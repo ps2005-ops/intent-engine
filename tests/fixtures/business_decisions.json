@@ -1,0 +1,72 @@
+[
+  {
+    "id": "asia-expansion",
+    "decision_text": "We're expanding into Asia with $2M investment over 18 months.",
+    "context": {
+      "revenue": "$60k MRR",
+      "growth_rate": "10%/mo",
+      "team_size": 12,
+      "runway_months": 16,
+      "market": "B2B project management SaaS",
+      "competitive_position": "mid-pack, two larger incumbents in target APAC markets",
+      "founder_goals": "establish a foothold in APAC before a well-funded competitor does",
+      "stated_priorities": ["growth", "market share"]
+    }
+  },
+  {
+    "id": "series-a-raise",
+    "decision_text": "We're raising a $2M Series A to extend runway and accelerate hiring.",
+    "context": {
+      "revenue": "$45k MRR",
+      "growth_rate": "8%/mo",
+      "team_size": 6,
+      "runway_months": 5,
+      "market": "vertical SaaS for logistics",
+      "competitive_position": "early leader in a narrow niche, no direct competitor yet",
+      "founder_goals": "extend runway and double the team to keep the lead",
+      "stated_priorities": ["survival", "growth"]
+    }
+  },
+  {
+    "id": "b2c-pivot",
+    "decision_text": "We're considering pivoting our B2B analytics tool into a B2C personal-finance app.",
+    "context": {
+      "revenue": "$15k MRR",
+      "growth_rate": "flat for 3 months",
+      "team_size": 4,
+      "runway_months": 9,
+      "market": "B2B analytics, considering personal finance B2C",
+      "competitive_position": "weak in current B2B niche; B2C market is crowded",
+      "founder_goals": "find a market where growth doesn't require enterprise sales cycles",
+      "stated_priorities": ["growth", "faster sales cycle"]
+    }
+  },
+  {
+    "id": "pricing-increase",
+    "decision_text": "We're raising prices 30% across all tiers to improve margins before our next fundraise.",
+    "context": {
+      "revenue": "$80k MRR",
+      "growth_rate": "5%/mo",
+      "team_size": 10,
+      "runway_months": 11,
+      "market": "SMB scheduling software",
+      "competitive_position": "price-competitive with 3 similar tools",
+      "founder_goals": "improve gross margin and unit economics ahead of a Series A pitch",
+      "stated_priorities": ["profitability", "fundraising readiness"]
+    }
+  },
+  {
+    "id": "early-sales-hire",
+    "decision_text": "We're hiring a 4-person outbound sales team before confirming strong product-market fit.",
+    "context": {
+      "revenue": "$20k MRR",
+      "growth_rate": "6%/mo, mostly inbound",
+      "team_size": 5,
+      "runway_months": 10,
+      "market": "early-stage dev-tools SaaS",
+      "competitive_position": "unclear, few direct competitors but unproven category",
+      "founder_goals": "accelerate growth and prove the sales-led motion works",
+      "stated_priorities": ["growth"]
+    }
+  }
+]
