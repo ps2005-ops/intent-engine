@@ -3,6 +3,15 @@
 **Status: plan only, not started.** No code written, no dependencies installed.
 Written the night of Week 3's close-out, for review before any Week 4 build begins.
 
+**Amended per `intent-engine-v2-entity-memory.md`**: Week 4 and Stage A (entity
+memory) are now a collapsed, single build, not sequenced. The most direct
+consequence: `PersonalContext` (Question 2/Step 2 below) is no longer a standalone
+snapshot object populated per-call — it's a **view computed from entity memory**
+(or from mock data during the mock-data phase, per the original Week 4 scope, until
+Stage A's store actually exists to view). See `intent-engine-v2-entity-memory.md`
+for the full architecture; this doc keeps the voice-specific build details that
+document still doesn't cover.
+
 ## Spec recap (Week 4 milestone)
 
 - Voice input pipeline: transcription (Deepgram) → intent inference → suggested
@@ -84,10 +93,18 @@ discipline as Weeks 1-3 (measure before committing to an architecture):
    "typical-case, not hard gate" treatment the simulator's 10s target got, and
    that should be an explicit, deliberate decision (like the last one), not a
    discovery made mid-debugging.
-2. **`voice/context_schema.py`** — `PersonalContext`, parallel to `BusinessContext`.
-   Spec says mock data initially — no live Gmail/Calendar API integration yet, so
-   this is just a plain data class populated by hand for the 10 test examples, not
-   a real integration.
+2. **`voice/context_schema.py`** — `PersonalContext`, **no longer parallel to
+   `BusinessContext`** (superseded — see amendment note at top of this doc).
+   `BusinessContext`-style objects are a snapshot assembled fresh per call, which
+   is the wrong shape for something meant to sit on top of an accumulating store.
+   `PersonalContext` is now a *view*: during the mock-data phase (no entity memory
+   populated yet), it's assembled from hand-written mock data same as originally
+   planned; once Stage A's store exists, it's computed by querying entity memory
+   for the relevant entity_id and shaping the result into whatever `voice/`'s
+   classifier prompt needs. The view-computation logic should be written so mock
+   data and real entity-memory data are interchangeable inputs to it — don't
+   special-case "mock mode" throughout `voice/`, isolate it to wherever the view
+   gets its source data from.
 3. **`voice/schemas.py`** — `VoiceIntent` (see Question 2), following the
    `simulator/schemas.py` pattern (kept out of `core/` since these are
    voice-specific concepts, not domain-agnostic ones).
@@ -114,17 +131,27 @@ discipline as Weeks 1-3 (measure before committing to an architecture):
 displaying/speaking the proposed action, not executing it against real Gmail/
 Calendar APIs — that's later-week integration work per the spec's own schedule.
 Week 4 proves the intent engine works on personal context and hits its latency
-target; it doesn't wire up real side effects yet.
+target; it doesn't wire up real side effects yet. This boundary is now also
+enforced structurally, not just by convention: per
+`intent-engine-v2-entity-memory.md`, Stage B's permission registry is built before
+any real integration beyond mock data, so there's a hard gate in place by
+construction whenever real integrations do get built, not just a documented
+intention here.
 
-## Open questions for you to resolve before I start building
+## Open questions — status
 
-1. Confirm the `voice/` module boundary and flat `VoiceIntent` schema shape above,
-   or redirect.
-2. `suggested_action`: same call or separate step (Question 2's open item)?
-3. Voice backend choice: Deepgram for STT is spec's explicit suggestion — any
-   preference between OpenAI TTS and ElevenLabs for synthesis, or should I bring
-   a comparison (cost, latency, quality) before you decide, same as the embedding
-   backend question?
-4. Should step 1 (measure a bare intent-classification call) happen as a
-   throwaway experiment I report back on, or do you want to review the exact
-   schema/prompt before I even run that measurement?
+1. ~~Confirm the `voice/` module boundary and flat `VoiceIntent` schema shape
+   above, or redirect.~~ **Resolved** by the Weeks 1-4 audit + the v2 plan: `voice/`
+   stays its own module with its own schema/prompt (nothing about entity memory
+   changes this), `VoiceIntent`'s flat shape stands. Only `PersonalContext`
+   changed (see amendment note at top).
+2. `suggested_action`: same call or separate step — **still open**, needs the
+   step-1 latency measurement to answer with data rather than a guess.
+3. Voice backend choice (Deepgram confirmed by spec; OpenAI TTS vs. ElevenLabs)
+   — **still open**.
+4. Whether step 1's latency measurement happens as a throwaway experiment or
+   needs schema/prompt review first — **still open**.
+
+None of these four are blocking Stage A/B work, which doesn't depend on any of
+them. They block the voice-specific half of the collapsed build (Steps 2-7 above),
+not entity memory or the permission registry.

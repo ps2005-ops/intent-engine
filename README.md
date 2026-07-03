@@ -17,7 +17,7 @@ assistant. Once the Intent Engine works on business data, extending it to person
 context is domain adaptation, not rearchitecture. Full 26-week schedule: see the
 original planning doc (not tracked in this repo).
 
-## Status: Weeks 1-3 complete
+## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete
 
 **Week 1 goal:** a working CLI that takes a business decision as text + context and
 outputs a structured risk audit in under 10 seconds, validated on 5 example decisions.
@@ -29,7 +29,15 @@ grounded in hand-coded causal relationships — while staying under the same 10s
 **Week 3 goal:** ground the simulation in similar past decisions with known outcomes,
 retrieved via similarity search against a curated reference set.
 
-**All done.** All 5 fixtures average ~7.9-10.0s across repeated runs — comfortably
+**Stage A/B goal** (per `docs/weekly/intent-engine-v2-entity-memory.md`, which
+supersedes the original Week 5+ direction): a structured, append-only entity-memory
+store both `simulator/` and `voice/` write into, plus a deny-by-default permission
+registry gating future action-taking. `--entity-id` is now required on every
+`premortem` run — see `core/entity_memory.py` and `core/permissions.py`. Currently
+building `voice/PersonalContext` as a view over this store next (mock data first,
+per the original Week 4 plan, before any real integration).
+
+**Weeks 1-3, all done.** All 5 fixtures average ~7.9-10.0s across repeated runs — comfortably
 meeting <10s as a *typical-case* target. Multi-run testing showed ~5% of individual
 calls spike to 11-13s from API-side variance independent of content length or fixture,
 so <10s is treated as an average to hit, not a strict per-call gate (the CLI prints a
@@ -86,18 +94,23 @@ cp .env.example .env   # then fill in ANTHROPIC_API_KEY
 
 ## Usage
 
+`--entity-id` is required on every run — it tags the entity-memory record this
+decision gets written under (see `core/entity_memory.py`). Free text is fine;
+`"Acme Inc"` and `"acme inc."` accumulate under the same normalized entity.
+
 ```bash
 # From a JSON file (decision_text + context):
-premortem --input tests/fixtures/business_decisions.json   # (see below re: batch format)
+premortem --input tests/fixtures/business_decisions.json --entity-id "Acme Inc"   # (see below re: batch format)
 
 # Ad hoc:
 premortem --decision "We're expanding into Asia with \$2M over 18 months." \
+  --entity-id "Acme Inc" \
   --revenue "\$60k MRR" --growth-rate "10%/mo" --team-size 12 --runway-months 16 \
   --market "B2B SaaS" --competitive-position "two larger incumbents" \
   --founder-goals "establish APAC foothold before a competitor does"
 
 # JSON output instead of formatted text:
-premortem --decision "..." --json
+premortem --decision "..." --entity-id "Acme Inc" --json
 ```
 
 Note: `tests/fixtures/business_decisions.json` is a list of 5 decisions used for testing,

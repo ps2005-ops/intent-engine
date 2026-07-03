@@ -408,3 +408,13 @@ All three fixes verified against live regeneration of the same 3 fixtures.
 Offline test suite: 26 tests (up from 23 — added retry/false-positive coverage
 for the garbled-word check, including a dedicated contraction-false-positive
 regression test).
+
+## Stage A/B: Entity Memory + Permission Registry
+
+Built and verified — see `docs/weekly/intent-engine-v2-entity-memory.md`'s
+"Current state" section for the full account (schema, verification evidence,
+what's still not built).
+
+**Backlog:** nothing in the test suite calls `cli.main()` — the CLI's argparse
+layer (including the `--entity-id` requirement and the entity-memory write path)
+has no automated coverage, only the live manual run performed during review.

@@ -1,11 +1,17 @@
 """CLI entrypoint: `premortem` — a business decision as text + context -> structured risk audit.
 
 Usage:
-    premortem --input path/to/decision.json
+    premortem --input path/to/decision.json --entity-id "Acme Inc"
     premortem --decision "We're expanding into Asia with $2M over 18 months" \\
+        --entity-id "Acme Inc" \\
         --revenue "$40k MRR" --growth-rate "12%/mo" --team-size 8 --runway-months 14 \\
         --market "B2B SaaS" --competitive-position "two well-funded competitors" \\
         --founder-goals "grow fast, raise Series A in 12 months"
+
+--entity-id is required: every run writes an EntityMemoryRecord to entity memory,
+tagged to the entity (founder/company) this decision is about. Free-text input is
+fine -- e.g. "Acme Inc" and "acme inc." both accumulate under the same normalized
+entity_id (see core/entity_memory.normalize_entity_id).
 
 decision.json shape:
     {
@@ -22,6 +28,7 @@ import argparse
 import json
 import sys
 
+from ..core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, normalize_entity_id
 from ..core.schemas import RiskAudit, StructuredIntent
 from .context_schema import BusinessContext
 from .pipeline import run_premortem
@@ -30,6 +37,7 @@ from .schemas import ScenarioSet
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="premortem", description="Run a pre-mortem risk audit on a business decision.")
+    parser.add_argument("--entity-id", required=True, help="Who/what this decision is about (founder or company name) -- tags the entity-memory record.")
     parser.add_argument("--input", help="Path to a JSON file with decision_text + context.")
     parser.add_argument("--decision", help="The business decision as free text (alternative to --input).")
     parser.add_argument("--revenue")
@@ -134,6 +142,22 @@ def main(argv=None) -> int:
         )
     else:
         print(_format_report(decision_text, result.intent, result.risk_audit, result.scenario_set, result.elapsed_seconds))
+
+    # Entity-memory write happens here, after run_premortem() returns -- not inside
+    # run_premortem() itself, so callers that use run_premortem() directly
+    # (tests/test_simulator_e2e.py, scripts/run_examples.py) are unaffected by this
+    # CLI-only behavior, per the Weeks 1-4 call-site audit.
+    record = EntityMemoryRecord(
+        entity_id=args.entity_id,
+        source="simulator",
+        decision_text=decision_text,
+        goals=result.intent.goals,
+        constraints=result.intent.constraints,
+        risk_tolerance=result.intent.risk_tolerance,
+        primary_priority=result.scenario_set.primary_priority,
+    )
+    JsonlEntityMemoryWriter().write(record)
+    print(f"Saved to entity memory: {normalize_entity_id(args.entity_id)}", file=sys.stderr)
 
     return 0
 
