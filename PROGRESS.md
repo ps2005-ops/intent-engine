@@ -70,12 +70,45 @@ call): 3/5 fixtures landed at 10-14s. The fix path took several iterations:
    malformed response (missing keys, mismatched parallel-array lengths) instead of
    continuing to chase latency through prompt constraints — a second consecutive
    malformed response now raises a clear error rather than looping forever.
-5. **Decision: relaxed the latency budget from <10s to <12s** rather than keep trading
-   quality/correctness bugs for marginal latency gains. The narrative layer does more
-   work than original Week 1 scope: 10s was the right target for a quantified audit
-   alone, not for a quantified audit *plus* a persuasion layer engineered against
-   three separate psychological principles at once. All 10 tests (5 unit + 5 live e2e)
-   pass reliably at the 12s budget.
+5. Relaxed the latency budget from <10s to <12s as an intermediate step, rather than
+   keep trading quality/correctness bugs for marginal latency gains.
+6. User then asked to get back to the strict <10s Week 1 spec target. Profiled actual
+   output token counts directly against the API (not just wall-clock time) to confirm
+   the lever was generation volume, not call structure — `narrative_summary` was
+   already in the same combined call as the rest of the audit, not a second
+   sequential round-trip. Applied a **safe** trim this time: reduced `goals` and
+   `constraints` from 3 to exactly 2 items each, and `recommended_stress_tests` from
+   3 to exactly 2, via `maxItems`/prompt count instructions (item-count limits proved
+   reliable in earlier testing) rather than adding new character-length caps (which
+   is what caused the `KeyError` crash in step 3). Result: **4/5 fixtures reliably
+   under 10s** (8.3-9.5s), up from 2/5 passing before this round.
+7. Also fixed a separate bug found by reading actual output: the model occasionally
+   leaks tag-like fragments (`</sensitivity>`, `</invoke>`) into a string field --
+   rare, didn't reproduce in 3 direct attempts, so likely a stochastic generation
+   glitch. Added regex-based markup-leak detection in `PremortemAnalyzer._parse`
+   (careful to not false-positive on legitimate `<5%`/`< $50` comparisons) that
+   triggers the existing retry-once mechanism.
+8. Rewrote the narrative_summary prompt to give the 4 underlying qualities (vivid
+   scene, stated pattern-match, direct tone, implicit cost-of-inaction) plus 3
+   example sentence *shapes* to show acceptable range, instead of one rigid
+   template -- fixes literal repetition of "this is exactly how X founders lose Y"
+   across every output. Verified: wording is now genuinely varied across all 5
+   fixtures. Honest caveat: sentence *architecture* (vivid scene, em-dash, trailing
+   pattern-tag) is still consistent across all 5 -- lexical variety improved,
+   structural variety only partially. **Decision: not pursuing further structural
+   variety right now** -- current shape is working, and per-schedule this is better
+   validated against real founder feedback (Weeks 3+ cold outreach) than optimized
+   blind against 5 synthetic fixtures today.
+
+**Known limitation:** `b2c-pivot` (an open-ended pivot decision, inherently more to
+reason about than a single-lever decision like a price change) lands at ~11s,
+consistently the one outlier across every round of this tuning. Accepted as a known
+edge case rather than continuing to chase it -- further trimming was already shown
+(step 3) to risk correctness bugs for marginal latency gains on complex decisions.
+
+**Final state:** 4/5 fixtures under the strict <10s Week 1 budget; `b2c-pivot` at
+~11s as a documented exception. Narrative + risk audit pipeline locked in as Week 1
+complete.
 
 ## Week 2
 

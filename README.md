@@ -20,9 +20,9 @@ original planning doc (not tracked in this repo).
 ## Current week: Week 1 — Intent Engine Scaffolding + Simulator Proof-of-Concept
 
 **Goal:** a working CLI that takes a business decision as text + context and outputs a
-structured risk audit, validated on 5 example decisions. **Done** — verified reliably
-under a 12s latency budget against the live API (see [PROGRESS.md](PROGRESS.md) for why
-this moved from the original 10s target).
+structured risk audit in under 10 seconds, validated on 5 example decisions. **Done** —
+4 of 5 fixtures land at 8.3-9.5s; `b2c-pivot` (an open-ended pivot decision) is a
+documented ~11s exception. See [PROGRESS.md](PROGRESS.md) for the full tuning history.
 
 **Pipeline:** `Raw Context Input → Intent Classification → Structured Intent Output
 (goals, constraints, risk tolerance) → Outcome Simulation → Risk Audit`

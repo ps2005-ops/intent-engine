@@ -14,6 +14,19 @@ class FakeLLMClient:
         return self.canned_response
 
 
+class SequenceLLMClient:
+    """Returns a different canned response on each successive call_tool, to test retry."""
+
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.call_count = 0
+
+    def call_tool(self, **kwargs):
+        response = self.responses[self.call_count]
+        self.call_count += 1
+        return response
+
+
 CANNED_FLAT_RESPONSE = {
     "decision_summary": "Expand into a new market with significant capital.",
     "goals": ["establish market presence"],
@@ -57,3 +70,44 @@ def test_premortem_analyzer_zips_parallel_arrays_in_order():
 
     likelihoods = [fm.likelihood for fm in result.risk_audit.failure_modes]
     assert likelihoods == ["likely", "possible", "possible"]
+
+
+def test_premortem_analyzer_retries_once_on_leaked_markup():
+    garbled = dict(CANNED_FLAT_RESPONSE)
+    garbled["key_sensitivity"] = "Whether the $2M closes on schedule.</sensitivity>\n</invoke>"
+    clean = dict(CANNED_FLAT_RESPONSE)
+
+    fake_client = SequenceLLMClient([garbled, clean])
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert fake_client.call_count == 2
+    assert result.risk_audit.key_sensitivity == "Whether the $2M closes on schedule."
+
+
+def test_premortem_analyzer_raises_after_two_consecutive_leaks():
+    garbled = dict(CANNED_FLAT_RESPONSE)
+    garbled["key_sensitivity"] = "Whether the $2M closes on schedule.</sensitivity>"
+
+    fake_client = SequenceLLMClient([garbled, garbled])
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    try:
+        analyzer.run("Expand into Asia with $2M.", BusinessContext())
+    except RuntimeError as exc:
+        assert "malformed twice in a row" in str(exc)
+    else:
+        raise AssertionError("expected RuntimeError after two consecutive malformed responses")
+
+
+def test_premortem_analyzer_does_not_false_positive_on_comparison_operators():
+    canned = dict(CANNED_FLAT_RESPONSE)
+    canned["key_sensitivity"] = "Whether churn stays <5% or CAC < $50 per customer."
+
+    fake_client = FakeLLMClient(canned)
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert result.risk_audit.key_sensitivity == "Whether churn stays <5% or CAC < $50 per customer."

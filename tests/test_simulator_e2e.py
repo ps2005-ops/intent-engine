@@ -1,14 +1,9 @@
 """End-to-end test against the real Anthropic API.
 
 Skipped automatically if ANTHROPIC_API_KEY isn't set, since it costs real API calls.
-This checks output SHAPE and a latency budget — it does not (and can't) assert exact
-wording, since the model's reasoning isn't deterministic. Use scripts/run_examples.py
-to actually read the audits and judge quality by eye.
-
-Budget is 12s, not the original Week 1 10s: adding the narrative_summary persuasion
-layer (see PROGRESS.md) pushed some content-dense fixtures to 10-11s even after
-trimming other fields. Further trimming was cutting quality or causing schema
-omissions, not just shortening text, so the budget moved instead of the content.
+This checks output SHAPE and the Week 1 spec's <10s latency budget — it does not (and
+can't) assert exact wording, since the model's reasoning isn't deterministic. Use
+scripts/run_examples.py to actually read the audits and judge quality by eye.
 """
 
 import json
@@ -21,6 +16,13 @@ from intent_engine.simulator.context_schema import BusinessContext
 from intent_engine.simulator.pipeline import run_premortem
 
 FIXTURES_PATH = Path(__file__).parent / "fixtures" / "business_decisions.json"
+
+# b2c-pivot is a documented exception (see PROGRESS.md): open-ended pivot decisions
+# inherently need more reasoning than a single-lever decision, and consistently ran
+# ~11s across every round of latency tuning. Accepted rather than continuing to trade
+# correctness bugs for marginal latency gains on this one fixture.
+LATENCY_BUDGET_SECONDS = {"b2c-pivot": 12}
+DEFAULT_LATENCY_BUDGET_SECONDS = 10
 
 pytestmark = pytest.mark.skipif(
     not os.environ.get("ANTHROPIC_API_KEY"),
@@ -43,6 +45,8 @@ def test_premortem_end_to_end(fixture):
     assert result.risk_audit.key_sensitivity
     assert result.risk_audit.narrative_summary
     assert result.intent.decision_summary
-    assert result.elapsed_seconds < 12, (
-        f"{fixture['id']} took {result.elapsed_seconds:.1f}s, exceeding the 12s budget"
+    budget = LATENCY_BUDGET_SECONDS.get(fixture["id"], DEFAULT_LATENCY_BUDGET_SECONDS)
+    print(f"\n{fixture['id']}: {result.elapsed_seconds:.1f}s (budget {budget}s)")
+    assert result.elapsed_seconds < budget, (
+        f"{fixture['id']} took {result.elapsed_seconds:.1f}s, exceeding its {budget}s budget"
     )

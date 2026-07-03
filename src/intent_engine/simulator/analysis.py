@@ -10,6 +10,7 @@ kept as-is for reuse where the two-call latency doesn't matter (e.g. testing, or
 future domain with a looser budget).
 """
 
+import re
 from typing import NamedTuple, Optional
 
 from ..core.llm_client import LLMClient
@@ -19,10 +20,17 @@ from .context_schema import BusinessContext
 
 FAST_MODEL = "claude-haiku-4-5-20251001"
 
+# Occasionally the model leaks tag-like fragments (e.g. "</sensitivity>", "</invoke>")
+# into an otherwise-fine string field -- a rare generation glitch, not a schema issue.
+# Matches closing tags and simple self-contained opening tags, but not legitimate
+# business text like "<5%" or "CAC < $50" (no letter immediately follows the "<").
+_MARKUP_LEAK_PATTERN = re.compile(r"</[a-zA-Z]|<[a-zA-Z_]+>")
+
 SYSTEM_PROMPT = """You are a pre-mortem risk auditor for pre-seed/seed-stage SaaS founders. \
-In one pass: (1) extract the founder's intent (goals, constraints, risk tolerance) from \
-their decision and context, then (2) identify EXACTLY 3 ways this decision could fail given \
-that specific context -- not 2, not 4: always exactly 3, even under the word budgets below. \
+In one pass: (1) extract the founder's intent as EXACTLY 2 goals and EXACTLY 2 constraints \
+(pick the 2 that matter most, not the 4 that are merely true) plus risk tolerance, then (2) \
+identify EXACTLY 3 ways this decision could fail given that specific context -- not 2, not 4: \
+always exactly 3, even under the word budgets below -- plus EXACTLY 2 recommended stress-tests. \
 failure_descriptions, failure_likelihoods, and failure_rationales are PARALLEL arrays of \
 length 3: index i in each describes the same failure mode. Use likelihood bands \
 (unlikely, possible, likely, tail_risk), not fake percentages -- these bands are the honest \
@@ -42,22 +50,34 @@ uncertainty -- the description doesn't need to hedge on top of it.
 
 Also write narrative_summary: ONE short sentence, 30 words or fewer, second person, present \
 tense, describing the single worst failure mode as something the founder is already living \
-through, not a probability they're evaluating. It must do three things in that one short \
-sentence: (a) name ONE specific vivid moment (a board meeting, a runway number, a slipping \
-deadline) -- not a cascading multi-clause scenario with several sub-events strung together on \
-commas, (b) explicitly state the pattern-match, using language like "this is exactly how \
-[stage/type] founders lose [thing]" or "founders in your exact position almost always..." -- \
-say it outright, don't just imply it, (c) frame the cost of NOT stress-testing this decision, \
-not just the cost of the decision itself going wrong. Do not soften it with "might" or "could." \
-If your draft has more than one comma-separated clause, cut it down to one. This sentence is \
-the hook that gets someone to read the quantified audit below it, not a summary of that audit."""
+through, not a probability they're evaluating. It must carry four qualities: (a) ONE specific \
+vivid moment (a board meeting, a runway number, a slipping deadline), not a cascading scenario \
+with several sub-events strung together on commas, (b) a stated pattern-match -- signal that \
+founders in this situation predictably fail this way, not just that this founder might, (c) \
+direct, unhedged language -- no "might" or "could," (d) an implicit sense that not stress-testing \
+this is itself the risky move, not just that the decision might go wrong.
+
+Vary the sentence's shape every time -- do not default to one fixed skeleton. Below are three \
+DIFFERENT structures showing the range available; do not reuse their wording, only the shape \
+of how they're built:
+- Scene first, pattern-match as a trailing tag: "You're staring at a term sheet worse than \
+today's, having spent the runway that would've gotten you a better one on your own -- this is \
+the exact sequence that sinks pre-seed bridge rounds."
+- Pattern-match first, scene second: "Founders who hire before PMF almost always end up here: \
+four new salaries, zero repeatable pipeline, and a board asking what happened to the runway."
+- Direct address with the pattern folded into the consequence, no "this is exactly how" phrasing \
+at all: "Skip the stress test and you're the founder explaining in Q3 why doubling headcount \
+moved no growth metric -- this specific hiring mistake repeats almost every time it's tried."
+Pick whichever shape fits the specific failure mode best, or write a fourth shape entirely -- \
+the four qualities above are the requirement, not the sentence skeleton. This sentence is the \
+hook that gets someone to read the quantified audit below it, not a summary of that audit."""
 
 ANALYSIS_TOOL_SCHEMA = {
     "type": "object",
     "properties": {
         "decision_summary": {"type": "string"},
-        "goals": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
-        "constraints": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
+        "goals": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
+        "constraints": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
         "risk_tolerance": {"type": "string", "enum": ["low", "medium", "high"]},
         "narrative_summary": {"type": "string", "maxLength": 220},
         "failure_descriptions": {"type": "array", "items": {"type": "string", "maxLength": 170}, "minItems": 3, "maxItems": 3},
@@ -68,7 +88,7 @@ ANALYSIS_TOOL_SCHEMA = {
             "maxItems": 3,
         },
         "failure_rationales": {"type": "array", "items": {"type": "string", "maxLength": 130}, "minItems": 3, "maxItems": 3},
-        "recommended_stress_tests": {"type": "array", "items": {"type": "string", "maxLength": 150}, "maxItems": 3},
+        "recommended_stress_tests": {"type": "array", "items": {"type": "string", "maxLength": 150}, "minItems": 2, "maxItems": 2},
         "key_sensitivity": {"type": "string", "maxLength": 200},
     },
     "required": [
@@ -124,6 +144,12 @@ class PremortemAnalyzer(Stage):
         lengths = {len(result[k]) for k in ("failure_descriptions", "failure_likelihoods", "failure_rationales")}
         if lengths != {3}:
             raise ValueError(f"expected 3 parallel failure-mode entries, got lengths {lengths}")
+
+        for key, value in result.items():
+            values = value if isinstance(value, list) else [value]
+            for v in values:
+                if isinstance(v, str) and _MARKUP_LEAK_PATTERN.search(v):
+                    raise ValueError(f"field '{key}' contains leaked markup: {v!r}")
 
         intent = StructuredIntent(
             decision_summary=result["decision_summary"],
