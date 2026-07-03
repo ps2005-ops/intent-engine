@@ -342,3 +342,69 @@ precedent (near-identical decision) and its contrasting success case (same decis
 type, different choice, worked) — genuine grounding, not padding. `pricing-increase`
 correctly bucketed two topically-irrelevant matches as "loose match" rather than
 overclaiming relevance.
+
+### Post-Week-3 addition: narrative-quality pass with retrieval active
+
+Reviewed the 3 fixtures where retrieval grounding is doing real work
+(asia-expansion, series-a-raise, b2c-pivot). Two read as intended (retrieved
+precedent genuinely strengthening the narrative); three specific quality issues
+found, none of them schema/validation failures — they pass pydantic clean, which
+is exactly why nothing existing caught them.
+
+**1. Garbled word** (`"pricing pressure emerads"` instead of `"emerges"`) — a
+compression artifact under tight word budgets, not a structural failure. Root
+cause: `failure_rationales`' 8-word budget is the tightest in the schema, with no
+explicit instruction protecting basic word integrity under pressure (mirrors
+`key_sensitivity`'s earlier under-scaffolding pattern). Fixed the prompt directly:
+"never compress a word into something that isn't a real word to hit a budget... a
+correct sentence a few words over budget always beats a shorter one with a broken
+word." Also added a `pyspellchecker`-based detector as a proposed safety net —
+**this went through two live-tested false-positive failures before landing**:
+- Attempt 1: the word-matching regex split contractions on the apostrophe
+  (`"hasn't"` → `"hasn"` + `"t"`), flagging `"hasn"`/`"didn"` as garbled. This
+  caused a real crash (2 failed attempts, `RuntimeError`) on completely ordinary
+  English. Fixed the regex to capture contractions as one token.
+- Attempt 2, immediately after: the *dictionary itself* proved too narrow for this
+  domain — flagged `"analytics"`, `"onboard"`, `"underdeliver"`, `"derisk"`,
+  `"downround"` as unknown, none of them actually wrong. A 160k-word dictionary
+  still doesn't reliably cover common business/tech vocabulary.
+- **Decision: log-only, not retry-blocking.** The true bug ("emerads") has
+  occurred once in the entire session; the naive dictionary check produced two
+  false-positive crashes in two live attempts — a much worse false-positive rate
+  than the true-positive rate it's meant to catch. Blocking on a signal this noisy
+  is a worse trade than the rare bug itself. Kept: the prompt fix (no downside
+  risk) and a `logger.warning` on suspected garbled tokens (zero risk, since it
+  never blocks) purely for future incidence visibility — if it turns out to
+  matter, that's real evidence to justify a smarter check (a domain-augmented
+  dictionary, or a narrower heuristic), not a guess made now. **Same lesson as
+  the markup-leak whack-a-mole, correctly generalized**: a detector with unknown
+  precision against a rare bug shouldn't gate generation.
+- Diagnostic pattern reinforced for next time: when a field triggers a bug that
+  same-shaped fields never do, check its prompt scaffolding first (as with
+  `key_sensitivity`) — but also *test any new automated safety net against
+  ordinary text before trusting it*, not just against the one bug it was built
+  to catch.
+
+**2. Inconsistent em-dash usage** — some narrative_summary outputs used `—`,
+others `--`. Root cause found immediately, no investigation needed: **the
+prompt's own example shapes used `--`** (2 of 3 example sentences), while
+instructing the model to match "the style of these examples." The prompt was
+teaching the inconsistency it was accused of causing. Fixed by rewriting the
+examples to use real `—` characters and adding an explicit instruction: em-dash
+only, never double-hyphen.
+
+**3. Tone drift at sentence endings** — one narrative
+(`"...without local market friction modeling"`) shifted from vivid/visceral
+into dry analyst jargon right at the punchline, while others stayed concrete
+throughout. Added explicit guidance: the final clause must stay in the same
+register as the rest of the sentence, with a good/bad example pair. **Verified,
+honestly**: 2 of 3 regenerated fixtures (series-a-raise, b2c-pivot) now hold
+register cleanly to the last word. `asia-expansion` improved but still drifted
+mildly (`"...unit economics model"`) — better than before, not fully resolved.
+Left as-is rather than pushing further prompt-fighting on a soft, subjective
+quality dimension; revisit if it recurs.
+
+All three fixes verified against live regeneration of the same 3 fixtures.
+Offline test suite: 26 tests (up from 23 — added retry/false-positive coverage
+for the garbled-word check, including a dedicated contraction-false-positive
+regression test).

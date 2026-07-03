@@ -12,7 +12,9 @@ future domain with a looser budget).
 
 import logging
 import re
-from typing import List, NamedTuple, Optional
+from typing import List, NamedTuple, Optional, Set
+
+from spellchecker import SpellChecker
 
 from ..core.llm_client import LLMClient
 from ..core.pipeline import Stage
@@ -32,6 +34,37 @@ FAST_MODEL = "claude-haiku-4-5-20251001"
 # business text like "<5%" or "CAC < $50" (no letter immediately follows the "<").
 _MARKUP_LEAK_PATTERN = re.compile(r"</[a-zA-Z]|<[a-zA-Z_]+>")
 
+# Occasionally the model produces a coherent-looking sentence with a corrupted word
+# inside it (e.g. "pricing pressure emerads" instead of "emerges") -- a compression
+# artifact under tight word budgets, not a schema issue, so pydantic validation lets
+# it through clean. Safety net: flag lowercase alphabetic words the dictionary doesn't
+# know, skipping all-caps tokens (likely acronyms) and a manual allowlist of common
+# startup/SaaS jargon a general English dictionary doesn't recognize -- extend the
+# allowlist if a real word starts getting flagged.
+_spellchecker = SpellChecker()
+_DOMAIN_JARGON_ALLOWLIST = {
+    "saas", "mrr", "arr", "cac", "ltv", "pmf", "apac", "gtm", "icp", "sdr", "kpi", "roi",
+    "b2b", "b2c", "onboarding", "freemium", "fundraise", "fundraising", "preseed",
+    "tranched", "tranching",
+}
+# Must capture contractions ("hasn't", "didn't") as one token, not split on the
+# apostrophe -- splitting was a real bug: it turned "hasn't" into "hasn" + "t" and
+# flagged "hasn" as a garbled word, causing false-positive retries (and, once, an
+# outright crash) on completely ordinary English.
+_WORD_PATTERN = re.compile(r"[a-zA-Z]+(?:'[a-zA-Z]+)?")
+
+
+def _find_garbled_words(text: str) -> Set[str]:
+    candidates = set()
+    for word in _WORD_PATTERN.findall(text):
+        if len(word) < 4 or word.isupper():
+            continue
+        lower = word.lower()
+        if lower in _DOMAIN_JARGON_ALLOWLIST:
+            continue
+        candidates.add(lower)
+    return _spellchecker.unknown(candidates) if candidates else set()
+
 SYSTEM_PROMPT = """You are a pre-mortem risk auditor for pre-seed/seed-stage SaaS founders. \
 In one pass: (1) extract the founder's intent. goals and constraints must each be a JSON \
 array of EXACTLY 2 short strings -- a real array, never a single string and never a \
@@ -48,8 +81,10 @@ word budget: failure_descriptions <=13 words, failure_rationales <=8 words, \
 recommended_stress_tests <=11 words. These budgets are for cutting FILLER WORDS ONLY -- never \
 cut the specific dollar amounts, percentages, or timeframes that make this grounded instead of \
 generic, and never drop a failure mode to make the others fit the budget; if something has to \
-give, go a few words over rather than cutting a number or an item. This is a fast pre-commit \
-check, not a report.
+give, go a few words over rather than cutting a number or an item. Never compress a word into \
+something that isn't a real word to hit a budget (e.g. "emerads" instead of "emerges") -- a \
+correct sentence a few words over budget always beats a shorter one with a broken word in it. \
+This is a fast pre-commit check, not a report.
 
 Within failure_descriptions specifically, write in confident, direct language, not hedged \
 qualifiers ("Your team will not survive doubling headcount without an ops hire" beats "the \
@@ -70,19 +105,26 @@ vivid moment (a board meeting, a runway number, a slipping deadline), not a casc
 with several sub-events strung together on commas, (b) a stated pattern-match -- signal that \
 founders in this situation predictably fail this way, not just that this founder might, (c) \
 direct, unhedged language -- no "might" or "could," (d) an implicit sense that not stress-testing \
-this is itself the risky move, not just that the decision might go wrong.
+this is itself the risky move, not just that the decision might go wrong. Stay in the same \
+vivid, plain, concrete register all the way to the final word -- do not let the last clause \
+drift into dry analytical or technical vocabulary (e.g. "...without local market friction \
+modeling" breaks register; "...before you've validated a single local deal" holds it). The \
+punchline should land in the same voice the sentence started in.
+
+If you use a dash to connect clauses, it must be an em-dash (—), never a double-hyphen (--) -- \
+match the em-dash used in the example shapes below exactly.
 
 Vary the sentence's shape every time -- do not default to one fixed skeleton. Below are three \
 DIFFERENT structures showing the range available; do not reuse their wording, only the shape \
 of how they're built:
 - Scene first, pattern-match as a trailing tag: "You're staring at a term sheet worse than \
-today's, having spent the runway that would've gotten you a better one on your own -- this is \
+today's, having spent the runway that would've gotten you a better one on your own — this is \
 the exact sequence that sinks pre-seed bridge rounds."
 - Pattern-match first, scene second: "Founders who hire before PMF almost always end up here: \
 four new salaries, zero repeatable pipeline, and a board asking what happened to the runway."
 - Direct address with the pattern folded into the consequence, no "this is exactly how" phrasing \
 at all: "Skip the stress test and you're the founder explaining in Q3 why doubling headcount \
-moved no growth metric -- this specific hiring mistake repeats almost every time it's tried."
+moved no growth metric — this specific hiring mistake repeats almost every time it's tried."
 Pick whichever shape fits the specific failure mode best, or write a fourth shape entirely -- \
 the four qualities above are the requirement, not the sentence skeleton. This sentence is the \
 hook that gets someone to read the quantified audit below it, not a summary of that audit.
@@ -220,8 +262,22 @@ class PremortemAnalyzer(Stage):
         for key, value in result.items():
             values = value if isinstance(value, list) else [value]
             for v in values:
-                if isinstance(v, str) and _MARKUP_LEAK_PATTERN.search(v):
+                if not isinstance(v, str):
+                    continue
+                if _MARKUP_LEAK_PATTERN.search(v):
                     raise ValueError(f"field '{key}' contains leaked markup: {v!r}")
+                # Log-only, not retry-blocking: the dictionary check has unknown
+                # precision against a bug ("emerads" for "emerges") that's occurred
+                # once all session, and already produced two false-positive crashes
+                # on ordinary words ("analytics", "underdeliver", "onboard") the
+                # dictionary just doesn't know. Blocking on a signal this noisy is a
+                # worse trade than the rare bug it's meant to catch. This gives real
+                # incidence data over time -- if it turns out to matter, that's the
+                # evidence to justify a better check (domain-augmented dictionary, a
+                # narrower heuristic), not a guess made now.
+                garbled = _find_garbled_words(v)
+                if garbled:
+                    logger.warning("field '%s' contains a possibly-garbled token %r: %r", key, garbled, v)
 
         intent = StructuredIntent(
             decision_summary=result["decision_summary"],

@@ -8,9 +8,11 @@ class FakeLLMClient:
     def __init__(self, canned_response):
         self.canned_response = canned_response
         self.last_call_kwargs = None
+        self.call_count = 0
 
     def call_tool(self, **kwargs):
         self.last_call_kwargs = kwargs
+        self.call_count += 1
         return self.canned_response
 
 
@@ -133,3 +135,49 @@ def test_premortem_analyzer_does_not_false_positive_on_comparison_operators():
     result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
 
     assert result.risk_audit.key_sensitivity == "Whether churn stays <5% or CAC < $50 per customer."
+
+
+def test_premortem_analyzer_logs_but_does_not_retry_on_garbled_word(caplog):
+    garbled = dict(CANNED_FLAT_RESPONSE)
+    garbled["failure_descriptions"] = list(garbled["failure_descriptions"])
+    garbled["failure_descriptions"][2] = "Pricing pressure emerads, deal cycles extend."
+
+    fake_client = FakeLLMClient(garbled)
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    with caplog.at_level("WARNING"):
+        result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    # Log-only: doesn't retry (a dictionary-based check has too many false positives
+    # on ordinary business vocabulary to justify blocking -- see analysis.py comment),
+    # but the word passing through should still be visible in the logs.
+    assert fake_client.call_count == 1
+    assert "emerads" in result.risk_audit.failure_modes[2].description
+    assert any("possibly-garbled" in record.message for record in caplog.records)
+
+
+def test_premortem_analyzer_does_not_false_positive_on_domain_jargon():
+    canned = dict(CANNED_FLAT_RESPONSE)
+    canned["key_sensitivity"] = "Whether SaaS MRR growth offsets rising CAC during onboarding of the APAC GTM motion."
+
+    fake_client = FakeLLMClient(canned)
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert "GTM" in result.risk_audit.key_sensitivity
+
+
+def test_premortem_analyzer_does_not_false_positive_on_contractions():
+    canned = dict(CANNED_FLAT_RESPONSE)
+    canned["narrative_summary"] = (
+        "You're watching runway shrink because the team hasn't closed a deal and didn't "
+        "validate demand before it wasn't too late to change course."
+    )
+
+    fake_client = FakeLLMClient(canned)
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert "hasn't" in result.risk_audit.narrative_summary
