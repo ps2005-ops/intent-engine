@@ -19,7 +19,10 @@ top 3-5 ways this decision could fail, given their specific situation and stated
 Do not claim false precision: use likelihood bands (unlikely, possible, likely, tail_risk), \
 not fake percentages. Ground every failure mode in the specific context provided, not generic \
 startup advice. Also name the single factor this decision is most sensitive to, and recommend \
-concrete stress-tests the founder could run before committing."""
+concrete stress-tests the founder could run before committing.
+
+Be concise: 1-2 sentences for each failure mode's description, 1 sentence for its rationale, \
+1 sentence per stress-test. This is a quick pre-commit check, not a full report."""
 
 RISK_AUDIT_TOOL_SCHEMA = {
     "type": "object",
@@ -77,6 +80,6 @@ class RiskAuditGenerator(Stage):
             tool_name="record_risk_audit",
             tool_description="Record the structured risk audit for this decision.",
             input_schema=RISK_AUDIT_TOOL_SCHEMA,
-            max_tokens=1536,
+            max_tokens=3072,
         )
         return RiskAudit(**result)

@@ -20,12 +20,20 @@ original planning doc (not tracked in this repo).
 ## Current week: Week 1 — Intent Engine Scaffolding + Simulator Proof-of-Concept
 
 **Goal:** a working CLI that takes a business decision as text + context and outputs a
-structured risk audit in under 10 seconds, validated on 5 example decisions.
+structured risk audit in under 10 seconds, validated on 5 example decisions. **Done** —
+verified at 6.8-9.4s per decision (avg 8.1s) against the live API. See
+[PROGRESS.md](PROGRESS.md) for the full writeup.
 
 **Pipeline:** `Raw Context Input → Intent Classification → Structured Intent Output
 (goals, constraints, risk tolerance) → Outcome Simulation → Risk Audit`
 
-See [PROGRESS.md](PROGRESS.md) for the weekly milestone tracker.
+The simulator's live pipeline (`simulator/analysis.py`, `PremortemAnalyzer`) runs this as
+**one combined Claude call** on Haiku 4.5, not two sequential calls — the two-call version
+(Sonnet, intent then audit separately) measured 21-23s end-to-end, well over budget.
+`core/classifier.py` and `simulator/outcome_simulation.py` still implement the pipeline as
+two separate, independently testable stages and are kept for reuse where the tighter
+latency budget doesn't apply — they're just not what the CLI calls today. See
+[PROGRESS.md](PROGRESS.md) for why.
 
 ## Setup
 

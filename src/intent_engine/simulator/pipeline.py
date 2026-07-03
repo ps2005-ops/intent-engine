@@ -1,19 +1,19 @@
 """Composes the Week 1 pipeline: raw input -> intent -> risk audit, with timing.
 
-Kept as an explicit function rather than a generic chained Pipeline runner because the
-outcome-simulation stage needs both the classifier's output AND the original context,
-not just the previous stage's output. Each stage is still independently swappable and
-unit-testable via the Stage classes in core.classifier / simulator.outcome_simulation.
+Uses the combined PremortemAnalyzer stage by default (one Claude call, ~7-8s) rather than
+chaining the separate IntentClassifier + RiskAuditGenerator stages (two calls, ~20s+),
+which blew the spec's <10s budget. Pass an `analyzer=` override to use a different
+implementation (e.g. the two-stage version) for comparison or future domains with a
+looser latency budget.
 """
 
 import time
 from typing import NamedTuple, Optional
 
-from ..core.classifier import IntentClassifier
 from ..core.llm_client import LLMClient
-from ..core.schemas import RawInput, RiskAudit, StructuredIntent
+from ..core.schemas import RiskAudit, StructuredIntent
+from .analysis import PremortemAnalyzer
 from .context_schema import BusinessContext
-from .outcome_simulation import RiskAuditGenerator
 
 
 class PremortemResult(NamedTuple):
@@ -26,17 +26,12 @@ def run_premortem(
     decision_text: str,
     context: BusinessContext,
     client: Optional[LLMClient] = None,
-    classifier: Optional[IntentClassifier] = None,
-    audit_generator: Optional[RiskAuditGenerator] = None,
+    analyzer: Optional[PremortemAnalyzer] = None,
 ) -> PremortemResult:
-    classifier = classifier or IntentClassifier(client=client)
-    audit_generator = audit_generator or RiskAuditGenerator(client=client)
+    analyzer = analyzer or PremortemAnalyzer(client=client)
 
     start = time.monotonic()
-
-    raw_input = RawInput(decision_text=decision_text, context_text=context.to_prompt_text())
-    intent = classifier.run(raw_input)
-    risk_audit = audit_generator.run(decision_text, context, intent)
-
+    result = analyzer.run(decision_text, context)
     elapsed = time.monotonic() - start
-    return PremortemResult(intent=intent, risk_audit=risk_audit, elapsed_seconds=elapsed)
+
+    return PremortemResult(intent=result.intent, risk_audit=result.risk_audit, elapsed_seconds=elapsed)

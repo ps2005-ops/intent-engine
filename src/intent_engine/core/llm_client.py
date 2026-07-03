@@ -52,6 +52,12 @@ class LLMClient:
             ],
             tool_choice={"type": "tool", "name": tool_name},
         )
+        if response.stop_reason == "max_tokens":
+            raise RuntimeError(
+                f"Response to tool '{tool_name}' was truncated at max_tokens={max_tokens} "
+                f"(used {response.usage.output_tokens} output tokens). Raise max_tokens for "
+                "this call or shorten the prompt's requested output."
+            )
         for block in response.content:
             if block.type == "tool_use" and block.name == tool_name:
                 return block.input
