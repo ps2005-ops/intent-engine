@@ -1,0 +1,254 @@
+[
+  {
+    "id": "ref-01",
+    "decision_text": "Raised prices 40% across all tiers to fix negative unit economics.",
+    "context_at_decision": {
+      "revenue": "$30k MRR",
+      "growth_rate": "3%/mo",
+      "team_size": 4,
+      "runway_months": 8,
+      "market": "SMB scheduling software",
+      "competitive_position": "price-competitive, 4 similar tools"
+    },
+    "outcome": "Lost 22% of MRR to churn within 60 days; net revenue dropped for 2 months before stabilizing.",
+    "lesson": "A 40% jump in a commodity SMB category triggered switching; a phased or segmented increase would likely have held more revenue."
+  },
+  {
+    "id": "ref-02",
+    "decision_text": "Raised prices 15% for new customers only, grandfathered existing accounts.",
+    "context_at_decision": {
+      "revenue": "$60k MRR",
+      "growth_rate": "6%/mo",
+      "team_size": 6,
+      "runway_months": 14,
+      "market": "vertical SaaS for restaurants",
+      "competitive_position": "differentiated, few direct competitors"
+    },
+    "outcome": "No measurable churn increase; new-customer margin improved within one quarter.",
+    "lesson": "Grandfathering existing customers avoided the switching-cost trigger seen in blanket increases."
+  },
+  {
+    "id": "ref-03",
+    "decision_text": "Hired a 3-person outbound sales team before confirming repeatable product-market fit.",
+    "context_at_decision": {
+      "revenue": "$18k MRR",
+      "growth_rate": "5%/mo, mostly inbound",
+      "team_size": 4,
+      "runway_months": 9,
+      "market": "dev-tools SaaS",
+      "competitive_position": "unproven category"
+    },
+    "outcome": "Outbound generated zero qualified pipeline in 4 months; runway dropped from 9 to 4 months before the team was let go.",
+    "lesson": "Sales-led motion cannot substitute for unproven product-market fit; founder-led validation should have preceded hiring."
+  },
+  {
+    "id": "ref-04",
+    "decision_text": "Delayed all sales hiring for 6 months to run founder-led outbound first, validating messaging before hiring.",
+    "context_at_decision": {
+      "revenue": "$22k MRR",
+      "growth_rate": "7%/mo",
+      "team_size": 5,
+      "runway_months": 11,
+      "market": "dev-tools SaaS",
+      "competitive_position": "unproven category"
+    },
+    "outcome": "Founder closed 6 deals solo in 6 months, establishing a repeatable pitch; the first sales hire ramped to productivity in under 6 weeks.",
+    "lesson": "Founder-led validation before hiring compressed the new hire's ramp time significantly."
+  },
+  {
+    "id": "ref-05",
+    "decision_text": "Raised a $1.5M seed round and doubled headcount from 5 to 10 within 2 months.",
+    "context_at_decision": {
+      "revenue": "$25k MRR",
+      "growth_rate": "8%/mo",
+      "team_size": 5,
+      "runway_months": 4,
+      "market": "logistics SaaS",
+      "competitive_position": "early leader in narrow niche"
+    },
+    "outcome": "New hires took 4-5 months to ramp with no dedicated onboarding lead; growth rate fell to 3%/mo during the ramp period and burn multiple worsened to 3.1x.",
+    "lesson": "Doubling headcount without an ops/onboarding lead in place created a productivity gap that ate most of the new runway."
+  },
+  {
+    "id": "ref-06",
+    "decision_text": "Raised a $2M Series A and hired in 3 staggered tranches of 2-3 people over 9 months, each tied to a revenue milestone.",
+    "context_at_decision": {
+      "revenue": "$50k MRR",
+      "growth_rate": "9%/mo",
+      "team_size": 6,
+      "runway_months": 5,
+      "market": "logistics SaaS",
+      "competitive_position": "early leader in narrow niche"
+    },
+    "outcome": "Growth rate held steady through each hiring wave; runway extended to 22 months by month 9.",
+    "lesson": "Tying hiring tranches to revenue milestones avoided the ramp-time cash crunch seen in single-wave hiring."
+  },
+  {
+    "id": "ref-07",
+    "decision_text": "Pivoted from B2B analytics to a B2C personal-finance app after 3 months of flat B2B growth.",
+    "context_at_decision": {
+      "revenue": "$12k MRR",
+      "growth_rate": "flat for 3 months",
+      "team_size": 3,
+      "runway_months": 8,
+      "market": "B2B analytics, pivoting to consumer finance",
+      "competitive_position": "weak in B2B; crowded in target B2C market"
+    },
+    "outcome": "B2C user acquisition cost ran 4x the modeled estimate; the team burned through the pivot's allotted runway with no path to profitability and shut down 5 months later.",
+    "lesson": "Pivoting into a crowded consumer category without a distribution advantage repeated the same problem (no differentiated acquisition channel) in a new market."
+  },
+  {
+    "id": "ref-08",
+    "decision_text": "Pivoted from generic project-management SaaS to a niche vertical (construction subcontractor scheduling) after 4 months of flat growth.",
+    "context_at_decision": {
+      "revenue": "$16k MRR",
+      "growth_rate": "flat for 4 months",
+      "team_size": 4,
+      "runway_months": 10,
+      "market": "generic PM SaaS, pivoting to construction-vertical PM",
+      "competitive_position": "weak in generic market; no direct competitor in the narrow vertical"
+    },
+    "outcome": "Existing customer base converted at 40%; new vertical-specific leads closed at 3x the prior rate due to purpose-built features.",
+    "lesson": "Narrowing into an underserved vertical (rather than a broader adjacent market) let existing product investment carry over."
+  },
+  {
+    "id": "ref-09",
+    "decision_text": "Expanded into the UK/EU market with a $500k budget over 12 months, hiring 2 local sales reps.",
+    "context_at_decision": {
+      "revenue": "$70k MRR",
+      "growth_rate": "8%/mo",
+      "team_size": 10,
+      "runway_months": 18,
+      "market": "B2B HR SaaS",
+      "competitive_position": "strong in US, no presence in target region"
+    },
+    "outcome": "EU CAC ran 2.5x the US baseline for the first 8 months due to unfamiliar buying processes and compliance requirements; EU revenue reached only 12% of the modeled target by month 12.",
+    "lesson": "Underestimated regulatory/compliance friction (GDPR, local payroll law) extended the sales cycle well beyond the US benchmark used to model CAC."
+  },
+  {
+    "id": "ref-10",
+    "decision_text": "Expanded into the UK market only (not full EU) with a $200k budget, partnering with a local reseller instead of hiring direct sales.",
+    "context_at_decision": {
+      "revenue": "$65k MRR",
+      "growth_rate": "9%/mo",
+      "team_size": 9,
+      "runway_months": 16,
+      "market": "B2B HR SaaS",
+      "competitive_position": "strong in US, no presence in target region"
+    },
+    "outcome": "Reseller partnership reached breakeven on the regional investment by month 7; CAC ran close to the US baseline since the reseller absorbed the local relationship-building cost.",
+    "lesson": "A narrower initial market plus a local partner avoided paying the full compliance/relationship-building cost directly."
+  },
+  {
+    "id": "ref-11",
+    "decision_text": "Ignored a well-funded competitor's aggressive price cuts for 6 months, maintaining premium pricing.",
+    "context_at_decision": {
+      "revenue": "$45k MRR",
+      "growth_rate": "6%/mo",
+      "team_size": 7,
+      "runway_months": 12,
+      "market": "SMB scheduling software",
+      "competitive_position": "premium positioning vs. newly aggressive low-cost entrant"
+    },
+    "outcome": "Growth rate fell to 1%/mo as price-sensitive segments switched to the competitor; had to eventually cut prices reactively at a worse negotiating position.",
+    "lesson": "Delaying a pricing response to competitive pressure let the competitor establish switching momentum before any counter-move."
+  },
+  {
+    "id": "ref-12",
+    "decision_text": "Responded to a competitor's price cuts within 3 weeks by adding a lower-cost tier rather than cutting core pricing.",
+    "context_at_decision": {
+      "revenue": "$48k MRR",
+      "growth_rate": "6%/mo",
+      "team_size": 7,
+      "runway_months": 13,
+      "market": "SMB scheduling software",
+      "competitive_position": "premium positioning vs. newly aggressive low-cost entrant"
+    },
+    "outcome": "Churn to the competitor stayed under 5%; the new lower tier captured price-sensitive prospects without discounting the core product.",
+    "lesson": "A fast, differentiated response (new tier, not a blanket cut) preserved both price-sensitive and premium segments."
+  },
+  {
+    "id": "ref-13",
+    "decision_text": "Raised a $3M Series A pre-revenue, based on a strong prototype and team pedigree.",
+    "context_at_decision": {
+      "revenue": "$0 MRR",
+      "growth_rate": "n/a, pre-launch",
+      "team_size": 3,
+      "runway_months": 6,
+      "market": "AI-powered analytics",
+      "competitive_position": "unproven, no launched product"
+    },
+    "outcome": "Spent 14 months finding product-market fit with no revenue signal to guide iteration; the Series A round's valuation created pressure that led to two rushed, reversed pivots.",
+    "lesson": "Raising growth-stage capital before any revenue signal removed the forcing function that would have kept iteration grounded in real usage."
+  },
+  {
+    "id": "ref-14",
+    "decision_text": "Raised a smaller $800k pre-seed instead of a larger round, specifically to reach initial revenue before a bigger raise.",
+    "context_at_decision": {
+      "revenue": "$0 MRR",
+      "growth_rate": "n/a, pre-launch",
+      "team_size": 2,
+      "runway_months": 8,
+      "market": "AI-powered analytics",
+      "competitive_position": "unproven, no launched product"
+    },
+    "outcome": "Reached $15k MRR within 7 months on the smaller round; raised a $2.5M Series A at a materially better valuation once revenue existed.",
+    "lesson": "Deliberately raising less pre-revenue preserved both equity and the discipline to find a real signal before scaling spend."
+  },
+  {
+    "id": "ref-15",
+    "decision_text": "Expanded from one product to three simultaneous product lines to capture more of the market in a single push.",
+    "context_at_decision": {
+      "revenue": "$40k MRR",
+      "growth_rate": "5%/mo",
+      "team_size": 8,
+      "runway_months": 11,
+      "market": "B2B productivity tools",
+      "competitive_position": "moderate, several adjacent competitors"
+    },
+    "outcome": "None of the three product lines reached meaningful traction; engineering and support load tripled while revenue grew only 20% over 6 months.",
+    "lesson": "Splitting an 8-person team across three products diluted execution below the threshold needed for any one to gain traction."
+  },
+  {
+    "id": "ref-16",
+    "decision_text": "Stayed focused on a single product line and turned down two adjacent-market expansion opportunities to keep the team concentrated.",
+    "context_at_decision": {
+      "revenue": "$38k MRR",
+      "growth_rate": "6%/mo",
+      "team_size": 7,
+      "runway_months": 13,
+      "market": "B2B productivity tools",
+      "competitive_position": "moderate, several adjacent competitors"
+    },
+    "outcome": "Grew to $95k MRR over the following 12 months with the same headcount, then expanded into one adjacent product only after the core reached profitability.",
+    "lesson": "Concentrating the team on one product until it was self-sustaining created the capacity to expand later without diluting the core."
+  },
+  {
+    "id": "ref-17",
+    "decision_text": "Cut prices 20% to try to out-compete on price against a much larger, better-funded incumbent.",
+    "context_at_decision": {
+      "revenue": "$28k MRR",
+      "growth_rate": "4%/mo",
+      "team_size": 5,
+      "runway_months": 9,
+      "market": "SMB accounting software",
+      "competitive_position": "small player vs. dominant, well-funded incumbent"
+    },
+    "outcome": "The incumbent matched the price cut within weeks using their larger margin cushion; the startup's margin collapsed while growth stayed flat.",
+    "lesson": "Competing on price against a better-capitalized incumbent invited a price war the smaller company couldn't sustain."
+  },
+  {
+    "id": "ref-18",
+    "decision_text": "Declined to compete on price against a larger incumbent, instead narrowing focus to a specific underserved customer segment the incumbent ignored.",
+    "context_at_decision": {
+      "revenue": "$26k MRR",
+      "growth_rate": "4%/mo",
+      "team_size": 5,
+      "runway_months": 10,
+      "market": "SMB accounting software",
+      "competitive_position": "small player vs. dominant, well-funded incumbent"
+    },
+    "outcome": "Grew 3x within a year inside the underserved segment, where the incumbent's generic product was a poor fit and did not respond competitively.",
+    "lesson": "Avoiding a direct price fight and finding a segment the incumbent structurally couldn't serve well was more durable than competing head-on."
+  }
+]

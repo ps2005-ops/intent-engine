@@ -241,3 +241,104 @@ reads as "still working," not "broken."
 check whether it's a pattern across repeated runs before assuming a regression or
 reaching for more trimming. Multi-run sampling before drawing latency conclusions is
 now the standard here, not single-run snapshots.
+
+## Week 3: Retrieval + Personalization Layer
+
+**Spec goal:** given a new decision, retrieve similar past decisions/businesses to
+inform the simulation. Spec calls for ~50-100 scraped decisions, 10-20 manually
+annotated with outcomes, top-3 retrieval to adjust causal assumptions. Scope-cut
+per the spec's own guidance ("RAG at scale → use 20 curated examples instead of
+50+, quality over quantity") to a fully hand-curated 18-entry set — no scraping,
+deliberately.
+
+**Status:** Done.
+
+**What was built:**
+- `simulator/data/reference_decisions.json` — 18 hand-curated business decisions
+  covering the same decision types as the 5 test fixtures (pricing, hiring,
+  fundraising, expansion, pivots, competitive response), each with a
+  `context_at_decision` snapshot (revenue, growth_rate, team_size, runway_months,
+  market, competitive_position) **at the time that decision was made**, plus an
+  `outcome` and a `lesson`. Deliberately includes matched failure/success pairs for
+  several decision types (e.g. two sales-hiring-before-PMF cases, one that failed
+  and one that worked) so retrieval can surface contrast, not just similarity.
+- `simulator/retrieval.py` — `retrieve_similar()` (TF-IDF + cosine similarity, top-3)
+  and `format_retrieval_digest()` (pure string formatting, no LLM call — mirrors
+  `causal_model._format_causal_context`). Each digest line: a bucketed match-quality
+  tag (`strong match` / `loose match`), structured deltas on `team_size` and
+  `runway_months` (computed against the reference's decision-time snapshot, not
+  current-day figures for that business), the past decision, its outcome, and the
+  lesson.
+- Wired into `PremortemAnalyzer.run()` alongside the causal-relationships context,
+  injected into the same combined call (not a second LLM call) — the digest itself
+  costs zero extra generation, only some extra input tokens.
+
+**Architecture decision, made deliberately before building** (per explicit request,
+to avoid discovering a bad call mid-debugging the way Week 2's scenarios did):
+should retrieval be injected raw into the combined call, or pre-digested via a
+separate step? Chose **separate step, pre-digested summary**, reasoning:
+1. The combined call was already near its latency ceiling; raw retrieved text is
+   exactly the kind of "more material to react to" that inflated *output* length
+   during the Week 2 scenario work, even under tight word budgets.
+2. Retrieval (an embedding computation) is a fundamentally different kind of step
+   than a second generative Claude call — the Week 1 lesson "don't sequence two
+   generative calls" doesn't generalize to "don't add any step before the one
+   generative call."
+3. Pre-digesting mirrors the causal-relationships pattern that already works:
+   short structured bullets, not paragraphs, keep the main call focused.
+4. Separate steps are separately measurable — critical after this week's own
+   experience disentangling retries from content-volume latency.
+
+**Embedding backend reversal** (flagged explicitly so it isn't silently "fixed"
+later without the context): spec suggests OpenAI embeddings or local
+`all-MiniLM-L6-v2` (sentence-transformers). Initially chose sentence-transformers
+(true semantic similarity, no new API key). **Before wiring it in, measured its
+actual fresh-process cost** — the CLI is a new Python process every invocation,
+not a long-running server, so model load isn't a one-time cost:
+- Cold start (first-ever run, downloads model weights): 11.65s
+- Warm start (weights cached, still a fresh process): 3.51s, of which 2.15s is
+  just `import sentence_transformers` and 1.14s is model instantiation — the
+  actual embedding computation is 0.23s.
+
+Since retrieval must complete *before* the main call (the digest goes into that
+prompt), ~3.5s of unavoidable per-invocation overhead on top of an already-tight
+7-9s budget was a non-starter. **Switched to TF-IDF (scikit-learn)**: fresh-process
+cost measured at 0.836s, almost entirely import time, no model download, no API
+key. Explicitly not "true" semantic embedding — word-overlap similarity, will miss
+paraphrases/synonyms a real embedding model would catch. Accepted anyway because:
+the reference corpus is small (18 entries), hand-curated, and uses consistent
+business-decision vocabulary written by us, not noisy scraped text — semantic
+nuance matters less against a controlled corpus than it would generically. This is
+a deliberately cheap-to-falsify bet: if retrieved matches look poorly calibrated
+once eyeballed on real output, that's a concrete, visible signal to revisit (same
+pattern as the narrative-variety and scenario-format decisions this project has
+made all along — validate against real output, don't optimize blind).
+
+**Known limitation, flagged deliberately**: similarity deltas are only computed for
+`team_size` and `runway_months` — the two `BusinessContext` fields that are clean
+`int`s. `revenue` and `growth_rate` stay free text (Week 1's deliberate choice, to
+avoid guessing units/formats this early) and are NOT included in the structured
+delta signal, because computing a reliable delta would require parsing free text
+into normalized numbers — exactly the fragility Week 1 avoided by keeping those
+fields free text. **Do not "fix" this by adding a parser without revisiting whether
+free-text revenue/growth_rate is still the right call** — if that decision changes,
+it should change deliberately, with the delta computation as a downstream
+consequence, not the reason.
+
+**Verification**: 5 fixtures x 3 runs each after wiring retrieval in:
+
+| Fixture | min | max | avg |
+|---|---|---|---|
+| asia-expansion | 8.7s | 11.3s | 10.0s |
+| series-a-raise | 9.2s | 9.6s | 9.3s |
+| b2c-pivot | 8.3s | 9.2s | 8.9s |
+| pricing-increase | 7.4s | 8.2s | 7.9s |
+| early-sales-hire | 7.2s | 9.3s | 8.1s |
+
+Overall average ~8.8s, up from Week 2's 7.4-8.8s baseline by roughly 0.5-1s — lines
+up almost exactly with the measured 0.836s TF-IDF overhead, no surprises. Digest
+quality read well on manual inspection: `early-sales-hire` retrieved both a failed
+precedent (near-identical decision) and its contrasting success case (same decision
+type, different choice, worked) — genuine grounding, not padding. `pricing-increase`
+correctly bucketed two topically-irrelevant matches as "loose match" rather than
+overclaiming relevance.

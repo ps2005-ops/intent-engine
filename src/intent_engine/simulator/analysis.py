@@ -19,6 +19,7 @@ from ..core.pipeline import Stage
 from ..core.schemas import FailureMode, RiskAudit, StructuredIntent
 from .causal_model import CausalRelationship, relevant_relationships
 from .context_schema import BusinessContext
+from .retrieval import format_retrieval_digest, retrieve_similar
 from .schemas import Scenario, ScenarioSet
 
 logger = logging.getLogger(__name__)
@@ -93,7 +94,11 @@ parameterized by that priority (a "growth" priority means scenarios stress growt
 "profitability" priority means they stress margin/cost levers; "survival" means runway/cash; \
 "optionality" means flexibility/reversibility). Ground scenarios in the causal relationships \
 listed in the user message where they apply -- e.g. if a relevant relationship says headcount \
-growth increases burn, an upside scenario shouldn't assume hiring is free. \
+growth increases burn, an upside scenario shouldn't assume hiring is free. Also weight the \
+similar past decisions listed in the user message: if a 'strong match' precedent failed a \
+specific way, that failure mode should show up in failure_descriptions or the downside \
+scenario unless this decision differs meaningfully (say so implicitly through the delta \
+numbers, don't just copy the precedent's outcome as if it's certain to repeat). \
 scenario_tags and scenario_deltas are PARALLEL arrays of length 3, in that fixed \
 upside/base/downside order. scenario_tags <=4 words each: a short situational label for what's \
 driving this branch, e.g. "strong fundraising", "as planned", "competitor undercuts" -- NOT a \
@@ -161,11 +166,18 @@ class PremortemAnalyzer(Stage):
     def run(self, decision_text: str, context: BusinessContext) -> AnalysisResult:
         context_text = context.to_prompt_text()
         relationships = relevant_relationships(decision_text, context_text, limit=3)
+        retrieved = retrieve_similar(decision_text, top_k=3)
+        retrieval_digest = format_retrieval_digest(
+            retrieved, current_team_size=context.team_size, current_runway_months=context.runway_months
+        )
         user_message = (
             f"Decision: {decision_text}\n\n"
             f"Context:\n{context_text}\n\n"
             f"Potentially relevant causal relationships for this domain (use where applicable, "
-            f"ignore where not):\n{_format_causal_context(relationships)}"
+            f"ignore where not):\n{_format_causal_context(relationships)}\n\n"
+            f"Similar past decisions with known outcomes (weight 'strong match' entries more "
+            f"than 'loose match' ones; use these to ground scenarios and failure modes in real "
+            f"precedent, not as facts about THIS business):\n{retrieval_digest}"
         )
 
         # Occasionally the model omits a required field or returns mismatched-length
