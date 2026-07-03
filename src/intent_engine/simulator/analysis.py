@@ -21,12 +21,36 @@ FAST_MODEL = "claude-haiku-4-5-20251001"
 
 SYSTEM_PROMPT = """You are a pre-mortem risk auditor for pre-seed/seed-stage SaaS founders. \
 In one pass: (1) extract the founder's intent (goals, constraints, risk tolerance) from \
-their decision and context, then (2) identify the top 3 ways this decision could fail given \
-that specific context. failure_descriptions, failure_likelihoods, and failure_rationales are \
-PARALLEL arrays: index i in each describes the same failure mode. Use likelihood bands \
-(unlikely, possible, likely, tail_risk), not fake percentages. Ground every failure mode in \
-the specific context given, not generic startup advice. Be terse: max one short sentence per \
-field. This is a fast pre-commit check, not a report."""
+their decision and context, then (2) identify EXACTLY 3 ways this decision could fail given \
+that specific context -- not 2, not 4: always exactly 3, even under the word budgets below. \
+failure_descriptions, failure_likelihoods, and failure_rationales are PARALLEL arrays of \
+length 3: index i in each describes the same failure mode. Use likelihood bands \
+(unlikely, possible, likely, tail_risk), not fake percentages -- these bands are the honest \
+signal and must stay calibrated to your actual confidence. Ground every failure mode in the \
+specific context given, not generic startup advice. Be terse and keep every field within its \
+word budget: failure_descriptions <=22 words, failure_rationales <=15 words, \
+recommended_stress_tests <=18 words each, key_sensitivity <=25 words. These budgets are for \
+cutting FILLER WORDS ONLY -- never cut the specific dollar amounts, percentages, or timeframes \
+that make this grounded instead of generic, and never drop a failure mode to make the others fit \
+the budget; if something has to give, go a few words over rather than cutting a number or an \
+item. This is a fast pre-commit check, not a report.
+
+Within failure_descriptions specifically, write in confident, direct language, not hedged \
+qualifiers ("Your team will not survive doubling headcount without an ops hire" beats "the \
+team may struggle with a larger headcount"). The likelihood field already carries the honest \
+uncertainty -- the description doesn't need to hedge on top of it.
+
+Also write narrative_summary: ONE short sentence, 30 words or fewer, second person, present \
+tense, describing the single worst failure mode as something the founder is already living \
+through, not a probability they're evaluating. It must do three things in that one short \
+sentence: (a) name ONE specific vivid moment (a board meeting, a runway number, a slipping \
+deadline) -- not a cascading multi-clause scenario with several sub-events strung together on \
+commas, (b) explicitly state the pattern-match, using language like "this is exactly how \
+[stage/type] founders lose [thing]" or "founders in your exact position almost always..." -- \
+say it outright, don't just imply it, (c) frame the cost of NOT stress-testing this decision, \
+not just the cost of the decision itself going wrong. Do not soften it with "might" or "could." \
+If your draft has more than one comma-separated clause, cut it down to one. This sentence is \
+the hook that gets someone to read the quantified audit below it, not a summary of that audit."""
 
 ANALYSIS_TOOL_SCHEMA = {
     "type": "object",
@@ -35,22 +59,24 @@ ANALYSIS_TOOL_SCHEMA = {
         "goals": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
         "constraints": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
         "risk_tolerance": {"type": "string", "enum": ["low", "medium", "high"]},
-        "failure_descriptions": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3},
+        "narrative_summary": {"type": "string", "maxLength": 220},
+        "failure_descriptions": {"type": "array", "items": {"type": "string", "maxLength": 170}, "minItems": 3, "maxItems": 3},
         "failure_likelihoods": {
             "type": "array",
             "items": {"type": "string", "enum": ["unlikely", "possible", "likely", "tail_risk"]},
             "minItems": 3,
             "maxItems": 3,
         },
-        "failure_rationales": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3},
-        "recommended_stress_tests": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
-        "key_sensitivity": {"type": "string"},
+        "failure_rationales": {"type": "array", "items": {"type": "string", "maxLength": 130}, "minItems": 3, "maxItems": 3},
+        "recommended_stress_tests": {"type": "array", "items": {"type": "string", "maxLength": 150}, "maxItems": 3},
+        "key_sensitivity": {"type": "string", "maxLength": 200},
     },
     "required": [
         "decision_summary",
         "goals",
         "constraints",
         "risk_tolerance",
+        "narrative_summary",
         "failure_descriptions",
         "failure_likelihoods",
         "failure_rationales",
@@ -73,14 +99,31 @@ class PremortemAnalyzer(Stage):
 
     def run(self, decision_text: str, context: BusinessContext) -> AnalysisResult:
         user_message = f"Decision: {decision_text}\n\nContext:\n{context.to_prompt_text()}"
-        result = self.client.call_tool(
-            system=SYSTEM_PROMPT,
-            user_message=user_message,
-            tool_name="record_analysis",
-            tool_description="Record the combined intent extraction and risk audit.",
-            input_schema=ANALYSIS_TOOL_SCHEMA,
-            max_tokens=1024,
-        )
+
+        # Occasionally the model omits a required field or returns mismatched-length
+        # parallel arrays despite the schema. One retry is cheap insurance against a
+        # hard crash from a single bad generation; a second consecutive failure is a
+        # real problem worth surfacing rather than silently retrying forever.
+        last_error = None
+        for attempt in range(2):
+            result = self.client.call_tool(
+                system=SYSTEM_PROMPT,
+                user_message=user_message,
+                tool_name="record_analysis",
+                tool_description="Record the combined intent extraction and risk audit.",
+                input_schema=ANALYSIS_TOOL_SCHEMA,
+                max_tokens=1024,
+            )
+            try:
+                return self._parse(result)
+            except (KeyError, ValueError) as exc:
+                last_error = exc
+        raise RuntimeError(f"record_analysis response malformed twice in a row: {last_error}")
+
+    def _parse(self, result: dict) -> AnalysisResult:
+        lengths = {len(result[k]) for k in ("failure_descriptions", "failure_likelihoods", "failure_rationales")}
+        if lengths != {3}:
+            raise ValueError(f"expected 3 parallel failure-mode entries, got lengths {lengths}")
 
         intent = StructuredIntent(
             decision_summary=result["decision_summary"],
@@ -97,6 +140,7 @@ class PremortemAnalyzer(Stage):
             )
         ]
         risk_audit = RiskAudit(
+            narrative_summary=result["narrative_summary"],
             failure_modes=failure_modes,
             recommended_stress_tests=result["recommended_stress_tests"],
             key_sensitivity=result["key_sensitivity"],

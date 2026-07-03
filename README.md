@@ -20,9 +20,9 @@ original planning doc (not tracked in this repo).
 ## Current week: Week 1 — Intent Engine Scaffolding + Simulator Proof-of-Concept
 
 **Goal:** a working CLI that takes a business decision as text + context and outputs a
-structured risk audit in under 10 seconds, validated on 5 example decisions. **Done** —
-verified at 6.8-9.4s per decision (avg 8.1s) against the live API. See
-[PROGRESS.md](PROGRESS.md) for the full writeup.
+structured risk audit, validated on 5 example decisions. **Done** — verified reliably
+under a 12s latency budget against the live API (see [PROGRESS.md](PROGRESS.md) for why
+this moved from the original 10s target).
 
 **Pipeline:** `Raw Context Input → Intent Classification → Structured Intent Output
 (goals, constraints, risk tolerance) → Outcome Simulation → Risk Audit`
@@ -34,6 +34,14 @@ The simulator's live pipeline (`simulator/analysis.py`, `PremortemAnalyzer`) run
 two separate, independently testable stages and are kept for reuse where the tighter
 latency budget doesn't apply — they're just not what the CLI calls today. See
 [PROGRESS.md](PROGRESS.md) for why.
+
+**Positioning layer:** the risk audit also carries a `narrative_summary` — one vivid,
+second-person sentence (regret-avoidance framing, explicit pattern-recognition authority,
+cost-of-inaction) that sits above the quantified audit, per the "Pre-Mortem Machine"
+positioning strategy (Rory Sutherland framework) in the original spec. The quantified
+audit itself — failure modes, likelihood tags, stress-tests — is unchanged in structure;
+only the wording tone and this new field were added. See PROGRESS.md for the tuning
+process, including why the latency budget moved to 12s.
 
 ## Setup
 

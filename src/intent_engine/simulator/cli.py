@@ -71,6 +71,8 @@ def _format_report(decision_text: str, intent: StructuredIntent, audit: RiskAudi
     lines = [
         f"DECISION: {decision_text}",
         "",
+        "** " + audit.narrative_summary + " **",
+        "",
         f"INFERRED INTENT: {intent.decision_summary}",
         f"  Goals: {', '.join(intent.goals) or '(none extracted)'}",
         f"  Constraints: {', '.join(intent.constraints) or '(none extracted)'}",

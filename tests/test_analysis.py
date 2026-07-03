@@ -19,6 +19,7 @@ CANNED_FLAT_RESPONSE = {
     "goals": ["establish market presence"],
     "constraints": ["18-month timeline", "$2M budget"],
     "risk_tolerance": "medium",
+    "narrative_summary": "You're in the board meeting eight months from now explaining why the expansion drained the runway funding the business that actually worked.",
     "failure_descriptions": ["Runway runs out before expansion pays off.", "Local competitor undercuts pricing.", "Team overextends."],
     "failure_likelihoods": ["likely", "possible", "possible"],
     "failure_rationales": ["Runway is shorter than the expansion timeline.", "Competitors already have local presence.", "Team size is small for two markets."],
@@ -43,6 +44,7 @@ def test_premortem_analyzer_reconstructs_intent_and_audit():
     assert first.likelihood == "likely"
     assert first.rationale == "Runway is shorter than the expansion timeline."
     assert result.risk_audit.key_sensitivity == "Whether the $2M closes on schedule."
+    assert result.risk_audit.narrative_summary.startswith("You're in the board meeting")
     assert fake_client.last_call_kwargs["tool_name"] == "record_analysis"
 
 

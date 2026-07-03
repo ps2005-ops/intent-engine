@@ -41,6 +41,15 @@ class FailureMode(BaseModel):
 class RiskAudit(BaseModel):
     """Structured output of the outcome-simulation stage."""
 
+    narrative_summary: str = Field(
+        ...,
+        description=(
+            "One vivid, second-person, present-tense sentence framing the top risk as a felt "
+            "regret, not a probability. Sits above the quantified audit as the conversion layer; "
+            "does not replace it. E.g. 'You're explaining to your board in month 8 why the "
+            "expansion drained the runway that was funding the business that actually worked.'"
+        ),
+    )
     failure_modes: List[FailureMode]
     recommended_stress_tests: List[str]
     key_sensitivity: str = Field(..., description="The single factor this decision is most sensitive to.")
