@@ -25,6 +25,7 @@ import sys
 from ..core.schemas import RiskAudit, StructuredIntent
 from .context_schema import BusinessContext
 from .pipeline import run_premortem
+from .schemas import ScenarioSet
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -67,7 +68,13 @@ def _load_from_args(args: argparse.Namespace):
     return args.decision, context
 
 
-def _format_report(decision_text: str, intent: StructuredIntent, audit: RiskAudit, elapsed_seconds: float) -> str:
+def _format_report(
+    decision_text: str,
+    intent: StructuredIntent,
+    audit: RiskAudit,
+    scenario_set: ScenarioSet,
+    elapsed_seconds: float,
+) -> str:
     lines = [
         f"DECISION: {decision_text}",
         "",
@@ -78,8 +85,14 @@ def _format_report(decision_text: str, intent: StructuredIntent, audit: RiskAudi
         f"  Constraints: {', '.join(intent.constraints) or '(none extracted)'}",
         f"  Risk tolerance: {intent.risk_tolerance}",
         "",
-        "RISK AUDIT",
+        f"PRIMARY PRIORITY: {scenario_set.primary_priority}",
+        "",
+        "SCENARIOS",
     ]
+    for scenario in scenario_set.scenarios:
+        lines.append(f"  {scenario.name.upper()} ({scenario.tag}): {scenario.key_deltas}")
+    lines.append("")
+    lines.append("RISK AUDIT")
     for i, fm in enumerate(audit.failure_modes, 1):
         lines.append(f"  {i}. [{fm.likelihood}] {fm.description}")
         lines.append(f"     -> {fm.rationale}")
@@ -99,6 +112,12 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     decision_text, context = _load_from_args(args)
 
+    # Typical latency is 7-9s; occasional calls (~5% in testing) take 11-13s due to
+    # API-side variance unrelated to content length -- printed upfront so a slower
+    # call reads as "still working," not "hung." Goes to stderr so --json output
+    # piped to a file or another process stays clean.
+    print("Running pre-mortem analysis (typically 7-9s, occasionally longer)...", file=sys.stderr)
+
     result = run_premortem(decision_text, context)
 
     if args.json:
@@ -107,13 +126,14 @@ def main(argv=None) -> int:
                 {
                     "intent": result.intent.model_dump(),
                     "risk_audit": result.risk_audit.model_dump(),
+                    "scenario_set": result.scenario_set.model_dump(),
                     "elapsed_seconds": result.elapsed_seconds,
                 },
                 indent=2,
             )
         )
     else:
-        print(_format_report(decision_text, result.intent, result.risk_audit, result.elapsed_seconds))
+        print(_format_report(decision_text, result.intent, result.risk_audit, result.scenario_set, result.elapsed_seconds))
 
     return 0
 

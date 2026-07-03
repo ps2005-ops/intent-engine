@@ -31,7 +31,7 @@ def main():
         print(f"[{fixture['id']}]")
         context = BusinessContext(**fixture["context"])
         result = run_premortem(fixture["decision_text"], context)
-        print(_format_report(fixture["decision_text"], result.intent, result.risk_audit, result.elapsed_seconds))
+        print(_format_report(fixture["decision_text"], result.intent, result.risk_audit, result.scenario_set, result.elapsed_seconds))
         total_elapsed += result.elapsed_seconds
         print()
 

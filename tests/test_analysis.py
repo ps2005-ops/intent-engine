@@ -38,6 +38,9 @@ CANNED_FLAT_RESPONSE = {
     "failure_rationales": ["Runway is shorter than the expansion timeline.", "Competitors already have local presence.", "Team size is small for two markets."],
     "recommended_stress_tests": ["Model a 6-month funding delay.", "Survey local pricing."],
     "key_sensitivity": "Whether the $2M closes on schedule.",
+    "primary_priority": "growth",
+    "scenario_tags": ["strong APAC traction", "as planned", "expansion stalls"],
+    "scenario_deltas": ["+$500k ARR, break-even month 14", "flat runway, +1 regional hire", "-2 months runway, 0 regional hires"],
 }
 
 
@@ -59,6 +62,11 @@ def test_premortem_analyzer_reconstructs_intent_and_audit():
     assert result.risk_audit.key_sensitivity == "Whether the $2M closes on schedule."
     assert result.risk_audit.narrative_summary.startswith("You're in the board meeting")
     assert fake_client.last_call_kwargs["tool_name"] == "record_analysis"
+
+    assert result.scenario_set.primary_priority == "growth"
+    assert [s.name for s in result.scenario_set.scenarios] == ["upside", "base", "downside"]
+    assert result.scenario_set.scenarios[0].tag == "strong APAC traction"
+    assert result.scenario_set.scenarios[0].key_deltas == "+$500k ARR, break-even month 14"
 
 
 def test_premortem_analyzer_zips_parallel_arrays_in_order():
@@ -99,6 +107,20 @@ def test_premortem_analyzer_raises_after_two_consecutive_leaks():
         assert "malformed twice in a row" in str(exc)
     else:
         raise AssertionError("expected RuntimeError after two consecutive malformed responses")
+
+
+def test_premortem_analyzer_retries_on_mismatched_scenario_lengths():
+    bad = dict(CANNED_FLAT_RESPONSE)
+    bad["scenario_tags"] = ["only one scenario"]
+    clean = dict(CANNED_FLAT_RESPONSE)
+
+    fake_client = SequenceLLMClient([bad, clean])
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert fake_client.call_count == 2
+    assert len(result.scenario_set.scenarios) == 3
 
 
 def test_premortem_analyzer_does_not_false_positive_on_comparison_operators():

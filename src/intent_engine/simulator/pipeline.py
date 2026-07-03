@@ -14,11 +14,13 @@ from ..core.llm_client import LLMClient
 from ..core.schemas import RiskAudit, StructuredIntent
 from .analysis import PremortemAnalyzer
 from .context_schema import BusinessContext
+from .schemas import ScenarioSet
 
 
 class PremortemResult(NamedTuple):
     intent: StructuredIntent
     risk_audit: RiskAudit
+    scenario_set: ScenarioSet
     elapsed_seconds: float
 
 
@@ -34,4 +36,9 @@ def run_premortem(
     result = analyzer.run(decision_text, context)
     elapsed = time.monotonic() - start
 
-    return PremortemResult(intent=result.intent, risk_audit=result.risk_audit, elapsed_seconds=elapsed)
+    return PremortemResult(
+        intent=result.intent,
+        risk_audit=result.risk_audit,
+        scenario_set=result.scenario_set,
+        elapsed_seconds=elapsed,
+    )

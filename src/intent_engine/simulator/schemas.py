@@ -16,7 +16,7 @@ FounderPriority = Literal["growth", "profitability", "survival", "optionality"]
 
 class Scenario(BaseModel):
     name: Literal["upside", "base", "downside"]
-    narrative: str
+    tag: str = Field(..., description="Short situational label for this branch, e.g. 'strong fundraising', not a sentence.")
     key_deltas: str = Field(..., description="Short, concrete outcome deltas as one line, e.g. '+$2M runway, +2 hires possible'.")
 
 

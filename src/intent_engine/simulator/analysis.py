@@ -10,13 +10,18 @@ kept as-is for reuse where the two-call latency doesn't matter (e.g. testing, or
 future domain with a looser budget).
 """
 
+import logging
 import re
-from typing import NamedTuple, Optional
+from typing import List, NamedTuple, Optional
 
 from ..core.llm_client import LLMClient
 from ..core.pipeline import Stage
 from ..core.schemas import FailureMode, RiskAudit, StructuredIntent
+from .causal_model import CausalRelationship, relevant_relationships
 from .context_schema import BusinessContext
+from .schemas import Scenario, ScenarioSet
+
+logger = logging.getLogger(__name__)
 
 FAST_MODEL = "claude-haiku-4-5-20251001"
 
@@ -27,28 +32,37 @@ FAST_MODEL = "claude-haiku-4-5-20251001"
 _MARKUP_LEAK_PATTERN = re.compile(r"</[a-zA-Z]|<[a-zA-Z_]+>")
 
 SYSTEM_PROMPT = """You are a pre-mortem risk auditor for pre-seed/seed-stage SaaS founders. \
-In one pass: (1) extract the founder's intent as EXACTLY 2 goals and EXACTLY 2 constraints \
-(pick the 2 that matter most, not the 4 that are merely true) plus risk tolerance, then (2) \
+In one pass: (1) extract the founder's intent. goals and constraints must each be a JSON \
+array of EXACTLY 2 short strings -- a real array, never a single string and never a \
+stringified list like '["a", "b"]' -- pick the 2 that matter most, not the 4 that are merely \
+true, plus risk_tolerance, then (2) \
 identify EXACTLY 3 ways this decision could fail given that specific context -- not 2, not 4: \
-always exactly 3, even under the word budgets below -- plus EXACTLY 2 recommended stress-tests. \
+always exactly 3, even under the word budgets below -- plus EXACTLY 1 recommended stress-test. \
 failure_descriptions, failure_likelihoods, and failure_rationales are PARALLEL arrays of \
 length 3: index i in each describes the same failure mode. Use likelihood bands \
 (unlikely, possible, likely, tail_risk), not fake percentages -- these bands are the honest \
 signal and must stay calibrated to your actual confidence. Ground every failure mode in the \
 specific context given, not generic startup advice. Be terse and keep every field within its \
-word budget: failure_descriptions <=22 words, failure_rationales <=15 words, \
-recommended_stress_tests <=18 words each, key_sensitivity <=25 words. These budgets are for \
-cutting FILLER WORDS ONLY -- never cut the specific dollar amounts, percentages, or timeframes \
-that make this grounded instead of generic, and never drop a failure mode to make the others fit \
-the budget; if something has to give, go a few words over rather than cutting a number or an \
-item. This is a fast pre-commit check, not a report.
+word budget: failure_descriptions <=13 words, failure_rationales <=8 words, \
+recommended_stress_tests <=11 words. These budgets are for cutting FILLER WORDS ONLY -- never \
+cut the specific dollar amounts, percentages, or timeframes that make this grounded instead of \
+generic, and never drop a failure mode to make the others fit the budget; if something has to \
+give, go a few words over rather than cutting a number or an item. This is a fast pre-commit \
+check, not a report.
 
 Within failure_descriptions specifically, write in confident, direct language, not hedged \
 qualifiers ("Your team will not survive doubling headcount without an ops hire" beats "the \
 team may struggle with a larger headcount"). The likelihood field already carries the honest \
 uncertainty -- the description doesn't need to hedge on top of it.
 
-Also write narrative_summary: ONE short sentence, 30 words or fewer, second person, present \
+Also write key_sensitivity: ONE plain-data sentence, 13 words or fewer, naming the single \
+factor this decision's success or failure is most sensitive to -- a number, threshold, or \
+condition (e.g. "Churn above 8% erases the margin gain within two quarters."), not a summary \
+of the audit above it and not a restatement of narrative_summary. This is a plain data field: \
+end with a period or a number and nothing else. Never include XML/HTML-like tags, angle \
+brackets, or any formatting/meta-commentary about the response itself.
+
+Also write narrative_summary: ONE short sentence, 24 words or fewer, second person, present \
 tense, describing the single worst failure mode as something the founder is already living \
 through, not a probability they're evaluating. It must carry four qualities: (a) ONE specific \
 vivid moment (a board meeting, a runway number, a slipping deadline), not a cascading scenario \
@@ -70,7 +84,22 @@ at all: "Skip the stress test and you're the founder explaining in Q3 why doubli
 moved no growth metric -- this specific hiring mistake repeats almost every time it's tried."
 Pick whichever shape fits the specific failure mode best, or write a fourth shape entirely -- \
 the four qualities above are the requirement, not the sentence skeleton. This sentence is the \
-hook that gets someone to read the quantified audit below it, not a summary of that audit."""
+hook that gets someone to read the quantified audit below it, not a summary of that audit.
+
+Finally: classify primary_priority as exactly ONE of growth, profitability, survival, \
+optionality -- the single dominant thing this founder is actually optimizing for, not a blend \
+of several. Then write EXACTLY 3 scenarios in this fixed order: upside, base, downside, each \
+parameterized by that priority (a "growth" priority means scenarios stress growth levers; a \
+"profitability" priority means they stress margin/cost levers; "survival" means runway/cash; \
+"optionality" means flexibility/reversibility). Ground scenarios in the causal relationships \
+listed in the user message where they apply -- e.g. if a relevant relationship says headcount \
+growth increases burn, an upside scenario shouldn't assume hiring is free. \
+scenario_tags and scenario_deltas are PARALLEL arrays of length 3, in that fixed \
+upside/base/downside order. scenario_tags <=4 words each: a short situational label for what's \
+driving this branch, e.g. "strong fundraising", "as planned", "competitor undercuts" -- NOT a \
+sentence, just the label, matching the style "Scenario A (strong fundraising): +$2M runway, \
++2 hires possible". scenario_deltas <=8 words each: concrete deltas only, e.g. '+$2M runway, \
++2 hires' -- no full sentences, just the numbers/outcomes that changed."""
 
 ANALYSIS_TOOL_SCHEMA = {
     "type": "object",
@@ -79,17 +108,20 @@ ANALYSIS_TOOL_SCHEMA = {
         "goals": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
         "constraints": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
         "risk_tolerance": {"type": "string", "enum": ["low", "medium", "high"]},
-        "narrative_summary": {"type": "string", "maxLength": 220},
-        "failure_descriptions": {"type": "array", "items": {"type": "string", "maxLength": 170}, "minItems": 3, "maxItems": 3},
+        "narrative_summary": {"type": "string", "maxLength": 170},
+        "failure_descriptions": {"type": "array", "items": {"type": "string", "maxLength": 100}, "minItems": 3, "maxItems": 3},
         "failure_likelihoods": {
             "type": "array",
             "items": {"type": "string", "enum": ["unlikely", "possible", "likely", "tail_risk"]},
             "minItems": 3,
             "maxItems": 3,
         },
-        "failure_rationales": {"type": "array", "items": {"type": "string", "maxLength": 130}, "minItems": 3, "maxItems": 3},
-        "recommended_stress_tests": {"type": "array", "items": {"type": "string", "maxLength": 150}, "minItems": 2, "maxItems": 2},
-        "key_sensitivity": {"type": "string", "maxLength": 200},
+        "failure_rationales": {"type": "array", "items": {"type": "string", "maxLength": 65}, "minItems": 3, "maxItems": 3},
+        "recommended_stress_tests": {"type": "array", "items": {"type": "string", "maxLength": 85}, "minItems": 1, "maxItems": 1},
+        "key_sensitivity": {"type": "string", "maxLength": 100},
+        "primary_priority": {"type": "string", "enum": ["growth", "profitability", "survival", "optionality"]},
+        "scenario_tags": {"type": "array", "items": {"type": "string", "maxLength": 30}, "minItems": 3, "maxItems": 3},
+        "scenario_deltas": {"type": "array", "items": {"type": "string", "maxLength": 50}, "minItems": 3, "maxItems": 3},
     },
     "required": [
         "decision_summary",
@@ -100,6 +132,9 @@ ANALYSIS_TOOL_SCHEMA = {
         "failure_descriptions",
         "failure_likelihoods",
         "failure_rationales",
+        "primary_priority",
+        "scenario_tags",
+        "scenario_deltas",
         "recommended_stress_tests",
         "key_sensitivity",
     ],
@@ -109,6 +144,12 @@ ANALYSIS_TOOL_SCHEMA = {
 class AnalysisResult(NamedTuple):
     intent: StructuredIntent
     risk_audit: RiskAudit
+    scenario_set: ScenarioSet
+
+
+def _format_causal_context(relationships: List[CausalRelationship]) -> str:
+    lines = [f"- {rel.trigger} -> {rel.effect}" for rel in relationships]
+    return "\n".join(lines)
 
 
 class PremortemAnalyzer(Stage):
@@ -118,12 +159,21 @@ class PremortemAnalyzer(Stage):
         self.client = client or LLMClient(model=FAST_MODEL)
 
     def run(self, decision_text: str, context: BusinessContext) -> AnalysisResult:
-        user_message = f"Decision: {decision_text}\n\nContext:\n{context.to_prompt_text()}"
+        context_text = context.to_prompt_text()
+        relationships = relevant_relationships(decision_text, context_text, limit=3)
+        user_message = (
+            f"Decision: {decision_text}\n\n"
+            f"Context:\n{context_text}\n\n"
+            f"Potentially relevant causal relationships for this domain (use where applicable, "
+            f"ignore where not):\n{_format_causal_context(relationships)}"
+        )
 
         # Occasionally the model omits a required field or returns mismatched-length
         # parallel arrays despite the schema. One retry is cheap insurance against a
         # hard crash from a single bad generation; a second consecutive failure is a
-        # real problem worth surfacing rather than silently retrying forever.
+        # real problem worth surfacing rather than silently retrying forever. Logged
+        # every time it fires so we can see real incidence in production, not just
+        # guess from a handful of test fixtures.
         last_error = None
         for attempt in range(2):
             result = self.client.call_tool(
@@ -132,18 +182,28 @@ class PremortemAnalyzer(Stage):
                 tool_name="record_analysis",
                 tool_description="Record the combined intent extraction and risk audit.",
                 input_schema=ANALYSIS_TOOL_SCHEMA,
-                max_tokens=1024,
+                max_tokens=1536,
             )
             try:
                 return self._parse(result)
             except (KeyError, ValueError) as exc:
                 last_error = exc
+                logger.warning(
+                    "record_analysis attempt %d/2 failed validation, %s: %s",
+                    attempt + 1,
+                    "retrying" if attempt == 0 else "giving up",
+                    exc,
+                )
         raise RuntimeError(f"record_analysis response malformed twice in a row: {last_error}")
 
     def _parse(self, result: dict) -> AnalysisResult:
         lengths = {len(result[k]) for k in ("failure_descriptions", "failure_likelihoods", "failure_rationales")}
         if lengths != {3}:
             raise ValueError(f"expected 3 parallel failure-mode entries, got lengths {lengths}")
+
+        scenario_lengths = {len(result[k]) for k in ("scenario_tags", "scenario_deltas")}
+        if scenario_lengths != {3}:
+            raise ValueError(f"expected 3 parallel scenario entries, got lengths {scenario_lengths}")
 
         for key, value in result.items():
             values = value if isinstance(value, list) else [value]
@@ -171,4 +231,13 @@ class PremortemAnalyzer(Stage):
             recommended_stress_tests=result["recommended_stress_tests"],
             key_sensitivity=result["key_sensitivity"],
         )
-        return AnalysisResult(intent=intent, risk_audit=risk_audit)
+        scenarios = [
+            Scenario(name=name, tag=tag, key_deltas=deltas)
+            for name, tag, deltas in zip(
+                ("upside", "base", "downside"),
+                result["scenario_tags"],
+                result["scenario_deltas"],
+            )
+        ]
+        scenario_set = ScenarioSet(primary_priority=result["primary_priority"], scenarios=scenarios)
+        return AnalysisResult(intent=intent, risk_audit=risk_audit, scenario_set=scenario_set)
