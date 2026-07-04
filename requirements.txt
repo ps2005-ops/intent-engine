@@ -2,4 +2,3 @@ anthropic==0.116.0
 pydantic==2.13.4
 python-dotenv==1.2.1
 scikit-learn==1.6.1
-pyspellchecker==0.8.4

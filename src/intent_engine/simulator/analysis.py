@@ -12,9 +12,7 @@ future domain with a looser budget).
 
 import logging
 import re
-from typing import List, NamedTuple, Optional, Set
-
-from spellchecker import SpellChecker
+from typing import List, NamedTuple, Optional
 
 from ..core.llm_client import LLMClient
 from ..core.pipeline import Stage
@@ -51,37 +49,6 @@ class _NarrativeSummaryTooLong(ValueError):
     so the retry loop in run() treats this one differently on a second consecutive
     miss (truncate instead of raising RuntimeError)."""
 
-
-# Occasionally the model produces a coherent-looking sentence with a corrupted word
-# inside it (e.g. "pricing pressure emerads" instead of "emerges") -- a compression
-# artifact under tight word budgets, not a schema issue, so pydantic validation lets
-# it through clean. Safety net: flag lowercase alphabetic words the dictionary doesn't
-# know, skipping all-caps tokens (likely acronyms) and a manual allowlist of common
-# startup/SaaS jargon a general English dictionary doesn't recognize -- extend the
-# allowlist if a real word starts getting flagged.
-_spellchecker = SpellChecker()
-_DOMAIN_JARGON_ALLOWLIST = {
-    "saas", "mrr", "arr", "cac", "ltv", "pmf", "apac", "gtm", "icp", "sdr", "kpi", "roi",
-    "b2b", "b2c", "onboarding", "freemium", "fundraise", "fundraising", "preseed",
-    "tranched", "tranching",
-}
-# Must capture contractions ("hasn't", "didn't") as one token, not split on the
-# apostrophe -- splitting was a real bug: it turned "hasn't" into "hasn" + "t" and
-# flagged "hasn" as a garbled word, causing false-positive retries (and, once, an
-# outright crash) on completely ordinary English.
-_WORD_PATTERN = re.compile(r"[a-zA-Z]+(?:'[a-zA-Z]+)?")
-
-
-def _find_garbled_words(text: str) -> Set[str]:
-    candidates = set()
-    for word in _WORD_PATTERN.findall(text):
-        if len(word) < 4 or word.isupper():
-            continue
-        lower = word.lower()
-        if lower in _DOMAIN_JARGON_ALLOWLIST:
-            continue
-        candidates.add(lower)
-    return _spellchecker.unknown(candidates) if candidates else set()
 
 SYSTEM_PROMPT = """You are a pre-mortem risk auditor for pre-seed/seed-stage SaaS founders. \
 In one pass: (1) extract the founder's intent. goals and constraints must each be a JSON \
@@ -342,18 +309,6 @@ class PremortemAnalyzer(Stage):
                     continue
                 if _MARKUP_LEAK_PATTERN.search(v):
                     raise ValueError(f"field '{key}' contains leaked markup: {v!r}")
-                # Log-only, not retry-blocking: the dictionary check has unknown
-                # precision against a bug ("emerads" for "emerges") that's occurred
-                # once all session, and already produced two false-positive crashes
-                # on ordinary words ("analytics", "underdeliver", "onboard") the
-                # dictionary just doesn't know. Blocking on a signal this noisy is a
-                # worse trade than the rare bug it's meant to catch. This gives real
-                # incidence data over time -- if it turns out to matter, that's the
-                # evidence to justify a better check (domain-augmented dictionary, a
-                # narrower heuristic), not a guess made now.
-                garbled = _find_garbled_words(v)
-                if garbled:
-                    logger.warning("field '%s' contains a possibly-garbled token %r: %r", key, garbled, v)
 
         narrative_summary = result["narrative_summary"]
         if len(narrative_summary) > _NARRATIVE_SUMMARY_MAX_CHARS:
