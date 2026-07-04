@@ -488,7 +488,12 @@ momentum:**
 - The compound-action mechanism (reply-to-existing for `email_draft`, and
   anything with the same shape) — rule locked in, concrete mechanism
   deliberately tabled, see above.
-- Observed, not fixed: the classifier's `target` field for `email_draft` comes
-  back as a bare name (e.g. "Sarah"), not an email address — a real Gmail
-  integration would need contact resolution, which doesn't exist.
+- **Open gap: recipient resolution for `gmail_act`.** A bare name in a voice
+  utterance (e.g. "email Sarah about the deck") needs to resolve to a real
+  email address before any real send capability exists. Not yet decided how:
+  contacts lookup, entity-memory learning names/addresses over repeated
+  interactions, user disambiguation when a name is ambiguous, or some
+  combination. Needs a decision before Stage C's real Gmail integration, not
+  before — the current stub doesn't need this since nothing is actually sent.
+  Flagging now so it's not rediscovered cold later.
 - 57 offline tests passing as of the `email_draft` fresh-compose wiring commit.
