@@ -53,6 +53,14 @@ class GmailReadResult(BaseModel):
     authorized: bool
     messages: List[GmailMessage] = []
     message: Optional[str] = None
+    # Additive, defaults False so every existing stub-produced result is
+    # unaffected: distinguishes "not_authorized" (authorized=False, failed=False
+    # -- a permission decision) from "read_failed" (authorized=False,
+    # failed=True -- an operational failure: expired token, rate limit, network
+    # error, malformed response). No real Gmail reader produces failed=True yet
+    # (StubGmailReader never fails) -- kept symmetric with CalendarReadResult
+    # for when one exists.
+    failed: bool = False
 
 
 class StubGmailReader:

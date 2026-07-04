@@ -1,5 +1,7 @@
 from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
 from intent_engine.core.permissions import PermissionRegistry
+from intent_engine.voice.calendar import CalendarReadResult
+from intent_engine.voice.gmail import GmailReadResult
 from intent_engine.voice.context_schema import (
     CalendarContext,
     EntityHistorySummary,
@@ -8,6 +10,26 @@ from intent_engine.voice.context_schema import (
     PersonalContext,
     build_personal_context,
 )
+
+
+class _FailingCalendarReader:
+    """Stands in for GoogleCalendarReader's failure path without needing real
+    OAuth/network -- read_events() returns a genuine operational failure, not a
+    permission denial."""
+
+    def __init__(self, message="Unable to read calendar right now (connection issue)."):
+        self.message = message
+
+    def read_events(self):
+        return CalendarReadResult(authorized=False, failed=True, message=self.message)
+
+
+class _FailingGmailReader:
+    def __init__(self, message="Unable to read Gmail right now (connection issue)."):
+        self.message = message
+
+    def read_messages(self):
+        return GmailReadResult(authorized=False, failed=True, message=self.message)
 
 
 def _record(entity_id, decision_text, goals, primary_priority, risk_tolerance):
@@ -145,6 +167,46 @@ def test_to_prompt_text_shows_fetched_data_when_authorized(tmp_path):
 
     assert "Gmail: 3 message(s)" in text
     assert "Calendar: 3 event(s)" in text
+
+
+def test_build_personal_context_distinguishes_read_failed_from_not_authorized(tmp_path):
+    """A genuine operational failure (e.g. GoogleCalendarReader hitting an
+    expired token or a network error) must map to "read_failed", not
+    "not_authorized" -- even though the registry itself grants calendar_read."""
+    path = tmp_path / "entity_memory.jsonl"
+    registry = PermissionRegistry({"calendar_read": True, "gmail_read": True})
+
+    ctx = build_personal_context(
+        "acme inc",
+        MockPersonalData(),
+        path=path,
+        permission_registry=registry,
+        calendar_reader=_FailingCalendarReader(),
+        gmail_reader=_FailingGmailReader(),
+    )
+
+    assert ctx.calendar_context.state == "read_failed"
+    assert ctx.calendar_context.message == "Unable to read calendar right now (connection issue)."
+    assert ctx.gmail_context.state == "read_failed"
+    assert ctx.gmail_context.message == "Unable to read Gmail right now (connection issue)."
+
+
+def test_to_prompt_text_surfaces_read_failed_distinctly_from_not_authorized(tmp_path):
+    path = tmp_path / "entity_memory.jsonl"
+    registry = PermissionRegistry({"calendar_read": True})
+
+    ctx = build_personal_context(
+        "acme inc",
+        MockPersonalData(),
+        path=path,
+        permission_registry=registry,
+        calendar_reader=_FailingCalendarReader("Calendar token needs re-authorization -- run setup again."),
+    )
+    text = ctx.to_prompt_text()
+
+    assert "Calendar: Calendar token needs re-authorization -- run setup again." in text
+    # Distinctly NOT the not_authorized wording, even though calendar_read IS granted.
+    assert "Not authorized to read calendar" not in text
 
 
 def test_skipped_for_cost_state_is_already_representable_no_schema_change_needed():

@@ -17,19 +17,31 @@ entity_history (real) and mock_data (placeholder) -- domain-named, not collapsed
 into one shared bucket, matching the project's existing precedent (the
 domain-string convention) of never forcing distinct domains into a shared shape.
 
-Their `state` field is three-valued from day one, not a bool -- "fetched",
-"not_authorized", "skipped_for_cost". Only the first two are ever produced today
-(every pull is attempted unconditionally, matching today's real, near-zero stub
-cost). "skipped_for_cost" is reserved, unused, for when a future cost-based
-gating or caching strategy decides NOT to attempt a pull at all -- the same
-reserved-field pattern already used for EntityMemoryRecord.outcome. Whether pulls
-should stay unconditional, become conditionally gated, or get cached is an
-explicit, OPEN, deliberately deferred decision -- see PROGRESS.md and
-docs/weekly/intent-engine-v2-entity-memory.md. Deciding it now would mean
-guessing against a cost (real Stage C vendor latency) that doesn't exist yet
-with stubs -- the same trap this project already avoided once with entity_id
-normalization and the compound-action schema. When that decision does get made,
-it changes which pull-strategy populates this field, not the field shape itself.
+Their `state` field is FOUR-valued, not a bool -- "fetched", "not_authorized",
+"read_failed", "skipped_for_cost". "skipped_for_cost" is reserved, unused, for
+when a future cost-based gating or caching strategy decides NOT to attempt a
+pull at all -- the same reserved-field pattern already used for
+EntityMemoryRecord.outcome. Whether pulls should stay unconditional, become
+conditionally gated, or get cached is an explicit, OPEN, deliberately deferred
+decision -- see PROGRESS.md and docs/weekly/intent-engine-v2-entity-memory.md.
+Deciding it now would mean guessing against a cost (real Stage C vendor
+latency) that doesn't exist yet with stubs -- the same trap this project
+already avoided once with entity_id normalization and the compound-action
+schema. When that decision does get made, it changes which pull-strategy
+populates this field, not the field shape itself.
+
+"not_authorized" vs. "read_failed" is a real, deliberate distinction, not two
+words for the same thing: "not_authorized" means Stage B's PermissionRegistry
+said no -- a permission decision. "read_failed" means the domain WAS
+authorized but the actual read attempt broke (expired/revoked OAuth token, API
+rate limit, network failure, malformed response) -- an operational failure.
+Conflating them would hide a real operational problem (e.g. an expired
+Calendar token) behind wording that implies the person declined access, which
+could mislead both a human debugging this and the classifier's own reasoning
+if surfaced in to_prompt_text() unchanged. `CalendarReadResult`/`GmailReadResult`
+(calendar.py/gmail.py) carry this distinction via a `failed: bool` field
+alongside `authorized: bool`, additive so existing stub-produced results
+(`failed` always False) are unaffected.
 """
 
 from pathlib import Path
@@ -44,10 +56,21 @@ except ImportError:  # pragma: no cover
 
 from ..core.entity_memory import DEFAULT_PATH, read_records
 from ..core.permissions import PermissionRegistry
-from .calendar import CalendarEvent, StubCalendarReader
-from .gmail import GmailMessage, StubGmailReader
+from .calendar import CalendarEvent, CalendarReadResult, StubCalendarReader
+from .gmail import GmailMessage, GmailReadResult, StubGmailReader
 
-ExternalReadState = Literal["fetched", "not_authorized", "skipped_for_cost"]
+ExternalReadState = Literal["fetched", "not_authorized", "read_failed", "skipped_for_cost"]
+
+
+def _state_from_read_result(result: Union[GmailReadResult, CalendarReadResult]) -> ExternalReadState:
+    """Shared mapping for both GmailReadResult and CalendarReadResult -- see
+    module docstring for why "not_authorized" and "read_failed" must stay
+    distinct rather than both collapsing to "not fetched"."""
+    if result.authorized:
+        return "fetched"
+    if result.failed:
+        return "read_failed"
+    return "not_authorized"
 
 
 class EntityHistorySummary(BaseModel):
@@ -72,9 +95,9 @@ class MockPersonalData(BaseModel):
 
 
 class GmailContext(BaseModel):
-    """Result of a gated pull from StubGmailReader, three-valued -- see module
-    docstring for why "not_authorized" and "skipped_for_cost" are distinct from
-    each other and from an empty `messages` list."""
+    """Result of a gated pull from a Gmail reader (stub today), four-valued --
+    see module docstring for why "not_authorized"/"read_failed"/"skipped_for_cost"
+    are each distinct from one another and from an empty `messages` list."""
 
     state: ExternalReadState
     messages: List[GmailMessage] = Field(default_factory=list)
@@ -82,8 +105,8 @@ class GmailContext(BaseModel):
 
 
 class CalendarContext(BaseModel):
-    """Result of a gated pull from StubCalendarReader, three-valued -- see
-    GmailContext."""
+    """Result of a gated pull from a Calendar reader (stub or GoogleCalendarReader),
+    four-valued -- see GmailContext."""
 
     state: ExternalReadState
     events: List[CalendarEvent] = Field(default_factory=list)
@@ -130,7 +153,9 @@ class PersonalContext(BaseModel):
             else:
                 lines.append("  Gmail: authorized, no messages.")
         elif self.gmail_context.state == "not_authorized":
-            lines.append(f"  Gmail: {self.gmail_context.message or 'not authorized.'}")
+            lines.append(f"  Gmail: {self.gmail_context.message or 'Not authorized to read Gmail.'}")
+        elif self.gmail_context.state == "read_failed":
+            lines.append(f"  Gmail: {self.gmail_context.message or 'unable to read right now (connection issue).'}")
         else:
             lines.append("  Gmail: skipped (not attempted this pass).")
 
@@ -141,7 +166,9 @@ class PersonalContext(BaseModel):
             else:
                 lines.append("  Calendar: authorized, no events.")
         elif self.calendar_context.state == "not_authorized":
-            lines.append(f"  Calendar: {self.calendar_context.message or 'not authorized.'}")
+            lines.append(f"  Calendar: {self.calendar_context.message or 'Not authorized to read calendar.'}")
+        elif self.calendar_context.state == "read_failed":
+            lines.append(f"  Calendar: {self.calendar_context.message or 'unable to read right now (connection issue).'}")
         else:
             lines.append("  Calendar: skipped (not attempted this pass).")
 
@@ -195,14 +222,14 @@ def build_personal_context(
 
     gmail_read_result = gmail_reader.read_messages()
     gmail_context = GmailContext(
-        state="fetched" if gmail_read_result.authorized else "not_authorized",
+        state=_state_from_read_result(gmail_read_result),
         messages=gmail_read_result.messages,
         message=gmail_read_result.message,
     )
 
     calendar_read_result = calendar_reader.read_events()
     calendar_context = CalendarContext(
-        state="fetched" if calendar_read_result.authorized else "not_authorized",
+        state=_state_from_read_result(calendar_read_result),
         events=calendar_read_result.events,
         message=calendar_read_result.message,
     )
