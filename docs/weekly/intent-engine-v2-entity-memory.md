@@ -94,9 +94,9 @@ both an authorized and a denied `gmail_act` grant on the same utterance
 ("draft an email to Sarah about pushing the board deck review to Friday") —
 both produced correct `GmailActResult`s and both wrote an `EntityMemoryRecord`.
 Observed gap from that live run, not fixed: the classifier's `target` field
-comes back as a bare name ("Sarah"), not an email address — a real Gmail
-integration would need contact resolution, which doesn't exist. 57 offline
-tests passing.
+comes back as a bare name ("Sarah"), not an email address — tracked as its own
+named, open gap ("recipient resolution for `gmail_act`") in `PROGRESS.md`, not
+duplicated in full here. 57 offline tests passing.
 
 `gmail_read` remains unwired: it has no natural `intent_type` trigger (unlike
 `calendar_block` or `email_draft`), and its own triggering question (proactive?
