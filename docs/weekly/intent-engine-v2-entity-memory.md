@@ -42,9 +42,58 @@ per domain (Gmail: maybe, WhatsApp: maybe not), decided by the person, not assum
   no automated coverage, only the live manual run performed during review. See
   `PROGRESS.md` backlog note.
 
-**Not yet built**: Stage C (real integrations), Stage D (hypothesis formation),
-`PersonalContext`/`voice/` (in progress next — see amendment note in
-`docs/weekly/week-04-plan.md`), any grants persistence for `PermissionRegistry`.
+**`voice/` built and verified**: `PersonalContext` (a view computed from real
+`entity_memory.read_records()`, not a standalone snapshot — see the amendment note
+in `docs/weekly/week-04-plan.md`), `VoiceIntentClassifier` (own prompt/schema, Haiku,
+measured well under the <3s voice latency target), `process_voice_interaction()`
+(composes classification + entity-memory write, source="voice", every interaction
+written with no filtering by salience). `EntityMemoryRecord.salience` added
+(`Optional[Literal["low","medium","high"]]`, voice-only) as the signal Stage D will
+query/weight by later. Salience calibration is an open, partially-characterized
+question — real 10-run distributions showed `intent_type` perfectly stable but
+`salience` varying on ambiguous utterances specifically, correlated with
+`PersonalContext` injection; documented as a code comment in `voice/classifier.py`,
+not resolved.
+
+**Stage C started, Calendar only**: `voice/calendar.py` — `StubCalendarReader`/
+`StubCalendarActor`, gated on `"calendar_read"`/`"calendar_act"`. Proves the
+two-tier read/act permission distinction end-to-end (a read grant does not
+authorize act, and vice versa — both directions tested). Stub only: no real
+Google Calendar API, no OAuth, no new dependencies. **Domain-string convention
+locked in** (see `core/permissions.py`'s docstring): every future integration uses
+`"{integration}_read"`/`"{integration}_act"`, never a single shared domain string.
+
+**Calendar stub wired into the real voice pipeline, end-to-end, verified**:
+`voice/pipeline.py`'s `process_voice_interaction()` now routes `calendar_block`
+`VoiceIntent`s through `PermissionRegistry` to `StubCalendarActor` directly —
+not a second stub, the same pipeline every other intent goes through. Returns
+`VoiceInteractionResult(voice_intent, calendar_action)`; `calendar_action` stays
+`None` for every non-`calendar_block` intent. Order is fixed: entity-memory write
+happens unconditionally, before the permission check — a denied action still
+leaves a durable record that it was requested (verified: both the authorized and
+denied scenarios below produced a persisted JSONL line). Verified with a real
+live run (real Haiku classification call, real file writes, real
+`PermissionRegistry`, no mocks) for both an authorized and a denied
+`calendar_act` grant on the same utterance ("block off Thursday afternoon for
+the board meeting") — both produced correct `CalendarActResult`s and both wrote
+an `EntityMemoryRecord`. 46 offline tests passing (3 new pipeline-wiring tests
+added, covering authorized, denied, and non-calendar-intent pass-through).
+
+**Not yet built**: Gmail/Notion integrations (deliberately deferred until the
+Calendar wiring proved the pattern holds under real pipeline contact — it now
+has), Stage D (hypothesis formation), any grants persistence for
+`PermissionRegistry`, real OAuth for any integration.
+
+**Known gap, deliberately deferred, not a bolt-on**: no field or record anywhere
+captures whether a gated action was actually executed, denied, or not applicable
+— `EntityMemoryRecord` records what was *requested* (`decision_text`, `salience`,
+etc.), not what happened as a result. This is a real design question in its own
+right (a field on `EntityMemoryRecord` vs. a separate linked record entirely —
+arguably action-outcome is a different *kind* of fact than "what was requested"),
+close to the same territory as `outcome`'s existing reserved-but-unused field and
+Stage D's "hypothesis formation over accumulated history." Deliberately left open
+for its own deliberate design pass at or near Stage D, not decided under the
+momentum of the Calendar-wiring checkpoint.
 
 ---
 
