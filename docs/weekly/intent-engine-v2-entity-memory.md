@@ -84,6 +84,24 @@ Calendar wiring proved the pattern holds under real pipeline contact — it now
 has), Stage D (hypothesis formation), any grants persistence for
 `PermissionRegistry`, real OAuth for any integration.
 
+**Action-domain wiring shape, locked in with Calendar and binding for every
+future action domain** (Gmail, Notion, WhatsApp, etc. — same treatment as the
+domain-string convention, decided once so it isn't reopened at Gmail):
+1. **Unconditional entity-memory write happens before any gate check.** A
+   denied or not-applicable action must never suppress the record that it was
+   requested.
+2. **Dispatch is by `intent_type`.** Each action domain owns exactly the
+   `intent_type` value(s) that route to it; no domain infers from unstructured
+   content.
+3. **Every gated action returns an explicit authorized/denied result, never
+   silent.** No domain handler skips a response or throws instead of returning
+   a typed refusal — same "state what it would do, don't silently skip"
+   principle as the two-engine design above.
+
+What's explicitly NOT locked in by this: the exact shape of a domain's actor
+class, its internal methods, or how many gated calls a single intent triggers
+— those stay domain-specific and get designed per integration.
+
 **Known gap, deliberately deferred, not a bolt-on**: no field or record anywhere
 captures whether a gated action was actually executed, denied, or not applicable
 — `EntityMemoryRecord` records what was *requested* (`decision_text`, `salience`,
