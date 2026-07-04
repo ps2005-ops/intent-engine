@@ -17,7 +17,7 @@ assistant. Once the Intent Engine works on business data, extending it to person
 context is domain adaptation, not rearchitecture. Full 26-week schedule: see the
 original planning doc (not tracked in this repo).
 
-## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete; voice pipeline + Stage C (Calendar wired, Gmail act wired fresh-compose-only, Gmail read unwired) complete
+## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete; voice pipeline + Stage C (PersonalContext wired, Calendar wired, Gmail act wired fresh-compose-only, Gmail/Calendar read-as-triggerable-intent unwired) complete
 
 **Week 1 goal:** a working CLI that takes a business decision as text + context and
 outputs a structured risk audit in under 10 seconds, validated on 5 example decisions.
@@ -36,22 +36,32 @@ registry gating future action-taking. `--entity-id` is now required on every
 `premortem` run — see `core/entity_memory.py` and `core/permissions.py`.
 
 **Voice pipeline + Stage C goal**: `voice/PersonalContext` (a view computed from
-entity memory), `voice/VoiceIntentClassifier`, and `process_voice_interaction()`
-(classification → unconditional entity-memory write) are built and verified.
-Both Calendar and Gmail's act tier are wired directly into the voice pipeline
-end-to-end: `calendar_block` → `StubCalendarActor` and `email_draft` →
-`StubGmailActor`, each flowing classification → entity-memory write →
-permission check → the stub actor, gated on `"{domain}_read"`/`"{domain}_act"`.
-`email_draft` is scoped to fresh-compose only — reply-to-existing needs a
-compound-action mechanism (an act domain depending on a read domain's grant
-*and* content) that's deliberately tabled rather than designed from a single
-case; see `docs/weekly/intent-engine-v2-entity-memory.md`. This wiring shape
+entity memory) is now genuinely wired into `process_voice_interaction()`, not
+just built and tested in isolation — the function builds it internally by
+default whenever a caller doesn't supply one, using the `entity_id` it already
+requires. `PersonalContext` also now includes gated `gmail_read`/`calendar_read`
+pulls (`StubGmailReader`/`StubCalendarReader`), three-valued
+(`"fetched"`/`"not_authorized"`/`"skipped_for_cost"`, the last reserved for a
+not-yet-decided future gating/caching strategy) so a denied domain is stated
+explicitly, never silently omitted. `voice/VoiceIntentClassifier` and
+`process_voice_interaction()`'s entity-memory write (unconditional, every
+interaction) are built and verified. Both Calendar and Gmail's act tier are
+wired directly into the voice pipeline end-to-end: `calendar_block` →
+`StubCalendarActor` and `email_draft` → `StubGmailActor`, each flowing
+classification → entity-memory write → permission check → the stub actor,
+gated on `"{domain}_read"`/`"{domain}_act"`. `email_draft` is scoped to
+fresh-compose only — reply-to-existing needs a compound-action mechanism (an
+act domain depending on a read domain's grant *and* content) that's
+deliberately tabled rather than designed from a single case; see
+`docs/weekly/intent-engine-v2-entity-memory.md`. This wiring shape
 (unconditional write before any gate check, `intent_type`-based dispatch,
 gated actions always return an explicit authorized/denied result) is locked in
-as binding for every future action domain. `gmail_read` is built and tested but
-deliberately not yet wired — there's no natural `intent_type` trigger for a
-read the way there is for an action. See
-`docs/weekly/intent-engine-v2-entity-memory.md` for the full account.
+as binding for every future action domain. `gmail_read`/`calendar_read` now
+reach every classification *ambiently* via `PersonalContext` — but remain
+deliberately not built as **first-class, explicitly-triggerable intents** (e.g.
+"what's on my calendar today" as its own `intent_type`), a genuinely different,
+still-open capability. See `docs/weekly/intent-engine-v2-entity-memory.md` for
+the full account.
 
 **Weeks 1-3, all done.** All 5 fixtures average ~7.9-10.0s across repeated runs — comfortably
 meeting <10s as a *typical-case* target. Multi-run testing showed ~5% of individual
