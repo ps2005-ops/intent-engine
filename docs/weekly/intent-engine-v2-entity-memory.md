@@ -79,14 +79,29 @@ the board meeting") — both produced correct `CalendarActResult`s and both wrot
 an `EntityMemoryRecord`. 46 offline tests passing (3 new pipeline-wiring tests
 added, covering authorized, denied, and non-calendar-intent pass-through).
 
-**Stage C, Gmail: both tiers stubbed, neither wired**: `voice/gmail.py` —
-`StubGmailReader` (`"gmail_read"`) and `StubGmailActor.create_draft()`
-(`"gmail_act"`), mirroring Calendar's shape. Not wired into the pipeline:
-`gmail_read` has no natural `intent_type` trigger (unlike `calendar_block`);
-`gmail_act`'s trigger (`email_draft`) looks obvious but isn't wired either,
-because examining it alongside `gmail_read` surfaced the compound-action
-question above — wiring `email_draft` to `create_draft()` as originally shaped
-would silently mishandle the reply case. Notion integration not started.
+**Stage C, Gmail: `gmail_act` wired (fresh-compose only), `gmail_read`
+unwired**: `voice/gmail.py` — `StubGmailReader` (`"gmail_read"`) and
+`StubGmailActor.create_draft()` (`"gmail_act"`), mirroring Calendar's shape.
+`process_voice_interaction()` now routes `email_draft` `VoiceIntent`s through
+`PermissionRegistry` to `StubGmailActor` directly, same shape as
+`calendar_block`. **Scoped to fresh-compose only, deliberately**: there is no
+field distinguishing "compose new" from "reply to existing," so every
+`email_draft` intent is treated as fresh-compose, including reply-style
+utterances this pipeline cannot yet detect — a known, documented limitation,
+not a silent gap, tied directly to the tabled compound-action mechanism above.
+Verified with a real live run (real API call, real file writes, no mocks) for
+both an authorized and a denied `gmail_act` grant on the same utterance
+("draft an email to Sarah about pushing the board deck review to Friday") —
+both produced correct `GmailActResult`s and both wrote an `EntityMemoryRecord`.
+Observed gap from that live run, not fixed: the classifier's `target` field
+comes back as a bare name ("Sarah"), not an email address — a real Gmail
+integration would need contact resolution, which doesn't exist. 57 offline
+tests passing.
+
+`gmail_read` remains unwired: it has no natural `intent_type` trigger (unlike
+`calendar_block` or `email_draft`), and its own triggering question (proactive?
+a sub-step inside `context_retrieval`?) is still open. Notion integration not
+started.
 
 **Not yet built**: the concrete Gmail compound-action implementation (schema
 changes to distinguish fresh-compose vs. reply-to-existing, the actual

@@ -419,7 +419,7 @@ what's still not built).
 layer (including the `--entity-id` requirement and the entity-memory write path)
 has no automated coverage, only the live manual run performed during review.
 
-## Voice pipeline + Stage C: Calendar (wired) and Gmail (read-only stub)
+## Voice pipeline + Stage C: Calendar (wired) and Gmail (act wired fresh-compose-only, read unwired)
 
 Built and verified on top of Stage A/B — full account, including real measured
 salience-variance distributions and the locked-in action-domain pattern, lives
@@ -447,12 +447,33 @@ Summary here:
   domain** (not just Calendar): unconditional write before any gate check,
   `intent_type`-based dispatch, gated actions always return an explicit
   authorized/denied result, never silent.
-- `voice/gmail.py` — `StubGmailReader`, gated on `"gmail_read"`, mirroring
-  `voice/calendar.py`'s shape. **Deliberately not wired into the pipeline**:
-  unlike `calendar_block`, there's no natural `intent_type` trigger for a read
-  (checking email isn't a command shape the way "block off Thursday" is).
-  Deciding how reads get triggered is deferred until there's more than one read
-  integration to compare against. `gmail_act` not built yet.
+- `voice/gmail.py` — `StubGmailReader` (`"gmail_read"`) and
+  `StubGmailActor.create_draft()` (`"gmail_act"`), mirroring
+  `voice/calendar.py`'s shape. `gmail_act` is wired into
+  `process_voice_interaction()`: an `email_draft` `VoiceIntent` flows through
+  classification → entity-memory write → permission check → `StubGmailActor`,
+  verified with a real live run for both an authorized and a denied grant.
+  **Scoped to fresh-compose only, deliberately**: no field distinguishes
+  "compose new" from "reply to existing," so every `email_draft` intent is
+  currently treated as fresh-compose — a documented limitation, tied to the
+  compound-action finding below, not a silent gap. `gmail_read` remains
+  **deliberately not wired**: unlike `calendar_block`/`email_draft`, there's no
+  natural `intent_type` trigger for a read (checking email isn't a command
+  shape the way "block off Thursday" is); deferred until more read integrations
+  exist to compare against.
+- **Compound-action finding, from examining `gmail_read` and `gmail_act`
+  together**: unlike Calendar's self-contained `act`, Gmail's reply case
+  (drafting a reply) needs the source message's *content*, not just a
+  `gmail_act` grant — a genuine data dependency between domains. Locked in as
+  a second binding wiring shape (an act domain's gated call may depend on a
+  read domain's grant + content, for actions referencing existing material).
+  The concrete mechanism was deliberately NOT designed from this one case:
+  attempting to shape it (`reference_id: Optional[str]`) surfaced at least
+  three distinct reference shapes (content-reference, target-resolution,
+  aggregate-reference) that one field can't fit, plus a missing pipeline
+  resolution-step (the classifier has no access to live read-domain data, so
+  it can't itself resolve "Sarah's email about the board deck" to a concrete
+  reference). Tabled until a real case forces it.
 
 **Backlog / open gaps, deliberately deferred, not bolted on under checkpoint
 momentum:**
@@ -464,5 +485,10 @@ momentum:**
 - `gmail_read`'s read-triggering design (proactive? a sub-step inside
   `context_retrieval`? something else?) — open, deferred until more read
   integrations exist to compare against.
-- `gmail_act` not built.
-- 49 offline tests passing as of the Gmail read-only stub commit.
+- The compound-action mechanism (reply-to-existing for `email_draft`, and
+  anything with the same shape) — rule locked in, concrete mechanism
+  deliberately tabled, see above.
+- Observed, not fixed: the classifier's `target` field for `email_draft` comes
+  back as a bare name (e.g. "Sarah"), not an email address — a real Gmail
+  integration would need contact resolution, which doesn't exist.
+- 57 offline tests passing as of the `email_draft` fresh-compose wiring commit.

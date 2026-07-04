@@ -2,6 +2,7 @@ from intent_engine.core.entity_memory import JsonlEntityMemoryWriter, read_recor
 from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import StubCalendarActor
 from intent_engine.voice.classifier import VoiceIntentClassifier
+from intent_engine.voice.gmail import StubGmailActor
 from intent_engine.voice.pipeline import process_voice_interaction
 
 
@@ -53,6 +54,8 @@ def test_process_voice_interaction_writes_every_interaction_regardless_of_salien
     assert high_result.voice_intent.salience == "high"
     assert low_result.calendar_action is None  # not a calendar_block intent
     assert high_result.calendar_action is None
+    assert low_result.gmail_action is None  # not an email_draft intent
+    assert high_result.gmail_action is None
 
     records = read_records("Acme Inc", path=path)
     assert len(records) == 2  # both written -- neither filtered out
@@ -159,3 +162,93 @@ def test_non_calendar_intent_never_calls_calendar_actor(tmp_path):
 
     assert result.voice_intent.intent_type == "reminder"
     assert result.calendar_action is None
+
+
+def _email_draft_client():
+    return FakeLLMClient(
+        {
+            "intent_type": "email_draft",
+            "target": "sarah@acme.example",
+            "when": None,
+            "content": "board deck follow-up",
+            "salience": "medium",
+        }
+    )
+
+
+def test_email_draft_intent_authorized_creates_draft_end_to_end(tmp_path):
+    """Fresh-compose only, per the recorded design decision: the full chain --
+    classification -> entity memory write -> permission check ->
+    StubGmailActor -- for a compose-style email_draft utterance."""
+    path = tmp_path / "entity_memory.jsonl"
+    writer = JsonlEntityMemoryWriter(path=path)
+    registry = PermissionRegistry({"gmail_act": True})
+    actor = StubGmailActor(registry)
+
+    result = process_voice_interaction(
+        entity_id="Acme Inc",
+        utterance="draft an email to Sarah about the board deck follow-up",
+        classifier=VoiceIntentClassifier(client=_email_draft_client()),
+        writer=writer,
+        permission_registry=registry,
+        gmail_actor=actor,
+    )
+
+    assert result.voice_intent.intent_type == "email_draft"
+    assert result.calendar_action is None
+    assert result.gmail_action is not None
+    assert result.gmail_action.authorized is True
+    assert "sarah@acme.example" in result.gmail_action.confirmation
+    assert "board deck follow-up" in result.gmail_action.confirmation
+
+    records = read_records("Acme Inc", path=path)
+    assert len(records) == 1
+    assert records[0].decision_text == "draft an email to Sarah about the board deck follow-up"
+
+
+def test_email_draft_intent_unauthorized_is_refused_but_still_written(tmp_path):
+    """Same invariant as Calendar's: a denied gmail_act must not suppress the
+    entity-memory write."""
+    path = tmp_path / "entity_memory.jsonl"
+    writer = JsonlEntityMemoryWriter(path=path)
+    registry = PermissionRegistry()  # no grants at all -- deny-by-default
+    actor = StubGmailActor(registry)
+
+    result = process_voice_interaction(
+        entity_id="Acme Inc",
+        utterance="draft an email to Sarah about the board deck follow-up",
+        classifier=VoiceIntentClassifier(client=_email_draft_client()),
+        writer=writer,
+        permission_registry=registry,
+        gmail_actor=actor,
+    )
+
+    assert result.gmail_action is not None
+    assert result.gmail_action.authorized is False
+    assert result.gmail_action.confirmation is None
+    assert result.gmail_action.message == "Not authorized to create Gmail drafts."
+
+    records = read_records("Acme Inc", path=path)
+    assert len(records) == 1
+    assert records[0].decision_text == "draft an email to Sarah about the board deck follow-up"
+
+
+def test_non_email_intent_never_calls_gmail_actor(tmp_path):
+    """A non-email_draft intent must not touch the Gmail actor at all --
+    gmail_action stays None even when an authorized actor is supplied."""
+    path = tmp_path / "entity_memory.jsonl"
+    writer = JsonlEntityMemoryWriter(path=path)
+    registry = PermissionRegistry({"gmail_act": True})
+    actor = StubGmailActor(registry)
+
+    result = process_voice_interaction(
+        entity_id="Acme Inc",
+        utterance="block off Thursday afternoon for the board meeting",
+        classifier=VoiceIntentClassifier(client=_calendar_client()),
+        writer=writer,
+        permission_registry=registry,
+        gmail_actor=actor,
+    )
+
+    assert result.voice_intent.intent_type == "calendar_block"
+    assert result.gmail_action is None

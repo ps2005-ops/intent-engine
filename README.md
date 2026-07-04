@@ -17,7 +17,7 @@ assistant. Once the Intent Engine works on business data, extending it to person
 context is domain adaptation, not rearchitecture. Full 26-week schedule: see the
 original planning doc (not tracked in this repo).
 
-## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete; voice pipeline + Stage C (Calendar wired, Gmail read-only stub) complete
+## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete; voice pipeline + Stage C (Calendar wired, Gmail act wired fresh-compose-only, Gmail read unwired) complete
 
 **Week 1 goal:** a working CLI that takes a business decision as text + context and
 outputs a structured risk audit in under 10 seconds, validated on 5 example decisions.
@@ -37,17 +37,21 @@ registry gating future action-taking. `--entity-id` is now required on every
 
 **Voice pipeline + Stage C goal**: `voice/PersonalContext` (a view computed from
 entity memory), `voice/VoiceIntentClassifier`, and `process_voice_interaction()`
-(classification → unconditional entity-memory write) are built and verified. Stage
-C's first real (stubbed) integration, Calendar, is wired directly into the voice
-pipeline end-to-end — a `calendar_block` `VoiceIntent` flows through
-classification → entity-memory write → permission check → `StubCalendarActor`,
-gated on `"calendar_read"`/`"calendar_act"`. This wiring shape (unconditional
-write before any gate check, `intent_type`-based dispatch, gated actions always
-return an explicit authorized/denied result) is now locked in as binding for
-every future action domain. Gmail's read-only stub (`voice/gmail.py`,
-`"gmail_read"`) is built and tested but deliberately not yet wired in — see
-`PROGRESS.md` for why. See `docs/weekly/intent-engine-v2-entity-memory.md` for
-the full account.
+(classification → unconditional entity-memory write) are built and verified.
+Both Calendar and Gmail's act tier are wired directly into the voice pipeline
+end-to-end: `calendar_block` → `StubCalendarActor` and `email_draft` →
+`StubGmailActor`, each flowing classification → entity-memory write →
+permission check → the stub actor, gated on `"{domain}_read"`/`"{domain}_act"`.
+`email_draft` is scoped to fresh-compose only — reply-to-existing needs a
+compound-action mechanism (an act domain depending on a read domain's grant
+*and* content) that's deliberately tabled rather than designed from a single
+case; see `docs/weekly/intent-engine-v2-entity-memory.md`. This wiring shape
+(unconditional write before any gate check, `intent_type`-based dispatch,
+gated actions always return an explicit authorized/denied result) is locked in
+as binding for every future action domain. `gmail_read` is built and tested but
+deliberately not yet wired — there's no natural `intent_type` trigger for a
+read the way there is for an action. See
+`docs/weekly/intent-engine-v2-entity-memory.md` for the full account.
 
 **Weeks 1-3, all done.** All 5 fixtures average ~7.9-10.0s across repeated runs — comfortably
 meeting <10s as a *typical-case* target. Multi-run testing showed ~5% of individual
@@ -151,8 +155,9 @@ src/intent_engine/
                # retrieval.py + data/reference_decisions.json hold the Week 3 retrieval layer)
   voice/       # Cognitive Delegate: context_schema.py (PersonalContext), classifier.py
                # (VoiceIntentClassifier), pipeline.py (process_voice_interaction, the
-               # calendar_block wiring), calendar.py (Stage C Calendar stub, wired),
-               # gmail.py (Stage C Gmail read-only stub, not yet wired), schemas.py
+               # calendar_block + email_draft wiring), calendar.py (Stage C Calendar
+               # stub, wired), gmail.py (Stage C Gmail stub -- act wired fresh-compose-
+               # only, read not yet wired), schemas.py
 tests/         # unit tests (mocked) + live e2e test against the 5 fixture decisions
 scripts/       # run_examples.py — manual review of the 5 fixture decisions
 docs/weekly/   # per-week notes
