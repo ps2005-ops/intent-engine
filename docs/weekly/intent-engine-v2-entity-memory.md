@@ -42,18 +42,31 @@ per domain (Gmail: maybe, WhatsApp: maybe not), decided by the person, not assum
   no automated coverage, only the live manual run performed during review. See
   `PROGRESS.md` backlog note.
 
-**`voice/` built and verified**: `PersonalContext` (a view computed from real
-`entity_memory.read_records()`, not a standalone snapshot — see the amendment note
-in `docs/weekly/week-04-plan.md`), `VoiceIntentClassifier` (own prompt/schema, Haiku,
-measured well under the <3s voice latency target), `process_voice_interaction()`
-(composes classification + entity-memory write, source="voice", every interaction
-written with no filtering by salience). `EntityMemoryRecord.salience` added
+**`voice/` built, schema-verified, but NOT wired into the live path**:
+`PersonalContext` (a view computed from real `entity_memory.read_records()`, not a
+standalone snapshot — see the amendment note in `docs/weekly/week-04-plan.md`),
+`VoiceIntentClassifier` (own prompt/schema, Haiku, measured well under the <3s
+voice latency target), `process_voice_interaction()` (composes classification +
+entity-memory write, source="voice", every interaction written with no filtering
+by salience). `EntityMemoryRecord.salience` added
 (`Optional[Literal["low","medium","high"]]`, voice-only) as the signal Stage D will
 query/weight by later. Salience calibration is an open, partially-characterized
 question — real 10-run distributions showed `intent_type` perfectly stable but
 `salience` varying on ambiguous utterances specifically, correlated with
 `PersonalContext` injection; documented as a code comment in `voice/classifier.py`,
 not resolved.
+
+**Verified by direct code read (not assumed from docstrings)**: `build_personal_context()`
+is defined and tested in isolation (`tests/test_context_schema.py`) but is never
+called anywhere in the live path — `process_voice_interaction()` accepts an
+optional `context: Optional[PersonalContext] = None` and forwards it to the
+classifier if supplied, but nothing today ever builds and supplies one. Every real
+voice interaction currently classifies with `context=None`. Entity memory is being
+*written* to on every interaction; nothing yet *reads* it back to inform a live
+classification. This is a pre-existing gap from when `PersonalContext` was
+originally checkpointed as schema-only (correctly scoped at the time to exclude
+classifier/pipeline wiring) — it was never closed afterward, not something the
+Gmail stub work introduced.
 
 **Stage C started, Calendar only**: `voice/calendar.py` — `StubCalendarReader`/
 `StubCalendarActor`, gated on `"calendar_read"`/`"calendar_act"`. Proves the
@@ -102,6 +115,17 @@ duplicated in full here. 57 offline tests passing.
 `calendar_block` or `email_draft`), and its own triggering question (proactive?
 a sub-step inside `context_retrieval`?) is still open. Notion integration not
 started.
+
+**This triggering question and the `PersonalContext` wiring gap above are ONE
+unresolved design question, not two** (confirmed by direct code inspection, not
+inference): both are really asking "how does read-domain data — entity-memory
+history, Gmail messages, calendar events — actually reach a live classification
+call." Building `gmail_read`'s pipeline wiring in isolation, before that question
+is settled, would very likely reproduce the exact "plumbed but not connected"
+state found above, under a different name. **Decision: do not build `gmail_read`
+wiring until this is resolved as one combined design pass.** A design proposal
+for that combined pass exists (not yet implemented, awaiting review) — see
+`PROGRESS.md`'s corresponding backlog entry for the current status.
 
 **Not yet built**: the concrete Gmail compound-action implementation (schema
 changes to distinguish fresh-compose vs. reply-to-existing, the actual

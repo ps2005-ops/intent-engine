@@ -428,7 +428,14 @@ Summary here:
 
 - `voice/context_schema.py` — `PersonalContext`, a view computed from real
   `entity_memory.read_records()` (not a snapshot), keeping real history and
-  placeholder mock data in visibly separate sections.
+  placeholder mock data in visibly separate sections. **Verified by direct code
+  read: NOT wired into the live path.** `build_personal_context()` is only ever
+  called from its own test file — `process_voice_interaction()` accepts an
+  optional `context` and forwards it if supplied, but never builds one itself.
+  Every real voice interaction today classifies with `context=None`. A
+  pre-existing gap (from `PersonalContext`'s original schema-only checkpoint,
+  correctly scoped at the time, never closed afterward), not something the
+  Gmail stub work introduced.
 - `voice/classifier.py` — `VoiceIntentClassifier` (Haiku, own prompt/schema),
   classifies `VoiceIntent` including a non-optional `salience` field. Salience
   calibration under `PersonalContext` injection is an open, only
@@ -483,8 +490,15 @@ momentum:**
   (close to the same territory as the existing reserved-but-unused `outcome`
   field).
 - `gmail_read`'s read-triggering design (proactive? a sub-step inside
-  `context_retrieval`? something else?) — open, deferred until more read
-  integrations exist to compare against.
+  `context_retrieval`? something else?) — **confirmed to be the same
+  unresolved question as the `PersonalContext` wiring gap above, not a
+  separate one**: both are "how does read-domain data reach a live
+  classification call." Decision: do not build `gmail_read` wiring until this
+  is resolved as one combined design pass, not two. A design proposal exists
+  (build `PersonalContext` inside `process_voice_interaction()` by default;
+  fold gated `gmail_read`/`calendar_read` pulls into `PersonalContext`
+  construction itself, domain-named, not a shared bucket) — not yet
+  implemented, awaiting review.
 - The compound-action mechanism (reply-to-existing for `email_draft`, and
   anything with the same shape) — rule locked in, concrete mechanism
   deliberately tabled, see above.
