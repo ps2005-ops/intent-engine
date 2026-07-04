@@ -34,6 +34,14 @@ class ReferenceDecision(NamedTuple):
     context_at_decision: dict
     outcome: str
     lesson: str
+    # Optional Scale/Leverage/Luck tags (simulator/schemas.py's BusinessStructuredIntent
+    # field names) -- only present on the 3-4 proof-of-concept entries tagged manually;
+    # None on every other entry. Added here (not used by retrieval logic itself) because
+    # ReferenceDecision(**entry) rejects any unrecognized key -- tagging even one entry
+    # would otherwise crash _load_reference_decisions() with a TypeError.
+    scale_efficiency: Optional[str] = None
+    leverage_type: Optional[List[str]] = None
+    market_timing_signal: Optional[str] = None
 
 
 class RetrievedMatch(NamedTuple):

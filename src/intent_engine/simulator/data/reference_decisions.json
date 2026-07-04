@@ -11,7 +11,10 @@
       "competitive_position": "price-competitive, 4 similar tools"
     },
     "outcome": "Lost 22% of MRR to churn within 60 days; net revenue dropped for 2 months before stabilizing.",
-    "lesson": "A 40% jump in a commodity SMB category triggered switching; a phased or segmented increase would likely have held more revenue."
+    "lesson": "A 40% jump in a commodity SMB category triggered switching; a phased or segmented increase would likely have held more revenue.",
+    "scale_efficiency": "unclear",
+    "leverage_type": ["none_apparent"],
+    "market_timing_signal": "saturated"
   },
   {
     "id": "ref-02",
@@ -67,7 +70,10 @@
       "competitive_position": "early leader in narrow niche"
     },
     "outcome": "New hires took 4-5 months to ramp with no dedicated onboarding lead; growth rate fell to 3%/mo during the ramp period and burn multiple worsened to 3.1x.",
-    "lesson": "Doubling headcount without an ops/onboarding lead in place created a productivity gap that ate most of the new runway."
+    "lesson": "Doubling headcount without an ops/onboarding lead in place created a productivity gap that ate most of the new runway.",
+    "scale_efficiency": "cost_outpacing_output",
+    "leverage_type": ["financial", "people"],
+    "market_timing_signal": "uncertain"
   },
   {
     "id": "ref-06",
@@ -81,7 +87,10 @@
       "competitive_position": "early leader in narrow niche"
     },
     "outcome": "Growth rate held steady through each hiring wave; runway extended to 22 months by month 9.",
-    "lesson": "Tying hiring tranches to revenue milestones avoided the ramp-time cash crunch seen in single-wave hiring."
+    "lesson": "Tying hiring tranches to revenue milestones avoided the ramp-time cash crunch seen in single-wave hiring.",
+    "scale_efficiency": "proportional",
+    "leverage_type": ["financial", "people"],
+    "market_timing_signal": "uncertain"
   },
   {
     "id": "ref-07",
@@ -207,7 +216,10 @@
       "competitive_position": "moderate, several adjacent competitors"
     },
     "outcome": "None of the three product lines reached meaningful traction; engineering and support load tripled while revenue grew only 20% over 6 months.",
-    "lesson": "Splitting an 8-person team across three products diluted execution below the threshold needed for any one to gain traction."
+    "lesson": "Splitting an 8-person team across three products diluted execution below the threshold needed for any one to gain traction.",
+    "scale_efficiency": "cost_outpacing_output",
+    "leverage_type": ["none_apparent"],
+    "market_timing_signal": "unclear"
   },
   {
     "id": "ref-16",

@@ -43,6 +43,9 @@ CANNED_FLAT_RESPONSE = {
     "primary_priority": "growth",
     "scenario_tags": ["strong APAC traction", "as planned", "expansion stalls"],
     "scenario_deltas": ["+$500k ARR, break-even month 14", "flat runway, +1 regional hire", "-2 months runway, 0 regional hires"],
+    "scale_efficiency": "cost_outpacing_output",
+    "leverage_type": ["financial"],
+    "market_timing_signal": "uncertain",
 }
 
 
@@ -69,6 +72,10 @@ def test_premortem_analyzer_reconstructs_intent_and_audit():
     assert [s.name for s in result.scenario_set.scenarios] == ["upside", "base", "downside"]
     assert result.scenario_set.scenarios[0].tag == "strong APAC traction"
     assert result.scenario_set.scenarios[0].key_deltas == "+$500k ARR, break-even month 14"
+
+    assert result.intent.scale_efficiency == "cost_outpacing_output"
+    assert result.intent.leverage_type == ["financial"]
+    assert result.intent.market_timing_signal == "uncertain"
 
 
 def test_premortem_analyzer_zips_parallel_arrays_in_order():
@@ -166,6 +173,34 @@ def test_premortem_analyzer_does_not_false_positive_on_domain_jargon():
     result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
 
     assert "GTM" in result.risk_audit.key_sensitivity
+
+
+def test_premortem_analyzer_leverage_type_can_be_none_apparent():
+    canned = dict(CANNED_FLAT_RESPONSE)
+    canned["leverage_type"] = ["none_apparent"]
+    canned["scale_efficiency"] = "unclear"
+    canned["market_timing_signal"] = "uncertain"
+
+    fake_client = FakeLLMClient(canned)
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert result.intent.leverage_type == ["none_apparent"]
+    assert result.intent.scale_efficiency == "unclear"
+    assert result.intent.market_timing_signal == "uncertain"
+
+
+def test_premortem_analyzer_leverage_type_can_have_multiple_values():
+    canned = dict(CANNED_FLAT_RESPONSE)
+    canned["leverage_type"] = ["financial", "people", "technology"]
+
+    fake_client = FakeLLMClient(canned)
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert result.intent.leverage_type == ["financial", "people", "technology"]
 
 
 def test_premortem_analyzer_does_not_false_positive_on_contractions():

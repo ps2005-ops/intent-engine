@@ -18,11 +18,11 @@ from spellchecker import SpellChecker
 
 from ..core.llm_client import LLMClient
 from ..core.pipeline import Stage
-from ..core.schemas import FailureMode, RiskAudit, StructuredIntent
+from ..core.schemas import FailureMode, RiskAudit
 from .causal_model import CausalRelationship, relevant_relationships
 from .context_schema import BusinessContext
 from .retrieval import format_retrieval_digest, retrieve_similar
-from .schemas import Scenario, ScenarioSet
+from .schemas import BusinessStructuredIntent, Scenario, ScenarioSet
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +146,28 @@ upside/base/downside order. scenario_tags <=4 words each: a short situational la
 driving this branch, e.g. "strong fundraising", "as planned", "competitor undercuts" -- NOT a \
 sentence, just the label, matching the style "Scenario A (strong fundraising): +$2M runway, \
 +2 hires possible". scenario_deltas <=8 words each: concrete deltas only, e.g. '+$2M runway, \
-+2 hires' -- no full sentences, just the numbers/outcomes that changed."""
++2 hires' -- no full sentences, just the numbers/outcomes that changed.
+
+Also classify three additional structured signals (a Scale/Leverage/Luck framework \
+classification, separate from the risk audit above -- these are honest extraction \
+signals, not risk claims, and must NOT be referenced in narrative_summary, \
+key_sensitivity, or any failure_description this pass):
+
+scale_efficiency: does this decision's cost and output scale proportionally (adding \
+customers/revenue without proportional cost growth), or is cost growing faster than \
+output (cost_outpacing_output)? Answer "unclear" if the decision text doesn't contain \
+enough signal to judge -- do not force a guess.
+
+leverage_type: a JSON array of every leverage mechanism this decision clearly relies \
+on -- financial (raising or deploying capital), people (hiring, delegation), technology \
+(automation, product-led/self-serve scaling), media (audience or distribution reach). \
+Multiple can apply. If the decision is pure linear effort with no identified leverage \
+mechanism, the array must be exactly ["none_apparent"] -- never leave it empty.
+
+market_timing_signal: is this decision made in a market that's growing or \
+under-saturated (rising_tide), already crowded (saturated), or is there insufficient \
+signal in the decision text to judge (uncertain)? "uncertain" is a valid, honest answer \
+-- do not force a guess when the text doesn't mention market conditions."""
 
 ANALYSIS_TOOL_SCHEMA = {
     "type": "object",
@@ -169,6 +190,13 @@ ANALYSIS_TOOL_SCHEMA = {
         "primary_priority": {"type": "string", "enum": ["growth", "profitability", "survival", "optionality"]},
         "scenario_tags": {"type": "array", "items": {"type": "string", "maxLength": 30}, "minItems": 3, "maxItems": 3},
         "scenario_deltas": {"type": "array", "items": {"type": "string", "maxLength": 50}, "minItems": 3, "maxItems": 3},
+        "scale_efficiency": {"type": "string", "enum": ["proportional", "cost_outpacing_output", "unclear"]},
+        "leverage_type": {
+            "type": "array",
+            "items": {"type": "string", "enum": ["financial", "people", "technology", "media", "none_apparent"]},
+            "minItems": 1,
+        },
+        "market_timing_signal": {"type": "string", "enum": ["rising_tide", "saturated", "uncertain"]},
     },
     "required": [
         "decision_summary",
@@ -184,12 +212,15 @@ ANALYSIS_TOOL_SCHEMA = {
         "scenario_deltas",
         "recommended_stress_tests",
         "key_sensitivity",
+        "scale_efficiency",
+        "leverage_type",
+        "market_timing_signal",
     ],
 }
 
 
 class AnalysisResult(NamedTuple):
-    intent: StructuredIntent
+    intent: BusinessStructuredIntent
     risk_audit: RiskAudit
     scenario_set: ScenarioSet
 
@@ -279,11 +310,14 @@ class PremortemAnalyzer(Stage):
                 if garbled:
                     logger.warning("field '%s' contains a possibly-garbled token %r: %r", key, garbled, v)
 
-        intent = StructuredIntent(
+        intent = BusinessStructuredIntent(
             decision_summary=result["decision_summary"],
             goals=result["goals"],
             constraints=result["constraints"],
             risk_tolerance=result["risk_tolerance"],
+            scale_efficiency=result["scale_efficiency"],
+            leverage_type=result["leverage_type"],
+            market_timing_signal=result["market_timing_signal"],
         )
         failure_modes = [
             FailureMode(description=desc, likelihood=likelihood, rationale=rationale)
