@@ -419,7 +419,7 @@ what's still not built).
 layer (including the `--entity-id` requirement and the entity-memory write path)
 has no automated coverage, only the live manual run performed during review.
 
-## Voice pipeline + Stage C: Calendar (wired) and Gmail (act wired fresh-compose-only, read unwired)
+## Voice pipeline + Stage C: PersonalContext wired, Calendar (wired), Gmail (act wired fresh-compose-only, read-as-triggerable-intent unwired)
 
 Built and verified on top of Stage A/B — full account, including real measured
 salience-variance distributions and the locked-in action-domain pattern, lives
