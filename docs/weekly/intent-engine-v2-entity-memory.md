@@ -130,9 +130,35 @@ existing content.** Concretely, for such cases: both the relevant `_read` and
 compose. This is a second binding shape alongside the single-domain one, not a
 replacement for it — most actions (Calendar's, Gmail fresh-compose) stay
 single-domain; only actions that inherently reference another domain's content
-use the compound shape. Concrete Gmail implementation (schema changes, the
-actual compound-check code) is a separate, not-yet-built pass — see "Not yet
-built" below.
+use the compound shape. **The rule above is locked in. The mechanism is
+explicitly open — not a placeholder "TBD," a real underspecified problem found
+by trying to design it and stopping before locking in something that fits one
+case and breaks on the others:**
+
+1. **At least three distinct reference shapes exist**, found by considering a
+   second hypothetical case rather than generalizing from Gmail reply alone:
+   *content-reference* (act needs one prior-read item's content to compose
+   against — "reply to Sarah's email"), *target-resolution* (act needs to find
+   *which* existing item to modify, not attach content to a new one — e.g. a
+   future Calendar case, "move my meeting with Sarah to Friday"), and
+   *aggregate-reference* (act needs a *set* of prior-read items, not one —
+   "summarize my unread emails and draft a status update"). A single optional
+   reference field only fits the first shape, and only awkwardly.
+2. **A resolution step is missing from the pipeline entirely, independent of
+   field shape.** `VoiceIntentClassifier` only ever sees the raw utterance plus
+   `PersonalContext` — it has no access to live read-domain data at
+   classification time, so it cannot itself emit a concrete reference (a
+   message ID, an event ID) for anything described in natural language ("Sarah's
+   email about the board deck"). Populating any reference mechanism requires an
+   actual read call *between* classification and the act call, searching/
+   matching read results against the utterance's description — a real pipeline
+   step nothing today designs for, not something a classifier field can paper
+   over.
+
+**Do not build anything for compound actions until a real case forces the
+resolution-step question to be answered concretely** — most likely when
+`gmail_act`'s reply case, or the read/act-triggering question below, actually
+gets picked up for real build work, not before.
 
 **Known gap, deliberately deferred, not a bolt-on**: no field or record anywhere
 captures whether a gated action was actually executed, denied, or not applicable
