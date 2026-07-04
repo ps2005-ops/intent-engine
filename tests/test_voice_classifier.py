@@ -1,5 +1,11 @@
 from intent_engine.voice.classifier import VoiceIntentClassifier
-from intent_engine.voice.context_schema import EntityHistorySummary, MockPersonalData, PersonalContext
+from intent_engine.voice.context_schema import (
+    CalendarContext,
+    EntityHistorySummary,
+    GmailContext,
+    MockPersonalData,
+    PersonalContext,
+)
 from intent_engine.voice.schemas import VoiceIntent
 
 
@@ -55,6 +61,8 @@ def test_voice_intent_classifier_injects_context_when_provided():
         entity_id="acme inc",
         entity_history=EntityHistorySummary(recent_goals=["extend runway"]),
         mock_data=MockPersonalData(calendar_density="busy"),
+        gmail_context=GmailContext(state="not_authorized", message="Not authorized to read Gmail."),
+        calendar_context=CalendarContext(state="not_authorized", message="Not authorized to read calendar."),
     )
     classifier.run("Remind me to follow up with Sarah in 5 days", context=context)
 

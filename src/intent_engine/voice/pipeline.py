@@ -22,15 +22,30 @@ the compound-action mechanism (an act domain depending on a read domain's
 content), which is explicitly tabled -- see
 docs/weekly/intent-engine-v2-entity-memory.md's compound-action section for why
 a concrete field/mechanism wasn't locked in from this one case alone.
+
+PersonalContext is now built INSIDE this function by default, when the caller
+doesn't supply one -- closing the gap where every real voice interaction
+classified with context=None (build_personal_context() existed, schema-tested,
+but was never actually called from this live path). Same idiom as every other
+collaborator here (classifier = classifier or VoiceIntentClassifier()): a real,
+working default, not an inert None a caller has to remember to fill in. Uses
+the entity_id parameter already required for the entity-memory write below --
+no new required input. This also answers "how does gmail_read/calendar_read
+data reach a live classification call": build_personal_context() pulls both,
+gated by the same PermissionRegistry already threaded through this function,
+independent of intent_type -- see context_schema.py for why the pull is
+unconditional for now (an explicitly open, deliberately deferred decision, not
+a permanent default) and why the result is three-valued, not a bool.
 """
 
-from typing import NamedTuple, Optional
+from pathlib import Path
+from typing import NamedTuple, Optional, Union
 
-from ..core.entity_memory import EntityMemoryRecord, EntityMemoryWriter, JsonlEntityMemoryWriter
+from ..core.entity_memory import DEFAULT_PATH, EntityMemoryRecord, EntityMemoryWriter, JsonlEntityMemoryWriter
 from ..core.permissions import PermissionRegistry
 from .calendar import CalendarActResult, StubCalendarActor
 from .classifier import VoiceIntentClassifier
-from .context_schema import PersonalContext
+from .context_schema import MockPersonalData, PersonalContext, build_personal_context
 from .gmail import GmailActResult, StubGmailActor
 from .schemas import VoiceIntent
 
@@ -50,12 +65,19 @@ def process_voice_interaction(
     permission_registry: Optional[PermissionRegistry] = None,
     calendar_actor: Optional[StubCalendarActor] = None,
     gmail_actor: Optional[StubGmailActor] = None,
+    entity_memory_path: Union[str, Path] = DEFAULT_PATH,
 ) -> VoiceInteractionResult:
     classifier = classifier or VoiceIntentClassifier()
     writer = writer or JsonlEntityMemoryWriter()
     registry = permission_registry or PermissionRegistry()  # deny-by-default if not supplied
     calendar_actor = calendar_actor or StubCalendarActor(registry)
     gmail_actor = gmail_actor or StubGmailActor(registry)
+    context = context or build_personal_context(
+        entity_id,
+        mock_data=MockPersonalData(),
+        path=entity_memory_path,
+        permission_registry=registry,
+    )
 
     voice_intent = classifier.run(utterance, context=context)
 

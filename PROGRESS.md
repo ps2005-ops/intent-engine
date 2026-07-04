@@ -428,14 +428,31 @@ Summary here:
 
 - `voice/context_schema.py` — `PersonalContext`, a view computed from real
   `entity_memory.read_records()` (not a snapshot), keeping real history and
-  placeholder mock data in visibly separate sections. **Verified by direct code
-  read: NOT wired into the live path.** `build_personal_context()` is only ever
-  called from its own test file — `process_voice_interaction()` accepts an
-  optional `context` and forwards it if supplied, but never builds one itself.
-  Every real voice interaction today classifies with `context=None`. A
-  pre-existing gap (from `PersonalContext`'s original schema-only checkpoint,
-  correctly scoped at the time, never closed afterward), not something the
-  Gmail stub work introduced.
+  placeholder mock data in visibly separate sections. **Wiring gap closed**:
+  `process_voice_interaction()` now builds `PersonalContext` internally by
+  default (`context = context or build_personal_context(entity_id,
+  mock_data=MockPersonalData(), path=entity_memory_path, permission_registry=registry)`),
+  same idiom as its other collaborators (`classifier = classifier or
+  VoiceIntentClassifier()`). Uses the existing `entity_id` parameter, no new
+  required input. `PersonalContext` also gained `gmail_context`/
+  `calendar_context` — gated pulls from `StubGmailReader`/`StubCalendarReader`,
+  domain-named (not a shared bucket), three-valued from day one
+  (`"fetched"`/`"not_authorized"`/`"skipped_for_cost"`, the last reserved and
+  unused today, same pattern as `EntityMemoryRecord.outcome`). Verified with two
+  real live runs (authorized and deny-by-default) — `to_prompt_text()` showed
+  real prior history plus 3 fetched Gmail messages and 3 fetched Calendar
+  events when authorized, and explicit "Not authorized to read Gmail."/
+  "Not authorized to read calendar." lines (not silent omission) when denied.
+  80 offline tests passing (8 new, covering all three states, prompt-text
+  separation, and pipeline-level confirmation that context actually gets built
+  and used when not supplied).
+  **Explicitly OPEN, not decided**: whether these gated pulls should stay
+  unconditional (today's interim strategy, matching near-zero stub cost),
+  become conditionally gated, or get cached is deliberately deferred until real
+  Stage C vendor-latency numbers exist to decide against — guessing now would
+  repeat the same trap already avoided with `entity_id` normalization and the
+  compound-action schema. Tracked here explicitly, same as the recipient-
+  resolution gap above, so it isn't silently settled by default.
 - `voice/classifier.py` — `VoiceIntentClassifier` (Haiku, own prompt/schema),
   classifies `VoiceIntent` including a non-optional `salience` field. Salience
   calibration under `PersonalContext` injection is an open, only
@@ -463,11 +480,14 @@ Summary here:
   **Scoped to fresh-compose only, deliberately**: no field distinguishes
   "compose new" from "reply to existing," so every `email_draft` intent is
   currently treated as fresh-compose — a documented limitation, tied to the
-  compound-action finding below, not a silent gap. `gmail_read` remains
-  **deliberately not wired**: unlike `calendar_block`/`email_draft`, there's no
-  natural `intent_type` trigger for a read (checking email isn't a command
-  shape the way "block off Thursday" is); deferred until more read integrations
-  exist to compare against.
+  compound-action finding below, not a silent gap. `gmail_read`'s *ambient*
+  data now reaches every classification via `PersonalContext` (see above,
+  wiring gap closed). What's still deliberately not built: `gmail_read`/
+  `calendar_read` as **first-class, explicitly-triggerable intents** (e.g. "what's
+  on my calendar today" as its own `intent_type`, with the read result surfaced
+  back to the user directly) — a genuinely different capability than ambient
+  enrichment, with no evidence yet that any classified utterance needs it.
+  Stays out of scope per Step 3's original finding.
 - **Compound-action finding, from examining `gmail_read` and `gmail_act`
   together**: unlike Calendar's self-contained `act`, Gmail's reply case
   (drafting a reply) needs the source message's *content*, not just a
@@ -489,16 +509,21 @@ momentum:**
   *requested*, not the outcome. Deferred to its own design pass near Stage D
   (close to the same territory as the existing reserved-but-unused `outcome`
   field).
-- `gmail_read`'s read-triggering design (proactive? a sub-step inside
-  `context_retrieval`? something else?) — **confirmed to be the same
-  unresolved question as the `PersonalContext` wiring gap above, not a
-  separate one**: both are "how does read-domain data reach a live
-  classification call." Decision: do not build `gmail_read` wiring until this
-  is resolved as one combined design pass, not two. A design proposal exists
-  (build `PersonalContext` inside `process_voice_interaction()` by default;
-  fold gated `gmail_read`/`calendar_read` pulls into `PersonalContext`
-  construction itself, domain-named, not a shared bucket) — not yet
-  implemented, awaiting review.
+- **Ambient read-triggering resolved** (was: "`gmail_read`'s read-triggering
+  design... open"): `PersonalContext` construction now pulls gated
+  `gmail_read`/`calendar_read` data unconditionally on every classification,
+  independent of `intent_type` — implemented, verified with real live runs, see
+  above. **Still open, separately**: `gmail_read`/`calendar_read` as
+  first-class, explicitly-triggerable intents (distinct from ambient
+  enrichment) — deliberately not built, no evidence yet that it's needed.
+- **New open gap, explicitly tracked, not silently defaulted**: whether
+  `PersonalContext`'s gated external-read pulls should stay unconditional,
+  become conditionally gated, or get cached — deferred until real Stage C
+  vendor-latency numbers exist to decide against. Today's unconditional pull is
+  an interim strategy, not a permanent default; when this gets decided, it
+  changes which strategy populates `GmailContext`/`CalendarContext.state`, not
+  the field shape (the reserved `"skipped_for_cost"` state already exists for
+  this).
 - The compound-action mechanism (reply-to-existing for `email_draft`, and
   anything with the same shape) — rule locked in, concrete mechanism
   deliberately tabled, see above.

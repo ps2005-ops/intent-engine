@@ -1,4 +1,4 @@
-from intent_engine.core.entity_memory import JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
 from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import StubCalendarActor
 from intent_engine.voice.classifier import VoiceIntentClassifier
@@ -11,8 +11,10 @@ class FakeLLMClient:
 
     def __init__(self, canned_response):
         self.canned_response = canned_response
+        self.last_call_kwargs = None
 
     def call_tool(self, **kwargs):
+        self.last_call_kwargs = kwargs
         return self.canned_response
 
 
@@ -252,3 +254,66 @@ def test_non_email_intent_never_calls_gmail_actor(tmp_path):
 
     assert result.voice_intent.intent_type == "calendar_block"
     assert result.gmail_action is None
+
+
+def test_process_voice_interaction_builds_personal_context_when_not_supplied(tmp_path):
+    """Closes the gap found in Step 2a: when no context is supplied, the
+    classifier must actually receive a real PersonalContext built from prior
+    entity-memory records for this entity, not classify with context=None."""
+    path = tmp_path / "entity_memory.jsonl"
+    writer = JsonlEntityMemoryWriter(path=path)
+
+    # Seed prior history for this entity before the interaction under test.
+    writer.write(
+        EntityMemoryRecord(
+            entity_id="Acme Inc",
+            source="simulator",
+            decision_text="Raise a Series A.",
+            goals=["extend runway"],
+            constraints=[],
+            risk_tolerance="high",
+            primary_priority="growth",
+        )
+    )
+
+    fake_client = FakeLLMClient(
+        {"intent_type": "reminder", "target": "milk", "when": None, "content": "buy milk", "salience": "low"}
+    )
+    classifier = VoiceIntentClassifier(client=fake_client)
+
+    process_voice_interaction(
+        entity_id="Acme Inc",
+        utterance="remind me to buy milk",
+        classifier=classifier,
+        writer=writer,
+        entity_memory_path=path,
+    )
+
+    user_message = fake_client.last_call_kwargs["user_message"]
+    assert "Context about this person" in user_message
+    assert "extend runway" in user_message  # real prior history, not context=None
+
+
+def test_process_voice_interaction_context_reflects_deny_by_default_reads(tmp_path):
+    """No permission_registry supplied -- the auto-built PersonalContext's
+    external reads must come back explicitly not_authorized, not silently
+    empty, and must not block classification."""
+    path = tmp_path / "entity_memory.jsonl"
+    writer = JsonlEntityMemoryWriter(path=path)
+
+    fake_client = FakeLLMClient(
+        {"intent_type": "reminder", "target": "milk", "when": None, "content": "buy milk", "salience": "low"}
+    )
+    classifier = VoiceIntentClassifier(client=fake_client)
+
+    process_voice_interaction(
+        entity_id="Acme Inc",
+        utterance="remind me to buy milk",
+        classifier=classifier,
+        writer=writer,
+        entity_memory_path=path,
+    )
+
+    user_message = fake_client.last_call_kwargs["user_message"]
+    assert "Not authorized to read Gmail." in user_message
+    assert "Not authorized to read calendar." in user_message

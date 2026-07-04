@@ -42,31 +42,61 @@ per domain (Gmail: maybe, WhatsApp: maybe not), decided by the person, not assum
   no automated coverage, only the live manual run performed during review. See
   `PROGRESS.md` backlog note.
 
-**`voice/` built, schema-verified, but NOT wired into the live path**:
-`PersonalContext` (a view computed from real `entity_memory.read_records()`, not a
-standalone snapshot — see the amendment note in `docs/weekly/week-04-plan.md`),
-`VoiceIntentClassifier` (own prompt/schema, Haiku, measured well under the <3s
-voice latency target), `process_voice_interaction()` (composes classification +
-entity-memory write, source="voice", every interaction written with no filtering
-by salience). `EntityMemoryRecord.salience` added
-(`Optional[Literal["low","medium","high"]]`, voice-only) as the signal Stage D will
-query/weight by later. Salience calibration is an open, partially-characterized
-question — real 10-run distributions showed `intent_type` perfectly stable but
-`salience` varying on ambiguous utterances specifically, correlated with
-`PersonalContext` injection; documented as a code comment in `voice/classifier.py`,
-not resolved.
+**`voice/` built AND now wired into the live path**: `PersonalContext` (a view
+computed from real `entity_memory.read_records()`, not a standalone snapshot —
+see the amendment note in `docs/weekly/week-04-plan.md`), `VoiceIntentClassifier`
+(own prompt/schema, Haiku, measured well under the <3s voice latency target),
+`process_voice_interaction()` (composes classification + entity-memory write,
+source="voice", every interaction written with no filtering by salience).
+`EntityMemoryRecord.salience` added (`Optional[Literal["low","medium","high"]]`,
+voice-only) as the signal Stage D will query/weight by later. Salience
+calibration is an open, partially-characterized question — real 10-run
+distributions showed `intent_type` perfectly stable but `salience` varying on
+ambiguous utterances specifically, correlated with `PersonalContext` injection;
+documented as a code comment in `voice/classifier.py`, not resolved.
 
-**Verified by direct code read (not assumed from docstrings)**: `build_personal_context()`
-is defined and tested in isolation (`tests/test_context_schema.py`) but is never
-called anywhere in the live path — `process_voice_interaction()` accepts an
-optional `context: Optional[PersonalContext] = None` and forwards it to the
-classifier if supplied, but nothing today ever builds and supplies one. Every real
-voice interaction currently classifies with `context=None`. Entity memory is being
-*written* to on every interaction; nothing yet *reads* it back to inform a live
-classification. This is a pre-existing gap from when `PersonalContext` was
-originally checkpointed as schema-only (correctly scoped at the time to exclude
-classifier/pipeline wiring) — it was never closed afterward, not something the
-Gmail stub work introduced.
+**The `PersonalContext` wiring gap (found by direct code read: `build_personal_context()`
+was defined and tested in isolation but never called from the live path — every
+real voice interaction classified with `context=None`) is now closed.**
+`process_voice_interaction()` builds `PersonalContext` internally by default
+(`context = context or build_personal_context(entity_id, mock_data=MockPersonalData(),
+path=entity_memory_path, permission_registry=registry)`), same idiom as every
+other collaborator in that function — a real default, not an inert `None` a
+caller has to remember to supply. Uses the `entity_id` parameter already
+required for the entity-memory write; no new required input.
+
+This same change also answers the `gmail_read`/`calendar_read` triggering
+question, per Step 3's finding that both were one unresolved design question:
+`build_personal_context()` now also pulls gated `StubGmailReader`/
+`StubCalendarReader` data unconditionally, on every classification, independent
+of `intent_type` — no dedicated intent type needed for this (ambient) case. The
+result is three-valued (`GmailContext`/`CalendarContext.state`: `"fetched"`,
+`"not_authorized"`, `"skipped_for_cost"`), not a bool, from day one — mirrors
+`CalendarReadResult`/`GmailReadResult`'s "state what it would do, don't silently
+skip" principle, and `"skipped_for_cost"` is reserved, unused today, the same
+pattern as `EntityMemoryRecord.outcome`.
+
+**Explicitly OPEN, not decided**: whether these pulls should stay unconditional,
+become conditionally gated (e.g. only pull when relevant), or get cached is
+deliberately deferred — deciding it now would mean guessing against a cost (real
+Stage C vendor latency) that doesn't exist yet with stubs, the same trap already
+avoided with `entity_id` normalization and the compound-action schema. Today's
+interim strategy (unconditional, matching today's real near-zero stub cost) is
+not a permanent default — when this gets decided with real Stage C latency
+numbers in hand, it changes which strategy populates the `state` field, not the
+field shape itself.
+
+Verified with two real live runs (real Haiku classification, real file writes,
+no mocks), same utterance, same seeded prior entity-memory history, two
+permission scenarios: authorized (`gmail_read`+`calendar_read` both granted) —
+`PersonalContext.to_prompt_text()` showed real prior history AND 3 fetched Gmail
+messages AND 3 fetched Calendar events; deny-by-default (no grants) — the same
+prompt text explicitly stated "Gmail: Not authorized to read Gmail." and
+"Calendar: Not authorized to read calendar." rather than silently omitting
+either section. 80 offline tests passing (6 new in `test_context_schema.py`
+covering all three states and prompt-text separation, 2 new in
+`test_voice_pipeline.py` confirming the pipeline actually builds and uses
+context when not supplied).
 
 **Stage C started, Calendar only**: `voice/calendar.py` — `StubCalendarReader`/
 `StubCalendarActor`, gated on `"calendar_read"`/`"calendar_act"`. Proves the
@@ -111,21 +141,19 @@ comes back as a bare name ("Sarah"), not an email address — tracked as its own
 named, open gap ("recipient resolution for `gmail_act`") in `PROGRESS.md`, not
 duplicated in full here. 57 offline tests passing.
 
-`gmail_read` remains unwired: it has no natural `intent_type` trigger (unlike
-`calendar_block` or `email_draft`), and its own triggering question (proactive?
-a sub-step inside `context_retrieval`?) is still open. Notion integration not
-started.
-
-**This triggering question and the `PersonalContext` wiring gap above are ONE
-unresolved design question, not two** (confirmed by direct code inspection, not
-inference): both are really asking "how does read-domain data — entity-memory
-history, Gmail messages, calendar events — actually reach a live classification
-call." Building `gmail_read`'s pipeline wiring in isolation, before that question
-is settled, would very likely reproduce the exact "plumbed but not connected"
-state found above, under a different name. **Decision: do not build `gmail_read`
-wiring until this is resolved as one combined design pass.** A design proposal
-for that combined pass exists (not yet implemented, awaiting review) — see
-`PROGRESS.md`'s corresponding backlog entry for the current status.
+**Update: the ambient-context half of this question is now resolved (see above)
+— `gmail_read`/`calendar_read` data reaches every classification via
+`PersonalContext`, gated, independent of `intent_type`.** What remains
+genuinely separate and still unresolved: `gmail_read`/`calendar_read` as
+**first-class, explicitly-triggerable intents** (e.g. "what's on my calendar
+today" as a dedicated `intent_type`, mirroring `calendar_block`/`email_draft`'s
+action-domain pattern, with the read result surfaced back to the user directly
+rather than only fed silently into classifier context). That's a different
+capability than ambient enrichment — no evidence yet that any classified
+utterance needs it — and stays explicitly out of scope: **do not build
+`gmail_read`/`calendar_read` as first-class triggerable intents**, per Step 3's
+original finding, until a real case forces the question. Notion integration
+not started.
 
 **Not yet built**: the concrete Gmail compound-action implementation (schema
 changes to distinguish fresh-compose vs. reply-to-existing, the actual
