@@ -1,13 +1,14 @@
-"""Stage C: stub Gmail integration, read-only for this pass. Mirrors
-voice/calendar.py's shape exactly, per the locked-in action-domain pattern
-(docs/weekly/intent-engine-v2-entity-memory.md) -- gated by the real
-PermissionRegistry, canned data, no real Gmail API calls, no OAuth, no new
-dependencies.
+"""Stage C: stub Gmail integration. Mirrors voice/calendar.py's shape exactly,
+per the locked-in action-domain pattern (docs/weekly/intent-engine-v2-entity-memory.md)
+-- gated by the real PermissionRegistry, canned data, no real Gmail API calls,
+no OAuth, no new dependencies.
 
-gmail_act (sending on someone's behalf) is deliberately not built in this pass
--- reading someone's email and sending on their behalf are different
-authorization decisions per the domain-string convention, and only
-"gmail_read" is being proven here.
+The "act" tier is create_draft(), not send_email() -- drafting is the safer
+default for something acting on someone's behalf than an irreversible send,
+same caution this project has applied to action-taking throughout. It also
+maps directly onto VoiceIntentType's existing "email_draft" value, unlike
+gmail_read, which has no natural intent_type trigger -- see pipeline.py (not
+yet wired) for why that still matters.
 """
 
 from typing import List, Optional
@@ -17,6 +18,7 @@ from pydantic import BaseModel
 from ..core.permissions import PermissionRegistry
 
 GMAIL_READ_DOMAIN = "gmail_read"
+GMAIL_ACT_DOMAIN = "gmail_act"
 
 
 class GmailMessage(BaseModel):
@@ -63,3 +65,27 @@ class StubGmailReader:
         if not self.registry.is_authorized(GMAIL_READ_DOMAIN):
             return GmailReadResult(authorized=False, message="Not authorized to read Gmail.")
         return GmailReadResult(authorized=True, messages=list(_CANNED_MESSAGES))
+
+
+class GmailActResult(BaseModel):
+    authorized: bool
+    confirmation: Optional[str] = None
+    message: Optional[str] = None
+
+
+class StubGmailActor:
+    """Fake Gmail actor -- create_draft() doesn't actually create or send
+    anything, just returns a canned confirmation, gated by "gmail_act"
+    specifically -- separate from "gmail_read" so a read grant never implies
+    an act grant."""
+
+    def __init__(self, registry: PermissionRegistry):
+        self.registry = registry
+
+    def create_draft(self, recipient: str, subject: str) -> GmailActResult:
+        if not self.registry.is_authorized(GMAIL_ACT_DOMAIN):
+            return GmailActResult(authorized=False, message="Not authorized to create Gmail drafts.")
+        return GmailActResult(
+            authorized=True,
+            confirmation=f"Created draft to {recipient} with subject '{subject}' (stub -- nothing actually sent).",
+        )
