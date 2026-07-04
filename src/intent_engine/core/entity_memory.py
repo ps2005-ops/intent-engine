@@ -71,6 +71,7 @@ class EntityMemoryRecord(BaseModel):
     constraints: List[str]
     risk_tolerance: Optional[str] = None
     primary_priority: Optional[str] = None  # simulator-only; None from voice writes
+    salience: Optional[Literal["low", "medium", "high"]] = None  # voice-only; None from simulator writes
 
     outcome: Optional[str] = None  # reserved for Stage D+, always None for now
 
