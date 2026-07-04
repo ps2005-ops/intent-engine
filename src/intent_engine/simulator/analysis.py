@@ -34,6 +34,24 @@ FAST_MODEL = "claude-haiku-4-5-20251001"
 # business text like "<5%" or "CAC < $50" (no letter immediately follows the "<").
 _MARKUP_LEAK_PATTERN = re.compile(r"</[a-zA-Z]|<[a-zA-Z_]+>")
 
+# narrative_summary's real length ceiling. The prompt targets ~40 words, but this is
+# the actually-ENFORCED backstop (see _NarrativeSummaryTooLong below) -- the old
+# maxLength:170 tool-schema hint was never enforced (Claude's tool-use API doesn't
+# validate JSON-schema constraints server-side, and RiskAudit itself had no pydantic
+# length constraint either), so real outputs silently ran up to 339 chars/58 words
+# once the regret-avoidance + anti-templating instructions were added. ~300 chars
+# gives room for the ~40-word target's natural variance (structural variation was
+# the point of loosening the word count from 24) while still catching real outliers.
+_NARRATIVE_SUMMARY_MAX_CHARS = 300
+
+
+class _NarrativeSummaryTooLong(ValueError):
+    """Distinct from other malformation ValueErrors below: a length overage is
+    recoverable by truncation, unlike a markup leak or a mismatched-length array,
+    so the retry loop in run() treats this one differently on a second consecutive
+    miss (truncate instead of raising RuntimeError)."""
+
+
 # Occasionally the model produces a coherent-looking sentence with a corrupted word
 # inside it (e.g. "pricing pressure emerads" instead of "emerges") -- a compression
 # artifact under tight word budgets, not a schema issue, so pydantic validation lets
@@ -98,36 +116,51 @@ of the audit above it and not a restatement of narrative_summary. This is a plai
 end with a period or a number and nothing else. Never include XML/HTML-like tags, angle \
 brackets, or any formatting/meta-commentary about the response itself.
 
-Also write narrative_summary: ONE short sentence, 24 words or fewer, second person, present \
+Also write narrative_summary: ONE short sentence, 40 words or fewer, second person, present \
 tense, describing the single worst failure mode as something the founder is already living \
-through, not a probability they're evaluating. It must carry four qualities: (a) ONE specific \
-vivid moment (a board meeting, a runway number, a slipping deadline), not a cascading scenario \
-with several sub-events strung together on commas, (b) a stated pattern-match -- signal that \
-founders in this situation predictably fail this way, not just that this founder might, (c) \
-direct, unhedged language -- no "might" or "could," (d) an implicit sense that not stress-testing \
-this is itself the risky move, not just that the decision might go wrong. Stay in the same \
-vivid, plain, concrete register all the way to the final word -- do not let the last clause \
-drift into dry analytical or technical vocabulary (e.g. "...without local market friction \
+through, not a probability they're evaluating.
+
+This sentence must use Sutherland's regret-avoidance mechanism specifically -- not just a vivid \
+bad outcome. Regret-avoidance requires: (1) place the founder in a specific future moment \
+looking back at THIS decision, not a generic bad future, (2) make explicit that the outcome \
+resulted from a choice they actively made -- something they authored, not something that just \
+happened to them, (3) where the reference data supports it, let the sentence imply what \
+inaction or the nearest alternative would have looked like instead, so there's a felt "and you \
+could have avoided this" underneath it, even without spelling the alternative out in full. A \
+sentence that is vivid and scary but never puts the founder in the position of having chosen \
+this outcome over another path is not using the mechanism, however well-written.
+
+It must also carry: (a) ONE specific vivid moment (a board meeting, a runway number, a slipping \
+deadline), not a cascading scenario with several sub-events strung together on commas, (b) a \
+stated pattern-match -- signal that founders in this situation predictably fail this way, not \
+just that this founder might, (c) direct, unhedged language -- no "might" or "could." Stay in \
+the same vivid, plain, concrete register all the way to the final word -- do not let the last \
+clause drift into dry analytical or technical vocabulary (e.g. "...without local market friction \
 modeling" breaks register; "...before you've validated a single local deal" holds it). The \
 punchline should land in the same voice the sentence started in.
 
-If you use a dash to connect clauses, it must be an em-dash (—), never a double-hyphen (--) -- \
-match the em-dash used in the example shapes below exactly.
+If you use a dash to connect clauses, it must be an em-dash (—), never a double-hyphen (--).
 
-Vary the sentence's shape every time -- do not default to one fixed skeleton. Below are three \
-DIFFERENT structures showing the range available; do not reuse their wording, only the shape \
-of how they're built:
-- Scene first, pattern-match as a trailing tag: "You're staring at a term sheet worse than \
-today's, having spent the runway that would've gotten you a better one on your own — this is \
-the exact sequence that sinks pre-seed bridge rounds."
-- Pattern-match first, scene second: "Founders who hire before PMF almost always end up here: \
-four new salaries, zero repeatable pipeline, and a board asking what happened to the runway."
-- Direct address with the pattern folded into the consequence, no "this is exactly how" phrasing \
-at all: "Skip the stress test and you're the founder explaining in Q3 why doubling headcount \
-moved no growth metric — this specific hiring mistake repeats almost every time it's tried."
-Pick whichever shape fits the specific failure mode best, or write a fourth shape entirely -- \
-the four qualities above are the requirement, not the sentence skeleton. This sentence is the \
-hook that gets someone to read the quantified audit below it, not a summary of that audit.
+Do not converge on one rhythm every time. Vary, across responses: whether you use an em-dash at \
+all (a single clause with no dash is a valid shape), sentence length (some should land well \
+under the 40-word ceiling, not all stretched to it), and WHERE the pattern-match claim lands -- \
+opening the sentence, closing it as a trailing tag, or embedded mid-sentence with no clause set \
+apart at all. Below are three DIFFERENT structures illustrating that range -- these are \
+illustrations of range, not a menu of 3 templates to rotate between; do not let any single one \
+of these (or any other single shape) become your default:
+- Scene first, pattern-match as a trailing tag, em-dash: "You're staring at a term sheet worse \
+than the one patience would've gotten you, having spent the runway you chose to burn instead of \
+validating first — this is the exact sequence that sinks pre-seed bridge rounds."
+- Pattern-match opening, scene second, no dash: "Founders who hire before PMF always face this \
+exact board question: what happened to the four salaries and zero pipeline you added instead of \
+waiting the six months you had runway for."
+- Chosen-path-vs-alternative embedded mid-sentence, short, no dash: "You chose to double \
+headcount over validating demand, and now you're giving the board the same growth-stalled \
+explanation every team in this spot gives."
+Pick whichever shape fits the specific failure mode best, or write a genuinely different shape \
+entirely -- the regret-avoidance mechanism and the four qualities above are the requirement, not \
+any specific sentence skeleton. This sentence is the hook that gets someone to read the \
+quantified audit below it, not a summary of that audit.
 
 Finally: classify primary_priority as exactly ONE of growth, profitability, survival, \
 optionality -- the single dominant thing this founder is actually optimizing for, not a blend \
@@ -176,7 +209,7 @@ ANALYSIS_TOOL_SCHEMA = {
         "goals": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
         "constraints": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
         "risk_tolerance": {"type": "string", "enum": ["low", "medium", "high"]},
-        "narrative_summary": {"type": "string", "maxLength": 170},
+        "narrative_summary": {"type": "string", "maxLength": _NARRATIVE_SUMMARY_MAX_CHARS},
         "failure_descriptions": {"type": "array", "items": {"type": "string", "maxLength": 100}, "minItems": 3, "maxItems": 3},
         "failure_likelihoods": {
             "type": "array",
@@ -271,6 +304,18 @@ class PremortemAnalyzer(Stage):
             )
             try:
                 return self._parse(result)
+            except _NarrativeSummaryTooLong as exc:
+                last_error = exc
+                if attempt == 1:
+                    logger.warning("record_analysis narrative_summary exceeded %d chars twice in a "
+                                    "row, truncating instead of retrying again: %s", _NARRATIVE_SUMMARY_MAX_CHARS, exc)
+                    try:
+                        return self._parse(result, force_truncate=True)
+                    except (KeyError, ValueError) as exc2:
+                        last_error = exc2
+                else:
+                    logger.warning("record_analysis narrative_summary exceeded %d chars, retrying: %s",
+                                    _NARRATIVE_SUMMARY_MAX_CHARS, exc)
             except (KeyError, ValueError) as exc:
                 last_error = exc
                 logger.warning(
@@ -281,7 +326,7 @@ class PremortemAnalyzer(Stage):
                 )
         raise RuntimeError(f"record_analysis response malformed twice in a row: {last_error}")
 
-    def _parse(self, result: dict) -> AnalysisResult:
+    def _parse(self, result: dict, force_truncate: bool = False) -> AnalysisResult:
         lengths = {len(result[k]) for k in ("failure_descriptions", "failure_likelihoods", "failure_rationales")}
         if lengths != {3}:
             raise ValueError(f"expected 3 parallel failure-mode entries, got lengths {lengths}")
@@ -310,6 +355,15 @@ class PremortemAnalyzer(Stage):
                 if garbled:
                     logger.warning("field '%s' contains a possibly-garbled token %r: %r", key, garbled, v)
 
+        narrative_summary = result["narrative_summary"]
+        if len(narrative_summary) > _NARRATIVE_SUMMARY_MAX_CHARS:
+            if force_truncate:
+                narrative_summary = narrative_summary[:_NARRATIVE_SUMMARY_MAX_CHARS].rsplit(" ", 1)[0] + "…"
+            else:
+                raise _NarrativeSummaryTooLong(
+                    f"narrative_summary is {len(narrative_summary)} chars, exceeds {_NARRATIVE_SUMMARY_MAX_CHARS}"
+                )
+
         intent = BusinessStructuredIntent(
             decision_summary=result["decision_summary"],
             goals=result["goals"],
@@ -328,7 +382,7 @@ class PremortemAnalyzer(Stage):
             )
         ]
         risk_audit = RiskAudit(
-            narrative_summary=result["narrative_summary"],
+            narrative_summary=narrative_summary,
             failure_modes=failure_modes,
             recommended_stress_tests=result["recommended_stress_tests"],
             key_sensitivity=result["key_sensitivity"],

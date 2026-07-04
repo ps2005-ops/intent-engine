@@ -203,6 +203,36 @@ def test_premortem_analyzer_leverage_type_can_have_multiple_values():
     assert result.intent.leverage_type == ["financial", "people", "technology"]
 
 
+def test_premortem_analyzer_retries_once_on_overlong_narrative_summary():
+    overlong = dict(CANNED_FLAT_RESPONSE)
+    overlong["narrative_summary"] = "x" * 301  # exceeds _NARRATIVE_SUMMARY_MAX_CHARS (300)
+    clean = dict(CANNED_FLAT_RESPONSE)
+
+    fake_client = SequenceLLMClient([overlong, clean])
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    assert fake_client.call_count == 2
+    assert result.risk_audit.narrative_summary == CANNED_FLAT_RESPONSE["narrative_summary"]
+
+
+def test_premortem_analyzer_truncates_after_two_consecutive_overlong_narrative_summaries():
+    overlong = dict(CANNED_FLAT_RESPONSE)
+    overlong["narrative_summary"] = "word " * 70  # well over 300 chars, still two clean attempts
+
+    fake_client = SequenceLLMClient([overlong, overlong])
+    analyzer = PremortemAnalyzer(client=fake_client)
+
+    result = analyzer.run("Expand into Asia with $2M.", BusinessContext())
+
+    # Truncated, not a RuntimeError -- a length overage is recoverable, unlike a
+    # markup leak or mismatched array, per the explicit design decision.
+    assert fake_client.call_count == 2
+    assert len(result.risk_audit.narrative_summary) <= 300
+    assert result.risk_audit.narrative_summary.endswith("…")
+
+
 def test_premortem_analyzer_does_not_false_positive_on_contractions():
     canned = dict(CANNED_FLAT_RESPONSE)
     canned["narrative_summary"] = (
