@@ -79,10 +79,19 @@ the board meeting") — both produced correct `CalendarActResult`s and both wrot
 an `EntityMemoryRecord`. 46 offline tests passing (3 new pipeline-wiring tests
 added, covering authorized, denied, and non-calendar-intent pass-through).
 
-**Not yet built**: Gmail/Notion integrations (deliberately deferred until the
-Calendar wiring proved the pattern holds under real pipeline contact — it now
-has), Stage D (hypothesis formation), any grants persistence for
-`PermissionRegistry`, real OAuth for any integration.
+**Stage C, Gmail: both tiers stubbed, neither wired**: `voice/gmail.py` —
+`StubGmailReader` (`"gmail_read"`) and `StubGmailActor.create_draft()`
+(`"gmail_act"`), mirroring Calendar's shape. Not wired into the pipeline:
+`gmail_read` has no natural `intent_type` trigger (unlike `calendar_block`);
+`gmail_act`'s trigger (`email_draft`) looks obvious but isn't wired either,
+because examining it alongside `gmail_read` surfaced the compound-action
+question above — wiring `email_draft` to `create_draft()` as originally shaped
+would silently mishandle the reply case. Notion integration not started.
+
+**Not yet built**: the concrete Gmail compound-action implementation (schema
+changes to distinguish fresh-compose vs. reply-to-existing, the actual
+both-grants check), Notion integration, Stage D (hypothesis formation), any
+grants persistence for `PermissionRegistry`, real OAuth for any integration.
 
 **Action-domain wiring shape, locked in with Calendar and binding for every
 future action domain** (Gmail, Notion, WhatsApp, etc. — same treatment as the
@@ -101,6 +110,29 @@ domain-string convention, decided once so it isn't reopened at Gmail):
 What's explicitly NOT locked in by this: the exact shape of a domain's actor
 class, its internal methods, or how many gated calls a single intent triggers
 — those stay domain-specific and get designed per integration.
+
+**Compound-action pattern, locked in from the Gmail read/act interaction check,
+binding for any future domain with the same shape**: Calendar's `act` is
+self-contained — `create_event()` needs nothing from `calendar_read` to produce
+a correct action. Gmail's is not, for at least one real case: drafting a *reply*
+requires the source message's content, not just a `gmail_act` grant — a data
+dependency, not merely a second permission check. This means a single
+`intent_type` (`email_draft`) can cover two different action shapes (fresh
+compose vs. reply-to-existing), and the existing action-domain wiring pattern
+above — one gated call, one domain, self-contained — was proven on the case
+where that distinction doesn't exist.
+
+Locked-in resolution: **an act domain's gated call may internally depend on a
+read domain's gated call and grant, when the intent requires referencing
+existing content.** Concretely, for such cases: both the relevant `_read` and
+`_act` grants must be authorized before the compound action proceeds — a
+`gmail_act`-only grant is not sufficient to draft a reply, only a fresh
+compose. This is a second binding shape alongside the single-domain one, not a
+replacement for it — most actions (Calendar's, Gmail fresh-compose) stay
+single-domain; only actions that inherently reference another domain's content
+use the compound shape. Concrete Gmail implementation (schema changes, the
+actual compound-check code) is a separate, not-yet-built pass — see "Not yet
+built" below.
 
 **Known gap, deliberately deferred, not a bolt-on**: no field or record anywhere
 captures whether a gated action was actually executed, denied, or not applicable
