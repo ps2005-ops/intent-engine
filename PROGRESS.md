@@ -418,3 +418,51 @@ what's still not built).
 **Backlog:** nothing in the test suite calls `cli.main()` — the CLI's argparse
 layer (including the `--entity-id` requirement and the entity-memory write path)
 has no automated coverage, only the live manual run performed during review.
+
+## Voice pipeline + Stage C: Calendar (wired) and Gmail (read-only stub)
+
+Built and verified on top of Stage A/B — full account, including real measured
+salience-variance distributions and the locked-in action-domain pattern, lives
+in `docs/weekly/intent-engine-v2-entity-memory.md`'s "Current state" section.
+Summary here:
+
+- `voice/context_schema.py` — `PersonalContext`, a view computed from real
+  `entity_memory.read_records()` (not a snapshot), keeping real history and
+  placeholder mock data in visibly separate sections.
+- `voice/classifier.py` — `VoiceIntentClassifier` (Haiku, own prompt/schema),
+  classifies `VoiceIntent` including a non-optional `salience` field. Salience
+  calibration under `PersonalContext` injection is an open, only
+  partially-characterized question — documented as a permanent code comment,
+  not resolved.
+- `voice/pipeline.py` — `process_voice_interaction()` composes classification +
+  an unconditional entity-memory write (every interaction, no filtering by
+  salience) + calendar-action routing.
+- `voice/calendar.py` — `StubCalendarReader`/`StubCalendarActor`, gated on
+  `"calendar_read"`/`"calendar_act"`. The actor is wired directly into
+  `process_voice_interaction()`: a `calendar_block` `VoiceIntent` flows through
+  classification → entity-memory write → permission check → `StubCalendarActor`,
+  verified with a real live run (real API call, real file writes, no mocks) for
+  both an authorized and a denied grant.
+- **Action-domain wiring shape locked in as binding for every future action
+  domain** (not just Calendar): unconditional write before any gate check,
+  `intent_type`-based dispatch, gated actions always return an explicit
+  authorized/denied result, never silent.
+- `voice/gmail.py` — `StubGmailReader`, gated on `"gmail_read"`, mirroring
+  `voice/calendar.py`'s shape. **Deliberately not wired into the pipeline**:
+  unlike `calendar_block`, there's no natural `intent_type` trigger for a read
+  (checking email isn't a command shape the way "block off Thursday" is).
+  Deciding how reads get triggered is deferred until there's more than one read
+  integration to compare against. `gmail_act` not built yet.
+
+**Backlog / open gaps, deliberately deferred, not bolted on under checkpoint
+momentum:**
+- No field or record anywhere captures whether a gated action was actually
+  executed, denied, or not applicable — `EntityMemoryRecord` records what was
+  *requested*, not the outcome. Deferred to its own design pass near Stage D
+  (close to the same territory as the existing reserved-but-unused `outcome`
+  field).
+- `gmail_read`'s read-triggering design (proactive? a sub-step inside
+  `context_retrieval`? something else?) — open, deferred until more read
+  integrations exist to compare against.
+- `gmail_act` not built.
+- 49 offline tests passing as of the Gmail read-only stub commit.

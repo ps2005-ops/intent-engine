@@ -17,7 +17,7 @@ assistant. Once the Intent Engine works on business data, extending it to person
 context is domain adaptation, not rearchitecture. Full 26-week schedule: see the
 original planning doc (not tracked in this repo).
 
-## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete
+## Status: Weeks 1-3 complete; Stage A/B (entity memory + permissions) complete; voice pipeline + Stage C (Calendar wired, Gmail read-only stub) complete
 
 **Week 1 goal:** a working CLI that takes a business decision as text + context and
 outputs a structured risk audit in under 10 seconds, validated on 5 example decisions.
@@ -33,9 +33,21 @@ retrieved via similarity search against a curated reference set.
 supersedes the original Week 5+ direction): a structured, append-only entity-memory
 store both `simulator/` and `voice/` write into, plus a deny-by-default permission
 registry gating future action-taking. `--entity-id` is now required on every
-`premortem` run — see `core/entity_memory.py` and `core/permissions.py`. Currently
-building `voice/PersonalContext` as a view over this store next (mock data first,
-per the original Week 4 plan, before any real integration).
+`premortem` run — see `core/entity_memory.py` and `core/permissions.py`.
+
+**Voice pipeline + Stage C goal**: `voice/PersonalContext` (a view computed from
+entity memory), `voice/VoiceIntentClassifier`, and `process_voice_interaction()`
+(classification → unconditional entity-memory write) are built and verified. Stage
+C's first real (stubbed) integration, Calendar, is wired directly into the voice
+pipeline end-to-end — a `calendar_block` `VoiceIntent` flows through
+classification → entity-memory write → permission check → `StubCalendarActor`,
+gated on `"calendar_read"`/`"calendar_act"`. This wiring shape (unconditional
+write before any gate check, `intent_type`-based dispatch, gated actions always
+return an explicit authorized/denied result) is now locked in as binding for
+every future action domain. Gmail's read-only stub (`voice/gmail.py`,
+`"gmail_read"`) is built and tested but deliberately not yet wired in — see
+`PROGRESS.md` for why. See `docs/weekly/intent-engine-v2-entity-memory.md` for
+the full account.
 
 **Weeks 1-3, all done.** All 5 fixtures average ~7.9-10.0s across repeated runs — comfortably
 meeting <10s as a *typical-case* target. Multi-run testing showed ~5% of individual
@@ -137,7 +149,10 @@ src/intent_engine/
                # (analysis.py is the live combined-call pipeline; causal_model.py + schemas.py
                # hold the Week 2 causal relationships + Scenario/ScenarioSet shapes;
                # retrieval.py + data/reference_decisions.json hold the Week 3 retrieval layer)
-  voice/       # placeholder for the Week 4+ Cognitive Delegate module
+  voice/       # Cognitive Delegate: context_schema.py (PersonalContext), classifier.py
+               # (VoiceIntentClassifier), pipeline.py (process_voice_interaction, the
+               # calendar_block wiring), calendar.py (Stage C Calendar stub, wired),
+               # gmail.py (Stage C Gmail read-only stub, not yet wired), schemas.py
 tests/         # unit tests (mocked) + live e2e test against the 5 fixture decisions
 scripts/       # run_examples.py — manual review of the 5 fixture decisions
 docs/weekly/   # per-week notes
