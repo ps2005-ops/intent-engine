@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 try:
     from typing import Literal
@@ -58,10 +58,24 @@ class TaskAgentSpecStub(BaseModel):
     TaskAgentSpec execution runner (explicitly out of scope). trigger_hint is
     the pattern's own human-readable description, not a re-derived structured
     time window -- avoids re-parsing free text that's already been rendered
-    once, and stays exactly as auditable as the pattern it came from."""
+    once, and stays exactly as auditable as the pattern it came from.
 
+    spec_id is this spec's OWN stable identity, distinct from
+    source_pattern_id (the DetectedPattern's pattern_id, itself a fresh uuid4
+    every detection run -- see _same_underlying_pattern). The spec, once
+    created here at accept time, is never re-created, so draft_generator.py's
+    DraftAttempt.spec_id can reference this id across every subsequent draft
+    for the same accepted spec. supporting_record_ids is a snapshot of the
+    real entity_memory records that grounded acceptance -- draft_generator.py
+    uses it only as a starting point (to re-derive the recipient), then
+    re-scans entity_memory fresh each time it drafts, so new instances
+    (including a person's own corrections) are picked up without this stub
+    ever needing to be mutated."""
+
+    spec_id: str = Field(default_factory=lambda: str(uuid4()))
     source_pattern_id: str
     trigger_hint: str
+    supporting_record_ids: List[str]
     action: Literal["draft_only"] = "draft_only"
     gated: bool = True
 
@@ -235,6 +249,7 @@ def accept_suggestion(
     spec = TaskAgentSpecStub(
         source_pattern_id=current.pattern.pattern_id,
         trigger_hint=current.pattern.description,
+        supporting_record_ids=current.pattern.supporting_record_ids,
     )
     updated = current.model_copy(update={"status": "accepted", "resolved_at": _current_timestamp(), "task_agent_spec": spec})
     _append_suggestion_record(updated, path=path)

@@ -619,3 +619,104 @@ timing jitter, 5 wording variants) — real positive detection (18 occurrences,
 scaling confirmed across all three bands (2→`low`, 5→`medium`, 18→`high`).
 30 new tests (20 `test_pattern_watcher.py`, 10 `test_suggestion.py`). 120
 offline tests passing, zero regressions.
+
+## Shadow-guess-and-correct loop: `core/draft_generator.py` (recurring_message only)
+
+Turns an accepted `TaskAgentSpecStub` (`suggestion.py`) into a real, reviewable
+draft, and lets a person's reply refine the next one. `DraftAttempt`
+(`pending_review`/`approved_as_is`/`corrected`/`rejected`) has no "sent" state
+at all — every draft is surfaced as "please review," never auto-sent, same
+draft-and-review-only discipline as `gmail_act`/`calendar_act`.
+`generate_draft()` makes one minimal, separate LLM call, mirroring
+`LuckTestAnalyzer`'s isolation pattern. Correction parsing
+(`classify_draft_reply()`) is its own small classifier, not a literal reuse of
+`VoiceIntentClassifier` — that classifier's schema has no field for
+approval/correction/rejection of a specific draft, so forcing the judgment
+through its fixed `intent_type` enum would have been a real schema mismatch,
+not a clean fit. A correction is persisted as a new
+`EntityMemoryRecord(source="voice")`, feeding future drafts the same way any
+other real occurrence does.
+
+**Three real gaps found by live verification (not mocked tests) and fixed in
+sequence within this same pass, each with honest before/after evidence, not
+glossed over:**
+
+1. **Position-blindness**: `_gather_supporting_records`'s recipient re-scan
+   depends on `pattern_watcher._extract_recipient`'s verb-gated heuristic —
+   real corrected phrasing ("hey sarah, standup notes attached") and real new
+   occurrences in that same casual register often contain none of its gating
+   verbs, so both were silently invisible to `generate_draft()`. Measured
+   directly: `based_on_record_ids` stayed frozen across two genuinely new,
+   non-correction occurrences with distinct real content (an auth-migration
+   mention, a release-delay mention) — the draft just kept re-emitting the one
+   correction it had a bookkeeping pointer to, verbatim, regardless of either
+   occurrence's actual content. Fixed with a scoped name+timing fallback
+   (`_name_and_timing_fallback`): within one spec's own gathering only (never
+   a corpus-wide scan), a record naming the spec's already-confirmed recipient
+   is included if its hour also falls inside the pattern's own learned
+   hour-band (`_learned_hour_window`, reusing `pattern_watcher._timing_consistent`
+   as-is). Explicitly narrower than the bare-capitalization name detector
+   rejected in `pattern_watcher.py`'s own circularity fix — that one had no
+   idea which name mattered and scanned all of entity memory; this one already
+   knows the one confirmed name and only ever looks within one spec's records.
+   Does **not** fully close "is this record really about the same task" (an
+   unrelated mention of the recipient's name inside the learned hour-band
+   would still be a false positive) — timing narrows the surface, it doesn't
+   eliminate it; flagged as an open, residual risk, not resolved.
+
+2. **Position-recency bias, not correction-status**: a disambiguating test
+   (moving the correction to position 6 of 8, with two later plain,
+   textually-distinct occurrences after it) showed the correction's influence
+   vanished entirely once it wasn't the most recent item — the draft drifted
+   to the later plain entries' style instead. Root cause, confirmed directly:
+   the LLM prompt only ever showed a flat chronological list with an
+   instruction to weight the most recent example; `correction_record_id`
+   existed in our own JSONL bookkeeping but was never surfaced to the model
+   itself, so "correction-following" worked only by coincidence (a correction
+   is usually the most recent record when given), not by design. Fixed by
+   explicitly tagging each example in the prompt as `CORRECTED STYLE` or
+   `Past occurrence` (`_correction_record_ids` + `_format_examples`), with the
+   system prompt instructing the model to follow the newest `CORRECTED STYLE`
+   example's style regardless of position. Re-verified: the position-6-of-8
+   scenario now correctly holds the correction's style, and a genuinely
+   second, different correction correctly supersedes the first (not "always
+   follow the first correction forever").
+
+3. **Over-correction — style swallowing content**: fixing #2 by instructing
+   the model to always follow a stated correction's style introduced a new
+   regression, found immediately by re-running gap #1's repeated-element
+   test: three new occurrences all sharing a genuinely new, consistently
+   repeated element (`"-- will follow up tomorrow"`) stopped appearing in the
+   draft at all once any correction existed — the correction was now being
+   treated as an unconditional override of everything, not just style. Fixed
+   by splitting the prompt into two explicit, separately-answered questions —
+   "what tone/style should this use" (governed by the newest correction) and
+   "what recurring content elements appear 3+ times across plain occurrences"
+   (independent of any correction) — rather than loosening the correction
+   instruction, which would have reopened gap #2. Re-verified in one combined
+   scenario (correction not last + 3 plain occurrences sharing a new element):
+   output was `"hey sarah, standup notes attached -- will follow up tomorrow"`
+   — style and recurring content both present together, the actual bar, not
+   each passing in isolation.
+
+**Known gap, tracked explicitly, not fixed**: extending the same combined
+verification one step further (adding a *second* correction after the
+repeated-element occurrences) showed recurring content elements established
+alongside one correction do not reliably persist through a **second**
+correction, even though the supporting plain occurrences remain in the
+gathered set unchanged — style-supersession works correctly across multiple
+corrections, but content-persistence across multiple corrections does not.
+Not yet fixed — deferred until a real usage pattern forces the design (same
+discipline as the compound-action mechanism deferral), since this is a
+narrower edge case than the core mechanism this slice was built to validate.
+
+Verification throughout was live-LLM (not mocked) for every behavioral claim
+above — mocked tests only assert plumbing (prompt tags present, correct
+records gathered, correct JSONL writes), since a fixed fake response can't
+reveal how the model actually weighs competing signals. 21 new tests
+(`test_draft_generator.py`). 146 offline tests passing, 1 skipped (the
+live-credential-gated Calendar test), zero regressions.
+
+Not wired into any voice/CLI entrypoint. Scrap-metal/vision-based domain not
+started. Both remain separate decisions for a future session, not automatic
+next steps from this diagnostic loop closing.
