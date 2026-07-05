@@ -75,6 +75,28 @@ start -- sessions that never use audio never pay the ~2s model-load cost or
 need faster-whisper importable at all, matching the "local import, real
 default, no import-time hard dependency" pattern GoogleCalendarReader
 already uses for the google-* packages.
+
+## Image-verification, `/verify <path>`
+Same REPL-command precedent as `/audio` -- a distinct input modality (an
+image, not a spoken utterance or a recorded voice note), disambiguated via a
+prefix rather than retrofitting a VoiceIntentType or touching
+process_voice_interaction()/pipeline.py, per the approved image-verification
+CLI-wiring proposal. Calls core/image_verification.verify_image() directly
+against a fixed default checklist (overridable via --verification-checklist,
+repeatable), and prints the result via render_verification_as_text() plus
+its confidence -- ephemeral, human-review-only.
+
+Deliberately asymmetric with `/audio`, and this is intentional, not an
+oversight: `/audio` requires explicit y/n/edit confirmation before its
+result reaches the pipeline, because it CAN dispatch a real action
+(calendar_block/email_draft) or write an EntityMemoryRecord that pollutes
+Pattern-Watcher. `/verify` does neither -- it never writes to entity memory,
+never dispatches anything, and never feeds its result into
+process_voice_interaction() at all. There is nothing here for a
+confirmation step to gate, so it doesn't have one. No correction loop is
+attached either -- criterion-adjustment correction handling stays exactly
+where the architecture doc left it: blocked on real usage evidence that
+doesn't exist yet, not attempted even in a lighter form here.
 """
 
 import argparse
@@ -101,6 +123,7 @@ from ..core.suggestion import (
     get_pending_suggestion,
     surface_next_suggestion,
 )
+from ..core.image_verification import render_verification_as_text, verify_image
 from .calendar import DEFAULT_CALENDAR_TOKEN_PATH, DEFAULT_CLIENT_SECRET_PATH, GoogleCalendarReader, StubCalendarReader
 from .context_schema import MockPersonalData, PersonalContext, build_personal_context
 from .gmail import StubGmailReader
@@ -108,8 +131,10 @@ from .pipeline import process_voice_interaction
 from .speech_to_text import Transcriber
 
 AUDIO_COMMAND_PREFIX = "/audio "
+VERIFY_COMMAND_PREFIX = "/verify "
 
 DEFAULT_GRANTS_PATH = Path("data/grants.json")
+DEFAULT_VERIFICATION_CHECKLIST = ["Vendor name visible", "Date visible", "Amount visible"]
 
 
 def load_permission_registry(path=DEFAULT_GRANTS_PATH) -> PermissionRegistry:
@@ -248,6 +273,26 @@ def _handle_audio_command(audio_path: str, transcriber: Transcriber) -> Optional
     return None
 
 
+def _handle_verify_command(image_path: str, checklist: list) -> None:
+    """Runs verify_image() and prints the result -- ephemeral, human-review
+    only. Deliberately has NO confirmation step, unlike _handle_audio_command
+    above: this command never writes to entity memory and never dispatches
+    anything, so there is nothing for a confirmation gate to protect. See
+    module docstring's Image-verification section for why this asymmetry
+    with /audio is intentional, not an oversight."""
+    try:
+        result = verify_image(image_path, checklist)
+    except FileNotFoundError as exc:
+        print(f"  {exc}")
+        return
+    except Exception as exc:  # a corrupt/unsupported image -- never crash the session over one bad file
+        print(f"  Could not verify {image_path!r}: {exc}")
+        return
+
+    print(f"  {render_verification_as_text(result)}")
+    print(f"  confidence: {result.confidence}")
+
+
 def _process_utterance(
     entity_id: str, utterance: str, registry: PermissionRegistry, gmail_reader, calendar_reader, entity_memory_path
 ) -> None:
@@ -279,6 +324,13 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--entity-memory-path", default=str(DEFAULT_ENTITY_MEMORY_PATH))
     parser.add_argument("--suggestions-path", default=str(DEFAULT_SUGGESTIONS_PATH))
     parser.add_argument("--draft-attempts-path", default=str(DEFAULT_DRAFT_ATTEMPTS_PATH))
+    parser.add_argument(
+        "--verification-checklist",
+        action="append",
+        dest="verification_checklist",
+        default=None,
+        help="A checklist item for /verify (repeatable). Defaults to a standard receipt-style checklist if omitted.",
+    )
     return parser
 
 
@@ -312,8 +364,12 @@ def main(argv=None) -> int:
     _handle_pending_draft(args.entity_id, args.draft_attempts_path, args.entity_memory_path)
 
     transcriber: Optional[Transcriber] = None  # lazy -- only constructed on first /audio use
+    verification_checklist = args.verification_checklist or DEFAULT_VERIFICATION_CHECKLIST
 
-    print("\nEnter utterances (one per line), or '/audio <path>' for a recorded file. Type 'quit' to end the session.")
+    print(
+        "\nEnter utterances (one per line), '/audio <path>' for a recorded file, "
+        "or '/verify <path>' to check an image. Type 'quit' to end the session."
+    )
     for line in sys.stdin:
         raw = line.strip()
         if not raw:
@@ -329,6 +385,10 @@ def main(argv=None) -> int:
             utterance = _handle_audio_command(audio_path, transcriber)
             if utterance is None:
                 continue
+        elif raw.startswith(VERIFY_COMMAND_PREFIX):
+            image_path = raw[len(VERIFY_COMMAND_PREFIX):].strip()
+            _handle_verify_command(image_path, verification_checklist)
+            continue
         else:
             utterance = raw
 

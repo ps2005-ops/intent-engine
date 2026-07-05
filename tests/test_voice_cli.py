@@ -4,12 +4,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
+from intent_engine.core.image_verification import VerificationResult
 from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import StubCalendarReader
 from intent_engine.voice.cli import (
+    DEFAULT_VERIFICATION_CHECKLIST,
     _build_parser,
     _handle_audio_command,
+    _handle_verify_command,
     load_permission_registry,
     select_calendar_reader,
 )
@@ -223,3 +226,71 @@ def test_handle_audio_command_reports_transcription_error_without_crashing():
     result = _handle_audio_command("/bad/file.wav", transcriber)
 
     assert result is None
+
+
+# --- /verify command (image-verification wiring) --------------------------
+
+
+def test_build_parser_verification_checklist_defaults_to_none():
+    parser = _build_parser()
+    args = parser.parse_args(["--entity-id", "Acme Inc"])
+    assert args.verification_checklist is None
+
+
+def test_build_parser_verification_checklist_is_repeatable():
+    parser = _build_parser()
+    args = parser.parse_args(
+        ["--entity-id", "Acme Inc", "--verification-checklist", "A", "--verification-checklist", "B"]
+    )
+    assert args.verification_checklist == ["A", "B"]
+
+
+def test_handle_verify_command_prints_verdict_missing_reasoning_confidence(capsys):
+    result = VerificationResult(verdict="incomplete", missing=["Date visible"], reasoning="date not shown", confidence="medium")
+    with patch("intent_engine.voice.cli.verify_image", return_value=result) as mock_verify:
+        _handle_verify_command("/some/receipt.png", DEFAULT_VERIFICATION_CHECKLIST)
+
+    mock_verify.assert_called_once_with("/some/receipt.png", DEFAULT_VERIFICATION_CHECKLIST)
+    captured = capsys.readouterr()
+    assert "incomplete" in captured.out
+    assert "Date visible" in captured.out
+    assert "date not shown" in captured.out
+    assert "medium" in captured.out
+
+
+def test_handle_verify_command_does_not_touch_entity_memory(tmp_path):
+    """Real asymmetry with /audio: /verify never writes to entity memory --
+    ephemeral, human-review-only, no persistence of any kind."""
+    entity_path = tmp_path / "entity_memory.jsonl"
+    result = VerificationResult(verdict="complete", missing=[], reasoning="all fields visible", confidence="high")
+    with patch("intent_engine.voice.cli.verify_image", return_value=result):
+        _handle_verify_command("/some/receipt.png", DEFAULT_VERIFICATION_CHECKLIST)
+
+    assert not entity_path.exists()
+
+
+def test_handle_verify_command_reports_missing_file_without_crashing(capsys):
+    with patch("intent_engine.voice.cli.verify_image", side_effect=FileNotFoundError("Image not found: /nope.png")):
+        _handle_verify_command("/nope.png", DEFAULT_VERIFICATION_CHECKLIST)
+
+    captured = capsys.readouterr()
+    assert "not found" in captured.out.lower()
+
+
+def test_handle_verify_command_reports_invalid_image_without_crashing(capsys):
+    with patch("intent_engine.voice.cli.verify_image", side_effect=ValueError("Unsupported image type '.bmp'")):
+        _handle_verify_command("/bad/file.bmp", DEFAULT_VERIFICATION_CHECKLIST)
+
+    captured = capsys.readouterr()
+    assert "could not verify" in captured.out.lower()
+
+
+def test_handle_verify_command_never_prompts_for_confirmation(monkeypatch):
+    """No confirmation step by design -- input() must never be called."""
+    result = VerificationResult(verdict="complete", missing=[], reasoning="all fields visible", confidence="high")
+    called = []
+    monkeypatch.setattr("builtins.input", lambda p: called.append(p) or "y")
+    with patch("intent_engine.voice.cli.verify_image", return_value=result):
+        _handle_verify_command("/some/receipt.png", DEFAULT_VERIFICATION_CHECKLIST)
+
+    assert called == []
