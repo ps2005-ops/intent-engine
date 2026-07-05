@@ -868,3 +868,120 @@ first — specific package choice, how a recorded audio file actually enters
 `voice/cli.py`'s existing text-input loop, and failure-mode handling for a
 failed/garbled transcription — before any installation or code, same
 discipline as every other dependency decision this project has made.
+
+## Session close-out: PersonalContext wiring → architecture audit → two real domains → Phase-0 tooling
+
+What actually got built and verified in this session, end to end (`2a40fc3`
+through `6d91cc5`):
+
+- **`voice/PersonalContext` genuinely wired into the live pipeline** —
+  closed a gap that had been open across multiple prior sessions
+  (`process_voice_interaction()` previously classified every real
+  interaction with `context=None`; `build_personal_context()` existed and
+  was schema-tested but was never actually called from the live path).
+  `GoogleCalendarReader`, the first real (non-stub) Stage C integration,
+  landed in the same arc.
+- **Pattern-Watcher + the shadow-guess-and-correct loop**, `recurring_message`
+  only — detection, suggestion surfacing, draft generation, and a real
+  correction/refinement loop, each gap found by live verification (not
+  assumed) and fixed in sequence: recipient-heuristic blindness to casual
+  phrasing, correction influence depending on list position instead of
+  correction-status, and the resulting over-correction suppressing genuine
+  recurring content.
+- **The architecture-generalization audit** (image-verification as a
+  deliberately different-shaped hypothetical domain) produced two real,
+  committed outputs: the `SimilarityStrategy` seam in `pattern_watcher.py`
+  (a pure refactor, zero behavior change, verified against the session's
+  synthetic corpus), and a permanent limitation recorded in the architecture
+  doc — the correction/refinement loop is an imitation-learner, not a
+  criterion-calibrator. That limitation was **theorized on paper first, then
+  independently CONFIRMED BY A REAL FAILURE** once image-verification was
+  actually built: reacting to a real verification verdict with a simulated
+  criterion-adjustment reply caused `classify_draft_reply()` to fabricate a
+  "Barcode" field that was never on the checklist and produce an internally
+  self-contradictory verdict — not a conceptual mismatch, a concrete,
+  reproduced defect.
+- **Image-verification validated as a real second domain**
+  (`core/image_verification.py`) — 5/5 real, live Claude vision calls
+  against constructed synthetic fixtures matched expectations, high
+  confidence, correctly grounded reasoning. Required one small, additive
+  extension to `LLMClient.call_tool()` (an optional `image_path` param) —
+  no new API vendor.
+- **`voice/cli.py`**, the first real, live CLI entrypoint — wires together
+  entity memory, PersonalContext, Pattern-Watcher suggestions, draft
+  correction, and permission-gated calendar/gmail dispatch, verified in one
+  continuous real session cross-checked against persisted JSONL, not just
+  terminal output.
+- **Stage 2 STT (`/audio`)** — `faster-whisper`, local/offline, approved and
+  installed. Real finding worth remembering: `huggingface.co` and its CDN
+  were NOT blocked in this environment, contrary to the assumption going in
+  — checked directly rather than assumed. Real transcription and real
+  silence-detection both verified against constructed audio fixtures.
+- **`/verify <path>`** wired into `voice/cli.py` — review-only, no
+  persistence, no correction loop (criterion-adjustment handling stays
+  blocked on real usage evidence, per the audit's finding above).
+- **`core/phase0_trial_log.py`** — a thin, un-wired logging helper for the
+  still-not-started manual relay trial (Phase 0 of the WhatsApp
+  channel-bridge proposal), so a week of real usage produces reviewable
+  evidence instead of memory.
+
+Full suite at session close: 190 passed, 1 skipped, 5 pre-existing failures
+in `test_simulator_e2e.py` (Anthropic API credit exhausted mid-session — an
+external billing constraint, confirmed by direct error message, not a code
+regression; left failing loudly on purpose, not skipped/silenced/`xfail`'d).
+
+## Next session's plan — four parts, one at a time, checkpoint and stop after each
+
+Do not chain through all four in one sitting. Each is its own proposal-or-build
+pass with its own checkpoint, same discipline as every other decision this
+project has made.
+
+1. **Scrap-metal coarse-estimate domain** (the original use case this whole
+   project traces back to, not yet built). Mirrors
+   `core/image_verification.py`'s isolated-call scaffold, but the output is
+   a coarse, honestly-labeled COMPARATIVE grade impression —
+   `grade_impression`, `oxidation_level`, `visible_contamination`, an
+   optional `comparison_note` pulled from real `entity_memory` history if
+   any exists for this entity, `confidence`, `reasoning` — never a
+   composition percentage, since a vision model cannot see hidden material
+   composition, the exact honesty ceiling this project has flagged since the
+   architecture audit named it. Review-only, no correction loop attached —
+   grading feedback is almost certainly criterion-shaped, the same confirmed
+   failure mode already found once. Real synthetic scrap-metal test images
+   will likely have meaningfully weaker validity than the receipt case did
+   (visual grading of scrap metal is a much harder, less clean-cut judgment
+   than "is a printed field legible") — flag that honestly rather than
+   overclaiming confidence in whatever synthetic fixtures get built, and ask
+   for real photos if none are available rather than guessing at what
+   realistic scrap-metal photos even look like.
+
+2. **Mom's fitness-caption generator.** Reuses `recurring_message` +
+   the shadow-guess-and-correct loop exactly as already built — no new
+   mechanism. Seeded day-one with a 3-pillar content framework
+   (authority/education, transformation/social-proof, personal-story) as an
+   explicit, stated cold-start baseline rather than waiting for organic
+   history to accumulate. Draft-only, review-gated, same as
+   `recurring_message` today.
+
+3. **Brother's music-caption generator.** Same mechanism again, seeded with
+   a 40% music / 30% personality / 20% trends content mix. Explicitly:
+   do not start this until mom's domain has been reviewed and confirmed
+   working — one domain at a time, not built in parallel.
+
+4. **Trading, two separate pieces:**
+   - (a) A retrospective backtest harness — 15-20 real historical decisions
+     with known outcomes, reconstructed without hindsight, run through the
+     UNMODIFIED `PremortemAnalyzer`, expanded with real macro/valuation data.
+     Build the harness regardless of current API credit state; only run the
+     actual analysis once credits exist again.
+   - (b) A NEW, separate "explain current stock price" module using
+     `yfinance` (free, local — flag for sign-off as a new dependency before
+     installing) for real current data. Explicitly a synthesis of known
+     information, never a forecast or recommendation — no field or output
+     anywhere in this module should ever imply prediction.
+
+**None of this replaces actually starting the real manual-relay trial with
+dad.** The tooling (`/audio`, `/verify`, `log_trial_interaction()`) is ready
+and committed; the trial itself has not run yet. That remains the real next
+step whenever it's convenient, independent of and not blocked by this build
+list.
