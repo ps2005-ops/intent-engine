@@ -49,6 +49,32 @@ stays StubGmailReader (no real Gmail read integration exists yet). Gmail
 acting stays StubGmailActor; calendar acting stays StubCalendarActor --
 GoogleCalendarReader is read-only by design (see calendar.py's module
 docstring), and no real "act" integration exists for either domain yet.
+
+## Stage 2: file-based speech-to-text, `/audio <path>`
+A REPL command, not a separate invocation mode -- chosen over a CLI flag
+because the utterance loop already reads free-text lines, and a session may
+mix typed utterances and audio files turn by turn; a `/audio` prefix
+disambiguates without needing a second entrypoint. `voice/speech_to_text.py`
+(Transcriber, faster-whisper) does the actual transcription; this file only
+adds the confirmation gate and feeds the result into the EXACT SAME
+process_voice_interaction() call path every other utterance already uses --
+assembly in front of the existing loop, not a change to it.
+
+Real safety requirement, not optional (see _handle_audio_command): the
+transcript is always printed and confirmed ("Heard: '...' -- proceed?
+[y/n/edit]") before anything reaches the pipeline. A mis-transcription
+silently entering process_voice_interaction() could dispatch a wrong REAL
+action (GoogleCalendarReader is real; calendar_act's stub still writes a
+confirmed "created" record) or write a garbage EntityMemoryRecord that later
+pollutes Pattern-Watcher's pattern detection with content nobody actually
+said. "edit" lets the person correct a near-miss transcription rather than
+discarding a mostly-right one outright.
+
+The Transcriber is constructed lazily, on first `/audio` use, not at session
+start -- sessions that never use audio never pay the ~2s model-load cost or
+need faster-whisper importable at all, matching the "local import, real
+default, no import-time hard dependency" pattern GoogleCalendarReader
+already uses for the google-* packages.
 """
 
 import argparse
@@ -79,6 +105,9 @@ from .calendar import DEFAULT_CALENDAR_TOKEN_PATH, DEFAULT_CLIENT_SECRET_PATH, G
 from .context_schema import MockPersonalData, PersonalContext, build_personal_context
 from .gmail import StubGmailReader
 from .pipeline import process_voice_interaction
+from .speech_to_text import Transcriber
+
+AUDIO_COMMAND_PREFIX = "/audio "
 
 DEFAULT_GRANTS_PATH = Path("data/grants.json")
 
@@ -186,6 +215,61 @@ def _print_interaction_result(result, context: PersonalContext) -> None:
             print(f"  gmail dispatch DENIED: {result.gmail_action.message}")
 
 
+def _handle_audio_command(audio_path: str, transcriber: Transcriber) -> Optional[str]:
+    """Transcribes audio_path and gates it behind explicit confirmation
+    before anything reaches the pipeline -- see module docstring's Stage 2
+    section for why this is a real safety requirement, not optional. Returns
+    the (possibly person-edited) text to process, or None if nothing should
+    be processed (no speech detected, discarded, or a transcription error)."""
+    try:
+        result = transcriber.transcribe(audio_path)
+    except FileNotFoundError as exc:
+        print(f"  {exc}")
+        return None
+    except Exception as exc:  # a corrupt/unsupported file -- never crash the session over one bad file
+        print(f"  Could not transcribe {audio_path!r}: {exc}")
+        return None
+
+    if result.likely_silence or not result.text:
+        print(
+            f"  No clear speech detected in {audio_path!r} "
+            f"(language_probability={result.language_probability}) -- nothing was processed."
+        )
+        return None
+
+    print(f'  Heard: "{result.text}"')
+    reply = input("  Proceed? [y/n/edit]: ").strip().lower()
+    if reply in ("y", "yes"):
+        return result.text
+    if reply == "edit":
+        edited = input("  Enter corrected text: ").strip()
+        return edited or None
+    print("  Discarded.")
+    return None
+
+
+def _process_utterance(
+    entity_id: str, utterance: str, registry: PermissionRegistry, gmail_reader, calendar_reader, entity_memory_path
+) -> None:
+    context = build_personal_context(
+        entity_id,
+        mock_data=MockPersonalData(),
+        path=entity_memory_path,
+        permission_registry=registry,
+        gmail_reader=gmail_reader,
+        calendar_reader=calendar_reader,
+    )
+    result = process_voice_interaction(
+        entity_id,
+        utterance,
+        context=context,
+        permission_registry=registry,
+        entity_memory_path=entity_memory_path,
+    )
+    print(f"\n> {utterance}")
+    _print_interaction_result(result, context)
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="delegate", description="Cognitive Delegate voice-pipeline CLI (text input, Stage 1 -- no STT/audio)."
@@ -227,31 +311,28 @@ def main(argv=None) -> int:
     # Step 3: a pending draft left over from a PRIOR invocation, if any.
     _handle_pending_draft(args.entity_id, args.draft_attempts_path, args.entity_memory_path)
 
-    print("\nEnter utterances (one per line). Type 'quit' to end the session.")
+    transcriber: Optional[Transcriber] = None  # lazy -- only constructed on first /audio use
+
+    print("\nEnter utterances (one per line), or '/audio <path>' for a recorded file. Type 'quit' to end the session.")
     for line in sys.stdin:
-        utterance = line.strip()
-        if not utterance:
+        raw = line.strip()
+        if not raw:
             continue
-        if utterance.lower() in ("quit", "exit"):
+        if raw.lower() in ("quit", "exit"):
             break
 
-        context = build_personal_context(
-            args.entity_id,
-            mock_data=MockPersonalData(),
-            path=args.entity_memory_path,
-            permission_registry=registry,
-            gmail_reader=gmail_reader,
-            calendar_reader=calendar_reader,
-        )
-        result = process_voice_interaction(
-            args.entity_id,
-            utterance,
-            context=context,
-            permission_registry=registry,
-            entity_memory_path=args.entity_memory_path,
-        )
-        print(f"\n> {utterance}")
-        _print_interaction_result(result, context)
+        if raw.startswith(AUDIO_COMMAND_PREFIX):
+            audio_path = raw[len(AUDIO_COMMAND_PREFIX):].strip()
+            if transcriber is None:
+                print("Loading speech-to-text model (first use this session)...")
+                transcriber = Transcriber()
+            utterance = _handle_audio_command(audio_path, transcriber)
+            if utterance is None:
+                continue
+        else:
+            utterance = raw
+
+        _process_utterance(args.entity_id, utterance, registry, gmail_reader, calendar_reader, args.entity_memory_path)
 
     print("\nSession ended.")
     return 0

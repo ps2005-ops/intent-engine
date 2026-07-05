@@ -9,9 +9,11 @@ from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import StubCalendarReader
 from intent_engine.voice.cli import (
     _build_parser,
+    _handle_audio_command,
     load_permission_registry,
     select_calendar_reader,
 )
+from intent_engine.voice.speech_to_text import TranscriptionResult
 
 
 # --- grants loading -----------------------------------------------------
@@ -144,4 +146,80 @@ def test_handle_pending_draft_returns_none_when_nothing_pending(tmp_path):
     from intent_engine.voice.cli import _handle_pending_draft
 
     result = _handle_pending_draft("Acme Inc", tmp_path / "draft_attempts.jsonl", tmp_path / "entity_memory.jsonl")
+    assert result is None
+
+
+# --- /audio command (Stage 2 STT) -----------------------------------------
+
+
+def _fake_transcriber(result: TranscriptionResult):
+    transcriber = MagicMock()
+    transcriber.transcribe.return_value = result
+    return transcriber
+
+
+def test_handle_audio_command_confirms_and_returns_text_on_yes(monkeypatch):
+    transcriber = _fake_transcriber(
+        TranscriptionResult(text="block off Thursday at 2pm", language="en", language_probability=0.99)
+    )
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    result = _handle_audio_command("/some/file.wav", transcriber)
+
+    assert result == "block off Thursday at 2pm"
+
+
+def test_handle_audio_command_discards_on_no(monkeypatch):
+    transcriber = _fake_transcriber(
+        TranscriptionResult(text="block off Thursday at 2pm", language="en", language_probability=0.99)
+    )
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    result = _handle_audio_command("/some/file.wav", transcriber)
+
+    assert result is None
+
+
+def test_handle_audio_command_edit_replaces_text(monkeypatch):
+    transcriber = _fake_transcriber(
+        TranscriptionResult(text="block off Thursday at 2pm", language="en", language_probability=0.99)
+    )
+    replies = iter(["edit", "block off Thursday at 3pm instead"])
+    monkeypatch.setattr("builtins.input", lambda _: next(replies))
+
+    result = _handle_audio_command("/some/file.wav", transcriber)
+
+    assert result == "block off Thursday at 3pm instead"
+
+
+def test_handle_audio_command_never_processes_likely_silence(monkeypatch):
+    """Real safety requirement: silence/no-speech must never be fed forward,
+    and must never even prompt for confirmation."""
+    transcriber = _fake_transcriber(
+        TranscriptionResult(text=None, language="nn", language_probability=0.23, likely_silence=True)
+    )
+    called = []
+    monkeypatch.setattr("builtins.input", lambda p: called.append(p) or "y")
+
+    result = _handle_audio_command("/some/silence.wav", transcriber)
+
+    assert result is None
+    assert called == []  # never even asked for confirmation
+
+
+def test_handle_audio_command_reports_missing_file_without_crashing():
+    transcriber = MagicMock()
+    transcriber.transcribe.side_effect = FileNotFoundError("Audio file not found: /nope.wav")
+
+    result = _handle_audio_command("/nope.wav", transcriber)
+
+    assert result is None
+
+
+def test_handle_audio_command_reports_transcription_error_without_crashing():
+    transcriber = MagicMock()
+    transcriber.transcribe.side_effect = RuntimeError("corrupt audio stream")
+
+    result = _handle_audio_command("/bad/file.wav", transcriber)
+
     assert result is None
