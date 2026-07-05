@@ -178,6 +178,21 @@ def _same_underlying_pattern(a: DetectedPattern, b: DetectedPattern) -> bool:
     return len(a_ids & b_ids) / len(a_ids) > 0.5
 
 
+def get_pending_suggestion(
+    entity_id: str, path: Union[str, Path] = DEFAULT_SUGGESTIONS_PATH
+) -> Optional[SuggestionRecord]:
+    """Returns the existing pending SuggestionRecord for this entity, if any --
+    used by voice/cli.py to show an unresolved suggestion at session start.
+    Deliberately separate from surface_next_suggestion(): that function
+    returns None both when a pending suggestion already exists (won't stack a
+    second one) AND when nothing new is detected -- a caller that needs to
+    distinguish "there's already one to show you" from "there's genuinely
+    nothing" needs this, not that one."""
+    existing = _read_latest_suggestion_records(entity_id, path=path)
+    pending = [r for r in existing if r.status == "pending"]
+    return pending[0] if pending else None
+
+
 def surface_next_suggestion(
     entity_id: str,
     entity_memory_path: Union[str, Path] = DEFAULT_PATH,

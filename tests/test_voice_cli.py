@@ -1,0 +1,147 @@
+import json
+from io import StringIO
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.permissions import PermissionRegistry
+from intent_engine.voice.calendar import StubCalendarReader
+from intent_engine.voice.cli import (
+    _build_parser,
+    load_permission_registry,
+    select_calendar_reader,
+)
+
+
+# --- grants loading -----------------------------------------------------
+
+
+def test_load_permission_registry_deny_by_default_when_file_absent(tmp_path):
+    registry = load_permission_registry(tmp_path / "no_such_file.json")
+
+    assert isinstance(registry, PermissionRegistry)
+    assert registry.is_authorized("calendar_act") is False
+    assert registry.is_authorized("anything") is False
+
+
+def test_load_permission_registry_loads_real_grants(tmp_path):
+    grants_path = tmp_path / "grants.json"
+    grants_path.write_text(json.dumps({"calendar_read": True, "calendar_act": False}))
+
+    registry = load_permission_registry(grants_path)
+
+    assert registry.is_authorized("calendar_read") is True
+    assert registry.is_authorized("calendar_act") is False
+    # A domain simply absent from the file must still deny -- not invent a grant.
+    assert registry.is_authorized("gmail_act") is False
+
+
+def test_load_permission_registry_rejects_malformed_file(tmp_path):
+    grants_path = tmp_path / "grants.json"
+    grants_path.write_text(json.dumps({"calendar_read": "yes"}))  # not a bool
+
+    with pytest.raises(ValueError):
+        load_permission_registry(grants_path)
+
+
+def test_load_permission_registry_rejects_non_object_json(tmp_path):
+    grants_path = tmp_path / "grants.json"
+    grants_path.write_text(json.dumps(["calendar_read"]))
+
+    with pytest.raises(ValueError):
+        load_permission_registry(grants_path)
+
+
+# --- calendar reader selection -------------------------------------------
+
+
+def test_select_calendar_reader_falls_back_to_stub_when_no_credentials():
+    registry = PermissionRegistry(grants={"calendar_read": True})
+    with patch("intent_engine.voice.cli.DEFAULT_CALENDAR_TOKEN_PATH") as mock_token_path:
+        mock_token_path.exists.return_value = False
+        reader = select_calendar_reader(registry)
+    assert isinstance(reader, StubCalendarReader)
+
+
+# --- arg parsing ----------------------------------------------------------
+
+
+def test_build_parser_requires_entity_id():
+    parser = _build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args([])
+
+
+def test_build_parser_accepts_entity_id_and_defaults(tmp_path):
+    parser = _build_parser()
+    args = parser.parse_args(["--entity-id", "Acme Inc"])
+    assert args.entity_id == "Acme Inc"
+    assert args.grants_path  # has a default
+
+
+# --- session flow (mocked collaborators) ---------------------------------
+
+
+def test_handle_pending_suggestion_returns_none_when_nothing_pending(tmp_path):
+    from intent_engine.voice.cli import _handle_pending_suggestion
+
+    result = _handle_pending_suggestion(
+        "Acme Inc", tmp_path / "suggestions.jsonl", tmp_path / "entity_memory.jsonl"
+    )
+    assert result is None
+
+
+def test_handle_pending_suggestion_accept_flow(tmp_path, monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    from intent_engine.voice.cli import _handle_pending_suggestion
+
+    entity_path = tmp_path / "entity_memory.jsonl"
+    suggestions_path = tmp_path / "suggestions.jsonl"
+    writer = JsonlEntityMemoryWriter(path=entity_path)
+    for days_ago in range(5, 0, -1):
+        dt = (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=19, minute=0, second=0, microsecond=0)
+        writer.write(
+            EntityMemoryRecord(
+                entity_id="Acme Inc", source="voice", decision_text="email Sarah the daily standup notes",
+                goals=[], constraints=[], timestamp=dt.isoformat(), salience="low",
+            )
+        )
+
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+    accepted = _handle_pending_suggestion("Acme Inc", suggestions_path, entity_path)
+
+    assert accepted is not None
+    assert accepted.status == "accepted"
+    assert accepted.task_agent_spec is not None
+
+
+def test_handle_pending_suggestion_decline_flow(tmp_path, monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    from intent_engine.voice.cli import _handle_pending_suggestion
+
+    entity_path = tmp_path / "entity_memory.jsonl"
+    suggestions_path = tmp_path / "suggestions.jsonl"
+    writer = JsonlEntityMemoryWriter(path=entity_path)
+    for days_ago in range(5, 0, -1):
+        dt = (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=19, minute=0, second=0, microsecond=0)
+        writer.write(
+            EntityMemoryRecord(
+                entity_id="Acme Inc", source="voice", decision_text="email Sarah the daily standup notes",
+                goals=[], constraints=[], timestamp=dt.isoformat(), salience="low",
+            )
+        )
+
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+    accepted = _handle_pending_suggestion("Acme Inc", suggestions_path, entity_path)
+
+    assert accepted is None
+
+
+def test_handle_pending_draft_returns_none_when_nothing_pending(tmp_path):
+    from intent_engine.voice.cli import _handle_pending_draft
+
+    result = _handle_pending_draft("Acme Inc", tmp_path / "draft_attempts.jsonl", tmp_path / "entity_memory.jsonl")
+    assert result is None

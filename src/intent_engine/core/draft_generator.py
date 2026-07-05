@@ -425,6 +425,31 @@ def _append_draft_attempt(record: DraftAttempt, path: Union[str, Path] = DEFAULT
         f.write(record.model_dump_json() + "\n")
 
 
+def persist_draft_attempt(attempt: DraftAttempt, path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH) -> None:
+    """Public entrypoint for persisting a DraftAttempt generate_draft() just
+    produced -- generate_draft() itself deliberately does NOT persist (compute
+    vs. persist stays separate, same reasoning as EntityMemoryWriter being a
+    Protocol rather than folded into Stage.run()'s return). Used by
+    voice/cli.py, a different subpackage, so it gets a real public function
+    rather than reaching into the underscore-prefixed _append_draft_attempt
+    directly across a package boundary."""
+    _append_draft_attempt(attempt, path=path)
+
+
+def get_pending_draft(entity_id: str, path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH) -> Optional[DraftAttempt]:
+    """Returns the single pending_review DraftAttempt for this entity, if any
+    -- used by voice/cli.py to check for an unresolved draft at session
+    start, re-reading fresh from draft_attempts.jsonl each time rather than
+    depending on any in-memory state (same reload-per-invocation principle as
+    suggestion.get_pending_suggestion()). Only one pending draft is ever
+    expected at a time in this pass's flow, but if more than one somehow
+    exists, the most recent is returned rather than guessed at."""
+    pending = [a for a in _read_latest_draft_attempts(entity_id, path=path) if a.status == "pending_review"]
+    if not pending:
+        return None
+    return max(pending, key=lambda a: a.timestamp)
+
+
 # --- Correction parsing ------------------------------------------------------
 #
 # Own small classifier -- NOT a literal reuse of VoiceIntentClassifier. See

@@ -9,6 +9,7 @@ requires-python = ">=3.9"
 
 [project.scripts]
 premortem = "intent_engine.simulator.cli:main"
+delegate = "intent_engine.voice.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

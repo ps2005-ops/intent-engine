@@ -8,4 +8,7 @@ venv/
 .DS_Store
 data/entity_memory.jsonl
 data/calendar_token.json
+data/suggestions.jsonl
+data/draft_attempts.jsonl
+data/grants.json
 credentials/

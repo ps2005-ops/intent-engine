@@ -810,3 +810,61 @@ dependency question). Two real, separate open threads for a future session:
 (1) designing a real criterion-adjustment mechanism, once real usage exists
 to shape it; (2) whether to wire anything built so far into a real CLI/voice
 entrypoint. Neither decided now.
+
+## Milestone: `voice/cli.py` — first end-to-end live CLI session
+
+**First end-to-end live CLI session (`voice/cli.py`) confirms the full
+pipeline holds together in practice: entity memory, PersonalContext,
+Pattern-Watcher suggestions, draft correction, and permission-gated
+calendar/gmail dispatch all verified in one real run, cross-checked against
+persisted JSONL.** Text input only (stands in for a transcript) — no
+STT/audio, no TTS, that's Stage 2 (proposed, not built).
+
+Nothing new was invented beyond CLI/session plumbing — this is assembly of
+already-validated pieces (`process_voice_interaction()`,
+`surface_next_suggestion()`/`accept_suggestion()`/`decline_suggestion()`,
+`generate_draft()`/`classify_draft_reply()`/`process_draft_reply()`), plus
+three small, additive public functions two modules needed but didn't expose
+yet (`suggestion.get_pending_suggestion`, `draft_generator.get_pending_draft`,
+`draft_generator.persist_draft_attempt`) — reading/persisting logic that
+already existed, not new capability. `pipeline.py` itself needed no changes:
+`process_voice_interaction()` already accepted an injectable `context`, so
+the CLI builds `PersonalContext` directly (with a real `GoogleCalendarReader`
+or a stated `StubCalendarReader` fallback — never silent) and passes it in.
+
+Two design questions proposed, not silently decided: (1) grants source — a
+local `data/grants.json` loaded once at CLI start via
+`load_permission_registry()`, deny-by-default preserved at every layer
+(absent file, domain missing from a present file, and a malformed file all
+handled explicitly, the last by raising loudly rather than degrading
+silently); (2) interactive REPL for convenience, but all "pending" state
+(`get_pending_suggestion`/`get_pending_draft`) re-reads its JSONL file fresh
+each time rather than caching across turns — a real one-invocation-per-
+voice-note deployment later behaves identically to this REPL staying open.
+
+Verified in one real, live, multi-turn session (not simulated): a genuinely
+detected recurring-message suggestion accepted, its first draft corrected
+(`"Please email Sarah the standup notes for today for her review at her
+earliest convenience"` → `"hey sarah standup notes are up"`), the follow-up
+draft demonstrating that correction approved, a `calendar_block` utterance
+dispatched successfully (stub actor), and an `email_draft` utterance
+explicitly denied (`gmail_act` not granted) — printed AND cross-checked
+directly against `suggestions.jsonl`/`draft_attempts.jsonl`/
+`entity_memory.jsonl`, not assumed from terminal output alone. 11 new mocked
+tests (`test_voice_cli.py`, arg parsing/grants loading/session-flow
+plumbing). Full suite: 169 passed, 1 skipped, zero regressions.
+
+`delegate` registered as a console-script entrypoint (`pyproject.toml`,
+mirroring `premortem`). `data/grants.json`/`data/suggestions.jsonl`/
+`data/draft_attempts.jsonl` added to `.gitignore` — real local runtime state,
+same category as `data/entity_memory.jsonl`, never committed.
+
+**Stage 2, approved direction, not yet built**: file-based speech-to-text
+via a local, lightweight Whisper variant (`faster-whisper` or
+`whisper.cpp`) — no cloud vendor by default, reasoned explicitly as a
+privacy decision (this assistant handles real family-business calendar/
+email/decision content) as much as a cost one. Needs its own scoped proposal
+first — specific package choice, how a recorded audio file actually enters
+`voice/cli.py`'s existing text-input loop, and failure-mode handling for a
+failed/garbled transcription — before any installation or code, same
+discipline as every other dependency decision this project has made.
