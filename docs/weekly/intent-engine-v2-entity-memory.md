@@ -311,6 +311,38 @@ they are not the same gate.
   revocable, not silently running.
 - Unauthorized domstem states what it would do, doesn't do it.
 
+### Known, permanent limitation: the correction/refinement loop is an imitation-learner, not a criterion-calibrator
+
+`core/draft_generator.py`'s shadow-guess-and-correct loop (the current, concrete
+implementation of Stage E's "generate a concrete, inspectable action" for the
+`recurring_message` domain) works by imitation: it gathers real prior instances
+of an artifact and asks an LLM to produce the next one in the same style, then
+treats a person's correction as a restated instance of that same artifact,
+feeding future generation. This works precisely because `recurring_message`'s
+artifact (a message to send) has a STYLE to match — tone, phrasing, format.
+
+This does **not** generalize to every future domain, confirmed by direct code
+analysis (the image-verification architecture-generalization audit), not
+assumed. Some domains produce artifacts with a DECISION RULE to calibrate
+instead — a verdict, a threshold, a criterion — and a "correction" there means
+something structurally different: not "here's what the message should have
+said," but "here's how the criterion should be adjusted" (e.g. "that photo's
+actually fine, you're being too strict about the barcode"). Feeding that kind
+of correction into `generate_draft()`'s imitation prompt as another instance
+to stylistically imitate does not do anything useful — there is no "next
+instance's style" for a decision rule to imitate.
+
+**Before applying this mechanism to any new domain, classify it first:** is a
+"correction" in this domain a restated instance of the artifact itself
+(imitation-shaped — this mechanism applies as-is), or a criterion adjustment
+(rule-shaped — this mechanism does NOT apply as-is, and needs a different
+feedback shape, e.g. accumulating standing exceptions/threshold adjustments
+fed into the judgment prompt rather than more examples to imitate)? Getting
+this classification wrong before building is the likeliest way this
+mechanism would silently fail on a second domain — not a hypothetical risk,
+but the single most concrete finding from testing the architecture against a
+genuinely different-shaped domain on paper.
+
 ---
 
 ## Guardrails carried over from the rest of this build
