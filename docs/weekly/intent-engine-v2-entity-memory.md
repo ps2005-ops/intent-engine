@@ -339,9 +339,32 @@ instance's style" for a decision rule to imitate.
 feedback shape, e.g. accumulating standing exceptions/threshold adjustments
 fed into the judgment prompt rather than more examples to imitate)? Getting
 this classification wrong before building is the likeliest way this
-mechanism would silently fail on a second domain — not a hypothetical risk,
-but the single most concrete finding from testing the architecture against a
-genuinely different-shaped domain on paper.
+mechanism would silently fail on a second domain.
+
+**Update: this is no longer a paper finding — it is CONFIRMED BY A REAL
+FAILURE CASE.** `core/image_verification.py`'s `verify_image()` was built for
+real (not audited on paper) specifically to test this. A real verification
+result (`"Verdict: incomplete. Missing: Amount visible..."`, produced by a
+live Claude vision call against a constructed test image with the amount
+field cropped out of frame) was reacted to with exactly the kind of reply
+this section already anticipated above: *"you're being too strict about the
+barcode, that's fine."* `classify_draft_reply()` classified this as
+`"correction"` — defensible — but the resulting `correction_text` was not
+merely a poor conceptual fit, it was concretely wrong: it **fabricated a
+"Barcode" field that was never on the checklist and never mentioned in the
+original judgment**, hallucinated from the reply's incidental wording, and
+the result was internally self-contradictory — it still read
+`"Verdict: incomplete"` even though the person said "that's fine," so the
+one adjustment the reply actually asked for wasn't reflected at all. See
+`PROGRESS.md`'s "Architecture-generalization audit + second real domain:
+image-verification" section for the full real output. One real failure case
+is evidence the mechanism doesn't apply as-is; it is deliberately NOT treated
+as evidence of what the right mechanism should be (a running exceptions
+list? per-checklist-item override? something else?) — designing that from a
+single data point would repeat the exact mistake already avoided twice this
+project (the compound-action mechanism deferral, the PersonalContext
+pull-strategy deferral). Deferred until real usage across this or another
+criterion-shaped domain exists to shape it properly, not guessed at now.
 
 ---
 
