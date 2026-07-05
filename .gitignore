@@ -11,4 +11,5 @@ data/calendar_token.json
 data/suggestions.jsonl
 data/draft_attempts.jsonl
 data/grants.json
+data/phase0_trial_log.jsonl
 credentials/
