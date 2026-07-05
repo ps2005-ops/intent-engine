@@ -536,3 +536,86 @@ momentum:**
   before — the current stub doesn't need this since nothing is actually sent.
   Flagging now so it's not rediscovered cold later.
 - 57 offline tests passing as of the `email_draft` fresh-compose wiring commit.
+
+## Pattern-Watcher + Suggestion Moment: first real slice (recurring_message only)
+
+Stage D-adjacent: a new consumer that reads across MANY existing
+`entity_memory` records looking for repetition. Nothing in `entity_memory.py`
+was modified — this is a new reader, not a new writer.
+
+`core/pattern_watcher.py` — `DetectedPattern` (three pattern types named now,
+`recurring_action`/`recurring_check` reserved and unimplemented, same
+reserved-field discipline as `EntityMemoryRecord.outcome`),
+`detect_recurring_message_patterns()`. Every field is an observation, not an
+assertion: `confidence` is a deterministic function of real, counted evidence
+(occurrence count, TF-IDF content-similarity, hour-of-day timing
+consistency), never asked of an LLM and never fabricated independent of the
+data — `supporting_record_ids` makes every pattern auditable against the real
+records that grounded it.
+
+`core/suggestion.py` — `generate_suggestion()` turns a `DetectedPattern` into
+plain-language text whose hedging genuinely varies by confidence (verified:
+low/medium/high produce three genuinely different strings, not the same text
+with a label swapped), always ends in a question, never an assumed-already-
+acted-on statement. `surface_next_suggestion()` persists to
+`data/suggestions.jsonl` (same append-only convention as
+`entity_memory.jsonl`) and enforces **at most one unresolved suggestion per
+entity at a time** — a real product requirement (stacking multiple unresolved
+"did you notice you do X" prompts creates suggestion fatigue and trains
+people to dismiss the assistant wholesale), not a nice-to-have. Accepting
+produces a `TaskAgentSpecStub` (`action="draft_only"`, `gated=True` always) —
+proves the accept path yields a real, inspectable artifact without building
+the full spec/execution system (deliberately out of scope). Declining a
+pattern is checked via supporting-evidence overlap (`pattern_id` is a fresh
+uuid4 every detection run, so it can't serve as stable identity across
+repeated detection on the same/evolving history) — never re-suggests the
+same underlying pattern, never suppresses a genuinely different one.
+
+**Real, measured calibration gap found and closed within this same pass, not
+glossed over**: the first version of recipient-extraction (a narrow verb list
+— "email"/"message"/"text"/"tell") was verified against synthetic data using
+those same words, then independently re-tested against realistic phrasing
+variety for the SAME recurring action ("let Sarah know...", "shoot Sarah a
+note...", "ping Sarah...", "send Sarah...", "give Sarah...", "update Sarah
+on...", "fill Sarah in...", "drop Sarah a line...") — measured **83% miss
+rate** (caught 3 of 18 real recurring instances). A capitalization-based
+name-detection alternative was tried and measured next: it closed the
+miss-rate gap entirely (0% miss) but introduced two new, real problems, both
+measured: 100% miss the moment names aren't capitalized (a lowercase-only
+speech-to-text transcript would defeat it completely), and new false
+positives on pure noise data (4 spurious patterns — "Thursday", "March",
+"Alex", "Api" — recurring capitalized words in unrelated sentences, since
+nothing gated candidacy on an actual communication-like verb anymore).
+Neither was committed.
+
+Landed instead: broaden the verb list (13 verbs/phrasal patterns, covering
+the realistic variety measured) while keeping verb-gating (avoids the
+false-positive regression) and case-insensitivity (avoids the capitalization
+dependency), plus a stopword/particle exclusion list (guards the broadened
+verbs' own false-positive risk — "update"/"send"/"give"/"drop"/"fill" are
+common in everyday phrases not about messaging a person, e.g. "update the
+roadmap", "fill out the expense report"). Re-measured against all three
+corpora: 0% miss rate on the realistic-phrasing corpus (both capitalized and
+lowercased), 0 false positives on pure noise, 0 false positives on the
+everyday-phrasal-verb check. A materially better result than the
+capitalization-based alternative on all three axes measured, not just the
+one the original gap was found on.
+
+**Still a real, open limitation, not resolved by this fix**: the verb list is
+finite and will always be somewhat behind real usage — some real ways of
+describing "send someone a message" will still be missed (a false negative,
+not a false positive). Considered and explicitly not built this pass: a cheap
+LLM call for recipient/action extraction instead of a regex, which would
+likely generalize better but is a real, flagged tradeoff — a new per-record
+API cost scanned across potentially many `entity_memory` records, not free
+the way a regex is. Proposing this for a future pass if the verb-list
+approach proves insufficient against real usage, not building it speculatively
+now.
+
+Verification: realistic 21-day synthetic dataset (49 records, 18 the
+recurring message mixed with 1-2 unrelated noise interactions per day, ±25min
+timing jitter, 5 wording variants) — real positive detection (18 occurrences,
+`high` confidence), real negative (0 patterns on pure noise), confidence
+scaling confirmed across all three bands (2→`low`, 5→`medium`, 18→`high`).
+30 new tests (20 `test_pattern_watcher.py`, 10 `test_suggestion.py`). 120
+offline tests passing, zero regressions.
