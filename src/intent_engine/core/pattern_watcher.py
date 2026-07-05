@@ -15,6 +15,18 @@ and "recurring_check" are named in the enum now, unimplemented, so the schema
 doesn't need to change when they're built -- same reserved-field discipline as
 EntityMemoryRecord.outcome.
 
+Detection is split behind a SimilarityStrategy protocol (below): what makes
+records "the same recurring thing" (group_key) and whether their content is
+consistent (content_consistent) are pluggable per domain; distinct-day
+collapsing, timing consistency, and confidence calibration are genuinely
+domain-agnostic and stay in the shared detect_recurring_patterns(). This is a
+pure refactor -- RecurringMessageStrategy wraps the exact same
+recipient-extraction + TF-IDF logic that used to be inline, with identical
+behavior. Extracted specifically because the architecture-generalization
+audit (image-verification domain) found this logic is fundamentally
+text-specific and would not transfer to a non-text modality as-is -- the seam
+exists so that's a pluggable choice per domain, not a hardcoded assumption.
+
 Known, deliberate limitations (flagged, not hidden):
 - Recipient extraction is a conservative regex heuristic requiring an
   explicit communication verb (email/message/text/tell), not real NLP/NER.
@@ -40,7 +52,7 @@ import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Protocol, Tuple, Union
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -52,7 +64,7 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Literal
 
-from .entity_memory import DEFAULT_PATH, read_records
+from .entity_memory import DEFAULT_PATH, EntityMemoryRecord, read_records
 
 PatternType = Literal["recurring_message", "recurring_action", "recurring_check"]
 Confidence = Literal["low", "medium", "high"]
@@ -206,18 +218,67 @@ def _describe_pattern(
     )
 
 
-def detect_recurring_message_patterns(
+class SimilarityStrategy(Protocol):
+    """Pluggable per-domain seam, extracted from what used to be
+    detect_recurring_message_patterns' hardcoded body -- see the
+    architecture-generalization audit (image-verification domain) that found
+    _extract_recipient/_content_similarity_consistent are fundamentally
+    text-specific and would NOT transfer to a non-text modality, while
+    _timing_consistent (hour-of-day only) is genuinely modality-agnostic and
+    stays shared rather than going behind this seam.
+
+    group_key: what makes two records "the same recurring thing" for this
+    domain (e.g. the extracted recipient, for text messages). None means the
+    record doesn't belong to any recognizable group.
+    content_consistent: given the representative records for one group,
+    whether their actual content is similar enough to count as one recurring
+    pattern rather than coincidentally-timed noise, plus a similarity score
+    for the description text.
+
+    This is a pure extraction of existing behavior into a named seam -- no
+    new strategy is implemented here beyond the one recurring_message already
+    had (RecurringMessageStrategy, below). A genuinely different-modality
+    strategy (e.g. for image-verification) is proposed, not built, in the
+    architecture-generalization audit -- there isn't yet a second real
+    implementation to validate this protocol's shape against.
+    """
+
+    def group_key(self, record: EntityMemoryRecord) -> Optional[str]: ...
+
+    def content_consistent(self, records: List[EntityMemoryRecord]) -> Tuple[bool, float]: ...
+
+
+class RecurringMessageStrategy:
+    """Wraps the existing recipient-extraction + TF-IDF content-similarity
+    logic as a SimilarityStrategy -- pure extraction, identical behavior to
+    what detect_recurring_message_patterns did inline before this refactor."""
+
+    def group_key(self, record: EntityMemoryRecord) -> Optional[str]:
+        return _extract_recipient(record.decision_text)
+
+    def content_consistent(self, records: List[EntityMemoryRecord]) -> Tuple[bool, float]:
+        texts = [r.decision_text for r in records]
+        return _content_similarity_consistent(texts)
+
+
+def detect_recurring_patterns(
     entity_id: str,
+    strategy: SimilarityStrategy,
+    pattern_type: PatternType,
+    describe_fn: Callable[[str, int, Optional[Tuple[int, int]], float], str],
     min_occurrences: int = 3,
     lookback_days: int = 30,
     path: Union[str, Path] = DEFAULT_PATH,
 ) -> List[DetectedPattern]:
-    """Reads entity_memory.read_records(entity_id), looks for voice-sourced
-    records with similar decision_text (recurring recipient signal + content
-    similarity) occurring at similar times of day, across at least
-    min_occurrences DISTINCT DAYS within lookback_days. confidence is always
-    computed from the actual occurrence_count/consistency of the real
-    supporting records -- never asserted independent of them.
+    """Generic recurring-pattern detection over entity_memory, parameterized
+    by a SimilarityStrategy (what makes records "the same recurring thing"
+    and whether their content is consistent) plus a describe_fn for the
+    pattern's human-readable description. Everything else -- distinct-day
+    collapsing, timing consistency, confidence calibration -- is genuinely
+    domain-agnostic and stays here rather than behind the strategy seam.
+    confidence is always computed from the actual occurrence_count/
+    consistency of the real supporting records -- never asserted independent
+    of them.
     """
     records = read_records(entity_id, path=path)
     cutoff = datetime.now(timezone.utc) - timedelta(days=lookback_days)
@@ -232,16 +293,16 @@ def detect_recurring_message_patterns(
             continue
         if ts < cutoff:
             continue
-        recipient = _extract_recipient(record.decision_text)
-        if recipient is None:
+        key = strategy.group_key(record)
+        if key is None:
             continue
-        groups[recipient].append((record, ts))
+        groups[key].append((record, ts))
 
     patterns: List[DetectedPattern] = []
-    for recipient, entries in groups.items():
-        # Distinct calendar days only -- multiple utterances to the same
-        # recipient on the SAME day shouldn't inflate occurrence_count; the
-        # pattern being detected is "recurs across days," not "was said more
+    for key, entries in groups.items():
+        # Distinct calendar days only -- multiple occurrences of the same
+        # group on the SAME day shouldn't inflate occurrence_count; the
+        # pattern being detected is "recurs across days," not "happened more
         # than once." Keep the earliest record per day as that day's
         # representative.
         by_day: dict = defaultdict(list)
@@ -254,8 +315,7 @@ def detect_recurring_message_patterns(
 
         representative = [min(by_day[day], key=lambda pair: pair[1])[0] for day in distinct_days]
 
-        texts = [r.decision_text for r in representative]
-        content_consistent, avg_similarity = _content_similarity_consistent(texts)
+        content_consistent, avg_similarity = strategy.content_consistent(representative)
 
         hours = [datetime.fromisoformat(r.timestamp).hour for r in representative]
         timing_consistent, hour_window = _timing_consistent(hours)
@@ -267,8 +327,8 @@ def detect_recurring_message_patterns(
         patterns.append(
             DetectedPattern(
                 entity_id=entity_id,
-                pattern_type="recurring_message",
-                description=_describe_pattern(recipient, occurrence_count, hour_window, avg_similarity),
+                pattern_type=pattern_type,
+                description=describe_fn(key, occurrence_count, hour_window, avg_similarity),
                 occurrence_count=occurrence_count,
                 first_seen=min(timestamps),
                 last_seen=max(timestamps),
@@ -278,3 +338,25 @@ def detect_recurring_message_patterns(
         )
 
     return patterns
+
+
+def detect_recurring_message_patterns(
+    entity_id: str,
+    min_occurrences: int = 3,
+    lookback_days: int = 30,
+    path: Union[str, Path] = DEFAULT_PATH,
+) -> List[DetectedPattern]:
+    """Thin wrapper over detect_recurring_patterns(), reusing
+    RecurringMessageStrategy and _describe_pattern's prose template. Pure
+    refactor -- identical behavior to before this seam existed; see
+    SimilarityStrategy's docstring for why the strategy is now pluggable.
+    """
+    return detect_recurring_patterns(
+        entity_id,
+        strategy=RecurringMessageStrategy(),
+        pattern_type="recurring_message",
+        describe_fn=_describe_pattern,
+        min_occurrences=min_occurrences,
+        lookback_days=lookback_days,
+        path=path,
+    )
