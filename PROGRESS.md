@@ -1223,6 +1223,45 @@ by design when independent estimates genuinely disagree.
 
 Full suite: 331 passed, 1 skipped, zero regressions.
 
+## The iteration loop is the product
+
+Process finding from the scrap-metal arc, worth recording before moving on:
+the domain took roughly 12 supervised iterations to reach its current
+state — naive attempt → structural diagnosis → fix-library application →
+problem reframing → calculation-based narrowing → honest floor. Each step
+was gated by a human (me) looking at real evidence and saying "not good
+enough, iterate" or "ship it."
+
+The FIX LIBRARY that emerged is now documented and reusable: closed
+taxonomies over free-text extraction, information hiding over prompt
+instruction (three confirmed instances: prior-lot narrative anchoring,
+per-category ceiling-blending, label/baseline anchoring), deterministic
+composition over LLM-computed math, self-consistency voting with
+reliability gates before shipping, and cross-field coherence checks where
+two independent judgments describe physically linked facts. These are
+real, load-bearing patterns — not one-off scrap-metal tricks.
+
+What's still missing is the SELF-EVALUATION + ORCHESTRATION layer: an
+agent that runs try → check → diagnose → retry against machine-checkable
+quality bars WITHOUT a human supplying the "not good enough, iterate"
+signal at each gate — and only surfaces results once a bar passes, or once
+an honest floor is proven with real, stated reasons (the way photos 3/4/7
+and photo 5 above have a floor with a reason, not a shrug). Every gate in
+the scrap-metal arc — the reliability tests, the "is this actually
+narrower or just clamped" checks, the decision to stop and ask rather than
+patch again — was a human judgment call this session. Automating that loop
+credibly (not just running N attempts and picking one, but genuinely
+diagnosing WHY a bar failed and choosing the right fix from the library
+above) is the project's true bottleneck for autonomous first-day quality,
+bigger than any single domain's remaining gaps.
+
+This is NOT to be built ad hoc inside a domain pass. It deserves its own
+dedicated design phase, with the scrap-metal arc kept as its reference
+trace (12 iterations, each with a real before/after, a real reason, and a
+real stop-or-ship decision) — the concrete example to design the
+orchestration layer against, once the current domain queue (mom's,
+brother's) completes.
+
 ## Design principles
 
 **Structured priors over statistical rediscovery.** Where structure is
