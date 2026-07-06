@@ -97,6 +97,16 @@ confirmation step to gate, so it doesn't have one. No correction loop is
 attached either -- criterion-adjustment correction handling stays exactly
 where the architecture doc left it: blocked on real usage evidence that
 doesn't exist yet, not attempted even in a lighter form here.
+
+## Scrap-metal coarse estimate, `/scrap <path>`
+Same REPL-command precedent as `/verify`, calling
+core/scrap_estimate.estimate_scrap_lot() directly. No confirmation step,
+same reasoning as `/verify`: nothing here dispatches a real action. One
+real, flagged difference from `/verify`: this command DOES write one
+EntityMemoryRecord per check (see scrap_estimate.py's module docstring for
+why -- comparison_note's own requirement forces it), so it is not fully
+"ephemeral" the way `/verify` is. No correction loop, same reasoning as
+`/verify` -- grading feedback is almost certainly criterion-shaped.
 """
 
 import argparse
@@ -124,6 +134,7 @@ from ..core.suggestion import (
     surface_next_suggestion,
 )
 from ..core.image_verification import render_verification_as_text, verify_image
+from ..core.scrap_estimate import estimate_scrap_lot, render_scrap_estimate_as_text
 from .calendar import DEFAULT_CALENDAR_TOKEN_PATH, DEFAULT_CLIENT_SECRET_PATH, GoogleCalendarReader, StubCalendarReader
 from .context_schema import MockPersonalData, PersonalContext, build_personal_context
 from .gmail import StubGmailReader
@@ -132,6 +143,7 @@ from .speech_to_text import Transcriber
 
 AUDIO_COMMAND_PREFIX = "/audio "
 VERIFY_COMMAND_PREFIX = "/verify "
+SCRAP_COMMAND_PREFIX = "/scrap "
 
 DEFAULT_GRANTS_PATH = Path("data/grants.json")
 DEFAULT_VERIFICATION_CHECKLIST = ["Vendor name visible", "Date visible", "Amount visible"]
@@ -293,6 +305,25 @@ def _handle_verify_command(image_path: str, checklist: list) -> None:
     print(f"  confidence: {result.confidence}")
 
 
+def _handle_scrap_command(image_path: str, entity_id: str, entity_memory_path) -> None:
+    """Runs estimate_scrap_lot() and prints the result. No confirmation step,
+    same reasoning as /verify -- nothing here dispatches a real action. See
+    module docstring's Scrap-metal section for the one real difference from
+    /verify (this DOES write an EntityMemoryRecord, for comparison_note's
+    sake) and why that still doesn't need a confirmation gate."""
+    try:
+        estimate = estimate_scrap_lot(image_path, entity_id, path=entity_memory_path)
+    except FileNotFoundError as exc:
+        print(f"  {exc}")
+        return
+    except Exception as exc:  # a corrupt/unsupported image -- never crash the session over one bad file
+        print(f"  Could not estimate {image_path!r}: {exc}")
+        return
+
+    print(f"  {render_scrap_estimate_as_text(estimate)}")
+    print(f"  confidence: {estimate.confidence}")
+
+
 def _process_utterance(
     entity_id: str, utterance: str, registry: PermissionRegistry, gmail_reader, calendar_reader, entity_memory_path
 ) -> None:
@@ -368,7 +399,8 @@ def main(argv=None) -> int:
 
     print(
         "\nEnter utterances (one per line), '/audio <path>' for a recorded file, "
-        "or '/verify <path>' to check an image. Type 'quit' to end the session."
+        "'/verify <path>' to check an image, or '/scrap <path>' for a scrap-metal lot photo. "
+        "Type 'quit' to end the session."
     )
     for line in sys.stdin:
         raw = line.strip()
@@ -388,6 +420,10 @@ def main(argv=None) -> int:
         elif raw.startswith(VERIFY_COMMAND_PREFIX):
             image_path = raw[len(VERIFY_COMMAND_PREFIX):].strip()
             _handle_verify_command(image_path, verification_checklist)
+            continue
+        elif raw.startswith(SCRAP_COMMAND_PREFIX):
+            image_path = raw[len(SCRAP_COMMAND_PREFIX):].strip()
+            _handle_scrap_command(image_path, args.entity_id, args.entity_memory_path)
             continue
         else:
             utterance = raw

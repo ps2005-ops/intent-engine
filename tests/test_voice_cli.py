@@ -6,12 +6,14 @@ import pytest
 
 from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
 from intent_engine.core.image_verification import VerificationResult
+from intent_engine.core.scrap_estimate import ScrapEstimate
 from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import StubCalendarReader
 from intent_engine.voice.cli import (
     DEFAULT_VERIFICATION_CHECKLIST,
     _build_parser,
     _handle_audio_command,
+    _handle_scrap_command,
     _handle_verify_command,
     load_permission_registry,
     select_calendar_reader,
@@ -292,5 +294,57 @@ def test_handle_verify_command_never_prompts_for_confirmation(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda p: called.append(p) or "y")
     with patch("intent_engine.voice.cli.verify_image", return_value=result):
         _handle_verify_command("/some/receipt.png", DEFAULT_VERIFICATION_CHECKLIST)
+
+    assert called == []
+
+
+# --- /scrap command (scrap-metal coarse-estimate wiring) -------------------
+
+
+def test_handle_scrap_command_prints_grade_oxidation_contamination_confidence(capsys, tmp_path):
+    estimate = ScrapEstimate(
+        is_scrap_metal_lot=True, grade_impression="looks_average", oxidation_level="moderate",
+        visible_contamination=["plastic housing"], copper_exposure="enclosed_housing",
+        comparison_note="No prior lots on record yet for this entity.",
+        scrap_score=5, confidence="medium", reasoning="moderate rust visible across the lot",
+    )
+    entity_path = tmp_path / "entity_memory.jsonl"
+    with patch("intent_engine.voice.cli.estimate_scrap_lot", return_value=estimate) as mock_estimate:
+        _handle_scrap_command("/some/lot.png", "Acme Scrap Yard", entity_path)
+
+    mock_estimate.assert_called_once_with("/some/lot.png", "Acme Scrap Yard", path=entity_path)
+    captured = capsys.readouterr()
+    assert "looks_average" in captured.out
+    assert "moderate" in captured.out
+    assert "plastic housing" in captured.out
+    assert "medium" in captured.out
+
+
+def test_handle_scrap_command_reports_missing_file_without_crashing(capsys, tmp_path):
+    with patch("intent_engine.voice.cli.estimate_scrap_lot", side_effect=FileNotFoundError("Image not found: /nope.png")):
+        _handle_scrap_command("/nope.png", "Acme Scrap Yard", tmp_path / "entity_memory.jsonl")
+
+    captured = capsys.readouterr()
+    assert "not found" in captured.out.lower()
+
+
+def test_handle_scrap_command_reports_invalid_image_without_crashing(capsys, tmp_path):
+    with patch("intent_engine.voice.cli.estimate_scrap_lot", side_effect=ValueError("Unsupported image type '.bmp'")):
+        _handle_scrap_command("/bad/file.bmp", "Acme Scrap Yard", tmp_path / "entity_memory.jsonl")
+
+    captured = capsys.readouterr()
+    assert "could not estimate" in captured.out.lower()
+
+
+def test_handle_scrap_command_never_prompts_for_confirmation(monkeypatch, tmp_path):
+    estimate = ScrapEstimate(
+        is_scrap_metal_lot=True, grade_impression="looks_strong", oxidation_level="low",
+        visible_contamination=[], copper_exposure="enclosed_housing",
+        comparison_note=None, scrap_score=9, confidence="high", reasoning="clean lot",
+    )
+    called = []
+    monkeypatch.setattr("builtins.input", lambda p: called.append(p) or "y")
+    with patch("intent_engine.voice.cli.estimate_scrap_lot", return_value=estimate):
+        _handle_scrap_command("/some/lot.png", "Acme Scrap Yard", tmp_path / "entity_memory.jsonl")
 
     assert called == []

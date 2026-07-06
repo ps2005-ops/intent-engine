@@ -932,6 +932,10 @@ regression; left failing loudly on purpose, not skipped/silenced/`xfail`'d).
 
 ## Next session's plan — four parts, one at a time, checkpoint and stop after each
 
+**Part 1 (scrap-metal) is DONE — see "Session close-out: scrap-metal domain
+complete" below.** Parts 2-4 (mom's, brother's, trading) are unstarted,
+still one at a time, still checkpoint-and-stop after each.
+
 Do not chain through all four in one sitting. Each is its own proposal-or-build
 pass with its own checkpoint, same discipline as every other decision this
 project has made.
@@ -985,3 +989,89 @@ dad.** The tooling (`/audio`, `/verify`, `log_trial_interaction()`) is ready
 and committed; the trial itself has not run yet. That remains the real next
 step whenever it's convenient, independent of and not blocked by this build
 list.
+
+## Session close-out: scrap-metal domain complete (Part 1 of the four-part plan)
+
+Built `core/scrap_estimate.py` end-to-end and wired it into `voice/cli.py`
+(`/scrap <path>`). Isolated-call scaffold mirroring `image_verification.py`;
+review-only, no correction loop. Real 9-photo test fixtures at
+`tests/fixtures/scrap_metal/` (the actual target user's own scrap-yard
+photos, not synthetic renders).
+
+Built across several real, measured passes, not one shot:
+- `ScrapEstimate` core fields (`grade_impression`, `oxidation_level`,
+  `copper_exposure`, `category_typical_yield_note` with cited industry
+  figures, `condition_note`, `comparison_note`, `scrap_score`) — all
+  deterministic where possible, isolated LLM calls only for genuine visual
+  judgment.
+- **Anchoring bug found and structurally fixed**: the original design fed
+  prior-lot text into the same call judging a new photo, causing later
+  photos to be misjudged as continuations of an established narrative
+  (confirmed via real photos 5/6/7/8/9 misjudged in sequence, correct in
+  isolation). Fixed by splitting into a strictly isolated judgment call
+  (zero prior-lot text, ever) plus a separate deterministic
+  `comparison_note` computed in code from prior lots' stored structured
+  JSON.
+- `category_proportions` (sample category mix) went through two measured
+  failed/partial attempts before shipping: v1 (free-text categories) was
+  unstable and never used "unclear" honestly across 18 real calls — reported
+  and NOT shipped. v2 (closed taxonomy + 3-vote) fixed the dominant category
+  but secondary categories still wobbled — reported as partial, not shipped
+  as clean. v3 (5 votes, honest bin-union width instead of resolving
+  wobble away) is what shipped.
+- Full three-way `material_composite` (copper / aluminum / HMS-ferrous),
+  built with cited-vs-assumption-labeled material fractions per category
+  and a mandatory hedge, plus a calibration loop (`record_actual_weighin`,
+  `compute_track_record_note`) that surfaces real weigh-in gaps without
+  ever auto-adjusting.
+- **A real >100% composite bug was found (not clamped, fixed at the root)**:
+  the original normalization could push a dominant category's high end past
+  100% (confirmed up to 143.2% on real photos). Fixed via (1) a constrained
+  single-scalar-per-side normalization that only corrects shares when the
+  aggregate is actually inconsistent, and (2) a min/max-of-two-weightings
+  composite formula, provably bounded and ordered by construction — not a
+  `min(100, ...)` patch. A second, subtler ordering bug in an intermediate
+  version of this fix was caught by property-fuzz testing (2000+ random
+  trials) before it shipped.
+- Added, in the same pass: per-supplier calibrated yields (switches from
+  generic/cited industry ranges to this entity's own observed yield once
+  ≥3 real weigh-ins exist, clearly labeled either way), within-bin
+  refinement on unanimous votes only, `aggregate_shipment_estimates()`
+  (combines same-shipment photos as independent samples, 1/√N width
+  reduction, assumption stated explicitly), and a real (not simulated) web
+  search confirming no more specific citable copper fraction exists for
+  stripped stator/winding scrap — the existing 20-40% assumption was kept,
+  not narrowed on vibes.
+- Added a deterministic cross-field coherence check
+  (`compute_coherence_note`): `copper_exposure` and `category_proportions`
+  are independent judgments describing the same physical photo; when they
+  conflict, the disagreement is surfaced (never silently reconciled) and
+  confidence drops one level. Live-verified: fired correctly on 2 of the 9
+  real photos, for a real, explainable reason (a smaller high-copper
+  category pulling the blended ceiling past what "dominated by sealed
+  motors" implies alone), and did not false-fire on structurally similar
+  photos that stayed under the ceiling.
+
+Real 9-photo live re-verification after all fixes: 0 impossible bounds
+(down from 6, up to 143.2%), average composite width cut from 29.62pp to
+12.33pp. Full suite: 279 passed, 1 skipped, zero regressions.
+
+## Design principles
+
+**Structured priors over statistical rediscovery.** Where structure is
+already known — closed taxonomies, physical constraints, sum rules, field
+dependencies — bake it into the schema/code and let the model only fit
+parameters within it, rather than asking the model to rediscover the
+structure itself from free-form output. This is why closed-`Literal`
+category extractions were stable where free-text category extraction
+failed (`core/scrap_estimate.py`'s `category_proportions` v1 vs. v2/v3).
+It's also why cross-field coherence between `copper_exposure` and
+`category_proportions` is checked deterministically in code
+(`compute_coherence_note`) rather than left as two independent LLM
+judgments with an unused physical link between them — the two fields
+describe the same underlying photo and are not independent, so their
+consistency is a free constraint, not something to infer statistically.
+It applies forward, too: the trading backtest's hand-coded causal rules are
+this same pattern — structure (the causal relationships) is stated up
+front from domain knowledge, and correlation with real outcomes is then
+*measured*, never rediscovered from statistics alone.
