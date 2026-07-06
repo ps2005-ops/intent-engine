@@ -1056,6 +1056,173 @@ Real 9-photo live re-verification after all fixes: 0 impossible bounds
 (down from 6, up to 143.2%), average composite width cut from 29.62pp to
 12.33pp. Full suite: 279 passed, 1 skipped, zero regressions.
 
+## Architectural replacement: base rate + deviation retires the composite path
+
+The compositional approach above (`category_proportions` × per-category
+yield fractions, blended into a whole-lot composite) was fully fixed —
+zero impossible bounds, ordering provably guaranteed — and STILL measurably
+underperformed a plain base-rate lookup: it took a photo, tried to extract
+several independent QUANTITIES from it (category shares), and blended them
+through real arithmetic risk, when the actual yield for a given TYPE of
+scrap is already known and cited. That the underlying approach
+underperformed a simpler baseline, not just that it had a fixable bug, is
+why this was replaced rather than patched a seventh time.
+
+Replacement: `lot_type` (a closed-taxonomy CLASSIFICATION, added to the
+existing main isolated call — the task family that has tested reliable
+throughout this domain) is looked up directly in the same cited/assumption
+table the old composite math used — no blending, so the >100%-bound defect
+is now structurally impossible, not merely patched. The vision model's only
+remaining job is `assess_copper_richness()`: a blind, 4-class judgment of
+whether a photo looks unusually copper-rich or -poor relative to scrap
+motor/machinery lots IN GENERAL. `compute_deviation_from_richness()` joins
+classification and richness signal afterward, in plain code, every
+combination enumerated and testable without an API call.
+
+This took two attempts. The first (`assess_deviation`, since removed) told
+the vision call the lot's classified type AND numeric baseline, then asked
+it to judge deviation against that baseline — a real 5-runs×3-photos test
+showed the model anchoring on the offered label, rationalizing a heavily
+copper-rich photo as "typical for sealed motors" in 4 of 5 runs. This is
+the THIRD confirmed instance of the same failure family in this module
+(after prior-lot narrative anchoring, and the old composite math's
+per-category ceiling-blending). The fix was the same each time: remove the
+contaminating information from the call, not instruct the model to ignore
+it — a prompt-revision option was explicitly considered and rejected for
+this reason. The final version of the richness call receives no lot-type
+label, no baseline, no number; re-tested with the same bar, the same photo
+read `unusually_copper_rich` in 5 of 5 runs.
+
+`category_proportions`, `compute_material_composite`,
+`aggregate_shipment_estimates`, and the rest of the old pipeline are kept,
+still fully tested, but no longer called by `estimate_scrap_lot()` or
+rendered to any user — archived reference code, not deleted, in case a real
+future need reintroduces per-photo compositional estimation. Per-supplier
+calibration (the actual accuracy path) carries over unchanged in spirit,
+simplified: since `lot_type` now classifies the WHOLE lot rather than a
+share of it, a real weigh-in's actual percentages directly ARE the observed
+yield for that type — no share-fraction back-solving needed anymore.
+
+Full suite: 293 passed, 1 skipped, zero regressions.
+
+## Width-reduction pass (three structural changes, no quantity-guessing)
+
+1. **Motor sub-type classification.** A second, still presence/absence-
+   shaped classification (`classify_motor_subtype`), fired only when the
+   coarse type is `sealed_motors_alternators_starters`, looks up a narrower
+   cited range where the photo supports it: `small_fractional_motors`
+   9-10% Cu, `dc_motors` 15-18%, `automotive_alternators_starters` ~10-14%
+   (newly sourced from a real 1976 US Bureau of Mines dismantling study —
+   narrower than the generic 7-18% because it's specific to vehicle-parts
+   scrap). `mixed_sealed_motors` is the honest fallback to the full coarse
+   range. Reliability-tested 5 runs on photos 1, 4, 7: photos 1 (5/5
+   `automotive_alternators_starters`) and 7 (5/5 `mixed_sealed_motors`)
+   were stable and met the shipping bar; photo 4 was NOT stable (3/5
+   `mixed_sealed_motors`, 2/5 `small_fractional_motors`) — disclosed, not
+   hidden: on a genuinely borderline lot, sub-type narrowing may apply
+   inconsistently across repeated estimates of the same photo. Shipped per
+   the stated bar (photos 1 and 7), with this limitation on record.
+2. **Re-sourced the two remaining uncited profiles** (stripped stator/
+   winding, large industrial machinery/gearbox) — a fresh, dedicated search
+   for each. Neither turned up anything more specific than what's already
+   cited elsewhere (whole-motor copper content) or an unrelated quantity
+   (extraction-equipment recovery rates). Both stay explicit assumptions,
+   now visibly tagged `(uncited estimate)` in the rendered `yield_source`
+   so a person can see at a glance which numbers are earned vs. assumed.
+3. **Made the calibration promise the headline, not a footnote.**
+   `GENERIC_YIELD_EXPECTATION_NOTE` now reads: "Range reflects industry-
+   wide variance. After ~3 real weigh-ins for this supplier, it narrows to
+   their actual observed yields." Verified with a simulated realistic
+   cluster (11.2%, 12.1%, 11.8%) — the calibrated range tightens to well
+   under 5pp with the "calibrated from 3 real weigh-ins" label.
+
+Live 9-photo re-run with sub-typing active: photos 1 and 2 both
+sub-classified as `automotive_alternators_starters`, narrowing from 11pp
+(7-18%) to 4pp (10-14%). Photos 3 and 7 stayed at the coarse 7-18% range —
+honestly, since neither photo's sub-type call resolved to anything more
+specific than "mixed." Photos 4, 5 (`exposed_copper_windings_stators`) and
+6, 8 (`large_industrial_machinery`) aren't eligible for sub-typing at all
+and now show the `(uncited estimate)` tag. Photo 9 stayed not-scrap.
+Noted plainly: coarse-type classification for photos 3 and 4 differed from
+the previous run's classification of the SAME photos (single isolated
+calls, not voted) — expected variance, not a regression, and the same
+mechanism behind photo 4's sub-type instability above.
+
+Full suite: 306 passed, 1 skipped, zero regressions.
+
+## Final scrap-domain pass: voting, refinement, trim, aggregation
+
+Goal: copper and aluminum each to ~4pp or their honest floor; ferrous no
+longer independently looked up at all. Four mechanisms, all calculation/
+voting-based, zero new external data, zero model-guessed quantities,
+stacked together.
+
+1. **Voted classification.** `lot_type`, `sub_type`, and `richness` each
+   became 5-vote modal decisions (`vote_lot_type`, `vote_motor_subtype`,
+   `vote_copper_richness`, `_vote_modal_or_fallback`) — modal wins on a
+   strict plurality, a genuine tie falls back to the coarser/more
+   conservative option. `lot_type` was extracted out of the main isolated
+   judgment call into its own isolated call specifically so it could be
+   voted. Real result: photo 4's previously-unstable sub-type call (3/5 vs.
+   2/5 in the last checkpoint's single-shot test) resolved to the SAME
+   modal answer (`small_fractional_motors`) across 2 repeated aggregate
+   votes this pass — a real, measured stabilization. `lot_type` itself
+   also showed real cross-session variance before voting (photo 4 read
+   `sealed_motors` in one prior single-shot run, `exposed_copper_windings`
+   in another); voting resolved it unanimously to `sealed_motors` across 2
+   repeated aggregate votes in this pass's own testing.
+2. **Within-range refinement**, reliability-gated exactly as specified: 5
+   runs on photo 1, came back 5/5 `middle` — stable, shipped. Fires only on
+   genuine 5/5 sub-type unanimity, narrowing a cited sub-type range (e.g.
+   10-14% Cu) to a third (~1.3pp).
+3. **Shipment aggregation** (`aggregate_shipment_yield_assessments`) —
+   same-type photos combine by range INTERSECTION; mixed-type photos by an
+   equal-weight blend (explicit, weaker, stated assumption). Real demo on
+   photos 1+2 (same alternator lot): their post-refinement/trim ranges
+   ([12.7,14.0] and [11.3,12.4]) did NOT overlap — an honest disagreement,
+   not a bug — so the function correctly fell back to the union ([11.3,
+   14.0], 2.7pp), which is WIDER than either single photo (1.3pp, 1.1pp).
+   Reported plainly: combining independent estimates doesn't always
+   narrow; when they disagree this much, the honest combined range is
+   wider, not narrower.
+4. **Richness-conditioned tail trim** (`apply_richness_trim`) — exactly two
+   rules, both from the checkpoint, nothing invented: unanimous
+   `typical_mixed_scrap` trims the top 20%; unanimous
+   `unusually_copper_rich` trims the bottom 20%. Deliberately did NOT
+   extend a rule to unanimous `unusually_copper_poor` (none was specified).
+   Applied identically to copper and aluminum.
+
+**Ferrous is no longer an independent lookup.** It's the arithmetic
+complement of the final copper+aluminum ranges (100% minus their ranges),
+computed after every mechanism above has already run — stated plainly in
+the rendered output every time. Verified live: photo 1's ferrous
+[83.0, 87.3] = 100 - copper[12.7,14.0] - aluminum[0,3], exactly.
+
+**Real 9-photo before/after (copper width):**
+
+| Photo | Resolved type | Before | After | Mechanisms fired |
+|---|---|---|---|---|
+| 1 | automotive_alternators_starters | 4.0pp | **1.3pp** | refinement (upper third) |
+| 2 | automotive_alternators_starters | 4.0pp | **1.1pp** | refinement + trim (both) |
+| 3 | sealed_motors_alternators_starters (coarse) | 11.0pp | 8.8pp | trim only — sub-type not unanimous, honest coarse floor |
+| 4 | sealed_motors_alternators_starters (coarse) | 11.0pp | 8.8pp | trim only — same honest floor |
+| 5 | exposed_copper_windings_stators | 20.0pp | 16.0pp | trim only — uncited category, no sub-type system exists |
+| 6 | large_industrial_machinery | 4.0pp | **3.2pp** | trim only — base table range was already narrow |
+| 7 | sealed_motors_alternators_starters (coarse) | 11.0pp | 8.8pp | trim only — honest coarse floor |
+| 8 | large_industrial_machinery | 4.0pp | **3.2pp** | trim only |
+| 9 | not scrap | — | — | — |
+
+4 of 8 scrap photos hit the ≤4pp goal (1, 2, 6, 8). Photos 3/4/7 have a
+real, explained floor at 8.8pp (sub-type didn't resolve unanimously to
+anything narrower than the coarse range — an honest result, not a bug).
+Photo 5 has a real floor at 16pp (its category has no sub-type system and
+stays an uncited assumption). No range widened relative to its own inputs
+anywhere in the single-photo results; the shipment-aggregation union
+(photos 1+2) is the one case that's wider than a single photo, and that's
+by design when independent estimates genuinely disagree.
+
+Full suite: 331 passed, 1 skipped, zero regressions.
+
 ## Design principles
 
 **Structured priors over statistical rediscovery.** Where structure is
@@ -1075,3 +1242,11 @@ It applies forward, too: the trading backtest's hand-coded causal rules are
 this same pattern — structure (the causal relationships) is stated up
 front from domain knowledge, and correlation with real outcomes is then
 *measured*, never rediscovered from statistics alone.
+
+**Information hiding beats instruction.** A judgment call receives only the
+inputs it should condition on — labels, baselines, and history are applied
+deterministically in code afterward. Third confirmed instance of
+context-anchoring (prior-lot narrative text, then a stated numeric
+baseline/label, in `core/scrap_estimate.py`); structural withholding was
+the durable fix each time, not a prompt instruction telling the model to
+ignore what it was given.

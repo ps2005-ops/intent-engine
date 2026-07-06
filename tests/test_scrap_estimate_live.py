@@ -98,14 +98,16 @@ def test_real_sequential_photos_comparison_note_behaves_correctly(tmp_path):
         match = _composition_violation.search(combined_text)
         assert match is None, f"Possible purity/alloy percentage claim found: {combined_text!r}"
 
-    # category_typical_yield_note is the one deliberate exception -- IF the
-    # model populates it, it must cite one of the given real sources, never
-    # present a bare figure as if self-derived.
+    # yield_assessment.note is the one deliberate exception -- it's a
+    # deterministic table lookup (see compute_yield_assessment), never an
+    # LLM-invented figure, and IF the underlying profile is "cited" (not a
+    # stated assumption), its yield_source must name one of the given real
+    # sources -- never present a bare figure as if self-derived.
     for estimate in estimates:
-        if estimate.category_typical_yield_note:
-            lowered = estimate.category_typical_yield_note.lower()
+        if estimate.yield_assessment and "cited industry range" in estimate.yield_assessment.yield_source:
+            lowered = estimate.yield_assessment.yield_source.lower()
             assert any(source in lowered for source in _YIELD_NOTE_SOURCES), (
-                f"category_typical_yield_note populated without citing a source: {estimate.category_typical_yield_note!r}"
+                f"cited yield_source populated without citing a source: {estimate.yield_assessment.yield_source!r}"
             )
 
     # is_scrap_metal_lot=False must never carry a computed scrap_score --
