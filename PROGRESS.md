@@ -1710,5 +1710,227 @@ all" schema check above), the no-activity-skips-the-LLM-call case, and
 both tiered-retrieval states. Full suite: 388 passed, 1 skipped, zero
 regressions.
 
-**Stopping here for review, per instruction** — Stage 3 (quiet-observer
-digest design proposal) has not been started.
+**Stage 2 approved and committed. Stage 3 below — DESIGN PROPOSAL ONLY, no
+code in this section.**
+
+## Data foundation pass, Stage 3: the quiet-observer digest (design proposal)
+
+The job this component does: periodically look at what's accumulated in
+an entity's memory and, ONLY if something real and stable is there, draft
+a short digest surfacing it — unprompted, unlike a suggestion (which
+reacts to one detected pattern and asks "want me to draft this?") or a
+draft review (which reacts to a specific artifact). Silence is the
+default and the common case, not an edge case to handle gracefully.
+
+### 1. What feeds it — real inputs today vs. genuine gaps
+
+**Pattern-Watcher detections (`core/pattern_watcher.py`) — exists today,
+partially.** `detect_recurring_patterns()` is pluggable via
+`SimilarityStrategy`, but only one strategy is actually built and wired:
+`RecurringMessageStrategy`, via `detect_recurring_message_patterns()`.
+Every `DetectedPattern` already carries `supporting_record_ids`,
+`occurrence_count`, `first_seen`/`last_seen`, and `confidence` — exactly
+the shape a quality bar needs. This is real, usable input today, for
+`pattern_type="recurring_message"` only.
+
+**Tier-2 summary trends — Tier 2 itself exists (Stage 2); TRENDS do
+NOT.** `core/entity_summary.py` generates and stores one
+`EntitySummaryRecord` per period. Nothing today compares consecutive
+summaries to derive a trend ("this kept coming up for 3 weeks running").
+This is new machinery this proposal assumes but does not design in
+detail: a trend-detection step reading N consecutive `EntitySummaryRecord`s
+for an entity and identifying a persisting element across them. Flagged,
+not papered over: this is real, unbuilt work, likely itself needing an
+LLM comparison step gated by the same code-decides-inclusion discipline
+as everything else here (the model may notice a candidate repeated
+element; code decides whether it clears the stability bar).
+
+**Hypothesis candidates — do NOT exist. No Stage D code exists anywhere
+in this repo** (checked directly: no `hypothesis`-named module, class, or
+function anywhere in `src/`). The architecture doc's Stage D ("the system
+proposes structured hypotheses about the entity from accumulated
+memory... tested/revised as new evidence arrives") is unstarted. This
+proposal does NOT assume hypothesis candidates as a real input — until
+Stage D is built, the observer has exactly two candidate feed types
+(Pattern-Watcher detections; future summary-trend detections), not three.
+
+### 2. Deterministic quality bars
+
+The central design commitment: **the model may draft digest text for an
+item; it may never decide whether that item is included.** Inclusion is
+a set of code-level, machine-checkable predicates evaluated BEFORE any
+LLM call — the same principle as Stage 2's `source_record_ids` never
+being asked of the model. A candidate that fails any applicable bar is
+silently dropped, not down-weighted or hedged in the drafted text; there
+is no "low confidence" digest item, only included-and-drafted or
+excluded-and-never-seen.
+
+Proposed bars, all computed from real persisted data, no bar left as a
+vague "sufficiently interesting" judgment call:
+
+- **Minimum supporting-evidence count.** `len(supporting_record_ids) >= N`.
+  Proposed `N = 3`, reusing the existing convention already anchored
+  across this codebase (`detect_recurring_message_patterns`'s own
+  `min_occurrences=3` default, `generate_draft`'s
+  `min_occurrences_for_confidence=3`) rather than inventing a new
+  threshold with no precedent.
+- **Pattern stability duration.** The candidate (or the element a trend
+  step identifies) must be present across `M+` consecutive weekly
+  summaries, not one week's blip — a real persistence check, not a
+  single-snapshot read. `M`'s value is an open parameter, flagged below,
+  not asserted here.
+- **Novelty.** Never previously surfaced in a past digest. Proposed
+  mechanism: **reuse `suggestion.py`'s existing
+  `_same_underlying_pattern()` evidence-overlap check** (>50% supporting-id
+  overlap with something already resolved) against a persisted digest
+  history, rather than inventing a second dedup mechanism — this is
+  exactly the "has this already been shown" problem `_same_underlying_pattern`
+  already solves for suggestions, and a digest item's identity is the
+  same shape (a set of supporting record/summary ids).
+- **Magnitude thresholds, where applicable.** Flagged as conditional, not
+  universal: `DetectedPattern` carries no numeric field today, so a
+  magnitude bar has nothing to threshold against for `recurring_message`
+  patterns. This bar only becomes real once a pattern/trend type that
+  carries a quantifiable delta exists (a future numeric-trend detector).
+  Not designed further here — would be premature against data that
+  doesn't exist yet.
+
+A candidate is included only if every bar applicable to its type passes
+(logical AND, not a weighted score) — no partial credit, no "3 of 4 bars
+is probably fine." This mirrors Part 5's "only surfaces results once a
+bar passes... not a shrug" standard, applied here to relevance instead of
+artifact quality.
+
+### 3. Silence semantics
+
+**No bar-passing candidates → no digest object is created at all**, not
+an empty or hedged one. An LLM-drafted "here are three mild observations"
+sent because SOMETHING had to be sent is the trust-killer this design
+exists to prevent — the same failure mode as a suggestion system that
+stacks multiple unresolved asks (already solved once in `suggestion.py`,
+same underlying value: don't manufacture engagement).
+
+**Cadence means a CHECK cadence, not a send cadence.** "Every 3-4 days"
+gates *when the bar-evaluation logic runs at all* (a rate-limit on doing
+the Pattern-Watcher/trend-detection work itself, so a CLI session-start
+doesn't re-run expensive detection on every single invocation) —
+completely separate from whether that check produces a digest. Running a
+check every 3-4 days for a month and surfacing nothing every time is
+correct, intended behavior if nothing has cleared the bars in that month,
+not a malfunction to fix. The existing `get_pending_suggestion()` /
+`surface_next_suggestion()` pair already models exactly this
+separation — a call that legitimately, routinely returns `None` — and
+the digest's own check function should return the same `Optional[...]`,
+never a placeholder.
+
+### 4. Provenance
+
+Every digest item carries `source_record_ids` — computed in code from
+the real Pattern-Watcher/trend evidence that cleared the bars, never
+requested from or asserted by the model (identical discipline to Stage
+2's schema check: the drafting tool's input schema has no id field at
+all). For a Pattern-Watcher-sourced item, this is directly
+`DetectedPattern.supporting_record_ids`. For a future trend-sourced item,
+this should be the UNION of `source_record_ids` across every
+`EntitySummaryRecord` the trend spans — since each of those summaries
+already carries its own real citations (Stage 2), a trend item's
+provenance resolves transitively down to real Tier-1 records, the same
+depth `get_tiered_view(include_raw=True)` already provides on request. A
+digest item is a claim about accumulated data and must be auditable to
+the same real records a person could pull up themselves, not a black box.
+
+### 5. Delivery shape
+
+**Today: the `voice/cli.py` session-start flow, alongside pending
+suggestions — a real, already-established precedent, not a new pattern.**
+`_handle_pending_suggestion()` (`voice/cli.py`) already does exactly this
+shape for suggestions: check for something pending, print it under a
+`"--- Pending suggestion ---"` header, prompt for a response. A parallel
+`_handle_pending_digest()` would follow the identical structure — check,
+print under its own header, but with **no accept/decline prompt**: a
+digest is informational, read-only, not an action awaiting a yes/no (a
+digest item MAY reference a pattern that also has its own real,
+independent suggestion/accept-decline flow — the two systems are
+complementary, not to be conflated into one prompt).
+
+**Post-channel-bridge (WhatsApp, per the Phase 0 manual-relay plan) does
+NOT require redesigning any of the above.** The generation/gating layer
+(check → run bars → draft if included → persist a `DigestRecord`)
+produces a plain object, independent of how it's ultimately shown to a
+person. Today's adapter is "print to CLI stdout"; a later adapter is "send
+as a WhatsApp message." Designing for the CLI now, per the explicit
+instruction not to gate on WhatsApp, means building the generation layer
+delivery-agnostic from the start — the same "decide, then deliver"
+separation already used for permission-gated actions (`PermissionRegistry`
+checks are independent of which domain executes the action).
+
+### 6. Explicit relationship to Part 5
+
+**This digest is a SIBLING of the iteration-loop layer described in "The
+iteration loop is the product," not a different kind of thing.** Both are
+instances of the same unsolved problem: *the agent holding its own
+quality bar, without a human supplying the "not good enough" signal at
+each gate.* Part 5's version: is THIS generated artifact (a scrap
+estimate, a caption draft) good enough to show — requiring
+diagnose-and-retry against the fix library. Stage 3's version: is THIS
+accumulated pattern significant enough to interrupt someone about —
+requiring evidence/stability/novelty gating instead of retry.
+
+**What transfers from this small-scale rehearsal to Part 5:**
+- The core discipline — model drafts, code decides — proven small here
+  (Stage 2's citations, Stage 3's inclusion gate) is the same discipline
+  Part 5 needs at its own artifact-quality gates, not a new principle to
+  invent there.
+- Silence as a first-class, correct outcome, not an edge case — Part 5's
+  own stated standard ("only surfaces results once a bar passes, or once
+  an honest floor is proven with real, stated reasons") is structurally
+  identical to Stage 3's "no bar-passing items → no digest."
+- Reusing an existing dedup mechanism (`_same_underlying_pattern`) rather
+  than inventing a parallel one is the template for how Part 5 should
+  likely avoid re-flagging an already-diagnosed failure mode, rather than
+  building a second "have I seen this before" mechanism per domain.
+
+**What Part 5 still needs beyond what this rehearses — the harder half,
+not covered here:** Stage 3's bars are almost entirely COUNTING bars
+(evidence count, week-count, id-overlap novelty) — genuinely
+deterministic, with no judgment call about the CONTENT'S quality
+anywhere. Stage 3 never has to decide "is this good," only "is this
+present, stable, and new enough." Part 5's real, harder problem — per
+"The iteration loop is the product" — is diagnosing WHY an attempt failed
+a quality bar and choosing the correct fix from the fix library: a
+reasoning step, not a counting step. Stage 3 has no analogue to
+diagnose-and-retry; it only ever decides show-or-don't-show once,
+never "try again differently." Part 5 also needs to generalize across
+genuinely different domain-specific quality criteria (a scrap estimate's
+"good enough" bears no resemblance to a caption's), where Stage 3 only
+ever had one thing to get right (its own digest-worthiness bars). This
+gap is the actual scope of Part 5's design phase — this proposal
+rehearses the gating half, not the diagnosis half.
+
+### Open design questions, flagged for decision, not resolved here
+
+1. **`M` (week-persistence count) has no existing precedent to anchor
+   to**, unlike `N` (evidence count, reusing the established `3`). Is `M
+   = 2` or `M = 3`? Left open.
+2. **One item per digest, or a batch?** `suggestion.py` has a hard,
+   explicit "at most ONE unresolved suggestion... at a time" rule. A
+   "digest" linguistically implies it could bundle several items that
+   clear the bar in the same check. These are in real tension — does the
+   digest inherit the one-at-a-time discipline (a single most-significant
+   item per surfacing) or is a small batch the correct, different shape
+   for this specific surface? Not decided here.
+3. **Trend novelty identity is undefined** until trend-detection itself
+   is designed — is a trend's "same underlying thing" check
+   (`_same_underlying_pattern`-style) done over the union of its spanned
+   summaries' `source_record_ids`, or does a trend need its own stable
+   identity concept distinct from a `DetectedPattern`'s? Open.
+4. **Cadence-check state**: does "last checked N days ago" need its own
+   new persisted field, or can it be derived from the timestamp of the
+   most recent `DigestRecord` (real or a deliberate "checked, found
+   nothing" marker) without new state? Leaning toward derivable-from-existing-data,
+   but not committed here.
+
+**No code in this section, per the standing scope. The foundation pass
+closes here** — the next fork (observer build vs. Part 5 design vs. the
+simulator evaluation-stage work from the backtest-v1 diagnosis) gets
+decided with all three proposals on the table.
