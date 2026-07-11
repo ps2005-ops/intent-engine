@@ -2233,27 +2233,42 @@ synergistic with this proposal — the same condition-tagging work item 2
 above requires would also enable it — but is its own future decision,
 not bundled in here, per the explicit scoping.
 
-### Open design questions, flagged for decision, not resolved here
+### Open design questions — RESOLVED
 
-1. **Full vs. partial reference-corpus tagging.** All 18 entries, or only
-   a subset (matching the existing partial `scale_efficiency`/
-   `leverage_type`/`market_timing_signal` tagging precedent)? Partial
-   tagging creates a two-tier corpus (some references evaluable, some
-   not) — not resolved here.
-2. **The exact match function.** All-4-agree = applicable, 0-agree =
-   excluded is clear; the partial-match band in between needs a real
-   rule (all combinations of 1-3 agreeing conditions, or a weighted rule
-   where reversibility/magnitude matter more than horizon/traction)?
-   Not decided.
-3. **Latency tension, real and unresolved.** `PremortemAnalyzer` is
-   deliberately ONE combined call specifically because two separate calls
-   measured at 20s+ against a <10s budget (`simulator/pipeline.py`'s own
-   docstring). A genuinely isolated extraction call reintroduces exactly
-   that tradeoff. Whether this is acceptable (a slower analysis path with
-   real structural grounding) or needs its own latency measurement and a
-   possible combined-call redesign is not decided here.
-4. **Tagging method for the reference corpus.** LLM-assisted with human
-   review, or fully manual? Not decided.
+1. **Full vs. partial reference-corpus tagging → FULL, with mandatory
+   human review.** All 18 entries get the 4 new condition tags, not a
+   subset — no two-tier corpus. Tagging method (open question 4) and
+   this question share one resolution: LLM-assisted tagging proposals,
+   every one of the 18 reviewed and confirmed by a human before use, then
+   frozen (not re-tagged silently later without the same review).
+2. **The exact match function → RESOLVED, v1 = deliberately simple, not
+   the final word.** Exact agreement required on `bet_magnitude_relative_to_resources`
+   and `bet_reversibility` (the two dimensions the real misses/failures
+   split cleanest on); `feedback_horizon` and `traction_at_decision_time`
+   only need to be "adjacent-or-better," not exact (e.g. a new case at
+   `months` matches a reference at `weeks` or `months`, not `years` — the
+   new case's horizon is at least as fast-feedback as the reference's).
+   Documented explicitly as a v1 approximation, not a claim this is the
+   correct weighting — a real rule, chosen for buildability, not
+   discovered empirically.
+3. **Latency tension → RESOLVED: the isolated extraction call stays
+   fully separate, `PremortemAnalyzer`'s own combined-call prompt is
+   untouched.** The extraction call feeds a downstream weighting/reporting
+   layer over the retrieval digest, not the risk-audit generation prompt
+   itself — so the existing <10s combined-call path is unaffected by this
+   feature; a caller that doesn't need structural-match grounding doesn't
+   pay for it. The real cost (a slower TOTAL path when structural-match
+   evaluation is used) is accepted, not hidden — stated here plainly
+   rather than silently absorbed into the existing latency budget.
+4. **Tagging method → RESOLVED, see #1: LLM-assisted, mandatory human
+   review of all 18, then frozen.**
 
 **No code, no causal-rule changes, no re-run of the 18 backtest cases in
 this pass, per the standing scope.**
+
+**Build status: design-complete, BUILD DEFERRED.** Not built now, and not
+queued next, by explicit decision: this stage's own validation path (new
+held-out historical cases, or the forward paper-log) isn't ready, and
+building real machinery that can't be outcome-validated yet invites
+exactly the kind of ungrounded drift the overfitting guard exists to
+prevent. Revisit once a validation path exists, not before.
