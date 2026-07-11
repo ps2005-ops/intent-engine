@@ -1657,6 +1657,58 @@ returns the 6 real "email Sarah"/"email Alex" records;
 `artifact_kind` default/round-trip, both query helpers including their
 empty-file cases). Full suite: 379 passed, 1 skipped, zero regressions.
 
-**Stopping here for review, per instruction** — Stage 2 (two-tier
-raw/summary layer) and Stage 3 (quiet-observer digest design proposal)
-have not been started.
+**Stage 1 approved. Stage 2 below.**
+
+## Data foundation pass, Stage 2: two-tier raw/summary layer
+
+`core/entity_summary.py`. Tier 1 stays exactly what Stage 1 already
+built — `EntityMemoryRecord`, full fidelity, SQLite-backed, never
+deleted, mutated, or superseded by anything below. Tier 2 is new:
+`EntitySummaryRecord` condenses the Tier-1 records covering one period
+into a single synthesized `summary_text`, own SQLite table
+(`data/entity_summaries.db`), same per-store ownership pattern as every
+Stage 1 store (own schema, own read/write functions).
+
+**`source_record_ids` is a real citation, not an LLM claim** — computed
+in code from exactly which Tier-1 records were read for the period,
+before the model ever sees anything. The model is never asked which
+records it used (checked directly: `"source_record_ids" not in
+input_schema["properties"]`, a real test, not just a design intention) —
+this is the same "structured prior over statistical rediscovery"
+discipline as `compute_coherence_note` in `scrap_estimate.py`: a
+self-reported citation list is exactly the kind of claim this project's
+own honesty discipline distrusts, so the list a person reads is always
+literally what was fed into the prompt.
+
+**Tiered retrieval** (`get_tiered_view()`): summary tier by default
+(cheap, compact); raw tier only on explicit request
+(`include_raw=True`), and even then scoped to exactly the records the
+returned summaries cite — not a full entity history dump. `raw_records`
+is `None` (not requested) vs. an empty list (requested, nothing found) —
+a real three-state distinction, not collapsed, same discipline as
+`GmailContext`/`CalendarContext.state` elsewhere in this project.
+
+**Real live generation + tiered-retrieval demo, against this repo's real
+migrated data** (`delegate demo co`, the same real entity Stage 1's
+migration verification used — not a synthetic fixture):
+- Tier 1: 9 real records read (the "email Sarah standup notes" /
+  calendar-block / "email Alex" history from earlier `voice/` demo runs).
+- Real live call generated: *"Standup notes were sent to Sarah for review
+  on June 30, July 1-4, and July 5. On July 5, Thursday at 2 p.m. was
+  blocked off for an investor call, and Alex was contacted about a term
+  sheet update."*
+- Citation check: `source_record_ids` (9 ids) matched the real Tier-1
+  `record_id` set exactly — verified programmatically, not eyeballed.
+- Tiered retrieval: `get_tiered_view()` returned 1 summary,
+  `raw_records=None`; `get_tiered_view(include_raw=True)` returned the
+  same 1 summary plus exactly the 9 raw records it cites — verified equal
+  to the citation set, not just non-empty.
+
+9 new tests (`test_entity_summary.py`): period gathering/filtering,
+citation correctness (including the "model was never asked for ids at
+all" schema check above), the no-activity-skips-the-LLM-call case, and
+both tiered-retrieval states. Full suite: 388 passed, 1 skipped, zero
+regressions.
+
+**Stopping here for review, per instruction** — Stage 3 (quiet-observer
+digest design proposal) has not been started.
