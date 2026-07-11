@@ -1,9 +1,35 @@
 """Part 2 of the four-part domain queue: mom's fitness Instagram caption
 generator. Reuses core/pattern_watcher.py's recurring-pattern machinery and
-core/draft_generator.py's shadow-guess-and-correct loop EXACTLY as already
-built -- no new mechanism, no schema change, no prompt change to either
-module. generate_draft(), classify_draft_reply(), and process_draft_reply()
-are called here completely unmodified.
+core/draft_generator.py's shadow-guess-and-correct loop as already built --
+no new mechanism, no schema change, no prompt change to either module, and
+no change at all to the recipient verb-gate (pattern_watcher._extract_recipient).
+classify_draft_reply() and process_draft_reply() are called here completely
+unmodified. generate_draft() gained two small, additive, backward-compatible
+optional parameters (example_text_transform/output_text_transform, both
+default None/no-op -- every other caller, including recurring_message, is
+unaffected) specifically to fix a real bug this domain's own live
+verification found: see PREFIX-STRIP FIX below.
+
+PREFIX-STRIP FIX (found by real, live verification, not theorized): the
+recipient-framing phrasing adaptation (see below) means every seed/example
+caption's STORED decision_text starts with "Update Instagram with today's
+caption:" -- scaffolding needed only so _extract_recipient can find
+"instagram" as the recipient. A live generate -> correct -> regenerate
+cycle showed this literal prefix leaking into 2 of 3 real generated
+captions verbatim, because it appears often enough across gathered
+examples to register as its own "recurring content element" the model then
+imitates -- exactly the kind of scaffolding-as-content leak the
+prior-lot-narrative-anchoring fix (core/scrap_estimate.py) and the
+label/baseline information-hiding fix (same file) were built to prevent,
+just discovered in a new domain. Fixed the same way: information hiding
+applied to the seed scaffolding -- generate_caption_draft() (below) strips
+the prefix from every example BEFORE it enters the prompt
+(example_text_transform) and from the model's own output before display
+(output_text_transform), while _gather_supporting_records/
+_correction_record_ids inside the UNMODIFIED generate_draft() still match
+against the RAW stored text, prefix included -- the verb-gate itself is
+untouched, per the explicit instruction that this is the data-foundation
+pass's question, not this fix's.
 
 The one genuinely new thing in this file is COLD-START SEEDING. The
 existing recurring_message flow (detect_recurring_message_patterns() ->
@@ -49,6 +75,7 @@ about the extraction logic was changed to accommodate this domain.
 from pathlib import Path
 from typing import List, Optional, Union
 
+from .draft_generator import DEFAULT_DRAFT_ATTEMPTS_PATH, DraftAttempt, generate_draft
 from .entity_memory import (
     DEFAULT_PATH,
     EntityMemoryRecord,
@@ -56,9 +83,15 @@ from .entity_memory import (
     JsonlEntityMemoryWriter,
     read_records,
 )
+from .llm_client import LLMClient
 from .suggestion import TaskAgentSpecStub
 
 ENTITY_ID = "Mom's Fitness Instagram"
+
+# Scaffolding needed ONLY so pattern_watcher._extract_recipient can find
+# "instagram" as the recipient when STORING a record -- never meant to be
+# seen by the model or a real person. See PREFIX-STRIP FIX above.
+_SCAFFOLD_PREFIX = "Update Instagram with today's caption:"
 
 # Explicit, stated cold-start baseline -- see module docstring. Content is a
 # generic placeholder illustrating each pillar's SHAPE, not real business
@@ -143,3 +176,39 @@ def start_mom_fitness_captions(
     existing = [r for r in read_records(entity_id, path=path) if r.source == "voice"]
     seed_records = existing if existing else seed_cold_start_pillars(entity_id, path=path, writer=writer)
     return build_cold_start_spec(entity_id, seed_records)
+
+
+def _strip_scaffold_prefix(text: str) -> str:
+    """Strips the "Update Instagram with today's caption:" scaffolding
+    prefix if present -- case-insensitive match, any immediately-following
+    whitespace also removed. A real caption (from the model, or a real
+    person editing one) should never contain this phrase; it exists only
+    so the STORED record satisfies the recipient verb-gate. A no-op on any
+    text that doesn't start with it, so this is safe to apply broadly
+    (e.g. to model output that already omits the prefix)."""
+    stripped = text.strip()
+    if stripped.lower().startswith(_SCAFFOLD_PREFIX.lower()):
+        return stripped[len(_SCAFFOLD_PREFIX):].strip()
+    return stripped
+
+
+def generate_caption_draft(
+    spec: TaskAgentSpecStub,
+    entity_id: str,
+    client: Optional[LLMClient] = None,
+    path: Union[str, Path] = DEFAULT_PATH,
+    attempts_path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH,
+    min_occurrences_for_confidence: int = 3,
+) -> DraftAttempt:
+    """Thin wrapper over the UNMODIFIED generate_draft() -- reuses it
+    exactly, only supplying this domain's scaffolding-prefix strip via the
+    two optional transform hooks (see PREFIX-STRIP FIX in the module
+    docstring). Gathering/matching (the recipient verb-gate included)
+    still runs inside generate_draft() against the RAW stored text,
+    completely untouched by either transform."""
+    return generate_draft(
+        spec, entity_id, client=client, path=path, attempts_path=attempts_path,
+        min_occurrences_for_confidence=min_occurrences_for_confidence,
+        example_text_transform=_strip_scaffold_prefix,
+        output_text_transform=_strip_scaffold_prefix,
+    )

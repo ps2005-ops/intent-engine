@@ -120,7 +120,7 @@ returning nothing.
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 from uuid import uuid4
 
 from pydantic import BaseModel
@@ -322,7 +322,9 @@ def _correction_record_ids(
     }
 
 
-def _format_examples(records: List[EntityMemoryRecord], correction_ids: set) -> str:
+def _format_examples(
+    records: List[EntityMemoryRecord], correction_ids: set, example_text_transform: Optional[Callable[[str], str]] = None
+) -> str:
     lines = []
     for i, r in enumerate(records):
         label = (
@@ -330,7 +332,8 @@ def _format_examples(records: List[EntityMemoryRecord], correction_ids: set) -> 
             if r.record_id in correction_ids
             else "Past occurrence"
         )
-        lines.append(f"{i + 1}. [{label}] {r.decision_text}")
+        text = example_text_transform(r.decision_text) if example_text_transform else r.decision_text
+        lines.append(f"{i + 1}. [{label}] {text}")
     return "\n".join(lines)
 
 
@@ -341,6 +344,8 @@ def generate_draft(
     path: Union[str, Path] = DEFAULT_PATH,
     attempts_path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH,
     min_occurrences_for_confidence: int = 3,
+    example_text_transform: Optional[Callable[[str], str]] = None,
+    output_text_transform: Optional[Callable[[str], str]] = None,
 ) -> DraftAttempt:
     """Pulls the real prior instances of this recurring message from entity
     memory (re-derived fresh, see _gather_supporting_records) and produces a
@@ -351,12 +356,24 @@ def generate_draft(
     surfaced text says so explicitly ("early days, this is a rough first
     attempt") rather than presenting a thin-evidence draft with false
     confidence -- same discipline as demand_durability/leverage_type.
+
+    example_text_transform/output_text_transform: optional, both default to
+    None (no-op) -- every existing caller (recurring_message included) is
+    completely unaffected. Added for domains whose STORED decision_text
+    carries scaffolding needed only for gathering/matching (e.g. a
+    recipient-verb-gate phrase) that the model itself should never see --
+    information hiding applied to that scaffolding, the same principle as
+    never leaking prior-lot narratives elsewhere in this codebase. The
+    gathering/matching logic above (_gather_supporting_records,
+    _correction_record_ids) always operates on the RAW stored text,
+    unaffected by either transform -- only what the model sees in the
+    prompt, and what a caller displays afterward, changes.
     """
     client = client or LLMClient(model=FAST_MODEL)
     supporting_records = _gather_supporting_records(spec, entity_id, path=path, attempts_path=attempts_path)
     correction_ids = _correction_record_ids(spec, entity_id, attempts_path=attempts_path)
 
-    examples = _format_examples(supporting_records, correction_ids)
+    examples = _format_examples(supporting_records, correction_ids, example_text_transform)
     user_message = (
         f"Examples of this recurring message, oldest to newest:\n{examples}\n\n"
         "Generate the next instance of this message in the same style."
@@ -371,6 +388,8 @@ def generate_draft(
         max_tokens=256,
     )
     draft_text = result["draft_text"]
+    if output_text_transform:
+        draft_text = output_text_transform(draft_text)
 
     if len(supporting_records) < min_occurrences_for_confidence:
         draft_text = (

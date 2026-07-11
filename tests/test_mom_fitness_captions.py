@@ -1,10 +1,14 @@
 import inspect
+from unittest.mock import MagicMock
 
 from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
 from intent_engine.core.mom_fitness_captions import (
     ENTITY_ID,
     PILLAR_SEED_CAPTIONS,
+    _SCAFFOLD_PREFIX,
+    _strip_scaffold_prefix,
     build_cold_start_spec,
+    generate_caption_draft,
     seed_cold_start_pillars,
     start_mom_fitness_captions,
 )
@@ -43,13 +47,26 @@ def test_mom_fitness_captions_module_defines_no_draft_generation_logic_of_its_ow
 
 def test_mom_fitness_captions_module_only_defines_cold_start_seeding_functions():
     """Positive check to complement the above: the only functions this
-    module actually defines are the cold-start seeding ones -- nothing
-    else, no surprise extra mechanism."""
+    module actually defines are cold-start seeding and the scaffolding-
+    prefix strip fix -- nothing else, no surprise extra mechanism.
+    generate_caption_draft is a thin wrapper (asserted below to call the
+    real, unmodified generate_draft), not a reimplementation."""
     own_functions = {
         name for name, obj in inspect.getmembers(mom_module, inspect.isfunction)
         if obj.__module__ == mom_module.__name__
     }
-    assert own_functions == {"seed_cold_start_pillars", "build_cold_start_spec", "start_mom_fitness_captions"}
+    assert own_functions == {
+        "seed_cold_start_pillars", "build_cold_start_spec", "start_mom_fitness_captions",
+        "_strip_scaffold_prefix", "generate_caption_draft",
+    }
+
+
+def test_generate_caption_draft_calls_the_real_unmodified_generate_draft():
+    """generate_caption_draft must be a thin wrapper, not a reimplementation
+    -- checked by confirming it's the exact same function object
+    draft_generator.py defines, imported and called through, not copied."""
+    import intent_engine.core.draft_generator as draft_generator_module
+    assert mom_module.generate_draft is draft_generator_module.generate_draft
 
 
 # --- Pillar seed content: exactly 3, flagged as placeholders ---------------
@@ -172,3 +189,79 @@ def test_start_mom_fitness_captions_defaults_to_the_real_entity_id(tmp_path):
     start_mom_fitness_captions(path=path)
     stored = read_records(ENTITY_ID, path=path)
     assert len(stored) == 3
+
+
+# --- Prefix-strip fix: information hiding applied to the seed scaffolding --
+
+
+def test_strip_scaffold_prefix_removes_the_exact_phrase():
+    text = _SCAFFOLD_PREFIX + " Did you know rest days matter? #fitness"
+    assert _strip_scaffold_prefix(text) == "Did you know rest days matter? #fitness"
+
+
+def test_strip_scaffold_prefix_case_insensitive():
+    text = "update instagram with today's caption: shorter one here"
+    assert _strip_scaffold_prefix(text) == "shorter one here"
+
+
+def test_strip_scaffold_prefix_is_a_noop_when_prefix_absent():
+    text = "Just eat consistently. That's it. #realtalk"
+    assert _strip_scaffold_prefix(text) == text
+
+
+def test_generate_caption_draft_strips_prefix_from_examples_before_the_prompt(tmp_path):
+    """The verb-gate (_extract_recipient) still needs the prefix in the
+    STORED record to find "instagram" as the recipient -- gathering is
+    unaffected. But the prompt the model actually sees must never contain
+    it."""
+    path = tmp_path / "entity_memory.jsonl"
+    spec = start_mom_fitness_captions(entity_id="Test Mom Account", path=path)
+
+    client = MagicMock()
+    client.call_tool.return_value = {"draft_text": "a mocked draft, no prefix here"}
+
+    generate_caption_draft(spec, "Test Mom Account", client=client, path=path)
+
+    user_message = client.call_tool.call_args.kwargs["user_message"]
+    assert _SCAFFOLD_PREFIX.lower() not in user_message.lower()
+    # sanity: the real pillar content itself IS still present -- only the
+    # scaffolding prefix was stripped, not the actual example text.
+    assert "rest day" in user_message.lower() or "push-up" in user_message.lower() or "workout" in user_message.lower()
+
+
+def test_generate_caption_draft_strips_prefix_from_model_output_if_present(tmp_path):
+    """Render-time safety net: even if the model's own output still
+    contains the scaffolding phrase (as real live verification showed it
+    sometimes does, imitating it as a "recurring content element"), the
+    final generated_text a person sees must never contain it."""
+    path = tmp_path / "entity_memory.jsonl"
+    spec = start_mom_fitness_captions(entity_id="Test Mom Account", path=path)
+
+    client = MagicMock()
+    client.call_tool.return_value = {
+        "draft_text": f"{_SCAFFOLD_PREFIX} a caption the model generated, prefix and all"
+    }
+
+    attempt = generate_caption_draft(spec, "Test Mom Account", client=client, path=path)
+
+    assert _SCAFFOLD_PREFIX.lower() not in attempt.generated_text.lower()
+    assert attempt.generated_text == "a caption the model generated, prefix and all"
+
+
+def test_generate_caption_draft_never_produces_prefix_across_realistic_mocked_outputs(tmp_path):
+    """Broader confirmation: across several plausible mocked model outputs
+    (with prefix, without prefix, different casing), generated captions
+    never contain the scaffolding prefix."""
+    path = tmp_path / "entity_memory.jsonl"
+    spec = start_mom_fitness_captions(entity_id="Test Mom Account", path=path)
+
+    mocked_outputs = [
+        f"{_SCAFFOLD_PREFIX} short and personal caption here",
+        "already-clean caption, no prefix",
+        f"{_SCAFFOLD_PREFIX.lower()} lowercase variant of the prefix",
+    ]
+    for mocked_text in mocked_outputs:
+        client = MagicMock()
+        client.call_tool.return_value = {"draft_text": mocked_text}
+        attempt = generate_caption_draft(spec, "Test Mom Account", client=client, path=path)
+        assert _SCAFFOLD_PREFIX.lower() not in attempt.generated_text.lower(), mocked_text
