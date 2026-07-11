@@ -2272,3 +2272,273 @@ held-out historical cases, or the forward paper-log) isn't ready, and
 building real machinery that can't be outcome-validated yet invites
 exactly the kind of ungrounded drift the overfitting guard exists to
 prevent. Revisit once a validation path exists, not before.
+
+## Part 5 design proposal: the iteration-loop / self-evaluation layer (no code)
+
+The project's named bottleneck, stated at its original naming: "an agent
+that runs try → check → diagnose → retry against machine-checkable
+quality bars WITHOUT a human supplying the 'not good enough, iterate'
+signal at each gate." Two reference instances now exist to design
+against: the observer build (the GATING half — model drafts, code
+decides, silence is a correct outcome, provenance computed not claimed)
+and the evaluation-stage design (the DIAGNOSIS half — structured checking
+isolated from the output's own narrative). This proposal is the third
+piece: the loop that ties try/check/diagnose/retry together, grounded
+throughout in the scrap-metal arc's real, recorded trace — not invented
+abstractly.
+
+### 1. The loop's shape, mapped to the scrap-metal trace's real phases
+
+**try → machine-checkable quality bars → [pass → surface] / [fail →
+structured diagnosis → targeted retry, budget permitting] → surface only
+on pass or a human-confirmed honest floor, else escalate.**
+
+Four real instances from the scrap-metal arc, each phase named against
+what actually happened:
+
+- **`category_proportions` v1 → v2 → v3.** TRY: v1, free-text categories
+  (a naive attempt). BAR: reliability testing across 18 real calls —
+  FAILS ("unstable and never used 'unclear' honestly"). DIAGNOSIS: root
+  cause is free-text extraction instability, matching the fix library's
+  "closed taxonomies over free-text extraction" entry. TARGETED RETRY:
+  v2 (closed taxonomy + 3-vote). BAR again: dominant category passes,
+  secondary still wobbles — a PARTIAL fail, not shipped as clean.
+  DIAGNOSIS #2: same failure family, insufficient sampling — matches
+  "self-consistency voting with reliability gates." TARGETED RETRY #2:
+  v3 (5 votes, honest bin-union width instead of resolving the wobble
+  away). BAR: passes — width is honest, not fabricated precision.
+  SURFACE: shipped.
+- **The anchoring bug in `assess_deviation`.** TRY: fed the vision call
+  the classified lot-type label and numeric baseline, asked it to judge
+  deviation against that baseline. BAR: a real 5-runs×3-photos reliability
+  test — FAILS (anchored on the offered label, rationalizing a
+  copper-rich photo as "typical" in 4 of 5 runs). DIAGNOSIS: this project's
+  own text calls this **the THIRD confirmed instance of the same failure
+  family** (after prior-lot narrative anchoring and the composite math's
+  per-category ceiling-blending) — matching "information hiding over
+  prompt instruction" exactly, a signature this project has now hit
+  three separate times with the identical fix. TARGETED RETRY: the final
+  richness call receives no lot-type label, no baseline, no number.
+  BAR: passes, 5 of 5. SURFACE: shipped.
+- **The >100% composite bound.** TRY: the original per-category blending
+  normalization. BAR: property-fuzz testing, 2000+ random trials — FAILS
+  (confirmed up to 143.2% on real photos, a hard mathematical bound
+  violated). DIAGNOSIS: matches "deterministic composition over
+  LLM-computed math" — NOT a clamp. TARGETED RETRY: a constrained
+  single-scalar normalization plus a min/max-of-two-weightings composite,
+  provably bounded by construction. BAR: passes — 0 violations across
+  2000+ trials, then a real 9-photo re-verification. SURFACE: shipped.
+- **The base-rate architectural pivot — does NOT fit this loop, stated
+  plainly.** The compositional approach above was, by this point, fully
+  fixed: zero impossible bounds, ordering provably guaranteed, every bar
+  passing. A human (the user) still judged it should be replaced, because
+  it "measurably underperformed a plain base-rate lookup" — a
+  categorically simpler approach the loop was never trying. **This class
+  of move is explicitly OUT OF SCOPE for v1**, detailed in Section 3.
+
+### 2. Quality bars as first-class objects
+
+**A bar is a deterministic predicate over `(output, provenance) →
+pass/fail`, evaluated in code, never by asking the model "is this good"**
+— the same "model drafts/extracts, code decides" shape as Stage 2's
+citations, Stage 3's inclusion gate, and the evaluation-stage's match
+step, generalized a third time. Bars are defined **per domain, by
+whoever builds that domain pass** — Part 5 is an orchestration shell that
+runs whatever bars a domain declares; it does not invent domain taste
+from nothing.
+
+**The hard question, answered honestly in two tiers:**
+
+**Generalizable bars** (domain-agnostic; could ship WITH Part 5's shell
+itself, already proven across 4+ real domains in this project):
+1. **Reliability/stability** — run the same input N times (or the same
+   input with a suspect field toggled on/off), check consistency.
+   Directly generalizes the scrap-metal reliability tests, the
+   mom/brother caption cross-pillar tests, image-verification's 5/5
+   tests.
+2. **Provenance integrity** — every claimed citation resolves to a real
+   record that actually exists and was actually fed to the model. Fully
+   mechanical; directly generalizes Stage 2/3's citations-computed-not-claimed
+   discipline and the evaluation-stage's match step.
+3. **Schema/coherence and structural bounds** — cross-field consistency
+   where two independent judgments describe the same underlying fact
+   (generalizes `compute_coherence_note`), and hard mathematical/logical
+   bounds a correct output can never violate (generalizes the >100%
+   property-fuzz test).
+4. **Isolation/anchoring checks** — does the same judgment change when a
+   suspect field (a label, a prior narrative, a baseline) is present vs.
+   withheld. Mechanically runnable without a human first noticing the
+   anchoring by inspection: run twice, diff. Directly generalizes the
+   THREE real anchoring incidents this project has already found and
+   fixed the identical way.
+
+**Irreducibly domain-specific bars** (cannot be invented by the shell;
+supplied per-domain, same as today):
+- "Honest floor" judgments — that an 11pp range genuinely IS the correct,
+  honest answer given what's cited vs. assumed, not a mechanical
+  threshold.
+- "Is this good" content-quality bars — whether a caption sounds like the
+  right voice, whether a narrative_summary is well-framed. No
+  generalizable predicate captures taste; each domain supplies its own.
+- Domain-specific numeric/business constraints (cited yield ranges,
+  taxonomy values) — from that domain's own research, not the shell.
+
+**On day one of a brand-new domain, before any human has supplied
+taste**, Part 5's shell can run ONLY the generalizable tier — real and
+meaningful (it proves internal consistency: stable, provenance-honest,
+coherent, non-anchored), but **it cannot judge whether the content is
+actually good**, only whether it's internally trustworthy. Stated
+plainly, not glossed over: a domain passing only the generalizable tier
+has NOT been proven correct, the same distinction the scrap arc's own
+honest-floor language already draws between "earned" and "assumed."
+
+### 3. The diagnosis step: a machine-consultable registry, not prose
+
+A closed, enumerable failure-signature taxonomy, each mapped to a real
+candidate fix already used at least once in this project — not invented
+for this proposal:
+
+| Failure signature | Candidate fix |
+|---|---|
+| `unstable_across_reruns` | Closed-taxonomy extraction (if currently free-text) OR more votes + honest uncertainty representation (if already closed-taxonomy but under-sampled) |
+| `anchors_on_offered_context` | Information hiding — strip the contaminating field from the call; move it to a separate deterministic step |
+| `bound_violated` | Deterministic/provably-bounded composition — never a clamp |
+| `cross_field_incoherent` | Add or consult a deterministic cross-field coherence check |
+| `citation_unresolvable` | Move citation computation from "asked of the model" to "computed in code from what was actually fed in" |
+| `novelty_or_scope_gap` | **No fix candidate.** Always escalates. Never auto-retried. |
+
+This is the project's own existing fix library, restructured as a lookup
+table keyed by signature instead of prose a human re-reads and
+pattern-matches by hand each time.
+
+**Which real scrap-arc diagnoses fit this registry mechanically, stated
+honestly, not overclaimed:**
+- `assess_deviation`'s anchoring → `anchors_on_offered_context` →
+  information hiding. Clean fit — and the STRONGEST evidence this
+  registry is real, not speculative: this exact signature→fix pairing
+  has now fired identically three separate times in this one project.
+- The >100% bound → `bound_violated` → deterministic/bounded
+  composition. Detection was fully mechanical (a property test).
+  **Nuance stated plainly:** the registry correctly narrows the fix to a
+  CATEGORY ("don't clamp, build a provably-bounded formula"); it does
+  not hand you the specific min/max-of-two-weightings formula that
+  actually shipped — constructing the right formula within that category
+  was real design work the registry can point toward but not automate.
+- `category_proportions` v1→v2 and v2→v3 → `unstable_across_reruns` both
+  times (the second retry escalating within the same signature family
+  after the first fix proved insufficient, not wrong).
+
+**What does NOT fit, stated plainly per the explicit instruction: the
+base-rate architectural pivot is OUT OF SCOPE for v1.** It came from the
+user, not a mechanical process, and it is fundamentally a different KIND
+of move than anything in the registry above: every registry entry fires
+when a bar FAILS. The base-rate pivot happened when every bar was
+PASSING — the compositional approach was correct on its own terms and
+still the wrong approach, because a categorically simpler alternative
+existed that was never attempted. No failure-signature registry can
+produce "the thing that's currently succeeding is still not the right
+shape," because nothing in that judgment is a failure signature to match
+against. `novelty_or_scope_gap` is the registry's deliberate acknowledgment
+of this boundary — anything that doesn't cleanly match escalates, never
+gets a guessed fix — but a pivot proposed while every bar is GREEN is a
+different case again, not even covered by that catch-all. This class of
+move stays a human call in v1, full stop.
+
+### 4. Budget and stopping
+
+**Budget**: a per-attempt total (API calls or a token count), same
+vocabulary this project's own Workflow tooling already uses
+(`budget.total`, `budget.spent()`, `budget.remaining()`) — reused, not
+reinvented.
+
+**Three distinct exits, not two:**
+1. **Bars passed** → surface normally.
+2. **Honest floor proven** → every known fix-library entry for the
+   current failure signature(s) has been tried and the remaining gap is
+   documented with a real, stated reason (the scrap arc's own "reflects
+   industry-wide variance," never a shrug). **Requires human
+   confirmation, every time** — an unattended system declaring its own
+   shortfall "acceptable" is exactly the ungrounded self-grading this
+   whole layer exists to prevent, now applied to itself. Not
+   auto-declared.
+3. **Budget exhausted** → escalate, no floor claimed (none was
+   confirmed) — a distinct, honest "ran out of budget, unresolved," never
+   dressed up as an intentional floor.
+
+**What escalation delivers**: the full iteration trace — every attempt,
+which bar(s) failed each time, which registry signature/fix was selected
+and applied, and the final state — structured the same way the
+scrap-metal arc's own real write-up already is in this document (12
+iterations, each with a stated before/after and reason). Real evidence,
+not a raw error dump, same discipline as everywhere else in this
+project.
+
+### 5. Scope honesty for v1
+
+**What v1 actually orchestrates first: new-domain EXTRACTION/CLASSIFICATION
+reliability** — the "task family that has tested reliable throughout this
+domain" (the scrap arc's own words about its isolated calls) run through
+the generalizable bar tier with mechanical registry diagnosis. This is
+the right first target because every generalizable bar and every proven
+registry entry was developed specifically on extraction/classification
+tasks — this is where the existing evidence actually is, not a new
+domain the loop has to prove itself on cold.
+
+**What v1 is explicitly NOT:**
+- **Not the full autonomous-domain-builder vision.** It orchestrates
+  iterate-until-bar-passes for one already-scoped extraction/
+  classification task at a time. Deciding what fields a new domain needs,
+  what taxonomy values it should have, what's cited vs. assumed — the
+  scoping work that came before any code in every one of Parts 1-4 —
+  stays human.
+- **Not capable of the base-rate-style reframe.** It iterates WITHIN a
+  chosen approach; recognizing the approach itself is wrong stays a
+  human call (Section 3), escalated only through the honest-floor exit's
+  mandatory human confirmation, never resolved by the loop itself.
+- **Not a replacement for domain-specific bars.** A human still writes a
+  domain's own taste/content-quality bars before v1 can orchestrate a
+  full ship decision for it. Without them, v1 proves internal
+  consistency only, not correctness — stated as plainly as the
+  evaluation-stage proposal stated its own extraction-vs-computable
+  limits.
+- **Not validated yet.** Same discipline as the evaluation-stage's own
+  deferred-build decision: whether mechanical diagnosis actually saves
+  real iterations vs. a human doing it is an empirical question this
+  design does not get to assume the answer to.
+
+### Open design questions, flagged for decision, not resolved here
+
+1. **Shared code or a documented pattern?** Does the generalizable bar
+   tier ship as literal reusable code every domain pass imports, or stay
+   a documented pattern each domain re-implements? Reusable code is more
+   powerful but risks becoming its own wrong-abstraction burden — this
+   project already explicitly rejected one shared abstraction (a common
+   ORM across the 4 Stage-1 SQLite stores) for exactly this reason. Not
+   decided.
+2. **Budget default.** A fixed default per attempt, or human-specified
+   per domain? Not decided.
+3. **Does honest-floor confirmation need to be human EVERY time?** Or can
+   some floors (e.g., a bound violation that gets fixed and then
+   objectively re-verified passing) auto-confirm once the bar itself is
+   met, reserving mandatory human sign-off only for genuine "is this
+   range/behavior good enough" taste calls? Real tension between full
+   automation and "don't let the system grade its own homework" — not
+   resolved here.
+4. **Is the 6-signature registry actually closed?** Every fix-library
+   entry in this project so far emerged from a real failure, not
+   anticipation — it's likely a first real domain run through this loop
+   surfaces new signatures immediately. Should the registry be
+   extensible/versioned from day one, or frozen for v1 and revisited
+   after real usage? Not decided.
+5. **A cheap, immediate validation idea, not yet decided on:** rather
+   than needing new held-out cases the way the evaluation stage does,
+   could the registry be sanity-checked by REPLAYING it against the
+   scrap-metal arc's own already-known failures (same symptom in, does
+   the registry produce the same diagnosis a human already made)? This
+   uses real, existing ground truth at zero new sourcing cost — distinct
+   from validating the LOOP's real-world iteration savings, which still
+   needs real future usage. Promising, not decided or built here.
+
+**No code. This is the last design piece before the next build decision
+— observer (done), evaluation stage (designed, build-deferred), Part 5
+(designed) — decided together with the full picture in hand.**
