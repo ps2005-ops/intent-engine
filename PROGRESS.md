@@ -1348,3 +1348,147 @@ context-anchoring (prior-lot narrative text, then a stated numeric
 baseline/label, in `core/scrap_estimate.py`); structural withholding was
 the durable fix each time, not a prompt instruction telling the model to
 ignore what it was given.
+
+## Backtest v1 (18 cases): the honest result
+
+A note on provenance before the numbers: this section was requested with a
+specific set of figures already in hand (15 cases, 40% directional
+accuracy vs. a 50%/67% baseline, 5/6 recall on bad outcomes, a "top-3
+misses" analysis referencing a Meta-scale example). None of that matches
+what `scripts/premortem_backtest.py` (commit `231438b`) actually produced
+— it ran 18 cases, not 15, and none of the 18 involve a large-capital
+incumbent absorbing a loss; every case is an independent startup. Rather
+than write figures into this doc that I can't reproduce from the real run,
+the numbers below are freshly computed from the actual 18-case output,
+verified by rereading the per-case results directly, not assumed to match
+the cited framing. The underlying *shape* of the finding turned out to be
+the same either way — see below.
+
+**Setup.** For each of the 18 cases, PremortemAnalyzer's own 3
+failure-mode likelihood labels were reduced to one binary call: if the
+majority of the 3 are `likely`/`tail_risk`, treat the case as "predicted
+risky" (predicted failure); otherwise "predicted survivable" (predicted
+success). Compared against the real, cited outcome for each case.
+
+**Result: 12/18 correct = 66.7% directional accuracy.** Baselines on this
+sample: coin-flip = 50%, "always predict failure" (the majority class,
+11/18 = 61.1% of this sample) = 61.1%. So PremortemAnalyzer beats the
+always-predict-failure baseline by only 5.6 points — a razor-thin margin,
+not a meaningfully better-than-baseline result.
+
+**Why the margin is that thin, found by reading the actual predictions,
+not assumed:** the model called 17 of the 18 cases "predicted risky." Only
+one case (Zappos' free-shipping/365-day-return policy) got a
+lower-risk majority label. That means:
+- **Recall on real failures: 11/11 = 100%.** Every real failure got
+  flagged as risky. This is *not* evidence the risk-flagging mechanism is
+  discerning — it's what you'd get by flagging almost everything as risky
+  regardless of the input, given failures were the majority class in this
+  sample. 100% recall from a near-constant prediction is a degenerate
+  result, not a demonstrated capability.
+- **Specificity on real successes: 1/7 = 14.3%.** Of the 7 decisions that
+  actually worked out, only Zappos was correctly read as
+  lower-risk. The other 6 — Airbnb's cereal-box stunt, Slack's pivot off
+  Glitch, Instagram's pivot off Burbn, Dropbox's demo-video launch,
+  Buffer's salary transparency, and Basecamp's VC-rejection stance — were
+  all called "predicted risky," same as every real disaster in the set.
+
+**Root cause hypothesis, from the 6 misses above (not the "Meta-scale"
+framing originally requested, since no case in this dataset is a
+large-incumbent bet — but the same underlying mechanism):** every one of
+the 6 misses is a *small, low-cost, reversible* bet — a few thousand
+dollars of cereal boxes, a screencast video, a policy decision with near-
+zero direct cash exposure — made by a team that had little to lose either
+way. PremortemAnalyzer's current inputs have no variable for **bet
+magnitude relative to what the decision-maker can absorb**: a
+cash-strapped two-person team's photo-app pivot and a $1.2B-funded
+company's automated-warehouse buildout (Webvan, a real failure in this
+same set) produce structurally similar-looking failure-mode audits,
+because nothing in `BusinessContext`/`StructuredIntent` distinguishes
+"this bet is cheap and reversible" from "this bet is capital-intensive and
+irreversible." The rules see risk; they don't see how much room there was
+to be wrong.
+
+**Sample-size caveat, stated as loudly as the result itself:** n=18 (and
+n=7 for the specificity figure specifically) is nowhere near enough to
+treat 66.7%, 100%, or 14.3% as stable estimates — a handful of different
+case selections could move any of these numbers substantially. The
+*mechanism* (near-constant risky-by-default predictions driving the
+recall/specificity gap) is visible directly in the per-case output and is
+the more load-bearing finding here, not the specific percentages.
+
+**Overfitting guard, stated explicitly per the requesting instruction:**
+any causal-rule change made in response to this finding must be validated
+against *new*, held-out cases — never re-tuned against these same 18.
+Same discipline as never validating scrap-metal extraction against its
+own reliability-test photos.
+
+### Proposal (not built): an "absorption capacity" input
+
+Per the fix library's standing preference — a structured prior (a real
+variable) over hoping the model rediscovers this from free text — here is
+how a capacity-to-absorb-failure signal could enter honestly, laid out for
+review, no code written:
+
+**What field(s).** A new optional field on `BusinessContext`, e.g.
+`bet_magnitude_relative_to_resources: Optional[Literal["small_reversible",
+"moderate", "large_irreversible"]]`, describing the decision's downside
+relative to what the decision-maker can absorb — not the decision-maker's
+absolute size (a well-funded company can still make a
+`large_irreversible` bet; a tiny team can make a `small_reversible` one,
+as Airbnb's cereal boxes shows).
+
+**Extracted from what.** Three honest options, not a single clean answer:
+1. **New extraction from the decision text itself**, when the text states
+   or implies the cost/exposure of the bet (e.g., "$400 hardware unit
+   cost," "three years of infrastructure buildout," "a $40/box novelty
+   item") relative to stated runway/revenue in the same `BusinessContext`.
+   This is the most broadly available option (works for private
+   companies) but is exactly the kind of judgment call `analysis.py`
+   already makes elsewhere, so it inherits the same risk of being
+   under-determined by vague input text.
+2. **A yfinance-derived deterministic input**, but *only* for the subset
+   of cases where the entity (or its parent) was already public at
+   decision time — e.g., market cap or cash-and-equivalents from a filing
+   date near the decision, compared against a stated deal size. This is
+   the most rigorous, least judgment-dependent option, but it covers a
+   small minority of realistic cases (1 of 18 in this backtest — MoviePass
+   via HMNY); most real decisions, including nearly everything in Part 1's
+   actual use case (a solo/small-team founder), have no ticker at all.
+3. **A user-supplied field**, asked directly at input time ("relative to
+   what you have, is this bet small and reversible, or would it hurt to
+   lose?") — the most honest source when available, since the
+   decision-maker is the only party who reliably knows their own capacity,
+   but it adds a new required/optional input to the intake flow, which is
+   a real UX cost this pass doesn't currently pay anywhere else in the
+   pipeline.
+
+**Which causal rules would consume it.** `_extract_recipient`-style gating
+is the wrong analogy here — this isn't a gate, it's a modifier on
+severity. The natural consumer is the failure-mode likelihood-assignment
+step of `PremortemAnalyzer`'s own prompt: a rule that a `small_reversible`
+bet caps derived likelihoods at `possible` regardless of how many
+plausible failure narratives exist (since even several plausible failure
+paths don't matter much if the downside is small), while
+`large_irreversible` bets are the only ones eligible for `tail_risk`
+framing at all colored by consequence, not just probability.
+
+**How it would have changed the top misses, specifically.** Airbnb (cereal
+boxes, ~$5-10k exposure against near-zero runway but a reversible,
+one-time cost), Dropbox (a video, effectively free to make), and Basecamp
+(a standing policy with no direct cash cost) would all plausibly be capped
+below "majority risky," flipping 3 of the 6 misses. Slack, Instagram, and
+Buffer are murkier — Slack's pivot had real sunk engineering cost, and
+Instagram's two-person team had real opportunity cost — so this field
+alone would not have fixed all 6; it's a partial fix aimed at the cleanest
+cases, not a complete recalibration.
+
+**What can't be known for private companies, stated plainly.** Option 2
+(yfinance-derived) simply doesn't exist for the overwhelming majority of
+real early-stage decisions — there is no public balance sheet for a
+two-person pre-seed team. For that population, this field can only ever
+be extraction-from-text (option 1, judgment-dependent) or user-supplied
+(option 3, an intake-flow cost) — there is no deterministic ground truth
+available the way there is for public-company cases. Any implementation
+needs to be honest that most real usage will fall into the
+less-rigorous of the two available paths, not the yfinance one.
