@@ -1494,6 +1494,37 @@ available the way there is for public-company cases. Any implementation
 needs to be honest that most real usage will fall into the
 less-rigorous of the two available paths, not the yfinance one.
 
+### Sharpened diagnosis: mapping without evaluation
+
+In analogical-reasoning terms, the simulator has retrieval (TF-IDF,
+`simulator/retrieval.py`) and mapping (the hand-coded causal rules,
+`simulator/causal_model.py`) but **no evaluation stage**: it never tests
+whether a retrieved precedent structurally applies to the new case or
+merely superficially resembles it. The degenerate flag-everything
+behavior found above is mapping-without-evaluation — a failure pattern
+gets applied because a precedent was retrieved and matched on surface
+similarity, not because anything checked that the precedent's own
+load-bearing conditions actually hold for the case at hand.
+
+Two concrete future directions, both gated on held-out cases per the
+overfitting guard stated above (validate against new cases, never
+re-tuned against these same 18):
+
+1. **An analogy-evaluation step** — for each retrieved reference case, a
+   structured check of whether the load-bearing conditions (scale,
+   resources, reversibility of the bet) actually match before its failure
+   pattern is applied to the new case, rather than applying it on
+   retrieval alone.
+2. **Restructuring reference-set retrieval around structural similarity**
+   rather than surface/TF-IDF similarity — far analogies with matching
+   structure carry more inferential power than near analogies with
+   matching vocabulary.
+
+Filed under the Part-5-adjacent design queue. **Not built now** — this is
+a documentation-only entry; the evaluation-stage design and Part 5
+sequencing get decided after the data-foundation pass lands, same
+discipline as every other deferred design question in this project.
+
 ## Part 3 complete: brother's music-caption generator
 
 Structurally a near-exact copy of Part 2 (`core/brother_music_captions.py`)
