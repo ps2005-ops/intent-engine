@@ -1492,3 +1492,42 @@ be extraction-from-text (option 1, judgment-dependent) or user-supplied
 available the way there is for public-company cases. Any implementation
 needs to be honest that most real usage will fall into the
 less-rigorous of the two available paths, not the yfinance one.
+
+## Part 3 complete: brother's music-caption generator
+
+Structurally a near-exact copy of Part 2 (`core/brother_music_captions.py`)
+— same reuse-discipline checks passed (no new draft-generation logic of its
+own, `generate_caption_draft` confirmed to call the real, unmodified
+`generate_draft`), same recipient-verb-gate phrasing adaptation
+("Update Instagram with today's caption: ..." → `_extract_recipient`
+returns "instagram"), same cold-start-bypasses-DetectedPattern design. 22
+new tests (`test_brother_music_captions.py`).
+
+Both of Part 2's live-discovered lessons were applied from day one instead
+of rediscovered:
+
+1. **Prefix-strip wired up from the start.** `generate_caption_draft()`
+   supplies `example_text_transform`/`output_text_transform` immediately —
+   no live leak this time. Confirmed directly: none of the 3 real
+   generations below contain the scaffolding prefix.
+2. **No-cross-pillar-rotation stated up front, not found by surprise.**
+   The module docstring and the spec's own `trigger_hint` both say plainly
+   that corrections won't rotate content across pillars until real usage
+   accumulates 3+ repeats of some detail — this is cold-start seeding's
+   structural property (each pillar is a one-off example), not a defect.
+
+**Real, live generate → correct → regenerate cycle** (not mocked):
+1. Day-one first draft (original-music/performance pillar, the 40%-weight
+   primary pillar): 336 chars, on-theme, no scaffolding prefix.
+2. Correction applied: "too generic and salesy — shorter, more personal,
+   like I'm talking to a friend."
+3. Regenerated draft: 136 chars — genuinely shorter and more casual, not a
+   verbatim echo of the correction text (checked programmatically). No
+   scaffolding prefix.
+4. A second post-correction draft (the stated cross-pillar test): 153
+   chars, stayed on the same original-music/performance topic rather than
+   rotating to behind-the-scenes or personal-connection — exactly the
+   documented, expected behavior from Lesson 2 above, not a surprise this
+   time. No scaffolding prefix, either generation.
+
+Full suite: 373 passed, 1 skipped, zero regressions (+22 from this pass).
