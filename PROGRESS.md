@@ -2044,6 +2044,216 @@ level, not just at the gate's own unit-test level.
 
 Full suite: 402 passed, 1 skipped, zero regressions (+14 from this pass).
 
-**The data foundation pass closes here.** Next fork (Part 5 design vs.
-the simulator evaluation-stage work from the backtest-v1 diagnosis)
-decided with both proposals in hand.
+**The data foundation pass closes here.** Fork taken: simulator
+evaluation-stage design next (below), Part 5 design after.
+
+## Simulator evaluation-stage design proposal (no code, no re-run of the 18 backtest cases)
+
+Per the backtest-v1 diagnosis: the simulator has retrieval
+(`simulator/retrieval.py`, TF-IDF against `simulator/data/reference_decisions.json`,
+18 hand-written generic SaaS scenarios — confirmed by direct inspection
+to be a **completely different corpus from the 18 real historical cases**
+in `scripts/premortem_backtest.py`; no circularity between the two) and
+mapping (`simulator/causal_model.py`'s 8 keyword-tagged causal rules,
+matched independently of retrieval) but no evaluation stage between them.
+This proposal designs that missing stage. **The target is specifically
+`retrieve_similar()`'s retrieved `ReferenceDecision`s** (case-shaped
+precedents with a real outcome/lesson fed into the prompt) — not
+`causal_model.py`'s 8 rules, which are general stated relationships
+("prices increase → churn increases"), not case-specific precedents
+needing an applicability check the same way.
+
+### 1. The structural-match condition set (closed taxonomy)
+
+Four conditions, each grounded in the actual recorded top misses, not
+invented abstractly:
+
+- **`bet_magnitude_relative_to_resources`**: `Literal["small", "moderate",
+  "large"]`. Justified directly: all 6 real misses (Airbnb's ~$5-10k
+  cereal-box stunt, Dropbox's free demo video, Basecamp's zero-cost
+  standing policy, Buffer's low-direct-cost policy, Slack's and
+  Instagram's pivots) were small bets; the real failures that
+  PremortemAnalyzer correctly flagged (Webvan's $1.2B-funded automated
+  warehouse buildout, WeWork's long-term lease commitments) were large.
+  This decomposes the earlier `bet_magnitude_relative_to_resources`
+  3-value field from the backtest-v1 proposal (which bundled magnitude
+  and reversibility into one axis) into two orthogonal conditions here —
+  a real refinement of that earlier design, stated plainly, not silently
+  dropped: a bet can be small but irreversible, or large but reversible,
+  and the earlier single field couldn't represent either.
+- **`bet_reversibility`**: `Literal["reversible", "partially_reversible",
+  "irreversible"]`. Justified: Airbnb's cereal boxes, Dropbox's video,
+  and Basecamp's standing policy (revocable at will) were all reversible,
+  one-time or low-commitment actions. Webvan's warehouse infrastructure
+  and WeWork's real-estate leases were not — capital committed for years,
+  not reclaimable if wrong. This is the dimension the earlier
+  absorption-capacity proposal's "flipping 3 of the 6 misses" language
+  was really describing.
+- **`feedback_horizon`**: `Literal["weeks", "months", "years"]`. Justified
+  by the pair PROGRESS.md already names as the *murkier* misses: Slack's
+  pivot (real sunk engineering cost, company's fate rode on it for
+  potentially years) and Instagram's (two-person team, real opportunity
+  cost) are NOT explained by magnitude/reversibility alone — both
+  succeeded despite a long horizon. What distinguishes them from Webvan
+  (also a years-long horizon before demand could validate the
+  infrastructure spend) is that Webvan combined a long horizon WITH large
+  capital already irreversibly committed before the negative signal
+  arrived; Slack combined a long horizon with a SMALL ongoing burn while
+  the pivot played out. Horizon alone doesn't sort the misses from the
+  failures — it's the horizon-times-reversibility-times-magnitude
+  interaction that does, which is exactly why this needs a real
+  structural-match check across multiple conditions jointly, not a
+  single field.
+- **`traction_at_decision_time`**: `Literal["greenfield", "early_traction",
+  "established"]`. Justified: Zappos (the one case PremortemAnalyzer
+  correctly read as lower-risk) and Buffer and Basecamp were all
+  decisions made by already-operating businesses with real, if modest,
+  revenue — not bets on an unproven concept from zero. Contrast Quibi
+  (launched an entirely new, unproven format from zero, $1.75B raised
+  first), Webvan, and Color Labs (a completely novel, unproven mechanic
+  launched cold) — real failures, all greenfield bets. This tracks
+  loosely with the free-text `BusinessContext.revenue`/`growth_rate`
+  fields already present but not currently used as a risk-calibration
+  signal anywhere in `causal_model.py` or `analysis.py`.
+
+None of these 4 conditions exist as fields anywhere in
+`BusinessContext`/`StructuredIntent`/`BusinessStructuredIntent` today —
+confirmed by direct inspection of `simulator/context_schema.py` and
+`simulator/schemas.py`, not assumed. This is the real gap the earlier
+diagnosis pointed at, now named as 4 specific, closed-taxonomy fields
+instead of one general "absorption capacity" idea.
+
+### 2. Where it runs — isolated extraction, deterministic match, no live comparison call per reference
+
+**Recommended design, refined from what a literal "one evaluation call
+per retrieved case" would require:** the new decision's own condition
+values only need to be extracted ONCE per analysis (they don't depend on
+which reference is being compared against), then compared DETERMINISTICALLY
+in code against each retrieved reference's condition values — not once
+per reference case:
+
+1. **Extraction (LLM, isolated, one call).** A new, dedicated tool call —
+   separate from `PremortemAnalyzer`'s combined intent/risk/scenario
+   call — extracts the new decision's 4 condition values from
+   `decision_text`/`BusinessContext` alone. **It must not see
+   `PremortemAnalyzer`'s own `risk_audit`/`failure_modes`/`narrative_summary`
+   output** — feeding an already-formed risk narrative into a judgment
+   meant to independently characterize the decision's structural
+   properties is exactly the repeated context-anchoring pattern this
+   project has already confirmed multiple times (prior-lot narrative
+   anchoring, label/baseline anchoring, the caption scaffolding-prefix
+   leak — each fixed by structural withholding, not instruction). Same
+   principle, a new instance: the extraction call sees only the decision
+   text and context, nothing PremortemAnalyzer already concluded.
+2. **Reference tagging (LLM-assisted, one-time, NOT live).** The 18
+   entries in `reference_decisions.json` already carry manually-added
+   `scale_efficiency`/`leverage_type`/`market_timing_signal` tags on a
+   subset. Extend this same one-time tagging pass to the 4 new
+   conditions, for every entry (see open question 1 below on
+   full-vs-partial tagging) — done once when the corpus is curated, not
+   re-extracted on every analysis call. This avoids a live LLM call per
+   retrieved reference entirely.
+3. **Match (deterministic code, zero LLM calls, zero anchoring risk).**
+   Comparing the new decision's 4 extracted values against a reference's
+   4 pre-tagged values is a plain code comparison — no judgment call, no
+   model in the loop, nothing to anchor. This is the same "model
+   extracts/drafts, code decides" shape as Stage 2's `source_record_ids`
+   and Stage 3's inclusion gate, applied here to structural applicability
+   instead of citation or digest inclusion.
+
+**Extractable vs. computable, stated honestly:** all 4 conditions are
+extraction-dependent (LLM judgment from free text), not computable from
+structured data today — none of `BusinessContext`'s fields are typed
+numerics that would let any of these be derived deterministically, the
+same finding the earlier absorption-capacity proposal already made for
+its own field. The rare public-company/yfinance path from that earlier
+proposal applies here too, for the same small minority of cases, and is
+not re-derived in full here.
+
+### 3. On a failed match: exclude or down-weight, reported honestly
+
+- **No conditions match** (all 4 diverge, e.g. new case is
+  `small`/`reversible`/`weeks`/`early_traction` against a reference that
+  is `large`/`irreversible`/`years`/`greenfield`): **exclude** — the
+  reference's outcome/lesson is dropped from `format_retrieval_digest()`'s
+  output entirely. An inapplicable precedent fed into the prompt as
+  grounding is worse than no precedent, per this project's own
+  information-hiding discipline — it's an anchor toward the wrong
+  conclusion, not a neutral non-signal.
+- **Partial match** (some conditions align, some don't): **down-weight,
+  not exclude** — kept in the digest, but with the specific mismatched
+  dimension(s) stated explicitly (e.g. "similar bet size, but this
+  precedent was irreversible infrastructure spend while your decision
+  reads as a reversible one-time action — apply its lesson with that
+  difference in mind"), rather than presented as an equally-weighted
+  precedent.
+- **Full match** (all 4 align): included as today, no change.
+
+**Honest reporting, not silently filtered:** `format_retrieval_digest()`'s
+output should state the count explicitly — "Retrieved 3 precedents: 1
+structurally applicable, 1 partial (reversibility differs), 1 excluded
+(magnitude and traction both differ)" — surfaced the same way the
+backtest's own sample-size caveat and Stage 3's digest counts are stated
+loudly rather than absorbed into a single number.
+
+### 4. Validation plan without the 18 backtest cases
+
+**Honest timeline, stated plainly: this design cannot be validated for
+real-world accuracy the week it's built.** Outcome-based validation
+needs one of:
+- **New, held-out historical cases** — a second real sourcing/fact-checking
+  pass (same discipline as Part 4a's 18: real citations, no-hindsight
+  inputs, real outcomes kept separate), explicitly never the same 18,
+  per the overfitting guard. This is genuinely new research work, not a
+  quick check — comparable effort to Part 4a's original sourcing pass.
+- **The forward paper-log** (`core/phase0_trial_log.py`, not yet
+  started) — real usage accumulating real outcomes over time, avoiding
+  hand-picked-sample bias entirely, but slow: weeks to months before
+  enough real interactions with known outcomes exist to say anything.
+
+**What CAN be gathered immediately, before any outcome data exists:**
+the RELIABILITY of the extraction step itself — does the new
+condition-extraction call return the same 4 values on repeated runs of
+the same input? This is testable the standard way already established
+in this project (multi-run reliability testing, the same discipline as
+`scrap_estimate.py`'s reliability gates) and requires no outcome data at
+all — it only checks whether the extraction is internally consistent,
+not whether it's predictive. This is the real, immediate first
+checkpoint; outcome validation is a separate, later, slower one.
+
+### 5. Retrieval restructuring — a separate, severable, larger change
+
+Explicitly NOT part of this proposal's build scope. Structural-similarity
+retrieval (ranking `reference_decisions.json` entries by the same 4
+condition values instead of TF-IDF vocabulary overlap) is a larger
+change: it replaces `retrieve_similar()`'s core ranking mechanism, not
+just adds a filter after it, and depends on every reference entry
+already being condition-tagged (open question 1 below). It is genuinely
+synergistic with this proposal — the same condition-tagging work item 2
+above requires would also enable it — but is its own future decision,
+not bundled in here, per the explicit scoping.
+
+### Open design questions, flagged for decision, not resolved here
+
+1. **Full vs. partial reference-corpus tagging.** All 18 entries, or only
+   a subset (matching the existing partial `scale_efficiency`/
+   `leverage_type`/`market_timing_signal` tagging precedent)? Partial
+   tagging creates a two-tier corpus (some references evaluable, some
+   not) — not resolved here.
+2. **The exact match function.** All-4-agree = applicable, 0-agree =
+   excluded is clear; the partial-match band in between needs a real
+   rule (all combinations of 1-3 agreeing conditions, or a weighted rule
+   where reversibility/magnitude matter more than horizon/traction)?
+   Not decided.
+3. **Latency tension, real and unresolved.** `PremortemAnalyzer` is
+   deliberately ONE combined call specifically because two separate calls
+   measured at 20s+ against a <10s budget (`simulator/pipeline.py`'s own
+   docstring). A genuinely isolated extraction call reintroduces exactly
+   that tradeoff. Whether this is acceptable (a slower analysis path with
+   real structural grounding) or needs its own latency measurement and a
+   possible combined-call redesign is not decided here.
+4. **Tagging method for the reference corpus.** LLM-assisted with human
+   review, or fully manual? Not decided.
+
+**No code, no causal-rule changes, no re-run of the 18 backtest cases in
+this pass, per the standing scope.**
