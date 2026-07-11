@@ -19,6 +19,14 @@ artifact. It is explicitly NOT the full spec/execution system (out of scope
 this pass) and gated=True always: nothing here authorizes real sending or
 acting, same as every existing act-tier domain requiring its own separate
 permission check before anything real happens.
+
+DATA FOUNDATION PASS, STAGE 1: backing store is now SQLite (core/db.py),
+same migration as core/entity_memory.py -- see that module's docstring for
+the full rationale. Every row appended (a suggestion created, then later
+accepted/declined) is its own SQLite row, same append-only convention as
+before; "latest wins per suggestion_id" is still collapsed in Python
+exactly as it was over JSONL lines, just fed by SQL rows ordered by
+insertion instead of file lines. Signatures unchanged.
 """
 
 from datetime import datetime, timezone
@@ -35,8 +43,9 @@ except ImportError:  # pragma: no cover
 
 from .pattern_watcher import DetectedPattern, detect_recurring_message_patterns
 from .entity_memory import DEFAULT_PATH
+from .db import get_connection
 
-DEFAULT_SUGGESTIONS_PATH = Path("data/suggestions.jsonl")
+DEFAULT_SUGGESTIONS_PATH = Path("data/suggestions.db")
 
 SuggestionStatus = Literal["pending", "accepted", "declined"]
 
@@ -126,20 +135,35 @@ def generate_suggestion(pattern: DetectedPattern) -> PatternSuggestion:
     return PatternSuggestion(pattern=pattern, suggestion_text=suggestion_text, status="pending")
 
 
+def _ensure_schema(conn) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS suggestions (
+            suggestion_id TEXT NOT NULL,
+            entity_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            data TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_suggestions_entity_id ON suggestions(entity_id)")
+    conn.commit()
+
+
 def _read_all_suggestion_records(entity_id: str, path: Union[str, Path] = DEFAULT_SUGGESTIONS_PATH) -> List[SuggestionRecord]:
     path = Path(path)
     if not path.exists():
         return []
-    records = []
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            record = SuggestionRecord.model_validate_json(line)
-            if record.entity_id == entity_id:
-                records.append(record)
-    return records
+    conn = get_connection(path)
+    try:
+        _ensure_schema(conn)
+        rows = conn.execute(
+            "SELECT data FROM suggestions WHERE entity_id = ? ORDER BY rowid", (entity_id,)
+        ).fetchall()
+    finally:
+        conn.close()
+    return [SuggestionRecord.model_validate_json(row[0]) for row in rows]
 
 
 def _read_latest_suggestion_records(entity_id: str, path: Union[str, Path] = DEFAULT_SUGGESTIONS_PATH) -> List[SuggestionRecord]:
@@ -155,10 +179,16 @@ def _read_latest_suggestion_records(entity_id: str, path: Union[str, Path] = DEF
 
 
 def _append_suggestion_record(record: SuggestionRecord, path: Union[str, Path] = DEFAULT_SUGGESTIONS_PATH) -> None:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a") as f:
-        f.write(record.model_dump_json() + "\n")
+    conn = get_connection(path)
+    try:
+        _ensure_schema(conn)
+        conn.execute(
+            "INSERT INTO suggestions (suggestion_id, entity_id, status, created_at, data) VALUES (?, ?, ?, ?, ?)",
+            (record.suggestion_id, record.entity_id, record.status, record.created_at, record.model_dump_json()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def _same_underlying_pattern(a: DetectedPattern, b: DetectedPattern) -> bool:

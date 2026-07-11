@@ -130,6 +130,7 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Literal
 
+from .db import get_connection
 from .entity_memory import (
     DEFAULT_PATH,
     EntityMemoryRecord,
@@ -143,7 +144,11 @@ from .suggestion import TaskAgentSpecStub
 
 FAST_MODEL = "claude-haiku-4-5-20251001"
 
-DEFAULT_DRAFT_ATTEMPTS_PATH = Path("data/draft_attempts.jsonl")
+# DATA FOUNDATION PASS, STAGE 1: backing store is now SQLite (core/db.py),
+# same migration as core/entity_memory.py/core/suggestion.py -- see
+# entity_memory.py's module docstring for the full rationale. Signatures
+# unchanged.
+DEFAULT_DRAFT_ATTEMPTS_PATH = Path("data/draft_attempts.db")
 
 DraftStatus = Literal["pending_review", "approved_as_is", "corrected", "rejected"]
 DraftReplyClassification = Literal["approval", "correction", "rejection"]
@@ -408,23 +413,38 @@ def generate_draft(
     )
 
 
-# --- Draft attempt persistence (JSONL, same append-only convention) --------
+# --- Draft attempt persistence (SQLite, same append-only convention) -------
+
+
+def _ensure_draft_attempts_schema(conn) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS draft_attempts (
+            attempt_id TEXT NOT NULL,
+            entity_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            data TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_draft_attempts_entity_id ON draft_attempts(entity_id)")
+    conn.commit()
 
 
 def _read_all_draft_attempts(entity_id: str, path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH) -> List[DraftAttempt]:
     path = Path(path)
     if not path.exists():
         return []
-    records = []
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            record = DraftAttempt.model_validate_json(line)
-            if record.entity_id == entity_id:
-                records.append(record)
-    return records
+    conn = get_connection(path)
+    try:
+        _ensure_draft_attempts_schema(conn)
+        rows = conn.execute(
+            "SELECT data FROM draft_attempts WHERE entity_id = ? ORDER BY rowid", (entity_id,)
+        ).fetchall()
+    finally:
+        conn.close()
+    return [DraftAttempt.model_validate_json(row[0]) for row in rows]
 
 
 def _read_latest_draft_attempts(entity_id: str, path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH) -> List[DraftAttempt]:
@@ -438,10 +458,16 @@ def _read_latest_draft_attempts(entity_id: str, path: Union[str, Path] = DEFAULT
 
 
 def _append_draft_attempt(record: DraftAttempt, path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH) -> None:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a") as f:
-        f.write(record.model_dump_json() + "\n")
+    conn = get_connection(path)
+    try:
+        _ensure_draft_attempts_schema(conn)
+        conn.execute(
+            "INSERT INTO draft_attempts (attempt_id, entity_id, status, timestamp, data) VALUES (?, ?, ?, ?, ?)",
+            (record.attempt_id, record.entity_id, record.status, record.timestamp, record.model_dump_json()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def persist_draft_attempt(attempt: DraftAttempt, path: Union[str, Path] = DEFAULT_DRAFT_ATTEMPTS_PATH) -> None:

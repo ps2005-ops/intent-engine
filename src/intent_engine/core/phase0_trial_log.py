@@ -16,9 +16,16 @@ worked, it only records what someone else decided.
 
 Deliberately not wired into voice/cli.py as a new command -- log_trial_interaction()
 is meant to be called directly, right after a manual relay interaction, by
-whoever is doing the relaying. Same append-only JSONL convention as every
-other record in this project (entity_memory.jsonl, suggestions.jsonl,
-draft_attempts.jsonl) -- one line per interaction, never mutated.
+whoever is doing the relaying. Same append-only convention as every other
+record in this project (entity_memory, suggestions, draft_attempts) -- one
+row per interaction, never mutated.
+
+DATA FOUNDATION PASS, STAGE 1: backing store is now SQLite (core/db.py),
+same migration as the other three stores -- see entity_memory.py's module
+docstring for the full rationale. This store has no id field at all (a
+pure append log, nothing ever gets "latest wins" collapsed), so the
+migration here is the simplest of the four: one row per entry, read back
+in insertion order. Signatures unchanged.
 """
 
 from datetime import datetime, timezone
@@ -32,7 +39,9 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Literal
 
-DEFAULT_PHASE0_LOG_PATH = Path("data/phase0_trial_log.jsonl")
+from .db import get_connection
+
+DEFAULT_PHASE0_LOG_PATH = Path("data/phase0_trial_log.db")
 
 InputType = Literal["text", "voice", "image"]
 Entrypoint = Literal["process_voice_interaction", "/audio", "/verify"]
@@ -73,11 +82,29 @@ def log_trial_interaction(
         worked_well=worked_well,
         note=note,
     )
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a") as f:
-        f.write(entry.model_dump_json() + "\n")
+    conn = get_connection(path)
+    try:
+        _ensure_schema(conn)
+        conn.execute(
+            "INSERT INTO trial_log (timestamp, data) VALUES (?, ?)",
+            (entry.timestamp, entry.model_dump_json()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
     return entry
+
+
+def _ensure_schema(conn) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS trial_log (
+            timestamp TEXT NOT NULL,
+            data TEXT NOT NULL
+        )
+        """
+    )
+    conn.commit()
 
 
 def read_trial_log(path: Union[str, Path] = DEFAULT_PHASE0_LOG_PATH) -> List[PhaseZeroLogEntry]:
@@ -86,11 +113,10 @@ def read_trial_log(path: Union[str, Path] = DEFAULT_PHASE0_LOG_PATH) -> List[Pha
     path = Path(path)
     if not path.exists():
         return []
-    entries = []
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            entries.append(PhaseZeroLogEntry.model_validate_json(line))
-    return entries
+    conn = get_connection(path)
+    try:
+        _ensure_schema(conn)
+        rows = conn.execute("SELECT data FROM trial_log ORDER BY rowid").fetchall()
+    finally:
+        conn.close()
+    return [PhaseZeroLogEntry.model_validate_json(row[0]) for row in rows]

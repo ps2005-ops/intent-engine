@@ -1532,3 +1532,100 @@ of rediscovered:
    time. No scaffolding prefix, either generation.
 
 Full suite: 373 passed, 1 skipped, zero regressions (+22 from this pass).
+
+## Data foundation pass, Stage 1: SQLite migration
+
+All 4 append-only JSONL stores (`core/entity_memory.py`,
+`core/suggestion.py`, `core/draft_generator.py`'s draft attempts,
+`core/phase0_trial_log.py`) now persist to SQLite via a new shared
+low-level connection helper, `core/db.py`. Each store keeps its own table
+schema and owns its own read/write functions exactly as before — no
+shared ORM-style abstraction imposed across all 4 (considered and
+rejected: their record shapes differ enough — some collapse to "latest
+wins per id" on repeat appends, one has no id at all — that one shared
+abstraction would fit none of them well).
+
+**Signatures unchanged**, confirmed by grep across all 18 real call sites
+(production + test code) before touching anything: same function names,
+same parameters, same return types, same empty-result-on-missing-file
+behavior. Zero test files needed to change to pass against the new
+backend — the 3 pre-existing `test_entity_memory.py` tests, and every
+other test across `test_suggestion.py`, `test_draft_generator.py`,
+`test_phase0_trial_log.py`, and every domain module that writes through
+these stores (`scrap_estimate.py`, `mom_fitness_captions.py`,
+`brother_music_captions.py`, `voice/`), passed unmodified.
+
+**One flagged, deliberate exception to "signatures unchanged":**
+`JsonlEntityMemoryWriter`'s class name is now backend-inaccurate (writes
+SQLite, not JSONL). Kept anyway rather than renamed this pass — a rename
+touches all 18 call sites for a cosmetic reason alone, a larger blast
+radius than this stage should take on. Tracked here as a real followup,
+not silently accepted: do a small, dedicated rename pass
+(`JsonlEntityMemoryWriter` → `SqliteEntityMemoryWriter` or similar) on its
+own, separate from any future functional Stage.
+
+**Query helpers, new this pass** (`core/entity_memory.py`):
+`records_by_artifact_kind(entity_id, artifact_kind, path)` and
+`count_records_by_entity(entity_id, path)` — real, indexed SQL queries,
+not full-table Python scans. `read_records()` itself is now an indexed
+`WHERE entity_id = ?` query — this directly answers the scaling note the
+pre-migration module docstring flagged ("O(n) full scan... revisit if the
+file grows large enough").
+
+### Domain-typing: the schema fix for Part 2/3's masquerade finding
+
+Per the explicit addition to this stage's scope: `EntityMemoryRecord`
+gained `artifact_kind: Optional[Literal["message", "caption"]] = None`,
+additive and default-`None`, so every existing caller (simulator
+decisions, voice interactions, scrap-estimate records) is unaffected.
+This is the schema-level answer to a real structural smell found in Part
+2/3, not glossed over or ported into SQL unexamined: caption-domain
+records had to be phrased "Update Instagram with today's caption: ..."
+purely so `pattern_watcher._extract_recipient`'s message-era verb-gate
+would find "instagram" as a recipient — gathering had exactly one record
+shape (a message to someone) to group by, so a caption had to disguise
+itself as one.
+
+**This pass adds the column and backfills it correctly for existing
+data. It does NOT change gathering/matching logic** (`pattern_watcher.py`,
+`draft_generator._gather_supporting_records`) to consume it — deliberately
+deferred, same discipline as every other "state the finding, don't build
+the fix under a different stage's momentum" deferral in this project (the
+compound-action mechanism, the `PersonalContext` pull-strategy). A future
+pass could group caption records by `(entity_id, artifact_kind)` directly
+instead of requiring a verb-gate match, eliminating scaffolding prefixes
+like "Update Instagram with today's caption:" entirely for that domain —
+proposed here, not built.
+
+**Migration verification, real numbers from this repo's actual
+`data/*.jsonl` files** (`scripts/migrate_jsonl_to_sqlite.py`, row counts
+asserted equal before printing success, not assumed):
+- `entity_memory`: 11 source lines → 11 destination rows. Backfill
+  breakdown: 0 `caption` (no mom/brother caption data has ever been
+  written to this repo's real `data/` directory — those domains were only
+  ever exercised against `tmp_path`/`/tmp` scratch files during Part 2/3's
+  live verification), 6 `message` (real recurring-message-shaped records
+  from earlier `voice/` demo runs, detected via the same, unmodified
+  `pattern_watcher._extract_recipient` the live recurring-message loop
+  itself depends on — not a new heuristic invented for this backfill), 5
+  `None` (simulator decisions and non-recurring voice actions like "block
+  off Thursday" — correctly left blank rather than force-fit into either
+  bucket, since the field doesn't describe them).
+- `suggestions`: 2 source lines → 2 destination rows.
+- `draft_attempts`: 4 source lines → 4 destination rows.
+- `phase0_trial_log`: no source file exists (never used in this repo yet)
+  — skipped, not an error.
+
+Query-helper demo against this real migrated data (not synthetic):
+`records_by_artifact_kind("delegate demo co", "message")` correctly
+returns the 6 real "email Sarah"/"email Alex" records;
+`count_records_by_entity("delegate demo co")` returns 9, matching
+`len(read_records(...))` exactly.
+
+6 new tests added to `test_entity_memory.py` (SQLite-backed-file check,
+`artifact_kind` default/round-trip, both query helpers including their
+empty-file cases). Full suite: 379 passed, 1 skipped, zero regressions.
+
+**Stopping here for review, per instruction** — Stage 2 (two-tier
+raw/summary layer) and Stage 3 (quiet-observer digest design proposal)
+have not been started.
