@@ -29,12 +29,30 @@ default (cheap, compact) and, only if the caller explicitly asks
 Nothing here decides "you only get the summary" on the caller's behalf --
 the raw tier is always one call away, never deleted or hidden behind the
 summary.
+
+DATA FOUNDATION PASS, STAGE 3: detect_trends() below is the "Tier-2
+summary trend" feed the Stage 3 quiet-observer digest proposal flagged as
+missing machinery -- now built. Deterministic, no LLM call anywhere in
+detection: it compares consecutive EntitySummaryRecords per entity on
+three dimensions computed from real Tier-1 fields already in the schema
+(record_volume, source_mix, salience_distribution) -- no invented
+dimension requiring data that doesn't exist. See core/entity_digest.py
+for how a TrendCandidate is turned into a digest item (only after passing
+that module's own persistence/evidence/novelty bars -- detection here
+returns every candidate, including ones that won't clear those bars, so
+the gate's rejections are visible and testable, not silently absorbed
+into detection).
 """
 
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, NamedTuple, Optional, Union
 from uuid import uuid4
+
+try:
+    from typing import Literal
+except ImportError:  # pragma: no cover
+    from typing_extensions import Literal
 
 from pydantic import BaseModel, Field
 
@@ -221,3 +239,115 @@ def get_tiered_view(
     cited_ids = {record_id for s in summaries for record_id in s.source_record_ids}
     raw_records = [r for r in read_records(entity_id, path=entity_memory_path) if r.record_id in cited_ids]
     return TieredView(summaries=summaries, raw_records=raw_records)
+
+
+# --- Trend detection (Stage 3 feed) -----------------------------------------
+
+TrendDimension = Literal["record_volume", "source_mix", "salience_distribution"]
+Direction = Literal["increasing", "decreasing"]
+
+TREND_DIMENSIONS = ("record_volume", "source_mix", "salience_distribution")
+
+
+class TrendCandidate(BaseModel):
+    entity_id: str
+    trend_dimension: TrendDimension
+    direction: Direction
+    # Number of consecutive, agreeing period-to-period comparisons trailing
+    # from the most recent period -- 1 comparison (2 summaries) is "a
+    # blip" in the Stage 3 proposal's own words; the gate's persistence bar
+    # (core/entity_digest.py, M=2) requires >= 2 to treat this as a real
+    # trend, not detection here.
+    persistence_count: int
+    source_summary_ids: List[str]
+    source_record_ids: List[str]
+
+
+def _period_metrics(
+    source_record_ids: List[str], entity_id: str, entity_memory_path: Union[str, Path]
+):
+    """The three real, deterministic per-period scalars a trend dimension
+    can be computed from -- each derived from fields already on
+    EntityMemoryRecord (source, salience), nothing invented. None where
+    the denominator is 0 (e.g. no voice records that period for
+    salience_distribution) -- an undefined period breaks a trailing run
+    rather than being silently treated as 0, since "no data" and "zero
+    value" are not the same claim."""
+    records = [r for r in read_records(entity_id, path=entity_memory_path) if r.record_id in set(source_record_ids)]
+    metrics = {"record_volume": float(len(records))}
+
+    if records:
+        voice_count = sum(1 for r in records if r.source == "voice")
+        metrics["source_mix"] = voice_count / len(records)
+    else:
+        metrics["source_mix"] = None
+
+    voice_records = [r for r in records if r.source == "voice"]
+    if voice_records:
+        high_count = sum(1 for r in voice_records if r.salience == "high")
+        metrics["salience_distribution"] = high_count / len(voice_records)
+    else:
+        metrics["salience_distribution"] = None
+
+    return metrics
+
+
+def _direction(prev: Optional[float], curr: Optional[float]) -> Optional[Direction]:
+    """None for a missing value OR a "stable" (no-change) comparison --
+    stable isn't a trend to surface, and is treated identically to a data
+    gap: both break a trailing run of agreeing directions."""
+    if prev is None or curr is None:
+        return None
+    if curr > prev:
+        return "increasing"
+    if curr < prev:
+        return "decreasing"
+    return None
+
+
+def detect_trends(
+    entity_id: str,
+    summary_path: Union[str, Path] = DEFAULT_SUMMARY_PATH,
+    entity_memory_path: Union[str, Path] = DEFAULT_PATH,
+) -> List[TrendCandidate]:
+    """Deterministic -- no LLM call anywhere in this function. Walks every
+    consecutive pair of this entity's EntitySummaryRecords (oldest to
+    newest) for each of the 3 real dimensions, and returns one
+    TrendCandidate per dimension whose most recent period-to-period
+    comparison shows a real direction (increasing/decreasing) -- with
+    persistence_count reporting how many CONSECUTIVE trailing comparisons
+    agree with that latest direction. A dimension with no real (non-None)
+    latest-period comparison produces no candidate at all."""
+    summaries = read_summaries(entity_id, path=summary_path)
+    candidates = []
+
+    for dimension in TREND_DIMENSIONS:
+        values = [_period_metrics(s.source_record_ids, entity_id, entity_memory_path)[dimension] for s in summaries]
+
+        # directions[0] = latest comparison (most recent period vs. the one before it),
+        # walking backward in time from there.
+        directions = [_direction(values[i - 1], values[i]) for i in range(len(values) - 1, 0, -1)]
+        if not directions or directions[0] is None:
+            continue
+
+        latest_direction = directions[0]
+        run_length = 0
+        for d in directions:
+            if d == latest_direction:
+                run_length += 1
+            else:
+                break
+
+        spanned_summaries = summaries[len(summaries) - 1 - run_length:]
+        source_record_ids = sorted({rid for s in spanned_summaries for rid in s.source_record_ids})
+
+        candidates.append(TrendCandidate(
+            entity_id=normalize_entity_id(entity_id),
+            trend_dimension=dimension,
+            direction=latest_direction,
+            persistence_count=run_length,
+            source_summary_ids=[s.summary_id for s in spanned_summaries],
+            source_record_ids=source_record_ids,
+        ))
+
+    return candidates

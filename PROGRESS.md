@@ -1930,7 +1930,120 @@ rehearses the gating half, not the diagnosis half.
    nothing" marker) without new state? Leaning toward derivable-from-existing-data,
    but not committed here.
 
-**No code in this section, per the standing scope. The foundation pass
-closes here** — the next fork (observer build vs. Part 5 design vs. the
-simulator evaluation-stage work from the backtest-v1 diagnosis) gets
-decided with all three proposals on the table.
+**Proposal approved with 4 decisions (M=2; batch cap 3, ranked by
+evidence, overflow stays eligible; trend novelty identity =
+(entity_id, trend_dimension, direction); cadence/history state in
+SQLite). Built below.**
+
+## Data foundation pass, Stage 3: the quiet-observer digest (built)
+
+**(a) Tier-2 trend comparison** — `detect_trends()`, added to
+`core/entity_summary.py` (the missing feed the proposal flagged).
+Deterministic, zero LLM calls: walks consecutive `EntitySummaryRecord`s
+per entity across 3 real dimensions computed from existing `EntityMemoryRecord`
+fields — `record_volume` (count), `source_mix` (voice share),
+`salience_distribution` (high-salience share among voice records). No
+invented dimension requiring data that doesn't exist. `persistence_count`
+= number of consecutive trailing agreeing period-to-period comparisons;
+a single comparison (`persistence_count=1`) is a real, returned
+candidate — the design's own "blip," rejected by the gate's M=2 bar, not
+silently absorbed into detection.
+
+**(b) The digest gate** — `core/entity_digest.py`. Gathers Pattern-Watcher
+detections + trend candidates, applies every bar in code before any model
+call: evidence count (`N=3`, reusing the existing convention), trend
+persistence (`M=2`), and novelty — patterns reuse `suggestion.py`'s own
+`_same_underlying_pattern()` directly (real reuse, not a second
+implementation); trends use the exact `(entity_id, trend_dimension,
+direction)` tuple decided above. Survivors are ranked by evidence count
+descending and capped at 3; **only the included items are recorded as
+surfaced** — overflow candidates stay eligible for their next check,
+verified directly (`test_check_for_digest_overflow_item_stays_eligible_for_next_check`).
+`DIGEST_ITEM_TOOL_SCHEMA` has exactly one field, `digest_text` — checked
+directly (`test_digest_item_tool_schema_has_no_include_or_exclude_field`),
+the same structural guarantee as Stage 2's `source_record_ids` never
+being asked of the model.
+
+**(c) Delivery** — `voice/cli.py`'s `_handle_pending_digest()`, wired in
+as Step 1 of `main()`, before the existing suggestion step, mirroring
+`_handle_pending_suggestion()`'s shape exactly (check, print under a
+header) with no accept/decline prompt (informational, not an action).
+`check_for_digest()` returning `None` prints nothing at all — verified
+directly (`test_check_for_digest_returns_none_when_nothing_clears_any_bar`),
+not just designed.
+
+**(d) Provenance** — every `DigestItem.source_record_ids` is computed in
+code from the real candidate that passed every bar (`DetectedPattern.supporting_record_ids`
+for patterns; the union of a trend's spanned summaries' own real
+citations for trends) — never requested from or asserted by the model.
+
+**Cadence/history state**: 3 SQLite tables in `data/entity_digests.db`
+— `digest_checks` (entity_id, checked_at, items_surfaced, written on
+every check, silent or not), `digest_item_history` (the full candidate
+JSON per surfaced item, read back for novelty comparisons),
+`digest_records` (the persisted `DigestRecord`s themselves).
+`should_check_for_digest()` gates cadence (default 3 real days) fully
+independent of whether a check that runs finds anything.
+
+24 new tests across `test_entity_summary.py` (+4, trend detection: full
+persistence, a real blip at persistence=1, a stable dimension producing
+no candidate, insufficient data) and `test_entity_digest.py` (+10: the
+schema guarantee, silence + always-records-the-check, pattern
+surface/repeat-novelty, trend surface/persistence-rejection/repeat-novelty,
+cap+ranking, overflow-stays-eligible).
+
+### Real, live verification — all 4 engineered cases, real API calls throughout
+
+Ran against 4 real synthetic entities via a throwaway verification
+script (session scratch, not committed to the repo — this was
+interactive verification, not a permanent fixture), real weekly-summary
+generation and real digest-item drafting calls, no mocking:
+
+- **(i) Fitness Tracker Co — bar-passing TREND.** 3 real weeks of
+  workout logs, `record_volume` strictly increasing (2→4→6).
+  `persistence_count=2` (clears M=2). Surfaced: *"Over the last 3 weeks,
+  recorded activity volume has been increasing for this entity."* 12
+  `source_record_ids`, all verified to resolve to real Tier-1 records.
+- **(ii) Pattern Verify Co — bar-passing PATTERN.** 3 real occurrences of
+  "email Sarah the weekly status update" inside the real 30-day lookback
+  window. Surfaced: *"You sent an identically-worded message to Sarah on
+  3 separate days, each time between 10am and 12pm UTC."* 3
+  `source_record_ids`, all verified real.
+- **(iii) Blip Verify Co — near-miss, persistence M=1.** Record volume
+  4→2→4 (decreasing then increasing) — latest comparison shows
+  `increasing`, but `persistence_count=1`, not reconfirmed. Correctly
+  SILENT.
+- **(iv) Repeat Verify Co — repeat failing novelty.** A real pattern
+  (3 occurrences of "email Alex the sprint update") surfaced once via a
+  genuine first `check_for_digest()` call (a real "prior cycle," not a
+  mocked history row), then checked again — the second, official
+  verification-round call correctly returned SILENT.
+
+**Exactly the right two surfaced, confirmed programmatically**:
+`actual_surfaced == {"Fitness Tracker Co", "Pattern Verify Co"}` →
+`True`. **Second-round silence check**: re-running both surfaced
+entities' checks again returned `None` for both — everything now
+non-novel, no digest object either time.
+
+**Real live end-to-end CLI demo** (`python -m intent_engine.voice.cli`,
+real subprocess, real stdin, real API calls): first invocation for a
+fresh entity ("CLI Demo Co," 3 real "email Jordan the weekly metrics
+summary" occurrences) printed
+```
+--- Digest ---
+- You sent an identical message to Jordan on 3 separate days, each time between 10am-12pm UTC.
+
+--- Pending suggestion ---
+...
+```
+— the digest appearing first, exactly as wired, before the pre-existing
+suggestion step. A second real invocation for the same entity printed
+neither section (cadence gate suppressed the digest re-check; the
+suggestion was already declined) — real, observed silence at the CLI
+level, not just at the gate's own unit-test level.
+
+Full suite: 402 passed, 1 skipped, zero regressions (+14 from this pass).
+
+**The data foundation pass closes here.** Next fork (Part 5 design vs.
+the simulator evaluation-stage work from the backtest-v1 diagnosis)
+decided with both proposals in hand.

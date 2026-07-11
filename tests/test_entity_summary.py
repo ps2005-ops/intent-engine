@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
 from intent_engine.core.entity_summary import (
     EntitySummaryRecord,
+    detect_trends,
     generate_weekly_summary,
     get_tiered_view,
     read_summaries,
@@ -188,3 +189,83 @@ def test_get_tiered_view_filters_by_period(tmp_path):
 
     assert len(view.summaries) == 1
     assert view.summaries[0].period_start == "2026-02-01T00:00:00+00:00"
+
+
+# --- detect_trends: deterministic, no LLM call ------------------------------
+
+_WEEK_BOUNDS = [
+    ("2026-01-01T00:00:00+00:00", "2026-01-08T00:00:00+00:00"),
+    ("2026-01-08T00:00:00+00:00", "2026-01-15T00:00:00+00:00"),
+    ("2026-01-15T00:00:00+00:00", "2026-01-22T00:00:00+00:00"),
+    ("2026-01-22T00:00:00+00:00", "2026-01-29T00:00:00+00:00"),
+]
+
+
+def _seed_period(entity_memory_path, entity_id, week_index, count, source="voice"):
+    start, _ = _WEEK_BOUNDS[week_index]
+    base = int(start[8:10])  # day-of-month, so timestamps land inside [start, end)
+    records = [
+        _record(entity_id, f"Item {i}", f"2026-01-{base + 1:02d}T00:00:0{i}+00:00", source=source)
+        for i in range(count)
+    ]
+    _seed(entity_memory_path, entity_id, records)
+
+
+def _generate_summary_for_week(entity_id, week_index, entity_path, summary_path):
+    start, end = _WEEK_BOUNDS[week_index]
+    client = _fake_client()
+    return generate_weekly_summary(entity_id, start, end, client=client,
+                                    entity_memory_path=entity_path, summary_path=summary_path)
+
+
+def test_detect_trends_finds_increasing_record_volume_with_full_persistence(tmp_path):
+    entity_path = tmp_path / "entity_memory.db"
+    summary_path = tmp_path / "entity_summaries.db"
+    counts = [2, 4, 6]  # strictly increasing across 3 weeks
+    for i, count in enumerate(counts):
+        _seed_period(entity_path, "Growth Co", i, count)
+        _generate_summary_for_week("Growth Co", i, entity_path, summary_path)
+
+    trends = detect_trends("Growth Co", summary_path=summary_path, entity_memory_path=entity_path)
+    volume_trend = next(t for t in trends if t.trend_dimension == "record_volume")
+
+    assert volume_trend.direction == "increasing"
+    assert volume_trend.persistence_count == 2  # 2 agreeing consecutive comparisons
+    assert len(volume_trend.source_record_ids) == sum(counts)
+
+
+def test_detect_trends_reports_persistence_1_for_a_blip_not_yet_reconfirmed(tmp_path):
+    entity_path = tmp_path / "entity_memory.db"
+    summary_path = tmp_path / "entity_summaries.db"
+    counts = [4, 2, 4]  # decreasing, then increasing -- only the latest comparison agrees with itself
+    for i, count in enumerate(counts):
+        _seed_period(entity_path, "Blip Co", i, count)
+        _generate_summary_for_week("Blip Co", i, entity_path, summary_path)
+
+    trends = detect_trends("Blip Co", summary_path=summary_path, entity_memory_path=entity_path)
+    volume_trend = next(t for t in trends if t.trend_dimension == "record_volume")
+
+    assert volume_trend.direction == "increasing"
+    assert volume_trend.persistence_count == 1  # a real blip, not yet reconfirmed
+
+
+def test_detect_trends_produces_no_candidate_for_a_stable_dimension(tmp_path):
+    entity_path = tmp_path / "entity_memory.db"
+    summary_path = tmp_path / "entity_summaries.db"
+    counts = [3, 3, 3]  # no change at all
+    for i, count in enumerate(counts):
+        _seed_period(entity_path, "Steady Co", i, count)
+        _generate_summary_for_week("Steady Co", i, entity_path, summary_path)
+
+    trends = detect_trends("Steady Co", summary_path=summary_path, entity_memory_path=entity_path)
+    assert not any(t.trend_dimension == "record_volume" for t in trends)
+
+
+def test_detect_trends_returns_empty_list_with_fewer_than_2_summaries(tmp_path):
+    entity_path = tmp_path / "entity_memory.db"
+    summary_path = tmp_path / "entity_summaries.db"
+    _seed_period(entity_path, "New Co", 0, 3)
+    _generate_summary_for_week("New Co", 0, entity_path, summary_path)
+
+    trends = detect_trends("New Co", summary_path=summary_path, entity_memory_path=entity_path)
+    assert trends == []

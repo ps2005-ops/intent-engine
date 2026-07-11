@@ -123,7 +123,9 @@ from ..core.draft_generator import (
     persist_draft_attempt,
     process_draft_reply,
 )
+from ..core.entity_digest import DEFAULT_DIGEST_PATH, check_for_digest, should_check_for_digest
 from ..core.entity_memory import DEFAULT_PATH as DEFAULT_ENTITY_MEMORY_PATH
+from ..core.entity_summary import DEFAULT_SUMMARY_PATH
 from ..core.permissions import PermissionRegistry
 from ..core.suggestion import (
     DEFAULT_SUGGESTIONS_PATH,
@@ -176,6 +178,33 @@ def select_calendar_reader(registry: PermissionRegistry):
         file=sys.stderr,
     )
     return StubCalendarReader(registry)
+
+
+def _handle_pending_digest(
+    entity_id: str, entity_memory_path, summary_path, digest_path
+):
+    """Quiet-observer digest, Data foundation pass Stage 3. Mirrors
+    _handle_pending_suggestion()'s shape (check, print under a header) but
+    with no accept/decline prompt -- a digest is informational and
+    read-only, not an action awaiting a yes/no. should_check_for_digest()
+    gates whether the (not-free) bar-evaluation work runs at all this
+    session; check_for_digest() then either returns a real DigestRecord
+    or None -- printing nothing at all when it returns None is the
+    intended, common-case behavior, not a gap to fill with a placeholder
+    message."""
+    if not should_check_for_digest(entity_id, path=digest_path):
+        return None
+
+    digest = check_for_digest(
+        entity_id, entity_memory_path=entity_memory_path, summary_path=summary_path, digest_path=digest_path,
+    )
+    if digest is None:
+        return None
+
+    print("\n--- Digest ---")
+    for item in digest.items:
+        print(f"- {item.digest_text}")
+    return digest
 
 
 def _handle_pending_suggestion(
@@ -355,6 +384,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--entity-memory-path", default=str(DEFAULT_ENTITY_MEMORY_PATH))
     parser.add_argument("--suggestions-path", default=str(DEFAULT_SUGGESTIONS_PATH))
     parser.add_argument("--draft-attempts-path", default=str(DEFAULT_DRAFT_ATTEMPTS_PATH))
+    parser.add_argument("--summary-path", default=str(DEFAULT_SUMMARY_PATH))
+    parser.add_argument("--digest-path", default=str(DEFAULT_DIGEST_PATH))
     parser.add_argument(
         "--verification-checklist",
         action="append",
@@ -374,6 +405,11 @@ def main(argv=None) -> int:
     gmail_reader = StubGmailReader(registry)
 
     print(f"=== Cognitive Delegate session -- entity_id={args.entity_id!r} ===")
+
+    # Step 1: quiet-observer digest (Data foundation pass, Stage 3) -- prints
+    # nothing at all when the check is skipped (cadence) or finds nothing
+    # (silence is the default, not an edge case).
+    _handle_pending_digest(args.entity_id, args.entity_memory_path, args.summary_path, args.digest_path)
 
     # Step 2: pending Suggestion (existing, or newly detected this turn).
     accepted = _handle_pending_suggestion(args.entity_id, args.suggestions_path, args.entity_memory_path)
