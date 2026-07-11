@@ -1351,18 +1351,13 @@ ignore what it was given.
 
 ## Backtest v1 (18 cases): the honest result
 
-A note on provenance before the numbers: this section was requested with a
-specific set of figures already in hand (15 cases, 40% directional
-accuracy vs. a 50%/67% baseline, 5/6 recall on bad outcomes, a "top-3
-misses" analysis referencing a Meta-scale example). None of that matches
-what `scripts/premortem_backtest.py` (commit `231438b`) actually produced
-— it ran 18 cases, not 15, and none of the 18 involve a large-capital
-incumbent absorbing a loss; every case is an independent startup. Rather
-than write figures into this doc that I can't reproduce from the real run,
-the numbers below are freshly computed from the actual 18-case output,
-verified by rereading the per-case results directly, not assumed to match
-the cited framing. The underlying *shape* of the finding turned out to be
-the same either way — see below.
+A note on provenance before the numbers: this section was originally
+requested with a set of figures that did not match what
+`scripts/premortem_backtest.py` (commit `231438b`) actually produced. That
+mismatch was raised, confirmed, and resolved — the earlier figures were
+wrong and are superseded. Everything below is freshly computed from the
+actual 18-case output, verified by rereading the per-case results
+directly, and is the only version of this finding that stands.
 
 **Setup.** For each of the 18 cases, PremortemAnalyzer's own 3
 failure-mode likelihood labels were reduced to one binary call: if the
@@ -1393,9 +1388,15 @@ lower-risk majority label. That means:
   Buffer's salary transparency, and Basecamp's VC-rejection stance — were
   all called "predicted risky," same as every real disaster in the set.
 
-**Root cause hypothesis, from the 6 misses above (not the "Meta-scale"
-framing originally requested, since no case in this dataset is a
-large-incumbent bet — but the same underlying mechanism):** every one of
+**The failure mode is a DEGENERATE classifier, not a mis-calibrated one.**
+It isn't getting individual risk levels slightly wrong — it's barely
+varying at all: 17 of 18 cases get flagged "risky" regardless of what's
+actually being described. The product's entire value depends on
+discrimination (telling a good bet from a bad one apart); current
+discrimination is near zero. 100% recall achieved by flagging nearly
+everything is not discernment.
+
+**Root cause hypothesis, from the 6 misses above:** every one of
 the 6 misses is a *small, low-cost, reversible* bet — a few thousand
 dollars of cereal boxes, a screencast video, a policy decision with near-
 zero direct cash exposure — made by a team that had little to lose either
