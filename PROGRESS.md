@@ -2506,39 +2506,135 @@ domain the loop has to prove itself on cold.
   real iterations vs. a human doing it is an empirical question this
   design does not get to assume the answer to.
 
-### Open design questions, flagged for decision, not resolved here
+### Open design questions — RESOLVED
 
-1. **Shared code or a documented pattern?** Does the generalizable bar
-   tier ship as literal reusable code every domain pass imports, or stay
-   a documented pattern each domain re-implements? Reusable code is more
-   powerful but risks becoming its own wrong-abstraction burden — this
-   project already explicitly rejected one shared abstraction (a common
-   ORM across the 4 Stage-1 SQLite stores) for exactly this reason. Not
-   decided.
-2. **Budget default.** A fixed default per attempt, or human-specified
-   per domain? Not decided.
-3. **Does honest-floor confirmation need to be human EVERY time?** Or can
-   some floors (e.g., a bound violation that gets fixed and then
-   objectively re-verified passing) auto-confirm once the bar itself is
-   met, reserving mandatory human sign-off only for genuine "is this
-   range/behavior good enough" taste calls? Real tension between full
-   automation and "don't let the system grade its own homework" — not
-   resolved here.
-4. **Is the 6-signature registry actually closed?** Every fix-library
-   entry in this project so far emerged from a real failure, not
-   anticipation — it's likely a first real domain run through this loop
-   surfaces new signatures immediately. Should the registry be
-   extensible/versioned from day one, or frozen for v1 and revisited
-   after real usage? Not decided.
-5. **A cheap, immediate validation idea, not yet decided on:** rather
-   than needing new held-out cases the way the evaluation stage does,
-   could the registry be sanity-checked by REPLAYING it against the
-   scrap-metal arc's own already-known failures (same symptom in, does
-   the registry produce the same diagnosis a human already made)? This
-   uses real, existing ground truth at zero new sourcing cost — distinct
-   from validating the LOOP's real-world iteration savings, which still
-   needs real future usage. Promising, not decided or built here.
+1. **Shared code or a documented pattern? → RESOLVED: documented pattern,
+   v1-deliberately-simple.** Not reusable shared code. Matches this
+   project's own precedent (the explicit ORM rejection across the 4
+   Stage-1 stores) — defer the shared-abstraction question until 2+ real
+   domains actually use the generalizable bar tier and show what's truly
+   common, rather than guessing the right abstraction from zero domains.
+2. **Budget default → RESOLVED: a fixed default per attempt,
+   human-overridable, v1-deliberately-simple.** No per-domain
+   configuration required to start; reuses this project's own existing
+   `budget.total`/`spent()`/`remaining()` shape from Section 4.
+3. **Honest-floor confirmation every time? → RESOLVED per the stated
+   leaning: YES, mandatory human confirmation every time, no auto-confirm
+   path in v1.** The "don't let the system grade its own homework"
+   concern was the stronger, better-grounded argument in the original
+   proposal; a conditional auto-confirm rule would also need its own
+   definition of which bar types qualify, which is not simpler. Kept
+   simple: always human-confirmed.
+4. **Is the registry actually closed? → RESOLVED per the stated leaning:
+   NO — versioned/extensible from day one, not frozen.** This is no
+   longer just a leaning: the replay below (episode 5) found a REAL gap
+   on the very first run against real history, empirically confirming
+   the registry was never going to be closed at 6 signatures.
+5. **The replay idea → APPROVED as Part 5's first build step.** Built
+   below.
 
-**No code. This is the last design piece before the next build decision
-— observer (done), evaluation stage (designed, build-deferred), Part 5
+**No code beyond this pass's registry + replay harness. This is the last
+design piece before the next build decision — observer (done),
+evaluation stage (designed, build-deferred), Part 5
 (designed) — decided together with the full picture in hand.**
+
+## Part 5, first build step: the diagnosis registry + replay
+
+**Scope discipline held, per direct instruction: this pass built ONLY
+the registry (`core/diagnosis_registry.py`) and the replay harness
+(`scripts/replay_diagnosis_registry.py`). No live loop, no orchestrator,
+no budget machinery, no bar objects — those wait on this replay's
+verdict, not built alongside it.**
+
+`core/diagnosis_registry.py`: the 6-signature closed taxonomy from the
+Part 5 proposal, as data (`REGISTRY: List[RegistryEntry]`, each with a
+stated rationale for auditability) plus `diagnose(signature,
+extraction_shape) -> FixCategory`, a thin matching layer with exactly one
+real disambiguation (`unstable_across_reruns` picks between
+`closed_taxonomy_extraction` and `self_consistency_voting` depending on
+whether the current extraction is already a closed taxonomy) and a
+fail-closed default (`novelty_or_scope_gap`, and any signature the
+registry doesn't recognize at all, always resolves to `no_fix_escalate`
+— never a guess). 11 new tests (`test_diagnosis_registry.py`).
+
+### The replay: 6 real episodes, presenting symptoms only, no hindsight
+
+`scripts/replay_diagnosis_registry.py` encodes 6 real, documented failure
+episodes from this project's own history — the invented-taxonomy
+instability, the >100% composite bound, the `assess_deviation` label
+anchoring, the mom's-captions prefix leak, the backtest-v1 degenerate
+classifier, and the photo-4 sub-type near-miss — each with its
+presenting symptoms written as they would have looked AT THE TIME
+(no mention of the eventual fix), run through `diagnose()`, and scored
+against the real historical resolution.
+
+| # | Episode | Triaged signature | Registry selected | Real fix | Verdict |
+|---|---|---|---|---|---|
+| 1 | Invented taxonomies (`category_proportions` v1) | `unstable_across_reruns` (free_text) | `closed_taxonomy_extraction` | closed taxonomy + 3-vote | **MATCH** |
+| 2 | >100% composite bound | `bound_violated` | `deterministic_bounded_composition` | provably-bounded min/max composite | **MATCH** |
+| 3 | Label anchoring (`assess_deviation`) | `anchors_on_offered_context` | `information_hiding` | stripped label/baseline/number | **MATCH** |
+| 4 | Prefix leak (mom's captions) | `anchors_on_offered_context` | `information_hiding` | prefix-strip transform hooks | **MATCH*** |
+| 5 | Degenerate classifier (backtest v1) | `novelty_or_scope_gap` | `no_fix_escalate` | not yet resolved (evaluation stage, deferred) | **MISS — registry gap** |
+| 6 | Near-miss: sub-type instability (photo 4) | `unstable_across_reruns` (closed_taxonomy) | `self_consistency_voting` | disclosed as honest floor, not further iterated | **MISS — scope boundary** |
+
+*Episode 4 matched on fix category, but via a genuinely different
+mechanism than episode 3 (generation-leak/imitation vs.
+classification-bias) — both resolve to `information_hiding` because the
+diagnostic test ("does removing the suspect field change the output?")
+applies identically either way. Recorded as a real finding: the
+`anchors_on_offered_context` signature's documented definition should be
+widened explicitly to cover generation-leak cases, not just
+classification bias, so this match isn't accidental next time.
+
+**4/6 clean matches on real, already-resolved episodes.** The 2 misses,
+scored honestly as findings, not embarrassments:
+
+- **Episode 5 — a real REGISTRY GAP, not a scope boundary.** None of the
+  5 substantive signatures fit the degenerate-classifier symptom (no
+  rerun instability, no single suspect field, no bound violated, no
+  cross-field disagreement, no citation issue) — correctly falls to the
+  catch-all rather than forcing a wrong guess, which is itself a
+  legitimate outcome. Classified as a gap because "insufficient output
+  variance across genuinely different inputs" is a describable, checkable
+  property (unlike the base-rate pivot) — a candidate 7th signature
+  could plausibly be added, though its candidate fix (the evaluation
+  stage) is itself still unvalidated. **This empirically confirms open
+  question 4's resolution** (the registry was never going to be closed
+  at 6) on the very first real run against history, not just as a
+  predicted leaning.
+- **Episode 6 — a CONFIRMED SCOPE BOUNDARY, not a registry defect.** The
+  signature assignment was correct and the selected fix
+  (`self_consistency_voting`) was a reasonable next mechanical step — but
+  sub-type classification was already vote-based going in and still
+  wobbled on this specific borderline photo. The real resolution wasn't
+  "apply the same fix category again," it was recognizing an irreducibly
+  borderline case and disclosing an honest floor instead. This validates
+  the Part 5 proposal's own stopping-rule design (Section 4's
+  mandatory-human-confirmed honest-floor exit) rather than undermining
+  the registry: diagnosis correctly identifies the PROBLEM TYPE;
+  recognizing WHEN to stop retrying that type is the stopping rule's job,
+  never the registry's.
+
+Full suite: 413 total (412 passed, 1 skipped) + zero regressions,
+verified in two parts rather than one combined run, stated honestly: a
+single real live vision-API test
+(`test_scrap_estimate_live.py::test_real_sequential_photos_comparison_note_behaves_correctly`,
+unrelated to this pass's pure-Python, zero-network changes) showed
+severely variable real latency tonight (4m35s on one isolated run,
+9m16s on a second) and repeatedly stalled the combined run past a
+reasonable wait. The full suite minus that one test ran clean: 412
+passed, 1 skipped, 1 deselected, zero regressions (+11 from this pass).
+That one test was then run alone twice more and passed both times, real
+API calls, no mocking — real, not fabricated, evidence it works, just
+not combinable into a single fast run under tonight's API conditions.
+
+**Verdict on what this replay decides, per the checkpoint's own framing:**
+Part 5's v1 proceeds substantially as designed, with the registry
+explicitly treated as extensible (already load-bearing, not
+hypothetical) and the two scrap-arc misses folded back into the design
+as real refinements rather than reasons to rethink the approach: widen
+`anchors_on_offered_context`'s definition to explicitly cover
+generation-leak cases; treat episode 5's gap as a live, named candidate
+7th signature to add once a real fix for it exists to attach; and treat
+episode 6 as confirming (not contradicting) that the stopping rule, not
+the registry, is what has to catch irreducibly-borderline cases.
