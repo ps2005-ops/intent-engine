@@ -2790,3 +2790,104 @@ across projects. Read that way, principles reappearing in job-agent are less
 person's consistent intent signature expressing itself in a second project"
 — real, still meaningful replication evidence, but a different and more
 precise claim than pure independence would be.
+
+## Causal-engine pillar status (overnight run, 2026-07-15)
+
+Executed unattended per `~/Downloads/overnight-execution-plan.md`, real
+API credits, no human gate — full real trace in
+`reports/overnight_trace.md`. Strategic frame: four pillars (causal
+entity-relationship graph, game theory, calibration, mechanism library),
+sequenced calibration/mechanisms first since they upgrade the flagship
+immediately and need no new data.
+
+**Pillar 3 (calibration) — substrate built.** `core/prediction_ledger.py`:
+`record_prediction()`/`resolve_prediction()`/`brier_summary()`, Brier
+component computed in code at resolution, never model-asserted. Not
+wired into any live path yet, per its own scope wall — pure substrate.
+13 tests, 0 live calls. **Adjacent gap found, not fixed** (flagged for a
+human decision, not silently patched): `entity_id` here is not
+normalized, unlike `core/entity_memory.py`'s established convention —
+the same real fragmentation risk that convention exists to prevent.
+
+**Pillar 4 (mechanism library) — v1 built, real-cited.**
+`core/mechanism_library.py` + `core/data/mechanisms.json`: 8 seed
+mechanisms, each backed by a real, checked historical instance found via
+9 real web searches tonight (2020-2023 chip shortage, Delta/Northwest
+price war, German auto industry regulatory capture, Microsoft
+IE/Windows platform envelopment, Lehman Brothers credit contagion, the
+WWI alliance cascade, the AOL-Time Warner winner's curse, Hanjin
+Shipping's debt-fueled overcapacity collapse). None needed the
+"speculative" tier; 3 tiered "plausible" on source-quality grounds
+(educational/advocacy sources vs. primary/major-outlet). Deterministic
+matcher, zero LLM calls, confirmed by a signature-inspection test. 10
+tests.
+
+**The one new LLM capability this plan needed — mechanism-extraction
+reliability — PARKED, not pushed through.** 5 runs × 3 real decision
+texts, isolated + information-hidden extraction. The two clear cases
+were perfectly stable (5/5 both). The deliberately-ambiguous case stayed
+confidently unanimous even after a strengthened negative instruction and
+a full second round — a real, twice-confirmed bar failure, not a guessed
+workaround. 20 live calls spent (budget ≤40). **What a human should
+decide**: whether this reflects a flawed test case (the two clear
+cases' precision suggests the extraction itself isn't over-triggering
+generally) or a real need for a more prominent "insufficient evidence"
+escape hatch in the extraction schema — both real possibilities, not
+resolved here. **Because this gate parked, wiring mechanisms into the
+simulator's rendering (the dependent task) was correctly
+SKIPPED-DEPENDENCY, not attempted with a fallback rendering — the
+combined-call prompt (hard wall) was never at risk either way.**
+
+**The premortem → prediction-ledger bridge — built, against plain
+output.** Per the plan's own explicit fallback (the mechanism-wiring
+dependency parked), `core/premortem_prediction_bridge.py` drafts 1-3
+resolvable predictions from a real `RiskAudit`'s failure modes alone, no
+mechanism enrichment. Model drafts, code decides — the drafting schema
+has no id/include field, checked directly. **A real bug was found and
+fixed within this task's own live verification, not deferred**: drafted
+`resolve_by` dates came back in 2025 (already past relative to the real
+session date) because the prompt never stated today's actual date.
+Fixed by stating it explicitly, backstopped by a code-level check that
+rejects any non-future or malformed date before persisting — re-verified
+live afterward, all future dates. 7 tests, 4 live calls (budget ≤6).
+
+**Pillar 1 (causal graph) — v0 built, scoped to dad's real domain.**
+`core/entity_graph.py`: nodes/edges deterministically derived from real
+scrap-check/weigh-in records, zero LLM calls. `affected_by(node,
+hops<=2)` does real BFS reachability with per-node edge provenance. 10
+tests, including a hand-checkable constructed graph and a real honesty
+check: **this repo's actual entity memory has zero real scrap-check
+records yet** (confirmed by direct query before writing any code, not
+assumed) — the graph builder is verified to handle that real-but-empty
+input honestly rather than only ever being tested against synthetic
+data. `buyer` nodes and `buys_from`/`ships_material` edges are
+schema-supported but have zero real population source in this codebase
+today — left empty, not fabricated to look populated.
+
+**Pillar 2 (game theory) remains unstarted, BY DESIGN, not by
+oversight.** Per the strategic frame's own sequencing: game theory needs
+the extraction layer (mechanism-matching) to mature first, and that
+layer parked tonight on its own reliability gate. Building game-theory
+work now would mean building on top of a capability that hasn't cleared
+its own bar — exactly the kind of ungrounded layering this project's
+overfitting guard and stopping-rule discipline both exist to prevent.
+
+**What was explicitly NOT done, per Part C of the plan (so nothing
+"helpfully" happened)**: no game-theory solver work; no LLM population
+of the graph from news/filings; no Brier-based confidence adjustment
+(the ledger has zero resolved predictions yet — nothing to adjust from);
+no changes to scrap, captions, digest, observer, or voice domains; no
+evaluation-stage build; no Part 5 orchestrator build; no retrieval
+restructuring; no cleanup pass.
+
+**Suite discipline held throughout**: full offline suite green before
+every commit tonight (437 → 447 → 447 → 454 → 464 passed, 1 skipped, 1
+deselected — the one known-slow live vision test, separately verified
+passing earlier in the session — zero regressions at any point). 6
+commits, one per task (including the parked Task 3, whose real
+scaffolding and real distributions were committed even though its
+capability-level verdict was PARK).
+
+**Full real trace, every bar's actual value, every real distribution,
+every commit hash: `reports/overnight_trace.md`.** This document is the
+summary; that one is the primary evidence.
