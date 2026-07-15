@@ -5,9 +5,24 @@
 #
 # Safety model, stated plainly (see PROGRESS.md's "Overnight autonomous
 # operation" section for the full writeup):
-# - Tool/path/network scoping is enforced structurally via
-#   .claude/nightly-agent-settings.json + --allowedTools/--disallowedTools,
-#   not by prompt instruction alone.
+# - Runs under --permission-mode auto (Anthropic's real safety-classifier
+#   mode, verified directly this session via a live `claude -p ... --permission-mode
+#   auto` call -- not the earlier, incorrect secondhand read that it needed
+#   an unavailable model tier), not --dangerously-skip-permissions -- per
+#   Anthropic's own guidance, full bypass is for disposable sandboxes, not
+#   a real dev machine. Auto mode itself can only be selected as the
+#   SESSION DEFAULT from ~/.claude/settings.json (user-level) -- Claude
+#   Code deliberately ignores defaultMode:"auto" set at the project level
+#   (.claude/settings.json / .claude/settings.local.json) so a checked-out
+#   repo can never grant itself elevated trust. This script's own
+#   --permission-mode auto is a plain CLI flag (an explicit per-invocation
+#   choice by whoever runs the script), not a project-settings escalation,
+#   and is unaffected by that restriction.
+# - On top of the classifier, explicit --allowedTools/--disallowedTools plus
+#   .claude/nightly-agent-settings.json's own deny list are a SECOND,
+#   structural layer evaluated regardless of mode -- not relying on the
+#   classifier's judgment alone for the things that must never happen
+#   (force-push, rm -rf, main-branch pushes, credential paths).
 # - --max-budget-usd is a REAL hard cap (verified flag). There is no
 #   --max-turns flag in this CLI version -- checked directly via `claude
 #   --help`, not assumed. "Stop when budget/turns run out" is therefore only
@@ -87,10 +102,13 @@ INSTRUCTIONS:
 - Never touch files outside this task's stated scope.
 - Never modify ROADMAP.md, MORNING_REPORT.md, or anything under .claude/ -- those are managed by the orchestrating script, not you."
 
-# 5. Invoke claude -p, scoped and budgeted.
+# 5. Invoke claude -p, scoped and budgeted. Auto mode (the real safety
+# classifier), not full bypass -- backstopped by the explicit
+# allow/disallow lists and settings file regardless of what the classifier
+# would otherwise permit.
 RESULT_JSON="$(claude -p "$FULL_PROMPT" \
   --settings "$SETTINGS_FILE" \
-  --permission-mode dontAsk \
+  --permission-mode auto \
   --allowedTools "$ALLOWED_TOOLS" \
   --disallowedTools "$DISALLOWED_TOOLS" \
   --max-budget-usd "$NIGHTLY_BUDGET_USD" \

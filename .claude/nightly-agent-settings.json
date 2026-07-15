@@ -1,7 +1,7 @@
 {
-  "_comment": "Permission scoping for the unattended nightly agent (nightly_agent.sh) ONLY. Not the interactive-session default -- passed explicitly via --settings, never picked up automatically. Deny takes precedence over allow (verified against current Claude Code docs, 2026-07); a broad deny blocks even a narrower allow. Network denial via Bash patterns is enforced at the tool-invocation level, not the OS level -- stated honestly, not oversold: it stops Claude from directly running curl/wget/etc., but does not sandbox the process. WebFetch/WebSearch are separately denied as whole tools.",
+  "_comment": "Permission scoping for the unattended nightly agent (nightly_agent.sh) ONLY. Not the interactive-session default -- passed explicitly via --settings, never picked up automatically. defaultMode here is a fallback only: nightly_agent.sh's own --permission-mode auto CLI flag wins on precedence (CLI flags override a --settings file for the session). Deny takes precedence over allow (verified against current Claude Code docs, 2026-07); a broad deny blocks even a narrower allow. Network denial via Bash patterns is enforced at the tool-invocation level, not the OS level -- stated honestly, not oversold: it stops Claude from directly running curl/wget/etc., but does not sandbox the process. WebFetch/WebSearch are separately denied as whole tools. These explicit allow/deny lists are a second, structural layer on top of whatever the auto-mode classifier would otherwise permit -- not a replacement for it.",
   "permissions": {
-    "defaultMode": "dontAsk",
+    "defaultMode": "auto",
     "allow": [
       "Read",
       "Edit",
@@ -41,6 +41,7 @@
       "WebSearch",
       "Read(.env)",
       "Read(.env.*)",
+      "Read(~/.ssh/**)",
       "Read(credentials/**)",
       "Edit(.env)",
       "Edit(.env.*)",
