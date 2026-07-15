@@ -1,0 +1,47 @@
+{
+  "_comment": "TEMPLATE, NOT ACTIVE. Per the request's item 5: 'in the job-agent repo (if ever pointed there): submission, outreach, and Gmail modules are read-only.' This file lives here in intent-engine (not copied into ~/job-application-agent) because that repo was explicitly marked read-only for a separate task this session -- nothing should be written there without a direct instruction to do so. If nightly_agent.sh is ever pointed at that repo, copy this file into its .claude/ directory (adjusting the exact module paths against that repo's real layout, which has not been verified against this template) and pass it via --settings instead of nightly-agent-settings.json. Not tested, not wired into nightly_agent.sh's REPO_ROOT logic today -- intent-engine is the only repo this task actually configured or rehearsed against.",
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout -b agent/*)",
+      "Bash(git checkout agent/*)",
+      "Bash(git push origin agent/*)",
+      "Bash(gh pr create*)",
+      "Bash(gh pr view*)",
+      "Bash(python -m pytest*)",
+      "Bash(pip install*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push origin main*)",
+      "Bash(git push origin master*)",
+      "Bash(git reset --hard*)",
+      "Bash(rm -rf*)",
+      "Bash(sudo*)",
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "WebFetch",
+      "WebSearch",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(credentials/**)",
+      "Edit(.env)",
+      "Edit(.env.*)",
+      "Edit(credentials/**)",
+      "Edit(apply_agent/submit/**)",
+      "Edit(apply_agent/outreach/**)",
+      "Edit(apply_agent/**gmail**)",
+      "Edit(**/gmail_send*)",
+      "Edit(**/gmail_draft*)"
+    ]
+  }
+}
