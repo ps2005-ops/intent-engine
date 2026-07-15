@@ -59,7 +59,7 @@ def _load_result_json(path: str) -> dict:
         raw = Path(path).read_text().strip()
         return json.loads(raw)
     except Exception as exc:  # real run output can be malformed if the invocation itself errored
-        return {"status": "unknown", "result": f"(could not parse result JSON: {exc})", "total_cost_usd": None}
+        return {"is_error": True, "subtype": "unknown", "result": f"(could not parse result JSON: {exc})", "total_cost_usd": None}
 
 
 def render_no_task_report(now: str) -> str:
@@ -90,11 +90,19 @@ def render_report(args, now: str) -> str:
     result = _load_result_json(args.result_json)
     baseline_summary = _parse_test_summary(args.baseline_tests)
     final_summary = _parse_test_summary(args.final_tests)
-    status = result.get("status", "unknown")
+    # Real --output-format json field names, confirmed against an actual
+    # run's saved JSON (2026-07-15 rehearsal) -- NOT "status", which this
+    # function incorrectly looked for before that rehearsal caught it (every
+    # prior run would have been mis-labeled PARTIAL/BLOCKED regardless of
+    # real outcome). Fail closed on a missing/malformed field: an
+    # unrecognized result is treated as not-confirmed-successful, never
+    # assumed done.
+    is_error = result.get("is_error", True)
+    subtype = result.get("subtype", "unknown")
     cost = result.get("total_cost_usd")
     cost_str = f"${cost:.4f}" if isinstance(cost, (int, float)) else "(unknown -- result JSON did not include total_cost_usd)"
 
-    outcome = "DONE" if status == "success" and "failed" not in final_summary else "PARTIAL/BLOCKED"
+    outcome = "DONE" if not is_error and "failed" not in final_summary else "PARTIAL/BLOCKED"
 
     lines = [
         "# Morning report",
@@ -102,7 +110,7 @@ def render_report(args, now: str) -> str:
         f"Run: {now}",
         f"Task attempted: **{args.task_id}**",
         f"Branch: `{args.branch}`",
-        f"Result: **{outcome}**" + (f" ({status})" if status != "success" else ""),
+        f"Result: **{outcome}**" + (f" (subtype={subtype}, is_error={is_error})" if outcome != "DONE" else ""),
         "",
         "## Tests",
         f"- Before: {baseline_summary}",

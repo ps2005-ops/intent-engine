@@ -17,7 +17,11 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T001 — Add real tests for `simulator/cli.py`'s `main()`
 
-- **Status**: RUNNABLE
+- **Status**: DONE — completed 2026-07-15 via `nightly_agent.sh`'s first
+  real rehearsal (Auto mode), commit `8e0dbac` on `agent/T001` (local
+  branch, no remote configured — not yet merged to `main`, pending
+  review). 5 new tests, 470 passed / 1 skipped, zero regressions, real
+  cost $0.9347. See `MORNING_REPORT.md` / `reports/` for the full record.
 - **Priority**: 1
 - **Size**: S
 - **Source**: PROGRESS.md line 418 — "nothing in the test suite calls
