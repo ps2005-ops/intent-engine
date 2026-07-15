@@ -2638,3 +2638,155 @@ generation-leak cases; treat episode 5's gap as a live, named candidate
 7th signature to add once a real fix for it exists to attach; and treat
 episode 6 as confirming (not contradicting) that the stopping rule, not
 the registry, is what has to catch irreducibly-borderline cases.
+
+## Cross-project replication: the job-application-agent case study
+
+Documentation/analysis only, no code. Source:
+`~/job-application-agent/docs/case_studies/job_agent_intent_arc.md` (a
+separate repository, read-only) — a real development-history reconstruction
+of a different, independently-built agent project by the same author,
+covering 2026-07-06 through 2026-07-14. This is the **first cross-project
+evidence** for both the fix library and the iteration-loop thesis — every
+prior confirmation (the anchoring pattern fired 3x, the diagnosis registry's
+4/6 in-sample match) came from inside this one repository.
+
+### 1. Out-of-sample replay: job-agent's 9 named "dead ends" against our 6-signature registry
+
+Real value, stated per the framing this task itself set: a miss here is
+worth more than an in-sample miss, because the registry was built from the
+scrap arc alone and has never seen this project's failures before.
+
+| # | Episode | In scope? | Verdict |
+|---|---|---|---|
+| 1 | "Distance-based geography" (never existed — a corrected false premise) | NO | N/A — a stated-premise correction, not a diagnosable extraction/judgment failure |
+| 2 | Uncontrolled taxonomy A/B test (compared two different collection runs, confounding the taxonomy variable with population drift) | YES | **MISS — registry gap.** No signature covers an invalid experimental control. Candidate: `confounded_comparison`. |
+| 3 | `webbrowser.open` monkeypatch (wrong function patched) | NO | N/A — a plain deterministic code bug, outside the registry's LLM-extraction/judgment scope entirely |
+| 4 | Fixed `top_n=10` bullet selection — stable and deterministic, but DRW and Uber Freight (different JD keyword profiles) selected the **identical** 10 bullets from only a 12-bullet inventory | YES | **MISS against the current 6-signature registry — but a clean, independent, out-of-sample MATCH for the proposed (not-yet-built) 7th signature, `stable_but_non_discriminating`.** Structurally identical to episode 5 of the in-sample replay (the backtest-v1 degenerate classifier): consistent output, near-zero discrimination across genuinely different inputs. This is real prospective evidence for that signature, found independently of the case it was originally encoded from — the strongest single finding of this pass. |
+| 5 | Bare-first-word slug guessing (`"US Tiger Securities, Inc."` → `"us"` collided with an unrelated real company's Greenhouse slug) | YES | **MISS — registry gap.** Not rerun-instability (deterministic, confidently wrong every time, not inconsistent) and not a bound violation. Candidate: `unvalidated_heuristic_edge_case`. |
+| 6 | `networkidle` wait silently hung on real Lever pages, always returning **zero** screening questions — indistinguishable from "genuinely no questions" | YES | **MISS — registry gap.** Candidate: `silent_state_collapse` — a real three-state outcome (found / genuinely-none / mechanism-broken) collapses into one value indistinguishable from a different, valid one. Notable: this project already independently solved this exact class of problem elsewhere (the three-state `GmailContext.state`/`CalendarContext.state` fields — `"fetched"`/`"not_authorized"`/`"skipped_for_cost"`, "state what it would do, don't silently skip") — that principle was simply never folded into the diagnosis registry as a named signature. |
+| 7 | Blanket `<label>` scan misread ~70 individual EEO/demographic radio options as 70 separate screening questions | YES | **MISS — same gap family as #5** (an extraction heuristic not scoped/validated against a realistic edge case), folded into the same candidate signature rather than adding a near-duplicate. |
+| 8 | 3-ancestor-level container walk landed on the wrong DOM element (the whole form) | NO | N/A — deterministic DOM-traversal code, outside the registry's scope, same category as #3 |
+| 9 | Three rejected inline-inspection tool calls | NO | N/A — the source document itself states this explicitly: "a process dead end (the user's own permission layer), not a technical one" |
+
+**Reinforcing evidence, not separately tabled**: two more real job-agent bugs
+outside the "named dead ends" list independently reinforce the
+`silent_state_collapse` candidate — the 07-09 "unclassified must never mean
+excluded" policy fix (an uncertain classification outcome silently collapsed
+into a binary include/exclude decision, causing queue size to collapse from
+expected hundreds to 4) is the *same shape* as #6 above, found on a
+completely different subsystem (filtering, not screening-question
+extraction). Two independent hits on one candidate signature, in one
+external project, is real signal this gap is not a one-off.
+
+**Score: 5 in-scope episodes, 1 independently confirms a proposed signature,
+4 reveal real gaps collapsing into 3 candidate signatures** (plus 2 more
+reinforcing hits on one of those 3 from outside the named list). 4 episodes
+were correctly out of the registry's scope entirely (deterministic code bugs
+and a premise correction, not LLM-extraction/judgment failures) — flagged as
+N/A rather than force-fit into a signature that doesn't apply, which would
+have been dishonest scoring.
+
+### 2. Taxonomy comparison: the 6 intent-signature dimensions vs. the evaluation stage's 4 structural-match fields
+
+**These operate at different levels, stated plainly before comparing them:**
+the intent-signature dimensions (`evidence_before_change`,
+`honest_metric_over_flattering_metric`, `compounding_fix_over_threshold_fix`,
+`closed_structure_over_free_generation`, `human_at_judgment_points`,
+`automation_of_convergence_not_framing`) describe **how a person behaves**
+across decisions; the evaluation-stage's 4 fields
+(`bet_magnitude_relative_to_resources`, `bet_reversibility`,
+`feedback_horizon`, `traction_at_decision_time`) describe **properties of
+one decision's structural shape**. No direct 1:1 mapping should be expected
+or forced — a person-trait taxonomy and a decision-shape taxonomy are
+different objects.
+
+**Real overlaps found anyway:**
+- `human_at_judgment_points` and `bet_reversibility` connect directly: the
+  job-agent arc's own real pattern (autosend refused outright, real
+  submission always gated on an explicit human click, but the read-only
+  company-resolver cache runs fully automated) shows a person gating
+  MORE tightly exactly where the action is less reversible — reversibility
+  is the kind of signal that should trigger judgment-point gating. This is
+  also, independently, the exact shape of Part 5's own stopping-rule design
+  (honest-floor exits require mandatory human confirmation, always) — the
+  same principle, applied to a person's own behavior in job-agent and to
+  our loop's own architecture in Part 5.
+- `evidence_before_change` and `traction_at_decision_time` are related but
+  not identical: one is a procedural habit (does the decision-maker measure
+  first), the other is a property of the decision's situation (was there
+  already real traction). Adjacent, not the same axis.
+- `closed_structure_over_free_generation` doesn't map onto the 4 fields at
+  all, but maps directly onto the diagnosis registry's own
+  `closed_taxonomy_extraction`/`information_hiding` fix categories — more
+  relevant to Section 3 below than to the evaluation stage specifically.
+
+**A genuine extension, flagged as a recommendation only, not a decision:**
+`evidence_before_change` + `honest_metric_over_flattering_metric` together
+suggest a 5th structural-match condition the current 4 don't cover: whether
+the decision itself was **grounded in measured evidence or assumption**
+before being made — e.g. Webvan's warehouse buildout assumed demand rather
+than measuring it first. This is a different axis from the existing 4 (which
+describe the bet's shape, not its epistemic grounding) and would need the
+same open-question treatment (closed taxonomy, extraction-vs-computable
+honesty) the other 4 already went through — **not silently added, proposed
+here for the same decision process, not built or adopted.**
+
+**No real conflicts found** between the two taxonomies — the different
+levels of abstraction mean there's nothing to contradict, only a category
+error risk in merging them without translation.
+
+**Recommendation**: do not merge the 6 intent-signature dimensions into the
+evaluation stage's 4 fields wholesale — different objects, would muddy a
+currently clean, decision-shaped taxonomy. Do consider the "measured vs.
+assumed" grounding dimension as a real candidate 5th field, decided the same
+way the existing 4 were.
+
+### 3. Cross-project replication record
+
+**Principles independently re-derived in job-agent** (no reference to this
+repository exists anywhere in the source document, and job-agent's own
+history starts from a plain SPEC.md interview on 2026-07-06 — no evidence
+either project's development process consulted the other):
+- **Closed-structure-over-free-generation** — `tailoring2/select.py`'s
+  never-reword design (claim integrity true by construction, "stronger than
+  policing a rephraser" — the job-agent document's own words, independently
+  arriving at exactly this project's own "information hiding beats
+  instruction" conclusion), deterministic scoring throughout, work-authorization
+  answers resolved from config only, never LLM-drafted.
+- **The predictability boundary** — job-agent's Section 4 draws, independently,
+  the *exact* distinction Part 5's proposal draws between registry-diagnosable
+  triage and the base-rate-pivot-style reframe: "the intent signature predicts
+  *how* a finding will be handled... It does not predict *what* the finding
+  will be." That is this project's own "diagnosis is mapping a known failure
+  signature to a known fix; recognizing a whole approach is wrong is a
+  categorically different, unmechanizable move" — arrived at independently,
+  in a different project, using different language, over the same real
+  structural distinction.
+- **The iteration-loop shape itself** — the Gmail OAuth debugging saga (5
+  real, sequential diagnose-and-fix steps, alternating between
+  user-supplied reframes and assistant-autonomous root-causing) and the
+  taxonomy A/B dead-end → controlled-retest fix are real, independent
+  instances of exactly Part 5's try → bar fails → diagnose → targeted fix →
+  re-verify shape, occurring in a project that was never designed with Part
+  5's vocabulary in mind. This is evidence the loop shape is a real,
+  recurring pattern worth formalizing — not an artifact of how the
+  scrap-metal arc's own write-up happened to be told.
+- **Human-at-judgment-points as honest-floor-style gating** — see the
+  taxonomy comparison above.
+
+**Zero principles identified as imported** (consciously carried over from
+this repository into job-agent) — no cross-reference exists in the source
+document to check against.
+
+**One honest caveat on "independent," stated plainly rather than
+overclaimed**: both projects share the same author. "No cross-referenced
+codebase or document" is verifiably true; "fully independent judgment" is a
+stronger claim this evidence can't fully support, since the same person's
+accumulated taste is the common thread across both. The case study's own
+framework actually names this precisely — its "Intent Signature" concept is
+exactly the claim that one person's demonstrated judgment predicts behavior
+across projects. Read that way, principles reappearing in job-agent are less
+"two unrelated parties independently discovering the same law" and more "one
+person's consistent intent signature expressing itself in a second project"
+— real, still meaningful replication evidence, but a different and more
+precise claim than pure independence would be.
