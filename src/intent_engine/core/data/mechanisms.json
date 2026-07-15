@@ -1,0 +1,162 @@
+[
+  {
+    "mechanism_id": "supply_shock_propagation",
+    "name": "Supply-shock propagation",
+    "trigger_conditions": ["concentrated_supplier_base", "few_dominant_competitors"],
+    "causal_chain": [
+      "A small number of suppliers account for most of an industry's critical input",
+      "An external shock (natural disaster, geopolitical disruption, demand spike elsewhere) removes capacity from that supplier base",
+      "Buyers relying on just-in-time inventory have no slack to absorb the gap",
+      "Production halts cascade downstream faster than new supply can be qualified or built",
+      "Recovery lags the shock by quarters to years because building new supplier capacity is slow"
+    ],
+    "historical_instances": [
+      {
+        "case": "2020-2023 global semiconductor chip shortage (automotive sector)",
+        "year": 2021,
+        "source": "https://en.wikipedia.org/wiki/2020%E2%80%932023_global_chip_shortage ; https://www.clevelandfed.org/publications/economic-commentary/2021/ec-202117-semiconductor-shortages-vehicle-production-prices"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "prisoners_dilemma_price_war",
+    "name": "Prisoner's-dilemma price war",
+    "trigger_conditions": ["few_dominant_competitors", "symmetric_competitor_response_expected"],
+    "causal_chain": [
+      "A small number of competitors serve the same customer base with substitutable products",
+      "One competitor cuts price to gain share, expecting rivals not to match",
+      "Rivals match the cut to avoid losing share, since matching dominates not-matching for each individual player",
+      "Industry-wide margins collapse below what any player would have accepted unilaterally",
+      "No player can unilaterally raise price back without losing share, so the low-price equilibrium persists until capacity exits"
+    ],
+    "historical_instances": [
+      {
+        "case": "Delta Air Lines vs. Northwest Airlines Atlanta-Minneapolis hub price war",
+        "year": 1990,
+        "source": "https://www.bartleby.com/essay/The-Prisoners-Dilemma-in-the-Airline-Industry-F3H4KJSS8C38Q ; https://www.pragmaticinstitute.com/resources/articles/product/pricing-and-the-prisoners-dilemma/"
+      }
+    ],
+    "confidence_tier": "plausible"
+  },
+  {
+    "mechanism_id": "regulatory_capture_race",
+    "name": "Regulatory-capture race",
+    "trigger_conditions": ["frequent_regulatory_interaction", "few_dominant_competitors"],
+    "causal_chain": [
+      "An industry has a small number of large incumbents who interact with the same regulator repeatedly",
+      "Incumbents invest heavily in lobbying, technical staff loaned to the regulator, and standard-setting participation",
+      "The regulator comes to rely on incumbent-supplied expertise and framing for technical rulemaking",
+      "Rules get written that favor incumbent technology/cost structure over new entrants or stricter alternatives",
+      "The incumbent's competitive position is protected by regulation rather than by superior product or price"
+    ],
+    "historical_instances": [
+      {
+        "case": "German automotive industry's influence over EU vehicle emissions regulation",
+        "year": 2018,
+        "source": "https://www.mindthegap.ngo/harmful-strategies/utilising-state-power/avoiding-regulations-through-corporate-lobbying/example-the-german-car-industrys-regulatory-capture/"
+      }
+    ],
+    "confidence_tier": "plausible"
+  },
+  {
+    "mechanism_id": "platform_envelopment",
+    "name": "Platform envelopment",
+    "trigger_conditions": ["adjacent_market_bundling_opportunity", "network_effects_present"],
+    "causal_chain": [
+      "A platform provider has an established user base with existing network effects in market A",
+      "An adjacent market B has a separate incumbent whose product is a complement or weak substitute to the provider's",
+      "The provider bundles a B-market feature into its A-market platform at zero or near-zero marginal price",
+      "B-market incumbent's access to the shared user base is foreclosed, since users already have the bundled feature",
+      "The provider captures B-market share by leveraging A-market network effects, not by B-market product superiority"
+    ],
+    "historical_instances": [
+      {
+        "case": "Microsoft bundling Internet Explorer with Windows (the 'browser wars')",
+        "year": 1998,
+        "source": "https://www.ssrn.com/abstract=1496336 ; https://sms.onlinelibrary.wiley.com/doi/abs/10.1002/smj.935 (Eisenmann, Parker, Van Alstyne, 'Platform Envelopment,' Strategic Management Journal, 2011)"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "credit_contagion",
+    "name": "Credit contagion",
+    "trigger_conditions": ["interconnected_counterparty_exposure"],
+    "causal_chain": [
+      "Financial institutions hold significant claims on each other's debt or collateral",
+      "One major counterparty fails or is perceived as likely to fail",
+      "Other institutions cannot verify their own exposure to the failing counterparty's exposure to others",
+      "Institutions hoard liquidity and cut interbank lending to protect against unknown exposure",
+      "Credit tightens system-wide even for institutions with no direct exposure to the original failure"
+    ],
+    "historical_instances": [
+      {
+        "case": "Lehman Brothers bankruptcy and the collapse of interbank lending",
+        "year": 2008,
+        "source": "https://en.wikipedia.org/wiki/Bankruptcy_of_Lehman_Brothers ; https://www.fsb.org/uploads/r_0910a.pdf"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "ally_drawn_into_linked_conflict",
+    "name": "Ally drawn into a linked conflict",
+    "trigger_conditions": ["binding_mutual_commitment_exists"],
+    "causal_chain": [
+      "Two or more parties hold a formal mutual-support commitment (treaty, contract, alliance)",
+      "One party enters a conflict or dispute with a third party unrelated to the original commitment's purpose",
+      "The mutual-support commitment obligates the ally to escalate involvement, regardless of whether the ally's own interests are served",
+      "The ally's exposure and risk profile shifts to match a conflict it did not choose and may not benefit from",
+      "Disengaging costs the ally its credibility on every other commitment it holds"
+    ],
+    "historical_instances": [
+      {
+        "case": "The European alliance system's cascade into World War I following Austria-Hungary's declaration on Serbia",
+        "year": 1914,
+        "source": "https://polsci.institute/international-relations-world-history/conflicting-alliance-systems-wwi/ ; https://www.histclo.com/essay/war/ww1/alli/ww1-alli.html"
+      }
+    ],
+    "confidence_tier": "plausible"
+  },
+  {
+    "mechanism_id": "winners_curse_acquisition",
+    "name": "Winner's-curse acquisition",
+    "trigger_conditions": ["valuation_disconnected_from_fundamentals"],
+    "causal_chain": [
+      "An acquirer's own equity or currency is highly valued relative to its underlying fundamentals (a bubble or hype cycle)",
+      "The acquirer uses that inflated valuation as acquisition currency to buy a large target",
+      "Winning the deal requires outbidding rational estimates of the target's standalone value, since only the most optimistic bidder wins",
+      "Projected synergies used to justify the price do not materialize, since they were sized to justify the bid, not derived independently",
+      "The combined entity writes down goodwill once the valuation premise (the acquirer's own inflated price) reverts"
+    ],
+    "historical_instances": [
+      {
+        "case": "AOL's acquisition of Time Warner ($182B, announced Jan 2000) and the subsequent $99B write-down (2002)",
+        "year": 2000,
+        "source": "https://www.npr.org/sections/planet-money/2025/12/16/g-s1-102314/the-warner-bros-curse"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "debt_fueled_capacity_race",
+    "name": "Debt-fueled capacity race",
+    "trigger_conditions": ["capacity_investment_outpacing_demand_signal", "debt_financed_expansion"],
+    "causal_chain": [
+      "Multiple competitors in a capital-intensive industry each forecast continued demand growth",
+      "Each competitor debt-finances new capacity to avoid ceding future share to rivals doing the same",
+      "Aggregate capacity additions across all competitors outpace the real demand growth any one of them could see",
+      "Oversupply forces price/rate cuts industry-wide, below what services the debt taken on to build the capacity",
+      "The most leveraged competitor defaults first, but overcapacity (and depressed pricing) persists industry-wide after its exit"
+    ],
+    "historical_instances": [
+      {
+        "case": "Hanjin Shipping bankruptcy amid container-shipping industry overcapacity (debt-to-equity ~850% at collapse)",
+        "year": 2016,
+        "source": "https://commons.wmu.se/cgi/viewcontent.cgi?article=2529&context=all_dissertations ; https://www.weforum.org/stories/2016/09/hanjin-shipping-crisis-global-trade/"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  }
+]
