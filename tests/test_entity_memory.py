@@ -1,6 +1,6 @@
 from intent_engine.core.entity_memory import (
     EntityMemoryRecord,
-    JsonlEntityMemoryWriter,
+    SqliteEntityMemoryWriter,
     count_records_by_entity,
     normalize_entity_id,
     read_records,
@@ -22,7 +22,7 @@ def _record(entity_id, decision_text, goals=None, constraints=None):
 
 def test_round_trip_write_and_read_by_entity_id(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     # Two records for the same real entity, written with different raw spellings --
     # should both land under one normalized entity_id.
@@ -55,7 +55,7 @@ def test_round_trip_write_and_read_by_entity_id(tmp_path):
 
 def test_read_records_returns_empty_list_for_unknown_entity(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", "Cut prices 20%."))
 
     assert read_records("Nonexistent Company", path=path) == []
@@ -76,7 +76,7 @@ def test_read_records_is_backed_by_sqlite_not_a_jsonl_file(tmp_path):
     import sqlite3
 
     path = tmp_path / "entity_memory.db"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", "Cut prices 20%."))
 
     conn = sqlite3.connect(str(path))
@@ -87,7 +87,7 @@ def test_read_records_is_backed_by_sqlite_not_a_jsonl_file(tmp_path):
 
 def test_artifact_kind_defaults_to_none_and_round_trips_through_write_and_read(tmp_path):
     path = tmp_path / "entity_memory.db"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     default_record = _record("Acme Inc", "Cut prices 20%.")
     assert default_record.artifact_kind is None
@@ -105,7 +105,7 @@ def test_artifact_kind_defaults_to_none_and_round_trips_through_write_and_read(t
 
 def test_records_by_artifact_kind_filters_by_entity_and_kind(tmp_path):
     path = tmp_path / "entity_memory.db"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(EntityMemoryRecord(
         entity_id="Acme Inc", source="voice", decision_text="email Sarah the notes",
         goals=[], constraints=[], artifact_kind="message",
@@ -135,7 +135,7 @@ def test_records_by_artifact_kind_returns_empty_list_when_file_does_not_exist(tm
 
 def test_count_records_by_entity_matches_read_records_length(tmp_path):
     path = tmp_path / "entity_memory.db"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", "Cut prices 20%."))
     writer.write(_record("Acme Inc", "Raise a Series A."))
     writer.write(_record("Other Co", "Something else."))

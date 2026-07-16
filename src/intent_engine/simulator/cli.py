@@ -28,7 +28,7 @@ import argparse
 import json
 import sys
 
-from ..core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, normalize_entity_id
+from ..core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter, normalize_entity_id
 from ..core.schemas import RiskAudit, StructuredIntent
 from .context_schema import BusinessContext
 from .pipeline import run_premortem
@@ -156,7 +156,7 @@ def main(argv=None) -> int:
         risk_tolerance=result.intent.risk_tolerance,
         primary_priority=result.scenario_set.primary_priority,
     )
-    JsonlEntityMemoryWriter().write(record)
+    SqliteEntityMemoryWriter().write(record)
     print(f"Saved to entity memory: {normalize_entity_id(args.entity_id)}", file=sys.stderr)
 
     return 0

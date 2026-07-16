@@ -1,6 +1,6 @@
 import pytest
 
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 from intent_engine.core.pattern_watcher import DetectedPattern
 from intent_engine.core.suggestion import (
     accept_suggestion,
@@ -72,7 +72,7 @@ def test_generate_suggestion_always_ends_with_a_question_never_an_assumed_action
 def test_surface_next_suggestion_creates_one_when_a_pattern_exists(tmp_path):
     entity_path = tmp_path / "entity_memory.jsonl"
     suggestions_path = tmp_path / "suggestions.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
 
     from datetime import datetime, timedelta, timezone
 
@@ -104,7 +104,7 @@ def test_surface_next_suggestion_never_stacks_a_second_pending_suggestion(tmp_pa
     unresolved suggestion at once."""
     entity_path = tmp_path / "entity_memory.jsonl"
     suggestions_path = tmp_path / "suggestions.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
 
     from datetime import datetime, timedelta, timezone
 
@@ -126,7 +126,7 @@ def test_surface_next_suggestion_never_stacks_a_second_pending_suggestion(tmp_pa
 def test_surface_next_suggestion_does_not_resurface_a_declined_pattern(tmp_path):
     entity_path = tmp_path / "entity_memory.jsonl"
     suggestions_path = tmp_path / "suggestions.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
 
     from datetime import datetime, timedelta, timezone
 
@@ -149,7 +149,7 @@ def test_surface_next_suggestion_does_not_resurface_a_declined_pattern(tmp_path)
 def test_accept_suggestion_produces_a_gated_draft_only_spec(tmp_path):
     entity_path = tmp_path / "entity_memory.jsonl"
     suggestions_path = tmp_path / "suggestions.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
 
     from datetime import datetime, timedelta, timezone
 
@@ -174,7 +174,7 @@ def test_accept_suggestion_produces_a_gated_draft_only_spec(tmp_path):
 def test_accept_suggestion_raises_if_not_pending(tmp_path):
     suggestions_path = tmp_path / "suggestions.jsonl"
     entity_path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
 
     from datetime import datetime, timedelta, timezone
 

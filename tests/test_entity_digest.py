@@ -6,7 +6,7 @@ from intent_engine.core.entity_digest import (
     check_for_digest,
     should_check_for_digest,
 )
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 from intent_engine.core.entity_summary import generate_weekly_summary
 
 
@@ -18,7 +18,7 @@ def _voice_record(entity_id, decision_text, timestamp):
 
 
 def _seed(entity_memory_path, entity_id, records):
-    writer = JsonlEntityMemoryWriter(path=entity_memory_path)
+    writer = SqliteEntityMemoryWriter(path=entity_memory_path)
     for r in records:
         writer.write(r)
 

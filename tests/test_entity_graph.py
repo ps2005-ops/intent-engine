@@ -8,7 +8,7 @@ from intent_engine.core.entity_graph import (
     affected_by,
     build_graph_from_entity_memory,
 )
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 
 
 def _scrap_check_record(entity_id, lot_type, is_scrap_metal_lot=True, timestamp="2026-01-01T00:00:00+00:00"):
@@ -32,7 +32,7 @@ def _weighin_record(entity_id, lot_type, timestamp="2026-01-02T00:00:00+00:00"):
 
 
 def _seed(entity_memory_path, records):
-    writer = JsonlEntityMemoryWriter(path=entity_memory_path)
+    writer = SqliteEntityMemoryWriter(path=entity_memory_path)
     for r in records:
         writer.write(r)
 

@@ -1,4 +1,4 @@
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import CalendarReadResult
 from intent_engine.voice.gmail import GmailReadResult
@@ -46,7 +46,7 @@ def _record(entity_id, decision_text, goals, primary_priority, risk_tolerance):
 
 def test_build_personal_context_aggregates_across_records_and_uses_most_recent_for_snapshot_fields(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     # Written first (older, per JSONL append order) -- lowercase raw entity_id.
     writer.write(_record("acme inc", "Double headcount.", ["scale ahead of demand"], "survival", "medium"))
@@ -68,7 +68,7 @@ def test_build_personal_context_aggregates_across_records_and_uses_most_recent_f
 
 def test_build_personal_context_returns_empty_history_for_unknown_entity(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("acme inc", "Double headcount.", ["scale ahead of demand"], "survival", "medium"))
 
     ctx = build_personal_context("a company that has never used premortem", MockPersonalData(), path=path)
@@ -91,7 +91,7 @@ def test_build_personal_context_returns_empty_history_when_store_does_not_exist(
 
 def test_to_prompt_text_keeps_real_and_mock_sections_visibly_separate(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("acme inc", "Double headcount.", ["scale ahead of demand"], "survival", "medium"))
 
     mock = MockPersonalData(calendar_density="busy", important_relationships=["Sarah"])

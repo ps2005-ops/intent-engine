@@ -190,9 +190,9 @@ def build_personal_context(
 
     read_records() already normalizes entity_id internally, so the raw string
     passed here doesn't need pre-normalization -- consistent with how
-    JsonlEntityMemoryWriter.write() handles it on the write side. `path` defaults
+    SqliteEntityMemoryWriter.write() handles it on the write side. `path` defaults
     to the real entity-memory store but is overridable for tests, same pattern as
-    JsonlEntityMemoryWriter/read_records themselves.
+    SqliteEntityMemoryWriter/read_records themselves.
 
     permission_registry defaults to a fresh, deny-by-default PermissionRegistry()
     if not supplied -- same "deny by default, not silently permissive" behavior

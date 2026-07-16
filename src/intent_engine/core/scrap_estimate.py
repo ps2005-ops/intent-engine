@@ -295,7 +295,7 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Literal
 
-from .entity_memory import DEFAULT_PATH, EntityMemoryRecord, EntityMemoryWriter, JsonlEntityMemoryWriter, read_records
+from .entity_memory import DEFAULT_PATH, EntityMemoryRecord, EntityMemoryWriter, SqliteEntityMemoryWriter, read_records
 from .llm_client import LLMClient
 
 FAST_MODEL = "claude-haiku-4-5-20251001"
@@ -1865,7 +1865,7 @@ def record_actual_weighin(
         lot_type=matched_assessment.lot_type if matched_assessment else None,
     )
 
-    writer = writer or JsonlEntityMemoryWriter(path=path)
+    writer = writer or SqliteEntityMemoryWriter(path=path)
     writer.write(
         EntityMemoryRecord(
             entity_id=entity_id,
@@ -2089,7 +2089,7 @@ def estimate_scrap_lot(
         reasoning=result["reasoning"],
     )
 
-    writer = writer or JsonlEntityMemoryWriter(path=path)
+    writer = writer or SqliteEntityMemoryWriter(path=path)
     writer.write(
         EntityMemoryRecord(
             entity_id=entity_id,

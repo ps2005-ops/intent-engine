@@ -1,7 +1,7 @@
 import inspect
 from unittest.mock import MagicMock
 
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter, read_records
 from intent_engine.core.mom_fitness_captions import (
     ENTITY_ID,
     PILLAR_SEED_CAPTIONS,
@@ -173,7 +173,7 @@ def test_start_mom_fitness_captions_reuses_existing_real_history_instead_of_seed
     spec from that real history, never silently injecting placeholder seed
     captions on top of or instead of it."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     real_record = _voice_record("Test Mom Account", "Update Instagram with today's caption: a real one, already posted")
     writer.write(real_record)
 

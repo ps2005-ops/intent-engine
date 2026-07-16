@@ -1,4 +1,4 @@
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 from intent_engine.simulator.luck_test import LuckTestAnalyzer, compute_diversification_signal
 
 
@@ -33,7 +33,7 @@ def test_diversification_signal_insufficient_history_when_no_records(tmp_path):
 
 def test_diversification_signal_single_bet_with_one_record(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", ["extend runway"], primary_priority="survival"))
 
     assert compute_diversification_signal("Acme Inc", path=path) == "single_bet"
@@ -42,7 +42,7 @@ def test_diversification_signal_single_bet_with_one_record(tmp_path):
 def test_diversification_signal_single_bet_when_records_share_priority_and_goals(tmp_path):
     """Two records, same underlying bet reiterated -- must not count as multiple_bets."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", ["extend runway", "cut burn"], primary_priority="survival"))
     writer.write(_record("Acme Inc", ["extend runway"], primary_priority="survival"))
 
@@ -51,7 +51,7 @@ def test_diversification_signal_single_bet_when_records_share_priority_and_goals
 
 def test_diversification_signal_multiple_bets_on_differing_priority(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", ["extend runway"], primary_priority="survival"))
     writer.write(_record("Acme Inc", ["capture market share"], primary_priority="growth"))
 
@@ -63,7 +63,7 @@ def test_diversification_signal_multiple_bets_on_disjoint_goals_same_priority(tm
     clearly different bets, per the "different priority OR clearly different
     goals" rule."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", ["expand into APAC"], primary_priority="growth"))
     writer.write(_record("Acme Inc", ["launch a loyalty program"], primary_priority="growth"))
 
@@ -73,7 +73,7 @@ def test_diversification_signal_multiple_bets_on_disjoint_goals_same_priority(tm
 def test_diversification_signal_is_entity_scoped(tmp_path):
     """Records for a different entity must not count toward this entity's signal."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", ["extend runway"], primary_priority="survival"))
     writer.write(_record("Other Co", ["capture market share"], primary_priority="growth"))
 
@@ -82,7 +82,7 @@ def test_diversification_signal_is_entity_scoped(tmp_path):
 
 def test_luck_test_analyzer_combines_llm_output_with_computed_diversification(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_record("Acme Inc", ["extend runway"], primary_priority="survival"))
     writer.write(_record("Acme Inc", ["capture market share"], primary_priority="growth"))
 

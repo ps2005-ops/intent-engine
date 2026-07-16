@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 from intent_engine.core.pattern_watcher import (
     _calibrate_confidence,
     _content_similarity_consistent,
@@ -150,7 +150,7 @@ def test_confidence_high_requires_7_plus_and_consistency():
 
 def test_detect_recurring_message_pattern_positive_case(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     for days_ago in range(7, 0, -1):
         writer.write(
@@ -180,7 +180,7 @@ def test_detect_recurring_message_pattern_positive_case(tmp_path):
 
 def test_detect_recurring_message_pattern_low_confidence_with_two_occurrences(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     for days_ago in (2, 1):
         writer.write(
@@ -198,7 +198,7 @@ def test_detect_recurring_message_pattern_negative_case_no_false_positive_on_noi
     """Unrelated, non-recurring voice interactions must NOT produce a
     recurring_message pattern -- a real negative, not just a positive case."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     noise = [
         "remind me to buy milk",
@@ -219,7 +219,7 @@ def test_detect_recurring_message_pattern_ignores_multiple_same_day_utterances(t
     """Several utterances to the same recipient on the SAME day must count as
     ONE occurrence (one day), not inflate occurrence_count."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     # 3 utterances on the same day.
     for hour in (19, 20, 21):
@@ -235,7 +235,7 @@ def test_detect_recurring_message_pattern_ignores_multiple_same_day_utterances(t
 
 def test_detect_recurring_message_pattern_respects_lookback_days(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     # All occurrences are 60+ days old -- outside a 30-day lookback window.
     for days_ago in (65, 62, 60):
@@ -251,7 +251,7 @@ def test_detect_recurring_message_pattern_only_considers_voice_records(tmp_path)
     pattern detection, even if their decision_text happens to match the
     recipient heuristic."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     for days_ago in (3, 2, 1):
         writer.write(
@@ -277,7 +277,7 @@ def test_detect_recurring_message_pattern_catches_realistic_phrasing_variety_end
     detected as ONE pattern, all instances caught. Regression test for the
     measured 83% miss rate this fix closed."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     phrasings = [
         "let sarah know the standup notes are ready",

@@ -2,7 +2,7 @@ import random
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from intent_engine.core.entity_memory import JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import SqliteEntityMemoryWriter, read_records
 from intent_engine.core.scrap_estimate import (
     GENERIC_YIELD_EXPECTATION_NOTE,
     RICHNESS_SYSTEM_PROMPT,
@@ -145,7 +145,7 @@ def _base_result(**overrides):
 def _write_prior_estimate(path, entity_id, **overrides):
     """Writes a prior ScrapEstimate directly to entity memory in the real,
     current JSON-behind-the-marker format."""
-    from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+    from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 
     defaults = dict(
         is_scrap_metal_lot=True, category_note=None, grade_impression="looks_weak",
@@ -155,7 +155,7 @@ def _write_prior_estimate(path, entity_id, **overrides):
     )
     defaults.update(overrides)
     estimate = ScrapEstimate(**defaults)
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(EntityMemoryRecord(
         entity_id=entity_id, source="voice",
         decision_text=f"{_SCRAP_CHECK_MARKER}{estimate.model_dump_json()}",
@@ -395,10 +395,10 @@ def test_read_prior_scrap_estimates_parses_real_stored_json(tmp_path):
 
 
 def test_read_prior_scrap_estimates_skips_unparseable_legacy_records(tmp_path):
-    from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+    from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 
     entity_path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     writer.write(EntityMemoryRecord(
         entity_id="Acme Scrap Yard", source="voice",
         decision_text=f"{_SCRAP_CHECK_MARKER}Grade impression: looks_weak. Oxidation: heavy. Reasoning: old format.",

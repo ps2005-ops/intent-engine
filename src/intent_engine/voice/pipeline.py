@@ -41,7 +41,7 @@ a permanent default) and why the result is three-valued, not a bool.
 from pathlib import Path
 from typing import NamedTuple, Optional, Union
 
-from ..core.entity_memory import DEFAULT_PATH, EntityMemoryRecord, EntityMemoryWriter, JsonlEntityMemoryWriter
+from ..core.entity_memory import DEFAULT_PATH, EntityMemoryRecord, EntityMemoryWriter, SqliteEntityMemoryWriter
 from ..core.permissions import PermissionRegistry
 from .calendar import CalendarActResult, StubCalendarActor
 from .classifier import VoiceIntentClassifier
@@ -68,7 +68,7 @@ def process_voice_interaction(
     entity_memory_path: Union[str, Path] = DEFAULT_PATH,
 ) -> VoiceInteractionResult:
     classifier = classifier or VoiceIntentClassifier()
-    writer = writer or JsonlEntityMemoryWriter()
+    writer = writer or SqliteEntityMemoryWriter()
     registry = permission_registry or PermissionRegistry()  # deny-by-default if not supplied
     calendar_actor = calendar_actor or StubCalendarActor(registry)
     gmail_actor = gmail_actor or StubGmailActor(registry)

@@ -14,7 +14,7 @@ from intent_engine.core.draft_generator import (
     generate_draft,
     process_draft_reply,
 )
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter, read_records
 from intent_engine.core.suggestion import TaskAgentSpecStub
 
 
@@ -41,7 +41,7 @@ def _fake_client(tool_input):
 
 def test_gather_supporting_records_re_scans_fresh_not_just_the_frozen_snapshot(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     for _ in range(3):
         writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes"))
@@ -62,7 +62,7 @@ def test_gather_supporting_records_re_scans_fresh_not_just_the_frozen_snapshot(t
 
 def test_gather_supporting_records_falls_back_to_frozen_snapshot_if_recipient_unrecoverable(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_voice_record("Acme Inc", "just a note with no communication verb at all"))
     original_records = read_records("Acme Inc", path=path)
 
@@ -121,7 +121,7 @@ def test_gather_supporting_records_picks_up_casual_new_occurrence_within_hour_ba
     correction) occurrence in a casual, verb-less register must now be
     picked up via the name+timing fallback."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     for d in (5, 4, 3):
         writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes", _iso(d, hour=19)))
     original_records = read_records("Acme Inc", path=path)
@@ -143,7 +143,7 @@ def test_gather_supporting_records_excludes_unrelated_mention_outside_hour_band(
     mentioning "sarah" at 11am (outside the learned ~7pm band) must NOT be
     pulled into this spec's supporting set."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     for d in (5, 4, 3):
         writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes", _iso(d, hour=19)))
     original_records = read_records("Acme Inc", path=path)
@@ -165,7 +165,7 @@ def test_gather_supporting_records_excludes_unrelated_mention_outside_hour_band(
 
 def test_generate_draft_produces_pending_review_attempt(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     for _ in range(5):
         writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes"))
     records = read_records("Acme Inc", path=path)
@@ -189,7 +189,7 @@ def test_generate_draft_produces_pending_review_attempt(tmp_path):
 
 def test_generate_draft_flags_thin_evidence_explicitly(tmp_path):
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes"))
     records = read_records("Acme Inc", path=path)
 
@@ -212,7 +212,7 @@ def test_generate_draft_tags_correction_examples_explicitly_in_the_prompt(tmp_pa
     not rely on the model inferring it from list position."""
     entity_path = tmp_path / "entity_memory.jsonl"
     attempts_path = tmp_path / "draft_attempts.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     for d in (5, 4, 3):
         writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes", _iso(d, hour=19)))
     original_records = read_records("Acme Inc", path=entity_path)
@@ -274,7 +274,7 @@ def test_classify_draft_reply_correction():
 def test_process_draft_reply_approval_records_no_phantom_correction(tmp_path):
     entity_path = tmp_path / "entity_memory.jsonl"
     attempts_path = tmp_path / "draft_attempts.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes"))
 
     attempt = DraftAttempt(
@@ -304,7 +304,7 @@ def test_process_draft_reply_approval_records_no_phantom_correction(tmp_path):
 def test_process_draft_reply_correction_persists_correction_text_and_new_entity_memory_record(tmp_path):
     entity_path = tmp_path / "entity_memory.jsonl"
     attempts_path = tmp_path / "draft_attempts.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes"))
 
     attempt = DraftAttempt(
@@ -341,7 +341,7 @@ def test_process_draft_reply_correction_persists_correction_text_and_new_entity_
 def test_process_draft_reply_rejection_records_no_phantom_correction(tmp_path):
     entity_path = tmp_path / "entity_memory.jsonl"
     attempts_path = tmp_path / "draft_attempts.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes"))
 
     attempt = DraftAttempt(
@@ -402,7 +402,7 @@ def test_refinement_loop_next_draft_includes_correction_record(tmp_path):
     verification script (needs a real LLM call to be meaningful)."""
     entity_path = tmp_path / "entity_memory.jsonl"
     attempts_path = tmp_path / "draft_attempts.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     for _ in range(5):
         writer.write(_voice_record("Acme Inc", "email Sarah the daily standup notes, please find attached"))
     records = read_records("Acme Inc", path=entity_path)
@@ -446,7 +446,7 @@ def test_refinement_loop_includes_correction_even_without_a_trigger_verb(tmp_pat
     (via spec_id) must include it regardless."""
     entity_path = tmp_path / "entity_memory.jsonl"
     attempts_path = tmp_path / "draft_attempts.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     for _ in range(5):
         writer.write(_voice_record("Acme Inc", "please email Sarah the daily standup notes for her review"))
     records = read_records("Acme Inc", path=entity_path)

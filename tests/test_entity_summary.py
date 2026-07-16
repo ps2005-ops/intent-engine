@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter
 from intent_engine.core.entity_summary import (
     EntitySummaryRecord,
     detect_trends,
@@ -18,7 +18,7 @@ def _record(entity_id, decision_text, timestamp, source="voice"):
 
 
 def _seed(entity_memory_path, entity_id, records):
-    writer = JsonlEntityMemoryWriter(path=entity_memory_path)
+    writer = SqliteEntityMemoryWriter(path=entity_memory_path)
     for r in records:
         writer.write(r)
 

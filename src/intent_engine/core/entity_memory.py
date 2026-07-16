@@ -14,7 +14,7 @@ Signatures are deliberately UNCHANGED — every existing caller (18 call
 sites across production and test code) continues to work with zero
 changes: same function names, same parameters, same return types, same
 empty-list-on-missing-file behavior. One explicit, flagged exception:
-`JsonlEntityMemoryWriter`'s class NAME is now backend-inaccurate (it
+`SqliteEntityMemoryWriter`'s class NAME is now backend-inaccurate (it
 writes to SQLite, not JSONL) — kept anyway rather than renamed, because a
 rename touches all 18 call sites for a cosmetic reason alone, which is a
 larger blast radius than a "signatures unchanged" migration stage should
@@ -90,7 +90,7 @@ class EntityMemoryRecord(BaseModel):
     # transformation of caller input, so there's nothing for the writer to do to
     # them. entity_id normalization is different: it transforms whatever raw
     # string the caller passed in, and is deliberately NOT done here (see
-    # normalize_entity_id's docstring and JsonlEntityMemoryWriter.write below) --
+    # normalize_entity_id's docstring and SqliteEntityMemoryWriter.write below) --
     # it happens in the writer so every write path normalizes consistently,
     # rather than trusting every caller to remember to do it themselves.
     record_id: str = Field(default_factory=_new_record_id)
@@ -155,7 +155,7 @@ def _ensure_schema(conn) -> None:
     conn.commit()
 
 
-class JsonlEntityMemoryWriter:
+class SqliteEntityMemoryWriter:
     """Writes one row per record to a local SQLite file (core/db.py).
 
     Class name kept as-is despite no longer writing JSONL -- see the module

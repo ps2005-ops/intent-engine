@@ -80,7 +80,7 @@ from .entity_memory import (
     DEFAULT_PATH,
     EntityMemoryRecord,
     EntityMemoryWriter,
-    JsonlEntityMemoryWriter,
+    SqliteEntityMemoryWriter,
     read_records,
 )
 from .llm_client import LLMClient
@@ -130,7 +130,7 @@ def seed_cold_start_pillars(
     idempotent by itself (calling it twice writes 6 records, not 3) --
     start_mom_fitness_captions() is the safe, checked entrypoint; call this
     directly only if you specifically want to (re-)seed."""
-    writer = writer or JsonlEntityMemoryWriter(path=path)
+    writer = writer or SqliteEntityMemoryWriter(path=path)
     records = []
     for text in PILLAR_SEED_CAPTIONS.values():
         record = EntityMemoryRecord(entity_id=entity_id, source="voice", decision_text=text, goals=[], constraints=[])

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter, read_records
 from intent_engine.core.image_verification import VerificationResult
 from intent_engine.core.scrap_estimate import ScrapEstimate
 from intent_engine.core.permissions import PermissionRegistry
@@ -106,7 +106,7 @@ def test_handle_pending_suggestion_accept_flow(tmp_path, monkeypatch):
 
     entity_path = tmp_path / "entity_memory.jsonl"
     suggestions_path = tmp_path / "suggestions.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     for days_ago in range(5, 0, -1):
         dt = (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=19, minute=0, second=0, microsecond=0)
         writer.write(
@@ -131,7 +131,7 @@ def test_handle_pending_suggestion_decline_flow(tmp_path, monkeypatch):
 
     entity_path = tmp_path / "entity_memory.jsonl"
     suggestions_path = tmp_path / "suggestions.jsonl"
-    writer = JsonlEntityMemoryWriter(path=entity_path)
+    writer = SqliteEntityMemoryWriter(path=entity_path)
     for days_ago in range(5, 0, -1):
         dt = (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=19, minute=0, second=0, microsecond=0)
         writer.write(

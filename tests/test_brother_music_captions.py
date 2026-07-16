@@ -11,7 +11,7 @@ from intent_engine.core.brother_music_captions import (
     seed_cold_start_pillars,
     start_brother_music_captions,
 )
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter, read_records
 from intent_engine.core.pattern_watcher import _extract_recipient
 from intent_engine.core.suggestion import TaskAgentSpecStub
 
@@ -180,7 +180,7 @@ def test_start_brother_music_captions_reuses_existing_real_history_instead_of_se
     must build the spec from that real history, never silently injecting
     placeholder seed captions on top of or instead of it."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     real_record = _voice_record("Test Brother Account", "Update Instagram with today's caption: a real one, already posted")
     writer.write(real_record)
 

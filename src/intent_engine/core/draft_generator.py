@@ -135,7 +135,7 @@ from .entity_memory import (
     DEFAULT_PATH,
     EntityMemoryRecord,
     EntityMemoryWriter,
-    JsonlEntityMemoryWriter,
+    SqliteEntityMemoryWriter,
     read_records,
 )
 from .llm_client import LLMClient
@@ -582,7 +582,7 @@ def process_draft_reply(
             goals=[],
             constraints=[],
         )
-        writer = entity_memory_writer or JsonlEntityMemoryWriter(path=entity_memory_path)
+        writer = entity_memory_writer or SqliteEntityMemoryWriter(path=entity_memory_path)
         writer.write(new_record)
         updated = current.model_copy(
             update={

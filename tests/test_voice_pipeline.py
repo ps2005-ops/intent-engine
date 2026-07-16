@@ -1,4 +1,4 @@
-from intent_engine.core.entity_memory import EntityMemoryRecord, JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import EntityMemoryRecord, SqliteEntityMemoryWriter, read_records
 from intent_engine.core.permissions import PermissionRegistry
 from intent_engine.voice.calendar import StubCalendarActor
 from intent_engine.voice.classifier import VoiceIntentClassifier
@@ -23,7 +23,7 @@ def test_process_voice_interaction_writes_every_interaction_regardless_of_salien
     same entity must both land in entity memory -- salience is a signal for
     Stage D to query/weight by later, not a write-time gate."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     low_client = VoiceIntentClassifier(
         client=FakeLLMClient(
@@ -86,7 +86,7 @@ def test_calendar_block_intent_authorized_creates_event_end_to_end(tmp_path):
     """The full chain: classification -> entity memory write -> permission check
     -> StubCalendarActor, for real, not unit-tested in isolation."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     registry = PermissionRegistry({"calendar_act": True})
     actor = StubCalendarActor(registry)
 
@@ -118,7 +118,7 @@ def test_calendar_block_intent_unauthorized_is_refused_but_still_written(tmp_pat
     'every interaction written, no filtering' rule doesn't get suspended just
     because the requested action was denied."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     registry = PermissionRegistry()  # no grants at all -- deny-by-default
     actor = StubCalendarActor(registry)
 
@@ -145,7 +145,7 @@ def test_non_calendar_intent_never_calls_calendar_actor(tmp_path):
     """A non-calendar_block intent must not touch the calendar actor at all --
     calendar_action stays None even when an authorized actor is supplied."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     registry = PermissionRegistry({"calendar_act": True})
     actor = StubCalendarActor(registry)
 
@@ -183,7 +183,7 @@ def test_email_draft_intent_authorized_creates_draft_end_to_end(tmp_path):
     classification -> entity memory write -> permission check ->
     StubGmailActor -- for a compose-style email_draft utterance."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     registry = PermissionRegistry({"gmail_act": True})
     actor = StubGmailActor(registry)
 
@@ -212,7 +212,7 @@ def test_email_draft_intent_unauthorized_is_refused_but_still_written(tmp_path):
     """Same invariant as Calendar's: a denied gmail_act must not suppress the
     entity-memory write."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     registry = PermissionRegistry()  # no grants at all -- deny-by-default
     actor = StubGmailActor(registry)
 
@@ -239,7 +239,7 @@ def test_non_email_intent_never_calls_gmail_actor(tmp_path):
     """A non-email_draft intent must not touch the Gmail actor at all --
     gmail_action stays None even when an authorized actor is supplied."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
     registry = PermissionRegistry({"gmail_act": True})
     actor = StubGmailActor(registry)
 
@@ -261,7 +261,7 @@ def test_process_voice_interaction_builds_personal_context_when_not_supplied(tmp
     classifier must actually receive a real PersonalContext built from prior
     entity-memory records for this entity, not classify with context=None."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     # Seed prior history for this entity before the interaction under test.
     writer.write(
@@ -299,7 +299,7 @@ def test_process_voice_interaction_context_reflects_deny_by_default_reads(tmp_pa
     external reads must come back explicitly not_authorized, not silently
     empty, and must not block classification."""
     path = tmp_path / "entity_memory.jsonl"
-    writer = JsonlEntityMemoryWriter(path=path)
+    writer = SqliteEntityMemoryWriter(path=path)
 
     fake_client = FakeLLMClient(
         {"intent_type": "reminder", "target": "milk", "when": None, "content": "buy milk", "salience": "low"}

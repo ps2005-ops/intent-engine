@@ -19,7 +19,7 @@ from unittest.mock import patch
 
 import pytest
 
-from intent_engine.core.entity_memory import JsonlEntityMemoryWriter, read_records
+from intent_engine.core.entity_memory import SqliteEntityMemoryWriter, read_records
 from intent_engine.core.schemas import FailureMode, RiskAudit, StructuredIntent
 from intent_engine.simulator.cli import _build_parser, main
 from intent_engine.simulator.pipeline import PremortemResult
@@ -93,7 +93,7 @@ def test_main_end_to_end_writes_entity_memory(tmp_path, capsys):
     canned = _canned_result()
 
     with patch("intent_engine.simulator.cli.run_premortem", return_value=canned) as mock_run, \
-         patch("intent_engine.simulator.cli.JsonlEntityMemoryWriter", lambda: JsonlEntityMemoryWriter(path=db_path)):
+         patch("intent_engine.simulator.cli.SqliteEntityMemoryWriter", lambda: SqliteEntityMemoryWriter(path=db_path)):
         exit_code = main(["--input", str(input_path), "--entity-id", "Acme Inc"])
 
     assert exit_code == 0
@@ -128,7 +128,7 @@ def test_main_json_flag_prints_valid_json(tmp_path, capsys):
     canned = _canned_result()
 
     with patch("intent_engine.simulator.cli.run_premortem", return_value=canned), \
-         patch("intent_engine.simulator.cli.JsonlEntityMemoryWriter", lambda: JsonlEntityMemoryWriter(path=db_path)):
+         patch("intent_engine.simulator.cli.SqliteEntityMemoryWriter", lambda: SqliteEntityMemoryWriter(path=db_path)):
         exit_code = main(["--input", str(input_path), "--entity-id", "Beta Co", "--json"])
 
     assert exit_code == 0
