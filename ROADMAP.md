@@ -45,7 +45,12 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T002 — Rename `JsonlEntityMemoryWriter` to a backend-accurate name
 
-- **Status**: RUNNABLE
+- **Status**: DONE — completed 2026-07-16, commit `b7ecf34`. Pure rename to
+  `SqliteEntityMemoryWriter` across 23 files (8 src, 15 tests), 94
+  insertions/94 deletions. `grep -rln "JsonlEntityMemoryWriter" src tests`
+  returns zero matches. Offline suite identical before/after: 468 passed, 2
+  skipped, same 5 pre-existing e2e API-credit failures — zero behavior
+  change.
 - **Priority**: 2
 - **Size**: M
 - **Source**: PROGRESS.md, Data foundation pass Stage 1 — "kept anyway rather
