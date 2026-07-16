@@ -18,10 +18,13 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 ## T001 — Add real tests for `simulator/cli.py`'s `main()`
 
 - **Status**: DONE — completed 2026-07-15 via `nightly_agent.sh`'s first
-  real rehearsal (Auto mode), commit `8e0dbac` on `agent/T001` (local
-  branch, no remote configured — not yet merged to `main`, pending
-  review). 5 new tests, 470 passed / 1 skipped, zero regressions, real
-  cost $0.9347. See `MORNING_REPORT.md` / `reports/` for the full record.
+  real rehearsal (Auto mode), commit `8e0dbac` on `agent/T001`. Reviewed
+  and merged into `main` 2026-07-16 via merge commit `ac962d8` (regular
+  merge, no history rewrite). Post-merge full offline suite: 468 passed
+  (463 pre-merge + 5 new), 2 skipped, zero regressions — the 5 pre-existing
+  `test_simulator_e2e.py` failures (external API-credit exhaustion, not
+  code) are unchanged and excluded from this count. See
+  `MORNING_REPORT.md` / `reports/` for the original rehearsal record.
 - **Priority**: 1
 - **Size**: S
 - **Source**: PROGRESS.md line 418 — "nothing in the test suite calls
@@ -142,3 +145,4 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   (no validation path exists yet: new held-out cases or the forward paper-log).
   Not a gap in specification — deliberately excluded from any task queue,
   autonomous or not, until that decision changes.
+- **T001 test-quality nits, found in review, not fixed** — `tests/test_simulator_cli.py`: `test_main_requires_entity_id_flag` duplicates `test_build_parser_requires_entity_id`'s required-flag check, and `test_main_end_to_end_writes_entity_memory` asserts exact stdout/stderr wording (`"Saved to entity memory: ..."`), which a harmless copy edit would break. Flagged for a future cleanup pass only.
