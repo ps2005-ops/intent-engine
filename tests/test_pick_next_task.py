@@ -73,6 +73,7 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     tasks = parse_roadmap(roadmap_path.read_text())
     runnable_ids = {t.task_id for t in tasks if t.status == "RUNNABLE"}
     # T001 completed 2026-07-15 via the real nightly_agent.sh rehearsal
-    # (commit 8e0dbac) -- no longer RUNNABLE, correctly excluded here.
-    assert runnable_ids == {"T002", "T003", "T004"}
-    assert pick_next_runnable(tasks) == "T002"
+    # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34) --
+    # neither is RUNNABLE anymore, correctly excluded here.
+    assert runnable_ids == {"T003", "T004"}
+    assert pick_next_runnable(tasks) == "T003"
