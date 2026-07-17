@@ -75,7 +75,13 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T003 — Widen `anchors_on_offered_context`'s documented rationale
 
-- **Status**: RUNNABLE
+- **Status**: DONE — completed 2026-07-17 (Cowork session, direct-to-main),
+  commit `25cb4b5`. Rationale now documents BOTH mechanisms explicitly
+  (classification bias / episode 3, generation-leak-imitation / episode 4)
+  plus the shared diagnostic test. New test
+  `test_anchoring_rationale_documents_both_failure_shapes` asserts
+  generation+imitation AND classification+bias terms present. Offline
+  suite: 553 passed, zero regressions.
 - **Priority**: 3
 - **Size**: XS
 - **Source**: `scripts/replay_diagnosis_registry.py`'s own finding on episode 4
@@ -93,7 +99,16 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T004 — Add the 7th diagnosis-registry signature: `stable_but_non_discriminating`
 
-- **Status**: RUNNABLE
+- **Status**: DONE — completed 2026-07-17 (Cowork session, direct-to-main),
+  commit `5342fec`. 7th signature + `design_level_fix_required` fix category
+  added, registry row explicitly marked ENCODED, UNVALIDATED;
+  `check_discrimination_bar()` built as the narrowly-scoped deterministic
+  detector (real backtest-v1 regression fixture: 66.7% vs 61.1% flags True,
+  including the exact 14.3%-specificity reconstruction; 94.4% on the same
+  real ground truth returns False). Replay episode 5 reclassified under the
+  new signature with verdict ENCODED_UNVALIDATED — deliberately NOT scored
+  as a match, per this task's own definition-of-done. Offline suite: 557
+  passed, zero regressions.
 - **Priority**: 4
 - **Size**: M
 - **Source**: The approved Part 5 Step-1 design (already proposed in detail
