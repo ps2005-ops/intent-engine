@@ -73,7 +73,11 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     tasks = parse_roadmap(roadmap_path.read_text())
     runnable_ids = {t.task_id for t in tasks if t.status == "RUNNABLE"}
     # T001 completed 2026-07-15 via the real nightly_agent.sh rehearsal
-    # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34) --
-    # neither is RUNNABLE anymore, correctly excluded here.
-    assert runnable_ids == {"T003", "T004"}
-    assert pick_next_runnable(tasks) == "T003"
+    # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34);
+    # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec) -- the
+    # queue is currently DRAINED: no RUNNABLE tasks until a human specs and
+    # adds new ones (NEEDS-SPEC items are never auto-promoted).
+    assert runnable_ids == set()
+    # An empty queue must return None (nightly loop no-ops safely), never
+    # raise or pick a NEEDS-SPEC item.
+    assert pick_next_runnable(tasks) is None
