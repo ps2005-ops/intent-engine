@@ -752,3 +752,22 @@ above, `BAMLH0A0HYM2`/`CPIAUCSL`/`UNRATE` once each, `SPY` once), **4
 MODEL calls** (2 real end-to-end attempts × 1 extraction + 1 drafting
 call each, well under ≤8), 0 additional web searches this task
 (headlines gathered once, before the task started).
+
+## Operational step — `record_baselines.py` run (per step 3, after M7)
+
+Pure operational run, no code change — `scripts/record_baselines.py` was
+already DONE (M8, previous session). Run once now, right after M7's real
+market predictions, so the ledger's first cohort has engine and baseline
+predictions sharing a horizon, per direct instruction ("the scoreboard
+starts from the same date").
+
+Real result: `record_momentum_baseline` → P=0.65 (SPY's real trailing
+3-month return was positive), `record_base_rate_baseline` → P=0.8079
+(the frozen constant). **Both landed on `resolve_by=2026-09-15`**,
+exactly matching 2 of M7's own market predictions' `resolve_by` dates —
+confirmed by direct DB read: `market`/`baseline` rows for that same date
+now both exist side by side.
+
+Spend: 1 DATA call (the momentum rule's real trailing-return fetch; the
+base-rate rule uses its already-frozen constant, no fetch). 0 MODEL.
+No commit — no code changed.
