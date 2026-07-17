@@ -23,6 +23,24 @@ function to consume -- that extraction is Task 3/4's concern. match_mechanisms()
 here takes the already-extracted trigger-condition list directly
 (List[str]), the honest input shape for what this task actually builds;
 wiring a real extraction step in front of it is later work.
+
+Task M3 (market-engine-execution-plan.md) extended this file with 9
+financial-crisis mechanisms and 5 new regime-derived trigger conditions
+(curve_inverted, credit_spreads_elevated, inflation_rising,
+unemployment_momentum_triggered, drawdown_gt_20pct). Each new regime term
+maps to a REAL, already-computed field on core.regime_engine.regime_snapshot's
+output -- deliberately narrower than the plan's own illustrative example
+list (which also named "rapid_tightening"): M2 never built a rate-of-change
+indicator, so a term with nothing behind it to check would violate this
+taxonomy's own "machine-checkable" requirement. Every historical_instances
+entry cites a real, checked source (primary/regulator/major-outlet where
+tiered well_documented, an educational/secondary source where tiered
+plausible) -- none fabricated. capex_overbuild deliberately does NOT cite
+an AI-datacenter historical instance, even though the plan names it as an
+example of the kind of episode this mechanism covers: that situation is
+still unresolved, and citing an outcome for an ongoing episode would be
+exactly the kind of unearned claim this project's citation discipline
+exists to prevent.
 """
 
 import json
@@ -54,6 +72,13 @@ TriggerCondition = Literal[
     "valuation_disconnected_from_fundamentals",
     "capacity_investment_outpacing_demand_signal",
     "debt_financed_expansion",
+    # Regime-derived terms added by Task M3, each machine-checkable against
+    # a real field on core.regime_engine.regime_snapshot's output:
+    "curve_inverted",  # regime_snapshot["curve_inversion"].inverted
+    "credit_spreads_elevated",  # regime_snapshot["credit_spread_percentile"].percentile above a defined threshold
+    "inflation_rising",  # regime_snapshot["inflation_trend"].trend == "rising"
+    "unemployment_momentum_triggered",  # regime_snapshot["unemployment_momentum"].triggered
+    "drawdown_gt_20pct",  # regime_snapshot["drawdown_state"].pct_off_high <= -20
 ]
 
 ConfidenceTier = Literal["well_documented", "plausible", "speculative"]

@@ -158,5 +158,190 @@
       }
     ],
     "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "leverage_cycle_bust",
+    "name": "Leverage-cycle bust",
+    "trigger_conditions": ["debt_financed_expansion", "drawdown_gt_20pct"],
+    "causal_chain": [
+      "Households or firms increase borrowing against rising collateral values (home equity, asset prices) during an upswing",
+      "Rising leverage amplifies consumption and investment, which further inflates the asset prices used as collateral",
+      "A shock or plateau in asset prices halts the collateral-value increase that was funding new borrowing",
+      "Highly leveraged borrowers face margin/equity pressure and cut spending sharply to deleverage, since a small price decline wipes out a much larger fraction of thin equity",
+      "The resulting demand contraction and forced asset sales deepen the price decline, extending and worsening the downturn beyond what the initial shock alone would explain"
+    ],
+    "historical_instances": [
+      {
+        "case": "US household leverage cycle and the 2007-2009 recession (home-equity-based borrowing amplifying the housing bust)",
+        "year": 2008,
+        "source": "https://www.nber.org/papers/w15283 ; https://www.aeaweb.org/articles?id=10.1257%2Faer.101.5.2132 (Mian & Sufi, 'House Prices, Home Equity-Based Borrowing, and the U.S. Household Leverage Crisis,' American Economic Review, 2011)"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "margin_collateral_spiral",
+    "name": "Margin/collateral spiral",
+    "trigger_conditions": ["drawdown_gt_20pct"],
+    "causal_chain": [
+      "A highly leveraged position is financed via margin or derivatives (e.g. total return swaps) whose lenders can demand more collateral if the position's value falls",
+      "A price decline in the underlying position reduces its collateral value, triggering a margin call",
+      "The position holder cannot meet the margin call in cash and is forced to sell the underlying asset to raise it",
+      "The forced sale itself pushes the asset's price down further, since it is a large, price-insensitive sale rather than a valuation-driven one",
+      "The further price decline triggers additional margin calls (from the same or other lenders), repeating the cycle until positions are fully liquidated"
+    ],
+    "historical_instances": [
+      {
+        "case": "Archegos Capital Management's forced liquidation of concentrated equity swap positions (Credit Suisse, Nomura, Morgan Stanley, and UBS all took losses)",
+        "year": 2021,
+        "source": "https://en.wikipedia.org/wiki/Archegos_Capital_Management ; https://www.cnbc.com/2021/03/29/the-archegos-blowup-and-its-ripple-effect-across-markets.html"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "bank_run_maturity_mismatch",
+    "name": "Bank-run maturity mismatch",
+    "trigger_conditions": ["interconnected_counterparty_exposure", "curve_inverted"],
+    "causal_chain": [
+      "A bank funds itself with short-term, on-demand deposits while holding longer-duration assets (loans, held-to-maturity securities)",
+      "A rapid rise in interest rates reduces the market value of the bank's long-duration assets well below their face value",
+      "Depositors or analysts become aware of the resulting unrealized losses and question the bank's solvency",
+      "A subset of depositors, disproportionately concentrated or uninsured, begin withdrawing funds, forcing the bank to realize losses by selling assets at depressed prices to meet withdrawals",
+      "Realized losses confirm the solvency concern, accelerating withdrawals into a full run before the bank can raise capital or find a buyer"
+    ],
+    "historical_instances": [
+      {
+        "case": "Silicon Valley Bank collapse -- $42B withdrawn in a single day following disclosed losses on its held-to-maturity securities portfolio, driven by 2022-2023 rate-hike-cycle duration losses",
+        "year": 2023,
+        "source": "https://www.fdic.gov/news/speeches/2024/lessons-learned-us-regional-bank-failures-2023 ; https://democrats-financialservices.house.gov/uploadedfiles/svb_failure_fact_sheet_03.23.pdf"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "carry_trade_unwind",
+    "name": "Carry-trade unwind",
+    "trigger_conditions": ["interconnected_counterparty_exposure"],
+    "causal_chain": [
+      "Investors borrow in a low-interest-rate funding currency and invest the proceeds in higher-yielding assets denominated in other currencies, profiting from the rate differential as long as the funding currency stays weak/stable",
+      "A policy surprise (e.g. an unexpected rate hike in the funding currency, or a rate cut in the target currency) narrows the yield differential and/or causes the funding currency to appreciate",
+      "Carry-trade positions become unprofitable or trigger losses on the currency leg, prompting leveraged holders to unwind (sell the target-currency asset, buy back the funding currency to repay the loan)",
+      "The unwinding itself pushes the funding currency higher and target-currency assets lower, since many holders are forced to unwind simultaneously",
+      "The self-reinforcing move (funding currency spikes, further squeezing remaining carry positions) transmits volatility broadly across asset classes financed by the same trade, not just the original currency pair"
+      ],
+    "historical_instances": [
+      {
+        "case": "August 2024 global market selloff following the Bank of Japan's rate hike, unwinding an estimated multi-trillion-dollar yen carry trade (Nikkei -12.4% in a single day)",
+        "year": 2024,
+        "source": "https://www.bis.org/publ/bisbull90.pdf (Bank for International Settlements, 'The market turbulence and carry trade unwind of August 2024')"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "reflexive_bubble",
+    "name": "Reflexive bubble (narrative-price feedback)",
+    "trigger_conditions": ["valuation_disconnected_from_fundamentals"],
+    "causal_chain": [
+      "A compelling narrative about a transformative technology or trend takes hold among investors, unsupported yet by proportionate current fundamentals",
+      "Rising prices are read as confirmation of the narrative, not just sentiment, drawing in more capital and more believers",
+      "Companies and entrepreneurs respond to the availability of capital by launching more ventures fitting the narrative, which the market further rewards with rising prices, reinforcing the original belief",
+      "The feedback loop between narrative, price, and real investment decisions decouples valuations further from any current, verifiable fundamental",
+      "The loop breaks when new information (a prominent failure, a rate change, a growth disappointment) forces a reassessment; because the earlier rise was self-reinforcing, the reversal tends to be self-reinforcing too"
+    ],
+    "historical_instances": [
+      {
+        "case": "The dot-com bubble -- internet-transformation narrative driving valuations far beyond current earnings/revenue support, 1999-2000, followed by the 2000-2002 crash",
+        "year": 2000,
+        "source": "https://novelinvestor.com/reflexivity-explaining-bubbles/ ; George Soros, 'The Alchemy of Finance' (1987), the original statement of reflexivity theory"
+      }
+    ],
+    "confidence_tier": "plausible"
+  },
+  {
+    "mechanism_id": "monetary_tightening_lag",
+    "name": "Monetary-tightening lag",
+    "trigger_conditions": ["curve_inverted"],
+    "causal_chain": [
+      "A central bank raises its policy rate rapidly to combat inflation",
+      "Higher policy rates transmit to the real economy only gradually and unevenly -- through loan repricing, credit tightening, and investment/hiring decisions that take months to change -- the textbook 'long and variable lags' of monetary policy",
+      "Economic activity and inflation appear resilient in the near term even as the rate increases accumulate, since the lagged effects of earlier hikes have not yet arrived",
+      "The delayed effects of the full tightening cycle arrive together well after the policy rate has peaked, producing a sharper slowdown than the contemporaneous data suggested was coming",
+      "Because the slowdown appears after tightening has already stopped, it is frequently misread in real time as unrelated to the tightening cycle rather than as its delayed consequence"
+    ],
+    "historical_instances": [
+      {
+        "case": "Volcker's 1979-1981 rate hikes (fed funds rate peaking near 22.4% in mid-1981) and the resulting July 1981-November 1982 recession",
+        "year": 1982,
+        "source": "https://www.federalreservehistory.org/essays/recession-of-1981-82"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "sovereign_debt_doom_loop",
+    "name": "Sovereign-debt doom loop",
+    "trigger_conditions": ["credit_spreads_elevated", "interconnected_counterparty_exposure"],
+    "causal_chain": [
+      "Domestic banks hold large quantities of their own government's sovereign debt, often encouraged by favorable regulatory treatment",
+      "Concern about the government's fiscal position raises the market's perceived default risk, pushing sovereign bond yields up and prices down",
+      "The banks holding that sovereign debt suffer mark-to-market losses, weakening their own capital position and raising doubts about their solvency",
+      "Weakened banks either need a government-funded bailout (adding directly to the sovereign's debt burden) or restrict credit to the real economy (weakening growth and tax revenue, worsening the fiscal position indirectly)",
+      "Either channel further erodes confidence in the sovereign's finances, which further weakens the banks holding its debt -- a self-reinforcing loop between bank and sovereign credit risk"
+    ],
+    "historical_instances": [
+      {
+        "case": "Greece and the eurozone periphery, 2010-2012 -- sovereign yield spikes and simultaneous domestic bank recapitalization needs, explicitly named the 'doom loop' in ECB/EU policy discussion",
+        "year": 2011,
+        "source": "https://www.minneapolisfed.org/article/2012/chronic-sovereign-debt-crises-in-the-eurozone-20102012-epp ; https://en.wikipedia.org/wiki/Euro_area_crisis"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "capex_overbuild",
+    "name": "Capex overbuild",
+    "trigger_conditions": ["capacity_investment_outpacing_demand_signal", "valuation_disconnected_from_fundamentals"],
+    "causal_chain": [
+      "A new technology or transformative infrastructure category attracts genuine enthusiasm about future demand, distinct from deliberate multi-competitor racing (contrast debt_fueled_capacity_race)",
+      "Cheap capital and optimistic demand forecasts lead multiple independent builders to construct capacity sized to a shared, aggressively optimistic view of future demand",
+      "Actual demand grows more slowly than the capacity built to serve it, since the forecasts embedded a narrative premium rather than a measured trajectory",
+      "Realized utilization comes in far below what was underwritten, and prices for the resulting capacity (freight rates, bandwidth, whatever the capacity actually is) collapse under oversupply",
+      "The most leveraged/aggressive builders fail first, but the excess capacity itself persists and depresses prices/returns industry-wide for years after the initial building wave ends"
+    ],
+    "historical_instances": [
+      {
+        "case": "US railroad overbuilding (33,000 miles laid 1868-1873) culminating in the Panic of 1873",
+        "year": 1873,
+        "source": "https://www.federalreservehistory.org/essays/banking-panics-of-the-gilded-age ; https://www.smithsonianmag.com/history/robber-baron-gamble-railroads-brought-down-bank-plunged-us-into-first-great-depression-panic-1873-180982877/"
+      },
+      {
+        "case": "Dot-com era fiber-optic telecom overbuild -- an estimated $2 trillion spent on 80-90 million miles of fiber, ~2.7% utilized by 2002, Global Crossing bankruptcy",
+        "year": 2002,
+        "source": "https://www.richmondfed.org/~/media/richmondfedorg/publications/research/economic_quarterly/2003/fall/pdf/wolman.pdf (Federal Reserve Bank of Richmond, 'Boom and Bust in Telecommunications')"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "money_market_contagion",
+    "name": "Money-market contagion",
+    "trigger_conditions": ["interconnected_counterparty_exposure", "credit_spreads_elevated"],
+    "causal_chain": [
+      "Money market funds hold short-term debt (commercial paper, repo, financial-institution debt) and are widely treated by investors as cash-equivalent, redeemable at a stable $1.00 net asset value",
+      "One fund's holdings include debt of an institution that suddenly defaults or fails, causing that fund's net asset value to fall below $1.00 ('breaking the buck')",
+      "Investors in OTHER money market funds, unable to quickly verify their own fund's exposure to the same or similar risks, redeem preemptively rather than risk being caught in a second broken fund",
+      "The resulting wave of redemptions forces funds industry-wide to sell holdings and refuse to roll over commercial paper, even for issuers with no connection to the original failure",
+      "Short-term credit markets that rely on money-market-fund demand for commercial paper freeze, transmitting the shock to any borrower who depended on that funding channel"
+    ],
+    "historical_instances": [
+      {
+        "case": "Reserve Primary Fund breaking the buck after Lehman Brothers' bankruptcy, triggering >$300B in prime money-market-fund redemptions",
+        "year": 2008,
+        "source": "https://en.wikipedia.org/wiki/Reserve_Primary_Fund ; https://libertystreeteconomics.newyorkfed.org/2013/10/twenty-eight-money-market-funds-that-could-have-broken-the-buck-new-data-on-losses-during-the-2008-c/"
+      }
+    ],
+    "confidence_tier": "well_documented"
   }
 ]
