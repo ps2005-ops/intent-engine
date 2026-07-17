@@ -226,6 +226,29 @@ def resolve_prediction(
     return updated
 
 
+def list_predictions(
+    source: Optional[PredictionSource] = None,
+    unresolved_only: bool = False,
+    due_by: Optional[Union[str, date]] = None,
+    path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+) -> List[Prediction]:
+    """Task M6 addition: a small, additive read primitive -- the resolve
+    script needs to find "all due, unresolved predictions" and no public
+    function exposed that before now (only aggregate stats via
+    brier_summary()). "unresolved" matches resolve_prediction()'s own
+    definition exactly: outcome is None (not resolved_at, though the two
+    are always set together in practice)."""
+    predictions = _read_latest(path)
+    if source is not None:
+        predictions = [p for p in predictions if p.source == source]
+    if unresolved_only:
+        predictions = [p for p in predictions if p.outcome is None]
+    if due_by is not None:
+        due_by_str = due_by.isoformat() if isinstance(due_by, date) else due_by
+        predictions = [p for p in predictions if p.resolve_by <= due_by_str]
+    return predictions
+
+
 class CalibrationBucket(NamedTuple):
     count: int
     realized_rate: float  # fraction of this bucket's predictions that actually happened
