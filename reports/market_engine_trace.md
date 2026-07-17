@@ -360,3 +360,37 @@ constraint. Per the plan's own scope wall, M4's verdict gates only M7's
 extraction path (M7 may run matcher-only if M4 ultimately parks on its
 actual bars) — it does not block M5, M6, or M8, none of which depend on
 M4, and this session proceeded to them per direct instruction.
+
+## Task M5 — Market prediction schema (ledger extension) — **DONE**
+
+- Bars: (a) mocked round-trip with a market prediction including rule
+  validation, malformed rule raises — **PASS**, 9 new tests
+  (`tests/test_prediction_ledger_m5.py`), covering both rule shapes
+  (`PctChangeRule`, `LevelRule`), 4 distinct malformed-rule cases (missing
+  field, unknown `type`, wrong value type, and an explicit "never
+  persists" check that the ledger file doesn't even exist after a
+  malformed call). (b) old ledger tests pass unchanged — **PASS**,
+  13/13 original tests in `tests/test_prediction_ledger.py`, zero edits
+  to that file. Migration is additive — **PASS**, verified directly
+  against a hand-inserted row shaped exactly like the pre-M5 schema
+  (missing the 5 new keys entirely, not just set to null), confirmed it
+  still parses via `Prediction.model_validate_json()`/`_read_all()`.
+  (c) full suite green — **PASS**, 514 passed / 2 skipped, same 5
+  pre-existing failures, +9 from this task.
+- Spend: **0 MODEL, 0 DATA** (pure schema/validation work).
+- Commit: `45428e0`.
+- Design notes: no SQL migration was needed at all — the `predictions`
+  table already stores each row as one JSON blob
+  (`_ensure_schema`/`_persist`, both untouched), so new `Optional`
+  `Prediction` fields are free at the storage layer; only the pydantic
+  model changed. `resolution_rule` uses a real discriminated union on
+  `"type"` (not a loose `dict`), so malformed-rule rejection comes from
+  pydantic's own validation at `Prediction(...)` construction time inside
+  `record_prediction()` — no hand-written validation code, and no risk of
+  a malformed rule silently validating as a generic all-optional shape.
+  `direction` is left as free text (no closed enum) since the plan states
+  no fixed vocabulary for it — consistent with Week 1's own precedent
+  (free-text `revenue`/`growth_rate`) of not inventing a taxonomy the
+  spec didn't ask for. `resolve_prediction()`/`brier_summary()` are
+  completely untouched — M6 reuses the existing resolve function as-is,
+  per the plan's own instruction.
