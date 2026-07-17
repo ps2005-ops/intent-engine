@@ -394,3 +394,65 @@ M4, and this session proceeded to them per direct instruction.
   spec didn't ask for. `resolve_prediction()`/`brier_summary()` are
   completely untouched — M6 reuses the existing resolve function as-is,
   per the plan's own instruction.
+
+## Task M6 — Resolution layer (Tiingo + FRED graders) — **DONE**
+
+- Bars: (a) fixture-based grading tests — **PASS**, 16 tests
+  (`tests/test_market_resolution.py`): a hit case (+3% touch against a
+  ≥2% threshold), a miss case (never crosses +1.5% vs. the 2% bar), an
+  explicit weekend-gap case (window end lands on 2024-01-06, a real
+  Saturday — the touch only occurs on 2024-01-08, the forward-searched
+  Monday; asserted both as a direct unit test on `_forward_search` and
+  end-to-end through `resolve_pct_change_rule`), an unresolvable case
+  (unknown symbol, no data) verified excluded from `brier_summary` via a
+  real ledger round-trip, and a hand-computed Brier value (probability
+  0.8, `happened` → `(0.8-1.0)² = 0.04`) re-derived through the full
+  `resolve_market_prediction → resolve_prediction` path, not just
+  asserted in isolation. (b) idempotency — **PASS**: running
+  `resolve_due_predictions` twice against the same ledger resolves 1 the
+  first time and genuinely **0** the second (not just "same counts") —
+  confirms the no-op is real, not coincidental. (c) live smoke — **PASS**,
+  2 real Tiingo calls (real SPY price shape; a real end-to-end
+  `resolve_pct_change_rule` call against real January 2024 SPY data,
+  deliberately using a near-certain 0.01% threshold so the test proves
+  the *wiring* works, not a market-timing claim) — ran for real since
+  `TIINGO_API_KEY` is present, not skipped. (d) full suite green —
+  **PASS**, 532 passed / 2 skipped, same 5 pre-existing failures, +18
+  from this task.
+- Spend: **3 DATA calls** (1 to discover Tiingo's real response shape
+  before writing the parser, 2 from the live test file), **0 MODEL**.
+  Well under the ≤10 DATA budget.
+- Commit: `6b7242c`.
+- Design notes, stated rather than silently decided:
+  - **Touched-vs-closed**, concretely: pct_change rules with an ordering
+    op (`>=`, `>`, `<=`, `<`) use TOUCHED semantics — the claim resolves
+    `happened` the moment *any* trading day within the window crosses the
+    threshold, matching how a claim like "SPY rises 2%+ within 60 days"
+    actually reads in plain language (it doesn't require the price to
+    *still* be up 2% on day 60 specifically). `==` uses CLOSED semantics
+    — the window-end value specifically, the one case where an exact
+    value at a specific point is the only sensible reading. This wasn't
+    specified field-by-field in M5's schema (no separate touched/closed
+    flag exists), so it's an implementation decision inside M6's grading
+    logic, made explicit here rather than silently baked in.
+  - Forward-search is used at 3 distinct points, not just the one the
+    bar names: baseline-price lookup (if `created_at`'s date itself lands
+    on a gap), the touched-window's effective end boundary (so a window
+    computed to end on a weekend still correctly extends through the
+    next real trading day rather than silently truncating one day early),
+    and a level rule's `by` date. Capped at 10 calendar days for daily
+    Tiingo data, 40 for monthly FRED data (a monthly series' real release
+    gap is much wider than a long weekend) — past the cap, a source is
+    treated as genuinely missing (`unresolvable`), never searched
+    forever.
+  - `list_predictions()` is a new, small, additive read primitive added
+    to `prediction_ledger.py` in this task's own commit (not reopening
+    M5's) — the resolve script needs "all due, unresolved predictions"
+    and nothing exposed that before (only aggregate stats via
+    `brier_summary`). Zero changes to any existing function in that file.
+  - The resolve script filters to predictions with a non-null
+    `resolution_rule` (rather than hardcoding `source in
+    ("market","baseline")`) — correctly, automatically leaves
+    premortem/scrap/digest/manual predictions alone (they never carry a
+    rule) without needing to enumerate sources by name, and stays correct
+    if a future source also adopts `resolution_rule`.
