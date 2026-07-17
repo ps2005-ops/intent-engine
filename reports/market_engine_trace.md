@@ -456,3 +456,79 @@ M4, and this session proceeded to them per direct instruction.
     premortem/scrap/digest/manual predictions alone (they never carry a
     rule) without needing to enumerate sources by name, and stays correct
     if a future source also adopts `resolution_rule`.
+
+## Task M8 — Baseline predictors — **DONE**
+
+- Bars: (a) mocked tests, both rules produce valid ledger rows with valid
+  `resolution_rule`s — **PASS**, 9 tests
+  (`tests/test_record_baselines.py`); determinism (same inputs →
+  identical probability and `resolution_rule` content across two
+  separate calls, `id`/`created_at` correctly differing since the ledger
+  stamps those fresh by design) — **PASS**. (b) frozen constant's
+  derivation documented in a comment with the data window used —
+  **PASS**, see `BASE_RATE_SPY_2PCT_60D`'s own comment in
+  `scripts/record_baselines.py`. (c) full suite green — **PASS**, 541
+  passed / 2 skipped, same 5 pre-existing failures, +9 from this task.
+- Spend: **1 DATA call** (the one-time base-rate history fetch), **0
+  MODEL**. Well under the ≤5 DATA budget.
+- Commit: `5e0e30b`.
+- **The real, one-time base-rate computation** (not asserted, actually
+  run this session): SPY adjusted closes from Tiingo, 2021-01-01 through
+  2026-07-16 (a single fetch, 1389 daily observations). For every trading
+  day with a *complete* forward 60-calendar-day window available (1348
+  such days — the final ~60 days of the series were excluded, since their
+  true 60-day-forward outcome isn't knowable yet), checked whether the
+  price touched ≥2% above that day's own price at any point in the
+  following 60 days — deliberately the exact same touched-semantics
+  evaluation `core.market_resolution.resolve_pct_change_rule` uses for a
+  real claim of this shape (not a separate ad hoc definition, for direct
+  comparability against what the ledger will actually grade). **Result:
+  1089 of 1348 windows (80.79%) touched the threshold** →
+  `BASE_RATE_SPY_2PCT_60D = 0.8079`, frozen. Recomputing this later is a
+  deliberate, separate decision this script never makes automatically.
+- Design notes: both baseline rules share one `resolution_rule` shape
+  (`pct_change`, `SPY`, `>=0.02`, `60 days`) and flow through the exact
+  same M6 resolution path and M5/ledger Brier scoring as any other market
+  prediction — no special-cased handling anywhere downstream, which is
+  the entire point of a baseline (it has to be graded the same way the
+  real thing will be, or the comparison means nothing). A guard in
+  `record_base_rate_baseline` (implicit via its fixed `INSTRUMENT`/
+  `THRESHOLD`/`WINDOW_DAYS` module constants, not a runtime check) keeps
+  the frozen constant tied to exactly the claim shape it was computed
+  for — the momentum rule and base-rate rule are not parameterized to
+  drift apart from what was actually measured.
+
+---
+
+# Session 2 totals
+
+- **Commits**: 8 substantive task commits (`9a0be6b` M4-parked,
+  `45428e0` M5, `6b7242c` M6, `5e0e30b` M8) plus 4 trace-append commits
+  (`53ac5f5`, `61d32eb`, `8a1fb99`, and this file's own upcoming commit
+  for M8) — one code commit per task, one trace commit per task, per
+  direct instruction this session.
+- **Spend**: M4 — 0 successful MODEL calls (1 attempted, failed on a
+  confirmed credit-exhaustion error before any response); M5 — 0 MODEL,
+  0 DATA; M6 — 3 DATA, 0 MODEL; M8 — 1 DATA, 0 MODEL. **Total this
+  session: 4 real DATA calls, 0 successful MODEL calls, 0 web searches.**
+- **Test suite growth**: 505 → 541 passed (+36: 0 net from M4 [parked
+  before any test could be written against a real result], 9 in M5, 18
+  in M6, 9 in M8), 2 skipped throughout (same pre-existing, unrelated
+  causes), same 5 pre-existing `test_simulator_e2e.py` failures
+  throughout (external API-credit exhaustion — the SAME root cause M4
+  hit live and directly confirmed this session, not a new or different
+  problem).
+- **M4's real, unresolved blocker**: Anthropic API credits are exhausted
+  account-wide as of this session — this affects M4 specifically (it
+  needs live MODEL calls) and is the same condition already responsible
+  for the 5 standing `test_simulator_e2e.py` failures. Nothing else in
+  this session needed a MODEL call, so M5/M6/M8 were unaffected. **What a
+  human should decide**: whether/when to add credits; M4's script needs
+  no further changes, only a re-run once credits exist.
+- **M7, M9**: correctly **NOT STARTED**, per direct instruction — M7 is
+  the next human gate (review M4's distributions, once they exist, and
+  the calibration-footer design) before it runs; M9 documents the whole
+  phase and depends on all prior tasks including M7.
+
+**Stopping here.** M4 needs Anthropic credits before it can produce a
+real verdict; M7 and M9 remain explicitly gated on your review.
