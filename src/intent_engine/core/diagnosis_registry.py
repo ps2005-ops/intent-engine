@@ -80,7 +80,16 @@ REGISTRY: List[RegistryEntry] = [
         "A judgment or generation changes when a suspect contextual field "
         "(a label, a baseline, contaminating scaffolding text) is present vs. "
         "withheld -- remove the field from the call. Never instruct the model "
-        "to ignore it; that has never been the durable fix in this project.",
+        "to ignore it; that has never been the durable fix in this project. "
+        "This signature covers TWO distinct mechanisms with the same "
+        "diagnostic test and the same fix: (1) classification bias -- a "
+        "judgment call rationalizes toward an offered label/baseline "
+        "(episode 3, assess_deviation label anchoring); (2) generation "
+        "leak / imitation -- scaffolding text present in gathered examples "
+        "recurs verbatim in generated output because the imitation learner "
+        "treats it as a recurring content element (episode 4, mom's-captions "
+        "prefix leak). Either way the test is: does withholding the suspect "
+        "field change the output? If yes, hide the field structurally.",
     ),
     RegistryEntry(
         "bound_violated", "deterministic_bounded_composition",

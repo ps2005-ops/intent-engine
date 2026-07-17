@@ -38,6 +38,25 @@ def test_diagnose_anchors_on_offered_context_selects_information_hiding():
     assert diagnose("anchors_on_offered_context") == "information_hiding"
 
 
+def test_anchoring_rationale_documents_both_failure_shapes():
+    """T003: the replay's episode-4 finding -- anchors_on_offered_context
+    matched via a genuinely different mechanism (generation-leak/imitation,
+    the prefix leak) than the signature's original description
+    (classification bias). The documented rationale must explicitly cover
+    BOTH shapes, so a future triager doesn't reject the signature on a
+    generation-leak case because the docs only describe classification."""
+    entry = next(
+        e for e in REGISTRY if e.signature == "anchors_on_offered_context"
+    )
+    rationale = entry.rationale.lower()
+    # generation/imitation shape (episode 4)
+    assert "generat" in rationale
+    assert "imitat" in rationale
+    # classification-bias shape (episode 3) still documented
+    assert "classification" in rationale
+    assert "bias" in rationale
+
+
 def test_diagnose_bound_violated_selects_deterministic_bounded_composition():
     assert diagnose("bound_violated") == "deterministic_bounded_composition"
 
