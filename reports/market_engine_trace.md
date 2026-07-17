@@ -240,28 +240,36 @@ excluded — M7 is the next human gate).
 
 Legend: **DONE** / **PARKED** / **NOT STARTED (out of session scope)**.
 
-## Task M4 — Regime-extraction reliability gate — **PARKED**
+## Task M4 — Regime-extraction reliability gate — **DONE (PASS)**
 
-**Verdict, stated plainly up front**: PARKED. Not a bar failure — the
-task could not run at all. The very first live call (round 1, call 1/15)
-failed with a definitive Anthropic API billing error before any real
-distribution could be collected. 0 of 15 round-1 calls succeeded; 0/40
-budget spent.
+**Verdict, stated plainly up front**: **PASS**. Bar (a) holds on both
+clear cases (5/5 modal agreement, not just the required ≥4/5). Bar (b)
+holds — the ambiguous case produced 4 distinct answers across 5 runs,
+nowhere close to confident unanimity. 15/15 round-1 calls succeeded, no
+round 2 needed. 15/40 budget spent.
 
-**Real error, verbatim**:
+**First blocked by a real, external billing condition, resolved before
+this result — kept here as part of the real record, not edited out**:
+the first attempt (previous session) failed on call 1/15 with a
+definitive Anthropic credit-exhaustion error:
 ```
 anthropic.BadRequestError: Error code: 400 - {'type': 'error', 'error':
 {'type': 'invalid_request_error', 'message': 'Your credit balance is too
 low to access the Anthropic API. Please go to Plans & Billing to upgrade
 or purchase credits.'}, 'request_id': 'req_011Cd6zRLBvGzYRr3hLZsMVc'}
 ```
-This is the same external billing condition already documented elsewhere
-in this repo for `test_scrap_estimate_live.py` (PROGRESS.md's scrap-metal
-checkpoint) — a confirmed account-level state, not new. Not a
-429/5xx-style transient error (a clear billing-state 400), so no retry
-was attempted: retrying a confirmed balance-exhaustion error would not
-produce new information, only spend more of the (already-zero) budget on
-an identical failure.
+the same external condition already documented elsewhere in this repo
+for `test_scrap_estimate_live.py`. After credits were added, a second
+attempt still failed, but with a DIFFERENT, more specific error —
+`401 authentication_error: "API key is invalid"` — indicating the
+billing action had also rotated/invalidated the key then in `.env`. A
+newly-generated key was pasted in by hand and still failed 401 (likely a
+manual copy-paste error); re-copying via the console's own Copy button
+(rather than manual selection) finally produced a working key
+(confirmed only by byte-length change each time, never by printing the
+value). None of this involved any code change to the script or the
+case-design — it was purely an external credentials issue, now
+resolved.
 
 **Script built and committed regardless, complete and reviewed-shape**:
 `scripts/regime_extraction_reliability_gate.py`, exactly the base-plan
@@ -342,24 +350,58 @@ but well short of a dramatic move; the drawdown (11.82%) is meaningful
 but well under the 20% bar. The headlines explicitly state analysts are
 split. No single number or headline was written to obviously "win."
 
-**Bars, as written in the plan**:
-- (a) ≥4/5 modal agreement on the two clear cases: **NOT EVALUATED** — 0
-  successful calls.
-- (b) ambiguous case must not be confidently unanimous: **NOT
-  EVALUATED** — 0 successful calls.
-- (c) real distributions in the TRACE: **N/A** — no distributions exist
-  to record; the verbatim error above is the complete real result.
+**Real round-1 results, verbatim (5 runs × 3 cases, 15 calls)**:
+```
+[clear_stress] run 1/5: ['curve_inverted']
+[clear_stress] run 2/5: ['curve_inverted']
+[clear_stress] run 3/5: ['curve_inverted']
+[clear_stress] run 4/5: ['curve_inverted']
+[clear_stress] run 5/5: ['curve_inverted']
+[clear_benign] run 1/5: []
+[clear_benign] run 2/5: []
+[clear_benign] run 3/5: []
+[clear_benign] run 4/5: []
+[clear_benign] run 5/5: []
+[ambiguous] run 1/5: ['inflation_rising']
+[ambiguous] run 2/5: ['credit_spreads_elevated', 'curve_inverted', 'inflation_rising', 'unemployment_momentum_triggered']
+[ambiguous] run 3/5: ['curve_inverted', 'inflation_rising']
+[ambiguous] run 4/5: ['curve_inverted', 'inflation_rising', 'unemployment_momentum_triggered']
+[ambiguous] run 5/5: ['curve_inverted', 'inflation_rising', 'unemployment_momentum_triggered']
+```
 
-**Commit**: `9a0be6b`.
-**Spend**: 0 MODEL calls succeeded (1 attempted, failed before any
-response), 0 DATA calls.
-**What a human should decide**: add Anthropic credits, then re-run
-`python scripts/regime_extraction_reliability_gate.py` unchanged — no
-code or case-design decision is pending, only the external billing
-constraint. Per the plan's own scope wall, M4's verdict gates only M7's
-extraction path (M7 may run matcher-only if M4 ultimately parks on its
-actual bars) — it does not block M5, M6, or M8, none of which depend on
-M4, and this session proceeded to them per direct instruction.
+**Summaries**:
+- `clear_stress`: modal `('curve_inverted',)`, **5/5** — exactly the
+  designed single-condition answer, every run, no noise at all.
+- `clear_benign`: modal `()` (empty), **5/5** — the model correctly
+  selected nothing on a case designed to support nothing, every run.
+- `ambiguous`: modal `('curve_inverted', 'inflation_rising',
+  'unemployment_momentum_triggered')`, **2/5** — 4 distinct answers
+  across 5 runs (a 1-condition answer, a 4-condition answer, a
+  2-condition answer, and the 2-run modal 3-condition answer). Every run
+  included `inflation_rising` (the one number written to be modestly,
+  not extremely, elevated) and every run treated the borderline
+  `curve_inverted` (-0.04pp) inconsistently — 4 of 5 included it, 1
+  didn't — exactly the kind of genuine, evidence-tracking disagreement
+  the case was designed to surface, not random noise (no run ever
+  invented a condition unconnected to the given numbers).
+
+**Bars, as written in the plan**:
+- (a) ≥4/5 modal agreement on the two clear cases: **PASS** — 5/5 on
+  both `clear_stress` and `clear_benign`.
+- (b) ambiguous case must not be confidently unanimous: **PASS** — modal
+  count is 2/5, not 5/5; 4 distinct answers observed. No round 2
+  (strengthened-instruction re-run) was needed.
+- (c) real distributions in the TRACE: **PASS** — see above, the actual
+  per-run outputs and modal summaries, not just a pass/fail label.
+
+**Commit**: `9a0be6b` (script, built and committed while still parked)
+— this run itself produced no code change, only a real result; the
+script ran completely unmodified from that commit.
+**Spend**: **15 MODEL calls** (round 1 only, budget ≤40, 2 rounds max),
+**0 DATA calls**.
+**Consequence for M7**: M4 PASSED, so M7 (when it runs, still gated on
+separate human review of this result and the calibration-footer design)
+may use the real extraction path, not just matcher-only.
 
 ## Task M5 — Market prediction schema (ledger extension) — **DONE**
 
@@ -530,5 +572,34 @@ M4, and this session proceeded to them per direct instruction.
   the calibration-footer design) before it runs; M9 documents the whole
   phase and depends on all prior tasks including M7.
 
-**Stopping here.** M4 needs Anthropic credits before it can produce a
-real verdict; M7 and M9 remain explicitly gated on your review.
+**Stopped here at the time.** M4 needed Anthropic credits before it
+could produce a real verdict; M7 and M9 remained explicitly gated on
+human review.
+
+---
+
+# Session 2 addendum — M4 re-run to a real verdict
+
+Credits were added; the first re-run still failed (401, "API key is
+invalid" — the billing action had rotated the key); a hand-pasted new
+key also failed 401 (likely a manual copy-paste error); a key re-copied
+via the console's own Copy button finally worked. No code or case-design
+change was made at any point in this sequence — see M4's own entry above
+(now updated in place) for the full real error sequence and the actual
+passing result.
+
+**M4 final verdict: DONE (PASS)**, no code changes, script unmodified
+from commit `9a0be6b`. Updated totals:
+
+- **Spend (M4 only, this re-run)**: 15 MODEL calls (round 1, no round 2
+  needed), 0 DATA. Session 2's running total across all 4 tasks now
+  stands at 4 DATA calls, **15 MODEL calls**, 0 web searches.
+- **M7's extraction-path gate is now resolved**: M4 passed, so a future
+  M7 run may use the real regime-extraction path rather than falling
+  back to matcher-only. M7 itself is still not started — the human gate
+  is on reviewing this result and the calibration-footer design, per
+  standing instruction, not on M4's verdict alone.
+- M9 remains correctly not started (depends on M7).
+
+**Stopping here.** M4 is now a real, passing result. M7 and M9 remain
+explicitly gated on your review.
