@@ -603,3 +603,46 @@ from commit `9a0be6b`. Updated totals:
 
 **Stopping here.** M4 is now a real, passing result. M7 and M9 remain
 explicitly gated on your review.
+
+---
+
+# Session 3 — M7 (extraction path authorized) + M8 run + M9 + operational handoff
+
+M4 reviewed and approved by the human: the ambiguous-case distribution
+(2/5 modal, 4 distinct answers) is exactly the honest-uncertainty
+behavior the gate exists to verify. **Extraction path authorized for
+M7.**
+
+## Status check — M5, M6, M8 (previous session's scope)
+
+Per direct instruction, verified explicitly before anything else in this
+session, not assumed from memory:
+
+- **M5 — Market prediction schema — DONE.** Commit `45428e0`, verified
+  present on `main` (`git show --stat 45428e0`). Bars, as recorded in
+  Session 2 above: (a) mocked round-trip + malformed-rule rejection —
+  PASS, 9 tests; (b) 13/13 old ledger tests unchanged — PASS; migration
+  additive, old rows verified readable — PASS; (c) suite green at the
+  time, 514 passed / 2 skipped (+9), same 5 pre-existing failures.
+- **M6 — Resolution layer — DONE.** Commit `6b7242c`, verified present.
+  Bars: (a) fixture-based grading (hit/miss/weekend-gap/unresolvable) —
+  PASS, 16 tests; (b) idempotency (second run genuinely 0) — PASS;
+  (c) live smoke, 2 real Tiingo calls — PASS; (d) suite green, 532
+  passed / 2 skipped (+18), same 5 pre-existing failures.
+- **M8 — Baseline predictors — DONE (code).** Commit `5e0e30b`, verified
+  present. Bars: (a) mocked tests, determinism — PASS, 9 tests; (b)
+  frozen constant documented (`BASE_RATE_SPY_2PCT_60D = 0.8079`,
+  derivation in-comment) — PASS; (c) suite green, 541 passed / 2 skipped
+  (+9), same 5 pre-existing failures. **Code is DONE; the plan's own
+  step 3 for this session — actually RUNNING `record_baselines.py` once,
+  timed to right after M7's first real market predictions — is separate
+  operational work, done later in this session, see below.**
+
+All three verified against the CURRENT `main` (not re-derived from
+memory), and the current full suite is green as of this session's start
+(**547 passed, 1 skipped, 0 failed** — improved from the 505/2/5 state
+recorded when M5-M8 were originally built, because the same credit/key
+fix that unblocked M4 also fixed the 5 standing
+`test_simulator_e2e.py` failures; nothing about M5/M6/M8 themselves
+changed). **All three confirmed DONE — proceeding directly to M7, no
+rework needed.**
