@@ -771,3 +771,27 @@ now both exist side by side.
 Spend: 1 DATA call (the momentum rule's real trailing-return fetch; the
 base-rate rule uses its already-frozen constant, no fetch). 0 MODEL.
 No commit — no code changed.
+
+## Task M9 — Documentation close-out — **DONE**
+
+`PROGRESS.md`'s "Causal-engine pillar status" section gained a Market
+Intelligence subsection: M1-M8 status (all DONE) summarized from this
+trace, what's correctly not done (scheduling — human's job; Part C-M's
+standing exclusions), the A-M3 contamination wall restated explicitly,
+and the standing ≥30-resolved-predictions-per-source success definition
+(honestly noted as nowhere near met yet — the ledger holds its first
+small cohort, zero resolved).
+
+**Newly authorized this session, done and disclosed rather than silently
+decided**: `PROGRESS.md`'s one genuinely stale forward-looking note (the
+trading-backtest harness's "only run once credits exist again" caveat)
+was updated with a dated addendum confirming that condition is now
+satisfied. The historical session-close record of the 5
+`test_simulator_e2e.py` failures, from a specific past session's actual
+close, was deliberately left untouched — an accurate record of what was
+true then, not a standing claim, and rewriting it would misrepresent
+history rather than fix a stale note.
+
+Bar: section present, accurate against this trace — **PASS**. Committed.
+**Commit**: `1019949`.
+**Spend**: 0 (docs only).
