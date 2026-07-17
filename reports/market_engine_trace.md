@@ -646,3 +646,109 @@ fix that unblocked M4 also fixed the 5 standing
 `test_simulator_e2e.py` failures; nothing about M5/M6/M8 themselves
 changed). **All three confirmed DONE — proceeding directly to M7, no
 rework needed.**
+
+## Task M7 — Weekly regime report — **DONE**
+
+Real extraction path used throughout (M4 passed, authorized by the
+human this session) — no matcher-only fallback needed.
+
+**A real, significant finding hit mid-task, fixed within this task's own
+budget, not glossed over**: the first live attempt crashed outright.
+FRED marks market-holiday dates with `"."` for daily series (e.g.
+Juneteenth, 2026-06-19, for `T10Y2Y`) — M1's hard NaN guard (already
+reviewed and correct; untouched here) raises on ANY such value anywhere
+in a fetched range. A 30-day `T10Y2Y` window and `BAMLH0A0HYM2`'s
+structurally-required 10-year lookback are both near-certain to contain
+at least one such gap. Fixed at the M7 fetch layer only: a per-series
+fetch failure is now caught in `fetch_current_series_data` and that
+series is simply OMITTED from `series_data` — reusing M2's own
+already-tested `"series missing → unavailable"` path rather than
+inventing a second resilience mechanism, and never silent (a `WARNING`
+is printed naming which series and why). `T10Y2Y`'s window was also
+narrowed 30d→10d (`curve_inversion` only ever reads the latest
+observation, and 10 days safely clears the June 19 gap at zero extra
+fetch cost) — this one specific, targeted, budget-neutral fix recovered
+real `T10Y2Y` data on the next attempt. **`BAMLH0A0HYM2`/`CPIAUCSL`/
+`UNRATE` remain structurally unable to shrink below their required
+lookback and stayed `unavailable` in the final real run** — a real
+architectural finding, not a bug I could cheaply route around: a
+gap-tolerant recursive re-fetch was considered and rejected here, since
+a series with dozens of calendar gaps across a 10-year window could cost
+dozens of DATA calls against this task's ≤6 budget. **Flagged plainly
+for your review, not silently patched**: whether M1's guard should gain
+an opt-in "tolerate/skip individual gaps, report which dates were
+skipped" mode is a real, separate design question — not decided here.
+
+**The real, full rendered report** (the actual output of the real
+end-to-end run, byte-for-byte, also saved at
+`reports/weekly_regime_report_2026-07-17.txt`):
+```
+REGIME SNAPSHOT -- as of 2026-07-17
+----------------------------------------------------------------------
+Yield curve (T10Y2Y):        not inverted  [FRED T10Y2Y, 2026-07-16]
+Credit spreads (HY OAS):     unavailable
+Inflation trend (CPI YoY):   unavailable
+Unemployment momentum:       unavailable
+Drawdown (SPY):              -0.91% off recent high  [Tiingo, 2026-07-16]
+
+Structural mechanisms possibly in play: none matched -- no forced match on an empty/weak signal.
+
+RESOLVABLE PREDICTIONS RECORDED THIS RUN (source=market)
+----------------------------------------------------------------------
+- P=0.72 by 2026-10-16: 10-Year minus 2-Year Treasury yield spread remains above +0.30 percentage points (consistent with a non-inverted, moderately steep curve regime).
+- P=0.58 by 2026-09-15: SPY rebounds to within +1.0% of its recent running high within the next 60 days (mild mean reversion from current -0.91% drawdown).
+- P=0.65 by 2026-10-01: US unemployment rate remains below 5.0% through end of Q3 2026 (persistent tightness in labor market).
+
+CALIBRATION (read-only; no feedback into generation)
+----------------------------------------------------------------------
+market: no resolutions yet.
+baseline: no resolutions yet.
+(The ledger accumulates from here -- per A-M5, no confidence adjustment happens until at least 30 resolved predictions per source exist.)
+```
+
+Real headlines fed into extraction (gathered via web search before this
+task started, real and current, not fabricated): the June jobs report
+miss (57K vs. ~110-115K consensus, unemployment steady at 4.3%),
+futures pricing a possible October Fed rate hike, and a second
+consecutive weekly bond selloff pushing yields to their highest since
+mid-May. The model correctly used the headline's real unemployment
+figure to ground its UNRATE prediction even though the `UNRATE` FRED
+series itself was unavailable in the snapshot table that run — a real,
+useful demonstration that the drafting call synthesizes numeric AND
+headline evidence, not just one or the other.
+
+**Bars**:
+- (a) real end-to-end run on the current real snapshot, ≥1 genuinely
+  matched mechanism OR correct silence — **PASS**: correct silence (the
+  available signal — a non-inverted curve, a modest drawdown, mixed
+  headlines — genuinely didn't clear any mechanism's trigger
+  conditions; no match was forced).
+- (b) recorded rows verified by direct DB read, sane probabilities,
+  future `resolve_by`, valid rules — **PASS**. **5 real predictions
+  total were recorded across this task's live debugging** (2 from the
+  intermediate run before the `T10Y2Y` fetch fix — when `T10Y2Y`,
+  `BAMLH0A0HYM2`, `CPIAUCSL`, and `UNRATE` were ALL unavailable, so those
+  2 predictions grounded entirely in the drawdown number and headlines
+  — plus the 3 shown above from the final run). None deleted — append-
+  only per this project's standing convention (same discipline as every
+  other ledger write in this codebase). Direct DB read confirmed all 5:
+  probabilities `{0.65, 0.72, 0.72, 0.58, 0.65}`, all strictly in
+  `(0,1)`; `resolve_by` `{2026-08-31, 2026-09-15, 2026-10-16, 2026-09-15,
+  2026-10-01}`, all genuinely future relative to 2026-07-17; all 5
+  `resolution_rule`s are valid, correctly-typed `PctChangeRule`/
+  `LevelRule` instances (3 `pct_change`/SPY, 2 `level`/`T10Y2Y`+`UNRATE`).
+- (c) language-wall grep bars — **PASS**, checked directly against the
+  actual rendered file (not just the internal assertion): `grep -ic`
+  for `"will happen"`, `"buy"`, `"sell"`, `"position size"` — **0 hits
+  each**.
+- (d) suite green — **PASS**, 562 passed / 1 skipped / 1 deselected (the
+  confirmed-passing 10-minute live vision test, deselected only to avoid
+  a redundant re-run, not because anything failed).
+
+**Commit**: `01800d7`.
+**Spend**: **6 DATA calls** (exactly at the ≤6 budget — `T10Y2Y` fetched
+twice under two different windows during the live-debugging sequence
+above, `BAMLH0A0HYM2`/`CPIAUCSL`/`UNRATE` once each, `SPY` once), **4
+MODEL calls** (2 real end-to-end attempts × 1 extraction + 1 drafting
+call each, well under ≤8), 0 additional web searches this task
+(headlines gathered once, before the task started).
