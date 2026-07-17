@@ -39,6 +39,7 @@ FailureSignature = Literal[
     "bound_violated",
     "cross_field_incoherent",
     "citation_unresolvable",
+    "stable_but_non_discriminating",
     "novelty_or_scope_gap",
 ]
 
@@ -49,6 +50,7 @@ FixCategory = Literal[
     "deterministic_bounded_composition",
     "cross_field_coherence_check",
     "citation_computed_in_code",
+    "design_level_fix_required",
     "no_fix_escalate",
 ]
 
@@ -110,6 +112,23 @@ REGISTRY: List[RegistryEntry] = [
         "to computed-in-code.",
     ),
     RegistryEntry(
+        "stable_but_non_discriminating", "design_level_fix_required",
+        "Output is stable across reruns AND across genuinely different "
+        "inputs -- near-total insensitivity to input variation, "
+        "indistinguishable from a constant predictor (backtest v1: 17/18 "
+        "cases flagged 'majority risky' whether the case was a $30k "
+        "reversible stunt or a $1.2B capital failure; out-of-sample "
+        "confirmation: the job-application agent's top_n=10 "
+        "bullet-selection degeneracy). Not a rerun-instability problem, "
+        "not a single suspect field, no bound broken, no fields "
+        "disagreeing -- the pipeline is MISSING A STAGE or has a "
+        "degenerate selection rule. ENCODED, UNVALIDATED: no shipped fix "
+        "of this category exists yet in this project (the evaluation-stage "
+        "design is proposed, build-deferred). The fix is design-level and "
+        "requires a human decision -- it is never a mechanical retry. "
+        "Detection is deterministic: check_discrimination_bar().",
+    ),
+    RegistryEntry(
         "novelty_or_scope_gap", "no_fix_escalate",
         "No known signature fits. Escalate. Never guess a fix.",
     ),
@@ -126,7 +145,7 @@ def diagnose(signature: str, extraction_shape: str = "unknown") -> FixCategory:
     """The thin matching layer. Pure lookup, with the one real
     disambiguation the registry needs (see module docstring). Fails
     CLOSED: any signature not in REGISTRY -- including a raw string that
-    isn't one of the 6 known FailureSignature values -- returns
+    isn't one of the 7 known FailureSignature values -- returns
     "no_fix_escalate" rather than raising or guessing."""
     if signature == "unstable_across_reruns":
         if extraction_shape == "closed_taxonomy":
@@ -134,3 +153,40 @@ def diagnose(signature: str, extraction_shape: str = "unknown") -> FixCategory:
         return "closed_taxonomy_extraction"
 
     return _FIX_BY_SIGNATURE.get(signature, "no_fix_escalate")
+
+
+def check_discrimination_bar(
+    predictions: List[str],
+    ground_truth: List[str],
+    baseline_predictions: List[str],
+    margin: float = 0.10,
+) -> bool:
+    """Deterministic detector for `stable_but_non_discriminating`.
+
+    Narrowly scoped helper next to its registry row -- NOT a general
+    shared bar-tier module, per the recorded 'documented pattern, not
+    shared code' resolution.
+
+    Compares the system's accuracy against a trivial baseline predictor's
+    accuracy on the same real ground truth. Returns True when the bar
+    FLAGS the signature (the system fails to beat the baseline by more
+    than `margin`) -- i.e. True means 'non-discriminating, do not trust
+    the accuracy number'. Returns False when discrimination is real.
+
+    Computed in code, never asked of a model. The margin exists because
+    backtest v1 proved a degenerate classifier can still nominally beat a
+    baseline (66.7% vs. 61.1%) purely by riding the base rate -- a small
+    raw edge over 'always predict the majority class' is not evidence of
+    discrimination.
+    """
+    n = len(ground_truth)
+    if n == 0 or len(predictions) != n or len(baseline_predictions) != n:
+        raise ValueError(
+            "predictions, ground_truth, and baseline_predictions must be "
+            "non-empty and the same length"
+        )
+    accuracy = sum(p == g for p, g in zip(predictions, ground_truth)) / n
+    baseline_accuracy = sum(
+        b == g for b, g in zip(baseline_predictions, ground_truth)
+    ) / n
+    return accuracy < baseline_accuracy + margin

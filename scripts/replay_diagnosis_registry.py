@@ -121,7 +121,7 @@ EPISODES = [
             "failure. Not a same-input-rerun problem -- a near-total insensitivity to "
             "genuinely different inputs."
         ),
-        signature="novelty_or_scope_gap",
+        signature="stable_but_non_discriminating",
         extraction_shape="n/a",
         real_historical_fix=(
             "NOT YET RESOLVED. The evaluation-stage design (structural-match conditions, "
@@ -129,19 +129,18 @@ EPISODES = [
             "real, shipped resolution to compare against."
         ),
         real_fix_category=None,
-        manual_verdict="miss_registry_gap",
+        manual_verdict="encoded_unvalidated",
         manual_note=(
-            "None of the 5 substantive signatures fit: no rerun instability, no single "
-            "suspect field to toggle, no bound violated, no two fields disagreeing, no "
-            "citation issue. Correctly falls to the catch-all (escalate, no guess) -- a "
-            "correct 'I don't know' is a legitimate outcome, not a wrong answer. Classified "
-            "as a REGISTRY GAP, not a scope boundary: 'insufficient output variance across "
-            "genuinely different inputs' is a describable, checkable property (unlike the "
-            "base-rate pivot, this doesn't require comparing against a hypothetical "
-            "alternative approach) -- a candidate 7th signature, "
-            "e.g. insufficient_discrimination_across_inputs, could plausibly be added. Its "
-            "candidate fix is not yet known to work, since the only proposed fix (the "
-            "evaluation stage) hasn't been validated."
+            "T004 closed the registry gap this episode originally exposed: the 7th "
+            "signature (stable_but_non_discriminating -> design_level_fix_required, with "
+            "the deterministic check_discrimination_bar detector) now classifies this "
+            "episode precisely instead of dumping it in the novelty_or_scope_gap "
+            "catch-all. Explicitly NOT scored as a match: the registry row is ENCODED, "
+            "UNVALIDATED -- the only proposed fix (the evaluation stage) remains "
+            "build-deferred and unvalidated, so there is still no real, shipped "
+            "resolution to compare the selected fix category against. The signature "
+            "assignment is validated (it's this episode's own documented symptoms plus "
+            "the job-agent out-of-sample confirmation); the fix mapping is not."
         ),
     ),
     Episode(
@@ -212,10 +211,12 @@ def main():
     print("=" * 100)
     matches = [r for r in results if r[2] == "match"]
     gaps = [r for r in results if r[2] == "miss_registry_gap"]
+    encoded = [r for r in results if r[2] == "encoded_unvalidated"]
     boundaries = [r for r in results if r[2] == "miss_scope_boundary"]
     unclassified = [r for r in results if r[2] == "miss_unclassified"]
 
     print(f"MATCH: {len(matches)}/6 -- {', '.join(ep.name.split('.')[0] for ep, _, _ in matches)}")
+    print(f"ENCODED-UNVALIDATED (signature added, fix unproven): {len(encoded)}/6 -- {', '.join(ep.name.split('.')[0] for ep, _, _ in encoded)}")
     print(f"MISS (registry gap, fixable): {len(gaps)}/6 -- {', '.join(ep.name.split('.')[0] for ep, _, _ in gaps)}")
     print(f"MISS (confirmed scope boundary): {len(boundaries)}/6 -- {', '.join(ep.name.split('.')[0] for ep, _, _ in boundaries)}")
     if unclassified:
@@ -224,11 +225,12 @@ def main():
     print()
     print("Honest read: 4/6 clean category matches on real, already-resolved episodes")
     print("(with one, episode 4, matching via a documented widening of the anchoring")
-    print("signature's definition rather than a slam-dunk fit). The 2 misses are both")
-    print("informative, not embarrassing: episode 5 is a real registry gap (no signature")
-    print("for cross-input insensitivity) with no proven fix to add yet either; episode 6")
-    print("confirms the stopping rule's honest-floor exit is doing real work the registry")
-    print("itself was never meant to do.")
+    print("signature's definition rather than a slam-dunk fit). Episode 5's original")
+    print("registry gap was closed by T004 (stable_but_non_discriminating, 7th")
+    print("signature) -- now classified precisely, but scored ENCODED-UNVALIDATED, not a")
+    print("match: no shipped, validated fix of that category exists yet to compare")
+    print("against. Episode 6 confirms the stopping rule's honest-floor exit is doing")
+    print("real work the registry itself was never meant to do.")
 
 
 if __name__ == "__main__":
