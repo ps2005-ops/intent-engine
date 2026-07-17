@@ -16,12 +16,29 @@ reads collapse to the latest row per id.
 SCOPE WALL, per Task 1's own spec: no wiring into PremortemAnalyzer or any
 live path yet. No backfilling old predictions. No UI. This is substrate
 only -- a later task is where a live path actually writes to this ledger.
+
+Task M5 (market-engine-execution-plan.md) extended this additively: two
+new source values ("market", "baseline"), and 5 new nullable fields
+(instrument, direction, horizon_days, resolution_rule, resolution_source)
+for machine-evaluable market predictions. Additive per A3/M5's own scope
+wall: no existing field renamed or removed, no SQL schema change needed
+at all -- the underlying `predictions` table already stores each
+Prediction as one JSON blob in its `data` column (see `_ensure_schema`
+below), so a new Optional Prediction field is "free": an old row's JSON,
+missing these fields entirely, still round-trips through
+`Prediction.model_validate_json()` with them defaulting to None, no
+migration script required. resolution_rule is validated at record time
+by pydantic itself (a discriminated union on "type" -- PctChangeRule or
+LevelRule) -- a malformed rule dict fails BaseModel construction with a
+real ValidationError before anything is persisted, per the task's own
+"reject malformed rules at record time" bar. Rules are DEFINED and
+VALIDATED here only; evaluating one against real data is M6's job.
 """
 
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 try:
     from typing import Literal
@@ -34,8 +51,33 @@ from .db import get_connection
 
 DEFAULT_LEDGER_PATH = Path("data/prediction_ledger.db")
 
-PredictionSource = Literal["premortem", "scrap", "digest", "manual"]
+PredictionSource = Literal["premortem", "scrap", "digest", "manual", "market", "baseline"]
 PredictionOutcome = Literal["happened", "did_not_happen", "unresolvable"]
+ResolutionSource = Literal["tiingo", "fred"]
+ComparisonOp = Literal[">=", "<=", ">", "<", "=="]
+
+
+class PctChangeRule(BaseModel):
+    """e.g. {"type":"pct_change","symbol":"SPY","op":">=","value":0.02,"window_days":60}
+    -- evaluated by M6 against Tiingo adjusted closes."""
+    type: Literal["pct_change"]
+    symbol: str
+    op: ComparisonOp
+    value: float
+    window_days: int
+
+
+class LevelRule(BaseModel):
+    """e.g. {"type":"level","series":"UNRATE","op":">=","value":4.5,"by":"2026-12-31"}
+    -- evaluated by M6 against FRED observations."""
+    type: Literal["level"]
+    series: str
+    op: ComparisonOp
+    value: float
+    by: str  # ISO date string
+
+
+ResolutionRule = Union[PctChangeRule, LevelRule]
 
 
 def _current_timestamp() -> str:
@@ -58,6 +100,14 @@ class Prediction(BaseModel):
     # if it were a miss).
     brier_component: Optional[float] = None
     resolution_note: Optional[str] = None
+    # Task M5 additions -- all nullable, all None for every non-market/
+    # baseline source (premortem/scrap/digest/manual predictions never set
+    # these; they resolve via a human/existing path, not M6).
+    instrument: Optional[str] = None  # e.g. "SPY"
+    direction: Optional[str] = None  # free text (e.g. "up"/"down") -- no closed set specified by the plan
+    horizon_days: Optional[int] = None
+    resolution_rule: Optional[ResolutionRule] = Field(default=None, discriminator="type")
+    resolution_source: Optional[ResolutionSource] = None
 
 
 def _ensure_schema(conn) -> None:
@@ -121,14 +171,26 @@ def record_prediction(
     probability: float,
     resolve_by: Union[str, date],
     path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+    instrument: Optional[str] = None,
+    direction: Optional[str] = None,
+    horizon_days: Optional[int] = None,
+    resolution_rule: Optional[Union[Dict[str, Any], PctChangeRule, LevelRule]] = None,
+    resolution_source: Optional[ResolutionSource] = None,
 ) -> Prediction:
     if not (0.0 <= probability <= 1.0):
         raise ValueError(f"probability must be in [0, 1], got {probability!r}")
 
     resolve_by_str = resolve_by.isoformat() if isinstance(resolve_by, date) else resolve_by
+    # resolution_rule is validated here, at record time, by Prediction's own
+    # discriminated-union field -- a malformed dict (wrong/missing "type",
+    # missing a type-specific required field, wrong value type) raises a
+    # real pydantic.ValidationError from this constructor call, before
+    # _persist() ever runs. Nothing is written on a malformed rule.
     prediction = Prediction(
         source=source, entity_id=entity_id, claim_text=claim_text,
         probability=probability, resolve_by=resolve_by_str,
+        instrument=instrument, direction=direction, horizon_days=horizon_days,
+        resolution_rule=resolution_rule, resolution_source=resolution_source,
     )
     _persist(prediction, path)
     return prediction
