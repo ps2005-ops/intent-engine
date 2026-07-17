@@ -15,5 +15,6 @@ data/phase0_trial_log.jsonl
 data/*.db
 data/*.db-shm
 data/*.db-wal
+data/cache/
 credentials/
 logs/
