@@ -978,6 +978,11 @@ project has made.
      UNMODIFIED `PremortemAnalyzer`, expanded with real macro/valuation data.
      Build the harness regardless of current API credit state; only run the
      actual analysis once credits exist again.
+     **Update, 2026-07-17**: Anthropic credits were confirmed refilled this
+     session (see `reports/market_engine_trace.md`'s M4 entry) — the
+     "once credits exist again" condition above is now satisfied. This no
+     longer blocks running the actual analysis whenever Part 4a is picked
+     up; the harness itself still needs to be built first.
    - (b) A NEW, separate "explain current stock price" module using
      `yfinance` (free, local — flag for sign-off as a new dependency before
      installing) for real current data. Explicitly a synthesis of known
@@ -2891,3 +2896,117 @@ capability-level verdict was PARK).
 **Full real trace, every bar's actual value, every real distribution,
 every commit hash: `reports/overnight_trace.md`.** This document is the
 summary; that one is the primary evidence.
+
+## Market Intelligence subsection (Task M9, market-engine-execution-plan.md)
+
+Extends the causal-engine pillars into market/macro territory, across
+two supervised sessions (2026-07-16/17). Full real trace, every bar's
+actual value, every real distribution, every commit hash, and the
+complete verbatim rendered report:
+**`reports/market_engine_trace.md`.** This section is the summary; that
+one is the primary evidence — same division of labor as the overnight
+plan's own trace/summary pairing above.
+
+**What exists, M1 through M8, all DONE**:
+- **M1 — `core/macro_data.py`**: requests-only FRED client, on-disk JSON
+  cache, retry-with-backoff, hard NaN/missing-series guards. Seed set of
+  8 series.
+- **M2 — `core/regime_engine.py`**: 5 deterministic regime indicators
+  (curve inversion, credit-spread percentile, inflation trend,
+  unemployment momentum via a cited real Sahm-Rule threshold, drawdown)
+  and `regime_snapshot()`, which assembles them with an explicit
+  `"unavailable"` marker for any missing/insufficient series — never a
+  silent default. Zero LLM, zero network.
+- **M3 — `data/mechanisms.json`**: extended from 8 to 17 mechanisms (9
+  new financial-crisis mechanisms, real-cited: leverage-cycle bust,
+  margin/collateral spiral, bank-run maturity mismatch, carry-trade
+  unwind, reflexive bubble, monetary-tightening lag, sovereign-debt doom
+  loop, capex overbuild, money-market contagion). The trigger-condition
+  taxonomy gained 5 regime-derived terms, each mapped to a real
+  `regime_snapshot()` field — deliberately narrower than the plan's own
+  illustrative example list (no `rapid_tightening` term, since M2 never
+  built a rate-of-change indicator to check it against).
+- **M4 — regime-extraction reliability gate — PASSED** (`5/5` and `5/5`
+  modal agreement on the two clear cases, `2/5` — genuinely
+  non-unanimous — on the deliberately ambiguous one). Real path, worth
+  recording plainly here: the first attempt parked on Anthropic credit
+  exhaustion (the same account-level condition responsible for this
+  file's own `test_simulator_e2e.py` note below); after credits were
+  added, the API key itself needed re-issuing (a billing-side rotation)
+  before a real run could complete. **Anthropic credits and the API key
+  are both confirmed live as of this session** — extraction path
+  authorized for M7.
+- **M5 — `core/prediction_ledger.py`**: additively extended (`"market"`/
+  `"baseline"` sources, `resolution_rule` as a real discriminated
+  union). No SQL migration needed — the ledger already stores each row
+  as one JSON blob. Malformed rules verified to raise at record time.
+- **M6 — `core/market_resolution.py` + `scripts/resolve_market_predictions.py`**:
+  a Tiingo EOD client mirroring M1's shape, touched-vs-closed grading
+  semantics and forward-search across weekend/holiday gaps (both
+  explicitly designed and disclosed, since M5's schema doesn't
+  parametrize the distinction), idempotent by construction.
+- **M7 — `core/regime_report.py` + `scripts/generate_weekly_regime_report.py`**:
+  the phase's first user-facing product. Real end-to-end run verified:
+  correct silence on mechanisms (none forced), 5 real predictions
+  recorded across the run's own live-debugging sequence, all verified by
+  direct DB read, all 4 language-wall greps clean. **A real architectural
+  finding surfaced here, not silently patched**: FRED's daily series
+  mark market-holiday dates with `"."`, and M1's hard NaN guard (already
+  reviewed, correct, left untouched) means a long lookback window (e.g.
+  `BAMLH0A0HYM2`'s required 10-year percentile window) is near-certain to
+  hit one. Fixed at M7's own fetch layer for the cheaply-fixable case
+  (`T10Y2Y`, narrowed to a window that avoids the gap); the credit-spread
+  and inflation/unemployment indicators legitimately rendered
+  `"unavailable"` in the real run rather than being routed around with a
+  budget-blowing gap-stitching fetch. **Open, flagged for a real
+  decision, not resolved here**: whether M1 should gain an opt-in
+  gap-tolerant fetch mode.
+- **M8 — `scripts/record_baselines.py`**: the honest scoreboard. A fixed,
+  never-tuned momentum rule (P=0.65/0.35 by trailing-return direction)
+  and a frozen, one-time-computed base-rate constant
+  (`BASE_RATE_SPY_2PCT_60D = 0.8079`, derivation documented in-comment
+  against 1,348 real historical 60-day windows). Run once after M7's
+  real predictions so the ledger's first cohort has engine and baseline
+  rows sharing a horizon (`resolve_by=2026-09-15` on 2 of each).
+
+**What's NOT done, correctly, by design**: M7 was run manually this
+session, not scheduled (the plan's own scope wall: "human wires the
+schedule," never the agent). **M8's own baseline-recording is likewise
+unscheduled** — the operational handoff (cron/Task-Scheduler entries for
+both) is proposed in `reports/market_engine_trace.md`'s own closing
+section for the human to actually wire, not set up automatically here.
+
+**The contamination wall (A-M3), restated explicitly so a future session
+doesn't "helpfully" cross it**: the LLM is never evaluated by "paper
+trading in the past." No rule, threshold, or mechanism trigger anywhere
+in M1-M8 was tuned to make a historical fixture "call" a crisis — every
+M2 test fixture is synthetic, and the only two thresholds that could
+read as "tuned" (the Sahm Rule's 0.50pp trigger, `inflation_trend`'s
+0.1pp stability tolerance) are either a cited external constant or a
+definitional necessity with zero crisis-outcome assertion anywhere near
+them, checked directly, not assumed. History is INPUT to the mechanism
+library only (M3's real historical citations). Evaluation is FORWARD:
+claims ledgered now (M5/M7), resolved later against real data (M6),
+scored in code (the ledger's own `resolve_prediction`, untouched
+throughout this whole phase). **This wall does not expire and does not
+get relaxed by a future session finding it inconvenient.**
+
+**Standing definition of success for this phase, restated so it isn't
+silently forgotten or declared early**: calibration measured over **≥30
+resolved market predictions per source** before any conclusion is drawn
+about whether the engine's structural predictions beat the baselines.
+As of this session's close, the ledger holds its first cohort (a
+handful of `market`/`baseline` rows, zero resolved) — nowhere near that
+bar yet, and no conclusion is drawn here. No Brier-based confidence
+adjustment, weight tuning, or "earned confidence" display exists
+anywhere in this phase (A-M5) — the calibration footer rendered by M7 is
+read-only, and correctly rendered `"no resolutions yet"` this session,
+honestly, rather than a fabricated number.
+
+**M7 and M9 were explicit human gates this phase, both now cleared
+through this session** — M7 ran (real extraction path, human-authorized
+after reviewing M4); this M9 section is that gate's own documentation
+close-out. Not yet started, by explicit scope: any scheduling wiring
+(human's own job), and Part C-M's standing exclusions (no Alpaca, no
+Quiver, no Kronos, no LLM backtesting ever, no 90%-accuracy target
+anywhere).
