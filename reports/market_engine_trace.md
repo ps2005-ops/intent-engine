@@ -795,3 +795,61 @@ history rather than fix a stale note.
 Bar: section present, accurate against this trace — **PASS**. Committed.
 **Commit**: `1019949`.
 **Spend**: 0 (docs only).
+
+## Operational handoff — scheduling (NOT set up by this session; human wires it)
+
+Per the plan's own scope wall (M6/M7: "no auto-scheduling setup — human
+wires the schedule"), nothing below has been installed as a real cron
+job, launchd plist, or Task Scheduler entry. These are the exact
+commands to wire, and the reasoning behind each recommended cadence.
+
+### (a) The resolve script — recommend **daily**
+
+```
+0 6 * * * cd /Users/prathamsharma/intent-engine && .venv/bin/python scripts/resolve_market_predictions.py >> logs/resolve_market_predictions_$(date +\%Y-\%m-\%d).log 2>&1
+```
+(standard crontab syntax; `crontab -e` to install. On macOS a `launchd`
+plist with `StartCalendarInterval` at `{Hour: 6, Minute: 0}` works
+identically if you prefer that over cron.)
+
+**Why daily, not weekly**: this script is fully unattended-safe —
+idempotent by construction (queries only unresolved, due predictions;
+a day with nothing due is a real no-op), needs no human input (no
+headlines, nothing to draft), and is cheap (≤10 DATA calls per M6's own
+budget, typically far fewer since most days resolve 0-2 predictions and
+Tiingo/FRED responses are cached). Running it daily keeps each
+prediction's `resolved_at` timestamp close to its actual `resolve_by`
+date — weekly resolution would let a prediction sit due-but-unresolved
+for up to 6 extra days, which is avoidable timing noise in any future
+calibration analysis keyed on `resolved_at` (`brier_summary`'s own
+`window_days` filter uses exactly that field). 6am is arbitrary but
+deliberate: after the prior US trading day's Tiingo data and any
+overnight FRED release are reliably available, before market open.
+
+### (b) The weekly regime report (+ baselines) — recommend **weekly, with one real caveat**
+
+```
+0 8 * * 1 cd /Users/prathamsharma/intent-engine && .venv/bin/python scripts/generate_weekly_regime_report.py --entity-id "macro-watch" --headline "<a real, current headline>" --headline "<a second real, current headline>" --output "reports/weekly_regime_report_$(date +\%Y-\%m-\%d).txt" && .venv/bin/python scripts/record_baselines.py --entity-id "macro-watch" >> logs/weekly_regime_$(date +\%Y-\%m-\%d).log 2>&1
+```
+
+**Why weekly**: matches the task's own name and the plan's own cadence
+intent; also matches `record_baselines.py`'s own purpose (a fresh
+baseline cohort recorded alongside each new batch of real market
+predictions, sharing a horizon — exactly what this session did manually
+after M7).
+
+**The one real caveat, stated plainly rather than glossed over**: the
+`--headline` arguments above are placeholders, not something this
+command can fill in itself. No news-ingestion vendor is wired into this
+phase (out of scope, Part C-M) — this session's own real run used 3
+headlines gathered by hand via web search immediately before running the
+script. **A literal cron job with static/stale headline text would
+silently degrade extraction quality over time** (the same 2 headlines
+re-used every week, increasingly disconnected from that week's real
+news) — worse than the "correct silence" this system is designed to
+produce when evidence is genuinely absent. Recommend one of: (i) keep
+this specific step human-triggered weekly (run the command by hand with
+fresh headlines, exactly as this session did) until a real
+headline-sourcing decision is made and scoped as its own task, or (ii) a
+future task designs a real, scoped news-input mechanism before this step
+is fully unattended. Not decided here — flagged for your call.
