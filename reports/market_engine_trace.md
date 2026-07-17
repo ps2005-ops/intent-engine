@@ -227,5 +227,136 @@ a deliberate scope boundary, not a gap in readiness.
   1 plausible, 0 speculative, exactly mirroring the original 8's honest
   ratio).
 
-**Stopping here per explicit instruction.** M4 (live-model reliability
-gate) is next, pending your review of M1-M3.
+**Stopped here per explicit instruction in the first session.** M1-M3
+reviewed and approved by the human, including the disclosed judgment
+calls (narrower taxonomy, no AI-datacenter citation, the separate
+regression-fix commit) — all confirmed correct. Second session below
+continues with M4, M5, M6, M8 per direct instruction (M7, M9 explicitly
+excluded — M7 is the next human gate).
+
+---
+
+# Session 2 — GATE + RESOLUTION LAYER (M4, M5, M6, M8)
+
+Legend: **DONE** / **PARKED** / **NOT STARTED (out of session scope)**.
+
+## Task M4 — Regime-extraction reliability gate — **PARKED**
+
+**Verdict, stated plainly up front**: PARKED. Not a bar failure — the
+task could not run at all. The very first live call (round 1, call 1/15)
+failed with a definitive Anthropic API billing error before any real
+distribution could be collected. 0 of 15 round-1 calls succeeded; 0/40
+budget spent.
+
+**Real error, verbatim**:
+```
+anthropic.BadRequestError: Error code: 400 - {'type': 'error', 'error':
+{'type': 'invalid_request_error', 'message': 'Your credit balance is too
+low to access the Anthropic API. Please go to Plans & Billing to upgrade
+or purchase credits.'}, 'request_id': 'req_011Cd6zRLBvGzYRr3hLZsMVc'}
+```
+This is the same external billing condition already documented elsewhere
+in this repo for `test_scrap_estimate_live.py` (PROGRESS.md's scrap-metal
+checkpoint) — a confirmed account-level state, not new. Not a
+429/5xx-style transient error (a clear billing-state 400), so no retry
+was attempted: retrying a confirmed balance-exhaustion error would not
+produce new information, only spend more of the (already-zero) budget on
+an identical failure.
+
+**Script built and committed regardless, complete and reviewed-shape**:
+`scripts/regime_extraction_reliability_gate.py`, exactly the base-plan
+Task 3 pattern (`scripts/mechanism_extraction_reliability_gate.py`),
+adapted for regime-flavored input — isolated call, information-hiding
+(bare taxonomy names only, all 16 terms: the 11 original Task-2
+conditions plus the 5 Task-M3 regime terms; no mechanism names/library,
+no added definitions, matching Task 3's own precedent exactly).
+
+**"No interpretation," enforced deliberately in how the 3 cases were
+built**: every number below is either a REAL output of M2's own pure
+functions (`credit_spread_percentile`, `unemployment_momentum`,
+`inflation_trend`, `drawdown_state`), with only the raw numeric field
+rendered — never the derived boolean/label field (`triggered`, `trend`)
+those same functions also return, which would have handed the model its
+own answer — or, for the T10Y2Y curve spread, the raw signed number
+itself (there is no separate boolean to strip for that one; the spread
+value IS the raw fact). The taxonomy shown to the model is bare condition
+NAMES only, no definitions, so `drawdown_gt_20pct` etc. must be
+self-explanatory the same way `concentrated_supplier_base` was in Task 3.
+
+**The 3 constructed cases, verbatim (exactly what was sent, for you to
+judge whether "clear" was actually clear)**:
+
+### `clear_stress` — designed for exactly ONE unambiguous condition (curve_inverted)
+```
+- 10-Year minus 2-Year Treasury yield spread (T10Y2Y): -1.45 percentage points as of 2026-06-30 (source: FRED, series T10Y2Y)
+- ICE BofA US High Yield Option-Adjusted Spread (BAMLH0A0HYM2): currently ranks at the 60th percentile of its own trailing 10-year window as of 2024-08-01 (source: FRED, series BAMLH0A0HYM2)
+- CPI year-over-year: averaged 2.80% over the last 3 months vs. 2.88% over the last 12 months (source: FRED, series CPIAUCSL)
+- Unemployment rate: 3-month moving average currently equal to its own low over the prior 12 months (delta 0.00 percentage points) (source: FRED, series UNRATE)
+- A broad equity price index is currently 4.17% below its own recent running high (source: a broad market price index)
+
+Headlines:
+- "Retailers report steady holiday-season sales, in line with analyst expectations."
+```
+Design rationale: after a first design pass with 5 simultaneously-clear
+conditions was rejected as methodologically unsound (see "design notes"
+below), this was narrowed to ONE dominant, extreme signal (a deeply
+negative spread, -1.45pp) with every other number left deliberately
+unremarkable — mirroring Task 3's own narrow "clear" cases (1-2
+conditions, not 5). Expected stable answer: `{curve_inverted}` only.
+
+### `clear_benign` — designed for the empty set
+```
+- 10-Year minus 2-Year Treasury yield spread (T10Y2Y): +1.35 percentage points as of 2026-06-30 (source: FRED, series T10Y2Y)
+- ICE BofA US High Yield Option-Adjusted Spread (BAMLH0A0HYM2): currently ranks at the 15th percentile of its own trailing 10-year window (source: FRED, series BAMLH0A0HYM2)
+- CPI year-over-year: averaged 2.10% over the last 3 months vs. 2.18% over the last 12 months (source: FRED, series CPIAUCSL)
+- Unemployment rate: 3-month moving average currently 0.03 percentage points BELOW its own low over the prior 12 months (source: FRED, series UNRATE)
+- A broad equity price index is currently at its own recent running high, 0.00% off (source: a broad market price index)
+
+Headlines:
+- "Consumer confidence index ticks up for a third consecutive month; economists describe underlying trends as steady."
+```
+Every number here is calm/normal or actively improving (the unemployment
+delta is negative — the labor market cooling toward its own recent best,
+not worsening). Expected stable answer: `{}` (empty), a genuine "nothing
+here" case per the extraction prompt's own instruction to select FEW or
+NONE rather than force a selection.
+
+### `ambiguous` — designed to be borderline on every axis at once
+```
+- 10-Year minus 2-Year Treasury yield spread (T10Y2Y): -0.04 percentage points as of 2026-06-30 (source: FRED, series T10Y2Y)
+- ICE BofA US High Yield Option-Adjusted Spread (BAMLH0A0HYM2): currently ranks at the 65th percentile of its own trailing 10-year window (source: FRED, series BAMLH0A0HYM2)
+- CPI year-over-year: averaged 3.40% over the last 3 months vs. 3.18% over the last 12 months (source: FRED, series CPIAUCSL)
+- Unemployment rate: 3-month moving average currently 0.20 percentage points above its own low over the prior 12 months (source: FRED, series UNRATE)
+- A broad equity price index is currently 11.82% below its own recent running high (source: a broad market price index)
+
+Headlines:
+- "Manufacturing activity contracts for a third straight month, but services-sector growth remains resilient and consumer spending is holding up."
+- "Fed officials are described as 'closely watching' incoming data but have given no signal of imminent policy action."
+- "Analysts remain split on whether this represents an early warning sign or a temporary soft patch."
+```
+Every single number is deliberately borderline: the spread is
+technically negative but by 4 basis points (noise-level, not a real
+inversion); the credit-spread percentile is mid-high but not extreme;
+the inflation uptick is modest; the unemployment delta (0.20pp) is real
+but well short of a dramatic move; the drawdown (11.82%) is meaningful
+but well under the 20% bar. The headlines explicitly state analysts are
+split. No single number or headline was written to obviously "win."
+
+**Bars, as written in the plan**:
+- (a) ≥4/5 modal agreement on the two clear cases: **NOT EVALUATED** — 0
+  successful calls.
+- (b) ambiguous case must not be confidently unanimous: **NOT
+  EVALUATED** — 0 successful calls.
+- (c) real distributions in the TRACE: **N/A** — no distributions exist
+  to record; the verbatim error above is the complete real result.
+
+**Commit**: `9a0be6b`.
+**Spend**: 0 MODEL calls succeeded (1 attempted, failed before any
+response), 0 DATA calls.
+**What a human should decide**: add Anthropic credits, then re-run
+`python scripts/regime_extraction_reliability_gate.py` unchanged — no
+code or case-design decision is pending, only the external billing
+constraint. Per the plan's own scope wall, M4's verdict gates only M7's
+extraction path (M7 may run matcher-only if M4 ultimately parks on its
+actual bars) — it does not block M5, M6, or M8, none of which depend on
+M4, and this session proceeded to them per direct instruction.
