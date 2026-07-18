@@ -826,6 +826,44 @@ calibration analysis keyed on `resolved_at` (`brier_summary`'s own
 deliberate: after the prior US trading day's Tiingo data and any
 overnight FRED release are reliably available, before market open.
 
+## Session 4 — Cowork standing-cadence checkpoint (2026-07-17)
+
+**Status check, M5-M9 — verified against current `main`, not assumed**: all
+five confirmed **DONE** (M5 `45428e0`, M6 `6b7242c`, M7 `01800d7`, M8
+`5e0e30b`, M9 `1019949`) — nothing left in the queue to complete. Offline
+suite re-run this session: **557 passed, 7 deselected (live), 0 failed** —
+green, matches this repo's own prior-session record in
+`COWORK-HANDOFF-2026-07-17.md`.
+
+**Daily resolve cadence — first standing run**, `scripts/resolve_market_predictions.py`:
+```
+Resolved 0 due market/baseline prediction(s) as of 2026-07-17:
+  happened:       0
+  did_not_happen: 0
+  unresolvable:   0
+```
+Correct no-op — earliest `resolve_by` in the ledger is 2026-08-31 (M7's own
+predictions), nothing due yet. 0 DATA calls consumed (no fetch needed when
+nothing is due). No code change, no commit.
+
+**Blocker found, not present in prior sessions' record**: `.git/index.lock`,
+`.git/HEAD.lock`, `.git/objects/maintenance.lock`, and
+`.git/refs/heads/main.lock` are still present in this repo (confirmed via
+`ls`), causing `git status`/`git diff` to report false modifications on 5
+files (`ROADMAP.md`, `scripts/replay_diagnosis_registry.py`,
+`src/intent_engine/core/diagnosis_registry.py`,
+`tests/test_diagnosis_registry.py`, `tests/test_pick_next_task.py`) that are
+NOT real — verified directly via `git show HEAD:ROADMAP.md` vs the working
+tree copy, byte-identical content. Per `COWORK-HANDOFF-2026-07-17.md` §2,
+this is the sandbox-mount-can't-unlink-files issue and the fix
+(`rm -f .git/*.lock ... && git reset`) must run on the Mac, not from this
+session. **No commits were attempted in this repo this session** — the
+existing corrupted index makes any `git add`/`git commit` unsafe (real risk
+of accidentally staging content from the false diff, the same near-miss the
+prior session records twice under §2). Nothing new needed committing this
+session anyway (resolve script is a pure no-op read, and the docs work
+below was intentionally kept out of git until the lock is cleared).
+
 ### (b) The weekly regime report (+ baselines) — recommend **weekly, with one real caveat**
 
 ```

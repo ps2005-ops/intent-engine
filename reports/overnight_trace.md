@@ -80,6 +80,54 @@ Legend: **DONE** / **PARKED** / **SKIPPED-DEPENDENCY**.
   "insufficient evidence, select nothing" affordance made more prominent,
   and re-test that version.
 
+## Task 3b — Redesign ambiguous case + rerun reliability gate — **PASS** (real verdict; does NOT unpark Task 3)
+
+- Spun up 2026-07-17 per explicit human decision on Task 3's park (option
+  1 of the two offered: redesign the "ambiguous" case to be genuinely
+  uncertain on its own stated conditions, and re-run the full protocol
+  fresh). Explicitly instructed: this task does not unpark Task 3 itself —
+  Task 3's own entry above, its script, and its PARKED verdict are
+  untouched. This is a separate script
+  (`scripts/mechanism_extraction_reliability_gate_v2.py`, imports Task 3's
+  extraction/prompt/schema machinery unchanged so the isolated-call
+  discipline is identical between the two gates) producing its own,
+  separate real verdict for a human to weigh against Task 3's park.
+- Redesign: Task 3's ambiguous case plainly stated its two candidate
+  conditions ("some regulatory oversight," "a handful of larger
+  companies") — arguably a test-design flaw, not evidence the extractor
+  over-triggers. The new case hedges the same territory ("hard to tell how
+  many serious players," "nothing has been formalized... people disagree
+  how binding it would be") rather than removing signal entirely or
+  stating it plainly. Full text in the script.
+- Real protocol run: fresh 5×3 (15 live calls), same two clear cases as
+  Task 3 verbatim (imported, not retyped), new ambiguous case.
+- Real distributions:
+  - `clear_supply_shock`: 5/5 identical — `['concentrated_supplier_base']`
+  - `clear_price_war`: 5/5 identical — `['few_dominant_competitors', 'symmetric_competitor_response_expected']`
+  - `ambiguous` (redesigned): **4/5** `['adjacent_market_bundling_opportunity']`,
+    **1/5** `['few_dominant_competitors', 'frequent_regulatory_interaction']`
+    — real run-to-run disagreement, not unanimous.
+- Bar (a) (>=4/5 modal agreement on both clear cases): **PASS** (5/5 both).
+- Bar (b) (ambiguous case not confidently unanimous): **PASS** — modal
+  count 4/5 is not the required 5/5-and-nonempty threshold for
+  "overconfident," and the dissenting run picked a materially different
+  condition set, not a near-miss. Strengthened-instruction round-2 was not
+  triggered (only fires if bar (b) fails on round 1).
+- Spend: 15 live calls (budget <=40, same ceiling as Task 3). No web
+  searches.
+- Commit: pending (this trace entry + the new script, not yet committed as
+  of this writing).
+- **What this does and doesn't settle**: this is real evidence the
+  extractor itself is capable of appropriate uncertainty when the input
+  text is genuinely uncertain — the round-1 failure in Task 3 looks more
+  like a test-design artifact (an "ambiguous" case that wasn't actually
+  ambiguous) than a defect in the extraction step. It does not, on its
+  own, retroactively pass Task 3 or clear Task 4 to proceed — Task 3's
+  entry stays PARKED per explicit instruction, and a human should decide
+  whether this result is sufficient to revisit that verdict, or whether
+  Task 3 should be independently re-run against this same redesigned case
+  before anything downstream changes.
+
 ## Task 4 — Wire mechanisms into simulator output — **SKIPPED-DEPENDENCY**
 
 - Explicitly gated on Task 3's PASS verdict (plan's own dependency rule).
