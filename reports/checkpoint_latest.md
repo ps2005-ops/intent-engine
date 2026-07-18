@@ -10,11 +10,7 @@
    built, sitting in the review UI (`~/job-application-agent`,
    `scripts/review.sh`). Nothing sent or submitted. Full list:
    `applications/APPLICATION_LEDGER.md`.
-2. **Gmail OAuth token expired** (`invalid_grant`) — blocks new outreach
-   drafts. Re-auth (`gmail_token.json`/`gmail_compose_token.json`,
-   compose-scope) before any further packet prep, or it'll just accumulate
-   more failed drafts.
-3. **intent-engine git lock files still present** — `.git/index.lock`,
+2. **intent-engine git lock files still present** — `.git/index.lock`,
    `.git/HEAD.lock`, `.git/objects/maintenance.lock`,
    `.git/refs/heads/main.lock`. Run this on the Mac before any new commit
    in that repo (working tree already matches HEAD, verified — this just
@@ -22,16 +18,16 @@
    ```
    cd ~/intent-engine && rm -f .git/index.lock .git/HEAD.lock .git/refs/heads/main.lock .git/objects/maintenance.lock && git reset
    ```
-4. **Lever adapter unverified on a real page** — before the 29-item
+3. **Lever adapter unverified on a real page** — before the 29-item
    adapter batch (real Playwright submissions) runs, verify one real Lever
    screenshot first: `python scripts/batch_execute.py --only adapter
    --limit 10 --yes` (your call to run it, not run this session — it
    submits for real).
-5. **Cron/Task Scheduler entries below** — installing these is your call;
+4. **Cron/Task Scheduler entries below** — installing these is your call;
    I didn't set any schedule.
-6. **Social publishing path** — still an open human decision (Postiz vs
+5. **Social publishing path** — still an open human decision (Postiz vs
    Publer vs Meta Graph), blocks the marketing agent's NOW-tier tooling.
-7. **Task 3's park** (mechanism-extraction ambiguous-case gate, intent-engine) —
+6. **Task 3's park** (mechanism-extraction ambiguous-case gate, intent-engine) —
    your read needed: flawed test case, or does the extraction schema need a
    more prominent "insufficient evidence" escape hatch? Gates Task 4.
 
@@ -39,6 +35,13 @@
 
 ## What finished this session
 
+- **Gmail OAuth re-authed (Workstream 4)**: both tokens had gone bad with
+  `invalid_grant` (refresh token itself dead, not just an expired access
+  token). Deleted both stale files and ran the full browser consent flow
+  for each: `gmail_compose_token.json` (`gmail.compose` scope, outreach
+  drafts) and `gmail_token.json` (`gmail.readonly` scope, job-alert
+  parsing). Both verified with a fresh `refresh_token` and valid expiry
+  afterward. Outreach drafting is unblocked.
 - **Market engine (Workstream 2)**: verified M5-M9 all DONE (commits
   `45428e0`, `6b7242c`, `01800d7`, `5e0e30b`, `1019949` — no work needed,
   queue was already complete). Ran the daily resolve cadence for the first
@@ -86,13 +89,13 @@
   no-op; the new docs/script are intentionally left uncommitted until the
   lock clears).
 - **job-application-agent packet prep for 361 remaining manual-path
-  items**: parked behind the Gmail OAuth fix (⏳ #2) — running more packets
-  now would just add more `gmail-draft-error` rows.
+  items**: was parked behind the Gmail OAuth fix, now resolved (see "What
+  finished this session") — unparked, no longer blocked.
 - **Adapter batch (29 real-submission items)**: parked behind Lever
-  verification (⏳ #4) and your explicit approval — never run with `--yes`
+  verification (⏳ #3) and your explicit approval — never run with `--yes`
   on a real-submission path without it.
 - **Task 3 mechanism-extraction gate**: parked in a prior session, still
-  open (⏳ #7) — restated here since it gates Task 4.
+  open (⏳ #6) — restated here since it gates Task 4.
 
 ## Spend since last checkpoint
 
@@ -113,5 +116,6 @@
   RUNNABLE roadmap task once Task 3 is resolved.
 - **Workstream 3**: none queued — PORTFOLIO.md is current as of this
   checkpoint; next update is the next checkpoint.
-- **Workstream 4**: (1) re-auth Gmail, (2) approve/reject the 20 prepared
-  items, (3) decide on the Lever-verification + adapter-batch step.
+- **Workstream 4**: (1) approve/reject the 20 prepared items, (2) decide
+  on the Lever-verification + adapter-batch step, (3) resume packet prep
+  for the 361 remaining manual-path items now that Gmail is unblocked.
