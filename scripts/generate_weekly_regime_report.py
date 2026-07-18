@@ -62,11 +62,29 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--entity-id", required=True)
     parser.add_argument("--headline", action="append", default=[], help="A real current headline (repeatable).")
+    parser.add_argument(
+        "--headlines-from-feeds", action="store_true",
+        help="Source headlines from the approved RSS allowlist (core.headline_feed) instead of --headline. "
+             "Deterministic top-K with provenance in the report header; zero qualifying headlines -> "
+             "numeric-only mode (item 3, docs/BA_ACCELERATION_PROPOSAL.md, approved 2026-07-18).")
     parser.add_argument("--path", default=str(DEFAULT_LEDGER_PATH))
     parser.add_argument("--output", default=None, help="Optional file to save the rendered report to.")
     args = parser.parse_args(argv)
 
-    report = generate_report(args.entity_id, args.headline, path=args.path)
+    headlines = args.headline
+    provenance_block = None
+    if args.headlines_from_feeds:
+        if args.headline:
+            parser.error("--headline and --headlines-from-feeds are mutually exclusive -- pick one input path.")
+        from intent_engine.core.headline_feed import fetch_feeds, render_provenance, select_headlines
+        as_of = date.today()
+        selected = select_headlines(fetch_feeds(), as_of)
+        headlines = [h.title for h in selected]
+        provenance_block = render_provenance(selected, as_of)
+
+    report = generate_report(args.entity_id, headlines, path=args.path)
+    if provenance_block is not None:
+        report = provenance_block + "\n\n" + report
     print(report)
     if args.output:
         Path(args.output).write_text(report)

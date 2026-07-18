@@ -231,3 +231,20 @@ detailed in its own task entry above):
 No hard walls were crossed. No new external dependencies were added. No
 force-pushes, no history rewrites, no deletions. Every live-API bar was
 checked against a real value, never assumed.
+
+## Addendum 2026-07-18 — Task 3b (v2 ambiguity gate) execution attempt
+
+Priority shift (user instruction 2026-07-18): business-analyst agent is
+the focus workstream. Task 3b's v2 gate run was ordered executed.
+Attempted 3× from the Cowork sandbox
+(`scripts/mechanism_extraction_reliability_gate_v2.py`, socksio
+installed, proxy-var variants tried): `anthropic.APIConnectionError` —
+sandbox egress cannot reach api.anthropic.com (same limitation as the
+2026-07-17 session). 0 live calls consumed; Task 3 remains PARKED with
+its verdict untouched. Hand-off: run on the Mac —
+`cd ~/intent-engine && .venv/bin/python scripts/mechanism_extraction_reliability_gate_v2.py`
+(≤40 haiku calls). Result to be recorded here by whoever sees the log.
+Related: acceleration proposals for the ledger cadence, a quarantined
+historical backtest track (A-M3 amendment REQUIRED first), and
+headline-sourcing are in `docs/BA_ACCELERATION_PROPOSAL.md`, all
+awaiting human approval — nothing implemented.

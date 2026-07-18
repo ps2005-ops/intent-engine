@@ -1,0 +1,19 @@
+# Cron lines to install by hand (crontab -e) — written 2026-07-18 per your
+# instruction. Nothing here was installed automatically.
+#
+# 1) Daily prediction runner (item 1, approved). 18:30 ET Mon-Fri — after
+#    the trading day's Tiingo EOD data is available. Weekends/holidays are
+#    cheap no-ops; the $7/mo estimated-spend ceiling parks it automatically.
+
+30 18 * * 1-5 cd /Users/prathamsharma/intent-engine && .venv/bin/python scripts/daily_market_predictions.py --entity-id "macro-watch" >> logs/daily_market_predictions_$(date +\%Y-\%m-\%d).log 2>&1
+
+# 2) Weekly regime report (item 3, approved) — Mondays 08:00, now fully
+#    unattended via the approved RSS allowlist. NOTE: record_baselines.py is
+#    deliberately NOT in this line anymore — the daily runner records
+#    baselines under the approved 2/day cap; a weekly extra would breach the
+#    cap on Mondays (see market_engine_trace.md, Session 5).
+
+0 8 * * 1 cd /Users/prathamsharma/intent-engine && .venv/bin/python scripts/generate_weekly_regime_report.py --entity-id "macro-watch" --headlines-from-feeds --output "reports/weekly_regime_report_$(date +\%Y-\%m-\%d).txt" >> logs/weekly_regime_$(date +\%Y-\%m-\%d).log 2>&1
+
+# (Unchanged, already recommended earlier and reportedly installed: the daily
+#  resolve job at 06:00 — scripts/resolve_market_predictions.py.)

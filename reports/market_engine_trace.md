@@ -891,3 +891,54 @@ fresh headlines, exactly as this session did) until a real
 headline-sourcing decision is made and scoped as its own task, or (ii) a
 future task designs a real, scoped news-input mechanism before this step
 is fully unattended. Not decided here — flagged for your call.
+
+## Session 5 — BA acceleration decisions + implementation (2026-07-18)
+
+Decisions received in writing (user, 2026-07-18), against
+`docs/BA_ACCELERATION_PROPOSAL.md`:
+1. Daily cadence — **APPROVED as proposed**, implemented this session.
+2. Historical backtest track — **HELD** (not approved, not rejected).
+   A-M3 NOT amended; zero backtest code written; design doc kept as-is
+   for a revisit after first live calibration data (~mid-September).
+3. Headline sourcing — **APPROVED** with the proposed 3-feed allowlist,
+   implemented this session.
+4. Task 3b v2 gate — user runs on the Mac; sandbox attempt recorded in
+   overnight_trace.md addendum. Not re-attempted from sandbox.
+
+**Implemented (item 1)**: `core/daily_prediction_policy.py` (pure policy:
+allowlist 7 Tiingo + 6 FRED, cap 5/day, 14d floor, buckets {14,30,60,90},
+max 2/bucket/day, anti-dup vs unresolved live + within batch, baseline
+quota 2/day only when the 60d bucket is used, date-seeded mechanism
+rotation + rotating 6th-data-call instrument, $7/mo ESTIMATED spend
+ceiling with park-if-exceeded) + `scripts/daily_market_predictions.py`
+(thin runner: <=6 DATA + <=2 MODEL calls, numeric-only headlines until
+item 3 is wired into it by a future decision, spend log
+`data/daily_runner_spend.jsonl`, momentum baseline reuses the snapshot's
+SPY series — zero extra DATA calls). 22 offline tests
+(`test_daily_prediction_policy.py`, `test_daily_market_predictions_runner.py`).
+
+**Implemented (item 3)**: `core/headline_feed.py` (approved allowlist,
+stdlib RSS/Atom parsing, recency <=7d, dedupe keeping digits, top-3 by
+deterministic vocab score, provenance rendering, dead-feed degradation,
+zero-headline -> numeric-only) + `--headlines-from-feeds` flag on
+`scripts/generate_weekly_regime_report.py` (additive; `--headline` path
+unchanged; flags mutually exclusive). 9 fixture tests
+(`test_headline_feed.py`). Honest allowlist note: Yahoo feed verified
+live from the sandbox (application/xml); Reuters/AP URLs unverifiable
+from the sandbox (fetch blocked) — kept as approved, protected by the
+degradation path; persistent live warnings = human allowlist decision.
+
+**Bars**: full offline suite **588 passed, 0 failed, 7 deselected
+(live)** — 557 pre-existing + 31 new, zero regressions. Live first runs
+(bar-b-style) happen on the Mac via the cron lines in
+`cron_lines_to_install.txt` (human installs; never installed from here).
+
+**Spend**: 0 live model calls, 0 data calls this session (all tests
+offline/faked). Sandbox cannot reach the Anthropic API anyway — see
+overnight_trace addendum.
+
+**Cron note, stated explicitly**: the weekly cron line deliberately does
+NOT include `record_baselines.py` anymore — the daily runner now records
+baselines under the approved 2/day cap; keeping the weekly baseline call
+would breach that cap on Mondays. Removing it from the recommended line
+is cap-compliance, not a change to record_baselines itself (untouched).
