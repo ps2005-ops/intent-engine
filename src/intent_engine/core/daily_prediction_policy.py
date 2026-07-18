@@ -223,11 +223,17 @@ def apply_daily_policy(
 
 
 def baseline_quota(accepted: Sequence[dict], as_of: date) -> int:
-    """Baselines (fixed SPY 2%-in-60d shape, per M8 — never tuned) are
-    recorded only on a day the engine itself used the 60d bucket, capped at
-    BASELINE_DAILY_CAP — comparison stays horizon-matched by construction."""
-    buckets = {candidate_key(c, as_of).bucket for c in accepted}
-    return BASELINE_DAILY_CAP if 60 in buckets else 0
+    """AMENDED 2026-07-18 (user decision, option 1 after the coverage-gap
+    review): the baseline pair (fixed SPY 2%-in-60d shape, per M8 — never
+    tuned) is recorded UNCONDITIONALLY on every successful trading-day run,
+    <= BASELINE_DAILY_CAP/day — guaranteed 60d baseline accrual regardless
+    of which buckets the engine used that day. The original 60d-bucket
+    matching condition traded guaranteed accrual for date-matched
+    comparability; the user chose the guarantee. The real <=2/day cap
+    against double runs is enforced in the runner by counting baselines
+    already ledgered today. (Signature kept for call-site stability;
+    `accepted`/`as_of` are deliberately unused now.)"""
+    return BASELINE_DAILY_CAP
 
 
 def month_estimated_spend_usd(spend_rows: Sequence[dict], year: int, month: int) -> float:

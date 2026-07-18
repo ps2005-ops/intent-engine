@@ -91,13 +91,34 @@ def test_records_within_cap_and_writes_spend_row(tmp_path, monkeypatch):
     assert rows[-1]["status"] == "ok" and rows[-1]["model_calls"] == 2
 
 
-def test_baselines_only_when_60d_bucket_used(tmp_path, monkeypatch):
+def test_baselines_unconditional_daily_pair(tmp_path, monkeypatch):
+    # 2026-07-18 amendment (option 1): pair recorded regardless of buckets used.
     summary, ledger, _ = _run(tmp_path, monkeypatch, [_cand("SPY", 60)])
     assert summary["baselines"] == policy.BASELINE_DAILY_CAP
     assert len(list_predictions(source="baseline", path=ledger)) == policy.BASELINE_DAILY_CAP
 
+    (tmp_path / "b").mkdir()
     summary2, ledger2, _ = _run(tmp_path / "b", monkeypatch, [_cand("SPY", 30)])
-    assert summary2["baselines"] == 0
+    assert summary2["baselines"] == policy.BASELINE_DAILY_CAP
+    assert len(list_predictions(source="baseline", path=ledger2)) == policy.BASELINE_DAILY_CAP
+
+
+def test_baseline_cap_holds_across_double_run_same_day(tmp_path, monkeypatch):
+    ledger = tmp_path / "ledger.db"
+    monkeypatch.setattr(runner, "SPEND_LOG_PATH", tmp_path / "spend.jsonl")
+
+    def go():
+        return runner.run_daily(
+            "test-entity", as_of=AS_OF, ledger_path=ledger,
+            client=_fake_client([_cand("SPY", 30)]),
+            fred_fetcher=_fake_fred, price_fetcher=_fake_tiingo, spend_rows=[],
+        )
+
+    first = go()
+    assert first["baselines"] == policy.BASELINE_DAILY_CAP
+    second = go()
+    assert second["baselines"] == 0  # cap already consumed today
+    assert len(list_predictions(source="baseline", path=ledger)) == policy.BASELINE_DAILY_CAP
 
 
 def test_policy_rejections_surface_in_summary(tmp_path, monkeypatch):

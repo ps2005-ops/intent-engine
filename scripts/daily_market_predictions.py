@@ -257,8 +257,17 @@ def run_daily(
     if recorded:
         assert_language_walls("\n".join(p.claim_text for p in recorded))
 
-    # --- baselines (horizon-matched, capped, zero extra DATA calls) ---------
-    quota = policy.baseline_quota(decision.accepted, as_of)
+    # --- baselines (unconditional daily pair per 2026-07-18 amendment;
+    # real <=2/day cap enforced against the ledger, zero extra DATA calls).
+    # "Today's" baselines are identified by resolve_by == as_of + 60d (both
+    # M8 baselines are exactly that by construction) -- deterministic and
+    # correct under --as-of overrides, unlike a created_at timestamp match.
+    baseline_resolve_by = (as_of + timedelta(days=60)).isoformat()
+    baselines_today = sum(
+        1 for p in list_predictions(source="baseline", path=ledger_path)
+        if p.resolve_by == baseline_resolve_by
+    )
+    quota = max(0, policy.baseline_quota(decision.accepted, as_of) - baselines_today)
     if quota > 0:
         import record_baselines as baselines  # noqa: E402  (scripts/ on path)
         price_id, price_obs = price_series

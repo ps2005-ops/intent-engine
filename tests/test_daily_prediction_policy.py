@@ -145,10 +145,12 @@ def test_already_recorded_today_shrinks_budget():
 
 # --- baselines --------------------------------------------------------------
 
-def test_baseline_quota_requires_60d_bucket():
+def test_baseline_quota_unconditional_after_2026_07_18_amendment():
+    # Option 1 (user decision): guaranteed daily accrual — quota is the cap
+    # regardless of which buckets the engine used, even on a zero-recorded day.
     assert policy.baseline_quota([_cand("SPY", 60)], AS_OF) == policy.BASELINE_DAILY_CAP
-    assert policy.baseline_quota([_cand("SPY", 30)], AS_OF) == 0
-    assert policy.baseline_quota([], AS_OF) == 0
+    assert policy.baseline_quota([_cand("SPY", 30)], AS_OF) == policy.BASELINE_DAILY_CAP
+    assert policy.baseline_quota([], AS_OF) == policy.BASELINE_DAILY_CAP
 
 
 # --- spend ceiling ----------------------------------------------------------
