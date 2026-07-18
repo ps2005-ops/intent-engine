@@ -942,3 +942,32 @@ NOT include `record_baselines.py` anymore — the daily runner now records
 baselines under the approved 2/day cap; keeping the weekly baseline call
 would breach that cap on Mondays. Removing it from the recommended line
 is cap-compliance, not a change to record_baselines itself (untouched).
+
+## Session 6 — post-review amendments (2026-07-18, user decisions in writing)
+
+1. Task 3b verdict recorded (two consecutive PASSes, bars a+b); **Task 3
+   UNPARKED by human review; Task 4 unblocked, pending spec** (details in
+   overnight_trace.md addendum; ROADMAP NEEDS-SPEC updated).
+2. **Baseline coverage fix (option 1)**: `baseline_quota` now returns the
+   daily cap unconditionally — guaranteed 60d baseline accrual every
+   trading day; the real <=2/day cap is enforced in the runner against
+   the ledger (keyed on resolve_by == as_of+60d, robust under --as-of).
+   Honest note: this replaced the 60d-bucket-matching condition I shipped
+   earlier the same day, whose stall scenario the user caught in review.
+   Option 2 (all-bucket baselines, 3 new frozen base-rate constants)
+   recorded as LATER in ROADMAP — deliberately NOT implemented.
+3. **FRED '.'-guard amendment** (user-approved deterministic rule, full
+   text in macro_data.py docstring): business-daily series drop weekend
+   and 1-2-day weekday-holiday '.' placeholders silently (FRED's own
+   semantics); >=3 consecutive weekday '.'s, or any '.' in a non-daily
+   series (the Oct-2025 shutdown month shape), are GENUINE GAPS —
+   excluded, recorded in FredSeries.gaps, warned loudly, and surfaced in
+   the rendered report via a "!! DATA GAPS DETECTED" section. None /
+   unparseable / empty-after-drops still raise — strictness narrowed to
+   FRED's documented semantics, not weakened. One legacy bar updated in
+   place as part of the approved change (test_macro_data.py's VIXCLS
+   New-Year's-Day fixture: raise -> documented holiday-drop). This
+   unbreaks the permanent BAMLH0A0HYM2/CPI/UNRATE weekly failures.
+
+**Bars**: full offline suite **601 passed, 0 failed, 7 deselected** (13
+net-new tests incl. 12 gap-rule bars). **Spend**: 0 live calls.

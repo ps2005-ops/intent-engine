@@ -51,14 +51,20 @@ def test_parse_response_raises_on_empty_observations():
         _parse_response(raw, "DFF")
 
 
-def test_parse_response_raises_on_nan_observation():
-    """NaN guard, against a REAL FRED quirk: VIXCLS_2024-01-01_2024-01-31.json
-    is a real, live-captured response whose first observation (2024-01-01,
-    New Year's Day) is FRED's own '.' missing-value marker -- not a
-    fabricated edge case."""
+def test_parse_response_drops_holiday_placeholder_per_2026_07_18_amendment():
+    """UPDATED as a user-approved bar change (2026-07-18 '.'-guard
+    amendment; full rule bars in test_macro_data_gap_rule.py, rule text in
+    macro_data.py's docstring). This same real live-captured VIXCLS
+    fixture -- whose first observation (2024-01-01, New Year's Day) is
+    FRED's '.' placeholder -- previously asserted a raise; under the
+    amendment a 1-2 day weekday-holiday '.' run in a business-daily series
+    is FRED's own semantics: dropped silently, no gap recorded, and the
+    rest of the series parses to real floats."""
     raw = _load_fixture("VIXCLS_2024-01-01_2024-01-31.json")
-    with pytest.raises(ValueError, match="missing/NaN"):
-        _parse_response(raw, "VIXCLS")
+    series = _parse_response(raw, "VIXCLS")
+    assert series.gaps == []
+    assert "2024-01-01" not in [d for d, _ in series.observations]
+    assert series.observations, "the non-holiday observations must survive"
 
 
 def test_parse_response_never_returns_unknown_string():

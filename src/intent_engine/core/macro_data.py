@@ -10,11 +10,34 @@ Hard guards, deliberately strict ("the friend's-bot lesson" the plan's own
 text names -- a data layer that silently substitutes a sentinel for a real
 gap teaches every downstream consumer to trust a number that was never
 actually observed): a missing series (the API returned zero observations
-for the requested range) or any single NaN/placeholder observation
-(FRED's own "." missing-value marker) RAISES. Nothing here ever returns an
-"Unknown" string or a coerced default in place of a real value -- a caller
-that wants tolerant handling of sparse series builds that on top of this,
-explicitly, not silently inside it.
+for the requested range), a None value, or an unparseable value RAISES.
+Nothing here ever returns an "Unknown" string or a coerced default in
+place of a real value.
+
+AMENDED 2026-07-18 (user-approved deterministic rule -- see
+tests/test_macro_data_gap_rule.py for the bars). The original guard raised
+on ANY '.' observation, which made every long-lookback fetch of a
+business-day daily series fail permanently (holidays are always in a 10y
+window) and let one historical gap month (e.g. the Oct-2025 shutdown)
+permanently kill CPI/UNRATE fetches. The amended rule distinguishes
+FRED's own placeholder semantics from genuine gaps, in code:
+
+1. For series in BUSINESS_DAILY_SERIES, a '.' on a weekend is FRED's
+   expected non-business-day placeholder: dropped silently.
+2. For those same series, a run of 1-2 consecutive WEEKDAY '.'s is a
+   market-holiday placeholder (US market closures are 1, historically at
+   most 2, consecutive business days): dropped silently.
+3. A run of >=3 consecutive weekday '.'s in a business-daily series, or
+   ANY '.' in any other series (monthly/quarterly data should exist for
+   every period), is a GENUINE GAP: the observation is still never
+   coerced -- it is excluded from `observations`, recorded with its date
+   in `FredSeries.gaps`, and a loud warning is printed. Callers surface
+   gaps in rendered output (regime_report's data-gaps section); the run
+   itself stays alive -- an unattended weekly cron that dies forever on a
+   one-month historical gap is an availability failure, not data honesty.
+4. None values, unparseable values, and zero-observations-after-drops
+   still RAISE -- the strictness against silent substitution is not
+   weakened; '.' handling is narrowed to FRED's documented semantics.
 """
 
 import json
@@ -45,10 +68,23 @@ SEED_SERIES = ["DFF", "CPIAUCSL", "UNRATE", "T10Y2Y", "BAMLH0A0HYM2", "GDPC1", "
 _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
+# Series whose native frequency is business-daily: FRED publishes '.' rows
+# for non-business days by its own semantics. Everything NOT in this set is
+# held to the stricter any-'.'-is-a-gap rule. Widening this set is a
+# reviewed code change, never inference.
+BUSINESS_DAILY_SERIES = {"T10Y2Y", "BAMLH0A0HYM2", "DGS10", "VIXCLS"}
+
+# Longest consecutive-weekday '.' run still explainable as a market holiday.
+# US market closures are single days; rare events (e.g. Sandy, 2012) reached
+# two. Three or more consecutive business days without data is a gap.
+HOLIDAY_RUN_MAX = 2
+
+
 class FredSeries(BaseModel):
     series_id: str
     realtime_date: str  # provenance: the FRED vintage this observation set was fetched as-of
     observations: List[Tuple[str, float]]  # (date, value), ascending by date
+    gaps: List[str] = []  # dates of GENUINE-GAP '.' observations (rule 3) -- additive, default empty
 
 
 def _cache_path(series_id: str, start: str, end: str, cache_dir: Union[str, Path]) -> Path:
@@ -102,17 +138,58 @@ def _parse_response(raw: dict, series_id: str) -> FredSeries:
         )
 
     observations: List[Tuple[str, float]] = []
+    gaps: List[str] = []
+    weekday_dot_run: List[str] = []  # pending consecutive weekday '.' dates (business-daily series)
+
+    def _flush_weekday_run() -> None:
+        # Rule 2 vs rule 3: a short run is a holiday placeholder (dropped
+        # silently); a long run is a genuine gap (recorded, warned).
+        if len(weekday_dot_run) > HOLIDAY_RUN_MAX:
+            gaps.extend(weekday_dot_run)
+        weekday_dot_run.clear()
+
+    is_business_daily = series_id in BUSINESS_DAILY_SERIES
     for obs in observations_raw:
         value_str = obs.get("value")
-        if value_str is None or value_str == ".":
+        obs_date = obs.get("date")
+        if value_str is None:
             raise ValueError(
-                f"FRED series {series_id!r} has a missing/NaN observation at date={obs.get('date')!r} "
-                f"(value={value_str!r}) -- never silently coerced to a default or dropped."
+                f"FRED series {series_id!r} has a None observation at date={obs_date!r} "
+                "-- never silently coerced to a default or dropped."
             )
-        observations.append((obs["date"], float(value_str)))
+        if value_str == ".":
+            if is_business_daily:
+                if date.fromisoformat(obs_date).weekday() >= 5:
+                    continue  # rule 1: weekend placeholder, FRED's own semantics
+                weekday_dot_run.append(obs_date)
+            else:
+                gaps.append(obs_date)  # rule 3: non-daily series, data should exist
+            continue
+        _flush_weekday_run()
+        try:
+            value = float(value_str)
+        except ValueError:
+            raise ValueError(
+                f"FRED series {series_id!r} has an unparseable observation at date={obs_date!r} "
+                f"(value={value_str!r}) -- never silently coerced."
+            )
+        observations.append((obs_date, value))
+    _flush_weekday_run()
+
+    if not observations:
+        raise ValueError(
+            f"FRED series {series_id!r} has no usable observations for the requested range "
+            "after applying the documented placeholder rule -- never treated as empty-but-valid."
+        )
+    if gaps:
+        print(
+            f"WARNING: FRED series {series_id!r} has {len(gaps)} GENUINE-GAP observation(s) "
+            f"(first: {gaps[0]}, last: {gaps[-1]}) -- excluded, recorded in .gaps, and surfaced "
+            "in rendered reports. This is a real data gap (e.g. a shutdown month), not a holiday."
+        )
 
     realtime_date = observations_raw[0].get("realtime_start") or raw.get("realtime_start", "")
-    return FredSeries(series_id=series_id, realtime_date=realtime_date, observations=observations)
+    return FredSeries(series_id=series_id, realtime_date=realtime_date, observations=observations, gaps=gaps)
 
 
 def get_series(

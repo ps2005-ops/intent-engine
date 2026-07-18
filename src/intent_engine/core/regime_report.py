@@ -360,6 +360,25 @@ def render_snapshot_table(snapshot: dict) -> str:
     return "\n".join(rows)
 
 
+def render_data_gaps_section(series_data: Dict[str, FredSeries]) -> str:
+    """2026-07-18 guard amendment: genuine FRED gaps (macro_data rule 3) are
+    surfaced LOUDLY in the rendered report, not just in logs. Returns ""
+    when there are no gaps -- the section only exists when there's
+    something a human must see."""
+    gap_lines = []
+    for series_id in sorted(series_data):
+        gaps = getattr(series_data[series_id], "gaps", [])
+        if gaps:
+            first, last = gaps[0], gaps[-1]
+            span = first if first == last else f"{first}..{last}"
+            gap_lines.append(f"- {series_id}: {len(gaps)} missing observation(s) ({span}) -- genuine data "
+                             "gap(s), excluded from every number above; NOT holiday placeholders.")
+    if not gap_lines:
+        return ""
+    return "\n".join(["!! DATA GAPS DETECTED (review before trusting affected indicators)",
+                      "-" * 70] + gap_lines)
+
+
 def render_calibration_footer(path: Union[str, Path] = DEFAULT_LEDGER_PATH) -> str:
     lines = ["CALIBRATION (read-only; no feedback into generation)", "-" * 70]
     any_resolved = False
@@ -388,10 +407,15 @@ def assert_language_walls(rendered_report: str) -> None:
 
 def render_full_report(
     snapshot: dict, mechanisms_text: str, predictions: List[Prediction], ledger_path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+    data_gaps_text: str = "",
 ) -> str:
     sections = [
         render_snapshot_table(snapshot),
         "",
+    ]
+    if data_gaps_text:
+        sections += [data_gaps_text, ""]
+    sections += [
         mechanisms_text,
         "",
         "RESOLVABLE PREDICTIONS RECORDED THIS RUN (source=market)",

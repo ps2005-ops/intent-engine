@@ -36,6 +36,7 @@ from intent_engine.core.regime_report import (  # noqa: E402
     draft_market_predictions,
     extract_trigger_conditions,
     fetch_current_series_data,
+    render_data_gaps_section,
     render_full_report,
     render_mechanisms_section,
     render_snapshot_numbers_for_extraction,
@@ -55,7 +56,8 @@ def generate_report(entity_id: str, headlines: list, path=DEFAULT_LEDGER_PATH, a
 
     predictions = draft_market_predictions(entity_id, extraction_text, mechanisms_text, ledger_path=path, as_of=as_of)
 
-    return render_full_report(snapshot, mechanisms_text, predictions, ledger_path=path)
+    return render_full_report(snapshot, mechanisms_text, predictions, ledger_path=path,
+                              data_gaps_text=render_data_gaps_section(series_data))
 
 
 def main(argv=None):
