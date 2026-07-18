@@ -139,6 +139,18 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
+- **Overnight Task 4 — mechanism rendering in the premortem** — UNBLOCKED
+  2026-07-18 (Task 3 unparked by human review after the v2 gate's two
+  consecutive PASSes; see reports/overnight_trace.md addendum). Needs a
+  written spec + bars before entering the runnable queue.
+- **All-bucket baselines (option 2, docs/BA_ACCELERATION_PROPOSAL.md
+  follow-up) — LATER by direct decision 2026-07-18**: extend the baseline
+  pair to horizon buckets {14,30,90} alongside 60d. Momentum rule
+  generalizes trivially; the base-rate constants require three new
+  one-time frozen computations (per M8's own never-auto-refresh rule) —
+  a deliberate, documented human decision pending. Do NOT implement
+  until decided.
+
 - **Recipient-verb-gate revisit** — PROGRESS.md's mom/brother-captions backlog
   note: "Revisit whether recipient-extraction should gate non-message domains
   during the data-foundation pass." No design decided; "revisit" is not a

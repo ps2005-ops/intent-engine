@@ -248,3 +248,17 @@ Related: acceleration proposals for the ledger cadence, a quarantined
 historical backtest track (A-M3 amendment REQUIRED first), and
 headline-sourcing are in `docs/BA_ACCELERATION_PROPOSAL.md`, all
 awaiting human approval — nothing implemented.
+
+## Addendum 2026-07-18 (later) — Task 3b verdict recorded; Task 3 UNPARKED by human review
+
+User ran `mechanism_extraction_reliability_gate_v2.py` on the Mac and
+reported the result for the record: **two consecutive PASSes — bars (a)
+(both clear cases >=4/5 stable) and (b) (redesigned ambiguous case NOT
+confidently unanimous) both held.** Per the script's own scope note the
+run alone did not unpark anything; the human review decision (user,
+2026-07-18, in writing) is: **Task 3 is UNPARKED on this evidence** —
+the original park's concern is resolved as a test-design flaw fixed by
+the redesigned gate, not an extractor defect. **Task 4
+(mechanism rendering in the premortem) is UNBLOCKED** and may be specced
+into the runnable queue as a next step (spec still required before any
+autonomous run — unblocked ≠ specced).
