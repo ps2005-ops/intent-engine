@@ -7,13 +7,22 @@
 # NOTHING IS PENDING. The commands below are optional re-verification only.
 
 set -e
+# Batch 1 (all verified from sandbox 2026-07-19; re-check optional) +
+# Batch 2 (episodes 5-8; the last two are PENDING-MAC-VERIFICATION --
+# LTCM's Fed speech returned empty from the sandbox, Japan's IMF PDF was
+# oversized to display though it returned 200. These two REQUIRE a real
+# 200 here before the batch-2 merge; a non-200 means swap the citation).
 for url in \
   "https://www.federalreservehistory.org/essays/panic-of-1907" \
   "https://fraser.stlouisfed.org/files/docs/meltzer/fisdeb33.pdf" \
   "https://www.federalreservehistory.org/essays/banking-panics-1930-31" \
   "https://www.federalreservehistory.org/essays/oil-shock-of-1973-74" \
   "https://www.nber.org/papers/w14563" \
-  "https://www.federalreservehistory.org/essays/recession-of-1981-82"
+  "https://www.federalreservehistory.org/essays/recession-of-1981-82" \
+  "https://www.federalreservehistory.org/essays/stock-market-crash-of-1987" \
+  "https://www.federalreservehistory.org/essays/asian-financial-crisis" \
+  "https://www.imf.org/external/pubs/ft/wp/2009/wp09241.pdf" \
+  "https://home.treasury.gov/system/files/276/hedgefund.pdf"
 do
   code=$(curl -s -o /dev/null -w "%{http_code}" -L "$url")
   echo "$code  $url"

@@ -1,0 +1,74 @@
+{
+ "new_entries": [
+  {
+   "mechanism_id": "mechanical_feedback_liquidation",
+   "name": "Mechanical feedback liquidation",
+   "trigger_conditions": [
+    "drawdown_gt_20pct"
+   ],
+   "causal_chain": [
+    "A large share of market participants run pre-programmed, rule-based selling strategies (e.g. portfolio insurance) that mechanically sell into price declines",
+    "An initial price drop triggers these rules to sell, regardless of fundamentals",
+    "That selling pushes prices lower, which triggers the same rules to sell again -- a self-reinforcing downdraft",
+    "Sell orders vastly outnumber willing buyers near prior prices; liquidity evaporates and the decline accelerates within hours",
+    "The vacuum clears only when a liquidity backstop appears or mechanical selling is exhausted"
+   ],
+   "historical_instances": [
+    {
+     "case": "https://www.federalreservehistory.org/essays/stock-market-crash-of-1987 -- Black Monday, 19 Oct 1987: the DJIA fell 22.6% in a single session (the largest one-day decline in history); portfolio-insurance selling accelerated the crash as initial losses triggered further rounds of automated selling (Shiller 1988)",
+     "year": 1987,
+     "source": "https://www.federalreservehistory.org/essays/stock-market-crash-of-1987 -- Bernhardt & Eckblad, 'Stock Market Crash of 1987', Federal Reserve History"
+    }
+   ],
+   "confidence_tier": "well_documented"
+  },
+  {
+   "mechanism_id": "crowded_trade_deleveraging",
+   "name": "Crowded-trade deleveraging",
+   "trigger_conditions": [
+    "interconnected_counterparty_exposure",
+    "debt_financed_expansion"
+   ],
+   "causal_chain": [
+    "Many highly-leveraged players crowd into similar convergence/relative-value positions, often financed by the same set of counterparties",
+    "A shock moves those positions against everyone simultaneously",
+    "Margin calls force multiple players to unwind the same trades at once, into a market with no offsetting buyers",
+    "Prices gap further against the crowded position, amplifying losses and threatening the leveraged counterparties themselves",
+    "A disorderly failure is avoided only by a coordinated recapitalization or backstop that halts the forced simultaneous unwind"
+   ],
+   "historical_instances": [
+    {
+     "case": "PENDING-MAC-VERIFICATION -- Long-Term Capital Management, Sept 1998: a hedge fund with ~$4.6B capital but notional derivatives exposure in the trillions saw crowded relative-value trades move against it after the Russian default; the NY Fed convened 14 creditor banks to fund an orderly ~$3.6B recapitalization",
+     "year": 1998,
+     "source": "https://home.treasury.gov/system/files/276/hedgefund.pdf -- President's Working Group on Financial Markets, 'Hedge Funds, Leverage, and the Lessons of Long-Term Capital Management' (1999) [sandbox fetch of the primary Fed speech returned empty; URL routed to citation_check.sh for Mac verification]"
+    }
+   ],
+   "confidence_tier": "well_documented"
+  }
+ ],
+ "enrichments": [
+  {
+   "target": "reflexive_bubble",
+   "instance": {
+    "case": "PENDING-MAC-VERIFICATION -- Japan's asset-price bubble, late 1980s: equity and urban land valuations detached from fundamentals through a self-reinforcing collateral-and-credit loop; the Nikkei peaked end-1989 (~38,900) and land values collapsed through the early 1990s into a prolonged stagnation",
+    "year": 1990,
+    "source": "https://www.imf.org/external/pubs/ft/wp/2009/wp09241.pdf -- Syed, Kang & Tokuoka, 'Lost Decade in Translation', IMF WP/09/241 (2009) [sandbox returned HTTP 200 application/pdf but oversized to display; URL routed to citation_check.sh]"
+   }
+  },
+  {
+   "target": "credit_contagion",
+   "instance": {
+    "case": "https://www.federalreservehistory.org/essays/asian-financial-crisis -- Asian financial crisis, 1997: after Thailand's July 1997 baht devaluation, foreign creditors pulled back across East Asian economies seen as sharing similar vulnerabilities, spreading a depreciation-recession-banking spiral region-wide (Thailand, Malaysia, Indonesia, South Korea)",
+    "year": 1997,
+    "source": "https://www.federalreservehistory.org/essays/asian-financial-crisis -- Carson & Clark, 'Asian Financial Crisis', Federal Reserve History"
+   }
+  }
+ ],
+ "parked": [
+  {
+   "mechanism_id": "currency_peg_break_contagion",
+   "reason": "needs a currency-peg-dependence trigger condition not in the frozen enum",
+   "needs_condition": "pegged_currency_with_external_short_term_debt"
+  }
+ ]
+}

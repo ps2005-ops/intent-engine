@@ -1080,3 +1080,22 @@ only): reports/weekly_regime_report_2026-07-17.founder.html — 3
 UNAVAILABLE badges, none-matched card, no-gaps line, 0-resolved
 no-accuracy card, P-values {0.58,0.65,0.72} identical to source.
 Saved alongside the raw .txt. Suite 627 passed. Spend: 0 live calls.
+
+## Overnight loop 2 — Library batch 2 (episodes 5-8) — STAGED AT FOUNDER GATE
+
+Episodes: 1987 Black Monday, Japan bubble ~1990, Asia 1997, LTCM 1998.
+Output: 2 NEW mechanisms (mechanical_feedback_liquidation [1987] --
+FLAGGED trigger-set collision with margin_collateral_spiral, same class
+founder accepted in batch 1; crowded_trade_deleveraging [LTCM] -- clean
+distinct set) + 2 ENRICHMENTS (reflexive_bubble: Japan 1990;
+credit_contagion: Asia 1997 regional contagion) + 1 PARKED mechanism
+(currency_peg_break_contagion -- Asia's true mechanism needs a peg
+condition the frozen enum lacks; recorded as NEEDS-APPROVAL candidate #3,
+mechanism parked, enum NOT widened, exactly as instructed). All
+machine-validated (schema/enum/id/dedup). Two citations
+PENDING-MAC-VERIFICATION (LTCM Fed speech returned empty from sandbox;
+Japan IMF PDF returned 200 application/pdf but oversized) -- routed to
+citation_check.sh per amendment 2; these two require a real 200 before
+merge. mechanisms.json UNTOUCHED; NO data-file commit. Batch 3 NOT
+started. Drafts: docs/library_batch2_draft_entries.json; review sheet:
+docs/library_batch2_review_sheet.md. Spend: 7 fetches, 0 model calls.
