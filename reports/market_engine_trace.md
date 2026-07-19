@@ -1027,3 +1027,20 @@ prediction_ledger's latest-row-per-id convention, with the
 job-application dry-run/real wall stated as invariant #2 (no "sent" row
 without prior approval row + non-null approved_by). NOTHING sent,
 scheduled, or published. Spend WS4+WS5: 0 live calls, 0 fetches.
+
+## Overnight loop 2 (2026-07-19/20) — morning decisions recorded
+
+Received and recorded VERBATIM state: decisions 2 (library batch 1
+APPROVED AS-IS, enum candidates DEFERRED until after batch 3) and 3
+(report mockup APPROVED, wire renderer) are fully specified — EXECUTED
+below. Decisions 1 (T005 live-bar result), 4 (marketing drafts), the
+approval half of 5, and the cron-confirmation half of 6 arrived with
+UNFILLED template brackets ("[PASTE RESULT...]", "[APPROVED AS-IS /
+...]", "[YES/NO...]") — per park-don't-improvise these are NOT assumed:
+T005 closeout PARKED (disk check corroborates: no t005-live entity-memory
+rows, no new logs — the runs appear not to have happened yet); marketing/
+outreach drafts remain DRAFT-pending-approval; cron confirmation goes
+back on the morning list. Decision 5's placeholder VALUES ([X days]=3
+business days, [segment]=early-stage B2B founders) and decision 6's
+four ambiguity-recommendation acceptances were affirmatively stated and
+ARE acted on.

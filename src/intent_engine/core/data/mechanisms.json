@@ -2,7 +2,10 @@
   {
     "mechanism_id": "supply_shock_propagation",
     "name": "Supply-shock propagation",
-    "trigger_conditions": ["concentrated_supplier_base", "few_dominant_competitors"],
+    "trigger_conditions": [
+      "concentrated_supplier_base",
+      "few_dominant_competitors"
+    ],
     "causal_chain": [
       "A small number of suppliers account for most of an industry's critical input",
       "An external shock (natural disaster, geopolitical disruption, demand spike elsewhere) removes capacity from that supplier base",
@@ -15,6 +18,11 @@
         "case": "2020-2023 global semiconductor chip shortage (automotive sector)",
         "year": 2021,
         "source": "https://en.wikipedia.org/wiki/2020%E2%80%932023_global_chip_shortage ; https://www.clevelandfed.org/publications/economic-commentary/2021/ec-202117-semiconductor-shortages-vehicle-production-prices"
+      },
+      {
+        "case": "1973-74 OAPEC oil embargo -- concentrated exporter group's production cuts against a US oil industry with no spare capacity; embargo lifted March 1974 but prices stayed",
+        "year": 1973,
+        "source": "Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History -- https://www.federalreservehistory.org/essays/oil-shock-of-1973-74"
       }
     ],
     "confidence_tier": "well_documented"
@@ -22,7 +30,10 @@
   {
     "mechanism_id": "prisoners_dilemma_price_war",
     "name": "Prisoner's-dilemma price war",
-    "trigger_conditions": ["few_dominant_competitors", "symmetric_competitor_response_expected"],
+    "trigger_conditions": [
+      "few_dominant_competitors",
+      "symmetric_competitor_response_expected"
+    ],
     "causal_chain": [
       "A small number of competitors serve the same customer base with substitutable products",
       "One competitor cuts price to gain share, expecting rivals not to match",
@@ -42,7 +53,10 @@
   {
     "mechanism_id": "regulatory_capture_race",
     "name": "Regulatory-capture race",
-    "trigger_conditions": ["frequent_regulatory_interaction", "few_dominant_competitors"],
+    "trigger_conditions": [
+      "frequent_regulatory_interaction",
+      "few_dominant_competitors"
+    ],
     "causal_chain": [
       "An industry has a small number of large incumbents who interact with the same regulator repeatedly",
       "Incumbents invest heavily in lobbying, technical staff loaned to the regulator, and standard-setting participation",
@@ -62,7 +76,10 @@
   {
     "mechanism_id": "platform_envelopment",
     "name": "Platform envelopment",
-    "trigger_conditions": ["adjacent_market_bundling_opportunity", "network_effects_present"],
+    "trigger_conditions": [
+      "adjacent_market_bundling_opportunity",
+      "network_effects_present"
+    ],
     "causal_chain": [
       "A platform provider has an established user base with existing network effects in market A",
       "An adjacent market B has a separate incumbent whose product is a complement or weak substitute to the provider's",
@@ -82,7 +99,9 @@
   {
     "mechanism_id": "credit_contagion",
     "name": "Credit contagion",
-    "trigger_conditions": ["interconnected_counterparty_exposure"],
+    "trigger_conditions": [
+      "interconnected_counterparty_exposure"
+    ],
     "causal_chain": [
       "Financial institutions hold significant claims on each other's debt or collateral",
       "One major counterparty fails or is perceived as likely to fail",
@@ -95,6 +114,16 @@
         "case": "Lehman Brothers bankruptcy and the collapse of interbank lending",
         "year": 2008,
         "source": "https://en.wikipedia.org/wiki/Bankruptcy_of_Lehman_Brothers ; https://www.fsb.org/uploads/r_0910a.pdf"
+      },
+      {
+        "case": "Panic of 1907 -- run on Knickerbocker Trust cut off trust-company call-loan liquidity to NYSE brokers; annualized call-money rates spiked from 9.5% to 100% and runs spread across New York trusts",
+        "year": 1907,
+        "source": "Jon R. Moen and Ellis W. Tallman, 'The Panic of 1907', Federal Reserve History -- https://www.federalreservehistory.org/essays/panic-of-1907"
+      },
+      {
+        "case": "Caldwell and Company collapse, Nov 1930 -- failures cascaded through the correspondent-reserve pyramid, forcing hundreds of country-bank suspensions within weeks",
+        "year": 1930,
+        "source": "Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31"
       }
     ],
     "confidence_tier": "well_documented"
@@ -102,7 +131,9 @@
   {
     "mechanism_id": "ally_drawn_into_linked_conflict",
     "name": "Ally drawn into a linked conflict",
-    "trigger_conditions": ["binding_mutual_commitment_exists"],
+    "trigger_conditions": [
+      "binding_mutual_commitment_exists"
+    ],
     "causal_chain": [
       "Two or more parties hold a formal mutual-support commitment (treaty, contract, alliance)",
       "One party enters a conflict or dispute with a third party unrelated to the original commitment's purpose",
@@ -122,7 +153,9 @@
   {
     "mechanism_id": "winners_curse_acquisition",
     "name": "Winner's-curse acquisition",
-    "trigger_conditions": ["valuation_disconnected_from_fundamentals"],
+    "trigger_conditions": [
+      "valuation_disconnected_from_fundamentals"
+    ],
     "causal_chain": [
       "An acquirer's own equity or currency is highly valued relative to its underlying fundamentals (a bubble or hype cycle)",
       "The acquirer uses that inflated valuation as acquisition currency to buy a large target",
@@ -142,7 +175,10 @@
   {
     "mechanism_id": "debt_fueled_capacity_race",
     "name": "Debt-fueled capacity race",
-    "trigger_conditions": ["capacity_investment_outpacing_demand_signal", "debt_financed_expansion"],
+    "trigger_conditions": [
+      "capacity_investment_outpacing_demand_signal",
+      "debt_financed_expansion"
+    ],
     "causal_chain": [
       "Multiple competitors in a capital-intensive industry each forecast continued demand growth",
       "Each competitor debt-finances new capacity to avoid ceding future share to rivals doing the same",
@@ -162,7 +198,10 @@
   {
     "mechanism_id": "leverage_cycle_bust",
     "name": "Leverage-cycle bust",
-    "trigger_conditions": ["debt_financed_expansion", "drawdown_gt_20pct"],
+    "trigger_conditions": [
+      "debt_financed_expansion",
+      "drawdown_gt_20pct"
+    ],
     "causal_chain": [
       "Households or firms increase borrowing against rising collateral values (home equity, asset prices) during an upswing",
       "Rising leverage amplifies consumption and investment, which further inflates the asset prices used as collateral",
@@ -182,7 +221,9 @@
   {
     "mechanism_id": "margin_collateral_spiral",
     "name": "Margin/collateral spiral",
-    "trigger_conditions": ["drawdown_gt_20pct"],
+    "trigger_conditions": [
+      "drawdown_gt_20pct"
+    ],
     "causal_chain": [
       "A highly leveraged position is financed via margin or derivatives (e.g. total return swaps) whose lenders can demand more collateral if the position's value falls",
       "A price decline in the underlying position reduces its collateral value, triggering a margin call",
@@ -202,7 +243,10 @@
   {
     "mechanism_id": "bank_run_maturity_mismatch",
     "name": "Bank-run maturity mismatch",
-    "trigger_conditions": ["interconnected_counterparty_exposure", "curve_inverted"],
+    "trigger_conditions": [
+      "interconnected_counterparty_exposure",
+      "curve_inverted"
+    ],
     "causal_chain": [
       "A bank funds itself with short-term, on-demand deposits while holding longer-duration assets (loans, held-to-maturity securities)",
       "A rapid rise in interest rates reduces the market value of the bank's long-duration assets well below their face value",
@@ -222,14 +266,16 @@
   {
     "mechanism_id": "carry_trade_unwind",
     "name": "Carry-trade unwind",
-    "trigger_conditions": ["interconnected_counterparty_exposure"],
+    "trigger_conditions": [
+      "interconnected_counterparty_exposure"
+    ],
     "causal_chain": [
       "Investors borrow in a low-interest-rate funding currency and invest the proceeds in higher-yielding assets denominated in other currencies, profiting from the rate differential as long as the funding currency stays weak/stable",
       "A policy surprise (e.g. an unexpected rate hike in the funding currency, or a rate cut in the target currency) narrows the yield differential and/or causes the funding currency to appreciate",
       "Carry-trade positions become unprofitable or trigger losses on the currency leg, prompting leveraged holders to unwind (sell the target-currency asset, buy back the funding currency to repay the loan)",
       "The unwinding itself pushes the funding currency higher and target-currency assets lower, since many holders are forced to unwind simultaneously",
       "The self-reinforcing move (funding currency spikes, further squeezing remaining carry positions) transmits volatility broadly across asset classes financed by the same trade, not just the original currency pair"
-      ],
+    ],
     "historical_instances": [
       {
         "case": "August 2024 global market selloff following the Bank of Japan's rate hike, unwinding an estimated multi-trillion-dollar yen carry trade (Nikkei -12.4% in a single day)",
@@ -242,7 +288,9 @@
   {
     "mechanism_id": "reflexive_bubble",
     "name": "Reflexive bubble (narrative-price feedback)",
-    "trigger_conditions": ["valuation_disconnected_from_fundamentals"],
+    "trigger_conditions": [
+      "valuation_disconnected_from_fundamentals"
+    ],
     "causal_chain": [
       "A compelling narrative about a transformative technology or trend takes hold among investors, unsupported yet by proportionate current fundamentals",
       "Rising prices are read as confirmation of the narrative, not just sentiment, drawing in more capital and more believers",
@@ -262,7 +310,9 @@
   {
     "mechanism_id": "monetary_tightening_lag",
     "name": "Monetary-tightening lag",
-    "trigger_conditions": ["curve_inverted"],
+    "trigger_conditions": [
+      "curve_inverted"
+    ],
     "causal_chain": [
       "A central bank raises its policy rate rapidly to combat inflation",
       "Higher policy rates transmit to the real economy only gradually and unevenly -- through loan repricing, credit tightening, and investment/hiring decisions that take months to change -- the textbook 'long and variable lags' of monetary policy",
@@ -282,7 +332,10 @@
   {
     "mechanism_id": "sovereign_debt_doom_loop",
     "name": "Sovereign-debt doom loop",
-    "trigger_conditions": ["credit_spreads_elevated", "interconnected_counterparty_exposure"],
+    "trigger_conditions": [
+      "credit_spreads_elevated",
+      "interconnected_counterparty_exposure"
+    ],
     "causal_chain": [
       "Domestic banks hold large quantities of their own government's sovereign debt, often encouraged by favorable regulatory treatment",
       "Concern about the government's fiscal position raises the market's perceived default risk, pushing sovereign bond yields up and prices down",
@@ -302,7 +355,10 @@
   {
     "mechanism_id": "capex_overbuild",
     "name": "Capex overbuild",
-    "trigger_conditions": ["capacity_investment_outpacing_demand_signal", "valuation_disconnected_from_fundamentals"],
+    "trigger_conditions": [
+      "capacity_investment_outpacing_demand_signal",
+      "valuation_disconnected_from_fundamentals"
+    ],
     "causal_chain": [
       "A new technology or transformative infrastructure category attracts genuine enthusiasm about future demand, distinct from deliberate multi-competitor racing (contrast debt_fueled_capacity_race)",
       "Cheap capital and optimistic demand forecasts lead multiple independent builders to construct capacity sized to a shared, aggressively optimistic view of future demand",
@@ -327,7 +383,10 @@
   {
     "mechanism_id": "money_market_contagion",
     "name": "Money-market contagion",
-    "trigger_conditions": ["interconnected_counterparty_exposure", "credit_spreads_elevated"],
+    "trigger_conditions": [
+      "interconnected_counterparty_exposure",
+      "credit_spreads_elevated"
+    ],
     "causal_chain": [
       "Money market funds hold short-term debt (commercial paper, repo, financial-institution debt) and are widely treated by investors as cash-equivalent, redeemable at a stable $1.00 net asset value",
       "One fund's holdings include debt of an institution that suddenly defaults or fails, causing that fund's net asset value to fall below $1.00 ('breaking the buck')",
@@ -340,6 +399,78 @@
         "case": "Reserve Primary Fund breaking the buck after Lehman Brothers' bankruptcy, triggering >$300B in prime money-market-fund redemptions",
         "year": 2008,
         "source": "https://en.wikipedia.org/wiki/Reserve_Primary_Fund ; https://libertystreeteconomics.newyorkfed.org/2013/10/twenty-eight-money-market-funds-that-could-have-broken-the-buck-new-data-on-losses-during-the-2008-c/"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "debt_deflation_spiral",
+    "name": "Debt-deflation spiral",
+    "trigger_conditions": [
+      "debt_financed_expansion",
+      "drawdown_gt_20pct"
+    ],
+    "causal_chain": [
+      "An economy-wide buildup of debt occurs during a boom (over-indebtedness relative to income and collateral values)",
+      "A shock triggers debt liquidation: distress selling and repayment of bank loans contracts deposits and slows money velocity",
+      "The general price level falls as the money stock shrinks",
+      "Falling prices raise the real burden of every remaining unit of debt -- net worths and profits collapse faster than debts are repaid",
+      "The attempt to liquidate defeats itself: the more debtors pay, the more they owe in real terms",
+      "Output, trade, and employment contract; pessimism and hoarding further slow money velocity, deepening the deflation until mass bankruptcy or policy reflation breaks the loop"
+    ],
+    "historical_instances": [
+      {
+        "case": "US Great Depression 1929-33 -- liquidation cut nominal debts ~20% while deflation raised the real debt burden ~40% (Fisher's own computation)",
+        "year": 1933,
+        "source": "Irving Fisher, 'The Debt-Deflation Theory of Great Depressions', Econometrica 1(4) 1933 -- https://fraser.stlouisfed.org/files/docs/meltzer/fisdeb33.pdf; Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "input_cost_inflation_passthrough",
+    "name": "Input-cost inflation passthrough",
+    "trigger_conditions": [
+      "concentrated_supplier_base",
+      "inflation_rising"
+    ],
+    "causal_chain": [
+      "A concentrated supplier group controls a critical, economy-wide input (energy, a key commodity)",
+      "Supply restriction or pricing power sharply raises that input's price while short-run demand is inelastic",
+      "The cost shock propagates through wholesale prices into consumer prices across every sector that uses the input",
+      "With the economy near capacity and inflation already elevated, the one-time price jump feeds wage- and price-setting expectations",
+      "Inflation shifts to a persistently higher regime while output slows -- a combination demand-management policy cannot offset on both sides at once"
+    ],
+    "historical_instances": [
+      {
+        "case": "1973-74 OAPEC oil embargo -- production cuts by the concentrated exporter group nearly quadrupled oil from $2.90 to $11.65/barrel in three months into an economy already running hot",
+        "year": 1973,
+        "source": "Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History -- https://www.federalreservehistory.org/essays/oil-shock-of-1973-74; Blinder & Rudd, 'The Supply-Shock Explanation of the Great Stagflation Revisited', NBER w14563 -- https://www.nber.org/papers/w14563"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "policy_tightening_demand_collapse",
+    "name": "Policy-tightening demand collapse",
+    "trigger_conditions": [
+      "inflation_rising",
+      "curve_inverted",
+      "unemployment_momentum_triggered"
+    ],
+    "causal_chain": [
+      "Inflation becomes entrenched in expectations after a period of accommodative or stop-go policy",
+      "The central bank tightens aggressively and holds policy tight despite rising unemployment, to restore credibility",
+      "Short rates rise above long rates as markets price eventual disinflation",
+      "Rate-sensitive, borrowing-dependent sectors (construction, manufacturing, autos) contract first and hardest",
+      "Unemployment rises sharply while inflation responds only with a lag",
+      "Once expectations break, inflation and long rates fall together and rate-sensitive demand recovers"
+    ],
+    "historical_instances": [
+      {
+        "case": "Volcker disinflation and the 1981-82 US recession -- fed funds near 20%, unemployment peaking near 11%, inflation falling from ~11% (mid-1979) to 5% (Oct 1982)",
+        "year": 1982,
+        "source": "Tim Sablik, 'Recession of 1981-82', Federal Reserve History -- https://www.federalreservehistory.org/essays/recession-of-1981-82; Goodfriend & King, 'The Incredible Volcker Disinflation', Journal of Monetary Economics 52(5) 2005"
       }
     ],
     "confidence_tier": "well_documented"
