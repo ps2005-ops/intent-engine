@@ -1172,3 +1172,22 @@ shared reason (0 resolved predictions). Both docs analysis-only, no code,
 no gated actions. Item 5 (Task 5 impl) skipped -- unapproved. Suite 627
 green (explicit exit-code check before each commit, per the process
 guard). Spend loop 3: 0 fetches, 0 model calls.
+
+## Overnight loop 4 (2026-07-21/22) — fields unfilled a 4th time; per-field status
+
+A/B/C/D and all standing picks arrived as menus again ("opt / opt /
+feedback"), no selection. Per the founder's explicit rule ("a selection,
+not a menu ... menu-style = parked a fourth time, nothing below item 4
+runs") and park-don't-improvise:
+- A (T005 result): PARKED -> T005 stays LIVE-BARS-PENDING-HUMAN.
+- B (marketing drafts): PARKED -> DRAFT-pending-approval.
+- C (outreach package): PARKED -> DRAFT-pending-approval.
+- D (citation_check): PARKED -> batch-2 citations unverified.
+- Batch-2 verdict / Task 5 / AP feed / vocab: PARKED (unfilled menus).
+Item 1 (execute filled fields): nothing filled -> PARKED, no commits.
+Item 2 (batch 3): gated on batch-2 verdict filled -> NOT filled -> NOT
+started; curriculum stays 8/12. Item 5 (Task 5 impl): unapproved -> skip.
+Ungated work executed: item 3 (mechanism-explanation-depth SPEC -- design
+only, my-approval-before-build) and item 4 (docs/POSITIONING.md -- analysis
+only). No enum/prompt/allowlist touched; mechanisms.json still 20. Spend:
+0 fetches, 0 live model calls.
