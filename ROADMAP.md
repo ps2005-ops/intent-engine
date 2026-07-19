@@ -139,20 +139,27 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T007 — Mechanism explanation depth
 
-- **Status**: PARKED — BAR RECONCILIATION PENDING (2026-07-22). Approved
-  as specced (docs/MECHANISM_EXPLANATION_DEPTH_SPEC.md) and build begun;
-  a build-time pre-check found bars **(c) verbatim causal chain** and
-  **(d) full-block language wall** are MUTUALLY UNSATISFIABLE on the real
-  library — 6 mechanisms have `buy`/`sell`/`forecast` inside verbatim
-  historical causal-chain descriptions. Parked rather than bend a bar to
-  ship. One founder decision unblocks it — see
-  `docs/T007_PARK_FINDING.md` (3 resolution options, recommendation:
-  scope the wall to system-authored lines, exempting verbatim quoted
-  causal steps + cited source). No code committed; suite green at 627.
-- **Files (proposed, on resolution)**: `simulator/mechanism_section.py`
-  (new `render_mechanism_explanation`), `simulator/cli.py` (`--explain`
-  flag), `tests/test_mechanism_explanation.py`. Budget: 0 live calls
-  (deterministic render).
+- **Status**: DONE — 2026-07-22. Built to green under the founder-ratified
+  OPTION 1 (docs/T007_PARK_FINDING.md): the language wall applies to the
+  system-authored framing lines only; verbatim `causal_chain` steps + the
+  cited source are exempt (bar (c) guarantees they're unedited quotes of
+  documented history, not the system's predictive voice). All six bars
+  pass — (a) condition-traceability, (b) cited-instance presence, (c)
+  verbatim causal-chain fidelity, (d) system-line language wall, (e)
+  correct silence, (f) additive/no-regression — asserted across the whole
+  real 20-mechanism library. The decisive proof (test + trace): a
+  wall-tripping mechanism (`carry_trade_unwind`, whose verbatim chain says
+  "unwind (sell … buy back …)") renders its history correctly while the
+  system framing stays clean. Suite **635 passed** (627 + 8 new), 0 live
+  calls, one commit.
+- **Files**: `simulator/mechanism_section.py`
+  (`render_mechanism_explanation` + `assert_explanation_system_walls`),
+  `simulator/cli.py` (`--explain` flag, off by default, additive),
+  `tests/test_mechanism_explanation.py` (8 bar tests).
+- **Walls honored**: 0 model calls (a model call here is a park
+  condition); no probability/prediction attached to any explanation;
+  `render_mechanism_section` one-liner untouched (bar f); enum & prompts
+  untouched.
 
 ## T005 — Wire mechanisms into premortem output (overnight Task 4)
 

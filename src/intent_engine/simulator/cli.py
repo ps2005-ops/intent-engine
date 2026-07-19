@@ -54,6 +54,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="T005: also run the isolated structural-mechanism extraction (1 extra call) and, when "
              "anything genuinely matches, append the 'Structural mechanisms possibly in play' section. "
              "No match -> no section (correct silence). Off by default: zero extra calls.")
+    parser.add_argument(
+        "--explain", action="store_true",
+        help="T007: with --mechanisms, render the fuller 'Why this may be in play' explanation "
+             "(matched conditions + verbatim documented causal chain + cited historical precedent) "
+             "instead of the one-line section. Deterministic, 0 extra calls. No match -> no section.")
     return parser
 
 
@@ -158,8 +163,12 @@ def main(argv=None) -> int:
     else:
         print(_format_report(decision_text, result.intent, result.risk_audit, result.scenario_set, result.elapsed_seconds))
         if result.ranked_mechanisms:
-            from .mechanism_section import render_mechanism_section
-            section = render_mechanism_section(result.ranked_mechanisms)
+            if args.explain:
+                from .mechanism_section import render_mechanism_explanation
+                section = render_mechanism_explanation(result.ranked_mechanisms)
+            else:
+                from .mechanism_section import render_mechanism_section
+                section = render_mechanism_section(result.ranked_mechanisms)
             if section:
                 print("\n" + section)
 

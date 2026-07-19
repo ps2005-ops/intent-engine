@@ -1249,3 +1249,41 @@ supply_shock_propagation entry -- the founder asked to see real output):
 
 (margin_collateral_spiral's block would be identical in shape but trips
 bar (d) on the verbatim step "...is forced to sell the underlying asset...".)
+
+## Overnight loop 6 (2026-07-22) — T007 BUILT TO GREEN (option 1, founder-ratified)
+
+The (c)/(d) conflict from loop 5 resolved by OPTION 1 (ratified): language
+wall scoped to SYSTEM-AUTHORED framing lines; verbatim causal_chain steps +
+cited source EXEMPT (bar (c) guarantees they're unedited historical
+quotes, not the system's voice -- which is what "no predictions in the
+system's voice" protects). render_mechanism_explanation +
+assert_explanation_system_walls added to simulator/mechanism_section.py
+(0 model calls -- a model call here is a park condition); --explain CLI
+flag (off by default, additive, one-liner path byte-identical per bar f).
+8 bar tests (tests/test_mechanism_explanation.py), all against the REAL
+20-mechanism library. All six bars pass:
+(a) condition-traceability, (b) cited-instance presence, (c) verbatim
+causal-chain fidelity, (d) system-line wall, (e) correct silence,
+(f) additive/no-regression. Suite 635 passed (627+8), explicit exit-code
+check (EXIT=0) before commit. Spend: 0.
+
+THE PROOF (real --explain block, wall-tripping mechanism carry_trade_unwind
+-- verbatim history contains 'sell'/'buy', system framing stays clean):
+
+    Why this may be in play — Carry-trade unwind (well_documented)
+      Conditions present in your situation:
+        - interconnected_counterparty_exposure
+      How it unfolds (documented pattern):
+        1. Investors borrow in a low-interest-rate funding currency and invest
+           the proceeds in higher-yielding assets ...
+        3. ... prompting leveraged holders to unwind (sell the target-currency
+           asset, buy back the funding currency to repay the loan)
+        4. The unwinding itself pushes the funding currency higher ...
+      Historical precedent: August 2024 global market selloff following the Bank
+        of Japan's rate hike ... (Nikkei -12.4% in a single day) (2024)
+      Source: https://www.bis.org/publ/bisbull90.pdf (BIS, 'The market turbulence
+        and carry trade unwind of August 2024')
+
+The verbatim "unwind (sell ... buy back ...)" renders (bar c) while the
+system-authored header/labels carry zero forbidden terms (bar d, option 1).
+ROADMAP T007 -> DONE.
