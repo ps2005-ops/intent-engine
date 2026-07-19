@@ -1,130 +1,106 @@
-# MORNING HANDOFF — overnight loop 2 (2026-07-19/20)
+# MORNING HANDOFF — overnight loop 3 (2026-07-20/21)
 
-*Suite at close: **627 passed, 0 failed, 7 deselected (live)**. 11 commits
-(af0dc9d → deaba51). Walls held: no publishing, no sending, no crontab
-writes, no vendor accounts, no OAuth, no live Anthropic calls from the
-sandbox; A-M3 untouched, backtest HELD, enum frozen, extraction &
-drafting prompts frozen. One protocol violation caught and fixed forward
-(see workstream 1). Total overnight spend: 11 citation/verification
-fetches, 0 live model calls.*
+*Suite at close: **627 passed, 0 failed, 7 deselected (live)**. 4 commits
+(`05ee073` → `e1d8434`). Walls held: no publishing, no sending, no crontab
+writes, no vendor accounts, no OAuth, no live Anthropic calls from
+sandbox; A-M3 untouched, backtest HELD, enum frozen, prompts frozen.
+**Process guard honored**: every commit gated on an explicit exit-code
+check of the full offline suite — the loop-2 wrong-exit-status bug did
+NOT recur. Spend loop 3: 0 fetches, 0 live model calls.*
+
+## Did the four bracket fields get executed?
+
+**No — all four arrived unfilled again** (option-menus like
+`[opt1 / opt2 / opt3]`, no selection). Per your own rule ("empty brackets
+= parked again") and park-don't-improvise, I parked rather than guessed.
+Guessing "approve" would have crossed real walls (a data-file merge, an
+allowlist change, code into the runnable queue). Status of each:
+
+- **A (T005 result)** — unfilled → T005 stays LIVE-BARS-PENDING-HUMAN.
+- **B (marketing drafts)** — unfilled → stay DRAFT-pending-approval.
+- **C (outreach package)** — unfilled → stays DRAFT-pending-approval.
+- **D (citation_check.sh)** — unfilled → batch-2 citations unverified →
+  no batch-2 merge.
+
+Same for the standing decisions (batch-2 verdict, Task 5, AP feed, vocab):
+all unfilled menus → parked, allowlist/enum/prompts untouched.
 
 ## Workstream states
 
-### 1. Execute morning decisions (2, 3 done; 1, 4 parked on unfilled brackets)
-- **State**: mixed, all recorded. Decision 2 (batch-1 merge) and
-  decision 3 (renderer wiring + real founder report) fully EXECUTED.
-  Decisions 1, 4, and the approval-halves of 5/6 arrived as unfilled
-  template brackets → parked, not guessed (recorded in traces).
-- **Commits**: `af0dc9d` (batch-1 merge), `ab21afb` (fix-forward),
-  `521b36a` (renderer + first real founder report).
-- **Honest note**: the batch-1 merge commit `af0dc9d` landed while the
-  suite showed 3 failures — my commit chain gated on the wrong exit
-  status. All 3 were legitimate consequences of the approved merge
-  (ID-set 17→20, citation format, unused-condition test), fixed FORWARD
-  in `ab21afb`; suite verified green with an explicit exit check after.
-  Recorded in `reports/market_engine_trace.md`.
-- **Spend**: 0.
-- **Next human action**: none — decisions 2/3 are done. See item 1 in the
-  morning list for the still-parked T005 closeout (decision 1).
+### 1. Execute filled decisions
+- **State**: parked — nothing was filled (see above). No commits.
+- **Next human action**: fill A/B/C/D and the standing decisions with bare
+  answers; everything below unblocks immediately.
 
-### 2. Library batch 2 (episodes 5–8)
-- **State**: staged-at-gate — review sheet awaiting approval;
-  `mechanisms.json` untouched (still 20). 2 new (1 collision-flagged) +
-  2 enrichments + 1 parked (currency-peg). Batch 3 NOT started.
-- **Commits**: `6592162`.
-- **Spend**: 7 fetches, 0 model calls.
-- **Next human action**: read `docs/library_batch2_review_sheet.md`;
-  approve/amend; run `sh citation_check.sh` on the Mac to clear the 2
-  PENDING-MAC-VERIFICATION citations (LTCM, Japan) before any merge.
+### 2. Library batch 3 (final batch, episodes 9–12)
+- **State**: NOT started — explicitly gated on batch-2 feedback being
+  filled, which it wasn't. The 12-episode curriculum stands at **8
+  studied** (batch 1 merged, batch 2 drafted-pending).
+- **Next human action**: give the batch-2 verdict (+ run
+  `citation_check.sh`); then batch 3 can run.
 
-### 3. Founder-readable report — renderer WIRED + first real report
-- **State**: DONE (decision 3). Renderer + 10 bars green; wired additively
-  into the weekly pipeline (`--founder-html`); first real founder report
-  generated from 2026-07-17 data, saved alongside the raw .txt.
-- **Commits**: `521b36a`.
-- **Spend**: 0.
-- **Next human action**: open
-  `reports/weekly_regime_report_2026-07-17.founder.html` — the demo asset.
-  (Optional: confirm the `--founder-html` flag lands in your weekly cron
-  line when you next edit it.)
+### 3. Mechanism library state inventory — DELIVERED (interim)
+- **State**: DONE as far as it can go — `docs/MECHANISM_LIBRARY_STATE.md`,
+  honestly labeled **8/12 episodes** since batch 3 is parked. Full map of
+  the 20 live entries (3 multi-instance, 17 single), batch-2 pending
+  changes, the 1 park, and the 4 deferred enum candidates with what each
+  unlocks.
+- **Commits**: `0fe51d3`.
+- **Next human action**: read it — it's the interim map; it completes
+  after batch 3. Nothing to approve.
 
-### 4. Task 5 wiring spec (T006)
-- **State**: staged-at-gate — spec awaiting approval. Verified the Task 5
-  bridge SUBSTRATE is already built + green (7 tests); the spec covers the
-  unbuilt WIRING layer, T005-parallel. SPEC ONLY, no implementation.
-- **Commits**: `c458456`.
-- **Spend**: 0.
-- **Next human action**: read `docs/TASK5_WIRING_SPEC_PROPOSAL.md`;
-  approve → runnable queue, or amend.
+### 4. Capability-boundaries memo — DELIVERED
+- **State**: DONE — `docs/CAPABILITY_BOUNDARIES.md`. The 4-item DO surface
+  + the 4 absent capabilities (strategy backtest / technical analysis /
+  company analysis / TimesFM-Kronos), each with cost, gate, and the
+  explicit "no accuracy before calibration" reasoning.
+- **Commits**: `e1d8434`.
+- **Next human action**: read it — decision-support for when/whether to
+  pursue any of the four. Nothing to approve.
 
-### 5. AP feed decision-prep
-- **State**: staged-at-gate — AP is BLOCKED by the fetch tool (not dead,
-  not routed around); 2 of 3 approved feeds now unusable, only Yahoo
-  works. NPR Business verified as a clean replacement. No allowlist change
-  made.
-- **Commits**: `de07ea1`.
-- **Spend**: 4 fetches.
-- **Next human action**: read `docs/AP_FEED_DECISION_PREP.md`; pick a
-  replacement (NPR recommended) or leave as-is; optionally OK a small
-  vocab-widening task (secondary finding: vocab misses IPO/merger/stock).
-
-### 6. Outreach finalization
-- **State**: staged-at-gate — send-ready variants (affirmed placeholders:
-  3 business days, early-stage B2B), per-message approval checklist, empty
-  ledger initialized. Nothing sends. Marketing drafts + outreach package
-  remain DRAFT-pending your approval (decisions 4 and 5-approval-half were
-  unfilled brackets).
-- **Commits**: `deaba51`.
-- **Spend**: 0.
-- **Next human action**: approve marketing drafts (decision 4) and the
-  outreach package (decision 5) with any feedback; first sends are one-tap
-  per the checklist.
+### 5. Task 5 implementation
+- **State**: skipped — its spec (T006) is not approved (unfilled). Not
+  implemented.
+- **Next human action**: approve/amend `docs/TASK5_WIRING_SPEC_PROPOSAL.md`.
 
 ## MY MORNING LIST (in order)
 
-1. **Mac command** — T005 live bars (still parked from last night;
-   decision 1 came as an unfilled bracket): the two one-liners in
-   `T005_LIVE_RUNS.md`. Paste results → T005 flips to DONE. (~2 haiku
-   calls.) Disk check confirms they haven't been run yet.
-2. **Approval** — Library batch 2: `docs/library_batch2_review_sheet.md`
-   (one collision flag on `mechanical_feedback_liquidation`, same class
-   you accepted in batch 1).
-3. **Mac command** — `sh citation_check.sh`: now also checks batch-2's
-   LTCM + Japan URLs (both PENDING); needs a real 200 on each before the
-   batch-2 merge.
-4. **Approval** — Task 5 wiring spec: `docs/TASK5_WIRING_SPEC_PROPOSAL.md`.
-5. **Decision** — AP feed replacement: `docs/AP_FEED_DECISION_PREP.md`
-   (NPR recommended).
-6. **Approval** — the still-pending bracket decisions from last night:
-   marketing drafts (4) and outreach package (5). Then the founder report
-   HTML (item 3 above) is ready to look at as your demo asset.
-7. Batch 3 starts only after your batch-2 feedback.
+1. **Fill the four fields** (A/B/C/D) — the single highest-leverage thing;
+   bare answers are fine. Two nights of parked execution all hinge on
+   these. Recommended fills, if you concur: A "run the two one-liners
+   first", B/C "approved", D "run citation_check.sh first".
+2. **Mac commands** (independent of the fills): the T005 live one-liners
+   (`T005_LIVE_RUNS.md`) and `sh citation_check.sh` (now includes batch-2's
+   LTCM + Japan URLs). Their outputs ARE the A and D answers.
+3. **Standing decisions**: batch-2 verdict, Task 5 (T006), AP feed (NPR
+   recommended), vocab-widening yes/no.
+4. **Read (no approval needed)**: `docs/MECHANISM_LIBRARY_STATE.md` and
+   `docs/CAPABILITY_BOUNDARIES.md` — tonight's two deliverables.
+5. Once batch-2 verdict is in, batch 3 runs and the library inventory
+   completes to 12/12.
 
 ## AMBIGUITIES (parked with recommendations, not guessed)
 
-1. **Repeated unfilled-bracket decisions**: decisions 1, 4, and the
-   approval-halves of 5/6 arrived as literal "[PASTE...]"/"[APPROVED...]"
-   placeholders two nights running. I parked rather than guessed each
-   time. *Recommendation: when you send the decision block, fill those
-   four fields (even a bare "T005: both passed" / "drafts: approved") and
-   I'll execute immediately — they're the only things blocking T005 DONE
-   and the marketing/outreach go-ahead.*
-2. **`mechanical_feedback_liquidation` collision** (batch 2): identical
-   trigger set to `margin_collateral_spiral`, like batch-1's
-   debt_deflation_spiral. *Recommendation: accept (dual-match on a >20%
-   drawdown is correct), same as last time — but it's flagged for your
-   explicit call.*
-3. **Two batch-2 citations unverifiable from sandbox** (LTCM empty, Japan
-   oversized). *Recommendation: they're in citation_check.sh; run it on
-   the Mac before merging batch 2 — I did not merge, so nothing is at
-   risk.*
-4. **Thin feed allowlist**: with AP + Reuters both blocked, only Yahoo
-   works today. *Recommendation: adopt NPR Business (verified) so the
-   weekly headline sourcing isn't single-feed-dependent.*
+1. **Three nights of unfilled brackets.** This is now the dominant blocker;
+   real build/merge/send work has queued behind it for two loops.
+   *Recommendation: the fastest unblock is to run the two Mac commands
+   (T005 one-liners, citation_check.sh) — their results directly fill A
+   and D — and send a one-word "approved"/"feedback" for B, C, and the
+   standing decisions. I did not guess any of them because each guards a
+   real wall.*
+2. **Interim library inventory.** Item 3 assumed 12 episodes studied;
+   only 8 are (batch 3 gated). I wrote it as the honest current-state map
+   rather than parking it, since its content (instance counts, parks, enum
+   candidates) is all available now and useful. *Recommendation: treat it
+   as the interim map; it auto-completes once batch 3 runs.*
+3. **Batch-2 merge is double-gated** (verdict + verified citations). Even
+   if you give the verdict, the LTCM/Japan citations need a real 200 from
+   `citation_check.sh` first. *Recommendation: run that script before or
+   alongside the verdict.*
 
 ## Free-time use (per whitelist)
 
-All six items reached their gates with budget to spare; remaining time
-went to the fix-forward verification (item 1), trace/doc accuracy, and
-this handoff. Not touched: batch 3, enum edits, prompt edits, publishing
-past dry-run, new workstreams.
+After parking items 1–2 and 5 and delivering 3–4, remaining time went to
+the process-guard verification (explicit exit-code checks) and this
+handoff. Not touched: enum edits, prompt edits, publishing past dry-run,
+backtest work, new engines, batch 3.
