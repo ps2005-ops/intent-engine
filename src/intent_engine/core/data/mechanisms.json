@@ -22,7 +22,7 @@
       {
         "case": "1973-74 OAPEC oil embargo -- concentrated exporter group's production cuts against a US oil industry with no spare capacity; embargo lifted March 1974 but prices stayed",
         "year": 1973,
-        "source": "Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History -- https://www.federalreservehistory.org/essays/oil-shock-of-1973-74"
+        "source": "https://www.federalreservehistory.org/essays/oil-shock-of-1973-74 -- Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History"
       }
     ],
     "confidence_tier": "well_documented"
@@ -118,12 +118,12 @@
       {
         "case": "Panic of 1907 -- run on Knickerbocker Trust cut off trust-company call-loan liquidity to NYSE brokers; annualized call-money rates spiked from 9.5% to 100% and runs spread across New York trusts",
         "year": 1907,
-        "source": "Jon R. Moen and Ellis W. Tallman, 'The Panic of 1907', Federal Reserve History -- https://www.federalreservehistory.org/essays/panic-of-1907"
+        "source": "https://www.federalreservehistory.org/essays/panic-of-1907 -- Jon R. Moen and Ellis W. Tallman, 'The Panic of 1907', Federal Reserve History"
       },
       {
         "case": "Caldwell and Company collapse, Nov 1930 -- failures cascaded through the correspondent-reserve pyramid, forcing hundreds of country-bank suspensions within weeks",
         "year": 1930,
-        "source": "Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31"
+        "source": "https://www.federalreservehistory.org/essays/banking-panics-1930-31 -- Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History"
       }
     ],
     "confidence_tier": "well_documented"
@@ -422,7 +422,7 @@
       {
         "case": "US Great Depression 1929-33 -- liquidation cut nominal debts ~20% while deflation raised the real debt burden ~40% (Fisher's own computation)",
         "year": 1933,
-        "source": "Irving Fisher, 'The Debt-Deflation Theory of Great Depressions', Econometrica 1(4) 1933 -- https://fraser.stlouisfed.org/files/docs/meltzer/fisdeb33.pdf; Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31"
+        "source": "https://fraser.stlouisfed.org/files/docs/meltzer/fisdeb33.pdf; Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31 -- Irving Fisher, 'The Debt-Deflation Theory of Great Depressions', Econometrica 1(4) 1933"
       }
     ],
     "confidence_tier": "well_documented"
@@ -445,7 +445,7 @@
       {
         "case": "1973-74 OAPEC oil embargo -- production cuts by the concentrated exporter group nearly quadrupled oil from $2.90 to $11.65/barrel in three months into an economy already running hot",
         "year": 1973,
-        "source": "Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History -- https://www.federalreservehistory.org/essays/oil-shock-of-1973-74; Blinder & Rudd, 'The Supply-Shock Explanation of the Great Stagflation Revisited', NBER w14563 -- https://www.nber.org/papers/w14563"
+        "source": "https://www.federalreservehistory.org/essays/oil-shock-of-1973-74; Blinder & Rudd, 'The Supply-Shock Explanation of the Great Stagflation Revisited', NBER w14563 -- https://www.nber.org/papers/w14563 -- Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History"
       }
     ],
     "confidence_tier": "well_documented"
@@ -470,7 +470,7 @@
       {
         "case": "Volcker disinflation and the 1981-82 US recession -- fed funds near 20%, unemployment peaking near 11%, inflation falling from ~11% (mid-1979) to 5% (Oct 1982)",
         "year": 1982,
-        "source": "Tim Sablik, 'Recession of 1981-82', Federal Reserve History -- https://www.federalreservehistory.org/essays/recession-of-1981-82; Goodfriend & King, 'The Incredible Volcker Disinflation', Journal of Monetary Economics 52(5) 2005"
+        "source": "https://www.federalreservehistory.org/essays/recession-of-1981-82; Goodfriend & King, 'The Incredible Volcker Disinflation', Journal of Monetary Economics 52(5) 2005 -- Tim Sablik, 'Recession of 1981-82', Federal Reserve History"
       }
     ],
     "confidence_tier": "well_documented"

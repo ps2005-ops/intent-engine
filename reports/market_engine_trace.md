@@ -1044,3 +1044,21 @@ back on the morning list. Decision 5's placeholder VALUES ([X days]=3
 business days, [segment]=early-stage B2B founders) and decision 6's
 four ambiguity-recommendation acceptances were affirmatively stated and
 ARE acted on.
+
+## Overnight loop 2 — batch-1 merge EXECUTED + a protocol violation, owned
+
+Merge done per decision 2: 3 new mechanisms + 3 enrichments ->
+mechanisms.json now 20 entries; bar (e) PASS (both extraction prompts
+sha256-identical before/after; simulator 2067d21a..., regime_report
+fb19551507...). **Violation, recorded honestly**: the merge commit
+(af0dc9d) landed while the suite showed 3 failures — my commit chain
+gated on the wrong pipeline exit status. All 3 failures were legitimate
+consequences of the approved merge, fixed FORWARD (no history rewrite):
+(1) exact-ID-set test updated 17->20 (same precedent as its own M3
+update); (2) batch-1 citation strings reformatted URL-first to conform
+to the EXISTING strict test convention — bar kept strict, data conformed;
+(3) the unused-condition no-catch-all test rewritten to assert its intent
+directly (batch 1 consumed the last unused condition; matching
+inflation_rising is now correct declared behavior). Suite after fixes:
+**617 passed, 0 failed** (exit code checked this time). Enum candidates
+remain DEFERRED per decision; enum and prompts untouched.

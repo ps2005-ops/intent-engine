@@ -1,11 +1,12 @@
 from intent_engine.core.mechanism_library import Mechanism, load_mechanisms, match_mechanisms
 
 
-def test_load_mechanisms_returns_the_8_task2_plus_9_task_m3_mechanisms():
+def test_load_mechanisms_returns_the_8_task2_plus_9_task_m3_plus_3_batch1_mechanisms():
     """Task M3 (market-engine-execution-plan.md) extended the original 8
-    with 9 financial-crisis mechanisms -- this assertion is updated to
-    match, a real and expected consequence of that extension, same as the
-    original 8 IDs below (untouched, still all present)."""
+    with 9 financial-crisis mechanisms; the historical-study track's
+    batch 1 (founder-APPROVED 2026-07-19, docs/library_batch1_review_sheet.md)
+    added 3 more -- this assertion is updated to match, same precedent as
+    the M3 update. Original 17 IDs untouched, still all present."""
     mechanisms = load_mechanisms()
     ids = {m.mechanism_id for m in mechanisms}
     assert ids == {
@@ -26,8 +27,13 @@ def test_load_mechanisms_returns_the_8_task2_plus_9_task_m3_mechanisms():
         "sovereign_debt_doom_loop",
         "capex_overbuild",
         "money_market_contagion",
+        # batch 1 (episodes 1-4), approved as-is incl. the flagged
+        # debt_deflation_spiral trigger-set collision (dual-match accepted):
+        "debt_deflation_spiral",
+        "input_cost_inflation_passthrough",
+        "policy_tightening_demand_collapse",
     }
-    assert len(mechanisms) == 17
+    assert len(mechanisms) == 20
 
 
 def test_every_mechanism_has_at_least_one_historical_instance():
@@ -153,12 +159,21 @@ def test_regime_flavored_intent_matches_the_expected_crisis_mechanism():
     assert results[0].overlap_count == 2
 
 
-def test_regime_flavored_no_match_case_returns_empty_with_extended_taxonomy():
-    """A condition no mechanism (old 8 or new 9) declares must still
-    return empty -- the extension didn't introduce an accidental
-    catch-all."""
-    results = match_mechanisms(["inflation_rising"])  # declared in the taxonomy, but no mechanism uses it (yet)
-    assert results == []
+def test_no_accidental_catch_all_after_batch1():
+    """UPDATED 2026-07-19 with the founder-approved batch-1 merge: the
+    original construction (a declared-but-unused condition returns empty)
+    is no longer possible -- batch 1 consumed the last unused condition
+    (inflation_rising, now genuinely declared by
+    input_cost_inflation_passthrough and policy_tightening_demand_collapse,
+    so matching on it is CORRECT behavior, not a catch-all). The test's
+    intent is preserved directly: every returned mechanism must genuinely
+    declare an overlapping condition, and empty input returns empty."""
+    assert match_mechanisms([]) == []
+    for condition in ["inflation_rising", "curve_inverted", "network_effects_present"]:
+        for r in match_mechanisms([condition]):
+            assert condition in r.mechanism.trigger_conditions, (
+                f"{r.mechanism.mechanism_id} matched {condition!r} without declaring it -- catch-all bug")
+            assert r.matched_conditions == [condition]
 
 
 def test_old_task2_matcher_behavior_unaffected_by_the_m3_extension():
