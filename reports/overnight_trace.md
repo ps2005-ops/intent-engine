@@ -262,3 +262,26 @@ the redesigned gate, not an extractor defect. **Task 4
 (mechanism rendering in the premortem) is UNBLOCKED** and may be specced
 into the runnable queue as a next step (spec still required before any
 autonomous run — unblocked ≠ specced).
+
+## Overnight loop 2026-07-18/19 — standing approvals recorded + T005 build
+
+**Approvals recorded (user, in writing, pre-loop)**: T005 spec APPROVED as
+written → runnable queue. Library expansion APPROVED with two amendments:
+(1) founder review in batches of 4 episodes, review sheet before next
+batch, batch-1 feedback binds later batches, one data-file commit per
+approved batch; (2) citation bar (b): sandbox fetch failures are NOT
+citation failures — unreachable URLs collect into citation_check.sh for
+the Mac. Enum-freeze confirmed (closed TriggerCondition; NEEDS-APPROVAL
+list for candidates; widening = sign-off + full Task 3 gate rerun).
+
+**T005 BUILD — staged at live gate.** `simulator/mechanism_section.py`
+(gate-verified extraction design duplicated verbatim as production code;
+info-hiding test asserts no mechanism name/id appears in the prompt),
+additive `PremortemResult.ranked_mechanisms` (default None — old callers
+untouched, tested), `--mechanisms` CLI flag (off by default, zero new
+calls unless asked), word-boundary section language walls (tested against
+all 17 real library mechanisms rendered at once). 11 mocked tests = bars
+(c)(d)(e). Live bars (a)/(b): 2 Mac one-liners with pass criteria in
+`T005_LIVE_RUNS.md` — mocked-as-live is a standing wall, so T005 is
+**live-bars-pending-human**, not done. Spend: 0 live calls (sandbox), 2
+staged for the Mac.

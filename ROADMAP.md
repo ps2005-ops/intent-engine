@@ -137,6 +137,24 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ---
 
+## T005 — Wire mechanisms into premortem output (overnight Task 4)
+
+- **Status**: LIVE-BARS-PENDING-HUMAN — approved into the runnable queue
+  2026-07-18 (spec: docs/TASK4_SPEC_PROPOSAL.md, approved as written).
+  Implementation + mocked bars (c)(d)(e) committed this session, suite
+  green. Live bars (a)/(b) are staged in `T005_LIVE_RUNS.md` (2 Mac
+  one-liners, 2 of the <=8 live-call budget) — NOT done until both pass
+  and outputs land in reports/overnight_trace.md. NOT runnable by the
+  nightly agent (live bars are human-run by definition).
+- **Priority**: 1. **Size**: S (built).
+- **Files touched**: `src/intent_engine/simulator/mechanism_section.py`
+  (new), `simulator/pipeline.py` (additive field + kwarg),
+  `simulator/cli.py` (--mechanisms flag), `tests/test_mechanism_section.py`.
+- **Walls honored**: combined premortem prompt untouched; extraction
+  prompt duplicated verbatim from the gate-verified design (editing it
+  re-opens the Task 3 gate); closed-enum schema; word-boundary language
+  walls on the rendered section; no ledger wiring (Task 5's job).
+
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
 - **Overnight Task 4 — mechanism rendering in the premortem** — UNBLOCKED

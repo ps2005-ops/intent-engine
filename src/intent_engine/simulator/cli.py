@@ -49,6 +49,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--founder-goals")
     parser.add_argument("--stated-priority", action="append", dest="stated_priorities", default=[])
     parser.add_argument("--json", action="store_true", help="Print raw JSON instead of formatted text.")
+    parser.add_argument(
+        "--mechanisms", action="store_true",
+        help="T005: also run the isolated structural-mechanism extraction (1 extra call) and, when "
+             "anything genuinely matches, append the 'Structural mechanisms possibly in play' section. "
+             "No match -> no section (correct silence). Off by default: zero extra calls.")
     return parser
 
 
@@ -126,22 +131,37 @@ def main(argv=None) -> int:
     # piped to a file or another process stays clean.
     print("Running pre-mortem analysis (typically 7-9s, occasionally longer)...", file=sys.stderr)
 
-    result = run_premortem(decision_text, context)
+    mechanism_client = None
+    if args.mechanisms:
+        from ..core.llm_client import LLMClient
+        from .mechanism_section import FAST_MODEL
+        mechanism_client = LLMClient(model=FAST_MODEL)
+
+    result = run_premortem(decision_text, context, mechanism_client=mechanism_client)
 
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "intent": result.intent.model_dump(),
-                    "risk_audit": result.risk_audit.model_dump(),
-                    "scenario_set": result.scenario_set.model_dump(),
-                    "elapsed_seconds": result.elapsed_seconds,
-                },
-                indent=2,
-            )
-        )
+        payload = {
+            "intent": result.intent.model_dump(),
+            "risk_audit": result.risk_audit.model_dump(),
+            "scenario_set": result.scenario_set.model_dump(),
+            "elapsed_seconds": result.elapsed_seconds,
+        }
+        if result.ranked_mechanisms is not None:
+            payload["mechanisms"] = [
+                {"name": r.mechanism.name, "confidence_tier": r.mechanism.confidence_tier,
+                 "matched_conditions": list(r.matched_conditions),
+                 "historical_instance": {"case": r.mechanism.historical_instances[0].case,
+                                          "year": r.mechanism.historical_instances[0].year}}
+                for r in result.ranked_mechanisms
+            ]
+        print(json.dumps(payload, indent=2))
     else:
         print(_format_report(decision_text, result.intent, result.risk_audit, result.scenario_set, result.elapsed_seconds))
+        if result.ranked_mechanisms:
+            from .mechanism_section import render_mechanism_section
+            section = render_mechanism_section(result.ranked_mechanisms)
+            if section:
+                print("\n" + section)
 
     # Entity-memory write happens here, after run_premortem() returns -- not inside
     # run_premortem() itself, so callers that use run_premortem() directly
