@@ -115,8 +115,10 @@ def test_score_title_counts_distinct_vocab_words():
     assert score_title("nothing relevant here") == 0
 
 
-def test_allowlist_is_exactly_the_approved_three():
-    assert [name for name, _ in FEED_ALLOWLIST] == ["Reuters Business", "AP Business", "Yahoo Finance"]
+def test_allowlist_is_exactly_the_approved_set():
+    # 2026-07-22: Reuters + AP dropped (both web-fetch-tool-blocked), NPR
+    # Business added (verified working). Founder decision.
+    assert [name for name, _ in FEED_ALLOWLIST] == ["NPR Business", "Yahoo Finance"]
 
 
 def test_top_k_default_is_three():

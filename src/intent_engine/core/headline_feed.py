@@ -34,10 +34,12 @@ from email.utils import parsedate_to_datetime
 from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 # --- approved allowlist (change requires a new written decision) ------------
-
+# 2026-07-22 (founder decision, docs/AP_FEED_DECISION_PREP.md): Reuters and
+# AP dropped -- both are blocked by the web-fetch tool (403), so neither is
+# usable from this system regardless of feed health. NPR Business added
+# (verified working: clean text/xml, RFC-822 pubDates the parser handles).
 FEED_ALLOWLIST: Tuple[Tuple[str, str], ...] = (
-    ("Reuters Business", "https://feeds.reuters.com/reuters/businessNews"),
-    ("AP Business", "https://apnews.com/hub/business?output=rss"),
+    ("NPR Business", "https://feeds.npr.org/1006/rss.xml"),
     ("Yahoo Finance", "https://finance.yahoo.com/news/rssindex"),
 )
 
