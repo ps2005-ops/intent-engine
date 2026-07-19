@@ -137,6 +137,16 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ---
 
+## T006 — Wire the premortem->ledger bridge into the live pipeline
+
+- **Status**: APPROVED — runnable queue (2026-07-22). Spec:
+  docs/TASK5_WIRING_SPEC_PROPOSAL.md (approved as written). The bridge
+  SUBSTRATE (core/premortem_prediction_bridge.py) is already built + green
+  (7 tests); this task is the WIRING layer only: opt-in --record-predictions
+  flag + additive PremortemResult.ledgered_predictions field, combined
+  prompt untouched, drafting prompt frozen. 6 deterministic bars, <=6 live
+  calls (Mac). NOT yet built.
+
 ## T007 — Mechanism explanation depth
 
 - **Status**: DONE — 2026-07-22. Built to green under the founder-ratified
