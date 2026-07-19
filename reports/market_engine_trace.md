@@ -971,3 +971,23 @@ is cap-compliance, not a change to record_baselines itself (untouched).
 
 **Bars**: full offline suite **601 passed, 0 failed, 7 deselected** (13
 net-new tests incl. 12 gap-rule bars). **Spend**: 0 live calls.
+
+## Overnight loop — Library batch 1 (episodes 1-4) — STAGED AT FOUNDER GATE
+
+Research done for Panic of 1907, Great Depression 1929-33, 1973-74 oil
+shock, Volcker disinflation. Output: 3 NEW mechanisms
+(debt_deflation_spiral, input_cost_inflation_passthrough,
+policy_tightening_demand_collapse) + 3 instance ENRICHMENTS
+(credit_contagion x2: Knickerbocker 1907, Caldwell 1930;
+supply_shock_propagation: OAPEC 1973). All machine-validated (pydantic
+schema, enum subset, id-collision) — one flagged item for founder
+distinctness judgment: debt_deflation_spiral's trigger set collides with
+leverage_cycle_bust (root cause: no deflation condition in the frozen
+enum — recorded on NEEDS-APPROVAL list with
+outside_liquidity_backstop_perimeter). Drafts:
+docs/library_batch1_draft_entries.json; review sheet:
+docs/library_batch1_review_sheet.md. mechanisms.json UNTOUCHED — merge
+waits for approval, one data-file commit then. citation_check.sh:
+optional only (all 6 URLs verified from sandbox with titles). Spend: 6
+fetches, 0 model calls — far under the 40-search/16-call batch ceiling.
+Episodes 5-8 NOT started, per instruction.

@@ -1,0 +1,102 @@
+{
+ "new_entries": [
+  {
+   "mechanism_id": "debt_deflation_spiral",
+   "name": "Debt-deflation spiral",
+   "trigger_conditions": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "causal_chain": [
+    "An economy-wide buildup of debt occurs during a boom (over-indebtedness relative to income and collateral values)",
+    "A shock triggers debt liquidation: distress selling and repayment of bank loans contracts deposits and slows money velocity",
+    "The general price level falls as the money stock shrinks",
+    "Falling prices raise the real burden of every remaining unit of debt -- net worths and profits collapse faster than debts are repaid",
+    "The attempt to liquidate defeats itself: the more debtors pay, the more they owe in real terms",
+    "Output, trade, and employment contract; pessimism and hoarding further slow money velocity, deepening the deflation until mass bankruptcy or policy reflation breaks the loop"
+   ],
+   "historical_instances": [
+    {
+     "case": "US Great Depression 1929-33 -- liquidation cut nominal debts ~20% while deflation raised the real debt burden ~40% (Fisher's own computation)",
+     "year": 1933,
+     "source": "Irving Fisher, 'The Debt-Deflation Theory of Great Depressions', Econometrica 1(4) 1933 -- https://fraser.stlouisfed.org/files/docs/meltzer/fisdeb33.pdf; Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31"
+    }
+   ],
+   "confidence_tier": "well_documented"
+  },
+  {
+   "mechanism_id": "input_cost_inflation_passthrough",
+   "name": "Input-cost inflation passthrough",
+   "trigger_conditions": [
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "causal_chain": [
+    "A concentrated supplier group controls a critical, economy-wide input (energy, a key commodity)",
+    "Supply restriction or pricing power sharply raises that input's price while short-run demand is inelastic",
+    "The cost shock propagates through wholesale prices into consumer prices across every sector that uses the input",
+    "With the economy near capacity and inflation already elevated, the one-time price jump feeds wage- and price-setting expectations",
+    "Inflation shifts to a persistently higher regime while output slows -- a combination demand-management policy cannot offset on both sides at once"
+   ],
+   "historical_instances": [
+    {
+     "case": "1973-74 OAPEC oil embargo -- production cuts by the concentrated exporter group nearly quadrupled oil from $2.90 to $11.65/barrel in three months into an economy already running hot",
+     "year": 1973,
+     "source": "Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History -- https://www.federalreservehistory.org/essays/oil-shock-of-1973-74; Blinder & Rudd, 'The Supply-Shock Explanation of the Great Stagflation Revisited', NBER w14563 -- https://www.nber.org/papers/w14563"
+    }
+   ],
+   "confidence_tier": "well_documented"
+  },
+  {
+   "mechanism_id": "policy_tightening_demand_collapse",
+   "name": "Policy-tightening demand collapse",
+   "trigger_conditions": [
+    "inflation_rising",
+    "curve_inverted",
+    "unemployment_momentum_triggered"
+   ],
+   "causal_chain": [
+    "Inflation becomes entrenched in expectations after a period of accommodative or stop-go policy",
+    "The central bank tightens aggressively and holds policy tight despite rising unemployment, to restore credibility",
+    "Short rates rise above long rates as markets price eventual disinflation",
+    "Rate-sensitive, borrowing-dependent sectors (construction, manufacturing, autos) contract first and hardest",
+    "Unemployment rises sharply while inflation responds only with a lag",
+    "Once expectations break, inflation and long rates fall together and rate-sensitive demand recovers"
+   ],
+   "historical_instances": [
+    {
+     "case": "Volcker disinflation and the 1981-82 US recession -- fed funds near 20%, unemployment peaking near 11%, inflation falling from ~11% (mid-1979) to 5% (Oct 1982)",
+     "year": 1982,
+     "source": "Tim Sablik, 'Recession of 1981-82', Federal Reserve History -- https://www.federalreservehistory.org/essays/recession-of-1981-82; Goodfriend & King, 'The Incredible Volcker Disinflation', Journal of Monetary Economics 52(5) 2005"
+    }
+   ],
+   "confidence_tier": "well_documented"
+  }
+ ],
+ "enrichments": [
+  {
+   "target": "credit_contagion",
+   "instance": {
+    "case": "Panic of 1907 -- run on Knickerbocker Trust cut off trust-company call-loan liquidity to NYSE brokers; annualized call-money rates spiked from 9.5% to 100% and runs spread across New York trusts",
+    "year": 1907,
+    "source": "Jon R. Moen and Ellis W. Tallman, 'The Panic of 1907', Federal Reserve History -- https://www.federalreservehistory.org/essays/panic-of-1907"
+   }
+  },
+  {
+   "target": "credit_contagion",
+   "instance": {
+    "case": "Caldwell and Company collapse, Nov 1930 -- failures cascaded through the correspondent-reserve pyramid, forcing hundreds of country-bank suspensions within weeks",
+    "year": 1930,
+    "source": "Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History -- https://www.federalreservehistory.org/essays/banking-panics-1930-31"
+   }
+  },
+  {
+   "target": "supply_shock_propagation",
+   "instance": {
+    "case": "1973-74 OAPEC oil embargo -- concentrated exporter group's production cuts against a US oil industry with no spare capacity; embargo lifted March 1974 but prices stayed",
+    "year": 1973,
+    "source": "Michael Corbett, 'Oil Shock of 1973-74', Federal Reserve History -- https://www.federalreservehistory.org/essays/oil-shock-of-1973-74"
+   }
+  }
+ ]
+}
