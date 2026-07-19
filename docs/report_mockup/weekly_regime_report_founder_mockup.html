@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Structural Regime Read — Week of 2026-07-17</title>
+<style>
+  :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --accent:#0f4c81;
+          --honest:#8a6d1a; --honest-bg:#fdf6e3; --silent-bg:#f0f4f8; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: var(--ink);
+         max-width: 720px; margin: 2.5rem auto; padding: 0 1.25rem; line-height: 1.55; }
+  header { border-bottom: 3px double var(--ink); padding-bottom: .75rem; margin-bottom: 1.5rem; }
+  h1 { font-size: 1.45rem; margin: 0; letter-spacing: .02em; }
+  .sub { color: var(--muted); font-size: .9rem; margin-top: .3rem;
+         font-family: Helvetica, Arial, sans-serif; }
+  h2 { font-family: Helvetica, Arial, sans-serif; font-size: .8rem; text-transform: uppercase;
+       letter-spacing: .12em; color: var(--accent); margin: 1.8rem 0 .6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  td { padding: .45rem .3rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.k { width: 38%; font-weight: bold; }
+  td.prov { color: var(--muted); font-size: .78rem; font-family: Helvetica, Arial, sans-serif;
+            text-align: right; width: 30%; }
+  .badge { display: inline-block; font-family: Helvetica, Arial, sans-serif; font-size: .72rem;
+           padding: .1rem .5rem; border-radius: 3px; letter-spacing: .04em; }
+  .badge.unavail { background: var(--honest-bg); color: var(--honest); border: 1px solid #e6d9a8; }
+  .badge.ok { background: #eef6ee; color: #2f6b2f; border: 1px solid #cfe3cf; }
+  .honest-card { background: var(--silent-bg); border-left: 4px solid var(--accent);
+                 padding: .8rem 1rem; font-size: .95rem; }
+  .honest-card .why { color: var(--muted); font-size: .82rem; margin-top: .35rem;
+                      font-family: Helvetica, Arial, sans-serif; }
+  .pred { border: 1px solid var(--line); border-radius: 4px; padding: .7rem .9rem; margin: .5rem 0; }
+  .pred .p { font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: var(--accent); }
+  .pred .by { color: var(--muted); font-size: .82rem; font-family: Helvetica, Arial, sans-serif; }
+  .gaps { border: 1px solid var(--line); border-radius: 4px; padding: .7rem .9rem;
+          font-size: .9rem; color: var(--muted); }
+  .gaps.active { background: var(--honest-bg); color: var(--honest); border-color: #e6d9a8; }
+  footer { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: .9rem;
+           font-size: .82rem; color: var(--muted); font-family: Helvetica, Arial, sans-serif; }
+  footer strong { color: var(--ink); }
+  @media print { body { margin: 0 auto; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Structural Regime Read</h1>
+  <div class="sub">Week of July 17, 2026 &nbsp;·&nbsp; every number carries its source and date
+    &nbsp;·&nbsp; what we can't verify, we say we can't verify</div>
+</header>
+
+<h2>Where the regime stands</h2>
+<table>
+  <tr><td class="k">Yield curve (10y − 2y)</td>
+      <td><span class="badge ok">NOT INVERTED</span> — long rates still above short rates: the classic recession-signal configuration is absent this week.</td>
+      <td class="prov">FRED T10Y2Y · 2026-07-16</td></tr>
+  <tr><td class="k">Credit spreads (high-yield)</td>
+      <td><span class="badge unavail">UNAVAILABLE</span> — the source series didn't clear our data-quality guard this run, so no number is shown rather than a stale one.</td>
+      <td class="prov">FRED BAMLH0A0HYM2</td></tr>
+  <tr><td class="k">Inflation trend (CPI YoY)</td>
+      <td><span class="badge unavail">UNAVAILABLE</span> — same rule: no verified data, no claim.</td>
+      <td class="prov">FRED CPIAUCSL</td></tr>
+  <tr><td class="k">Unemployment momentum</td>
+      <td><span class="badge unavail">UNAVAILABLE</span> — same rule.</td>
+      <td class="prov">FRED UNRATE</td></tr>
+  <tr><td class="k">Equity drawdown (SPY)</td>
+      <td><span class="badge ok">−0.91%</span> off its recent high — effectively at highs; no drawdown stress.</td>
+      <td class="prov">Tiingo · 2026-07-16</td></tr>
+</table>
+
+<h2>Structural mechanisms in play</h2>
+<div class="honest-card">
+  <strong>None matched this week — and that's the finding.</strong>
+  The available signal (a non-inverted curve, a market near its highs) didn't
+  genuinely clear any documented mechanism's trigger conditions, so the system
+  says nothing rather than forcing a story.
+  <div class="why">Mechanism reads come from a library of documented historical
+  episodes, matched by deterministic rules — never by vibes. Silence when
+  evidence is thin is a designed behavior, verified by a reliability gate.</div>
+</div>
+
+<h2>Claims on the record this week</h2>
+<div class="pred"><span class="p">P = 0.72</span> <span class="by">· resolves by 2026-10-16 · graded automatically against FRED</span><br>
+  The 10y−2y Treasury spread stays above +0.30pp — consistent with a non-inverted, moderately steep curve regime.</div>
+<div class="pred"><span class="p">P = 0.58</span> <span class="by">· resolves by 2026-09-15 · graded automatically against Tiingo</span><br>
+  SPY returns to within 1.0% of its recent high within 60 days — mild mean reversion from the current −0.91% drawdown.</div>
+<div class="pred"><span class="p">P = 0.65</span> <span class="by">· resolves by 2026-10-01 · graded automatically against FRED</span><br>
+  US unemployment stays below 5.0% through the end of Q3 2026 — persistent labor-market tightness.</div>
+
+<h2>Data gaps</h2>
+<div class="gaps">No genuine data gaps detected in this run. (When a source
+series has a real hole — e.g. a missing month — it is listed here loudly,
+excluded from every number above, and never papered over.)</div>
+
+<h2>Track record</h2>
+<div class="honest-card">
+  <strong>0 predictions resolved so far — so no accuracy is claimed, full stop.</strong>
+  Every probability above is written to an append-only ledger and graded by
+  code against real market data on its resolve-by date. The first resolutions
+  land late August 2026; calibration will be reported here as it accumulates,
+  including against two dumb baselines that the system has to beat honestly.
+</div>
+
+<footer>
+  <strong>Method, in one paragraph:</strong> real macro/market data (FRED,
+  Tiingo, sources and dates shown inline) → deterministic regime indicators →
+  a gate-tested structural-mechanism read against documented historical
+  episodes → probabilistic claims recorded to an append-only ledger and graded
+  by code, never by self-assessment. What's unavailable is labeled
+  unavailable; what doesn't match, doesn't match; what hasn't resolved yet
+  isn't a track record. Generated from the 2026-07-17 production run —
+  no numbers in this document were added, adjusted, or invented for
+  presentation.
+</footer>
+</body>
+</html>

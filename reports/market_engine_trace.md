@@ -991,3 +991,15 @@ waits for approval, one data-file commit then. citation_check.sh:
 optional only (all 6 URLs verified from sandbox with titles). Spend: 6
 fetches, 0 model calls — far under the 40-search/16-call batch ceiling.
 Episodes 5-8 NOT started, per instruction.
+
+## Overnight loop — Founder-readable report mockup — STAGED AT FOUNDER GATE
+
+Mockup built 1:1 from the real 2026-07-17 report (no invented numbers;
+claim-tracing audit in the design note): docs/report_mockup/
+weekly_regime_report_founder_mockup.html + DESIGN_NOTE.md. Format
+recommendation: single-file HTML with print-to-PDF (rationale + rejected
+alternatives in the note). Honesty markers rendered as features:
+UNAVAILABLE badges, "none matched — and that's the finding" card,
+always-rendered DATA GAPS section, "0 resolved — no accuracy claimed"
+track-record card, per-row provenance. No pipeline wiring — follows
+approval. Spend: 0.
