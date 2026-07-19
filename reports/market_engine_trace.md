@@ -1287,3 +1287,19 @@ THE PROOF (real --explain block, wall-tripping mechanism carry_trade_unwind
 The verbatim "unwind (sell ... buy back ...)" renders (bar c) while the
 system-authored header/labels carry zero forbidden terms (bar d, option 1).
 ROADMAP T007 -> DONE.
+
+## Overnight loop 7 (2026-07-22) — backlog clearance: T005 DONE + batch-2 MERGED
+
+BATCH-2 MERGE (founder verdict: APPROVE AS-IS, incl. the flagged
+mechanical_feedback_liquidation dual-match collision -- same class accepted
+in batch 1): 2 new mechanisms (mechanical_feedback_liquidation [1987],
+crowded_trade_deleveraging [LTCM 1998]) + 2 enrichments (reflexive_bubble
++Japan 1990; credit_contagion +Asia 1997) merged -> mechanisms.json now
+**22 entries**. currency_peg_break_contagion stays PARKED (enum-frozen).
+LTCM citation swapped per founder: 404'd Treasury /276/hedgefund.pdf ->
+/236/hedgfund.pdf (sandbox web_fetch confirmed ~140KB real Treasury PDF =
+reachable; citation_check.sh updated for the authoritative Mac run;
+sechistorical.org mirror added). bar (e): extraction prompts sha256-
+identical before/after merge -- PASS. ID-set test updated 20->22. Suite
+635 passed, EXIT=0 (explicit check before commit). Enum candidates (now 4)
+remain DEFERRED until after batch 3. Batch 3 now unblocked by this merge.

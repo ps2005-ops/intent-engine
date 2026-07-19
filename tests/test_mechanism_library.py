@@ -32,8 +32,12 @@ def test_load_mechanisms_returns_the_8_task2_plus_9_task_m3_plus_3_batch1_mechan
         "debt_deflation_spiral",
         "input_cost_inflation_passthrough",
         "policy_tightening_demand_collapse",
+        # batch 2 (episodes 5-8), approved as-is 2026-07-22 incl. the flagged
+        # mechanical_feedback_liquidation collision (dual-match accepted):
+        "mechanical_feedback_liquidation",
+        "crowded_trade_deleveraging",
     }
-    assert len(mechanisms) == 20
+    assert len(mechanisms) == 22
 
 
 def test_every_mechanism_has_at_least_one_historical_instance():

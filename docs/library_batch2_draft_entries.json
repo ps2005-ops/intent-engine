@@ -40,7 +40,7 @@
     {
      "case": "PENDING-MAC-VERIFICATION -- Long-Term Capital Management, Sept 1998: a hedge fund with ~$4.6B capital but notional derivatives exposure in the trillions saw crowded relative-value trades move against it after the Russian default; the NY Fed convened 14 creditor banks to fund an orderly ~$3.6B recapitalization",
      "year": 1998,
-     "source": "https://home.treasury.gov/system/files/276/hedgefund.pdf -- President's Working Group on Financial Markets, 'Hedge Funds, Leverage, and the Lessons of Long-Term Capital Management' (1999) [sandbox fetch of the primary Fed speech returned empty; URL routed to citation_check.sh for Mac verification]"
+     "source": "https://home.treasury.gov/system/files/236/hedgfund.pdf -- President's Working Group on Financial Markets, 'Hedge Funds, Leverage, and the Lessons of Long-Term Capital Management' (1999). Corroborating mirror: https://www.sechistorical.org/collection/papers/1990/1999_0401_LTCMReport-1.pdf [Treasury-hosted PDF; sandbox web_fetch 2026-07-22 returned ~140KB real PDF content = reachable]"
     }
    ],
    "confidence_tier": "well_documented"

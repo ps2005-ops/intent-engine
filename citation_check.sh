@@ -22,7 +22,7 @@ for url in \
   "https://www.federalreservehistory.org/essays/stock-market-crash-of-1987" \
   "https://www.federalreservehistory.org/essays/asian-financial-crisis" \
   "https://www.imf.org/external/pubs/ft/wp/2009/wp09241.pdf" \
-  "https://home.treasury.gov/system/files/276/hedgefund.pdf"
+  "https://home.treasury.gov/system/files/236/hedgfund.pdf"
 do
   code=$(curl -s -o /dev/null -w "%{http_code}" -L "$url")
   echo "$code  $url"

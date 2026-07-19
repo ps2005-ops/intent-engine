@@ -124,6 +124,11 @@
         "case": "Caldwell and Company collapse, Nov 1930 -- failures cascaded through the correspondent-reserve pyramid, forcing hundreds of country-bank suspensions within weeks",
         "year": 1930,
         "source": "https://www.federalreservehistory.org/essays/banking-panics-1930-31 -- Gary Richardson, 'Banking Panics of 1930-31', Federal Reserve History"
+      },
+      {
+        "case": "https://www.federalreservehistory.org/essays/asian-financial-crisis -- Asian financial crisis, 1997: after Thailand's July 1997 baht devaluation, foreign creditors pulled back across East Asian economies seen as sharing similar vulnerabilities, spreading a depreciation-recession-banking spiral region-wide (Thailand, Malaysia, Indonesia, South Korea)",
+        "year": 1997,
+        "source": "https://www.federalreservehistory.org/essays/asian-financial-crisis -- Carson & Clark, 'Asian Financial Crisis', Federal Reserve History"
       }
     ],
     "confidence_tier": "well_documented"
@@ -303,6 +308,11 @@
         "case": "The dot-com bubble -- internet-transformation narrative driving valuations far beyond current earnings/revenue support, 1999-2000, followed by the 2000-2002 crash",
         "year": 2000,
         "source": "https://novelinvestor.com/reflexivity-explaining-bubbles/ ; George Soros, 'The Alchemy of Finance' (1987), the original statement of reflexivity theory"
+      },
+      {
+        "case": "PENDING-MAC-VERIFICATION -- Japan's asset-price bubble, late 1980s: equity and urban land valuations detached from fundamentals through a self-reinforcing collateral-and-credit loop; the Nikkei peaked end-1989 (~38,900) and land values collapsed through the early 1990s into a prolonged stagnation",
+        "year": 1990,
+        "source": "https://www.imf.org/external/pubs/ft/wp/2009/wp09241.pdf -- Syed, Kang & Tokuoka, 'Lost Decade in Translation', IMF WP/09/241 (2009) [sandbox returned HTTP 200 application/pdf but oversized to display; URL routed to citation_check.sh]"
       }
     ],
     "confidence_tier": "plausible"
@@ -471,6 +481,51 @@
         "case": "Volcker disinflation and the 1981-82 US recession -- fed funds near 20%, unemployment peaking near 11%, inflation falling from ~11% (mid-1979) to 5% (Oct 1982)",
         "year": 1982,
         "source": "https://www.federalreservehistory.org/essays/recession-of-1981-82; Goodfriend & King, 'The Incredible Volcker Disinflation', Journal of Monetary Economics 52(5) 2005 -- Tim Sablik, 'Recession of 1981-82', Federal Reserve History"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "mechanical_feedback_liquidation",
+    "name": "Mechanical feedback liquidation",
+    "trigger_conditions": [
+      "drawdown_gt_20pct"
+    ],
+    "causal_chain": [
+      "A large share of market participants run pre-programmed, rule-based selling strategies (e.g. portfolio insurance) that mechanically sell into price declines",
+      "An initial price drop triggers these rules to sell, regardless of fundamentals",
+      "That selling pushes prices lower, which triggers the same rules to sell again -- a self-reinforcing downdraft",
+      "Sell orders vastly outnumber willing buyers near prior prices; liquidity evaporates and the decline accelerates within hours",
+      "The vacuum clears only when a liquidity backstop appears or mechanical selling is exhausted"
+    ],
+    "historical_instances": [
+      {
+        "case": "https://www.federalreservehistory.org/essays/stock-market-crash-of-1987 -- Black Monday, 19 Oct 1987: the DJIA fell 22.6% in a single session (the largest one-day decline in history); portfolio-insurance selling accelerated the crash as initial losses triggered further rounds of automated selling (Shiller 1988)",
+        "year": 1987,
+        "source": "https://www.federalreservehistory.org/essays/stock-market-crash-of-1987 -- Bernhardt & Eckblad, 'Stock Market Crash of 1987', Federal Reserve History"
+      }
+    ],
+    "confidence_tier": "well_documented"
+  },
+  {
+    "mechanism_id": "crowded_trade_deleveraging",
+    "name": "Crowded-trade deleveraging",
+    "trigger_conditions": [
+      "interconnected_counterparty_exposure",
+      "debt_financed_expansion"
+    ],
+    "causal_chain": [
+      "Many highly-leveraged players crowd into similar convergence/relative-value positions, often financed by the same set of counterparties",
+      "A shock moves those positions against everyone simultaneously",
+      "Margin calls force multiple players to unwind the same trades at once, into a market with no offsetting buyers",
+      "Prices gap further against the crowded position, amplifying losses and threatening the leveraged counterparties themselves",
+      "A disorderly failure is avoided only by a coordinated recapitalization or backstop that halts the forced simultaneous unwind"
+    ],
+    "historical_instances": [
+      {
+        "case": "PENDING-MAC-VERIFICATION -- Long-Term Capital Management, Sept 1998: a hedge fund with ~$4.6B capital but notional derivatives exposure in the trillions saw crowded relative-value trades move against it after the Russian default; the NY Fed convened 14 creditor banks to fund an orderly ~$3.6B recapitalization",
+        "year": 1998,
+        "source": "https://home.treasury.gov/system/files/236/hedgfund.pdf -- President's Working Group on Financial Markets, 'Hedge Funds, Leverage, and the Lessons of Long-Term Capital Management' (1999). Corroborating mirror: https://www.sechistorical.org/collection/papers/1990/1999_0401_LTCMReport-1.pdf [Treasury-hosted PDF; sandbox web_fetch 2026-07-22 returned ~140KB real PDF content = reachable]"
       }
     ],
     "confidence_tier": "well_documented"
