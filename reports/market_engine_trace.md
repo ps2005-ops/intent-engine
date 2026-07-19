@@ -1191,3 +1191,20 @@ Ungated work executed: item 3 (mechanism-explanation-depth SPEC -- design
 only, my-approval-before-build) and item 4 (docs/POSITIONING.md -- analysis
 only). No enum/prompt/allowlist touched; mechanisms.json still 20. Spend:
 0 fetches, 0 live model calls.
+
+## Overnight loop 4 — items 3 & 4 (ungated) DELIVERED
+
+Item 3: docs/MECHANISM_EXPLANATION_DEPTH_SPEC.md (T007) -- SPEC ONLY.
+Key design finding: causal_chain + cited instances already exist per
+mechanism, so explanation depth is DETERMINISTIC RENDERING (0 live calls,
+fully offline-testable), not a new model call. 6 bars: condition
+traceability, cited-instance presence, causal-chain verbatim fidelity,
+no-prediction grep walls, correct silence, additive/no-regression. Build
+gated on approval. Item 4: docs/POSITIONING.md -- analysis-only thesis
+(moat = verified code-graded forward calibration + transparent method,
+NOT an accuracy number; incumbents measure plan-vs-actuals or backtested
+hit-rates, neither = verified forward calibration; faking a number before
+Sep destroys the trust that IS the product; what's sellable now =
+transparent structural analysis + explanation depth). Zero accuracy
+claims in either doc. Suite 627 green (explicit exit-code check before
+each commit). Spend: 0.
