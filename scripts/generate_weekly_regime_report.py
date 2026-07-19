@@ -28,6 +28,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))  # for the additive --founder-html renderer import
 
 from intent_engine.core.mechanism_library import match_mechanisms  # noqa: E402
 from intent_engine.core.prediction_ledger import DEFAULT_LEDGER_PATH  # noqa: E402
@@ -71,6 +72,11 @@ def main(argv=None):
              "numeric-only mode (item 3, docs/BA_ACCELERATION_PROPOSAL.md, approved 2026-07-18).")
     parser.add_argument("--path", default=str(DEFAULT_LEDGER_PATH))
     parser.add_argument("--output", default=None, help="Optional file to save the rendered report to.")
+    parser.add_argument(
+        "--founder-html", action="store_true",
+        help="Also emit the presentation-grade founder-readable HTML next to --output "
+             "(<output>.founder.html), via scripts/render_founder_report. Additive: same data, "
+             "zero new claims (approved 2026-07-19 decision 3). Requires --output.")
     args = parser.parse_args(argv)
 
     headlines = args.headline
@@ -90,6 +96,13 @@ def main(argv=None):
     print(report)
     if args.output:
         Path(args.output).write_text(report)
+        if args.founder_html:
+            from render_founder_report import parse_report, render
+            founder_path = Path(args.output).with_suffix(".founder.html")
+            founder_path.write_text(render(parse_report(report)))
+            print(f"founder-readable HTML written: {founder_path}", file=sys.stderr)
+    elif args.founder_html:
+        parser.error("--founder-html requires --output (the HTML is written next to it).")
     return 0
 
 

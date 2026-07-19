@@ -1062,3 +1062,21 @@ directly (batch 1 consumed the last unused condition; matching
 inflation_rising is now correct declared behavior). Suite after fixes:
 **617 passed, 0 failed** (exit code checked this time). Enum candidates
 remain DEFERRED per decision; enum and prompts untouched.
+
+## Overnight loop 2 — Report renderer wired + FIRST real founder report (decisions 3, WS3)
+
+scripts/render_founder_report.py: deterministic .txt->HTML transform in
+the approved mockup style; parse-park (RAISES on unrecognized shape, never
+guesses); track-record card is DATA-DRIVEN (0-resolved card only while
+calibration says "no resolutions yet", else renders ledger counts
+verbatim); assert_language_walls on the final artifact. 10 bars
+(test_render_founder_report.py) incl. golden-file from the REAL 2026-07-17
+report + a no-invented-numbers test (every HTML P-value must exist in the
+source). Wired additively into generate_weekly_regime_report.py via
+--founder-html (requires --output; old paths untouched).
+
+FIRST real founder report generated (WS3 demo asset, production data
+only): reports/weekly_regime_report_2026-07-17.founder.html — 3
+UNAVAILABLE badges, none-matched card, no-gaps line, 0-resolved
+no-accuracy card, P-values {0.58,0.65,0.72} identical to source.
+Saved alongside the raw .txt. Suite 627 passed. Spend: 0 live calls.

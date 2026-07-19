@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Structural Regime Read — 2026-07-17</title><style>
+  :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --accent:#0f4c81;
+          --honest:#8a6d1a; --honest-bg:#fdf6e3; --silent-bg:#f0f4f8; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: var(--ink);
+         max-width: 720px; margin: 2.5rem auto; padding: 0 1.25rem; line-height: 1.55; }
+  header { border-bottom: 3px double var(--ink); padding-bottom: .75rem; margin-bottom: 1.5rem; }
+  h1 { font-size: 1.45rem; margin: 0; }
+  .sub { color: var(--muted); font-size: .9rem; margin-top: .3rem; font-family: Helvetica, Arial, sans-serif; }
+  h2 { font-family: Helvetica, Arial, sans-serif; font-size: .8rem; text-transform: uppercase;
+       letter-spacing: .12em; color: var(--accent); margin: 1.8rem 0 .6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  td { padding: .45rem .3rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.k { width: 38%; font-weight: bold; }
+  td.prov { color: var(--muted); font-size: .78rem; font-family: Helvetica, Arial, sans-serif; text-align: right; width: 28%; }
+  .badge { display: inline-block; font-family: Helvetica, Arial, sans-serif; font-size: .72rem;
+           padding: .1rem .5rem; border-radius: 3px; }
+  .badge.unavail { background: var(--honest-bg); color: var(--honest); border: 1px solid #e6d9a8; }
+  .badge.ok { background: #eef6ee; color: #2f6b2f; border: 1px solid #cfe3cf; }
+  .honest-card { background: var(--silent-bg); border-left: 4px solid var(--accent); padding: .8rem 1rem; font-size: .95rem; }
+  .honest-card .why { color: var(--muted); font-size: .82rem; margin-top: .35rem; font-family: Helvetica, Arial, sans-serif; }
+  .pred { border: 1px solid var(--line); border-radius: 4px; padding: .7rem .9rem; margin: .5rem 0; }
+  .pred .p { font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: var(--accent); }
+  .pred .by { color: var(--muted); font-size: .82rem; font-family: Helvetica, Arial, sans-serif; }
+  .gaps { border: 1px solid var(--line); border-radius: 4px; padding: .7rem .9rem; font-size: .9rem; color: var(--muted); }
+  .gaps.active { background: var(--honest-bg); color: var(--honest); border-color: #e6d9a8; }
+  footer { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: .9rem;
+           font-size: .82rem; color: var(--muted); font-family: Helvetica, Arial, sans-serif; }
+</style></head><body>
+<header><h1>Structural Regime Read</h1><div class="sub">As of 2026-07-17 · every number carries its source and date · what we can't verify, we say we can't verify</div></header>
+<h2>Where the regime stands</h2><table>
+<tr><td class="k">Yield curve (10y − 2y)</td><td><span class="badge ok">NOT INVERTED</span></td><td class="prov">FRED T10Y2Y, 2026-07-16</td></tr>
+<tr><td class="k">Credit spreads (high-yield)</td><td><span class="badge unavail">UNAVAILABLE</span> — no verified number this run, so no claim is made (rather than showing a stale one).</td><td class="prov"></td></tr>
+<tr><td class="k">Inflation trend (CPI YoY)</td><td><span class="badge unavail">UNAVAILABLE</span> — no verified number this run, so no claim is made (rather than showing a stale one).</td><td class="prov"></td></tr>
+<tr><td class="k">Unemployment momentum</td><td><span class="badge unavail">UNAVAILABLE</span> — no verified number this run, so no claim is made (rather than showing a stale one).</td><td class="prov"></td></tr>
+<tr><td class="k">Drawdown (SPY)</td><td>-0.91% off recent high</td><td class="prov">Tiingo, 2026-07-16</td></tr>
+</table>
+<h2>Structural mechanisms in play</h2>
+<div class="honest-card"><strong>None matched this run — and that's the finding.</strong> The available signal didn't genuinely clear any documented mechanism's trigger conditions, so the system says nothing rather than forcing a story.<div class="why">Mechanism reads are matched by deterministic rules against a citation-carrying library; silence on thin evidence is a designed, reliability-tested behavior.</div></div>
+<h2>Claims on the record</h2>
+<div class="pred"><span class="p">P = 0.72</span> <span class="by">· resolves by 2026-10-16 · graded automatically against real data</span><br>10-Year minus 2-Year Treasury yield spread remains above +0.30 percentage points (consistent with a non-inverted, moderately steep curve regime).</div>
+<div class="pred"><span class="p">P = 0.58</span> <span class="by">· resolves by 2026-09-15 · graded automatically against real data</span><br>SPY rebounds to within +1.0% of its recent running high within the next 60 days (mild mean reversion from current -0.91% drawdown).</div>
+<div class="pred"><span class="p">P = 0.65</span> <span class="by">· resolves by 2026-10-01 · graded automatically against real data</span><br>US unemployment rate remains below 5.0% through end of Q3 2026 (persistent tightness in labor market).</div>
+<h2>Data gaps</h2>
+<div class="gaps">No genuine data gaps detected in this run. (When a source series has a real hole, it is listed here loudly and excluded from every number above.)</div>
+<h2>Track record</h2>
+<div class="honest-card"><strong>0 predictions resolved so far — so no accuracy is claimed, full stop.</strong> Every probability above is written to an append-only ledger and graded by code against real market data on its resolve-by date. Calibration is reported here as it accumulates, including against two dumb baselines the system has to beat honestly.</div>
+<footer><strong>Method, in one paragraph:</strong> real macro/market data (FRED, Tiingo; sources and dates shown inline) → deterministic regime indicators → a gate-tested structural-mechanism read against documented historical episodes → probabilistic claims recorded to an append-only ledger and graded by code, never by self-assessment. What's unavailable is labeled unavailable; what doesn't match, doesn't match; what hasn't resolved yet isn't a track record. Rendered 1:1 from the production run — no numbers added, adjusted, or invented for presentation.</footer></body></html>
