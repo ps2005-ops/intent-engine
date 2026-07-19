@@ -1155,3 +1155,20 @@ both analysis-only, no gated actions, no accuracy claims. Item 5 (Task 5
 impl) skipped -- not approved. Guessing "approve" on any of the above
 would cross a real wall (data-file merge / allowlist change / code into
 queue) -- declined by design.
+
+## Overnight loop 3 — items 3 & 4 (ungated analysis docs) DELIVERED
+
+Item 3: docs/MECHANISM_LIBRARY_STATE.md -- INTERIM inventory (labeled
+8/12 episodes, since batch 3 is gated-not-started). Current live library
+20 entries (3 multi-instance, 17 single, 0 speculative), batch-2 drafts
+pending, 1 park recorded (currency-peg), 4 deferred enum candidates mapped
+with what each unlocks. Zero accuracy claims. Item 4:
+docs/CAPABILITY_BOUNDARIES.md -- plain statement of the 4-item DO surface
++ the 4 absent capabilities (strategy backtest HELD/A-M3; technical
+analysis absent+contested; company/fundamental absent+new-data; TimesFM/
+Kronos LATER-gated), each with what-it-would-take / gate-hit / and the
+explicit "does it move accuracy before calibration? No" with the single
+shared reason (0 resolved predictions). Both docs analysis-only, no code,
+no gated actions. Item 5 (Task 5 impl) skipped -- unapproved. Suite 627
+green (explicit exit-code check before each commit, per the process
+guard). Spend loop 3: 0 fetches, 0 model calls.
