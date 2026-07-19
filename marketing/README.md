@@ -49,5 +49,13 @@ one audited tool publishes.
 
 ## Approval state
 
-Every file under drafts/ and outreach/ is DRAFT-ONLY awaiting per-item
-founder approval. Nothing has been posted, scheduled, or sent.
+**2026-07-22 — founder decision**: the marketing drafts (drafts/) and the
+outreach package (outreach/) are **APPROVED AS DRAFTS**. This approval does
+NOT authorize any publish or send:
+- `PUBLISHING_ENABLED` remains **uncreated** — the Publer pipeline stays in
+  dry-run; nothing posts.
+- The per-message approval wall stands for outreach — no `status="sent"`
+  ledger row without a prior approved row + non-null `approved_by`; sending
+  is a human act on the Mac.
+"Approved as drafts" means the content is signed off as the working basis;
+it does not move anything past the dry-run / per-message-approval walls.

@@ -1303,3 +1303,31 @@ sechistorical.org mirror added). bar (e): extraction prompts sha256-
 identical before/after merge -- PASS. ID-set test updated 20->22. Suite
 635 passed, EXIT=0 (explicit check before commit). Enum candidates (now 4)
 remain DEFERRED until after batch 3. Batch 3 now unblocked by this merge.
+
+## Overnight loop 7 — remaining clearance + Phase 1 cadence-v2 proposal
+
+Task 5 (T006) -> runnable queue (spec approved). AP feed: Reuters+AP
+dropped (web-fetch-blocked), NPR Business added (verified) -- allowlist +
+test updated, suite green. REGIME_VOCAB widening: SPEC ONLY
+(docs/REGIME_VOCAB_WIDENING_SPEC.md, T008) -- add ipo/merger/acquisition/
+stock/buyback/guidance, bars written, awaiting approval before merge.
+Marketing + outreach drafts: recorded APPROVED-AS-DRAFTS in marketing/
+README (PUBLISHING_ENABLED uncreated, per-message send wall stands --
+approval does not move anything past dry-run).
+
+PHASE 1 (densification): docs/CADENCE_V2_PROPOSAL.md -- widened FORWARD
+surface for MY approval, NOT implemented. Proposes instrument allowlist
+13 -> ~30 (9 more sector ETFs + broad/intl/credit ETFs + 7 more FRED
+macro series, all deterministic + pydantic-validated), daily cap 5 -> 8
+(fills 4 horizon buckets at 2 each), ceiling stays $7 (breadth adds $0
+data calls, not model calls; model-call estimate ~$1.68/mo). All quality
+guards (rotation, horizon staggering, anti-dup, baselines, correct
+silence, A-M5 wall) unchanged. Three explicit approvals requested:
+allowlist, cap, ceiling. Code staged, not built.
+
+LEDGER GROWTH SNAPSHOT (2026-07-22): 9 total predictions (7 market, 2
+baseline), 0 resolved; instruments SPY x6 + 3 macro; resolve_by window
+2026-08-31 .. 2026-10-16; FIRST resolution 2026-08-31. Toward the
+>=30-resolved-per-source gate: densification (cadence-v2) is what closes
+that gap; daily generation runs on the Mac (no sandbox Anthropic egress).
+Spend loop 7: 0 live calls; 1 web_fetch (LTCM citation verify).
