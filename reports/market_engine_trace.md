@@ -1331,3 +1331,22 @@ baseline), 0 resolved; instruments SPY x6 + 3 macro; resolve_by window
 >=30-resolved-per-source gate: densification (cadence-v2) is what closes
 that gap; daily generation runs on the Mac (no sandbox Anthropic egress).
 Spend loop 7: 0 live calls; 1 web_fetch (LTCM citation verify).
+
+## Overnight loop 7 — Library batch 3 (episodes 9-12, FINAL) — STAGED AT FOUNDER GATE
+
+Unblocked by the batch-2 merge this loop. Honest finding: episodes 9-12
+are mostly ALREADY COVERED -- dot-com (reflexive_bubble/winners_curse/
+capex_overbuild) and GFC (credit_contagion/leverage_cycle_bust/
+money_market_contagion/bank_run) are already in the library. Batch 3 =
+1 NEW mechanism (exogenous_activity_halt [COVID 2020, NBER-cited] --
+FLAGGED trigger-set collision with mechanical_feedback_liquidation +
+margin_collateral_spiral, same dual-match class accepted in batches 1-2)
++ 2 ENRICHMENTS (input_cost_inflation_passthrough +2021-22 CPI 9.1%;
+policy_tightening_demand_collapse +2022-23 hiking ~525bp -- both citations
+PENDING-MAC) + 1 PARKED (securitized_credit_opacity -- GFC opacity needs a
+condition the enum lacks; its expressible set collides with
+money_market_contagion -> enum candidate #5). mechanisms.json UNTOUCHED;
+NO data-file commit. Review sheet: docs/library_batch3_review_sheet.md;
+drafts: docs/library_batch3_draft_entries.json. Completes the 12-episode
+curriculum. Enum-candidate list now COMPLETE at 5 -- ready for the batched
+enum decision. Spend: 3 fetches, 0 model calls.

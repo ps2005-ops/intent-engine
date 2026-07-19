@@ -1,0 +1,55 @@
+{
+ "new_entries": [
+  {
+   "mechanism_id": "exogenous_activity_halt",
+   "name": "Exogenous activity halt",
+   "trigger_conditions": [
+    "drawdown_gt_20pct"
+   ],
+   "causal_chain": [
+    "An external, non-financial shock (pandemic, natural disaster, war) forces a sudden, economy-wide stop in normal activity that no market participant caused or can quickly reverse",
+    "Demand and supply collapse simultaneously across many sectors as movement, gathering, and production are curtailed at once",
+    "Cash flows evaporate for exposed firms while fixed obligations continue, triggering a scramble for liquidity and a sharp asset-price drawdown",
+    "The shock's path depends on the exogenous event and the policy response, not on the usual internal build-up of leverage or valuation excess",
+    "Recovery timing is set by the external event's resolution and the scale/speed of fiscal-monetary backstop, and can be far faster or slower than a normal financial-cycle recession"
+   ],
+   "historical_instances": [
+    {
+     "case": "https://www.nber.org/research/business-cycle-dating -- COVID-19 recession: NBER dated the peak February 2020 and trough April 2020; the downturn was 'so great and so widely diffused throughout the economy that, even if it proved to be quite brief,' it was classified a recession (S&P 500 fell ~34% peak-to-trough in Feb-Mar 2020)",
+     "year": 2020,
+     "source": "https://www.nber.org/research/business-cycle-dating -- NBER Business Cycle Dating Committee, US business-cycle chronology"
+    }
+   ],
+   "confidence_tier": "well_documented"
+  }
+ ],
+ "enrichments": [
+  {
+   "target": "input_cost_inflation_passthrough",
+   "instance": {
+    "case": "PENDING-MAC-VERIFICATION -- 2021-22 post-pandemic inflation: pandemic supply-chain disruptions plus an energy price surge (amplified by the 2022 Russia-Ukraine war) passed through into broad consumer prices, with US CPI peaking near 9.1% year-over-year in June 2022",
+    "year": 2022,
+    "source": "https://www.bls.gov/cpi/ -- US Bureau of Labor Statistics, Consumer Price Index (Jun-2022 CPI ~9.1% YoY) [sandbox fetch not attempted for a data landing page; routed to citation_check.sh]"
+   }
+  },
+  {
+   "target": "policy_tightening_demand_collapse",
+   "instance": {
+    "case": "PENDING-MAC-VERIFICATION -- 2022-23 Fed hiking cycle: the FOMC raised the federal funds target ~525bp from near zero (Mar 2022) to ~5.25-5.50% by mid-2023 -- the fastest tightening in four decades -- to break entrenched inflation, with rate-sensitive sectors (housing, long-duration equities) contracting first",
+    "year": 2022,
+    "source": "https://www.federalreserve.gov/monetarypolicy/openmarket.htm -- Federal Reserve, Open Market Operations / policy rate actions 2022-2023 [routed to citation_check.sh]"
+   }
+  }
+ ],
+ "parked": [
+  {
+   "mechanism_id": "securitized_credit_opacity",
+   "reason": "GFC's distinctive mechanism (opacity of structured/securitized credit + ratings failure -> mispriced systemic risk) needs a condition the frozen enum lacks; its expressible trigger set {interconnected_counterparty_exposure, credit_spreads_elevated} is IDENTICAL to money_market_contagion, so it can't be honestly distinguished without a new condition",
+   "needs_condition": "opaque_securitized_exposure"
+  }
+ ],
+ "already_covered": [
+  "2000 dot-com (reflexive_bubble 2000, winners_curse_acquisition AOL-TW 2000, capex_overbuild fiber 2002 already in library)",
+  "2008 GFC (credit_contagion Lehman 2008, leverage_cycle_bust 2008, money_market_contagion Reserve Primary 2008, bank_run_maturity_mismatch already in library)"
+ ]
+}
