@@ -1116,3 +1116,16 @@ Secondary finding surfaced, NOT acted on: REGIME_VOCAB misses
 IPO/merger/singular-"stock" headlines -- flagged as optional tuning task,
 vocab untouched (shared tested surface). NO allowlist change made.
 Decision-prep: docs/AP_FEED_DECISION_PREP.md. Spend: 4 fetches.
+
+## Overnight loop 2 — Outreach finalization (WS6 item 6)
+
+Send-ready variants produced with founder-affirmed placeholder values
+(3 business days, early-stage B2B founders); per-recipient fields stay
+unresolved until real-research approval time. Per-message approval
+checklist template (message + recipient + claim-trace audit + one-follow-
+up gate). ledger.jsonl initialized EMPTY. Same dry-run/real wall: no
+status="sent" row without a prior approved row + non-null approved_by.
+NOTHING SENDS. Note: decision 4 (marketing drafts) and the approval-half
+of decision 5 arrived as unfilled brackets, so those drafts remain
+DRAFT-pending-approval -- no revisions applied (none were specified);
+only the affirmatively-given placeholder VALUES were applied. Spend: 0.
