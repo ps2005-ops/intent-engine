@@ -1,96 +1,101 @@
-# MORNING HANDOFF — overnight loop 6 (2026-07-22) — T007 single-focus
+# MORNING HANDOFF — overnight loop 7 (2026-07-22) — backlog cleared + densification kickoff
 
-*Suite at close: **635 passed, 0 failed, 7 deselected (live)** (627 + 8
-new T007 bars). 1 build commit (`26bcc91`) + this handoff. Walls held:
-no publishing/sending/crontab/vendor/OAuth/sandbox-live-calls; A-M3
-untouched, backtest HELD, enum frozen, prompts frozen. Process guard
-honored (explicit exit-code check, EXIT=0, before the commit). Spend: 0
-live calls.*
+*Suite at close: **635 passed, 0 failed, 7 deselected (live)**. 8 commits
+(`4c5c27c` → `f9f31591`) + this handoff. Walls held: no publishing/sending/
+crontab/vendor/OAuth/sandbox-live-calls; A-M3 untouched, backtest HELD,
+enum frozen, prompts frozen. Process guard honored — every commit gated on
+an explicit suite exit-code check (EXIT=0). Spend: 0 live model calls;
+4 web_fetches (LTCM citation verify + batch-3 sources).*
 
-## T007 — final state: DONE, shipped green
+## Backlog clearance — all 8 items, per-item status
 
-Built to green this loop under the **founder-ratified option 1** — the
-language wall is scoped to the system's own authored lines; verbatim
-`causal_chain` steps + cited source are exempt because bar (c) guarantees
-they're unedited quotes of documented history, not the system's
-predictive voice.
+1. **T005 → DONE** (`4c5c27c`). Both live bars PASS (your outputs pasted
+   into `overnight_trace.md`); ROADMAP flipped.
+2. **LTCM citation swapped** — the 404'd `/276/hedgefund.pdf` → your
+   `/236/hedgfund.pdf`; sandbox web_fetch confirmed ~140KB real Treasury
+   PDF (reachable). `citation_check.sh` updated for the authoritative Mac
+   run; sechistorical.org mirror added.
+3. **Batch-2 MERGED as-is** (`9ef8528`) — +2 mechanisms +2 enrichments →
+   **22 entries**; bar-(e) prompt byte-identity PASS; `currency_peg`
+   stays parked; suite exit-checked.
+4. **Enum candidates** — DEFERRED (no action), now complete at 5 after
+   batch 3 (see below).
+5. **Task 5 (T006) → runnable queue** (`916b1b1`).
+6. **AP feed → NPR Business** (`7be77d4`) — Reuters+AP dropped
+   (web-fetch-blocked), NPR added; allowlist + test updated.
+7. **REGIME_VOCAB widening → SPEC ONLY** (`f80fcba`, doc T008) — awaiting
+   your approval before merge.
+8. **Marketing + outreach → APPROVED AS DRAFTS** (`f80fcba`) — recorded in
+   `marketing/README`; PUBLISHING_ENABLED uncreated, per-message send wall
+   stands (approval does not move anything past dry-run).
 
-- **Commit**: `26bcc91`. **ROADMAP T007 → DONE.**
-- **What shipped**: `render_mechanism_explanation` +
-  `assert_explanation_system_walls` in `simulator/mechanism_section.py`;
-  an opt-in `--explain` CLI flag (off by default, additive — the existing
-  one-line `render_mechanism_section` is byte-identical, bar f);
-  `tests/test_mechanism_explanation.py` (8 bar tests). **0 model calls.**
-- **All six bars pass, across the real 20-mechanism library** (not
-  fixtures): (a) condition-traceability, (b) cited-instance presence,
-  (c) verbatim causal-chain fidelity, (d) system-line language wall,
-  (e) correct silence, (f) additive/no-regression.
+## Densification plan
 
-## The proof option 1 works (real wall-tripping mechanism, as you asked)
+### Phase 1 — cadence-v2 proposal (STAGED, awaiting approval)
+`docs/CADENCE_V2_PROPOSAL.md` (`f80fcba`). Proposes: instrument allowlist
+13 → ~30 (9 more sector ETFs + broad/intl/credit ETFs + 7 more FRED macro
+series, all deterministic + pydantic-validated); daily cap **5 → 8** (fills
+the 4 horizon buckets at 2 each); **ceiling stays $7** (breadth adds $0
+data calls, not model calls — model estimate ~$1.68/mo). All quality guards
+unchanged. **Needs three explicit approvals: allowlist, cap, ceiling.** Code
+staged, not built.
 
-`carry_trade_unwind` — its verbatim causal chain contains `sell` AND
-`buy`. It renders correctly (bar c) while the system framing stays clean
-(bar d). Full block is in the trace; the load-bearing line:
+### Still-parked items finished as gates cleared
+- **Library batch 3 (episodes 9-12, FINAL)** — staged at your gate
+  (`f9f31591`), unblocked by the batch-2 merge. Honest finding: dot-com
+  and GFC are already well-covered; batch 3 = **1 new** (COVID
+  `exogenous_activity_halt`, collision-flagged) + **2 enrichments**
+  (2021-22 inflation, 2022 hiking) + **1 parked** (GFC
+  `securitized_credit_opacity` → enum candidate #5). `mechanisms.json`
+  untouched; merge waits for your verdict + 2 PENDING-MAC citations.
+  **This completes the 12-episode curriculum.**
 
-    How it unfolds (documented pattern):
-      3. ... prompting leveraged holders to unwind (sell the target-currency
-         asset, buy back the funding currency to repay the loan)
+## LEDGER GROWTH SNAPSHOT (2026-07-22)
 
-The verbatim history renders; the system-authored header/labels carry
-zero forbidden terms. A dedicated test
-(`test_bar_d_the_proof_wall_tripping_mechanism_renders_verbatim_history`)
-asserts exactly this for `carry_trade_unwind`, `margin_collateral_spiral`,
-and `money_market_contagion`.
-
-## READY FOR THE DENSIFICATION PLAN ✅
-
-T007 shipped clean. The mechanism-explanation surface is live and
-deterministic; whenever you want to move on the densification plan, this
-is green and out of the way.
-
-## Deferred to your next message (NOT touched this loop, per T007-only scope)
-
-Unchanged from loop 5 — all waiting on your filled selections:
-- **T005**: both live bars PASS (your report); DONE-flip + output paste
-  into `overnight_trace.md` queued for next message.
-- **Batch-2 citation**: the LTCM Treasury PWG PDF 404'd — needs a
-  replacement URL before batch 2 can merge (Japan IMF cleared 200).
-- Batch 2 verdict / batch 3 / Task 5 (T006) / AP feed / vocab /
-  marketing / outreach — all pending your selections.
+- **Total predictions: 9** (7 market, 2 baseline) · **resolved: 0** ·
+  toward the ≥30-resolved-per-source gate.
+- By instrument: SPY ×6 + 3 macro. By horizon: resolve_by window
+  **2026-08-31 → 2026-10-16**.
+- **First resolution: 2026-08-31** (nothing resolvable before then).
+- **The gap to ≥30 is what densification closes** — but daily generation
+  runs on the Mac (the sandbox has no Anthropic egress), so the ledger
+  only grows once cadence-v2 is approved AND the daily job runs on your
+  machine. That dependency is the single biggest lever on calibration
+  timing.
 
 ## MY MORNING LIST (in order)
 
-1. **Try it**: `cd ~/intent-engine && .venv/bin/python -m
-   intent_engine.simulator.cli --entity-id demo --mechanisms --explain
-   --decision "<a supplier-concentration decision>"` — see the live
-   `--explain` output. (Needs your Anthropic key for the extraction call,
-   same as `--mechanisms`; the explanation render itself is 0-call.)
-2. **T005 DONE-flip**: confirm you want it and I paste your passed-bar
-   outputs into `overnight_trace.md` next loop.
-3. **Swap the LTCM batch-2 citation** (404'd Treasury URL) → then batch 2
-   can merge once its verdict is in.
-4. The remaining filled selections (batch-2 verdict, Task 5, AP feed,
-   vocab, marketing/outreach) whenever ready — or greenlight the
-   densification plan.
+1. **Approve cadence-v2's three numbers** (allowlist / cap=8 / ceiling=$7)
+   — this is the densification engine; nothing accrues without it.
+2. **Batch-3 verdict** (`docs/library_batch3_review_sheet.md`) + run
+   `sh citation_check.sh` (now includes batch-3's NBER/BLS/Fed URLs — the
+   2 PENDING-MAC ones must show 200 before merge). On approval: merge →
+   23 entries, and I complete `MECHANISM_LIBRARY_STATE.md` to 12/12.
+3. **The batched enum decision** — the candidate list is now complete at 5
+   (`docs/library_batch3_review_sheet.md` lists all with what each
+   unlocks). Any widening = your sign-off + a full Task 3 gate rerun.
+4. **REGIME_VOCAB widening** (T008) — approve to merge, or leave.
+5. **Start the daily prediction job on the Mac** once cadence-v2 is live —
+   the only way the ledger grows toward the gate.
 
 ## AMBIGUITIES (parked with recommendations, not guessed)
 
-1. **Your new standing instruction is noted and will be applied going
-   forward**: for intent-preserving mechanical bar-reconciliations this
-   clear-cut, I may implement inline and flag prominently for ratification
-   rather than parking a whole loop; genuine judgment calls still park;
-   when in doubt, park. Loop 5's park was the right conservative call at
-   the time (the reconciliation hadn't been ratified yet); loop 6 executed
-   it once you approved. *No open question — just confirming I've absorbed
-   the rule.*
-2. **`--explain` requires `--mechanisms`** (it selects the fuller render of
-   the same matched set). I did not make it imply `--mechanisms` on its
-   own, to keep the flag surface predictable. *Recommendation: fine as-is;
-   say the word if you'd rather `--explain` auto-enable `--mechanisms`.*
+1. **Cadence-v2 ceiling**: I recommend keeping $7 (breadth is data calls =
+   $0, not model calls). *If you want headroom for a future cap>8 or an
+   LLM-prose feature, name a number; otherwise $7 stands.*
+2. **exogenous_activity_halt collision** (COVID, batch 3): same class you
+   accepted twice. *Recommendation: accept (distinct causal shape); flagged
+   for your explicit call.*
+3. **2 batch-3 citations PENDING-MAC** (BLS CPI, Fed open-market). *In
+   citation_check.sh; run on the Mac before merging batch 3.*
+4. **Phase 3 (synthetic-world reasoning test)** is scoped as spec-only/low-
+   priority in the plan; I did NOT scope it this loop (Phase 1 + backlog
+   filled the loop). *Recommendation: I scope it next loop unless you'd
+   rather I prioritize building cadence-v2 the moment you approve it.*
 
 ## Free-time use (per whitelist)
 
-After T007 went green, remaining time went to the wall-tripping-proof
-test, the byte-identical bar-(f) verification, and this handoff — all
-test-coverage/doc-accuracy on T007 itself, per the whitelist. Nothing
-else touched.
+Loop was full with the 8-item clearance + Phase-1 proposal + batch-3
+research; no spare-time work beyond trace/handoff accuracy. Not touched:
+enum/prompt edits, publishing past dry-run, backtest-of-LLM-judgment,
+company-fundamental engine, accuracy claims.
