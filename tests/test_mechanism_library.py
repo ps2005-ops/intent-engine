@@ -36,8 +36,12 @@ def test_load_mechanisms_returns_the_8_task2_plus_9_task_m3_plus_3_batch1_mechan
         # mechanical_feedback_liquidation collision (dual-match accepted):
         "mechanical_feedback_liquidation",
         "crowded_trade_deleveraging",
+        # batch 3 (episodes 9-12, FINAL), approved as-is 2026-07-19 incl. the
+        # flagged exogenous_activity_halt collision (dual-match ratified --
+        # third accepted member of the drawdown_gt_20pct class):
+        "exogenous_activity_halt",
     }
-    assert len(mechanisms) == 22
+    assert len(mechanisms) == 23
 
 
 def test_every_mechanism_has_at_least_one_historical_instance():

@@ -27,17 +27,17 @@
   {
    "target": "input_cost_inflation_passthrough",
    "instance": {
-    "case": "PENDING-MAC-VERIFICATION -- 2021-22 post-pandemic inflation: pandemic supply-chain disruptions plus an energy price surge (amplified by the 2022 Russia-Ukraine war) passed through into broad consumer prices, with US CPI peaking near 9.1% year-over-year in June 2022",
+    "case": "VERIFIED 2026-07-19 -- 2021-22 post-pandemic inflation: pandemic supply-chain disruptions plus an energy price surge (amplified by the 2022 Russia-Ukraine war) passed through into broad consumer prices, with US CPI peaking near 9.1% year-over-year in June 2022",
     "year": 2022,
-    "source": "https://www.bls.gov/cpi/ -- US Bureau of Labor Statistics, Consumer Price Index (Jun-2022 CPI ~9.1% YoY) [sandbox fetch not attempted for a data landing page; routed to citation_check.sh]"
+    "source": "https://www.bls.gov/cpi/ -- US Bureau of Labor Statistics, Consumer Price Index (Jun-2022 CPI ~9.1% YoY) [web_fetch returned full CPI-home page content, HTTP 200, 2026-07-19]"
    }
   },
   {
    "target": "policy_tightening_demand_collapse",
    "instance": {
-    "case": "PENDING-MAC-VERIFICATION -- 2022-23 Fed hiking cycle: the FOMC raised the federal funds target ~525bp from near zero (Mar 2022) to ~5.25-5.50% by mid-2023 -- the fastest tightening in four decades -- to break entrenched inflation, with rate-sensitive sectors (housing, long-duration equities) contracting first",
+    "case": "VERIFIED 2026-07-19 -- 2022-23 Fed hiking cycle: the FOMC raised the federal funds target ~525bp from near zero (Mar 2022) to 5.25-5.50% by Jul 2023 -- the fastest tightening in four decades -- to break entrenched inflation, with rate-sensitive sectors (housing, long-duration equities) contracting first",
     "year": 2022,
-    "source": "https://www.federalreserve.gov/monetarypolicy/openmarket.htm -- Federal Reserve, Open Market Operations / policy rate actions 2022-2023 [routed to citation_check.sh]"
+    "source": "https://www.federalreserve.gov/monetarypolicy/openmarket.htm -- Federal Reserve, Open Market Operations / policy rate actions 2022-2023 [web_fetch returned full page incl. the 2022-23 rate-action tables, HTTP 200, 2026-07-19]"
    }
   }
  ],

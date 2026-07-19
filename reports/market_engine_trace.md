@@ -1350,3 +1350,27 @@ NO data-file commit. Review sheet: docs/library_batch3_review_sheet.md;
 drafts: docs/library_batch3_draft_entries.json. Completes the 12-episode
 curriculum. Enum-candidate list now COMPLETE at 5 -- ready for the batched
 enum decision. Spend: 3 fetches, 0 model calls.
+
+## Overnight loop 8 (2026-07-19) — batch-3 MERGED: curriculum COMPLETE at 12/12
+
+BATCH-3 MERGE (founder verdict: APPROVE AS-IS, incl. the flagged
+exogenous_activity_halt dual-match collision -- third ratified member of
+the drawdown_gt_20pct class after 1987/2021): 1 new mechanism
+(exogenous_activity_halt [COVID 2020, NBER-dated]) + 2 enrichments
+(input_cost_inflation_passthrough +2021-22 CPI ~9.1%;
+policy_tightening_demand_collapse +2022-23 ~525bp hiking cycle) merged ->
+mechanisms.json now **23 entries**. Both PENDING-MAC citations cleared
+BEFORE merge: bls.gov/cpi and federalreserve.gov/monetarypolicy/
+openmarket.htm each returned HTTP 200 with full real page content via
+web_fetch 2026-07-19 (the Fed page even renders the 2022-23 rate-action
+tables the citation cites). securitized_credit_opacity stays PARKED.
+bar (e): extraction prompts sha256-identical before/after merge
+(regime_report fb19551507..., simulator 2067d21a...) -- PASS. ID-set test
+updated 22->23. MECHANISM_LIBRARY_STATE.md rewritten to the final 12/12
+map. ENUM DECISION (founder, post-batch-3, against the complete 5-candidate
+list): **KEEP FROZEN -- all 5 DEFERRED**, recorded in the state doc.
+Suite 635 passed, 0 failed, 9 deselected (live/networked), EXIT=0
+(explicit check before commit). Note: this session runs in a fresh
+sandbox; a stale .git/index.lock from an interrupted prior git op was
+found (worktree verified byte-identical to HEAD 0ec7503 before any work);
+commits use a separate GIT_INDEX_FILE -- founder can rm the lock file.
