@@ -1129,3 +1129,29 @@ NOTHING SENDS. Note: decision 4 (marketing drafts) and the approval-half
 of decision 5 arrived as unfilled brackets, so those drafts remain
 DRAFT-pending-approval -- no revisions applied (none were specified);
 only the affirmatively-given placeholder VALUES were applied. Spend: 0.
+
+## Overnight loop 3 (2026-07-20/21) — bracket fields unfilled AGAIN; gated items parked
+
+The four fields (A T005 result, B marketing drafts, C outreach, D
+citation_check) and ALL standing decisions (batch-2 verdict, Task 5,
+AP feed, vocab) arrived as unfilled option-menus ("[opt1 / opt2 / opt3]"),
+no selection marked. Per the founder's OWN stated rule ("empty brackets =
+parked again") and the park-don't-improvise wall, all of item 1 is PARKED,
+not guessed:
+- A unfilled -> T005 stays LIVE-BARS-PENDING-HUMAN (disk still shows no
+  t005-live rows / no new run logs; consistent).
+- Batch-2 verdict + D unfilled -> NO batch-2 merge (a real data-file
+  commit gated on an actual approval + verified citations; neither
+  present).
+- B/C unfilled -> marketing/outreach stay DRAFT-pending-approval.
+- AP-feed + vocab unfilled -> allowlist and REGIME_VOCAB untouched.
+- Task 5 verdict unfilled -> T006 not implemented, stays a proposal.
+Item 2 (batch 3) is explicitly gated on batch-2 feedback being filled ->
+NOT filled -> batch 3 NOT started; the 12-episode curriculum stops at 8
+studied (batch 1 merged, batch 2 drafted-pending).
+Ungated work executed instead: item 3 (library inventory, honest
+current-state, pre-batch-3) and item 4 (capability-boundaries memo) --
+both analysis-only, no gated actions, no accuracy claims. Item 5 (Task 5
+impl) skipped -- not approved. Guessing "approve" on any of the above
+would cross a real wall (data-file merge / allowlist change / code into
+queue) -- declined by design.
