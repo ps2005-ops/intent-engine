@@ -1,106 +1,98 @@
-# MORNING HANDOFF — overnight loop 3 (2026-07-20/21)
+# MORNING HANDOFF — overnight loop 4 (2026-07-21/22)
 
-*Suite at close: **627 passed, 0 failed, 7 deselected (live)**. 4 commits
-(`05ee073` → `e1d8434`). Walls held: no publishing, no sending, no crontab
+*Suite at close: **627 passed, 0 failed, 7 deselected (live)**. 3 commits
+(`e137690` → `22f9141`). Walls held: no publishing, no sending, no crontab
 writes, no vendor accounts, no OAuth, no live Anthropic calls from
 sandbox; A-M3 untouched, backtest HELD, enum frozen, prompts frozen.
-**Process guard honored**: every commit gated on an explicit exit-code
-check of the full offline suite — the loop-2 wrong-exit-status bug did
-NOT recur. Spend loop 3: 0 fetches, 0 live model calls.*
+Process guard honored: every commit gated on an explicit suite exit-code
+check. Spend loop 4: 0 fetches, 0 live model calls.*
 
-## Did the four bracket fields get executed?
+## Were A/B/C/D filled-and-executed, or parked? (per-field, as requested)
 
-**No — all four arrived unfilled again** (option-menus like
-`[opt1 / opt2 / opt3]`, no selection). Per your own rule ("empty brackets
-= parked again") and park-don't-improvise, I parked rather than guessed.
-Guessing "approve" would have crossed real walls (a data-file merge, an
-allowlist change, code into the runnable queue). Status of each:
+**All four PARKED — unfilled a fourth time** (arrived as menus like
+`"approved" OR feedback`, no selection). Per your explicit rule this loop
+("a selection, not a menu; menu-style = parked a fourth time") I parked
+rather than guessed:
 
-- **A (T005 result)** — unfilled → T005 stays LIVE-BARS-PENDING-HUMAN.
-- **B (marketing drafts)** — unfilled → stay DRAFT-pending-approval.
-- **C (outreach package)** — unfilled → stays DRAFT-pending-approval.
-- **D (citation_check.sh)** — unfilled → batch-2 citations unverified →
-  no batch-2 merge.
-
-Same for the standing decisions (batch-2 verdict, Task 5, AP feed, vocab):
-all unfilled menus → parked, allowlist/enum/prompts untouched.
+- **A (T005 live bars)** — PARKED. T005 stays LIVE-BARS-PENDING-HUMAN;
+  disk shows still no t005-live rows / no new run logs.
+- **B (marketing drafts)** — PARKED. Stay DRAFT-pending-approval.
+- **C (outreach package)** — PARKED. Stays DRAFT-pending-approval.
+- **D (citation_check.sh)** — PARKED. Batch-2 citations unverified →
+  **batch-2 NOT merged** (the rule requires verdict AND D=200s; neither).
+- **Standing picks** (batch-2 verdict, Task 5, AP feed, vocab) — all
+  PARKED (unfilled menus). Allowlist, enum, prompts untouched;
+  `mechanisms.json` still 20 entries.
 
 ## Workstream states
 
-### 1. Execute filled decisions
-- **State**: parked — nothing was filled (see above). No commits.
-- **Next human action**: fill A/B/C/D and the standing decisions with bare
-  answers; everything below unblocks immediately.
+### 1. Execute filled fields
+- **State**: parked — nothing filled. No commits.
+- **Next human action**: fill A/B/C/D + standing picks with bare selections.
 
 ### 2. Library batch 3 (final batch, episodes 9–12)
-- **State**: NOT started — explicitly gated on batch-2 feedback being
-  filled, which it wasn't. The 12-episode curriculum stands at **8
-  studied** (batch 1 merged, batch 2 drafted-pending).
-- **Next human action**: give the batch-2 verdict (+ run
-  `citation_check.sh`); then batch 3 can run.
+- **State**: NOT started — gated on the batch-2 verdict, which was
+  unfilled. Curriculum stays **8/12 studied**.
+- **Next human action**: give the batch-2 verdict; then batch 3 runs and
+  the library inventory completes to 12/12.
 
-### 3. Mechanism library state inventory — DELIVERED (interim)
-- **State**: DONE as far as it can go — `docs/MECHANISM_LIBRARY_STATE.md`,
-  honestly labeled **8/12 episodes** since batch 3 is parked. Full map of
-  the 20 live entries (3 multi-instance, 17 single), batch-2 pending
-  changes, the 1 park, and the 4 deferred enum candidates with what each
-  unlocks.
-- **Commits**: `0fe51d3`.
-- **Next human action**: read it — it's the interim map; it completes
-  after batch 3. Nothing to approve.
+### 3. Mechanism explanation-depth spec (T007) — DELIVERED
+- **State**: DONE — `docs/MECHANISM_EXPLANATION_DEPTH_SPEC.md`, SPEC ONLY.
+  Notable finding: it's a **deterministic render of existing data (0 live
+  calls)**, not a new model call — so if approved it's fully buildable and
+  testable in-sandbox, unlike T005. 6 offline bars incl. no-prediction
+  grep walls.
+- **Commits**: `0d12761`.
+- **Next human action**: approve/amend → runnable queue (build could then
+  finish in one sandbox loop, no Mac step).
 
-### 4. Capability-boundaries memo — DELIVERED
-- **State**: DONE — `docs/CAPABILITY_BOUNDARIES.md`. The 4-item DO surface
-  + the 4 absent capabilities (strategy backtest / technical analysis /
-  company analysis / TimesFM-Kronos), each with cost, gate, and the
-  explicit "no accuracy before calibration" reasoning.
-- **Commits**: `e1d8434`.
-- **Next human action**: read it — decision-support for when/whether to
-  pursue any of the four. Nothing to approve.
+### 4. Positioning memo — DELIVERED
+- **State**: DONE — `docs/POSITIONING.md`. Thesis: the moat is verified,
+  code-graded forward calibration + transparent method, NOT an accuracy
+  number; why faking a number before Sep calibration is fatal; what's
+  sellable now.
+- **Commits**: `22f9141`.
+- **Next human action**: read — decision-support for the go-to-market
+  stance. Nothing to approve.
 
-### 5. Task 5 implementation
-- **State**: skipped — its spec (T006) is not approved (unfilled). Not
-  implemented.
+### 5. Task 5 implementation (T006)
+- **State**: skipped — spec unapproved (unfilled). Not implemented.
 - **Next human action**: approve/amend `docs/TASK5_WIRING_SPEC_PROPOSAL.md`.
 
 ## MY MORNING LIST (in order)
 
-1. **Fill the four fields** (A/B/C/D) — the single highest-leverage thing;
-   bare answers are fine. Two nights of parked execution all hinge on
-   these. Recommended fills, if you concur: A "run the two one-liners
-   first", B/C "approved", D "run citation_check.sh first".
-2. **Mac commands** (independent of the fills): the T005 live one-liners
-   (`T005_LIVE_RUNS.md`) and `sh citation_check.sh` (now includes batch-2's
-   LTCM + Japan URLs). Their outputs ARE the A and D answers.
-3. **Standing decisions**: batch-2 verdict, Task 5 (T006), AP feed (NPR
-   recommended), vocab-widening yes/no.
-4. **Read (no approval needed)**: `docs/MECHANISM_LIBRARY_STATE.md` and
-   `docs/CAPABILITY_BOUNDARIES.md` — tonight's two deliverables.
-5. Once batch-2 verdict is in, batch 3 runs and the library inventory
-   completes to 12/12.
+1. **Run the two Mac commands** — they *are* the A and D answers, so this
+   is the single highest-leverage action:
+   - `cd ~/intent-engine` + the two one-liners in `T005_LIVE_RUNS.md` → A.
+   - `cd ~/intent-engine && sh citation_check.sh` → D (LTCM + Japan must
+     show 200 before batch-2 can merge).
+2. **Send bare selections** for B, C, and the four standing picks
+   (recommended, if you concur: B/C "approved"; batch-2 "approve as-is";
+   Task 5 "approve"; AP "replace with NPR"; vocab "yes").
+3. **Read (no approval needed)**: `docs/POSITIONING.md` and
+   `docs/MECHANISM_EXPLANATION_DEPTH_SPEC.md` — tonight's deliverables.
+4. Once the batch-2 verdict lands, batch 3 runs and completes the
+   12-episode curriculum + the library inventory.
 
 ## AMBIGUITIES (parked with recommendations, not guessed)
 
-1. **Three nights of unfilled brackets.** This is now the dominant blocker;
-   real build/merge/send work has queued behind it for two loops.
-   *Recommendation: the fastest unblock is to run the two Mac commands
-   (T005 one-liners, citation_check.sh) — their results directly fill A
-   and D — and send a one-word "approved"/"feedback" for B, C, and the
-   standing decisions. I did not guess any of them because each guards a
-   real wall.*
-2. **Interim library inventory.** Item 3 assumed 12 episodes studied;
-   only 8 are (batch 3 gated). I wrote it as the honest current-state map
-   rather than parking it, since its content (instance counts, parks, enum
-   candidates) is all available now and useful. *Recommendation: treat it
-   as the interim map; it auto-completes once batch 3 runs.*
-3. **Batch-2 merge is double-gated** (verdict + verified citations). Even
-   if you give the verdict, the LTCM/Japan citations need a real 200 from
-   `citation_check.sh` first. *Recommendation: run that script before or
-   alongside the verdict.*
+1. **Four nights of unfilled brackets — this is now the whole bottleneck.**
+   Every build/merge/send item has queued behind it. I have not guessed
+   any of them because each guards a real wall (data-file merge, allowlist
+   change, code-into-queue, external sends). *Recommendation, unchanged and
+   now urgent: run the two Mac commands (they auto-fill A and D) and send
+   six one-word answers. That single reply unblocks ~everything at once.*
+2. **T007 is the cheapest win in the queue.** Unlike every other pending
+   build, it needs no Mac step and no live budget (deterministic render).
+   *Recommendation: if you approve only one thing, approve T007 — it can
+   ship end-to-end in the next sandbox loop.*
+3. **Batch-2 merge stays double-gated** (verdict + D=200s). Even a "yes"
+   verdict can't merge until `citation_check.sh` clears LTCM + Japan.
+   *Recommendation: run that script alongside the verdict.*
 
 ## Free-time use (per whitelist)
 
-After parking items 1–2 and 5 and delivering 3–4, remaining time went to
-the process-guard verification (explicit exit-code checks) and this
-handoff. Not touched: enum edits, prompt edits, publishing past dry-run,
-backtest work, new engines, batch 3.
+After parking items 1/2/5 and delivering 3/4, remaining time went to the
+process-guard exit-code checks and this handoff. Not touched: enum edits,
+prompt edits, publishing past dry-run, backtest work, new prediction
+engines, batch 3.
