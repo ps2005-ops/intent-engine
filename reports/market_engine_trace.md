@@ -1003,3 +1003,27 @@ UNAVAILABLE badges, "none matched — and that's the finding" card,
 always-rendered DATA GAPS section, "0 resolved — no accuracy claimed"
 track-record card, per-row provenance. No pipeline wiring — follows
 approval. Spend: 0.
+
+## Overnight loop — Marketing workspace (WS4) + cold-outreach package (WS5) — DRAFTS STAGED
+
+WS4: marketing/ stood up per AGENTS.md §3 (no dedicated repo by that doc's
+own definition — location decision recorded in its README, movable on
+founder preference). Walls declared in README FIRST. Deliverables, all
+DRAFT: (a) landing_page_copy.md, (b) sample_structural_analysis_template.md,
+(c) weekly_regime_content_formats.md (examples use ONLY the real
+2026-07-17 run), (d) publer_pipeline.py — DRY-RUN by design: real mode
+double-gated (--real AND founder-created PUBLISHING_ENABLED flag file,
+which does not exist) and the real HTTP call deliberately UNWIRED
+(NotImplementedError names it a founder-present task). Key read from
+.env at runtime only in real mode, never printed/copied — dry-run never
+touches it. 5 wall tests (test_publer_pipeline_walls.py). Every claim in
+every draft carries an inline trace to a gate-passed capability or
+ledgered fact; the only performance statement anywhere is the explicit
+no-accuracy-claim disclaimer.
+
+WS5: marketing/outreach/ — 3 message variants (DM, email, one follow-up
+max), offer one-pager, append-only tracking-ledger schema mirroring
+prediction_ledger's latest-row-per-id convention, with the
+job-application dry-run/real wall stated as invariant #2 (no "sent" row
+without prior approval row + non-null approved_by). NOTHING sent,
+scheduled, or published. Spend WS4+WS5: 0 live calls, 0 fetches.
