@@ -163,11 +163,13 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T005 — Wire mechanisms into premortem output (overnight Task 4)
 
-- **Status**: LIVE-BARS-PENDING-HUMAN — approved into the runnable queue
-  2026-07-18 (spec: docs/TASK4_SPEC_PROPOSAL.md, approved as written).
-  *(Founder reported both live bars PASS 2026-07-22; the DONE flip +
-  output paste into overnight_trace.md is deferred to the next message
-  per that loop's T007-only scope — this line updated then.)*
+- **Status**: DONE — 2026-07-22. Mocked bars (c)(d)(e) green since
+  2026-07-18; live bars (a)(b) run on the Mac, BOTH PASS (founder-reported,
+  outputs in reports/overnight_trace.md): (a) supplier decision renders the
+  section with a real concentrated_supplier_base match + dated instances;
+  (b) neutral decision renders no section (correct silence). 2 of <=8 live
+  calls used. Spec: docs/TASK4_SPEC_PROPOSAL.md.
+  <!-- historical detail retained below -->
   Implementation + mocked bars (c)(d)(e) committed this session, suite
   green. Live bars (a)/(b) are staged in `T005_LIVE_RUNS.md` (2 Mac
   one-liners, 2 of the <=8 live-call budget) — NOT done until both pass

@@ -311,3 +311,17 @@ additive PremortemResult field, combined prompt untouched, drafting prompt
 frozen, 6 deterministic bars incl. live-DB-read + schema wall + no-accuracy
 grep, <=6 live-call budget, 4 park conditions. SPEC ONLY -- awaiting
 approval; no implementation.
+
+## Addendum 2026-07-22 — T005 live bars PASS, T005 -> DONE (founder-reported)
+
+Founder ran the two T005_LIVE_RUNS.md one-liners on the Mac; both PASS:
+- Bar (a) supplier-concentration decision: PASS. "Structural mechanisms
+  possibly in play:" header present; 4 mechanisms rendered incl. a
+  concentrated_supplier_base match with dated historical instances (2021,
+  1973, 1990, 2018); zero forbidden probability/trade terms in the section.
+- Bar (b) neutral wiki-migration decision: PASS. Premortem rendered
+  normally; NO "Structural mechanisms possibly in play" section at all
+  (correct silence, no forced match).
+Both live bars pass within the <=8-call budget (2 calls used). T005
+(overnight Task 4) is DONE -- mocked bars (c)(d)(e) were green since
+2026-07-18; live bars (a)(b) now confirmed. ROADMAP updated.
