@@ -1099,3 +1099,20 @@ citation_check.sh per amendment 2; these two require a real 200 before
 merge. mechanisms.json UNTOUCHED; NO data-file commit. Batch 3 NOT
 started. Drafts: docs/library_batch2_draft_entries.json; review sheet:
 docs/library_batch2_review_sheet.md. Spend: 7 fetches, 0 model calls.
+
+## Overnight loop 2 — AP feed decision-prep (WS5 item 5)
+
+AP Business (apnews.com/hub/business?output=rss) is BLOCKED by the
+web-fetch tool (HTTP 403 cowork_web_fetch_url_blocked), same class as
+Reuters -- not dead, but unusable from the sandbox and NOT routed around
+(standing web-content rule). Net: 2 of 3 approved feeds (Reuters, AP) are
+unusable; only Yahoo verified-working. Degradation path keeps it safe but
+thin. Verified replacement candidates: NPR Business
+(feeds.npr.org/1006/rss.xml -- clean text/xml, parser+scorer confirmed on
+real fetched items; RECOMMENDED), MarketWatch MarketPulse (Dow Jones
+public feed, application/xml 200, markets-focused, couldn't render items
+in sandbox -- needs founder eyeball), CNBC (empty body -- skip).
+Secondary finding surfaced, NOT acted on: REGIME_VOCAB misses
+IPO/merger/singular-"stock" headlines -- flagged as optional tuning task,
+vocab untouched (shared tested surface). NO allowlist change made.
+Decision-prep: docs/AP_FEED_DECISION_PREP.md. Spend: 4 fetches.
