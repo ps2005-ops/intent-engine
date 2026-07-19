@@ -137,10 +137,30 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ---
 
+## T007 — Mechanism explanation depth
+
+- **Status**: PARKED — BAR RECONCILIATION PENDING (2026-07-22). Approved
+  as specced (docs/MECHANISM_EXPLANATION_DEPTH_SPEC.md) and build begun;
+  a build-time pre-check found bars **(c) verbatim causal chain** and
+  **(d) full-block language wall** are MUTUALLY UNSATISFIABLE on the real
+  library — 6 mechanisms have `buy`/`sell`/`forecast` inside verbatim
+  historical causal-chain descriptions. Parked rather than bend a bar to
+  ship. One founder decision unblocks it — see
+  `docs/T007_PARK_FINDING.md` (3 resolution options, recommendation:
+  scope the wall to system-authored lines, exempting verbatim quoted
+  causal steps + cited source). No code committed; suite green at 627.
+- **Files (proposed, on resolution)**: `simulator/mechanism_section.py`
+  (new `render_mechanism_explanation`), `simulator/cli.py` (`--explain`
+  flag), `tests/test_mechanism_explanation.py`. Budget: 0 live calls
+  (deterministic render).
+
 ## T005 — Wire mechanisms into premortem output (overnight Task 4)
 
 - **Status**: LIVE-BARS-PENDING-HUMAN — approved into the runnable queue
   2026-07-18 (spec: docs/TASK4_SPEC_PROPOSAL.md, approved as written).
+  *(Founder reported both live bars PASS 2026-07-22; the DONE flip +
+  output paste into overnight_trace.md is deferred to the next message
+  per that loop's T007-only scope — this line updated then.)*
   Implementation + mocked bars (c)(d)(e) committed this session, suite
   green. Live bars (a)/(b) are staged in `T005_LIVE_RUNS.md` (2 Mac
   one-liners, 2 of the <=8 live-call budget) — NOT done until both pass

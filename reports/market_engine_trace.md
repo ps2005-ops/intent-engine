@@ -1208,3 +1208,44 @@ Sep destroys the trust that IS the product; what's sellable now =
 transparent structural analysis + explanation depth). Zero accuracy
 claims in either doc. Suite 627 green (explicit exit-code check before
 each commit). Spend: 0.
+
+## Overnight loop 5 (2026-07-22) — T007 build: PARKED at build time (honest bar conflict)
+
+Received context (not acted on this loop, per T007-only scope): A =
+BOTH T005 live bars PASS (supplier decision renders 4 mechanisms incl.
+concentrated_supplier_base; neutral decision renders no section) -- T005
+DONE-flip deferred to next message. D = citation_check 9/10 200; the LTCM
+Treasury PWG PDF (home.treasury.gov/.../hedgefund.pdf) 404 -> that batch-2
+citation needs a swap before merge; Japan IMF PDF cleared 200. Neither
+acted on this loop.
+
+T007 (APPROVED as specced) build BEGUN; a bar-(d) pre-check against real
+data (before any committed code) found bars (c) and (d) MUTUALLY
+UNSATISFIABLE on the real library: bar (c) requires verbatim causal_chain
+steps; bar (d) forbids buy/sell/forecast across the whole block; 6
+mechanisms (margin_collateral_spiral, carry_trade_unwind,
+money_market_contagion, winners_curse_acquisition, debt_fueled_capacity_race)
+use those words in verbatim third-person historical descriptions.
+PARKED rather than unilaterally narrow bar (d) to ship my own approved
+feature (park-don't-improvise; Honest Park > crossed wall). Full finding +
+3 resolution options + recommendation: docs/T007_PARK_FINDING.md. No code
+committed; suite green 627 (explicit exit-code check). Spend: 0.
+
+Real --explain block the feature produces (deterministic, from the CLEAN
+supply_shock_propagation entry -- the founder asked to see real output):
+
+    Why this may be in play — Supply-shock propagation (well_documented)
+      Conditions present in your situation:
+        - concentrated_supplier_base
+        - few_dominant_competitors
+      How it unfolds (documented pattern):
+        1. A small number of suppliers account for most of an industry's critical input
+        2. An external shock removes capacity from that supplier base
+        3. Buyers relying on just-in-time inventory have no slack to absorb the gap
+        4. Production halts cascade downstream faster than new supply can be qualified
+        5. Recovery lags the shock by quarters to years
+      Historical precedent: 2020-2023 global semiconductor chip shortage (2021)
+      Source: <cited URLs>
+
+(margin_collateral_spiral's block would be identical in shape but trips
+bar (d) on the verbatim step "...is forced to sell the underlying asset...".)
