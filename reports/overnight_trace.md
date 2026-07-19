@@ -285,3 +285,29 @@ all 17 real library mechanisms rendered at once). 11 mocked tests = bars
 `T005_LIVE_RUNS.md` — mocked-as-live is a standing wall, so T005 is
 **live-bars-pending-human**, not done. Spend: 0 live calls (sandbox), 2
 staged for the Mac.
+
+## Addendum 2026-07-19/20 — T005 live-bar closeout PARKED (decision 1 unfilled)
+
+Decision 1 arrived as an unfilled template bracket ("[PASTE RESULT...]").
+Per park-don't-improvise, T005 is NOT marked done. Disk corroboration
+(not a substitute for your result, just a consistency check): no
+entity-memory rows tagged "t005-live-*" exist, and logs/ has no new
+premortem run since the task3b gate logs — i.e. the two one-liners in
+T005_LIVE_RUNS.md appear not to have been run yet. T005 stays
+LIVE-BARS-PENDING-HUMAN in ROADMAP. Action stays on the morning list
+verbatim: run the two one-liners, paste outputs, then it flips to DONE.
+No live call was attempted from the sandbox (no egress; mocked-as-live
+is a wall).
+
+## Overnight loop 2 — Task 5 spec: verification finding + wiring spec
+
+VERIFIED: the plan's Task 5 substrate (core/premortem_prediction_bridge.py,
+derive_predictions_from_premortem, source="premortem", schema-only-fields
+discipline, future-date backstop) is ALREADY BUILT and green (7 tests).
+It is NOT invoked by the pipeline/CLI. So the accurate "Task 5 spec" is
+the WIRING layer (T006, docs/TASK5_WIRING_SPEC_PROPOSAL.md), parallel to
+how T005 wired the mechanism section: opt-in --record-predictions flag +
+additive PremortemResult field, combined prompt untouched, drafting prompt
+frozen, 6 deterministic bars incl. live-DB-read + schema wall + no-accuracy
+grep, <=6 live-call budget, 4 park conditions. SPEC ONLY -- awaiting
+approval; no implementation.
