@@ -1408,3 +1408,41 @@ park-if-exceeded, append-only ledger, >=30-resolved Alpaca wall.
 The widened cadence only goes LIVE when the daily job runs on the Mac
 (sandbox has no Anthropic egress) -- that remains the founder's single
 biggest lever on calibration timing.
+
+## Loop 8 (cont.) — T009 BUILT: synthetic-world reasoning eval (founder approved + raised to HIGH priority)
+
+Founder decisions mid-loop: (1) Phase 3 = the EVALUATION variant (fictional
+companies/industries/events with constructed outcomes; explicitly NOT model
+training); (2) priority raised from low to HIGH; (3) "make the synthetic
+examples as close to the real world as possible; work the base well" —
+implemented as analyst-brief realism (seeded magnitudes in realistic
+ranges, fictional rivals/lenders/regulators, healthy-metrics control
+worlds that bait topical hallucination).
+
+Built: core/synthetic_worlds.py (deterministic generator, 89 worlds =
+23x3 single + 12 mixed + 8 control; 6-part leakage wall: no enum token,
+no enum phrase, no mechanism id/name, no real-world anchor incl. banned
+years, no 8-word library shingle, enum-valid plants; fictional-entity
+disjointness wall) + scripts/run_synthetic_world_eval.py (offline leg run
+THIS loop; live leg STAGED for Mac: frozen extraction prompt used
+READ-ONLY with sha256 2067d21a... asserted before any call, <=100-call
+cap, ~$1.78 estimate, park semantics, no ledger writes) + 16 bar tests.
+
+OFFLINE RESULTS (reports/synthetic_worlds_eval.md/.json): constructed
+truth recovered 89/89 by construction; the extracted learning is the
+ENUM EXPRESSIVENESS MAP — only 11/23 mechanisms uniquely identifiable on
+their own best evidence; 6 tied classes derived incl. the 6-member
+credit-side class and the 5-member drawdown class; cross-checked
+33 = 3x11 unique-top singles. Recorded as EVIDENCE for the deferred enum
+decision, no recommendation. Report carries the scope disclaimer +
+language walls (no accuracy-claim phrasing; tested).
+
+The reasoning test proper is the LIVE leg (narrative -> frozen extraction
+prompt -> matcher): one Mac command. Honest caveat recorded in the
+script: the frozen prompt says "business decision's description"; briefs
+are close but not identical — poor extraction on briefs would be a
+FINDING, never a prompt patch (edit re-opens the Task 3 gate).
+
+Suite 660 passed (644 + 16), 0 failed, EXIT=0 explicit check. Walls: 0
+model calls; prompts/enum/library untouched; nothing published; training
+use of the generator would be a separate founder-gated capability.
