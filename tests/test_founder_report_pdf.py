@@ -80,24 +80,86 @@ def test_recommendation_is_a_decision_framework_not_a_prediction(result, tmp_pat
     assert result.risk_audit.key_sensitivity in flat
 
 
-def test_evidence_confidence_is_rule_computed_about_the_analysis(result, tmp_path):
-    """Founder feedback #2: confidence in the ANALYSIS, never the future,
-    and derived by rule from the checks — not model self-assessment."""
+def test_evidence_confidence_renders_three_separate_axes(result, tmp_path):
+    """T012: the single gauge is split into Evidence Quality / Reasoning
+    Coverage / Prediction Confidence — each rule-computed, never model
+    self-assessment (resolves V1-roadmap finding #7)."""
     ctx_rich = BusinessContext(revenue="$45k MRR", growth_rate="8%/mo", team_size=6,
                                runway_months=5, market="B2B SaaS",
                                competitive_position="challenger",
                                founder_goals="APAC presence")
     sections = frr.build_premortem_sections(DECISION, ctx_rich, result)
     items = sections["Evidence Confidence"]
-    gauge = next(i for i in items if isinstance(i, dict) and "gauge" in i)
-    assert gauge["gauge"] in ("HIGH", "MEDIUM", "LOW")
+    gauges = {i["label"]: i["gauge"] for i in items
+              if isinstance(i, dict) and "gauge" in i}
+    assert set(gauges) == {"Evidence Quality", "Reasoning Coverage"}
+    assert all(v in ("HIGH", "MEDIUM", "LOW") for v in gauges.values())
     flat = frr.flatten_sections({"Evidence Confidence": items})
     assert "NOT confidence in the future" in flat
     assert "never by model self-assessment" in flat
-    # rule check: this fixture has an unknown signal + no mechanisms + no
-    # ledger entry -> 3 crosses -> LOW. Deterministic, not a judgment call.
-    assert gauge["gauge"] == "LOW"
-    assert sum(1 for i in items if isinstance(i, dict) and "cross" in i) == 3
+    assert "Prediction Confidence" in flat
+
+
+def test_unrequested_leg_lowers_coverage_never_evidence_quality(result, tmp_path):
+    """The finding-#7 fix, asserted directly: rich context + clean signals
+    with NO mechanism/prediction legs requested -> Evidence Quality reads
+    from the evidence alone; only Reasoning Coverage carries the gap."""
+    ctx_rich = BusinessContext(revenue="$45k MRR", growth_rate="8%/mo", team_size=6,
+                               runway_months=5, market="B2B SaaS",
+                               competitive_position="challenger",
+                               founder_goals="APAC presence")
+    sections = frr.build_premortem_sections(DECISION, ctx_rich, result)
+    items = sections["Evidence Confidence"]
+    gauges = {i["label"]: i["gauge"] for i in items
+              if isinstance(i, dict) and "gauge" in i}
+    # this fixture requests neither leg: coverage takes BOTH crosses...
+    assert gauges["Reasoning Coverage"] == "LOW"
+    # ...and Evidence Quality is untouched by requested-ness. The fixture's
+    # one unknown structural signal is its only evidence cross -> MEDIUM,
+    # not the old LOW that unrequested legs used to force.
+    assert gauges["Evidence Quality"] == "MEDIUM"
+    crosses = [i["cross"] for i in items if isinstance(i, dict) and "cross" in i]
+    assert any("NOT weak evidence" in c for c in crosses)
+
+
+def test_missing_prediction_confidence_renders_unavailable(result, tmp_path):
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result)
+    flat = frr.flatten_sections({"Evidence Confidence":
+                                 sections["Evidence Confidence"]})
+    assert "Prediction Confidence: UNAVAILABLE" in flat
+    assert "no accuracy claimed" in flat.lower()
+
+
+def test_ledgered_predictions_render_recorded_not_accuracy(result, tmp_path):
+    from intent_engine.core.prediction_ledger import Prediction
+    lp = [Prediction(source="premortem", entity_id="acme",
+                     claim_text="Burn exceeds plan", probability=0.6,
+                     resolve_by="2027-01-15")]
+    wired = result._replace(ledgered_predictions=lp)
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), wired)
+    flat = frr.flatten_sections({"Evidence Confidence":
+                                 sections["Evidence Confidence"]})
+    assert "Prediction Confidence: RECORDED — 1 ledgered claim(s)" in flat
+    assert "graded by code" in flat
+    frr._assert_no_accuracy_claim(flat)
+
+
+def test_contradictions_affect_evidence_quality_axis(result, tmp_path):
+    """Unverified/contradictory signals land on Evidence Quality (the
+    evidence axis), not on coverage."""
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result)
+    items = sections["Evidence Confidence"]
+    # find the crosses BETWEEN the two gauges: those belong to Evidence Quality
+    labels = [(i.get("label") if isinstance(i, dict) else None) for i in items]
+    eq_at = labels.index("Evidence Quality")
+    rc_at = labels.index("Reasoning Coverage")
+    eq_slice = items[eq_at:rc_at]
+    assert any(isinstance(i, dict) and "cross" in i
+               and "structural signals incomplete" in i["cross"]
+               for i in eq_slice)
 
 
 def test_evidence_separates_facts_from_inference_and_grades_risk(result, tmp_path):

@@ -372,35 +372,84 @@ def build_premortem_sections(decision_text: str, context, result,
             "an outcome.)"]
     sections["Recommendation"] = [{"box": rec}]
 
-    # -- Evidence Confidence (feedback #2: in the ANALYSIS, not the future) --
-    checks = []
+    # -- Evidence Confidence (T012 Slice 2B: THREE separate axes) ------------
+    # Splitting the old single gauge resolves V1-roadmap finding #7: a leg
+    # that was not requested is a smaller examination (Reasoning Coverage),
+    # never weaker evidence (Evidence Quality). Every level is computed by
+    # rule from the report's own inputs — never model self-assessment.
+
+    # Axis 1 — Evidence Quality: strength of the evidence actually available.
+    eq_checks = []
     if n_ctx >= 4:
-        checks.append({"check": f"business context: {n_ctx} of {len(ctx_fields)} "
-                                "fields provided"})
+        eq_checks.append({"check": f"business context: {n_ctx} of "
+                                   f"{len(ctx_fields)} fields provided"})
     else:
-        checks.append({"cross": f"business context sparse: {n_ctx} of "
-                                f"{len(ctx_fields)} fields provided"})
+        eq_checks.append({"cross": f"business context sparse: {n_ctx} of "
+                                   f"{len(ctx_fields)} fields provided"})
     if unverified:
-        checks.append({"cross": "structural signals incomplete: "
-                                + "; ".join(unverified)})
+        eq_checks.append({"cross": "structural signals incomplete: "
+                                   + "; ".join(unverified)})
     else:
-        checks.append({"check": "structural signals fully extracted"})
+        eq_checks.append({"check": "structural signals fully extracted"})
+    n_eq_cross = sum(1 for c in eq_checks if "cross" in c)
+    eq_level = ("HIGH" if n_eq_cross == 0
+                else "MEDIUM" if n_eq_cross == 1 else "LOW")
+
+    # Axis 2 — Reasoning Coverage: how much of the examination actually ran.
+    rc_checks = [
+        {"check": f"scenario framing ran ({len(scen.scenarios)} scenarios)"},
+        {"check": "assumptions enumerated (see the numbered box below)"},
+    ]
     if rm is not None:
-        checks.append({"check": "documented mechanism library consulted"})
+        rc_checks.append({"check": "documented mechanism library consulted"})
     else:
-        checks.append({"cross": "mechanism read not requested this run"})
+        rc_checks.append({"cross": "mechanism read not requested this run "
+                                   "(a coverage gap, NOT weak evidence)"})
     if lp is not None:
-        checks.append({"check": "claims recorded to the append-only ledger"})
+        rc_checks.append({"check": "prediction-recording leg ran "
+                                   "(append-only ledger)"})
     else:
-        checks.append({"cross": "no prediction recorded this run"})
-    n_cross = sum(1 for c in checks if "cross" in c)
-    level = "HIGH" if n_cross == 0 else ("MEDIUM" if n_cross <= 2 else "LOW")
-    sections["Evidence Confidence"] = (
-        [{"gauge": level},
-         "Confidence in the analysis given the available evidence — NOT "
-         "confidence in the future. Computed by rule from the checks below, "
-         "never by model self-assessment.", "because:"]
-        + checks)
+        rc_checks.append({"cross": "prediction recording not requested this "
+                                   "run (a coverage gap, NOT weak evidence)"})
+    n_rc_cross = sum(1 for c in rc_checks if "cross" in c)
+    rc_level = ("HIGH" if n_rc_cross == 0
+                else "MEDIUM" if n_rc_cross == 1 else "LOW")
+
+    # Axis 3 — Prediction Confidence: only what is explicitly ledgered.
+    if lp:
+        pc_head = {"h": f"Prediction Confidence: RECORDED — {len(lp)} "
+                        f"ledgered claim(s)"}
+        pc_lines = [
+            "Stated probabilities are listed in the Prediction section; they "
+            "were stated at creation, live on the append-only ledger, and are "
+            "graded by code on their resolve-by dates. No accuracy claimed "
+            "(0 resolved is 0 resolved).",
+        ]
+    else:
+        pc_head = {"h": "Prediction Confidence: UNAVAILABLE"}
+        pc_lines = [
+            ("No prediction was recorded this run, so there is no ledgered "
+             "claim to attach confidence to — saying so is the honest answer. "
+             "No accuracy claimed."),
+        ]
+
+    sections["Evidence Confidence"] = [
+        "Three separate reads, each computed by rule from this report's own "
+        "inputs — never by model self-assessment. All three are confidence "
+        "in the ANALYSIS given the available evidence — NOT confidence in "
+        "the future.",
+        {"gauge": eq_level, "label": "Evidence Quality"},
+        "because:",
+        *eq_checks,
+        {"gauge": rc_level, "label": "Reasoning Coverage"},
+        "Coverage measures how much of the examination ran. A leg that was "
+        "not requested makes the examination smaller — it does not make the "
+        "evidence weaker (it never lowers Evidence Quality above).",
+        "because:",
+        *rc_checks,
+        pc_head,
+        *pc_lines,
+    ]
 
     # -- Decision ------------------------------------------------------------
     dec = [f"Decision under review: {decision_text}"]
@@ -588,7 +637,7 @@ def _item_text(it) -> list:
     if "sub" in it:
         return [it["sub"]]
     if "gauge" in it:
-        return [f"Overall evidence confidence: {it['gauge']}"]
+        return [f"{it.get('label', 'Overall evidence confidence')}: {it['gauge']}"]
     if "tree" in it:
         return [f"{n.upper()} — {t}: {d}" for n, t, d in it["tree"]]
     if "box" in it:
@@ -642,7 +691,7 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
         for cont in lines[1:]:
             put(cont, x=x + 14)
 
-    def put_gauge(level, x=58):
+    def put_gauge(level, x=58, label="Overall evidence confidence"):
         nonlocal y
         ensure(3 * lh + 14)
         y -= 4
@@ -656,7 +705,9 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
                 cur.append(f"0.70 G {bx} {y - 16} 84 18 re S 0 G")
                 text_at(bx + 8, y - 11, lbl, size=9, gray=0.55)
         y -= 16 + lh
-        put(f"Overall evidence confidence: {level}", font="F2", size=10, x=x)
+        # The text label always accompanies the filled box: meaning is never
+        # conveyed by the visual alone (accessibility bar).
+        put(f"{label}: {level}", font="F2", size=10, x=x)
 
     def put_bar(level, text, x=58):
         nonlocal y
@@ -732,7 +783,8 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
             elif "bullet" in it:
                 put_mark(it["bullet"], "l", x=x + 4)   # dingbat small square
             elif "gauge" in it:
-                put_gauge(it["gauge"], x=x + 4)
+                put_gauge(it["gauge"], x=x + 4,
+                          label=it.get("label", "Overall evidence confidence"))
             elif "bar" in it:
                 put_bar(it["bar"], it["text"], x=x + 4)
             elif "tree" in it:
