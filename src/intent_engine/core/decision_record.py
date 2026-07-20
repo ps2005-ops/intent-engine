@@ -571,6 +571,18 @@ class DecisionService:
                          for r in inbound],
         }
 
+    def list_decision_ids(self) -> list[str]:
+        """All decision ids, in creation order (T013: the DecisionEvent
+        bridge iterates decisions through the service, never raw SQL)."""
+        con = self._connect()
+        try:
+            rows = con.execute(
+                "SELECT decision_id FROM decision_records "
+                "ORDER BY created_at, decision_key").fetchall()
+        finally:
+            con.close()
+        return [r["decision_id"] for r in rows]
+
     def get_entities(self, decision_id: str) -> list[dict]:
         con = self._connect()
         try:
