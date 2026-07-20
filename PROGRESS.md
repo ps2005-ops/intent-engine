@@ -3046,3 +3046,14 @@ bars; parser test asserts the queue truthfully. NOT YET BUILT, stated
 plainly: report wiring (2A/2B), event bus, CRM, knowledge promotion,
 analytics consumers, marketing C3–C8, PM/Research agents, growth,
 AgentOS extraction, Personal AI, public APIs.
+
+**Addendum (same session): T011 Slice 2A also landed** (commit bfa0b3f)
+— the founder report now reads the Decision Record: identity header,
+folded three-axis status badge, owner, supersession cross-links by
+decision_key, record schema version in the audit trail. Reads only
+(rendering appends zero events, tested); absent record → byte-identical
+output; both walls run over every new line. The decision-platform
+vertical is now real end-to-end: intake → record → stamped ledger rows →
+report that displays the folded state. Queue: T012 (Slice 2B, approved
+report polish: 3-axis confidence split, Alternatives, lifecycle
+presentation) is RUNNABLE with bars.

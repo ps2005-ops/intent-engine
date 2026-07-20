@@ -272,9 +272,11 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T011 — Decision Record → founder report wiring (Slice 2A)
 
-- **Status**: RUNNABLE — record wiring only; the approved v3 polish
-  (3-axis Evidence Confidence, Alternatives, lifecycle presentation) is
-  Slice 2B, a separate task.
+- **Status**: DONE 2026-07-20 (commit bfa0b3f) — identity header, folded
+  three-axis status badge, owner, supersession cross-links by
+  decision_key, record schema version in the audit trail. Reads only
+  (zero events appended — tested); absent record → unchanged output;
+  walls pass on every new line. +4 tests.
 - **Priority**: 1. **Size**: M.
 - **Source**: `docs/V1_COMPLETION_ROADMAP.md` P1 verdict ("split per
   review point 11 → Slice 2A"), founder-reviewed 2026-07-20.
@@ -292,6 +294,29 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 - **Walls**: PDF writer stays dependency-free (no HTML build, per the
   accepted P1 verdict); reads only — the report never writes decision
   events; frozen prompts untouched.
+
+## T012 — Approved founder-report polish (Slice 2B)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: M.
+- **Source**: `docs/V1_COMPLETION_ROADMAP.md` P1 verdict (the deferred
+  v3 polish), founder-reviewed 2026-07-20.
+- **Files in scope**: `scripts/render_founder_report.py`,
+  `tests/test_founder_report_pdf.py`.
+- **Definition of done (bars)**: (a) **3-axis Evidence Confidence** —
+  the single gauge splits into Evidence Quality / Reasoning Coverage /
+  Prediction Confidence, each rule-computed from existing check inputs
+  (resolves V1 roadmap finding #7: "leg not requested" no longer
+  penalizes like "evidence weak"); (b) **Alternatives Considered**
+  section rendered from the scenario set + stated constraints only (no
+  new facts); (c) **9-stage lifecycle presentation** — the decision loop
+  rendered as explicit stages with the record's current position when a
+  Decision Record is attached; (d) PDF polish stays inside the existing
+  dependency-free writer; (e) walls pass on all new content; absent
+  record/legs degrade honestly (UNAVAILABLE, never guessed); offline
+  suite green + EXIT=0.
+- **Walls**: no new dependency; no accuracy claims (A-M5 untouched);
+  frozen prompts untouched; reads only.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

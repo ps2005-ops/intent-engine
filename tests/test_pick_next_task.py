@@ -76,10 +76,11 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34);
     # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec);
     # T010 (event-sourced Decision Record: data layer + Slice 1B wiring)
-    # completed 2026-07-20 (commits 8abb2dd, 524296e). The current queue is
-    # T011 (Slice 2A: record -> founder-report wiring). NEEDS-SPEC items
-    # are still never auto-promoted.
-    assert runnable_ids == {"T011"}
-    # The nightly loop must pick T011 (the only RUNNABLE task), never a
+    # and T011 (Slice 2A: record -> report wiring) completed 2026-07-20
+    # (commits 8abb2dd, 524296e, bfa0b3f). The current queue is T012
+    # (Slice 2B: approved report polish). NEEDS-SPEC items are still
+    # never auto-promoted.
+    assert runnable_ids == {"T012"}
+    # The nightly loop must pick T012 (the only RUNNABLE task), never a
     # NEEDS-SPEC item.
-    assert pick_next_runnable(tasks) == "T011"
+    assert pick_next_runnable(tasks) == "T012"
