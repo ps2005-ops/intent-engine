@@ -108,6 +108,13 @@ class Prediction(BaseModel):
     horizon_days: Optional[int] = None
     resolution_rule: Optional[ResolutionRule] = Field(default=None, discriminator="type")
     resolution_source: Optional[ResolutionSource] = None
+    # T010 Slice 1B addition (V1_COMPLETION_ROADMAP.md Part E): a nullable
+    # REFERENCE to the Decision Record that owns this prediction's decision
+    # identity. Strictly one-way per the accepted design: the ledger never
+    # allocates decisions, infers status, or writes records -- it only
+    # carries the opaque ULID stamped by the caller. Additive like the M5
+    # fields: old rows' JSON round-trips with this defaulting to None.
+    decision_id: Optional[str] = None
 
 
 def _ensure_schema(conn) -> None:
@@ -176,6 +183,7 @@ def record_prediction(
     horizon_days: Optional[int] = None,
     resolution_rule: Optional[Union[Dict[str, Any], PctChangeRule, LevelRule]] = None,
     resolution_source: Optional[ResolutionSource] = None,
+    decision_id: Optional[str] = None,
 ) -> Prediction:
     if not (0.0 <= probability <= 1.0):
         raise ValueError(f"probability must be in [0, 1], got {probability!r}")
@@ -191,6 +199,7 @@ def record_prediction(
         probability=probability, resolve_by=resolve_by_str,
         instrument=instrument, direction=direction, horizon_days=horizon_days,
         resolution_rule=resolution_rule, resolution_source=resolution_source,
+        decision_id=decision_id,
     )
     _persist(prediction, path)
     return prediction
@@ -231,6 +240,7 @@ def list_predictions(
     unresolved_only: bool = False,
     due_by: Optional[Union[str, date]] = None,
     path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+    decision_id: Optional[str] = None,
 ) -> List[Prediction]:
     """Task M6 addition: a small, additive read primitive -- the resolve
     script needs to find "all due, unresolved predictions" and no public
@@ -241,6 +251,10 @@ def list_predictions(
     predictions = _read_latest(path)
     if source is not None:
         predictions = [p for p in predictions if p.source == source]
+    if decision_id is not None:
+        # T010 Slice 1B: "all predictions for this decision" is the read the
+        # idempotent intake wiring and the report (Slice 2A) both need.
+        predictions = [p for p in predictions if p.decision_id == decision_id]
     if unresolved_only:
         predictions = [p for p in predictions if p.outcome is None]
     if due_by is not None:

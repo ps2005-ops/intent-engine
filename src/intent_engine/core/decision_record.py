@@ -36,6 +36,7 @@ import sqlite3
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 
 from intent_engine.core.decision_ids import (
     format_decision_key, is_decision_key, new_ulid,
@@ -43,6 +44,10 @@ from intent_engine.core.decision_ids import (
 
 RECORD_SCHEMA_VERSION = 1
 EVENT_SCHEMA_VERSION = 1
+
+# Same convention as prediction_ledger.DEFAULT_LEDGER_PATH: the one real
+# store lives under data/ (git-ignored), tests always pass a tmp path.
+DEFAULT_DECISIONS_DB = Path("data/decisions.db")
 
 # --- the closed event taxonomy ------------------------------------------------
 LIFECYCLE_EVENTS = {

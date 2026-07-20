@@ -64,6 +64,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="T006: also derive 1-3 resolvable predictions from the audit's failure modes and "
              "record them to the append-only ledger (source=premortem; 1 extra isolated call; "
              "recording is code, the model has no record field). Off by default: zero extra calls.")
+    parser.add_argument(
+        "--decision-record", action="store_true",
+        help="T010 Slice 1B: create (or idempotently reuse) ONE event-sourced Decision Record "
+             "for this intake in data/decisions.db; with --record-predictions, every ledger row "
+             "is stamped with its decision_id. Retrying the same intake reuses the record and "
+             "creates zero duplicates. Off by default: zero behavior change.")
     return parser
 
 
@@ -159,9 +165,24 @@ def main(argv=None) -> int:
         from ..core.premortem_prediction_bridge import FAST_MODEL as BRIDGE_FAST_MODEL
         bridge_client = LLMClient(model=BRIDGE_FAST_MODEL)
 
+    decision_service = None
+    decision_intake_key = None
+    if args.decision_record:
+        import hashlib
+        from ..core.decision_record import DEFAULT_DECISIONS_DB, DecisionService
+        DEFAULT_DECISIONS_DB.parent.mkdir(parents=True, exist_ok=True)
+        decision_service = DecisionService(str(DEFAULT_DECISIONS_DB))
+        # Deterministic intake key: the same entity + decision text IS the
+        # same intake, so an interrupted run rerun tomorrow reuses its
+        # Decision Record instead of allocating a second identity.
+        decision_intake_key = hashlib.sha256(
+            f"{normalize_entity_id(args.entity_id)}|{decision_text}".encode()
+        ).hexdigest()
+
     result = run_premortem(
         decision_text, context, mechanism_client=mechanism_client,
-        bridge_client=bridge_client, bridge_entity_id=args.entity_id)
+        bridge_client=bridge_client, bridge_entity_id=args.entity_id,
+        decision_service=decision_service, decision_intake_key=decision_intake_key)
 
     if args.json:
         payload = {
@@ -211,6 +232,11 @@ def main(argv=None) -> int:
     # framing; stderr, same convention as the entity-memory line).
     if result.ledgered_predictions is not None:
         print(_record_confirmation(len(result.ledgered_predictions)), file=sys.stderr)
+
+    # T010 Slice 1B: plain identity confirmation, same stderr convention.
+    if result.decision_record is not None:
+        print(f"Decision record: {result.decision_record.decision_key} "
+              f"({result.decision_record.decision_id})", file=sys.stderr)
 
     return 0
 

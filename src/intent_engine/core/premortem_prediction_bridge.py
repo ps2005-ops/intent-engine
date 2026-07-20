@@ -73,12 +73,19 @@ def derive_predictions_from_premortem(
     risk_audit: RiskAudit,
     client: Optional[LLMClient] = None,
     ledger_path: Union[str, Path] = DEFAULT_LEDGER_PATH,
+    decision_id: Optional[str] = None,
 ) -> List[Prediction]:
     """Drafts 1-3 predictions from a real RiskAudit's failure_modes and
     records them to the ledger with source="premortem" -- recording is
     entirely code (record_prediction() is called here directly on the
     model's drafted fields); the model has no field in its own schema
-    that could record anything itself."""
+    that could record anything itself.
+
+    `decision_id` (T010 Slice 1B): when the caller owns a Decision Record
+    for this intake, every row this bridge records is stamped with that one
+    opaque ULID -- stamping is code-side and one-way (the drafting schema
+    still has no decision/id field for the model to see or set; asserted by
+    test). Default None: pre-record callers unaffected."""
     client = client or LLMClient(model=FAST_MODEL)
 
     failure_modes_text = "\n".join(
@@ -122,6 +129,7 @@ def derive_predictions_from_premortem(
             probability=candidate["probability"],
             resolve_by=candidate["resolve_by"],
             path=ledger_path,
+            decision_id=decision_id,
         )
         predictions.append(p)
     return predictions

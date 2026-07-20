@@ -32,6 +32,11 @@ class PremortemResult(NamedTuple):
     # of Prediction rows the bridge recorded (source="premortem").
     # Defaulted for the same caller-compatibility guarantee as T005.
     ledgered_predictions: Optional[list] = None
+    # T010 Slice 1B additive field (V1_COMPLETION_ROADMAP.md Part E): None
+    # when no DecisionService was provided; otherwise the (created or
+    # idempotently reused) DecisionRecord this intake belongs to. Same
+    # caller-compatibility guarantee as the two fields above.
+    decision_record: Optional[object] = None
 
 
 def run_premortem(
@@ -43,6 +48,9 @@ def run_premortem(
     bridge_client: Optional[LLMClient] = None,
     bridge_entity_id: Optional[str] = None,
     bridge_ledger_path=None,
+    decision_service=None,
+    decision_intake_key: Optional[str] = None,
+    decision_actor_id: str = "founder",
 ) -> PremortemResult:
     """`mechanism_client` (T005): when provided, ONE additional isolated
     extraction call computes the structural-mechanisms read (see
@@ -57,11 +65,54 @@ def run_premortem(
     code -- the drafting schema has no record/include field). Same A3
     isolation: the combined analyzer prompt is untouched either way.
     Default None: zero new calls, nothing recorded, additive field stays
-    None. `bridge_entity_id` is required with `bridge_client`."""
+    None. `bridge_entity_id` is required with `bridge_client`.
+
+    `decision_service` (T010 Slice 1B, V1_COMPLETION_ROADMAP.md Part E):
+    when provided, this intake gets ONE event-sourced Decision Record
+    (created idempotently on `decision_intake_key`, so reprocessing the
+    same accepted intake reuses the existing record). The ordered flow
+    appends events and a later failure never erases earlier facts:
+    DecisionCreated -> analysis -> RecommendationIssued -> prediction rows
+    stamped with the record's decision_id. A failed analysis appends
+    AnalysisFailed; a failed bridge appends PredictionLoggingFailed; both
+    re-raise, and a retry with the same intake key creates zero duplicate
+    records, events, or ledger rows. Default None: zero behavior change."""
     analyzer = analyzer or PremortemAnalyzer(client=client)
 
+    decision_record = None
+    if decision_service is not None:
+        import hashlib
+        metadata = {"intake_sha256": hashlib.sha256(decision_text.encode()).hexdigest()}
+        if bridge_entity_id:
+            metadata["entity_id"] = bridge_entity_id
+        decision_record = decision_service.create_decision(
+            decision_actor_id, actor_type="human", actor_id=decision_actor_id,
+            source="cli", idempotency_key=decision_intake_key, metadata=metadata)
+        if bridge_entity_id:
+            decision_service.add_entity(
+                decision_record.decision_id, bridge_entity_id, "subject")
+
     start = time.monotonic()
-    result = analyzer.run(decision_text, context)
+    try:
+        result = analyzer.run(decision_text, context)
+    except Exception as exc:
+        if decision_record is not None:
+            # Typed failure event -- audit-only, never erases the record.
+            # Payload carries the exception TYPE only: no raw intake or
+            # provider text ever enters an event payload (locked decision 10).
+            decision_service.record_event(
+                decision_record.decision_id, "AnalysisFailed",
+                actor_type="system", actor_id="premortem_pipeline",
+                source="system", payload={"error_type": type(exc).__name__})
+        raise
+
+    if decision_record is not None:
+        decision_service.record_event(
+            decision_record.decision_id, "RecommendationIssued",
+            actor_type="system", actor_id="premortem_pipeline", source="system",
+            payload={"n_failure_modes": len(result.risk_audit.failure_modes)},
+            idempotency_key=(f"reco:{decision_intake_key}"
+                             if decision_intake_key else None))
 
     ranked_mechanisms = None
     if mechanism_client is not None:
@@ -73,9 +124,32 @@ def run_premortem(
         if not bridge_entity_id:
             raise ValueError("bridge_entity_id is required when bridge_client is provided")
         from ..core.premortem_prediction_bridge import derive_predictions_from_premortem
+        from ..core.prediction_ledger import DEFAULT_LEDGER_PATH, list_predictions
         bridge_kwargs = {} if bridge_ledger_path is None else {"ledger_path": bridge_ledger_path}
-        ledgered_predictions = derive_predictions_from_premortem(
-            bridge_entity_id, result.risk_audit, client=bridge_client, **bridge_kwargs)
+        existing_rows = []
+        if decision_record is not None:
+            ledger = DEFAULT_LEDGER_PATH if bridge_ledger_path is None else bridge_ledger_path
+            existing_rows = list_predictions(
+                path=ledger, decision_id=decision_record.decision_id)
+        if existing_rows:
+            # Idempotent retry (bar b): this decision's rows already exist --
+            # zero new ledger rows, zero drafting calls.
+            ledgered_predictions = existing_rows
+        else:
+            try:
+                ledgered_predictions = derive_predictions_from_premortem(
+                    bridge_entity_id, result.risk_audit, client=bridge_client,
+                    decision_id=(None if decision_record is None
+                                 else decision_record.decision_id),
+                    **bridge_kwargs)
+            except Exception as exc:
+                if decision_record is not None:
+                    decision_service.record_event(
+                        decision_record.decision_id, "PredictionLoggingFailed",
+                        actor_type="system", actor_id="premortem_pipeline",
+                        source="system",
+                        payload={"error_type": type(exc).__name__})
+                raise
     elapsed = time.monotonic() - start
 
     return PremortemResult(
@@ -85,4 +159,5 @@ def run_premortem(
         elapsed_seconds=elapsed,
         ranked_mechanisms=ranked_mechanisms,
         ledgered_predictions=ledgered_predictions,
+        decision_record=decision_record,
     )
