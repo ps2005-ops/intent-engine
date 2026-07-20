@@ -205,3 +205,87 @@ def test_accuracy_claim_wall_blocks_render(result, tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="Accuracy-claim wall"):
         frr.render_premortem_pdf(DECISION, BusinessContext(revenue="$60k MRR"), bad, out)
     assert not out.exists()  # walls run before any byte is written
+
+
+# =============================================================================
+# T011 Slice 2A bars (ROADMAP.md): Decision Record -> report wiring.
+# Reads only; absent record -> unchanged output; walls still run.
+# =============================================================================
+
+from intent_engine.core.decision_record import DecisionService  # noqa: E402
+
+
+def _result_with_record(base_result, svc, entity="acme"):
+    rec = svc.create_decision("founder", idempotency_key="report-test")
+    svc.add_entity(rec.decision_id, entity, "subject")
+    return base_result._replace(decision_record=rec), rec
+
+
+def test_report_renders_decision_id_key_status_and_owner(result, tmp_path):
+    """Bars (a)-(c): identity header, folded three-axis status badge, owner."""
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    wired, rec = _result_with_record(result, svc)
+    svc.record_event(rec.decision_id, "OwnerAssigned", actor_type="human",
+                     actor_id="founder", source="cli",
+                     payload={"owner": "Pratham"})
+    out = tmp_path / "premortem.pdf"
+    sections = frr.render_premortem_pdf(DECISION, BusinessContext(revenue="$60k MRR"),
+                                        wired, out, decision_service=svc)
+    flat = frr.flatten_sections(sections)
+    assert rec.decision_key in flat and rec.decision_id in flat
+    assert "decision=draft" in flat            # folded, not inferred
+    assert "execution=not_started" in flat
+    assert "evaluation=unresolved" in flat
+    assert "Owner: Pratham" in flat
+    # the badge is read from the fold; the record's schema version is in the
+    # audit trail (bar e)
+    assert f"record schema v{rec.record_schema_version}" in flat
+    # and it made it into the actual PDF bytes (uncompressed streams)
+    assert rec.decision_key.encode() in out.read_bytes()
+
+
+def test_report_renders_supersession_links(result, tmp_path):
+    """Bar (d): supersedes / superseded-by cross-links by decision_key."""
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    wired_old, old_rec = _result_with_record(result, svc)
+    new_rec = svc.create_decision("founder", idempotency_key="successor")
+    svc.supersede_decision(old_rec.decision_id, new_rec.decision_id)
+
+    flat_old = frr.flatten_sections(frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), wired_old,
+        decision_service=svc))
+    assert f"Superseded by: {new_rec.decision_key}" in flat_old
+    assert "decision=superseded" in flat_old
+
+    wired_new = result._replace(decision_record=new_rec)
+    flat_new = frr.flatten_sections(frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), wired_new,
+        decision_service=svc))
+    assert f"Supersedes: {old_rec.decision_key}" in flat_new
+
+
+def test_report_without_record_is_unchanged(result, tmp_path):
+    """Bar (f): additive default -- no record, no new lines, same sections."""
+    baseline = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result,
+        generated_at="2026-07-20T00:00:00+00:00")
+    with_kwarg = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result,
+        generated_at="2026-07-20T00:00:00+00:00", decision_service=None)
+    assert baseline == with_kwarg
+    flat = frr.flatten_sections(baseline)
+    assert "Decision record" not in flat
+
+
+def test_record_wiring_passes_walls_and_never_writes_events(result, tmp_path):
+    """Bar (g) + the read-only wall: rendering appends ZERO decision events."""
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    wired, rec = _result_with_record(result, svc)
+    events_before = len(svc.get_events(rec.decision_id))
+    out = tmp_path / "premortem.pdf"
+    sections = frr.render_premortem_pdf(DECISION, BusinessContext(revenue="$60k MRR"),
+                                        wired, out, decision_service=svc)
+    flat = frr.flatten_sections(sections)
+    frr.assert_language_walls(flat)            # would raise on violation
+    frr._assert_no_accuracy_claim(flat)
+    assert len(svc.get_events(rec.decision_id)) == events_before   # reads only

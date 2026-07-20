@@ -264,7 +264,8 @@ def _could_not_verify_lines(unverified: list) -> list:
 
 
 def build_premortem_sections(decision_text: str, context, result,
-                             generated_at: str = None) -> dict:
+                             generated_at: str = None,
+                             decision_service=None) -> dict:
     """PremortemResult -> {section_title: [items]}, in the approved order.
 
     Items are strings (body text) or dicts the PDF writer understands:
@@ -272,10 +273,46 @@ def build_premortem_sections(decision_text: str, context, result,
     {"gauge": level}, {"bar": level, "text":}, {"tree": [(name,tag,deltas)]}.
     Every fact comes from the inputs; everything else is fixed template
     prose. No new facts, no forecasts, no accuracy claims.
+
+    T011 Slice 2A: when the result carries a Decision Record (T010) the
+    report renders its identity; with a `decision_service` it also renders
+    the folded three-axis status, current owner, and supersession links —
+    all READS of the record (folded by `DecisionService`, never inferred
+    here). Absent record -> byte-identical output to before (additive
+    default). The report never writes decision events.
     """
     intent, audit, scen = result.intent, result.risk_audit, result.scenario_set
     rm = result.ranked_mechanisms
     lp = result.ledgered_predictions
+    drec = getattr(result, "decision_record", None)
+
+    # -- Decision Record read (Slice 2A): identity, folded status, owner,
+    # supersession links. Display strings only; the fold happens in
+    # DecisionService (one source of truth), never re-implemented here.
+    record_lines = []
+    record_version_bullets = []
+    if drec is not None:
+        record_lines.append(f"Decision record: {drec.decision_key} "
+                            f"({drec.decision_id})")
+        record_version_bullets.append(
+            {"bullet": f"Decision record: {drec.decision_key}; record schema "
+                       f"v{drec.record_schema_version}"})
+        if decision_service is not None:
+            st = decision_service.get_current_state(drec.decision_id)
+            record_lines.append(
+                f"Status: decision={st.decision_status} / "
+                f"execution={st.execution_status} / "
+                f"evaluation={st.evaluation_status}")
+            record_lines.append(
+                f"Owner: {st.owner if st.owner else 'unassigned'}")
+            rel = decision_service.get_related_decisions(drec.decision_id)
+            for edge in rel["outgoing"] + rel["incoming"]:
+                if edge["relationship_type"] in ("supersedes", "superseded_by"):
+                    other = decision_service.get_decision(edge["decision_id"])
+                    label = other.decision_key if other else edge["decision_id"]
+                    verb = ("Supersedes" if edge["relationship_type"] == "supersedes"
+                            else "Superseded by")
+                    record_lines.append(f"{verb}: {label}")
 
     # -- shared derivations (computed once, used by several sections) --------
     unverified = []
@@ -310,6 +347,12 @@ def build_premortem_sections(decision_text: str, context, result,
     snap = [{"h": "This analysis is grounded in the following business:"}]
     for label, v in ctx_fields:
         snap.append(f"{label}: {v if v is not None else 'not provided'}")
+    if record_lines:
+        # Slice 2A: decision identity + folded status header, in the box the
+        # reader sees first. Reads only; absent record -> absent lines.
+        snap.append({"h": "Decision record (event-sourced; status folded, "
+                          "never stored)"})
+        snap.extend(record_lines)
     sections["Company Snapshot"] = [{"box": snap}]
 
     sections["Executive Summary"] = [audit.narrative_summary]
@@ -486,6 +529,7 @@ def build_premortem_sections(decision_text: str, context, result,
         ledger_status,
         {"h": "Version & audit trail"},
         {"bullet": f"Engine version: {_engine_version()}"},
+        *record_version_bullets,
         {"bullet": f"Analysis timestamp: {ts}"},
         {"bullet": "Report generator: scripts/render_founder_report.py "
                    "(deterministic; no numbers invented for presentation)"},
@@ -772,11 +816,15 @@ def flatten_sections(sections: dict) -> str:
 
 def render_premortem_pdf(decision_text: str, context, result, out_path,
                          title: str = "Pre-Mortem Report",
-                         generated_at: str = None) -> dict:
+                         generated_at: str = None,
+                         decision_service=None) -> dict:
     """The C2 entry point: PremortemResult -> productized PDF. Returns the
-    section dict that was rendered (for callers/tests)."""
+    section dict that was rendered (for callers/tests). `decision_service`
+    (T011 Slice 2A): read-only Decision Record wiring, see
+    build_premortem_sections."""
     sections = build_premortem_sections(decision_text, context, result,
-                                        generated_at=generated_at)
+                                        generated_at=generated_at,
+                                        decision_service=decision_service)
     flat = flatten_sections(sections)
     assert_language_walls(flat)
     _assert_no_accuracy_claim(flat)
