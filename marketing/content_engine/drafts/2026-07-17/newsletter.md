@@ -1,7 +1,7 @@
 <!-- DRAFT — approval queue item. Not published. Publishing requires per-item founder approval + PUBLISHING_ENABLED (publer_pipeline.py). -->
 Subject: Structural regime read — 2026-07-17
 
-This is the weekly read: real data, deterministic indicators, a mechanism check against documented historical episodes, and probabilistic claims recorded to a public append-only ledger.
+This is the weekly read. Nothing has been simplified or hidden — where the evidence is incomplete, the report says so. Real data, deterministic indicators, a mechanism check against documented historical episodes, and probabilistic claims recorded to a public append-only ledger.
 
 REGIME SNAPSHOT
 
@@ -13,7 +13,9 @@ REGIME SNAPSHOT
 
 MECHANISMS
 
-**NONE MATCHED** — and that's the finding. The available signal didn't clear any documented mechanism's trigger conditions, so the system says nothing rather than forcing a story.
+**NONE MATCHED** — none of the documented mechanisms cleared their trigger conditions.
+
+That doesn't mean "nothing is happening." It means the available evidence does not justify claiming a known historical pattern — so the system says so rather than forcing a story.
 
 ON THE RECORD THIS WEEK
 

@@ -11,7 +11,7 @@
 
 6/ Drawdown (SPY): -0.91% off recent high [Tiingo, 2026-07-16]
 
-7/ Mechanisms matched: NONE — the system stays silent on thin evidence rather than forcing a narrative.
+7/ Mechanisms matched: NONE MATCHED. That doesn't mean "nothing is happening" — it means the evidence doesn't justify claiming a known historical pattern.
 
 8/ On the record: P=0.72 by 2026-10-16 — 10-Year minus 2-Year Treasury yield spread remains above +0.30 percentage points (consistent with a non-inverted, moderately steep curve regime).
 

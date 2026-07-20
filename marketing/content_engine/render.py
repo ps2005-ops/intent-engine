@@ -151,11 +151,21 @@ def _snapshot_lines(src: ContentSource) -> List[str]:
     return out
 
 
+# Founder feedback 2026-07-20 (#7): "NONE MATCHED" is a teaching moment,
+# not a shrug. Same three beats everywhere it renders.
+NONE_MATCHED_BLOCK = [
+    "**NONE MATCHED** — none of the documented mechanisms cleared their "
+    "trigger conditions.",
+    "",
+    "That doesn't mean \"nothing is happening.\" It means the available "
+    "evidence does not justify claiming a known historical pattern — so the "
+    "system says so rather than forcing a story.",
+]
+
+
 def _mechanism_block(src: ContentSource) -> List[str]:
     if src.none_matched:
-        return ["**NONE MATCHED** — and that's the finding. The available signal "
-                "didn't clear any documented mechanism's trigger conditions, so the "
-                "system says nothing rather than forcing a story."]
+        return list(NONE_MATCHED_BLOCK)
     return [f"- {m}" for m in src.mechanisms]
 
 
@@ -195,8 +205,10 @@ def render_website_article(src: ContentSource) -> str:
 
 def render_linkedin_post(src: ContentSource) -> str:
     n_unavail = sum(1 for r in src.rows if r["value"] == "unavailable")
-    mech_line = ("Structural mechanisms matched this week: none — and the system "
-                 "says so plainly instead of forcing a story."
+    mech_line = ("Structural mechanisms matched this week: NONE MATCHED. That "
+                 "doesn't mean nothing is happening — it means the available "
+                 "evidence doesn't justify claiming a known historical pattern, "
+                 "so we say so instead of forcing a story."
                  if src.none_matched else
                  f"Structural mechanisms matched this week: {len(src.mechanisms)}.")
     lines = [DRAFT_BANNER,
@@ -229,8 +241,9 @@ def render_x_thread(src: ContentSource) -> str:
         lines += [f"{n}/ {r['label']}: {v}{prov}", ""]
         n += 1
     if src.none_matched:
-        lines += [f"{n}/ Mechanisms matched: NONE — the system stays silent on "
-                  "thin evidence rather than forcing a narrative.", ""]
+        lines += [f"{n}/ Mechanisms matched: NONE MATCHED. That doesn't mean "
+                  "\"nothing is happening\" — it means the evidence doesn't "
+                  "justify claiming a known historical pattern.", ""]
         n += 1
     for p in src.predictions:
         lines += [f"{n}/ On the record: P={p['p']} by {p['by']} — {p['claim']}", ""]
@@ -243,9 +256,11 @@ def render_newsletter(src: ContentSource) -> str:
     lines = [DRAFT_BANNER,
              f"Subject: Structural regime read — {src.snapshot_date}",
              "",
-             "This is the weekly read: real data, deterministic indicators, a "
-             "mechanism check against documented historical episodes, and "
-             "probabilistic claims recorded to a public append-only ledger.",
+             "This is the weekly read. Nothing has been simplified or hidden — "
+             "where the evidence is incomplete, the report says so. Real data, "
+             "deterministic indicators, a mechanism check against documented "
+             "historical episodes, and probabilistic claims recorded to a "
+             "public append-only ledger.",
              "",
              "REGIME SNAPSHOT", ""]
     lines += _snapshot_lines(src)
@@ -263,7 +278,8 @@ def render_founder_email(src: ContentSource) -> str:
     lines = [DRAFT_BANNER,
              f"Subject: Your structural regime read, {src.snapshot_date}",
              "",
-             "Here's this week's read — two minutes, no narrative padding.",
+             "Here's the latest structural read. Nothing has been simplified or "
+             "hidden — where the evidence is incomplete, the report says so.",
              "",
              "Where the regime stands:", ""]
     lines += _snapshot_lines(src)

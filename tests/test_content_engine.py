@@ -98,6 +98,40 @@ def test_write_drafts_is_idempotent(source, tmp_path):
     assert len(all_files) == len(first)
 
 
+def test_none_matched_is_educational_everywhere_it_renders(source):
+    """Founder feedback #7: 'NONE MATCHED' teaches, it doesn't shrug. The
+    2026-07-17 run matched nothing, so every asset must carry all three
+    beats: the marker, the disclaimer of the wrong reading, and the reason."""
+    assert source.none_matched
+    drafts = ce.render_all(source)
+    for asset_type, draft in drafts.items():
+        assert "NONE MATCHED" in draft, asset_type
+        assert "nothing is happening" in draft, asset_type
+        assert "known historical pattern" in draft, asset_type
+
+
+def test_founder_email_and_newsletter_lead_with_positioning(source):
+    """Founder feedback #6: warmer opener that reinforces the positioning,
+    without conversational fluff."""
+    drafts = ce.render_all(source)
+    for asset_type in ("founder_email", "newsletter"):
+        assert "Nothing has been simplified or hidden" in drafts[asset_type], asset_type
+    assert "Here's this week's read — two minutes" not in drafts["founder_email"]
+
+
+def test_tone_stays_restrained(source):
+    """The tone is a feature, not an accident: the body copy carries no
+    exclamation marks, no emoji, and no hype words. (The machine-readable
+    draft banner and the fixed trace table are excluded — they aren't prose.)"""
+    for asset_type, draft in ce.render_all(source).items():
+        body = draft.replace(ce.DRAFT_BANNER, "").replace(ce.TRACE_TABLE, "")
+        assert "!" not in body, asset_type
+        assert all(ord(ch) < 0x2190 or ch in "—…" for ch in body), asset_type
+        for hype in ("game-changer", "revolutionary", "unprecedented",
+                     "guarantee", "cutting-edge", "world-class"):
+            assert hype not in body.lower(), (asset_type, hype)
+
+
 def test_claim_audit_catches_violations():
     assert ce.audit_predictive_accuracy_claims("our model is 90% accurate") != []
     assert ce.audit_predictive_accuracy_claims("a proven track record") != []

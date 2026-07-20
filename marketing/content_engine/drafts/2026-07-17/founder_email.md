@@ -1,7 +1,7 @@
 <!-- DRAFT — approval queue item. Not published. Publishing requires per-item founder approval + PUBLISHING_ENABLED (publer_pipeline.py). -->
 Subject: Your structural regime read, 2026-07-17
 
-Here's this week's read — two minutes, no narrative padding.
+Here's the latest structural read. Nothing has been simplified or hidden — where the evidence is incomplete, the report says so.
 
 Where the regime stands:
 
@@ -13,7 +13,9 @@ Where the regime stands:
 
 Mechanisms:
 
-**NONE MATCHED** — and that's the finding. The available signal didn't clear any documented mechanism's trigger conditions, so the system says nothing rather than forcing a story.
+**NONE MATCHED** — none of the documented mechanisms cleared their trigger conditions.
+
+That doesn't mean "nothing is happening." It means the available evidence does not justify claiming a known historical pattern — so the system says so rather than forcing a story.
 
 Claims we put on the record (graded by code, not by us):
 

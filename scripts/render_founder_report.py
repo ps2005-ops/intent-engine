@@ -210,11 +210,33 @@ def render(parsed: dict) -> str:
 # new packages, and the byte-level simplicity keeps the artifact auditable.
 # ---------------------------------------------------------------------------
 
+from datetime import datetime, timezone  # noqa: E402
+
+# Founder feedback 2026-07-20 (report v2): Company Snapshot, boxed
+# Recommendation (decision framework, NOT a prediction), rule-computed
+# Evidence Confidence (in the analysis, NOT the future), numbered
+# Assumptions, facts/inference separation, risk-level grouping,
+# "what would change this", Appendix + decision loop. The original
+# 9-section DoD set is a strict subset of this order.
 PREMORTEM_SECTION_ORDER = [
-    "Executive Summary", "Decision", "Mechanisms", "Evidence",
-    "Contradictions", "Scenario tree", "Metrics to watch",
-    "90-day checklist", "Prediction",
+    "Company Snapshot", "Executive Summary", "Recommendation",
+    "Evidence Confidence", "Decision", "Assumptions", "Mechanisms",
+    "Evidence", "Contradictions", "Scenario tree", "Metrics to watch",
+    "What would change this", "90-day checklist", "Prediction", "Appendix",
 ]
+
+RISK_LEVELS = {"likely": "HIGH", "tail_risk": "TAIL", "possible": "MEDIUM",
+               "unlikely": "LOW"}
+_RISK_ORDER = ["HIGH", "TAIL", "MEDIUM", "LOW", "UNRATED"]
+
+
+def _engine_version() -> str:
+    try:
+        m = re.search(r'^version\s*=\s*"([^"]+)"',
+                      (REPO_ROOT / "pyproject.toml").read_text(), re.M)
+        return m.group(1) if m else "unknown"
+    except OSError:  # pragma: no cover
+        return "unknown"
 
 _PDF_ALLOWED_DISCLAIMERS = ["no accuracy is claimed", "no accuracy claimed"]
 _PDF_FORBIDDEN_CLAIMS = ["accura", "track record", "hit rate", "win rate",
@@ -241,73 +263,184 @@ def _could_not_verify_lines(unverified: list) -> list:
     return [header] + [f"- {u}" for u in unverified]
 
 
-def build_premortem_sections(decision_text: str, context, result) -> dict:
-    """PremortemResult -> {section_title: [lines]}, in the approved order."""
+def build_premortem_sections(decision_text: str, context, result,
+                             generated_at: str = None) -> dict:
+    """PremortemResult -> {section_title: [items]}, in the approved order.
+
+    Items are strings (body text) or dicts the PDF writer understands:
+    {"h":}, {"check":}, {"cross":}, {"bullet":}, {"box": [...]},
+    {"gauge": level}, {"bar": level, "text":}, {"tree": [(name,tag,deltas)]}.
+    Every fact comes from the inputs; everything else is fixed template
+    prose. No new facts, no forecasts, no accuracy claims.
+    """
     intent, audit, scen = result.intent, result.risk_audit, result.scenario_set
-
-    sections = {}
-    sections["Executive Summary"] = [audit.narrative_summary]
-
-    ctx_lines = [f"Decision under review: {decision_text}"]
-    for k, v in context.model_dump().items():
-        if v is not None:
-            ctx_lines.append(f"- {k.replace('_', ' ')}: {v}")
-    if intent.goals:
-        ctx_lines.append("Goals: " + "; ".join(intent.goals))
-    if intent.constraints:
-        ctx_lines.append("Constraints: " + "; ".join(intent.constraints))
-    ctx_lines.append(f"Stated risk tolerance: {intent.risk_tolerance}")
-    sections["Decision"] = ctx_lines
-
     rm = result.ranked_mechanisms
-    if rm is None:
-        sections["Mechanisms"] = ["UNAVAILABLE — the mechanism read was not "
-                                  "requested this run, so no claim is made."]
-    elif not rm:
-        sections["Mechanisms"] = ["NONE MATCHED — the available signal didn't "
-                                  "clear any documented mechanism's trigger "
-                                  "conditions; silence is the honest answer."]
-    else:
-        sections["Mechanisms"] = [f"- {m}" for m in rm]
+    lp = result.ledgered_predictions
 
-    ev = []
-    for fm in audit.failure_modes:
-        ev.append(f"- {fm.description} [likelihood: {fm.likelihood}] — {fm.rationale}")
+    # -- shared derivations (computed once, used by several sections) --------
     unverified = []
+    signal_lines = []
 
     def _signal(label, value):
         sval = ", ".join(value) if isinstance(value, list) else value
         if sval is None or str(sval) in _UNVERIFIED_VALUES:
-            marker = "UNKNOWN — not enough signal in the decision text; not guessed."
+            signal_lines.append(f"{label}: UNKNOWN — not enough signal in the "
+                                "decision text; not guessed.")
             unverified.append(f"{label}: {sval if sval is not None else 'not extracted'}")
-            ev.append(f"- {label}: {marker}")
         else:
-            ev.append(f"- {label}: {sval}")
+            signal_lines.append(f"{label}: {sval}")
 
     _signal("Scale efficiency", getattr(intent, "scale_efficiency", None))
     _signal("Leverage type", getattr(intent, "leverage_type", None) or None)
     _signal("Market timing signal", getattr(intent, "market_timing_signal", None))
+
+    ctx_fields = [
+        ("Revenue", context.revenue), ("Growth rate", context.growth_rate),
+        ("Team size", context.team_size), ("Runway (months)", context.runway_months),
+        ("Market", context.market),
+        ("Competitive position", context.competitive_position),
+        ("Primary goal", context.founder_goals
+         or (", ".join(context.stated_priorities) or None)),
+    ]
+    n_ctx = sum(1 for _, v in ctx_fields if v is not None)
+
+    sections = {}
+
+    # -- Company Snapshot (feedback #8: written for one company) -------------
+    snap = [{"h": "This analysis is grounded in the following business:"}]
+    for label, v in ctx_fields:
+        snap.append(f"{label}: {v if v is not None else 'not provided'}")
+    sections["Company Snapshot"] = [{"box": snap}]
+
+    sections["Executive Summary"] = [audit.narrative_summary]
+
+    # -- Recommendation (feedback #1: a decision framework, not a prediction)
+    rec = [{"h": "Decision framework — conditions, not a forecast"},
+           "Proceed only if ALL of the following hold:"]
+    for c in intent.constraints:
+        rec.append({"check": f"This constraint still holds: {c}"})
+    rec.append({"check": f"The key sensitivity clears: {audit.key_sensitivity}"})
+    for fm in audit.failure_modes:
+        if fm.likelihood in ("likely", "tail_risk"):
+            rec.append({"check": f"A mitigation is in place for: {fm.description}"})
+    rec += ["If any condition fails: delay or re-scope, and re-run this premortem.",
+            "(Every condition above is drawn 1:1 from the stated constraints and "
+            "the risks below. This box frames the decision; it does not forecast "
+            "an outcome.)"]
+    sections["Recommendation"] = [{"box": rec}]
+
+    # -- Evidence Confidence (feedback #2: in the ANALYSIS, not the future) --
+    checks = []
+    if n_ctx >= 4:
+        checks.append({"check": f"business context: {n_ctx} of {len(ctx_fields)} "
+                                "fields provided"})
+    else:
+        checks.append({"cross": f"business context sparse: {n_ctx} of "
+                                f"{len(ctx_fields)} fields provided"})
+    if unverified:
+        checks.append({"cross": "structural signals incomplete: "
+                                + "; ".join(unverified)})
+    else:
+        checks.append({"check": "structural signals fully extracted"})
+    if rm is not None:
+        checks.append({"check": "documented mechanism library consulted"})
+    else:
+        checks.append({"cross": "mechanism read not requested this run"})
+    if lp is not None:
+        checks.append({"check": "claims recorded to the append-only ledger"})
+    else:
+        checks.append({"cross": "no prediction recorded this run"})
+    n_cross = sum(1 for c in checks if "cross" in c)
+    level = "HIGH" if n_cross == 0 else ("MEDIUM" if n_cross <= 2 else "LOW")
+    sections["Evidence Confidence"] = (
+        [{"gauge": level},
+         "Confidence in the analysis given the available evidence — NOT "
+         "confidence in the future. Computed by rule from the checks below, "
+         "never by model self-assessment.", "because:"]
+        + checks)
+
+    # -- Decision ------------------------------------------------------------
+    dec = [f"Decision under review: {decision_text}"]
+    if intent.goals:
+        dec.append("Goals: " + "; ".join(intent.goals))
+    if intent.constraints:
+        dec.append("Constraints: " + "; ".join(intent.constraints))
+    dec.append(f"Stated risk tolerance: {intent.risk_tolerance}")
+    sections["Decision"] = dec
+
+    # -- Assumptions (feedback #4: numbered, re-run trigger) -----------------
+    assumptions = []
+    for c in intent.constraints:
+        assumptions.append(f"{c} (stated constraint)")
+    for label, v in ctx_fields:
+        if v is not None:
+            assumptions.append(f"{label} stays ~ {v} (provided input)")
+    ass = [{"h": "Assumptions this analysis stands on"}]
+    ass += [f"{i}. {a}" for i, a in enumerate(assumptions, 1)]
+    ass.append("If any numbered assumption changes, this report should be "
+               "re-run and superseded (\"re-run because assumption #N changed\").")
+    sections["Assumptions"] = [{"box": ass}]
+
+    # -- Mechanisms (feedback #7: educational NONE MATCHED) ------------------
+    if rm is None:
+        sections["Mechanisms"] = ["UNAVAILABLE — the mechanism read was not "
+                                  "requested this run, so no claim is made."]
+    elif not rm:
+        sections["Mechanisms"] = [
+            "NONE MATCHED — none of the documented mechanisms cleared their "
+            "trigger conditions.",
+            "That doesn't mean \"nothing is happening.\" It means the available "
+            "evidence does not justify claiming a known historical pattern — "
+            "and saying so is the honest answer."]
+    else:
+        sections["Mechanisms"] = [{"bullet": str(m)} for m in rm]
+
+    # -- Evidence (feedback #3 facts vs interpretation, #10 risk levels) -----
+    ev = [{"h": "Observed inputs (facts provided or extracted; honesty "
+               "markers, never guesses)"}]
+    ev += [{"bullet": s} for s in signal_lines]
+    ev.append({"h": "Inference and possible consequence, grouped by risk level"})
+    ev.append("(The grouping is a display mapping of the model's stated "
+              "likelihoods — likely->HIGH, tail_risk->TAIL, possible->MEDIUM, "
+              "unlikely->LOW. It adds no new information.)")
+    by_level = {}
+    for fm in audit.failure_modes:
+        by_level.setdefault(RISK_LEVELS.get(fm.likelihood, "UNRATED"), []).append(fm)
+    for lvl in _RISK_ORDER:
+        for fm in by_level.get(lvl, []):
+            ev.append({"bar": lvl, "text": f"Possible consequence: {fm.description}"})
+            ev.append({"sub": f"Inference: {fm.rationale}"})
     sections["Evidence"] = ev
 
     sections["Contradictions"] = (
         [f"The single factor this decision is most sensitive to: {audit.key_sensitivity}", ""]
         + _could_not_verify_lines(unverified))
 
-    scen_lines = [f"Primary founder priority (extracted): {scen.primary_priority}"]
-    for s in scen.scenarios:
-        scen_lines.append(f"- {s.name.upper()} — {s.tag}: {s.key_deltas}")
-    sections["Scenario tree"] = scen_lines
+    sections["Scenario tree"] = [
+        f"Primary founder priority (extracted): {scen.primary_priority}",
+        {"tree": [(s.name, s.tag, s.key_deltas) for s in scen.scenarios]}]
 
     sections["Metrics to watch"] = (
-        [f"- Key sensitivity to track: {audit.key_sensitivity}"]
-        + [f"- Scenario delta to watch ({s.name}): {s.key_deltas}" for s in scen.scenarios])
+        [{"bullet": f"Key sensitivity to track: {audit.key_sensitivity}"}]
+        + [{"bullet": f"Scenario delta to watch ({s.name}): {s.key_deltas}"}
+           for s in scen.scenarios])
+
+    # -- What would change this (feedback #5) --------------------------------
+    sections["What would change this"] = (
+        ["This assessment — and the recommendation box above — would change if:"]
+        + [{"bullet": f"the key sensitivity resolves the other way: {audit.key_sensitivity}"},
+           {"bullet": "any numbered assumption above breaks"}]
+        + [{"bullet": f"observed results diverge from the {s.name} scenario band "
+                      f"({s.key_deltas})"}
+           for s in scen.scenarios if s.name in ("upside", "downside")]
+        + [{"bullet": "a ledgered claim resolves against this read (graded by "
+                      "code, visible on the ledger)"}])
 
     sections["90-day checklist"] = (
         [f"[ ] {t}" for t in audit.recommended_stress_tests]
         + ["[ ] Re-run this premortem if the key sensitivity above changes materially.",
            "[ ] Check the prediction ledger on each resolve-by date (graded by code)."])
 
-    lp = result.ledgered_predictions
     if lp is None:
         pred_lines = ["UNAVAILABLE — prediction recording was not requested this run."]
     elif not lp:
@@ -319,6 +452,50 @@ def build_premortem_sections(decision_text: str, context, result) -> dict:
                       "by code. Nothing here is a forecast guarantee and no "
                       "accuracy is claimed (0 resolved is 0 resolved).")
     sections["Prediction"] = pred_lines
+
+    # -- Appendix (feedback #9 auditable; #12 decision loop) -----------------
+    ts = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    if rm is None:
+        mech_status = "not requested this run (labeled UNAVAILABLE above)"
+    elif not rm:
+        mech_status = "library consulted; zero mechanisms cleared their triggers"
+    else:
+        mech_status = f"{len(rm)} mechanism(s) matched (listed above, cited)"
+    if lp:
+        ledger_status = f"{len(lp)} entr{'y' if len(lp) == 1 else 'ies'} recorded (source=premortem)"
+    elif lp is None:
+        ledger_status = "recording not requested this run"
+    else:
+        ledger_status = "requested; none recorded this run"
+    sections["Appendix"] = [
+        {"h": "Methodology"},
+        "Founder-provided context -> structural extraction by a gate-tested "
+        "analyzer (closed taxonomy; no forced matches) -> deterministic check "
+        "against a documented mechanism library -> scenario framing -> "
+        "probabilistic claims recorded to an append-only ledger and graded by "
+        "code, never by self-assessment. What's unavailable is labeled "
+        "unavailable; what doesn't match, doesn't match.",
+        {"h": "Evidence sources"},
+        {"bullet": "Business context: provided by the founder (Company Snapshot)"},
+        {"bullet": "Structural signals: extracted from the decision text only"},
+        {"bullet": "Mechanism library: mechanisms.json — every historical "
+                   "instance carries a real citation"},
+        {"h": "Mechanisms consulted"},
+        mech_status,
+        {"h": "Prediction ledger"},
+        ledger_status,
+        {"h": "Version & audit trail"},
+        {"bullet": f"Engine version: {_engine_version()}"},
+        {"bullet": f"Analysis timestamp: {ts}"},
+        {"bullet": "Report generator: scripts/render_founder_report.py "
+                   "(deterministic; no numbers invented for presentation)"},
+        {"h": "The decision loop"},
+        "Today's decision -> Evidence -> Recommendation -> Watch list -> "
+        "Decision journal -> Outcome (on the resolve-by dates) -> Calibration.",
+        "This report is one pass through that loop. The append-only ledger and "
+        "the feedback survey close it: a report here is a living record that "
+        "gets graded, not a static artifact.",
+    ]
 
     return {k: sections[k] for k in PREMORTEM_SECTION_ORDER}
 
@@ -343,11 +520,46 @@ def _wrap(line: str, width: int = 92) -> list:
     return out
 
 
+_GAUGE_LEVELS = ["HIGH", "MEDIUM", "LOW"]
+_BAR_WIDTHS = {"HIGH": 130, "TAIL": 130, "MEDIUM": 85, "LOW": 45, "UNRATED": 60}
+_BAR_GRAYS = {"HIGH": 0.2, "TAIL": 0.2, "MEDIUM": 0.45, "LOW": 0.65, "UNRATED": 0.5}
+
+
+def _item_text(it) -> list:
+    """All human-readable text inside one item (for walls/audit/tests)."""
+    if isinstance(it, str):
+        return [it]
+    if "t" in it:
+        return [it["t"]]
+    if "h" in it:
+        return [it["h"]]
+    if "check" in it:
+        return [it["check"]]
+    if "cross" in it:
+        return [it["cross"]]
+    if "bullet" in it:
+        return [it["bullet"]]
+    if "bar" in it:
+        return [it["text"]]
+    if "sub" in it:
+        return [it["sub"]]
+    if "gauge" in it:
+        return [f"Overall evidence confidence: {it['gauge']}"]
+    if "tree" in it:
+        return [f"{n.upper()} — {t}: {d}" for n, t, d in it["tree"]]
+    if "box" in it:
+        return [s for sub in it["box"] for s in _item_text(sub)]
+    return []
+
+
 def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> None:
-    """Structured-text PDF, Letter, Helvetica core fonts, uncompressed
-    streams (auditable: section text is visible in the raw bytes)."""
-    pages, cur, y = [], [], 738
+    """Structured PDF, Letter, Helvetica core fonts + ZapfDingbats
+    check/cross marks, light vector visuals (confidence gauge, risk bars,
+    boxed callouts, scenario tree). Uncompressed streams: the text is
+    visible in the raw bytes, so the artifact stays auditable."""
+    pages, cur = [], []
     top, bottom, lh = 738, 60, 14
+    y = top
 
     def newpage():
         nonlocal cur, y
@@ -355,22 +567,161 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
             pages.append(cur)
         cur, y = [], top
 
-    def put(text, font="F1", size=10, indent=54):
-        nonlocal y
-        if y < bottom:
+    def ensure(height):
+        if y - height < bottom:
             newpage()
-        cur.append(f"BT /{font} {size} Tf {indent} {y} Td ({_pdf_escape(text)}) Tj ET")
+
+    def text_at(x, ypos, s, font="F1", size=10, gray=0.0):
+        cur.append(f"{gray:.2f} g BT /{font} {size} Tf {x} {ypos} Td "
+                   f"({_pdf_escape(s)}) Tj ET 0 g")
+
+    def put(text, font="F1", size=10, x=54, gray=0.0):
+        nonlocal y
+        ensure(lh)
+        text_at(x, y, text, font=font, size=size, gray=gray)
         y -= lh
 
-    put(title, font="F2", size=16); y -= 8
+    def put_wrapped(text, x=54, font="F1", size=10, gray=0.0):
+        width = max(30, int((558 - x) / 5.4))
+        for line in _wrap(str(text), width=width):
+            put(line, font=font, size=size, x=x, gray=gray)
+
+    def put_mark(text, mark, x=58):
+        # mark: '3' = check, '7' = cross (ZapfDingbats)
+        nonlocal y
+        ensure(lh)
+        text_at(x, y, mark, font="F3", size=9, gray=0.15 if mark == "3" else 0.35)
+        width = max(30, int((558 - x - 16) / 5.4))
+        lines = _wrap(str(text), width=width)
+        text_at(x + 14, y, lines[0])
+        y -= lh
+        for cont in lines[1:]:
+            put(cont, x=x + 14)
+
+    def put_gauge(level, x=58):
+        nonlocal y
+        ensure(3 * lh + 14)
+        y -= 4
+        for i, lbl in enumerate(_GAUGE_LEVELS):
+            bx = x + i * 92
+            if lbl == level:
+                cur.append(f"0.20 g {bx} {y - 16} 84 18 re f 0 g")
+                text_at(bx + 8, y - 11, lbl, font="F2", size=9, gray=1.0)
+            else:
+                cur.append(f"0.94 g {bx} {y - 16} 84 18 re f 0 g")
+                cur.append(f"0.70 G {bx} {y - 16} 84 18 re S 0 G")
+                text_at(bx + 8, y - 11, lbl, size=9, gray=0.55)
+        y -= 16 + lh
+        put(f"Overall evidence confidence: {level}", font="F2", size=10, x=x)
+
+    def put_bar(level, text, x=58):
+        nonlocal y
+        ensure(2 * lh + 8)
+        text_at(x, y, f"[{level}]", font="F2", size=9,
+                gray=_BAR_GRAYS.get(level, 0.4))
+        put_wrapped(text, x=x + 52)
+        w = _BAR_WIDTHS.get(level, 60)
+        g = _BAR_GRAYS.get(level, 0.5)
+        if level == "TAIL":  # low probability, high impact: outline, not fill
+            cur.append(f"0.30 G {x} {y + 6} {w} 4 re S 0 G")
+        else:
+            cur.append(f"{g:.2f} g {x} {y + 6} {w} 4 re f 0 g")
+        y -= 8
+
+    def put_tree(branches, x=70):
+        nonlocal y
+        ensure(len(branches) * 2 * lh + 10)
+        y -= 2
+        top_y = y - 4
+        for name, tag, deltas in branches:
+            branch_y = y - 5
+            cur.append(f"0.55 G {x} {branch_y} m {x + 16} {branch_y} l S 0 G")
+            put(f"{name.upper()} — {tag}", font="F2", size=10, x=x + 22)
+            put_wrapped(deltas, x=x + 22, gray=0.35)
+            y -= 4
+        cur.append(f"0.55 G {x} {top_y} m {x} {y + lh} l S 0 G")
+        y -= 4
+
+    def measure(items, x=54):
+        n = 0
+        for it in items:
+            if isinstance(it, str) or "t" in it:
+                s = it if isinstance(it, str) else it["t"]
+                n += len(_wrap(str(s), width=max(30, int((558 - x) / 5.4))))
+            elif "h" in it:
+                n += len(_wrap(it["h"], width=max(30, int((558 - x) / 5.4))))
+            elif "check" in it or "cross" in it or "bullet" in it:
+                s = it.get("check") or it.get("cross") or it.get("bullet")
+                n += len(_wrap(str(s), width=max(30, int((558 - x - 16) / 5.4))))
+            elif "sub" in it:
+                n += len(_wrap(it["sub"], width=max(30, int((558 - x - 56) / 5.4))))
+            else:
+                n += 3
+        return n
+
+    def put_box(items, x=58):
+        nonlocal y
+        height = measure(items, x=x + 6) * lh + 16
+        ensure(min(height, top - bottom - lh))
+        y -= 4
+        box_top = y
+        cur.append(f"0.955 g 50 {box_top - height + 10} 512 {height} re f 0 g")
+        cur.append(f"0.70 G 50 {box_top - height + 10} 512 {height} re S 0 G")
+        y -= 8
+        render_items(items, x=x)
+        y -= 6
+
+    def render_items(items, x=54):
+        for it in items:
+            if isinstance(it, str):
+                put_wrapped(it, x=x)
+            elif "t" in it:
+                put_wrapped(it["t"], x=x)
+            elif "h" in it:
+                put_wrapped(it["h"], x=x, font="F2", size=10.5)
+            elif "sub" in it:
+                put_wrapped(it["sub"], x=x + 56, gray=0.30)
+            elif "check" in it:
+                put_mark(it["check"], "3", x=x + 4)
+            elif "cross" in it:
+                put_mark(it["cross"], "7", x=x + 4)
+            elif "bullet" in it:
+                put_mark(it["bullet"], "l", x=x + 4)   # dingbat small square
+            elif "gauge" in it:
+                put_gauge(it["gauge"], x=x + 4)
+            elif "bar" in it:
+                put_bar(it["bar"], it["text"], x=x + 4)
+            elif "tree" in it:
+                put_tree(it["tree"], x=x + 16)
+            elif "box" in it:
+                put_box(it["box"], x=x + 4)
+
+    def first_item_height(items):
+        """Height of the first element, so a section heading is never left
+        stranded at the foot of a page ('keep with next')."""
+        if not items:
+            return 0
+        it = items[0]
+        if isinstance(it, dict):
+            if "tree" in it:
+                return len(it["tree"]) * 2 * lh + 10
+            if "gauge" in it:
+                return 3 * lh + 14
+            if "box" in it:
+                return min(measure(it["box"], x=64) * lh + 16, top - bottom - lh)
+            if "bar" in it:
+                return 2 * lh + 8
+        return len(_wrap(str(_item_text(it)[0] if _item_text(it) else ""))) * lh
+
+    put(title, font="F2", size=16)
+    y -= 8
     for sec_title in sections:
         y -= 6
-        if y < bottom + 3 * lh:
-            newpage()
-        put(sec_title, font="F2", size=13); y -= 2
-        for raw in sections[sec_title]:
-            for line in _wrap(str(raw)):
-                put(line)
+        items = sections[sec_title]
+        ensure(min(2 * lh + first_item_height(items), top - bottom - lh))
+        put(sec_title, font="F2", size=13)
+        y -= 2
+        render_items(items)
     newpage()
 
     def enc(s: str) -> bytes:
@@ -382,7 +733,8 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
     kids = " ".join(f"{4 + 2 * i} 0 R" for i in range(n_pages))
     objs[2] = enc(f"<< /Type /Pages /Kids [{kids}] /Count {n_pages} >>")
     objs[3] = (b"<< /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >> "
-               b"/F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >> >>")
+               b"/F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >> "
+               b"/F3 << /Type /Font /Subtype /Type1 /BaseFont /ZapfDingbats >> >>")
     for i, page in enumerate(pages):
         pnum, cnum = 4 + 2 * i, 5 + 2 * i
         stream = enc("\n".join(page))
@@ -405,12 +757,27 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
     Path(out_path).write_bytes(bytes(buf))
 
 
+def flatten_sections(sections: dict) -> str:
+    """Every human-readable string in the report, including section titles
+    and text nested inside boxes/gauges/bars/trees. This is what the walls
+    and the claim audit run against — a visual element must never become a
+    place where an unchecked claim can hide."""
+    out = []
+    for title, items in sections.items():
+        out.append(title)
+        for it in items:
+            out.extend(_item_text(it))
+    return "\n".join(out)
+
+
 def render_premortem_pdf(decision_text: str, context, result, out_path,
-                         title: str = "Pre-Mortem Report") -> dict:
+                         title: str = "Pre-Mortem Report",
+                         generated_at: str = None) -> dict:
     """The C2 entry point: PremortemResult -> productized PDF. Returns the
     section dict that was rendered (for callers/tests)."""
-    sections = build_premortem_sections(decision_text, context, result)
-    flat = "\n".join(line for lines in sections.values() for line in lines)
+    sections = build_premortem_sections(decision_text, context, result,
+                                        generated_at=generated_at)
+    flat = flatten_sections(sections)
     assert_language_walls(flat)
     _assert_no_accuracy_claim(flat)
     write_pdf(sections, out_path, title=title)

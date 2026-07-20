@@ -1,7 +1,7 @@
 <!-- DRAFT — approval queue item. Not published. Publishing requires per-item founder approval + PUBLISHING_ENABLED (publer_pipeline.py). -->
 Weekly structural regime read, 2026-07-17.
 
-Structural mechanisms matched this week: none — and the system says so plainly instead of forcing a story.
+Structural mechanisms matched this week: NONE MATCHED. That doesn't mean nothing is happening — it means the available evidence doesn't justify claiming a known historical pattern, so we say so instead of forcing a story.
 
 3 of 5 indicator series were unavailable this run — they're labeled UNAVAILABLE, not papered over.
 
