@@ -363,10 +363,14 @@ no-sent-without-human-approval outreach wall). **Analytics: BUILT**
 (T015, `src/intent_engine/analytics/` — canonical metric contract in
 `analytics/models.py`; read-side only; versioned metrics; calibration
 behind the A-M5 gate with brier_summary authoritative; consumer health
-proven read-only). Knowledge and marketing-automation consumers:
-**NOT BUILT** — knowledge promotion is next (`ROADMAP.md` T016).
-Autonomous outreach: **NOT BUILT** and not planned without its own
-founder gate.
+proven read-only). **Knowledge promotion: BUILT** (T016,
+`src/intent_engine/knowledge/` — canonical contract in
+`knowledge/records.py`; feedback → insight → knowledge kept separate;
+human-only validation and promotion; citations mandatory; mechanism
+proposals queue for review and never write the frozen library).
+Marketing-automation consumers: **NOT BUILT** — C3–C8 is next
+(`ROADMAP.md` T017). Autonomous outreach and autonomous publication:
+**NOT BUILT** and not planned without their own founder gates.
 
 ---
 

@@ -23,6 +23,7 @@ corrected.
 | Company event contract (envelope + taxonomy + producer ownership) | `src/intent_engine/events/envelope.py` (architecture: `docs/COMPANY_OS.md` Part 3) |
 | CRM contract (identity + taxonomy + lifecycle axes) | `src/intent_engine/crm/events.py` (architecture: `docs/COMPANY_OS.md` P8) |
 | Analytics contract (MetricResult + versions + windows) | `src/intent_engine/analytics/models.py` (architecture: `docs/COMPANY_OS.md` P10) |
+| Knowledge contract (feedback/insight/knowledge + consent + citations) | `src/intent_engine/knowledge/records.py` (architecture: `docs/COMPANY_OS.md` P9) |
 | Agent registry | `docs/AGENTS.md` |
 | Tooling decisions (NOW / LATER / NEVER) | `docs/TOOLS.md` |
 | Honest claim surface / positioning | `docs/POSITIONING.md`, `docs/CAPABILITY_BOUNDARIES.md` |

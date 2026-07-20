@@ -288,9 +288,15 @@ now also BUILT** (T015, commits 60b8ae8 / aac36c8 / 40dfd50 / a27bba8:
 versioned read-side metrics, A-M5-gated calibration views reusing
 brier_summary, CRM funnel + report + consumer-health views, one
 AnalyticsService + read-only CLI — canonical contract in
-`src/intent_engine/analytics/models.py`). Knowledge promotion (next:
-`ROADMAP.md` T016), marketing C3–C8, growth, PM/Research agents,
-AgentOS extraction, Personal AI, public APIs: **NOT YET BUILT**.*
+`src/intent_engine/analytics/models.py`). **Knowledge Promotion and
+Feedback V1 is now also BUILT** (T016, commits 6db7d83 / 3859b8e /
+eb57aba: append-only feedback ledger with the exact-text human quote
+gate, typed citations, human-gated insight validation and knowledge
+promotion with versioning and typed retraction, mechanism proposal queue
+that never writes the frozen library — canonical contract in
+`src/intent_engine/knowledge/records.py`). Marketing C3–C8 (next:
+`ROADMAP.md` T017), growth, PM/Research agents, AgentOS extraction,
+Personal AI, public APIs: **NOT YET BUILT**.*
 
 *Revised 2026-07-20 after founder review. The one insisted change is
 adopted in full: the record is **event-sourced**. State is never stored as

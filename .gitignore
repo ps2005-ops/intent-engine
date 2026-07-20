@@ -27,3 +27,9 @@ events/
 # T014 runtime CRM log (append-only data, not source)
 marketing/crm/crm.jsonl
 marketing/crm/crm.jsonl.lock
+
+# T016 runtime knowledge/feedback logs (append-only data, not source)
+data/feedback.jsonl
+data/feedback.jsonl.lock
+knowledge/knowledge.jsonl
+knowledge/knowledge.jsonl.lock

@@ -3177,3 +3177,35 @@ sections, never optimistic zeroes. 34 new tests (suite 851 → 885).
 **Queue**: T016 — knowledge promotion and feedback (append-only
 feedback + knowledge stores, human-gated promotion path, citations
 mandatory, frozen mechanism library untouched — bars in ROADMAP.md).
+
+## 2026-07-21 (session 7) — T016 complete: Knowledge Promotion and Feedback
+
+**Committed**: 6db7d83 (append-only data/feedback.jsonl with the
+flock+fsync+fingerprint discipline; the quote gate binds consent to the
+EXACT text span and the intended use — internal consent never implies
+public, approval/rejection/revocation are human-only, revocation blocks
+future publication while every consent fact stays auditable), 3859b8e
+(seven typed citation sources resolved through read-only readers —
+uncited items rejected, external refs must carry title+url, and an
+analytics metric reading UNAVAILABLE / TOO FEW / NO OBSERVATION SOURCE
+can never support a positive claim; insights: systems propose, humans
+validate against an EXACT revision, any later revision demands
+revalidation, rejections stay visible; knowledge: promotion needs the
+validated current revision plus mandatory scope, limitations and
+citations, supersession versions without overwrite, retraction carries a
+typed reason; mechanism proposals queue for human review), eb57aba
+(observation-only company-event consumer with its own checkpoint, CLI,
+and end-to-end coverage of the promotion, rejection, and wall paths).
+
+**Boundaries held**: feedback, insight, and knowledge remain three
+distinct layers — an anecdote never becomes truth by existing. No system
+actor can validate or promote. The frozen mechanism library is
+byte-identical after a full proposal-and-acceptance cycle (asserted
+twice). Consumption creates observations only; nothing auto-promotes.
+Claim vocabulary ("proven", "always", "causes", "validated by data", …)
+is rejected at propose/promote/supersede time by a word-boundary wall —
+'provenance' is not 'proven'. 30 new tests (suite 885 → 915).
+
+**Queue**: T017 — marketing automation C3–C8 (drafts only; reuse the
+built CRM approval wall, the T016 quote gate, and the analytics
+calibration view rather than reimplementing any of them).

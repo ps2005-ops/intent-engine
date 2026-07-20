@@ -1,4 +1,25 @@
-# MORNING HANDOFF — loop 14 (2026-07-21, early) — Analytics V1 BUILT
+# MORNING HANDOFF — loop 15 (2026-07-21, morning) — Knowledge Promotion V1 BUILT
+
+*Suite at close: **915 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-15 commits: `6db7d83` (append-only feedback ledger + quote-consent
+gate — consent binds to the exact text AND intended use, approval is
+human-only, revocation blocks future use, history preserved), `3859b8e`
+(typed citations with uncited items rejected and below-gate analytics
+unable to support a positive claim; insights proposed by systems but
+validated only by humans against an exact revision; knowledge promoted
+with mandatory scope/limitations/citations, versioned supersession,
+typed retraction; mechanism proposals queued for human review),
+`eb57aba` (checkpointed observation-only company-event consumer, CLI,
+end-to-end promotion/rejection/wall coverage) + docs. **The frozen
+mechanism library was never written to — asserted by byte identity in
+two tests.** Consumption creates observations only; nothing
+auto-promotes. Queue: **T017 — Marketing automation C3–C8** (drafts
+only; publication and claims stay human-gated; reuse CRM/knowledge/
+analytics rather than reimplementing). Still open for you: two T009
+live runs (A1); Calendar API enablement (403, GCP 965657964785).*
+
+## Previous handoff (loop 14, early) — Analytics V1 BUILT
 
 *Suite at close: **885 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.

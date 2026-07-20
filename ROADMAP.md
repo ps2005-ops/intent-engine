@@ -439,7 +439,20 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T016 — Knowledge promotion and feedback (human-gated learning loop)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits 6db7d83, 3859b8e, eb57aba) — all
+  bars proven: append-only `data/feedback.jsonl` with the exact-text,
+  exact-use, human-only quote-consent gate (revocation blocks future
+  use; history preserved); typed citations resolved through read-only
+  readers with uncited items rejected and below-gate analytics unable to
+  support a positive claim; insight lifecycle where systems propose and
+  only humans validate, bound to the exact revision; knowledge promotion
+  requiring mandatory scope + limitations + citations, versioned
+  supersession and typed retraction; mechanism proposals queued for
+  human review with `mechanisms.json` byte-identical; checkpointed
+  idempotent observation-only consumer. Canonical contract:
+  `src/intent_engine/knowledge/records.py`. 30 tests.
+  Feedback Ledger V1 / Knowledge Promotion V1 / Mechanism Proposal
+  Queue: BUILT. Frozen-library update workflow: NOT BUILT.
 - **Priority**: 1. **Size**: L.
 - **Source**: `docs/COMPANY_OS.md` P9 verdict + PLAN_2026-07-21 C4
   (feedback ledger). One append-only store, many item types — not many
@@ -465,6 +478,39 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   green + EXIT=0.
 - **Walls**: append-only; human-gated promotion; frozen prompts/library
   untouched; no accuracy claims; 0 model calls in the suite.
+
+## T017 — Marketing automation C3–C8 (approved-workflow automation only)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: L.
+- **Source**: `PLAN_2026-07-21.md` C3–C8 + `marketing/MARKETING_PLAN_V2.md`
+  ("automate generation, gate publication and claims"). Extends the
+  built C1 content engine; consumes T013 events, T014 CRM, T016 consent.
+- **Files in scope**: `marketing/content_engine/` (extend),
+  `marketing/content_engine/from_commits.py` (new), page generators,
+  a marketing event consumer, tests. NO growth experiments, NO agents.
+- **Definition of done (bars)**: (a) **C3** a `prediction.recorded` /
+  `report.generated` company-event consumer (own checkpoint, idempotent)
+  fans one ledger fact into the existing draft set — re-drain produces
+  zero duplicate drafts and zero publishes; (b) **C4** feedback capture
+  routes through the T016 ledger (no second feedback store) and the
+  quote gate is the ONLY testimonial path — a draft containing an
+  unconsented quote fails to render; (c) **C5** CRM integration writes
+  outreach drafts through `CRMService` (no `sent` without prior human
+  approval — reuse, do not reimplement); (d) **C6** commit-triggered
+  changelog + social drafts from a fixture commit range, all
+  trace-audited, none published; (e) **C7** public page generators
+  (predictions, leaderboard, mechanism library, case studies, changelog)
+  render from real data and show raw rows + "too few resolved to claim
+  calibration" until the A-M5 gate clears — asserted by reusing the
+  analytics calibration view, never a parallel computation; (f) **C8**
+  the roadmap page regenerates from `ROADMAP.md` with no manual
+  duplication; (g) every generated asset carries the T:1–T:6 trace table
+  and passes the existing claim audit; `PUBLISHING_ENABLED` remains off
+  and no network call occurs in the suite; offline suite green + EXIT=0.
+- **Walls**: drafts only — nothing publishes, nothing sends; no accuracy
+  claims (A-M5); frozen prompts/library untouched; 0 model calls in the
+  suite; no parallel CRM/feedback/analytics implementations.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
