@@ -1,12 +1,19 @@
-# Cadence v2 — widened forward-prediction surface — PROPOSAL FOR APPROVAL
+# Cadence v2 — widened forward-prediction surface — APPROVED & IMPLEMENTED
 
-*Phase 1 of the densification plan. PROPOSAL ONLY — I approve nothing and
-implement nothing here; the code is staged behind your explicit approval
-of (1) the widened allowlist, (2) the new daily cap, and (3) the matching
-budget ceiling. Forward-only; every prediction stays deterministic-
-allowlist + pydantic-validated at record time. No accuracy claims. This
-widens DENSITY and BREADTH; it does not change how predictions are graded
-or claimed.*
+*Phase 1 of the densification plan. Founder approved all three numbers
+exactly as proposed on 2026-07-19 (loop 8): (1) allowlist as §1, (2) daily
+cap = 8, (3) ceiling = $7 unchanged. Implemented same loop in
+`core/daily_prediction_policy.py` + `scripts/daily_market_predictions.py`
+with tests (allowlist membership, cap enforcement at 8, per-bucket spread,
+5-instrument extra-window rotation incl. full-pool coverage, ceiling
+math); suite green, exit-checked, one commit. Implementation note: the
+rotating extra became a 5-instrument daily WINDOW over the 29-entry
+non-core pool (window start steps by 5; gcd(5,29)=1 ⇒ every instrument
+visited every 29 days) — this is the "rotating-extra pool grows
+accordingly" clause of §1 made concrete, keeping the run at ≤10 data
+calls. Forward-only; deterministic allowlist + pydantic validation at
+record time; no accuracy claims; grading unchanged. Original proposal
+preserved below.*
 
 ## Current surface (cadence v1, live)
 

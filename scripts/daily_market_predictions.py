@@ -7,12 +7,14 @@ pipeline pieces (fetch -> extraction -> mechanisms -> drafting -> record).
 Numeric-only by design (headlines=[]) until item 3 (headline sourcing)
 merges — per the approval's own sequencing.
 
-Per-run budget: <=6 DATA calls (4 core FRED + SPY + today's rotating
-extra), <=4 MODEL calls (1 extraction + 1 drafting; the +2 retry
-allowance exists in the budget but this script does NOT auto-retry —
-a failed call is a failed run, logged, try again tomorrow). Monthly
-ESTIMATED spend ceiling $7 — checked BEFORE any call; if exceeded the
-run PARKS loudly and does nothing.
+Per-run budget (cadence v2, founder-approved 2026-07-19): <=10 DATA calls
+(4 core FRED + SPY + today's 5-instrument rotating-extra window), <=4
+MODEL calls (1 extraction + 1 drafting; the +2 retry allowance exists in
+the budget but this script does NOT auto-retry — a failed call is a
+failed run, logged, try again tomorrow). Monthly ESTIMATED spend ceiling
+$7 (unchanged in v2 — breadth adds $0 data calls, not model calls) —
+checked BEFORE any call; if exceeded the run PARKS loudly and does
+nothing.
 
 Spend log: data/daily_runner_spend.jsonl (append-only, one row per
 attempted run, including parked/failed ones — the ceiling check reads
@@ -105,10 +107,9 @@ def _append_spend_row(row: dict) -> None:
         fh.write(json.dumps(row) + "\n")
 
 
-def _fetch_rotating_extra(as_of: date, fred_fetcher, price_fetcher):
-    """Today's 6th DATA call. Failure is non-fatal (same discipline as
-    fetch_current_series_data): warn and continue without the extra."""
-    source, instrument = policy.rotating_extra_instrument(as_of)
+def _fetch_one_extra(source: str, instrument: str, as_of: date, fred_fetcher, price_fetcher):
+    """One rotating-extra DATA call. Failure is non-fatal (same discipline
+    as fetch_current_series_data): warn and continue without it."""
     try:
         if source == "tiingo":
             series = price_fetcher(instrument, (as_of - timedelta(days=120)).isoformat(), as_of.isoformat())
@@ -131,6 +132,16 @@ def _fetch_rotating_extra(as_of: date, fred_fetcher, price_fetcher):
     except (ValueError, RuntimeError) as exc:
         print(f"WARNING: rotating extra {instrument!r} fetch failed ({exc}) -- continuing without it.")
         return None
+
+
+def _fetch_rotating_extras(as_of: date, fred_fetcher, price_fetcher):
+    """Cadence v2: today's 5-instrument rotating window (data calls 6-10)."""
+    lines = []
+    for source, instrument in policy.rotating_extra_instruments(as_of):
+        line = _fetch_one_extra(source, instrument, as_of, fred_fetcher, price_fetcher)
+        if line:
+            lines.append(line)
+    return lines
 
 
 def _daily_draft_addendum(as_of: date) -> str:
@@ -180,14 +191,14 @@ def run_daily(
                                "model_calls": 0, "data_calls": 0})
         return summary
 
-    # --- data (<=6 calls) ---------------------------------------------------
+    # --- data (<=10 calls, cadence v2) --------------------------------------
     series_data, price_series = fetch_current_series_data(
         as_of, fred_fetcher=fred_fetcher, price_fetcher=price_fetcher)  # 5 calls
     extraction_text = render_snapshot_numbers_for_extraction(series_data, price_series, as_of)
-    extra_line = _fetch_rotating_extra(as_of, fred_fetcher, price_fetcher)  # 1 call
-    summary["data_calls"] = 6
-    if extra_line:
-        extraction_text = extraction_text + "\n" + extra_line
+    extra_lines = _fetch_rotating_extras(as_of, fred_fetcher, price_fetcher)  # 5 calls
+    summary["data_calls"] = 5 + policy.DAILY_EXTRA_INSTRUMENT_COUNT
+    if extra_lines:
+        extraction_text = extraction_text + "\n" + "\n".join(extra_lines)
 
     if not extraction_text.strip():
         summary["status"] = "no-data"

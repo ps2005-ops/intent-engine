@@ -36,7 +36,7 @@ def _fake_fred(series_id, start, end):
         obs = [(d, base * (1.003 ** i)) for i, d in enumerate(_dates_back(30 * 26))][-780:]
     elif series_id == "UNRATE":
         obs = [(d, 4.3) for d in _dates_back(n)]
-    else:  # DGS10 / VIXCLS rotating extra
+    else:  # any FRED rotating extra (v2 window)
         obs = [(d, 4.1) for d in _dates_back(90)]
     return FredSeries(series_id=series_id, realtime_date=AS_OF.isoformat(), observations=obs)
 
@@ -83,7 +83,8 @@ def test_records_within_cap_and_writes_spend_row(tmp_path, monkeypatch):
     summary, ledger, spend_log = _run(tmp_path, monkeypatch, drafts)
     assert summary["status"] == "ok"
     assert summary["recorded"] == 3
-    assert summary["model_calls"] == 2 and summary["data_calls"] == 6
+    assert summary["model_calls"] == 2
+    assert summary["data_calls"] == 5 + policy.DAILY_EXTRA_INSTRUMENT_COUNT == 10  # cadence v2
     market = list_predictions(source="market", path=ledger)
     assert len(market) == 3
     assert all(p.horizon_days is not None and p.direction is not None for p in market)

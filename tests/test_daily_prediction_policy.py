@@ -1,8 +1,10 @@
 """Offline tests for the approved daily-cadence policy (item 1,
-docs/BA_ACCELERATION_PROPOSAL.md). Every enforced constraint from the
-approval gets a direct test: allowlist, cap 5, 14d floor, bucket spread,
-anti-dup (vs ledger and within batch), baseline quota, rotation
-determinism, spend ceiling."""
+docs/BA_ACCELERATION_PROPOSAL.md; widened to cadence v2 per
+docs/CADENCE_V2_PROPOSAL.md, founder-approved 2026-07-19). Every enforced
+constraint gets a direct test: allowlist (22 Tiingo + 12 FRED), cap 8,
+14d floor, bucket spread, anti-dup (vs ledger and within batch), baseline
+quota, rotation determinism (incl. the v2 5-instrument extra window),
+spend ceiling ($7 unchanged)."""
 
 from datetime import date
 
@@ -53,6 +55,59 @@ def test_rotating_extra_deterministic_and_within_allowlists():
             assert instrument in policy.FRED_SERIES
 
 
+# --- cadence v2 (founder-approved 2026-07-19) -------------------------------
+
+def test_v2_allowlist_is_exactly_the_approved_set():
+    assert policy.TIINGO_INSTRUMENTS == (
+        "SPY", "QQQ", "IWM", "TLT", "GLD", "XLE", "XLF",
+        "XLK", "XLV", "XLY", "XLP", "XLI", "XLB", "XLU", "XLRE", "XLC",
+        "DIA", "MDY", "EFA", "EEM", "HYG", "LQD",
+    )
+    assert policy.FRED_SERIES == (
+        "T10Y2Y", "UNRATE", "CPIAUCSL", "BAMLH0A0HYM2", "DGS10", "VIXCLS",
+        "DGS2", "DGS30", "T10YIE", "DTWEXBGS", "DCOILWTICO", "DEXUSEU",
+    )
+    assert len(policy.TIINGO_INSTRUMENTS) == 22 and len(policy.FRED_SERIES) == 12
+
+
+def test_v2_cap_and_ceiling_numbers():
+    assert policy.DAILY_CAP == 8
+    assert policy.MAX_PER_BUCKET_PER_DAY == 2  # 8/day = 4 buckets x 2, by construction
+    assert policy.MONTHLY_SPEND_CEILING_USD == 7.00  # unchanged in v2
+    # ~21 trading days x <=4 model calls x $0.02 stays far under the ceiling
+    assert 21 * 4 * policy.ESTIMATED_COST_PER_MODEL_CALL_USD < policy.MONTHLY_SPEND_CEILING_USD
+
+
+def test_v2_extra_window_deterministic_size_5_no_dupes_within_day():
+    for offset in range(40):
+        d = date.fromordinal(AS_OF.toordinal() + offset)
+        window = policy.rotating_extra_instruments(d)
+        assert window == policy.rotating_extra_instruments(d)
+        assert len(window) == policy.DAILY_EXTRA_INSTRUMENT_COUNT == 5
+        assert len(set(window)) == 5  # no instrument fetched twice in a day
+        for source, instrument in window:
+            assert (instrument in policy.TIINGO_INSTRUMENTS) if source == "tiingo" \
+                else (instrument in policy.FRED_SERIES)
+        # core+SPY never wastes an extra slot
+        assert all(inst not in policy.CORE_SNAPSHOT_SERIES + ("SPY",) for _, inst in window)
+
+
+def test_v2_rotation_covers_the_full_pool():
+    # gcd(5, 29) == 1: 29 consecutive days must visit every pool entry.
+    seen = set()
+    for offset in range(29):
+        seen.update(policy.rotating_extra_instruments(date.fromordinal(AS_OF.toordinal() + offset)))
+    assert seen == set(policy._ROTATING_EXTRAS)
+    assert len(seen) == 29
+
+
+def test_v2_allowed_today_is_core_plus_spy_plus_window():
+    today = policy.allowed_instruments_today(AS_OF)
+    assert len(today) == 10  # 4 core + SPY + 5 extras == the <=10 data calls
+    for s in policy.CORE_SNAPSHOT_SERIES + ("SPY",):
+        assert s in today
+
+
 # --- horizon buckets --------------------------------------------------------
 
 def test_horizon_floor_rejected():
@@ -73,14 +128,17 @@ def test_horizon_bucket_unparseable():
 # --- the policy gate --------------------------------------------------------
 
 def test_daily_cap_enforced():
+    # 9 grounded, non-duplicate candidates spread 2-per-bucket: exactly
+    # DAILY_CAP (8) accepted, the 9th rejected on the cap.
     cands = [
-        _cand("SPY", 14), _cand("SPY", 30),
-        _cand("UNRATE", 60, rule_type="level", value=4.5),
+        _cand("SPY", 14), _cand("UNRATE", 14, rule_type="level", value=4.5),
+        _cand("SPY", 30), _cand("UNRATE", 30, rule_type="level", value=4.5),
+        _cand("SPY", 60), _cand("UNRATE", 60, rule_type="level", value=4.5),
+        _cand("SPY", 90), _cand("UNRATE", 90, rule_type="level", value=4.5),
         _cand("T10Y2Y", 90, rule_type="level", value=0.5),
-        _cand("SPY", 60), _cand("SPY", 90, value=-0.05, op="<="),
     ]
     decision = policy.apply_daily_policy(cands, AS_OF, unresolved_live=[])
-    assert len(decision.accepted) == policy.DAILY_CAP
+    assert len(decision.accepted) == policy.DAILY_CAP == 8
     assert any("daily cap" in reason for _, reason in decision.rejected)
 
 
@@ -91,11 +149,16 @@ def test_allowlist_enforced():
 
 
 def test_grounding_enforced_only_todays_instruments():
-    # QQQ is in the global allowlist but only grounded on its rotation day.
-    d = AS_OF
-    if "QQQ" in policy.allowed_instruments_today(d):
-        d = date.fromordinal(d.toordinal() + 1)  # move to a day QQQ is NOT the extra
-        assert "QQQ" not in policy.allowed_instruments_today(d)
+    # QQQ is in the global allowlist but only grounded on days its window
+    # includes it. Find a nearby day where it is NOT (with a 5-of-29
+    # window most days qualify; assert one exists within the cycle).
+    d = None
+    for offset in range(29):
+        cand_day = date.fromordinal(AS_OF.toordinal() + offset)
+        if "QQQ" not in policy.allowed_instruments_today(cand_day):
+            d = cand_day
+            break
+    assert d is not None, "no QQQ-free day in a full rotation cycle -- window logic broken"
     decision = policy.apply_daily_policy([_cand("QQQ", 30)], d, unresolved_live=[])
     assert decision.accepted == []
     assert "not grounded in today's snapshot" in decision.rejected[0][1]
@@ -139,7 +202,8 @@ def test_opposite_direction_not_a_duplicate():
 
 def test_already_recorded_today_shrinks_budget():
     cands = [_cand("SPY", 14), _cand("SPY", 30), _cand("SPY", 60)]
-    decision = policy.apply_daily_policy(cands, AS_OF, unresolved_live=[], already_recorded_today=4)
+    decision = policy.apply_daily_policy(
+        cands, AS_OF, unresolved_live=[], already_recorded_today=policy.DAILY_CAP - 1)
     assert len(decision.accepted) == 1
 
 

@@ -1386,3 +1386,25 @@ score 0 (no term dropped -- park condition not triggered), (d) scoring
 deterministic/unchanged. Suite 639 passed, 0 failed, EXIT=0 (explicit
 check before commit). This is the headline vocab surface -- NOT the
 frozen TriggerCondition enum, which stays frozen per the loop-8 decision.
+
+## Loop 8 — CADENCE V2 IMPLEMENTED (founder approved all three numbers)
+
+Founder approvals recorded: allowlist as proposed (22 Tiingo incl. all 11
+GICS sector SPDRs + DIA/MDY/EFA/EEM/HYG/LQD; 12 FRED incl. DGS2/DGS30/
+T10YIE/DTWEXBGS/DCOILWTICO/DEXUSEU -- 13 -> 34 instruments), DAILY_CAP
+5 -> 8 (max-per-bucket stays 2; 8/day = 4 buckets x 2 by construction),
+ceiling $7 UNCHANGED. Implementation: rotating extra generalized to a
+deterministic 5-instrument daily window over the 29-entry non-core pool
+(start steps by window size; gcd(5,29)=1 so all 29 visited in 29 days,
+asserted as a test); run budget <=10 data + <=4 model calls;
+allowed_instruments_today = 4 core + SPY + today's 5 extras (grounding
+discipline intact); drafting schema maxItems tracks DAILY_CAP
+automatically. Tests: v2 allowlist exact-set, cap/ceiling numbers,
+window determinism/size/no-dupes/full-coverage, allowed-today shape,
+cap-enforced-at-8 with 9-candidate spread, budget shrink at cap-1.
+Suite 644 passed, 0 failed, EXIT=0 (explicit check before commit).
+NOT changed: grading, claims, baseline pairing, anti-dup, 14d floor,
+park-if-exceeded, append-only ledger, >=30-resolved Alpaca wall.
+The widened cadence only goes LIVE when the daily job runs on the Mac
+(sandbox has no Anthropic egress) -- that remains the founder's single
+biggest lever on calibration timing.
