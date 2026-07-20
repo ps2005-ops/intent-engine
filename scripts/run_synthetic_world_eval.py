@@ -32,7 +32,7 @@ import hashlib
 import json
 import sys
 from collections import Counter
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
@@ -44,7 +44,14 @@ REPORT_DIR = REPO_ROOT / "reports"
 OFFLINE_MD = REPORT_DIR / "synthetic_worlds_eval.md"
 OFFLINE_JSON = REPORT_DIR / "synthetic_worlds_eval.json"
 LIVE_MD = REPORT_DIR / "synthetic_worlds_eval_live.md"
-LIVE_JSON = REPORT_DIR / "synthetic_worlds_eval_live.json"
+LIVE_JSON = REPORT_DIR / "synthetic_worlds_eval_live.json"  # latest run (compat)
+# The live leg is NON-deterministic (model calls on fixed worlds), so
+# run-to-run variance is itself a measurement — every run is archived and
+# summarized in an append-only history; nothing is overwritten anymore.
+# (Founder-flagged 2026-07-20: run 2 clobbered run 1's report; run 1 was
+# recovered from git and backfilled.)
+RUNS_DIR = REPORT_DIR / "synthetic_worlds_runs"
+RUN_HISTORY = REPORT_DIR / "synthetic_worlds_run_history.jsonl"
 
 # The gate-verified simulator extraction prompt's sha256 (recorded at the
 # batch-1 merge, re-verified at batches 2-3). The live leg refuses to run
@@ -203,38 +210,101 @@ def run_live(seed: int, max_calls: int, client=None) -> int:
             **result._asdict(),
         })
 
+    summary = summarize_live_rows(rows)
+    payload = {"seed": seed, "run": date.today().isoformat(), "calls": calls,
+               "generator_version": sw.GENERATOR_VERSION, "rows": rows}
+    record_live_run(payload, summary)
+    print(f"LIVE eval: {calls} calls, report -> {LIVE_MD.name} "
+          f"(archived under {RUNS_DIR.name}/, history appended)")
+    return 0
+
+
+def summarize_live_rows(rows) -> dict:
     singles = [r for r in rows if r["world_type"] == "single"]
     mixed = [r for r in rows if r["world_type"] == "mixed"]
     controls = [r for r in rows if r["world_type"] == "control"]
-    clean_controls = sum(1 for r in controls if not r["predicted"])
+    recalls = [r["condition_recall"] for r in singles + mixed if r["condition_recall"] is not None]
+    precs = [r["condition_precision"] for r in singles + mixed if r["condition_precision"] is not None]
+    return {
+        "singles_identified": sum(1 for r in singles if r["identified"]),
+        "singles_n": len(singles),
+        "mixed_identified": sum(1 for r in mixed if r["identified"]),
+        "mixed_n": len(mixed),
+        "controls_clean": sum(1 for r in controls if not r["predicted"]),
+        "controls_n": len(controls),
+        "mean_recall": round(sum(recalls) / len(recalls), 3) if recalls else None,
+        "mean_precision": round(sum(precs) / len(precs), 3) if precs else None,
+    }
 
+
+def _control_line(s: dict) -> str:
+    base = (f"- control worlds (healthy, condition-free): clean silence in "
+            f"{s['controls_clean']}/{s['controls_n']}")
+    if s["controls_clean"] == s["controls_n"]:
+        return base + " — no hallucinated conditions on any control this run."
+    return (base + " — hallucinated conditions on the rest are the key "
+            "negative finding, listed in the JSON.")
+
+
+def record_live_run(payload: dict, summary: dict) -> None:
+    """Append-only run recording: per-run archive + history line + a
+    regenerated latest-report that includes the cross-run stability table
+    (the live leg is non-deterministic, so variance across runs on the
+    SAME worlds is a first-class measurement)."""
+    REPORT_DIR.mkdir(exist_ok=True)
+    RUNS_DIR.mkdir(exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+    run_id = f"live_{stamp}_v{payload.get('generator_version', '?')}"
+    (RUNS_DIR / f"{run_id}.json").write_text(json.dumps(payload, indent=1))
+    history_row = {"run_id": run_id, "run": payload.get("run"),
+                   "generator_version": payload.get("generator_version"),
+                   "calls": payload.get("calls"), **summary}
+    with open(RUN_HISTORY, "a") as fh:
+        fh.write(json.dumps(history_row) + "\n")
+    LIVE_JSON.write_text(json.dumps(payload, indent=1))
+
+    history = [json.loads(l) for l in RUN_HISTORY.read_text().splitlines() if l.strip()]
+    hist_lines = ["| run | gen | singles | mixed | controls clean | recall | precision |",
+                  "|---|---|---|---|---|---|---|"]
+    for h in history:
+        hist_lines.append(
+            f"| {h['run_id']} | v{h.get('generator_version', '?')} "
+            f"| {h['singles_identified']}/{h['singles_n']} "
+            f"| {h['mixed_identified']}/{h['mixed_n']} "
+            f"| {h['controls_clean']}/{h['controls_n']} "
+            f"| {h.get('mean_recall', '—')} | {h.get('mean_precision', '—')} |")
+
+    s = summary
     lines = [
         "# Synthetic-world reasoning eval — LIVE leg (extraction -> matcher)",
         "",
-        f"*Run {date.today().isoformat()}, seed {seed}, {calls} extraction "
-        f"calls (≈${calls * ESTIMATED_COST_PER_CALL_USD:.2f} estimated). "
-        "Frozen prompt sha256 verified before the first call.*",
+        f"*Latest run {payload.get('run')}, seed {payload.get('seed')}, "
+        f"{payload.get('calls')} extraction calls "
+        f"(≈${(payload.get('calls') or 0) * ESTIMATED_COST_PER_CALL_USD:.2f} "
+        f"estimated), generator v{payload.get('generator_version', '?')}. "
+        "Frozen prompt sha256 verified before the first call. Every run is "
+        f"archived in {RUNS_DIR.name}/ and summarized below — the live leg "
+        "is non-deterministic, so cross-run variance on the same worlds is "
+        "part of the measurement.*",
         "",
         sw.DIAGNOSTIC_DISCLAIMER,
         "",
         f"- single worlds: constructed truth recovered in "
-        f"{sum(1 for r in singles if r['identified'])}/{len(singles)}",
+        f"{s['singles_identified']}/{s['singles_n']}",
         f"- mixed worlds: both mechanisms recovered in "
-        f"{sum(1 for r in mixed if r['identified'])}/{len(mixed)}",
-        f"- control worlds (healthy, condition-free): clean silence in "
-        f"{clean_controls}/{len(controls)} — hallucinated conditions on the "
-        "rest are the key negative finding, listed in the JSON.",
+        f"{s['mixed_identified']}/{s['mixed_n']}",
+        _control_line(s),
         "",
-        "Per-world detail: synthetic_worlds_eval_live.json.",
+        "## Run history (append-only)",
+        "",
+        *hist_lines,
+        "",
+        "Per-world detail: synthetic_worlds_eval_live.json (latest) and "
+        f"{RUNS_DIR.name}/<run_id>.json (all runs).",
     ]
     report = "\n".join(lines) + "\n"
     sw.assert_report_language_walls(report)
-    REPORT_DIR.mkdir(exist_ok=True)
     LIVE_MD.write_text(report)
-    LIVE_JSON.write_text(json.dumps({"seed": seed, "run": date.today().isoformat(),
-                                     "calls": calls, "rows": rows}, indent=1))
-    print(f"LIVE eval: {calls} calls, report -> {LIVE_MD.name}")
-    return 0
 
 
 def main(argv=None):

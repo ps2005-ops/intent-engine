@@ -10,21 +10,27 @@
     "binding_mutual_commitment_exists"
    ],
    "predicted": [
-    "binding_mutual_commitment_exists"
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "ally_drawn_into_linked_conflict"
    ],
    "top_tier": [
-    "ally_drawn_into_linked_conflict"
+    "ally_drawn_into_linked_conflict",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 1,
+   "tier_size": 4,
    "identified": true,
-   "unique_top": true
+   "unique_top": false
   },
   {
    "world_id": "single-ally_drawn_into_linked_conflict-1",
@@ -34,11 +40,13 @@
    ],
    "predicted": [
     "binding_mutual_commitment_exists",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 0.5,
+   "condition_precision": 0.3333333333333333,
    "condition_recall": 1.0,
    "hallucinated": [
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
    "missed": [],
@@ -52,9 +60,12 @@
     "credit_contagion",
     "crowded_trade_deleveraging",
     "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
    ],
-   "tier_size": 7,
+   "tier_size": 10,
    "identified": true,
    "unique_top": false
   },
@@ -65,21 +76,27 @@
     "binding_mutual_commitment_exists"
    ],
    "predicted": [
-    "binding_mutual_commitment_exists"
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "ally_drawn_into_linked_conflict"
    ],
    "top_tier": [
-    "ally_drawn_into_linked_conflict"
+    "ally_drawn_into_linked_conflict",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 1,
+   "tier_size": 4,
    "identified": true,
-   "unique_top": true
+   "unique_top": false
   },
   {
    "world_id": "single-bank_run_maturity_mismatch-0",
@@ -90,11 +107,14 @@
    ],
    "predicted": [
     "curve_inverted",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "bank_run_maturity_mismatch"
@@ -115,11 +135,14 @@
    ],
    "predicted": [
     "curve_inverted",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "bank_run_maturity_mismatch"
@@ -140,11 +163,14 @@
    ],
    "predicted": [
     "curve_inverted",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "bank_run_maturity_mismatch"
@@ -166,12 +192,14 @@
    "predicted": [
     "capacity_investment_outpacing_demand_signal",
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 0.6666666666666666,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
    "hallucinated": [
-    "debt_financed_expansion"
+    "debt_financed_expansion",
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -195,12 +223,14 @@
    "predicted": [
     "capacity_investment_outpacing_demand_signal",
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 0.6666666666666666,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
    "hallucinated": [
-    "debt_financed_expansion"
+    "debt_financed_expansion",
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -224,12 +254,14 @@
    "predicted": [
     "capacity_investment_outpacing_demand_signal",
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 0.6666666666666666,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
    "hallucinated": [
-    "debt_financed_expansion"
+    "debt_financed_expansion",
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -284,11 +316,14 @@
     "interconnected_counterparty_exposure"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "carry_trade_unwind"
@@ -299,9 +334,12 @@
     "credit_contagion",
     "crowded_trade_deleveraging",
     "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
    ],
-   "tier_size": 6,
+   "tier_size": 9,
    "identified": true,
    "unique_top": false
   },
@@ -346,11 +384,14 @@
     "interconnected_counterparty_exposure"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "credit_contagion"
@@ -361,9 +402,12 @@
     "credit_contagion",
     "crowded_trade_deleveraging",
     "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
    ],
-   "tier_size": 6,
+   "tier_size": 9,
    "identified": true,
    "unique_top": false
   },
@@ -374,11 +418,14 @@
     "interconnected_counterparty_exposure"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "credit_contagion"
@@ -389,9 +436,12 @@
     "credit_contagion",
     "crowded_trade_deleveraging",
     "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
    ],
-   "tier_size": 6,
+   "tier_size": 9,
    "identified": true,
    "unique_top": false
   },
@@ -402,11 +452,14 @@
     "interconnected_counterparty_exposure"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "credit_contagion"
@@ -417,9 +470,12 @@
     "credit_contagion",
     "crowded_trade_deleveraging",
     "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
    ],
-   "tier_size": 6,
+   "tier_size": 9,
    "identified": true,
    "unique_top": false
   },
@@ -432,11 +488,14 @@
    ],
    "predicted": [
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "crowded_trade_deleveraging"
@@ -457,11 +516,14 @@
    ],
    "predicted": [
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "crowded_trade_deleveraging"
@@ -481,12 +543,17 @@
     "interconnected_counterparty_exposure"
    ],
    "predicted": [
+    "binding_mutual_commitment_exists",
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "crowded_trade_deleveraging"
@@ -508,23 +575,22 @@
    "predicted": [
     "debt_financed_expansion",
     "drawdown_gt_20pct",
-    "interconnected_counterparty_exposure"
+    "few_dominant_competitors"
    ],
    "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
    "hallucinated": [
-    "interconnected_counterparty_exposure"
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
     "debt_deflation_spiral"
    ],
    "top_tier": [
-    "crowded_trade_deleveraging",
     "debt_deflation_spiral",
     "leverage_cycle_bust"
    ],
-   "tier_size": 3,
+   "tier_size": 2,
    "identified": true,
    "unique_top": false
   },
@@ -537,11 +603,14 @@
    ],
    "predicted": [
     "debt_financed_expansion",
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "debt_deflation_spiral"
@@ -563,11 +632,14 @@
    ],
    "predicted": [
     "debt_financed_expansion",
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "debt_deflation_spiral"
@@ -589,11 +661,14 @@
    ],
    "predicted": [
     "capacity_investment_outpacing_demand_signal",
-    "debt_financed_expansion"
+    "debt_financed_expansion",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "debt_fueled_capacity_race"
@@ -614,11 +689,14 @@
    ],
    "predicted": [
     "capacity_investment_outpacing_demand_signal",
-    "debt_financed_expansion"
+    "debt_financed_expansion",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "debt_fueled_capacity_race"
@@ -695,11 +773,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "exogenous_activity_halt"
@@ -709,9 +790,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -722,11 +806,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "exogenous_activity_halt"
@@ -736,9 +823,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -801,21 +891,25 @@
    ],
    "predicted": [
     "concentrated_supplier_base",
+    "few_dominant_competitors",
     "inflation_rising"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "input_cost_inflation_passthrough"
    ],
    "top_tier": [
-    "input_cost_inflation_passthrough"
+    "input_cost_inflation_passthrough",
+    "supply_shock_propagation"
    ],
-   "tier_size": 1,
+   "tier_size": 2,
    "identified": true,
-   "unique_top": true
+   "unique_top": false
   },
   {
    "world_id": "single-leverage_cycle_bust-0",
@@ -826,20 +920,26 @@
    ],
    "predicted": [
     "debt_financed_expansion",
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
    "missed": [],
    "ground_truth": [
     "leverage_cycle_bust"
    ],
    "top_tier": [
     "debt_deflation_spiral",
-    "leverage_cycle_bust"
+    "leverage_cycle_bust",
+    "regulatory_capture_race"
    ],
-   "tier_size": 2,
+   "tier_size": 3,
    "identified": true,
    "unique_top": false
   },
@@ -852,11 +952,14 @@
    ],
    "predicted": [
     "debt_financed_expansion",
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "leverage_cycle_bust"
@@ -878,20 +981,26 @@
    ],
    "predicted": [
     "debt_financed_expansion",
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
    "missed": [],
    "ground_truth": [
     "leverage_cycle_bust"
    ],
    "top_tier": [
+    "crowded_trade_deleveraging",
     "debt_deflation_spiral",
     "leverage_cycle_bust"
    ],
-   "tier_size": 2,
+   "tier_size": 3,
    "identified": true,
    "unique_top": false
   },
@@ -902,11 +1011,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "margin_collateral_spiral"
@@ -916,9 +1028,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -929,11 +1044,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "margin_collateral_spiral"
@@ -943,9 +1061,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -956,11 +1077,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "margin_collateral_spiral"
@@ -970,9 +1094,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -983,11 +1110,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "mechanical_feedback_liquidation"
@@ -997,9 +1127,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -1010,11 +1143,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "mechanical_feedback_liquidation"
@@ -1024,9 +1160,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -1037,11 +1176,14 @@
     "drawdown_gt_20pct"
    ],
    "predicted": [
-    "drawdown_gt_20pct"
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "mechanical_feedback_liquidation"
@@ -1051,9 +1193,12 @@
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
-    "mechanical_feedback_liquidation"
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 5,
+   "tier_size": 8,
    "identified": true,
    "unique_top": false
   },
@@ -1089,11 +1234,14 @@
     "curve_inverted"
    ],
    "predicted": [
-    "curve_inverted"
+    "curve_inverted",
+    "few_dominant_competitors"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "monetary_tightening_lag"
@@ -1101,9 +1249,12 @@
    "top_tier": [
     "bank_run_maturity_mismatch",
     "monetary_tightening_lag",
-    "policy_tightening_demand_collapse"
+    "policy_tightening_demand_collapse",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 3,
+   "tier_size": 6,
    "identified": true,
    "unique_top": false
   },
@@ -1170,11 +1321,14 @@
    ],
    "predicted": [
     "credit_spreads_elevated",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "money_market_contagion"
@@ -1225,11 +1379,14 @@
    ],
    "predicted": [
     "adjacent_market_bundling_opportunity",
+    "few_dominant_competitors",
     "network_effects_present"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "platform_envelopment"
@@ -1275,11 +1432,14 @@
    ],
    "predicted": [
     "adjacent_market_bundling_opportunity",
+    "few_dominant_competitors",
     "network_effects_present"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "platform_envelopment"
@@ -1300,15 +1460,15 @@
     "unemployment_momentum_triggered"
    ],
    "predicted": [
-    "credit_spreads_elevated",
     "curve_inverted",
+    "few_dominant_competitors",
     "inflation_rising",
     "unemployment_momentum_triggered"
    ],
    "condition_precision": 0.75,
    "condition_recall": 1.0,
    "hallucinated": [
-    "credit_spreads_elevated"
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -1358,12 +1518,15 @@
    ],
    "predicted": [
     "curve_inverted",
+    "few_dominant_competitors",
     "inflation_rising",
     "unemployment_momentum_triggered"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.75,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "policy_tightening_demand_collapse"
@@ -1457,21 +1620,27 @@
     "valuation_disconnected_from_fundamentals"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "reflexive_bubble"
    ],
    "top_tier": [
     "capex_overbuild",
+    "prisoners_dilemma_price_war",
     "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
     "winners_curse_acquisition"
    ],
-   "tier_size": 3,
+   "tier_size": 6,
    "identified": true,
    "unique_top": false
   },
@@ -1482,21 +1651,27 @@
     "valuation_disconnected_from_fundamentals"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "reflexive_bubble"
    ],
    "top_tier": [
     "capex_overbuild",
+    "prisoners_dilemma_price_war",
     "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
     "winners_curse_acquisition"
    ],
-   "tier_size": 3,
+   "tier_size": 6,
    "identified": true,
    "unique_top": false
   },
@@ -1507,21 +1682,27 @@
     "valuation_disconnected_from_fundamentals"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "reflexive_bubble"
    ],
    "top_tier": [
     "capex_overbuild",
+    "prisoners_dilemma_price_war",
     "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
     "winners_curse_acquisition"
    ],
-   "tier_size": 3,
+   "tier_size": 6,
    "identified": true,
    "unique_top": false
   },
@@ -1613,11 +1794,14 @@
    ],
    "predicted": [
     "credit_spreads_elevated",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "sovereign_debt_doom_loop"
@@ -1639,11 +1823,14 @@
    ],
    "predicted": [
     "credit_spreads_elevated",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "sovereign_debt_doom_loop"
@@ -1802,21 +1989,27 @@
     "valuation_disconnected_from_fundamentals"
    ],
    "predicted": [
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.5,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "winners_curse_acquisition"
    ],
    "top_tier": [
     "capex_overbuild",
+    "prisoners_dilemma_price_war",
     "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
     "winners_curse_acquisition"
    ],
-   "tier_size": 3,
+   "tier_size": 6,
    "identified": true,
    "unique_top": false
   },
@@ -1828,12 +2021,14 @@
    ],
    "predicted": [
     "capacity_investment_outpacing_demand_signal",
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 0.5,
+   "condition_precision": 0.3333333333333333,
    "condition_recall": 1.0,
    "hallucinated": [
-    "capacity_investment_outpacing_demand_signal"
+    "capacity_investment_outpacing_demand_signal",
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -1859,11 +2054,14 @@
     "capacity_investment_outpacing_demand_signal",
     "credit_spreads_elevated",
     "debt_financed_expansion",
+    "few_dominant_competitors",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.8,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "debt_fueled_capacity_race",
@@ -1889,16 +2087,16 @@
     "unemployment_momentum_triggered"
    ],
    "predicted": [
-    "credit_spreads_elevated",
     "curve_inverted",
     "drawdown_gt_20pct",
+    "few_dominant_competitors",
     "inflation_rising",
     "unemployment_momentum_triggered"
    ],
    "condition_precision": 0.8,
    "condition_recall": 1.0,
    "hallucinated": [
-    "credit_spreads_elevated"
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -1921,11 +2119,14 @@
    ],
    "predicted": [
     "drawdown_gt_20pct",
+    "few_dominant_competitors",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "margin_collateral_spiral",
@@ -1938,10 +2139,13 @@
     "leverage_cycle_bust",
     "margin_collateral_spiral",
     "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
     "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
     "winners_curse_acquisition"
    ],
-   "tier_size": 8,
+   "tier_size": 11,
    "identified": true,
    "unique_top": false
   },
@@ -1988,12 +2192,15 @@
    "predicted": [
     "concentrated_supplier_base",
     "credit_spreads_elevated",
+    "few_dominant_competitors",
     "inflation_rising",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.8,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "input_cost_inflation_passthrough",
@@ -2002,9 +2209,10 @@
    "top_tier": [
     "input_cost_inflation_passthrough",
     "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
    ],
-   "tier_size": 3,
+   "tier_size": 4,
    "identified": true,
    "unique_top": false
   },
@@ -2018,15 +2226,17 @@
     "symmetric_competitor_response_expected"
    ],
    "predicted": [
+    "binding_mutual_commitment_exists",
     "debt_financed_expansion",
     "few_dominant_competitors",
     "frequent_regulatory_interaction",
     "interconnected_counterparty_exposure",
     "symmetric_competitor_response_expected"
    ],
-   "condition_precision": 0.8,
+   "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
    "hallucinated": [
+    "binding_mutual_commitment_exists",
     "frequent_regulatory_interaction"
    ],
    "missed": [],
@@ -2057,14 +2267,12 @@
     "debt_financed_expansion",
     "drawdown_gt_20pct",
     "few_dominant_competitors",
-    "interconnected_counterparty_exposure",
     "valuation_disconnected_from_fundamentals"
    ],
-   "condition_precision": 0.6666666666666666,
+   "condition_precision": 0.8,
    "condition_recall": 1.0,
    "hallucinated": [
-    "few_dominant_competitors",
-    "interconnected_counterparty_exposure"
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -2073,12 +2281,11 @@
    ],
    "top_tier": [
     "capex_overbuild",
-    "crowded_trade_deleveraging",
     "debt_deflation_spiral",
     "debt_fueled_capacity_race",
     "leverage_cycle_bust"
    ],
-   "tier_size": 5,
+   "tier_size": 4,
    "identified": true,
    "unique_top": false
   },
@@ -2092,12 +2299,12 @@
    "predicted": [
     "binding_mutual_commitment_exists",
     "drawdown_gt_20pct",
-    "interconnected_counterparty_exposure"
+    "few_dominant_competitors"
    ],
    "condition_precision": 0.6666666666666666,
    "condition_recall": 1.0,
    "hallucinated": [
-    "interconnected_counterparty_exposure"
+    "few_dominant_competitors"
    ],
    "missed": [],
    "ground_truth": [
@@ -2106,19 +2313,16 @@
    ],
    "top_tier": [
     "ally_drawn_into_linked_conflict",
-    "bank_run_maturity_mismatch",
-    "carry_trade_unwind",
-    "credit_contagion",
-    "crowded_trade_deleveraging",
     "debt_deflation_spiral",
     "exogenous_activity_halt",
     "leverage_cycle_bust",
     "margin_collateral_spiral",
     "mechanical_feedback_liquidation",
-    "money_market_contagion",
-    "sovereign_debt_doom_loop"
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
    ],
-   "tier_size": 12,
+   "tier_size": 9,
    "identified": true,
    "unique_top": false
   },
@@ -2132,21 +2336,25 @@
    ],
    "predicted": [
     "concentrated_supplier_base",
+    "few_dominant_competitors",
     "inflation_rising",
     "interconnected_counterparty_exposure"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.75,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "carry_trade_unwind",
     "input_cost_inflation_passthrough"
    ],
    "top_tier": [
-    "input_cost_inflation_passthrough"
+    "input_cost_inflation_passthrough",
+    "supply_shock_propagation"
    ],
-   "tier_size": 1,
+   "tier_size": 2,
    "identified": true,
    "unique_top": false
   },
@@ -2192,20 +2400,24 @@
    "predicted": [
     "binding_mutual_commitment_exists",
     "concentrated_supplier_base",
+    "few_dominant_competitors",
     "inflation_rising"
    ],
-   "condition_precision": 1.0,
+   "condition_precision": 0.75,
    "condition_recall": 1.0,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [
     "ally_drawn_into_linked_conflict",
     "input_cost_inflation_passthrough"
    ],
    "top_tier": [
-    "input_cost_inflation_passthrough"
+    "input_cost_inflation_passthrough",
+    "supply_shock_propagation"
    ],
-   "tier_size": 1,
+   "tier_size": 2,
    "identified": true,
    "unique_top": false
   },
@@ -2246,16 +2458,24 @@
    "world_id": "control-0",
    "world_type": "control",
    "planted": [],
-   "predicted": [],
-   "condition_precision": null,
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
    "condition_recall": null,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [],
-   "top_tier": [],
-   "tier_size": 0,
-   "identified": true,
-   "unique_top": true
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
   },
   {
    "world_id": "control-1",
@@ -2276,61 +2496,93 @@
    "world_id": "control-2",
    "world_type": "control",
    "planted": [],
-   "predicted": [],
-   "condition_precision": null,
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
    "condition_recall": null,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [],
-   "top_tier": [],
-   "tier_size": 0,
-   "identified": true,
-   "unique_top": true
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
   },
   {
    "world_id": "control-3",
    "world_type": "control",
    "planted": [],
-   "predicted": [],
-   "condition_precision": null,
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
    "condition_recall": null,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [],
-   "top_tier": [],
-   "tier_size": 0,
-   "identified": true,
-   "unique_top": true
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
   },
   {
    "world_id": "control-4",
    "world_type": "control",
    "planted": [],
-   "predicted": [],
-   "condition_precision": null,
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
    "condition_recall": null,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [],
-   "top_tier": [],
-   "tier_size": 0,
-   "identified": true,
-   "unique_top": true
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
   },
   {
    "world_id": "control-5",
    "world_type": "control",
    "planted": [],
-   "predicted": [],
-   "condition_precision": null,
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
    "condition_recall": null,
-   "hallucinated": [],
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
    "missed": [],
    "ground_truth": [],
-   "top_tier": [],
-   "tier_size": 0,
-   "identified": true,
-   "unique_top": true
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
   },
   {
    "world_id": "control-6",
@@ -2363,5 +2615,5 @@
    "unique_top": true
   }
  ],
- "generator_version": "1.1"
+ "generator_version": "1.0"
 }

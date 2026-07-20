@@ -1,0 +1,2 @@
+{"run_id": "live_20260720T015341_v1.0", "run": "2026-07-20", "generator_version": "1.0", "calls": 89, "singles_identified": 68, "singles_n": 69, "mixed_identified": 12, "mixed_n": 12, "controls_clean": 3, "controls_n": 8, "mean_recall": 1.0, "mean_precision": 0.677}
+{"run_id": "live_20260720T015341_v1.1", "run": "2026-07-20", "generator_version": "1.1", "calls": 89, "singles_identified": 68, "singles_n": 69, "mixed_identified": 12, "mixed_n": 12, "controls_clean": 8, "controls_n": 8, "mean_recall": 1.0, "mean_precision": 0.907}

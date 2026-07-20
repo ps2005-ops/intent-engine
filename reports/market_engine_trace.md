@@ -1498,3 +1498,31 @@ unchanged, offline report regenerated, v1.0 live record preserved in
 reports/synthetic_worlds_eval_live.md with the analysis appended. v1.1
 live numbers need one fresh Mac run (same command). NO prompt/enum/
 library change; training use still gated.
+
+## Loop 9 (cont.) — T009 run 2 (v1.1, founder-run) harvested + harness made append-only
+
+RUN 2 RESULTS (89 calls, same seed): singles 68/69 (same lone miss --
+winners_curse world 2, where a hallucinated capacity_investment condition
+combined with the planted valuation condition to rank capex_overbuild
+first), mixed 12/12, **controls 8/8 clean** (from 3/8), condition recall
+1.000 (again: zero planted symptoms missed across both runs), precision
+0.677 -> **0.907**; few_dominant_competitors hallucinations 67 -> 9.
+Reading: the v1.1 opener fix removed the dominant artifact; the residual
+~9% imprecision (mostly few_dominant_competitors x9 + adjacent credit-
+family conditions) is now plausibly model over-trigger, but ONE clean
+control run does not establish stability -- the live leg is
+non-deterministic on fixed worlds, and 3/8 -> 8/8 across two runs is
+itself the variance measurement (founder's point, adopted).
+
+TWO FOUNDER-FLAGGED HARNESS DEFECTS FIXED:
+(1) stale template line ("hallucinated conditions on the rest") rendered
+even in the all-clean case -> control line is now conditional (tested);
+(2) worse, run 2 OVERWROTE run 1's report/JSON (run 1 recovered from git
+26c575d) -> record_live_run() now archives every run to
+reports/synthetic_worlds_runs/<run_id>.json, appends a summary row to
+reports/synthetic_worlds_run_history.jsonl (append-only), and regenerates
+the latest report WITH the cross-run history table. Both founder runs
+backfilled into the history (v1.0: 3/8 clean, prec 0.677; v1.1: 8/8,
+prec 0.907). e2e test extended to cover archiving + history + conditional
+wording. Suite 668 passed, EXIT=0. Stability question stays OPEN: 2-3
+more v1.1 runs (~$1.78 each) would bound the control-hallucination rate.

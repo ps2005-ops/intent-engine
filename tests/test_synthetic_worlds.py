@@ -175,9 +175,19 @@ def test_live_leg_end_to_end_with_perfect_fake_extraction(monkeypatch, tmp_path)
     monkeypatch.setattr(runner, "REPORT_DIR", tmp_path)
     monkeypatch.setattr(runner, "LIVE_MD", tmp_path / "live.md")
     monkeypatch.setattr(runner, "LIVE_JSON", tmp_path / "live.json")
+    monkeypatch.setattr(runner, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(runner, "RUN_HISTORY", tmp_path / "history.jsonl")
     assert runner.run_live(sw.DEFAULT_SEED, 100, client=client) == 0
     assert client.call_tool.call_count == len(worlds)
     import json
+    # append-only run recording: one archived run + one history row
+    assert len(list((tmp_path / "runs").glob("live_*.json"))) == 1
+    history = (tmp_path / "history.jsonl").read_text().splitlines()
+    assert len(history) == 1 and json.loads(history[0])["controls_clean"] == 8
+    # conditional control wording: all-clean case has no stale "the rest"
+    live_md = (tmp_path / "live.md").read_text()
+    assert "no hallucinated conditions on any control this run" in live_md
+    assert "on the rest" not in live_md
     rows = json.loads((tmp_path / "live.json").read_text())["rows"]
     assert all(r["identified"] for r in rows)
     controls = [r for r in rows if r["world_type"] == "control"]
