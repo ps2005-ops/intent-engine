@@ -234,6 +234,36 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   re-opens the Task 3 gate); closed-enum schema; word-boundary language
   walls on the rendered section; no ledger wiring (Task 5's job).
 
+## T010 — Event-sourced Decision Record (Slice 1, data layer)
+
+- **Status**: RUNNABLE — data layer first; NO premortem/pipeline wiring in
+  this task (that is a later, separate commit per the completion roadmap).
+- **Priority**: 1. **Size**: M.
+- **Source**: `docs/V1_COMPLETION_ROADMAP.md` Part E (Slice 1),
+  founder-reviewed 2026-07-20 (event-sourced; 10 final decisions locked).
+- **Files in scope**: `src/intent_engine/core/decision_ids.py` (new),
+  `src/intent_engine/core/decision_record.py` (new),
+  `tests/test_decision_record.py` (new). Prediction-ledger nullable FK and
+  intake wiring are T010's *subsequent* steps (separate commits), not this
+  one.
+- **Definition of done (bars)**: (a) **fold** — create → append a hand-built
+  event sequence → `get_current_state` returns the correct
+  decision/execution/evaluation axes; (b) **idempotency** — re-running
+  `create_decision` with the same `idempotency_key` returns the existing
+  record and creates zero duplicate rows; (c) **dual ID** — `decision_id` is
+  a 26-char ULID, `decision_key` matches `DEC-YYYY-NNNNNN`, both UNIQUE;
+  (d) **transition validator** rejects an illegal sequence (e.g.
+  `DecisionApproved` before `DecisionSubmitted`); (e) **canonical
+  relationships** — one direction stored, inverse derived on read;
+  (f) **schema-version guard** rejects an unsupported future major version;
+  (g) **no raw sensitive intake text** is copied into any event payload;
+  (h) **append-only** enforced (UPDATE/DELETE raise). Check:
+  `python -m pytest tests/test_decision_record.py -q` passes, then the full
+  offline suite passes with EXIT=0, zero regressions.
+- **Walls**: stdlib only (sqlite3/json/hashlib — no new dependency, A3);
+  `PremortemAnalyzer` combined-call prompt + `TriggerCondition` enum
+  untouched; append-only; one commit per step.
+
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
 - **Overnight Task 4 — mechanism rendering in the premortem** — UNBLOCKED
