@@ -278,9 +278,15 @@ bfc0059 / b181f34 / dd3079d: append-only log, canonical envelope in
 `src/intent_engine/events/envelope.py`, idempotent publisher, one-way
 DecisionEvent bridge, consumer checkpoints, bounded retry + dead
 letters + explicit redrive, human-only approval-wall transitions).
-CRM (next: `ROADMAP.md` T014), knowledge promotion, analytics
-consumers, marketing C3–C8, growth, PM/Research agents, AgentOS
-extraction, Personal AI, public APIs: **NOT YET BUILT**.*
+**CRM and Customer Intelligence V1 is now also BUILT** (T014, commits
+cb4c68a / 17bdaef / e206061 / c6991be / 9ea6951 / fd1f89b: append-only
+CRM facts, folded three-axis lifecycle, typed decision links, the first
+real checkpointed company-event consumer, versioned health/conversion
+signals, structural outreach approval wall — canonical contract in
+`src/intent_engine/crm/events.py`). Knowledge promotion, analytics
+consumers (next: `ROADMAP.md` T015), marketing C3–C8, growth,
+PM/Research agents, AgentOS extraction, Personal AI, public APIs:
+**NOT YET BUILT**.*
 
 *Revised 2026-07-20 after founder review. The one insisted change is
 adopted in full: the record is **event-sourced**. State is never stored as

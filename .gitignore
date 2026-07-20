@@ -23,3 +23,7 @@ logs/
 
 # T013 runtime event log (append-only data, not source)
 events/
+
+# T014 runtime CRM log (append-only data, not source)
+marketing/crm/crm.jsonl
+marketing/crm/crm.jsonl.lock

@@ -367,7 +367,17 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T014 — CRM and customer intelligence (first substantial event consumer)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-20 (commits cb4c68a, 17bdaef, e206061,
+  c6991be, 9ea6951, fd1f89b) — all bars proven: append-only
+  `marketing/crm/crm.jsonl` with opaque ULID identity (attributes never
+  keys; exact-match resolution, no fuzzy merge), three folded axes with
+  validated transitions and explicit-only terminal reopen, typed
+  decision links (Decision Record stays authoritative), checkpointed
+  idempotent company-event consumer (no identity guessing; replay =
+  zero duplicate facts), versioned health/conversion signals (missing
+  data = UNKNOWN/UNAVAILABLE, no probabilities), outreach wall
+  structural (sent requires prior human approval per draft). Canonical
+  contract: `src/intent_engine/crm/events.py`. 55 tests. CRM V1: BUILT.
 - **Priority**: 1. **Size**: L.
 - **Source**: `docs/COMPANY_OS.md` P8 verdict + PLAN_2026-07-21 C5 spec
   (extend, not reinvent); first real consumer of the T013 log.
@@ -389,6 +399,33 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   suite green + EXIT=0.
 - **Walls**: append-only; nothing sends without per-item human
   approval; no accuracy claims (A-M5); 0 model calls in the suite.
+
+## T015 — Analytics and calibration (read-side consumers)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: M.
+- **Source**: `docs/COMPANY_OS.md` P10 verdict — analytics as a
+  CONSUMER of authoritative stores, never a parallel logger; every
+  metric ships with why-it-exists / who-consumes-it / what-decision-it-
+  improves.
+- **Files in scope**: new `src/intent_engine/analytics/` (computed
+  read models + an event consumer with its own checkpoint), tests. NO
+  dashboards, NO PostHog wiring in this task (LATER-gated per
+  TOOLS.md), NO knowledge promotion.
+- **Definition of done (bars)**: (a) decision lifecycle metrics
+  (counts/durations per axis) computed from DecisionService reads;
+  (b) prediction calibration view reuses `brier_summary` and renders
+  "too few resolved to claim calibration" until the A-M5 gate (≥30
+  resolved per source) clears — asserted by test, no side door around
+  the claim wall; (c) CRM funnel metrics computed from crm.jsonl rows
+  (conversion counts by stage; metrics computed, never stored);
+  (d) event-consumer health: DLQ depth + checkpoint lag per consumer
+  from the T013 store; (e) an analytics event consumer (own checkpoint)
+  is idempotent under replay; (f) every metric carries its why/who/
+  which-decision annotation (structural, tested); offline suite green +
+  EXIT=0.
+- **Walls**: read-side only — analytics never mutates any store; no
+  accuracy claims; no new dependency; 0 model calls.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

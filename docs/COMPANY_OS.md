@@ -354,8 +354,15 @@ elsewhere). Implemented event names use dotted form
 bridge + the pipeline/report producers. The walls are structural:
 approval/rejection/publication transitions require `actor_type=human`,
 and `content.published` requires a prior human `content.approved` for
-the same subject. Consumers (CRM, analytics, knowledge, marketing
-automation): **NOT BUILT** — CRM is next (`ROADMAP.md` T014).
+the same subject. Consumer status (2026-07-20): **CRM: BUILT** (T014,
+`src/intent_engine/crm/` — canonical CRM contract in `crm/events.py`;
+append-only `marketing/crm/crm.jsonl`; checkpointed idempotent consumer
+of decision.* + report.generated with explicit-link-only identity;
+versioned code-computed health/conversion signals; structural
+no-sent-without-human-approval outreach wall). Analytics, knowledge,
+and marketing-automation consumers: **NOT BUILT** — analytics is next
+(`ROADMAP.md` T015). Autonomous outreach: **NOT BUILT** and not
+planned without its own founder gate.
 
 ---
 

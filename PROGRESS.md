@@ -3122,3 +3122,31 @@ knowledge consumer, marketing automation consumers.
 
 **Queue**: T014 — CRM and customer intelligence, the first substantial
 event consumer (bars in ROADMAP.md).
+
+## 2026-07-20 (session 5) — T014 complete: CRM and Customer Intelligence
+
+**Committed**: cb4c68a (append-only crm.jsonl + opaque ULID identity;
+attributes never keys; exact-match resolution with explicit-conflict
+raising — no fuzzy merge), 17bdaef (three independent folded axes —
+relationship/opportunity/customer — with validated transitions; terminal
+states reopen only via explicit human crm.reopened), e206061 (typed
+decision links validated against DecisionService + the first real
+company-event consumer: checkpoint "crm", identity ONLY through explicit
+crm.decision_linked facts, skip-not-guess policy, replay = zero
+duplicate facts, company events byte-identical after consumption),
+c6991be (health + conversion signals: versioned deterministic rules,
+visible reasons, UNKNOWN/UNAVAILABLE on missing data, boundary-tested
+30-day window, zero probability/accuracy language — asserted), 9ea6951
+(outreach wall: drafted-by-agent OK, sent requires prior human approval
+per draft, rejection blocks, retries deduplicate; CLI), fd1f89b (two
+end-to-end scenarios + corrupted-CRM-store-leaves-platform-green proof).
+
+**Boundaries held**: Decision Record state never inferred or copied
+into CRM rows (tested — no folded status, no intake hash in the CRM
+file); prediction outcomes stay in the ledger; company events stay
+immutable; nothing was sent anywhere; no analytics or marketing
+automation was smuggled in. 55 new tests (suite 796 → 851).
+
+**Queue**: T015 — analytics and calibration read-side consumers (bars
+in ROADMAP.md; the A-M5 ≥30-resolved gate remains the only path to any
+calibration claim).

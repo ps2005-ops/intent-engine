@@ -1,4 +1,25 @@
-# MORNING HANDOFF — loop 12 (2026-07-20, night) — Company Event System V1 BUILT
+# MORNING HANDOFF — loop 13 (2026-07-20, late night) — CRM V1 BUILT
+
+*Suite at close: **851 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-13 commits: `cb4c68a` (CRM store + identity — opaque ULID, exact
+match only, no fuzzy merge), `17bdaef` (three folded lifecycle axes,
+validated transitions, explicit-only terminal reopen), `e206061` (typed
+decision links + the FIRST real company-event consumer: checkpointed,
+idempotent, explicit-link-only identity, replay = zero duplicates),
+`c6991be` (versioned health/conversion signals — missing data reads
+UNKNOWN/UNAVAILABLE, never optimism, no probabilities), `9ea6951`
+(outreach wall structural: no sent without prior human approval per
+draft — the tracking-ledger-schema wall, now code), `fd1f89b` (e2e +
+replay coverage incl. corrupted-CRM-cannot-break-the-platform) + docs.
+**CRM and Customer Intelligence V1: BUILT.** Nothing sends anything;
+`marketing/outreach/ledger.jsonl` untouched (empty; no migration
+needed). Queue: **T015 — Analytics and calibration** (read-side
+consumers; the A-M5 ≥30-resolved claim gate stays load-bearing). Still
+open for you: two T009 live runs (A1); Calendar API enablement (403,
+GCP 965657964785).*
+
+## Previous handoff (loop 12, night) — Company Event System V1 BUILT
 
 *Suite at close: **796 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.
