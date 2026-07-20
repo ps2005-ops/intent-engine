@@ -1,10 +1,11 @@
 # MORNING HANDOFF — loop 10 (2026-07-20, afternoon) — B1/B2/C1/C2 DONE; A1 awaits your runs
 
-*Suite at close: **683 passed, 0 failed, 2 skipped, 10 deselected
+*Suite at close: **694 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit (now
 also enforced by a pre-commit hook). Loop-10 commits: `1c0aa1a` (B1
 housekeeping), `97c586d` (B2 guard), `6190be2` (C1 content engine),
-`fc392be` (C2 premortem PDF) + this handoff. Walls held: prompts/enum/
+`fc392be` (C2 premortem PDF), `1ded8a1` (report v2 — your 12 feedback
+items + Decision Intelligence architecture) + this handoff. Walls held: prompts/enum/
 mechanism library untouched; **0 sandbox model calls** (the live e2e
 tests were explicitly deselected/stripped of the API key in every suite
 run); nothing published, no accuracy claim anywhere.*
@@ -40,6 +41,35 @@ run); nothing published, no accuracy claim anywhere.*
    throughout; language + accuracy-claim walls run before any byte is
    written. 4 tests on a real analyzer fixture (fake client, 0 calls).
 
+5. **Report v2 — your 12 feedback items, all implemented** (`1ded8a1`).
+   Into the premortem PDF: Company Snapshot (#8), boxed Recommendation
+   as a *decision framework with an explicit delay path* (#1),
+   rule-computed Evidence Confidence gauge (#2 — and it says in the
+   report itself that it means confidence in the analysis, not the
+   future), numbered Assumptions with the "re-run because assumption #N
+   changed" trigger (#4), facts/inference separation (#3), risk-level
+   grouping HIGH/TAIL/MEDIUM/LOW (#10), "What would change this" (#5),
+   auditable Appendix (#9), decision-loop framing (#12), and visuals —
+   gauge, risk bars, boxed callouts, scenario tree (#11). Content
+   engine: educational NONE MATCHED with all three beats (#7) and
+   positioning-forward email/newsletter openers (#6). Your "don't make
+   it AI-like" instruction is now enforced by a test: no exclamation
+   marks, no emoji, no hype words in body copy.
+   **One design note for your review**: Evidence Confidence counts
+   "mechanism read not requested" and "no prediction recorded" as
+   crosses, so a quick run without those legs reads LOW. That is
+   deliberate (a thinner run *is* weaker evidence), but if you'd rather
+   those be neutral rather than penalising, say so and I'll re-weight —
+   it's a two-line rule change.
+6. **Decision Intelligence architecture** — `docs/DECISION_INTELLIGENCE_
+   ARCHITECTURE.md` captures the platform tree you sketched, maps every
+   box to real repo paths, and grades the decision loop honestly. The
+   one genuine gap it identifies is the **Decision Journal**: without
+   it, a report is a snapshot rather than a living document. That's the
+   highest-value next build in that direction and it pairs naturally
+   with C4 (feedback loop) — both write append-only rows keyed to a
+   decision.
+
 ## LEDGER SNAPSHOT (2026-07-20 ~12:00 ET, direct DB read)
 
 - **Total: 12** (7 market, 3 premortem, 2 baseline) · resolved: 0 ·
@@ -71,6 +101,14 @@ C6 commit-triggered content → C7 public SEO pages → C8 public roadmap
 page. All emit drafts into the approval queue; publish/claim walls
 unchanged. Phase 2 (weekly sector spanning) recommendation unchanged:
 let a week of live v2 ledger data accrue first.
+
+**Recommended re-sequencing after report v2**: pull the **Decision
+Journal** forward and build it *with* C4. The report now produces a
+recommendation, an assumption set, and a watch list — all three are
+exactly what a journal entry needs, and without one the report can't yet
+say "re-run because assumption #2 changed," which is the whole point of
+numbering them. C4 + Decision Journal together close the loop in
+`docs/DECISION_INTELLIGENCE_ARCHITECTURE.md`; C3/C5–C8 are unaffected.
 
 *Recurring note: densification's value is DENSITY and BREADTH, not being
 right; the synthetic eval's value is DIAGNOSIS, not a claim. Nothing this
