@@ -359,10 +359,14 @@ the same subject. Consumer status (2026-07-20): **CRM: BUILT** (T014,
 append-only `marketing/crm/crm.jsonl`; checkpointed idempotent consumer
 of decision.* + report.generated with explicit-link-only identity;
 versioned code-computed health/conversion signals; structural
-no-sent-without-human-approval outreach wall). Analytics, knowledge,
-and marketing-automation consumers: **NOT BUILT** — analytics is next
-(`ROADMAP.md` T015). Autonomous outreach: **NOT BUILT** and not
-planned without its own founder gate.
+no-sent-without-human-approval outreach wall). **Analytics: BUILT**
+(T015, `src/intent_engine/analytics/` — canonical metric contract in
+`analytics/models.py`; read-side only; versioned metrics; calibration
+behind the A-M5 gate with brier_summary authoritative; consumer health
+proven read-only). Knowledge and marketing-automation consumers:
+**NOT BUILT** — knowledge promotion is next (`ROADMAP.md` T016).
+Autonomous outreach: **NOT BUILT** and not planned without its own
+founder gate.
 
 ---
 

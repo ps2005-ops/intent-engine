@@ -402,7 +402,17 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T015 — Analytics and calibration (read-side consumers)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-20 (commits 60b8ae8, aac36c8, 40dfd50,
+  a27bba8) — all bars proven: versioned MetricResult contract
+  (`src/intent_engine/analytics/models.py`), event-derived decision
+  lifecycle metrics with stalled.v1, calibration views behind the A-M5
+  gate (29→TOO FEW / 30→count gate with founder-review caveat;
+  brier_summary reused, never forked), CRM funnel with
+  history-vs-current separation and UNAVAILABLE denominators, report
+  metrics with NO OBSERVATION SOURCE honesty, per-consumer health
+  (lag/retry/DLQ/NEVER STARTED) proven read-only, one AnalyticsService
+  + read-only CLI, language wall over the full snapshot. 34 tests.
+  Analytics and Calibration V1: BUILT.
 - **Priority**: 1. **Size**: M.
 - **Source**: `docs/COMPANY_OS.md` P10 verdict — analytics as a
   CONSUMER of authoritative stores, never a parallel logger; every
@@ -426,6 +436,35 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   EXIT=0.
 - **Walls**: read-side only — analytics never mutates any store; no
   accuracy claims; no new dependency; 0 model calls.
+
+## T016 — Knowledge promotion and feedback (human-gated learning loop)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: L.
+- **Source**: `docs/COMPANY_OS.md` P9 verdict + PLAN_2026-07-21 C4
+  (feedback ledger). One append-only store, many item types — not many
+  stores.
+- **Files in scope**: new `src/intent_engine/knowledge/` +
+  `knowledge/knowledge.jsonl` + `marketing/feedback/feedback.jsonl`;
+  review-queue artifacts for mechanism proposals. The mechanism library
+  and diagnosis registry are NOT edited (frozen, A3).
+- **Definition of done (bars)**: (a) append-only feedback store (C4
+  fields: useful 1–5, what was wrong, what surprised, would pay, can we
+  quote); "quote=yes" is the ONLY testimonial-eligible path and still
+  requires founder approval before use (structural); (b) append-only
+  `knowledge.jsonl` with typed items; every item cites its source
+  (decision_id / prediction_id / feedback ref) — an uncited item is
+  rejected; (c) promotion path feedback → insight → validated →
+  knowledge item as explicit events; validation and promotion are
+  HUMAN-only transitions; nothing auto-promotes; (d) mechanism
+  candidates go to a review-queue draft with citations; the frozen
+  library is untouched and promotion stays behind its existing
+  reliability gate; (e) knowledge items may link Decision Records
+  (references only — no decision state copied); (f) replay/idempotency:
+  re-running any promotion flow creates zero duplicates; offline suite
+  green + EXIT=0.
+- **Walls**: append-only; human-gated promotion; frozen prompts/library
+  untouched; no accuracy claims; 0 model calls in the suite.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

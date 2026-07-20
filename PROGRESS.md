@@ -3150,3 +3150,30 @@ automation was smuggled in. 55 new tests (suite 796 → 851).
 **Queue**: T015 — analytics and calibration read-side consumers (bars
 in ROADMAP.md; the A-M5 ≥30-resolved gate remains the only path to any
 calibration claim).
+
+## 2026-07-21 (session 6) — T015 complete: Analytics and Calibration
+
+**Committed**: 60b8ae8 (canonical MetricResult contract — one version
+registry, explicit UTC windows with injected as_of, UNAVAILABLE distinct
+from zero, ratios that refuse empty denominators, bounded contributor
+samples; decision lifecycle metrics derived from event history with
+stalled.v1 named and boundary-tested), aac36c8 (calibration behind the
+A-M5 evidence gate: brier_summary stays the one authoritative grading
+computation; 29 resolved renders TOO FEW RESOLVED TO CLAIM CALIBRATION
+with no numbers; 30 opens the count gate while stating the founder-
+review requirement; unresolved/unresolvable counted separately, never
+scored), 40dfd50 (CRM funnel: historical transitions deduped by entity,
+kept distinct from current folded distribution, loss/churn visible;
+report metrics: engagement = NO OBSERVATION SOURCE, not invented;
+consumer health: lag/retry/DLQ/NEVER STARTED, reading modifies nothing),
+a27bba8 (AnalyticsService + read-only CLI + end-to-end with the gate
+flipping at exactly 30 + a language wall over the entire snapshot).
+
+**Boundaries held**: analytics derives facts, creates none; zero writes
+to any store (byte-identity proven); no checkpoint advanced; no claim
+vocabulary anywhere in output; missing sources render UNAVAILABLE
+sections, never optimistic zeroes. 34 new tests (suite 851 → 885).
+
+**Queue**: T016 — knowledge promotion and feedback (append-only
+feedback + knowledge stores, human-gated promotion path, citations
+mandatory, frozen mechanism library untouched — bars in ROADMAP.md).

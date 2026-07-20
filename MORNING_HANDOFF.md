@@ -1,4 +1,24 @@
-# MORNING HANDOFF — loop 13 (2026-07-20, late night) — CRM V1 BUILT
+# MORNING HANDOFF — loop 14 (2026-07-21, early) — Analytics V1 BUILT
+
+*Suite at close: **885 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-14 commits: `60b8ae8` (metric models + decision lifecycle views —
+versioned MetricResult, explicit UTC windows, UNAVAILABLE never
+conflated with zero, stalled.v1), `aac36c8` (calibration views behind
+the A-M5 gate: 29→TOO FEW RESOLVED TO CLAIM CALIBRATION, 30→count gate
+with the founder-review caveat stated; brier_summary reused, never
+forked), `40dfd50` (CRM funnel history-vs-current separation, report
+metrics with NO OBSERVATION SOURCE honesty, per-consumer
+lag/retry/DLQ health proven read-only), `a27bba8` (AnalyticsService +
+read-only CLI + e2e incl. gate flip at exactly 30 + language wall over
+the full snapshot) + docs. **Analytics and Calibration V1: BUILT.**
+Analytics writes to no store (byte-identity tested). Queue: **T016 —
+Knowledge promotion and feedback** (human-gated promotion; frozen
+mechanism library untouched — proposals go to a review queue). Still
+open for you: two T009 live runs (A1); Calendar API enablement (403,
+GCP 965657964785).*
+
+## Previous handoff (loop 13, late night) — CRM V1 BUILT
 
 *Suite at close: **851 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.
