@@ -20,6 +20,7 @@ corrected.
 | Autonomous task queue | `ROADMAP.md` |
 | Near-term execution queue | `PLAN_2026-07-21.md` |
 | Marketing strategy | `marketing/MARKETING_PLAN_V2.md` |
+| Company event contract (envelope + taxonomy + producer ownership) | `src/intent_engine/events/envelope.py` (architecture: `docs/COMPANY_OS.md` Part 3) |
 | Agent registry | `docs/AGENTS.md` |
 | Tooling decisions (NOW / LATER / NEVER) | `docs/TOOLS.md` |
 | Honest claim surface / positioning | `docs/POSITIONING.md`, `docs/CAPABILITY_BOUNDARIES.md` |

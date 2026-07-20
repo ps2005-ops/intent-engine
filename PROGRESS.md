@@ -3090,3 +3090,35 @@ typed envelope from the COMPANY_OS Part 3 catalogue, idempotent
 publishers, DecisionEvent bridge as first producer, consumer
 checkpoints, retry/dead-letter, approval-wall events). Bars in
 ROADMAP.md; consumer systems stay out of scope until the log exists.
+
+## 2026-07-20 (session 4) — T013 complete: the Company Event System
+
+**Committed**: 20a9c2a (envelope + append-only store + idempotent
+publisher; canonical contract = src/intent_engine/events/envelope.py,
+one authoritative producer per event type enforced at publish; fsync
+before publish returns; flock'd concurrent appends), bfc0059
+(DecisionEvent bridge: total deterministic mapping — every domain type
+bridged or explicitly skipped; privacy/owner detail never leaves the
+authoritative store; replay = zero duplicates via
+decision-event:<event_id> keys), b181f34 (consumer checkpoints outside
+the log advancing only on success; bounded retry with persisted attempt
+state; append-only dead letters; explicit idempotent redrive that never
+erases failure history; replay/drain/dry-run CLI), dd3079d
+(approval-wall events: human-only approval/rejection/publication,
+content.published structurally requires prior human content.approved
+for the same subject; real producers wired additively — pipeline emits
+prediction.recorded + invokes the bridge, report renderer emits
+report.generated/generation_failed; observation-only, correctness never
+depends on the log).
+
+**Boundary held**: the DecisionEvent store remains the ONLY source of
+truth for decision state; company events are notifications, never folded
+back. Stdlib only; 0 model calls; frozen prompts untouched. 41 new
+tests (suite 755 → 796).
+
+**Status truthfully marked**: Company Event System V1 BUILT;
+DecisionEvent bridge BUILT. NOT built: CRM consumer, analytics consumer,
+knowledge consumer, marketing automation consumers.
+
+**Queue**: T014 — CRM and customer intelligence, the first substantial
+event consumer (bars in ROADMAP.md).

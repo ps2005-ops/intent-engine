@@ -160,7 +160,12 @@ consumer is also BUILT: the founder report reads the record (Slice 2A,
 bfa0b3f) and renders the three-axis confidence split, Alternatives
 Considered, and the nine-stage lifecycle position (Slice 2B, 6e8d1b0 /
 b34a9d3 / 74d9b1f) — reads only, the report never writes events. The
-event bus (T013) and all further consumers remain **NOT YET BUILT**.
+Company Event System (T013) is also **BUILT**
+(`src/intent_engine/events/`; canonical contract in `envelope.py`): the
+DecisionEvent store remains the ONLY source of truth for decision state,
+and the bridge fans its facts one-way into the integration log — company
+events never fold back into decision state. Consumers (CRM, analytics,
+knowledge, marketing automation) remain **NOT YET BUILT**.
 
 ## What does not change
 

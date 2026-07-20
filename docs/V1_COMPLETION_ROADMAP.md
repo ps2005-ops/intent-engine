@@ -272,9 +272,13 @@ record → report wiring commit bfa0b3f; Slice 2B approved polish commits
 6e8d1b0 / b34a9d3 / 74d9b1f (three-axis Evidence Confidence resolving
 finding #7, Alternatives Considered, nine-stage lifecycle, PDF
 metadata/footer polish). **Decision Platform V1: BUILT. Founder Report
-V1: BUILT.** All bars proven by test; 0 live model calls. Next: Slice 4
-— the Company Event System (`ROADMAP.md` T013, bars written from Part 3
-of COMPANY_OS). Event bus, CRM, knowledge promotion, analytics
+V1: BUILT.** All bars proven by test; 0 live model calls. Slice 4 — the
+**Company Event System — is now also BUILT** (T013, commits 20a9c2a /
+bfc0059 / b181f34 / dd3079d: append-only log, canonical envelope in
+`src/intent_engine/events/envelope.py`, idempotent publisher, one-way
+DecisionEvent bridge, consumer checkpoints, bounded retry + dead
+letters + explicit redrive, human-only approval-wall transitions).
+CRM (next: `ROADMAP.md` T014), knowledge promotion, analytics
 consumers, marketing C3–C8, growth, PM/Research agents, AgentOS
 extraction, Personal AI, public APIs: **NOT YET BUILT**.*
 

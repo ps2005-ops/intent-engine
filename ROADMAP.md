@@ -327,7 +327,17 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T013 — Company Event System (root: append-only log, envelope, first producer)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-20 (commits 20a9c2a, bfc0059, b181f34,
+  dd3079d) — all bars (a)–(h) proven: fsync'd append-only events.jsonl,
+  closed taxonomy with one authoritative producer per type,
+  idempotent publisher, one-way DecisionEvent bridge (total mapping:
+  bridged or explicitly skipped; replay = zero duplicates), per-consumer
+  checkpoints advancing only on success, bounded retry → append-only
+  dead letters → explicit idempotent redrive, replay CLI
+  (`PYTHONPATH=src python -m intent_engine.events`), human-only
+  approval-wall transitions with a structural published-requires-approved
+  check. Canonical contract: `src/intent_engine/events/envelope.py`.
+  41 tests. Company Event System V1: BUILT. Consumers: NOT BUILT.
 - **Priority**: 1. **Size**: L.
 - **Source**: `docs/COMPANY_OS.md` Part 3 (the catalogue and transport
   are already specified there — this task builds them; no new design).
@@ -354,6 +364,31 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 - **Walls**: stdlib only (A3 — the log IS the bus; no broker); frozen
   prompts untouched; the two walls remain the only human-emitted
   transitions; 0 model calls.
+
+## T014 — CRM and customer intelligence (first substantial event consumer)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: L.
+- **Source**: `docs/COMPANY_OS.md` P8 verdict + PLAN_2026-07-21 C5 spec
+  (extend, not reinvent); first real consumer of the T013 log.
+- **Files in scope**: new `marketing/crm/` (append-only `crm.jsonl`),
+  new CRM event consumer using the T013 consumer protocol, tests. NO
+  analytics/knowledge/growth systems in this task.
+- **Definition of done (bars)**: (a) append-only `crm.jsonl` keyed by
+  `prospect_id`; reads collapse to latest per id; (b) lifecycle
+  prospect → contacted → engaged → customer → advocate with validated
+  transitions (waitlist funnel included); (c) intelligence fields
+  (industry, stage, company size, decision type, pain points) plus
+  health score and likelihood-to-convert COMPUTED by code from rows,
+  never stored as opinions; (d) every report-generated interaction row
+  links the `decision_id`; (e) approval wall structural: no `sent` row
+  without a prior `approved` row with non-null `approved_by`; (f) a CRM
+  consumer (T013 protocol, own checkpoint) consumes decision.* and
+  report.generated events idempotently — re-drain writes zero duplicate
+  rows; (g) no scraped lists; metrics computed not stored; offline
+  suite green + EXIT=0.
+- **Walls**: append-only; nothing sends without per-item human
+  approval; no accuracy claims (A-M5); 0 model calls in the suite.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

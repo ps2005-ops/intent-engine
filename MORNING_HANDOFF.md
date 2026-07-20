@@ -1,4 +1,23 @@
-# MORNING HANDOFF — loop 11 (2026-07-20, evening) — Decision Platform V1 + Founder Report V1 BUILT
+# MORNING HANDOFF — loop 12 (2026-07-20, night) — Company Event System V1 BUILT
+
+*Suite at close: **796 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-12 commits: `20a9c2a` (typed append-only company event store +
+idempotent publisher — canonical contract in
+`src/intent_engine/events/envelope.py`), `bfc0059` (DecisionEvent
+bridge, one-way, replay = zero duplicates), `b181f34` (consumer
+checkpoints, bounded retry, dead letters, replay CLI), `dd3079d`
+(approval-wall events + real producers, observation-only) + docs. The
+two walls are now STRUCTURAL: publication/claim transitions require a
+human actor, and `content.published` requires a prior human
+`content.approved` for the same subject. Decision state still folds
+ONLY from the DecisionEvent store — the integration log never owns it.
+**Company Event System V1: BUILT. Consumers: NOT BUILT.** Queue:
+**T014 — CRM and customer intelligence** (first substantial consumer;
+bars in ROADMAP.md). Still open for you: two T009 live runs (A1) and
+the Calendar API enablement (403, GCP 965657964785).*
+
+## Previous handoff (loop 11, evening) — Decision Platform V1 + Founder Report V1 BUILT
 
 *Suite at close: **755 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit (guard

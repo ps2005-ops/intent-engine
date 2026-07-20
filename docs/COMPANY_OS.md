@@ -344,6 +344,19 @@ first-class state; nothing downstream of it fires until a human emits
 `PublishApproved`. This is how the event system and the two walls coexist:
 the walls *are* two events only a human can emit.
 
+**Status (2026-07-20): BUILT** as T013 — `src/intent_engine/events/`.
+The canonical envelope contract and taxonomy live in ONE place,
+`src/intent_engine/events/envelope.py` (this document describes the
+architecture; the code file owns the contract; do not restate it
+elsewhere). Implemented event names use dotted form
+(`decision.created`, `content.approved`, `content.published`,
+`claim.approved`, …); the flow above is realized by the DecisionEvent
+bridge + the pipeline/report producers. The walls are structural:
+approval/rejection/publication transitions require `actor_type=human`,
+and `content.published` requires a prior human `content.approved` for
+the same subject. Consumers (CRM, analytics, knowledge, marketing
+automation): **NOT BUILT** — CRM is next (`ROADMAP.md` T014).
+
 ---
 
 ## Part 4 — Repository restructuring proposal
