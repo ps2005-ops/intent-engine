@@ -263,13 +263,20 @@ indexing + archiving, not rewriting.
 
 ## Part E — Slice 1, revised & fully specified: the Decision Record (event-sourced)
 
-*Status (2026-07-20): **BUILT** — data layer commit 8abb2dd (hardened:
-FKs, append-only triggers on all four tables, atomic supersession,
-payload validation, validated folding, idempotency-key scoping) + Slice
-1B wiring commit 524296e (ledger reference, bridge stamping, idempotent
-intake, typed failure/recovery events). All bars (a)–(g) proven by test;
-0 live model calls. Slice 2A (record → report) is the active queue item
-(`ROADMAP.md` T011). Slices 2B–4 **NOT YET BUILT**.*
+*Status (2026-07-20): **Phase 1 BUILT** — Slice 1 data layer commit
+8abb2dd (hardened: FKs, append-only triggers on all four tables, atomic
+supersession, payload validation, validated folding, idempotency-key
+scoping); Slice 1B wiring commit 524296e (ledger reference, bridge
+stamping, idempotent intake, typed failure/recovery events); Slice 2A
+record → report wiring commit bfa0b3f; Slice 2B approved polish commits
+6e8d1b0 / b34a9d3 / 74d9b1f (three-axis Evidence Confidence resolving
+finding #7, Alternatives Considered, nine-stage lifecycle, PDF
+metadata/footer polish). **Decision Platform V1: BUILT. Founder Report
+V1: BUILT.** All bars proven by test; 0 live model calls. Next: Slice 4
+— the Company Event System (`ROADMAP.md` T013, bars written from Part 3
+of COMPANY_OS). Event bus, CRM, knowledge promotion, analytics
+consumers, marketing C3–C8, growth, PM/Research agents, AgentOS
+extraction, Personal AI, public APIs: **NOT YET BUILT**.*
 
 *Revised 2026-07-20 after founder review. The one insisted change is
 adopted in full: the record is **event-sourced**. State is never stored as

@@ -1,4 +1,22 @@
-# MORNING HANDOFF — loop 10 (2026-07-20, afternoon) — B1/B2/C1/C2 DONE; A1 awaits your runs
+# MORNING HANDOFF — loop 11 (2026-07-20, evening) — Decision Platform V1 + Founder Report V1 BUILT
+
+*Suite at close: **755 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit (guard
+enforced). Loop-11 commits: `8abb2dd` (T010 Decision Record data layer,
+hardened), `524296e` (Slice 1B: decision_id intake→record→ledger wiring,
+idempotent, typed recovery events), `bfa0b3f` (Slice 2A: report reads
+the record), `6e8d1b0`/`b34a9d3`/`74d9b1f` (T012 Slice 2B: three-axis
+Evidence Confidence resolving the finding-#7 concern you flagged,
+Alternatives Considered, nine-stage lifecycle, PDF metadata/footer) +
+docs/status commits. Walls held: prompts/enum/mechanism library
+untouched; **0 sandbox model calls**; nothing published, no accuracy
+claim anywhere. **Decision Platform V1: BUILT. Founder Report V1:
+BUILT.** Queue: **T013 — Company Event System** (bars in ROADMAP.md,
+built from COMPANY_OS Part 3; no consumer systems until the log
+exists). Still open for you: the two T009 live runs (A1) and the
+Calendar API enablement (403 accessNotConfigured, GCP 965657964785).*
+
+## Previous handoff (loop 10, afternoon) — B1/B2/C1/C2 DONE; A1 awaits your runs
 
 *Suite at close: **694 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit (now

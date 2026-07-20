@@ -155,9 +155,12 @@ every other system keys to. Status (2026-07-20): **BUILT** — Slice 1 data
 layer (`core/decision_ids.py`, `core/decision_record.py`, commit 8abb2dd)
 and Slice 1B wiring (ledger `decision_id` reference, bridge stamping,
 idempotent intake + typed recovery events in `run_premortem` /
-`premortem --decision-record`, commit 524296e), 32 tests. First consumer
-(the founder report, Slice 2A) is next; the event bus and further
-consumers remain **NOT YET BUILT**.
+`premortem --decision-record`, commit 524296e), 32 tests. Its first
+consumer is also BUILT: the founder report reads the record (Slice 2A,
+bfa0b3f) and renders the three-axis confidence split, Alternatives
+Considered, and the nine-stage lifecycle position (Slice 2B, 6e8d1b0 /
+b34a9d3 / 74d9b1f) — reads only, the report never writes events. The
+event bus (T013) and all further consumers remain **NOT YET BUILT**.
 
 ## What does not change
 

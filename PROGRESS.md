@@ -3057,3 +3057,36 @@ vertical is now real end-to-end: intake → record → stamped ledger rows →
 report that displays the folded state. Queue: T012 (Slice 2B, approved
 report polish: 3-axis confidence split, Alternatives, lifecycle
 presentation) is RUNNABLE with bars.
+
+## 2026-07-20 (session 3) — T012 complete: Founder Report V1
+
+**Committed**: 6e8d1b0 (three-axis Evidence Confidence — Evidence
+Quality / Reasoning Coverage / Prediction Confidence, each rule-computed;
+resolves the V1-roadmap finding-#7 concern: an unrequested leg is a
+coverage gap, never weak evidence, asserted directly by test), b34a9d3
+(Alternatives Considered from structured inputs only — NONE DOCUMENTED
+honestly, nothing invented, no second model call; nine-stage lifecycle
+read from the fold + event history, terminal decisions mark unreachable
+stages instead of showing pending; the appendix loop now points at the
+one lifecycle section), 74d9b1f (per-page footer with decision key, PDF
+/Info metadata, hard-break wrapping for unbroken identifiers; tagged-PDF
+accessibility stated as a limitation, not overstated).
+
+**Verified, not assumed**: three deterministic sample scenarios
+(approved+executing, resolved-not-calibrated, superseded-after-approval)
+were rendered and visually inspected page by page — decision-record box,
+three labeled gauges, footers on every page, superseded lifecycle
+correctly shows stages 1–4 done ("later superseded") and 5–9 not
+applicable. Samples were generated outside the repo; no binaries
+committed. 41 report tests (26 new this session).
+
+**Status truthfully marked**: Decision Platform V1 BUILT; Founder Report
+V1 BUILT. NOT built (unchanged): Company Event System, CRM, knowledge
+promotion, analytics consumers, marketing C3–C8, growth, PM/Research
+agents, AgentOS extraction, Personal AI, public APIs.
+
+**Queue**: T013 — Company Event System root (append-only events.jsonl,
+typed envelope from the COMPANY_OS Part 3 catalogue, idempotent
+publishers, DecisionEvent bridge as first producer, consumer
+checkpoints, retry/dead-letter, approval-wall events). Bars in
+ROADMAP.md; consumer systems stay out of scope until the log exists.

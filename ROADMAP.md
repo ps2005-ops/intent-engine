@@ -297,7 +297,14 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T012 — Approved founder-report polish (Slice 2B)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-20 (commits 6e8d1b0, b34a9d3, 74d9b1f) —
+  three-axis Evidence Confidence (finding #7 resolved: unrequested legs
+  lower coverage, never evidence quality), Alternatives Considered
+  (structured inputs only; NONE DOCUMENTED honestly), nine-stage
+  lifecycle read from the fold + event history (terminal decisions mark
+  unreachable stages), per-page footer with decision key, PDF /Info
+  metadata, hard-break wrapping. +26 tests; three sample scenarios
+  visually inspected. Founder Report V1: BUILT.
 - **Priority**: 1. **Size**: M.
 - **Source**: `docs/V1_COMPLETION_ROADMAP.md` P1 verdict (the deferred
   v3 polish), founder-reviewed 2026-07-20.
@@ -317,6 +324,36 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   suite green + EXIT=0.
 - **Walls**: no new dependency; no accuracy claims (A-M5 untouched);
   frozen prompts untouched; reads only.
+
+## T013 — Company Event System (root: append-only log, envelope, first producer)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: L.
+- **Source**: `docs/COMPANY_OS.md` Part 3 (the catalogue and transport
+  are already specified there — this task builds them; no new design).
+- **Files in scope**: new `src/intent_engine/core/company_events.py`,
+  new `tests/test_company_events.py`; NO consumer systems (CRM,
+  analytics, knowledge, marketing C3+) in this task.
+- **Definition of done (bars)**: (a) **append-only log** —
+  `events/events.jsonl` rows gain, never mutate; (b) **typed envelope**
+  — `event_id` (ULID), `event_type` (closed set = the Part 3 catalogue),
+  `key` (one of decision_id / prediction_id / prospect_id / event_id),
+  `occurred_at`/`recorded_at`, actor + source, `payload`,
+  `schema_version`, `idempotency_key`; unknown event types rejected;
+  (c) **idempotent publisher** — same `idempotency_key` appends zero
+  duplicate rows; (d) **DecisionEvent bridge** — decision_events rows
+  fan one-way into the company log as its FIRST producer, idempotent on
+  replay, the decision store stays the source of truth; (e) **consumer
+  checkpoints** — consumers are pure functions with a persisted offset;
+  re-running from a checkpoint reprocesses nothing; (f) **retry +
+  dead-letter** — a consumer failure writes a typed dead-letter row and
+  never blocks the log or other consumers; (g) **approval-wall events**
+  — `ApprovalQueued` / `PublishApproved` are first-class envelope types;
+  `PublishApproved` requires `actor_type=human` structurally; (h) fan-out
+  reaches DRAFTS only; nothing publishes; offline suite green + EXIT=0.
+- **Walls**: stdlib only (A3 — the log IS the bus; no broker); frozen
+  prompts untouched; the two walls remain the only human-emitted
+  transitions; 0 model calls.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
