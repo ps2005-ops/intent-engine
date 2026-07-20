@@ -1,0 +1,29 @@
+HEADLINE SOURCES -- selected 3 of top-3, as of 2026-07-18
+----------------------------------------------------------------------
+- "Best high-yield savings interest rates today, Friday, July 17, 2026: Multiple banks offering up to 4.10% APY" [Yahoo Finance, published 2026-07-13, fetched 2026-07-18T18:07:23.931997+00:00]
+  https://finance.yahoo.com/personal-finance/banking/article/best-high-yield-savings-interest-rates-today-friday-july-17-2026-multiple-banks-offering-up-to-410-apy-100000572.html
+- "Best CD rates today, Saturday, July 18, 2026: Best account provides 4.10% APY" [Yahoo Finance, published 2026-07-18, fetched 2026-07-18T18:07:23.931997+00:00]
+  https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-saturday-july-18-2026-best-account-provides-410-apy-100000054.html
+- "Elon Musk's SpaceX has lost $1T in market cap since mid-June as Starship launch is scrubbed" [Yahoo Finance, published 2026-07-18, fetched 2026-07-18T18:07:23.931997+00:00]
+  https://finance.yahoo.com/markets/stocks/articles/elon-musks-spacex-lost-1t-150000833.html
+
+REGIME SNAPSHOT -- as of 2026-07-18
+----------------------------------------------------------------------
+Yield curve (T10Y2Y):        not inverted  [FRED T10Y2Y, 2026-07-17]
+Credit spreads (HY OAS):     unavailable
+Inflation trend (CPI YoY):   unavailable
+Unemployment momentum:       unavailable
+Drawdown (SPY):              -1.89% off recent high  [Tiingo, 2026-07-17]
+
+Structural mechanisms possibly in play: none matched -- no forced match on an empty/weak signal.
+
+RESOLVABLE PREDICTIONS RECORDED THIS RUN (source=market)
+----------------------------------------------------------------------
+- P=0.72 by 2026-09-30: 10-Year minus 2-Year Treasury yield spread remains above +0.25 percentage points through late September 2026, consistent with a non-inverted yield curve.
+- P=0.65 by 2026-09-18: SPY trades within 3.5% of its 2026-07-17 level over the next 60 trading days, suggesting consolidation after recent drawdown.
+
+CALIBRATION (read-only; no feedback into generation)
+----------------------------------------------------------------------
+market: no resolutions yet.
+baseline: no resolutions yet.
+(The ledger accumulates from here -- per A-M5, no confidence adjustment happens until at least 30 resolved predictions per source exist.)
