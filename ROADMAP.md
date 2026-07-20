@@ -171,7 +171,11 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T006 — Wire the premortem->ledger bridge into the live pipeline
 
-- **Status**: BUILT, LIVE BAR (a) PENDING MAC — 2026-07-19 (loop 8),
+- **Status**: DONE — 2026-07-20 (loop 9). Live bar (a) PASS on the
+  founder-run fixture: 3 rows source="premortem" (p 0.72/0.65/0.58, all
+  future resolve_by, resolvable claims), verified by direct DB read;
+  append-only held (pre-existing rows untouched); one transient 328-char
+  length retry within budget. Built 2026-07-19 (loop 8),
   commit `a236604`, founder green-light via the morning-list
   continuation. Wiring per the approved spec, T005's shape: opt-in
   `--record-predictions` flag (off by default), `bridge_client` kwargs on
@@ -179,7 +183,7 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   (default None — caller-compat tested). Bars (b)(c)(d)(e) asserted
   offline (7 tests incl. append-only proof + exactly-one-drafting-call);
   combined analyzer prompt and bridge drafting prompt untouched.
-- **Remaining human action (bar a, ≤6-call budget)**: one live run on the
+- ~~Remaining human action~~ CLOSED: the live run happened 2026-07-20; kept for the record — it was: one live run on the
   Mac with `--record-predictions` on a fixture decision, then verify the
   1-3 source="premortem" rows by direct DB read. On PASS → flip to DONE.
 

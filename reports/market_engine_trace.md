@@ -1467,3 +1467,16 @@ the real live run recording 1-3 rows, is MAC-PARKED within the spec's
     --decision "..." --record-predictions
 Suite 667 passed (660 + 7), 0 failed, EXIT=0 explicit check. 0 sandbox
 model calls.
+
+## Loop 9 (2026-07-20) — T006 bar (a) PASS (founder-run) -> T006 DONE
+
+Founder ran the live fixture (4-person outbound sales hire pre-PMF,
+entity t006-live): 20.4s, one drafting call + one transient-length retry
+(claim 328 chars vs 300 cap -> auto-retry PASS; within the <=6-call
+budget; recurrence worth watching, noted). 3 predictions recorded.
+DIRECT DB VERIFICATION (sandbox, this loop): 3 rows source="premortem",
+entity t006-live, p in {0.72, 0.65, 0.58} (all 0<p<1), resolve_by
+{2026-11-20, 2027-01-20, 2027-01-20} (all strictly future), claims
+resolvable (pipeline count, runway months, roadmap-iteration presence).
+Pre-existing 9 market/baseline rows untouched -- append-only held.
+All six bars now PASS -> ROADMAP T006 flipped DONE.
