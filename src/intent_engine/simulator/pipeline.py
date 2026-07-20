@@ -51,6 +51,7 @@ def run_premortem(
     decision_service=None,
     decision_intake_key: Optional[str] = None,
     decision_actor_id: str = "founder",
+    event_bus=None,
 ) -> PremortemResult:
     """`mechanism_client` (T005): when provided, ONE additional isolated
     extraction call computes the structural-mechanisms read (see
@@ -76,7 +77,16 @@ def run_premortem(
     stamped with the record's decision_id. A failed analysis appends
     AnalysisFailed; a failed bridge appends PredictionLoggingFailed; both
     re-raise, and a retry with the same intake key creates zero duplicate
-    records, events, or ledger rows. Default None: zero behavior change."""
+    records, events, or ledger rows. Default None: zero behavior change.
+
+    `event_bus` (T013): when provided, the run also notifies the company
+    event log — `prediction.recorded` per ledgered row (this pipeline is
+    that type's one authoritative producer) and, when a decision_service
+    is also present, the DecisionEvent bridge fans the decision's
+    authoritative events into the log (the bridge owns all decision.*
+    types). Publication is idempotent, so retries add zero events. The
+    log OBSERVES this flow; correctness never depends on it. Default
+    None: zero behavior change."""
     analyzer = analyzer or PremortemAnalyzer(client=client)
 
     decision_record = None
@@ -150,6 +160,25 @@ def run_premortem(
                         source="system",
                         payload={"error_type": type(exc).__name__})
                 raise
+    # T013: notify the integration log (observation only — never load-bearing
+    # for this flow's correctness; idempotent, so retries add zero events).
+    if event_bus is not None:
+        for p in (ledgered_predictions or []):
+            event_bus.publish(
+                "prediction.recorded", subject_type="prediction",
+                subject_id=p.id, producer="premortem_pipeline",
+                actor_type="system", actor_id="premortem_pipeline",
+                source="system",
+                payload={"source": p.source, "resolve_by": p.resolve_by},
+                prediction_id=p.id,
+                decision_id=getattr(p, "decision_id", None),
+                correlation_id=(decision_record.decision_id
+                                if decision_record is not None else None),
+                idempotency_key=f"prediction:{p.id}")
+        if decision_record is not None and decision_service is not None:
+            from ..events.decision_bridge import bridge_decision_events
+            bridge_decision_events(decision_service, event_bus,
+                                   decision_id=decision_record.decision_id)
     elapsed = time.monotonic() - start
 
     return PremortemResult(

@@ -1026,26 +1026,51 @@ def flatten_sections(sections: dict) -> str:
 def render_premortem_pdf(decision_text: str, context, result, out_path,
                          title: str = "Pre-Mortem Report",
                          generated_at: str = None,
-                         decision_service=None) -> dict:
+                         decision_service=None,
+                         event_bus=None) -> dict:
     """The C2 entry point: PremortemResult -> productized PDF. Returns the
     section dict that was rendered (for callers/tests). `decision_service`
     (T011 Slice 2A): read-only Decision Record wiring, see
-    build_premortem_sections."""
-    sections = build_premortem_sections(decision_text, context, result,
-                                        generated_at=generated_at,
-                                        decision_service=decision_service)
-    flat = flatten_sections(sections)
-    assert_language_walls(flat)
-    _assert_no_accuracy_claim(flat)
+    build_premortem_sections. `event_bus` (T013): this renderer is the one
+    authoritative producer of report.generated / report.generation_failed
+    company events; publication is idempotent and observation-only —
+    rendering never depends on the log. Default None: zero behavior
+    change."""
     ts = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
     drec = getattr(result, "decision_record", None)
     key = drec.decision_key if drec is not None else "no decision record"
-    write_pdf(sections, out_path, title=title,
-              footer=f"{key}  |  generated {ts}",
-              meta={"Title": title,
-                    "Subject": f"Decision record: {key}",
-                    "CreationDate":
-                        "D:" + re.sub(r"[^0-9]", "", ts)[:14]})
+    did = drec.decision_id if drec is not None else None
+    try:
+        sections = build_premortem_sections(decision_text, context, result,
+                                            generated_at=generated_at,
+                                            decision_service=decision_service)
+        flat = flatten_sections(sections)
+        assert_language_walls(flat)
+        _assert_no_accuracy_claim(flat)
+        write_pdf(sections, out_path, title=title,
+                  footer=f"{key}  |  generated {ts}",
+                  meta={"Title": title,
+                        "Subject": f"Decision record: {key}",
+                        "CreationDate":
+                            "D:" + re.sub(r"[^0-9]", "", ts)[:14]})
+    except Exception as exc:
+        if event_bus is not None:
+            event_bus.publish(
+                "report.generation_failed", subject_type="report",
+                subject_id=str(out_path), producer="report_renderer",
+                actor_type="system", actor_id="report_renderer",
+                source="system", decision_id=did, correlation_id=did,
+                payload={"error_type": type(exc).__name__},
+                idempotency_key=f"report-failed:{did or out_path}:{ts}")
+        raise
+    if event_bus is not None:
+        event_bus.publish(
+            "report.generated", subject_type="report",
+            subject_id=str(out_path), producer="report_renderer",
+            actor_type="system", actor_id="report_renderer",
+            source="system", decision_id=did, correlation_id=did,
+            payload={"decision_key": key, "generated_at": ts},
+            idempotency_key=f"report:{did or out_path}:{ts}")
     return sections
 
 
