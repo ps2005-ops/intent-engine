@@ -3010,3 +3010,39 @@ close-out. Not yet started, by explicit scope: any scheduling wiring
 (human's own job), and Part C-M's standing exclusions (no Alpaca, no
 Quiver, no Kronos, no LLM backtesting ever, no 90%-accuracy target
 anywhere).
+
+## 2026-07-20 (session 2) — T010 complete: the Decision Record is real and wired
+
+**Committed**: f4fa1d2 (docs batch), 8abb2dd (Slice 1 data layer,
+hardened), 23d8416 (live-Calendar 403 documented), 524296e (Slice 1B
+wiring). Offline gate green + EXIT=0 explicitly checked at every commit
+(the pre-commit guard's own deselect list is the offline/live boundary —
+no marker system introduced; the guard was already the convention).
+
+**What exists now that didn't this morning**: one intake → one
+event-sourced Decision Record (idempotent on a deterministic intake key)
+→ RecommendationIssued on success → every premortem ledger row stamped
+with the same `decision_id` → typed AnalysisFailed /
+PredictionLoggingFailed events on failure that never erase earlier facts
+→ retry creates zero duplicate records, events, rows, or drafting calls.
+The ledger references decision identity; it never owns it
+(V1_COMPLETION_ROADMAP Part E, point 12, held).
+
+**Hardening landed with the data layer** (pre-commit review): FKs +
+self-reference CHECK on relationships, append-only triggers on all four
+tables, atomic supersession (edge + event, one transaction), owner /
+supersede payload validation (invalid payload = zero rows), validated
+folding on production reads (hand-tampered history raises instead of
+folding silently), idempotency-key reuse across operations rejected.
+
+**Known external state, unchanged**: live Calendar test fails with
+`403 accessNotConfigured` (GCP project 965657964785 — founder action in
+the Cloud console; documented in the test docstring, outside the offline
+gate). Ledger cohort still 12 rows / 0 resolved — A-M5 calibration gate
+(≥30 resolved per source) nowhere near cleared; no claims made.
+
+**Queue**: T011 (Slice 2A, record → founder report) is RUNNABLE with
+bars; parser test asserts the queue truthfully. NOT YET BUILT, stated
+plainly: report wiring (2A/2B), event bus, CRM, knowledge promotion,
+analytics consumers, marketing C3–C8, PM/Research agents, growth,
+AgentOS extraction, Personal AI, public APIs.

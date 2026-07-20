@@ -263,6 +263,14 @@ indexing + archiving, not rewriting.
 
 ## Part E — Slice 1, revised & fully specified: the Decision Record (event-sourced)
 
+*Status (2026-07-20): **BUILT** — data layer commit 8abb2dd (hardened:
+FKs, append-only triggers on all four tables, atomic supersession,
+payload validation, validated folding, idempotency-key scoping) + Slice
+1B wiring commit 524296e (ledger reference, bridge stamping, idempotent
+intake, typed failure/recovery events). All bars (a)–(g) proven by test;
+0 live model calls. Slice 2A (record → report) is the active queue item
+(`ROADMAP.md` T011). Slices 2B–4 **NOT YET BUILT**.*
+
 *Revised 2026-07-20 after founder review. The one insisted change is
 adopted in full: the record is **event-sourced**. State is never stored as
 mutable fields on one record; it is **folded from an append-only event

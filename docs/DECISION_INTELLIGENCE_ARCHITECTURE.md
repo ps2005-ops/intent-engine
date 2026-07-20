@@ -151,8 +151,13 @@ references it. Full build spec: `docs/V1_COMPLETION_ROADMAP.md`, Slice 1.
   fields stay backward-compatible.
 
 This generalizes the Decision Journal gap into the permanent primitive
-every other system keys to. It is **designed and specified, not yet built**
-— Slice 1 of the completion roadmap, built before any consumer.
+every other system keys to. Status (2026-07-20): **BUILT** — Slice 1 data
+layer (`core/decision_ids.py`, `core/decision_record.py`, commit 8abb2dd)
+and Slice 1B wiring (ledger `decision_id` reference, bridge stamping,
+idempotent intake + typed recovery events in `run_premortem` /
+`premortem --decision-record`, commit 524296e), 32 tests. First consumer
+(the founder report, Slice 2A) is next; the event bus and further
+consumers remain **NOT YET BUILT**.
 
 ## What does not change
 

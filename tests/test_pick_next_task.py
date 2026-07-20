@@ -74,12 +74,12 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     runnable_ids = {t.task_id for t in tasks if t.status == "RUNNABLE"}
     # T001 completed 2026-07-15 via the real nightly_agent.sh rehearsal
     # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34);
-    # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec).
-    # T010 (event-sourced Decision Record, Slice 1 data layer) was specced
-    # by the founder-reviewed completion roadmap on 2026-07-20 and added to
-    # ROADMAP.md as RUNNABLE -- it is the current queue. NEEDS-SPEC items
+    # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec);
+    # T010 (event-sourced Decision Record: data layer + Slice 1B wiring)
+    # completed 2026-07-20 (commits 8abb2dd, 524296e). The current queue is
+    # T011 (Slice 2A: record -> founder-report wiring). NEEDS-SPEC items
     # are still never auto-promoted.
-    assert runnable_ids == {"T010"}
-    # The nightly loop must pick T010 (the only RUNNABLE task), never a
+    assert runnable_ids == {"T011"}
+    # The nightly loop must pick T011 (the only RUNNABLE task), never a
     # NEEDS-SPEC item.
-    assert pick_next_runnable(tasks) == "T010"
+    assert pick_next_runnable(tasks) == "T011"

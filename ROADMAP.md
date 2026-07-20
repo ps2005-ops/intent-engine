@@ -236,8 +236,14 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T010 — Event-sourced Decision Record (Slice 1, data layer)
 
-- **Status**: RUNNABLE — data layer first; NO premortem/pipeline wiring in
-  this task (that is a later, separate commit per the completion roadmap).
+- **Status**: DONE 2026-07-20 — data layer (commit 8abb2dd, hardened:
+  FKs, append-only triggers on all four tables, atomic supersession,
+  payload validation, validated folding, idempotency-key scoping) +
+  Slice 1B wiring (commit 524296e: `prediction_ledger.decision_id`
+  reference, bridge stamping, idempotent intake in `run_premortem` +
+  `premortem --decision-record`, typed AnalysisFailed /
+  PredictionLoggingFailed recovery events). 23 + 9 tests; offline suite
+  green + EXIT=0 at each commit.
 - **Priority**: 1. **Size**: M.
 - **Source**: `docs/V1_COMPLETION_ROADMAP.md` Part E (Slice 1),
   founder-reviewed 2026-07-20 (event-sourced; 10 final decisions locked).
@@ -263,6 +269,29 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 - **Walls**: stdlib only (sqlite3/json/hashlib — no new dependency, A3);
   `PremortemAnalyzer` combined-call prompt + `TriggerCondition` enum
   untouched; append-only; one commit per step.
+
+## T011 — Decision Record → founder report wiring (Slice 2A)
+
+- **Status**: RUNNABLE — record wiring only; the approved v3 polish
+  (3-axis Evidence Confidence, Alternatives, lifecycle presentation) is
+  Slice 2B, a separate task.
+- **Priority**: 1. **Size**: M.
+- **Source**: `docs/V1_COMPLETION_ROADMAP.md` P1 verdict ("split per
+  review point 11 → Slice 2A"), founder-reviewed 2026-07-20.
+- **Files in scope**: `scripts/render_founder_report.py` (extend
+  `build_premortem_sections()` / `write_pdf()`),
+  `tests/test_render_founder_report.py` / `tests/test_founder_report_pdf.py`.
+- **Definition of done (bars)**: given a decision_id, the report renders
+  (a) Decision ID/key header; (b) folded status badge (three axes, read
+  via `DecisionService.get_current_state`, never inferred); (c) current
+  owner; (d) `supersedes`/`superseded_by` links when present; (e) report
+  metadata + component versions (engine version already rendered; add
+  record/event schema versions); (f) absent record → report renders
+  unchanged (additive default); (g) language walls + accuracy-claim wall
+  still pass on every new section; offline suite green + EXIT=0.
+- **Walls**: PDF writer stays dependency-free (no HTML build, per the
+  accepted P1 verdict); reads only — the report never writes decision
+  events; frozen prompts untouched.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
