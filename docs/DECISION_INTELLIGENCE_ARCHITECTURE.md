@@ -7,6 +7,17 @@ it gives every existing component and every future agent a defined place,
 so new work becomes an application on one platform rather than a separate
 AI project.*
 
+*Scope boundary: this file is the **engineering / decision** map;
+`docs/COMPANY_OS.md` is the **company** map. Both use the internal "Decision
+Operating System" lens. Where they meet, this file owns the **decision
+primitive** (the Decision Record, below); COMPANY_OS owns how the company's
+systems consume it.*
+
+*v2 (2026-07-20) adds the **Decision Record** backbone (new section before
+"What does not change"). The one-sentence framing, terminology, and platform
+tree above are unchanged — the addition is additive, per the "improve only"
+scope of the architecture review.*
+
 ---
 
 ## The one-sentence framing
@@ -93,6 +104,55 @@ report a living document rather than a PDF someone files. That is the
 highest-value next build in this direction, and it slots naturally
 alongside C4 (feedback loop) — both write append-only rows keyed to a
 decision.
+
+## The Decision Record — the backbone (v2)
+
+The Decision Journal named above is the embryo of a permanent primitive.
+Every decision has one immutable, **event-sourced** record; every artifact
+(report, prediction, CRM row, content, feedback, resolution, case study)
+references it. Full build spec: `docs/V1_COMPLETION_ROADMAP.md`, Slice 1.
+
+- **Identity is dual.** An opaque internal `id` (stdlib ULID — no new
+  dependency, A3) carries all references; a human-readable `decision_key`
+  `DEC-YYYY-NNNNNN` is for display and search only, so counters need no
+  cross-agent coordination and cannot corrupt storage.
+- **Event-sourced, append-only.** The base record is written once; **status,
+  owner, relationships, and lifecycle are folded from an append-only
+  `DecisionEvent` stream**, consistent with the ledger's append-only
+  discipline. Nothing is mutated in place — the event history is the audit
+  trail, and it says *who* authorized each change (actor + source
+  provenance on every event).
+- **Three independent state axes**, never one collapsed status:
+  `decision_status` (draft → under_review → approved / declined / cancelled
+  / superseded), `execution_status` (not_started → executing → paused →
+  completed / abandoned), `evaluation_status` (unresolved →
+  partially_resolved → resolved → calibrated).
+- **The Decision Graph.** Decisions relate through typed, append-only edges
+  — supersedes / superseded_by, depends_on, blocks, contradicts, implements,
+  caused_by, follow_up_to, alternative_to, same_initiative_as — and link to
+  entities via a `decision_entities` table (subject / competitor / partner /
+  acquirer / market / benchmark), because one decision may concern many
+  entities. These typed edges are what a future Decision Graph traverses.
+- **The API layer.** One coordinator, `DecisionService`
+  (create · attach_prediction · record_event · supersede · get_decision ·
+  get_events · get_current_state · get_related). Every surface — report,
+  CRM, analytics, public API, Personal AI — reads through it; the prediction
+  ledger only *references* a decision (nullable `decision_id`), never owns
+  it. No consumer re-implements decision logic.
+- **Permission model.** Writes route through `permissions.py`
+  (deny-by-default) and the two walls; sensitive customer content is
+  separated from analytical metadata, with redaction / access-restriction /
+  anonymize / tombstone events defining the retention mechanism (designed
+  now, enforced later).
+- **Component versioning.** Every record and event carries its schema
+  version; the platform stamps component versions (engine / mechanism
+  library / report template) so two decisions are comparable across time.
+  v1 readers reject unsupported future *major* versions; *minor* additive
+  fields stay backward-compatible.
+
+This generalizes the Decision Journal gap into the permanent primitive
+every other system keys to. It is **designed and specified, not yet built**
+— Slice 1 of the completion roadmap, built before any consumer.
 
 ## What does not change
 
