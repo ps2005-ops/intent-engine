@@ -137,6 +137,17 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ---
 
+## T008 — REGIME_VOCAB widening
+
+- **Status**: DONE — 2026-07-19 (loop 8), commit `3495768`. Founder
+  approved the spec (docs/REGIME_VOCAB_WIDENING_SPEC.md) as written:
+  +6 terms (ipo, merger, acquisition, stock, buyback, guidance), 36→42,
+  additive only, scoring logic untouched. All 4 spec bars asserted as
+  tests in tests/test_headline_feed.py; bar-c control set stayed at 0 so
+  no term was dropped. This is the headline vocab — NOT the frozen
+  TriggerCondition enum (which stays frozen per the same-day founder
+  decision recorded in docs/MECHANISM_LIBRARY_STATE.md).
+
 ## T006 — Wire the premortem->ledger bridge into the live pipeline
 
 - **Status**: APPROVED — runnable queue (2026-07-22). Spec:

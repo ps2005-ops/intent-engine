@@ -1,101 +1,100 @@
-# MORNING HANDOFF — overnight loop 7 (2026-07-22) — backlog cleared + densification kickoff
+# MORNING HANDOFF — loop 8 (2026-07-19) — all four decisions executed; cadence-v2 LIVE-READY
 
-*Suite at close: **635 passed, 0 failed, 7 deselected (live)**. 8 commits
-(`4c5c27c` → `f9f31591`) + this handoff. Walls held: no publishing/sending/
-crontab/vendor/OAuth/sandbox-live-calls; A-M3 untouched, backtest HELD,
-enum frozen, prompts frozen. Process guard honored — every commit gated on
-an explicit suite exit-code check (EXIT=0). Spend: 0 live model calls;
-4 web_fetches (LTCM citation verify + batch-3 sources).*
+*Suite at close: **644 passed, 0 failed, 9 deselected (live/networked)**,
+EXIT=0 explicitly checked before every commit. 3 commits (`bb9b14d`,
+`3495768`, `1c58f93`) + this handoff. Walls held: no publishing/sending/
+crontab/vendor/OAuth/sandbox-live-Anthropic-calls; A-M3 untouched,
+backtest HELD, TriggerCondition enum frozen (now by explicit post-batch-3
+decision), prompts frozen (bar-e sha256 PASS). Spend: 0 model calls;
+2 web_fetches (batch-3 citation verification).*
 
-## Backlog clearance — all 8 items, per-item status
+## Your four decisions — all received and executed this loop
 
-1. **T005 → DONE** (`4c5c27c`). Both live bars PASS (your outputs pasted
-   into `overnight_trace.md`); ROADMAP flipped.
-2. **LTCM citation swapped** — the 404'd `/276/hedgefund.pdf` → your
-   `/236/hedgfund.pdf`; sandbox web_fetch confirmed ~140KB real Treasury
-   PDF (reachable). `citation_check.sh` updated for the authoritative Mac
-   run; sechistorical.org mirror added.
-3. **Batch-2 MERGED as-is** (`9ef8528`) — +2 mechanisms +2 enrichments →
-   **22 entries**; bar-(e) prompt byte-identity PASS; `currency_peg`
-   stays parked; suite exit-checked.
-4. **Enum candidates** — DEFERRED (no action), now complete at 5 after
-   batch 3 (see below).
-5. **Task 5 (T006) → runnable queue** (`916b1b1`).
-6. **AP feed → NPR Business** (`7be77d4`) — Reuters+AP dropped
-   (web-fetch-blocked), NPR added; allowlist + test updated.
-7. **REGIME_VOCAB widening → SPEC ONLY** (`f80fcba`, doc T008) — awaiting
-   your approval before merge.
-8. **Marketing + outreach → APPROVED AS DRAFTS** (`f80fcba`) — recorded in
-   `marketing/README`; PUBLISHING_ENABLED uncreated, per-message send wall
-   stands (approval does not move anything past dry-run).
+1. **Cadence-v2 APPROVED (all three numbers)** → implemented (`1c58f93`).
+   Allowlist 13→34 (22 Tiingo incl. all 11 GICS sector SPDRs +
+   DIA/MDY/EFA/EEM/HYG/LQD; 12 FRED incl. DGS2/DGS30/T10YIE/DTWEXBGS/
+   DCOILWTICO/DEXUSEU), DAILY_CAP 5→8 (2-per-bucket × 4 buckets by
+   construction), ceiling $7 unchanged. The rotating extra became a
+   deterministic 5-instrument daily window over the 29-entry non-core
+   pool — gcd(5,29)=1, so every instrument is visited every 29 days
+   (asserted as a test). Run budget ≤10 data + ≤4 model calls. Grading,
+   baselines, anti-dup, 14d floor, park-if-exceeded: untouched.
+2. **Batch-3 APPROVED as-is** → merged (`bb9b14d`), **23 entries,
+   curriculum COMPLETE 12/12**. Both PENDING-MAC citations returned
+   HTTP 200 with full real content BEFORE merge (the Fed page even
+   renders the 2022-23 rate tables the citation cites). bar-(e) prompt
+   sha256-identity PASS (fb19551507…/2067d21a…, same hashes as batch 1).
+   `securitized_credit_opacity` stays parked.
+3. **Enum: KEEP FROZEN, all 5 candidates DEFERRED** → recorded in
+   docs/MECHANISM_LIBRARY_STATE.md (rewritten to the final 12/12 map,
+   incl. the 3-member drawdown dual-match class you've now ratified).
+4. **T008 APPROVED** → merged (`3495768`). REGIME_VOCAB 36→42; all 4
+   spec bars as tests; control set stayed at 0 (no term dropped).
 
-## Densification plan
+## LEDGER GROWTH SNAPSHOT (2026-07-19)
 
-### Phase 1 — cadence-v2 proposal (STAGED, awaiting approval)
-`docs/CADENCE_V2_PROPOSAL.md` (`f80fcba`). Proposes: instrument allowlist
-13 → ~30 (9 more sector ETFs + broad/intl/credit ETFs + 7 more FRED macro
-series, all deterministic + pydantic-validated); daily cap **5 → 8** (fills
-the 4 horizon buckets at 2 each); **ceiling stays $7** (breadth adds $0
-data calls, not model calls — model estimate ~$1.68/mo). All quality guards
-unchanged. **Needs three explicit approvals: allowlist, cap, ceiling.** Code
-staged, not built.
-
-### Still-parked items finished as gates cleared
-- **Library batch 3 (episodes 9-12, FINAL)** — staged at your gate
-  (`f9f31591`), unblocked by the batch-2 merge. Honest finding: dot-com
-  and GFC are already well-covered; batch 3 = **1 new** (COVID
-  `exogenous_activity_halt`, collision-flagged) + **2 enrichments**
-  (2021-22 inflation, 2022 hiking) + **1 parked** (GFC
-  `securitized_credit_opacity` → enum candidate #5). `mechanisms.json`
-  untouched; merge waits for your verdict + 2 PENDING-MAC citations.
-  **This completes the 12-episode curriculum.**
-
-## LEDGER GROWTH SNAPSHOT (2026-07-22)
-
-- **Total predictions: 9** (7 market, 2 baseline) · **resolved: 0** ·
-  toward the ≥30-resolved-per-source gate.
-- By instrument: SPY ×6 + 3 macro. By horizon: resolve_by window
-  **2026-08-31 → 2026-10-16**.
-- **First resolution: 2026-08-31** (nothing resolvable before then).
-- **The gap to ≥30 is what densification closes** — but daily generation
-  runs on the Mac (the sandbox has no Anthropic egress), so the ledger
-  only grows once cadence-v2 is approved AND the daily job runs on your
-  machine. That dependency is the single biggest lever on calibration
-  timing.
+- **Total: 9** (7 market, 2 baseline) · **resolved: 0** · gate: ≥30
+  LIVE resolved per source.
+- By instrument: SPY ×6, T10Y2Y ×2, UNRATE ×1. Resolve window
+  2026-08-31 → 2026-10-16; first resolution 2026-08-31.
+- **Unchanged since loop 7 — expected**: the ledger only grows when the
+  daily job runs on the Mac (sandbox has no Anthropic egress). Cadence-v2
+  is now approved AND implemented, so the single remaining lever is you
+  starting the Mac job.
+- **What v2 changes once live**: ~8 market + 2 baseline per trading day;
+  14d-bucket predictions from a first run this week would begin resolving
+  ~2026-08-03 — four weeks EARLIER than the current 2026-08-31 first
+  resolution — and the 29-day rotation spreads instruments across all 11
+  GICS sectors + rates/credit/dollar/oil automatically. Rough shape: a
+  first run this week puts the ≥30-resolved gate in reach around
+  mid-September (14d + 30d buckets compounding), vs. no accrual at all
+  until you start it.
 
 ## MY MORNING LIST (in order)
 
-1. **Approve cadence-v2's three numbers** (allowlist / cap=8 / ceiling=$7)
-   — this is the densification engine; nothing accrues without it.
-2. **Batch-3 verdict** (`docs/library_batch3_review_sheet.md`) + run
-   `sh citation_check.sh` (now includes batch-3's NBER/BLS/Fed URLs — the
-   2 PENDING-MAC ones must show 200 before merge). On approval: merge →
-   23 entries, and I complete `MECHANISM_LIBRARY_STATE.md` to 12/12.
-3. **The batched enum decision** — the candidate list is now complete at 5
-   (`docs/library_batch3_review_sheet.md` lists all with what each
-   unlocks). Any widening = your sign-off + a full Task 3 gate rerun.
-4. **REGIME_VOCAB widening** (T008) — approve to merge, or leave.
-5. **Start the daily prediction job on the Mac** once cadence-v2 is live —
-   the only way the ledger grows toward the gate.
+1. **Start the daily prediction job on the Mac** — everything is now
+   approved, implemented, and tested; this is the only item standing
+   between the engine and calibration data. (Scheduling stays human-wired
+   per house rule; cron_lines_to_install.txt has the line.)
+2. Optional 1-minute cleanup: `rm ~/intent-engine/.git/index.lock` — a
+   stale lock from an interrupted git op predating this session. I
+   verified the worktree byte-identical to HEAD before touching anything
+   and committed via a separate index; stale locks I swept aside are
+   parked in `.git/stale_locks_loop8/` (safe to delete). Note:
+   `.git/objects/maintenance.lock` existed too — if Mac-side
+   `git maintenance` is enabled for this repo, consider disabling it to
+   stop lock contention with overnight loops.
+3. T006 (premortem→ledger wiring) is the runnable-queue head; its bars
+   need ≤6 live calls, so it's a Mac-run task — say the word and the next
+   loop builds it to the spec.
 
 ## AMBIGUITIES (parked with recommendations, not guessed)
 
-1. **Cadence-v2 ceiling**: I recommend keeping $7 (breadth is data calls =
-   $0, not model calls). *If you want headroom for a future cap>8 or an
-   LLM-prose feature, name a number; otherwise $7 stands.*
-2. **exogenous_activity_halt collision** (COVID, batch 3): same class you
-   accepted twice. *Recommendation: accept (distinct causal shape); flagged
-   for your explicit call.*
-3. **2 batch-3 citations PENDING-MAC** (BLS CPI, Fed open-market). *In
-   citation_check.sh; run on the Mac before merging batch 3.*
-4. **Phase 3 (synthetic-world reasoning test)** is scoped as spec-only/low-
-   priority in the plan; I did NOT scope it this loop (Phase 1 + backlog
-   filled the loop). *Recommendation: I scope it next loop unless you'd
-   rather I prioritize building cadence-v2 the moment you approve it.*
+1. **Phase 3 (synthetic-world reasoning spec)** — still unscoped; loop 8
+   was filled by your four approvals. *Recommendation: next loop scopes
+   it (spec-only, low priority per the plan) unless you'd rather the loop
+   build T006 first.*
+2. **Phase 2 (deliberate weekly sector spanning)** — the v2 rotation
+   already spreads instruments mechanically; Phase 2 proper (guaranteeing
+   each WEEK spans tech/energy/financials/healthcare/consumer) is a small
+   follow-on to the window logic. *Recommendation: let a week of live v2
+   ledger data accrue first, then decide if the mechanical spread needs
+   the deliberate weekly guarantee.*
+3. **Suite deselect set** — this sandbox reproduces the offline suite as
+   635→644 passed with 9 deselected (4 live-API tests across the 3 *_live
+   files + 5 live-model e2e premortems); loop-7 reported "7 deselected"
+   under the old environment. Same discipline (no live calls from
+   sandbox), slightly different counting. Flagging for the record, not
+   action.
 
 ## Free-time use (per whitelist)
 
-Loop was full with the 8-item clearance + Phase-1 proposal + batch-3
-research; no spare-time work beyond trace/handoff accuracy. Not touched:
-enum/prompt edits, publishing past dry-run, backtest-of-LLM-judgment,
-company-fundamental engine, accuracy claims.
+None beyond trace/handoff accuracy — the four approvals consumed the
+loop. Not touched: enum (frozen by your decision), prompts, publishing
+past dry-run, backtest-of-LLM-judgment, company-fundamental engine,
+accuracy claims.
+
+*Recurring note, per the plan: densification's value is DENSITY and
+BREADTH, not being right. Wrong predictions are as valuable as right ones
+— calibration needs both. Nothing here tunes, filters, or cherry-picks;
+the ledger records what the engine honestly produces.*
