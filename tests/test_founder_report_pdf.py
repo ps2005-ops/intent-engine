@@ -222,7 +222,10 @@ def test_appendix_makes_the_report_auditable(result, tmp_path):
         assert expected in flat, expected
     assert "Engine version:" in flat
     assert "2026-07-20T12:00:00+00:00" in flat
-    assert "Decision journal" in flat and "Calibration" in flat
+    # T012: the loop lives ONCE, in the Decision lifecycle section; the
+    # appendix points there instead of restating a second, different loop.
+    assert "nine-stage lifecycle" in flat
+    assert "One loop, stated once" in flat
 
 
 def test_visual_elements_are_wall_checked_not_a_loophole(result, tmp_path):
@@ -351,3 +354,199 @@ def test_record_wiring_passes_walls_and_never_writes_events(result, tmp_path):
     frr.assert_language_walls(flat)            # would raise on violation
     frr._assert_no_accuracy_claim(flat)
     assert len(svc.get_events(rec.decision_id)) == events_before   # reads only
+
+
+# =============================================================================
+# T012: Alternatives Considered + nine-stage lifecycle presentation.
+# =============================================================================
+
+from types import SimpleNamespace
+
+
+def _with_alternatives(result, alts):
+    """Report-layer input shim: same attrs as PremortemResult + alternatives.
+    (No engine schema is touched -- the frozen analyzer taxonomy stays
+    frozen; a future slice can thread structured alternatives through.)"""
+    ns = SimpleNamespace(**result._asdict())
+    ns.alternatives = alts
+    return ns
+
+
+def test_structured_alternatives_render_with_tradeoffs(result):
+    alts = [{
+        "alternative": "License instead of building in-region",
+        "why_considered": "lower fixed cost",
+        "main_advantage": "faster market entry",
+        "main_risk": "margin ceded to the licensee",
+        "why_not_recommended": "conflicts with the stated control constraint",
+        "preferable_if": "runway drops below 6 months",
+    }]
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"),
+        _with_alternatives(result, alts))
+    flat = frr.flatten_sections({"Alternatives Considered":
+                                 sections["Alternatives Considered"]})
+    assert "1. License instead of building in-region" in flat
+    for label in ("Why considered", "Main advantage", "Main risk",
+                  "Why not currently recommended", "Would become preferable if"):
+        assert label in flat
+    assert "NONE DOCUMENTED" not in flat
+
+
+def test_missing_alternatives_render_none_documented(result):
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result)
+    flat = frr.flatten_sections({"Alternatives Considered":
+                                 sections["Alternatives Considered"]})
+    assert "NONE DOCUMENTED" in flat
+    assert "never invents one" in flat
+
+
+def test_no_alternative_is_invented_from_scenarios(result):
+    """Scenario names must not be repackaged as 'alternatives'."""
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result)
+    flat = frr.flatten_sections({"Alternatives Considered":
+                                 sections["Alternatives Considered"]})
+    for s in result.scenario_set.scenarios:
+        assert s.name not in flat.replace("re-scope", "")
+
+
+# --- lifecycle: the ten state scenarios --------------------------------------
+
+LIFE = "Decision lifecycle"
+
+
+def _life_flat(result, svc, rec):
+    wired = result._replace(decision_record=rec)
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), wired,
+        decision_service=svc)
+    return sections[LIFE], frr.flatten_sections({LIFE: sections[LIFE]})
+
+
+def _mk(tmp_path, *events):
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    rec = svc.create_decision("founder")
+    for ev in events:
+        svc.record_event(rec.decision_id, ev, actor_type="human",
+                         actor_id="founder", source="cli")
+    return svc, rec
+
+
+def _marks(items):
+    """(checked, current, future/sub, crossed) stage-number sets."""
+    import re as _re
+    got = {"check": set(), "h": set(), "sub": set(), "cross": set()}
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        for kind in got:
+            if kind in it:
+                m = _re.search(r"(\d)\.", str(it[kind]))
+                if m:
+                    got[kind].add(int(m.group(1)))
+    return got
+
+
+def test_lifecycle_draft(result, tmp_path):
+    svc, rec = _mk(tmp_path)
+    items, flat = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert {1, 2}.issubset(marks["check"])
+    assert marks["h"] == {3}                       # current: recommendation
+    assert 9 in marks["sub"] and "never shown as reached" in flat
+
+
+def test_lifecycle_under_review(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted")
+    items, _ = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert 3 in marks["check"]                     # recommendation issued
+    assert marks["h"] == {4}                       # decision-taken is current
+
+
+def test_lifecycle_approved_not_executing(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted", "DecisionApproved")
+    items, _ = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert 4 in marks["check"]
+    assert marks["h"] == {5}                       # execution is next, not done
+    assert 6 not in marks["check"] and 7 not in marks["check"]
+
+
+def test_lifecycle_executing(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted",
+                   "DecisionApproved", "ExecutionStarted")
+    items, _ = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert 5 in marks["check"]
+    assert marks["h"] == {6}                       # monitoring is current
+
+
+def test_lifecycle_paused(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted",
+                   "DecisionApproved", "ExecutionStarted", "ExecutionPaused")
+    items, flat = _life_flat(result, svc, rec)
+    assert "currently paused" in flat
+    assert 5 in _marks(items)["check"]
+
+
+def test_lifecycle_resolved_not_calibrated(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted",
+                   "DecisionApproved", "ExecutionStarted", "DecisionResolved")
+    items, _ = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert 7 in marks["check"]
+    assert marks["h"] == {8}                       # calibration current
+    assert 8 not in marks["check"]                 # never shown as done
+
+
+def test_lifecycle_calibrated(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted",
+                   "DecisionApproved", "ExecutionStarted", "DecisionResolved", "DecisionCalibrated")
+    items, _ = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert {7, 8}.issubset(marks["check"])
+    assert marks["h"] == {9}                       # lessons promoted: future
+    assert 9 not in marks["check"]
+
+
+def test_lifecycle_declined(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted", "DecisionDeclined")
+    items, flat = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert 4 in marks["check"] and "declined" in flat.lower()
+    assert marks["cross"] == {5, 6, 7, 8, 9}       # honest: not applicable
+    assert marks["h"] == set()                     # no fake current stage
+
+
+def test_lifecycle_cancelled(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted",
+                   "DecisionApproved", "ExecutionStarted", "DecisionCancelled")
+    items, flat = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert "CANCELLED" in flat
+    assert 5 in marks["check"]                     # it DID execute
+    assert "execution abandoned" in flat
+    assert {6, 7, 8, 9}.issubset(marks["cross"])
+
+
+def test_lifecycle_superseded_after_approval(result, tmp_path):
+    svc, rec = _mk(tmp_path, "RecommendationIssued", "DecisionSubmitted", "DecisionApproved")
+    new = svc.create_decision("founder")
+    svc.supersede_decision(rec.decision_id, new.decision_id)
+    items, flat = _life_flat(result, svc, rec)
+    marks = _marks(items)
+    assert "SUPERSEDED" in flat
+    assert 4 in marks["check"]                     # events remember approval
+    assert "later superseded" in flat
+    assert marks["h"] == set()
+
+
+def test_lifecycle_without_record_is_unavailable(result):
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"), result)
+    flat = frr.flatten_sections({LIFE: sections[LIFE]})
+    assert "UNAVAILABLE" in flat
+    assert "not tracked" in flat

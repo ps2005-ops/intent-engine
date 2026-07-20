@@ -221,9 +221,83 @@ from datetime import datetime, timezone  # noqa: E402
 PREMORTEM_SECTION_ORDER = [
     "Company Snapshot", "Executive Summary", "Recommendation",
     "Evidence Confidence", "Decision", "Assumptions", "Mechanisms",
-    "Evidence", "Contradictions", "Scenario tree", "Metrics to watch",
-    "What would change this", "90-day checklist", "Prediction", "Appendix",
+    "Evidence", "Contradictions", "Scenario tree", "Alternatives Considered",
+    "Metrics to watch", "What would change this", "90-day checklist",
+    "Prediction", "Decision lifecycle", "Appendix",
 ]
+
+# T012: the nine-stage lifecycle the report is one point in. Presentation
+# only — the three folded state axes are read from DecisionService and are
+# NEVER collapsed into a stored status field here.
+LIFECYCLE_STAGES = [
+    "Decision framed", "Evidence gathered", "Recommendation issued",
+    "Decision taken", "Execution started", "Monitoring",
+    "Outcome resolved", "Calibration", "Lessons promoted",
+]
+
+
+def _lifecycle_items(state, event_types) -> list:
+    """Deterministic mapping: folded three-axis state -> nine-stage display.
+    Completed stages get checks, the current stage is a bold heading, future
+    stages render subordinate ('not yet'); terminal decisions (declined /
+    cancelled / superseded) mark unreachable stages honestly instead of
+    pretending progress."""
+    ds, es, ev = (state.decision_status, state.execution_status,
+                  state.evaluation_status)
+    evs = set(event_types)
+    # Stage completion reads the EVENT HISTORY where folding is lossy: an
+    # approved decision later superseded still WAS taken — the fold shows
+    # ds="superseded", the events still show DecisionApproved.
+    done = {
+        1: True,                                   # a record exists
+        2: True,                                   # this report is that pass
+        3: "RecommendationIssued" in evs,
+        4: bool({"DecisionApproved", "DecisionDeclined"} & evs)
+           or ds in ("approved", "declined"),
+        5: es in ("executing", "paused", "completed", "abandoned"),
+        6: es == "completed" or ev in ("partially_resolved", "resolved",
+                                       "calibrated"),
+        7: ev in ("resolved", "calibrated"),
+        8: ev == "calibrated",
+        9: False,   # knowledge promotion is not built yet — never claimed
+    }
+    qualifiers = {}
+    if ds == "declined" or "DecisionDeclined" in evs:
+        qualifiers[4] = " (declined — the honest end of this lifecycle)"
+    elif ds == "superseded" and done[4]:
+        qualifiers[4] = " (later superseded)"
+    if es == "paused":
+        qualifiers[5] = " (currently paused)"
+    if es == "abandoned":
+        qualifiers[5] = " (execution abandoned)"
+    if ev == "partially_resolved":
+        qualifiers[7] = " (partially resolved)"
+
+    terminal = ds in ("declined", "cancelled", "superseded")
+    current = None if terminal else next(
+        (n for n in range(1, 10) if not done[n]), None)
+
+    items = []
+    if terminal:
+        items.append(f"This decision is {ds.upper()} — remaining stages are "
+                     "not applicable, and are marked so rather than shown "
+                     "as pending.")
+    for n, name in enumerate(LIFECYCLE_STAGES, 1):
+        label = f"{n}. {name}{qualifiers.get(n, '')}"
+        if done[n]:
+            items.append({"check": label})
+        elif terminal:
+            items.append({"cross": f"{n}. {name} — not applicable "
+                                   f"(decision {ds})"})
+        elif n == current:
+            items.append({"h": f">> {label} — CURRENT STAGE"})
+        elif n == 9:
+            items.append({"sub": f"{n}. {name} — not yet (knowledge "
+                                 "promotion is not built; stated honestly, "
+                                 "never shown as reached)"})
+        else:
+            items.append({"sub": f"{n}. {name} — not yet"})
+    return items
 
 RISK_LEVELS = {"likely": "HIGH", "tail_risk": "TAIL", "possible": "MEDIUM",
                "unlikely": "LOW"}
@@ -291,6 +365,8 @@ def build_premortem_sections(decision_text: str, context, result,
     # DecisionService (one source of truth), never re-implemented here.
     record_lines = []
     record_version_bullets = []
+    record_state = None
+    record_event_types = []
     if drec is not None:
         record_lines.append(f"Decision record: {drec.decision_key} "
                             f"({drec.decision_id})")
@@ -299,6 +375,9 @@ def build_premortem_sections(decision_text: str, context, result,
                        f"v{drec.record_schema_version}"})
         if decision_service is not None:
             st = decision_service.get_current_state(drec.decision_id)
+            record_state = st
+            record_event_types = [e["event_type"] for e in
+                                  decision_service.get_events(drec.decision_id)]
             record_lines.append(
                 f"Status: decision={st.decision_status} / "
                 f"execution={st.execution_status} / "
@@ -512,6 +591,35 @@ def build_premortem_sections(decision_text: str, context, result,
         f"Primary founder priority (extracted): {scen.primary_priority}",
         {"tree": [(s.name, s.tag, s.key_deltas) for s in scen.scenarios]}]
 
+    # -- Alternatives Considered (T012): structured inputs ONLY --------------
+    # This section never invents an alternative and never asks the model a
+    # second untracked question. It renders structured alternatives when a
+    # caller supplies them (result.alternatives); otherwise it says so.
+    alternatives = getattr(result, "alternatives", None) or []
+    alt_items = []
+    for i, alt in enumerate(alternatives, 1):
+        get = (alt.get if isinstance(alt, dict)
+               else lambda k, _a=alt: getattr(_a, k, None))
+        alt_items.append({"h": f"{i}. {get('alternative')}"})
+        for label, key in (("Why considered", "why_considered"),
+                           ("Main advantage", "main_advantage"),
+                           ("Main risk", "main_risk"),
+                           ("Why not currently recommended",
+                            "why_not_recommended"),
+                           ("Would become preferable if", "preferable_if")):
+            val = get(key)
+            if val:
+                alt_items.append({"bullet": f"{label}: {val}"})
+    if not alt_items:
+        alt_items = [
+            "NONE DOCUMENTED — this run's structured analysis output contains "
+            "no alternatives, and this report never invents one.",
+            "The Recommendation box's delay / re-scope path remains the "
+            "standing fallback. When a run supplies structured alternatives, "
+            "they render here with their trade-offs.",
+        ]
+    sections["Alternatives Considered"] = alt_items
+
     sections["Metrics to watch"] = (
         [{"bullet": f"Key sensitivity to track: {audit.key_sensitivity}"}]
         + [{"bullet": f"Scenario delta to watch ({s.name}): {s.key_deltas}"}
@@ -544,6 +652,22 @@ def build_premortem_sections(decision_text: str, context, result,
                       "by code. Nothing here is a forecast guarantee and no "
                       "accuracy is claimed (0 resolved is 0 resolved).")
     sections["Prediction"] = pred_lines
+
+    # -- Decision lifecycle (T012): nine stages, position read from the fold -
+    if record_state is not None:
+        life = ["This report is one pass through a larger lifecycle. The "
+                "position below is READ from the decision's event-sourced "
+                "state (three independent axes, folded by DecisionService) — "
+                "the report stores nothing and infers nothing."]
+        life += _lifecycle_items(record_state, record_event_types)
+    else:
+        life = [
+            "UNAVAILABLE — no Decision Record is attached to this run, so "
+            "the lifecycle position is not tracked. The nine stages, for "
+            "reference:",
+        ] + [{"sub": f"{n}. {name}"}
+             for n, name in enumerate(LIFECYCLE_STAGES, 1)]
+    sections["Decision lifecycle"] = life
 
     # -- Appendix (feedback #9 auditable; #12 decision loop) -----------------
     ts = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -583,8 +707,9 @@ def build_premortem_sections(decision_text: str, context, result,
         {"bullet": "Report generator: scripts/render_founder_report.py "
                    "(deterministic; no numbers invented for presentation)"},
         {"h": "The decision loop"},
-        "Today's decision -> Evidence -> Recommendation -> Watch list -> "
-        "Decision journal -> Outcome (on the resolve-by dates) -> Calibration.",
+        "The full nine-stage lifecycle — and where this decision currently "
+        "sits in it — is rendered in the Decision lifecycle section above. "
+        "One loop, stated once.",
         "This report is one pass through that loop. The append-only ledger and "
         "the feedback survey close it: a report here is a living record that "
         "gets graded, not a static artifact.",
