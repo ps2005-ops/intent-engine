@@ -196,6 +196,227 @@ def render(parsed: dict) -> str:
     return rendered
 
 
+# ---------------------------------------------------------------------------
+# C2 (PLAN_2026-07-21 / MARKETING_PLAN_V2 §3): productized premortem PDF.
+#
+# Deterministic transform PremortemResult -> structured PDF with the approved
+# section set. NO new facts: every line comes from the result object or is
+# fixed template prose. Honesty markers render in every section; the "what we
+# could not verify" block is MANDATORY — it renders with an explicit label
+# even when empty. No accuracy claim anywhere (checked before writing).
+#
+# The PDF writer below is deliberately dependency-free (plain-text streams,
+# built-in Helvetica): the offline suite must pass on any machine with no
+# new packages, and the byte-level simplicity keeps the artifact auditable.
+# ---------------------------------------------------------------------------
+
+PREMORTEM_SECTION_ORDER = [
+    "Executive Summary", "Decision", "Mechanisms", "Evidence",
+    "Contradictions", "Scenario tree", "Metrics to watch",
+    "90-day checklist", "Prediction",
+]
+
+_PDF_ALLOWED_DISCLAIMERS = ["no accuracy is claimed", "no accuracy claimed"]
+_PDF_FORBIDDEN_CLAIMS = ["accura", "track record", "hit rate", "win rate",
+                         "correctly predicted", "proven", "success rate"]
+
+_UNVERIFIED_VALUES = {"unclear", "uncertain", "none_apparent", "unknown"}
+
+
+def _assert_no_accuracy_claim(text: str) -> None:
+    lowered = text.lower()
+    for allowed in _PDF_ALLOWED_DISCLAIMERS:
+        lowered = lowered.replace(allowed, " ")
+    hits = [p for p in _PDF_FORBIDDEN_CLAIMS if p in lowered]
+    if hits:
+        raise ValueError(f"Accuracy-claim wall violation in premortem PDF: {hits}")
+
+
+def _could_not_verify_lines(unverified: list) -> list:
+    """MANDATORY block. Renders an explicit label even when empty."""
+    header = "WHAT WE COULD NOT VERIFY (said plainly, never papered over):"
+    if not unverified:
+        return [header, "NONE FLAGGED this run — every signal above carries a "
+                        "value; nothing was silently dropped."]
+    return [header] + [f"- {u}" for u in unverified]
+
+
+def build_premortem_sections(decision_text: str, context, result) -> dict:
+    """PremortemResult -> {section_title: [lines]}, in the approved order."""
+    intent, audit, scen = result.intent, result.risk_audit, result.scenario_set
+
+    sections = {}
+    sections["Executive Summary"] = [audit.narrative_summary]
+
+    ctx_lines = [f"Decision under review: {decision_text}"]
+    for k, v in context.model_dump().items():
+        if v is not None:
+            ctx_lines.append(f"- {k.replace('_', ' ')}: {v}")
+    if intent.goals:
+        ctx_lines.append("Goals: " + "; ".join(intent.goals))
+    if intent.constraints:
+        ctx_lines.append("Constraints: " + "; ".join(intent.constraints))
+    ctx_lines.append(f"Stated risk tolerance: {intent.risk_tolerance}")
+    sections["Decision"] = ctx_lines
+
+    rm = result.ranked_mechanisms
+    if rm is None:
+        sections["Mechanisms"] = ["UNAVAILABLE — the mechanism read was not "
+                                  "requested this run, so no claim is made."]
+    elif not rm:
+        sections["Mechanisms"] = ["NONE MATCHED — the available signal didn't "
+                                  "clear any documented mechanism's trigger "
+                                  "conditions; silence is the honest answer."]
+    else:
+        sections["Mechanisms"] = [f"- {m}" for m in rm]
+
+    ev = []
+    for fm in audit.failure_modes:
+        ev.append(f"- {fm.description} [likelihood: {fm.likelihood}] — {fm.rationale}")
+    unverified = []
+
+    def _signal(label, value):
+        sval = ", ".join(value) if isinstance(value, list) else value
+        if sval is None or str(sval) in _UNVERIFIED_VALUES:
+            marker = "UNKNOWN — not enough signal in the decision text; not guessed."
+            unverified.append(f"{label}: {sval if sval is not None else 'not extracted'}")
+            ev.append(f"- {label}: {marker}")
+        else:
+            ev.append(f"- {label}: {sval}")
+
+    _signal("Scale efficiency", getattr(intent, "scale_efficiency", None))
+    _signal("Leverage type", getattr(intent, "leverage_type", None) or None)
+    _signal("Market timing signal", getattr(intent, "market_timing_signal", None))
+    sections["Evidence"] = ev
+
+    sections["Contradictions"] = (
+        [f"The single factor this decision is most sensitive to: {audit.key_sensitivity}", ""]
+        + _could_not_verify_lines(unverified))
+
+    scen_lines = [f"Primary founder priority (extracted): {scen.primary_priority}"]
+    for s in scen.scenarios:
+        scen_lines.append(f"- {s.name.upper()} — {s.tag}: {s.key_deltas}")
+    sections["Scenario tree"] = scen_lines
+
+    sections["Metrics to watch"] = (
+        [f"- Key sensitivity to track: {audit.key_sensitivity}"]
+        + [f"- Scenario delta to watch ({s.name}): {s.key_deltas}" for s in scen.scenarios])
+
+    sections["90-day checklist"] = (
+        [f"[ ] {t}" for t in audit.recommended_stress_tests]
+        + ["[ ] Re-run this premortem if the key sensitivity above changes materially.",
+           "[ ] Check the prediction ledger on each resolve-by date (graded by code)."])
+
+    lp = result.ledgered_predictions
+    if lp is None:
+        pred_lines = ["UNAVAILABLE — prediction recording was not requested this run."]
+    elif not lp:
+        pred_lines = ["None recorded this run."]
+    else:
+        pred_lines = [f"- P={p.probability:.2f} by {p.resolve_by}: {p.claim_text}"
+                      for p in lp]
+    pred_lines.append("Predictions live on an append-only ledger and are graded "
+                      "by code. Nothing here is a forecast guarantee and no "
+                      "accuracy is claimed (0 resolved is 0 resolved).")
+    sections["Prediction"] = pred_lines
+
+    return {k: sections[k] for k in PREMORTEM_SECTION_ORDER}
+
+
+# --- minimal dependency-free PDF writer -------------------------------------
+
+def _pdf_escape(s: str) -> str:
+    return s.replace("\\", r"\\").replace("(", r"\(").replace(")", r"\)")
+
+
+def _wrap(line: str, width: int = 92) -> list:
+    if len(line) <= width:
+        return [line]
+    words, out, cur = line.split(" "), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            out.append(cur); cur = w
+        else:
+            cur = f"{cur} {w}" if cur else w
+    if cur:
+        out.append(cur)
+    return out
+
+
+def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> None:
+    """Structured-text PDF, Letter, Helvetica core fonts, uncompressed
+    streams (auditable: section text is visible in the raw bytes)."""
+    pages, cur, y = [], [], 738
+    top, bottom, lh = 738, 60, 14
+
+    def newpage():
+        nonlocal cur, y
+        if cur:
+            pages.append(cur)
+        cur, y = [], top
+
+    def put(text, font="F1", size=10, indent=54):
+        nonlocal y
+        if y < bottom:
+            newpage()
+        cur.append(f"BT /{font} {size} Tf {indent} {y} Td ({_pdf_escape(text)}) Tj ET")
+        y -= lh
+
+    put(title, font="F2", size=16); y -= 8
+    for sec_title in sections:
+        y -= 6
+        if y < bottom + 3 * lh:
+            newpage()
+        put(sec_title, font="F2", size=13); y -= 2
+        for raw in sections[sec_title]:
+            for line in _wrap(str(raw)):
+                put(line)
+    newpage()
+
+    def enc(s: str) -> bytes:
+        return s.encode("cp1252", errors="replace")
+
+    n_pages = len(pages)
+    objs = {}  # obj number -> bytes body
+    objs[1] = b"<< /Type /Catalog /Pages 2 0 R >>"
+    kids = " ".join(f"{4 + 2 * i} 0 R" for i in range(n_pages))
+    objs[2] = enc(f"<< /Type /Pages /Kids [{kids}] /Count {n_pages} >>")
+    objs[3] = (b"<< /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >> "
+               b"/F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >> >>")
+    for i, page in enumerate(pages):
+        pnum, cnum = 4 + 2 * i, 5 + 2 * i
+        stream = enc("\n".join(page))
+        objs[pnum] = enc(f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+                         f"/Resources << /Font 3 0 R >> /Contents {cnum} 0 R >>")
+        objs[cnum] = enc(f"<< /Length {len(stream)} >>\nstream\n") + stream + b"\nendstream"
+
+    buf = bytearray(b"%PDF-1.4\n")
+    offsets = {}
+    for num in sorted(objs):
+        offsets[num] = len(buf)
+        buf += f"{num} 0 obj\n".encode() + objs[num] + b"\nendobj\n"
+    xref_at = len(buf)
+    n_objs = max(objs) + 1
+    buf += f"xref\n0 {n_objs}\n0000000000 65535 f \n".encode()
+    for num in range(1, n_objs):
+        buf += f"{offsets[num]:010d} 00000 n \n".encode()
+    buf += (f"trailer\n<< /Size {n_objs} /Root 1 0 R >>\nstartxref\n{xref_at}\n%%EOF"
+            .encode())
+    Path(out_path).write_bytes(bytes(buf))
+
+
+def render_premortem_pdf(decision_text: str, context, result, out_path,
+                         title: str = "Pre-Mortem Report") -> dict:
+    """The C2 entry point: PremortemResult -> productized PDF. Returns the
+    section dict that was rendered (for callers/tests)."""
+    sections = build_premortem_sections(decision_text, context, result)
+    flat = "\n".join(line for lines in sections.values() for line in lines)
+    assert_language_walls(flat)
+    _assert_no_accuracy_claim(flat)
+    write_pdf(sections, out_path, title=title)
+    return sections
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--input", required=True)
