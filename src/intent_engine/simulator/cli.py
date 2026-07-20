@@ -59,7 +59,18 @@ def _build_parser() -> argparse.ArgumentParser:
         help="T007: with --mechanisms, render the fuller 'Why this may be in play' explanation "
              "(matched conditions + verbatim documented causal chain + cited historical precedent) "
              "instead of the one-line section. Deterministic, 0 extra calls. No match -> no section.")
+    parser.add_argument(
+        "--record-predictions", action="store_true",
+        help="T006: also derive 1-3 resolvable predictions from the audit's failure modes and "
+             "record them to the append-only ledger (source=premortem; 1 extra isolated call; "
+             "recording is code, the model has no record field). Off by default: zero extra calls.")
     return parser
+
+
+def _record_confirmation(n: int) -> str:
+    """T006 bar (e): a plain recording confirmation -- no forecast/accuracy
+    framing (tested by word-boundary grep)."""
+    return f"Recorded {n} prediction(s) to the ledger (source=premortem)."
 
 
 def _load_from_args(args: argparse.Namespace):
@@ -142,7 +153,15 @@ def main(argv=None) -> int:
         from .mechanism_section import FAST_MODEL
         mechanism_client = LLMClient(model=FAST_MODEL)
 
-    result = run_premortem(decision_text, context, mechanism_client=mechanism_client)
+    bridge_client = None
+    if args.record_predictions:
+        from ..core.llm_client import LLMClient
+        from ..core.premortem_prediction_bridge import FAST_MODEL as BRIDGE_FAST_MODEL
+        bridge_client = LLMClient(model=BRIDGE_FAST_MODEL)
+
+    result = run_premortem(
+        decision_text, context, mechanism_client=mechanism_client,
+        bridge_client=bridge_client, bridge_entity_id=args.entity_id)
 
     if args.json:
         payload = {
@@ -187,6 +206,11 @@ def main(argv=None) -> int:
     )
     SqliteEntityMemoryWriter().write(record)
     print(f"Saved to entity memory: {normalize_entity_id(args.entity_id)}", file=sys.stderr)
+
+    # T006: plain recording confirmation (bar e -- no forecast/accuracy
+    # framing; stderr, same convention as the entity-memory line).
+    if result.ledgered_predictions is not None:
+        print(_record_confirmation(len(result.ledgered_predictions)), file=sys.stderr)
 
     return 0
 

@@ -1446,3 +1446,24 @@ FINDING, never a prompt patch (edit re-opens the Task 3 gate).
 Suite 660 passed (644 + 16), 0 failed, EXIT=0 explicit check. Walls: 0
 model calls; prompts/enum/library untouched; nothing published; training
 use of the generator would be a separate founder-gated capability.
+
+## Loop 8 (cont.) — T006 WIRED (founder green-light via morning-list continuation)
+
+Built to the approved spec (docs/TASK5_WIRING_SPEC_PROPOSAL.md), T005's
+shape mirrored exactly: run_premortem gains bridge_client /
+bridge_entity_id / bridge_ledger_path kwargs (explicit ValueError if
+client without entity id); additive PremortemResult.ledgered_predictions
+(default None -- every existing caller unaffected, constructor-compat
+tested); CLI --record-predictions flag (off by default, zero extra calls
+otherwise) + plain stderr confirmation via _record_confirmation() with a
+word-boundary language bar (no will/forecast/accurate/P=). Combined
+analyzer prompt UNTOUCHED (A3); bridge drafting prompt untouched (frozen
+substrate); no auto-resolution/scoring/backfill (scope wall stands).
+Bars (b)(c)(d)(e) asserted offline (7 tests incl. append-only proof
+against a pre-existing ledger row + exactly-one-drafting-call): bar (a),
+the real live run recording 1-3 rows, is MAC-PARKED within the spec's
+<=6-call budget -- command:
+  .venv/bin/python -m intent_engine.simulator.cli --entity-id <id> \
+    --decision "..." --record-predictions
+Suite 667 passed (660 + 7), 0 failed, EXIT=0 explicit check. 0 sandbox
+model calls.
