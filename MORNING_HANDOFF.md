@@ -41,10 +41,13 @@ one in-budget retry; T009 89 calls ≈ $1.78). Training remains gated: the
 
 1. **(If not already done) install the cron line** — paste 1 from
    yesterday; idempotent.
-2. **Re-run the T009 live leg once against base v1.1** (same command,
-   ≈$1.78) — this isolates how much of the 0.68 precision was my opener
-   vs. genuine over-triggering. With recall already at 1.00, v1.1's
-   precision + control-silence numbers are the interesting residual.
+2. **DONE — v1.1 re-run happened** (controls 8/8 clean, precision 0.907,
+   recall 1.000 again; your overwrite + stale-template flags both fixed —
+   runs now archive append-only with a cross-run history table). OPEN per
+   your own point: one clean run doesn't bound the control-hallucination
+   rate on a non-deterministic leg — 2-3 more runs (~$1.78 each, same
+   command, any day) would. No urgency; each run auto-appends to the
+   history.
 3. Nothing else is blocked on you. Next build item is Phase 2 (deliberate
    weekly sector spanning) — recommendation unchanged: let a week of live
    v2 ledger data accrue first, then decide whether the mechanical 29-day
