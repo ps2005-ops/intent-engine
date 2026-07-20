@@ -1,12 +1,13 @@
-# MORNING HANDOFF — loop 8 (2026-07-19) — all four decisions executed; cadence-v2 LIVE-READY
+# MORNING HANDOFF — loop 8 (2026-07-19) — four decisions executed + T009 built; cadence-v2 LIVE-READY
 
-*Suite at close: **644 passed, 0 failed, 9 deselected (live/networked)**,
-EXIT=0 explicitly checked before every commit. 3 commits (`bb9b14d`,
-`3495768`, `1c58f93`) + this handoff. Walls held: no publishing/sending/
-crontab/vendor/OAuth/sandbox-live-Anthropic-calls; A-M3 untouched,
-backtest HELD, TriggerCondition enum frozen (now by explicit post-batch-3
-decision), prompts frozen (bar-e sha256 PASS). Spend: 0 model calls;
-2 web_fetches (batch-3 citation verification).*
+*Suite at close: **660 passed, 0 failed, 9 deselected (live/networked)**,
+EXIT=0 explicitly checked before every commit. 5 commits (`bb9b14d`,
+`3495768`, `1c58f93`, `2034536` + handoffs). Walls held: no publishing/
+sending/crontab/vendor/OAuth/sandbox-live-Anthropic-calls; A-M3
+untouched, backtest HELD, TriggerCondition enum frozen (now by explicit
+post-batch-3 decision), prompts frozen (bar-e sha256 PASS; T009 uses the
+extraction prompt READ-ONLY behind a hash assertion). Spend: 0 model
+calls; 2 web_fetches (batch-3 citation verification).*
 
 ## Your four decisions — all received and executed this loop
 
@@ -30,6 +31,34 @@ decision), prompts frozen (bar-e sha256 PASS). Spend: 0 model calls;
    incl. the 3-member drawdown dual-match class you've now ratified).
 4. **T008 APPROVED** → merged (`3495768`). REGIME_VOCAB 36→42; all 4
    spec bars as tests; control set stayed at 0 (no term dropped).
+
+## T009 — synthetic-world reasoning eval (your mid-loop approval, HIGH priority)
+
+Built same-loop (`2034536`) as the EVALUATION variant you confirmed (not
+training), with the realism you directed: 89 deterministic fictional
+worlds written as analyst situation briefs — seeded realistic magnitudes,
+fictional rivals/lenders/regulators, healthy-metrics control worlds that
+bait topical hallucination — behind a 6-part leakage wall (no enum
+token/phrase, no mechanism id/name, no real-world anchors incl. banned
+years, no 8-word library shingle, enum-valid plants; fictional cast
+provably disjoint from library text). 16 bar tests.
+
+**Offline leg RUN tonight** (reports/synthetic_worlds_eval.md): the
+matcher recovers every constructed truth by construction; the extracted
+learning is the **enum expressiveness map — only 11/23 mechanisms are
+uniquely identifiable on their own best evidence**, with 6 tied classes
+(the 6-member credit-side class, the 5-member drawdown class, and 4
+more). This is recorded as EVIDENCE for your deferred enum decision —
+candidates #1/#4/#5 would each split a documented tie — no
+recommendation attached.
+
+**Live leg STAGED** — the actual LLM reasoning diagnostic: one command on
+the Mac, `python scripts/run_synthetic_world_eval.py --live` (≈$1.78
+estimated, ≤100 calls, frozen-prompt sha256 asserted before the first
+call, parks otherwise). Scope walls: reasoning diagnostic only — not
+forward-market accuracy, not a marketing claim; the generator is the
+reusable BASE, and any training use of it is a separate capability
+requiring your explicit approval.
 
 ## LEDGER GROWTH SNAPSHOT (2026-07-19)
 
@@ -64,16 +93,23 @@ decision), prompts frozen (bar-e sha256 PASS). Spend: 0 model calls;
    `.git/objects/maintenance.lock` existed too — if Mac-side
    `git maintenance` is enabled for this repo, consider disabling it to
    stop lock contention with overnight loops.
-3. T006 (premortem→ledger wiring) is the runnable-queue head; its bars
+3. **Run the T009 live leg**:
+   `python scripts/run_synthetic_world_eval.py --live` (≈$1.78; the
+   report + per-world JSON land in reports/). This is the reasoning
+   diagnostic proper — the offline leg's expressiveness map is already in
+   reports/synthetic_worlds_eval.md.
+4. T006 (premortem→ledger wiring) is the runnable-queue head; its bars
    need ≤6 live calls, so it's a Mac-run task — say the word and the next
    loop builds it to the spec.
 
 ## AMBIGUITIES (parked with recommendations, not guessed)
 
-1. **Phase 3 (synthetic-world reasoning spec)** — still unscoped; loop 8
-   was filled by your four approvals. *Recommendation: next loop scopes
-   it (spec-only, low priority per the plan) unless you'd rather the loop
-   build T006 first.*
+1. **T009 live-leg prompt framing** — the frozen extraction prompt says
+   "business decision's description"; the worlds are situation briefs.
+   Close, not identical. *Per the walls I did NOT touch the prompt
+   (editing it re-opens the Task 3 gate). If live extraction on briefs
+   underperforms, that's a finding to bring back to you, not something I
+   patch.*
 2. **Phase 2 (deliberate weekly sector spanning)** — the v2 rotation
    already spreads instruments mechanically; Phase 2 proper (guaranteeing
    each WEEK spans tech/energy/financials/healthcare/consumer) is a small

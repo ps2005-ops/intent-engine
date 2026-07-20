@@ -137,6 +137,27 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ---
 
+## T009 — Synthetic-world reasoning eval (HIGH priority per founder, 2026-07-19)
+
+- **Status**: OFFLINE LEG DONE / LIVE LEG STAGED — 2026-07-19 (loop 8),
+  commit `2034536`. Founder approved the EVALUATION variant (explicitly
+  not training), raised it to high priority, and directed maximum realism
+  ("as close to the real world as possible; work the base well").
+  Built: `core/synthetic_worlds.py` — 89 deterministic fictional worlds
+  (23×3 single + 12 mixed + 8 healthy controls) with analyst-brief
+  realism and a 6-part leakage wall (zero memorization risk, asserted) —
+  plus `scripts/run_synthetic_world_eval.py` and 16 bar tests.
+  Offline finding (reports/synthetic_worlds_eval.md): only **11/23
+  mechanisms are uniquely identifiable** under the frozen enum; 6 tied
+  classes derived — recorded as evidence for the deferred enum decision.
+- **Next human action**: run the live leg on the Mac —
+  `python scripts/run_synthetic_world_eval.py --live` (≈$1.78, ≤100
+  calls, frozen-prompt sha256 asserted before any call). That leg is the
+  LLM reasoning diagnostic proper.
+- **Walls**: reasoning diagnostic only — NOT forward-market accuracy, NOT
+  a marketing claim; prompts/enum/library untouched; training use of the
+  generator = separate founder-gated capability.
+
 ## T008 — REGIME_VOCAB widening
 
 - **Status**: DONE — 2026-07-19 (loop 8), commit `3495768`. Founder
