@@ -1480,3 +1480,21 @@ entity t006-live, p in {0.72, 0.65, 0.58} (all 0<p<1), resolve_by
 resolvable (pipeline count, runway months, roadmap-iteration presence).
 Pre-existing 9 market/baseline rows untouched -- append-only held.
 All six bars now PASS -> ROADMAP T006 flipped DONE.
+
+## Loop 9 — T009 LIVE RUN HARVESTED (founder-run) + generator v1.1
+
+Founder ran the live leg (89 calls, ~$1.78, frozen-prompt hash verified).
+Headline: recall 1.00 (no planted causal symptom ever missed on fully
+fictional inputs), 68/69 singles + 12/12 mixed recovered. Key negative
+finding: precision 0.68 from ONE systematic artifact -- the v1.0 opener
+named a "principal competitor" in every world and the extractor read it
+as few_dominant_competitors 67 times (also costing 5/8 control silences
+and the single miss, winners_curse_acquisition 2/3). Honest attribution:
+generator artifact first, model over-trigger second. FIX (base v1.1, per
+the founder's "work the base well" directive): conditional opener --
+concentrated phrasing only where the condition is planted, broad-field
+counter-evidence phrasing everywhere else; +1 test (17 total), walls
+unchanged, offline report regenerated, v1.0 live record preserved in
+reports/synthetic_worlds_eval_live.md with the analysis appended. v1.1
+live numbers need one fresh Mac run (same command). NO prompt/enum/
+library change; training use still gated.

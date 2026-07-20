@@ -262,11 +262,30 @@ def _symptom(condition: str, variant: int, cast: WorldCast, params: Dict[str, st
         regulator=cast.regulator, sector=cast.sector, **params)
 
 
-def _opener(cast: WorldCast) -> str:
-    return (
-        f"Situation brief, prepared for the board of {cast.company}. "
-        f"{cast.company} operates in the {cast.sector} industry, where its "
-        f"principal competitor is {cast.rival}."
+GENERATOR_VERSION = "1.1"
+# v1.1 (2026-07-20, from the first LIVE run's key negative finding): the
+# v1.0 opener said "its principal competitor is {rival}" in EVERY world,
+# and the live extractor read that as few_dominant_competitors 67 times
+# where it was not planted (precision 0.68 with perfect 1.00 recall; 5/8
+# controls lost clean silence to it). That was a generator artifact, not
+# purely a model failure — so the opener is now CONDITIONAL: worlds that
+# plant few_dominant_competitors keep the concentrated phrasing (their
+# symptom sentence agrees); all other worlds describe a broad field, which
+# turns the named rival into honest counter-evidence bait instead of an
+# accidental oligopoly cue. v1.0's live results stay on record; live
+# numbers for v1.1 need a fresh Mac run.
+
+
+def _opener(cast: WorldCast, planted: Sequence[str]) -> str:
+    lead = f"Situation brief, prepared for the board of {cast.company}. "
+    if "few_dominant_competitors" in planted:
+        return lead + (
+            f"{cast.company} operates in the {cast.sector} industry, where its "
+            f"principal competitor is {cast.rival}."
+        )
+    return lead + (
+        f"{cast.company} operates in the {cast.sector} industry, one of a "
+        f"broad field of firms competing there that includes {cast.rival}."
     )
 
 
@@ -280,7 +299,7 @@ def _build_narrative(rng: Random, cast: WorldCast,
     ]
     body = units + filler
     rng.shuffle(body)
-    return " ".join([_opener(cast)] + body)
+    return " ".join([_opener(cast, conditions)] + body)
 
 
 def generate_worlds(
@@ -339,7 +358,7 @@ def generate_worlds(
         rng.shuffle(body)
         worlds.append(SyntheticWorld(
             world_id=f"control-{k}", world_type="control", company=cast.company,
-            sector=cast.sector, narrative=" ".join([_opener(cast)] + body),
+            sector=cast.sector, narrative=" ".join([_opener(cast, ())] + body),
             planted_conditions=(), ground_truth_mechanisms=(),
         ))
 

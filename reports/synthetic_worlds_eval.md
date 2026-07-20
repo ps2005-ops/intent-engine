@@ -1,6 +1,6 @@
 # Synthetic-world reasoning eval — OFFLINE leg (matcher-level)
 
-*Generated 2026-07-19, seed 20260719, 89 worlds (69 single, 12 mixed, 8 control). Deterministic; 0 model calls; all leakage walls enforced at generation time.*
+*Generated 2026-07-20, seed 20260719, 89 worlds (69 single, 12 mixed, 8 control). Deterministic; 0 model calls; all leakage walls enforced at generation time.*
 
 SCOPE (recorded so it cannot be misquoted): this is a causal-reasoning diagnostic on constructed fictional worlds. It is NOT a forward-market accuracy measure, NOT calibration evidence, NOT a marketing claim, and it changes no prompt, enum, or library data. Fictional worlds cannot be memorized; that is the point of the design.
 

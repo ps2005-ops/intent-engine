@@ -1,0 +1,2618 @@
+{
+ "seed": 20260719,
+ "run": "2026-07-20",
+ "calls": 89,
+ "rows": [
+  {
+   "world_id": "single-ally_drawn_into_linked_conflict-0",
+   "world_type": "single",
+   "planted": [
+    "binding_mutual_commitment_exists"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "ally_drawn_into_linked_conflict"
+   ],
+   "top_tier": [
+    "ally_drawn_into_linked_conflict",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 4,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-ally_drawn_into_linked_conflict-1",
+   "world_type": "single",
+   "planted": [
+    "binding_mutual_commitment_exists"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.3333333333333333,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "ally_drawn_into_linked_conflict"
+   ],
+   "top_tier": [
+    "ally_drawn_into_linked_conflict",
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 10,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-ally_drawn_into_linked_conflict-2",
+   "world_type": "single",
+   "planted": [
+    "binding_mutual_commitment_exists"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "ally_drawn_into_linked_conflict"
+   ],
+   "top_tier": [
+    "ally_drawn_into_linked_conflict",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 4,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-bank_run_maturity_mismatch-0",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "bank_run_maturity_mismatch"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-bank_run_maturity_mismatch-1",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "bank_run_maturity_mismatch"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-bank_run_maturity_mismatch-2",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "bank_run_maturity_mismatch"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-capex_overbuild-0",
+   "world_type": "single",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "debt_financed_expansion",
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "capex_overbuild"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "debt_fueled_capacity_race"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-capex_overbuild-1",
+   "world_type": "single",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "debt_financed_expansion",
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "capex_overbuild"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "debt_fueled_capacity_race"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-capex_overbuild-2",
+   "world_type": "single",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "debt_financed_expansion",
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "capex_overbuild"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "debt_fueled_capacity_race"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-carry_trade_unwind-0",
+   "world_type": "single",
+   "planted": [
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "carry_trade_unwind"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-carry_trade_unwind-1",
+   "world_type": "single",
+   "planted": [
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "carry_trade_unwind"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-carry_trade_unwind-2",
+   "world_type": "single",
+   "planted": [
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "carry_trade_unwind"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-credit_contagion-0",
+   "world_type": "single",
+   "planted": [
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "credit_contagion"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-credit_contagion-1",
+   "world_type": "single",
+   "planted": [
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "credit_contagion"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-credit_contagion-2",
+   "world_type": "single",
+   "planted": [
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "credit_contagion"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "carry_trade_unwind",
+    "credit_contagion",
+    "crowded_trade_deleveraging",
+    "money_market_contagion",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-crowded_trade_deleveraging-0",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "crowded_trade_deleveraging"
+   ],
+   "top_tier": [
+    "crowded_trade_deleveraging"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-crowded_trade_deleveraging-1",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "crowded_trade_deleveraging"
+   ],
+   "top_tier": [
+    "crowded_trade_deleveraging"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-crowded_trade_deleveraging-2",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "binding_mutual_commitment_exists",
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "crowded_trade_deleveraging"
+   ],
+   "top_tier": [
+    "crowded_trade_deleveraging"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-debt_deflation_spiral-0",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "debt_deflation_spiral"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "leverage_cycle_bust"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-debt_deflation_spiral-1",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "debt_deflation_spiral"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "leverage_cycle_bust"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-debt_deflation_spiral-2",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "debt_deflation_spiral"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "leverage_cycle_bust"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-debt_fueled_capacity_race-0",
+   "world_type": "single",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "debt_fueled_capacity_race"
+   ],
+   "top_tier": [
+    "debt_fueled_capacity_race"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-debt_fueled_capacity_race-1",
+   "world_type": "single",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "debt_fueled_capacity_race"
+   ],
+   "top_tier": [
+    "debt_fueled_capacity_race"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-debt_fueled_capacity_race-2",
+   "world_type": "single",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "debt_fueled_capacity_race"
+   ],
+   "top_tier": [
+    "debt_fueled_capacity_race"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-exogenous_activity_halt-0",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "exogenous_activity_halt"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-exogenous_activity_halt-1",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "exogenous_activity_halt"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-exogenous_activity_halt-2",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "exogenous_activity_halt"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-input_cost_inflation_passthrough-0",
+   "world_type": "single",
+   "planted": [
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "input_cost_inflation_passthrough"
+   ],
+   "top_tier": [
+    "input_cost_inflation_passthrough"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-input_cost_inflation_passthrough-1",
+   "world_type": "single",
+   "planted": [
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "input_cost_inflation_passthrough"
+   ],
+   "top_tier": [
+    "input_cost_inflation_passthrough"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-input_cost_inflation_passthrough-2",
+   "world_type": "single",
+   "planted": [
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors",
+    "inflation_rising"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "input_cost_inflation_passthrough"
+   ],
+   "top_tier": [
+    "input_cost_inflation_passthrough",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-leverage_cycle_bust-0",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "leverage_cycle_bust"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "leverage_cycle_bust",
+    "regulatory_capture_race"
+   ],
+   "tier_size": 3,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-leverage_cycle_bust-1",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "leverage_cycle_bust"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "leverage_cycle_bust"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-leverage_cycle_bust-2",
+   "world_type": "single",
+   "planted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "leverage_cycle_bust"
+   ],
+   "top_tier": [
+    "crowded_trade_deleveraging",
+    "debt_deflation_spiral",
+    "leverage_cycle_bust"
+   ],
+   "tier_size": 3,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-margin_collateral_spiral-0",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "margin_collateral_spiral"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-margin_collateral_spiral-1",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "margin_collateral_spiral"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-margin_collateral_spiral-2",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "margin_collateral_spiral"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-mechanical_feedback_liquidation-0",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "mechanical_feedback_liquidation"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-mechanical_feedback_liquidation-1",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "mechanical_feedback_liquidation"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-mechanical_feedback_liquidation-2",
+   "world_type": "single",
+   "planted": [
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "mechanical_feedback_liquidation"
+   ],
+   "top_tier": [
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 8,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-monetary_tightening_lag-0",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted"
+   ],
+   "predicted": [
+    "curve_inverted"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "monetary_tightening_lag"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "monetary_tightening_lag",
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 3,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-monetary_tightening_lag-1",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "monetary_tightening_lag"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "monetary_tightening_lag",
+    "policy_tightening_demand_collapse",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 6,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-monetary_tightening_lag-2",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted"
+   ],
+   "predicted": [
+    "curve_inverted"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "monetary_tightening_lag"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "monetary_tightening_lag",
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 3,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-money_market_contagion-0",
+   "world_type": "single",
+   "planted": [
+    "credit_spreads_elevated",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "money_market_contagion"
+   ],
+   "top_tier": [
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-money_market_contagion-1",
+   "world_type": "single",
+   "planted": [
+    "credit_spreads_elevated",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "money_market_contagion"
+   ],
+   "top_tier": [
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-money_market_contagion-2",
+   "world_type": "single",
+   "planted": [
+    "credit_spreads_elevated",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "money_market_contagion"
+   ],
+   "top_tier": [
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-platform_envelopment-0",
+   "world_type": "single",
+   "planted": [
+    "adjacent_market_bundling_opportunity",
+    "network_effects_present"
+   ],
+   "predicted": [
+    "adjacent_market_bundling_opportunity",
+    "few_dominant_competitors",
+    "network_effects_present"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "platform_envelopment"
+   ],
+   "top_tier": [
+    "platform_envelopment"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-platform_envelopment-1",
+   "world_type": "single",
+   "planted": [
+    "adjacent_market_bundling_opportunity",
+    "network_effects_present"
+   ],
+   "predicted": [
+    "adjacent_market_bundling_opportunity",
+    "network_effects_present"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "platform_envelopment"
+   ],
+   "top_tier": [
+    "platform_envelopment"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-platform_envelopment-2",
+   "world_type": "single",
+   "planted": [
+    "adjacent_market_bundling_opportunity",
+    "network_effects_present"
+   ],
+   "predicted": [
+    "adjacent_market_bundling_opportunity",
+    "few_dominant_competitors",
+    "network_effects_present"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "platform_envelopment"
+   ],
+   "top_tier": [
+    "platform_envelopment"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-policy_tightening_demand_collapse-0",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "condition_precision": 0.75,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "policy_tightening_demand_collapse"
+   ],
+   "top_tier": [
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-policy_tightening_demand_collapse-1",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "policy_tightening_demand_collapse"
+   ],
+   "top_tier": [
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-policy_tightening_demand_collapse-2",
+   "world_type": "single",
+   "planted": [
+    "curve_inverted",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "condition_precision": 0.75,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "policy_tightening_demand_collapse"
+   ],
+   "top_tier": [
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-prisoners_dilemma_price_war-0",
+   "world_type": "single",
+   "planted": [
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "prisoners_dilemma_price_war"
+   ],
+   "top_tier": [
+    "prisoners_dilemma_price_war"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-prisoners_dilemma_price_war-1",
+   "world_type": "single",
+   "planted": [
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "prisoners_dilemma_price_war"
+   ],
+   "top_tier": [
+    "prisoners_dilemma_price_war"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-prisoners_dilemma_price_war-2",
+   "world_type": "single",
+   "planted": [
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "prisoners_dilemma_price_war"
+   ],
+   "top_tier": [
+    "prisoners_dilemma_price_war"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-reflexive_bubble-0",
+   "world_type": "single",
+   "planted": [
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "reflexive_bubble"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "prisoners_dilemma_price_war",
+    "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
+    "winners_curse_acquisition"
+   ],
+   "tier_size": 6,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-reflexive_bubble-1",
+   "world_type": "single",
+   "planted": [
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "reflexive_bubble"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "prisoners_dilemma_price_war",
+    "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
+    "winners_curse_acquisition"
+   ],
+   "tier_size": 6,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-reflexive_bubble-2",
+   "world_type": "single",
+   "planted": [
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "reflexive_bubble"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "prisoners_dilemma_price_war",
+    "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
+    "winners_curse_acquisition"
+   ],
+   "tier_size": 6,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-regulatory_capture_race-0",
+   "world_type": "single",
+   "planted": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "concentrated_supplier_base"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "regulatory_capture_race"
+   ],
+   "top_tier": [
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-regulatory_capture_race-1",
+   "world_type": "single",
+   "planted": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "regulatory_capture_race"
+   ],
+   "top_tier": [
+    "regulatory_capture_race"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-regulatory_capture_race-2",
+   "world_type": "single",
+   "planted": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "regulatory_capture_race"
+   ],
+   "top_tier": [
+    "regulatory_capture_race"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-sovereign_debt_doom_loop-0",
+   "world_type": "single",
+   "planted": [
+    "credit_spreads_elevated",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "sovereign_debt_doom_loop"
+   ],
+   "top_tier": [
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-sovereign_debt_doom_loop-1",
+   "world_type": "single",
+   "planted": [
+    "credit_spreads_elevated",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "sovereign_debt_doom_loop"
+   ],
+   "top_tier": [
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-sovereign_debt_doom_loop-2",
+   "world_type": "single",
+   "planted": [
+    "credit_spreads_elevated",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "sovereign_debt_doom_loop"
+   ],
+   "top_tier": [
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-supply_shock_propagation-0",
+   "world_type": "single",
+   "planted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "supply_shock_propagation"
+   ],
+   "top_tier": [
+    "supply_shock_propagation"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-supply_shock_propagation-1",
+   "world_type": "single",
+   "planted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "supply_shock_propagation"
+   ],
+   "top_tier": [
+    "supply_shock_propagation"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "single-supply_shock_propagation-2",
+   "world_type": "single",
+   "planted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "symmetric_competitor_response_expected"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "supply_shock_propagation"
+   ],
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-winners_curse_acquisition-0",
+   "world_type": "single",
+   "planted": [
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "winners_curse_acquisition"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "prisoners_dilemma_price_war",
+    "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
+    "winners_curse_acquisition"
+   ],
+   "tier_size": 6,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-winners_curse_acquisition-1",
+   "world_type": "single",
+   "planted": [
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.5,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "winners_curse_acquisition"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "prisoners_dilemma_price_war",
+    "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
+    "winners_curse_acquisition"
+   ],
+   "tier_size": 6,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "single-winners_curse_acquisition-2",
+   "world_type": "single",
+   "planted": [
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.3333333333333333,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "capacity_investment_outpacing_demand_signal",
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "winners_curse_acquisition"
+   ],
+   "top_tier": [
+    "capex_overbuild"
+   ],
+   "tier_size": 1,
+   "identified": false,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-debt_fueled_capacity_race--sovereign_debt_doom_loop",
+   "world_type": "mixed",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "credit_spreads_elevated",
+    "debt_financed_expansion",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "credit_spreads_elevated",
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.8,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "debt_fueled_capacity_race",
+    "sovereign_debt_doom_loop"
+   ],
+   "top_tier": [
+    "crowded_trade_deleveraging",
+    "debt_fueled_capacity_race",
+    "money_market_contagion",
+    "sovereign_debt_doom_loop"
+   ],
+   "tier_size": 4,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-mechanical_feedback_liquidation--policy_tightening_demand_collapse",
+   "world_type": "mixed",
+   "planted": [
+    "curve_inverted",
+    "drawdown_gt_20pct",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "condition_precision": 0.8,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "mechanical_feedback_liquidation",
+    "policy_tightening_demand_collapse"
+   ],
+   "top_tier": [
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-margin_collateral_spiral--winners_curse_acquisition",
+   "world_type": "mixed",
+   "planted": [
+    "drawdown_gt_20pct",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "margin_collateral_spiral",
+    "winners_curse_acquisition"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "reflexive_bubble",
+    "regulatory_capture_race",
+    "supply_shock_propagation",
+    "winners_curse_acquisition"
+   ],
+   "tier_size": 11,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-platform_envelopment--prisoners_dilemma_price_war",
+   "world_type": "mixed",
+   "planted": [
+    "adjacent_market_bundling_opportunity",
+    "few_dominant_competitors",
+    "network_effects_present",
+    "symmetric_competitor_response_expected"
+   ],
+   "predicted": [
+    "adjacent_market_bundling_opportunity",
+    "few_dominant_competitors",
+    "network_effects_present",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "platform_envelopment",
+    "prisoners_dilemma_price_war"
+   ],
+   "top_tier": [
+    "platform_envelopment",
+    "prisoners_dilemma_price_war"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "mixed-input_cost_inflation_passthrough--sovereign_debt_doom_loop",
+   "world_type": "mixed",
+   "planted": [
+    "concentrated_supplier_base",
+    "credit_spreads_elevated",
+    "inflation_rising",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "credit_spreads_elevated",
+    "few_dominant_competitors",
+    "inflation_rising",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.8,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "input_cost_inflation_passthrough",
+    "sovereign_debt_doom_loop"
+   ],
+   "top_tier": [
+    "input_cost_inflation_passthrough",
+    "money_market_contagion",
+    "sovereign_debt_doom_loop",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 4,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-crowded_trade_deleveraging--prisoners_dilemma_price_war",
+   "world_type": "mixed",
+   "planted": [
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure",
+    "symmetric_competitor_response_expected"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "debt_financed_expansion",
+    "few_dominant_competitors",
+    "frequent_regulatory_interaction",
+    "interconnected_counterparty_exposure",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "binding_mutual_commitment_exists",
+    "frequent_regulatory_interaction"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "crowded_trade_deleveraging",
+    "prisoners_dilemma_price_war"
+   ],
+   "top_tier": [
+    "crowded_trade_deleveraging",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race"
+   ],
+   "tier_size": 3,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-capex_overbuild--leverage_cycle_bust",
+   "world_type": "mixed",
+   "planted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "predicted": [
+    "capacity_investment_outpacing_demand_signal",
+    "debt_financed_expansion",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "valuation_disconnected_from_fundamentals"
+   ],
+   "condition_precision": 0.8,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "capex_overbuild",
+    "leverage_cycle_bust"
+   ],
+   "top_tier": [
+    "capex_overbuild",
+    "debt_deflation_spiral",
+    "debt_fueled_capacity_race",
+    "leverage_cycle_bust"
+   ],
+   "tier_size": 4,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-ally_drawn_into_linked_conflict--exogenous_activity_halt",
+   "world_type": "mixed",
+   "planted": [
+    "binding_mutual_commitment_exists",
+    "drawdown_gt_20pct"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.6666666666666666,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "ally_drawn_into_linked_conflict",
+    "exogenous_activity_halt"
+   ],
+   "top_tier": [
+    "ally_drawn_into_linked_conflict",
+    "debt_deflation_spiral",
+    "exogenous_activity_halt",
+    "leverage_cycle_bust",
+    "margin_collateral_spiral",
+    "mechanical_feedback_liquidation",
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 9,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-carry_trade_unwind--input_cost_inflation_passthrough",
+   "world_type": "mixed",
+   "planted": [
+    "concentrated_supplier_base",
+    "inflation_rising",
+    "interconnected_counterparty_exposure"
+   ],
+   "predicted": [
+    "concentrated_supplier_base",
+    "few_dominant_competitors",
+    "inflation_rising",
+    "interconnected_counterparty_exposure"
+   ],
+   "condition_precision": 0.75,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "carry_trade_unwind",
+    "input_cost_inflation_passthrough"
+   ],
+   "top_tier": [
+    "input_cost_inflation_passthrough",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-bank_run_maturity_mismatch--prisoners_dilemma_price_war",
+   "world_type": "mixed",
+   "planted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure",
+    "symmetric_competitor_response_expected"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "few_dominant_competitors",
+    "interconnected_counterparty_exposure",
+    "symmetric_competitor_response_expected"
+   ],
+   "condition_precision": 1.0,
+   "condition_recall": 1.0,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [
+    "bank_run_maturity_mismatch",
+    "prisoners_dilemma_price_war"
+   ],
+   "top_tier": [
+    "bank_run_maturity_mismatch",
+    "prisoners_dilemma_price_war"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "mixed-ally_drawn_into_linked_conflict--input_cost_inflation_passthrough",
+   "world_type": "mixed",
+   "planted": [
+    "binding_mutual_commitment_exists",
+    "concentrated_supplier_base",
+    "inflation_rising"
+   ],
+   "predicted": [
+    "binding_mutual_commitment_exists",
+    "concentrated_supplier_base",
+    "few_dominant_competitors",
+    "inflation_rising"
+   ],
+   "condition_precision": 0.75,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "ally_drawn_into_linked_conflict",
+    "input_cost_inflation_passthrough"
+   ],
+   "top_tier": [
+    "input_cost_inflation_passthrough",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 2,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "mixed-margin_collateral_spiral--policy_tightening_demand_collapse",
+   "world_type": "mixed",
+   "planted": [
+    "curve_inverted",
+    "drawdown_gt_20pct",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "predicted": [
+    "curve_inverted",
+    "drawdown_gt_20pct",
+    "few_dominant_competitors",
+    "inflation_rising",
+    "unemployment_momentum_triggered"
+   ],
+   "condition_precision": 0.8,
+   "condition_recall": 1.0,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [
+    "margin_collateral_spiral",
+    "policy_tightening_demand_collapse"
+   ],
+   "top_tier": [
+    "policy_tightening_demand_collapse"
+   ],
+   "tier_size": 1,
+   "identified": true,
+   "unique_top": false
+  },
+  {
+   "world_id": "control-0",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
+   "condition_recall": null,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
+  },
+  {
+   "world_id": "control-1",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [],
+   "condition_precision": null,
+   "condition_recall": null,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [],
+   "tier_size": 0,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "control-2",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
+   "condition_recall": null,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
+  },
+  {
+   "world_id": "control-3",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
+   "condition_recall": null,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
+  },
+  {
+   "world_id": "control-4",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
+   "condition_recall": null,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
+  },
+  {
+   "world_id": "control-5",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [
+    "few_dominant_competitors"
+   ],
+   "condition_precision": 0.0,
+   "condition_recall": null,
+   "hallucinated": [
+    "few_dominant_competitors"
+   ],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [
+    "prisoners_dilemma_price_war",
+    "regulatory_capture_race",
+    "supply_shock_propagation"
+   ],
+   "tier_size": 3,
+   "identified": false,
+   "unique_top": false
+  },
+  {
+   "world_id": "control-6",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [],
+   "condition_precision": null,
+   "condition_recall": null,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [],
+   "tier_size": 0,
+   "identified": true,
+   "unique_top": true
+  },
+  {
+   "world_id": "control-7",
+   "world_type": "control",
+   "planted": [],
+   "predicted": [],
+   "condition_precision": null,
+   "condition_recall": null,
+   "hallucinated": [],
+   "missed": [],
+   "ground_truth": [],
+   "top_tier": [],
+   "tier_size": 0,
+   "identified": true,
+   "unique_top": true
+  }
+ ]
+}

@@ -184,3 +184,18 @@ def test_live_leg_end_to_end_with_perfect_fake_extraction(monkeypatch, tmp_path)
     assert all(r["predicted"] == [] for r in controls)
     report = (tmp_path / "live.md").read_text()
     assert sw.DIAGNOSTIC_DISCLAIMER in report
+
+
+# --- v1.1: conditional opener (live-run finding, 2026-07-20) ----------------
+
+def test_v11_opener_is_conditional_on_the_oligopoly_condition():
+    """v1.0's unconditional 'principal competitor' opener baited
+    few_dominant_competitors 67 times in the first live run. v1.1: only
+    worlds that PLANT the condition keep the concentrated phrasing;
+    everything else (controls included) describes a broad field."""
+    for w in _worlds():
+        if "few_dominant_competitors" in w.planted_conditions:
+            assert "principal competitor" in w.narrative, w.world_id
+        else:
+            assert "principal competitor" not in w.narrative, w.world_id
+            assert "broad field" in w.narrative, w.world_id
