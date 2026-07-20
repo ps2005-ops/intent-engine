@@ -1374,3 +1374,15 @@ Suite 635 passed, 0 failed, 9 deselected (live/networked), EXIT=0
 sandbox; a stale .git/index.lock from an interrupted prior git op was
 found (worktree verified byte-identical to HEAD 0ec7503 before any work);
 commits use a separate GIT_INDEX_FILE -- founder can rm the lock file.
+
+## Loop 8 — T008 MERGED: REGIME_VOCAB widened +6 (founder approved)
+
+Added ipo, merger, acquisition, stock, buyback, guidance to
+core/headline_feed.REGIME_VOCAB (36 -> 42 terms; additive only, scoring
+logic untouched). All spec bars asserted as tests: (a) additive-by-
+exactly-6 with every pre-existing term still present, (b) the three real
+NPR miss titles now score >=1, (c) 4 non-markets control titles still
+score 0 (no term dropped -- park condition not triggered), (d) scoring
+deterministic/unchanged. Suite 639 passed, 0 failed, EXIT=0 (explicit
+check before commit). This is the headline vocab surface -- NOT the
+frozen TriggerCondition enum, which stays frozen per the loop-8 decision.

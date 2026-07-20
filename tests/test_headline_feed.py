@@ -127,3 +127,47 @@ def test_top_k_default_is_three():
         _item(f"Fed rates headline number {i}", FRESH) for i in range(6)
     ]))]
     assert len(select_headlines(payloads, AS_OF)) == 3
+
+
+# --- T008: REGIME_VOCAB widening (founder-approved, merged 2026-07-19) ----
+
+
+def test_t008_bar_a_widening_is_additive_by_exactly_6():
+    from intent_engine.core.headline_feed import REGIME_VOCAB
+    pre_t008 = {
+        "fed", "rate", "rates", "yield", "yields", "treasury", "bond", "bonds",
+        "inflation", "cpi", "unemployment", "jobs", "payrolls", "labor",
+        "recession", "curve", "spread", "credit", "default", "stocks", "equities",
+        "market", "markets", "selloff", "rally", "drawdown", "volatility", "vix",
+        "earnings", "gdp", "dollar", "oil", "tariff", "tariffs", "hike", "cut",
+    }
+    new_terms = {"ipo", "merger", "acquisition", "stock", "buyback", "guidance"}
+    vocab = set(REGIME_VOCAB)
+    assert pre_t008 <= vocab  # every pre-existing term still present
+    assert new_terms <= vocab
+    assert len(REGIME_VOCAB) == len(pre_t008) + 6
+
+
+def test_t008_bar_b_real_npr_misses_now_score():
+    # The three real NPR titles that scored 0 pre-widening (AP-feed
+    # decision-prep finding) must now score >= 1.
+    assert score_title("SpaceX IPO: Stock gains 19% in trading debut") >= 1
+    assert score_title("Paramount-Warner merger clears final regulatory hurdle") >= 1
+    assert score_title("Chipmaker announces acquisition of AI startup") >= 1
+
+
+def test_t008_bar_c_non_markets_controls_still_score_zero():
+    for control in (
+        "Celebrity opens new restaurant in downtown Toronto",
+        "Cat wins annual pet pageant to adoring crowds",
+        "Local library extends weekend opening hours",
+        "New museum exhibit celebrates jazz history",
+    ):
+        assert score_title(control) == 0, control
+
+
+def test_t008_bar_d_scoring_logic_unchanged_and_deterministic():
+    # Same deterministic distinct-word-overlap count; scoring twice agrees;
+    # plural/singular are separate vocab entries, counted distinctly.
+    title = "Stock stocks STOCK rally"
+    assert score_title(title) == score_title(title) == 3  # {stock, stocks, rally}

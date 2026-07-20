@@ -1,8 +1,8 @@
-# T008 — REGIME_VOCAB widening — SPEC FOR APPROVAL
+# T008 — REGIME_VOCAB widening — MERGED
 
-*Status: PROPOSED (2026-07-22). Founder said YES to scoping it; per that
-instruction this is SPEC ONLY — my approval-before-merge stands, no code
-merged until you sign off on the spec. Small, deterministic, 0 live calls.*
+*Status: MERGED 2026-07-19 (founder approved the spec; overnight loop 8).
+All 5 bars asserted as tests in tests/test_headline_feed.py; no term
+dropped (bar-c controls stayed at 0). Spec preserved below as written.*
 
 ## Motivation (the real finding it fixes)
 

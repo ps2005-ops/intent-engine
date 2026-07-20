@@ -56,6 +56,9 @@ REGIME_VOCAB: Tuple[str, ...] = (
     "recession", "curve", "spread", "credit", "default", "stocks", "equities",
     "market", "markets", "selloff", "rally", "drawdown", "volatility", "vix",
     "earnings", "gdp", "dollar", "oil", "tariff", "tariffs", "hike", "cut",
+    # T008 widening (founder-approved 2026-07-19): real NPR misses showed
+    # "stock"/"ipo"/"merger" scoring 0 -- additive only, no logic change.
+    "ipo", "merger", "acquisition", "stock", "buyback", "guidance",
 )
 
 _WORD_RE = re.compile(r"[a-z']+")
