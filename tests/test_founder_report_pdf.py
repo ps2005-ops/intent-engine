@@ -550,3 +550,103 @@ def test_lifecycle_without_record_is_unavailable(result):
     flat = frr.flatten_sections({LIFE: sections[LIFE]})
     assert "UNAVAILABLE" in flat
     assert "not tracked" in flat
+
+
+# =============================================================================
+# T012: layout, metadata, and robustness bars.
+# =============================================================================
+
+
+def test_wrap_hard_breaks_unbroken_identifiers():
+    long_word = "A" * 300
+    lines = frr._wrap(f"id {long_word} end", width=40)
+    assert all(len(ln) <= 40 for ln in lines)      # nothing overflows
+    assert "".join(lines).replace(" ", "") == f"id{long_word}end".replace(" ", "")
+
+
+def test_pdf_metadata_and_footer_carry_decision_key(result, tmp_path):
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    rec = svc.create_decision("founder")
+    wired = result._replace(decision_record=rec)
+    out = tmp_path / "premortem.pdf"
+    frr.render_premortem_pdf(DECISION, BusinessContext(revenue="$60k MRR"),
+                             wired, out, decision_service=svc,
+                             generated_at="2026-07-20T12:00:00+00:00")
+    raw = out.read_bytes()
+    assert b"/Info" in raw and b"/Title (Pre-Mortem Report)" in raw
+    assert f"/Subject (Decision record: {rec.decision_key})".encode() in raw
+    assert b"/CreationDate (D:20260720120000)" in raw
+    assert b"Page 1 of" in raw                     # footer on page 1
+    assert rec.decision_key.encode() in raw
+
+
+def test_footer_appears_on_every_page_of_a_multipage_report(result, tmp_path):
+    out = tmp_path / "premortem.pdf"
+    frr.render_premortem_pdf(DECISION, BusinessContext(revenue="$60k MRR"),
+                             result, out,
+                             generated_at="2026-07-20T12:00:00+00:00")
+    raw = out.read_bytes()
+    n_pages = raw.count(b"/Type /Page ")           # page objects (not /Pages)
+    assert n_pages >= 2                            # the report is multi-page
+    for i in range(1, n_pages + 1):
+        assert f"Page {i} of {n_pages}".encode() in raw
+
+
+def test_long_owner_and_long_related_lists_render_within_margins(result, tmp_path):
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    rec = svc.create_decision("founder")
+    svc.record_event(rec.decision_id, "OwnerAssigned", actor_type="human",
+                     actor_id="founder", source="cli",
+                     payload={"owner": "Dr. Maximiliana von "
+                              "Hohenzollern-Sigmaringen-Oberweissbach, Chief "
+                              "Strategy and Special Projects Officer"})
+    # a long supersession chain: several related records
+    others = [svc.create_decision("founder") for _ in range(3)]
+    for o in others:
+        svc.add_relationship(o.decision_id, rec.decision_id, "depends_on")
+    wired = result._replace(decision_record=rec)
+    out = tmp_path / "premortem.pdf"
+    sections = frr.render_premortem_pdf(DECISION,
+                                        BusinessContext(revenue="$60k MRR"),
+                                        wired, out, decision_service=svc)
+    flat = frr.flatten_sections(sections)
+    assert "Hohenzollern-Sigmaringen-Oberweissbach" in flat
+    assert out.read_bytes().startswith(b"%PDF-1.4")   # still a valid PDF
+
+
+def test_special_characters_are_escaped_in_pdf_streams(result, tmp_path):
+    out = tmp_path / "premortem.pdf"
+    tricky = BusinessContext(revenue="$60k (MRR) 50% \\ up",
+                             market="B2B (SaaS) — nichè")
+    frr.render_premortem_pdf(DECISION, tricky, result, out)
+    raw = out.read_bytes()
+    assert raw.startswith(b"%PDF-1.4") and raw.rstrip().endswith(b"%%EOF")
+    assert br"\(MRR\)" in raw                      # parens escaped, not raw
+
+
+def test_long_alternatives_render_and_pass_walls(result, tmp_path):
+    alts = [{"alternative": "Alt " + "x" * 200,
+             "main_risk": "risk " + "y" * 200}]
+    sections = frr.build_premortem_sections(
+        DECISION, BusinessContext(revenue="$60k MRR"),
+        _with_alternatives(result, alts))
+    flat = frr.flatten_sections(sections)
+    frr.assert_language_walls(flat)
+    frr._assert_no_accuracy_claim(flat)
+    out = tmp_path / "premortem.pdf"
+    frr.write_pdf(sections, out)
+    assert out.read_bytes().startswith(b"%PDF-1.4")
+
+
+def test_regression_decision_id_still_matches_record(result, tmp_path):
+    """T011 regression: 2A wiring intact after 2B changes."""
+    svc = DecisionService(str(tmp_path / "decisions.db"))
+    rec = svc.create_decision("founder")
+    wired = result._replace(decision_record=rec)
+    out = tmp_path / "premortem.pdf"
+    sections = frr.render_premortem_pdf(DECISION,
+                                        BusinessContext(revenue="$60k MRR"),
+                                        wired, out, decision_service=svc)
+    flat = frr.flatten_sections(sections)
+    assert rec.decision_id in flat and rec.decision_key in flat
+    assert len(svc.get_events(rec.decision_id)) == 1   # reads only, still

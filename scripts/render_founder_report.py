@@ -727,7 +727,15 @@ def _pdf_escape(s: str) -> str:
 def _wrap(line: str, width: int = 92) -> list:
     if len(line) <= width:
         return [line]
-    words, out, cur = line.split(" "), [], ""
+    # T012 polish: hard-break words longer than the line (26-char ULIDs,
+    # URLs, unbroken identifiers) so nothing ever overflows the margin.
+    words = []
+    for w in line.split(" "):
+        while len(w) > width:
+            words.append(w[:width])
+            w = w[width:]
+        words.append(w)
+    out, cur = [], ""
     for w in words:
         if cur and len(cur) + 1 + len(w) > width:
             out.append(cur); cur = w
@@ -770,11 +778,19 @@ def _item_text(it) -> list:
     return []
 
 
-def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> None:
+def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report",
+              footer: str = None, meta: dict = None) -> None:
     """Structured PDF, Letter, Helvetica core fonts + ZapfDingbats
     check/cross marks, light vector visuals (confidence gauge, risk bars,
     boxed callouts, scenario tree). Uncompressed streams: the text is
-    visible in the raw bytes, so the artifact stays auditable."""
+    visible in the raw bytes, so the artifact stays auditable.
+
+    T012 polish: `footer` renders on every page with the page number
+    ("Page n of N — <footer>"), keeping the decision key visible
+    throughout; `meta` ({"Title","Subject","CreationDate"}) writes a PDF
+    /Info dictionary. This is document metadata, NOT tagged-PDF
+    accessibility — the dependency-free writer cannot produce a tagged
+    PDF, and that limitation is stated rather than papered over."""
     pages, cur = [], []
     top, bottom, lh = 738, 60, 14
     y = top
@@ -945,6 +961,14 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
         render_items(items)
     newpage()
 
+    # T012 polish: consistent footer on every page — page number + the
+    # decision key stay visible wherever the reader lands.
+    if footer:
+        total = len(pages)
+        for i, page in enumerate(pages, 1):
+            ftext = _pdf_escape(f"Page {i} of {total}  |  {footer}"[:110])
+            page.append(f"0.45 g BT /F1 8 Tf 54 36 Td ({ftext}) Tj ET 0 g")
+
     def enc(s: str) -> bytes:
         return s.encode("cp1252", errors="replace")
 
@@ -963,6 +987,14 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
                          f"/Resources << /Font 3 0 R >> /Contents {cnum} 0 R >>")
         objs[cnum] = enc(f"<< /Length {len(stream)} >>\nstream\n") + stream + b"\nendstream"
 
+    info_ref = ""
+    if meta:
+        info_num = max(objs) + 1
+        pairs = "".join(f"/{k} ({_pdf_escape(str(v))}) "
+                        for k, v in meta.items() if v)
+        objs[info_num] = enc(f"<< {pairs}>>")
+        info_ref = f" /Info {info_num} 0 R"
+
     buf = bytearray(b"%PDF-1.4\n")
     offsets = {}
     for num in sorted(objs):
@@ -973,8 +1005,8 @@ def write_pdf(sections: dict, out_path, title: str = "Pre-Mortem Report") -> Non
     buf += f"xref\n0 {n_objs}\n0000000000 65535 f \n".encode()
     for num in range(1, n_objs):
         buf += f"{offsets[num]:010d} 00000 n \n".encode()
-    buf += (f"trailer\n<< /Size {n_objs} /Root 1 0 R >>\nstartxref\n{xref_at}\n%%EOF"
-            .encode())
+    buf += (f"trailer\n<< /Size {n_objs} /Root 1 0 R{info_ref} >>\n"
+            f"startxref\n{xref_at}\n%%EOF".encode())
     Path(out_path).write_bytes(bytes(buf))
 
 
@@ -1005,7 +1037,15 @@ def render_premortem_pdf(decision_text: str, context, result, out_path,
     flat = flatten_sections(sections)
     assert_language_walls(flat)
     _assert_no_accuracy_claim(flat)
-    write_pdf(sections, out_path, title=title)
+    ts = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    drec = getattr(result, "decision_record", None)
+    key = drec.decision_key if drec is not None else "no decision record"
+    write_pdf(sections, out_path, title=title,
+              footer=f"{key}  |  generated {ts}",
+              meta={"Title": title,
+                    "Subject": f"Decision record: {key}",
+                    "CreationDate":
+                        "D:" + re.sub(r"[^0-9]", "", ts)[:14]})
     return sections
 
 
