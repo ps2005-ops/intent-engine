@@ -79,28 +79,41 @@ requiring your explicit approval.
   mid-September (14d + 30d buckets compounding), vs. no accrual at all
   until you start it.
 
-## MY MORNING LIST (in order)
+## MY MORNING LIST (updated after the continuation — everything buildable is built; what remains is Mac-side)
 
-1. **Start the daily prediction job on the Mac** — everything is now
-   approved, implemented, and tested; this is the only item standing
-   between the engine and calibration data. (Scheduling stays human-wired
-   per house rule; cron_lines_to_install.txt has the line.)
-2. Optional 1-minute cleanup: `rm ~/intent-engine/.git/index.lock` — a
-   stale lock from an interrupted git op predating this session. I
-   verified the worktree byte-identical to HEAD before touching anything
-   and committed via a separate index; stale locks I swept aside are
-   parked in `.git/stale_locks_loop8/` (safe to delete). Note:
-   `.git/objects/maintenance.lock` existed too — if Mac-side
-   `git maintenance` is enabled for this repo, consider disabling it to
-   stop lock contention with overnight loops.
-3. **Run the T009 live leg**:
-   `python scripts/run_synthetic_world_eval.py --live` (≈$1.78; the
-   report + per-world JSON land in reports/). This is the reasoning
-   diagnostic proper — the offline leg's expressiveness map is already in
-   reports/synthetic_worlds_eval.md.
-4. T006 (premortem→ledger wiring) is the runnable-queue head; its bars
-   need ≤6 live calls, so it's a Mac-run task — say the word and the next
-   loop builds it to the spec.
+1. **Start the daily prediction job** — idempotent one-paste (adds the
+   18:30 ET weekday line only if absent; scheduling stays human-run per
+   house rule):
+
+   ```
+   (crontab -l 2>/dev/null | grep -q daily_market_predictions) || { (crontab -l 2>/dev/null; cat <<'CRON'
+   30 18 * * 1-5 cd /Users/prathamsharma/intent-engine && .venv/bin/python scripts/daily_market_predictions.py --entity-id "macro-watch" >> logs/daily_market_predictions_$(date +\%Y-\%m-\%d).log 2>&1
+   CRON
+   ) | crontab -; }
+   ```
+
+2. **Run the T009 live leg** (≈$1.78, ≤100 calls, parks on prompt-hash
+   mismatch):
+
+   ```
+   cd ~/intent-engine && .venv/bin/python scripts/run_synthetic_world_eval.py --live
+   ```
+
+3. **T006 live bar (a)** — wiring is BUILT (`a236604`, bars b-e green
+   offline); one fixture run flips it to DONE (≤6-call budget):
+
+   ```
+   cd ~/intent-engine && .venv/bin/python -m intent_engine.simulator.cli --entity-id "t006-live" --decision "We're hiring a 4-person outbound sales team before confirming strong product-market fit." --record-predictions
+   ```
+
+   Then paste the stderr confirmation + a
+   `list_predictions(source="premortem")` readout into the next loop and
+   I'll close T005-style.
+4. Optional 1-minute cleanup: `rm ~/intent-engine/.git/index.lock`; stale
+   locks I swept aside are parked in `.git/stale_locks_loop8/` (safe to
+   delete). If Mac-side `git maintenance` is enabled for this repo,
+   consider disabling it (a `maintenance.lock` shows lock contention with
+   overnight loops).
 
 ## AMBIGUITIES (parked with recommendations, not guessed)
 
