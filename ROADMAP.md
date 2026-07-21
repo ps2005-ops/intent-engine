@@ -647,10 +647,48 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   never a second one; no web ingestion until its own founder gate; the
   deterministic/model boundary is explicit in code.
 
-## T020 — Product Manager Agent (propose-only, evidence-backed)
+## T020 — Product Strategy & Roadmap Intelligence Platform (propose-only)
 
 - **Status**: RUNNABLE
-- **Priority**: 1. **Size**: L.
+- **Priority**: 1. **Size**: XL.
+- **Scope expanded 2026-07-21**: this is not "a PM agent". It is the
+  subsystem whose job is to read ACROSS every other subsystem and turn
+  what they collectively know into artifacts the founder can accept,
+  reject, merge, or defer. It owns **product proposals, not product
+  decisions**, and it gets a canonical memory — the **Opportunity
+  Index** — exactly as Research got the Evidence Index, so T021–T023
+  read one substrate instead of rebuilding it.
+- **Additional bars (beyond those below)**: (i) **Opportunity Index** —
+  deterministic, rebuilt from append-only rows, never model-written,
+  rejects orphans, self-checks invariants, answers lineage proposal →
+  opportunity → evidence → source → request; (j) **problem-first** — a
+  problem records evidence references, affected customers, why-now, and
+  what-changes-if-ignored BEFORE any solution exists; a solution
+  recorded before its problem is rejected; (k) **three-way separation**
+  of Problem / Solution / Spec, so one problem may carry several
+  competing solutions; (l) **lifecycle with no skipped steps**
+  Opportunity → Proposal → Spec Draft → Founder Review → Decision
+  Record → Execution Candidate, with `merged_into` and `deferred` as
+  first-class terminal states because those are real founder answers;
+  (m) **multi-dimensional scoring** — opportunity_score, confidence,
+  evidence/customer/experiment/research coverage, strategic_alignment,
+  freshness — each computed separately, each carrying version, inputs,
+  formula and reasons; a missing input is UNAVAILABLE never 0;
+  strategic_alignment is UNAVAILABLE without a human declaration
+  (an agent does not infer strategy); (n) **automatic intake** turning
+  T019 research debt, T018 INCONCLUSIVE/TOO-FEW/GUARDRAIL results, and
+  CRM churn/at-risk facts into candidate opportunities that cite their
+  origin and inherit its uncertainty; (o) **spec drafts bounded** to
+  goals / non-goals / requirements / constraints / acceptance criteria /
+  unknowns / dependencies / risks / open questions — an implementation,
+  estimate, or assignee field is rejected, and an unfalsifiable
+  acceptance criterion is rejected; (p) **proposal graph** with
+  addresses / supports / depends_on / blocks / alternative_to /
+  implements / supported_by / supersedes, no cycles and no orphans;
+  (q) **portfolio rollup** Portfolio → Initiatives → Opportunities →
+  Proposals → Specs, folded from the log in one deterministic call;
+  (r) **known / unknown / assumptions mandatory** on every proposal — a
+  proposal claiming no unknowns is rejected.
 - **Source**: `docs/V1_COMPLETION_ROADMAP.md` P11 verdict — the PM Agent
   is **read/propose-only**, never auto-promotes a NEEDS-SPEC item, and
   never edits `src/` prompts. It is the second agent, and it inherits
@@ -679,8 +717,19 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   no "should", "must", or "obviously" without cited support;
   0 model calls in the suite; offline suite green + EXIT=0.
 - **Walls**: propose-only; no roadmap writes; no promotion of anything;
-  reuse the Evidence Index rather than re-deriving evidence; reuse
-  analytics rather than computing metrics; 0 network.
+  no ticketing, scheduling, or execution; reuse the Evidence Index
+  rather than re-deriving evidence; reuse analytics rather than
+  computing metrics; 0 network.
+- **Repository invariants** (standing from T020 onward — every remaining
+  subsystem must prove these): exactly one canonical contract, one
+  append-only store, one folded-state implementation, one deterministic
+  scoring implementation, one graph implementation where applicable, one
+  snapshot implementation, and one CLI surface per subsystem; no
+  duplicated business logic across subsystems; replay reproduces every
+  derived artifact; every output traces back to append-only history.
+  Asserted by source inspection, as T018 and T019 already do. These
+  compound: by T025 the release audit becomes mechanical rather than
+  archaeological.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

@@ -318,16 +318,42 @@ deliberately: generalizing a kernel from three real orchestrating agents
 produces a better kernel than designing one ahead of its users.*
 
 ```
-T019 — Research & Evidence Intelligence    (evidence packages, propose-only)
-T020 — Product Manager Agent               (consumes research + decisions)
-T021 — Executive Decision Agent            (orchestrates Decision, Growth,
-                                            Research, Marketing, Analytics,
-                                            CRM, Knowledge)
-T022 — AgentOS Shared Kernel               (generalized FROM three agents)
-T023 — Personal AI Layer
-T024 — Public APIs & SDK
-T025 — V1 Stabilization & Release Audit
+T019 — Research & Evidence Intelligence    BUILT. Evidence Index is the
+                                           shared evidence substrate.
+T020 — Product Strategy & Roadmap          Opportunity Index is the shared
+       Intelligence                        product substrate. Owns proposals,
+                                           never decisions; never writes
+                                           ROADMAP.md.
+T021 — Executive Decision Agent            cross-system orchestration of
+                                           Decisions, Research, Growth,
+                                           Marketing, CRM, Analytics,
+                                           Knowledge, Product. Produces
+                                           reviewable recommendation packages
+                                           ONLY. No autonomous execution.
+T022 — AgentOS Shared Kernel               extracted FROM three production
+                                           agents, not designed ahead of them:
+                                           orchestration, memory, budgeting,
+                                           lifecycle, replay, permissions,
+                                           telemetry, agent registry.
+T023 — Personal AI Layer                   founder workspace on AgentOS.
+                                           Briefings, strategic conversation,
+                                           portfolio navigation, decision
+                                           history. No operational authority.
+T024 — Public APIs & SDK                   read-only + approved-write surfaces;
+                                           auth, versioning, SDKs, webhooks.
+                                           Internal stores stay encapsulated.
+T025 — V1 Stabilization & Release Audit    architectural integrity, replay
+                                           correctness, docs consistency,
+                                           dependency + security review, API
+                                           stability, migration verification,
+                                           frozen-asset validation, RC prep.
 ```
+
+*Two substrates now anchor the agent tier: the **Evidence Index** (what
+is true, and how well we know it) and the **Opportunity Index** (what is
+worth doing, and why). T021–T023 read both rather than reconstructing
+either — that is what makes the AgentOS extraction at T022 an extraction
+rather than a redesign.*
 
 *Revised 2026-07-20 after founder review. The one insisted change is
 adopted in full: the record is **event-sourced**. State is never stored as
