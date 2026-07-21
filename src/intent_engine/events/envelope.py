@@ -52,11 +52,20 @@ EVENT_PRODUCERS = {
     "claim.review_requested":             "approval_wall",
     "claim.approved":                     "approval_wall",
     "claim.rejected":                     "approval_wall",
+    # Growth (T018) — the experiment platform is the one authoritative
+    # producer. These are NOTIFICATIONS: no consumer may infer experiment
+    # state from them (the growth log is the source of truth), and there
+    # is deliberately no "experiment_won" or rollout event in the
+    # taxonomy, because no such fact exists in this architecture.
+    "growth.experiment_started":          "growth_platform",
+    "growth.experiment_stopped":          "growth_platform",
+    "growth.result_labelled":             "growth_platform",
 }
 EVENT_TYPES = set(EVENT_PRODUCERS)
 
 ACTOR_TYPES = {"human", "agent", "system"}
-SUBJECT_TYPES = {"decision", "prediction", "report", "content", "claim"}
+SUBJECT_TYPES = {"decision", "prediction", "report", "content", "claim",
+                 "experiment"}
 SOURCES = {"web_intake", "cli", "report_review", "crm", "api", "system",
            "bridge"}
 

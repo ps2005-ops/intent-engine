@@ -20,6 +20,10 @@ FEEDBACK_TYPES = {
     "feedback.founder_outcome", "feedback.customer_reply",
     "feedback.report_review", "feedback.internal_review",
     "feedback.crm_observation",
+    # T018: an experiment result enters the learning loop as FEEDBACK —
+    # evidence, never a conclusion. Promotion stays human-gated exactly
+    # as it is for every other feedback type.
+    "feedback.experiment_result",
     # quote-consent facts (exact text + intended use; approval human-only)
     "feedback.quote_consent_requested", "feedback.quote_consent_approved",
     "feedback.quote_consent_rejected", "feedback.quote_consent_revoked",

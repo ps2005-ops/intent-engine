@@ -22,7 +22,7 @@ logs/
 .claude/settings.local.json
 
 # T013 runtime event log (append-only data, not source)
-events/
+/events/
 
 # T014 runtime CRM log (append-only data, not source)
 marketing/crm/crm.jsonl
@@ -41,3 +41,9 @@ data/daily_runner_spend.jsonl
 marketing/content_engine/drafts/predictions/
 marketing/content_engine/drafts/commits/
 marketing/content_engine/drafts/pages/
+
+# T018 runtime growth logs (append-only data, not source)
+data/growth.jsonl
+data/growth.jsonl.lock
+data/growth_synthetic.jsonl
+data/growth_synthetic.jsonl.lock
