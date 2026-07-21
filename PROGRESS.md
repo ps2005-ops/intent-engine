@@ -3300,3 +3300,50 @@ auto-promote. 79 new tests (suite 992 → 1071).
 
 **Queue**: T019 — Research Agent (propose-only; frozen mechanism library
 untouched; no web ingestion until its own founder gate).
+
+## 2026-07-21 (session 10) — T019 complete: Research & Evidence Intelligence
+
+The first AGENT subsystem. The governing definition, now in the code:
+**an agent here is a constrained producer of reviewable artifacts, not a
+thing that answers questions.** T020–T023 inherit these patterns.
+
+**Committed**: eee7934 (contract + six-layer fold + source registry —
+canonicalization so one artifact is one source; grading provably
+independent of agreement; independence groups so three outlets quoting
+one wire report count once; freshness by domain with a conservative
+default; RETIRED distinct from STALE; explicit anti-recency bias),
+d611bea (the **Evidence Index** — research memory that is rebuilt
+deterministically from append-only rows, never written by a model,
+rejects orphans, enforces its own invariants, and answers lineage
+evidence→source→retrieval→session→plan→request; plus the
+anti-hallucination wall where the extraction schema has nowhere to put a
+URL, an unlocatable claim is rejected, and a rejected candidate is echoed
+without its invented fields), dbf69b7 (graph with six stances including
+NOT INVESTIGATED, MIXED carrying a reason and never collapsing to the
+majority, below-floor disagreement listed rather than discarded;
+coverage over counts; budget accounting; research debt; immutable
+structured conclusions separate from regenerable narrative; package AND
+graph snapshots; pre-registered plans with a mandatory failure
+definition; draft-only mechanism proposals; freshness-aware request
+reuse; a consumer that may only SUGGEST).
+
+**Three things the tests caught that mattered**: a derived source's
+independence group did not resolve to its origin's group (three outlets
+counted as two); a LOW-quality contradiction was silently excluded by the
+quality floor — now listed as `below_floor_contradicting`, because
+dropping a source because it disagrees is the failure this subsystem
+exists to prevent; and conflict attribution returned "unknown" when only
+one side declared a population, when an asymmetric declaration IS a
+population difference.
+
+**Also**: my own honest phrasing ("never searched", "always flagged")
+tripped my own language wall from inside stored payloads. Rephrased the
+text rather than weakening the wall.
+
+**Deliberately NOT built**: autonomous crawling and recursive browsing
+(LATER-gated per TOOLS.md); embeddings in the Evidence Index (a declared
+dependency decision — the index is shaped to add them additively).
+
+43 new tests (suite 1071 → 1114). Queue: T020 — Product Manager Agent
+(propose-only; every item cites evidence; ROADMAP.md never written by
+the agent).

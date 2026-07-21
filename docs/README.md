@@ -25,6 +25,7 @@ corrected.
 | Analytics contract (MetricResult + versions + windows) | `src/intent_engine/analytics/models.py` (architecture: `docs/COMPANY_OS.md` P10) |
 | Knowledge contract (feedback/insight/knowledge + consent + citations) | `src/intent_engine/knowledge/records.py` (architecture: `docs/COMPANY_OS.md` P9) |
 | Marketing contract (campaign/brief/draft/handoff + claim classes) | `src/intent_engine/marketing/records.py` (strategy: `marketing/MARKETING_PLAN_V2.md`) |
+| Research contract (six layers + Evidence Index + stances) | `src/intent_engine/research/records.py` (architecture: `docs/COMPANY_OS.md` P12) |
 | Growth contract (experiment envelope + labels + namespaces) | `src/intent_engine/growth/records.py` (architecture: `docs/COMPANY_OS.md` P7) |
 | Agent registry | `docs/AGENTS.md` |
 | Tooling decisions (NOW / LATER / NEVER) | `docs/TOOLS.md` |

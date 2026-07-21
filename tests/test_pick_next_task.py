@@ -80,7 +80,7 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     # growth platform) completed 2026-07-20/21. The current queue is
     # T019 (Research Agent, propose-only). NEEDS-SPEC items are still
     # never auto-promoted.
-    assert runnable_ids == {"T019"}
-    # The nightly loop must pick T019 (the only RUNNABLE task), never a
+    assert runnable_ids == {"T020"}
+    # The nightly loop must pick T020 (the only RUNNABLE task), never a
     # NEEDS-SPEC item.
-    assert pick_next_runnable(tasks) == "T019"
+    assert pick_next_runnable(tasks) == "T020"

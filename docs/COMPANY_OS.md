@@ -380,7 +380,13 @@ pre-registered experiments with human approval, deterministic
 randomization, survivorship accounting, stdlib-only statistics that
 render UNAVAILABLE rather than approximate, a label vocabulary with no
 `winner`, and stopping rules that record facts rather than act).
-Research Agent: **NOT BUILT** — next (`ROADMAP.md` T019). External
+**Research & Evidence Intelligence: BUILT** (T019,
+`src/intent_engine/research/` — canonical contract in `research/records.py`;
+six separated layers with the **Evidence Index** as the research-memory
+substrate later agents read; pre-registered plans; source grading
+independent of agreement; contradictions surfaced rather than smoothed;
+propose-only). Product Manager Agent: **NOT BUILT** — next
+(`ROADMAP.md` T020). External
 publishing, autonomous publication, autonomous outreach, automatic
 rollout and rollback: **NOT BUILT** and not planned without their own
 founder gates.

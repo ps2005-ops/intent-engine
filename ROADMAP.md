@@ -579,7 +579,23 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T019 — Research & Evidence Intelligence Platform (propose-only agent)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits eee7934, d611bea, dbf69b7) — all
+  bars proven. Six separated layers (Request → Plan → Session →
+  **Evidence Index** → Package → Conclusion); pre-registered plans with
+  a mandatory failure definition and an enforced tool allowlist;
+  canonicalized sources with rule-based grading proven independent of
+  agreement, independence groups, freshness by domain, and RETIRED
+  distinct from STALE; the Evidence Index as never-model-written
+  research memory with lineage and self-checked invariants; an
+  anti-hallucination wall a model cannot emit provenance through;
+  stances including NOT INVESTIGATED, with MIXED carrying a reason and
+  below-floor disagreement listed rather than discarded; coverage,
+  budget, and research debt; immutable structured conclusions separate
+  from regenerable narrative; package AND graph snapshots; draft-only
+  mechanism proposals. Canonical contract:
+  `src/intent_engine/research/records.py`. 43 tests.
+  Research & Evidence Intelligence V1: BUILT. Autonomous crawling,
+  recursive browsing, agent promotion: NOT BUILT.
 - **Priority**: 1. **Size**: XL.
 - **Source**: `docs/V1_COMPLETION_ROADMAP.md` P12 verdict (mechanism
   library **frozen, A3**) + `docs/TOOLS.md` (crawling LATER-gated).
@@ -630,6 +646,41 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   frozen library and prompts untouched; reuse the T016 citation model,
   never a second one; no web ingestion until its own founder gate; the
   deterministic/model boundary is explicit in code.
+
+## T020 — Product Manager Agent (propose-only, evidence-backed)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: L.
+- **Source**: `docs/V1_COMPLETION_ROADMAP.md` P11 verdict — the PM Agent
+  is **read/propose-only**, never auto-promotes a NEEDS-SPEC item, and
+  never edits `src/` prompts. It is the second agent, and it inherits
+  the T019 agent patterns rather than inventing new ones.
+- **Files in scope**: new `src/intent_engine/pm/`, tests. It READS the
+  Evidence Index (T019), decisions (T010), growth results (T018),
+  analytics (T015), CRM (T014), and knowledge (T016); it WRITES only
+  its own append-only store plus proposals through existing services.
+- **Definition of done (bars)**: (a) **backlog item identity** with
+  append-only history and a folded state; (b) **every proposed item
+  cites its evidence** — a proposal referencing no Evidence Index entry,
+  decision, experiment, or metric is REJECTED (no opinion-only backlog);
+  (c) **priority is computed deterministically and versioned** from
+  recorded inputs (linked decision status, experiment label, research
+  stance, CRM signal, analytics status) with visible inputs — never a
+  model-assigned score; (d) **research debt and INCONCLUSIVE experiment
+  results become first-class candidate items**, so gaps drive the
+  roadmap rather than vanishing; (e) **NEEDS-SPEC is never
+  auto-promoted** — a proposed item enters a review queue and only a
+  human marks it RUNNABLE, asserted by test; (f) **ROADMAP.md is never
+  written by the agent** — it emits a proposed diff for human
+  application, and `ROADMAP.md` is byte-identical after a full run;
+  (g) **technical-debt items** may be proposed from recorded failure
+  facts (DLQ depth, extraction failures, guardrail breaches) and must
+  cite them; (h) uncertainty and language walls inherited from T019 —
+  no "should", "must", or "obviously" without cited support;
+  0 model calls in the suite; offline suite green + EXIT=0.
+- **Walls**: propose-only; no roadmap writes; no promotion of anything;
+  reuse the Evidence Index rather than re-deriving evidence; reuse
+  analytics rather than computing metrics; 0 network.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

@@ -304,9 +304,12 @@ f137501 / ec3cb7d / 526196d — pre-registration, deterministic
 randomization, survivorship accounting, honest stdlib statistics,
 label vocabulary without a `winner`, human-gated stopping and review;
 canonical contract in `src/intent_engine/growth/records.py`).
-Research & Evidence Intelligence (next: `ROADMAP.md` T019), PM Agent,
-Executive Decision Agent, AgentOS extraction, Personal AI, public APIs:
-**NOT YET BUILT**.*
+**Research & Evidence Intelligence V1 is now BUILT** (T019, commits
+eee7934 / d611bea / dbf69b7 — the Evidence Index is the shared evidence
+substrate T020-T023 read instead of rebuilding; canonical contract in
+`src/intent_engine/research/records.py`). PM Agent (next: `ROADMAP.md`
+T020), Executive Decision Agent, AgentOS extraction, Personal AI, public
+APIs: **NOT YET BUILT**.*
 
 *Revised agent sequence (2026-07-21). The infrastructure phase is
 complete; what remains is composing these subsystems into agents. The
