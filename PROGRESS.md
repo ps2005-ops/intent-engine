@@ -3251,3 +3251,52 @@ calls. 77 new tests (suite 915 → 992).
 **Queue**: T018 — growth platform and experiments (pre-registered
 design, sample-size honesty, no causal claim without design support;
 bars in ROADMAP.md).
+
+## 2026-07-21 (session 9) — T018 complete: Growth & Experiment Intelligence
+
+**Committed**: f8a0717 (canonical contract; namespaced append-only store
+where production and synthetic can never mix; folded state that binds
+every execution and analysis fact to the currently APPROVED experiment
+version while historical rows keep theirs; terminal archival states that
+delete nothing; a (mtime,size)-keyed parse cache after the write path
+proved O(n^2) in parses), a90d2f0 (pre-registration frozen at human
+approval — the primary metric can never be replaced, only superseded by
+a human amendment creating a new version; provenance captured at the
+first fact; exactly one canonical analysis plan), f137501 (deterministic
+reproducible assignment with no reassign/rebalance/rollout API in
+existence; idempotent exposure; registered-metric-only observations; the
+survivorship funnel — assigned / exposed / observed / assigned-not-
+exposed / exposed-not-observed / excluded-after-registration /
+invalid-observations — travelling with every result), ec3cb7d
+(stdlib-only self-describing statistics returning UNAVAILABLE with the
+failed assumption named; the label vocabulary; stopping rules that
+record a fact and stop nothing; recorded interim reads; exploratory
+analyses that cannot move a label; first-class founder overrides),
+526196d (frozen reproducible snapshots, reference-only integrations,
+namespaced consumer, CLI without a start/stop/approve/rollout command,
+both acceptance scenarios, repository invariants).
+
+**Deliberately NOT implemented, and why**: p-values, Bayesian
+posteriors, sequential corrections, and CUPED all need a declared
+numerical dependency (A3) plus a design review. Rather than approximate
+them, the subsystem returns UNAVAILABLE with the reason and keeps the
+point estimate. This is a founder decision, recorded rather than made
+quietly.
+
+**Contract additions, minimal and deliberate**: growth.experiment_started
+/ stopped / result_labelled in the company-event taxonomy (producer
+growth_platform, subject_type experiment) and feedback.experiment_result
+in the knowledge taxonomy. One authoritative producer each.
+
+**Defect fixed in passing**: the loop-12 `events/` gitignore rule was
+unanchored and matched the source package src/intent_engine/events/, not
+just the runtime log directory. Now `/events/`.
+
+**Boundaries held**: mechanisms.json and the analyzer are byte-identical
+after a full arc; growth writes no other subsystem's store; the
+conclusion is a Decision Record made by DecisionService after human
+review; learnings enter as FEEDBACK through KnowledgeService and never
+auto-promote. 79 new tests (suite 992 → 1071).
+
+**Queue**: T019 — Research Agent (propose-only; frozen mechanism library
+untouched; no web ingestion until its own founder gate).

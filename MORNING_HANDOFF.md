@@ -1,4 +1,47 @@
-# MORNING HANDOFF — loop 16 (2026-07-21, midday) — Marketing C3–C8 V1 BUILT
+# MORNING HANDOFF — loop 17 (2026-07-21, afternoon) — Growth & Experiment Intelligence V1 BUILT
+
+*Suite at close: **1071 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-17 commits: `f8a0717` (contract + namespaced store + versioned
+fold), `a90d2f0` (pre-registration, immutability, amendment
+versioning), `f137501` (randomization, assignment, exposure,
+survivorship funnel), `ec3cb7d` (stdlib statistics, labels, stopping,
+founder overrides), `526196d` (snapshots, integrations, consumer, CLI,
+e2e) + docs. **Growth & Experiment Intelligence V1: BUILT.***
+
+**The four things worth knowing.**
+
+1. **There is no `winner` field, anywhere.** A result is a label plus
+   reasons plus its survivorship funnel. `DIFFERENCE OBSERVED` still
+   carries `REVIEW REQUIRED` and says in its own text that it is not a
+   conclusion. Without a control arm an experiment reads
+   `OBSERVATIONAL ONLY` permanently, at any sample size.
+2. **A satisfied stopping rule is a fact, not an action.** Nothing
+   stops, rolls out, rolls back, launches, or reassigns itself — there
+   is no such API at any layer. Stopping early without a satisfied rule
+   degrades every later read, and your override, if you make one, is
+   recorded as its own immutable fact that says the data did not make
+   the decision.
+3. **Statistics are stdlib-only and refuse to bluff.** You get per-arm
+   counts, rates, a difference point estimate, and a 95% normal
+   interval *only when its assumptions hold* — otherwise `UNAVAILABLE`
+   with the failed assumption named. **Deliberately not implemented and
+   awaiting your decision**: p-values, Bayesian posteriors, sequential
+   corrections, CUPED. Each needs a declared numerical dependency
+   (A3) and a design review; the point estimate still stands without
+   them.
+4. **Synthetic and production experiments cannot mix.** Separate store
+   files, separate consumer checkpoints, independent replay — a
+   cross-namespace row is a loud corruption error.
+
+*Also fixed a real defect from loop 12: the `events/` gitignore rule was
+unanchored and matched the source package `src/intent_engine/events/`,
+not just the runtime log. Now `/events/`. Still open for you: the two
+T009 live runs (A1); Calendar API enablement (403, GCP 965657964785).
+Queue: **T019 — Research Agent** (propose-only; frozen library stays
+frozen; no web ingestion until its own gate).*
+
+## Previous handoff (loop 16, midday) — Marketing C3–C8 V1 BUILT
 
 *Suite at close: **992 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.

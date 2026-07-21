@@ -374,10 +374,16 @@ proposals queue for review and never write the frozen library).
 preserves each source's status, versioned briefs and drafts, claim
 review through THIS event system's gate, quotes through the T016 gate,
 human-only approvals, observational publication recording, performance
-observations, KnowledgeService-only feedback). Growth experimentation:
-**NOT BUILT** — next (`ROADMAP.md` T018). External publishing,
-autonomous publication and autonomous outreach: **NOT BUILT** and not
-planned without their own founder gates.
+observations, KnowledgeService-only feedback). **Growth & Experiment Intelligence: BUILT** (T018,
+`src/intent_engine/growth/` — canonical contract in `growth/records.py`;
+pre-registered experiments with human approval, deterministic
+randomization, survivorship accounting, stdlib-only statistics that
+render UNAVAILABLE rather than approximate, a label vocabulary with no
+`winner`, and stopping rules that record facts rather than act).
+Research Agent: **NOT BUILT** — next (`ROADMAP.md` T019). External
+publishing, autonomous publication, autonomous outreach, automatic
+rollout and rollback: **NOT BUILT** and not planned without their own
+founder gates.
 
 ---
 
