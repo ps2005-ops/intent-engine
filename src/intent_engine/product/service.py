@@ -32,10 +32,10 @@ from intent_engine.product.problems import (
 from intent_engine.product.proposals import build_proposal, validate_retirement
 from intent_engine.product.records import (
     ALIGNMENT_LEVELS_DOC, DECISION_DEBT_KINDS, HUMAN_ONLY_EVENTS,
-    MODEL_FORBIDDEN_FIELDS, PROPOSAL_EDGES, REF_CRM_FACT, REF_EXPERIMENT,
-    REF_RESEARCH_CONCLUSION, REF_RESEARCH_DEBT, SPEC_DEBT_KINDS,
-    STATUS_ACCEPTED, STATUS_REVIEW_REQUESTED, ProductError, ProductEvent,
-    assert_product_language, json_normalize,
+    PROPOSAL_EDGES, REF_CRM_FACT, REF_EXPERIMENT, REF_RESEARCH_CONCLUSION,
+    REF_RESEARCH_DEBT, SPEC_DEBT_KINDS, STATUS_ACCEPTED,
+    STATUS_REVIEW_REQUESTED, ProductError, ProductEvent,
+    assert_product_language, find_forbidden_fields, json_normalize,
 )
 from intent_engine.product.roadmap_diff import (
     build_roadmap_candidate, render_roadmap_diff,
@@ -71,20 +71,6 @@ MODEL_ALLOWED_FIELDS = {
 class ModelOverreach(ProductError):
     """A model draft attempted to author something only code or a person
     may author. Recorded as a typed fact, never silently dropped."""
-
-
-def _forbidden_fields(value, found=None) -> list:
-    """Recursive: a forbidden field is rejected wherever it is nested."""
-    found = [] if found is None else found
-    if isinstance(value, dict):
-        for key, nested in value.items():
-            if key in MODEL_FORBIDDEN_FIELDS:
-                found.append(key)
-            _forbidden_fields(nested, found)
-    elif isinstance(value, (list, tuple)):
-        for item in value:
-            _forbidden_fields(item, found)
-    return sorted(set(found))
 
 
 def _unexpected_fields(draft: dict) -> list:
@@ -866,7 +852,7 @@ class ProductService:
                          provenance=provenance, **refs)
             raise
 
-        forbidden = _forbidden_fields(draft)
+        forbidden = find_forbidden_fields(draft)
         unexpected = _unexpected_fields(draft)
         if forbidden or unexpected:
             self._record("product.draft_rejected", actor_type="system",

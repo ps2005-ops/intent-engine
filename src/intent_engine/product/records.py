@@ -323,6 +323,23 @@ def assert_no_certainty(text: str, label: str, *, where: str = "text") -> None:
             f"evidence is {label} — uncertainty travels with the artifact")
 
 
+def find_forbidden_fields(value, found=None) -> list:
+    """The ONE recursive scan for fields a model or an author may not
+    supply. Nesting is not a loophole: a forbidden field is found wherever
+    it sits. Used by both the model boundary and the scoring wall, so
+    there is a single implementation of the rule."""
+    found = [] if found is None else found
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            if key in MODEL_FORBIDDEN_FIELDS:
+                found.append(key)
+            find_forbidden_fields(nested, found)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            find_forbidden_fields(item, found)
+    return sorted(set(found))
+
+
 def json_normalize(payload: dict) -> dict:
     try:
         return json.loads(json.dumps(payload, sort_keys=True))
