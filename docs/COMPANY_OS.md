@@ -671,31 +671,86 @@ Owner: Marketing Agent (CRM role). Extends C5 exactly as specced:
 
 ## Part 13 — Product management architecture
 
-The one genuinely new agent — and, like the BA Agent, a **read/propose-only
-steward**, never a builder.
+**Status: BUILT (T020).** Canonical contract:
+`src/intent_engine/product/records.py`. A **read/propose-only steward**,
+never a builder.
 
-- **Purpose:** keep the company's work legible and prioritized. Maintains
-  `ROADMAP.md` health (RUNNABLE vs NEEDS-SPEC honesty), tracks technical
-  debt, feature requests, experiments, product metrics, customer pain
-  points, and documentation quality (Part 5).
-- **How it coordinates:** the PM Agent is the **primary consumer of the
-  event bus.** Feedback, CRM, analytics, and commit events flow to it; it
-  turns them into *proposed* ROADMAP tasks and priority suggestions — as
-  drafts for founder approval. It **never auto-promotes NEEDS-SPEC** (the
-  standing rule) and never edits `src/` prompts.
-- **Inherits:** the full kernel (Part 2). Its outputs are proposals and
-  reports; the founder disposes.
-- **Metrics (each with a why):** roadmap RUNNABLE depth (is the loop ever
-  starved), NEEDS-SPEC age (are real items rotting), feedback-to-task
-  latency (does what users say reach the plan), doc-freshness (is the map
-  drifting from the territory).
+The subsystem that reads across every other subsystem and turns what they
+collectively know into artifacts the founder can act on. It owns
+**product proposals, not product decisions**.
 
-*Six-question check:* *necessary* because 18 systems and a growing agent
+**The five separated layers, never collapsed:**
+
+```
+Problem  ->  Opportunity  ->  Proposal  ->  Spec Draft  ->  Founder Review
+                                        ->  Decision Record (by a human)
+                                        ->  Execution Candidate
+```
+
+**The product memory.** Research got the Evidence Index; product gets the
+**Problem Index and the Opportunity Index** (`product/index.py`). Both are
+built only from append-only rows, are never written by a model, reject
+orphans, enforce their own invariants, and answer lineage proposal →
+opportunity → problem → evidence → source → request — with the last hops
+delegated to T019 rather than rebuilt. They are two indexes rather than
+one because a single problem routinely carries several competing
+opportunities, and collapsing them destroys the fan-out the founder
+chooses between. T021–T023 read this substrate instead of reconstructing
+it.
+
+**Problem-first, structurally.** Every artifact begins with a problem, its
+evidence references, why now, and what changes if it is ignored — before
+any solution exists. A problem with zero evidence references is rejected;
+a statement phrased as its own solution is rejected; dedup is exact-match,
+because near-duplicate merging silently folds two different problems into
+one. Problems evolve: active, split, merged, retired, superseded.
+
+**Deterministic scoring, never intuition.** Separate dimensions —
+evidence, customer, experiment, and research coverage, strategic
+alignment, freshness — each carrying its version, inputs, formula,
+reasons, and status. A dimension with no recorded input is UNAVAILABLE,
+never zero. A composite containing one is itself UNAVAILABLE with the gap
+named. Strategic alignment comes only from a human declaration. Four
+confidences (problem / opportunity / proposal / execution) are tracked
+separately, and **cost of delay is computed apart** from the opportunity
+score, because "how valuable" and "how expensive to postpone" are
+different questions.
+
+**Automatic intake** closes the loops the earlier sessions opened: T019
+research debt, T018 INCONCLUSIVE / TOO FEW / GUARDRAIL BREACHED results,
+and T014 churn / at-risk facts each become candidate opportunities that
+cite their origin and inherit its uncertainty as a confidence cap.
+
+**The portfolio** rolls up Portfolio → Strategic Themes → Initiatives →
+Opportunities → Proposals → Specs in one deterministic call, and reports
+balance against a human-declared band (withholding the verdict when none
+is declared), decision debt, and an executive summary. Priority,
+sequencing, blocking, and readiness are four separate questions.
+
+**How it coordinates:** it consumes `growth.result_labelled` and
+`decision.resolved` on checkpoint `product`, each creating at most one
+candidate opportunity. It reads the CRM store directly for churn and
+at-risk facts, which are CRM facts rather than company events.
+
+**The ROADMAP wall.** The agent emits a roadmap *candidate* and a
+*proposed diff*; a person applies it. `product/roadmap_diff.py` opens no
+file at all — the caller passes the roadmap text in — so the wall is
+structural rather than promised. A candidate is NEEDS-SPEC unless every
+bar is checkable, and the agent can never mark one RUNNABLE.
+
+**Metrics (each with a why):** roadmap RUNNABLE depth (is the loop ever
+starved), NEEDS-SPEC age (are real items rotting), evidence-to-proposal
+latency (does what customers show reach the plan), portfolio balance
+against declared bands (is the work lopsided), decision debt (what is
+waiting on a person).
+
+*Six-question check:* *necessary* because 19 systems and a growing agent
 set need a coordinator or they drift; *better* than the founder holding it
-all in `MORNING_HANDOFF.md` by hand; *integrates* by stewarding existing
-docs and consuming existing events; *complexity*: one read-only agent,
-zero new stores; *at 100×*, a PM function that proposes from evidence is
-how a many-agent company stays coherent.
+all in `MORNING_HANDOFF.md` by hand; *integrates* by reading existing
+subsystems and consuming existing events; *complexity*: one propose-only
+agent, one append-only store, zero duplicated logic; *at 100×*, a product
+function that proposes from evidence and never decides is how a many-agent
+company stays coherent.
 
 ---
 

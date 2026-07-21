@@ -155,12 +155,17 @@ Architectural decisions are stored as Decision Records (P2) with rationale.
 
 ### Phase 3 — The company layer
 
-**P11 · Product Manager Agent** — the one genuinely new process, and (like
-the BA Agent) **read/propose-only**. Primary consumer of the event bus;
-turns feedback/CRM/analytics/commit events into *proposed* ROADMAP tasks
-and priorities as drafts. Never auto-promotes NEEDS-SPEC; never edits
-`src/` prompts. Coordinates the other agents by stewarding `ROADMAP.md` +
-the knowledge base.
+**P11 · Product Manager Agent — BUILT as the Product Strategy & Roadmap
+Intelligence Platform (T020).** Read/propose-only, as specified. It turns
+research debt, unsettled experiments, and customer facts into *candidate
+opportunities*, and those into problem-first proposals, bounded spec
+drafts, and roadmap candidates emitted as a proposed diff. It never
+auto-promotes NEEDS-SPEC, never edits `src/` prompts, and — the wall that
+turned out to be the load-bearing one — **never writes `ROADMAP.md`**:
+the diff module opens no file at all, so the constraint is structural
+rather than remembered. It gets the Problem Index and the Opportunity
+Index as its canonical memory, exactly as Research got the Evidence
+Index. Canonical contract: `src/intent_engine/product/records.py`.
 
 **P12 · Research Agent** — paper ingestion, mechanism discovery, evidence
 ranking, source verification, contradiction detection, citation
@@ -307,9 +312,19 @@ canonical contract in `src/intent_engine/growth/records.py`).
 **Research & Evidence Intelligence V1 is now BUILT** (T019, commits
 eee7934 / d611bea / dbf69b7 — the Evidence Index is the shared evidence
 substrate T020-T023 read instead of rebuilding; canonical contract in
-`src/intent_engine/research/records.py`). PM Agent (next: `ROADMAP.md`
-T020), Executive Decision Agent, AgentOS extraction, Personal AI, public
-APIs: **NOT YET BUILT**.*
+`src/intent_engine/research/records.py`).
+**Product Strategy & Roadmap Intelligence V1 is now also BUILT** (T020,
+commits 15d494f / 0975417 / f689ab6 / c573958 / 9932620 / 1cd5282 /
+ec71d86 — the Problem Index and the Opportunity Index are the shared
+product substrate T021-T023 read instead of rebuilding; problem-first
+proposals, deterministic multi-dimensional scoring with UNAVAILABLE never
+zero, bounded spec drafts, an eight-edge proposal graph, portfolio rollup
+with balance and decision debt, and roadmap candidates emitted as a
+proposed diff that no code applies; canonical contract in
+`src/intent_engine/product/records.py`). Executive Decision Agent (next:
+`ROADMAP.md` T021), AgentOS extraction, Personal AI, public APIs:
+**NOT YET BUILT**. Roadmap writing by an agent, product execution,
+scheduling, and ticketing: **NOT BUILT, and out of scope by design**.*
 
 *Revised agent sequence (2026-07-21). The infrastructure phase is
 complete; what remains is composing these subsystems into agents. The
@@ -320,8 +335,9 @@ produces a better kernel than designing one ahead of its users.*
 ```
 T019 — Research & Evidence Intelligence    BUILT. Evidence Index is the
                                            shared evidence substrate.
-T020 — Product Strategy & Roadmap          Opportunity Index is the shared
-       Intelligence                        product substrate. Owns proposals,
+T020 — Product Strategy & Roadmap          BUILT. Problem Index and
+       Intelligence                        Opportunity Index are the shared
+                                           product substrate. Owns proposals,
                                            never decisions; never writes
                                            ROADMAP.md.
 T021 — Executive Decision Agent            cross-system orchestration of

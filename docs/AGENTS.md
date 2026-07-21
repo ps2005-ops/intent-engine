@@ -1,7 +1,9 @@
-# AGENTS.md — the four standing agents
+# AGENTS.md — the standing agents
 
-*Workstream 1, one-time capability audit. Defines purpose, scope walls, and
-authorized tooling for each of the four agents referenced across
+*Sections 1–4 are the Workstream 1 one-time capability audit; section 5
+onward registers the subsystem agents built since (T020 Product; T019
+Research is flagged as outstanding in section 5). Defines purpose, scope
+walls, and authorized tooling for each of the agents referenced across
 `overnight-execution-plan.md`, `market-engine-execution-plan.md`, and the
 standing Cowork operations brief. Every agent inherits the Global Autonomy
 Protocol (`overnight-execution-plan.md` Part A) in full: deterministic bars
@@ -149,6 +151,62 @@ decision signal (standing NEVER). No sentiment feeds as signals.
 
 **Authorized skills/tools**: `superpowers` (global). No marketing/design/SEO
 skills — out of scope.
+
+---
+
+## 5. Product agent (T020 — Product Strategy & Roadmap Intelligence)
+
+**Repo**: `~/intent-engine`, `src/intent_engine/product/` only.
+
+**Purpose**: reads across every other subsystem and turns what they
+collectively know into artifacts the founder can accept, reject, merge,
+or defer. It records problems (evidence first, then problem, then
+solution), registers opportunities, drafts proposals and bounded spec
+drafts, computes deterministic multi-dimensional scores, rolls up the
+portfolio, and emits roadmap **candidates** with a proposed diff.
+
+**Posture: propose-only.** It owns proposals; the founder owns decisions.
+Every disposition — accepted, rejected, merged_into, deferred,
+superseded, withdrawn — is a human act bound to an exact proposal
+version and an exact spec version.
+
+**May touch**: `data/product.jsonl` (its own append-only store) and
+nothing else. It READS the Evidence Index (T019), decisions (T010),
+growth results (T018), analytics (T015), CRM (T014), and knowledge
+(T016) through their public surfaces.
+
+**Hard walls** (each asserted by test):
+- **It never writes `ROADMAP.md`.** It emits a diff; a person applies it.
+  `product/roadmap_diff.py` opens no file at all, so this is structural
+  rather than remembered, and `ROADMAP.md` is byte-identical after a full
+  run.
+- It never marks a candidate RUNNABLE, and never auto-promotes
+  NEEDS-SPEC.
+- No engineering tickets, no task assignment, no scheduling, no
+  execution.
+- No creating or mutating Decision Records — it may reference one that a
+  person created through `DecisionService`.
+- No promoting knowledge, validating insights, approving anything,
+  starting experiments, or running campaigns.
+- No model-assigned priority, importance, or confidence. A model may
+  draft prose behind an injectable client; it may never emit an evidence
+  reference, a customer id, a score, a priority, a decision id, or a
+  citation, and an attempt is recorded as a typed rejection.
+- No proposal without a problem statement; no problem statement without
+  an evidence reference; no solution recorded before its problem.
+- Strategy comes from a human declaration — strategic themes,
+  initiatives, alignment levels, and portfolio balance bands are all
+  human-created, and an agent may report on them but not author them.
+- 0 live model calls in the offline suite; 0 network.
+
+**Authorized skills/tools**: `superpowers` (global). No web access, no
+vendor accounts, no publishing surface.
+
+*Registry note (outstanding, flagged not written):* the Research agent
+(T019, `src/intent_engine/research/`) is a subsystem agent of the same
+propose-only class and has no entry here yet. Adding it is a small
+docs-only follow-up; it is named rather than improvised so the gap is
+visible.
 
 ---
 

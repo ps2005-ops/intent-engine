@@ -3347,3 +3347,88 @@ dependency decision — the index is shaped to add them additively).
 43 new tests (suite 1071 → 1114). Queue: T020 — Product Manager Agent
 (propose-only; every item cites evidence; ROADMAP.md never written by
 the agent).
+
+---
+
+## Loop 19 (2026-07-21) — T020: Product Strategy & Roadmap Intelligence V1 BUILT
+
+Commits `15d494f` / `0975417` / `f689ab6` / `c573958` / `9932620` /
+`1cd5282` / `ec71d86` + docs. Canonical contract:
+`src/intent_engine/product/records.py`. Suite 1114 → 1308 (194 new).
+
+**What this subsystem is.** The second agent, and the first whose whole
+job is to read ACROSS the other subsystems. Five separated layers —
+Problem → Opportunity → Proposal → Spec Draft → Founder Review — with the
+founder disposing at every gate. It owns proposals; it does not own
+decisions, and it has no execution surface at all.
+
+**The architectural addition: two indexes, not one.** Research got the
+Evidence Index; product gets a **Problem Index** and an **Opportunity
+Index**. They are separate because one problem routinely carries several
+competing opportunities, and one index collapses that fan-out — which is
+precisely the thing the founder is choosing between. Both are built only
+from append-only rows, are never written by a model, reject orphans,
+enforce their own invariants, and answer lineage proposal → opportunity →
+problem → evidence → source → request, with the last two hops delegated
+to T019 rather than rebuilt.
+
+**Where these differ from the Evidence Index, and why** (recorded because
+the next agent will ask): two indexes rather than one; company-wide
+rather than request-scoped, since product has no equivalent of a research
+request, so freshness and supersession do the work scoping did; the
+leaves are REFERENCES into the subsystem that owns each fact rather than
+facts owned here, so the orphan check is cross-subsystem resolvability
+and resolution is delegated; and problems evolve (split / merge / retire
+/ supersede) where evidence only retires.
+
+**Five things the build settled.**
+
+1. **The ROADMAP wall became structural rather than remembered.** Instead
+   of a rule that says "do not write ROADMAP.md", `roadmap_diff.py` opens
+   no file at all — the caller passes the text in. A wall that cannot be
+   forgotten beats a wall that has to be.
+2. **Readiness precedence needed stating.** A proposal that is both
+   blocked and specless was reporting NEEDS_SPEC. An external block now
+   dominates a local gap, because writing the missing spec would not
+   unblock it — and `blocked_by` is reported separately regardless, so
+   collapsing to one label loses nothing.
+3. **The recursive forbidden-field scan had to be shared.** The model
+   boundary caught a nested `priority`, but the proposal-body wall only
+   checked top-level keys. One recursive scan now lives in `records.py`
+   and both walls call it — the alternative was two implementations of
+   one rule, which is how they drift apart.
+4. **Zero and absent are different, and the tests now hold that line.** A
+   recorded coverage of zero covered questions scores 0.0 with status OK;
+   an absent package is UNAVAILABLE with value None. Dropping an
+   UNAVAILABLE dimension from the composite's denominator would silently
+   inflate the score, so the composite is withheld and the gap is named.
+5. **Cost of delay is honest about the money it does not have.** Every
+   component is a count except revenue, which this repository does not
+   record. Rather than average counts with an invented figure, the
+   composite waits on a human declaration and the computable components
+   are still reported.
+
+**Two findings recorded rather than fixed** (park-don't-improvise):
+`tests/test_growth_store.py::test_concurrent_writers_do_not_corrupt`
+failed once in a full-suite run and then passed 5 consecutive full runs
+and 5 isolated runs — a pre-existing T018 load-sensitive flake, on a code
+path T020 does not touch, not reproduced and therefore not guessed at.
+And `growth.result_labelled` is in the company-event taxonomy with
+producer `growth_platform` but no T018 path emits it yet; the product
+consumer handles it correctly and the test publishes a real event under
+the declared producer rather than changing T018 from this session.
+
+**Deliberately NOT built**: roadmap writing by the agent (not built, and
+not a future item — the wall is the point); execution, scheduling, and
+ticketing; any autonomous action; a second Evidence Index, citation
+model, metric engine, decision store, or scoring implementation.
+
+**Deviation recorded**: the package is `src/intent_engine/product/`, not
+`src/intent_engine/pm/` as the original Files-in-scope line said. The
+subsystem owns product strategy rather than project management, and the
+name follows the thing.
+
+Queue: T021 — Executive Decision Agent (cross-system orchestration of
+Decisions, Research, Growth, Marketing, CRM, Analytics, Knowledge, and
+Product proposals; produces reviewable executive recommendation packages
+ONLY; no autonomous execution).

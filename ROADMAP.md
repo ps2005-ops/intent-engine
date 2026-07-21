@@ -649,7 +649,50 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T020 — Product Strategy & Roadmap Intelligence Platform (propose-only)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits 15d494f, 0975417, f689ab6,
+  c573958, 9932620, 1cd5282, ec71d86) — all bars proven. Five separated
+  layers (Problem → Opportunity → Proposal → Spec Draft → Founder
+  Review), with the **Problem Index and the Opportunity Index** as
+  never-model-written product memory, rebuilt deterministically from
+  append-only rows, rejecting orphans, self-checking their invariants,
+  and answering lineage proposal → opportunity → problem → evidence →
+  source → request (the last hops delegated to T019 rather than
+  rebuilt). Problem-first throughout: a problem with zero evidence
+  references is rejected, `why_now` and `what_changes_if_ignored` are
+  mandatory, a statement phrased as its own solution is rejected, and
+  dedup is exact-match so near-duplicates never silently merge.
+  Problems EVOLVE (active / split / merged / retired / superseded); one
+  problem carries a SOLUTION SET of competing proposals. Deterministic
+  multi-dimensional scoring with UNAVAILABLE never zero, a composite
+  that names its gaps rather than imputing them, strategic alignment
+  only from a human declaration, FOUR separate confidences (problem /
+  opportunity / proposal / execution), and **cost of delay computed
+  apart** from the opportunity score. Automatic intake from T019
+  research debt (every kind T019 can emit is mapped, asserted against
+  `DEBT_KINDS`), T018 INCONCLUSIVE / TOO FEW / GUARDRAIL BREACHED, and
+  T014 churn / at-risk facts — deterministic, idempotent, origin-citing,
+  and carrying the origin's uncertainty forward as a confidence cap.
+  Spec drafts bounded to nine sections with structurally rejected
+  execution fields, checkable acceptance criteria, and derived SPEC
+  DEBT. Eight-edge proposal graph with derived structural edges that
+  cannot drift, no cycles, no orphans, and symmetric `alternative_to`.
+  Portfolio → Strategic Themes → Initiatives → Opportunities →
+  Proposals → Specs rollup in one deterministic call, plus a balance
+  report measured against a human-declared band (withheld with none),
+  DECISION DEBT, priority / sequencing / blocking / readiness kept
+  separate, and an executive summary built for T021. Roadmap candidates
+  and a PROPOSED diff only — `roadmap_diff.py` opens no file at all, so
+  the wall is structural rather than promised, and `ROADMAP.md` is
+  byte-identical after a full run (asserted). Canonical contract:
+  `src/intent_engine/product/records.py`. 194 tests.
+  Product Strategy & Roadmap Intelligence V1: BUILT. Roadmap writing by
+  the agent: NOT BUILT and never will be. Execution, scheduling,
+  ticketing: NOT BUILT.
+  *Deviation from the plan, recorded:* the package is
+  `src/intent_engine/product/`, not `src/intent_engine/pm/` as the
+  original Files-in-scope line said — the subsystem owns product
+  strategy rather than project management, and the name follows the
+  thing.
 - **Priority**: 1. **Size**: XL.
 - **Scope expanded 2026-07-21**: this is not "a PM agent". It is the
   subsystem whose job is to read ACROSS every other subsystem and turn
@@ -730,6 +773,76 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   Asserted by source inspection, as T018 and T019 already do. These
   compound: by T025 the release audit becomes mechanical rather than
   archaeological.
+
+## T021 — Executive Decision Agent (recommendation packages only)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: XL.
+- **Scope**: the third agent, and the first that reasons ACROSS the
+  whole company rather than owning a domain. It reads Decisions (T010),
+  the Company Event log (T013), CRM (T014), Analytics (T015), Knowledge
+  (T016), Marketing (T017), Growth (T018), the **Evidence Index**
+  (T019), and the **Problem and Opportunity Indexes** (T020), and
+  produces **reviewable executive recommendation packages** — nothing
+  else. It owns recommendations, not decisions. It reuses both agent
+  memories rather than building a third; if it needs a fact, it reads
+  the subsystem that owns it.
+- **Source**: `docs/V1_COMPLETION_ROADMAP.md` revised agent sequence
+  (2026-07-21) — an Executive Decision Agent is deliberately built
+  BEFORE AgentOS, because generalizing a kernel from three real
+  orchestrating agents produces a better kernel than designing one
+  ahead of its users.
+- **Files in scope**: new `src/intent_engine/executive/`, tests. It
+  READS every subsystem's public surface and WRITES only its own
+  append-only store. It creates no Decision Record, no proposal, no
+  experiment, no campaign, and no roadmap entry.
+- **Definition of done (bars)**: (a) **canonical contract** — one
+  envelope, one taxonomy, one append-only store (`data/executive.jsonl`)
+  with the established discipline (flock, fsync, fingerprinted
+  idempotency, loud corruption, no mutation API, parse cache, one
+  `_stable_id` helper), and one folded-state implementation;
+  (b) **recommendation packages** each stating the question, the
+  options considered, the evidence for each option **by reference**
+  into the owning subsystem, the tradeoffs, the unknowns, and what
+  would change the recommendation — a package with no stated unknown is
+  rejected; (c) **cross-subsystem reads only** — asserted by source
+  inspection that no executive code writes another subsystem's store,
+  and that it holds no second Evidence Index, Opportunity Index,
+  scoring implementation, metric engine, or decision store;
+  (d) **deterministic synthesis** — the assembly of a package, every
+  score or ranking it carries, every coverage figure, and every wall is
+  computed from recorded facts and versioned; a model may draft prose
+  only, behind an injectable client, and may never emit a reference, an
+  identifier, a score, a priority, or a citation; (e) **conflict
+  surfacing** — where two subsystems disagree (a CONFLICTING research
+  stance against a DIFFERENCE OBSERVED experiment, an accepted proposal
+  against an at-risk customer signal), the package states the
+  disagreement rather than resolving it silently; (f) **UNAVAILABLE
+  propagates** — a recommendation resting on an UNAVAILABLE input says
+  so and names the gap, and uncertainty travels from every origin;
+  (g) **human-only disposition** — accept, reject, defer, and merge are
+  founder acts bound to an exact package version; a revised package is
+  a new version and a prior review does not carry forward;
+  (h) **no autonomous execution** — no Decision Record creation, no
+  experiment start, no campaign, no scheduling, no ticketing, no
+  promotion, and no roadmap write; asserted by test that the service
+  exposes no such surface at all; (i) **frozen reproducible snapshots**
+  recording every contributing version across all eight subsystems, and
+  the source high watermarks that reproduce them; (j) **company-event
+  consumer** with checkpoint `executive`, replay creating zero
+  duplicates, and a failure that cannot break any upstream system;
+  (k) **CLI** of reads and idempotent consumption only — no accept,
+  apply, or schedule command; (l) **language wall** over the full
+  serialized output, word-boundary matched; **0 live model calls and no
+  network in the suite**; offline suite green + EXIT=0.
+- **Walls**: recommend-only; the founder decides; no autonomous action
+  of any kind; reuse the Evidence Index and the Opportunity Index
+  rather than re-deriving either; reuse analytics rather than computing
+  metrics; reuse DecisionService for every decision read; frozen
+  library and prompts untouched; 0 network.
+- **Repository invariants**: the standing section above binds here in
+  full, and is asserted by source inspection as T018, T019, and T020
+  already do.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

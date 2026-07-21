@@ -1,4 +1,80 @@
-# MORNING HANDOFF — loop 17 (2026-07-21, afternoon) — Growth & Experiment Intelligence V1 BUILT
+# MORNING HANDOFF — loop 19 (2026-07-21) — Product Strategy & Roadmap Intelligence V1 BUILT
+
+*Suite at close: **1308 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-19 commits: `15d494f` (contract + append-only store + lifecycle
+fold), `0975417` (problem statements, dedup, the Problem Index and the
+Opportunity Index), `f689ab6` (automatic intake from research debt,
+growth, CRM), `c573958` (deterministic multi-dimensional scoring),
+`9932620` (proposals, spec drafts, proposal graph), `1cd5282`
+(portfolio rollup, roadmap candidates, the proposed-diff wall),
+`ec71d86` (snapshots, consumer, CLI, end-to-end, repository
+invariants) + docs. **Product Strategy & Roadmap Intelligence V1:
+BUILT.** 194 new tests (1114 -> 1308).*
+
+**The five things worth knowing.**
+
+1. **Nothing in this subsystem writes `ROADMAP.md`, and it is not a
+   promise — it is a structure.** `product/roadmap_diff.py` never opens
+   a file; the caller passes the roadmap text in and gets diff text
+   back. There is no filesystem path through which a write could be
+   added later by accident. The agent also cannot mark a candidate
+   RUNNABLE: only a person moves an item into the queue the nightly
+   loop picks from. Both are asserted, and `ROADMAP.md` is proven
+   byte-identical after a full run.
+2. **Problems are separate from opportunities, on purpose.** One
+   problem — "new accounts stall before first value" — routinely
+   carries three competing opportunities (a walkthrough, an email
+   sequence, a pricing change). Collapsing them into one record
+   destroys exactly the fan-out you choose between, so there are two
+   indexes: a Problem Index and an Opportunity Index. Problems also
+   evolve rather than sitting static: split, merged, retired,
+   superseded.
+3. **A missing input is UNAVAILABLE, never zero.** When no research
+   package is linked, evidence coverage does not read 0.0 — it reads
+   UNAVAILABLE, and the composite score is withheld with the gap
+   *named* rather than imputed. Strategic alignment stays UNAVAILABLE
+   until you declare it, because an agent does not decide strategy.
+   Cost of delay is computed separately from the opportunity score, and
+   its revenue component waits on a figure you declare, since this
+   repository holds no revenue data and a fabricated one would get
+   quoted later as though it were measured.
+4. **Uncertainty travels.** An experiment labelled INCONCLUSIVE cannot
+   produce a confidently-scored opportunity: the origin label is
+   recorded at intake and caps every confidence derived from it, with
+   the reason naming the label. The same holds for CONFLICTING
+   research. `deferred` and `merged_into` are first-class review
+   answers alongside accept and reject, because a system that models
+   only two distorts the answer you actually gave.
+5. **Every proposal states its unknowns, and a proposal claiming none
+   is rejected.** `known`, `unknown`, and `assumptions` are stored
+   separately and all three are mandatory. Spec drafts are bounded to
+   nine sections — an `implementation`, `estimate`, `assignee`, or
+   date field is rejected structurally — and every acceptance criterion
+   has to state something a person other than its author can check.
+
+**Two honest notes from this loop.**
+
+- **A flaky test, observed once and not reproduced.**
+  `tests/test_growth_store.py::test_concurrent_writers_do_not_corrupt`
+  (a T018 concurrency test, 3 threads x 6 writes) failed once during a
+  full-suite run, then passed 5 consecutive full-suite runs and 5
+  isolated runs afterwards. No T020 code path touches growth. Recorded
+  as a pre-existing load-sensitive flake rather than fixed, because
+  fixing what I could not reproduce would be guessing. Worth watching.
+- **`growth.result_labelled` has no producer yet.** It is in the
+  company-event taxonomy with producer `growth_platform`, but no T018
+  code path emits it — T018 publishes only `experiment_started` and
+  `experiment_stopped`. The product consumer handles it correctly when
+  it arrives, and the test publishes a real event on the real bus under
+  the declared producer rather than changing T018 from this session.
+  Closing this is a small T018 follow-up, named rather than improvised.
+- *Housekeeping:* the loop-18 handoff (T019, Research & Evidence
+  Intelligence) was never written — that loop updated `PROGRESS.md` and
+  `ROADMAP.md` but not this file. Recorded so the gap is visible; the
+  T019 record itself is complete in `ROADMAP.md` and `PROGRESS.md`.
+
+## Previous handoff (loop 17, afternoon) — Growth & Experiment Intelligence V1 BUILT
 
 *Suite at close: **1071 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.
