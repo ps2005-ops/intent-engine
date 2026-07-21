@@ -75,11 +75,11 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     # T001 completed 2026-07-15 via the real nightly_agent.sh rehearsal
     # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34);
     # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec);
-    # T010-T016 (Decision Record + wiring; report 2A/2B; Company Event
-    # System; CRM; analytics; knowledge promotion) completed 2026-07-20/21.
-    # The current queue is T017 (marketing automation C3-C8).
-    # NEEDS-SPEC items are still never auto-promoted.
-    assert runnable_ids == {"T017"}
-    # The nightly loop must pick T017 (the only RUNNABLE task), never a
+    # T010-T017 (Decision Record + wiring; report 2A/2B; Company Event
+    # System; CRM; analytics; knowledge promotion; marketing C3-C8)
+    # completed 2026-07-20/21. The current queue is T018 (growth platform
+    # and experiments). NEEDS-SPEC items are still never auto-promoted.
+    assert runnable_ids == {"T018"}
+    # The nightly loop must pick T018 (the only RUNNABLE task), never a
     # NEEDS-SPEC item.
-    assert pick_next_runnable(tasks) == "T017"
+    assert pick_next_runnable(tasks) == "T018"

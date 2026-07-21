@@ -3209,3 +3209,45 @@ is rejected at propose/promote/supersede time by a word-boundary wall —
 **Queue**: T017 — marketing automation C3–C8 (drafts only; reuse the
 built CRM approval wall, the T016 quote gate, and the analytics
 calibration view rather than reimplementing any of them).
+
+## 2026-07-21 (session 8) — T017 complete: Marketing Automation C3–C8
+
+**Plan mapping, stated honestly**: PLAN_2026-07-21's C4 (feedback loop +
+quote gate) and C5 (lightweight CRM) were already BUILT by T016 and T014.
+This session reused them rather than building the second implementations
+the original plan text implies, and built the genuinely unbuilt items —
+C3, C6, C7, C8 — plus the workflow spine the platform now needs.
+
+**Committed**: 30bc874 (canonical contract, append-only data/marketing.jsonl,
+folded multi-axis state with validated transitions; payloads normalized once
+at the service boundary so validation, fingerprint, and storage are the same
+bytes), f962738 (deterministic as-of CRM audience selection where every
+entity carries an inclusion or exclusion reason and missing data is never
+intent; evidence resolution that refuses below-gate calibration,
+NO OBSERVATION SOURCE, UNAVAILABLE metrics, retracted knowledge, and
+narrow scope behind universal claims), c5d9129 (versioned briefs and
+drafts bound to exact revisions; claim review through the EXISTING
+company-event gate; quotes through the T016 gate; human-only approvals;
+handoff blockers re-checked at approval), 5405abc (observational-only
+publication recording, zero-vs-UNAVAILABLE observations, ratios that
+refuse empty denominators, feedback only via KnowledgeService), b77f6e9
+(C3/C6/C7/C8 generators; the public pages take calibration language
+verbatim from the analytics view, so the A-M5 gate governs them
+automatically), 6226a08 (checkpointed consumer, CLI with no publish or
+approve surface, end-to-end + rejection paths + frozen-asset byte
+identity).
+
+**Design finding worth keeping**: a consented quote is still a
+*testimonial claim*. Consent grants the right to use someone's words;
+claim review governs whether we assert them publicly. Both gates now
+apply independently, and a test asserts consent alone is insufficient.
+
+**Boundaries held**: mechanisms.json and the analyzer module are
+byte-identical after a full vertical run (asserted in-suite); the CRM,
+knowledge, analytics, and event stores are only ever read or written
+through their own services; nothing published or sent anywhere; 0 model
+calls. 77 new tests (suite 915 → 992).
+
+**Queue**: T018 — growth platform and experiments (pre-registered
+design, sample-size honesty, no causal claim without design support;
+bars in ROADMAP.md).

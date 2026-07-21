@@ -1,4 +1,39 @@
-# MORNING HANDOFF — loop 15 (2026-07-21, morning) — Knowledge Promotion V1 BUILT
+# MORNING HANDOFF — loop 16 (2026-07-21, midday) — Marketing C3–C8 V1 BUILT
+
+*Suite at close: **992 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-16 commits: `30bc874` (marketing contract + append-only store +
+folded state), `f962738` (CRM audience + evidence honesty), `c5d9129`
+(briefs, drafts, and the claim/quote/review/handoff walls), `5405abc`
+(publication recording, performance observations, feedback loop),
+`b77f6e9` (C3/C6/C7/C8 generators), `6226a08` (consumer, CLI, e2e) +
+docs. **Marketing Automation C3–C8 V1: BUILT** — and note the honest
+mapping: the plan's **C4 and C5 were already built** (T016 quote gate /
+T014 CRM), so this session reused them instead of creating second
+implementations, and built C3, C6, C7, C8 plus the campaign→brief→draft
+→review→handoff→observation spine.*
+
+**Two things for you specifically.**
+
+1. **Your Monday cron fired.** `data/daily_runner_spend.jsonl` holds a
+   real row: `2026-07-20, status ok, 2 model calls, 10 data calls, 3
+   predictions recorded, 2 baselines`. That closes the PLAN_2026-07-21
+   **A2** question ("verify live ledger accrual actually started") —
+   accrual has started. The file is a runtime artifact and is now
+   gitignored like the other data logs.
+2. **Still yours to run**: the two remaining T009 live control-world runs
+   (**A1**), and enabling the Google Calendar API for GCP project
+   965657964785 (the live test's 403 is unchanged and stays outside the
+   offline gate).
+
+*Walls held: nothing published or sent; publication is only ever an
+externally supplied observed fact; mechanisms.json and the analyzer
+module are byte-identical after a full vertical run (asserted in-suite);
+0 sandbox model calls. Queue: **T018 — Growth platform and experiments**
+(pre-registered design, sample-size honesty, no causal claim without
+design support).*
+
+## Previous handoff (loop 15, morning) — Knowledge Promotion V1 BUILT
 
 *Suite at close: **915 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.

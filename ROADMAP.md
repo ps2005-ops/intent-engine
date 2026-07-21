@@ -481,7 +481,24 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T017 — Marketing automation C3–C8 (approved-workflow automation only)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits 30bc874, f962738, c5d9129,
+  5405abc, b77f6e9, 6226a08) — all bars proven. Plan mapping: **C4 and
+  C5 were already BUILT** (T016 feedback/quote gate; T014 CRM) and are
+  reused here, not reimplemented; this task built **C3** (ledger→content
+  fan-out as a checkpointed consumer), **C6** (commit-triggered
+  changelog + social drafts), **C7** (predictions / leaderboard /
+  mechanism-library pages taking calibration language verbatim from the
+  analytics view), **C8** (roadmap page via the nightly loop's own
+  parser), plus the workflow spine: campaigns, deterministic CRM
+  audience selection, evidence resolution honoring every source's
+  status, versioned briefs and drafts, claim review through the
+  existing company-event gate, quote checks through the T016 gate,
+  human-only draft and handoff approval, observational publication
+  recording, performance observations, and a KnowledgeService-only
+  feedback loop. Canonical contract:
+  `src/intent_engine/marketing/records.py`. 77 tests.
+  Marketing Automation C3–C8 V1: BUILT. External publishing,
+  autonomous publishing, autonomous outreach: NOT BUILT.
 - **Priority**: 1. **Size**: L.
 - **Source**: `PLAN_2026-07-21.md` C3–C8 + `marketing/MARKETING_PLAN_V2.md`
   ("automate generation, gate publication and claims"). Extends the
@@ -511,6 +528,39 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 - **Walls**: drafts only — nothing publishes, nothing sends; no accuracy
   claims (A-M5); frozen prompts/library untouched; 0 model calls in the
   suite; no parallel CRM/feedback/analytics implementations.
+
+## T018 — Growth platform and experiments (pre-registered, design-gated)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: L.
+- **Source**: `docs/COMPANY_OS.md` P7 verdict + `marketing/MARKETING_PLAN_V2.md`
+  funnel. Experiments are **pre-registered** (the synthetic-worlds
+  discipline) and their results become knowledge items through T016.
+- **Files in scope**: new `src/intent_engine/growth/` (experiment
+  registry + exposure/outcome records + read views), tests. States live
+  on the CRM ledger (T014) and metrics on the analytics views (T015) —
+  NO new prospect store, NO new metric engine, NO agents.
+- **Definition of done (bars)**: (a) **experiment identity** — opaque id
+  + hypothesis + audience definition + control/treatment definitions +
+  outcome definition, all recorded BEFORE any exposure (a
+  post-hoc-registered experiment is rejected); (b) **exposure records**
+  are append-only, reference `crm_entity_id`, and one entity cannot be
+  exposed to two arms of the same experiment; (c) **outcome records**
+  reference the pre-registered outcome definition only — a metric
+  chosen after results exist is rejected; (d) **sample-size honesty** —
+  every read reports observed n and renders `INSUFFICIENT SAMPLE` below
+  the experiment's own pre-registered minimum; no p-value, no
+  significance language, no lift claim without it; (e) **stopping
+  rules** are declared at registration and a stop is an explicit human
+  event; (f) **no causal claim without design support** — an experiment
+  without control/treatment separation may report observations only,
+  asserted by test; (g) results promote to knowledge ONLY through
+  `KnowledgeService` (human validation unchanged); (h) marketing
+  artifact links and CRM links are references, never copies; offline
+  suite green + EXIT=0.
+- **Walls**: append-only; human-gated stopping and promotion; no
+  accuracy or significance claims; reuse CRM/analytics/knowledge —
+  no parallel implementations; 0 model calls in the suite.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

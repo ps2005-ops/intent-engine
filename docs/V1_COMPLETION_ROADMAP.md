@@ -294,8 +294,12 @@ eb57aba: append-only feedback ledger with the exact-text human quote
 gate, typed citations, human-gated insight validation and knowledge
 promotion with versioning and typed retraction, mechanism proposal queue
 that never writes the frozen library — canonical contract in
-`src/intent_engine/knowledge/records.py`). Marketing C3–C8 (next:
-`ROADMAP.md` T017), growth, PM/Research agents, AgentOS extraction,
+`src/intent_engine/knowledge/records.py`). **Marketing Automation C3–C8
+V1 is now also BUILT** (T017, commits 30bc874 / f962738 / c5d9129 /
+5405abc / b77f6e9 / 6226a08 — plan C4/C5 were already covered by
+T016/T014 and are reused, not rebuilt; canonical contract in
+`src/intent_engine/marketing/records.py`). Growth experimentation
+(next: `ROADMAP.md` T018), PM/Research agents, AgentOS extraction,
 Personal AI, public APIs: **NOT YET BUILT**.*
 
 *Revised 2026-07-20 after founder review. The one insisted change is

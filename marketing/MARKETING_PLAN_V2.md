@@ -331,3 +331,32 @@ Every asset the content engine emits inherits the v1 trace table
 statement permitted anywhere remains the explicit disclaimer that no
 accuracy is claimed. This is asserted by the same audit the outreach
 checklist uses.
+
+---
+
+## Implementation status (2026-07-21) — C1–C8
+
+*One canonical implementation owns the marketing workflow:
+`src/intent_engine/marketing/` (contract: `marketing/records.py`). The C1
+content engine at `marketing/content_engine/render.py` is unchanged and
+reused for asset rendering, the claim audit, and the T:1–T:6 trace table.*
+
+| Item | Status | Where |
+|---|---|---|
+| C1 content engine | BUILT (2026-07-20) | `marketing/content_engine/render.py` |
+| C2 productized premortem PDF | BUILT | `scripts/render_founder_report.py` |
+| C3 ledger→content hook | **BUILT (T017)** | `marketing/generators.fan_out_prediction` + `marketing/consumer.py` |
+| C4 feedback loop + quote gate | **BUILT (T016)** | `src/intent_engine/knowledge/` — reused, not duplicated |
+| C5 lightweight CRM | **BUILT (T014)** | `src/intent_engine/crm/` — reused, not duplicated |
+| C6 commit-triggered content | **BUILT (T017)** | `marketing/generators.drafts_from_commits` |
+| C7 public pages | **BUILT (T017)** | `marketing/generators.render_public_pages` |
+| C8 public roadmap page | **BUILT (T017)** | `marketing/generators.render_roadmap_page` |
+
+**Walls, as code (not convention):** publication and claim approval are
+human-only company events; quotes require exact-text, exact-use consent
+through the T016 gate and a testimonial *additionally* needs claim review;
+the calibration language on public pages is taken verbatim from the
+analytics view, so the A-M5 gate governs the page automatically; nothing
+in this repository publishes or sends — a publication is an observed fact
+supplied from outside. **External publishing, autonomous publishing, and
+autonomous outreach remain NOT BUILT.**

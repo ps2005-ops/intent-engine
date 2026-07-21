@@ -368,9 +368,16 @@ proven read-only). **Knowledge promotion: BUILT** (T016,
 `knowledge/records.py`; feedback → insight → knowledge kept separate;
 human-only validation and promotion; citations mandatory; mechanism
 proposals queue for review and never write the frozen library).
-Marketing-automation consumers: **NOT BUILT** — C3–C8 is next
-(`ROADMAP.md` T017). Autonomous outreach and autonomous publication:
-**NOT BUILT** and not planned without their own founder gates.
+**Marketing automation C3–C8: BUILT** (T017,
+`src/intent_engine/marketing/` — canonical contract in
+`marketing/records.py`; campaigns, CRM-derived audiences, evidence that
+preserves each source's status, versioned briefs and drafts, claim
+review through THIS event system's gate, quotes through the T016 gate,
+human-only approvals, observational publication recording, performance
+observations, KnowledgeService-only feedback). Growth experimentation:
+**NOT BUILT** — next (`ROADMAP.md` T018). External publishing,
+autonomous publication and autonomous outreach: **NOT BUILT** and not
+planned without their own founder gates.
 
 ---
 

@@ -33,3 +33,11 @@ data/feedback.jsonl
 data/feedback.jsonl.lock
 knowledge/knowledge.jsonl
 knowledge/knowledge.jsonl.lock
+
+# T017 runtime marketing workflow log + generated drafts (data, not source)
+data/marketing.jsonl
+data/marketing.jsonl.lock
+data/daily_runner_spend.jsonl
+marketing/content_engine/drafts/predictions/
+marketing/content_engine/drafts/commits/
+marketing/content_engine/drafts/pages/
