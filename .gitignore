@@ -51,3 +51,7 @@ data/growth_synthetic.jsonl.lock
 # T019 runtime research log (append-only data, not source)
 data/research.jsonl
 data/research.jsonl.lock
+
+# T020 runtime product log (append-only data, not source)
+data/product.jsonl
+data/product.jsonl.lock
