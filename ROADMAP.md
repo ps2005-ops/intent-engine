@@ -774,75 +774,212 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   compound: by T025 the release audit becomes mechanical rather than
   archaeological.
 
-## T021 — Executive Decision Agent (recommendation packages only)
+## T021 — Executive Decision Intelligence Platform (decision candidates only)
 
 - **Status**: RUNNABLE
 - **Priority**: 1. **Size**: XL.
+- **Bars amended 2026-07-21** (after T020 closed) from a synthesis
+  framing to a **triage** framing. The question this subsystem answers
+  is *"given everything we know, what decision deserves the founder's
+  attention next?"* — not "what should the company do", and not "what
+  should the AI execute". That is a ranking question before it is a
+  writing question, so the primary artifact is a **queue of decision
+  candidates**, and a decision package is what opening one yields. The
+  prior bars described producing a good package and said nothing about
+  ordering; an agent that writes excellent packages nobody reads in the
+  right order has failed the actual question.
 - **Scope**: the third agent, and the first that reasons ACROSS the
-  whole company rather than owning a domain. It reads Decisions (T010),
-  the Company Event log (T013), CRM (T014), Analytics (T015), Knowledge
-  (T016), Marketing (T017), Growth (T018), the **Evidence Index**
-  (T019), and the **Problem and Opportunity Indexes** (T020), and
-  produces **reviewable executive recommendation packages** — nothing
-  else. It owns recommendations, not decisions. It reuses both agent
-  memories rather than building a third; if it needs a fact, it reads
-  the subsystem that owns it.
+  whole company rather than owning a domain. It READS the Decision
+  Platform (T010), the Prediction Ledger (T010 1B), the Company Event
+  log (T013), CRM (T014), Analytics (T015), Knowledge (T016), Marketing
+  (T017), Growth (T018), the **Evidence Index** (T019), and the
+  **Problem and Opportunity Indexes** (T020). It **owns exactly one
+  thing: decision candidates.** It owns no Decision Record, no
+  prediction, no proposal, no experiment, and no metric. It reuses both
+  existing agent memories rather than building a third; if it needs a
+  fact, it reads the subsystem that owns it.
 - **Source**: `docs/V1_COMPLETION_ROADMAP.md` revised agent sequence
   (2026-07-21) — an Executive Decision Agent is deliberately built
   BEFORE AgentOS, because generalizing a kernel from three real
   orchestrating agents produces a better kernel than designing one
-  ahead of its users.
+  ahead of its users. The layering this completes: Evidence (what is
+  known) → Opportunities (what could be built) → Decisions (what
+  deserves founder attention next).
 - **Files in scope**: new `src/intent_engine/executive/`, tests. It
   READS every subsystem's public surface and WRITES only its own
   append-only store. It creates no Decision Record, no proposal, no
   experiment, no campaign, and no roadmap entry.
-- **Definition of done (bars)**: (a) **canonical contract** — one
-  envelope, one taxonomy, one append-only store (`data/executive.jsonl`)
-  with the established discipline (flock, fsync, fingerprinted
-  idempotency, loud corruption, no mutation API, parse cache, one
-  `_stable_id` helper), and one folded-state implementation;
-  (b) **recommendation packages** each stating the question, the
-  options considered, the evidence for each option **by reference**
-  into the owning subsystem, the tradeoffs, the unknowns, and what
-  would change the recommendation — a package with no stated unknown is
-  rejected; (c) **cross-subsystem reads only** — asserted by source
-  inspection that no executive code writes another subsystem's store,
-  and that it holds no second Evidence Index, Opportunity Index,
-  scoring implementation, metric engine, or decision store;
-  (d) **deterministic synthesis** — the assembly of a package, every
-  score or ranking it carries, every coverage figure, and every wall is
-  computed from recorded facts and versioned; a model may draft prose
-  only, behind an injectable client, and may never emit a reference, an
-  identifier, a score, a priority, or a citation; (e) **conflict
-  surfacing** — where two subsystems disagree (a CONFLICTING research
-  stance against a DIFFERENCE OBSERVED experiment, an accepted proposal
-  against an at-risk customer signal), the package states the
-  disagreement rather than resolving it silently; (f) **UNAVAILABLE
-  propagates** — a recommendation resting on an UNAVAILABLE input says
-  so and names the gap, and uncertainty travels from every origin;
-  (g) **human-only disposition** — accept, reject, defer, and merge are
-  founder acts bound to an exact package version; a revised package is
-  a new version and a prior review does not carry forward;
-  (h) **no autonomous execution** — no Decision Record creation, no
+- **Definition of done (bars)**:
+
+  (a) **canonical contract** — one envelope, one taxonomy, one
+  append-only store (`data/executive.jsonl`) with the established
+  discipline (flock, fsync, fingerprinted idempotency, loud corruption,
+  no mutation API, `(mtime_ns, size)` parse cache, one `_stable_id`
+  helper), and one folded-state implementation.
+
+  (b) **THE DECISION INDEX** — the executive memory, and the
+  centrepiece, built exactly as the Evidence Index and the Opportunity
+  Index were: folded deterministically from append-only rows, NEVER
+  model-written, orphan-rejecting, self-checking its own invariants, and
+  answering lineage. It holds open decisions, blocked decisions, expired
+  decisions, decision debt, decision opportunities, conflicts,
+  recommendations, and review packages — and nothing else.
+  **The load-bearing design constraint:** the other two indexes are
+  reproducible because they fold only their own subsystem's rows. This
+  one spans the executive log AND `DecisionService` (SQLite), which
+  would break that property. Resolution: the index stores `decision_id`
+  **references** and treats `DecisionService` as a RESOLVER — the same
+  shape T020 uses for evidence references — so it stays reproducible
+  from its own log. Mirroring decision state into the executive log is
+  explicitly REJECTED: it is easier to query and it materializes a copy
+  that can drift.
+
+  (c) **decision lifecycle, nothing skipped** — Decision Candidate →
+  Decision Package → Founder Review → Decision Record → Outcome
+  Observation → Prediction Scoring → Knowledge Feedback. Each step
+  individually tested; the Decision Record is created by a human
+  through `DecisionService`, and this subsystem only references it.
+
+  (d) **the triage queue** — the primary artifact. A deterministic,
+  versioned ordering of decision candidates from recorded facts, with
+  its inputs, formula, and per-candidate reasons visible, and with
+  candidates that cannot honestly be ranked listed separately rather
+  than ranked against those that can (as T020 does for unrankable
+  proposals). No model-assigned ordering.
+
+  (e) **DECISION DEBT** — the counterpart of research debt (T019) and
+  spec debt (T020), continuously surfaced: `need_founder_choice`,
+  `need_legal_review`, `need_pricing`, `need_experiment`,
+  `need_customer_validation`, `need_research`, `need_budget`,
+  `need_engineering_estimate`. Every item cites what it is waiting on
+  and what would clear it.
+
+  (f) **cross-system conflict surfacing, with a typed taxonomy** —
+  where subsystems disagree (Growth LIKELY against Research
+  CONFLICTING against Analytics UNAVAILABLE against a high-urgency CRM
+  signal), the package produces a **Conflict Summary** rather than an
+  average. Closed taxonomy: `evidence_conflict`, `metric_conflict`,
+  `priority_conflict`, `timeline_conflict`, `staleness_conflict`,
+  `strategy_conflict`, `dependency_conflict`, `resource_conflict`,
+  `unknown`. `staleness_conflict` is kept distinct from
+  `timeline_conflict`: two inputs that were true at different times and
+  were never reconciled is a different problem from two inputs that
+  disagree about scheduling. Averaging away a disagreement is the
+  failure this bar exists to prevent. (The taxonomy is built HERE and
+  extracted by T022 — per the standing no-speculative-abstraction rule,
+  it is not generalized before it has a second user.)
+
+  (g) **six independent readiness dimensions, never one overall score**
+  — evidence readiness, execution readiness, strategic readiness,
+  financial readiness, operational readiness, and decision readiness.
+  Each computed separately, each carrying its version, inputs, formula,
+  reasons, and status; a dimension with no recorded input is
+  UNAVAILABLE, never 0. **Decision readiness is separate from
+  confidence** and is a YES/NO with stated reasons (missing experiment,
+  missing strategy, missing budget, missing owner, missing evidence).
+  **Financial readiness is structurally UNAVAILABLE** absent a human
+  declaration — this repository records no budget or revenue data, and
+  proxying one is how an invented figure later gets quoted as measured.
+
+  (h) **decision packages** — each stating the decision, supporting
+  evidence **by reference** into the owning subsystem, contradictions,
+  unknowns, dependencies, risks, predictions, **alternative decisions**,
+  research debt, spec debt, decision debt, and a recommended next
+  review. A package with no stated unknown is rejected, and so is one
+  with no alternative.
+
+  (i) **alternative decisions are mandatory** — never `approve / reject`,
+  always an OPTION SET (Option A / B / C) with explicit tradeoffs per
+  option. Structurally this is T020's solution set (one problem, several
+  competing proposals); reuse that shape rather than inventing a
+  parallel one.
+
+  (j) **explicit founder override, never overwritten** — when the
+  founder chooses B and the recorded recommendation preferred A, both
+  are retained with the founder's reason, as an immutable fact.
+  Precedent to reuse: T018's `FOUNDER OVERRIDE RECORDED` modifier, which
+  states in its own text that the data did not make the decision. Later
+  prediction scoring reads these; nothing is ever silently replaced.
+
+  (k) **"expired" is computed, not timed** — a decision expires when a
+  load-bearing input changes underneath it (a superseding research
+  conclusion, an experiment whose label flipped, a churned customer),
+  derived from the freshness and supersession machinery T019 and T020
+  already compute. Age alone never expires a decision: a clock
+  manufactures urgency, which is the opposite of this subsystem's job.
+
+  (l) **executive portfolio** — reads T020's existing rollup (Portfolio
+  → Strategic Themes → Initiatives → Opportunities → Proposals → Specs)
+  and extends it with Decision Packages and Decision Candidates. It does
+  NOT stand up a second hierarchy; strategic themes remain human-created
+  in T020, and a conflicting ordering of the same hierarchy is a defect.
+
+  (m) **deterministic synthesis** — package assembly, every readiness
+  dimension, every queue ordering, every conflict classification, every
+  coverage figure, and every wall computed from recorded facts and
+  versioned. A model may draft prose only, behind an injectable client,
+  and may never emit a reference, an identifier, a score, a priority, a
+  decision id, or a citation; a violation is a recorded typed
+  rejection, and a model failure is a typed fact rather than an empty
+  success. Tested adversarially, as T020 tests it.
+
+  (n) **UNAVAILABLE propagates** — a recommendation resting on an
+  UNAVAILABLE input says so and names the gap; uncertainty travels from
+  every origin, so an INCONCLUSIVE experiment or a CONFLICTING research
+  stance caps what any decision derived from it can claim.
+
+  (o) **human-only disposition** — accept, reject, defer, and merge are
+  founder acts bound to an exact package version; a revised package is a
+  new version and a prior review does not carry forward.
+
+  (p) **no autonomous execution** — no Decision Record creation, no
   experiment start, no campaign, no scheduling, no ticketing, no
-  promotion, and no roadmap write; asserted by test that the service
-  exposes no such surface at all; (i) **frozen reproducible snapshots**
-  recording every contributing version across all eight subsystems, and
-  the source high watermarks that reproduce them; (j) **company-event
-  consumer** with checkpoint `executive`, replay creating zero
-  duplicates, and a failure that cannot break any upstream system;
-  (k) **CLI** of reads and idempotent consumption only — no accept,
-  apply, or schedule command; (l) **language wall** over the full
-  serialized output, word-boundary matched; **0 live model calls and no
-  network in the suite**; offline suite green + EXIT=0.
+  promotion, no roadmap write; asserted by test that the service exposes
+  no such surface at all.
+
+  (q) **frozen reproducible snapshots** — freezing the Decision Index,
+  Opportunity Index, Evidence Index, knowledge, growth-label, analytics
+  metric, and prediction versions, plus the source high watermarks that
+  reproduce them. Recapturing the same `as_of` returns the original.
+
+  (r) **company-event consumer** with checkpoint `executive`, replay
+  creating zero duplicates, and a failure that cannot break any upstream
+  system.
+
+  (s) **CLI** of reads and idempotent consumption only — no accept, no
+  apply, no schedule command.
+
+  (t) **the recommendation wall** — reject `do this`, `must`, `best`,
+  `optimal`; require `current evidence suggests`, `tradeoff`, `review
+  required`, `option`, `candidate`. Word-boundary matched for single
+  words, applied over the full serialized output of a run.
+  **0 live model calls and no network in the suite**; offline suite
+  green + EXIT=0.
+
+- **Decision Principles** (declared in one place in the canonical
+  contract, as T020 declares its Product Principles, and asserted by
+  test): every recommendation has alternatives; every recommendation
+  cites evidence; every recommendation cites uncertainty; every
+  recommendation cites conflicts; every recommendation cites
+  predictions; every recommendation cites assumptions; every
+  recommendation is reviewable; nothing executes automatically; nothing
+  hides disagreement; every recommendation can be replayed.
 - **Walls**: recommend-only; the founder decides; no autonomous action
-  of any kind; reuse the Evidence Index and the Opportunity Index
-  rather than re-deriving either; reuse analytics rather than computing
-  metrics; reuse DecisionService for every decision read; frozen
-  library and prompts untouched; 0 network.
+  of any kind; reuse the Evidence Index and the Opportunity Index rather
+  than re-deriving either; reuse T020's portfolio rollup rather than
+  building a second hierarchy; reuse analytics rather than computing
+  metrics; reuse `DecisionService` for every decision read and never
+  mirror its state; frozen library and prompts untouched; 0 network.
 - **Repository invariants**: the standing section above binds here in
-  full, and is asserted by source inspection as T018, T019, and T020
-  already do.
+  full, asserted by source inspection as T018, T019, and T020 already
+  do. **One new standing invariant is added by this task**: every
+  recommendation is traceable along `recommendation → Decision Record →
+  Prediction → Outcome → Knowledge` **to a terminal state** — where
+  `rejected` and `deferred` are legitimate terminals. Stated that way
+  deliberately: a hard chain would make a recommendation the founder
+  declined into a violation, which is the same distortion T020 removed
+  when it made `deferred` and `merged_into` first-class. No dead-end
+  recommendations; no punished refusals.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

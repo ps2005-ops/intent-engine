@@ -321,8 +321,8 @@ proposals, deterministic multi-dimensional scoring with UNAVAILABLE never
 zero, bounded spec drafts, an eight-edge proposal graph, portfolio rollup
 with balance and decision debt, and roadmap candidates emitted as a
 proposed diff that no code applies; canonical contract in
-`src/intent_engine/product/records.py`). Executive Decision Agent (next:
-`ROADMAP.md` T021), AgentOS extraction, Personal AI, public APIs:
+`src/intent_engine/product/records.py`). Executive Decision Intelligence
+(next: `ROADMAP.md` T021), AgentOS extraction, Personal AI, public APIs:
 **NOT YET BUILT**. Roadmap writing by an agent, product execution,
 scheduling, and ticketing: **NOT BUILT, and out of scope by design**.*
 
@@ -340,12 +340,15 @@ T020 — Product Strategy & Roadmap          BUILT. Problem Index and
                                            product substrate. Owns proposals,
                                            never decisions; never writes
                                            ROADMAP.md.
-T021 — Executive Decision Agent            cross-system orchestration of
-                                           Decisions, Research, Growth,
-                                           Marketing, CRM, Analytics,
-                                           Knowledge, Product. Produces
-                                           reviewable recommendation packages
-                                           ONLY. No autonomous execution.
+T021 — Executive Decision Intelligence     Decision Index is the shared
+                                           executive substrate. Answers
+                                           "what decision deserves the
+                                           founder's attention next" — a
+                                           triage queue of decision
+                                           CANDIDATES, with a package behind
+                                           each. Owns candidates, never
+                                           decisions. No autonomous
+                                           execution.
 T022 — AgentOS Shared Kernel               extracted FROM three production
                                            agents, not designed ahead of them:
                                            orchestration, memory, budgeting,

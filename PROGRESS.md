@@ -3428,7 +3428,21 @@ model, metric engine, decision store, or scoring implementation.
 subsystem owns product strategy rather than project management, and the
 name follows the thing.
 
-Queue: T021 — Executive Decision Agent (cross-system orchestration of
-Decisions, Research, Growth, Marketing, CRM, Analytics, Knowledge, and
-Product proposals; produces reviewable executive recommendation packages
-ONLY; no autonomous execution).
+Queue: T021 — Executive Decision Intelligence Platform. Bars amended
+2026-07-21, after this loop closed, from a synthesis framing to a
+**triage** one: the question is "given everything we know, what decision
+deserves the founder's attention next?", which is a ranking question
+before it is a writing question. The primary artifact is a queue of
+decision CANDIDATES; a decision package is what opening one yields. It
+gets the **Decision Index** as its canonical memory, completing the
+layering Evidence (what is known) → Opportunities (what could be built)
+→ Decisions (what deserves attention next). Four corrections were folded
+into the bars at the same time: the Decision Index stores decision_id
+REFERENCES and resolves through DecisionService rather than mirroring
+its state, so it stays reproducible from its own log; "expired" is
+computed from load-bearing-input freshness rather than a clock, because
+a timer manufactures urgency; the new traceability invariant requires a
+TERMINAL state rather than a completed chain, so a recommendation the
+founder declines is not a violation; and the executive portfolio reads
+T020's existing hierarchy rather than standing up a second, conflicting
+one.
