@@ -577,40 +577,59 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   accuracy or significance claims; reuse CRM/analytics/knowledge —
   no parallel implementations; 0 model calls in the suite.
 
-## T019 — Research Agent (read/propose-only, gate-respecting)
+## T019 — Research & Evidence Intelligence Platform (propose-only agent)
 
 - **Status**: RUNNABLE
-- **Priority**: 1. **Size**: L.
-- **Source**: `docs/V1_COMPLETION_ROADMAP.md` P12 verdict — the
-  mechanism library is **frozen (A3)** and grows only through the
-  reliability-gated historical-study track, so the Research Agent is
-  **design-first and propose-only**.
-- **Files in scope**: new `src/intent_engine/research/` (source
-  registry, evidence ranking, contradiction detection, proposal
-  drafting), tests. It writes ONLY through `KnowledgeService`
-  (`propose_mechanism`, `propose_insight`, `record_feedback`). NO
-  ingestion of live web sources in this task (Crawl4AI/Firecrawl remain
-  LATER-gated per `docs/TOOLS.md`); sources are supplied.
-- **Definition of done (bars)**: (a) **source registry** — append-only
-  records of supplied sources with title, publisher, date, locator, and
-  a content hash; a source without retrievable identity is rejected;
-  (b) **evidence ranking** is deterministic and versioned, ranks by
-  recorded properties (directness, recency, corroboration count,
-  source class) and never by model preference — every rank carries its
-  inputs; (c) **contradiction detection** surfaces pairs of sources
-  whose recorded claims conflict, and a contradiction is a first-class
-  fact, never silently resolved; (d) **mechanism proposals** go to the
-  T016 review queue with citations; `mechanisms.json` stays
-  byte-identical (asserted); (e) **no promotion** — the agent cannot
-  validate an insight or promote knowledge; every write is a proposal;
-  (f) **no fabricated citations** — a proposal citing an unregistered
-  source is rejected; (g) **claim language wall** — proposals may not
-  assert proof, universality, or significance; (h) **0 live model
-  calls in the suite** and no network access; offline suite green +
-  EXIT=0.
-- **Walls**: propose-only; frozen library and prompts untouched; human
-  validation unchanged; reuse the T016 citation model rather than a
-  second one; no web ingestion until its own founder gate.
+- **Priority**: 1. **Size**: XL.
+- **Source**: `docs/V1_COMPLETION_ROADMAP.md` P12 verdict (mechanism
+  library **frozen, A3**) + `docs/TOOLS.md` (crawling LATER-gated).
+  Scope expanded 2026-07-21: this is the first *agent* subsystem, and
+  the patterns it sets are reused by T020–T023. **An agent here is a
+  constrained producer of reviewable artifacts, not a thing that
+  answers questions.**
+- **Files in scope**: new `src/intent_engine/research/`, tests. Writes
+  to other subsystems happen ONLY through `KnowledgeService`. Sources
+  are **supplied** — no autonomous crawling, no recursive browsing.
+- **Definition of done (bars)**: (a) **four separated layers** —
+  Request → Plan → Session → Evidence Package → Conclusion, never
+  collapsed (a Conclusion cannot exist without a Package; a Package
+  cannot exist without an approved Plan); (b) **research plans are
+  pre-registered** — questions, evidence requirements, stopping
+  conditions, a **failure definition**, and a tool allowlist, all
+  human-approved BEFORE any source is acquired; evidence stays
+  attributed to its plan version; (c) **source registry** with
+  mandatory content hash + retrieval timestamp, a closed source-class
+  set, and **rule-based versioned quality grading**
+  (HIGH/MEDIUM/LOW/UNKNOWN with reasons) that is provably independent
+  of whether the source agrees; `llm_generated` never above LOW;
+  (d) **verification + freshness policy** — hash mismatch marks rather
+  than deletes; unknown domain gets the conservative policy; stale
+  packages are labelled with the oldest load-bearing source age;
+  (e) **evidence items** each resolve to exactly one registered source
+  and carry a class (observation / mechanism / opinion / prediction /
+  recommendation / methodology / unknown); an `opinion` never becomes a
+  `mechanism` automatically and a `recommendation` cannot support a
+  conclusion; (f) **anti-hallucination wall** — a model may propose
+  candidates only; a model-emitted URL, citation, author, or date can
+  never enter the store, and an extraction failure is a typed fact, not
+  an empty success; (g) **evidence graph + contradiction detection**
+  with stance summaries SUPPORTED / CONTRADICTED / MIXED /
+  INSUFFICIENT / UNKNOWN, thresholds taken from the plan, MIXED never
+  collapsed to a majority; (h) **uncertainty vocabulary** — every
+  conclusion carries exactly one of KNOWN / LIKELY / SPECULATIVE /
+  CONFLICTING / UNKNOWN, and UNKNOWN is a legitimate success;
+  (i) **mechanism proposals are drafts only** into the T016 queue,
+  citations resolving to registered sources, `mechanisms.json`
+  byte-identical (asserted); (j) **duplicate-request detection** by
+  deterministic fingerprint with freshness-aware reuse; (k) **frozen
+  reproducible snapshots** recording tool/model/prompt versions and
+  retrieval timestamps; (l) language wall over the full serialized
+  output; **0 live model calls and no network in the suite**; offline
+  suite green + EXIT=0.
+- **Walls**: propose-only — no promotion, no validation, no decisions;
+  frozen library and prompts untouched; reuse the T016 citation model,
+  never a second one; no web ingestion until its own founder gate; the
+  deterministic/model boundary is explicit in code.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

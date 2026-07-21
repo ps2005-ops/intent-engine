@@ -304,8 +304,27 @@ f137501 / ec3cb7d / 526196d — pre-registration, deterministic
 randomization, survivorship accounting, honest stdlib statistics,
 label vocabulary without a `winner`, human-gated stopping and review;
 canonical contract in `src/intent_engine/growth/records.py`).
-Research Agent (next: `ROADMAP.md` T019), PM Agent, AgentOS extraction,
-Personal AI, public APIs: **NOT YET BUILT**.*
+Research & Evidence Intelligence (next: `ROADMAP.md` T019), PM Agent,
+Executive Decision Agent, AgentOS extraction, Personal AI, public APIs:
+**NOT YET BUILT**.*
+
+*Revised agent sequence (2026-07-21). The infrastructure phase is
+complete; what remains is composing these subsystems into agents. The
+order below inserts an **Executive Decision Agent before AgentOS**
+deliberately: generalizing a kernel from three real orchestrating agents
+produces a better kernel than designing one ahead of its users.*
+
+```
+T019 — Research & Evidence Intelligence    (evidence packages, propose-only)
+T020 — Product Manager Agent               (consumes research + decisions)
+T021 — Executive Decision Agent            (orchestrates Decision, Growth,
+                                            Research, Marketing, Analytics,
+                                            CRM, Knowledge)
+T022 — AgentOS Shared Kernel               (generalized FROM three agents)
+T023 — Personal AI Layer
+T024 — Public APIs & SDK
+T025 — V1 Stabilization & Release Audit
+```
 
 *Revised 2026-07-20 after founder review. The one insisted change is
 adopted in full: the record is **event-sourced**. State is never stored as
