@@ -213,6 +213,38 @@ def test_candidates_are_partitioned_into_three_queues():
     assert queues["queues"]["maintenance"]["order"] == ["C3"]
 
 
+def test_the_service_partitions_candidates_by_horizon_and_class(svc):
+    """Integration: a strategic candidate lands in the strategic queue and
+    a technical near-term one in maintenance — proving the queue is derived
+    from the folded context, not defaulted to operational."""
+    strategic, _ = _ready_package(svc, "strat", decision_class="strategic",
+                                  horizon="strategic")
+    svc.compute_readiness(strategic, {"research": {"stances": ["SUPPORTED"]},
+                                      "product": {"spec_present": True},
+                                      "alignment": {"level": "core",
+                                                    "declared_by": "f"},
+                                      "budget": {"amount_available": 1,
+                                                 "declared_by": "f"},
+                                      "owner": "f", "needs_budget": False},
+                          options=[{"reversibility": "easy"}])
+    maint, _ = _ready_package(svc, "maint", decision_class="technical",
+                              horizon="immediate")
+    svc.compute_readiness(maint, {"research": {"stances": ["SUPPORTED"]},
+                                  "product": {"spec_present": True},
+                                  "alignment": {"level": "core",
+                                                "declared_by": "f"},
+                                  "budget": {"amount_available": 1,
+                                             "declared_by": "f"},
+                                  "owner": "f", "needs_budget": False},
+                          options=[{"reversibility": "easy"}])
+    queues = svc.triage_queues(as_of="2026-07-21T00:00:00+00:00")
+    assert strategic in queues["queues"]["strategic"]["order"]
+    assert maint in queues["queues"]["maintenance"]["order"]
+    # neither collapsed into operational
+    assert strategic not in queues["queues"]["operational"]["order"]
+    assert maint not in queues["queues"]["operational"]["order"]
+
+
 def test_ordering_is_deterministic_and_by_stated_precedence():
     entries = [
         build_entry(candidate_id="C_ready", queue="operational",

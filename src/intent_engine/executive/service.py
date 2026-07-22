@@ -685,7 +685,13 @@ class ExecutiveService:
             conflicts = index.conflicts_for(cid)
             horizon = (context or {}).get("decision_horizon", "short_term")
             decision_class = (context or {}).get("decision_class", "operational")
-            queue = (context or {}).get("queue", "operational")
+            # The queue is DERIVED from (horizon, class) deterministically
+            # rather than read from a stored field: assign_queue is a pure
+            # table, so recomputing it here keeps the partition reproducible
+            # from the folded state and cannot drift from a stale copy.
+            from intent_engine.executive.records import assign_queue
+            queue, _ = assign_queue(horizon, decision_class) if context \
+                else ("operational", "")
             rankable = readiness_row is not None and context is not None
             gaps = []
             if context is None:
