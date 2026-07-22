@@ -776,10 +776,51 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T021 — Executive Decision Intelligence Platform (decision candidates only)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits 029f714, c6f89b9, 775dee8,
+  0324e1c, b0730d3, 3fe77db, c384a37, 4553cbf) — all bars proven. Six
+  separated layers (Candidate → Context → Package → Founder Review →
+  Decision Record → Outcome → Knowledge), with the **Decision Index** as
+  the third canonical index (folded from the executive log alone, never
+  model-written, orphan-rejecting, self-checking, lineage-answering),
+  completing the layering Evidence → Opportunities → Decisions. The
+  load-bearing design decision, resolved and asserted by test: the
+  Decision Index stores `decision_id` REFERENCES and resolves decision
+  state through `DecisionService` at read time rather than mirroring it,
+  so it stays reproducible from its own log — no executive module writes
+  `decisions.db`, creates a decision, or records a decision event. A
+  **Decision Context** carries a horizon and a class and fingerprints
+  every load-bearing input, so recent-changes, expiry, and replay all
+  fall out of one mechanism; **expiry follows a changed input, never a
+  clock** (a test advances `as_of` a year against unchanged inputs and
+  nothing expires). A **typed conflict taxonomy** (nine kinds, staleness
+  distinct from timeline) produces a **Conflict Summary** with both sides
+  named and no average anywhere — asserted by parsing the module. **Six
+  independent readiness dimensions**, no overall score; financial
+  readiness structurally UNAVAILABLE without a human declaration;
+  decision-readiness a YES/NO with every gap named, not a confidence.
+  **Impact** computed from scope (an irreversible decision raised one
+  level); **reversibility** declared per option and aggregated to the
+  least reversible. **Decision packages** with mandatory **alternative
+  decisions** (option sets, each carrying benefits/costs/risks/unknowns/
+  dependencies/reversibility), an **escalation** decision (who should
+  decide) separate from the recommendation, an explicit **no-recommendation**
+  outcome, and a **founder override** that keeps both the chosen and the
+  preferred option immutably. **Three partitioned triage queues**
+  (strategic / operational / maintenance) ordered by a fixed-precedence
+  tuple, never a blended score, with unrankable candidates listed
+  separately. An **executive portfolio** that reads T020's rollup rather
+  than standing up a second hierarchy, and a **health dashboard** for the
+  T023 briefing. **Traceability to a terminal state** — rejected and
+  deferred legitimate — as a new standing invariant. Reproducible
+  snapshots across all eight subsystems; a replay-safe consumer on
+  checkpoint `executive`; a reads-only CLI; the recommendation wall over
+  the full serialized run. Canonical contract:
+  `src/intent_engine/executive/records.py`. 112 tests.
+  Executive Decision Intelligence V1: BUILT. Autonomous execution,
+  agent-created Decision Records: NOT BUILT and never will be.
 - **Priority**: 1. **Size**: XL.
-- **Bars amended 2026-07-21** (after T020 closed) from a synthesis
-  framing to a **triage** framing. The question this subsystem answers
+- **Bars (retained for the record)** — amended 2026-07-21 (after T020
+  closed) from a synthesis framing to a **triage** framing. The question this subsystem answers
   is *"given everything we know, what decision deserves the founder's
   attention next?"* — not "what should the company do", and not "what
   should the AI execute". That is a ranking question before it is a
@@ -980,6 +1021,73 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   declined into a violation, which is the same distortion T020 removed
   when it made `deferred` and `merged_into` first-class. No dead-end
   recommendations; no punished refusals.
+
+## T022 — AgentOS Shared Kernel (extracted, not designed)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: XL.
+- **Scope**: the shared foundation, extracted FROM three production
+  agents — Research (T019), Product (T020), Executive (T021) — and
+  nothing else. The rule is **extraction, not design**: an abstraction
+  enters the kernel because three real implementations already contain
+  it, not because it seems likely to be useful. No speculative
+  abstraction; no capability the three agents do not already share.
+- **Source**: `docs/COMPANY_OS.md` Part 2 (the AgentOS sketch) and
+  `docs/V1_COMPLETION_ROADMAP.md` — deliberately built AFTER three
+  agents exist, so the kernel is generalized from its users rather than
+  ahead of them.
+- **Files in scope**: new `src/intent_engine/agentos/`, tests, and
+  **refactors of the three agents to consume the kernel** where the
+  extraction is a genuine simplification (not a mechanical move). It
+  writes no store of its own; it provides the shapes the agents already
+  reimplement in parallel.
+- **The shapes proven by three implementations, and therefore eligible**
+  (name each in the audit, with the three call sites):
+  (a) **the append-only store discipline** — flock, fsync,
+  fingerprinted idempotency, loud corruption, no mutation API, the
+  `(mtime_ns, size)` parse cache, and the one `_stable_id(key)` helper —
+  reimplemented in `research/store.py`, `product/store.py`,
+  `executive/store.py`; (b) **the canonical index contract** — folded
+  from append-only rows, never model-written, orphan-rejecting,
+  self-checking, lineage-answering — the Evidence, Opportunity, and
+  Decision Indexes; (c) **the folded-state + transition-validation
+  pattern**; (d) **the human-wall pattern** (`HUMAN_ONLY_EVENTS` + the
+  actor check in `_record`); (e) **the model boundary** — injectable
+  client, prompt/model versions recorded, the single recursive
+  forbidden-field scan, a typed rejection on overreach, a typed fact on
+  failure; (f) **the snapshot shape** — frozen versions across
+  contributing subsystems plus source high watermarks, reproducible from
+  the log; (g) **the company-event consumer + checkpoint + replay
+  pattern**; (h) **the language wall** with word-boundary matching; (i)
+  **the debt vocabulary shape** (research debt / spec debt / decision
+  debt); (j) **the typed conflict taxonomy** (built in T021, now with a
+  potential second user).
+- **Definition of done (bars)**: (a) **the kernel is extracted, not
+  invented** — every kernel module cites the three pre-existing
+  implementations it generalizes, asserted by an audit test that fails
+  if a kernel abstraction has fewer than the agents that already
+  contained it; (b) **at least three agents consume each extracted
+  shape** — a kernel primitive with fewer than two real consumers after
+  the refactor is rejected as speculative; (c) **behaviour is unchanged**
+  — the three agents' full test suites pass byte-for-byte in outcome
+  after the refactor, and every replay still reproduces every derived
+  artifact; (d) **one canonical implementation per shape**, replacing
+  three, with the per-subsystem invariants tests updated to point at the
+  kernel; (e) **agent registry** — a declared list of the production
+  agents and their contracts, read-only; (f) **no new store, no new
+  network, no new autonomous authority** — the kernel is plumbing, not a
+  new actor; (g) language and determinism walls inherited; **0 live
+  model calls and no network in the suite**; offline suite green +
+  EXIT=0.
+- **Walls**: extraction-only — no abstraction without three existing
+  implementations; no behaviour change during a move; the three agents
+  keep their contracts; the kernel writes no store and holds no
+  autonomous authority; frozen library and prompts untouched; 0 network.
+- **Repository invariants**: the standing section binds. This task is
+  where the invariants stop being per-subsystem assertions and become
+  the kernel's own contract — after T022, "one canonical implementation
+  of each shape" is enforced in one place rather than re-proven in each
+  agent.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

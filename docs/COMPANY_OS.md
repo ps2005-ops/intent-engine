@@ -754,6 +754,78 @@ company stays coherent.
 
 ---
 
+## Part 15 — Executive decision architecture
+
+**Status: BUILT (T021).** Canonical contract:
+`src/intent_engine/executive/records.py`. A **read/recommend-only**
+steward, and the first agent that reasons ACROSS the whole company rather
+than owning a domain.
+
+The subsystem that answers a triage question — *given everything we know,
+what decision deserves the founder's attention next?* It owns **decision
+candidates, not decisions**.
+
+**The three-index layering this completes.** Each agent memory has the
+same shape — folded from append-only rows, never model-written,
+orphan-rejecting, self-checking, lineage-answering — which is what lets a
+future kernel (T022) treat them as one standardized replayable read model:
+
+```
+Evidence Index      (T019)  what is known
+Problem + Opportunity Index (T020)  what could be built
+Decision Index      (T021)  what deserves a decision next
+```
+
+**The load-bearing design decision.** Decision state lives in
+`DecisionService` (SQLite), a different store from the executive log.
+Mirroring it in would query better and materialize a copy that drifts. So
+the Decision Index stores `decision_id` REFERENCES and resolves through
+`DecisionService` at read time — the same shape T020 uses for evidence
+references — and stays reproducible from its own log. No executive module
+writes `decisions.db`, creates a decision, or records a decision event.
+
+**What it refuses to do quietly: average a disagreement.** Where Growth,
+Research, Analytics, and CRM point different ways, the output is a typed
+**Conflict Summary** (nine kinds, staleness distinct from timeline), not a
+blended number — because the disagreement is the most useful thing in the
+room.
+
+**Six independent readiness dimensions, never one score** — evidence,
+execution, strategic, financial, operational, and decision readiness. A
+missing input is UNAVAILABLE, never 0. Financial readiness is structurally
+UNAVAILABLE without a human declaration. Decision readiness is a YES/NO
+with every gap named, not a confidence, because "no — the experiment has
+not run and nobody owns it" is actionable and "0.62" is not.
+
+**Decision packages** carry mandatory alternatives (option sets, each with
+benefits / costs / risks / unknowns / dependencies / a declared
+reversibility), an **escalation** decision (who should decide, separate
+from what to recommend), an explicit **no-recommendation** outcome, and a
+**founder override** that keeps both the chosen and the preferred option.
+Impact is computed from scope; reversibility is Type 1 / Type 2, declared
+not inferred.
+
+**The primary artifact is a triage queue** — three partitions (strategic /
+operational / maintenance) ordered by a fixed-precedence tuple, never a
+blended score. Expiry follows a changed load-bearing input, never a clock.
+Every recommendation traces to a terminal state, where rejected and
+deferred are legitimate — a new standing invariant.
+
+**How it coordinates:** it consumes `decision.resolved` on checkpoint
+`executive`, each event creating at most one candidate; and it reads
+accepted proposals from T020 directly. The health dashboard is the
+substrate for the Personal AI daily briefing (Part 9 / T023).
+
+*Six-question check:* *necessary* because a founder with ten agents
+surfacing work needs one triage surface or drowns; *better* than a
+priority list that averages incomparable decisions; *integrates* by
+reading the three indexes and DecisionService; *complexity*: one
+recommend-only agent, one append-only store, zero duplicated logic; *at
+100×*, a decision function that triages from evidence, states every
+disagreement, and never decides is how a founder stays the decider.
+
+---
+
 ## Part 14 — Execution roadmap (phased; reviewed before built)
 
 The detailed, dependency-ordered build sequence lives in

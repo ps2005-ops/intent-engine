@@ -321,10 +321,18 @@ proposals, deterministic multi-dimensional scoring with UNAVAILABLE never
 zero, bounded spec drafts, an eight-edge proposal graph, portfolio rollup
 with balance and decision debt, and roadmap candidates emitted as a
 proposed diff that no code applies; canonical contract in
-`src/intent_engine/product/records.py`). Executive Decision Intelligence
-(next: `ROADMAP.md` T021), AgentOS extraction, Personal AI, public APIs:
-**NOT YET BUILT**. Roadmap writing by an agent, product execution,
-scheduling, and ticketing: **NOT BUILT, and out of scope by design**.*
+`src/intent_engine/product/records.py`).
+**Executive Decision Intelligence V1 is now also BUILT** (T021, commits
+029f714 / c6f89b9 / 775dee8 / 0324e1c / b0730d3 / 3fe77db / c384a37 /
+4553cbf — the Decision Index is the third shared substrate; a triage
+queue of decision candidates, a typed conflict taxonomy that never
+averages, six independent readiness dimensions, mandatory alternative
+decisions, founder override, expiry from a changed input rather than a
+clock, and traceability to a terminal state; canonical contract in
+`src/intent_engine/executive/records.py`). AgentOS extraction (next:
+`ROADMAP.md` T022), Personal AI, public APIs: **NOT YET BUILT**. Roadmap
+writing by an agent, product execution, autonomous decisions, scheduling,
+and ticketing: **NOT BUILT, and out of scope by design**.*
 
 *Revised agent sequence (2026-07-21). The infrastructure phase is
 complete; what remains is composing these subsystems into agents. The
@@ -340,10 +348,10 @@ T020 — Product Strategy & Roadmap          BUILT. Problem Index and
                                            product substrate. Owns proposals,
                                            never decisions; never writes
                                            ROADMAP.md.
-T021 — Executive Decision Intelligence     Decision Index is the shared
-                                           executive substrate. Answers
-                                           "what decision deserves the
-                                           founder's attention next" — a
+T021 — Executive Decision Intelligence     BUILT. Decision Index is the
+                                           shared executive substrate.
+                                           Answers "what decision deserves
+                                           the founder's attention next" — a
                                            triage queue of decision
                                            CANDIDATES, with a package behind
                                            each. Owns candidates, never

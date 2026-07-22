@@ -202,11 +202,84 @@ growth results (T018), analytics (T015), CRM (T014), and knowledge
 **Authorized skills/tools**: `superpowers` (global). No web access, no
 vendor accounts, no publishing surface.
 
-*Registry note (outstanding, flagged not written):* the Research agent
-(T019, `src/intent_engine/research/`) is a subsystem agent of the same
-propose-only class and has no entry here yet. Adding it is a small
-docs-only follow-up; it is named rather than improvised so the gap is
-visible.
+---
+
+## 6. Research agent (T019 — Research & Evidence Intelligence)
+
+*Registry backfill (the outstanding Session-10 flag, now closed).*
+
+**Repo**: `~/intent-engine`, `src/intent_engine/research/` only.
+
+**Purpose**: turns supplied sources into reviewable evidence packages. It
+pre-registers a research plan (questions, evidence requirements, stopping
+conditions, a mandatory failure definition, a tool allowlist) for human
+approval BEFORE any source is acquired, then registers and grades sources,
+extracts candidate claims, indexes evidence, detects contradictions, and
+drafts uncertainty-labelled conclusions. Its memory is the **Evidence
+Index** — the first canonical index, which T020 and T021 read.
+
+**Posture: propose-only.** The agent drafts; it never approves a plan,
+reviews, validates an insight, or promotes knowledge.
+
+**May touch**: `data/research.jsonl` (its own append-only store), and it
+drafts mechanism candidates into the T016 review queue through
+`KnowledgeService`. Sources are **supplied** — no autonomous crawling, no
+recursive browsing.
+
+**Hard walls** (each asserted by test): a model may propose candidate
+claims only; a model-emitted source, URL, citation, author, or date can
+never enter the store, and an extraction failure is a typed fact rather
+than an empty success. Collection before an approved plan is rejected.
+Source quality is graded independently of whether the source agrees.
+`mechanisms.json` is frozen (A3) and stays byte-identical; the agent
+drafts into a review queue and promotion is human-gated. 0 live model
+calls in the offline suite; 0 network.
+
+**Authorized skills/tools**: `superpowers` (global). No web ingestion
+until its own founder gate.
+
+---
+
+## 7. Executive agent (T021 — Executive Decision Intelligence)
+
+**Repo**: `~/intent-engine`, `src/intent_engine/executive/` only.
+
+**Purpose**: the first agent that reasons ACROSS the whole company. It
+answers *what decision deserves the founder's attention next?* — reading
+the Decision Platform, Prediction Ledger, Evidence Index (T019), Problem
+and Opportunity Indexes (T020), Growth, CRM, Analytics, and Knowledge, and
+producing a **triage queue of decision candidates** with a **decision
+package** behind each. Its memory is the **Decision Index**, the third
+canonical index.
+
+**Posture: recommend-only.** It owns decision candidates; the founder owns
+decisions. Accept, reject, defer, and merge are founder acts bound to an
+exact package version.
+
+**May touch**: `data/executive.jsonl` (its own append-only store) and
+nothing else. It resolves decision state through `DecisionService` at read
+time and mirrors nothing.
+
+**Hard walls** (each asserted by test):
+- It creates no Decision Record, no prediction, no proposal, no
+  experiment, no campaign, and no roadmap entry — asserted by proving the
+  service exposes no such surface.
+- It writes no other subsystem's store, and never `decisions.db`; the
+  Decision Index stores `decision_id` references and never a copy of
+  decision state.
+- It never averages a disagreement — every conflict is typed and stated.
+- No overall readiness score; a missing input is UNAVAILABLE, never 0;
+  financial readiness is UNAVAILABLE without a human declaration.
+- A model may draft prose behind an injectable client; it may never emit a
+  decision id, a prediction id, a reference, a customer id, a score, a
+  readiness, or a citation, and an attempt is a recorded typed rejection.
+- Strategy and budget come from a human declaration.
+- Expiry follows a changed input, never a clock; nothing executes
+  automatically.
+- 0 live model calls in the offline suite; 0 network.
+
+**Authorized skills/tools**: `superpowers` (global). No web access, no
+vendor accounts, no publishing surface.
 
 ---
 

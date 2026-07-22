@@ -1,4 +1,82 @@
-# MORNING HANDOFF — loop 19 (2026-07-21) — Product Strategy & Roadmap Intelligence V1 BUILT
+# MORNING HANDOFF — loop 20 (2026-07-21) — Executive Decision Intelligence V1 BUILT
+
+*Suite at close: **1420 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-20 commits: `029f714` (contract + append-only store + lifecycle
+fold), `c6f89b9` (the Decision Index + the DecisionService resolver
+boundary), `775dee8` (decision debt, aging, expiry, intake), `0324e1c`
+(the typed conflict taxonomy + Conflict Summary), `b0730d3` (readiness,
+impact, reversibility, context), `3fe77db` (packages, options,
+escalation, no-recommendation, override), `c384a37` (triage queues,
+portfolio, health dashboard, traceability), `4553cbf` (snapshots,
+consumer, CLI, end-to-end, repository invariants) + docs. **Executive
+Decision Intelligence V1: BUILT.** 112 new tests (1308 -> 1420).*
+
+**The five things worth knowing.**
+
+1. **It owns exactly one thing — decision candidates — and the queue is
+   the artifact.** The question is triage: "given everything we know,
+   what decision deserves your attention next?" A decision package is
+   what you get when you open a queued candidate. There are three
+   queues, not one — strategic, operational, maintenance — because a bug
+   fix and an acquisition are not comparable, and forcing them into one
+   list produces a ranking nobody can act on. Ordering within a queue is
+   a fixed-precedence tuple (decision-ready first, then escalation,
+   conflicts, impact, debt, id), never a blended score, so every
+   position is explainable field by field.
+2. **It never averages a disagreement.** When Growth, Research,
+   Analytics, and CRM point different ways, you get a typed Conflict
+   Summary naming both sides, not a blended number — the disagreement is
+   the most useful thing in the room, and a test proves no averaging
+   code path exists. Nine conflict kinds, with staleness (two inputs
+   true at different times, never reconciled) kept distinct from timeline
+   (a scheduling disagreement).
+3. **The Decision Index does not copy your decision store.** The other
+   two indexes fold from their own log; this one would have to span the
+   executive log AND DecisionService (SQLite). Rather than mirror
+   decision state — which queries better and drifts — it stores
+   decision_id references and resolves status live through
+   DecisionService. A test proves no executive module writes
+   decisions.db, creates a decision, or records a decision event.
+4. **Six readiness dimensions, never one score, and a decision-readiness
+   that is YES/NO.** A single number would hide which dimension is
+   missing, and which is missing is the actionable part. Financial
+   readiness is UNAVAILABLE unless you declare a budget — this repository
+   holds no money data and will not invent one. Decision-readiness is
+   not a confidence: you get "no — the experiment has not run and nobody
+   owns it", which you can act on, rather than "0.62", which you cannot.
+5. **Every recommendation carries alternatives, and declining is an
+   answer.** Never approve/reject — always an option set, each option
+   with benefits, costs, risks, unknowns, dependencies, and a declared
+   reversibility (Type 1 vs Type 2). "No recommendation" is a
+   first-class outcome with a stated gap and a review date. When you
+   override — choose B where the recorded preference was A — both
+   survive, immutably, for later prediction scoring. And every
+   recommendation traces to a terminal state, where rejected and
+   deferred are legitimate terminals; declining is never a dead end.
+
+**Two design decisions I made explicitly (your §5 in the prompt).**
+
+- **`growth.result_labelled` — left unclosed, deliberately.** It is in
+  the company-event taxonomy with producer `growth_platform`, but no
+  T018 path emits it. I did NOT wire it this session: the executive
+  consumer does not need it (it consumes `decision.resolved`, which has
+  a real producer, and reads accepted proposals from T020 directly), so
+  closing it would be scope I do not need. It remains a clean, small
+  T018 follow-up. Recorded rather than silently depended on.
+- **No `product.proposal_ready` event either.** T020's bars anticipated
+  one "if a real consumer exists (T021 will be one)". But adding it means
+  modifying a closed taxonomy and T020's service, and the proposal
+  intake I need is already deterministic and idempotent through
+  `intake_from_accepted_proposals`, which reads the Product subsystem
+  directly — the same discipline the CRM path used in T020. Adding the
+  event stays a clean follow-up when a second consumer justifies it.
+
+**Housekeeping done:** the Research agent (T019) registry entry, flagged
+outstanding in the loop-19 handoff, is now written in `docs/AGENTS.md`
+alongside the new Executive entry.
+
+## Previous handoff (loop 19, 2026-07-21) — Product Strategy & Roadmap Intelligence V1 BUILT
 
 *Suite at close: **1308 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.

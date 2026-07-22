@@ -28,6 +28,7 @@ corrected.
 | Research contract (six layers + Evidence Index + stances) | `src/intent_engine/research/records.py` (architecture: `docs/COMPANY_OS.md` P12) |
 | Growth contract (experiment envelope + labels + namespaces) | `src/intent_engine/growth/records.py` (architecture: `docs/COMPANY_OS.md` P7) |
 | Product contract (problem/opportunity/proposal/spec + scoring + walls) | `src/intent_engine/product/records.py` (architecture: `docs/COMPANY_OS.md` Part 13) |
+| Executive contract (candidate/context/package + conflict taxonomy + readiness + walls) | `src/intent_engine/executive/records.py` (architecture: `docs/COMPANY_OS.md` Part 15) |
 | Agent registry | `docs/AGENTS.md` |
 | Tooling decisions (NOW / LATER / NEVER) | `docs/TOOLS.md` |
 | Honest claim surface / positioning | `docs/POSITIONING.md`, `docs/CAPABILITY_BOUNDARIES.md` |

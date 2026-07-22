@@ -3446,3 +3446,104 @@ TERMINAL state rather than a completed chain, so a recommendation the
 founder declines is not a violation; and the executive portfolio reads
 T020's existing hierarchy rather than standing up a second, conflicting
 one.
+
+---
+
+## Loop 20 (2026-07-21) — T021: Executive Decision Intelligence V1 BUILT
+
+Commits `029f714` / `c6f89b9` / `775dee8` / `0324e1c` / `b0730d3` /
+`3fe77db` / `c384a37` / `4553cbf` + docs. Canonical contract:
+`src/intent_engine/executive/records.py`. Suite 1308 → 1420 (112 new).
+
+**What this subsystem is.** The third agent, and the first that reasons
+ACROSS the whole company. It answers a triage question — given everything
+we know, what decision deserves the founder's attention next? — so it owns
+exactly one thing (decision candidates), the primary artifact is a queue,
+and a decision package is what opening a queued candidate yields. This
+completes the layering: Evidence (what is known) → Opportunities (what
+could be built) → Decisions (what deserves attention next), three indexes
+with identical properties.
+
+**The reframe that shaped it.** The T021 bars written when T020 closed
+were synthesis-shaped (produce a good package). The actual question is
+triage (rank which decision surfaces first). An agent that writes
+excellent packages nobody reads in the right order has failed the
+question. The bars were amended before this build, and the build followed
+the amended bars — queue.py is deliberately a separate module from
+packages.py so the triage/synthesis split stays structural.
+
+**The load-bearing design decision, and why the mirror was rejected.** The
+Evidence and Opportunity Indexes are reproducible because they fold only
+their own subsystem's rows. Decision state lives in DecisionService
+(SQLite). Mirroring it into the executive log would query better and
+materialize a copy that drifts the moment a decision event is recorded
+without passing through the executive layer. So the Decision Index stores
+decision_id REFERENCES and resolves through DecisionService at read time —
+the shape T020 uses for evidence references — and stays reproducible from
+its own log. A source-inspection test proves no executive module writes
+decisions.db, creates a decision, or records a decision event.
+
+**Six things the build settled.**
+
+1. **Expiry is a changed input, not a clock.** A decision expires when a
+   load-bearing input changed underneath it, derived from context input
+   fingerprints. A test advances as_of by a year against unchanged
+   fingerprints and nothing expires; changing one fingerprint expires it
+   and names the input. A timer would manufacture urgency, which is the
+   opposite of this subsystem's job.
+2. **The Decision Context does three jobs with one mechanism.** It
+   fingerprints every load-bearing input, so recent_changes (which input
+   moved), expiry (an input moved), and replay (same inputs rebuild the
+   same context) all fall out of the same data. It is what lets a later
+   layer answer "why is this in my queue today when it was not
+   yesterday?".
+3. **Conflicts are typed and stated, never averaged.** A test parses the
+   conflicts module and proves the only division is the seconds-to-days
+   unit conversion in staleness detection — there is no code path that
+   blends two conflicting inputs. staleness_conflict is distinct from
+   timeline_conflict, each arising from a different fact.
+4. **Six readiness dimensions with no composite.** A single number hides
+   which dimension is missing, and which is missing is the actionable
+   part. decision_readiness is a YES/NO with reasons, not a confidence.
+   Financial readiness is structurally UNAVAILABLE without a human budget
+   declaration.
+5. **Traceability checks for dead ends, not completion.** The new standing
+   invariant is "every recommendation traces to a TERMINAL state" — and
+   rejected and deferred are legitimate terminals. A hard chain would make
+   a declined recommendation a violation, the same distortion T020 removed
+   with deferred/merged_into. The golden path deliberately rejects a
+   second package to prove the invariant still holds.
+6. **The one recursive forbidden-field scan is shared.** The model
+   boundary and the readiness no-shaping wall both call the same scan in
+   records.py — the T020 lesson (two shallow checks let a nested field
+   slip past) applied from the start.
+
+**Two decisions recorded rather than drifted into (park-don't-improvise):**
+`growth.result_labelled` still has no producer and I did not wire it — the
+consumer uses decision.resolved (real producer) and reads accepted
+proposals directly — and no `product.proposal_ready` event was invented,
+because adding it means modifying a closed taxonomy and T020's service for
+intake that is already available deterministically. Both are clean
+follow-ups when a second consumer justifies them.
+
+**A test states why readiness ≠ scoring.** T020's scoring and T021's
+readiness both exist; a test asserts in prose that they are not
+duplication — different subjects (a proposal's worth vs a decision's
+readiness), different inputs, different outputs, neither importing the
+other — so a T025 audit does not flag the pair.
+
+**Deliberately NOT built:** autonomous execution of any kind;
+agent-created Decision Records; a second Evidence Index, Opportunity
+Index, citation model, metric engine, decision store, scoring
+implementation, or portfolio hierarchy.
+
+**Housekeeping:** the Research agent (T019) registry entry, outstanding
+since loop 18, is now written in docs/AGENTS.md.
+
+Queue: T022 — AgentOS Shared Kernel, extracted FROM three production
+agents (Research, Product, Executive). Extraction, not design: an
+abstraction enters the kernel because three implementations already
+contain it. The store discipline, the index contract, the folded-state
+pattern, the human wall, the model boundary, the snapshot shape, the
+consumer/checkpoint pattern, the language wall, the debt vocabulary, and
+the conflict taxonomy are the named candidates.
