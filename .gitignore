@@ -55,3 +55,7 @@ data/research.jsonl.lock
 # T020 runtime product log (append-only data, not source)
 data/product.jsonl
 data/product.jsonl.lock
+
+# T021 runtime executive log (append-only data, not source)
+data/executive.jsonl
+data/executive.jsonl.lock
