@@ -3765,3 +3765,34 @@ through an evidence-backed, approval-gated Creative Strategy Loop —
 internal, product-specific, proposal-first, still human-disposed. A human
 begins V2.0; the nightly loop does not (`pick_next_runnable` returns None
 and the boundary holds).
+
+## Loop 24 (2026-07-23) — Human review of T023.5; V1.0.1 inserted; V2.0 refined (docs only)
+
+Human review of the T023.5 close: **9.8/10, no architectural changes
+requested** — "the architecture has earned the right to become stable."
+Two roadmap decisions recorded, no code touched:
+
+1. **V1.0.1 — Launch Readiness & Product Polish** inserted between T023.5
+   and V2.0 (**NEEDS HUMAN START**). Polish only — landing copy/UX,
+   deployment (server/hosting/HTTPS/auth), browser E2E, shareable reports,
+   performance, accessibility, responsive/mobile, analytics verification,
+   onboarding/first-user friction, deployment docs, production config.
+   Walls: no new intelligence, agents, marketing features, execution,
+   autonomy, or rewrites. On completion V1.0 becomes **PRODUCT COMPLETE /
+   DEPLOYABLE / READY FOR EARLY USERS** and is **frozen** (bug fixes only).
+   Prompt: `docs/V101_LAUNCH_READINESS_PROMPT.md`.
+
+2. **V2.0 — Founder Growth Studio** refined: not "build a marketing
+   system" but **orchestrate the already-built subsystems (Marketing,
+   Growth, Research, Analytics, CRM, Personal AI, AgentOS) around one
+   client — Founder Intelligence itself**. Creative Strategy Loop is the
+   centerpiece; append-only growth memory; morning-brief completion gate;
+   proposal-first, approval-gated; starts only after V1.0.1 freezes V1.
+   Prompt: `docs/V2_GROWTH_STUDIO_PROMPT.md`.
+
+Also this loop: recovered the loop-23 close — the docs commit interrupted
+by the session limit was landed as `fcb359f` (stale `.git/index.lock`
+cleared; guard green twice; 1533 passed / 0 failed; frozen-foundation and
+mechanisms diffs empty vs `2056fd4`; §49 completion gate all green).
+
+Suite: unchanged, 1533 passing. Docs-only loop.

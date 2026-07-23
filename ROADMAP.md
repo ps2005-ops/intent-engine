@@ -1323,7 +1323,24 @@ before T023 changes; everything after T023 is reframed.***
   workspace and the public intelligence experience that let a human trust
   and use that reasoning. **Everything through T023.5 is V1.0.**
 
-- **V2.0 — Founder Growth Studio** — **Status: NEEDS HUMAN START.**
+- **V1.0.1 — Launch Readiness & Product Polish** — **Status: NEEDS HUMAN
+  START.** Inserted by human review (2026-07-23) between T023.5 and V2.0.
+  Mission: **make V1 feel like software someone would happily pay for
+  tomorrow** — polish only, no new capabilities. Scope: landing copy/UX
+  polish; deployment (server, hosting, HTTPS, auth); browser E2E tests;
+  shareable reports; performance; accessibility audit; responsive/mobile;
+  analytics verification; onboarding and first-user friction; deployment
+  documentation; production configuration. **Walls: no new intelligence, no
+  new agents, no marketing features, no execution, no autonomy, no
+  architecture rewrites.** Completion gate: deployable, responsive,
+  browser-tested, auth working, onboarding complete, reports polished,
+  production config documented, launch checklist complete — then V1.0 is
+  marked **PRODUCT COMPLETE / DEPLOYABLE / READY FOR EARLY USERS** and
+  **frozen** (bug fixes only thereafter). Session prompt:
+  `docs/V101_LAUNCH_READINESS_PROMPT.md`.
+
+- **V2.0 — Founder Growth Studio** — **Status: NEEDS HUMAN START (after
+  V1.0.1).**
   Mission: **reuse and repurpose the existing Marketing and Growth
   foundations to market and grow the Founder Intelligence product itself**
   through an evidence-backed, approval-gated Creative Strategy Loop
@@ -1335,7 +1352,15 @@ before T023 changes; everything after T023 is reframed.***
   and approval-gated**; it does NOT merge with V2.5 external action, and it
   does not expose Marketing/Growth as customer features. It may consume the
   product events T023.5 already records; it must not build the execution
-  loop itself. Do not auto-start it — a human begins V2.0.
+  loop itself. Do not auto-start it — a human begins V2.0, and only after
+  V1.0.1 freezes V1. Refined by human review (2026-07-23): the only truly
+  new work is **orchestration around one client** — V2.0 reuses Marketing,
+  Growth, Research, Analytics, CRM, Personal AI, and AgentOS rather than
+  building anything new; the Creative Strategy Loop is the centerpiece, an
+  append-only growth memory records hypotheses/experiments/lessons (no
+  silent overwrites), and the completion gate is a morning brief of
+  evidence-backed growth observations and ready-for-review experiments.
+  Session prompt: `docs/V2_GROWTH_STUDIO_PROMPT.md`.
 
 - **V2.5 — Execution Layer**: approval-based actions — the first time the
   system may act on the world, and only through explicit per-item human
