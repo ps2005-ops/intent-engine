@@ -96,7 +96,13 @@ class FounderIntelligenceService:
                      subject_type="run", subject_id=run_id,
                      payload={"input": company_input.as_dict(),
                               "consent": consent_record(company_input)},
-                     idempotency_key=f"run-create:{run_id}")
+                     # BUG FIX (V1.0.1, justified): this key must equal the
+                     # key `_stable_id` looks up ("run:{domain}:{as_of}"),
+                     # or a retry mints a fresh run_id and duplicates the
+                     # run — violating the documented idempotent-retry
+                     # contract. Discovered by the web layer's cross-user
+                     # isolation test.
+                     idempotency_key=f"run:{domain}:{as_of}")
         self._transition(run_id, domain, VALIDATING)
 
         # identity
