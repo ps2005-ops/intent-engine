@@ -59,3 +59,7 @@ data/product.jsonl.lock
 # T021 runtime executive log (append-only data, not source)
 data/executive.jsonl
 data/executive.jsonl.lock
+
+# T023 runtime workspace log (append-only data, not source)
+data/personal.jsonl
+data/personal.jsonl.lock
