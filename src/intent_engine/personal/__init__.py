@@ -36,3 +36,17 @@ from intent_engine.personal.state import (  # noqa: F401
 from intent_engine.personal.router import (  # noqa: F401
     INTENTS, classify, resolve_subsystems, supported_capabilities,
 )
+from intent_engine.personal.briefing import (  # noqa: F401
+    assemble_brief, investigation_candidate,
+)
+from intent_engine.personal.conversation import (  # noqa: F401
+    ClaimSet, answer, build_claim_set, challenge_assumption, validate_narrative,
+)
+from intent_engine.personal.explain import (  # noqa: F401
+    explain_claim, explain_decision,
+)
+from intent_engine.personal.reports import (  # noqa: F401
+    ALL_PROFILES, IMPLEMENTED_PROFILES, assemble_report,
+)
+from intent_engine.personal.service import PersonalService  # noqa: F401
+from intent_engine.personal.snapshots import capture_snapshot  # noqa: F401

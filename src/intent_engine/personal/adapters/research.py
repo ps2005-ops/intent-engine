@@ -62,7 +62,7 @@ class ResearchAdapter(Adapter):
                                       "no research package is recorded yet")]
         return claims
 
-    def research_debt(self) -> list:
+    def read_research_debt(self) -> list:
         """Open research debt across packages, for investigation candidates.
         The debt is exactly what the research package reported."""
         if not self.available:
