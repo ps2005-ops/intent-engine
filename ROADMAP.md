@@ -1112,60 +1112,148 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   of each shape" is enforced in one place rather than re-proven in each
   agent.
 
-## T023 — Personal AI Layer (founder-facing, no autonomous authority)
+## T023 — Personal AI Workspace (the first founder-facing product)
 
 - **Status**: RUNNABLE
 - **Priority**: 1. **Size**: XL.
-- **Scope**: a **founder-facing workspace built on AgentOS**. It is the
-  layer the founder actually sits in front of — briefings, strategic
-  conversation, memory-aware assistance, decision navigation, portfolio
-  review, contextual planning — and it composes the existing agents and
-  subsystems through the shared kernel (T022). It **orchestrates**
-  Research, Product, Executive, CRM, Marketing, Growth, Analytics, and
-  Knowledge; it **owns none of their data** and holds **no autonomous
-  authority**. Read-heavy, with explicitly approved write surfaces only.
+- **Renamed 2026-07-21** from "Personal AI Layer". "Layer" is
+  architecture; "Workspace" is a product — and this is the first
+  founder-facing product, not another backend subsystem. Nothing before
+  T023 changes: T019–T022 are stable, boring, and complete. The product
+  evolves on top of them; the backend does not get rewritten because the
+  product vision moved.
+- **Mission**: turn AgentOS into a **believable executive partner** — the
+  environment where a human *experiences* the reasoning the operating
+  system can now produce. Not autonomy. Not marketing. Not execution.
+  **Trust.** At the end of T023 the founder can sit down and spend a real
+  hour working entirely inside the workspace.
+- **Philosophy — conductor, never analyst**: the Personal AI owns
+  conversation, context, and orchestration. It owns **zero business
+  intelligence of its own.** Every fact, score, conflict, and conclusion
+  comes from an existing agent; the workspace never invents knowledge, it
+  asks the appropriate agent and merges the answers into one narrative. No
+  agent ever talks directly to another — everything routes through the
+  kernel.
+- **The Personal AI owns**: conversations, memory, workspace state,
+  sessions, personalization, briefings, orchestration, explanations,
+  routing, citations, task management, and context assembly. It owns
+  **no** domain reasoning.
 - **Source**: `docs/COMPANY_OS.md` Part 9 (Personal AI as the
-  orchestrator that learns the *why*) and the revised agent sequence —
-  built AFTER the kernel so it composes one substrate rather than
-  four bespoke ones.
+  orchestrator that learns the *why*), built AFTER the kernel so it
+  composes one substrate rather than four bespoke ones.
 - **Files in scope**: new `src/intent_engine/personal/`, tests. It READS
   every subsystem's public surface and the three agent indexes through
-  the kernel; it WRITES only its own append-only store (a workspace log:
-  the founder's questions, the briefings it assembled, the items it
-  surfaced) — and even that store records the founder's session, never an
-  operational fact owned elsewhere.
-- **Definition of done (bars)**: (a) **canonical contract + append-only
-  store + folded state**, built on the kernel's `AppendOnlyStore` (it
-  subclasses, it does not reimplement); (b) **briefings are assembled,
-  not authored** — a briefing is a deterministic composition of what the
-  subsystems already report (the executive health dashboard, the
-  portfolio rollup, pending reviews, open decision/research/spec debt),
-  every line resolving by reference to the subsystem that owns it, and a
-  gap named rather than filled; (c) **memory-aware assistance** — it
-  reads the three agent indexes (Evidence, Opportunity, Decision) through
-  the kernel and answers lineage questions ("why is this in my queue")
-  from them, never rebuilding a fourth memory; (d) **no operational
-  data ownership** — asserted by source inspection that it writes no
-  other subsystem's store and creates no decision, proposal, experiment,
-  candidate, or campaign; (e) **no autonomous authority** — every write
-  to another subsystem goes through that subsystem's existing human wall;
-  the Personal AI may DRAFT and SURFACE, and a person disposes, asserted
-  by test that it exposes no execute / approve / promote / schedule
-  surface; (f) **model boundary + language wall inherited from the
-  kernel** — a model may draft briefing prose only, behind the injectable
-  client, and may never emit a reference, an identifier, a score, or a
-  decision id; (g) **reproducible workspace snapshots** and a replay-safe
-  read; (h) a **reads-only CLI**; **0 live model calls and no network in
-  the suite**; offline suite green + EXIT=0.
-- **Walls**: founder-facing, orchestration-only; owns no operational
-  data; no autonomous authority; every cross-subsystem write goes through
-  an existing human wall; reuse the kernel and the three indexes rather
-  than building a fourth memory; frozen library and prompts untouched; 0
-  network.
-- **Repository invariants**: the standing section binds, now enforced
-  through the kernel — the Personal AI subclasses `AppendOnlyStore`, uses
-  the shared language wall and model boundary, and adds no second copy of
-  any kernel shape.
+  the kernel (T022); it WRITES only its own append-only workspace log —
+  the founder's questions, the briefings it assembled, the investigations
+  it opened, the findings it pinned — and even that records the session,
+  never an operational fact owned elsewhere.
+- **Definition of done (bars)**:
+  (a) **workspace foundation** — canonical contract, append-only store,
+  and folded session state, built on the kernel's `AppendOnlyStore`
+  (subclassed, not reimplemented); the language wall and model boundary
+  are inherited from the kernel.
+  (b) **the morning brief is assembled, not authored** — a deterministic
+  composition of what the subsystems already report: research highlights,
+  executive decisions, risks, open questions, and **recommended
+  investigations** (not recommendations — investigations, the thing a
+  founder acts on). Every line resolves by reference to the subsystem that
+  owns it, and a gap is named rather than filled.
+  (c) **conversation is the heart** — the founder asks questions ("why are
+  we losing confidence?", "show the evidence", "what should I investigate
+  next?", "challenge this assumption", "draft a board update") and every
+  answer is composed from the agents and **cites its source agent**.
+  Nothing is invented; a claim with no source agent is not produced.
+  (d) **explainability, end to end** — any conclusion expands into
+  Finding → Evidence → Confidence → Reasoning → **Source Agent** →
+  **Replay ID**, so the founder can always see why the workspace believes
+  something and reproduce it. This is a defining product characteristic,
+  not a debug feature.
+  (e) **workspace memory** — projects, open investigations, goals,
+  questions, pinned findings, conversations, and reports. It references
+  AgentOS; it **never copies operational data** into its own store,
+  asserted by source inspection.
+  (f) **executive reports** — daily / weekly / monthly / board / investor
+  / hiring / product / research, each assembled entirely from existing
+  agents, each line cited, each reproducible.
+  (g) **cross-agent orchestration** — the workspace can ask Research →
+  Product → Executive → Analytics → Knowledge and merge the answers into
+  one narrative; no agent talks to another, everything routes through the
+  kernel, asserted by source inspection.
+  (h) **human authority, bounded** — the workspace may summarize,
+  prioritize, explain, organize, and **draft**. It may **not** publish,
+  email, modify business state, or execute any external action — asserted
+  by test that it exposes no publish / send / execute / modify surface.
+  Every cross-subsystem write goes through that subsystem's existing human
+  wall.
+  (i) **reproducible workspace snapshots**, a replay-safe read, and a
+  **reads-only CLI**; **0 live model calls and no network in the suite**;
+  offline suite green + EXIT=0.
+- **Explicitly deferred to T023.5 (not in T023)**: entering an arbitrary
+  company name + website; the public intelligence pass; the packaged
+  Executive Brief / Proof of Understanding; any growth action; any
+  publish. T023 is the *internal* founder workspace; T023.5 is where it
+  becomes a public product.
+- **Completion test (the hour)**: the founder can ask strategic questions,
+  retrieve company knowledge, inspect executive decisions, review
+  research, generate reports, build investigations, receive a morning
+  briefing, and understand *why* the AI believes something — entirely
+  inside the workspace. The founder cannot yet onboard an arbitrary
+  company, generate the packaged Executive Brief, execute growth, or
+  publish. Those are intentionally deferred.
+- **Walls**: founder-facing, orchestration-only; owns no operational data
+  and no business intelligence; no autonomous authority; every
+  cross-subsystem write goes through an existing human wall; reuse the
+  kernel and the three indexes rather than building a fourth memory;
+  frozen library and prompts untouched; 0 network.
+- **Repository invariants**: the standing section binds, enforced through
+  the kernel — the workspace subclasses `AppendOnlyStore`, uses the shared
+  language wall and model boundary, and adds no second copy of any kernel
+  shape.
+
+---
+
+## The version roadmap (T023.5 onward — product expansion, not prerequisites)
+
+*Rationale (2026-07-21): T001–T023.5 is the engineering journey to the
+first sellable product. Everything after is expansion of capabilities, not
+a prerequisite for launch. So numbering switches from tasks to product
+versions at T023.5 — it communicates, internally and externally, that the
+platform is complete enough to sell and the rest is growth. **Nothing
+before T023 changes; everything after T023 is reframed.***
+
+- **T023.5 — Founder Intelligence Experience** *(the commercial milestone;
+  NEEDS-SPEC until its bars are written)*. Where the workspace becomes a
+  public SaaS: a CEO enters a **company name + website**, the system runs a
+  **public intelligence pass**, and presents (1) **Proof of Understanding**
+  — company profile, business model, customer segments, competitor
+  landscape, each with confidence and evidence; (2) **Executive
+  Perspective** — perceived strengths, blind spots, where to spend
+  executive attention, assumptions we'd investigate, what surprised us,
+  questions we'd ask leadership, executive confidence, and *what we don't
+  believe yet*; (3) **Conversation** — challenge any conclusion, show
+  evidence, explore alternatives, generate board reports. Built on T023;
+  every conclusion still cites its source agent and replay id. This closes
+  **V1.0**.
+
+- **V1.0 — Company Intelligence Platform** *(T001 → T023.5)*: the first
+  sellable product. The operating system that reasons, plus the founder
+  workspace and the public intelligence experience that let a human trust
+  and use that reasoning. **Everything through T023.5 is V1.0.**
+
+- **V2.0 — Founder Growth Studio**: planning + the Creative Strategy Loop
+  on top of V1.0. Still proposal-first; still human-disposed.
+
+- **V2.5 — Execution Layer**: approval-based actions — the first time the
+  system may act on the world, and only through explicit per-item human
+  approval. Everything the earlier walls forbade lives here, behind a
+  gate, never before.
+
+- **V3.0 — Continuous Company Operator**: the standing, always-on
+  composition of every prior layer. The end state, deliberately last.
+
+The through-line is unchanged from T001: propose/recommend-first, the
+human disposes, nothing acts without approval. The version scheme records
+that V1.0 is a **launch boundary**, not just the next task.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
