@@ -3796,3 +3796,50 @@ cleared; guard green twice; 1533 passed / 0 failed; frozen-foundation and
 mechanisms diffs empty vs `2056fd4`; §49 completion gate all green).
 
 Suite: unchanged, 1533 passing. Docs-only loop.
+
+## Loop 25 (2026-07-23) — V1.0.1 Early-Access Readiness BUILT; V2.0 Founder Growth Studio BUILT (human-started, execution-grade prompts)
+
+Human executed both upgraded prompts in order. Suite 1533 → **1599**
+(+33 webapp, +33 growth_studio); two full stability passes; frozen
+T019–T023 + Marketing + Growth trees untouched; mechanisms.json frozen.
+
+**V1.0.1 (`src/intent_engine/webapp/`)** — smallest compatible path
+(stdlib WSGI, no framework): PBKDF2 auth with lockout + expiring
+sessions + CSRF; per-run ownership with cross-user isolation proven;
+share links (256-bit, hash-only storage, revoke/expiry/access-log/
+noindex, guessing proven infeasible); three-environment config (no
+default production secret, debug-off assertion, trusted hosts,
+health/readiness, safe error pages); onboarding + honest degraded
+intake ("live ingestion not yet available" instead of invention); the
+full required journey as in-process E2E plus one loopback socket smoke
+test; docs/DEPLOYMENT.md, docs/V101_GAPS.md (classified), 
+docs/V101_LAUNCH_CHECKLIST.md. Status ladder honestly: PRODUCT READY /
+DEPLOYMENT READY / EARLY-USER READY yes; STAGING/PUBLIC/LAUNCHED no
+(EXTERNAL HUMAN ACTION). One justified foundation fix: FI run-create
+idempotency key now equals the stable-id lookup key (retry duplicated
+runs before; found by the isolation tests; same latent pattern fixed
+in the Studio before commit).
+
+**V2.0 (`src/intent_engine/growth_studio/`)** — orchestration only per
+docs/V2_REUSE_AUDIT.md (campaigns/briefs/drafts/claims/experiment
+science all reused by reference; nothing rebuilt): loop state machine
+(APPROVED_FOR_FUTURE_EXECUTION terminal for system actors), product_id
+locked to founder_intelligence, learning candidates require predefined
+metric/baseline/equal windows/sample≥2/confounders/counterevidence and
+**human acceptance** into append-only memory; metric-gaming walls
+(impressions≠conversions, no metric swap after results, no winner from
+UNAVAILABLE, no causality without randomization) asserted by test;
+channel policy walls; structured daily briefing (11 sections, every
+statement carries evidence+timeframe+confidence, idempotent per date,
+0 model calls); read adapters never rewrite product events (UNAVAILABLE
+stage ≠ 0); inert manifests for V2.5; 14-day fixture proves resistance:
+unequal-exposure winner invalidated, inconclusive experiment named,
+1-sample learning rejected, 1 learning human-accepted, 1 experiment
+awaiting approval. Caveat recorded: fixture-proven, no real early-user
+baseline yet — "continuously improving" is not claimed.
+
+Commits: `e9a8444` (execution-grade prompts), `c5f2c09` (web layer +
+FI fix), `8701b23` (deployment docs/gaps/checklist), `38483aa` (studio
+contracts + reuse audit), `603cf1c` (studio service/fixture/tests),
+docs close. Queue: V2.5 — Execution Layer stays NEEDS HUMAN START; the
+real next step is human deployment + controlled early users.

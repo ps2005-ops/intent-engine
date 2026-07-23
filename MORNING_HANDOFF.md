@@ -19,13 +19,23 @@ is no web server, no auth, and no live ingestion in the repo, and those are
 recorded as launch-blocking gaps (`docs/T0235_DEPENDENCY_GAPS.md`) rather
 than pretended. The honest status table lives in
 `docs/T0235_PRODUCT_ACCEPTANCE.md`. This closes **V1.0 as a built
-product**, not a deployed one. Human review (2026-07-23, verdict 9.8/10,
-no architectural changes) inserted **V1.0.1 — Launch Readiness & Product
-Polish** as the next milestone (polish only, then freeze V1; prompt in
-`docs/V101_LAUNCH_READINESS_PROMPT.md`). **V2.0 — Founder Growth Studio**
-follows it, refined to pure orchestration-around-one-client (prompt in
-`docs/V2_GROWTH_STUDIO_PROMPT.md`). Both are **NEEDS HUMAN START**: a
-human begins them; the nightly loop does not.
+product**, not a deployed one. Human review (2026-07-23, verdict 9.8/10)
+then human-started and completed two further milestones the same day:
+**V1.0.1 — Early-Access Readiness (BUILT)** — stdlib web layer with
+auth/CSRF/isolation/secure sharing/production config, full journey E2E,
+deployment docs, classified gaps; honest ladder: DEPLOYMENT READY yes,
+DEPLOYED/LAUNCHED no (EXTERNAL HUMAN ACTION); V1 now in maintenance
+mode. **V2.0 — Founder Growth Studio (BUILT)** — orchestration-only
+planning studio over the existing Marketing/Growth/Analytics
+foundations: loop state machine with a system-terminal approval state,
+human-only learning acceptance, metric-gaming and channel-policy walls,
+idempotent evidence-carrying daily briefing, inert V2.5 manifests, and
+a 14-day fixture proving false-conclusion resistance. Suite at close:
+**1599 passed** (1533 + 33 webapp + 33 studio), two stability passes.
+Honest caveats: nothing is deployed or launched; the Studio has no real
+early-user baseline yet. Next: a human deploys (docs/DEPLOYMENT.md),
+invites early users, then V2.5 — Execution Layer remains NEEDS HUMAN
+START.
 
 **The five things worth knowing.**
 

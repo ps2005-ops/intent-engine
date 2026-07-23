@@ -1323,24 +1323,44 @@ before T023 changes; everything after T023 is reframed.***
   workspace and the public intelligence experience that let a human trust
   and use that reasoning. **Everything through T023.5 is V1.0.**
 
-- **V1.0.1 — Launch Readiness & Product Polish** — **Status: NEEDS HUMAN
-  START.** Inserted by human review (2026-07-23) between T023.5 and V2.0.
-  Mission: **make V1 feel like software someone would happily pay for
-  tomorrow** — polish only, no new capabilities. Scope: landing copy/UX
-  polish; deployment (server, hosting, HTTPS, auth); browser E2E tests;
-  shareable reports; performance; accessibility audit; responsive/mobile;
-  analytics verification; onboarding and first-user friction; deployment
-  documentation; production configuration. **Walls: no new intelligence, no
-  new agents, no marketing features, no execution, no autonomy, no
-  architecture rewrites.** Completion gate: deployable, responsive,
-  browser-tested, auth working, onboarding complete, reports polished,
-  production config documented, launch checklist complete — then V1.0 is
-  marked **PRODUCT COMPLETE / DEPLOYABLE / READY FOR EARLY USERS** and
-  **frozen** (bug fixes only thereafter). Session prompt:
-  `docs/V101_LAUNCH_READINESS_PROMPT.md`.
+- **V1.0.1 — Early-Access Readiness** — **Status: BUILT (2026-07-23,
+  human-started).** Honest ladder: PRODUCT READY yes; DEPLOYMENT READY
+  yes; STAGING/PUBLICLY DEPLOYED no (EXTERNAL HUMAN ACTION);
+  EARLY-USER READY yes in-repo; LAUNCHED no. Delivered: stdlib WSGI web
+  layer (`intent_engine.webapp`) — auth (PBKDF2, sessions, CSRF,
+  lockout), per-run ownership + cross-user isolation, secure share
+  links (256-bit tokens, hash-only storage, revoke/expiry/access log/
+  noindex), three-environment production config (no default secret,
+  debug-off, trusted hosts, health/readiness), onboarding, honest
+  degraded intake for unsupported live ingestion, full required-journey
+  E2E + socket smoke, deployment docs + classified gap register
+  (`docs/V101_GAPS.md`, `docs/V101_LAUNCH_CHECKLIST.md`,
+  `docs/DEPLOYMENT.md`). One justified maintenance-mode foundation fix:
+  the FI idempotent-retry key. V1 is now in **maintenance mode**
+  (bug/security/reliability/accessibility/measured-friction changes
+  only). Originally inserted by human review (2026-07-23).
+  Session prompt (execution-grade): `docs/V101_LAUNCH_READINESS_PROMPT.md`.
 
-- **V2.0 — Founder Growth Studio** — **Status: NEEDS HUMAN START (after
-  V1.0.1).**
+- **V2.0 — Founder Growth Studio** — **Status: BUILT (2026-07-23,
+  human-started), honest caveat below.** Delivered:
+  `intent_engine.growth_studio` — orchestration-only over the existing
+  subsystems per the mandatory reuse audit (`docs/V2_REUSE_AUDIT.md`):
+  Creative-Strategy-Loop state machine (APPROVED_FOR_FUTURE_EXECUTION
+  terminal for the system; only a human/approved source records external
+  publication), single-client boundary (product_id locked to
+  founder_intelligence), learning-acceptance walls (predefined metric,
+  baseline, equal windows, sample sufficiency, confounders,
+  counterevidence, human acceptance only), metric-gaming prohibitions
+  asserted by test, channel policy walls (Reddit/HN/LinkedIn/X/
+  newsletter/PH/SEO), structured daily briefing (idempotent, evidence +
+  timeframe + confidence per statement, 0 model calls deterministic),
+  read adapters over product telemetry (raw events never rewritten),
+  inert V2.5 execution manifests, and the canonical 14-day fixture
+  proving false-conclusion resistance (invalidated winner, inconclusive
+  experiment, rejected learning). **Honest caveat: no real early users
+  exist yet, so the Studio is fixture-proven and must not claim it is
+  "continuously improving" the product until controlled early-user
+  usage establishes a real event baseline.**
   Mission: **reuse and repurpose the existing Marketing and Growth
   foundations to market and grow the Founder Intelligence product itself**
   through an evidence-backed, approval-gated Creative Strategy Loop
