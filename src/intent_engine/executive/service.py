@@ -16,7 +16,8 @@ from __future__ import annotations
 
 import hashlib
 
-from intent_engine.core.decision_ids import new_ulid
+from intent_engine.agentos.identity import stable_id as _kernel_stable_id
+from intent_engine.agentos.model_boundary import model_provenance
 from intent_engine.executive.conflicts import (
     conflict_summary, detect_conflicts,
 )
@@ -103,8 +104,8 @@ class ExecutiveService:
     # Write path
     # =====================================================================
     def _stable_id(self, key: str) -> str:
-        existing = self.store.find_by_idempotency_key(key)
-        return existing.subject_id if existing is not None else new_ulid()
+        # The stable-id helper lives once in the kernel (T022).
+        return _kernel_stable_id(self.store, key)
 
     def _record(self, event_type, *, actor_type, actor_id, source="cli",
                 payload=None, provenance=None, idempotency_key=None,
@@ -579,9 +580,9 @@ class ExecutiveService:
             raise ExecutiveError(f"unknown draft kind: {kind!r}")
         if self.llm_client is None:
             raise ExecutiveError("no model client is configured for drafting")
-        provenance = {"prompt_version": PROMPT_VERSIONS[kind],
-                      "model_version": self.model_version,
-                      "authority": "a candidate; a rule or a person accepts it"}
+        provenance = model_provenance(
+            PROMPT_VERSIONS[kind], self.model_version,
+            authority="a candidate; a rule or a person accepts it")
         try:
             draft = self.llm_client.call_tool(
                 prompt_version=PROMPT_VERSIONS[kind], user_message=context)

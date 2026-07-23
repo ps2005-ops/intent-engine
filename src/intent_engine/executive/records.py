@@ -39,6 +39,10 @@ import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
+from intent_engine.agentos.language_wall import scan_banned_language as _kernel_scan
+from intent_engine.agentos.model_boundary import (
+    find_forbidden_fields as _kernel_forbidden_fields,
+)
 from intent_engine.core.decision_ids import is_ulid, new_ulid
 
 EXECUTIVE_SCHEMA_VERSION = 1
@@ -345,15 +349,9 @@ def now_iso() -> str:
 
 
 def scan_banned_language(text: str) -> list:
-    lowered = (text or "").lower()
-    hits = []
-    for term in BANNED_RECOMMENDATION_LANGUAGE:
-        if " " in term:
-            if term in lowered:
-                hits.append(term)
-        elif re.search(rf"\b{re.escape(term)}\b", lowered):
-            hits.append(term)
-    return sorted(set(hits))
+    # The matcher lives once in the kernel (T022); executive keeps its own
+    # banned-term vocabulary and passes it in.
+    return _kernel_scan(text, BANNED_RECOMMENDATION_LANGUAGE)
 
 
 def assert_recommendation_language(text: str, *, where: str = "text") -> None:
@@ -378,19 +376,12 @@ def assert_no_certainty(text: str, label: str, *, where: str = "text") -> None:
 
 
 def find_forbidden_fields(value, found=None) -> list:
-    """The ONE recursive scan for fields a model or an author may not
-    supply. Nesting is not a loophole. Used by the model boundary and by
+    """Fields a model or an author may not supply, at any nesting depth.
+
+    The recursive scan lives once in the kernel (T022); executive passes
+    its own `MODEL_FORBIDDEN_FIELDS` set. Used by the model boundary and by
     the readiness wall, so there is a single implementation of the rule."""
-    found = [] if found is None else found
-    if isinstance(value, dict):
-        for key, nested in value.items():
-            if key in MODEL_FORBIDDEN_FIELDS:
-                found.append(key)
-            find_forbidden_fields(nested, found)
-    elif isinstance(value, (list, tuple)):
-        for item in value:
-            find_forbidden_fields(item, found)
-    return sorted(set(found))
+    return _kernel_forbidden_fields(value, MODEL_FORBIDDEN_FIELDS)
 
 
 def json_normalize(payload: dict) -> dict:

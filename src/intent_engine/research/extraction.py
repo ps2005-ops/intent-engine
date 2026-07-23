@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import re
 
+from intent_engine.agentos.model_boundary import model_provenance
 from intent_engine.research.records import (
     EVIDENCE_CLASSES, ResearchError, scan_banned_language,
 )
@@ -156,9 +157,9 @@ def extract_candidates(client, source: dict, source_text: str, *,
             rejected.append({"candidate": _safe_echo(candidate),
                              "reason": str(exc)})
     return {"accepted": accepted, "rejected": rejected,
-            "provenance": {"prompt_version": prompt_version,
-                           "model_version": model_version,
-                           "extraction_module": "research.extraction"},
+            "provenance": model_provenance(
+                prompt_version, model_version,
+                extraction_module="research.extraction"),
             "usage": {"candidates_returned": len(candidates),
                       "accepted": len(accepted), "rejected": len(rejected)}}
 

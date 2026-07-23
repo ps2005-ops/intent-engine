@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+from intent_engine.agentos.identity import stable_id as _kernel_stable_id
 from intent_engine.core.decision_ids import new_ulid
 from intent_engine.research.extraction import (
     ExtractionRejected, extract_candidates,
@@ -54,8 +55,8 @@ class ResearchService:
 
     # --- write path -----------------------------------------------------------
     def _stable_id(self, key: str) -> str:
-        existing = self.store.find_by_idempotency_key(key)
-        return existing.subject_id if existing is not None else new_ulid()
+        # The stable-id helper lives once in the kernel (T022).
+        return _kernel_stable_id(self.store, key)
 
     def _record(self, request_id, event_type, *, actor_type, actor_id,
                 source="cli", payload=None, provenance=None, version=None,

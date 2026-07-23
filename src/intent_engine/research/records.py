@@ -32,6 +32,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
+from intent_engine.agentos.language_wall import scan_banned_language as _kernel_scan
 from intent_engine.core.decision_ids import is_ulid, new_ulid
 
 RESEARCH_SCHEMA_VERSION = 1
@@ -151,15 +152,9 @@ def now_iso() -> str:
 
 
 def scan_banned_language(text: str) -> list:
-    lowered = (text or "").lower()
-    hits = []
-    for term in BANNED_RESEARCH_LANGUAGE:
-        if " " in term:
-            if term in lowered:
-                hits.append(term)
-        elif re.search(rf"\b{re.escape(term)}\b", lowered):
-            hits.append(term)
-    return sorted(set(hits))
+    # The word-boundary + phrase matcher lives once in the kernel (T022);
+    # research keeps its own banned-term vocabulary and passes it in.
+    return _kernel_scan(text, BANNED_RESEARCH_LANGUAGE)
 
 
 def assert_research_language(text: str, *, where: str = "text") -> None:
