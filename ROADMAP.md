@@ -1024,7 +1024,30 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T022 — AgentOS Shared Kernel (extracted, not designed)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits 3105125, 02e5a67) — an EXTRACTION
+  session, not a feature session. `src/intent_engine/agentos/` holds the
+  infrastructure the three agents were reimplementing in parallel,
+  lifted once: `AppendOnlyStore` (the flock / fsync / fingerprinted-
+  idempotency / parse-cache discipline three stores held byte-identical
+  copies of — the three agent stores now subclass it and keep only their
+  domain query methods, 338 → 123 lines of store code), `stable_id`, the
+  `scan_banned_language` word-boundary + phrase matcher (vocabulary
+  passed in), `model_provenance` and the recursive `find_forbidden_fields`
+  scan, the Store / Index / Consumer / Snapshot / Replayable protocols
+  (structural, no forced inheritance), the agent registry, the
+  Read/Write/Model/Publish/Human-only permission vocabulary, and
+  read-only telemetry/budgeting. **No behavioural change** — the full
+  suite passed byte-for-byte identical before and after (1421 → 1448,
+  the +27 being kernel tests only). **No new abstraction invented** — a
+  test proves no domain concept (scoring, readiness, conflicts, any debt,
+  either portfolio, any graph, the Decision Context) entered the kernel,
+  and the kernel imports no domain module. Intentionally left local, and
+  recorded: research's source-anchored model wall, each agent's
+  model-boundary exception subclass, and the T013–T018 subsystem stores
+  (events, crm, knowledge, marketing, growth — out of the three-agent
+  scope, some with genuine variations, not disturbed under the
+  zero-regression rule). AgentOS Shared Kernel V1: BUILT. New autonomous
+  authority: NOT BUILT — the kernel is plumbing, not an actor.
 - **Priority**: 1. **Size**: XL.
 - **Scope**: the shared foundation, extracted FROM three production
   agents — Research (T019), Product (T020), Executive (T021) — and
@@ -1088,6 +1111,61 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
   the kernel's own contract — after T022, "one canonical implementation
   of each shape" is enforced in one place rather than re-proven in each
   agent.
+
+## T023 — Personal AI Layer (founder-facing, no autonomous authority)
+
+- **Status**: RUNNABLE
+- **Priority**: 1. **Size**: XL.
+- **Scope**: a **founder-facing workspace built on AgentOS**. It is the
+  layer the founder actually sits in front of — briefings, strategic
+  conversation, memory-aware assistance, decision navigation, portfolio
+  review, contextual planning — and it composes the existing agents and
+  subsystems through the shared kernel (T022). It **orchestrates**
+  Research, Product, Executive, CRM, Marketing, Growth, Analytics, and
+  Knowledge; it **owns none of their data** and holds **no autonomous
+  authority**. Read-heavy, with explicitly approved write surfaces only.
+- **Source**: `docs/COMPANY_OS.md` Part 9 (Personal AI as the
+  orchestrator that learns the *why*) and the revised agent sequence —
+  built AFTER the kernel so it composes one substrate rather than
+  four bespoke ones.
+- **Files in scope**: new `src/intent_engine/personal/`, tests. It READS
+  every subsystem's public surface and the three agent indexes through
+  the kernel; it WRITES only its own append-only store (a workspace log:
+  the founder's questions, the briefings it assembled, the items it
+  surfaced) — and even that store records the founder's session, never an
+  operational fact owned elsewhere.
+- **Definition of done (bars)**: (a) **canonical contract + append-only
+  store + folded state**, built on the kernel's `AppendOnlyStore` (it
+  subclasses, it does not reimplement); (b) **briefings are assembled,
+  not authored** — a briefing is a deterministic composition of what the
+  subsystems already report (the executive health dashboard, the
+  portfolio rollup, pending reviews, open decision/research/spec debt),
+  every line resolving by reference to the subsystem that owns it, and a
+  gap named rather than filled; (c) **memory-aware assistance** — it
+  reads the three agent indexes (Evidence, Opportunity, Decision) through
+  the kernel and answers lineage questions ("why is this in my queue")
+  from them, never rebuilding a fourth memory; (d) **no operational
+  data ownership** — asserted by source inspection that it writes no
+  other subsystem's store and creates no decision, proposal, experiment,
+  candidate, or campaign; (e) **no autonomous authority** — every write
+  to another subsystem goes through that subsystem's existing human wall;
+  the Personal AI may DRAFT and SURFACE, and a person disposes, asserted
+  by test that it exposes no execute / approve / promote / schedule
+  surface; (f) **model boundary + language wall inherited from the
+  kernel** — a model may draft briefing prose only, behind the injectable
+  client, and may never emit a reference, an identifier, a score, or a
+  decision id; (g) **reproducible workspace snapshots** and a replay-safe
+  read; (h) a **reads-only CLI**; **0 live model calls and no network in
+  the suite**; offline suite green + EXIT=0.
+- **Walls**: founder-facing, orchestration-only; owns no operational
+  data; no autonomous authority; every cross-subsystem write goes through
+  an existing human wall; reuse the kernel and the three indexes rather
+  than building a fourth memory; frozen library and prompts untouched; 0
+  network.
+- **Repository invariants**: the standing section binds, now enforced
+  through the kernel — the Personal AI subclasses `AppendOnlyStore`, uses
+  the shared language wall and model boundary, and adds no second copy of
+  any kernel shape.
 
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 

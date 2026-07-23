@@ -29,6 +29,7 @@ corrected.
 | Growth contract (experiment envelope + labels + namespaces) | `src/intent_engine/growth/records.py` (architecture: `docs/COMPANY_OS.md` P7) |
 | Product contract (problem/opportunity/proposal/spec + scoring + walls) | `src/intent_engine/product/records.py` (architecture: `docs/COMPANY_OS.md` Part 13) |
 | Executive contract (candidate/context/package + conflict taxonomy + readiness + walls) | `src/intent_engine/executive/records.py` (architecture: `docs/COMPANY_OS.md` Part 15) |
+| AgentOS shared kernel (append-only, language wall, model boundary, contracts, registry) | `src/intent_engine/agentos/__init__.py` (architecture: `docs/COMPANY_OS.md` Part 2; extraction audit: `docs/AGENTOS_EXTRACTION_REPORT.md`) |
 | Agent registry | `docs/AGENTS.md` |
 | Tooling decisions (NOW / LATER / NEVER) | `docs/TOOLS.md` |
 | Honest claim surface / positioning | `docs/POSITIONING.md`, `docs/CAPABILITY_BOUNDARIES.md` |

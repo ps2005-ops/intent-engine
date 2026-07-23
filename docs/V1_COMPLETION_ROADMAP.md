@@ -329,10 +329,16 @@ queue of decision candidates, a typed conflict taxonomy that never
 averages, six independent readiness dimensions, mandatory alternative
 decisions, founder override, expiry from a changed input rather than a
 clock, and traceability to a terminal state; canonical contract in
-`src/intent_engine/executive/records.py`). AgentOS extraction (next:
-`ROADMAP.md` T022), Personal AI, public APIs: **NOT YET BUILT**. Roadmap
-writing by an agent, product execution, autonomous decisions, scheduling,
-and ticketing: **NOT BUILT, and out of scope by design**.*
+`src/intent_engine/executive/records.py`).
+**AgentOS Shared Kernel V1 is now also BUILT** (T022, commits 3105125 /
+02e5a67 — the append-only store, language wall, model boundary, contracts,
+registry, permissions, and telemetry extracted from the three production
+agents with zero behavioural change and no new abstraction; audit in
+`docs/AGENTOS_EXTRACTION_REPORT.md`). Personal AI (next: `ROADMAP.md`
+T023), public APIs: **NOT YET BUILT**. Roadmap writing by an agent,
+product execution, autonomous decisions, scheduling, ticketing, and any
+new autonomous authority in the kernel: **NOT BUILT, and out of scope by
+design**.*
 
 *Revised agent sequence (2026-07-21). The infrastructure phase is
 complete; what remains is composing these subsystems into agents. The
@@ -357,11 +363,13 @@ T021 — Executive Decision Intelligence     BUILT. Decision Index is the
                                            each. Owns candidates, never
                                            decisions. No autonomous
                                            execution.
-T022 — AgentOS Shared Kernel               extracted FROM three production
-                                           agents, not designed ahead of them:
-                                           orchestration, memory, budgeting,
-                                           lifecycle, replay, permissions,
-                                           telemetry, agent registry.
+T022 — AgentOS Shared Kernel               BUILT. Extracted FROM three
+                                           production agents, not designed
+                                           ahead of them: the append-only
+                                           store, language wall, model
+                                           boundary, contracts, registry,
+                                           permissions, telemetry. Zero
+                                           behavioural change.
 T023 — Personal AI Layer                   founder workspace on AgentOS.
                                            Briefings, strategic conversation,
                                            portfolio navigation, decision

@@ -75,13 +75,14 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     # T001 completed 2026-07-15 via the real nightly_agent.sh rehearsal
     # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34);
     # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec);
-    # T010-T021 (Decision Record + wiring; report 2A/2B; Company Event
+    # T010-T022 (Decision Record + wiring; report 2A/2B; Company Event
     # System; CRM; analytics; knowledge promotion; marketing C3-C8;
     # growth platform; research & evidence; product strategy & roadmap;
-    # executive decision intelligence) completed 2026-07-20/21. The
-    # current queue is T022 (AgentOS Shared Kernel, extraction-only).
-    # NEEDS-SPEC items are still never auto-promoted.
-    assert runnable_ids == {"T022"}
-    # The nightly loop must pick T022 (the only RUNNABLE task), never a
+    # executive decision intelligence; AgentOS shared kernel) completed
+    # 2026-07-20/21. The current queue is T023 (Personal AI Layer,
+    # founder-facing, no autonomous authority). NEEDS-SPEC items are
+    # still never auto-promoted.
+    assert runnable_ids == {"T023"}
+    # The nightly loop must pick T023 (the only RUNNABLE task), never a
     # NEEDS-SPEC item.
-    assert pick_next_runnable(tasks) == "T022"
+    assert pick_next_runnable(tasks) == "T023"

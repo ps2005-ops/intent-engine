@@ -3547,3 +3547,72 @@ contain it. The store discipline, the index contract, the folded-state
 pattern, the human wall, the model boundary, the snapshot shape, the
 consumer/checkpoint pattern, the language wall, the debt vocabulary, and
 the conflict taxonomy are the named candidates.
+
+---
+
+## Loop 21 (2026-07-21) — T022: AgentOS Shared Kernel V1 BUILT (extraction)
+
+Commits `3105125` (extract the kernel) / `02e5a67` (migrate the three
+agents; invariants + zero-regression) + docs. Package:
+`src/intent_engine/agentos/`. Audit: `docs/AGENTOS_EXTRACTION_REPORT.md`.
+Suite 1421 → 1448 (+27, all kernel tests; no existing expectation changed).
+
+**Why this was an extraction session, not a feature session.** With three
+production agents (Research, Product, Executive) complete, the dangerous
+move is to "generalize" too early and invent a framework the agents then
+have to bend to. The rule held throughout: three implementations before
+one abstraction. Nothing entered the kernel that did not already exist
+byte-for-byte in all three agents.
+
+**What was extracted (the duplication that was actually there):**
+
+- The append-only store discipline — flock, fsync, fingerprinted
+  idempotency, loud corruption, the (mtime_ns,size) parse cache — held in
+  three byte-identical copies. Now one `AppendOnlyStore`; the three agent
+  stores subclass it and keep only their domain query methods. Agent store
+  code 338 → 123 lines, ~215 lines of triplicated infrastructure gone.
+- `scan_banned_language` (the word-boundary + phrase matcher), the
+  recursive `find_forbidden_fields` scan (product + executive),
+  `_stable_id`, and the model-provenance dict shape.
+- The Store/Index/Consumer/Snapshot/Replayable contracts as typing
+  Protocols — structural, no forced inheritance, so a conformance test
+  enforces them at zero behavioural cost.
+- The agent registry, the permission vocabulary, and read-only
+  telemetry/budgeting — the metadata the T022 brief authorized as new.
+
+**What was intentionally NOT extracted, and recorded:**
+
+- The company-event consumer framework — already shared in `events/`
+  since T013; nothing to extract.
+- The index implementations and snapshot payloads — domain-specific;
+  only their shapes are contracts.
+- Research's model wall — a source-anchored locatability check, a
+  genuinely different and stricter operation than scanning drafted prose
+  for leaked identifiers. Only its provenance shape was shared.
+- Each agent's model-boundary exception — stays a subclass of its own
+  agent error so catchability is unchanged.
+- The T013-T018 subsystem stores (events, crm, knowledge, marketing,
+  growth) — out of the three-agent scope, some with genuine variations
+  (checkpoints, namespacing), stable code the zero-regression rule says
+  not to disturb. A clean separate follow-up, not done here.
+- All domain intelligence (scoring, readiness, conflicts, debt,
+  portfolios, graphs, Decision Context) — forbidden from the kernel, and
+  a test fails if any appears there.
+
+**The zero-regression proof.** The full suite passed 1421 before and 1448
+after, the +27 being only the kernel tests; no existing test changed its
+expectation. A store rebuilds byte-identically through the kernel; every
+T019/T020/T021 end-to-end (replay, snapshot, lineage, CLI) passes
+unchanged. Public APIs: none changed — the corruption errors now subclass
+the kernel's `CorruptLogError`, which is itself a `RuntimeError`, so every
+existing `except` still catches.
+
+**A design principle reinforced:** the kernel is infrastructure, not
+intelligence. It changed how the three agents are built and nothing about
+what they do. That is the line that keeps a shared kernel from becoming a
+second place where behaviour lives.
+
+Queue: T023 — Personal AI Layer, a founder-facing workspace built on
+AgentOS. It orchestrates the agents and subsystems through the kernel,
+owns no operational data, and holds no autonomous authority — read-heavy,
+with explicitly approved write surfaces only.

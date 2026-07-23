@@ -204,6 +204,27 @@ plus `docs/AGENTS.md` (the registry). AgentOS is the act of naming those
 two as a reusable kernel and generalizing them from `intent-engine` to
 every repo.
 
+**Status update (T022, BUILT 2026-07-21).** The kernel below is no longer
+only the autonomy protocol plus the registry — it is now also a concrete
+code package, `src/intent_engine/agentos/`, **extracted from three
+production agents** (Research T019, Product T020, Executive T021) rather
+than designed ahead of them. It owns the append-only store discipline
+(one `AppendOnlyStore` the three agent stores subclass), the language
+wall, the model boundary (provenance + the recursive forbidden-field
+scan), the Store/Index/Consumer/Snapshot/Replayable protocols, the agent
+registry, the permission vocabulary, and read-only telemetry/budgeting. It
+owns **no domain intelligence** — scoring, readiness, conflicts, debt,
+portfolios, graphs, and the Decision Context all stay in their agents, and
+a test enforces that none entered the kernel. The extraction removed
+~250 lines of triplicated infrastructure with **zero behavioural change**
+(the full suite passed byte-for-byte identical, 1421 → 1448, the +27 being
+kernel tests only). The audit trail is
+`docs/AGENTOS_EXTRACTION_REPORT.md`; the canonical contract surface is
+`src/intent_engine/agentos/__init__.py`. The governing rule was
+**extraction, not invention**: three implementations before one
+abstraction, and nothing anticipated for a fourth agent that does not yet
+exist.
+
 ### 2A. The kernel (the twelve shared services)
 
 Every agent inherits these. Each is a real mechanism today, not a

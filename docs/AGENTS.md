@@ -283,6 +283,20 @@ vendor accounts, no publishing surface.
 
 ---
 
+## The shared kernel (AgentOS, T022 — BUILT)
+
+The three subsystem agents above (Research §6, Product §5, Executive §7)
+no longer each own their infrastructure. As of T022 they subclass and
+delegate to **`src/intent_engine/agentos/`**, the shared kernel extracted
+from the three of them: one append-only store discipline, one language
+wall, one model boundary, one stable-id helper, the Store/Index/Consumer/
+Snapshot/Replayable protocols, the agent registry, and the permission
+vocabulary. The kernel holds **no domain intelligence** and **no
+autonomous authority** — it is plumbing, not an actor. Every agent
+registered in `agentos/registry.py` is propose/recommend-only, and the
+no-autonomous-authority posture is asserted at import. See
+`docs/AGENTOS_EXTRACTION_REPORT.md` for the extraction audit.
+
 ## Cross-agent notes
 
 - Every agent's `.claude/skills/` provisioning happens in per-agent
@@ -291,3 +305,6 @@ vendor accounts, no publishing surface.
   that actually needs it.
 - No agent may create vendor accounts, run OAuth flows, or provision API
   keys — Phase-0 unlock actions (TOOLS.md) are human-only, every time.
+- No agent — and not the kernel — holds autonomous authority. The kernel
+  records the propose/recommend-only posture; it adds no capability an
+  agent did not already have.

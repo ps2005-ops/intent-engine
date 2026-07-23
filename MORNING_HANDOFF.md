@@ -1,4 +1,58 @@
-# MORNING HANDOFF — loop 20 (2026-07-21) — Executive Decision Intelligence V1 BUILT
+# MORNING HANDOFF — loop 21 (2026-07-21) — AgentOS Shared Kernel V1 BUILT (extraction)
+
+*Suite at close: **1448 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-21 commits: `3105125` (extract the kernel), `02e5a67` (migrate the
+three agents onto it; invariants + zero-regression) + docs. **AgentOS
+Shared Kernel V1: BUILT.** 27 new tests, all kernel; not one existing
+test changed its expectation.*
+
+**This was an extraction session, not a feature session — on purpose.**
+
+You now have three production agents (Research, Product, Executive). T022
+was the moment most projects wreck their architecture by "generalizing"
+too early. The rule I held: **three implementations before one
+abstraction.** Nothing entered `src/intent_engine/agentos/` that did not
+already exist, byte-for-byte, in all three agents.
+
+**The four things worth knowing.**
+
+1. **The kernel is real code now, extracted not designed.**
+   `agentos/append_only.py` holds the flock/fsync/idempotency/parse-cache
+   store discipline the three agents each carried an identical copy of —
+   the three agent stores now subclass it and keep only their domain query
+   methods. Same for the language wall, the model boundary (provenance +
+   the recursive forbidden-field scan), and the stable-id helper. Agent
+   store code went from 338 lines to 123; about ~250 lines of triplicated
+   infrastructure are gone.
+2. **Zero behavioural change, and I mean zero.** The full suite passed
+   1421 before and 1448 after — and the +27 are only the new kernel tests.
+   No existing test changed its expectation (the one exception is the
+   `test_pick_next_task` queue marker, `{T022}` → `{T023}`, which moves
+   once per session by design). A test rebuilds a store through the kernel
+   and asserts byte-identical replay.
+3. **Nothing domain-specific entered the kernel, and a test enforces it.**
+   Scoring, the six readiness dimensions, the conflict taxonomy, every
+   debt vocabulary, both portfolios, every graph, and the Decision Context
+   all stayed in their agents. `test_domain_concepts_never_entered_the_kernel`
+   fails if any of them appears in `agentos/`, and the kernel imports no
+   research/product/executive/growth/crm/marketing/knowledge module.
+4. **Two honest scope calls, both recorded.** Research's model wall is a
+   different, stricter, source-anchored check (a claim must be locatable in
+   its registered source), so only its provenance shape was shared — the
+   wall itself stayed local. And the older T013-T018 stores (events, crm,
+   knowledge, marketing, growth) were NOT migrated: they predate the agent
+   pattern, some carry genuine variations (the event bus's checkpoints,
+   growth's namespacing), and disturbing stable code would risk the
+   zero-regression rule for no in-scope benefit. Migrating them is a clean,
+   separate follow-up — deliberately not done here.
+
+**The audit trail you asked for** is `docs/AGENTOS_EXTRACTION_REPORT.md`:
+the shape-by-shape extraction table, what was removed, what was
+intentionally left local and why, which public APIs changed (none), and
+which tests prove behaviour is identical.
+
+## Previous handoff (loop 20, 2026-07-21) — Executive Decision Intelligence V1 BUILT
 
 *Suite at close: **1420 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.
