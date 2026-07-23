@@ -67,3 +67,6 @@ data/personal.jsonl.lock
 # T023.5 runtime founder-intelligence log (append-only data, not source)
 data/founder_intelligence.jsonl
 data/founder_intelligence.jsonl.lock
+
+.env
+.env.production
