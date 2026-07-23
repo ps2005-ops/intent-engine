@@ -1,4 +1,61 @@
-# MORNING HANDOFF — loop 22 (2026-07-21) — Personal AI Workspace V1 BUILT (V1.0 boundary)
+# MORNING HANDOFF — loop 23 (2026-07-21) — Founder Intelligence Experience PRODUCT BUILT (V1.0 closed as a *built* product)
+
+*Suite at close: **1533 passed**, 0 failed, EXIT=0 explicitly checked
+before every commit. Loop-23 commits: `94b4176` (contract + run lifecycle +
+identity + intake + SSRF/secret walls + approved-only ingestion + demo
+fixture), `189ec38` (Proof of Understanding, evidence analytics, full
+perspective, conversation, service, snapshots, stdlib HTML presentation,
+CLI, 42 tests) + docs. **Founder Intelligence Experience (T023.5): PRODUCT
+BUILT.** 42 new tests, 0 model calls, 0 network, no live company data.*
+
+**What this milestone is, and what it deliberately is not.** T023.5 is the
+first **public-facing product**: a founder enters a company name + website
+and receives an evidence-backed executive experience that earns trust in
+one order — **prove knowledge → reveal perspective → invite investigation →
+converse**. It is built entirely on the frozen T019–T023 foundation and
+reuses the T023 provenance contract unchanged. It is **PRODUCT BUILT** and
+**CONTROLLED-DEMO READY**; it is **not DEPLOYED and not LAUNCHED** — there
+is no web server, no auth, and no live ingestion in the repo, and those are
+recorded as launch-blocking gaps (`docs/T0235_DEPENDENCY_GAPS.md`) rather
+than pretended. The honest status table lives in
+`docs/T0235_PRODUCT_ACCEPTANCE.md`. This closes **V1.0 as a built
+product**, not a deployed one. The next milestone, **V2.0 — Founder Growth
+Studio**, is **NEEDS HUMAN START**: a human begins it; the nightly loop
+does not.
+
+**The five things worth knowing.**
+
+1. **Trust is structural, not stylistic.** No perspective section can render
+   before Proof of Understanding — `assert_trust_sequence` enforces the
+   order. The product proves it knows the company before it offers an
+   opinion, and every present insight resolves to a SourceClaim → SourceRef.
+2. **It invents nothing, and refuses loudly.** No company master score
+   anywhere; competitors are OUT_OF_SCOPE (never fabricated); an invented
+   statistic is rejected by the closed ClaimSet; unsupported causality is
+   rejected; a wrong-company identity **stops** rather than merges. Ten
+   refusals are each proven by test. "No result is superior to an invented
+   result."
+3. **It computes zero business intelligence and holds zero action surface.**
+   Like the workspace, it presents what the agents already produced; the
+   presentation layer computes nothing. There is no publish / email / launch
+   path — a test asserts the surface does not exist.
+4. **Security walls run before storage.** SSRF URLs (non-HTTP, localhost,
+   loopback, link-local, private IPs, malformed) and secrets (API keys,
+   tokens, private keys, credentials, card data) are rejected before
+   anything is written; runs are company-scoped so nothing leaks across
+   companies.
+5. **Zero regression, frozen trees byte-untouched.** Suite 1491 → 1533, the
+   +42 being only the new founder-intelligence tests. The T019–T023 source
+   trees are unchanged since the T0235 baseline (`2056fd4`) — the product
+   composed the foundation, it did not touch it.
+
+**One honest scope call:** the repo has no web framework, so presentation
+is a dependency-free stdlib HTML renderer (the disciplined "lightest
+option"), and the public deploy path — server, auth, live SSRF-safe fetcher,
+signed share tokens, real-browser acceptance — is recorded as gaps, not
+built. PRODUCT BUILT ≠ DEPLOYMENT READY ≠ PUBLICLY DEPLOYED ≠ LAUNCHED.
+
+## Previous handoff (loop 22, 2026-07-21) — Personal AI Workspace V1 BUILT (V1.0 boundary)
 
 *Suite at close: **1491 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.

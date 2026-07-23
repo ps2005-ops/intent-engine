@@ -314,6 +314,43 @@ before storage; 0 live model calls in the suite; 0 network.
 publishing surface. The public onboarding pass (company name + website) is
 deferred to T023.5.
 
+## 9. Founder Intelligence Experience (T023.5 — the first public-facing product, PRODUCT BUILT)
+
+**Repo**: `~/intent-engine`, `src/intent_engine/founder_intelligence/` only.
+
+**Purpose**: the public experience where a founder enters a **company name
++ website** and receives an evidence-backed executive read that earns trust
+in one order — **prove knowledge → reveal perspective → invite
+investigation → converse**. It is a presentation-and-trust layer over the
+Personal AI Workspace's provenance chain; like the workspace it owns
+**zero business intelligence** and invents nothing.
+
+**Posture: experience layer, never analyst; no action surface.** It
+presents Proof of Understanding, then perspective (market view, blind
+spots, assumptions, executive attention, confidence, skepticism, leadership
+questions, opportunities), then a run-scoped conversation. No perspective
+section may precede Proof of Understanding (`assert_trust_sequence`).
+
+**May touch**: its own company/run-scoped event store and nothing else. It
+reuses the T023 `SourceRef`/`SourceClaim` contract unchanged and reads only
+what the workspace/agents already produced.
+
+**Hard walls** (each asserted by test): no company master score anywhere;
+no invented competitor (OUT_OF_SCOPE), statistic (closed ClaimSet rejects
+it), or causality; disagreement / staleness / unavailability preserved, not
+averaged or hidden; SSRF URLs and secrets rejected before storage; a
+wrong-company identity **stops**, never merges; runs are company-scoped
+(no cross-company leakage); no publish / email / launch surface exists;
+0 model calls, 0 network in the suite; **no live company data used**.
+
+**Deployment status (separate facts)**: PRODUCT BUILT — yes; CONTROLLED
+DEMO READY — yes; DEPLOYMENT READY / PUBLICLY DEPLOYED / LAUNCHED — no. See
+`docs/T0235_PRODUCT_ACCEPTANCE.md` and `docs/T0235_DEPENDENCY_GAPS.md`.
+
+**Authorized skills/tools**: none beyond stdlib. No web framework, no live
+fetcher, no auth — those are recorded launch-blocking gaps, not silent
+omissions.
+
 ## The shared kernel (AgentOS, T022 — BUILT)
 
 The three subsystem agents above (Research §6, Product §5, Executive §7)

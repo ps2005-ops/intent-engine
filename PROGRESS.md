@@ -3716,3 +3716,52 @@ Executive Perspective (including what we don't believe yet), and
 Conversation — reusing T023's exact provenance contract, still
 proposal-first, still human-disposed. This closes V1.0 — the first sellable
 product.
+
+## Loop 23 (2026-07-21) — T023.5: Founder Intelligence Experience PRODUCT BUILT (V1.0 closed as a built product)
+
+Commits `94b4176` / `189ec38` + docs. Canonical contract:
+`src/intent_engine/founder_intelligence/records.py`. Suite 1491 → 1533
+(+42, all founder-intelligence tests; no existing expectation changed —
+the numbered queue was already terminated at T023). 0 model calls, 0
+network, **no live company data used**. Baseline `2056fd4`.
+
+**The first public-facing product.** A founder enters a company name +
+website and receives an evidence-backed executive experience that earns
+trust in one structural order — **prove knowledge → reveal perspective →
+invite investigation → converse**. No perspective section may precede
+Proof of Understanding (`assert_trust_sequence`). It is built entirely on
+the frozen T019–T023 foundation, reuses the T023 `SourceRef`/`SourceClaim`
+contract unchanged, computes no business intelligence of its own, and holds
+no action surface.
+
+**What it refuses (each proven by test).** No company master score
+anywhere; competitors OUT_OF_SCOPE (never invented); invented statistic
+rejected by the closed ClaimSet; unsupported causality rejected;
+wrong-company identity **stops** rather than merges; SSRF URLs and secrets
+rejected before storage; disagreement / staleness / unavailability
+preserved, never averaged or hidden; cross-company isolation asserted; no
+publish / email / launch surface exists. "No result is superior to an
+invented result."
+
+**The honest-status discipline (the point of the milestone).** PRODUCT
+BUILT, DEPLOYMENT READY, PUBLICLY DEPLOYED, and LAUNCHED are recorded as
+**four separate facts** — PRODUCT BUILT: yes; CONTROLLED DEMO READY: yes;
+DEPLOYMENT READY / PUBLICLY DEPLOYED / LAUNCHED: no. The repo has no web
+server, no auth, and no live ingestion, so those are recorded as
+launch-blocking dependency gaps (`docs/T0235_DEPENDENCY_GAPS.md`) rather
+than pretended, and presentation is a dependency-free stdlib HTML renderer
+(the disciplined lightest option). Full status table:
+`docs/T0235_PRODUCT_ACCEPTANCE.md`. This closes **V1.0 as a built
+product**, not a deployed one — a fix-library-worthy distinction: *a
+milestone reports what it did not do as precisely as what it did.*
+
+**Zero regression:** T019–T023 source trees byte-untouched since the
+baseline (asserted by the completion gate's frozen-tree diff); suite
+1491 → 1533, +42 founder-intelligence only.
+
+Queue: **V2.0 — Founder Growth Studio** — **NEEDS HUMAN START.** Reuse the
+existing Marketing/Growth foundations to market and grow *this product*
+through an evidence-backed, approval-gated Creative Strategy Loop —
+internal, product-specific, proposal-first, still human-disposed. A human
+begins V2.0; the nightly loop does not (`pick_next_runnable` returns None
+and the boundary holds).

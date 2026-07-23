@@ -330,7 +330,17 @@ averages, six independent readiness dimensions, mandatory alternative
 decisions, founder override, expiry from a changed input rather than a
 clock, and traceability to a terminal state; canonical contract in
 `src/intent_engine/executive/records.py`).
-**Personal AI Workspace V1 is now also BUILT** (T023, commits f59120f /
+**Founder Intelligence Experience is now also PRODUCT BUILT** (T023.5,
+commits 94b4176 / 189ec38 — the first public-facing product: a founder
+enters a company name + website and receives an evidence-backed executive
+experience in the trust sequence, every conclusion cited to a source
+artifact + replay id, SSRF/secret walls, no invented statistic/competitor/
+causality, no company master score; a stdlib HTML presentation and a
+deterministic demo. PRODUCT BUILT / CONTROLLED DEMO READY; DEPLOYMENT
+READY, PUBLICLY DEPLOYED, and LAUNCHED are separate facts and are all NO —
+see `docs/T0235_PRODUCT_ACCEPTANCE.md`. This closes **V1.0 as a built
+product**, not a deployed one). **Personal AI Workspace V1 was BUILT**
+just before (T023, commits f59120f /
 764e12c — the first founder-facing product: a conductor that owns
 conversation, memory, and orchestration and zero business intelligence,
 citing every answer to a source artifact + replay id, degrading honestly on

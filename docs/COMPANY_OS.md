@@ -595,6 +595,30 @@ claim validation → cited answer* — not *question → model writes a plausibl
 answer → scan it*. The public onboarding experience (a CEO enters a company
 name + website) is deliberately deferred to T023.5, which closes V1.0.
 
+**Status update — the public experience is now PRODUCT BUILT (T023.5).**
+`src/intent_engine/founder_intelligence/` is the first public-facing
+product built directly on this workspace's provenance chain: a founder
+enters a company name + website and receives an evidence-backed executive
+experience in one trust-earning order — prove knowledge (Proof of
+Understanding) → reveal perspective (market view, blind spots, assumptions,
+attention, skepticism, questions) → invite investigation → converse
+(structurally enforced; no perspective precedes understanding). It reuses
+the T023 `SourceClaim`/`SourceRef` contract unchanged, computes **no**
+business intelligence of its own, holds **no** action surface, invents no
+competitor and no statistic, asserts no unsupported causality, and has no
+company master score. SSRF/secret walls reject unsafe URLs and credentials
+before storage; a wrong-company identity **stops** rather than merges; runs
+are company-scoped for isolation. Presentation is a stdlib HTML renderer
+(no web framework exists in the repo — the disciplined lightest option),
+accessible (labels, semantic headings, status stated in text). A
+deterministic synthetic demo runs end to end. **Separate facts** (see
+`docs/T0235_PRODUCT_ACCEPTANCE.md`): PRODUCT BUILT — yes; CONTROLLED DEMO
+READY — yes; DEPLOYMENT READY / PUBLICLY DEPLOYED / LAUNCHED — **no** (no
+server, no auth, no live ingestion; gaps in
+`docs/T0235_DEPENDENCY_GAPS.md`). This closes **V1.0 as a built product**,
+not a deployed one, with T019–T023 source trees byte-untouched. The next
+human-started milestone is V2.0 — Founder Growth Studio.
+
 The long-term vision below is the *why* this workspace serves — it should
 **understand why architectural decisions were made, not merely remember
 files** — and T023 realizes the first hour of it.

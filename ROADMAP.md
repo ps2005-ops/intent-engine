@@ -1255,9 +1255,34 @@ platform is complete enough to sell and the rest is growth. **Nothing
 before T023 changes; everything after T023 is reframed.***
 
 - **T023.5 — Founder Intelligence Experience** *(the commercial milestone)*
-  — **Status: RUNNABLE.** Where the workspace becomes a public SaaS: a CEO
-  enters a **company name + website**, the system runs a **public
-  intelligence pass**, and presents (1) **Proof of Understanding** —
+  — **Status: PRODUCT BUILT 2026-07-21** (commits 94b4176, 189ec38).
+  `src/intent_engine/founder_intelligence/` is the first public-facing
+  product: a founder enters a company name + website and receives an
+  evidence-backed executive experience that earns trust in one order —
+  prove knowledge → reveal perspective → invite investigation → converse
+  (enforced structurally; no perspective section precedes Proof of
+  Understanding). It composes the T023 `SourceClaim`/`SourceRef` contract,
+  computes no business intelligence, holds no action surface, invents no
+  competitor and no statistic, asserts no unsupported causality, and
+  preserves disagreement / staleness / unavailability. There is no company
+  master score. Security walls reject SSRF URLs and secrets before storage;
+  a wrong-company identity stops rather than merges; runs are scoped by
+  company for isolation. Presentation is a stdlib HTML renderer (no web
+  framework exists in the repo — the disciplined "lightest option"), with
+  accessibility (labels, semantic headings, status stated in text not
+  colour). A deterministic synthetic demo runs end to end and renders an
+  openable result page. 42 tests, 0 model calls, 0 network, **no live
+  company data used**. **Separate facts (see
+  `docs/T0235_PRODUCT_ACCEPTANCE.md`)**: PRODUCT BUILT — yes; CONTROLLED
+  DEMO READY — yes; DEPLOYMENT READY — **no**; PUBLICLY DEPLOYED — **no**;
+  LAUNCHED — **no** (no server, no auth, no live ingestion — recorded gaps
+  in `docs/T0235_DEPENDENCY_GAPS.md`). This closes **V1.0 as a built
+  product**, not as a deployed one. **Zero regression: T019–T023 source
+  trees byte-untouched.**
+  Original scope (for the record) — Where the workspace becomes a public
+  SaaS: a CEO enters a **company name + website**, the system runs a
+  **public intelligence pass**, and presents (1) **Proof of Understanding**
+  —
   company profile, business model, customer segments, competitor
   landscape, each with confidence and evidence; (2) **Executive
   Perspective** — perceived strengths, blind spots, where to spend
@@ -1298,8 +1323,19 @@ before T023 changes; everything after T023 is reframed.***
   workspace and the public intelligence experience that let a human trust
   and use that reasoning. **Everything through T023.5 is V1.0.**
 
-- **V2.0 — Founder Growth Studio**: planning + the Creative Strategy Loop
-  on top of V1.0. Still proposal-first; still human-disposed.
+- **V2.0 — Founder Growth Studio** — **Status: NEEDS HUMAN START.**
+  Mission: **reuse and repurpose the existing Marketing and Growth
+  foundations to market and grow the Founder Intelligence product itself**
+  through an evidence-backed, approval-gated Creative Strategy Loop
+  (observe product performance → research audience → generate growth
+  hypotheses → creative strategies → channel-specific drafts → human
+  approval → publish through the future execution layer → measure → learn
+  → update growth memory → repeat). Its first and only initial client is
+  this product. V2.0 remains **internal, product-specific, proposal-first,
+  and approval-gated**; it does NOT merge with V2.5 external action, and it
+  does not expose Marketing/Growth as customer features. It may consume the
+  product events T023.5 already records; it must not build the execution
+  loop itself. Do not auto-start it — a human begins V2.0.
 
 - **V2.5 — Execution Layer**: approval-based actions — the first time the
   system may act on the world, and only through explicit per-item human
