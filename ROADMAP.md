@@ -1114,7 +1114,40 @@ The nightly loop picks the lowest `priority` number among `RUNNABLE` tasks.
 
 ## T023 — Personal AI Workspace (the first founder-facing product)
 
-- **Status**: RUNNABLE
+- **Status**: DONE 2026-07-21 (commits f59120f, 764e12c) — the first
+  founder-facing product, built as a **conductor, not an analyst**:
+  `src/intent_engine/personal/` owns conversation, memory, and
+  orchestration, and **zero business intelligence** (a test proves no
+  score / readiness / conflict / metric is computed in `personal/` and no
+  fourth index is built). The canonical chain is structural — domain
+  artifact → `SourceRef` → `SourceClaim` → composition → optional model
+  wording over a **closed ClaimSet** → deterministic claim validation →
+  cited answer — so an answer cites source ARTIFACTS (not merely agents),
+  and a model narrative referencing a claim id outside the ClaimSet is
+  rejected. Read **adapters** are the anti-corruption boundary: each
+  normalizes one subsystem's public reads into `SourceClaim`s and derives
+  / scores / ranks nothing. Disagreement is preserved (SUPPORTED /
+  PARTIALLY_SUPPORTED / CONFLICTED / STALE / UNAVAILABLE / OUT_OF_SCOPE);
+  freshness travels (CURRENT / STALE / HISTORICAL / UNKNOWN, never CURRENT
+  by default). The morning brief is assembled and cited, with structured
+  **investigations** (not imperatives); explainability expands any
+  conclusion into Finding → Evidence → Confidence → Reasoning → Source
+  Agent → Replay ID; three report profiles ship (morning brief, weekly
+  founder review, board update draft), the rest registered-but-deferred. A
+  board update is a **draft** and stays one — the service exposes no
+  publish / send / execute / modify surface, and every cross-subsystem
+  write would go through an existing human wall. Three memory lifecycles
+  are kept apart, and a conversation turn is not durable memory unless the
+  founder pins/saves/opens it; secrets are refused before storage.
+  Snapshots capture source high-watermarks and state replay semantics
+  honestly (deterministic artifacts byte-identical; model prose semantic).
+  The dependency-gap protocol is exercised: competitor intelligence has no
+  owner and degrades to OUT_OF_SCOPE (`docs/T023_DEPENDENCY_GAPS.md`).
+  Canonical contract: `src/intent_engine/personal/records.py`. 43 tests,
+  built against the real T019–T022. **Zero regression: every T019–T022
+  test passed unchanged and those source trees are byte-untouched.**
+  Personal AI Workspace V1: BUILT. Public onboarding / the packaged
+  Executive Brief / any execution: NOT BUILT (T023.5 and later).
 - **Priority**: 1. **Size**: XL.
 - **Renamed 2026-07-21** from "Personal AI Layer". "Layer" is
   architecture; "Workspace" is a product — and this is the first
@@ -1221,19 +1254,44 @@ versions at T023.5 — it communicates, internally and externally, that the
 platform is complete enough to sell and the rest is growth. **Nothing
 before T023 changes; everything after T023 is reframed.***
 
-- **T023.5 — Founder Intelligence Experience** *(the commercial milestone;
-  NEEDS-SPEC until its bars are written)*. Where the workspace becomes a
-  public SaaS: a CEO enters a **company name + website**, the system runs a
-  **public intelligence pass**, and presents (1) **Proof of Understanding**
-  — company profile, business model, customer segments, competitor
+- **T023.5 — Founder Intelligence Experience** *(the commercial milestone)*
+  — **Status: RUNNABLE.** Where the workspace becomes a public SaaS: a CEO
+  enters a **company name + website**, the system runs a **public
+  intelligence pass**, and presents (1) **Proof of Understanding** —
+  company profile, business model, customer segments, competitor
   landscape, each with confidence and evidence; (2) **Executive
   Perspective** — perceived strengths, blind spots, where to spend
   executive attention, assumptions we'd investigate, what surprised us,
   questions we'd ask leadership, executive confidence, and *what we don't
   believe yet*; (3) **Conversation** — challenge any conclusion, show
-  evidence, explore alternatives, generate board reports. Built on T023;
-  every conclusion still cites its source agent and replay id. This closes
-  **V1.0**.
+  evidence, explore alternatives, generate board reports.
+  - **Files in scope**: new `src/intent_engine/founder_experience/` (or an
+    additive `personal/onboarding` surface), tests. It composes T023's
+    workspace and the existing agents; it writes only its own session log.
+  - **Bars**: (a) **the public intelligence pass is founder-gated and
+    additive** — do NOT assume autonomous crawling; the ingestion path is
+    whatever is founder-approved (supplied documents, an approved fetch),
+    and a missing capability is a recorded dependency gap, not a silent
+    scrape; (b) **Proof of Understanding cites evidence** — every profile
+    claim carries a `SourceRef` and a confidence read from an agent, and an
+    unsupported claim is UNAVAILABLE, never invented; competitor
+    intelligence closes dependency gap 1 or is honestly OUT_OF_SCOPE;
+    (c) **Executive Perspective preserves what we DON'T believe** — blind
+    spots, unresolved assumptions, and *what we don't believe yet* are
+    first-class sections, not omitted; disagreement is preserved;
+    (d) **still proposal-first, still human-disposed** — the experience
+    presents and drafts; it decides and executes nothing, asserted by
+    test; (e) **every conclusion still cites its source agent and replay
+    id**, reusing T023's exact answer contract so the public UI and the
+    internal workspace share one provenance model; (f) **onboarding an
+    arbitrary company writes no operational store** — the company's
+    intelligence lives in the experience's own session log as references;
+    (g) reproducible snapshots; a reads-only public surface; **0 live model
+    calls and no network in the suite**; offline suite green + EXIT=0.
+  - **Walls**: founder-gated ingestion only; no autonomous crawling; no
+    execution; presents and drafts; reuse T023's provenance contract and
+    the agents rather than a second intelligence engine; 0 network in the
+    suite. This closes **V1.0**.
 
 - **V1.0 — Company Intelligence Platform** *(T001 → T023.5)*: the first
   sellable product. The operating system that reasons, plus the founder

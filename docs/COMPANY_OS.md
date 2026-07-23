@@ -576,10 +576,28 @@ comes from, never *whether* a human approves it.
 
 ## Part 9 — Personal AI integration (the orchestrator that learns the *why*)
 
-The Personal AI is the long-term orchestrator. The founder's key
-instruction: it should **understand why architectural decisions were made,
-not merely remember files** — it should learn architectural reasoning, so
-future decisions stay consistent.
+**Status: BUILT as the Personal AI Workspace (T023).** Canonical contract:
+`src/intent_engine/personal/records.py`. The first founder-facing product,
+built on the AgentOS kernel — a **conductor, not an analyst**. It owns
+conversation, memory, and orchestration, and **zero business
+intelligence**: every fact comes from an existing agent, read through an
+adapter the workspace owns, and every answer cites source ARTIFACTS (a
+`SourceRef` with a replay id), not merely source agents. Disagreement and
+freshness travel with every claim; the morning brief is assembled and
+cited; explainability expands any conclusion into Finding → Evidence →
+Confidence → Reasoning → Source Agent → Replay ID; a board update is a
+draft and stays one. It may summarize, prioritize (by preserving an
+owner's ordering), explain, organize, and draft — it may not publish,
+email, execute, or modify business state. The chain that makes it
+trustworthy is structural: *domain artifact → SourceRef → SourceClaim →
+composition → optional model wording over a closed ClaimSet → deterministic
+claim validation → cited answer* — not *question → model writes a plausible
+answer → scan it*. The public onboarding experience (a CEO enters a company
+name + website) is deliberately deferred to T023.5, which closes V1.0.
+
+The long-term vision below is the *why* this workspace serves — it should
+**understand why architectural decisions were made, not merely remember
+files** — and T023 realizes the first hour of it.
 
 **How this is made real, using systems that already exist:**
 

@@ -283,6 +283,37 @@ vendor accounts, no publishing surface.
 
 ---
 
+## 8. Personal AI Workspace (T023 — the first founder-facing product)
+
+**Repo**: `~/intent-engine`, `src/intent_engine/personal/` only.
+
+**Purpose**: the environment where the founder experiences the reasoning
+the operating system produces. It owns conversation, memory, sessions,
+briefings, reports, orchestration, explanations, routing, citations, and
+context assembly — and **zero business intelligence**. Every fact comes
+from an existing agent, read through an adapter the workspace owns, and
+every answer cites a source artifact + replay id.
+
+**Posture: conductor, never analyst; draft-only.** It may summarize,
+prioritize (by preserving an owner's ordering), explain, organize, and
+draft. It may not publish, email, execute, or modify business state.
+
+**May touch**: `data/personal.jsonl` (its own session log) and nothing
+else. It READS every subsystem's public surface through
+`personal/adapters/`, and writes no other subsystem's store.
+
+**Hard walls** (each asserted by test): computes no score / readiness /
+conflict / metric and builds no fourth index; exposes no publish / send /
+execute / modify surface; no agent-to-agent call (every hop is an
+adapter); a model may only paraphrase over a closed ClaimSet and may never
+emit a reference, identifier, score, or replay id (an invented claim id is
+rejected); durable memory is a founder-only act; secrets are refused
+before storage; 0 live model calls in the suite; 0 network.
+
+**Authorized skills/tools**: `superpowers` (global). No web access, no
+publishing surface. The public onboarding pass (company name + website) is
+deferred to T023.5.
+
 ## The shared kernel (AgentOS, T022 — BUILT)
 
 The three subsystem agents above (Research §6, Product §5, Executive §7)

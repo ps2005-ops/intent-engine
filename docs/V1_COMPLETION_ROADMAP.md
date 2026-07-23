@@ -330,7 +330,16 @@ averages, six independent readiness dimensions, mandatory alternative
 decisions, founder override, expiry from a changed input rather than a
 clock, and traceability to a terminal state; canonical contract in
 `src/intent_engine/executive/records.py`).
-**AgentOS Shared Kernel V1 is now also BUILT** (T022, commits 3105125 /
+**Personal AI Workspace V1 is now also BUILT** (T023, commits f59120f /
+764e12c — the first founder-facing product: a conductor that owns
+conversation, memory, and orchestration and zero business intelligence,
+citing every answer to a source artifact + replay id, degrading honestly on
+dependency gaps, and holding no autonomous authority; canonical contract in
+`src/intent_engine/personal/records.py`). This reaches the **V1.0 launch
+boundary**: the numbered auto-task queue T001-T023 is complete, and what
+remains (T023.5 Founder Intelligence Experience, then the V-series) is
+human-sequenced product expansion, not a launch prerequisite. **AgentOS
+Shared Kernel V1 was BUILT** just before (T022, commits 3105125 /
 02e5a67 — the append-only store, language wall, model boundary, contracts,
 registry, permissions, and telemetry extracted from the three production
 agents with zero behavioural change and no new abstraction; audit in

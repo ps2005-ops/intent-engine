@@ -1,4 +1,62 @@
-# MORNING HANDOFF — loop 21 (2026-07-21) — AgentOS Shared Kernel V1 BUILT (extraction)
+# MORNING HANDOFF — loop 22 (2026-07-21) — Personal AI Workspace V1 BUILT (V1.0 boundary)
+
+*Suite at close: **1491 passed, 0 failed, 2 skipped, 10 deselected
+(live/networked)**, EXIT=0 explicitly checked before every commit.
+Loop-22 commits: `f59120f` (contract + SourceRef/SourceClaim + store +
+three memory classes + adapters + router), `764e12c` (brief, conversation
+with claim-set model validation, explainability, reports, service,
+snapshots, CLI, founder-usefulness fixture) + docs. **Personal AI
+Workspace V1: BUILT.** 43 new tests, built against the real T019-T022.*
+
+**This is the V1.0 launch boundary.** The numbered auto-task queue
+T001-T023 is complete. What remains — T023.5 (Founder Intelligence
+Experience) and the V-series — is human-sequenced product expansion,
+recorded in the version roadmap as bullets, deliberately NOT `## T0NN`
+headings. `pick_next_runnable` now returns None and the nightly loop stops
+cleanly at the boundary: a commercial milestone is a human decision to
+start, not an unattended overnight run.
+
+**The five things worth knowing.**
+
+1. **It is a conductor, not an analyst — enforced, not just intended.** The
+   workspace owns conversation, memory, and orchestration and ZERO business
+   intelligence. A test proves `personal/` computes no score, readiness,
+   conflict, or metric and builds no fourth index. Every fact comes from an
+   agent, read through an adapter the workspace owns.
+2. **Trust is the product, and provenance is how it's earned.** An answer
+   cites source ARTIFACTS, not merely agents: SourceRef names one artifact
+   with its replay id, snapshot version, as_of, and freshness. The chain is
+   structural — domain artifact -> SourceRef -> SourceClaim -> composition
+   -> optional model wording over a CLOSED ClaimSet -> deterministic claim
+   validation -> cited answer. A model narrative that references a claim id
+   outside the ClaimSet is rejected; the model never writes an identifier
+   or a citation.
+3. **Disagreement and freshness travel; nothing is smoothed.** A CONFLICTED
+   research conclusion stays CONFLICTED in the answer; an UNAVAILABLE metric
+   stays UNAVAILABLE; a stale claim says so. "Summarize competitors" has no
+   owning subsystem and degrades to OUT_OF_SCOPE honestly rather than
+   inventing — the dependency-gap protocol in action
+   (`docs/T023_DEPENDENCY_GAPS.md`).
+4. **It drafts; it does not act.** A board update is a DRAFT and stays one.
+   The service exposes no publish / send / execute / modify surface, and
+   writes no other subsystem's store. Durable memory (goals, pins,
+   investigations) is a founder-only act — a conversation turn does not
+   become durable memory merely because it was said. Secrets are refused
+   before storage.
+5. **Zero regression, and the frozen trees are byte-untouched.** The full
+   suite passed 1448 before and 1491 after, the +43 being only the new
+   personal tests. T019-T022 source trees are unchanged since the session
+   baseline — the workspace composed the backend, it did not touch it.
+
+**Two honest scope calls (your improvements, folded in):** the read
+adapters are anti-corruption boundaries (they normalize and cite; they do
+not derive/score/rank), and snapshots state replay semantics precisely —
+deterministic artifacts replay byte-identically, model prose replays
+semantically only when the NarrativeCandidate or the same fake client is
+reused. Exact conversational reproduction of free-running model prose is
+not promised.
+
+## Previous handoff (loop 21, 2026-07-21) — AgentOS Shared Kernel V1 BUILT (extraction)
 
 *Suite at close: **1448 passed, 0 failed, 2 skipped, 10 deselected
 (live/networked)**, EXIT=0 explicitly checked before every commit.

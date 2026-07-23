@@ -75,14 +75,19 @@ def test_parse_real_roadmap_file_has_the_expected_runnable_tasks():
     # T001 completed 2026-07-15 via the real nightly_agent.sh rehearsal
     # (commit 8e0dbac); T002 completed 2026-07-16 (rename commit b7ecf34);
     # T003 and T004 completed 2026-07-17 (commits 25cb4b5, 5342fec);
-    # T010-T022 (Decision Record + wiring; report 2A/2B; Company Event
+    # T010-T023 (Decision Record + wiring; report 2A/2B; Company Event
     # System; CRM; analytics; knowledge promotion; marketing C3-C8;
     # growth platform; research & evidence; product strategy & roadmap;
-    # executive decision intelligence; AgentOS shared kernel) completed
-    # 2026-07-20/21. The current queue is T023 (Personal AI Layer,
-    # founder-facing, no autonomous authority). NEEDS-SPEC items are
-    # still never auto-promoted.
-    assert runnable_ids == {"T023"}
-    # The nightly loop must pick T023 (the only RUNNABLE task), never a
-    # NEEDS-SPEC item.
-    assert pick_next_runnable(tasks) == "T023"
+    # executive decision intelligence; AgentOS shared kernel; the Personal
+    # AI Workspace) completed 2026-07-20/21. That is the V1.0 launch
+    # boundary: the numbered auto-task queue (T0NN headings) is now
+    # EXHAUSTED. What remains — T023.5 (Founder Intelligence Experience)
+    # and the V-series — are human-sequenced product milestones recorded
+    # in the version roadmap as bullets, deliberately NOT `## T0NN`
+    # headings, because a commercial milestone is a human decision to
+    # start, not an unattended overnight run.
+    assert runnable_ids == set()
+    # The nightly loop has no more auto-runnable task and stops cleanly at
+    # the launch boundary — it never crashes and never guesses at a
+    # NEEDS-SPEC or version-roadmap item.
+    assert pick_next_runnable(tasks) is None

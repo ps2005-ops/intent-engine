@@ -3616,3 +3616,103 @@ Queue: T023 — Personal AI Layer, a founder-facing workspace built on
 AgentOS. It orchestrates the agents and subsystems through the kernel,
 owns no operational data, and holds no autonomous authority — read-heavy,
 with explicitly approved write surfaces only.
+
+---
+
+## Loop 22 (2026-07-21) — T023: Personal AI Workspace V1 BUILT (the V1.0 boundary)
+
+Commits `f59120f` / `764e12c` + docs. Canonical contract:
+`src/intent_engine/personal/records.py`. Suite 1448 → 1491 (+43, all
+personal tests; no existing expectation changed except the pick_next_task
+queue marker, below).
+
+**The first founder-facing product.** T023 is where the operating system —
+complete enough to reason after T019-T022 — gets an environment a human can
+experience. It is a conductor, not an analyst: it owns conversation,
+memory, and orchestration, and zero business intelligence. Every fact comes
+from an existing agent, read through an adapter the workspace owns.
+
+**The reframe the founder made, and why it mattered.** T023 was renamed
+from "Personal AI Layer" to "Personal AI Workspace" — layer is
+architecture, workspace is a product. And the backend was declared frozen
+(reworded honestly to "the T019-T022 intelligence foundation is frozen for
+THIS session; their public contracts are stable dependencies; a missing
+capability is a recorded dependency gap, not a silent implementation"). The
+build touched no frozen tree.
+
+**The canonical chain, made structural.** The reason the workspace can be
+trusted is that it cannot invent:
+
+    domain artifact -> SourceRef -> SourceClaim -> composition ->
+        optional model wording over a CLOSED ClaimSet ->
+        deterministic claim validation -> cited answer
+
+Not: question -> model writes a plausible answer -> scan it for bad fields.
+Deterministic code builds a closed ClaimSet; the model sees only claim ids
+and safe text and returns a NarrativeCandidate referencing claim ids;
+deterministic code validates every id is in the set and attaches the
+SourceRefs itself. An unknown claim id is rejected. A claim cites
+ARTIFACTS, not merely agents — "research conclusion CON-123 at replay R-42"
+is trustworthy where "Research said so" is not.
+
+**Five things the build settled.**
+
+1. **Read adapters as anti-corruption boundaries.** Rather than importing a
+   pile of service modules into the router, each subsystem has a
+   `personal/adapters/` wrapper that normalizes its public reads into
+   SourceClaims. An adapter may normalize field names and absence states;
+   it may not derive, score, rank, reinterpret, or enrich. It is the one
+   replaceable seam when public APIs arrive (T024).
+2. **Disagreement and freshness travel.** Availability is a closed
+   vocabulary (SUPPORTED / PARTIALLY_SUPPORTED / CONFLICTED / STALE /
+   UNAVAILABLE / OUT_OF_SCOPE); composition may improve readability but
+   never erases disagreement. Freshness is CURRENT / STALE / HISTORICAL /
+   UNKNOWN, and UNKNOWN where no timestamp exists — never CURRENT by
+   default. A perfectly cited but old claim is still dangerous, so it says
+   how old.
+3. **The dependency-gap protocol earned its place immediately.** "Summarize
+   competitors" has no owning subsystem — CRM holds prospects, not
+   competitors. The workspace could trivially SOUND authoritative by asking
+   a model; the entire thesis is that it must not. It returns OUT_OF_SCOPE
+   with the reason, and the gap is recorded in
+   `docs/T023_DEPENDENCY_GAPS.md`. The honest refusal is the feature.
+4. **Three memory lifecycles, kept apart.** Ephemeral session, durable
+   founder memory, and generated artifacts. A conversation turn is not
+   durable memory merely because it was said; durable memory is a
+   founder-only act, and the workspace may propose a candidate but not
+   promote it. Secrets are refused before storage.
+5. **It drafts; it does not act.** A board update is a DRAFT and stays one.
+   The service exposes no publish/send/execute/modify surface, asserted by
+   test, and writes no other subsystem's store. Three report profiles ship
+   (morning brief, weekly founder review, board update draft); the rest are
+   registered-but-deferred views that return honestly.
+
+**Two small real fixes during the build:** the imperative-verb wall on
+investigation candidates was wrongly firing on a verbatim quoted research
+question ("Does send time change activation?" contains "change"/"send") —
+resolved by applying the wall only to the workspace's OWN framing and
+carrying the agent's question in a cited `owner_question` field; and the
+research adapter's `research_debt` method was renamed `read_research_debt`
+so it does not collide with the forbidden-token check that guards against
+reimplementing T019's `research_debt`.
+
+**The V1.0 launch boundary.** Marking T023 DONE exhausts the numbered
+auto-task queue. `pick_next_runnable` returns None and the nightly loop
+stops cleanly — T023.5 (Founder Intelligence Experience, the public
+company-name+website intelligence pass) and the V-series are human-
+sequenced product milestones, recorded as version-roadmap bullets rather
+than `## T0NN` headings, because a commercial milestone is a human decision
+to start. `pick_next_task` already returned None on an empty set (no code
+change needed); the real-roadmap test now asserts the boundary.
+
+**Zero regression:** the full suite passed byte-for-byte identical before
+and after (1448 -> 1491, +43 personal only); T019-T022 source trees are
+untouched since the session baseline.
+
+Queue: **T023.5 — Founder Intelligence Experience** (RUNNABLE in the
+version roadmap, human-started). A CEO enters a company name + website; a
+founder-gated public intelligence pass presents Proof of Understanding,
+Executive Perspective (including what we don't believe yet), and
+Conversation — reusing T023's exact provenance contract, still
+proposal-first, still human-disposed. This closes V1.0 — the first sellable
+product.

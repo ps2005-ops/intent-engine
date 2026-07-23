@@ -30,6 +30,7 @@ corrected.
 | Product contract (problem/opportunity/proposal/spec + scoring + walls) | `src/intent_engine/product/records.py` (architecture: `docs/COMPANY_OS.md` Part 13) |
 | Executive contract (candidate/context/package + conflict taxonomy + readiness + walls) | `src/intent_engine/executive/records.py` (architecture: `docs/COMPANY_OS.md` Part 15) |
 | AgentOS shared kernel (append-only, language wall, model boundary, contracts, registry) | `src/intent_engine/agentos/__init__.py` (architecture: `docs/COMPANY_OS.md` Part 2; extraction audit: `docs/AGENTOS_EXTRACTION_REPORT.md`) |
+| Personal AI Workspace contract (SourceRef/SourceClaim + memory classes + walls) | `src/intent_engine/personal/records.py` (architecture: `docs/COMPANY_OS.md` Part 9; dependency gaps: `docs/T023_DEPENDENCY_GAPS.md`) |
 | Agent registry | `docs/AGENTS.md` |
 | Tooling decisions (NOW / LATER / NEVER) | `docs/TOOLS.md` |
 | Honest claim surface / positioning | `docs/POSITIONING.md`, `docs/CAPABILITY_BOUNDARIES.md` |
