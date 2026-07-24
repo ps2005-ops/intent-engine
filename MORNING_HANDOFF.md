@@ -1,4 +1,20 @@
-# MORNING HANDOFF — loop 23 (2026-07-21) — Founder Intelligence Experience PRODUCT BUILT (V1.0 closed as a *built* product)
+# MORNING HANDOFF — loop 26 (2026-07-23) — V1.1 Approved Live Company Analysis BUILT: the product now analyzes REAL companies
+
+*V1.1 (human-started) replaced the synthetic demo as the primary path:
+real-domain intake → bounded discovery → explicit source approval →
+safe retrieval → deterministic real-source claims → the unchanged
+Founder Intelligence composition. Suite **1642 passing**; 3 real
+companies manually accepted over recorded real pages
+(`docs/V11_REAL_COMPANY_ACCEPTANCE.md`); zero model calls; no
+synthetic evidence can enter a real run (hard invariant + test). One
+justified foundation change: the language wall exempts quoted source
+material (`e602838`). NOT deployed, NOT launched. Next human actions:
+deploy (docs/DEPLOYMENT.md), re-run acceptance on live network, analyze
+10–20 companies, concierge validation
+(docs/V11_CONCIERGE_VALIDATION.md). V2.5 stays NEEDS HUMAN START. The
+original loop-23 handoff below is retained for history.*
+
+# (history) MORNING HANDOFF — loop 23 (2026-07-21) — Founder Intelligence Experience PRODUCT BUILT (V1.0 closed as a *built* product)
 
 *Suite at close: **1533 passed**, 0 failed, EXIT=0 explicitly checked
 before every commit. Loop-23 commits: `94b4176` (contract + run lifecycle +

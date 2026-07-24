@@ -70,3 +70,10 @@ data/founder_intelligence.jsonl.lock
 
 .env
 .env.production
+
+# V1.0.1/V1.1 runtime stores (append-only data, not source)
+data/webapp.jsonl
+data/webapp.jsonl.lock
+data/company_ingestion.jsonl
+data/company_ingestion.jsonl.lock
+.venv-deploy/

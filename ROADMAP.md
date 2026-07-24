@@ -1341,6 +1341,32 @@ before T023 changes; everything after T023 is reframed.***
   only). Originally inserted by human review (2026-07-23).
   Session prompt (execution-grade): `docs/V101_LAUNCH_READINESS_PROMPT.md`.
 
+- **V1.1 — Approved Live Company Analysis** — **Status: BUILT
+  (2026-07-23, human-started).** The product now analyzes REAL
+  companies: validated public-domain intake → bounded deterministic
+  discovery (≤20 candidates, no crawling) → explicit immutable source
+  approval (nothing fetched before approval, ≤10 sources) → safe
+  retrieval (SSRF wall + DNS public-address check, manual redirect
+  revalidation, size/time/MIME caps, no cookies/JS, honest failures) →
+  stdlib parsing with staleness → deterministic claims (verbatim-quote
+  verification, real `company_ingestion` SourceRefs, hard
+  no-synthetic-in-real-run invariant) → unchanged Founder Intelligence
+  composition + executive overview + grouped evidence library + pasted
+  external evidence. Zero model calls. New package
+  `src/intent_engine/company_ingestion/`; web flow adds source
+  review/approval/detail routes. One justified narrowly-additive
+  foundation change: the personal language wall exempts quoted source
+  material (`e602838`). Manual acceptance: 3 real companies
+  (plausible.io, usefathom.com, transistor.fm) PASSED over recorded
+  real pages — sandbox egress blocks arbitrary HTTP, so live-network
+  re-run is the first next human action
+  (`docs/V11_REAL_COMPANY_ACCEPTANCE.md`). Statuses: CODE BUILT yes;
+  REAL-DOMAIN ANALYSIS READY yes; STAGING/PUBLICLY
+  DEPLOYED/LAUNCHED no. Gaps: `docs/V11_DEPENDENCY_GAPS.md` (uploads,
+  external-URL approval UI, review platforms, JS pages — none blocking
+  controlled testing). The synthetic Northwind fixture remains for
+  regression/demo only.
+
 - **V2.0 — Founder Growth Studio** — **Status: BUILT (2026-07-23,
   human-started), honest caveat below.** Delivered:
   `intent_engine.growth_studio` — orchestration-only over the existing

@@ -3843,3 +3843,48 @@ FI fix), `8701b23` (deployment docs/gaps/checklist), `38483aa` (studio
 contracts + reuse audit), `603cf1c` (studio service/fixture/tests),
 docs close. Queue: V2.5 — Execution Layer stays NEEDS HUMAN START; the
 real next step is human deployment + controlled early users.
+
+## Loop 26 (2026-07-23) — V1.1: Approved Live Company Analysis BUILT (human-started)
+
+The synthetic demo is no longer the product. A user can now enter a
+real public company domain, review a bounded list of discovered pages,
+explicitly approve the exact source set, and receive a report in which
+**every major claim resolves to real retrieved source material** —
+quotes verified verbatim against stored text, real SourceRefs
+(subsystem `company_ingestion`), and a hard invariant that no synthetic
+`demo_fixture` ref can enter a real run.
+
+Built (`src/intent_engine/company_ingestion/`, stdlib-only, zero model
+calls): records/store (append-only, no-credential persistence);
+validation (T023.5 SSRF wall + embedded credentials, ports, DNS
+public-address checks, apex↔www/https-only redirect policy); bounded
+discovery (≤20 shown, known paths never assumed, fixed transparent
+ranking); safe fetch (manual redirect loop, 2MB/source, 15MB/run, MIME
+allowlist, no cookies/auth/JS, honest 401/403/429/anti-bot
+UNAVAILABLE); parsing (title/meta/headings/visible text, boilerplate
+dedupe, modified-date staleness); pasted evidence (labelled,
+authorized, secret-scanned); claims (direct observation before
+inference, term-frequency language analytics quoted as source material,
+meta-aware divergence blind spots needing two distinct sources,
+UNAVAILABLE never zero); service (idempotent discovery/retrieval/
+failures, immutable owner-checked approvals, restart-safe compose);
+webapp source-review/approve/detail flow with full disclosure text.
+
+Justified foundation change (separate commit `e602838`): the personal
+language wall now exempts QUOTED spans — the T023.5 spec's own "the
+wall must not erase accurate quoted evidence" (real titles contain
+"Best"); unquoted behavior preserved; targeted regression added.
+
+Manual real-company acceptance (docs/V11_REAL_COMPANY_ACCEPTANCE.md):
+plausible.io, usefathom.com, transistor.fm — end-to-end PASS over
+recorded real pages (sandbox egress blocks arbitrary in-process HTTP;
+recorded content is verbatim from the live sites, fetched 2026-07-23
+via the permitted fetcher; no access-control evasion). Two extraction
+defects were found by manual review and fixed in extraction (stopword
+curation; meta-aware divergence), not by rewriting prose.
+
+Suite: 1599 → **1642** (+40 ingestion, +3 language-wall). Frozen trees
+clean except the one documented personal change; mechanisms frozen;
+V2.0 untouched and still non-executing. Next: deploy, re-run acceptance
+live, 10–20 companies, concierge validation
+(docs/V11_CONCIERGE_VALIDATION.md). V2.5 stays NEEDS HUMAN START.

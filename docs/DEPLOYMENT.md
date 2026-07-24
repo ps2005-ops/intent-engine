@@ -20,6 +20,7 @@ WEBAPP_TRUSTED_HOSTS=app.yourdomain.com
 # optional
 WEBAPP_STORE=data/webapp.jsonl
 WEBAPP_FI_STORE=data/founder_intelligence.jsonl
+WEBAPP_CI_STORE=data/company_ingestion.jsonl   # V1.1 real-company runs
 WEBAPP_REGISTRATION_OPEN=0        # early access: admin-created accounts
 ```
 
