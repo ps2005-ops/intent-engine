@@ -33,6 +33,7 @@ class AppConfig:
     registration_open: bool = False        # admin-created accounts by default
     web_store_path: Path = field(default=Path("data/webapp.jsonl"))
     fi_store_path: Path = field(default=Path("data/founder_intelligence.jsonl"))
+    ci_store_path: Path = field(default=Path("data/company_ingestion.jsonl"))
 
     def validate(self) -> None:
         if self.env not in ENVIRONMENTS:
@@ -79,6 +80,8 @@ def from_env(environ=None) -> AppConfig:
                                         "data/webapp.jsonl")),
         fi_store_path=Path(env_map.get("WEBAPP_FI_STORE",
                                        "data/founder_intelligence.jsonl")),
+        ci_store_path=Path(env_map.get("WEBAPP_CI_STORE",
+                                       "data/company_ingestion.jsonl")),
     )
     config.validate()
     return config

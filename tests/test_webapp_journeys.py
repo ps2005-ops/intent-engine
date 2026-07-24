@@ -38,13 +38,19 @@ class Client:
         return self.cookie.split("=", 1)[1] if self.cookie else None
 
 
+def _no_network(url, timeout):
+    raise OSError("test transport: network disabled")
+
+
 @pytest.fixture
 def app(tmp_path):
     clock = {"t": 1000.0}
     config = AppConfig(env="test", secret="s" * 40,
                        web_store_path=tmp_path / "web.jsonl",
-                       fi_store_path=tmp_path / "fi.jsonl")
-    application = WebApp(config, now_fn=lambda: clock["t"])
+                       fi_store_path=tmp_path / "fi.jsonl",
+                       ci_store_path=tmp_path / "ci.jsonl")
+    application = WebApp(config, now_fn=lambda: clock["t"],
+                         transport=_no_network, resolver=False)
     application._clock = clock
     application.auth.create_user("founder@example.com", "password123")
     application.auth.create_user("other@example.com", "password456")
@@ -128,15 +134,23 @@ def test_cross_user_isolation(app):
     assert status.startswith("403")
 
 
-def test_arbitrary_company_is_honestly_degraded(app):
+def test_arbitrary_company_enters_source_approval_flow(app):
+    """V1.1: a real domain now enters bounded discovery + explicit source
+    approval (this test's transport has no network, so discovery degrades
+    honestly to known-path candidates)."""
     c = Client(app)
     csrf = _login(c)
-    status, _, body = c.request(
+    status, headers, _ = c.request(
         "POST", "/analyze",
-        f"consent=on&csrf={csrf}&website=https://real-company.example")
+        f"consent=on&csrf={csrf}&company_name=Real+Co"
+        f"&website=https://real-company.example")
+    assert status.startswith("303")
+    assert headers["Location"].endswith("/sources")
+    status, _, body = c.request("GET", headers["Location"])
     assert status == "200 OK"
-    assert "not yet available" in body
-    assert "synthetic demo" in body               # honest alternative offered
+    assert "pages and evidence you approve" in body
+    assert 'name="cand"' in body                  # known-path candidates
+    assert "I approve retrieval and analysis" in body
 
 
 def test_expired_share_link(app):
