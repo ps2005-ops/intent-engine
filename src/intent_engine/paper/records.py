@@ -29,7 +29,12 @@ from intent_engine.core.decision_ids import new_ulid
 
 PositionStatus = Literal["open", "closed"]
 Direction = Literal["long", "short"]
-ExitReason = Literal["target", "stop", "prediction_resolved", "manual"]
+ExitReason = Literal["target", "stop", "prediction_resolved", "manual",
+                     # the prediction resolved 'unresolvable' — there is no
+                     # market outcome to mark against, so the position is
+                     # voided (flat, excluded from scored performance) rather
+                     # than left stranded open.
+                     "voided"]
 
 
 def _now() -> str:

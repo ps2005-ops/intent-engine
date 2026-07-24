@@ -103,6 +103,82 @@ def test_resolve_is_idempotent(tmp_path):
     assert len(r1["resolved"]) == 1 and r2["resolved"] == []
 
 
+def test_one_bad_symbol_does_not_abort_the_open_batch(tmp_path):
+    """Regression: a single instrument's price gap must not abort the whole
+    daily open. The failure is isolated, persisted, and the batch continues."""
+    _seed(tmp_path, instrument="SPY", decision_id="D1")
+    _seed(tmp_path, instrument="QQQ", decision_id="D2",
+          resolution_rule={"type": "pct_change", "symbol": "QQQ", "op": ">=",
+                           "value": 0.02, "window_days": 30})
+    _seed(tmp_path, instrument="IWM", decision_id="D3",
+          resolution_rule={"type": "pct_change", "symbol": "IWM", "op": ">=",
+                           "value": 0.02, "window_days": 30})
+    mr, _ = _mr(tmp_path)
+    def flaky(sym, _d):
+        if sym == "QQQ":
+            raise RuntimeError("no price for QQQ")
+        return 100.0
+    out = mr.open_paper_from_predictions(as_of=AS_OF, price_at=flaky)
+    assert len(out["opened"]) == 2                 # SPY + IWM, not aborted
+    assert len(out["errors"]) == 1
+    assert any(r["rule"] == "data_error" for r in mr.rejections.read_all())
+
+
+def test_stranded_position_self_heals_and_is_observable(tmp_path):
+    """Regression: if a close fails after the prediction resolved, the
+    position must not be stranded — integrity detects it and the next
+    reconcile heals it."""
+    _seed(tmp_path)
+    mr, _ = _mr(tmp_path)
+    mr.open_paper_from_predictions(as_of=AS_OF, price_at=_price)
+    # resolve succeeds; close price feed is down
+    def down(_s, _d):
+        raise RuntimeError("feed down")
+    r1 = mr.resolve_and_link(as_of=FUTURE,
+                             resolver=lambda p: ResolutionResult("happened", "ok"),
+                             price_at=down)
+    assert r1["resolved"] and not r1["closed_positions"]
+    assert r1["reconcile_errors"]                  # isolated, recorded
+    assert len(mr.paper.store.open_positions()) == 1
+    from intent_engine.runtime.integrity import run_integrity
+    rep = run_integrity(tmp_path)
+    assert not rep["clean"]
+    assert any(i["kind"] == "stranded_open_position" for i in rep["issues"])
+    # next run, feed recovers -> reconcile closes it
+    r2 = mr.resolve_and_link(as_of=FUTURE,
+                             resolver=lambda p: ResolutionResult("happened", "ok"),
+                             price_at=lambda s, d: 105.0)
+    assert len(r2["closed_positions"]) == 1
+    assert mr.paper.store.open_positions() == []
+    assert run_integrity(tmp_path)["clean"]
+
+
+def test_reconcile_is_standalone_and_idempotent(tmp_path):
+    _seed(tmp_path)
+    mr, _ = _mr(tmp_path)
+    mr.open_paper_from_predictions(as_of=AS_OF, price_at=_price)
+    mr.resolve_and_link(as_of=FUTURE,
+                        resolver=lambda p: ResolutionResult("happened", "ok"))
+    # resolved but not closed (no price passed) -> reconcile closes it
+    assert len(mr.paper.store.open_positions()) == 1
+    rec = mr.reconcile_positions(price_at=lambda s, d: 105.0)
+    assert len(rec["closed"]) == 1
+    assert mr.reconcile_positions(price_at=lambda s, d: 105.0)["closed"] == []
+
+
+def test_unresolvable_prediction_voids_open_position(tmp_path):
+    _seed(tmp_path)
+    mr, _ = _mr(tmp_path)
+    mr.open_paper_from_predictions(as_of=AS_OF, price_at=_price)
+    res = mr.resolve_and_link(
+        as_of=FUTURE, resolver=lambda p: ResolutionResult("unresolvable", "no data"))
+    assert mr.paper.store.open_positions() == []       # not stranded
+    m = mr.metrics()
+    assert m.voided_count == 1 and m.win_rate is None  # voided, not scored
+    from intent_engine.runtime.integrity import run_integrity
+    assert run_integrity(tmp_path)["clean"]
+
+
 def test_daily_candidates_use_only_persisted_evidence(tmp_path):
     # 6 resolved losing trades in one regime -> a paper_trade candidate
     _seed(tmp_path)

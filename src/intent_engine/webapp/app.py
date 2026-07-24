@@ -1412,6 +1412,15 @@ class WebApp:
                     if v.get("status") == status and v.get("at")]
             return max(hits)[0] if hits else None
 
+        # the most recent failure, with why + since-when (observability:
+        # answer "what failed / why / since when" without reading source)
+        fails = [(v.get("at"), k, v.get("error")) for k, v in jobs.items()
+                 if v.get("status") == "failed" and v.get("at")]
+        last_failure_detail = None
+        if fails:
+            at, job, err = max(fails)
+            last_failure_detail = {"job": job, "at": at, "error": err}
+
         return {
             "as_of": as_of,
             "version": version_info(),
@@ -1433,6 +1442,7 @@ class WebApp:
                           "status": jobs.get("synthetic-daily", {}).get("status")},
             "scheduler": {"last_success": _last("succeeded"),
                           "last_failure": _last("failed"),
+                          "last_failure_detail": last_failure_detail,
                           "failed_jobs": failed_jobs},
             "pending": {"promotions": pending_promotions,
                         "failures": len(failed_jobs)},
@@ -1492,8 +1502,11 @@ class WebApp:
                     f'jobs {_kv(m["jobs"])}',
                     "a scheduled job that silently stops is the top production "
                     "risk; failures here are persistent, not swallowed",
-                    (f'failed: {st["scheduler"]["failed_jobs"]}'
-                     if st["scheduler"]["failed_jobs"] else None))
+                    ((lambda d: f'{_e(d["job"])} failed at {_e(str(d["at"]))}: '
+                      f'{_e(str(d["error"]))} — re-run the job (idempotent) or '
+                      'see docs/RUNTIME_DEPLOYMENT.md recovery runbook')(
+                        st["scheduler"]["last_failure_detail"])
+                     if st["scheduler"]["last_failure_detail"] else None))
             + _card("Market learning",
                     f'{m["predictions"]} predictions, {m["resolved"]} resolved; '
                     f'mean Brier {_e(str(m["mean_brier"]))}; '

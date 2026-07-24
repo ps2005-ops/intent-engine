@@ -57,6 +57,7 @@ class PortfolioMetrics(NamedTuple):
     sortino: Optional[float]
     max_drawdown: Optional[float]      # fraction, >= 0
     regime_attribution: Dict[str, float]   # regime -> total pnl
+    voided_count: int = 0              # closed but excluded from scoring
 
 
 def _mean(xs: List[float]) -> float:
@@ -105,19 +106,25 @@ def equity_curve(closed: List[PaperPosition],
 def compute_metrics(closed: List[PaperPosition],
                     starting: float = STARTING_EQUITY) -> PortfolioMetrics:
     closed = [p for p in closed if p.status == "closed"]
+    # Voided positions (unresolvable predictions) are flat and carry no market
+    # outcome — they belong to the equity curve as 0-P&L events but must NOT
+    # skew win rate, profit factor, or return statistics.
+    voided = [p for p in closed if p.exit_reason == "voided"]
+    scored = [p for p in closed if p.exit_reason != "voided"]
     curve = equity_curve(closed, starting)
     ending = curve[-1]
     total_pnl = ending - starting
 
-    if not closed:
+    if not scored:
         return PortfolioMetrics(
-            closed_count=0, starting_equity=starting, ending_equity=starting,
-            total_pnl=0.0, win_rate=None, profit_factor=None,
-            expected_value=None, sharpe=None, sortino=None,
-            max_drawdown=None, regime_attribution={})
+            closed_count=len(closed), starting_equity=starting,
+            ending_equity=ending, total_pnl=total_pnl, win_rate=None,
+            profit_factor=None, expected_value=None, sharpe=None, sortino=None,
+            max_drawdown=max_drawdown(curve), regime_attribution={},
+            voided_count=len(voided))
 
-    pnls = [realized_pnl(p) for p in closed]
-    rets = _returns(closed)
+    pnls = [realized_pnl(p) for p in scored]
+    rets = _returns(scored)
     wins = [x for x in pnls if x > 0]
     losses = [x for x in pnls if x < 0]
 
@@ -133,14 +140,14 @@ def compute_metrics(closed: List[PaperPosition],
     sortino = (ev / dsd) if (ev is not None and dsd not in (None, 0)) else None
 
     regime_attr: Dict[str, float] = {}
-    for p, pnl in zip(closed, pnls):
+    for p, pnl in zip(scored, pnls):
         regime_attr[p.regime] = regime_attr.get(p.regime, 0.0) + pnl
 
     return PortfolioMetrics(
         closed_count=len(closed), starting_equity=starting,
         ending_equity=ending, total_pnl=total_pnl,
-        win_rate=len(wins) / len(closed),
+        win_rate=len(wins) / len(scored),
         profit_factor=profit_factor, expected_value=ev,
         sharpe=sharpe, sortino=sortino,
         max_drawdown=max_drawdown(curve),
-        regime_attribution=regime_attr)
+        regime_attribution=regime_attr, voided_count=len(voided))

@@ -50,7 +50,12 @@ def check_events(events_dir: Path, report: IntegrityReport) -> None:
     except Exception as exc:  # noqa: BLE001
         report.add("events", "unreadable", str(exc))
         return
-    seen_ids, keys, last_recorded = set(), {}, None
+    # NB: recorded_at monotonicity is deliberately NOT checked. recorded_at is
+    # stamped before the append lock, so under concurrent producers it can be
+    # slightly out of order while the LOG ORDER (the real authority) is intact
+    # — checking it would raise false integrity alarms. Order lives in the
+    # file; there is no cross-event sequence field on CompanyEvent to verify.
+    seen_ids, keys = set(), {}
     for ev in events:
         try:
             ev.validate()
@@ -59,10 +64,6 @@ def check_events(events_dir: Path, report: IntegrityReport) -> None:
         if ev.event_id in seen_ids:
             report.add("events", "duplicate_event_id", "", ev.event_id)
         seen_ids.add(ev.event_id)
-        if last_recorded is not None and ev.recorded_at < last_recorded:
-            report.add("events", "non_monotonic_recorded_at",
-                       f"{ev.recorded_at} < {last_recorded}", ev.event_id)
-        last_recorded = max(last_recorded or ev.recorded_at, ev.recorded_at)
         if ev.idempotency_key:
             fp = ev.content_fingerprint()
             if ev.idempotency_key in keys and keys[ev.idempotency_key] != fp:
@@ -77,27 +78,19 @@ def check_learning(db_path: Path, report: IntegrityReport) -> None:
     from intent_engine.learning.ledger import LearningStore
     store = LearningStore(db_path)
     candidate_ids = {c.id for c in store.list_candidates()}
-    terminal = {c.id for c in store.list_candidates()
-                if c.status in ("promoted", "rejected")}
     # orphans
-    for blob in store._rows("evaluations", "rowid"):
-        from intent_engine.learning.records import Evaluation
-        e = Evaluation.model_validate_json(blob)
+    for e in store.all_evaluations():
         if e.candidate_id not in candidate_ids:
             report.add("learning", "orphan_evaluation",
                        f"candidate {e.candidate_id} not found", e.id)
-    for blob in store._rows("promotions", "rowid"):
-        from intent_engine.learning.records import PromotionDecision
-        p = PromotionDecision.model_validate_json(blob)
+    for p in store.all_promotions():
         if p.candidate_id not in candidate_ids:
             report.add("learning", "orphan_promotion",
                        f"candidate {p.candidate_id} not found", p.id)
     # illegal status regression: a terminal candidate must not reappear
     # non-terminal in a LATER row.
     seen_terminal = set()
-    for blob in store._rows("candidates", "rowid"):
-        from intent_engine.learning.records import Candidate
-        c = Candidate.model_validate_json(blob)
+    for c in store.candidate_rows():
         if c.id in seen_terminal and c.status in ("proposed", "evaluated"):
             report.add("learning", "status_regression",
                        f"{c.id} went terminal -> {c.status}", c.id)
@@ -105,10 +98,18 @@ def check_learning(db_path: Path, report: IntegrityReport) -> None:
             seen_terminal.add(c.id)
 
 
-def check_paper(db_path: Path, report: IntegrityReport) -> None:
+def check_paper(db_path: Path, report: IntegrityReport,
+                prediction_db: Path = None) -> None:
     if not db_path.exists():
         return
     from intent_engine.paper.ledger import PaperStore
+    # index prediction outcomes so we can detect stranded positions (open
+    # positions whose prediction already resolved to a real outcome — the
+    # bug reconcile_positions heals; this makes the invariant observable).
+    outcomes = {}
+    if prediction_db is not None and Path(prediction_db).exists():
+        from intent_engine.core import prediction_ledger as pl
+        outcomes = {p.id: p.outcome for p in pl.list_predictions(path=prediction_db)}
     for p in PaperStore(db_path).latest():
         if not p.prediction_id:
             report.add("paper", "missing_prediction_link", "", p.id)
@@ -116,6 +117,12 @@ def check_paper(db_path: Path, report: IntegrityReport) -> None:
             report.add("paper", "closed_without_exit", "", p.id)
         if p.status == "open" and (p.exit_price is not None or p.pnl is not None):
             report.add("paper", "open_with_exit_fields", "", p.id)
+        if p.status == "open" and outcomes.get(p.prediction_id) in (
+                "happened", "did_not_happen", "unresolvable"):
+            report.add("paper", "stranded_open_position",
+                       f"prediction {p.prediction_id} resolved "
+                       f"({outcomes[p.prediction_id]}) but position is open; "
+                       "run reconcile", p.id)
 
 
 def check_predictions(db_path: Path, report: IntegrityReport) -> None:
@@ -132,6 +139,6 @@ def run_integrity(root: Union[str, Path]) -> dict:
     report = IntegrityReport()
     check_events(root / "events", report)
     check_learning(root / "learning_ledger.db", report)
-    check_paper(root / "paper_book.db", report)
+    check_paper(root / "paper_book.db", report, root / "prediction_ledger.db")
     check_predictions(root / "prediction_ledger.db", report)
     return report.to_dict()

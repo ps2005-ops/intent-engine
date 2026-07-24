@@ -63,6 +63,24 @@ def test_status_json_has_no_secret_values(app):
     assert "sk-" not in body                     # no key material
 
 
+def test_dashboard_surfaces_job_failure_reason(app, tmp_path):
+    """Observability: a failed job must show WHY and SINCE-WHEN on the
+    dashboard, not just its name — answerable without reading source."""
+    from intent_engine.runtime.jobs import run_job
+    # the app reads job status from its runtime root (co-located with ci store)
+    root = app._runtime_root
+    def boom():
+        raise ValueError("tiingo rate limit exceeded")
+    run_job("resolve", boom, root=root, retries=0)
+    c = Client(app)
+    _login(c)
+    status, _, body = c.request("GET", "/dashboard")
+    assert status == "200 OK"
+    assert "tiingo rate limit exceeded" in body      # why
+    assert "resolve failed at" in body               # what + since-when
+    assert "recovery runbook" in body                # what action
+
+
 def test_assistant_has_no_promote_or_publish_control(app):
     c = Client(app)
     _login(c)

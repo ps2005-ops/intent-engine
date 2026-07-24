@@ -80,6 +80,8 @@ def cmd_market_open(root, bus, as_of, mr, price_at, regime_for):
 def cmd_resolve(root, bus, as_of, mr, price_at):
     def work():
         require_config(root, bus, "resolve", {"TIINGO_API_KEY", "FRED_API_KEY"})
+        # resolve_and_link already reconciles; a standalone reconcile is also
+        # exposed for self-healing without re-resolving.
         return mr.resolve_and_link(as_of=as_of, price_at=price_at)
     return run_job("resolve", work, root=root, bus=bus)
 

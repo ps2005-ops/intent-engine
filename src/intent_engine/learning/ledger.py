@@ -131,10 +131,23 @@ class LearningStore:
             out = [c for c in out if c.source == source]
         return out
 
-    def evaluations_for(self, candidate_id: str) -> List[Evaluation]:
+    def all_evaluations(self) -> List[Evaluation]:
         return [Evaluation.model_validate_json(b)
-                for b in self._rows("evaluations", "rowid")
-                if Evaluation.model_validate_json(b).candidate_id == candidate_id]
+                for b in self._rows("evaluations", "rowid")]
+
+    def all_promotions(self) -> List[PromotionDecision]:
+        return [PromotionDecision.model_validate_json(b)
+                for b in self._rows("promotions", "rowid")]
+
+    def candidate_rows(self) -> List[Candidate]:
+        """Every candidate row in append order (NOT collapsed) — for audit /
+        integrity, which needs to see status transitions, not just latest."""
+        return [Candidate.model_validate_json(b)
+                for b in self._rows("candidates", "rowid")]
+
+    def evaluations_for(self, candidate_id: str) -> List[Evaluation]:
+        return [e for e in self.all_evaluations()
+                if e.candidate_id == candidate_id]
 
     def promotion_for(self, candidate_id: str) -> Optional[PromotionDecision]:
         latest: Optional[PromotionDecision] = None

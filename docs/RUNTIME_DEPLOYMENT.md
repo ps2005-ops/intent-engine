@@ -150,6 +150,22 @@ ever needs to be shared with me or committed.
 5. `weekly-eval` once ≥20 predictions have resolved.
 6. `monthly-packet` → review the packet; promote (if any) via the human path.
 
+## Recovery runbook
+
+Every failure is persistent (a `job.failed`/`config.preflight_failed` event +
+a status file) and surfaced on `/dashboard`. Recovery is always a re-run —
+all jobs are idempotent, so re-running never double-acts.
+
+| Symptom (on `/dashboard` or `integrity`) | Why | Recovery |
+|---|---|---|
+| `config.preflight_failed`, job "failed: missing credentials" | a required key is unset/invalid | set the env var (see MANUAL ACTIONS), then `runtime preflight` — expect healthy |
+| a daily job shows `failed` with a network/timeout error | transient upstream (Tiingo/FRED) | re-run `runtime daily` (idempotent); the retry usually clears it; if persistent, check the provider status |
+| open positions not opening; `data_error` rejections logged | one instrument's price gap | isolated by design — the rest opened; the failed one retries next run automatically |
+| integrity: `stranded_open_position` | a close failed after the prediction resolved | `runtime resolve` (or a plain reconcile run) closes it at the next available price — self-healing; no manual data edit |
+| integrity: `orphan_evaluation` / `orphan_promotion` | a learning record references a missing candidate | do NOT mutate the append-only store; investigate the producing code path; the record is inert (candidate state is folded from candidates only) |
+| a job stuck "locked" | a previous run crashed holding the lock, OR one is genuinely running | the flock is released on process death — if no process is running, the next scheduled run acquires it cleanly; no manual unlock needed |
+| duplicate scheduler trigger | two runs fired at once | the second reports `locked` and no-ops — no duplicate trades/actions |
+
 ## Rollback
 - **App:** Render dashboard → service → **Rollback** to the previous deploy,
   or `git revert <commit> && git push origin main`.

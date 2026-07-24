@@ -23,7 +23,7 @@ from intent_engine.events import CompanyEventBus
 from intent_engine.learning import LearningLedger
 from intent_engine.learning.records import SuccessCriterion
 from intent_engine.paper.eligibility import (
-    EligibilityConfig, evaluate_prediction,
+    EligibilityConfig, EligibilityResult, evaluate_prediction,
 )
 from intent_engine.paper.rejections import RejectionStore
 from intent_engine.paper.service import PaperTradingLoop
@@ -62,7 +62,7 @@ class MarketRuntime:
                                          path=self.ledger_path)
         open_positions = self.paper.store.open_positions()
         open_pred_ids = {p.prediction_id for p in open_positions}
-        opened, rejected = [], []
+        opened, rejected, errors = [], [], []
         for prediction in unresolved:
             # Already represented by an open position: skip silently — this is
             # idempotency, not a rejection worth logging every re-run.
@@ -78,14 +78,27 @@ class MarketRuntime:
                                      "rule": result.rule,
                                      "reason": result.reason})
                 continue
-            entry = price_at(result.intent.instrument, as_of)
-            position = self.paper.open_from_intent(result.intent,
-                                                   entry_price=entry)
+            # PER-ITEM ISOLATION: a single instrument's price gap (or any
+            # per-prediction error) must not abort the whole daily open. The
+            # failure is recorded (persistently, once/day) and the batch
+            # continues; a re-run retries this prediction tomorrow.
+            try:
+                entry = price_at(result.intent.instrument, as_of)
+                position = self.paper.open_from_intent(result.intent,
+                                                       entry_price=entry)
+            except Exception as exc:  # noqa: BLE001 - isolate, record, continue
+                self.rejections.record(
+                    EligibilityResult(False, prediction.id,
+                                      reason=f"{type(exc).__name__}: {exc}",
+                                      rule="data_error"), as_of=as_of)
+                errors.append({"prediction_id": prediction.id,
+                               "error": f"{type(exc).__name__}: {exc}"})
+                continue
             open_pred_ids.add(prediction.id)
             open_positions.append(position)
             opened.append(position.id)
         return {"as_of": as_of, "regime": regime, "opened": opened,
-                "rejected": rejected,
+                "rejected": rejected, "errors": errors,
                 "considered": len(unresolved)}
 
     # --- resolve + link ------------------------------------------------------
@@ -94,32 +107,69 @@ class MarketRuntime:
         resolver: Callable = resolve_market_prediction,
         price_at: Optional[Callable[[str, str], float]] = None,
     ) -> Dict:
-        """Resolve due predictions with rules, publish prediction.resolved,
-        and close any linked open paper position at the instrument price on
-        resolve_by. Idempotent: only unresolved due predictions are touched."""
+        """Resolve due predictions with rules and publish prediction.resolved,
+        then reconcile paper positions. PER-ITEM ISOLATION: one prediction's
+        resolver error does not abort the others. Closing is delegated to the
+        single self-healing reconcile path, so a close failure here is retried
+        on the next run rather than stranding a position. Idempotent: only
+        unresolved due predictions are resolved."""
         due = [p for p in pl.list_predictions(unresolved_only=True,
                                               due_by=as_of, path=self.ledger_path)
                if p.resolution_rule is not None]
-        resolved, closed = [], []
+        resolved, errors = [], []
         for prediction in due:
-            result = resolver(prediction)
-            pl.resolve_prediction(prediction.id, result.outcome,
-                                  resolution_note=result.note,
-                                  path=self.ledger_path)
-            self._publish_resolved(prediction, result.outcome)
-            resolved.append({"prediction_id": prediction.id,
-                             "outcome": result.outcome})
-            # close linked open paper positions
-            if price_at is not None:
-                for pos in self.paper.store.by_prediction(prediction.id):
-                    if pos.status != "open":
-                        continue
-                    exit_price = price_at(pos.instrument, prediction.resolve_by)
-                    self.paper.close_position(
-                        pos.id, exit_price=exit_price,
-                        exit_reason="prediction_resolved")
-                    closed.append(pos.id)
-        return {"as_of": as_of, "resolved": resolved, "closed_positions": closed}
+            try:
+                result = resolver(prediction)
+                pl.resolve_prediction(prediction.id, result.outcome,
+                                      resolution_note=result.note,
+                                      path=self.ledger_path)
+                self._publish_resolved(prediction, result.outcome)
+                resolved.append({"prediction_id": prediction.id,
+                                 "outcome": result.outcome})
+            except Exception as exc:  # noqa: BLE001 - isolate, record, continue
+                errors.append({"prediction_id": prediction.id,
+                               "error": f"{type(exc).__name__}: {exc}"})
+        recon = self.reconcile_positions(price_at=price_at)
+        return {"as_of": as_of, "resolved": resolved, "errors": errors,
+                "closed_positions": recon["closed"],
+                "reconcile_errors": recon["errors"]}
+
+    def reconcile_positions(
+        self, *, price_at: Optional[Callable[[str, str], float]] = None,
+    ) -> Dict:
+        """The SINGLE close path — self-healing and idempotent. For every OPEN
+        paper position whose linked prediction is resolved:
+          - happened / did_not_happen -> close at the instrument price on the
+            prediction's resolve_by (skipped, retried next run, if the price
+            is unavailable — never stranded);
+          - unresolvable -> VOID (flat close, excluded from scored metrics),
+            because there is no market outcome to mark against.
+        Running this daily guarantees no position stays stranded open after
+        its prediction resolves, even if an earlier close attempt failed."""
+        by_id = {p.id: p for p in pl.list_predictions(path=self.ledger_path)}
+        closed, voided, errors = [], [], []
+        for pos in self.paper.store.open_positions():
+            prediction = by_id.get(pos.prediction_id)
+            if prediction is None or prediction.outcome is None:
+                continue                     # not yet resolved -> leave open
+            if prediction.outcome == "unresolvable":
+                self.paper.close_position(
+                    pos.id, exit_price=pos.entry_price, exit_reason="voided",
+                    regime_at_exit=pos.regime)
+                voided.append(pos.id)
+                continue
+            if price_at is None:
+                continue                     # cannot mark without a price feed
+            try:
+                exit_price = price_at(pos.instrument, prediction.resolve_by)
+                self.paper.close_position(
+                    pos.id, exit_price=exit_price,
+                    exit_reason="prediction_resolved")
+                closed.append(pos.id)
+            except Exception as exc:  # noqa: BLE001 - isolate; retry next run
+                errors.append({"position_id": pos.id,
+                               "error": f"{type(exc).__name__}: {exc}"})
+        return {"closed": closed, "voided": voided, "errors": errors}
 
     # --- daily learning candidates ------------------------------------------
     def generate_daily_candidates(self) -> Dict:
