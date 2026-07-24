@@ -28,6 +28,7 @@ WEB_EVENTS = frozenset({
     "web.share_accessed",
     "web.share_denied",
     "web.page_event",
+    "web.bootstrap_consumed",
 })
 
 ACTOR_TYPES = frozenset({"human", "system"})

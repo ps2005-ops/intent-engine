@@ -34,6 +34,12 @@ class AppConfig:
     web_store_path: Path = field(default=Path("data/webapp.jsonl"))
     fi_store_path: Path = field(default=Path("data/founder_intelligence.jsonl"))
     ci_store_path: Path = field(default=Path("data/company_ingestion.jsonl"))
+    # One-time staging-user bootstrap (Render Free has no shell). All three
+    # must be set for the route to exist; the hash is precomputed locally by
+    # `generate-bootstrap`; no plaintext password ever reaches the server env.
+    bootstrap_email: str = ""
+    bootstrap_password_hash: str = ""
+    bootstrap_token: str = ""
 
     def validate(self) -> None:
         if self.env not in ENVIRONMENTS:
@@ -82,6 +88,10 @@ def from_env(environ=None) -> AppConfig:
                                        "data/founder_intelligence.jsonl")),
         ci_store_path=Path(env_map.get("WEBAPP_CI_STORE",
                                        "data/company_ingestion.jsonl")),
+        bootstrap_email=env_map.get("WEBAPP_BOOTSTRAP_EMAIL", ""),
+        bootstrap_password_hash=env_map.get(
+            "WEBAPP_BOOTSTRAP_PASSWORD_HASH", ""),
+        bootstrap_token=env_map.get("WEBAPP_BOOTSTRAP_TOKEN", ""),
     )
     config.validate()
     return config

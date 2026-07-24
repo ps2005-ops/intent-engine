@@ -77,6 +77,29 @@ class AuthService:
                      "via_registration": via_registration}))
         return user_id
 
+    def create_user_with_hash(self, email: str, password_hash: str, *,
+                              created_by="bootstrap") -> str:
+        """Bootstrap path: the hash was precomputed locally by
+        `generate-bootstrap` using this module's hashing contract; no
+        plaintext password ever reaches the server."""
+        email = email.strip().lower()
+        if "@" not in email or len(email) > 254:
+            raise WebAppError("invalid email")
+        if not password_hash.startswith("pbkdf2_sha256$"):
+            raise WebAppError("password hash does not match the "
+                              "application's hashing contract")
+        if self.store.user_by_email(email) is not None:
+            raise WebAppError("account already exists")
+        user_id = f"user-{secrets.token_hex(8)}"
+        self.store.append(WebEvent(
+            event_type="web.user_created", actor_type="human",
+            actor_id=created_by, subject_type="user", subject_id=user_id,
+            idempotency_key=f"user:{email}",
+            payload={"email": email, "user_id": user_id,
+                     "password_hash": password_hash,
+                     "via_registration": False}))
+        return user_id
+
     # --- login with bounded attempts -----------------------------------------
     def _locked_out(self, email: str) -> bool:
         cutoff = self.now() - self.config.login_lockout_seconds

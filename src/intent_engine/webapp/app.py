@@ -116,6 +116,9 @@ class WebApp:
             return self._analyze(session, form)
         if parts and parts[0] == "shared" and len(parts) == 2:
             return self._shared(parts[1])
+        if parts and parts[0] == "bootstrap" and len(parts) == 2 \
+                and method == "GET":
+            return self._bootstrap(parts[1])
         if parts and parts[0] == "runs" and session is None:
             return self._redirect("/login")
         if route == ("GET", "runs", 2):
@@ -624,6 +627,51 @@ class WebApp:
                 f'<ul>{sections}</ul></main></body></html>')
         return self._html(body, extra_headers=(
             ("X-Robots-Tag", "noindex, nofollow"),))
+
+    # --- one-time staging-user bootstrap (V1.1.1) --------------------------------
+    def _bootstrap(self, supplied_token):
+        """GET /bootstrap/{token} — exists only while all three bootstrap
+        env vars are set; single use; constant-time token comparison;
+        never echoes any secret; generic 404 on every failure path so
+        nothing is learnable from responses."""
+        import hashlib as _hashlib
+        import hmac as _hmac
+        config = self.config
+        if not (config.bootstrap_email and config.bootstrap_password_hash
+                and config.bootstrap_token):
+            return self._error_page(404, "page not found")
+        token_hash = _hashlib.sha256(
+            config.bootstrap_token.encode()).hexdigest()
+        consumed = any(
+            row.event_type == "web.bootstrap_consumed"
+            and row.payload.get("token_hash") == token_hash
+            for row in self.web_store.read_all())
+        if consumed:
+            return self._error_page(404, "page not found")
+        if not _hmac.compare_digest(supplied_token or "",
+                                    config.bootstrap_token):
+            return self._error_page(404, "page not found")
+        if self.auth.store.user_by_email(
+                config.bootstrap_email.strip().lower()) is not None:
+            return self._error_page(404, "page not found")
+        # consume FIRST (persistent), then create — a failure after this
+        # point burns the token, which is the safe direction.
+        self.web_store.append(WebEvent(
+            event_type="web.bootstrap_consumed", actor_type="system",
+            actor_id="bootstrap", subject_type="bootstrap",
+            subject_id=token_hash[:16],
+            idempotency_key=f"bootstrap:{token_hash}",
+            payload={"token_hash": token_hash}))
+        self.auth.create_user_with_hash(config.bootstrap_email,
+                                        config.bootstrap_password_hash)
+        body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                '<title>Account created</title></head><body><main>'
+                '<h1>Early-access account created</h1>'
+                '<p>Your account is ready. This link has been consumed and '
+                'will not work again. Remove the bootstrap environment '
+                'variables and redeploy.</p>'
+                '<p><a href="/login">Log in</a></p></main></body></html>')
+        return self._html(body)
 
     # --- V1.1 real-company flow -------------------------------------------------
     def _is_real_run(self, run_id):

@@ -40,6 +40,53 @@ PYTHONPATH=src .venv/bin/python -m intent_engine.webapp runserver --host 127.0.0
 
 Health: `GET /healthz` (liveness), `GET /readyz` (config + stores).
 
+## Render Free: one-time staging-user bootstrap (no shell access)
+
+Render Free provides no interactive shell, so the first early-access
+account is created through a one-time, token-gated bootstrap route.
+No plaintext password ever reaches Render — only a locally computed
+PBKDF2 hash and a random token.
+
+1. Locally, run:
+
+   ```bash
+   PYTHONPATH=src python -m intent_engine.webapp generate-bootstrap
+   ```
+
+   It prompts for email, password, and confirmation, and prints ONLY
+   three environment-variable assignments (email, password hash,
+   random token). The plaintext password is never printed or stored.
+
+2. In the Render dashboard, add the three printed values as **secret**
+   environment variables:
+   `WEBAPP_BOOTSTRAP_EMAIL`, `WEBAPP_BOOTSTRAP_PASSWORD_HASH`,
+   `WEBAPP_BOOTSTRAP_TOKEN`.
+
+3. Deploy.
+
+4. Visit `https://<your-app>/bootstrap/<token>` **exactly once**. It
+   creates the account (using the precomputed hash), marks the token
+   consumed in persistent storage, and directs you to `/login`. It does
+   not log you in.
+
+5. Log in at `/login` with the email and the password you chose
+   locally.
+
+6. Delete all three bootstrap environment variables from Render.
+
+7. Redeploy.
+
+8. Confirm `https://<your-app>/bootstrap/<old-token>` now returns 404
+   (it does even before the variables are removed — the consumption
+   record persists across restarts — but removing them retires the
+   surface entirely).
+
+Properties: route exists only while all three variables are set;
+constant-time token comparison; single use enforced persistently;
+generic 404 for missing/invalid/consumed tokens and for an
+already-existing account; registration stays closed; no admin panel;
+auth/CSRF/session/ownership/trusted-host controls unchanged.
+
 ## HTTPS / reverse proxy (EXTERNAL HUMAN ACTION)
 
 The app serves plain HTTP on localhost and expects to sit behind a

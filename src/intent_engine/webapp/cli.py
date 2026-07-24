@@ -26,8 +26,36 @@ def main(argv=None) -> int:
     cu.add_argument("--password", default=None,
                     help="omit to be prompted (preferred)")
     sub.add_parser("check-config")
+    sub.add_parser("generate-bootstrap")
 
     args = ap.parse_args(argv)
+
+    if args.cmd == "generate-bootstrap":
+        # Runs entirely locally. Prints ONLY env-var assignments (email,
+        # hash, random token) — never the plaintext password.
+        import secrets as _secrets
+
+        from intent_engine.webapp.auth import hash_password
+        email = input("Email: ").strip().lower()
+        if "@" not in email:
+            print("ERROR: invalid email", file=sys.stderr)
+            return 2
+        password = getpass.getpass("Password (8+ chars): ")
+        confirm = getpass.getpass("Confirm password: ")
+        if password != confirm:
+            print("ERROR: passwords do not match", file=sys.stderr)
+            return 2
+        try:
+            password_hash = hash_password(password)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        token = _secrets.token_urlsafe(32)
+        print(f"WEBAPP_BOOTSTRAP_EMAIL={email}")
+        print(f"WEBAPP_BOOTSTRAP_PASSWORD_HASH={password_hash}")
+        print(f"WEBAPP_BOOTSTRAP_TOKEN={token}")
+        return 0
+
     try:
         config = from_env()
     except ConfigError as exc:
