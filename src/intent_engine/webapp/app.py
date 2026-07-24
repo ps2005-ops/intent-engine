@@ -142,6 +142,9 @@ class WebApp:
             return self._ok_json({"status": "ok"})
         if path == "/readyz":
             return self._ready()
+        if path == "/version":
+            from intent_engine._version import version_info
+            return self._ok_json(version_info())
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
         if path == "/login":
