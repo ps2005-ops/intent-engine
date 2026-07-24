@@ -27,6 +27,7 @@ from intent_engine.paper.eligibility import (
 )
 from intent_engine.paper.rejections import RejectionStore
 from intent_engine.paper.service import PaperTradingLoop
+from intent_engine.runtime.redaction import redact_secrets
 
 # Minimum resolved predictions in a confidence bucket before its calibration
 # error is worth a candidate. One resolution is noise.
@@ -87,12 +88,11 @@ class MarketRuntime:
                 position = self.paper.open_from_intent(result.intent,
                                                        entry_price=entry)
             except Exception as exc:  # noqa: BLE001 - isolate, record, continue
+                msg = redact_secrets(f"{type(exc).__name__}: {exc}")
                 self.rejections.record(
-                    EligibilityResult(False, prediction.id,
-                                      reason=f"{type(exc).__name__}: {exc}",
+                    EligibilityResult(False, prediction.id, reason=msg,
                                       rule="data_error"), as_of=as_of)
-                errors.append({"prediction_id": prediction.id,
-                               "error": f"{type(exc).__name__}: {exc}"})
+                errors.append({"prediction_id": prediction.id, "error": msg})
                 continue
             open_pred_ids.add(prediction.id)
             open_positions.append(position)
@@ -128,7 +128,7 @@ class MarketRuntime:
                                  "outcome": result.outcome})
             except Exception as exc:  # noqa: BLE001 - isolate, record, continue
                 errors.append({"prediction_id": prediction.id,
-                               "error": f"{type(exc).__name__}: {exc}"})
+                               "error": redact_secrets(f"{type(exc).__name__}: {exc}")})
         recon = self.reconcile_positions(price_at=price_at)
         return {"as_of": as_of, "resolved": resolved, "errors": errors,
                 "closed_positions": recon["closed"],
@@ -168,7 +168,7 @@ class MarketRuntime:
                 closed.append(pos.id)
             except Exception as exc:  # noqa: BLE001 - isolate; retry next run
                 errors.append({"position_id": pos.id,
-                               "error": f"{type(exc).__name__}: {exc}"})
+                               "error": redact_secrets(f"{type(exc).__name__}: {exc}")})
         return {"closed": closed, "voided": voided, "errors": errors}
 
     # --- daily learning candidates ------------------------------------------

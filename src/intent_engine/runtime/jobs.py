@@ -26,6 +26,7 @@ from typing import Callable, Optional
 from intent_engine.events import CompanyEventBus
 from intent_engine.runtime.config_health import missing_required, preflight
 from intent_engine.runtime.locks import JobLock, JobLockedError
+from intent_engine.runtime.redaction import redact_secrets
 
 
 @dataclass
@@ -83,7 +84,10 @@ def run_job(name: str, work: Callable[[], dict], *, root, bus=None,
                                     payload={"job": name, "attempt": attempt})
                     return result
                 except Exception as exc:  # noqa: BLE001 - persist EVERY failure
-                    last_error = f"{type(exc).__name__}: {exc}"
+                    # redact before ANYTHING persists it (event log, status
+                    # file, dashboard) — a fetcher exception can embed a
+                    # credential from a request URL.
+                    last_error = redact_secrets(f"{type(exc).__name__}: {exc}")
             result = JobResult(name, "failed", error=last_error)
             _write_status(root, result)
             if bus is not None:

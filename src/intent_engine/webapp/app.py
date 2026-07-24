@@ -1418,8 +1418,12 @@ class WebApp:
                  if v.get("status") == "failed" and v.get("at")]
         last_failure_detail = None
         if fails:
+            from intent_engine.runtime.redaction import redact_secrets
             at, job, err = max(fails)
-            last_failure_detail = {"job": job, "at": at, "error": err}
+            # defense in depth: redact at render too, in case a status file
+            # predates the write-time redaction fix.
+            last_failure_detail = {"job": job, "at": at,
+                                   "error": redact_secrets(err)}
 
         return {
             "as_of": as_of,
