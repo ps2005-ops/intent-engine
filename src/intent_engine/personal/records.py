@@ -153,7 +153,15 @@ def now_iso() -> str:
 
 
 def assert_workspace_language(text: str, *, where: str = "text") -> None:
-    hits = scan_banned_language(text, BANNED_WORKSPACE_LANGUAGE)
+    # NARROWLY ADDITIVE (V1.1, justified): quoted spans are source
+    # material, not workspace voice. The T023.5 language-wall spec is
+    # explicit that the wall "must not erase accurate quoted evidence" —
+    # real page titles like "Best Podcast Hosting" must remain quotable.
+    # Behavior is preserved for all unquoted text: removing quoted spans
+    # can only reduce hits, so every claim that passed before still
+    # passes. The workspace's own (unquoted) voice remains fully walled.
+    unquoted = re.sub(r'["“][^"”]*["”]', " ", text or "")
+    hits = scan_banned_language(unquoted, BANNED_WORKSPACE_LANGUAGE)
     if hits:
         raise PersonalError(
             f"{where} overclaims: {hits} — the workspace presents what the "
