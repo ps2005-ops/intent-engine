@@ -53,6 +53,14 @@ class PaperPosition(BaseModel):
     stop_price: Optional[float] = None
     target_price: Optional[float] = None
     status: PositionStatus = "open"
+    # --- provenance (additive; carried from the eligibility adapter) ---------
+    # Nullable so older rows round-trip; set for every position opened from a
+    # prediction via the eligibility adapter.
+    horizon_days: Optional[int] = None
+    strategy_version: Optional[str] = None
+    risk_rule_version: Optional[str] = None
+    opened_from: Optional[str] = None    # e.g. "prediction"
+    data_snapshot: dict = Field(default_factory=dict)
     # --- close (None until closed) -------------------------------------------
     closed_at: Optional[str] = None
     exit_price: Optional[float] = None

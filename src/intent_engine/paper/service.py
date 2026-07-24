@@ -75,6 +75,43 @@ class PaperTradingLoop:
                                "size": size, "entry_price": entry_price})
         return position
 
+    def open_from_intent(self, intent, *, entry_price: float,
+                         stop_price: Optional[float] = None,
+                         target_price: Optional[float] = None,
+                         actor_id: str = "market_loop") -> PaperPosition:
+        """Open a position from an eligibility PaperIntent, carrying its full
+        provenance (strategy/risk versions, horizon, data snapshot). Idempotent
+        per prediction: if the prediction already has an OPEN position, that
+        position is returned rather than opening a duplicate."""
+        existing = [p for p in self.store.by_prediction(intent.prediction_id)
+                    if p.status == "open"]
+        if existing:
+            return existing[0]
+        equity = self.current_equity()
+        alloc = position_size(equity, intent.confidence)
+        size = (alloc / entry_price) if entry_price > 0 else 0.0
+        position = PaperPosition(
+            prediction_id=intent.prediction_id, decision_id=intent.decision_id,
+            regime=intent.regime, confidence=intent.confidence,
+            reasoning=intent.reasoning, instrument=intent.instrument,
+            direction=intent.direction, entry_price=entry_price, size=size,
+            stop_price=stop_price, target_price=target_price, status="open",
+            horizon_days=intent.horizon_days,
+            strategy_version=intent.strategy_version,
+            risk_rule_version=intent.risk_rule_version, opened_from="prediction",
+            data_snapshot=dict(intent.data_snapshot))
+        position.require_traceable()
+        self.store.append(position)
+        self._publish("paper.position_opened", position, actor_id=actor_id,
+                      payload={"instrument": intent.instrument,
+                               "direction": intent.direction,
+                               "confidence": intent.confidence,
+                               "regime": intent.regime, "size": size,
+                               "entry_price": entry_price,
+                               "strategy_version": intent.strategy_version,
+                               "opened_from": "prediction"})
+        return position
+
     # --- close ---------------------------------------------------------------
     def close_position(
         self, position_id: str, *, exit_price: float, exit_reason: ExitReason,

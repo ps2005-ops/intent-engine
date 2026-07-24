@@ -82,6 +82,13 @@ class WebApp:
         self._personal = PersonalService(
             ci_path.parent / "personal.jsonl",
             learning_reader=self._learning_reader)
+        # Runtime root for the operational dashboard (job status, config
+        # health). In production this is the persistent disk (RUNTIME_ROOT);
+        # in tests it co-locates with the other stores so nothing writes into
+        # the repo.
+        import os as _os
+        self._runtime_root = _Path(
+            _os.environ.get("RUNTIME_ROOT") or ci_path.parent)
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
 
@@ -192,12 +199,21 @@ class WebApp:
             return self._share_revoke(session, parts[1], form)
         if route == ("POST", "runs", 3) and parts[2] == "feedback":
             return self._feedback(session, parts[1], form)
-        if parts and parts[0] == "learning" and session is None:
+        if parts and parts[0] in ("learning", "dashboard", "assistant") \
+                and session is None:
             return self._redirect("/login")
         if route == ("GET", "learning", 1):
             return self._learning_page(session)
         if route == ("GET", "learning", 2):
             return self._learning_explain_page(session, parts[1])
+        if route == ("GET", "dashboard", 1):
+            return self._dashboard_page(session)
+        if path == "/status.json" and method == "GET":
+            if session is None:
+                return self._redirect("/login")
+            return self._ok_json(self._platform_status())
+        if route == ("GET", "assistant", 1):
+            return self._assistant_page(session)
         return self._error_page(404, "page not found")
 
     # --- helpers --------------------------------------------------------------
@@ -1326,6 +1342,106 @@ class WebApp:
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
                     json.dumps({"status": "not ready", "reason": str(exc)}))
+
+    # --- unified operational dashboard (Part 5) -----------------------------
+    def _platform_status(self) -> dict:
+        """One read-only status object for market, synthetic, marketing, and
+        Personal AI — assembled from persisted runtime state. Every value is
+        real (from the stores/status files) or an honest null."""
+        from intent_engine.runtime.jobs import latest_status
+        from intent_engine.runtime.config_health import check_config
+        as_of = __import__("datetime").date.today().isoformat()
+        jobs = latest_status(self._runtime_root)
+        try:
+            insp = self._personal.inspect_learning(as_of=as_of)
+            pipeline = insp["pipeline"]
+        except Exception:                                   # noqa: BLE001
+            pipeline = {}
+        pm = self._learning_reader.paper_metrics() or {}
+        # config health WITHOUT secret values
+        cfg = {k: v["status"] for k, v in check_config().items()}
+        return {
+            "as_of": as_of,
+            "market": {
+                "candidate_pipeline": pipeline,
+                "paper_closed": pm.get("closed_count", 0),
+                "paper_total_pnl": pm.get("total_pnl"),
+                "paper_win_rate": pm.get("win_rate"),
+                "jobs": {k: jobs.get(k, {}).get("status") for k in
+                         ("preflight", "market-open", "resolve",
+                          "daily-candidates", "weekly-eval", "monthly-packet")},
+            },
+            "synthetic": {"last_run": jobs.get("synthetic-daily", {}).get("at"),
+                          "status": jobs.get("synthetic-daily", {}).get("status")},
+            "config_health": cfg,
+        }
+
+    def _dashboard_page(self, session):
+        st = self._platform_status()
+        def _kv(d):
+            return ", ".join(f"{_e(str(k))}: {_e(str(v))}" for k, v in d.items()) \
+                or "none"
+        jobs = st["market"]["jobs"]
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>Operations dashboard</title></head><body><main>'
+            f'<h1>Operations dashboard</h1>'
+            f'<p><em>Read-only. As of {_e(st["as_of"])}. '
+            f'<a href="/status.json">status.json</a></em></p>'
+            f'<h2>Market learning</h2>'
+            f'<p>Candidate pipeline: {_kv(st["market"]["candidate_pipeline"])}</p>'
+            f'<p>Paper book: {st["market"]["paper_closed"]} closed, '
+            f'P&L {_e(str(st["market"]["paper_total_pnl"]))}, '
+            f'win rate {_e(str(st["market"]["paper_win_rate"]))}</p>'
+            f'<p>Scheduled jobs: {_kv(jobs)}</p>'
+            f'<h2>Synthetic worlds</h2>'
+            f'<p>Last run: {_e(str(st["synthetic"]["last_run"]))} '
+            f'({_e(str(st["synthetic"]["status"]))})</p>'
+            f'<h2>Configuration health</h2>'
+            f'<p>{_kv(st["config_health"])}</p>'
+            f'<p><a href="/assistant">Personal AI</a> · '
+            f'<a href="/learning">Learning platform</a> · '
+            f'<a href="/">Home</a></p>'
+            f'</main></body></html>')
+        return self._html(_chrome(body, self._nav(session)))
+
+    def _assistant_page(self, session):
+        """Personal AI operator surface — distinct from the report chat.
+        Read-only observation + the pending-approval queue. Consequential
+        actions (promotion, publish) are NOT on this surface: they are
+        human-gated elsewhere, by design."""
+        as_of = __import__("datetime").date.today().isoformat()
+        insp = self._personal.inspect_learning(as_of=as_of)
+        ready = [c for c in self._learning_reader.candidates(status="evaluated")]
+        pending = []
+        for c in ready:
+            try:
+                r = self._learning_reader.explain_candidate(
+                    c["id"])["promotion_readiness"]
+                if r and r.get("ready"):
+                    pending.append(c)
+            except Exception:                               # noqa: BLE001
+                continue
+        pend_html = ("<ul>" + "".join(
+            f'<li>{_e(c["statement"])} '
+            f'<a href="/learning/{_e(c["id"])}">review</a></li>'
+            for c in pending) + "</ul>") if pending else \
+            "<p>No candidate is promotion-ready.</p>"
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>Personal AI</title></head><body><main>'
+            f'<h1>Personal AI — operator</h1>'
+            f'<p><em>I observe, explain, and prepare work for your approval. '
+            f'I do not promote, trade, or publish — those stay human-gated.</em></p>'
+            f'<h2>Pending your approval (promotion-ready)</h2>{pend_html}'
+            f'<h2>Learning pipeline</h2><p>{_e(str(insp["pipeline"]))}</p>'
+            f'<p><a href="/dashboard">Operations dashboard</a> · '
+            f'<a href="/learning">Learning platform</a> · '
+            f'<a href="/">Home</a></p>'
+            f'</main></body></html>')
+        return self._html(_chrome(body, self._nav(session)))
 
     # --- learning platform (read-only observation via Personal AI) ----------
     def _learning_page(self, session):

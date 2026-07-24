@@ -1,0 +1,110 @@
+# Render Blueprint — deployable scheduler + web service.
+#
+# This is the "reliably deployed scheduler" that replaces the laptop-only
+# launchd plist (com.pratham.intentengine.nightlyagent.plist). Render cron
+# jobs are a PAID feature (Free tier has no durable cron/worker) — see
+# docs/RUNTIME_DEPLOYMENT.md "MANUAL ACTIONS" for cost and the free
+# alternative (GitHub Actions scheduled workflow).
+#
+# Times are UTC. US market close is ~20:00-21:00 UTC (DST-dependent); jobs
+# are market-calendar-aware in code, so a weekend/holiday run is a safe
+# no-op rather than a bad day.
+#
+# Secrets are NEVER in this file — they are set in the Render dashboard as
+# environment variables / secret files (sync:false below marks them as
+# dashboard-managed, not committed).
+
+services:
+  # --- the web app (Personal AI, dashboard, /version, /healthz) -------------
+  - type: web
+    name: intent-engine-web
+    runtime: python
+    plan: starter                      # Free sleeps; Starter stays warm
+    buildCommand: "pip install -e ."
+    startCommand: "python -m intent_engine.webapp runserver --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /healthz
+    envVars:
+      - key: WEBAPP_ENV
+        value: production
+      - key: WEBAPP_SECRET
+        sync: false
+      - key: WEBAPP_TRUSTED_HOSTS
+        sync: false
+      - key: RUNTIME_ROOT
+        value: /var/data
+      - key: TIINGO_API_KEY
+        sync: false
+      - key: FRED_API_KEY
+        sync: false
+    disk:
+      name: intent-engine-data
+      mountPath: /var/data          # persistent across deploys (append-only stores)
+      sizeGB: 1
+
+  # --- daily market loop: preflight + open + resolve + candidates -----------
+  - type: cron
+    name: ie-daily-market
+    runtime: python
+    plan: starter
+    schedule: "30 21 * * 1-5"        # 21:30 UTC, weekdays (after US close)
+    buildCommand: "pip install -e ."
+    startCommand: "python -m intent_engine.runtime daily --root $RUNTIME_ROOT"
+    envVars:
+      - key: RUNTIME_ROOT
+        value: /var/data
+      - key: TIINGO_API_KEY
+        sync: false
+      - key: FRED_API_KEY
+        sync: false
+    disk:
+      name: intent-engine-data
+      mountPath: /var/data
+      sizeGB: 1
+
+  # --- daily synthetic gym (credential-independent offline leg) -------------
+  - type: cron
+    name: ie-synthetic-daily
+    runtime: python
+    plan: starter
+    schedule: "0 8 * * *"            # 08:00 UTC daily
+    buildCommand: "pip install -e ."
+    startCommand: "python -m intent_engine.runtime synthetic-daily --root $RUNTIME_ROOT"
+    envVars:
+      - key: RUNTIME_ROOT
+        value: /var/data
+    disk:
+      name: intent-engine-data
+      mountPath: /var/data
+      sizeGB: 1
+
+  # --- weekly candidate evaluation (walk-forward) ---------------------------
+  - type: cron
+    name: ie-weekly-eval
+    runtime: python
+    plan: starter
+    schedule: "0 9 * * 6"           # 09:00 UTC Saturdays
+    buildCommand: "pip install -e ."
+    startCommand: "python -m intent_engine.runtime weekly-eval --root $RUNTIME_ROOT"
+    envVars:
+      - key: RUNTIME_ROOT
+        value: /var/data
+    disk:
+      name: intent-engine-data
+      mountPath: /var/data
+      sizeGB: 1
+
+  # --- monthly promotion-review packet (never auto-promotes) ----------------
+  - type: cron
+    name: ie-monthly-packet
+    runtime: python
+    plan: starter
+    schedule: "0 10 1 * *"          # 10:00 UTC, 1st of month
+    buildCommand: "pip install -e ."
+    startCommand: "python -m intent_engine.runtime monthly-packet --root $RUNTIME_ROOT"
+    envVars:
+      - key: RUNTIME_ROOT
+        value: /var/data
+    disk:
+      name: intent-engine-data
+      mountPath: /var/data
+      sizeGB: 1

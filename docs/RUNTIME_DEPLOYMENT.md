@@ -1,0 +1,148 @@
+# Runtime deployment & operations
+
+*Written 2026-07-24. Covers the unified-learning runtime: the market
+learning loop, scheduler, config health, and the credential-independent
+surfaces for synthetic / marketing / Personal AI. Real-money trading is
+disabled everywhere; real external publication is disabled until you
+explicitly enable and approve it.*
+
+## What is now a real runtime path
+
+| Capability | Before | Now |
+|---|---|---|
+| prediction → paper position | manual, none | `paper/eligibility.py` + `MarketRuntime.open_paper_from_predictions` (deterministic, provenance-complete, rejections persisted) |
+| resolution | human-wired script | `MarketRuntime.resolve_and_link` — resolves due predictions, closes linked paper positions, emits `prediction.resolved` |
+| daily learning candidates | none | `MarketRuntime.generate_daily_candidates` (paper losses + calibration drift) |
+| weekly evaluation | interface only | `learning/evaluation.py` real expanding-window out-of-sample harness |
+| monthly promotion review | none | `learning/promotion_packet.py` persisted packet (never auto-promotes) |
+| scheduler | laptop launchd plist | `runtime/jobs.py` (locked/evented/idempotent) + `render.yaml` cron |
+| config health | none | `runtime/config_health.py` preflight + persistent failure events |
+| synthetic daily | manual | `python -m intent_engine.runtime synthetic-daily` |
+| marketing publish | stopped at handoff | `marketing/publishing.py` dry-run adapter (real disabled) |
+| marketing performance→learning | none | `marketing/performance.py` + shared-ledger bridge |
+| operator UI | none | `/dashboard`, `/assistant`, `/status.json`, `/version` |
+
+## Exact commands for local verification
+
+```bash
+cd intent-engine
+python -m intent_engine.runtime preflight --root /tmp/ie        # config health
+python -m intent_engine.runtime synthetic-daily --root /tmp/ie  # offline gym
+python -m intent_engine.runtime health --root /tmp/ie           # job statuses
+# market jobs FAIL LOUDLY without keys (by design — not a silent empty day):
+python -m intent_engine.runtime market-open --root /tmp/ie
+```
+
+## Production health URLs
+
+- `GET /healthz` — liveness
+- `GET /readyz` — config + stores
+- `GET /version` — `{app_version, commit}` (safe; no secrets)
+- `GET /dashboard` — unified operations (login-gated)
+- `GET /status.json` — machine status (login-gated)
+
+## The exact commit to deploy
+
+Deploy `origin/main` HEAD after this work is merged (printed at the end of
+the delivery report). `/version` returns Render's `RENDER_GIT_COMMIT`, so you
+can confirm the deployed commit equals the tested commit.
+
+---
+
+# MANUAL ACTIONS REQUIRED FROM PRATHAM
+
+Each action is something only you (the account owner) can do. No secret value
+ever needs to be shared with me or committed.
+
+### 1. Provision the persistent disk + deploy the Blueprint
+- **Why:** the append-only stores must survive restarts/deploys; the cron
+  jobs must run off-laptop.
+- **Where:** Render dashboard → **Blueprints** → **New Blueprint Instance** →
+  point at this repo (`render.yaml` is now committed).
+- **Env var:** n/a (the disk + services are declared in `render.yaml`).
+- **Secret:** no.
+- **Verify:** each service shows "Live"; `GET /version` returns the deployed
+  commit.
+- **Cost:** Render **cron jobs and always-on web require a paid plan**
+  (~$7/mo per service on Starter; the disk ~$0.25/GB/mo). The Free web
+  service sleeps and has **no** durable cron.
+- **Free alternative:** run the four jobs from a **GitHub Actions scheduled
+  workflow** (cron in `.github/workflows/`) hitting a small runner that
+  executes `python -m intent_engine.runtime <job>` against a checked-out
+  copy + committed data, or a Render **Free web** service pinged by an
+  external cron. Trade-off: GitHub Actions has no persistent disk, so the
+  data root must be committed or stored in a bucket.
+
+### 2. Set the Tiingo API key
+- **Why:** market prices for prediction resolution and paper marks; without
+  it the daily market job fails loudly (no silent empty day).
+- **Where:** Render dashboard → service **ie-daily-market** and
+  **intent-engine-web** → **Environment** → Add.
+- **Env var:** `TIINGO_API_KEY` — **secret: yes**.
+- **Action:** paste the key from https://www.tiingo.com (free tier exists).
+- **Verify:** `python -m intent_engine.runtime preflight` shows
+  `TIINGO_API_KEY: unprobed` (present); the next `market-open` run succeeds.
+- **Cost:** Tiingo has a **free** tier (rate-limited) sufficient for daily EOD.
+
+### 3. Set the FRED API key
+- **Why:** macro series (e.g. UNRATE) for level-rule predictions.
+- **Where:** same services → Environment.
+- **Env var:** `FRED_API_KEY` — **secret: yes**.
+- **Action:** free key from https://fred.stlouisfed.org/docs/api/api_key.html
+- **Verify:** preflight shows it present; `resolve` job succeeds.
+- **Cost:** free.
+
+### 4. (Optional) LLM key for the Synthetic Worlds `--live` leg
+- **Why:** the offline synthetic gym needs no key; the live reasoning leg does.
+- **Env var:** `ANTHROPIC_API_KEY` — **secret: yes**. Also set a cost ceiling
+  in your Anthropic console.
+- **Verify:** preflight shows it present.
+- **Cost:** usage-based; the offline daily job is **free** and already runs.
+- **Free alternative:** keep running only the offline leg (default).
+
+### 5. Web production secret + trusted host
+- **Env vars:** `WEBAPP_SECRET` (**secret: yes**, ≥32 chars —
+  `python3 -c "import secrets;print(secrets.token_urlsafe(48))"`),
+  `WEBAPP_TRUSTED_HOSTS` (your Render hostname, not secret),
+  `WEBAPP_ENV=production`.
+- **Verify:** `GET /readyz` returns ready.
+- **Cost:** none.
+
+### 6. (Only when you want real marketing publishing) Publer + enable flag
+- **Why:** real external publication is disabled until you turn it on AND
+  approve a first controlled post.
+- **Env vars:** `PUBLISHING_ENABLED=1` (not secret), `PUBLER_API_KEY`
+  (**secret: yes**). Leave `MARKETING_TRUSTED_AUTONOMY` unset (autonomy stays
+  locked).
+- **Action:** before this is usable I must (a) verify Publer's current API,
+  (b) implement the real provider client, and (c) get your explicit approval
+  for one controlled test post. Until then the adapter is **dry-run only**.
+- **Verify:** a dry-run publish returns a `sim_…` id and emits
+  `content.publish_dry_run`, never `content.published`.
+- **Cost:** Publer plan-dependent.
+
+### 7. Portfolio capital & risk limits (your call)
+- **Why:** the shadow book uses defaults (`STARTING_EQUITY=100000`,
+  max 10% per position, ≥0.60 confidence, ≤25 open). Adjust to your intent.
+- **Where:** `paper/portfolio.py` and `paper/eligibility.py` constants (a
+  config change; tell me your numbers and I'll wire them as env-configurable).
+- **Secret:** no.
+
+## First-run checklist (controlled)
+1. Deploy the Blueprint; confirm `/version` = intended commit.
+2. Set `TIINGO_API_KEY` + `FRED_API_KEY`; run **preflight** — expect healthy.
+3. Let `scripts/daily_market_predictions.py` (existing) create the day's
+   predictions, then run `market-open` — confirm positions open with
+   provenance and rejections are logged.
+4. After horizons pass, `resolve` — confirm predictions resolve and linked
+   positions close; check `/dashboard`.
+5. `weekly-eval` once ≥20 predictions have resolved.
+6. `monthly-packet` → review the packet; promote (if any) via the human path.
+
+## Rollback
+- **App:** Render dashboard → service → **Rollback** to the previous deploy,
+  or `git revert <commit> && git push origin main`.
+- **Data:** stores are append-only; nothing is destructively mutated. A bad
+  candidate is never in production (promotion is human-gated), so "rollback"
+  of learning is simply not promoting, or promoting a superseding candidate.
+- **Scheduler:** suspend the cron services in the Render dashboard.

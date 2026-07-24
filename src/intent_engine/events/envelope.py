@@ -80,12 +80,35 @@ EVENT_PRODUCERS = {
     # prediction_id / decision_id), so a paper trade is never a black box.
     "paper.position_opened":              "paper_trading",
     "paper.position_closed":              "paper_trading",
+    # Prediction resolution — owned by the automated resolution job (distinct
+    # from prediction.recorded, which the premortem pipeline owns). Published
+    # when a due prediction is graded against real outcome data.
+    "prediction.resolved":                "resolution_job",
+    # Scheduler / worker observability — one authoritative producer (the
+    # scheduler). job.failed is a PERSISTENT failure record; nothing is
+    # allowed to silently swallow a scheduled-job error.
+    "job.started":                        "scheduler",
+    "job.succeeded":                      "scheduler",
+    "job.failed":                         "scheduler",
+    # Configuration preflight — a missing/invalid credential creates a
+    # persistent failure event (visible in health), never a silent empty day.
+    "config.preflight_failed":            "config_preflight",
+    # Synthetic Worlds scheduled runs — the runner is the one producer; the
+    # event is a NOTIFICATION (the run record is the source of truth).
+    "synthetic.run_completed":            "synthetic_runner",
+    # Marketing publishing + performance (credential-independent surfaces).
+    # publish_dry_run is a SIMULATED publish (no external call); it is
+    # deliberately NOT content.published (which stays the human wall for real
+    # external publication).
+    "content.publish_dry_run":            "publishing_adapter",
+    "marketing.performance_ingested":     "marketing_performance",
 }
 EVENT_TYPES = set(EVENT_PRODUCERS)
 
 ACTOR_TYPES = {"human", "agent", "system"}
 SUBJECT_TYPES = {"decision", "prediction", "report", "content", "claim",
-                 "experiment", "candidate", "paper_position"}
+                 "experiment", "candidate", "paper_position",
+                 "job", "synthetic_run", "campaign"}
 SOURCES = {"web_intake", "cli", "report_review", "crm", "api", "system",
            "bridge"}
 
