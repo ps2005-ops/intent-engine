@@ -11,8 +11,10 @@ are recorded in docs/V101_GAPS.md rather than faked.
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
+import json
 import secrets
 
 from intent_engine.webapp.records import WebAppError, WebEvent
@@ -20,6 +22,19 @@ from intent_engine.webapp.records import WebAppError, WebEvent
 PBKDF2_ITERATIONS = 200_000
 PASSWORD_RESET_STATUS = ("NOT AVAILABLE — requires email delivery; an admin "
                          "may issue a new password out of band")
+
+# Version tag for the signed anonymous demo-session cookie. Bumping it
+# invalidates every previously issued anonymous token.
+ANON_TOKEN_VERSION = "anon1"
+
+
+def _b64u_encode(raw: bytes) -> str:
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
+
+
+def _b64u_decode(text: str) -> bytes:
+    pad = "=" * (-len(text) % 4)
+    return base64.urlsafe_b64decode(text + pad)
 
 
 def hash_password(password: str, *, salt: bytes | None = None) -> str:
@@ -143,32 +158,99 @@ class AuthService:
                 event_type="web.logout", actor_type="human",
                 actor_id=session["user_id"], payload={}))
 
-    # --- anonymous demo sessions (feature-flagged) ---------------------------
+    # --- anonymous demo sessions (feature-flagged, restart-tolerant) ---------
     def create_anonymous_session(self) -> str:
-        """Mint an ephemeral, in-memory-only session for DEMO_MODE usability
-        testing — the caller MUST have checked ``config.demo_mode`` first.
+        """Mint an ephemeral anonymous DEMO_MODE session and return a signed,
+        self-contained token to be used as the ``sid`` cookie — the caller
+        MUST have checked ``config.demo_mode`` first.
 
         No persistent user record is created (nothing is written to the
-        store), so anonymous visitors leave no account behind and vanish on
-        logout, expiry, or process restart. The session carries a unique
-        ``user_id`` (prefix ``anon-``) so every existing ownership check in
-        the app isolates it from real users and from every other anonymous
-        visitor automatically, and an ``anonymous`` flag so persistent-account
-        and administrative surfaces can refuse it. It gets a real CSRF token,
-        so state-changing POSTs remain CSRF-protected exactly like a normal
-        session. ``analyses`` holds this session's analysis timestamps for the
-        per-session daily rate cap.
+        store), so anonymous visitors leave no account behind. The returned
+        token is ``anon1.<payload>.<hmac>`` signed with ``WEBAPP_SECRET``; the
+        payload carries only the minimum anonymous identity: a unique
+        ``user_id`` (prefix ``anon-``) so every existing ownership check
+        isolates it from real users and from every other anonymous visitor, a
+        CSRF token so state-changing POSTs stay CSRF-protected, and an absolute
+        expiry. Because the token is *signed* rather than only held in memory,
+        an otherwise-unexpired anonymous browser session survives a process
+        restart: any app instance built from the same secret can verify and
+        restore it (see :meth:`restore_anonymous`). The payload always forces
+        ``anonymous=True``, so a valid signature can never mint a real account.
+
+        A live copy is cached in ``_sessions`` under the token so that, within
+        one process, the per-session ``analyses`` rate-limit timestamps accrue
+        normally.
         """
-        sid = secrets.token_urlsafe(32)
-        self._sessions[sid] = {
-            "user_id": f"anon-{secrets.token_hex(8)}",
-            "email": None,
-            "anonymous": True,
-            "expires": self.now() + self.config.session_ttl_seconds,
-            "csrf": secrets.token_urlsafe(32),
-            "analyses": [],
-        }
-        return sid
+        user_id = f"anon-{secrets.token_hex(8)}"
+        csrf = secrets.token_urlsafe(32)
+        expires = self.now() + self.config.session_ttl_seconds
+        token = self._sign_anonymous(user_id, csrf, expires)
+        self._sessions[token] = {
+            "user_id": user_id, "email": None, "anonymous": True,
+            "expires": expires, "csrf": csrf, "analyses": []}
+        return token
+
+    def restore_anonymous(self, token):
+        """Rebuild an anonymous session from a signed ``sid`` cookie whose
+        in-memory copy is gone (e.g. after a redeploy). Returns the session
+        dict or ``None``.
+
+        Restoration is completely disabled unless ``config.demo_mode`` is
+        truthy, so turning DEMO_MODE off is a hard kill switch for anonymous
+        access — no anonymous cookie is ever honoured. Nothing unsigned is
+        trusted: the HMAC signature and the expiry are verified before any
+        field is read, and only an anonymous session can ever result.
+        """
+        if not getattr(self.config, "demo_mode", False):
+            return None
+        data = self._verify_anonymous(token)
+        if data is None:
+            return None
+        session = {"user_id": data["uid"], "email": None, "anonymous": True,
+                   "expires": data["exp"], "csrf": data["csrf"],
+                   "analyses": []}
+        self._sessions[token] = session      # cache for this process lifetime
+        return session
+
+    def _sign_anonymous(self, user_id: str, csrf: str, expires: float) -> str:
+        payload = {"uid": user_id, "csrf": csrf, "exp": float(expires)}
+        body = _b64u_encode(json.dumps(
+            payload, sort_keys=True, separators=(",", ":")).encode())
+        signed = f"{ANON_TOKEN_VERSION}.{body}"
+        sig = hmac.new(self.config.secret.encode(), signed.encode(),
+                       hashlib.sha256).digest()
+        return f"{signed}.{_b64u_encode(sig)}"
+
+    def _verify_anonymous(self, token):
+        if not isinstance(token, str):
+            return None
+        parts = token.split(".")
+        if len(parts) != 3 or parts[0] != ANON_TOKEN_VERSION:
+            return None
+        _, body, sig = parts
+        expected = hmac.new(
+            self.config.secret.encode(),
+            f"{ANON_TOKEN_VERSION}.{body}".encode(), hashlib.sha256).digest()
+        try:
+            provided = _b64u_decode(sig)
+        except (ValueError, TypeError):
+            return None
+        if not hmac.compare_digest(expected, provided):
+            return None
+        try:
+            data = json.loads(_b64u_decode(body))
+        except (ValueError, TypeError):
+            return None
+        if not isinstance(data, dict):
+            return None
+        uid, csrf, exp = data.get("uid"), data.get("csrf"), data.get("exp")
+        if not (isinstance(uid, str) and uid.startswith("anon-")
+                and isinstance(csrf, str) and csrf
+                and isinstance(exp, (int, float))):
+            return None
+        if exp <= self.now():
+            return None
+        return {"uid": uid, "csrf": csrf, "exp": float(exp)}
 
     # --- session reads --------------------------------------------------------
     def session(self, sid: str):

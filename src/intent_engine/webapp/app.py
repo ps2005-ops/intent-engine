@@ -85,6 +85,12 @@ class WebApp:
         path = environ.get("PATH_INFO", "/")
         sid = self._cookie(environ, "sid")
         session = self.auth.session(sid) if sid else None
+        if session is None and sid and self.config.demo_mode:
+            # Restart-tolerant anonymous demo sessions: the in-memory copy is
+            # gone (e.g. after a redeploy), but a valid signed cookie can be
+            # cryptographically verified and restored. Fully disabled — and so
+            # the cookie fully ignored — whenever DEMO_MODE is off.
+            session = self.auth.restore_anonymous(sid)
         form = self._form(environ) if method == "POST" else {}
         remote = self._client_ip(environ)
 
@@ -276,13 +282,22 @@ class WebApp:
         return owner is not None and owner == session["user_id"]
 
     def _result(self, run_id):
-        """The deterministic demo result for an owned run (idempotent rerun)."""
+        """The deterministic demo result for an owned run (idempotent rerun).
+
+        The synthetic demo is deterministic, so it can be recomputed rather
+        than stored. Anonymous sessions namespace its run_id by user_id
+        (``<base>--<user_id>``); we cache the recomputed result under the
+        requested id too, so an owned demo run survives a process restart —
+        the result is recomputed on demand while ownership persists durably in
+        the web store."""
         if run_id not in self._results:
             result = self.fi.run(company_name=DEMO_COMPANY_NAME,
                                  website=f"https://{DEMO_DOMAIN}",
                                  claims_by_section=demo_claims(),
                                  as_of=DEMO_AS_OF)
             self._results[result["run_id"]] = result
+            if run_id != result["run_id"]:
+                self._results[run_id] = dict(result, run_id=run_id)
         return self._results.get(run_id)
 
     # --- pages ----------------------------------------------------------------
@@ -463,22 +478,138 @@ class WebApp:
     def _progress(self, session, run_id):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
-        if self._is_real_run(run_id):
+        real = self._is_real_run(run_id)
+        if real:
             status = self.ci.store.run_state(run_id) or "VALIDATING_COMPANY"
         else:
             status = self.fi.run_status(run_id)
-            if status == "UNKNOWN" and run_id in self._results:
-                # a per-session (namespaced) anonymous demo run is not in the
-                # FI store under its namespaced id; read the cached result.
-                status = self._results[run_id].get("status", status)
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            if status == "UNKNOWN":
+                # A per-session (namespaced) anonymous demo run is not in the
+                # FI store under its namespaced id; reconstruct the
+                # deterministic result (restart-safe) and read its status.
+                result = self._result(run_id)
+                status = (result or {}).get("status") or status
+        head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<title>Analysis progress</title></head><body>'
                 f'{self._nav(session, session["csrf"])}<main>'
                 f'<h1>Analysis progress</h1>'
                 f'<p>Run <code>{_e(run_id)}</code> status: '
-                f'<strong>{_e(status)}</strong></p>'
-                f'<p>These are real lifecycle stages, not decoration.</p>'
-                f'<p><a href="/runs/{_e(run_id)}">Open the result</a></p>'
+                f'<strong>{_e(status)}</strong></p>')
+        if status == "FAILED":
+            # Honest terminal failure: NO "Open the result" — there is no
+            # result. Explain why and offer a safe start-over.
+            tail = (f'<p>This analysis could not be completed, so there is no '
+                    f'result to open. {self._failure_explanation(run_id, real)}'
+                    f'</p><p><a href="/runs/{_e(run_id)}">See the failure '
+                    f'details</a> · <a href="/">Start a new analysis</a></p>')
+        elif status in ("COMPLETE", "PARTIAL"):
+            note = ('' if status == "COMPLETE" else
+                    '<p>Some approved sources could not be retrieved; the '
+                    'result is based only on the evidence that was.</p>')
+            tail = (f'{note}<p>These are real lifecycle stages, not '
+                    f'decoration.</p>'
+                    f'<p><a href="/runs/{_e(run_id)}">Open the result</a></p>')
+        else:
+            # Still in flight: show the current lifecycle stage without ever
+            # claiming a result already exists.
+            tail = ('<p>These are real lifecycle stages, not decoration. This '
+                    'analysis is still in progress — no result exists yet.</p>')
+        return self._html(head + tail + '</main></body></html>')
+
+    # --- honest failure surface (real-company runs) --------------------------
+    _FAILURE_LABELS = {
+        "http_403": ("access refused",
+                     "the site refused automated access (HTTP 401/403)"),
+        "http_429": ("rate limited",
+                     "the site rate-limited automated requests (HTTP 429)"),
+        "http_error": ("site error", "the site returned an HTTP error"),
+        "blocked": ("blocked",
+                    "the address was refused by the safety wall or a "
+                    "DNS/policy check"),
+        "timeout": ("timed out", "the site did not respond in time"),
+        "connection": ("unreachable",
+                       "the site could not be reached (DNS, TLS, or network)"),
+        "too_large": ("too large", "the page exceeded the size budget"),
+        "too_large_budget": ("skipped",
+                             "the run's overall byte budget was reached"),
+        "bad_mime": ("unsupported content",
+                     "the page was not text or HTML"),
+        "unsafe_redirect": ("unsafe redirect",
+                            "the page redirected off the approved domain"),
+        "parse_error": ("unreadable", "the page could not be decoded"),
+        "javascript_only": ("javascript-only",
+                            "the page required JavaScript and served no "
+                            "readable text"),
+    }
+
+    def _failure_category(self, failure):
+        """Map a stored failure record to a coarse, user-facing category —
+        distinguishing HTTP rejection (403/429) from server errors, network
+        failures, policy blocks, unsupported/JavaScript-only content, etc."""
+        ftype = failure.get("failure_type", "")
+        msg = str(failure.get("safe_message", ""))
+        if ftype == "http_status":
+            if "403" in msg or "401" in msg:
+                return "http_403"
+            if "429" in msg:
+                return "http_429"
+            return "http_error"
+        if ftype == "too_large" and "budget" in msg:
+            return "too_large_budget"
+        return ftype
+
+    def _failure_rows(self, run_id):
+        """Per-source (candidate, short-label, human-explanation, detail).
+        The raw ``safe_message`` (which can contain raw exception text) is
+        included only in development — never in production."""
+        rows = []
+        for f in self.ci.store.failures(run_id):
+            cat = self._failure_category(f)
+            label, human = self._FAILURE_LABELS.get(
+                cat, ("unavailable", "the source could not be retrieved"))
+            detail = (f' — {_e(str(f.get("safe_message", ""))[:200])}'
+                      if self.config.debug else '')
+            rows.append((str(f.get("candidate_id", "")), label, human, detail))
+        return rows
+
+    def _failure_explanation(self, run_id, real):
+        if not real:
+            return "No evidence could be composed for this session."
+        rows = self._failure_rows(run_id)
+        if not rows:
+            return ("No approved source could be retrieved, so there was not "
+                    "enough evidence to produce a report.")
+        cats = sorted({label for _, label, _, _ in rows})
+        return ("Every approved source failed to retrieve (" +
+                _e(", ".join(cats)) + "). Public sites can refuse automated "
+                "access or require JavaScript; a failed retrieval is not "
+                "evidence of real-world absence.")
+
+    def _failed_run_page(self, session, run_id):
+        """A clear, honest failed-run page for the run's owner. No fabricated
+        report, no redirect to source approval, no login redirect (the caller
+        has already confirmed ownership) and — in production — no stack traces,
+        secrets, internal paths, or raw exception data."""
+        rows = self._failure_rows(run_id) if self._is_real_run(run_id) else []
+        items = "".join(
+            f'<li><code>{_e(cid)}</code> — <strong>{_e(label)}</strong>: '
+            f'{_e(human)}{detail}</li>'
+            for cid, label, human, detail in rows)
+        detail_block = (f'<h2>What happened to each source</h2><ul>{items}</ul>'
+                        if items else '')
+        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                f'<meta name="viewport" content="width=device-width,'
+                f'initial-scale=1"><title>Analysis could not be completed'
+                f'</title></head><body>{self._nav(session, session["csrf"])}'
+                f'<main><h1>This analysis could not be completed</h1>'
+                f'<p>Run <code>{_e(run_id)}</code> did not produce a report '
+                f'because no approved source could be retrieved. There is no '
+                f'result to show — we do not invent one.</p>'
+                f'<p>Public websites can refuse automated access, rate-limit '
+                f'requests, or require JavaScript to render. A failed '
+                f'retrieval is not evidence that anything is missing in the '
+                f'real world.</p>{detail_block}'
+                f'<p><a href="/">Start a new analysis</a></p>'
                 f'</main></body></html>')
         return self._html(body)
 
@@ -486,9 +617,16 @@ class WebApp:
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
         if self._is_real_run(run_id):
+            # A FAILED real-company run has no report. Render an honest
+            # failed-run page — never redirect back to source approval and
+            # never present a nonexistent result.
+            if self.ci.store.run_state(run_id) == "FAILED":
+                return self._failed_run_page(session, run_id)
             result = self._real_result(run_id)
             if result is None:
                 return self._redirect(f"/runs/{run_id}/sources")
+            if result.get("status") == "FAILED" and not result.get("sections"):
+                return self._failed_run_page(session, run_id)
         else:
             result = self._result(run_id)
         if result is None:

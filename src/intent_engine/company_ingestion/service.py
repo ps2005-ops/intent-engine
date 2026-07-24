@@ -184,6 +184,16 @@ class CompanyIngestionService:
                 continue
             self._transition(run_id, domain, "PARSING_SOURCES")
             parsed = parse_html(result["body"])
+            if not parsed["text"].strip():
+                # Fetched successfully but yielded no readable text — a
+                # JavaScript-only shell or an empty document. Record it as a
+                # per-source failure rather than admitting an empty "document"
+                # that would silently pad an otherwise evidence-free report.
+                failed.append(self._fail(
+                    run_id, domain, candidate_id, "javascript_only",
+                    "page returned no readable text (JavaScript-only or "
+                    "empty document)", False))
+                continue
             freshness = "CURRENT"
             if parsed.get("modified_date"):
                 from datetime import datetime, timezone

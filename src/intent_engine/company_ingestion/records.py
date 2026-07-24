@@ -35,7 +35,8 @@ RUN_STATES = (
 RETRIEVAL_STATUSES = ("OK", "FAILED", "UNAVAILABLE", "SKIPPED")
 
 FAILURE_TYPES = ("timeout", "connection", "http_status", "too_large",
-                 "bad_mime", "unsafe_redirect", "blocked", "parse_error")
+                 "bad_mime", "unsafe_redirect", "blocked", "parse_error",
+                 "javascript_only")
 
 PRIVACY_CLASSES = ("public", "user_public_excerpt", "user_internal")
 
