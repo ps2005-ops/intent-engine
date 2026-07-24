@@ -138,10 +138,37 @@ class AuthService:
 
     def logout(self, sid: str) -> None:
         session = self._sessions.pop(sid, None)
-        if session:
+        if session and not session.get("anonymous"):
             self.store.append(WebEvent(
                 event_type="web.logout", actor_type="human",
                 actor_id=session["user_id"], payload={}))
+
+    # --- anonymous demo sessions (feature-flagged) ---------------------------
+    def create_anonymous_session(self) -> str:
+        """Mint an ephemeral, in-memory-only session for DEMO_MODE usability
+        testing — the caller MUST have checked ``config.demo_mode`` first.
+
+        No persistent user record is created (nothing is written to the
+        store), so anonymous visitors leave no account behind and vanish on
+        logout, expiry, or process restart. The session carries a unique
+        ``user_id`` (prefix ``anon-``) so every existing ownership check in
+        the app isolates it from real users and from every other anonymous
+        visitor automatically, and an ``anonymous`` flag so persistent-account
+        and administrative surfaces can refuse it. It gets a real CSRF token,
+        so state-changing POSTs remain CSRF-protected exactly like a normal
+        session. ``analyses`` holds this session's analysis timestamps for the
+        per-session daily rate cap.
+        """
+        sid = secrets.token_urlsafe(32)
+        self._sessions[sid] = {
+            "user_id": f"anon-{secrets.token_hex(8)}",
+            "email": None,
+            "anonymous": True,
+            "expires": self.now() + self.config.session_ttl_seconds,
+            "csrf": secrets.token_urlsafe(32),
+            "analyses": [],
+        }
+        return sid
 
     # --- session reads --------------------------------------------------------
     def session(self, sid: str):

@@ -58,6 +58,7 @@ class WebApp:
         self.auth = AuthService(self.web_store, config, now_fn=now_fn)
         self.sharing = SharingService(self.web_store, now_fn=now_fn)
         self._results: dict = {}   # run_id -> composed result cache
+        self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
 
     # --- plumbing -------------------------------------------------------------
     def __call__(self, environ, start_response):
@@ -85,8 +86,17 @@ class WebApp:
         sid = self._cookie(environ, "sid")
         session = self.auth.session(sid) if sid else None
         form = self._form(environ) if method == "POST" else {}
+        remote = self._client_ip(environ)
 
-        if method == "POST" and path not in ("/login", "/signup"):
+        # Every POST requires a live session + CSRF, EXCEPT the session-
+        # minting routes (there is no prior session to protect). `/demo` is a
+        # session-minting route ONLY while DEMO_MODE is on; when it is off,
+        # `/demo` is just an unknown path and the ordinary gate applies, so
+        # the authentication flow is byte-for-byte unchanged.
+        post_exempt = ("/login", "/signup")
+        if self.config.demo_mode:
+            post_exempt = post_exempt + ("/demo",)
+        if method == "POST" and path not in post_exempt:
             if session is None:
                 return self._redirect("/login")
             if not self.auth.check_csrf(sid, form.get("csrf", "")):
@@ -109,11 +119,15 @@ class WebApp:
         if path == "/signup":
             return (self._signup_page() if method == "GET"
                     else self._signup_post(form))
+        if (path == "/demo" and method == "POST"
+                and self.config.demo_mode):
+            new_sid = self.auth.create_anonymous_session()
+            return self._redirect("/", set_sid=new_sid)
         if path == "/logout" and method == "POST":
             self.auth.logout(sid)
             return self._redirect("/", clear_cookie=True)
         if path == "/analyze" and method == "POST":
-            return self._analyze(session, form)
+            return self._analyze(session, form, remote)
         if parts and parts[0] == "shared" and len(parts) == 2:
             return self._shared(parts[1])
         if parts and parts[0] == "bootstrap" and len(parts) == 2 \
@@ -165,6 +179,50 @@ class WebApp:
         return {k: (",".join(v) if k == "cand" else v[0])
                 for k, v in parse_qs(body).items()}
 
+    def _client_ip(self, environ) -> str:
+        """Best-effort client IP for demo rate-limiting. Prefers the left-most
+        X-Forwarded-For hop (the original client as seen by an edge proxy such
+        as Render), falling back to REMOTE_ADDR. X-Forwarded-For is client-
+        spoofable, so this is a throttle, NOT a security boundary — the real
+        boundaries are per-session isolation, the SSRF wall, and the refusal
+        of persistent/account functionality to anonymous sessions."""
+        xff = environ.get("HTTP_X_FORWARDED_FOR", "")
+        if xff:
+            first = xff.split(",")[0].strip()
+            if first:
+                return first
+        return environ.get("REMOTE_ADDR", "") or "unknown"
+
+    def _demo_rate_limited(self, session, remote):
+        """Anonymous-session abuse guardrail. Enforces a per-IP rolling-hour
+        cap and a per-session rolling-day cap on analyses. Returns a 429
+        response to block, or None to allow (recording the hit against both
+        windows). Real (logged-in) sessions are never limited here, so their
+        behaviour is unchanged."""
+        if not session.get("anonymous"):
+            return None
+        now = self.auth.now()
+        hour_ago, day_ago = now - 3600, now - 86400
+        ip_hits = [t for t in self._demo_ip_hits.get(remote, [])
+                   if t > hour_ago]
+        session_hits = [t for t in session.get("analyses", []) if t > day_ago]
+        if len(ip_hits) >= self.config.demo_ip_analyses_per_hour:
+            self._demo_ip_hits[remote] = ip_hits
+            return self._error_page(
+                429, "Demo analysis limit reached for your network; please "
+                     "try again later.")
+        if len(session_hits) >= self.config.demo_session_analyses_per_day:
+            session["analyses"] = session_hits
+            self._demo_ip_hits[remote] = ip_hits
+            return self._error_page(
+                429, "This demo session has reached its analysis limit for "
+                     "today; please try again later.")
+        ip_hits.append(now)
+        session_hits.append(now)
+        self._demo_ip_hits[remote] = ip_hits
+        session["analyses"] = session_hits
+        return None
+
     def _html(self, body, *, status="200 OK", extra_headers=()):
         return status, [("Content-Type", "text/html; charset=utf-8"),
                         *extra_headers], body
@@ -186,7 +244,7 @@ class WebApp:
 
     def _error_page(self, code, message):
         titles = {400: "Bad request", 403: "Forbidden", 404: "Not found",
-                  500: "Something went wrong"}
+                  429: "Too many requests", 500: "Something went wrong"}
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<title>{titles.get(code, "Error")}</title></head><body>'
                 f'<main><h1>{titles.get(code, "Error")}</h1>'
@@ -199,6 +257,13 @@ class WebApp:
         if session is None:
             return ('<nav aria-label="Session"><a href="/">Home</a> · '
                     '<a href="/login">Log in</a></nav>')
+        if session.get("anonymous"):
+            return (f'<nav aria-label="Session"><a href="/">Home</a> · '
+                    f'<span>Guest demo session</span> '
+                    f'<form action="/logout" method="post" '
+                    f'style="display:inline">'
+                    f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+                    f'<button type="submit">Leave demo</button></form></nav>')
         return (f'<nav aria-label="Session"><a href="/">Home</a> · '
                 f'<a href="/onboarding">Getting started</a> · '
                 f'signed in as {_e(session["email"])} '
@@ -232,11 +297,29 @@ class WebApp:
             page = page.replace('<button type="submit">',
                                 f'<input type="hidden" name="csrf" '
                                 f'value="{_e(csrf)}"><button type="submit">', 1)
+            if session.get("anonymous"):
+                page = page.replace(
+                    '<main>',
+                    '<main><p role="status"><strong>Demo mode.</strong> '
+                    'You are in an anonymous, isolated demo session — no '
+                    'sign-in, no access to anyone else\'s data, no share '
+                    'links. Analyze a company below.</p>', 1)
         else:
-            page = page.replace(
-                '<form action="/analyze"',
-                '<p><strong>Early access:</strong> <a href="/login">log in'
-                '</a> to run an analysis.</p><form action="/analyze"', 1)
+            note = ('<p><strong>Early access:</strong> '
+                    '<a href="/login">log in</a> to run an analysis.</p>')
+            if self.config.demo_mode:
+                # Feature-flagged anonymous entry point. Absent entirely when
+                # DEMO_MODE is off, so the logged-out landing page is unchanged.
+                note += ('<form action="/demo" method="post" '
+                         'aria-label="Try the demo without logging in">'
+                         '<button type="submit">Try the demo — no login '
+                         'required</button></form>'
+                         '<p class="trust-note">Demo sessions are anonymous '
+                         'and isolated: they can analyze companies and read '
+                         'reports, but cannot see anyone else\'s data or '
+                         'create share links.</p>')
+            page = page.replace('<form action="/analyze"',
+                                note + '<form action="/analyze"', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
 
     def _onboarding(self, session):
@@ -319,9 +402,12 @@ class WebApp:
         sid = self.auth.login(form.get("email", ""), form.get("password", ""))
         return self._redirect("/onboarding", set_sid=sid)
 
-    def _analyze(self, session, form):
+    def _analyze(self, session, form, remote="unknown"):
         if form.get("consent") is None:
             return self._error_page(400, "consent is required")
+        limited = self._demo_rate_limited(session, remote)
+        if limited is not None:
+            return limited
         website = form.get("website", f"https://{DEMO_DOMAIN}")
         if DEMO_DOMAIN not in website:
             # REAL company path: validate → discover → source approval.
@@ -353,6 +439,13 @@ class WebApp:
                              website=f"https://{DEMO_DOMAIN}",
                              claims_by_section=demo_claims(), as_of=DEMO_AS_OF)
         run_id = result["run_id"]
+        if session.get("anonymous"):
+            # The synthetic demo has one deterministic run id (no user_id in
+            # its key), so without this every anonymous tester would collide
+            # on it and all but the first would get a 403. Namespacing by the
+            # session's unique user_id gives each anonymous visitor their own
+            # isolated, owned demo run. Real (logged-in) runs are untouched.
+            run_id = f'{run_id}--{session["user_id"]}'
         self._results[run_id] = result
         existing = self.web_store.owner_of(run_id)
         if existing is None:
@@ -374,6 +467,10 @@ class WebApp:
             status = self.ci.store.run_state(run_id) or "VALIDATING_COMPANY"
         else:
             status = self.fi.run_status(run_id)
+            if status == "UNKNOWN" and run_id in self._results:
+                # a per-session (namespaced) anonymous demo run is not in the
+                # FI store under its namespaced id; read the cached result.
+                status = self._results[run_id].get("status", status)
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<title>Analysis progress</title></head><body>'
                 f'{self._nav(session, session["csrf"])}<main>'
@@ -437,6 +534,14 @@ class WebApp:
             for section in result.get("sections", [])
             for card in section.get("cards", [])
             for claim in card.get("claims", []))
+        # Sharing is persistent-account functionality; anonymous demo sessions
+        # do not get it (and it is enforced server-side in _share_create too).
+        share_form = (
+            '<p><small>Sharing is disabled for demo sessions.</small></p>'
+            if session.get("anonymous") else
+            f'<form action="/runs/{_e(run_id)}/share" method="post">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<button type="submit">Create share link</button></form>')
         extras = (f'<section aria-label="Evidence index"><h2>Evidence '
                   f'index</h2><p>Every claim resolves to its exact source '
                   f'artifacts:</p><ul>{claim_links}</ul></section>'
@@ -446,9 +551,7 @@ class WebApp:
                   f'value="{_e(csrf)}"><label for="q">Ask a follow-up '
                   f'question</label> <input id="q" name="question" required>'
                   f'<button type="submit">Ask</button></form>'
-                  f'<form action="/runs/{_e(run_id)}/share" method="post">'
-                  f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
-                  f'<button type="submit">Create share link</button></form>'
+                  f'{share_form}'
                   f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
                   f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
                   f'<fieldset><legend>Was this useful?</legend>'
@@ -556,6 +659,9 @@ class WebApp:
         return self._html(body)
 
     def _share_create(self, session, run_id):
+        if session.get("anonymous"):
+            return self._error_page(403, "sharing is not available in demo "
+                                         "mode")
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
         token = self.sharing.create_share(run_id=run_id,
@@ -580,6 +686,9 @@ class WebApp:
         return self._html(body)
 
     def _share_revoke(self, session, run_id, form):
+        if session.get("anonymous"):
+            return self._error_page(403, "sharing is not available in demo "
+                                         "mode")
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
         self.sharing.revoke_share(token_hash=form.get("token_hash", ""),

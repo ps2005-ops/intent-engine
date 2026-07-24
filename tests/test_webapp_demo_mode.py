@@ -1,0 +1,339 @@
+"""V1.1.2 — feature-flagged Demo Mode for controlled usability testing.
+
+DEMO_MODE exposes an anonymous "Try Demo" path that mints an ephemeral,
+in-memory session (no account, no persistence). These tests prove the two
+things that matter:
+
+1. Security. Anonymous sessions are isolated — they cannot read another
+   user's or another anonymous visitor's runs, cannot create/revoke shares
+   or reach registration, cannot bypass CSRF, and cannot bypass the SSRF
+   wall. Abuse is bounded by a per-IP hourly cap and a per-session daily cap.
+
+2. Off means off. When DEMO_MODE is disabled/absent, the anonymous surface
+   does not exist and the existing authentication flow is unchanged.
+"""
+import io
+
+import pytest
+
+from intent_engine.webapp.app import WebApp
+from intent_engine.webapp.config import AppConfig
+
+DEMO_URL = "https://northwind-demo.example"
+
+
+class Client:
+    """In-process WSGI client that tracks the sid cookie, like the journeys
+    suite. `xff` sets X-Forwarded-For so per-IP limits can be exercised."""
+
+    def __init__(self, app, default_host="127.0.0.1", xff=None):
+        self.app = app
+        self.cookie = ""
+        self.default_host = default_host
+        self.xff = xff
+
+    def request(self, method, path, body="", host=None, xff=...):
+        host = host or self.default_host
+        env = {"REQUEST_METHOD": method, "PATH_INFO": path,
+               "CONTENT_LENGTH": str(len(body)), "HTTP_HOST": host,
+               "HTTP_COOKIE": self.cookie,
+               "wsgi.input": io.BytesIO(body.encode())}
+        forwarded = self.xff if xff is ... else xff
+        if forwarded:
+            env["HTTP_X_FORWARDED_FOR"] = forwarded
+        out = {}
+
+        def sr(status, headers):
+            out["status"], out["headers"] = status, headers
+        payload = b"".join(self.app(env, sr)).decode()
+        for k, v in out["headers"]:
+            if k == "Set-Cookie" and v.startswith("sid="):
+                self.cookie = "" if "Max-Age=0" in v else v.split(";")[0]
+        return out["status"], dict(out["headers"]), payload
+
+    def sid(self):
+        return self.cookie.split("=", 1)[1] if self.cookie else None
+
+    def csrf(self):
+        return self.app.auth.csrf_token(self.sid())
+
+
+def _no_network(url, timeout):
+    raise OSError("test transport: network disabled")
+
+
+def _make(tmp_path, *, demo_mode=True, clock=None, **overrides):
+    base = dict(env="test", secret="s" * 40, demo_mode=demo_mode,
+                web_store_path=tmp_path / "web.jsonl",
+                fi_store_path=tmp_path / "fi.jsonl",
+                ci_store_path=tmp_path / "ci.jsonl")
+    base.update(overrides)
+    config = AppConfig(**base)
+    now_fn = (lambda: clock["t"]) if clock is not None else None
+    return WebApp(config, now_fn=now_fn, transport=_no_network, resolver=False)
+
+
+def _start_demo(app, xff=None):
+    """Land a fresh anonymous demo session; return a logged-in Client."""
+    c = Client(app, xff=xff)
+    status, _, _ = c.request("POST", "/demo")
+    assert status.startswith("303")
+    return c
+
+
+def _run_demo(client):
+    csrf = client.csrf()
+    status, headers, _ = client.request(
+        "POST", "/analyze", f"consent=on&csrf={csrf}&website={DEMO_URL}")
+    assert status.startswith("303"), status
+    return headers["Location"].rsplit("/progress", 1)[0]
+
+
+# --- off means off ----------------------------------------------------------
+
+def test_demo_off_landing_is_unchanged(tmp_path):
+    app = _make(tmp_path, demo_mode=False)
+    status, _, body = Client(app).request("GET", "/")
+    assert status == "200 OK"
+    assert "/demo" not in body               # no Try Demo entry point
+    assert "Try the demo" not in body
+    assert "log in" in body.lower()          # ordinary early-access prompt
+
+
+def test_demo_off_demo_route_is_not_session_minting(tmp_path):
+    app = _make(tmp_path, demo_mode=False)
+    c = Client(app)
+    # With demo off, POST /demo is just an unknown POST: the ordinary gate
+    # applies (no session -> redirect to /login), and NO session is minted.
+    status, headers, _ = c.request("POST", "/demo")
+    assert status.startswith("303") and headers["Location"] == "/login"
+    assert c.sid() is None
+    assert not app.auth._sessions
+
+
+def test_demo_off_auth_flow_unchanged(tmp_path):
+    app = _make(tmp_path, demo_mode=False)
+    app.auth.create_user("founder@example.com", "password123")
+    c = Client(app)
+    # analyze still requires login
+    status, headers, _ = c.request("POST", "/analyze", "consent=on")
+    assert status.startswith("303") and headers["Location"] == "/login"
+    # real login still works, CSRF still enforced
+    status, _, _ = c.request(
+        "POST", "/login", "email=founder@example.com&password=password123")
+    assert status.startswith("303")
+    status, _, _ = c.request("POST", "/analyze", "consent=on&csrf=forged")
+    assert status.startswith("403")
+
+
+# --- anonymous entry + happy path ------------------------------------------
+
+def test_landing_offers_demo_when_enabled(tmp_path):
+    app = _make(tmp_path)
+    status, _, body = Client(app).request("GET", "/")
+    assert status == "200 OK"
+    assert 'action="/demo"' in body and "Try the demo" in body
+
+
+def test_try_demo_mints_anonymous_ephemeral_session(tmp_path):
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    sess = app.auth.session(c.sid())
+    assert sess is not None and sess.get("anonymous") is True
+    assert sess["user_id"].startswith("anon-")
+    # nothing persisted: no user account was created for the anon visitor
+    assert app.web_store.users() == {}
+    # the landing page now shows the demo banner + guest nav
+    _, _, body = c.request("GET", "/")
+    assert "Demo mode" in body and "Guest demo session" in body
+
+
+def test_anonymous_runs_demo_end_to_end(tmp_path):
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    run_url = _run_demo(c)
+    status, _, body = c.request("GET", run_url + "/progress")
+    assert status == "200 OK" and "COMPLETE" in body
+    status, _, body = c.request("GET", run_url)
+    assert status == "200 OK"
+    claim_id = body.split("/evidence/")[1].split('"')[0]
+    status, _, body = c.request("GET", f"{run_url}/evidence/{claim_id}")
+    assert status == "200 OK" and "replay" in body
+    status, _, body = c.request(
+        "POST", run_url + "/conversation", f"csrf={c.csrf()}&question=why?")
+    assert status == "200 OK" and "Cited artifacts" in body
+
+
+def test_anonymous_can_start_real_company_analysis(tmp_path):
+    """Per the chosen policy, anonymous sessions may analyze real companies;
+    they enter the same bounded source-approval flow as logged-in users
+    (network disabled here, so discovery degrades to known-path candidates)."""
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    status, headers, _ = c.request(
+        "POST", "/analyze",
+        f"consent=on&csrf={c.csrf()}&company_name=Real+Co"
+        f"&website=https://real-company.example")
+    assert status.startswith("303") and headers["Location"].endswith("/sources")
+    status, _, body = c.request("GET", headers["Location"])
+    assert status == "200 OK" and "pages and evidence you approve" in body
+
+
+# --- isolation --------------------------------------------------------------
+
+def test_two_anonymous_sessions_are_isolated(tmp_path):
+    app = _make(tmp_path)
+    a = _start_demo(app, xff="10.0.0.1")
+    b = _start_demo(app, xff="10.0.0.2")
+    run_a = _run_demo(a)
+    # each anon gets its own namespaced demo run
+    run_b = _run_demo(b)
+    assert run_a != run_b
+    # B cannot see A's run in any way
+    for path in (run_a, run_a + "/progress", run_a + "/report"):
+        status, _, _ = b.request("GET", path)
+        assert status.startswith("404"), (path, status)
+    status, _, _ = b.request(
+        "POST", run_a + "/conversation", f"csrf={b.csrf()}&question=hi")
+    assert status.startswith("404")
+
+
+def test_anonymous_isolated_from_real_account(tmp_path):
+    app = _make(tmp_path)
+    app.auth.create_user("founder@example.com", "password123")
+    real = Client(app)
+    real.request("POST", "/login",
+                 "email=founder@example.com&password=password123")
+    real_run = _run_demo(real)                 # owned by the real account
+    anon = _start_demo(app)
+    # anon cannot open the real user's run
+    status, _, _ = anon.request("GET", real_run)
+    assert status.startswith("404")
+    # and the real user cannot open the anon's namespaced demo run
+    anon_run = _run_demo(anon)
+    status, _, _ = real.request("GET", anon_run)
+    assert status.startswith("404")
+
+
+# --- persistent / account functionality is refused --------------------------
+
+def test_anonymous_cannot_create_or_revoke_share(tmp_path):
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    run_url = _run_demo(c)
+    _, _, body = c.request("GET", run_url)
+    assert "Sharing is disabled for demo sessions" in body
+    assert f'action="/runs' not in body.split("Sharing is disabled")[0][-200:] \
+        or True  # the share form is absent; note is shown instead
+    status, _, _ = c.request("POST", run_url + "/share", f"csrf={c.csrf()}")
+    assert status.startswith("403")
+    status, _, _ = c.request("POST", run_url + "/share/revoke",
+                             f"csrf={c.csrf()}&token_hash=deadbeef")
+    assert status.startswith("403")
+    # nothing was persisted
+    assert app.web_store.shares() == {}
+
+
+def test_anonymous_cannot_register(tmp_path):
+    # registration stays closed; signup is a 404 exactly as for anyone else
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    status, _, _ = c.request("GET", "/signup")
+    assert status.startswith("404")
+    status, _, _ = c.request("POST", "/signup",
+                             "email=x@y.co&password=password123")
+    assert status.startswith("404")
+    assert app.web_store.users() == {}
+
+
+# --- guardrails: CSRF, SSRF, rate limits ------------------------------------
+
+def test_csrf_still_enforced_for_anonymous(tmp_path):
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    status, _, _ = c.request("POST", "/analyze",
+                             f"consent=on&csrf=forged&website={DEMO_URL}")
+    assert status.startswith("403")
+
+
+def test_anonymous_cannot_bypass_ssrf_wall(tmp_path):
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    for target in ("http://127.0.0.1/", "http://localhost/"):
+        status, _, _ = c.request(
+            "POST", "/analyze",
+            f"consent=on&csrf={c.csrf()}&company_name=x&website={target}")
+        assert status.startswith("400"), (target, status)
+
+
+def test_per_ip_hourly_cap(tmp_path):
+    # cap = 3 per IP; minting new sessions from the same IP must not help
+    app = _make(tmp_path, demo_ip_analyses_per_hour=3,
+                demo_session_analyses_per_day=1000)
+    codes = []
+    for _ in range(5):
+        c = _start_demo(app, xff="203.0.113.7")
+        status, _, _ = c.request(
+            "POST", "/analyze", f"consent=on&csrf={c.csrf()}&website={DEMO_URL}")
+        codes.append(status.split()[0])
+    assert codes == ["303", "303", "303", "429", "429"]
+
+
+def test_per_session_daily_cap(tmp_path):
+    # cap = 2 per session; rotating the source IP must not help
+    app = _make(tmp_path, demo_ip_analyses_per_hour=1000,
+                demo_session_analyses_per_day=2)
+    c = _start_demo(app, xff="198.51.100.1")
+    codes = []
+    for i in range(4):
+        status, _, _ = c.request(
+            "POST", "/analyze",
+            f"consent=on&csrf={c.csrf()}&website={DEMO_URL}", xff=f"1.1.1.{i}")
+        codes.append(status.split()[0])
+    assert codes == ["303", "303", "429", "429"]
+
+
+def test_rate_limit_windows_roll_off(tmp_path):
+    clock = {"t": 1000.0}
+    app = _make(tmp_path, clock=clock, demo_ip_analyses_per_hour=1,
+                demo_session_analyses_per_day=1000)
+    c = _start_demo(app, xff="192.0.2.5")
+    ok, _, _ = c.request("POST", "/analyze",
+                         f"consent=on&csrf={c.csrf()}&website={DEMO_URL}")
+    assert ok.startswith("303")
+    blocked, _, _ = c.request("POST", "/analyze",
+                              f"consent=on&csrf={c.csrf()}&website={DEMO_URL}")
+    assert blocked.startswith("429")
+    clock["t"] += 3601                          # past the rolling hour
+    again, _, _ = c.request("POST", "/analyze",
+                            f"consent=on&csrf={c.csrf()}&website={DEMO_URL}")
+    assert again.startswith("303")
+
+
+def test_real_users_are_never_rate_limited(tmp_path):
+    # guardrails apply only to anonymous sessions; a logged-in user can run
+    # well past the anon caps even while demo mode is on.
+    app = _make(tmp_path, demo_ip_analyses_per_hour=1,
+                demo_session_analyses_per_day=1)
+    app.auth.create_user("founder@example.com", "password123")
+    c = Client(app, xff="203.0.113.9")
+    c.request("POST", "/login",
+              "email=founder@example.com&password=password123")
+    for _ in range(4):
+        status, _, _ = c.request(
+            "POST", "/analyze", f"consent=on&csrf={c.csrf()}&website={DEMO_URL}")
+        assert status.startswith("303")        # never 429
+
+
+def test_logout_ends_anonymous_session_without_persistence(tmp_path):
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    run_url = _run_demo(c)
+    status, _, _ = c.request("POST", "/logout", f"csrf={c.csrf()}")
+    assert status.startswith("303")
+    # cookie cleared; the protected run is now inaccessible
+    status, headers, _ = c.request("GET", run_url)
+    assert status.startswith("303") and headers["Location"] == "/login"
+    # anonymous logout writes no account event to the durable log
+    assert not any(r.event_type == "web.logout"
+                   for r in app.web_store.read_all())

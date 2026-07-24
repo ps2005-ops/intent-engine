@@ -40,6 +40,17 @@ class AppConfig:
     bootstrap_email: str = ""
     bootstrap_password_hash: str = ""
     bootstrap_token: str = ""
+    # Temporary, feature-flagged Demo Mode for controlled usability testing.
+    # OFF by default and OFF unless DEMO_MODE is explicitly truthy — when off,
+    # the anonymous surface does not exist and the authentication flow is
+    # byte-for-byte unchanged. Anonymous sessions are ephemeral (in-memory
+    # only), isolated by a unique user_id through the existing ownership
+    # checks, and may NOT create shares or any persistent-account artifact.
+    # The two caps are abuse guardrails for the public URL while the beta is
+    # live; the kill switch is DEMO_MODE=false + redeploy.
+    demo_mode: bool = False
+    demo_ip_analyses_per_hour: int = 10      # per client IP, rolling hour
+    demo_session_analyses_per_day: int = 25  # per anon session, rolling day
 
     def validate(self) -> None:
         if self.env not in ENVIRONMENTS:
@@ -61,6 +72,11 @@ class AppConfig:
             # dev/test still need a secret, but may generate an ephemeral one.
             raise ConfigError("a secret is required (set WEBAPP_SECRET or use "
                               "from_env which generates an ephemeral dev key)")
+        if self.demo_mode:
+            if self.demo_ip_analyses_per_hour < 1:
+                raise ConfigError("demo_ip_analyses_per_hour must be >= 1")
+            if self.demo_session_analyses_per_day < 1:
+                raise ConfigError("demo_session_analyses_per_day must be >= 1")
 
 
 def from_env(environ=None) -> AppConfig:
@@ -75,6 +91,19 @@ def from_env(environ=None) -> AppConfig:
                   env_map.get("WEBAPP_TRUSTED_HOSTS", "").split(",")
                   if h.strip())
     is_prod = env == "production"
+
+    def _truthy(name):
+        return env_map.get(name, "").strip().lower() in (
+            "1", "true", "yes", "on")
+
+    def _pos_int(name, default):
+        try:
+            value = int(env_map.get(name, "").strip())
+        except (TypeError, ValueError):
+            return default
+        return value if value >= 1 else default
+
+    demo_mode = _truthy("DEMO_MODE")
     config = AppConfig(
         env=env,
         secret=secret,
@@ -92,6 +121,11 @@ def from_env(environ=None) -> AppConfig:
         bootstrap_password_hash=env_map.get(
             "WEBAPP_BOOTSTRAP_PASSWORD_HASH", ""),
         bootstrap_token=env_map.get("WEBAPP_BOOTSTRAP_TOKEN", ""),
+        demo_mode=demo_mode,
+        demo_ip_analyses_per_hour=_pos_int(
+            "DEMO_MAX_ANALYSES_PER_HOUR", 10),
+        demo_session_analyses_per_day=_pos_int(
+            "DEMO_MAX_ANALYSES_PER_DAY", 25),
     )
     config.validate()
     return config
