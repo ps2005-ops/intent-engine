@@ -21,7 +21,9 @@ from intent_engine.founder_intelligence.fixtures import (
 from intent_engine.founder_intelligence.presentation import (
     render_landing_html, render_report_preview, render_result_html,
 )
-from intent_engine.company_ingestion.records import IngestionError
+from intent_engine.company_ingestion.records import (
+    IngestionError, MAX_APPROVED_SOURCES,
+)
 from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
@@ -924,7 +926,8 @@ class WebApp:
     def _is_real_run(self, run_id):
         return self.ci.run_meta(run_id) is not None
 
-    def _sources_page(self, session, run_id):
+    def _sources_page(self, session, run_id, *, selected_ids=None,
+                      message=None, pasted=None):
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
             return self._error_page(404, "no such run for this account")
         meta = self.ci.run_meta(run_id)
@@ -933,10 +936,21 @@ class WebApp:
         if approval:
             return self._redirect(f"/runs/{run_id}/progress")
         csrf = session["csrf"]
+        pasted = pasted or {}
+
+        def _checked(c):
+            # On a re-render (e.g. too many sources) honour exactly what the
+            # user had selected; on first render fall back to the sensible
+            # default set.
+            if selected_ids is not None:
+                return "checked" if c["candidate_id"] in selected_ids else ""
+            return ("checked" if c["source_type"] in
+                    ("homepage", "product", "pricing", "about", "customers")
+                    else "")
+
         rows = "".join(
             f'<li><label><input type="checkbox" name="cand" '
-            f'value="{_e(c["candidate_id"])}" '
-            f'{"checked" if c["source_type"] in ("homepage", "product", "pricing", "about", "customers") else ""}> '
+            f'value="{_e(c["candidate_id"])}" {_checked(c)}> '
             f'<strong>{_e(c["source_type"])}</strong> — '
             f'<code>{_e(c["url"])}</code> '
             f'({_e(c["discovery_method"])}'
@@ -944,28 +958,35 @@ class WebApp:
             f'{"; unverified" if c.get("availability") == "UNVERIFIED" else ""})'
             f' · {_e(c["why_useful"])}</label></li>'
             for c in candidates)
+        alert = (f'<p role="alert"><strong>{_e(message)}</strong></p>'
+                 if message else '')
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Approve sources</title></head>'
                 f'<body>{self._nav(session, csrf)}<main>'
-                f'<h1>Choose the sources for this analysis</h1>'
+                f'<h1>Choose the sources for this analysis</h1>{alert}'
                 f'<p>We found these public pages on '
                 f'<code>{_e(meta["domain"])}</code>. Founder Intelligence '
                 f'analyzes only the pages and evidence you approve. '
-                f'Public websites can be incomplete; a retrieved page may '
-                f'be outdated; the report does not represent internal '
-                f'company knowledge. The system does not automatically '
-                f'contact, publish to, or modify any website.</p>'
+                f'You may approve at most {MAX_APPROVED_SOURCES} sources per '
+                f'analysis. Public websites can be incomplete; a retrieved '
+                f'page may be outdated; the report does not represent '
+                f'internal company knowledge. The system does not '
+                f'automatically contact, publish to, or modify any '
+                f'website.</p>'
                 f'<form action="/runs/{_e(run_id)}/sources/approve" '
                 f'method="post"><input type="hidden" name="csrf" '
                 f'value="{_e(csrf)}"><ul>{rows}</ul>'
                 f'<h2>Optional: paste external evidence</h2>'
                 f'<p><label for="plabel">Source label</label> '
-                f'<input id="plabel" name="pasted_label"></p>'
+                f'<input id="plabel" name="pasted_label" '
+                f'value="{_e(pasted.get("pasted_label", ""))}"></p>'
                 f'<p><label for="porigin">Origin description</label> '
-                f'<input id="porigin" name="pasted_origin"></p>'
+                f'<input id="porigin" name="pasted_origin" '
+                f'value="{_e(pasted.get("pasted_origin", ""))}"></p>'
                 f'<p><label for="ptext">Pasted text</label> '
-                f'<textarea id="ptext" name="pasted_text"></textarea></p>'
+                f'<textarea id="ptext" name="pasted_text">'
+                f'{_e(pasted.get("pasted_text", ""))}</textarea></p>'
                 f'<p><label><input type="checkbox" name="pasted_authorized">'
                 f' I am authorized to provide this text; it is included '
                 f'only because I approve it.</label></p>'
@@ -986,6 +1007,20 @@ class WebApp:
         approved_ids = [x for x in approved.split(",") if x] \
             if approved else []
         candidates = self.ci.store.candidates(run_id)
+        # Too many sources is a correctable user choice, not an error: re-render
+        # the approval page with their selections intact and tell them exactly
+        # how many to deselect, instead of a dead-end 400 page.
+        if len(approved_ids) > MAX_APPROVED_SOURCES:
+            excess = len(approved_ids) - MAX_APPROVED_SOURCES
+            return self._sources_page(
+                session, run_id, selected_ids=set(approved_ids),
+                pasted={k: form.get(k, "") for k in
+                        ("pasted_label", "pasted_origin", "pasted_text")},
+                message=(f"You selected {len(approved_ids)} sources, but the "
+                         f"maximum is {MAX_APPROVED_SOURCES} per analysis. "
+                         f"Please deselect at least {excess} "
+                         f"source{'s' if excess != 1 else ''} before "
+                         f"continuing."))
         rejected = [c["candidate_id"] for c in candidates
                     if c["candidate_id"] not in approved_ids]
         try:

@@ -18,6 +18,7 @@ import urllib.error
 import pytest
 
 from company_fixture_pages import BASE as BRIGHTLAKE, transport as brightlake
+from intent_engine.company_ingestion.records import MAX_APPROVED_SOURCES
 from intent_engine.webapp.app import WebApp
 from intent_engine.webapp.config import AppConfig
 
@@ -668,3 +669,46 @@ def test_incident_render_redeploy_midrun_failed_tesla_run(tmp_path):
     # progress after the redeploy is likewise honest and still result-free
     status, _, body = c.request("GET", f"/runs/{run_id}/progress")
     assert status == "200 OK" and "Open the result" not in body
+
+
+# --- source-approval over the maximum is correctable, not a dead-end --------
+
+def test_too_many_sources_rerenders_approval_page_preserving_selections(
+        tmp_path):
+    """Approving more than the maximum re-renders the approval page (200) with
+    the user's selections intact and a clear count, rather than a generic 400
+    error page; correcting the selection then proceeds normally."""
+    app = _make(tmp_path, transport=brightlake)
+    c = _start_demo(app)
+    run_id = _start_real(c, BRIGHTLAKE)
+    cands = [x["candidate_id"] for x in app.ci.store.candidates(run_id)]
+    assert len(cands) > MAX_APPROVED_SOURCES         # brightlake discovers many
+
+    over = ("csrf=" + c.csrf() + "&approve_consent=on&pasted_text=keep+me&"
+            + "&".join(f"cand={cid}" for cid in cands))
+    status, headers, body = c.request(
+        "POST", f"/runs/{run_id}/sources/approve", over)
+
+    # not a dead-end 400 and not a redirect — the approval form comes back 200
+    assert status == "200 OK", (status, headers)
+    assert "Approve and analyze" in body
+    # states selected vs maximum and exactly how many to deselect
+    assert f"You selected {len(cands)} sources" in body
+    assert f"maximum is {MAX_APPROVED_SOURCES}" in body
+    assert f"deselect at least {len(cands) - MAX_APPROVED_SOURCES}" in body
+    # every submitted selection is preserved as checked
+    for cid in cands:
+        assert f'value="{cid}" checked' in body
+    # pasted evidence the user had typed is preserved too
+    assert "keep me" in body
+    # nothing was approved or fetched — the choice is still the user's to make
+    assert app.ci.store.approval(run_id) is None
+
+    # correcting to within the limit then proceeds as normal
+    ok = ("csrf=" + c.csrf() + "&approve_consent=on&"
+          + "&".join(f"cand={cid}" for cid in cands[:MAX_APPROVED_SOURCES]))
+    status, headers, _ = c.request(
+        "POST", f"/runs/{run_id}/sources/approve", ok)
+    assert status.startswith("303") and headers["Location"].endswith(
+        "/progress")
+    assert app.ci.store.approval(run_id) is not None
