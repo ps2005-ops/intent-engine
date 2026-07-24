@@ -34,6 +34,12 @@ SCHEDULE = {
     "monthly-packet": "monthly",
 }
 
+# After a FAILED attempt, do not re-attempt for this long. A transient outage
+# (shorter than this) recovers on the next attempt; a persistent failure
+# (missing key, extended outage) is attempted at most hourly instead of every
+# tick — no job.failed storm, no wasted compute, while a human acts on it.
+RETRY_BACKOFF_SECONDS = 3600
+
 
 def _parse(ts: Optional[str]) -> Optional[datetime]:
     if not ts:
@@ -66,52 +72,88 @@ def is_due(cadence: str, now: datetime, last_fired: Optional[str], *,
 
 
 class MarkerStore:
+    """Per-job scheduling state: {job: {"fired": iso|None, "attempted": iso}}.
+    `fired` is the last SUCCESS (period gate); `attempted` is the last attempt
+    (retry-backoff gate). Backward-compatible with the old {job: iso} format,
+    which is read as a `fired` timestamp."""
+
     def __init__(self, root: Path):
         self.path = Path(root) / "status" / "scheduler.json"
 
-    def read(self) -> Dict[str, str]:
+    def read(self) -> Dict[str, dict]:
         if not self.path.exists():
             return {}
         try:
-            return json.loads(self.path.read_text())
+            raw = json.loads(self.path.read_text())
         except (json.JSONDecodeError, OSError):
             return {}
+        out: Dict[str, dict] = {}
+        for job, val in raw.items():
+            if isinstance(val, str):                # legacy format
+                out[job] = {"fired": val, "attempted": val}
+            elif isinstance(val, dict):
+                out[job] = {"fired": val.get("fired"),
+                            "attempted": val.get("attempted")}
+        return out
 
-    def advance(self, job: str, when: str) -> None:
+    def fired_at(self, job: str) -> Optional[str]:
+        return self.read().get(job, {}).get("fired")
+
+    def record(self, job: str, *, attempted: str, fired: Optional[str]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         data = self.read()
-        data[job] = when
+        entry = data.setdefault(job, {"fired": None, "attempted": None})
+        entry["attempted"] = attempted
+        if fired is not None:
+            entry["fired"] = fired
         tmp = self.path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(data, indent=2, sort_keys=True))
         os.replace(tmp, self.path)      # atomic
 
 
-def due_jobs(now: datetime, markers: Dict[str, str], *,
+def _backoff_ok(attempted: Optional[str], now: datetime) -> bool:
+    """True if enough time has passed since the last attempt to try again."""
+    prev = _parse(attempted)
+    if prev is None:
+        return True
+    return (now - prev).total_seconds() >= RETRY_BACKOFF_SECONDS
+
+
+def due_jobs(now: datetime, markers: Dict[str, dict], *,
              market_day_fn: Callable[[], bool] = None) -> List[str]:
     market_day = (market_day_fn or (lambda: is_market_day(now.date())))()
-    return [job for job, cadence in SCHEDULE.items()
-            if is_due(cadence, now, markers.get(job), market_day=market_day)]
+    due = []
+    for job, cadence in SCHEDULE.items():
+        entry = markers.get(job, {})
+        if not is_due(cadence, now, entry.get("fired"), market_day=market_day):
+            continue
+        # retry backoff: a job that just failed is not re-attempted every tick
+        if not _backoff_ok(entry.get("attempted"), now):
+            continue
+        due.append(job)
+    return due
 
 
 def run_due(root, *, now: Optional[datetime] = None,
             dispatch_fn: Callable = None,
             market_day_fn: Callable[[], bool] = None) -> Dict[str, str]:
-    """Run every due job once. Advances a job's marker ONLY if all its
-    sub-jobs succeeded (so a failure retries next tick). Returns {job: outcome}.
-    Idempotent within a period and safe across instances (run_job holds the
-    JobLock)."""
+    """Run every due job once. Records the attempt always; advances `fired`
+    (the period gate) only on full success. A failure is retried no sooner
+    than RETRY_BACKOFF_SECONDS later — so a transient outage recovers while a
+    persistent failure does not hammer every tick. Safe across instances
+    (run_job holds the JobLock). Returns {job: outcome}."""
     now = now or now_ny()
     root = Path(root)
     markers = MarkerStore(root)
     if dispatch_fn is None:
         from intent_engine.runtime.__main__ import dispatch as dispatch_fn
+    now_iso = now.isoformat(timespec="seconds")
     outcome: Dict[str, str] = {}
     for job in due_jobs(now, markers.read(), market_day_fn=market_day_fn):
         results = dispatch_fn(job, root, as_of=now.date().isoformat())
         ok = bool(results) and all(r.status == "succeeded" for r in results)
-        if ok:
-            markers.advance(job, now.isoformat(timespec="seconds"))
-        outcome[job] = "fired" if ok else "failed_will_retry"
+        markers.record(job, attempted=now_iso, fired=now_iso if ok else None)
+        outcome[job] = "fired" if ok else "failed_backoff"
     return outcome
 
 

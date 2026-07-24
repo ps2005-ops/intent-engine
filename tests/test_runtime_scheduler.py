@@ -54,22 +54,52 @@ def test_run_due_fires_and_is_idempotent(tmp_path):
     assert fired == []                     # nothing due again the same day
 
 
-def test_failed_job_marker_not_advanced_so_it_retries(tmp_path):
+def test_failed_job_is_not_marked_done_but_backs_off(tmp_path):
+    from datetime import timedelta
     run_due(tmp_path, now=MON, dispatch_fn=lambda job, root, as_of: _fail(job),
             market_day_fn=lambda: True)
-    assert "daily" not in MarkerStore(tmp_path).read()      # never marked fired
+    # failed -> recorded but NOT marked fired (period not satisfied)
+    assert MarkerStore(tmp_path).fired_at("daily") is None
+    # the very next tick must NOT re-attempt (backoff), else it hammers
     fired = []
-    run_due(tmp_path, now=MON,
+    run_due(tmp_path, now=MON + timedelta(minutes=5),
             dispatch_fn=lambda job, root, as_of: (fired.append(job) or _ok(job)),
             market_day_fn=lambda: True)
-    assert "daily" in fired                                 # retried
+    assert "daily" not in fired
+    # after the backoff window it retries and can succeed
+    fired.clear()
+    run_due(tmp_path, now=MON + timedelta(hours=2),
+            dispatch_fn=lambda job, root, as_of: (fired.append(job) or _ok(job)),
+            market_day_fn=lambda: True)
+    assert "daily" in fired
+    assert MarkerStore(tmp_path).fired_at("daily") is not None
+
+
+def test_persistent_failure_does_not_hammer_every_tick(tmp_path):
+    from datetime import timedelta
+    attempts = []
+    for i in range(6):                       # six 5-minute ticks in one hour
+        run_due(tmp_path, now=MON + timedelta(minutes=5 * i),
+                dispatch_fn=lambda job, root, as_of: (attempts.append(job) or _fail(job)),
+                market_day_fn=lambda: True)
+    # backoff caps re-attempts within the hour to one (not six)
+    assert attempts.count("daily") == 1
 
 
 def test_marker_survives_restart(tmp_path):
     run_due(tmp_path, now=MON, dispatch_fn=lambda job, root, as_of: _ok(job),
             market_day_fn=lambda: True)
-    # a fresh MarkerStore (simulating a restart) sees the persisted markers
-    assert "daily" in MarkerStore(tmp_path).read()
+    # a fresh MarkerStore (simulating a restart) sees the persisted success
+    assert MarkerStore(tmp_path).fired_at("daily") is not None
+
+
+def test_legacy_marker_format_is_read(tmp_path):
+    """Migration: the old {job: iso} marker format still loads as a `fired`."""
+    import json
+    (tmp_path / "status").mkdir()
+    (tmp_path / "status" / "scheduler.json").write_text(
+        json.dumps({"daily": "2026-07-20T22:00:00"}))
+    assert MarkerStore(tmp_path).fired_at("daily") == "2026-07-20T22:00:00"
 
 
 def test_scheduler_disabled_by_default(monkeypatch):
