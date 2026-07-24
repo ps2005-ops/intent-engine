@@ -268,10 +268,16 @@ class CompanyIngestionService:
         return record
 
     # --- composition ------------------------------------------------------------------
-    def compose(self, run_id: str, *, fi_service, competitor_approved=False):
+    def compose(self, run_id: str, *, fi_service, competitor_approved=False,
+                extra_observations=()):
         """Build real claims and run the existing Founder Intelligence
         composition. Deterministic; restart-safe (rebuilds from stored
-        documents)."""
+        documents).
+
+        ``extra_observations`` is a bounded, explicit source-addition hook:
+        curated/approved StrategicObservations (e.g. the Shopify validation
+        fixture, or classified external sources) added to the ones derived
+        from retrieved documents before strategic reasoning runs."""
         meta = self.run_meta(run_id)
         domain = meta["domain"]
         documents = self.store.retrieved(run_id)
@@ -304,10 +310,32 @@ class CompanyIngestionService:
             claims, company_name=meta["company_name"],
             source_count=len(documents), failure_count=len(failures))
         result["evidence_library"] = self.evidence_library(run_id)
+        # V1.2 strategic intelligence layer: derive structured observations
+        # from the approved documents and run the deterministic strategic
+        # reasoning engine over them. Additive — the legacy sections are
+        # untouched. Company-owned-only evidence is honestly marked partial by
+        # the strategic quality gate.
+        result["strategic_report"] = self._strategic_report(
+            meta["company_name"], documents, extra_observations)
         final = "COMPLETE" if not failures else "PARTIAL"
         self._transition(run_id, domain, final)
         result["ingestion_status"] = final
         return result
+
+    def _strategic_report(self, company_name, documents, extra_observations):
+        from intent_engine.strategic_intelligence.observations import (
+            derive_observations,
+        )
+        from intent_engine.strategic_intelligence.reasoning import (
+            build_strategic_report,
+        )
+        observations = derive_observations(documents)
+        observations += list(extra_observations or ())
+        if not observations:
+            return None
+        report = build_strategic_report(company_name=company_name,
+                                        observations=observations)
+        return report.as_dict()
 
     # --- evidence library ---------------------------------------------------------
     def evidence_library(self, run_id: str) -> dict:

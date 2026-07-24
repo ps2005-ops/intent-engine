@@ -705,6 +705,17 @@ class WebApp:
                   f'<p><a href="/runs/{_e(run_id)}/report">Executive report '
                   f'preview</a></p></section></main>')
         page = page.replace("</main>", extras, 1)
+        # V1.2: the Strategic Intelligence Report is the primary view when the
+        # run has one; the legacy source sections remain available below it.
+        if result.get("strategic_report"):
+            from intent_engine.strategic_intelligence.render import (
+                render_strategic_report,
+            )
+            strat = render_strategic_report(result["strategic_report"])
+            page = page.replace(
+                "<main>",
+                '<main><h1>Strategic Intelligence Report</h1>' + strat
+                + '<hr><h2>Detailed source sections</h2>', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
 
     def _evidence(self, session, run_id, claim_id):
@@ -760,9 +771,20 @@ class WebApp:
     def _converse(self, session, run_id, form):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
+        question = form.get("question", "")
+        # Prefer a strategic answer when the run has a strategic report and the
+        # question maps to one of its hypotheses: reasoning chain + citations +
+        # counter-evidence + confidence + falsification, not a card echo.
+        strat = self._strategic_report_for(run_id)
+        if strat is not None:
+            from intent_engine.strategic_intelligence.conversation import (
+                answer_strategic,
+            )
+            sa = answer_strategic(question, strat)
+            if sa["intent"] == "EXPLAINED":
+                return self._strategic_answer_page(session, run_id, sa)
         flat_claims = self._run_claims(run_id)
-        answer = self.fi.converse(run_id, form.get("question", ""),
-                                  run_claims=flat_claims)
+        answer = self.fi.converse(run_id, question, run_claims=flat_claims)
         paragraphs, citations = [], []
         for p in (answer.get("answer") or {}).get("paragraphs", []):
             paragraphs.append(f'<p>{_e(p.get("text", ""))}</p>')
@@ -777,6 +799,48 @@ class WebApp:
                 f'<p><small>Answers use only this run\'s approved evidence. '
                 f'A source that is not part of the approved evidence set '
                 f'must be added and approved before analysis.</small></p>'
+                f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
+                f'</main></body></html>')
+        return self._html(body)
+
+    def _strategic_report_for(self, run_id):
+        """The run's strategic report dict, if it has one (real runs only)."""
+        if not self._is_real_run(run_id):
+            return None
+        result = self._real_result(run_id)
+        return result.get("strategic_report") if result else None
+
+    def _strategic_answer_page(self, session, run_id, sa):
+        a = sa["answer"]
+        ev = "".join(
+            f'<li>“{_e(c["excerpt"])}” — <strong>{_e(c["source_title"])}</strong> '
+            f'<em>({_e(c["source_class"])}'
+            f'{", " + _e(c["date"]) if c.get("date") else ""})</em></li>'
+            for c in a["evidence"])
+        counter = ("".join(
+            f'<li>“{_e(c["excerpt"])}” — {_e(c["source_title"])} '
+            f'({_e(c["source_class"])})</li>' for c in a["counter_evidence"])
+            or f'<li>{_e(a["counter_note"])}</li>')
+        reasons = "".join(f'<li>{_e(x)}</li>' for x in a["confidence_reasons"])
+        falsify = "".join(f'<li>{_e(x)}</li>' for x in a["falsification"])
+        alts = "".join(f'<li>{_e(x)}</li>'
+                       for x in a.get("alternative_explanations", []))
+        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                f'<title>Strategic answer</title></head><body>'
+                f'{self._nav(session, session["csrf"])}<main>'
+                f'<h1>Strategic answer</h1>'
+                f'<p><strong>Reasoning.</strong> {_e(a["reasoning"])}</p>'
+                f'<h2>Supporting evidence</h2><ul>{ev}</ul>'
+                f'<h2>Counter-evidence</h2><ul>{counter}</ul>'
+                f'<h2>Alternative explanations</h2><ul>{alts}</ul>'
+                f'<h2>Confidence: {_e(str(a["confidence"]))}</h2>'
+                f'<ul>{reasons}</ul>'
+                f'<h2>What would change my view</h2><ul>{falsify}</ul>'
+                f'<p><strong>Decision this affects:</strong> '
+                f'{_e(a["decision"])}</p>'
+                f'<p><small>Grounded in this run\'s approved observations and '
+                f'the curated pattern library. Outside-in only; no private or '
+                f'internal knowledge is claimed.</small></p>'
                 f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
                 f'</main></body></html>')
         return self._html(body)
