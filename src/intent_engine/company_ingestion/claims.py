@@ -25,7 +25,12 @@ _STOPWORDS = frozenset(
     "the a an and or of to in for with on your you we our us is are be that "
     "this it as at by from more get all can will how what its their they "
     "them out up new about into over than then so if no not do does did have "
-    "has had but also just any every".split())
+    "has had but also just any every been being was were very such there "
+    "here when where which would could should while during without within "
+    "these those because other others some most much many like unlike once "
+    "ever never always want wants needs need make makes made give gives "
+    "take takes see sees say says use uses used using come comes way ways "
+    "thing things something".split())
 
 _OUTCOME_TERMS = ("faster", "save", "saving", "reduce", "reduces", "grow",
                   "growth", "automate", "automation", "secure", "security",
@@ -92,6 +97,11 @@ def _claim(claim_id, text, availability, docs, *, confidence=None,
                             default="CURRENT",
                             key=lambda f: 0 if f == "STALE" else 1))
     return claim
+
+
+def _q(term: str) -> str:
+    """Double-quote a source-derived term (source material, not voice)."""
+    return '"' + term + '"'
 
 
 def _terms(text: str, *, top=8) -> list:
@@ -199,7 +209,8 @@ def build_claims(*, documents: list, company_name: str, domain: str,
         if top:
             analytics.append(_claim(
                 "a.language_terms",
-                f"Most repeated site language: {', '.join(top[:6])} "
+                f"Most repeated site language: "
+                f"{', '.join(_q(t) for t in top[:6])} "
                 f"(term frequency across {len(site_docs)} approved pages; "
                 f"not a strategy conclusion).",
                 AVAIL_SUPPORTED, site_docs[:6], confidence="Moderate",
@@ -209,7 +220,7 @@ def build_claims(*, documents: list, company_name: str, domain: str,
             analytics.append(_claim(
                 "a.outcome_language",
                 f"Outcome language present on company pages: "
-                f"{', '.join(outcomes[:6])}.",
+                f"{', '.join(_q(t) for t in outcomes[:6])}.",
                 AVAIL_SUPPORTED, site_docs[:6], confidence="Moderate",
                 transformation="grouped"))
     blog_docs = by_type.get("blog", [])
@@ -228,22 +239,27 @@ def build_claims(*, documents: list, company_name: str, domain: str,
         market.append(_claim(
             "mv.company_language",
             f"Your company pages emphasize: "
-            f"{', '.join(_terms(' '.join(d['text_content'] for d in site_docs), top=5))}.",
+            f"{', '.join(_q(t) for t in _terms(' '.join(d['text_content'] for d in site_docs), top=5))}.",
             AVAIL_SUPPORTED, site_docs[:6], confidence="Moderate",
             transformation="grouped"))
     if external_docs:
         market.append(_claim(
             "mv.customer_language",
             f"Approved external evidence emphasizes: "
-            f"{', '.join(_terms(' '.join(d['text_content'] for d in external_docs), top=5))} "
+            f"{', '.join(_q(t) for t in _terms(' '.join(d['text_content'] for d in external_docs), top=5))} "
             f"(user-approved external sources).",
             AVAIL_SUPPORTED, external_docs[:6], confidence="Moderate",
             transformation="grouped"))
 
     # --- blind spot: only when two distinct sources genuinely diverge --------
     customers_docs = by_type.get("customers", [])
+    def _home_terms(h):
+        return (set(_terms(h["text_content"], top=10))
+                | set(_terms((h.get("title") or "") + " "
+                             + (h.get("meta_description") or ""), top=25)))
+
     if home and customers_docs:
-        home_terms = set(_terms(home["text_content"], top=10))
+        home_terms = _home_terms(home)
         cust_terms = set(_terms(" ".join(d["text_content"]
                                          for d in customers_docs), top=10))
         divergent = list(cust_terms - home_terms)[:4]
@@ -251,12 +267,13 @@ def build_claims(*, documents: list, company_name: str, domain: str,
             blind.append(_claim(
                 "b.emphasis_gap",
                 f"Customer-facing pages repeatedly use language the "
-                f"homepage does not emphasize: {', '.join(divergent)}. "
+                f"homepage does not emphasize: "
+                f"{', '.join(_q(t) for t in divergent)}. "
                 f"This may be intentional.", AVAIL_SUPPORTED,
                 [home, customers_docs[0]], confidence="Moderate",
                 transformation="grouped"))
     if home and external_docs and not blind:
-        home_terms = set(_terms(home["text_content"], top=10))
+        home_terms = _home_terms(home)
         ext_terms = set(_terms(" ".join(d["text_content"]
                                         for d in external_docs), top=10))
         divergent = list(ext_terms - home_terms)[:4]
@@ -264,7 +281,8 @@ def build_claims(*, documents: list, company_name: str, domain: str,
             blind.append(_claim(
                 "b.external_gap",
                 f"Approved external evidence emphasizes language the "
-                f"homepage does not: {', '.join(divergent)}. This may be "
+                f"homepage does not: "
+                f"{', '.join(_q(t) for t in divergent)}. This may be "
                 f"intentional.", AVAIL_SUPPORTED,
                 [home, external_docs[0]], confidence="Moderate",
                 transformation="grouped"))
@@ -276,7 +294,7 @@ def build_claims(*, documents: list, company_name: str, domain: str,
             assumption.append(_claim(
                 "as.emphasis.feature",
                 f"Visible assumption: buyers respond to the emphasized "
-                f"outcome language ({', '.join(home_outcomes[:3])}).",
+                f"outcome language ({', '.join(_q(t) for t in home_outcomes[:3])}).",
                 AVAIL_PARTIAL, [home], confidence="Moderate",
                 transformation="summarized"))
         if external_docs:
@@ -288,7 +306,7 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 assumption.append(_claim(
                     "as.external.speed",
                     f"Complicating evidence: external sources emphasize "
-                    f"{', '.join(complicating[:3])}, which the homepage "
+                    f"{', '.join(_q(t) for t in complicating[:3])}, which the homepage "
                     f"does not.", AVAIL_PARTIAL, external_docs[:2],
                     confidence="Moderate", transformation="summarized"))
 
