@@ -1,20 +1,42 @@
-"""V1.2 strategic follow-up conversation.
+"""V1.2 strategic follow-up conversation with query routing.
 
 Answers reason over the strategic report's objects — observations,
 hypotheses, counter-evidence, comparable patterns, evidence gaps, and decision
-implications — instead of echoing a report card. A "why do you think X"
-question returns the reasoning chain, cites the evidence, acknowledges
-counter-evidence, states calibrated confidence, and explains what would
-falsify the view.
+implications. A routing layer first detects the requested OPERATION (support,
+contradiction, comparison, falsification, implication, summary) and the target
+hypothesis / comparable company, so a "how is this like Stripe" question is
+answered with the hypothesis whose pattern actually cites Stripe — using a
+dedicated comparison structure that names and discusses Stripe — not whatever
+hypothesis happens to share keywords.
+
+Answers are selective (a few strongest observations, one or two counters), lead
+with a direct answer, and never expose internal signal names or record ids in
+the human-facing body.
 """
 from __future__ import annotations
 
 import re
 
-CONVERSATION_VERSION = "strategic_conversation.v1"
+CONVERSATION_VERSION = "strategic_conversation.v2"
 _STOP = {"the", "a", "an", "is", "are", "do", "you", "think", "why", "how",
          "what", "of", "to", "in", "on", "and", "or", "does", "it", "its",
-         "for", "about", "becoming", "toward", "into", "that", "this", "we"}
+         "for", "about", "becoming", "toward", "into", "that", "this", "we",
+         "similar", "compare", "comparison", "like", "where", "break", "breaks",
+         "down", "different", "difference", "differ"}
+
+# operation cue words
+_OP_CUES = {
+    "comparison": ("similar", "compare", "comparison", "like ", "versus", " vs",
+                   "analog", "break down", "breaks down", "how is this like"),
+    "contradiction": ("weaken", "against", "counter", "contradict", "argue "
+                      "against", "disagree", "wrong", "risk to"),
+    "falsification": ("falsify", "disprove", "what would change", "invalidate",
+                      "prove it wrong"),
+    "implication": ("decision", "implication", "so what", "should we", "affect",
+                    "what does it mean"),
+    "agenda": ("agenda", "leadership discuss", "being debated", "internally",
+               "timely", "recent", "last six months", "changed"),
+}
 
 
 def _tokens(text: str) -> set:
@@ -22,14 +44,55 @@ def _tokens(text: str) -> set:
             if w not in _STOP and len(w) > 2}
 
 
-def _match_hypothesis(question: str, hypotheses: list, patterns: list):
-    pat_by_id = {p["pattern_id"]: p for p in patterns}
+def _detect_operation(q: str) -> str:
+    low = " " + q.lower() + " "
+    for op in ("comparison", "falsification", "contradiction", "implication",
+               "agenda"):
+        if any(cue in low for cue in _OP_CUES[op]):
+            return op
+    return "support"
+
+
+def _all_comparables(report) -> dict:
+    """name(lower) -> pattern_id, from the cited historical examples."""
+    out = {}
+    for p in report.get("patterns", []):
+        for e in p.get("historical_examples", []):
+            name = (e.get("name") or "").split("→")[0].split("(")[0].strip()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9.\-]+", name):
+                if len(token) > 2:
+                    out[token.lower()] = p["pattern_id"]
+    return out
+
+
+def _detect_comparable(q: str, report) -> tuple:
+    """Return (comparable_name, pattern_id) if the question names one of the
+    report's cited comparison companies, else (None, None)."""
+    comparables = _all_comparables(report)
+    low = q.lower()
+    for name, pattern_id in comparables.items():
+        # word-boundary match so "stripe" matches but "strip" does not over-match
+        if re.search(rf"\b{re.escape(name)}\b", low):
+            return name, pattern_id
+    return None, None
+
+
+def _hyp_by_pattern(report, pattern_id):
+    for h in report.get("hypotheses", []):
+        if h.get("pattern_id") == pattern_id:
+            return h
+    return None
+
+
+def _match_hypothesis(question: str, report):
+    """Keyword-overlap fallback when no comparable/operation pins a hypothesis."""
+    pat_by_id = {p["pattern_id"]: p for p in report.get("patterns", [])}
     qtok = _tokens(question)
     best, best_score = None, 0
-    for h in hypotheses:
+    for h in report.get("hypotheses", []):
         pat = pat_by_id.get(h.get("pattern_id", ""), {})
         htok = _tokens(" ".join([
-            h.get("title", ""), h.get("statement", ""), h.get("reasoning", ""),
+            h.get("title", ""), h.get("statement", ""),
             pat.get("name", ""), pat.get("description", "")]))
         score = len(qtok & htok)
         if score > best_score:
@@ -37,67 +100,142 @@ def _match_hypothesis(question: str, hypotheses: list, patterns: list):
     return best if best_score else None
 
 
+def _cite(ids, obs_by_id, limit=None):
+    out = []
+    for i in ids:
+        o = obs_by_id.get(i)
+        if o:
+            out.append({"observation_id": i,
+                        "source_title": o.get("source_title", ""),
+                        "source_class": o.get("source_class", ""),
+                        "date": o.get("date", ""),
+                        "excerpt": o.get("excerpt") or o.get("text", "")})
+        if limit and len(out) >= limit:
+            break
+    return out
+
+
+def _pattern_for(report, pattern_id):
+    for p in report.get("patterns", []):
+        if p["pattern_id"] == pattern_id:
+            return p
+    return {}
+
+
+def _comparison_answer(question, report, hyp, comparable, obs_by_id):
+    pat = _pattern_for(report, hyp["pattern_id"])
+    support = _cite(hyp.get("strongest_support_ids")
+                    or hyp.get("supporting_observation_ids", []), obs_by_id, 3)
+    # find the cited example that matches the named comparable
+    example = next((e for e in pat.get("historical_examples", [])
+                    if comparable.lower() in (e.get("name", "").lower())), {})
+    name = comparable.title()
+    mechanism_head = pat.get("mechanism", "").split(".")[0]
+    direct = (f"The comparison to {name} is apt for one specific reason: the "
+              f"same mechanism — {mechanism_head}. It is a partial analogy, "
+              f"not an identity.")
+    example_note = example.get("note") or "followed the same transition"
+    return {
+        "direct_answer": direct,
+        "shared_mechanism": pat.get("mechanism", ""),
+        "key_similarities": [
+            f"Both fit the '{pat.get('name', '')}' transition.",
+            f"{name}: {example_note}.",
+        ],
+        "key_differences": [
+            "Business model, customer, and where value is captured differ — a "
+            "shared mechanism does not mean shared economics.",
+            pat.get("when_it_does_not_apply", ""),
+        ],
+        "where_the_analogy_breaks": pat.get("limitations", "")
+        or pat.get("when_it_does_not_apply", ""),
+        "strategic_implication": (hyp.get("decision_implications") or [""])[0],
+        "confidence": hyp.get("confidence"),
+        "missing_evidence": (hyp.get("evidence_gaps") or [""])[0],
+        "supporting_evidence": support,
+        "comparable": comparable.title(),
+    }
+
+
 def answer_strategic(question: str, report) -> dict:
-    """Return a structured, cited answer grounded in the strategic report."""
+    """Route the question, then answer with the right structure. ``report`` may
+    be a StrategicReport or its ``as_dict()``."""
     r = report.as_dict() if hasattr(report, "as_dict") else report
     obs_by_id = {o["observation_id"]: o for o in r.get("observations", [])}
-    hyp = _match_hypothesis(question, r.get("hypotheses", []),
-                            r.get("patterns", []))
+    operation = _detect_operation(question)
+    comparable, cmp_pattern = _detect_comparable(question, r)
+
+    # routing: a named comparable pins the hypothesis whose pattern cites it
+    hyp = _hyp_by_pattern(r, cmp_pattern) if cmp_pattern else None
+    if hyp is None:
+        hyp = _match_hypothesis(question, r)
+    if hyp is None and r.get("hypotheses"):
+        hyp = r["hypotheses"][0]            # fall back to the leading thesis
+
+    routing = {"operation": operation,
+               "selected_hypothesis": hyp["hypothesis_id"] if hyp else None,
+               "selected_comparable": comparable.title() if comparable else None}
 
     if hyp is None:
-        return {
-            "conversation_version": CONVERSATION_VERSION, "intent": "UNMATCHED",
-            "matched_hypothesis": None,
-            "answer": {"reasoning": "I don't hold a strategic hypothesis that "
-                       "matches that question. I can explain any of the "
-                       "hypotheses in the report, the blind spots, or the "
-                       "evidence gaps.",
-                       "evidence": [], "counter_evidence": [],
-                       "confidence": None, "confidence_reasons": [],
-                       "falsification": [], "decision": ""},
-            "citations": [],
-        }
+        return {"conversation_version": CONVERSATION_VERSION,
+                "intent": "UNMATCHED", "routing": routing,
+                "answer": {"direct_answer": "I don't yet hold a hypothesis that "
+                           "matches that question.", "evidence": [],
+                           "counter_evidence": [], "confidence": None,
+                           "confidence_reasons": [], "falsification": [],
+                           "decision": ""}, "citations": []}
 
-    def _cite(ids):
-        out = []
-        for i in ids:
-            o = obs_by_id.get(i)
-            if o:
-                out.append({"observation_id": i,
-                            "source_title": o.get("source_title", ""),
-                            "source_class": o.get("source_class", ""),
-                            "date": o.get("date", ""),
-                            "excerpt": o.get("excerpt") or o.get("text", "")})
-        return out
+    # comparison questions get the dedicated comparison structure
+    if operation == "comparison" and comparable:
+        comp = _comparison_answer(question, r, hyp, comparable, obs_by_id)
+        return {"conversation_version": CONVERSATION_VERSION,
+                "intent": "COMPARISON", "routing": routing,
+                "matched_hypothesis": hyp["hypothesis_id"],
+                "comparison": comp,
+                "citations": [c["observation_id"]
+                              for c in comp["supporting_evidence"]],
+                "note": "Comparison grounded in the cited historical pattern; "
+                        "shared mechanism, differences, and where the analogy "
+                        "breaks are stated explicitly."}
 
-    supporting = _cite(hyp.get("supporting_observation_ids", []))
-    counter = _cite(hyp.get("counter_observation_ids", []))
-    counter_note = (counter and "There is genuine counter-evidence: "
-                    + "; ".join(c["excerpt"] for c in counter[:2])
-                    or "No direct counter-evidence was retrieved; the open "
-                       "evidence gaps below temper the confidence instead.")
-
-    reasoning = (
-        f"I hold this as a {hyp['confidence']}-confidence hypothesis, not a "
-        f"fact. {hyp['reasoning']} The strongest supporting evidence: "
-        + "; ".join(f"{c['source_title']} ({c['source_class']})"
-                    for c in supporting[:3]) + ".")
+    # selective support / contradiction / falsification / implication answer
+    support = _cite(hyp.get("strongest_support_ids")
+                    or hyp.get("supporting_observation_ids", []), obs_by_id, 4)
+    counter = _cite(hyp.get("strongest_counter_ids")
+                    or hyp.get("counter_observation_ids", []), obs_by_id, 2)
+    against = counter[0]["excerpt"] if counter else \
+        "mainly the open evidence gaps below"
+    lead = {
+        "support": f"Yes — on balance the evidence supports that "
+                   f"{hyp['title'].lower()} ({hyp['confidence']} confidence).",
+        "contradiction": f"The strongest case against it: {against}.",
+        "falsification": "It would be wrong if the falsification tests below "
+                         "came back negative.",
+        "implication": "The decision this most affects: "
+                       + (hyp.get("decision_implications") or [""])[0],
+        "agenda": "This is likely on the current leadership agenda because "
+                  + (hyp.get("why_now") or "recent public signals point to it")
+                  + ".",
+    }[operation]
 
     return {
         "conversation_version": CONVERSATION_VERSION, "intent": "EXPLAINED",
-        "matched_hypothesis": hyp["hypothesis_id"],
+        "routing": routing, "matched_hypothesis": hyp["hypothesis_id"],
         "answer": {
-            "reasoning": reasoning,
-            "evidence": supporting,
+            "direct_answer": lead,
+            "reasoning": hyp.get("reasoning", ""),
+            "evidence": support,
             "counter_evidence": counter,
-            "counter_note": counter_note,
-            "confidence": hyp["confidence"],
+            "counter_note": (counter and "Genuine counter-evidence above."
+                             or "No strong counter-evidence retrieved; the "
+                                "evidence gaps temper confidence instead."),
+            "confidence": hyp.get("confidence"),
             "confidence_reasons": hyp.get("confidence_reasons", []),
             "falsification": hyp.get("falsification_questions", []),
             "alternative_explanations": hyp.get("alternative_explanations", []),
             "decision": (hyp.get("decision_implications") or [""])[0],
         },
-        "citations": [c["observation_id"] for c in supporting],
-        "note": "Grounded in this run's approved observations and the curated "
-                "pattern library; confidence and falsification are explicit.",
+        "citations": [c["observation_id"] for c in support],
+        "note": "Selective by design — strongest evidence only; full evidence "
+                "is available in the report's source library.",
     }

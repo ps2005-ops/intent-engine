@@ -634,54 +634,40 @@ class WebApp:
         if result is None:
             return self._error_page(404, "run result not found")
         csrf = session["csrf"]
-        page = render_result_html(result)
-        if result.get("overview"):
-            overview_html = "".join(
-                f'<p>{_e(s["text"])} <small>[{_e(", ".join(s["claim_ids"]))}]'
-                f'</small></p>' for s in result["overview"])
-            lib = result.get("evidence_library", {})
-            lib_html = ""
-            titles = {"company_website": "Company website",
-                      "external_public": "External public evidence",
-                      "user_provided": "User-provided evidence",
-                      "unavailable_or_failed": "Unavailable or failed"}
-            for group, entries in lib.items():
-                if not entries:
-                    continue
-                items = "".join(
-                    f'<li>{_e(str(e.get("title") or e.get("origin", "")))} '
-                    f'— <code>{_e(str(e.get("origin", "")))}</code>'
-                    + (f' · <a href="/runs/{_e(run_id)}/sources/'
-                       f'{_e(self._source_id_for(run_id, e))}">detail</a>'
-                       if group != "unavailable_or_failed" else
-                       f' · {_e(str(e.get("failure_type", "")))}: '
-                       f'{_e(str(e.get("message", ""))[:80])}')
-                    + '</li>' for e in entries)
-                lib_html += (f'<h3>{titles.get(group, group)}</h3>'
-                             f'<ul>{items}</ul>')
-            page = page.replace(
-                "<main>",
-                f'<main><section aria-label="Executive overview">'
-                f'<h2>Executive Overview</h2>{overview_html}</section>'
-                f'<section aria-label="Evidence library">'
-                f'<h2>Evidence Library</h2><p>This report is based only '
-                f'on the approved sources listed below. It does not '
-                f'represent internal company knowledge.</p>{lib_html}'
-                f'</section>', 1)
-        claim_links = "".join(
-            f'<li><a href="/runs/{_e(run_id)}/evidence/'
-            f'{_e(claim["claim_id"])}">{_e(claim["text"][:90])}</a></li>'
-            for section in result.get("sections", [])
-            for card in section.get("cards", [])
-            for claim in card.get("claims", []))
-        # Sharing is persistent-account functionality; anonymous demo sessions
-        # do not get it (and it is enforced server-side in _share_create too).
         share_form = (
             '<p><small>Sharing is disabled for demo sessions.</small></p>'
             if session.get("anonymous") else
             f'<form action="/runs/{_e(run_id)}/share" method="post">'
             f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
             f'<button type="submit">Create share link</button></form>')
+        feedback_form = (
+            f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<fieldset><legend>Was this useful?</legend>'
+            f'<label><input type="radio" name="useful" value="yes" required> '
+            f'Yes</label> <label><input type="radio" name="useful" '
+            f'value="partly"> Partly</label> <label><input type="radio" '
+            f'name="useful" value="no"> No</label></fieldset>'
+            f'<button type="submit">Send feedback</button></form>')
+
+        # V1.2: when the run has a Strategic Intelligence Report it IS the
+        # executive report. The legacy claim/evidence sections are quarantined
+        # into a collapsed technical appendix so they never weaken the exec view.
+        if result.get("strategic_report"):
+            return self._strategic_run_page(session, run_id, result,
+                                            share_form, feedback_form)
+
+        page = render_result_html(result)
+        if result.get("overview"):
+            page = page.replace("<main>",
+                                "<main>" + self._legacy_sections_html(
+                                    run_id, result), 1)
+        claim_links = "".join(
+            f'<li><a href="/runs/{_e(run_id)}/evidence/'
+            f'{_e(claim["claim_id"])}">{_e(claim["text"][:90])}</a></li>'
+            for section in result.get("sections", [])
+            for card in section.get("cards", [])
+            for claim in card.get("claims", []))
         extras = (f'<section aria-label="Evidence index"><h2>Evidence '
                   f'index</h2><p>Every claim resolves to its exact source '
                   f'artifacts:</p><ul>{claim_links}</ul></section>'
@@ -691,32 +677,99 @@ class WebApp:
                   f'value="{_e(csrf)}"><label for="q">Ask a follow-up '
                   f'question</label> <input id="q" name="question" required>'
                   f'<button type="submit">Ask</button></form>'
-                  f'{share_form}'
-                  f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
-                  f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
-                  f'<fieldset><legend>Was this useful?</legend>'
-                  f'<label><input type="radio" name="useful" value="yes" '
-                  f'required> Yes</label> '
-                  f'<label><input type="radio" name="useful" value="partly">'
-                  f' Partly</label> '
-                  f'<label><input type="radio" name="useful" value="no">'
-                  f' No</label></fieldset>'
-                  f'<button type="submit">Send feedback</button></form>'
+                  f'{share_form}{feedback_form}'
                   f'<p><a href="/runs/{_e(run_id)}/report">Executive report '
                   f'preview</a></p></section></main>')
         page = page.replace("</main>", extras, 1)
-        # V1.2: the Strategic Intelligence Report is the primary view when the
-        # run has one; the legacy source sections remain available below it.
-        if result.get("strategic_report"):
-            from intent_engine.strategic_intelligence.render import (
-                render_strategic_report,
-            )
-            strat = render_strategic_report(result["strategic_report"])
-            page = page.replace(
-                "<main>",
-                '<main><h1>Strategic Intelligence Report</h1>' + strat
-                + '<hr><h2>Detailed source sections</h2>', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
+
+    def _legacy_sections_html(self, run_id, result):
+        """The legacy executive-overview + evidence-library HTML (used inline
+        for non-strategic runs, or inside the technical appendix otherwise)."""
+        overview_html = "".join(
+            f'<p>{_e(s["text"])} <small>[{_e(", ".join(s["claim_ids"]))}]'
+            f'</small></p>' for s in result.get("overview", []))
+        lib = result.get("evidence_library", {})
+        titles = {"company_website": "Company website",
+                  "external_public": "External public evidence",
+                  "user_provided": "User-provided evidence",
+                  "unavailable_or_failed": "Unavailable or failed"}
+        lib_html = ""
+        for group, entries in lib.items():
+            if not entries:
+                continue
+            items = "".join(
+                f'<li>{_e(str(e.get("title") or e.get("origin", "")))} '
+                f'— <code>{_e(str(e.get("origin", "")))}</code>'
+                + (f' · <a href="/runs/{_e(run_id)}/sources/'
+                   f'{_e(self._source_id_for(run_id, e))}">detail</a>'
+                   if group != "unavailable_or_failed" else
+                   f' · {_e(str(e.get("failure_type", "")))}: '
+                   f'{_e(str(e.get("message", ""))[:80])}')
+                + '</li>' for e in entries)
+            lib_html += f'<h3>{titles.get(group, group)}</h3><ul>{items}</ul>'
+        return (f'<section aria-label="Executive overview">'
+                f'<h2>Executive Overview</h2>{overview_html}</section>'
+                f'<section aria-label="Evidence library">'
+                f'<h2>Evidence Library</h2><p>This report is based only on the '
+                f'approved sources listed below. It does not represent internal '
+                f'company knowledge.</p>{lib_html}</section>')
+
+    def _suggested_questions(self, report):
+        """Company-specific follow-ups derived from the report, not generic."""
+        hyps = report.get("hypotheses", [])
+        qs = []
+        if hyps:
+            top = hyps[0]
+            qs.append(f"What evidence most weakens the "
+                      f"{top['title'].split(' (')[0].lower()} thesis?")
+            comps = top.get("comparables", [])
+            if comps:
+                qs.append(f"How is this transition similar to {comps[0]}, and "
+                          f"where does the comparison break down?")
+        if report.get("agenda"):
+            qs.append("What is likely being debated internally right now?")
+        qs.append("Which recent event makes this timely?")
+        qs.append("What changed in the last six months?")
+        return qs[:5]
+
+    def _strategic_run_page(self, session, run_id, result, share_form,
+                            feedback_form):
+        from intent_engine.strategic_intelligence.render import (
+            render_strategic_report,
+        )
+        csrf = session["csrf"]
+        report = result["strategic_report"]
+        strat = render_strategic_report(report)
+        # company-specific suggested questions, each a one-click ask
+        suggested = "".join(
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
+            f'style="display:inline-block;margin:3px">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="question" value="{_e(q)}">'
+            f'<button type="submit" class="ghost">{_e(q)}</button></form>'
+            for q in self._suggested_questions(report))
+        actions = (
+            f'<section aria-label="Intelligence assistant"><h2>Ask the '
+            f'intelligence assistant</h2>'
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<label for="q">Your question</label> '
+            f'<input id="q" name="question" required style="min-width:60%">'
+            f'<button type="submit">Ask</button></form>'
+            f'<p class="muted">Suggested, company-specific:</p>{suggested}'
+            f'{share_form}{feedback_form}</section>')
+        # legacy content quarantined; never in the primary executive flow
+        appendix = (
+            f'<details><summary>Technical appendix — legacy source extraction'
+            f'</summary>{self._legacy_sections_html(run_id, result)}</details>')
+        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                f'<meta name="viewport" content="width=device-width,'
+                f'initial-scale=1"><title>Strategic Intelligence — '
+                f'{_e(report.get("company_name", ""))}</title></head><body>'
+                f'{self._nav(session, csrf)}<main>{strat}{actions}{appendix}'
+                f'</main></body></html>')
+        return self._html(body)
 
     def _evidence(self, session, run_id, claim_id):
         if not self._owned(session, run_id):
@@ -781,7 +834,7 @@ class WebApp:
                 answer_strategic,
             )
             sa = answer_strategic(question, strat)
-            if sa["intent"] == "EXPLAINED":
+            if sa["intent"] in ("EXPLAINED", "COMPARISON"):
                 return self._strategic_answer_page(session, run_id, sa)
         flat_claims = self._run_claims(run_id)
         answer = self.fi.converse(run_id, question, run_claims=flat_claims)
@@ -811,15 +864,54 @@ class WebApp:
         return result.get("strategic_report") if result else None
 
     def _strategic_answer_page(self, session, run_id, sa):
+        routing = sa.get("routing", {})
+        label = (f'<p class="muted"><small>Discussing hypothesis '
+                 f'<strong>{_e(str(routing.get("selected_hypothesis") or "—"))}'
+                 f'</strong>'
+                 + (f' · comparison: <strong>'
+                    f'{_e(str(routing.get("selected_comparable")))}</strong>'
+                    if routing.get("selected_comparable") else "")
+                 + f' · operation: {_e(str(routing.get("operation", "")))}'
+                 f'</small></p>')
+        back = (f'<p><a href="/runs/{_e(run_id)}">Back to report</a></p>'
+                f'<p><small>Outside-in only; grounded in this run\'s approved '
+                f'observations and the curated pattern library.</small></p>')
+
+        if sa["intent"] == "COMPARISON":
+            c = sa["comparison"]
+            def _ul(items):
+                return "".join(f"<li>{_e(x)}</li>" for x in items if x)
+            ev = "".join(
+                f'<li>“{_e(x["excerpt"])}” — <strong>{_e(x["source_title"])}'
+                f'</strong> <em>({_e(x["source_class"])})</em></li>'
+                for x in c["supporting_evidence"])
+            body = (f'<!doctype html><html lang="en"><head>'
+                    f'<meta charset="utf-8"><title>Comparison</title></head>'
+                    f'<body>{self._nav(session, session["csrf"])}<main>'
+                    f'<h1>Comparison: {_e(c["comparable"])}</h1>{label}'
+                    f'<p><strong>{_e(c["direct_answer"])}</strong></p>'
+                    f'<h2>Shared mechanism</h2><p>{_e(c["shared_mechanism"])}</p>'
+                    f'<h2>Key similarities</h2><ul>{_ul(c["key_similarities"])}</ul>'
+                    f'<h2>Key differences</h2><ul>{_ul(c["key_differences"])}</ul>'
+                    f'<h2>Where the analogy breaks</h2>'
+                    f'<p>{_e(c["where_the_analogy_breaks"])}</p>'
+                    f'<h2>Strategic implication</h2>'
+                    f'<p>{_e(c["strategic_implication"])}</p>'
+                    f'<h2>Confidence &amp; missing evidence</h2>'
+                    f'<p>{_e(str(c["confidence"]))} — {_e(c["missing_evidence"])}</p>'
+                    f'<h2>Supporting evidence</h2><ul>{ev}</ul>{back}'
+                    f'</main></body></html>')
+            return self._html(body)
+
         a = sa["answer"]
         ev = "".join(
-            f'<li>“{_e(c["excerpt"])}” — <strong>{_e(c["source_title"])}</strong> '
-            f'<em>({_e(c["source_class"])}'
-            f'{", " + _e(c["date"]) if c.get("date") else ""})</em></li>'
-            for c in a["evidence"])
+            f'<li>“{_e(x["excerpt"])}” — <strong>{_e(x["source_title"])}</strong> '
+            f'<em>({_e(x["source_class"])}'
+            f'{", " + _e(x["date"]) if x.get("date") else ""})</em></li>'
+            for x in a["evidence"])
         counter = ("".join(
-            f'<li>“{_e(c["excerpt"])}” — {_e(c["source_title"])} '
-            f'({_e(c["source_class"])})</li>' for c in a["counter_evidence"])
+            f'<li>“{_e(x["excerpt"])}” — {_e(x["source_title"])} '
+            f'({_e(x["source_class"])})</li>' for x in a["counter_evidence"])
             or f'<li>{_e(a["counter_note"])}</li>')
         reasons = "".join(f'<li>{_e(x)}</li>' for x in a["confidence_reasons"])
         falsify = "".join(f'<li>{_e(x)}</li>' for x in a["falsification"])
@@ -828,21 +920,16 @@ class WebApp:
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<title>Strategic answer</title></head><body>'
                 f'{self._nav(session, session["csrf"])}<main>'
-                f'<h1>Strategic answer</h1>'
-                f'<p><strong>Reasoning.</strong> {_e(a["reasoning"])}</p>'
-                f'<h2>Supporting evidence</h2><ul>{ev}</ul>'
+                f'<h1>Strategic answer</h1>{label}'
+                f'<p><strong>{_e(a["direct_answer"])}</strong></p>'
+                f'<p>{_e(a["reasoning"])}</p>'
+                f'<h2>Strongest supporting evidence</h2><ul>{ev}</ul>'
                 f'<h2>Counter-evidence</h2><ul>{counter}</ul>'
                 f'<h2>Alternative explanations</h2><ul>{alts}</ul>'
-                f'<h2>Confidence: {_e(str(a["confidence"]))}</h2>'
-                f'<ul>{reasons}</ul>'
+                f'<h2>Confidence: {_e(str(a["confidence"]))}</h2><ul>{reasons}</ul>'
                 f'<h2>What would change my view</h2><ul>{falsify}</ul>'
                 f'<p><strong>Decision this affects:</strong> '
-                f'{_e(a["decision"])}</p>'
-                f'<p><small>Grounded in this run\'s approved observations and '
-                f'the curated pattern library. Outside-in only; no private or '
-                f'internal knowledge is claimed.</small></p>'
-                f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
-                f'</main></body></html>')
+                f'{_e(a["decision"])}</p>{back}</main></body></html>')
         return self._html(body)
 
     def _report(self, session, run_id):

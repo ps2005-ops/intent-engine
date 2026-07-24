@@ -41,6 +41,16 @@ OBSERVATION_TYPES = (
 
 CONFIDENCE_LEVELS = ("speculative", "low", "moderate", "high")
 
+# How a piece of evidence relates to a hypothesis. Assigned per hypothesis, so
+# the same observation can support one and contradict another — but it may not
+# be BOTH support and contradiction for a single hypothesis without an explicit
+# dual-role explanation.
+EVIDENCE_ROLES = (
+    "direct_support", "indirect_support", "contradiction",
+    "alternative_explanation", "contextual_only", "weak_or_irrelevant",
+    "duplicate", "stale", "unresolved",
+)
+
 
 class StrategicError(ValueError):
     """A strategic record violated its contract."""
@@ -71,6 +81,12 @@ class StrategicObservation:
     source_title: str = ""
     origin: str = ""
     date: str = ""
+    # strategic-quality metadata (filled by extraction)
+    strategic_signal: str = ""      # one-line strategic meaning, not a title
+    relevance: str = ""             # why this matters to the analysis
+    entity: str = ""                # linked product/project/entity
+    weak: bool = False              # title-only / generic marketing → weak
+    evidence_quality: str = "strong"  # strong | weak
 
     def validate(self) -> None:
         _require(self.observation_type in OBSERVATION_TYPES,
@@ -143,6 +159,12 @@ class StrategicHypothesis:
     falsification_questions: list
     pattern_id: str = ""
     source_classes: tuple = ()
+    why_now: str = ""                      # timeliness from recent evidence
+    signal_trace: str = ""                 # internal signal detail (appendix)
+    strongest_support_ids: tuple = ()      # curated, not the full dump
+    strongest_counter_ids: tuple = ()
+    comparables: tuple = ()                # comparison company names
+    evidence_roles: tuple = ()             # [(observation_id, role), ...]
 
     def validate(self) -> None:
         _require(self.confidence in CONFIDENCE_LEVELS,
@@ -160,10 +182,19 @@ class StrategicHypothesis:
                  f"hypothesis {self.hypothesis_id} has no decision implication")
         _require(len(self.falsification_questions) >= 1,
                  f"hypothesis {self.hypothesis_id} has no falsification test")
+        # a single observation may not be BOTH support and contradiction for the
+        # same hypothesis (the wholesale-copy failure); dual roles must be made
+        # explicit via evidence_roles, never by listing an id in both.
+        overlap = (set(self.supporting_observation_ids)
+                   & set(self.counter_observation_ids))
+        _require(not overlap, f"hypothesis {self.hypothesis_id}: observations "
+                 f"{sorted(overlap)} appear as both support and contradiction")
 
     def as_dict(self) -> dict:
         d = asdict(self)
-        d["source_classes"] = list(self.source_classes)
+        for k in ("source_classes", "strongest_support_ids",
+                  "strongest_counter_ids", "comparables", "evidence_roles"):
+            d[k] = list(getattr(self, k))
         return d
 
 
@@ -223,6 +254,10 @@ class StrategicReport:
     quality_findings: list = field(default_factory=list)
     limited_scope_accepted: bool = False
     evidence_graph: dict = field(default_factory=dict)
+    agenda: list = field(default_factory=list)          # likely leadership items
+    timeline: list = field(default_factory=list)        # chronological events
+    source_library: dict = field(default_factory=dict)  # all sources, grouped
+    analytics_events: list = field(default_factory=list)
 
     def observation(self, obs_id: str):
         for o in self.observations:
@@ -251,4 +286,8 @@ class StrategicReport:
             "quality_findings": list(self.quality_findings),
             "limited_scope_accepted": self.limited_scope_accepted,
             "evidence_graph": self.evidence_graph,
+            "agenda": list(self.agenda),
+            "timeline": list(self.timeline),
+            "source_library": self.source_library,
+            "analytics_events": list(self.analytics_events),
         }

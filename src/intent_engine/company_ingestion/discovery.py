@@ -23,13 +23,14 @@ KNOWN_PATHS = ("/", "/product", "/products", "/solutions", "/pricing",
 # investor-relations pages are investor material; customer stories are the
 # customer voice. Everything else is a plain company-owned page. This is a
 # generic, company-agnostic classification — no company-specific rules.
+# NOTE: independent classes (customer_voice, competitor, independent_reporting)
+# deliberately come only from OFF-domain sources — a company's own case-study or
+# customer page is company-published marketing, not an independent vantage point.
 _CLASS_RULES = (
     ("investor_material", ("investor", "shareholder", "/ir", "earnings",
                            "annual-report", "financ")),
     ("executive_statement", ("press", "newsroom", "news", "media",
                              "leadership", "keynote", "letter")),
-    ("customer_voice", ("customer", "case-stud", "case_stud", "testimonial",
-                        "success-stor", "stories")),
 )
 
 _TYPE_RULES = (

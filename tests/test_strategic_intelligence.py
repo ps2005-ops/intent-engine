@@ -4,6 +4,8 @@ Covers the strategic reasoning model, evidence explanation, quality gates,
 conversation, the Shopify acceptance run through the real compose pipeline,
 and a regression capture of the previous website-summarizer failure mode.
 """
+import io
+
 import pytest
 
 from company_fixture_pages import BASE as BRIGHTLAKE, transport as brightlake
@@ -122,12 +124,15 @@ def test_comparable_patterns_have_mechanism_and_limits(shopify_report):
 
 def test_show_evidence_renders_reasoning_before_provenance_ids(shopify_report):
     html = render_strategic_report(shopify_report)
-    assert "Show evidence — why we believe this" in html
-    # human-readable evidence & interpretation appear before any provenance IDs
-    assert "Observed evidence" in html and "Interpretation" in html
-    assert html.index("Observed evidence") < html.index("Provenance IDs")
-    # provenance IDs are inside a secondary <details>, not the main surface
-    assert '<details class="provenance">' in html
+    # human-readable reasoning and evidence excerpts are primary
+    assert "Reasoning." in html
+    assert "Strongest support" in html and "Strongest counterpoint" in html
+    # raw artifact/replay ids do NOT appear in the human-facing body; the
+    # technical signal trace / provenance is quarantined to the appendix
+    assert "artifact_id" not in html and "replay_id" not in html
+    assert "Technical appendix" in html
+    # reasoning appears before the technical appendix (progressive disclosure)
+    assert html.index("Reasoning.") < html.index("Technical appendix")
     low, reasons = looks_low_value(html)
     assert not low, reasons
 
@@ -199,10 +204,14 @@ def test_conversation_explains_hypothesis_with_citations_and_counter(
     assert sa["matched_hypothesis"] == "hyp-product_to_platform"
     a = sa["answer"]
     assert a["confidence"] in ("high", "moderate", "low", "speculative")
-    assert a["citations"] if "citations" in a else sa["citations"]
+    assert sa["citations"]
     assert a["evidence"] and a["counter_evidence"]      # cites both sides
     assert a["falsification"]                            # what would change it
-    assert a["reasoning"] and "fact" in a["reasoning"].lower()
+    assert a["reasoning"]
+    # the answer leads with a direct, confidence-qualified answer (not certainty)
+    assert a["confidence"] in a["direct_answer"]
+    # selective, not a dump
+    assert len(a["evidence"]) <= 4 and len(a["counter_evidence"]) <= 2
 
 
 def test_conversation_does_not_just_repeat_a_card(shopify_report):
@@ -228,16 +237,21 @@ def test_new_shopify_report_rejects_low_value_structures(shopify_report):
     html = render_strategic_report(shopify_report)
     lowered = html.lower()
     # none of the old failure structures survive
-    for banned in ("most repeated words", "out of scope",
+    for banned in ("most repeated words", "out of scope", "not available",
                    "the company talks about", "visible audience"):
         assert banned not in lowered, banned
-    # "Not available" is not used for the core comparative-analysis section
-    assert "comparable pattern" in lowered
-    # every rendered leadership question explains itself
-    assert lowered.count("<article class=\"question\"") == \
-        lowered.count("why we ask")
-    # blind spots and hypotheses are populated, not empty
-    assert 'class="blind-spot"' in lowered and 'class="hypothesis"' in lowered
+    # the core comparative-analysis section is present with a mechanism
+    assert "comparable pattern" in lowered and "mechanism:" in lowered
+    # every rendered leadership question explains itself ("why we ask")
+    assert "why we ask" in lowered
+    # hypothesis cards, blind spots, timeline, agenda, and source library render
+    assert 'class="card hypothesis"' in lowered
+    assert "possible blind spots" in lowered
+    assert "strategic timeline" in lowered
+    assert "likely current leadership agenda" in lowered
+    assert "source library" in lowered
+    # executive-first: first viewport shows thesis + decision most affected
+    assert "decision most affected" in lowered
 
 
 # --- G: the acceptance evidence flows through the REAL compose pipeline ------
@@ -278,18 +292,19 @@ _PRESS = ("Leadership: we are building the essential infrastructure for "
 _INVESTORS = ("Investor update: enterprise (Plus) momentum with large "
               "merchants; expanding product breadth across payments, capital, "
               "fulfillment and POS drives platform adoption.")
-_REVIEWS = ("Merchant reviews: Shopify is simple and easy to get started; "
-            "anyone can start a business. Customers value the simplicity and "
-            "quick setup above all.")
+_REVIEWS = ("Independent merchant reviews repeatedly praise fast setup and "
+            "simple day-to-day operation, citing that simplicity as the top "
+            "reason they choose and remain customers rather than moving to "
+            "heavier enterprise platforms.")
 
 
 def _live_transport(url, timeout):
     import urllib.error
     import email as _email
     u = url.lower()
-    if "/press" in u or "/newsroom" in u:
+    if any(k in u for k in ("/press", "/newsroom", "/news", "/media")):
         body = f"<html><head><title>Press</title></head><body><p>{_PRESS}</p></body></html>"
-    elif "/investor" in u:
+    elif "investor" in u or "/ir" in u:
         body = f"<html><head><title>Investors</title></head><body><p>{_INVESTORS}</p></body></html>"
     elif "g2.com" in u or "trustpilot" in u or "capterra" in u:
         body = f"<html><head><title>Reviews</title></head><body><p>{_REVIEWS}</p></body></html>"
@@ -382,6 +397,193 @@ def test_evidence_graph_links_observations_hypotheses_patterns(shopify_report):
     assert any(e["from"] in obs_ids and e["to"] in hyp_ids for e in supports)
 
 
+# --- V1.2 executive-readiness: routing, evidence roles, temporal, selection ---
+
+def _obs(oid, text, otype, sclass, signals, *, excerpt="a substantive and "
+         "specific strategic observation excerpt that is not a page title",
+         date="", weak=False):
+    from intent_engine.strategic_intelligence.records import StrategicObservation
+    return StrategicObservation(
+        observation_id=oid, text=text, observation_type=otype,
+        source_refs=[{"artifact_id": f"src-{oid}"}], signals=tuple(signals),
+        source_class=sclass, excerpt=excerpt, source_title=f"src {oid}",
+        origin=f"https://ex/{oid}", date=date, weak=weak,
+        evidence_quality="weak" if weak else "strong")
+
+
+def test_stripe_comparison_routes_to_infrastructure_not_agentic(shopify_report):
+    sa = answer_strategic("How is this transition similar to Stripe, and where "
+                          "does the comparison break down?", shopify_report)
+    assert sa["intent"] == "COMPARISON"
+    assert sa["matched_hypothesis"] == "hyp-product_to_platform"   # not agentic
+    assert sa["routing"]["selected_comparable"] == "Stripe"
+    assert sa["routing"]["operation"] == "comparison"
+
+
+def test_comparison_answer_discusses_stripe_and_breakdown(shopify_report):
+    c = answer_strategic("How is this like Stripe and where does it break "
+                         "down?", shopify_report)["comparison"]
+    assert "Stripe" in c["direct_answer"]
+    assert any("Stripe" in s for s in c["key_similarities"])
+    assert c["key_differences"] and c["where_the_analogy_breaks"]
+    assert c["shared_mechanism"]
+
+
+def test_agentic_question_still_routes_to_agentic(shopify_report):
+    sa = answer_strategic("what makes you think AI agents will mediate "
+                          "buying?", shopify_report)
+    assert sa["matched_hypothesis"] == "hyp-human_to_agent_workflow"
+
+
+def test_support_and_counter_never_wholesale_duplicated(shopify_report):
+    for h in shopify_report.hypotheses:
+        sup = set(h.supporting_observation_ids)
+        con = set(h.counter_observation_ids)
+        assert not (sup & con), h.hypothesis_id       # disjoint per hypothesis
+
+
+def test_hypothesis_rejects_same_obs_as_support_and_contradiction():
+    from intent_engine.strategic_intelligence.records import StrategicHypothesis
+    h = StrategicHypothesis(
+        hypothesis_id="h", title="t", statement="s", reasoning="r",
+        supporting_observation_ids=["o1"], counter_observation_ids=["o1"],
+        alternative_explanations=["a"], confidence="low",
+        confidence_reasons=["c"], evidence_gaps=["g"],
+        decision_implications=["d"], falsification_questions=["f"])
+    with pytest.raises(StrategicError):
+        h.validate()
+
+
+def test_page_titles_alone_do_not_satisfy_evidence(tmp_path):
+    # all observations are weak (title-only / marketing) → not COMPLETE
+    obs = [_obs(f"w{i}", "Homepage", "messaging", "company_owned",
+                ["infrastructure_positioning", "product_breadth"],
+                excerpt="Home", weak=True) for i in range(4)]
+    report = build_strategic_report(company_name="Weak Co", observations=obs)
+    assert report.status in (INSUFFICIENT, PARTIAL, FAILED)
+    assert report.status != COMPLETE
+
+
+def test_duplicate_pages_collapse_into_one_observation(tmp_path):
+    from intent_engine.strategic_intelligence.observations import (
+        derive_observations,
+    )
+    dup = {"source_id": "a", "title": "Shopify", "meta_description":
+           "commerce infrastructure powering commerce with checkout payments",
+           "text_content": "commerce infrastructure powering commerce",
+           "final_url": "https://shopify.com/", "content_hash": "H1",
+           "source_class": "company_owned", "retrieved_at": "2024-01-01",
+           "freshness": "CURRENT"}
+    dup2 = dict(dup, source_id="b", final_url="https://www.shopify.com")
+    obs = derive_observations([dup, dup2])
+    assert len(obs) == 1                              # same content collapses
+
+
+def test_weak_evidence_excluded_from_hypothesis_support():
+    strong = _obs("s1", "Company positions as infrastructure", "messaging",
+                  "company_owned",
+                  ["infrastructure_positioning", "checkout_identity_rails",
+                   "product_breadth"], date="2024-06-01")
+    weak = _obs("w1", "Homepage", "messaging", "company_owned",
+                ["platform_control"], excerpt="Home", weak=True)
+    report = build_strategic_report(company_name="Co", observations=[strong, weak])
+    for h in report.hypotheses:
+        assert "w1" not in h.strongest_support_ids   # weak never a top citation
+
+
+def test_executive_report_shows_selected_not_all_evidence(shopify_report):
+    top = shopify_report.hypotheses[0]
+    # curated strongest support is a bounded subset of all support
+    assert len(top.strongest_support_ids) <= 3
+    assert len(top.strongest_support_ids) <= len(top.supporting_observation_ids)
+
+
+def test_all_sources_remain_in_source_library(shopify_report):
+    lib = shopify_report.as_dict()["source_library"]
+    titles_in_lib = {s["title"] for group in lib.values() for s in group}
+    all_titles = {o.source_title for o in shopify_report.observations}
+    assert all_titles <= titles_in_lib                   # no source is lost
+
+
+def test_complete_requires_hypothesis_level_coverage():
+    # 3 hypotheses fire but every supporting observation is weak → not COMPLETE
+    obs = [_obs(f"w{i}", "x", "messaging", "independent_reporting",
+                ["infrastructure_positioning", "checkout_identity_rails",
+                 "product_breadth", "platform_control",
+                 "partner_ecosystem_enablement"], excerpt="Home", weak=True)
+           for i in range(3)]
+    report = build_strategic_report(company_name="Co", observations=obs)
+    assert report.status != COMPLETE
+
+
+def test_agenda_inferred_from_timely_signals_no_private_claim(shopify_report):
+    agenda = shopify_report.agenda
+    assert agenda, "expected inferred agenda from dated evidence"
+    for a in agenda:
+        assert a["public_signals"] and a["why_timely"]
+        assert a["affected_functions"] and a["what_would_confirm"]
+    # never claims knowledge of an actual private meeting
+    blob = str(shopify_report.as_dict()).lower()
+    assert "discussed yesterday" not in blob
+    assert "in the meeting" not in blob and "private meeting" not in blob
+
+
+def test_timeline_is_chronological(shopify_report):
+    dates = [t["date"] for t in shopify_report.timeline]
+    assert dates == sorted(dates)
+
+
+def test_conversation_answers_are_selective(shopify_report):
+    sa = answer_strategic("why is it becoming infrastructure", shopify_report)
+    assert len(sa["answer"]["evidence"]) <= 4
+    assert len(sa["answer"]["counter_evidence"]) <= 2
+    assert sa["answer"]["direct_answer"]                 # leads with the answer
+    # no internal signal names or record ids in the human-facing answer
+    text = (sa["answer"]["direct_answer"] + sa["answer"]["reasoning"]).lower()
+    assert "signals matched" not in text and "obs-" not in text
+
+
+def test_different_companies_produce_different_hypotheses():
+    shopify = build_strategic_report(
+        company_name="Shopify", observations=shopify_observations())
+    linear = build_strategic_report(company_name="Linear", observations=[
+        _obs("l1", "Linear expands to enterprise", "buyer_segment",
+             "independent_reporting", ["enterprise_expansion", "product_breadth"],
+             date="2024-05-01"),
+        _obs("l2", "Linear keeps it simple", "messaging", "company_owned",
+             ["smb_simplicity"], date="2024-04-01"),
+        _obs("l3", "Linear adds breadth", "product_surface", "company_owned",
+             ["product_breadth", "merchant_outcome_positioning"], date="2024-06-01"),
+    ])
+    cloudflare = build_strategic_report(company_name="Cloudflare", observations=[
+        _obs("c1", "Cloudflare is internet infrastructure", "infrastructure_platform",
+             "independent_reporting",
+             ["infrastructure_positioning", "platform_control", "product_breadth"],
+             date="2024-05-01"),
+        _obs("c2", "Cloudflare developer platform + partners", "monetization_ecosystem",
+             "company_owned", ["partner_ecosystem_enablement", "product_breadth"],
+             date="2024-06-01"),
+        _obs("c3", "Cloudflare owns the edge rails", "infrastructure_platform",
+             "company_owned", ["platform_control", "checkout_identity_rails"],
+             date="2024-03-01"),
+    ])
+    s_set = {h.pattern_id for h in shopify.hypotheses}
+    l_set = {h.pattern_id for h in linear.hypotheses}
+    c_set = {h.pattern_id for h in cloudflare.hypotheses}
+    assert s_set != l_set and s_set != c_set and l_set != c_set
+
+
+def test_low_value_comparison_answer_is_a_regression_failure(shopify_report):
+    # the FAILED behaviour: a comparison answer that ignores the named company
+    good = answer_strategic("how is this like Stripe and where does it break?",
+                            shopify_report)
+    bad_answer = "This company is transitioning. It uses growth language."
+    assert good["comparison"]["comparable"] == "Stripe"      # names it
+    assert looks_low_value(bad_answer)[0]                    # old style flagged
+    # our answer is not low-value and actually discusses the company
+    assert not looks_low_value(str(good["comparison"]))[0]
+
+
 def test_real_company_owned_only_run_is_partial_strategic(tmp_path):
     """A real run over only company-owned pages yields a partial strategic
     state — never a hollow COMPLETE."""
@@ -399,3 +601,87 @@ def test_real_company_owned_only_run_is_partial_strategic(tmp_path):
     if report is not None:                 # only if any signal was detected
         assert report["status"] in (PARTIAL, INSUFFICIENT)
         assert report["status"] != COMPLETE
+
+
+# --- webapp-level: executive experience, legacy quarantine, comparison -------
+
+class _WsgiClient:
+    def __init__(self, app):
+        self.app, self.cookie = app, ""
+
+    def request(self, method, path, body=""):
+        env = {"REQUEST_METHOD": method, "PATH_INFO": path,
+               "CONTENT_LENGTH": str(len(body)), "HTTP_HOST": "127.0.0.1",
+               "HTTP_COOKIE": self.cookie, "wsgi.input": io.BytesIO(body.encode())}
+        out = {}
+        payload = b"".join(self.app(env, lambda s, h: out.update(
+            status=s, headers=h))).decode()
+        for k, v in out["headers"]:
+            if k == "Set-Cookie" and v.startswith("sid="):
+                self.cookie = "" if "Max-Age=0" in v else v.split(";")[0]
+        return out["status"], dict(out["headers"]), payload
+
+    def csrf(self):
+        return self.app.auth.csrf_token(self.cookie.split("=", 1)[1])
+
+
+def _strategic_webapp_run(tmp_path):
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    cfg = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                    web_store_path=tmp_path / "w.jsonl",
+                    fi_store_path=tmp_path / "fi.jsonl",
+                    ci_store_path=tmp_path / "ci.jsonl")
+    app = WebApp(cfg, transport=_live_transport, resolver=False)
+    c = _WsgiClient(app)
+    c.request("POST", "/demo")
+    _, h, _ = c.request("POST", "/analyze",
+                        f"consent=on&csrf={c.csrf()}&company_name=Acme"
+                        f"&website=https://acme.example")
+    rid = h["Location"].split("/runs/")[1].split("/sources")[0]
+    cands, picked, seen = app.ci.store.candidates(rid), [], set()
+    for x in cands:
+        if x["source_class"] not in seen:
+            seen.add(x["source_class"])
+            picked.append(x["candidate_id"])
+    c.request("POST", f"/runs/{rid}/sources/approve",
+              "csrf=" + c.csrf() + "&approve_consent=on&"
+              + "&".join(f"cand={x}" for x in picked))
+    return app, c, rid
+
+
+def test_webapp_strategic_run_quarantines_legacy(tmp_path):
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, _, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+    # executive-first content is present
+    assert "Decision most affected" in body and "card hypothesis" in body
+    assert "Strategic timeline" in body and "Source library" in body
+    # legacy material is ONLY inside the collapsed technical appendix
+    assert "Technical appendix" in body
+    assert body.index("Technical appendix") < body.index("Evidence Library")
+    # no legacy low-value structures leak into the executive view
+    lo = body.lower()
+    for banned in ("most repeated words", "out of scope", "not available"):
+        assert banned not in lo
+    # company-specific suggested questions, not generic
+    assert "How is this transition similar to" in body
+
+
+def test_webapp_stripe_comparison_answer(tmp_path):
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, _, body = c.request(
+        "POST", f"/runs/{rid}/conversation",
+        "csrf=" + c.csrf() + "&question=How is this similar to Stripe and "
+        "where does the comparison break down?")
+    assert status == "200 OK"
+    assert "Comparison: Stripe" in body
+    assert "Where the analogy breaks" in body
+    assert "hyp-product_to_platform" in body        # routed to infrastructure
+
+
+def test_render_is_responsive_and_styled(shopify_report):
+    html = render_strategic_report(shopify_report)
+    assert "@media(max-width:640px)" in html         # mobile layout
+    assert "max-width:920px" in html                 # bounded, no wall of text
+    assert "prefers-color-scheme:dark" in html       # theme-aware

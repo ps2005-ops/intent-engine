@@ -119,6 +119,30 @@ def evaluate_report(report) -> tuple:
         findings.append(_f("too_many_empty_sections",
                            "empty key sections: " + ", ".join(empty)))
 
+    # no strong evidence at all — only titles/marketing — is not strategic
+    strong_obs = [o for o in report.observations
+                  if not getattr(o, "weak", False)]
+    if report.observations and not strong_obs:
+        findings.append(_f("evidence_titles_only", "no strong strategic "
+                           "observation was extracted; only weak page-title / "
+                           "marketing snippets"))
+
+    # hypothesis-LEVEL coverage: the strongest hypothesis must actually have
+    # curated strong support (not merely a source-class label being present).
+    top = report.hypotheses[0] if report.hypotheses else None
+    hyp_coverage_ok = bool(top and getattr(top, "strongest_support_ids", ())
+                           and (top.counter_observation_ids or top.evidence_gaps))
+    if report.hypotheses and not hyp_coverage_ok:
+        findings.append(_f("weak_hypothesis_coverage", "the leading hypothesis "
+                           "lacks curated strong support with a counterpoint "
+                           "or explicit evidence gap"))
+    # temporal coverage: a current view needs at least some dated evidence
+    temporal_ok = bool(report.timeline)
+    if report.hypotheses and not temporal_ok:
+        findings.append(_f("no_temporal_coverage", "no dated evidence, so "
+                           "'what changed' and timeliness cannot be assessed",
+                           "warn"))
+
     external = [c for c in _EXTERNAL_CLASSES
                 if report.source_class_coverage.get(c)]
     independent = [c for c in _INDEPENDENT_CLASSES
@@ -131,10 +155,12 @@ def evaluate_report(report) -> tuple:
 
     if any(x["code"] == "unsupported_internal" for x in findings):
         status = FAILED
-    elif not hyps or any(x["code"] == "evidence_ids_only" for x in findings) \
-            or len(empty) > 1:
+    elif not hyps or any(x["code"] in ("evidence_ids_only",
+                                       "evidence_titles_only")
+                         for x in findings) or len(empty) > 1:
         status = FAILED if not hyps else INSUFFICIENT
-    elif len(hyps) < 3 or not _thesis_is_strategic(report.thesis):
+    elif len(hyps) < 3 or not _thesis_is_strategic(report.thesis) \
+            or not hyp_coverage_ok:
         status = INSUFFICIENT
     elif company_only and not accepted:
         findings.append(_f("single_source_class", "broad strategic claims rest "

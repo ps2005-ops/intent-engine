@@ -77,6 +77,17 @@ def _confidence(matched_qual, support_classes, counter_count) -> tuple:
     return level, reasons
 
 
+def _rank_evidence(observations):
+    """Order evidence by strategic value: independent vantage first, then
+    dated, then strong (not weak), then more specific (longer excerpt)."""
+    def score(o):
+        return (1 if o.source_class in _INDEPENDENT_CLASSES else 0,
+                1 if o.date else 0,
+                0 if o.weak else 1,
+                len(o.excerpt or ""))
+    return sorted(observations, key=score, reverse=True)
+
+
 def _hypothesis_for(pattern, scaffold, observations, company_name):
     present = _signals_present(observations)
     matched_qual = tuple(s for s in pattern.qualifying_signals if s in present)
@@ -84,26 +95,53 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
         return None
     matched_disc = tuple(s for s in pattern.disconfirming_signals
                          if s in present)
-    support = _obs_with_any(observations, matched_qual)
-    counter = _obs_with_any(observations, matched_disc)
+    # support: prefer STRONG observations carrying a qualifying signal
+    support_all = _obs_with_any(observations, matched_qual)
+    support = [o for o in support_all if not o.weak] or support_all
+    if not support:
+        return None
+    support_ids = {o.observation_id for o in support}
+    # counter: observations carrying a disconfirming signal, EXCLUDING anything
+    # already counted as support — the same observation is never listed as both
+    # support and contradiction (fixes the wholesale-copy failure).
+    counter_all = [o for o in _obs_with_any(observations, matched_disc)
+                   if o.observation_id not in support_ids]
+    counter = [o for o in counter_all if not o.weak] or counter_all
     support_classes = {o.source_class for o in support}
 
     level, reasons = _confidence(matched_qual, support_classes, len(counter))
-    # never let evidence push a hypothesis above the pattern's own reliability
     if _CONF_RANK[level] > _CONF_RANK[pattern.confidence]:
         level = pattern.confidence
         reasons.append(f"capped at the pattern's reliability ({level}); the "
                        "historical analogue is not more certain than this")
-    named = "; ".join(f'"{o.text}"' for o in support[:3])
-    reasoning = (scaffold["reasoning"] + " Signals matched here: "
-                 + ", ".join(matched_qual) + ". This reads directly off: "
-                 + named + ".")
+
+    # CLEAN reasoning for the executive view; internal signal detail goes to a
+    # separate trace shown only in the technical appendix.
+    reasoning = scaffold["reasoning"]
+    signal_trace = ("signals matched: " + ", ".join(matched_qual)
+                    + " · reads off: "
+                    + "; ".join(f'"{o.text}"' for o in support[:3]))
+
+    strongest_support = _rank_evidence(support)[:3]
+    strongest_counter = _rank_evidence(counter)[:2]
+    dated = sorted((o for o in support if o.date),
+                   key=lambda o: o.date, reverse=True)
+    why_now = (f"Recent public signal ({dated[0].date}, "
+               f"{dated[0].source_title}) keeps this timely."
+               if dated else "Timeliness limited: no dated evidence retrieved.")
+
     gaps = list(scaffold["gaps"])
     missing_external = [c for c in _EXTERNAL_CLASSES
                         if c not in support_classes]
     if missing_external:
         gaps.append("no " + " / ".join(missing_external)
                     + " source corroborates this yet")
+
+    strong_ids = {o.observation_id for o in strongest_support}
+    roles = ([(o.observation_id, "direct_support") for o in strongest_support]
+             + [(o.observation_id, "indirect_support") for o in support
+                if o.observation_id not in strong_ids]
+             + [(o.observation_id, "contradiction") for o in counter])
     h = StrategicHypothesis(
         hypothesis_id=f"hyp-{pattern.pattern_id}",
         title=scaffold["title"],
@@ -119,6 +157,13 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
         falsification_questions=list(scaffold["falsification"]),
         pattern_id=pattern.pattern_id,
         source_classes=tuple(sorted(support_classes)),
+        why_now=why_now, signal_trace=signal_trace,
+        strongest_support_ids=tuple(o.observation_id
+                                    for o in strongest_support),
+        strongest_counter_ids=tuple(o.observation_id for o in strongest_counter),
+        comparables=tuple(e.get("name", "")
+                          for e in pattern.historical_examples),
+        evidence_roles=tuple(roles),
     )
     h.validate()
     return h
@@ -285,6 +330,132 @@ def _build_evidence_graph(company_name, observations, hypotheses, patterns,
                        "edges": len(edges)}}
 
 
+_FUNCTION_FOR_SIGNAL = {
+    "product_breadth": "Product", "storefront_creation": "Product",
+    "agentic_commerce": "Product / AI", "distribution_shift": "Growth / GTM",
+    "enterprise_expansion": "Enterprise Sales / GTM",
+    "checkout_identity_rails": "Payments / Platform",
+    "platform_control": "Platform", "data_network": "Data / Platform",
+    "partner_ecosystem_enablement": "Partnerships",
+    "infrastructure_positioning": "Platform / Strategy",
+    "smb_simplicity": "SMB / Product", "merchant_outcome_positioning": "Marketing",
+    "investor_material": "Finance / IR",
+}
+
+
+def _affected_functions(signals) -> list:
+    fns = []
+    for s in signals:
+        f = _FUNCTION_FOR_SIGNAL.get(s)
+        if f and f not in fns:
+            fns.append(f)
+    return fns or ["Strategy"]
+
+
+def _build_timeline(observations) -> list:
+    """A chronological strategic timeline from dated evidence."""
+    dated = [o for o in observations if o.date]
+    dated.sort(key=lambda o: (o.date, o.observation_id))
+    return [{"date": o.date, "event": o.text, "source_class": o.source_class,
+             "source_title": o.source_title, "observation_id": o.observation_id,
+             "kind": o.observation_type} for o in dated]
+
+
+def _build_agenda(observations, hypotheses) -> list:
+    """Infer likely-current leadership discussions from combinations of timely
+    public signals. Explicitly labeled as inference — never a claim of private
+    meeting knowledge."""
+    obs_by_id = {o.observation_id: o for o in observations}
+    agenda = []
+    for h in hypotheses[:3]:
+        supp = [obs_by_id[i] for i in h.supporting_observation_ids
+                if i in obs_by_id]
+        recent = sorted((o for o in supp if o.date),
+                        key=lambda o: o.date, reverse=True)[:3]
+        if len(recent) < 1:
+            continue
+        signals = []
+        for o in supp:
+            signals += list(o.signals)
+        against = [obs_by_id[i].text for i in h.counter_observation_ids
+                   if i in obs_by_id][:2]
+        agenda.append({
+            "inferred_discussion": f"How aggressively to act on: {h.title}",
+            "public_signals": [f"{o.source_title} ({o.source_class}, {o.date})"
+                               for o in recent],
+            "why_timely": h.why_now,
+            "evidence_against": against or ["no strong disconfirming evidence "
+                                            "retrieved yet"],
+            "affected_functions": _affected_functions(signals),
+            "likely_decision": h.decision_implications[0],
+            "confidence": h.confidence,
+            "what_would_confirm": h.falsification_questions[0],
+        })
+        if len(agenda) >= 3:
+            break
+    return agenda
+
+
+def _build_source_library(observations, hypotheses) -> dict:
+    """Every considered source, grouped by how it was used — for auditability.
+    The executive report surfaces only the strongest evidence; this is where
+    the rest remains inspectable."""
+    role_by_obs = {}
+    affected = {}
+    for h in hypotheses:
+        for oid, role in h.evidence_roles:
+            # a stronger role wins if an observation is used by several
+            rank = {"direct_support": 3, "contradiction": 2,
+                    "indirect_support": 1}.get(role, 0)
+            if rank >= role_by_obs.get(oid, (None, -1))[1]:
+                role_by_obs[oid] = (role, rank)
+            affected.setdefault(oid, []).append(h.hypothesis_id)
+
+    groups = {"used_in_reasoning": [], "corroborating": [], "contradicting": [],
+              "contextual": [], "rejected_low_relevance": []}
+    for o in observations:
+        role = role_by_obs.get(o.observation_id, (None, -1))[0]
+        entry = {"title": o.source_title, "publisher": o.origin,
+                 "source_class": o.source_class, "date": o.date,
+                 "evidence_quality": o.evidence_quality,
+                 "affected_hypotheses": affected.get(o.observation_id, []),
+                 "role": role or ("weak_or_irrelevant" if o.weak
+                                  else "contextual_only")}
+        if role == "contradiction":
+            groups["contradicting"].append(entry)
+        elif role in ("direct_support", "indirect_support"):
+            groups["used_in_reasoning"].append(entry)
+            if o.source_class in _INDEPENDENT_CLASSES:
+                groups["corroborating"].append(entry)
+        elif o.weak:
+            groups["rejected_low_relevance"].append(entry)
+        else:
+            groups["contextual"].append(entry)
+    return groups
+
+
+def _analytics_events(observations, hypotheses, agenda, status) -> list:
+    """Report-attached analytics (source_selected, evidence_rejected,
+    contradiction_detected, hypothesis_created, ...). No new store; these ride
+    with the report for the web layer / analytics to consume."""
+    ev = [{"event": "source_selected", "id": o.observation_id,
+           "source_class": o.source_class}
+          for o in observations if not o.weak]
+    ev += [{"event": "evidence_rejected", "id": o.observation_id,
+            "reason": "weak_or_irrelevant"} for o in observations if o.weak]
+    for h in hypotheses:
+        ev.append({"event": "hypothesis_created", "id": h.hypothesis_id,
+                   "confidence": h.confidence})
+        if h.counter_observation_ids:
+            ev.append({"event": "contradiction_detected",
+                       "hypothesis": h.hypothesis_id,
+                       "count": len(h.counter_observation_ids)})
+    ev += [{"event": "likely_agenda_item_detected",
+            "item": a["inferred_discussion"]} for a in agenda]
+    ev.append({"event": "report_completed", "status": status})
+    return ev
+
+
 def build_strategic_report(*, company_name, observations,
                            patterns=None, scaffolds=None,
                            user_accepts_limited_scope=False) -> StrategicReport:
@@ -360,6 +531,9 @@ def build_strategic_report(*, company_name, observations,
 
     graph = _build_evidence_graph(company_name, observations, hypotheses,
                                   used_patterns, blind_spots, questions)
+    timeline = _build_timeline(observations)
+    agenda = _build_agenda(observations, hypotheses)
+    source_library = _build_source_library(observations, hypotheses)
     report = StrategicReport(
         company_name=company_name, status="",
         thesis=thesis, shifts=shifts, hypotheses=hypotheses,
@@ -367,11 +541,14 @@ def build_strategic_report(*, company_name, observations,
         evidence_gaps=evidence_gaps,
         decision_implications=_decision_implications(hypotheses, blind_spots),
         observations=list(observations), source_class_coverage=coverage,
-        limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph)
+        limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,
+        timeline=timeline, agenda=agenda, source_library=source_library)
 
     # provisional status via the quality gate (importing here avoids a cycle)
     from intent_engine.strategic_intelligence.quality import evaluate_report
     report.status, report.quality_findings = evaluate_report(report)
+    report.analytics_events = _analytics_events(observations, hypotheses,
+                                                agenda, report.status)
     return report
 
 
