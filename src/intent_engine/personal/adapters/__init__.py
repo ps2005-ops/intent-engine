@@ -26,3 +26,4 @@ from intent_engine.personal.adapters.crm import CRMAdapter  # noqa: F401
 from intent_engine.personal.adapters.analytics import AnalyticsAdapter  # noqa: F401
 from intent_engine.personal.adapters.knowledge import KnowledgeAdapter  # noqa: F401
 from intent_engine.personal.adapters.decisions import DecisionsAdapter  # noqa: F401
+from intent_engine.personal.adapters.learning import LearningAdapter  # noqa: F401

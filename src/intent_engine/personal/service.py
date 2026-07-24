@@ -36,6 +36,7 @@ class PersonalService:
                  product_service=None, executive_service=None,
                  crm_service=None, analytics_reader=None,
                  knowledge_service=None, decision_service=None,
+                 learning_reader=None,
                  llm_client=None, model_version="fake-model.v0"):
         self.store = PersonalStore(path)
         self.research = research_service
@@ -45,6 +46,10 @@ class PersonalService:
         self.analytics = analytics_reader
         self.knowledge = knowledge_service
         self.decisions = decision_service
+        # The learning platform (Learning Ledger + Paper book) as a
+        # read-only observation surface — Personal AI can inspect and
+        # explain the pipeline, never mutate it.
+        self.learning = learning_reader
         self.llm_client = llm_client
         self.model_version = model_version
 
@@ -77,7 +82,7 @@ class PersonalService:
     def _adapters(self, as_of: str) -> dict:
         from intent_engine.personal.adapters import (
             AnalyticsAdapter, CRMAdapter, DecisionsAdapter, ExecutiveAdapter,
-            KnowledgeAdapter, ProductAdapter, ResearchAdapter,
+            KnowledgeAdapter, LearningAdapter, ProductAdapter, ResearchAdapter,
         )
         return {
             "research": ResearchAdapter(self.research, as_of=as_of),
@@ -87,6 +92,7 @@ class PersonalService:
             "analytics": AnalyticsAdapter(self.analytics, as_of=as_of),
             "knowledge": KnowledgeAdapter(self.knowledge, as_of=as_of),
             "decisions": DecisionsAdapter(self.decisions, as_of=as_of),
+            "learning": LearningAdapter(self.learning, as_of=as_of),
         }
 
     # --- sessions ------------------------------------------------------------
@@ -128,6 +134,31 @@ class PersonalService:
 
     def explain(self, package_id: str, *, as_of: str) -> dict:
         return explain_decision(self._adapters(as_of)["executive"], package_id)
+
+    # --- learning-platform observation (read-only) --------------------------
+    def inspect_learning(self, *, as_of: str, status: str = None) -> dict:
+        """What the learning brain currently holds: the candidate pipeline
+        (by status) and the paper book's scored metrics. Read-only — the
+        workspace observes and explains, it never promotes or trades."""
+        adapter = self._adapters(as_of)["learning"]
+        return {
+            "as_of": as_of,
+            "pipeline": (self.learning.pipeline_summary()
+                         if self.learning is not None else {}),
+            "candidates": [
+                {"claim_id": c.claim_id, "text": c.text,
+                 "availability": c.availability,
+                 "source_refs": [r.as_dict() for r in c.source_refs]}
+                for c in adapter.candidates(status=status)],
+            "paper_book": (lambda pb: {"claim_id": pb.claim_id, "text": pb.text,
+                                       "availability": pb.availability})(
+                adapter.paper_book()),
+        }
+
+    def explain_candidate(self, candidate_id: str, *, as_of: str) -> dict:
+        """The explainability chain for one learning candidate:
+        Finding -> Evidence -> Confidence -> Reasoning -> Source -> Replay."""
+        return self._adapters(as_of)["learning"].explain_candidate(candidate_id)
 
     # --- briefs + reports (generated artifacts) -----------------------------
     def morning_brief(self, *, as_of: str, portfolio_id: str = None,

@@ -17,7 +17,12 @@ DEFAULT_EVENTS_DIR = Path("events")
 # human actor. Generation is automated; publication and claims are not.
 _HUMAN_ONLY_EVENTS = {"content.approved", "content.rejected",
                       "content.published", "claim.approved",
-                      "claim.rejected"}
+                      "claim.rejected",
+                      # Promotion is the only learning transition that
+                      # authorizes a change to production. Automation
+                      # proposes and evaluates; a human promotes. Same wall
+                      # discipline as content/claim approval.
+                      "learning.candidate_promoted"}
 
 
 class WallViolation(ValueError):

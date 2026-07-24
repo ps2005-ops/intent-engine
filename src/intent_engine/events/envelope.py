@@ -60,12 +60,32 @@ EVENT_PRODUCERS = {
     "growth.experiment_started":          "growth_platform",
     "growth.experiment_stopped":          "growth_platform",
     "growth.result_labelled":             "growth_platform",
+    # Learning & Promotion Ledger (unified-learning platform) — the ONE
+    # authoritative producer for the candidate lifecycle. These are the
+    # "learn every day, promote only on evidence" facts: a candidate is
+    # PROPOSED (daily), EVALUATED against the current system (weekly), and
+    # only then PROMOTED or REJECTED (monthly / on sufficient evidence).
+    # candidate_promoted is a HUMAN wall (see publisher._HUMAN_ONLY_EVENTS):
+    # promotion is the only transition that authorizes a change to
+    # production, so no agent may emit it. NOTHING in this taxonomy applies
+    # a change to production — these are notifications; the learning ledger
+    # is the source of truth for candidate state.
+    "learning.candidate_proposed":        "learning_ledger",
+    "learning.candidate_evaluated":       "learning_ledger",
+    "learning.candidate_promoted":        "learning_ledger",
+    "learning.candidate_rejected":        "learning_ledger",
+    # Paper-Trading Shadow Loop — simulated positions ONLY (no broker, no
+    # real money). The one authoritative producer. Every position traces
+    # back to a prediction + decision (carried on the envelope's
+    # prediction_id / decision_id), so a paper trade is never a black box.
+    "paper.position_opened":              "paper_trading",
+    "paper.position_closed":              "paper_trading",
 }
 EVENT_TYPES = set(EVENT_PRODUCERS)
 
 ACTOR_TYPES = {"human", "agent", "system"}
 SUBJECT_TYPES = {"decision", "prediction", "report", "content", "claim",
-                 "experiment"}
+                 "experiment", "candidate", "paper_position"}
 SOURCES = {"web_intake", "cli", "report_review", "crm", "api", "system",
            "bridge"}
 

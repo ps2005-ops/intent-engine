@@ -67,6 +67,21 @@ class WebApp:
         # data/ in production) so tests never write into the repo.
         self.strategic_memory = StrategicMemory(
             ci_path.parent / "strategic_state.jsonl")
+        # Read-only observation surface over the learning platform (Learning
+        # Ledger + Paper book), exposed to the founder through Personal AI.
+        # Co-located with the other stores so tests never write into the repo.
+        # No bus here: the web layer only READS — it never proposes, evaluates,
+        # promotes, or trades.
+        from intent_engine.learning import LearningLedger
+        from intent_engine.learning.inspection import PlatformLearningReader
+        from intent_engine.paper import PaperTradingLoop
+        from intent_engine.personal.service import PersonalService
+        self._learning_reader = PlatformLearningReader(
+            LearningLedger(ci_path.parent / "learning_ledger.db"),
+            PaperTradingLoop(ci_path.parent / "paper_book.db"))
+        self._personal = PersonalService(
+            ci_path.parent / "personal.jsonl",
+            learning_reader=self._learning_reader)
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
 
@@ -174,6 +189,12 @@ class WebApp:
             return self._share_revoke(session, parts[1], form)
         if route == ("POST", "runs", 3) and parts[2] == "feedback":
             return self._feedback(session, parts[1], form)
+        if parts and parts[0] == "learning" and session is None:
+            return self._redirect("/login")
+        if route == ("GET", "learning", 1):
+            return self._learning_page(session)
+        if route == ("GET", "learning", 2):
+            return self._learning_explain_page(session, parts[1])
         return self._error_page(404, "page not found")
 
     # --- helpers --------------------------------------------------------------
@@ -1302,6 +1323,65 @@ class WebApp:
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
                     json.dumps({"status": "not ready", "reason": str(exc)}))
+
+    # --- learning platform (read-only observation via Personal AI) ----------
+    def _learning_page(self, session):
+        """Personal AI's read-only view of the learning brain: the candidate
+        pipeline by status and the paper book's scored metrics. This page
+        can observe and explain; it exposes no promote/trade control (those
+        are human, gated, and off the web surface entirely)."""
+        as_of = __import__("datetime").date.today().isoformat()
+        insp = self._personal.inspect_learning(as_of=as_of)
+        pipeline = insp["pipeline"]
+        pipe_html = (", ".join(f"{_e(k)}: {v}" for k, v in sorted(pipeline.items()))
+                     or "no candidates recorded yet")
+        rows = []
+        for c in insp["candidates"]:
+            ref = c["source_refs"][0] if c["source_refs"] else None
+            cid = ref["artifact_id"] if ref else ""
+            link = (f'<a href="/learning/{_e(cid)}">explain</a>' if cid else "")
+            rows.append(f"<li>{_e(c['text'])} {link}</li>")
+        cand_html = ("<ul>" + "".join(rows) + "</ul>" if rows
+                     else "<p>No candidate is recorded yet.</p>")
+        pb = insp["paper_book"]
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<title>Learning platform</title></head><body><main>'
+            f'<h1>Learning platform</h1>'
+            f'<p><em>Personal AI, read-only. Candidates are proposed by the '
+            f'engine, paper loop, and synthetic worlds; only a human promotes '
+            f'one, and never from here.</em></p>'
+            f'<h2>Candidate pipeline</h2><p>{pipe_html}</p>'
+            f'<h2>Candidates</h2>{cand_html}'
+            f'<h2>Paper-trading book (shadow — no real money)</h2>'
+            f'<p>{_e(pb["text"])}</p>'
+            f'<p><a href="/">Back to start</a></p>'
+            f'</main></body></html>')
+        return self._html(_chrome(body, self._nav(session)))
+
+    def _learning_explain_page(self, session, candidate_id):
+        as_of = __import__("datetime").date.today().isoformat()
+        ex = self._personal.explain_candidate(candidate_id, as_of=as_of)
+        if not ex.get("available"):
+            return self._error_page(404, ex.get("reason", "candidate not found"))
+        ev_rows = "".join(
+            f"<li>{_e(e['kind'])}: {_e(e['verdict'])} "
+            f"(candidate {_e(str(e['candidate_metrics']))} vs baseline "
+            f"{_e(str(e['baseline_metrics']))}, n={e['sample_size']})</li>"
+            for e in ex["evidence"]) or "<li>no evaluations yet</li>"
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<title>Explain candidate</title></head><body><main>'
+            f'<h1>Explain: learning candidate</h1>'
+            f'<p><strong>Finding.</strong> {_e(ex["finding"])}</p>'
+            f'<p><strong>Evidence.</strong></p><ul>{ev_rows}</ul>'
+            f'<p><strong>Promotable on evidence.</strong> {_e(str(ex["confidence"]))}</p>'
+            f'<p><strong>Reasoning.</strong> {_e(ex["reasoning"])}</p>'
+            f'<p><strong>Source agent.</strong> {_e(str(ex["source_agent"]))}</p>'
+            f'<p><strong>Replay.</strong> {_e(ex["replay_id"])}</p>'
+            f'<p><a href="/learning">Back to learning platform</a></p>'
+            f'</main></body></html>')
+        return self._html(_chrome(body, self._nav(session)))
 
 
 def make_server(app, host="127.0.0.1", port=0):
