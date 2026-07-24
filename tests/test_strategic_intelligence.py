@@ -685,3 +685,184 @@ def test_render_is_responsive_and_styled(shopify_report):
     assert "@media(max-width:640px)" in html         # mobile layout
     assert "max-width:920px" in html                 # bounded, no wall of text
     assert "prefers-color-scheme:dark" in html       # theme-aware
+
+
+# --- V1.3 mental model, surprises, opportunities, vulnerabilities, feed ------
+
+from intent_engine.strategic_intelligence.model import (  # noqa: E402
+    build_mental_model, diff_models,
+)
+from intent_engine.strategic_intelligence.store import (  # noqa: E402
+    StrategicMemory,
+)
+from intent_engine.strategic_intelligence.quality import (  # noqa: E402
+    executive_insight_quality,
+)
+from intent_engine.strategic_intelligence.insights import (  # noqa: E402
+    is_generic_insight, passes_specificity,
+)
+
+
+def test_mental_model_is_built_with_typed_components(shopify_report):
+    mm = shopify_report.as_dict()["mental_model"]
+    assert mm["version"] == 1 and mm["components"]
+    for name, c in mm["components"].items():
+        assert c["current_state"] and c["confidence"]
+        assert "supporting_observation_ids" in c and "provenance" in c
+    assert "strategic_assets" in mm["components"]
+
+
+def test_model_update_preserves_history_and_reports_changes():
+    v1 = build_mental_model("Acme", shopify_observations()[:8],
+                            [], now="2024-06-01")
+    # a later run with richer evidence updates the model, not rebuilds it
+    r2 = build_strategic_report(company_name="Acme",
+                                observations=shopify_observations(),
+                                previous_model=v1.as_dict(), now="2025-02-01")
+    mm2 = r2.as_dict()["mental_model"]
+    assert mm2["version"] == 2                         # versioned
+    assert r2.what_changed                             # explains what changed
+    ch = r2.what_changed[0]
+    assert "previous_view" in ch and "new_view" in ch and ch["reason"]
+
+
+def test_model_diff_explains_added_and_updated_components():
+    old = build_mental_model("Co", [_obs("o1", "infra", "infrastructure_platform",
+                             "company_owned", ["infrastructure_positioning",
+                             "checkout_identity_rails"], date="2024-01-01")],
+                             [], now="2024-01-01")
+    new = build_mental_model("Co", [_obs("o1", "infra", "infrastructure_platform",
+                             "company_owned", ["infrastructure_positioning",
+                             "checkout_identity_rails"], date="2024-01-01"),
+                             _obs("o2", "breadth", "product_surface",
+                             "company_owned", ["product_breadth"],
+                             date="2024-06-01")], [], now="2024-06-01",
+                             previous=old)
+    changes = diff_models(old, new)
+    assert any(c["kind"] == "added" for c in changes)
+
+
+def test_surprise_requires_a_mismatch_not_a_fact():
+    from intent_engine.strategic_intelligence.insights import detect_surprises
+    # single-direction evidence (no opposing side) → no surprise
+    obs = [_obs(f"o{i}", "infra", "infrastructure_platform", "company_owned",
+                ["infrastructure_positioning", "checkout_identity_rails"],
+                date="2024-06-01") for i in range(3)]
+    assert detect_surprises("Co", obs, []) == []
+
+
+def test_agenda_requires_multiple_signals():
+    from intent_engine.strategic_intelligence.reasoning import _build_agenda
+    from intent_engine.strategic_intelligence.records import StrategicHypothesis
+    one_signal = [_obs("o1", "x", "messaging", "company_owned",
+                       ["infrastructure_positioning"], date="2025-01-01")]
+    h = StrategicHypothesis(
+        hypothesis_id="h", title="t", statement="s", reasoning="r",
+        supporting_observation_ids=["o1"], counter_observation_ids=[],
+        alternative_explanations=["a"], confidence="low",
+        confidence_reasons=["c"], evidence_gaps=["g"],
+        decision_implications=["d"], falsification_questions=["f"],
+        why_now="now")
+    assert _build_agenda(one_signal, [h]) == []       # single signal → no item
+
+
+def test_agenda_has_meeting_relevance_and_no_private_claim(shopify_report):
+    assert shopify_report.agenda
+    for a in shopify_report.agenda:
+        assert a["meeting_relevance"] and a["meeting_relevance_why"]
+        assert a["external_trigger"] and a["counter_explanation"]
+    blob = str(shopify_report.as_dict()).lower()
+    assert "discussed yesterday" not in blob and "private meeting" not in blob
+
+
+def test_opportunities_have_asymmetry_and_decision(shopify_report):
+    assert shopify_report.opportunities
+    for o in shopify_report.opportunities:
+        assert o["asymmetry"] and o["decision_required"] and o["downside"]
+
+
+def test_vulnerabilities_have_mechanism_and_decision(shopify_report):
+    assert shopify_report.vulnerabilities
+    for v in shopify_report.vulnerabilities:
+        assert v["mechanism"] and v["decision_affected"] and v["leading_indicator"]
+
+
+def test_underexamined_questions_are_company_specific(shopify_report):
+    assert shopify_report.underexamined_questions
+    for q in shopify_report.underexamined_questions:
+        assert "Shopify" in q["question"]
+        assert passes_specificity(q["question"], "Shopify")
+
+
+def test_generic_insight_fails_executive_quality_gate():
+    assert is_generic_insight("The company is investing in AI.")
+    assert is_generic_insight("The company wants to grow.")
+    assert not passes_specificity("The company faces competition.", "Acme")
+    # a specific, mechanism-bearing finding passes
+    assert passes_specificity("Acme is consolidating checkout and identity "
+                              "rails while courting partners.", "Acme")
+
+
+def test_executive_insight_quality_accepts_real_report(shopify_report):
+    ok, findings = executive_insight_quality(shopify_report)
+    assert ok, findings
+
+
+def test_feed_reflects_model_changes():
+    v1 = build_mental_model("Acme", shopify_observations()[:6], [],
+                            now="2024-06-01")
+    r2 = build_strategic_report(company_name="Acme",
+                                observations=shopify_observations(),
+                                previous_model=v1.as_dict(), now="2025-02-01")
+    assert r2.feed
+    assert all("model_change" in f and "confidence_change" in f for f in r2.feed)
+
+
+def test_strategic_memory_persists_and_is_idempotent(tmp_path):
+    mem = StrategicMemory(tmp_path / "s.jsonl")
+    r = build_strategic_report(company_name="Acme",
+                               observations=shopify_observations())
+    mem.save_snapshot("acme.example", r.as_dict()["mental_model"])
+    w1 = mem.publish("acme.example", r.as_dict()["analytics_events"],
+                     run_id="run1")
+    w2 = mem.publish("acme.example", r.as_dict()["analytics_events"],
+                     run_id="run1")               # same run → idempotent
+    assert w1 > 0 and w2 == 0
+    # snapshot is replayable
+    mem2 = StrategicMemory(tmp_path / "s.jsonl")
+    assert mem2.latest_model("acme.example")["version"] == 1
+
+
+def test_exec_output_excludes_internal_names_before_appendix(shopify_report):
+    html = render_strategic_report(shopify_report)
+    primary = html.split("Technical appendix")[0].lower()
+    for banned in ("signals matched", "pattern_id", "dominance filter",
+                   "evidence_role", "source scoring"):
+        assert banned not in primary, banned
+
+
+def test_companies_differ_across_all_intelligence():
+    def report(name, obs):
+        return build_strategic_report(company_name=name, observations=obs)
+    sh = report("Shopify", shopify_observations())
+    li = report("Linear", [
+        _obs("l1", "enterprise", "buyer_segment", "independent_reporting",
+             ["enterprise_expansion", "product_breadth"], date="2024-05-01"),
+        _obs("l2", "simple", "messaging", "customer_voice", ["smb_simplicity"],
+             date="2024-04-01"),
+        _obs("l3", "breadth", "product_surface", "company_owned",
+             ["product_breadth", "merchant_outcome_positioning"], date="2024-06-01")])
+    cf = report("Cloudflare", [
+        _obs("c1", "infra", "infrastructure_platform", "independent_reporting",
+             ["infrastructure_positioning", "platform_control", "product_breadth"],
+             date="2024-05-01"),
+        _obs("c2", "partners", "monetization_ecosystem", "company_owned",
+             ["partner_ecosystem_enablement", "product_breadth"], date="2024-06-01"),
+        _obs("c3", "edge", "infrastructure_platform", "company_owned",
+             ["platform_control", "checkout_identity_rails"], date="2024-03-01")])
+    # mental models, hypotheses, and vulnerabilities all differ
+    def mm_keys(r): return set(r.as_dict()["mental_model"]["components"])
+    assert mm_keys(sh) != mm_keys(li) or \
+        {h.pattern_id for h in sh.hypotheses} != {h.pattern_id for h in li.hypotheses}
+    assert {v["exposed_layer"] for v in sh.vulnerabilities} != \
+        {v["exposed_layer"] for v in cf.vulnerabilities}

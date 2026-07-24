@@ -258,6 +258,13 @@ class StrategicReport:
     timeline: list = field(default_factory=list)        # chronological events
     source_library: dict = field(default_factory=dict)  # all sources, grouped
     analytics_events: list = field(default_factory=list)
+    mental_model: dict = field(default_factory=dict)    # persistent company model
+    surprises: list = field(default_factory=list)       # strategic surprises
+    opportunities: list = field(default_factory=list)
+    vulnerabilities: list = field(default_factory=list)
+    underexamined_questions: list = field(default_factory=list)
+    what_changed: list = field(default_factory=list)    # vs previous model
+    feed: list = field(default_factory=list)            # intelligence feed
 
     def observation(self, obs_id: str):
         for o in self.observations:
@@ -290,4 +297,11 @@ class StrategicReport:
             "timeline": list(self.timeline),
             "source_library": self.source_library,
             "analytics_events": list(self.analytics_events),
+            "mental_model": self.mental_model,
+            "surprises": list(self.surprises),
+            "opportunities": list(self.opportunities),
+            "vulnerabilities": list(self.vulnerabilities),
+            "underexamined_questions": list(self.underexamined_questions),
+            "what_changed": list(self.what_changed),
+            "feed": list(self.feed),
         }

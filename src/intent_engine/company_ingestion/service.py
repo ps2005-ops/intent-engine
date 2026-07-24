@@ -281,7 +281,7 @@ class CompanyIngestionService:
 
     # --- composition ------------------------------------------------------------------
     def compose(self, run_id: str, *, fi_service, competitor_approved=False,
-                extra_observations=()):
+                extra_observations=(), previous_model=None):
         """Build real claims and run the existing Founder Intelligence
         composition. Deterministic; restart-safe (rebuilds from stored
         documents).
@@ -328,13 +328,15 @@ class CompanyIngestionService:
         # untouched. Company-owned-only evidence is honestly marked partial by
         # the strategic quality gate.
         result["strategic_report"] = self._strategic_report(
-            meta["company_name"], documents, extra_observations)
+            meta["company_name"], documents, extra_observations,
+            previous_model=previous_model)
         final = "COMPLETE" if not failures else "PARTIAL"
         self._transition(run_id, domain, final)
         result["ingestion_status"] = final
         return result
 
-    def _strategic_report(self, company_name, documents, extra_observations):
+    def _strategic_report(self, company_name, documents, extra_observations,
+                          previous_model=None):
         from intent_engine.strategic_intelligence.observations import (
             derive_observations,
         )
@@ -346,7 +348,8 @@ class CompanyIngestionService:
         if not observations:
             return None
         report = build_strategic_report(company_name=company_name,
-                                        observations=observations)
+                                        observations=observations,
+                                        previous_model=previous_model)
         return report.as_dict()
 
     # --- evidence library ---------------------------------------------------------

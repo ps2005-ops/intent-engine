@@ -365,30 +365,46 @@ def _build_agenda(observations, hypotheses) -> list:
     """Infer likely-current leadership discussions from combinations of timely
     public signals. Explicitly labeled as inference — never a claim of private
     meeting knowledge."""
+    from intent_engine.strategic_intelligence.insights import _mr_label
     obs_by_id = {o.observation_id: o for o in observations}
     agenda = []
-    for h in hypotheses[:3]:
+    for h in hypotheses[:4]:
         supp = [obs_by_id[i] for i in h.supporting_observation_ids
                 if i in obs_by_id]
         recent = sorted((o for o in supp if o.date),
                         key=lambda o: o.date, reverse=True)[:3]
-        if len(recent) < 1:
-            continue
-        signals = []
+        signals = set()
         for o in supp:
-            signals += list(o.signals)
+            signals.update(o.signals)
+        # a likely agenda item needs a CLUSTER: >= 2 distinct signals AND
+        # at least one dated (timely) signal — not a single keyword.
+        if len(signals) < 2 or not recent:
+            continue
+        classes = {o.source_class for o in supp}
+        independent = bool(classes & set(_INDEPENDENT_CLASSES))
+        exec_attention = "executive_statement" in classes
+        label, why = _mr_label(len(signals), bool(recent), exec_attention,
+                               independent)
         against = [obs_by_id[i].text for i in h.counter_observation_ids
                    if i in obs_by_id][:2]
         agenda.append({
             "inferred_discussion": f"How aggressively to act on: {h.title}",
+            "why_timely": h.why_now,
+            "evidence_cluster": [f"{o.source_title} ({o.source_class}, {o.date})"
+                                 for o in recent],
             "public_signals": [f"{o.source_title} ({o.source_class}, {o.date})"
                                for o in recent],
-            "why_timely": h.why_now,
+            "likely_deciding": h.decision_implications[0],
+            "affected_functions": _affected_functions(signals),
+            "external_trigger": ("independent reporting on the shift"
+                                 if independent else
+                                 "the company's own recent announcements"),
+            "counter_explanation": (h.alternative_explanations or [""])[0],
             "evidence_against": against or ["no strong disconfirming evidence "
                                             "retrieved yet"],
-            "affected_functions": _affected_functions(signals),
             "likely_decision": h.decision_implications[0],
             "confidence": h.confidence,
+            "meeting_relevance": label, "meeting_relevance_why": why,
             "what_would_confirm": h.falsification_questions[0],
         })
         if len(agenda) >= 3:
@@ -434,10 +450,42 @@ def _build_source_library(observations, hypotheses) -> dict:
     return groups
 
 
-def _analytics_events(observations, hypotheses, agenda, status) -> list:
-    """Report-attached analytics (source_selected, evidence_rejected,
-    contradiction_detected, hypothesis_created, ...). No new store; these ride
-    with the report for the web layer / analytics to consume."""
+def _rehydrate_model(model_dict):
+    """Reconstruct a CompanyMentalModel from a persisted dict for diffing."""
+    from intent_engine.strategic_intelligence.model import (
+        CompanyMentalModel, ModelComponent,
+    )
+    comps = {k: ModelComponent(**v)
+             for k, v in (model_dict.get("components") or {}).items()}
+    return CompanyMentalModel(
+        company=model_dict.get("company", ""),
+        version=model_dict.get("version", 1),
+        created_at=model_dict.get("created_at", ""), components=comps,
+        priorities=model_dict.get("priorities", []),
+        tensions=model_dict.get("tensions", []))
+
+
+def _build_feed(changes, agenda, when) -> list:
+    """Intelligence feed items from model changes (and new agenda items)."""
+    feed = []
+    for ch in changes:
+        feed.append({
+            "date": when, "component": ch["component"],
+            "new_evidence": ch["reason"],
+            "model_change": (f"{ch['component']}: "
+                             f"{ch['previous_view'][:60]} → {ch['new_view'][:60]}"
+                             if ch["kind"] == "updated"
+                             else f"{ch['component']} {ch['kind']}"),
+            "confidence_change": f"{ch['old_confidence']} → {ch['new_confidence']}",
+            "importance": "high" if ch["kind"] != "unchanged" else "low"})
+    return feed
+
+
+def _analytics_events(observations, hypotheses, agenda, status,
+                      surprises=(), opportunities=(), vulnerabilities=(),
+                      changes=()) -> list:
+    """Report-attached analytics; the web layer republishes these to the
+    persistent strategic-event store (idempotently)."""
     ev = [{"event": "source_selected", "id": o.observation_id,
            "source_class": o.source_class}
           for o in observations if not o.weak]
@@ -452,13 +500,27 @@ def _analytics_events(observations, hypotheses, agenda, status) -> list:
                        "count": len(h.counter_observation_ids)})
     ev += [{"event": "likely_agenda_item_detected",
             "item": a["inferred_discussion"]} for a in agenda]
+    ev += [{"event": "strategic_surprise_detected", "finding": s["finding"]}
+           for s in surprises]
+    ev += [{"event": "opportunity_detected", "statement": o["statement"]}
+           for o in opportunities]
+    ev += [{"event": "vulnerability_detected", "layer": v["exposed_layer"]}
+           for v in vulnerabilities]
+    ev += [{"event": "confidence_changed", "component": c["component"],
+            "to": c["new_confidence"]} for c in changes]
     ev.append({"event": "report_completed", "status": status})
     return ev
 
 
+def _latest_date(observations):
+    dates = [o.date for o in observations if o.date]
+    return max(dates) if dates else ""
+
+
 def build_strategic_report(*, company_name, observations,
                            patterns=None, scaffolds=None,
-                           user_accepts_limited_scope=False) -> StrategicReport:
+                           user_accepts_limited_scope=False,
+                           previous_model=None, now=None) -> StrategicReport:
     """Compose a StrategicReport from structured observations. Status is left
     to the quality gate (:func:`quality.evaluate_report`), which the caller
     should apply; this function sets a provisional status of the gate result."""
@@ -534,6 +596,33 @@ def build_strategic_report(*, company_name, observations,
     timeline = _build_timeline(observations)
     agenda = _build_agenda(observations, hypotheses)
     source_library = _build_source_library(observations, hypotheses)
+
+    # V1.3: the persistent mental model + executive insights. The report is a
+    # VIEW over the model, not a separate artifact.
+    from intent_engine.strategic_intelligence import insights as _ins
+    from intent_engine.strategic_intelligence.model import (
+        build_mental_model, diff_models,
+    )
+    when = now or _latest_date(observations) or "1970-01-01"
+    prev = None
+    if previous_model:
+        from intent_engine.strategic_intelligence.model import CompanyMentalModel
+        prev = _rehydrate_model(previous_model)
+    model = build_mental_model(company_name, observations, hypotheses,
+                               now=when, previous=prev, blind_spots=blind_spots)
+    surprises = [s.as_dict() for s in
+                 _ins.detect_surprises(company_name, observations, hypotheses)]
+    opportunities = [o.as_dict() for o in
+                     _ins.detect_opportunities(company_name, observations,
+                                               hypotheses)]
+    vulnerabilities = [v.as_dict() for v in
+                       _ins.detect_vulnerabilities(company_name, observations,
+                                                   hypotheses)]
+    underexamined = [q.as_dict() for q in _ins.underexamined_questions(
+        company_name, observations, hypotheses, blind_spots)]
+    changes = diff_models(prev, model) if prev else []
+    feed = _build_feed(changes, agenda, when)
+
     report = StrategicReport(
         company_name=company_name, status="",
         thesis=thesis, shifts=shifts, hypotheses=hypotheses,
@@ -542,13 +631,18 @@ def build_strategic_report(*, company_name, observations,
         decision_implications=_decision_implications(hypotheses, blind_spots),
         observations=list(observations), source_class_coverage=coverage,
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,
-        timeline=timeline, agenda=agenda, source_library=source_library)
+        timeline=timeline, agenda=agenda, source_library=source_library,
+        mental_model=model.as_dict(), surprises=surprises,
+        opportunities=opportunities, vulnerabilities=vulnerabilities,
+        underexamined_questions=underexamined, what_changed=changes, feed=feed)
 
     # provisional status via the quality gate (importing here avoids a cycle)
     from intent_engine.strategic_intelligence.quality import evaluate_report
     report.status, report.quality_findings = evaluate_report(report)
     report.analytics_events = _analytics_events(observations, hypotheses,
-                                                agenda, report.status)
+                                                agenda, report.status,
+                                                surprises, opportunities,
+                                                vulnerabilities, changes)
     return report
 
 

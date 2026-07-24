@@ -161,7 +161,7 @@ def _hypothesis_card(h, obs_by_id, pat_by_id):
         f'<h4>Alternative explanations</h4><ul>{alts}</ul>'
         f'<h4>Comparison</h4>{_pattern_block(pat) if pat else ""}'
         f'<h4>Confidence: {_e(conf)}</h4><ul>{reasons}</ul>'
-        f'<h4>What would change this view</h4><ul>{fals}</ul>'
+        f'<h4>What would change our mind?</h4><ul>{fals}</ul>'
         f'<details class="more"><summary>View all supporting evidence '
         f'({len(all_sup)})</summary>{all_sup_html}</details>'
         f'<details class="more"><summary>View all contradictions '
@@ -186,27 +186,38 @@ def render_strategic_report(report) -> str:
         for c, n in sorted(r.get("source_class_coverage", {}).items()))
 
     top_change = (r.get("shifts") or [{}])[0].get("title", "—")
+    top_surprise = (r.get("surprises") or [{}])[0].get("finding", "—")
+    top_opp = (r.get("opportunities") or [{}])[0].get("statement", "—")
+    top_vuln = (r.get("vulnerabilities") or [{}])[0].get("exposed_layer", "—")
+    top_agenda = (r.get("agenda") or [{}])[0]
 
-    # first viewport / hero
+    # first viewport / hero — decisions & changes first
     hero = (
         f'<div class="hero"><div class="badges">'
         f'<span class="status st-{_e(status)}">{_e(_STATUS_LABEL.get(status,status))}</span>'
-        f'<span class="badge">Freshness: {_e(freshness)}</span>{coverage_badges}</div>'
+        f'<span class="badge">Last researched: {_e(freshness)}</span>{coverage_badges}</div>'
         f'<h1>{_e(r.get("company_name",""))} — Strategic Intelligence</h1>'
         f'<p class="thesis">{_e(thesis.get("view",""))}</p>'
         f'<div class="kv">'
-        f'<b>Most important change</b><span>{_e(top_change)}</span>'
-        f'<b>Most important tension</b><span>{_e(thesis.get("tension",""))}</span>'
+        f'<b>What changed recently</b><span>{_e(top_change)}</span>'
+        f'<b>Most important surprise</b><span>{_e(top_surprise)}</span>'
+        f'<b>Likely current discussion</b>'
+        f'<span>{_e(top_agenda.get("inferred_discussion","—"))}'
+        f' <span class="badge">{_e(top_agenda.get("meeting_relevance",""))}</span></span>'
+        f'<b>Biggest opportunity</b><span>{_e(top_opp)}</span>'
+        f'<b>Biggest vulnerability</b><span>{_e(top_vuln)}</span>'
         f'<b>Decision most affected</b><span>{_e(thesis.get("why_care",""))}</span>'
-        f'<b>Transition underway</b><span>{_e(thesis.get("transition",""))}</span>'
         f'</div>'
         f'<div class="actions"><a href="#hypotheses">Explore reasoning</a>'
         f'<a class="ghost" href="#agenda">Current agenda</a>'
-        f'<a class="ghost" href="#timeline">Timeline</a>'
+        f'<a class="ghost" href="#changed">What changed</a>'
+        f'<a class="ghost" href="#model">Mental model</a>'
         f'<a class="ghost" href="#library">Source library</a></div>'
         f'<p class="muted">Outside-in analysis of approved public sources and a '
         f'curated historical-pattern library. No private or internal knowledge '
-        f'is claimed; no model is trained on this company.</p></div>')
+        f'is claimed, and no model is trained on this company; likely-agenda '
+        f'items are inferred from public signals, never from private '
+        f'meetings.</p></div>')
 
     # executive summary (caps of 3)
     def _cap(items, n=3):
@@ -309,12 +320,111 @@ def render_strategic_report(report) -> str:
                 f'traces &amp; quality gate</summary><ul>{traces}</ul>'
                 f'<h4>Quality gate</h4><ul>{findings}</ul></details>')
 
+    # strategic surprises
+    surprises_html = "".join(
+        f'<div class="card"><h3>{_e(s["finding"])} '
+        f'<span class="badge">{_e(s.get("meeting_relevance",""))}</span></h3>'
+        f'<p class="muted"><strong>Why it is surprising:</strong> '
+        f'{_e(s["why_surprising"])}</p>'
+        f'<div class="row"><div class="chip"><b>On one side</b>'
+        + "".join(f'<div class="ev sup">“{_e(x["excerpt"])}” '
+                  f'<span class="meta">{_e(x["source_title"])}</span></div>'
+                  for x in s["evidence_side_a"]) + '</div>'
+        f'<div class="chip"><b>On the other</b>'
+        + "".join(f'<div class="ev con">“{_e(x["excerpt"])}” '
+                  f'<span class="meta">{_e(x["source_title"])}</span></div>'
+                  for x in s["evidence_side_b"]) + '</div></div>'
+        f'<p><strong>What argues the other way:</strong> '
+        f'{_e(s["alternative_explanation"])}</p>'
+        f'<p><strong>Decision this affects:</strong> {_e(s["decision_affected"])}</p>'
+        f'<p class="muted"><strong>What would resolve it:</strong> '
+        f'{_e(s["what_would_resolve"])}</p></div>'
+        for s in r.get("surprises", [])) or "<p class='muted'>None detected.</p>"
+
+    # opportunities
+    opp_html = "".join(
+        f'<div class="card"><h3>{_e(o["statement"])}</h3>'
+        f'<p><strong>Why now:</strong> {_e(o["why_now"])}</p>'
+        f'<p><strong>The asymmetry:</strong> {_e(o["asymmetry"])}</p>'
+        f'<p class="muted"><strong>Downside:</strong> {_e(o["downside"])} · '
+        f'<strong>Difficulty:</strong> {_e(o["execution_difficulty"])}</p>'
+        f'<p><strong>Decision this affects:</strong> {_e(o["decision_required"])}</p>'
+        f'</div>' for o in r.get("opportunities", [])) or "<p class='muted'>—</p>"
+
+    # vulnerabilities
+    vuln_html = "".join(
+        f'<div class="card"><h3>Exposed: {_e(v["exposed_layer"])}</h3>'
+        f'<p><strong>Mechanism:</strong> {_e(v["mechanism"])}</p>'
+        f'<p class="muted"><strong>Why exposure may be rising:</strong> '
+        f'{_e(v["why_increasing"])} ({_e(v["market_force"])})</p>'
+        f'<p><strong>What argues against this:</strong> {_e(v["counterpoint"])}</p>'
+        f'<p><strong>Watch:</strong> {_e(v["leading_indicator"])} · '
+        f'<strong>Decision:</strong> {_e(v["decision_affected"])}</p></div>'
+        for v in r.get("vulnerabilities", [])) or "<p class='muted'>—</p>"
+
+    # underexamined questions
+    uq_html = "".join(
+        f'<div class="card"><h3>{_e(q["question"])}</h3>'
+        f'<p class="muted"><strong>Why it may be underexamined:</strong> '
+        f'{_e(q["why_underexamined"])}</p>'
+        f'<p><strong>What answers would imply:</strong> {_e(q["what_answers_imply"])}</p>'
+        f'<p><strong>Decision this affects:</strong> {_e(q["decision_affected"])}</p>'
+        f'</div>' for q in r.get("underexamined_questions", [])) \
+        or "<p class='muted'>—</p>"
+
+    # mental model panels
+    mm = r.get("mental_model", {})
+    panels = "".join(
+        f'<div class="chip"><b>{_e(name.replace("_"," ").title())} '
+        f'· {_e(c.get("confidence",""))}</b>{_e(c.get("current_state",""))}'
+        + (f'<p class="muted">Was: {_e(c["prior_state"])}</p>'
+           if c.get("prior_state") else "") + '</div>'
+        for name, c in mm.get("components", {}).items())
+    model_section = (f'<h2 id="model">Company mental model '
+                     f'(v{mm.get("version",1)})</h2>'
+                     f'<p class="muted">A living outside-in model — updated by '
+                     f'new evidence, not rebuilt from zero.</p>'
+                     f'<div class="row">{panels or "<p class=muted>—</p>"}</div>')
+
+    # what changed our view
+    changed = r.get("what_changed", [])
+    changed_html = "".join(
+        f'<div class="card"><h3>{_e(ch["component"].replace("_"," ").title())} '
+        f'— {_e(ch["kind"])}</h3>'
+        + (f'<p><strong>Previous view:</strong> {_e(ch["previous_view"])}</p>'
+           if ch.get("previous_view") else "")
+        + f'<p><strong>New view:</strong> {_e(ch["new_view"])}</p>'
+        f'<p class="muted"><strong>Confidence:</strong> '
+        f'{_e(ch["old_confidence"] or "—")} → {_e(ch["new_confidence"] or "—")} · '
+        f'{_e(ch["reason"])}</p></div>' for ch in changed)
+    changed_section = (
+        f'<h2 id="changed">What changed our view?</h2>'
+        + (changed_html if changed else
+           '<p class="muted">First analysis of this company — no prior model '
+           'to compare yet. Future evidence will update this.</p>'))
+
+    # intelligence feed
+    feed = r.get("feed", [])
+    feed_html = "".join(
+        f'<li><span class="d">{_e(f["date"])}</span> {_e(f["model_change"])} '
+        f'<span class="badge">{_e(f["confidence_change"])}</span></li>'
+        for f in feed)
+    feed_section = (f'<h2 id="feed">Intelligence feed</h2>'
+                    + (f'<ul class="tl">{feed_html}</ul>' if feed else
+                       '<p class="muted">Updates will appear here as new '
+                       'evidence changes the model.</p>'))
+
     return (
         f'{_CSS}<section class="si" aria-label="Strategic Intelligence Report">'
         f'{hero}{summary}'
+        f'<h2 id="surprises">Strategic surprises</h2>{surprises_html}'
         f'<h2 id="hypotheses">Strategic hypotheses</h2>{hyp_html}'
+        f'<h2 id="opportunities">Strategic opportunities</h2>{opp_html}'
+        f'<h2 id="vulnerabilities">Where the company is exposed</h2>{vuln_html}'
+        f'<h2>Questions that may be underexamined</h2>{uq_html}'
         f'<h2>Possible blind spots</h2>{blinds}'
-        f'{agenda_section}{timeline_section}'
+        f'{model_section}{changed_section}{agenda_section}{feed_section}'
+        f'{timeline_section}'
         f'<h2>Questions for leadership</h2>{questions}'
         f'<h2>Source library &amp; provenance</h2>{library_section}{appendix}'
         f'</section>')

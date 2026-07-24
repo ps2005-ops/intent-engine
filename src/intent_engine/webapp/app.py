@@ -59,6 +59,14 @@ class WebApp:
             transport=transport, resolver=resolver)
         self.auth = AuthService(self.web_store, config, now_fn=now_fn)
         self.sharing = SharingService(self.web_store, now_fn=now_fn)
+        from pathlib import Path as _Path
+        from intent_engine.strategic_intelligence.store import StrategicMemory
+        ci_path = _Path(getattr(config, "ci_store_path",
+                                "data/company_ingestion.jsonl"))
+        # co-locate strategic state with the ingestion store (tmp in tests,
+        # data/ in production) so tests never write into the repo.
+        self.strategic_memory = StrategicMemory(
+            ci_path.parent / "strategic_state.jsonl")
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
 
@@ -1230,8 +1238,7 @@ class WebApp:
                     privacy="user_public_excerpt", authorized=True,
                     source_class=pasted_class)
             self.ci.fetch_approved(run_id)
-            self._results[run_id] = self.ci.compose(run_id,
-                                                    fi_service=self.fi)
+            self._results[run_id] = self._compose(run_id)
         except IngestionError as exc:
             return self._error_page(400, str(exc))
         return self._redirect(f"/runs/{run_id}/progress")
@@ -1265,9 +1272,25 @@ class WebApp:
         if run_id not in self._results:
             if self.ci.store.approval(run_id) is None:
                 return None
-            self._results[run_id] = self.ci.compose(run_id,
-                                                    fi_service=self.fi)
+            self._results[run_id] = self._compose(run_id)
         return self._results.get(run_id)
+
+    def _compose(self, run_id):
+        """Compose the run, threading the persisted mental model so the report
+        is a VIEW over the company's evolving state, then persist the new
+        snapshot and publish strategic events durably (idempotent)."""
+        meta = self.ci.run_meta(run_id)
+        domain = meta["domain"] if meta else ""
+        previous_model = self.strategic_memory.latest_model(domain) \
+            if domain else None
+        result = self.ci.compose(run_id, fi_service=self.fi,
+                                 previous_model=previous_model)
+        report = result.get("strategic_report")
+        if report and domain:
+            self.strategic_memory.save_snapshot(domain, report["mental_model"])
+            self.strategic_memory.publish(
+                domain, report.get("analytics_events", []), run_id=run_id)
+        return result
 
     def _ready(self):
         try:

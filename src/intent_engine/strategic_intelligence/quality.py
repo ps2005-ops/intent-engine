@@ -185,6 +185,32 @@ def evaluate_report(report) -> tuple:
     return status, findings
 
 
+def executive_insight_quality(report) -> tuple:
+    """Reject/downgrade insights that merely restate positioning, lack a
+    mechanism/decision, or could apply to any company. Returns (ok, findings)."""
+    from intent_engine.strategic_intelligence.insights import (
+        is_generic_insight, passes_specificity,
+    )
+    r = report.as_dict() if hasattr(report, "as_dict") else report
+    company = r.get("company_name", "")
+    findings = []
+    for s in r.get("surprises", []):
+        if is_generic_insight(s["finding"]) or \
+                not passes_specificity(s["finding"], company):
+            findings.append(_f("generic_surprise",
+                               f"surprise reads generically: {s['finding'][:60]}",
+                               "warn"))
+    for o in r.get("opportunities", []):
+        if not passes_specificity(o["statement"], company):
+            findings.append(_f("generic_opportunity", "opportunity is not "
+                               "company-specific", "warn"))
+    for h in r.get("hypotheses", []):
+        if is_generic_insight(h.get("statement", "")):
+            findings.append(_f("generic_hypothesis", "hypothesis restates "
+                               "generic positioning", "warn"))
+    return (not findings, findings)
+
+
 def looks_low_value(payload) -> tuple:
     """Detect the previous website-summarizer failure mode. ``payload`` may be
     a rendered HTML string or any object with text. Returns (bool, reasons)."""
