@@ -57,15 +57,17 @@ when they open:
 ## Cadence — learn every day, promote on evidence
 
 Per the founder's final recommendation, learning ≠ training. The cadence is
-a state machine, enforced in `LearningLedger`, and orchestrated by
-`scripts/learning_cadence.py` (human-wired; the script installs no
-schedule, mirroring `resolve_market_predictions.py`):
+a state machine, enforced in `LearningLedger`, and orchestrated by the
+deployable runtime `python -m intent_engine.runtime <job>` (locked, evented,
+idempotent — see `docs/RUNTIME_DEPLOYMENT.md`). *(The earlier
+`scripts/learning_cadence.py` prototype was removed in the production
+hardening pass — the `runtime/` jobs supersede it.)*
 
 | Cadence | Job | What it does |
 |---|---|---|
-| **Daily** | `learning_cadence.py daily` | paper loop emits recurring-mistake candidates; synthetic eval report feeds weakness candidates |
-| **Weekly** | `learning_cadence.py weekly` | reports candidates awaiting evaluation (the comparison harness runs with real data via the market-engine flow) |
-| **Monthly** | `learning_cadence.py monthly` | reports promotion-readiness **for human review** — never promotes |
+| **Daily** | `runtime daily` | resolve due predictions, open eligible paper positions, generate candidates |
+| **Weekly** | `runtime weekly-eval` | real walk-forward candidate evaluation |
+| **Monthly** | `runtime monthly-packet` | writes the promotion-review packet **for human review** — never promotes |
 
 Everything is idempotent (re-running proposes no duplicates; a still-open
 candidate for a regime/mechanism is not re-proposed) and replayable from the
@@ -109,7 +111,7 @@ Per the "NO ARCHITECTURE DUPLICATION" directive, this build reused:
 | `paper/ledger.py` | append-only position store |
 | `paper/service.py` | the shadow loop + learning-candidate emission |
 | `personal/adapters/learning.py` | Personal AI's read adapter over the platform |
-| `scripts/learning_cadence.py` | daily/weekly/monthly orchestrator |
+| `runtime/` (jobs, market, __main__) | daily/weekly/monthly orchestrator (locked, evented, deployable) |
 
 ## Integrations (how the four reinforce each other)
 

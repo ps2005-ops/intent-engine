@@ -48,12 +48,11 @@ def _real_price_at():
 
 
 def _real_regime_for():
+    from intent_engine.runtime.regime import fetch_regime_label
+    fred_key = os.environ.get("FRED_API_KEY", "")
+
     def regime_for(as_of: str) -> str:
-        try:
-            from intent_engine.core.regime_engine import current_regime  # type: ignore
-            return str(current_regime())
-        except Exception:  # noqa: BLE001 - regime is best-effort context
-            return "unknown"
+        return fetch_regime_label(as_of, fred_key=fred_key)
     return regime_for
 
 
@@ -133,7 +132,8 @@ def main(argv=None) -> int:
                                  description=__doc__)
     ap.add_argument("job", choices=[
         "preflight", "market-open", "resolve", "daily-candidates", "daily",
-        "weekly-eval", "monthly-packet", "synthetic-daily", "health"])
+        "weekly-eval", "monthly-packet", "synthetic-daily", "health",
+        "integrity"])
     ap.add_argument("--root", default="data", type=Path)
     ap.add_argument("--as-of", default=None)
     args = ap.parse_args(argv)
@@ -144,6 +144,12 @@ def main(argv=None) -> int:
     if args.job == "health":
         print(json.dumps(latest_status(args.root), indent=2, default=str))
         return 0
+
+    if args.job == "integrity":
+        from intent_engine.runtime.integrity import run_integrity
+        rep = run_integrity(args.root)
+        print(json.dumps(rep, indent=2, default=str))
+        return 0 if rep["clean"] else 2
 
     results = []
     if args.job in ("preflight", "daily"):

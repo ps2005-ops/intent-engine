@@ -1345,26 +1345,84 @@ class WebApp:
 
     # --- unified operational dashboard (Part 5) -----------------------------
     def _platform_status(self) -> dict:
-        """One read-only status object for market, synthetic, marketing, and
-        Personal AI — assembled from persisted runtime state. Every value is
-        real (from the stores/status files) or an honest null."""
-        from intent_engine.runtime.jobs import latest_status
+        """One read-only status object for the whole platform — assembled from
+        persisted runtime state. Every value is real (from the stores/status
+        files) or an honest null. No secret value is ever included."""
+        from intent_engine._version import version_info
         from intent_engine.runtime.config_health import check_config
+        from intent_engine.runtime.jobs import latest_status
         as_of = __import__("datetime").date.today().isoformat()
-        jobs = latest_status(self._runtime_root)
+        root = self._runtime_root
+        jobs = latest_status(root)
         try:
-            insp = self._personal.inspect_learning(as_of=as_of)
-            pipeline = insp["pipeline"]
+            pipeline = self._personal.inspect_learning(as_of=as_of)["pipeline"]
         except Exception:                                   # noqa: BLE001
             pipeline = {}
         pm = self._learning_reader.paper_metrics() or {}
-        # config health WITHOUT secret values
+
+        # prediction ledger counts (real reads; honest zero if absent)
+        pred_total = pred_resolved = 0
+        mean_brier = None
+        try:
+            from intent_engine.core import prediction_ledger as pl
+            lp = root / "prediction_ledger.db"
+            preds = pl.list_predictions(path=lp)
+            pred_total = len(preds)
+            pred_resolved = sum(1 for p in preds
+                                if p.outcome in ("happened", "did_not_happen"))
+            mean_brier = pl.brier_summary(path=lp).mean_brier
+        except Exception:                                   # noqa: BLE001
+            pass
+
+        open_positions = 0
+        try:
+            from intent_engine.paper.ledger import PaperStore
+            open_positions = len(PaperStore(root / "paper_book.db").open_positions())
+        except Exception:                                   # noqa: BLE001
+            pass
+
+        # pending human promotions (evaluated + ready)
+        pending_promotions = 0
+        for c in self._learning_reader.candidates(status="evaluated"):
+            try:
+                r = self._learning_reader.explain_candidate(
+                    c["id"]).get("promotion_readiness")
+                if r and r.get("ready"):
+                    pending_promotions += 1
+            except Exception:                               # noqa: BLE001
+                continue
+
+        failed_jobs = sorted(k for k, v in jobs.items()
+                             if v.get("status") == "failed")
         cfg = {k: v["status"] for k, v in check_config().items()}
+        missing_required = [k for k, v in check_config().items()
+                            if v["required"] and v["status"] in
+                            ("missing", "invalid_format")]
+
+        try:
+            from intent_engine.runtime.integrity import run_integrity
+            integ = run_integrity(root)
+            integrity = {"clean": integ["clean"],
+                         "issue_count": integ["issue_count"]}
+        except Exception as exc:                            # noqa: BLE001
+            integrity = {"clean": None, "error": type(exc).__name__}
+
+        def _last(status):
+            hits = [(v.get("at"), k) for k, v in jobs.items()
+                    if v.get("status") == status and v.get("at")]
+            return max(hits)[0] if hits else None
+
         return {
             "as_of": as_of,
+            "version": version_info(),
             "market": {
                 "candidate_pipeline": pipeline,
+                "predictions": pred_total,
+                "resolved": pred_resolved,
+                "mean_brier": mean_brier,
+                "open_positions": open_positions,
                 "paper_closed": pm.get("closed_count", 0),
+                "portfolio_value": pm.get("ending_equity"),
                 "paper_total_pnl": pm.get("total_pnl"),
                 "paper_win_rate": pm.get("win_rate"),
                 "jobs": {k: jobs.get(k, {}).get("status") for k in
@@ -1373,34 +1431,101 @@ class WebApp:
             },
             "synthetic": {"last_run": jobs.get("synthetic-daily", {}).get("at"),
                           "status": jobs.get("synthetic-daily", {}).get("status")},
+            "scheduler": {"last_success": _last("succeeded"),
+                          "last_failure": _last("failed"),
+                          "failed_jobs": failed_jobs},
+            "pending": {"promotions": pending_promotions,
+                        "failures": len(failed_jobs)},
+            "integrity": integrity,
             "config_health": cfg,
+            "attention": self._attention(missing_required, failed_jobs,
+                                         pending_promotions, integrity),
         }
+
+    @staticmethod
+    def _attention(missing_required, failed_jobs, pending_promotions, integrity):
+        """What needs a human — the 'what needs attention' the cards surface."""
+        items = []
+        if missing_required:
+            items.append(f"missing required credentials: {missing_required}")
+        if failed_jobs:
+            items.append(f"failed jobs: {failed_jobs}")
+        if integrity.get("clean") is False:
+            items.append(f"data integrity: {integrity.get('issue_count')} issue(s)")
+        if pending_promotions:
+            items.append(f"{pending_promotions} candidate(s) awaiting your promotion")
+        return items or ["nothing needs attention"]
 
     def _dashboard_page(self, session):
         st = self._platform_status()
+        m = st["market"]
         def _kv(d):
             return ", ".join(f"{_e(str(k))}: {_e(str(v))}" for k, v in d.items()) \
                 or "none"
-        jobs = st["market"]["jobs"]
+        def _card(title, what, why, attention):
+            att = (f'<p><strong>Needs attention:</strong> {_e(attention)}</p>'
+                   if attention else "")
+            return (f'<section style="border:1px solid #8884;border-radius:8px;'
+                    f'padding:12px;margin:10px 0"><h2>{_e(title)}</h2>'
+                    f'<p><strong>What:</strong> {what}</p>'
+                    f'<p><strong>Why it matters:</strong> {_e(why)}</p>{att}</section>')
+        ver = st["version"]
+        attn = st["attention"]
+        market_attention = None
+        if m["predictions"] and not m["resolved"]:
+            market_attention = ("predictions exist but none have resolved yet — "
+                                "calibration and paper P&L stay provisional")
         body = (
             f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>Operations dashboard</title></head><body><main>'
             f'<h1>Operations dashboard</h1>'
             f'<p><em>Read-only. As of {_e(st["as_of"])}. '
+            f'Version {_e(ver["app_version"])} · commit {_e(ver["commit"])} · '
             f'<a href="/status.json">status.json</a></em></p>'
-            f'<h2>Market learning</h2>'
-            f'<p>Candidate pipeline: {_kv(st["market"]["candidate_pipeline"])}</p>'
-            f'<p>Paper book: {st["market"]["paper_closed"]} closed, '
-            f'P&L {_e(str(st["market"]["paper_total_pnl"]))}, '
-            f'win rate {_e(str(st["market"]["paper_win_rate"]))}</p>'
-            f'<p>Scheduled jobs: {_kv(jobs)}</p>'
-            f'<h2>Synthetic worlds</h2>'
-            f'<p>Last run: {_e(str(st["synthetic"]["last_run"]))} '
-            f'({_e(str(st["synthetic"]["status"]))})</p>'
-            f'<h2>Configuration health</h2>'
-            f'<p>{_kv(st["config_health"])}</p>'
-            f'<p><a href="/assistant">Personal AI</a> · '
+            + _card("Needs attention", "<ul>" + "".join(
+                f"<li>{_e(a)}</li>" for a in attn) + "</ul>",
+                "the single place to look before anything else", None)
+            + _card("System health & scheduler",
+                    f'last success {_e(str(st["scheduler"]["last_success"]))}; '
+                    f'last failure {_e(str(st["scheduler"]["last_failure"]))}; '
+                    f'jobs {_kv(m["jobs"])}',
+                    "a scheduled job that silently stops is the top production "
+                    "risk; failures here are persistent, not swallowed",
+                    (f'failed: {st["scheduler"]["failed_jobs"]}'
+                     if st["scheduler"]["failed_jobs"] else None))
+            + _card("Market learning",
+                    f'{m["predictions"]} predictions, {m["resolved"]} resolved; '
+                    f'mean Brier {_e(str(m["mean_brier"]))}; '
+                    f'{m["open_positions"]} open / {m["paper_closed"]} closed paper '
+                    f'positions; portfolio {_e(str(m["portfolio_value"]))}; '
+                    f'P&L {_e(str(m["paper_total_pnl"]))}; '
+                    f'pipeline {_kv(m["candidate_pipeline"])}',
+                    "this is the loop the platform exists to run and grade",
+                    market_attention)
+            + _card("Pending your decision",
+                    f'{st["pending"]["promotions"]} promotion(s) ready for review',
+                    "promotion is human-gated by design; nothing is applied "
+                    "to production without you",
+                    (f'{st["pending"]["promotions"]} awaiting review — '
+                     '<a href="/assistant">review</a>'
+                     if st["pending"]["promotions"] else None))
+            + _card("Data integrity",
+                    ("clean" if st["integrity"].get("clean")
+                     else f'{st["integrity"].get("issue_count", "?")} issue(s)'),
+                    "append-only stores must stay consistent for replay and "
+                    "provenance to be trustworthy",
+                    (None if st["integrity"].get("clean") else "run integrity job"))
+            + _card("Synthetic worlds",
+                    f'last run {_e(str(st["synthetic"]["last_run"]))} '
+                    f'({_e(str(st["synthetic"]["status"]))})',
+                    "the stress-test gym that feeds candidate improvements", None)
+            + _card("Configuration",
+                    _kv(st["config_health"]),
+                    "a missing credential fails jobs loudly rather than "
+                    "producing an empty day; values are never shown",
+                    None)
+            + f'<p><a href="/assistant">Personal AI</a> · '
             f'<a href="/learning">Learning platform</a> · '
             f'<a href="/">Home</a></p>'
             f'</main></body></html>')

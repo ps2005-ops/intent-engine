@@ -44,8 +44,11 @@ def test_dashboard_renders_sections(app):
     _login(c)
     status, _, body = c.request("GET", "/dashboard")
     assert status == "200 OK"
-    for section in ("Market learning", "Synthetic worlds", "Configuration health"):
+    for section in ("Needs attention", "Market learning", "Synthetic worlds",
+                    "Configuration", "Data integrity"):
         assert section in body
+    # every card explains what and why (Phase 4 requirement)
+    assert "Why it matters" in body
 
 
 def test_status_json_has_no_secret_values(app):

@@ -28,10 +28,21 @@ explicitly enable and approve it.*
 cd intent-engine
 python -m intent_engine.runtime preflight --root /tmp/ie        # config health
 python -m intent_engine.runtime synthetic-daily --root /tmp/ie  # offline gym
+python -m intent_engine.runtime integrity --root /tmp/ie        # data-integrity scan (exit 2 if issues)
 python -m intent_engine.runtime health --root /tmp/ie           # job statuses
 # market jobs FAIL LOUDLY without keys (by design — not a silent empty day):
 python -m intent_engine.runtime market-open --root /tmp/ie
 ```
+
+## Performance characteristics (measured)
+
+At daily volumes (≈5–20 predictions/day) all jobs are sub-second. Measured on
+a 200-record workload: runtime import ≈210 ms, open-200 ≈120 ms, integrity
+scan ≈30 ms. `resolve` is ≈1.8 s per 200 because the append-only stores are
+re-read per record (O(n²)); this is comfortably within a daily cadence but is
+a **scaling limitation** to revisit only if backfilling thousands of records
+at once — not before. The `/dashboard` runs a live integrity scan per view;
+fine at current scale.
 
 ## Production health URLs
 

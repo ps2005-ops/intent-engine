@@ -72,3 +72,30 @@ def test_preflight_never_exposes_secret_values(tmp_path, monkeypatch):
     dumped = str(report)
     assert "SUPERSECRETVALUE" not in dumped
     assert report["TIINGO_API_KEY"]["status"] == "unprobed"   # present, not echoed
+
+
+def test_retry_recovers_a_transient_failure(tmp_path):
+    """A job that fails once then succeeds is recorded as succeeded — retries
+    absorb a transient error rather than failing the day."""
+    calls = {"n": 0}
+    def flaky():
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise TimeoutError("transient")
+        return {"attempt": calls["n"]}
+    r = run_job("flaky", flaky, root=tmp_path, retries=1)
+    assert r.status == "succeeded" and calls["n"] == 2
+
+
+def test_config_preflight_failure_idempotent_per_day(tmp_path):
+    """Two preflights the same day emit ONE failure event per missing key
+    (idempotency keyed to the day) — no alert storm on a re-run."""
+    bus = CompanyEventBus(tmp_path / "events")
+    for var in ("TIINGO_API_KEY", "FRED_API_KEY"):
+        os.environ.pop(var, None)
+    preflight(bus=bus, root=tmp_path)
+    preflight(bus=bus, root=tmp_path)
+    tiingo_failures = [e for e in bus.store.read_all()
+                       if e.event_type == "config.preflight_failed"
+                       and e.payload.get("env_var") == "TIINGO_API_KEY"]
+    assert len(tiingo_failures) == 1
