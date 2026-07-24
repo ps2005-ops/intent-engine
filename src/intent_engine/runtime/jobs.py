@@ -18,6 +18,7 @@ a key is missing — never a silent empty day.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -48,8 +49,14 @@ def _write_status(root: Path, result: JobResult) -> None:
            "error": result.error, "detail": result.detail}
     with open(root / "status" / "jobs.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(row, sort_keys=True, default=str) + "\n")
-    (root / "status" / f"{result.name}.json").write_text(
-        json.dumps(row, indent=2, sort_keys=True, default=str))
+    # ATOMIC replace for the primary per-job status file: a concurrent
+    # dashboard read must never see a half-written JSON (it would be skipped as
+    # unparseable, momentarily dropping the card). temp + os.replace is atomic
+    # on POSIX, matching the event-store checkpoint and scheduler-marker writes.
+    target = root / "status" / f"{result.name}.json"
+    tmp = target.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(row, indent=2, sort_keys=True, default=str))
+    os.replace(tmp, target)
 
 
 def run_job(name: str, work: Callable[[], dict], *, root, bus=None,

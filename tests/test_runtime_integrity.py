@@ -93,3 +93,29 @@ def test_status_regression_detected(tmp_path):
 def test_empty_root_is_clean(tmp_path):
     rep = run_integrity(tmp_path)
     assert rep["clean"] is True
+
+
+def test_integrity_cache_write_and_read(tmp_path):
+    from intent_engine.runtime.integrity import (
+        read_cached_integrity, write_integrity,
+    )
+    assert read_cached_integrity(tmp_path) is None      # nothing cached yet
+    _populate(tmp_path)
+    rep = write_integrity(tmp_path)
+    assert "checked_at" in rep
+    cached = read_cached_integrity(tmp_path)
+    assert cached is not None and cached["clean"] == rep["clean"]
+    # atomic write leaves no partial temp file
+    assert not (tmp_path / "status" / "integrity.json.tmp").exists()
+
+
+def test_daily_composite_includes_integrity_scan(tmp_path):
+    from intent_engine.events import CompanyEventBus
+    from intent_engine.runtime.__main__ import dispatch
+    bus = CompanyEventBus(tmp_path / "events")
+    names = [r.name for r in dispatch("daily", tmp_path, as_of="2026-07-24",
+                                      bus=bus)]
+    assert "integrity-scan" in names
+    # the scheduled scan cached a result the dashboard can read
+    from intent_engine.runtime.integrity import read_cached_integrity
+    assert read_cached_integrity(tmp_path) is not None

@@ -1407,11 +1407,19 @@ class WebApp:
                             if v["required"] and v["status"] in
                             ("missing", "invalid_format")]
 
+        # Read the CACHED integrity result (written by the scheduled
+        # integrity-scan) so the user-facing dashboard never runs a full store
+        # scan per view. Falls back to a live scan only if no cache exists yet.
         try:
-            from intent_engine.runtime.integrity import run_integrity
-            integ = run_integrity(root)
+            from intent_engine.runtime.integrity import (
+                read_cached_integrity, run_integrity,
+            )
+            integ = read_cached_integrity(root)
+            if integ is None:
+                integ = run_integrity(root)
             integrity = {"clean": integ["clean"],
-                         "issue_count": integ["issue_count"]}
+                         "issue_count": integ["issue_count"],
+                         "checked_at": integ.get("checked_at")}
         except Exception as exc:                            # noqa: BLE001
             integrity = {"clean": None, "error": type(exc).__name__}
 

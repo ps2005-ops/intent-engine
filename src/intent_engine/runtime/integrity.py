@@ -142,3 +142,32 @@ def run_integrity(root: Union[str, Path]) -> dict:
     check_paper(root / "paper_book.db", report, root / "prediction_ledger.db")
     check_predictions(root / "prediction_ledger.db", report)
     return report.to_dict()
+
+
+def write_integrity(root: Union[str, Path]) -> dict:
+    """Run the scan and cache the result atomically. Called on a schedule so
+    the user-facing dashboard reads a cached result instead of doing a full
+    store scan on every page view."""
+    import json
+    import os
+    from datetime import datetime, timezone
+    root = Path(root)
+    report = run_integrity(root)
+    report["checked_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    (root / "status").mkdir(parents=True, exist_ok=True)
+    target = root / "status" / "integrity.json"
+    tmp = target.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(report, indent=2, sort_keys=True, default=str))
+    os.replace(tmp, target)
+    return report
+
+
+def read_cached_integrity(root: Union[str, Path]) -> Union[dict, None]:
+    import json
+    p = Path(root) / "status" / "integrity.json"
+    if not p.exists():
+        return None
+    try:
+        return json.loads(p.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None

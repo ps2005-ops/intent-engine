@@ -105,6 +105,13 @@ def cmd_monthly_packet(root, bus, as_of, mr):
     return run_job("monthly-packet", work, root=root, bus=bus)
 
 
+def cmd_integrity_scan(root, bus):
+    def work():
+        from intent_engine.runtime.integrity import write_integrity
+        return write_integrity(root)
+    return run_job("integrity-scan", work, root=root, bus=bus)
+
+
 def cmd_synthetic_daily(root, bus, as_of):
     def work():
         from intent_engine.core.synthetic_worlds import (
@@ -174,6 +181,10 @@ def dispatch(job: str, root, *, as_of: str, bus=None) -> list:
         results.append(cmd_resolve(root, bus, as_of, mr, _real_price_at()))
     if job in ("daily-candidates", "daily"):
         results.append(cmd_daily_candidates(root, bus, as_of, mr))
+    if job == "daily":
+        # cache a fresh integrity scan on the daily cadence so the dashboard
+        # reads a cached result instead of a full scan per page view.
+        results.append(cmd_integrity_scan(root, bus))
     if job == "weekly-eval":
         results.append(cmd_weekly_eval(root, bus, as_of, mr))
     if job == "monthly-packet":
