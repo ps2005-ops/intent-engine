@@ -604,3 +604,67 @@ def test_blocked_source_does_not_fail_run_when_other_evidence_succeeds(
     assert app.ci.store.run_state(run_id) == "PARTIAL"
     status, _, body = c.request("GET", f"/runs/{run_id}")
     assert status == "200 OK" and "Evidence Library" in body
+
+
+# --- production incident replay (Render redeploy mid-run) -------------------
+
+def test_incident_render_redeploy_midrun_failed_tesla_run(tmp_path):
+    """Regression for the production incident on run 01KY97FD8VFW3809TMPJ5J1C6S.
+
+    The Render access log shows the exact sequence (Tesla, www.tesla.com/en_ca):
+
+        POST /demo                          303   (anon session minted)
+        POST /analyze                       303   → /runs/<id>/sources
+        GET  /runs/<id>/sources             200
+        ==> Deploying...  (new process)           ← redeploy mid-session
+        POST /runs/<id>/sources/approve     303   → /progress   (old instance)
+        GET  /runs/<id>/progress            200
+        ==> Your service is live 🎉               ← new instance takes traffic
+        GET  /runs/<id>                     303   → /login       ← THE BUG
+
+    Root cause (from the log, not a guess): the anonymous session lived only in
+    AuthService._sessions, so the post-redeploy process had no record of it and
+    the ``session is None`` guard on /runs/... redirected to /login. Tesla also
+    refuses the retrieval bot (HTTP 403), so the run itself is legitimately
+    FAILED. This test replays the timeline and pins both fixes: the signed
+    cookie survives the redeploy, and the FAILED run renders an honest page —
+    never a /login bounce and never a fabricated result.
+    """
+    TESLA = "https://www.tesla.com/en_ca"
+    # instance A: Tesla refuses the bot on every request (HTTP 403)
+    app_a = _make(tmp_path, transport=_all_403)
+    c = _start_demo(app_a)                                   # POST /demo 303
+    anon_uid = app_a.auth.session(c.sid())["user_id"]
+
+    run_id = _start_real(c, TESLA)                           # POST /analyze 303
+    status, _, _ = c.request("GET", f"/runs/{run_id}/sources")
+    assert status == "200 OK"                                # GET /sources 200
+
+    status, headers, _ = _approve_all(app_a, c, run_id)      # approve 303
+    assert status.startswith("303") and headers["Location"].endswith(
+        "/progress")
+    assert app_a.ci.store.run_state(run_id) == "FAILED"      # Tesla 403 → FAILED
+
+    # progress on the OLD instance: honest FAILED, no fake "Open the result"
+    status, _, body = c.request("GET", f"/runs/{run_id}/progress")
+    assert status == "200 OK" and "FAILED" in body
+    assert "Open the result" not in body
+
+    # ==> Deploying... : a brand-new process takes over on the same disk+secret
+    app_b = _restart(app_a)
+    c.app = app_b
+    assert app_b.auth._sessions == {}                        # nothing in memory
+
+    # THE request that used to 303 → /login now restores the signed session and
+    # renders the honest failed-run page.
+    status, headers, body = c.request("GET", f"/runs/{run_id}")
+    assert status == "200 OK", (status, headers.get("Location"))
+    assert headers.get("Location") != "/login"
+    assert "could not be completed" in body
+    assert "access refused" in body                          # HTTP 403 category
+    restored = app_b.auth.session(c.sid())
+    assert restored["anonymous"] is True and restored["user_id"] == anon_uid
+
+    # progress after the redeploy is likewise honest and still result-free
+    status, _, body = c.request("GET", f"/runs/{run_id}/progress")
+    assert status == "200 OK" and "Open the result" not in body
