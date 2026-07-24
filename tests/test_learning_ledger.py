@@ -144,6 +144,25 @@ def test_human_promotes_when_ready_and_publishes(tmp_path):
     assert len(promoted) == 1 and promoted[0].actor_type == "human"
 
 
+def test_bus_itself_blocks_agent_promotion(tmp_path):
+    """Defense in depth: even bypassing the service and publishing directly on
+    the bus, a non-human learning.candidate_promoted is rejected. The approval
+    wall is structural, not just a service-level check."""
+    from intent_engine.events import WallViolation
+    bus = CompanyEventBus(tmp_path / "events")
+    with pytest.raises(WallViolation, match="human wall"):
+        bus.publish("learning.candidate_promoted", subject_type="candidate",
+                    subject_id="c1", producer="learning_ledger",
+                    actor_type="agent", actor_id="bot", source="system",
+                    payload={})
+    # a human actor is allowed
+    r = bus.publish("learning.candidate_promoted", subject_type="candidate",
+                    subject_id="c1", producer="learning_ledger",
+                    actor_type="human", actor_id="founder", source="cli",
+                    payload={})
+    assert r.event.actor_type == "human"
+
+
 def test_reject_records_terminal_status(tmp_path):
     led, bus = _ledger(tmp_path)
     c = _propose(led)

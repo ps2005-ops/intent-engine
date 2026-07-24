@@ -79,6 +79,21 @@ def test_scheduler_disabled_by_default(monkeypatch):
     assert Scheduler.enabled() is True
 
 
+def test_scheduler_tick_is_observable(tmp_path):
+    """A scheduler that silently stops is the top production risk. Each tick
+    is a persistent, observable job — success AND failure are recorded."""
+    from unittest import mock
+    from intent_engine.runtime.jobs import latest_status
+    sched = Scheduler(tmp_path)
+    sched.tick()
+    assert latest_status(tmp_path)["scheduler-tick"]["status"] == "succeeded"
+    with mock.patch("intent_engine.runtime.scheduler.run_due",
+                    side_effect=RuntimeError("dispatch boom")):
+        sched.tick()
+    st = latest_status(tmp_path)["scheduler-tick"]
+    assert st["status"] == "failed" and "dispatch boom" in st["error"]
+
+
 def test_holiday_skips_market_job_but_not_synthetic(tmp_path):
     fired = []
     run_due(tmp_path, now=MON,

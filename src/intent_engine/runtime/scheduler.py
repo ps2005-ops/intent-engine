@@ -141,9 +141,20 @@ class Scheduler:
     def stop(self) -> None:
         self._stop.set()
 
-    def _loop(self) -> None:  # pragma: no cover - exercised via run_due in tests
+    def tick(self):
+        """One scheduler tick, wrapped in run_job so a tick-level failure
+        (e.g. run_due construction error) is a PERSISTENT, observable
+        job.failed('scheduler-tick') on the dashboard — never a silently
+        dead scheduler. Returns the JobResult. Testable without the thread."""
+        from intent_engine.events import CompanyEventBus
+        from intent_engine.runtime.jobs import run_job
+        bus = CompanyEventBus(self.root / "events")
+        return run_job("scheduler-tick", lambda: run_due(self.root),
+                       root=self.root, bus=bus, retries=0)
+
+    def _loop(self) -> None:  # pragma: no cover - thread; tick() is tested
         while not self._stop.wait(self.tick_seconds):
             try:
-                run_due(self.root)
-            except Exception:  # noqa: BLE001 - a tick error must not kill the loop
+                self.tick()
+            except Exception:  # noqa: BLE001 - never let the loop die
                 continue
