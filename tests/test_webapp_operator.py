@@ -23,6 +23,32 @@ def _login(c):
     c.request("POST", "/login", "email=founder@example.com&password=password123")
 
 
+def test_dashboard_reads_the_runtime_root_not_a_divergent_path(tmp_path, monkeypatch):
+    """Config-drift regression: the web layer's learning/paper reads must use
+    the SAME RUNTIME_ROOT the scheduler writes to, or the dashboard shows an
+    empty/stale location in production."""
+    runtime_root = tmp_path / "var_data"       # where the scheduler writes
+    ci_dir = tmp_path / "ci"                    # a different location
+    ci_dir.mkdir()
+    monkeypatch.setenv("RUNTIME_ROOT", str(runtime_root))
+    from intent_engine.learning import LearningLedger
+    LearningLedger(runtime_root / "learning_ledger.db").propose(
+        source="calibration", target="conf", statement="seeded in runtime root",
+        hypothesis="h", baseline_ref="v1",
+        success_criteria=[{"metric": "brier", "comparator": "<=",
+                           "threshold": 0.2, "direction": "lower_better"}])
+    config = AppConfig(env="test", secret="s" * 40,
+                       web_store_path=ci_dir / "w.jsonl",
+                       fi_store_path=ci_dir / "fi.jsonl",
+                       ci_store_path=ci_dir / "ci.jsonl")
+    application = WebApp(config, now_fn=lambda: 1000.0,
+                         transport=_no_network, resolver=False)
+    insp = application._personal.inspect_learning(as_of="2026-07-24")
+    assert insp["pipeline"].get("proposed") == 1     # sees the scheduler's write
+    assert str(application._learning_reader.learning.store.path).startswith(
+        str(runtime_root))
+
+
 def test_version_is_public_and_safe(app):
     c = Client(app)
     status, _, body = c.request("GET", "/version")   # no login required

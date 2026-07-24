@@ -145,6 +145,23 @@ def test_winning_regime_emits_no_candidate(tmp_path):
     assert loop.emit_learning_candidates(led) == []
 
 
+def test_old_schema_position_still_loads(tmp_path):
+    """Migration safety: a PaperPosition row written before the provenance
+    fields / 'voided' reason existed must still round-trip (append-only,
+    additive-field discipline) — no migration script required."""
+    old = ('{"id":"01ABC","opened_at":"2026-01-01T00:00:00+00:00",'
+           '"prediction_id":"p1","decision_id":null,"regime":"risk_on",'
+           '"confidence":0.8,"reasoning":"x","instrument":"SPY",'
+           '"direction":"long","entry_price":100.0,"size":1.0,'
+           '"stop_price":null,"target_price":null,"status":"open",'
+           '"closed_at":null,"exit_price":null,"exit_reason":null,'
+           '"pnl":null,"return_pct":null,"regime_at_exit":null}')
+    p = PaperPosition.model_validate_json(old)
+    assert p.id == "01ABC"
+    assert p.strategy_version is None and p.horizon_days is None
+    assert p.data_snapshot == {} and p.opened_from is None
+
+
 def test_loop_has_no_order_submission_surface():
     """Shadow only: nothing here submits a live order."""
     surface = [m for m in dir(PaperTradingLoop)

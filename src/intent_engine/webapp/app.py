@@ -67,9 +67,17 @@ class WebApp:
         # data/ in production) so tests never write into the repo.
         self.strategic_memory = StrategicMemory(
             ci_path.parent / "strategic_state.jsonl")
+        # Runtime root — the ONE location the runtime jobs (scheduler) read and
+        # write. In production this is the persistent disk (RUNTIME_ROOT); in
+        # tests/dev it co-locates with the other stores. The web layer's
+        # learning/paper/personal reads MUST use this same root, or the
+        # dashboard would show a different (empty) location than where the
+        # scheduler actually writes — a real production config-drift bug.
+        import os as _os
+        self._runtime_root = _Path(
+            _os.environ.get("RUNTIME_ROOT") or ci_path.parent)
         # Read-only observation surface over the learning platform (Learning
         # Ledger + Paper book), exposed to the founder through Personal AI.
-        # Co-located with the other stores so tests never write into the repo.
         # No bus here: the web layer only READS — it never proposes, evaluates,
         # promotes, or trades.
         from intent_engine.learning import LearningLedger
@@ -77,18 +85,11 @@ class WebApp:
         from intent_engine.paper import PaperTradingLoop
         from intent_engine.personal.service import PersonalService
         self._learning_reader = PlatformLearningReader(
-            LearningLedger(ci_path.parent / "learning_ledger.db"),
-            PaperTradingLoop(ci_path.parent / "paper_book.db"))
+            LearningLedger(self._runtime_root / "learning_ledger.db"),
+            PaperTradingLoop(self._runtime_root / "paper_book.db"))
         self._personal = PersonalService(
-            ci_path.parent / "personal.jsonl",
+            self._runtime_root / "personal.jsonl",
             learning_reader=self._learning_reader)
-        # Runtime root for the operational dashboard (job status, config
-        # health). In production this is the persistent disk (RUNTIME_ROOT);
-        # in tests it co-locates with the other stores so nothing writes into
-        # the repo.
-        import os as _os
-        self._runtime_root = _Path(
-            _os.environ.get("RUNTIME_ROOT") or ci_path.parent)
         # In-process scheduler (the deployable scheduling path — Render disks
         # are single-service, so scheduled jobs run inside the web service to
         # share the append-only stores). Disabled unless SCHEDULER_ENABLED, so
