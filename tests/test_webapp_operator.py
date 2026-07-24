@@ -58,6 +58,19 @@ def test_version_is_public_and_safe(app):
     assert "SECRET" not in body.upper()
 
 
+def test_readyz_probes_runtime_root_writability(app):
+    c = Client(app)
+    status, _, body = c.request("GET", "/readyz")
+    assert status == "200 OK" and '"ready"' in body
+    assert "runtime_root" in body                     # probe ran + reported
+    # if the runtime root is not writable, readyz must report NOT ready
+    import unittest.mock as mock
+    with mock.patch.object(app, "_probe_runtime_root_writable",
+                           side_effect=OSError("read-only file system")):
+        status, _, body = c.request("GET", "/readyz")
+    assert status.startswith("503") and "not ready" in body
+
+
 @pytest.mark.parametrize("path", ["/dashboard", "/assistant", "/status.json"])
 def test_operator_pages_require_login(app, path):
     c = Client(app)

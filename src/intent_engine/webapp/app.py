@@ -1346,11 +1346,23 @@ class WebApp:
             self.config.validate()
             self.web_store.read_all()
             self.fi.store.read_all()
-            return self._ok_json({"status": "ready", "env": self.config.env})
+            # The runtime root (persistent disk in production) must be mounted
+            # and WRITABLE — otherwise the scheduler's jobs would silently fail
+            # to persist while /readyz still said "ready". Probe it explicitly.
+            self._probe_runtime_root_writable()
+            return self._ok_json({"status": "ready", "env": self.config.env,
+                                  "runtime_root": str(self._runtime_root)})
         except Exception as exc:                            # noqa: BLE001
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
                     json.dumps({"status": "not ready", "reason": str(exc)}))
+
+    def _probe_runtime_root_writable(self) -> None:
+        import os as _os
+        self._runtime_root.mkdir(parents=True, exist_ok=True)
+        probe = self._runtime_root / ".readyz_probe"
+        probe.write_text("ok")
+        _os.remove(probe)
 
     # --- unified operational dashboard (Part 5) -----------------------------
     def _platform_status(self) -> dict:
