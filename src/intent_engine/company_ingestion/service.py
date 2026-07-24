@@ -184,6 +184,20 @@ class CompanyIngestionService:
                 continue
             self._transition(run_id, domain, "PARSING_SOURCES")
             parsed = parse_html(result["body"])
+            freshness = "CURRENT"
+            if parsed.get("modified_date"):
+                from datetime import datetime, timezone
+                try:
+                    modified = datetime.fromisoformat(
+                        parsed["modified_date"].replace("Z", "+00:00"))
+                    if modified.tzinfo is None:
+                        modified = modified.replace(tzinfo=timezone.utc)
+                    age_days = (datetime.now(timezone.utc)
+                                - modified).days
+                    if age_days > 400:
+                        freshness = "STALE"
+                except ValueError:
+                    pass                 # a date we cannot parse stays CURRENT
             record = retrieved_record(
                 source_id=source_id, run_id=run_id, company_id=domain,
                 original_url=candidate["url"], final_url=result["final_url"],
@@ -194,7 +208,8 @@ class CompanyIngestionService:
                 byte_count=len(result["body"].encode()),
                 title=parsed["title"] or candidate.get("title"),
                 text_content=parsed["text"][:120_000],
-                meta_description=parsed["meta_description"][:500])
+                meta_description=parsed["meta_description"][:500],
+                freshness=freshness)
             total_bytes += record["byte_count"]
             self._append("ci.source_retrieved", run_id=run_id, domain=domain,
                          subject_type="source", subject_id=source_id,
@@ -208,6 +223,10 @@ class CompanyIngestionService:
 
     def _fail(self, run_id, domain, candidate_id, failure_type, message,
               retryable):
+        existing = self.store.find_by_idempotency_key(
+            f"fail:{run_id}:{candidate_id}")
+        if existing is not None:
+            return existing.payload      # idempotent retry, same failure
         payload = failure_record(
             failure_id=f"fail-{candidate_id[5:]}", run_id=run_id,
             candidate_id=candidate_id, failure_type=failure_type,

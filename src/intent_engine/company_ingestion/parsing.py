@@ -23,6 +23,7 @@ class _Extractor(HTMLParser):
         self.title = ""
         self.meta_description = ""
         self.canonical_url = None
+        self.modified_date = ""
         self.headings: list = []
         self.blocks: list = []
         self.links: list = []
@@ -38,6 +39,12 @@ class _Extractor(HTMLParser):
         if tag == "meta":
             if (attrs.get("name") or "").lower() == "description":
                 self.meta_description = (attrs.get("content") or "").strip()
+            if (attrs.get("property") or "").lower() in (
+                    "article:modified_time", "article:published_time",
+                    "og:updated_time") and not self.modified_date:
+                self.modified_date = (attrs.get("content") or "").strip()
+        if tag == "time" and attrs.get("datetime") and not self.modified_date:
+            self.modified_date = attrs["datetime"].strip()
         if tag == "link" and (attrs.get("rel") or "").lower() == "canonical":
             self.canonical_url = attrs.get("href")
         if tag == "a" and attrs.get("href"):
@@ -90,6 +97,7 @@ def parse_html(html: str) -> dict:
         "title": extractor.title,
         "meta_description": extractor.meta_description,
         "canonical_url": extractor.canonical_url,
+        "modified_date": extractor.modified_date,
         "headings": extractor.headings,
         "text": text,
         "links": extractor.links,
