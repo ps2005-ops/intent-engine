@@ -3888,3 +3888,13 @@ clean except the one documented personal change; mechanisms frozen;
 V2.0 untouched and still non-executing. Next: deploy, re-run acceptance
 live, 10–20 companies, concierge validation
 (docs/V11_CONCIERGE_VALIDATION.md). V2.5 stays NEEDS HUMAN START.
+
+### Loop 26 addendum (2026-07-23) — status precision by human review
+
+"REAL-DOMAIN ANALYSIS READY yes" is tightened to: **CODE READY; live
+in-product network acceptance PENDING.** The acceptance analyzed
+recorded copies of real pages, not live domains through the deployed
+application — proving parsing, provenance, composition, isolation, and
+source handling, but not yet reliable retrieval from the eventual
+hosting environment. Live acceptance is next-human-action #1 and gates
+early-user use; the remaining Next Human Actions follow it.

@@ -11,9 +11,9 @@ which every major claim resolves to real retrieved source material.
 | Status | Value |
 |---|---|
 | CODE BUILT | YES |
-| REAL-DOMAIN ANALYSIS READY | YES (code path complete; live retrieval verified over recorded real pages — sandbox egress blocks arbitrary HTTP) |
-| MANUAL REAL-COMPANY ACCEPTANCE | PASSED over recorded real pages for 3 companies (docs/V11_REAL_COMPANY_ACCEPTANCE.md); live-network re-run is the first next human action |
-| CONTROLLED EARLY-USER READY | YES (in-repo; auth/ownership/isolation from V1.0.1) |
+| REAL-DOMAIN ANALYSIS | **CODE READY; live in-product network acceptance PENDING.** The pipeline analyzed recorded copies of real pages, not live domains through the deployed application. That proves parsing, provenance, report composition, isolation, and source handling — it does not yet prove that real websites work reliably from the eventual hosting environment (TLS variance, redirects in the wild, slow/huge pages, real DNS). |
+| MANUAL REAL-COMPANY ACCEPTANCE | RECORDED-PAGE PASS for 3 companies (docs/V11_REAL_COMPANY_ACCEPTANCE.md); **live acceptance PENDING** — it is next-human-action #1 and gates any early-user use |
+| CONTROLLED EARLY-USER READY | Pending live network acceptance (auth/ownership/isolation proven in-repo) |
 | STAGING DEPLOYED | NO (EXTERNAL HUMAN ACTION) |
 | PUBLICLY DEPLOYED | NO |
 | PUBLICLY LAUNCHED | NO |

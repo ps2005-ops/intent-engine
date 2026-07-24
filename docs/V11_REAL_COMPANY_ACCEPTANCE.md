@@ -10,10 +10,17 @@ arbitrary in-process HTTP (proxy CONNECT 403 for non-allowlisted
 domains), so the pipeline ran over **recorded real pages**: verbatim
 titles, meta descriptions, and key visible sentences retrieved
 2026-07-23 from the live sites via the environment's permitted fetcher.
-No access control was bypassed; no evasion was attempted. Live
-end-to-end retrieval works wherever ordinary outbound HTTP exists (the
-deployed local server); re-running this acceptance against the live
-sites is step 1 of the next human actions.
+No access control was bypassed; no evasion was attempted.
+
+**Status precision: this is a RECORDED-PAGE PASS, not live acceptance.**
+It proves parsing, provenance, report composition, isolation, and
+source handling over genuine page content. It does NOT prove that real
+websites retrieve reliably from the eventual hosting environment (live
+TLS, real DNS, redirects in the wild, slow or oversized pages,
+anti-bot behavior). Real-domain readiness is therefore **CODE READY;
+live in-product network acceptance PENDING** — re-running this
+acceptance against the live sites through the deployed application is
+step 1 of the next human actions and gates early-user use.
 
 No company endorsed these reports. No outreach occurred.
 

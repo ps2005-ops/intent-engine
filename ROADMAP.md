@@ -1361,7 +1361,10 @@ before T023 changes; everything after T023 is reframed.***
   real pages — sandbox egress blocks arbitrary HTTP, so live-network
   re-run is the first next human action
   (`docs/V11_REAL_COMPANY_ACCEPTANCE.md`). Statuses: CODE BUILT yes;
-  REAL-DOMAIN ANALYSIS READY yes; STAGING/PUBLICLY
+  **REAL-DOMAIN ANALYSIS: CODE READY, live in-product network
+  acceptance PENDING** (recorded copies of real pages were analyzed,
+  not live domains through the deployed application — live acceptance
+  gates early-user use); STAGING/PUBLICLY
   DEPLOYED/LAUNCHED no. Gaps: `docs/V11_DEPENDENCY_GAPS.md` (uploads,
   external-URL approval UI, review platforms, JS pages — none blocking
   controlled testing). The synthetic Northwind fixture remains for

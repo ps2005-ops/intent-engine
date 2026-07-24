@@ -4,8 +4,10 @@
 real-domain intake → bounded discovery → explicit source approval →
 safe retrieval → deterministic real-source claims → the unchanged
 Founder Intelligence composition. Suite **1642 passing**; 3 real
-companies manually accepted over recorded real pages
-(`docs/V11_REAL_COMPANY_ACCEPTANCE.md`); zero model calls; no
+companies RECORDED-PAGE accepted (`docs/V11_REAL_COMPANY_ACCEPTANCE.md`)
+— **real-domain analysis is CODE READY with live in-product network
+acceptance PENDING**: recorded copies of real pages were analyzed, not
+live domains through the deployed app; zero model calls; no
 synthetic evidence can enter a real run (hard invariant + test). One
 justified foundation change: the language wall exempts quoted source
 material (`e602838`). NOT deployed, NOT launched. Next human actions:
