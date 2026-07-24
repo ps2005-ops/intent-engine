@@ -1,25 +1,21 @@
-# Render Blueprint — deployable scheduler + web service.
+# Render Blueprint — single always-on web service with an in-process scheduler.
 #
-# This is the "reliably deployed scheduler" that replaces the laptop-only
-# launchd plist (com.pratham.intentengine.nightlyagent.plist). Render cron
-# jobs are a PAID feature (Free tier has no durable cron/worker) — see
-# docs/RUNTIME_DEPLOYMENT.md "MANUAL ACTIONS" for cost and the free
-# alternative (GitHub Actions scheduled workflow).
+# WHY ONE SERVICE (not separate cron services): Render persistent disks attach
+# to exactly ONE service and are never shared. This platform's stores are
+# append-only files on that disk, so the scheduled jobs MUST run inside the
+# service that owns the disk. The web service runs the schedule in-process
+# (intent_engine.runtime.scheduler), gated by SCHEDULER_ENABLED. Every job
+# still goes through the JobLock + persistent job events, so scheduling is
+# idempotent and restart-safe even if the instance restarts mid-run.
 #
-# Times are UTC. US market close is ~20:00-21:00 UTC (DST-dependent); jobs
-# are market-calendar-aware in code, so a weekend/holiday run is a safe
-# no-op rather than a bad day.
-#
-# Secrets are NEVER in this file — they are set in the Render dashboard as
-# environment variables / secret files (sync:false below marks them as
-# dashboard-managed, not committed).
+# Secrets are NEVER in this file (sync:false = set in the Render dashboard).
+# The instance must be always-on (Starter+, not Free) or the scheduler sleeps.
 
 services:
-  # --- the web app (Personal AI, dashboard, /version, /healthz) -------------
   - type: web
     name: intent-engine-web
     runtime: python
-    plan: starter                      # Free sleeps; Starter stays warm
+    plan: starter                      # Free sleeps -> the scheduler would not tick
     buildCommand: "pip install -e ."
     startCommand: "python -m intent_engine.webapp runserver --host 0.0.0.0 --port $PORT"
     healthCheckPath: /healthz
@@ -32,79 +28,25 @@ services:
         sync: false
       - key: RUNTIME_ROOT
         value: /var/data
-      - key: TIINGO_API_KEY
+      - key: SCHEDULER_ENABLED          # turn the in-process scheduler on
+        value: "1"
+      - key: TIINGO_API_KEY             # market data; jobs fail loudly if unset
         sync: false
       - key: FRED_API_KEY
         sync: false
+      # optional: ANTHROPIC_API_KEY (synthetic --live), PUBLER_API_KEY +
+      # PUBLISHING_ENABLED (real marketing publish — off by default).
     disk:
       name: intent-engine-data
-      mountPath: /var/data          # persistent across deploys (append-only stores)
+      mountPath: /var/data              # persistent across deploys; owns every store
       sizeGB: 1
 
-  # --- daily market loop: preflight + open + resolve + candidates -----------
-  - type: cron
-    name: ie-daily-market
-    runtime: python
-    plan: starter
-    schedule: "30 21 * * 1-5"        # 21:30 UTC, weekdays (after US close)
-    buildCommand: "pip install -e ."
-    startCommand: "python -m intent_engine.runtime daily --root $RUNTIME_ROOT"
-    envVars:
-      - key: RUNTIME_ROOT
-        value: /var/data
-      - key: TIINGO_API_KEY
-        sync: false
-      - key: FRED_API_KEY
-        sync: false
-    disk:
-      name: intent-engine-data
-      mountPath: /var/data
-      sizeGB: 1
-
-  # --- daily synthetic gym (credential-independent offline leg) -------------
-  - type: cron
-    name: ie-synthetic-daily
-    runtime: python
-    plan: starter
-    schedule: "0 8 * * *"            # 08:00 UTC daily
-    buildCommand: "pip install -e ."
-    startCommand: "python -m intent_engine.runtime synthetic-daily --root $RUNTIME_ROOT"
-    envVars:
-      - key: RUNTIME_ROOT
-        value: /var/data
-    disk:
-      name: intent-engine-data
-      mountPath: /var/data
-      sizeGB: 1
-
-  # --- weekly candidate evaluation (walk-forward) ---------------------------
-  - type: cron
-    name: ie-weekly-eval
-    runtime: python
-    plan: starter
-    schedule: "0 9 * * 6"           # 09:00 UTC Saturdays
-    buildCommand: "pip install -e ."
-    startCommand: "python -m intent_engine.runtime weekly-eval --root $RUNTIME_ROOT"
-    envVars:
-      - key: RUNTIME_ROOT
-        value: /var/data
-    disk:
-      name: intent-engine-data
-      mountPath: /var/data
-      sizeGB: 1
-
-  # --- monthly promotion-review packet (never auto-promotes) ----------------
-  - type: cron
-    name: ie-monthly-packet
-    runtime: python
-    plan: starter
-    schedule: "0 10 1 * *"          # 10:00 UTC, 1st of month
-    buildCommand: "pip install -e ."
-    startCommand: "python -m intent_engine.runtime monthly-packet --root $RUNTIME_ROOT"
-    envVars:
-      - key: RUNTIME_ROOT
-        value: /var/data
-    disk:
-      name: intent-engine-data
-      mountPath: /var/data
-      sizeGB: 1
+# Scheduling cadence (intent_engine.runtime.scheduler.SCHEDULE), enforced in
+# code and market-calendar aware:
+#   daily (market days)  -> preflight + market-open + resolve + daily-candidates
+#   synthetic-daily      -> offline synthetic gym (every day)
+#   weekly-eval          -> walk-forward candidate evaluation (once/ISO week)
+#   monthly-packet       -> promotion-review packet (once/calendar month)
+#
+# Manual/on-demand runs remain available:
+#   python -m intent_engine.runtime <job> --root /var/data

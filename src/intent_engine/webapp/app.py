@@ -89,6 +89,14 @@ class WebApp:
         import os as _os
         self._runtime_root = _Path(
             _os.environ.get("RUNTIME_ROOT") or ci_path.parent)
+        # In-process scheduler (the deployable scheduling path — Render disks
+        # are single-service, so scheduled jobs run inside the web service to
+        # share the append-only stores). Disabled unless SCHEDULER_ENABLED, so
+        # tests and dev never spawn the thread.
+        self._scheduler = None
+        from intent_engine.runtime.scheduler import Scheduler
+        if Scheduler.enabled():
+            self._scheduler = Scheduler(self._runtime_root).start()
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
 

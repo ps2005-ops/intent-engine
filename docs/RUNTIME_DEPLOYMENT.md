@@ -15,7 +15,7 @@ explicitly enable and approve it.*
 | daily learning candidates | none | `MarketRuntime.generate_daily_candidates` (paper losses + calibration drift) |
 | weekly evaluation | interface only | `learning/evaluation.py` real expanding-window out-of-sample harness |
 | monthly promotion review | none | `learning/promotion_packet.py` persisted packet (never auto-promotes) |
-| scheduler | laptop launchd plist | `runtime/jobs.py` (locked/evented/idempotent) + `render.yaml` cron |
+| scheduler | laptop launchd plist | `runtime/scheduler.py` in-process scheduler (cadence-aware, JobLock-guarded, restart-safe) on the always-on web service |
 | config health | none | `runtime/config_health.py` preflight + persistent failure events |
 | synthetic daily | manual | `python -m intent_engine.runtime synthetic-daily` |
 | marketing publish | stopped at handoff | `marketing/publishing.py` dry-run adapter (real disabled) |
@@ -65,24 +65,28 @@ can confirm the deployed commit equals the tested commit.
 Each action is something only you (the account owner) can do. No secret value
 ever needs to be shared with me or committed.
 
-### 1. Provision the persistent disk + deploy the Blueprint
-- **Why:** the append-only stores must survive restarts/deploys; the cron
-  jobs must run off-laptop.
+### 1. Deploy the Blueprint (one web service + disk; scheduler in-process)
+- **Why:** the append-only stores live on a persistent disk. **Render disks
+  attach to exactly one service and are never shared**, so the scheduled jobs
+  run *inside* the web service (in-process scheduler) — not as separate cron
+  services, which could not see the disk. One service owns the disk and the
+  schedule.
 - **Where:** Render dashboard → **Blueprints** → **New Blueprint Instance** →
-  point at this repo (`render.yaml` is now committed).
-- **Env var:** n/a (the disk + services are declared in `render.yaml`).
+  point at this repo (`render.yaml` is committed).
+- **Env var:** `SCHEDULER_ENABLED=1` is set in `render.yaml` to turn the
+  in-process scheduler on; the instance must be **always-on** (Starter+) or a
+  sleeping Free instance never ticks.
 - **Secret:** no.
-- **Verify:** each service shows "Live"; `GET /version` returns the deployed
-  commit.
-- **Cost:** Render **cron jobs and always-on web require a paid plan**
-  (~$7/mo per service on Starter; the disk ~$0.25/GB/mo). The Free web
-  service sleeps and has **no** durable cron.
-- **Free alternative:** run the four jobs from a **GitHub Actions scheduled
-  workflow** (cron in `.github/workflows/`) hitting a small runner that
-  executes `python -m intent_engine.runtime <job>` against a checked-out
-  copy + committed data, or a Render **Free web** service pinged by an
-  external cron. Trade-off: GitHub Actions has no persistent disk, so the
-  data root must be committed or stored in a bucket.
+- **Verify:** the service shows "Live"; `GET /version` returns the deployed
+  commit; after a market day, `GET /dashboard` shows the daily job's
+  last-success time and the scheduler markers (`status/scheduler.json`).
+- **Cost:** one always-on web service (~$7/mo Starter) + disk (~$0.25/GB/mo).
+  No extra per-cron cost — scheduling is in-process.
+- **Free alternative:** a **GitHub Actions scheduled workflow** invoking
+  `python -m intent_engine.runtime <job>` on a checked-out copy, committing the
+  data root back (or syncing to a bucket). Trade-off: Actions has no
+  persistent disk, so the data root must be committed/synced; the in-process
+  scheduler on a paid always-on instance is simpler and is the recommended path.
 
 ### 2. Set the Tiingo API key
 - **Why:** market prices for prediction resolution and paper marks; without
@@ -140,14 +144,20 @@ ever needs to be shared with me or committed.
 - **Secret:** no.
 
 ## First-run checklist (controlled)
-1. Deploy the Blueprint; confirm `/version` = intended commit.
+1. Deploy the Blueprint; confirm `/version` = intended commit; `/healthz` ok.
 2. Set `TIINGO_API_KEY` + `FRED_API_KEY`; run **preflight** — expect healthy.
-3. Let `scripts/daily_market_predictions.py` (existing) create the day's
-   predictions, then run `market-open` — confirm positions open with
-   provenance and rejections are logged.
-4. After horizons pass, `resolve` — confirm predictions resolve and linked
-   positions close; check `/dashboard`.
-5. `weekly-eval` once ≥20 predictions have resolved.
+3. **Prediction generation is a separate, cost-capped step.** The scheduled
+   `daily` job opens paper positions from *existing* predictions and resolves
+   due ones; it does **not** itself call the model to CREATE predictions
+   (that is `scripts/daily_market_predictions.py`, which makes budgeted model
+   calls). Schedule/run that first so `market-open` has predictions to act on
+   — this boundary is deliberate so the in-process web scheduler never makes
+   unbudgeted paid model calls without your decision.
+4. With `SCHEDULER_ENABLED=1`, the in-process scheduler fires `daily` on
+   market days, `synthetic-daily` daily, `weekly-eval` weekly, `monthly-packet`
+   monthly. Confirm on `/dashboard` (job last-success + `status/scheduler.json`
+   markers). You do **not** run these by hand after deploy.
+5. Manual/on-demand: `python -m intent_engine.runtime <job> --root /var/data`.
 6. `monthly-packet` → review the packet; promote (if any) via the human path.
 
 ## Recovery runbook

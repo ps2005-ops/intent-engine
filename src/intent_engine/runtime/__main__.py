@@ -140,9 +140,6 @@ def main(argv=None) -> int:
     ap.add_argument("--as-of", default=None)
     args = ap.parse_args(argv)
     as_of = args.as_of or today_ny().isoformat()
-    bus = CompanyEventBus(args.root / "events")
-    mr = MarketRuntime(args.root, bus=bus)
-
     if args.job == "health":
         print(json.dumps(latest_status(args.root), indent=2, default=str))
         return 0
@@ -153,28 +150,37 @@ def main(argv=None) -> int:
         print(json.dumps(rep, indent=2, default=str))
         return 0 if rep["clean"] else 2
 
-    results = []
-    if args.job in ("preflight", "daily"):
-        results.append(cmd_preflight(args.root, bus, as_of))
-    if args.job in ("market-open", "daily"):
-        results.append(cmd_market_open(args.root, bus, as_of, mr,
-                                       _real_price_at(), _real_regime_for()))
-    if args.job in ("resolve", "daily"):
-        results.append(cmd_resolve(args.root, bus, as_of, mr, _real_price_at()))
-    if args.job in ("daily-candidates", "daily"):
-        results.append(cmd_daily_candidates(args.root, bus, as_of, mr))
-    if args.job == "weekly-eval":
-        results.append(cmd_weekly_eval(args.root, bus, as_of, mr))
-    if args.job == "monthly-packet":
-        results.append(cmd_monthly_packet(args.root, bus, as_of, mr))
-    if args.job == "synthetic-daily":
-        results.append(cmd_synthetic_daily(args.root, bus, as_of))
-
+    results = dispatch(args.job, args.root, as_of=as_of)
     for r in results:
         print(json.dumps({"job": r.name, "status": r.status,
                           "error": r.error, "detail": r.detail},
                          indent=2, default=str))
     return 0 if all(r.status == "succeeded" for r in results) else 1
+
+
+def dispatch(job: str, root, *, as_of: str, bus=None) -> list:
+    """Run a named job (or the 'daily' composite) and return its JobResults.
+    The ONE invocation path shared by the CLI and the in-process scheduler —
+    so both build the market runtime and real fetchers identically."""
+    bus = bus or CompanyEventBus(Path(root) / "events")
+    mr = MarketRuntime(root, bus=bus)
+    results = []
+    if job in ("preflight", "daily"):
+        results.append(cmd_preflight(root, bus, as_of))
+    if job in ("market-open", "daily"):
+        results.append(cmd_market_open(root, bus, as_of, mr,
+                                       _real_price_at(), _real_regime_for()))
+    if job in ("resolve", "daily"):
+        results.append(cmd_resolve(root, bus, as_of, mr, _real_price_at()))
+    if job in ("daily-candidates", "daily"):
+        results.append(cmd_daily_candidates(root, bus, as_of, mr))
+    if job == "weekly-eval":
+        results.append(cmd_weekly_eval(root, bus, as_of, mr))
+    if job == "monthly-packet":
+        results.append(cmd_monthly_packet(root, bus, as_of, mr))
+    if job == "synthetic-daily":
+        results.append(cmd_synthetic_daily(root, bus, as_of))
+    return results
 
 
 if __name__ == "__main__":
