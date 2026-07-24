@@ -266,6 +266,122 @@ def test_shopify_acceptance_runs_through_real_compose(tmp_path):
     assert not low, reasons
 
 
+# --- unification: the LIVE pipeline (no fixture) reaches multi-class quality --
+
+_HOME = ("commerce infrastructure powering commerce. Shop Pay checkout and "
+         "buyer identity, payments, capital, fulfillment, point of sale, "
+         "Markets and Audiences. App Store partners and developers. Online "
+         "store storefront. End-to-end first-party rails. Enterprise ready.")
+_PRESS = ("Leadership: we are building the essential infrastructure for "
+          "commerce, owning checkout and identity so merchants can focus on "
+          "their business. Payments and rails are first-party.")
+_INVESTORS = ("Investor update: enterprise (Plus) momentum with large "
+              "merchants; expanding product breadth across payments, capital, "
+              "fulfillment and POS drives platform adoption.")
+_REVIEWS = ("Merchant reviews: Shopify is simple and easy to get started; "
+            "anyone can start a business. Customers value the simplicity and "
+            "quick setup above all.")
+
+
+def _live_transport(url, timeout):
+    import urllib.error
+    import email as _email
+    u = url.lower()
+    if "/press" in u or "/newsroom" in u:
+        body = f"<html><head><title>Press</title></head><body><p>{_PRESS}</p></body></html>"
+    elif "/investor" in u:
+        body = f"<html><head><title>Investors</title></head><body><p>{_INVESTORS}</p></body></html>"
+    elif "g2.com" in u or "trustpilot" in u or "capterra" in u:
+        body = f"<html><head><title>Reviews</title></head><body><p>{_REVIEWS}</p></body></html>"
+    elif "acme.example" in u:
+        body = f"<html><head><title>Acme</title></head><body><p>{_HOME}</p></body></html>"
+    else:
+        raise urllib.error.HTTPError(url, 404, "nf",
+                                     _email.message_from_string(""), None)
+    return (200, {"content-type": "text/html"}, body.encode(), False)
+
+
+def test_live_pipeline_reaches_complete_multi_class(tmp_path):
+    """THE UNIFICATION PROOF: with only the live discovery→approval→retrieval→
+    derive pipeline (NO injected fixture observations), a run that approves
+    company + executive + investor + independent customer-voice sources reaches
+    multi-class COMPLETE strategic reasoning — the same category the fixture
+    demonstrates."""
+    ci = CompanyIngestionService(tmp_path / "ci.jsonl",
+                                 transport=_live_transport, resolver=False)
+    fi = FounderIntelligenceService(tmp_path / "fi.jsonl")
+    run = ci.create_run(company_name="Acme", website="https://acme.example",
+                        user_id="user-1", as_of="2026-07-24T00:00:00+00:00")
+    run_id = run["run_id"]
+    cands = ci.discover(run_id)
+    # approve one candidate from each available class (company, exec, investor,
+    # customer-voice) — exactly what a founder would do on the grouped page
+    picked, seen = [], set()
+    for c in cands:
+        cls = c.get("source_class")
+        if cls not in seen:
+            seen.add(cls)
+            picked.append(c["candidate_id"])
+    ci.approve(run_id, user_id="user-1", approved_ids=picked, rejected_ids=[])
+    ci.fetch_approved(run_id)
+    result = ci.compose(run_id, fi_service=fi)          # NO extra_observations
+    report = result["strategic_report"]
+    assert report is not None
+    classes = set(report["source_class_coverage"])
+    assert "customer_voice" in classes                  # an independent class
+    assert len(classes) >= 3                            # genuinely multi-source
+    assert report["status"] == COMPLETE
+    assert len(report["hypotheses"]) >= 3
+    low, reasons = looks_low_value(render_strategic_report(report))
+    assert not low, reasons
+
+
+def test_same_domain_company_published_only_is_partial(tmp_path):
+    """Company + executive + investor pages are ALL the company's own
+    publishing; without an independent source the report is honestly PARTIAL,
+    never a hollow COMPLETE."""
+    def company_only_transport(url, timeout):
+        import urllib.error
+        import email as _email
+        u = url.lower()
+        if "g2.com" in u or "trustpilot" in u or "capterra" in u:
+            raise urllib.error.HTTPError(url, 403, "forbidden",
+                                         _email.message_from_string(""), None)
+        return _live_transport(url, timeout)
+
+    ci = CompanyIngestionService(tmp_path / "ci.jsonl",
+                                 transport=company_only_transport,
+                                 resolver=False)
+    fi = FounderIntelligenceService(tmp_path / "fi.jsonl")
+    run = ci.create_run(company_name="Acme", website="https://acme.example",
+                        user_id="user-1", as_of="2026-07-24T00:00:00+00:00")
+    run_id = run["run_id"]
+    cands = ci.discover(run_id)
+    same = [c["candidate_id"] for c in cands if c["same_domain"]][:6]
+    ci.approve(run_id, user_id="user-1", approved_ids=same, rejected_ids=[])
+    ci.fetch_approved(run_id)
+    report = ci.compose(run_id, fi_service=fi)["strategic_report"]
+    assert report is not None
+    assert "customer_voice" not in report["source_class_coverage"]
+    assert report["status"] == PARTIAL       # company-published only
+    assert any(f["code"] in ("no_independent_source", "single_source_class")
+               for f in report["quality_findings"])
+
+
+def test_evidence_graph_links_observations_hypotheses_patterns(shopify_report):
+    graph = shopify_report.as_dict()["evidence_graph"]
+    assert graph["nodes"] and graph["edges"]
+    types = {n["type"] for n in graph["nodes"]}
+    assert {"observation", "hypothesis", "pattern", "source"} <= types
+    etypes = {e["type"] for e in graph["edges"]}
+    assert "supports" in etypes and "matches_pattern" in etypes
+    # a supporting edge connects a real observation to a real hypothesis
+    hyp_ids = {h.hypothesis_id for h in shopify_report.hypotheses}
+    obs_ids = {o.observation_id for o in shopify_report.observations}
+    supports = [e for e in graph["edges"] if e["type"] == "supports"]
+    assert any(e["from"] in obs_ids and e["to"] in hyp_ids for e in supports)
+
+
 def test_real_company_owned_only_run_is_partial_strategic(tmp_path):
     """A real run over only company-owned pages yields a partial strategic
     state — never a hollow COMPLETE."""

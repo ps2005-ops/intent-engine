@@ -455,15 +455,20 @@ def test_tampered_anonymous_cookie_is_rejected(tmp_path):
     app = _make(tmp_path)
     c = _start_demo(app)
     run_url = _run_demo(c)
-    # flip the last character of the signature segment
-    token = c.sid()
-    tampered = token[:-1] + ("A" if token[-1] != "A" else "B")
+    # tamper the signed PAYLOAD segment (anon1.<payload>.<sig>). Mutating the
+    # payload always breaks the HMAC deterministically — unlike flipping the
+    # last base64 char of the signature, whose low bits can decode identically.
+    prefix, payload, sig = c.sid().split(".")
+    flip = payload[0]
+    payload = ("B" if flip == "A" else "A") + payload[1:]
+    tampered = f"{prefix}.{payload}.{sig}"
     c.cookie = f"sid={tampered}"
     app2 = _restart(app)                              # force the restore path
     c.app = app2
     status, headers, _ = c.request("GET", run_url)
     assert status.startswith("303") and headers["Location"] == "/login"
     assert app2.auth.session(tampered) is None
+    assert app2.auth.restore_anonymous(tampered) is None
 
 
 def test_expired_anonymous_cookie_is_rejected(tmp_path):

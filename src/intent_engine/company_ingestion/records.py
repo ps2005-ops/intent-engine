@@ -23,7 +23,19 @@ SOURCE_TYPES = (
 )
 
 DISCOVERY_METHODS = ("entered", "homepage_link", "known_path",
-                     "user_external", "user_pasted")
+                     "user_external", "user_pasted", "external_proposed")
+
+# Strategic source classes (mirrors strategic_intelligence.records.SOURCE_CLASSES
+# minus the non-ingestible members). Every candidate and retrieved document
+# carries one so the strategic layer can reason across evidence classes rather
+# than treating everything as a company-owned page.
+SOURCE_CLASSES = (
+    "company_owned", "executive_statement", "investor_material",
+    "customer_voice", "competitor", "independent_reporting",
+)
+# classes that represent a vantage point OUTSIDE the company's own publishing —
+# a COMPLETE strategic report needs at least one of these (cross-source).
+INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
 
 RUN_STATES = (
     "VALIDATING_COMPANY", "DISCOVERING_SOURCES", "AWAITING_SOURCE_APPROVAL",
@@ -131,16 +143,20 @@ class IngestionEvent:
 
 def candidate_record(*, candidate_id, company_id, url, canonical_url,
                      source_type, title, discovery_method, same_domain,
-                     availability="PROPOSED") -> dict:
+                     availability="PROPOSED", source_class="company_owned",
+                     why_relevant="") -> dict:
     if source_type not in SOURCE_TYPES:
         raise IngestionError(f"unknown source_type {source_type!r}")
     if discovery_method not in DISCOVERY_METHODS:
         raise IngestionError(f"unknown discovery_method {discovery_method!r}")
+    if source_class not in SOURCE_CLASSES:
+        raise IngestionError(f"unknown source_class {source_class!r}")
     return {"candidate_id": candidate_id, "company_id": company_id,
             "url": url, "canonical_url": canonical_url,
             "source_type": source_type, "title": title,
             "discovery_method": discovery_method,
-            "same_domain": bool(same_domain),
+            "same_domain": bool(same_domain), "source_class": source_class,
+            "why_relevant": why_relevant,
             "proposed_at": now_iso(), "availability": availability}
 
 
@@ -149,7 +165,7 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
                      content_hash, byte_count, title, text_content,
                      meta_description="", freshness="CURRENT",
                      retrieval_status="OK", privacy="public",
-                     origin_note="") -> dict:
+                     origin_note="", source_class="company_owned") -> dict:
     assert_no_secret(text_content[:20000], where="retrieved source text")
     if privacy not in PRIVACY_CLASSES:
         raise IngestionError(f"unknown privacy class {privacy!r}")
@@ -165,7 +181,8 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
             "meta_description": meta_description,
             "parser_version": PARSER_VERSION,
             "freshness": freshness, "retrieval_status": retrieval_status,
-            "privacy": privacy, "origin_note": origin_note}
+            "privacy": privacy, "origin_note": origin_note,
+            "source_class": source_class}
 
 
 def failure_record(*, failure_id, run_id, candidate_id, failure_type,

@@ -16,6 +16,9 @@ STRATEGIC_STATUSES = (COMPLETE, PARTIAL, INSUFFICIENT, FAILED)
 
 _EXTERNAL_CLASSES = ("executive_statement", "investor_material",
                      "customer_voice", "competitor", "independent_reporting")
+# a genuinely outside vantage point (not the company's own publishing). A
+# COMPLETE report needs cross-source corroboration from at least one of these.
+_INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
 
 # transition/strategy cue words a real thesis must contain (not a description)
 _STRATEGIC_CUES = ("appears to", "moving", "shift", "transition", "toward",
@@ -118,10 +121,13 @@ def evaluate_report(report) -> tuple:
 
     external = [c for c in _EXTERNAL_CLASSES
                 if report.source_class_coverage.get(c)]
+    independent = [c for c in _INDEPENDENT_CLASSES
+                   if report.source_class_coverage.get(c)]
     active_classes = [c for c, n in report.source_class_coverage.items() if n]
     company_only = not external
 
     blocking = [x for x in findings if x["severity"] in ("block", "fatal")]
+    accepted = report.limited_scope_accepted
 
     if any(x["code"] == "unsupported_internal" for x in findings):
         status = FAILED
@@ -130,12 +136,21 @@ def evaluate_report(report) -> tuple:
         status = FAILED if not hyps else INSUFFICIENT
     elif len(hyps) < 3 or not _thesis_is_strategic(report.thesis):
         status = INSUFFICIENT
-    elif company_only and not report.limited_scope_accepted:
+    elif company_only and not accepted:
         findings.append(_f("single_source_class", "broad strategic claims rest "
                            "on company-owned pages only; independent "
                            "corroboration is missing", "warn"))
         status = PARTIAL
-    elif len(active_classes) <= 1 and not report.limited_scope_accepted:
+    elif not independent and not accepted:
+        # exec/investor pages are still the company's own publishing; without an
+        # independent, customer, or competitor source there is no cross-source
+        # check, so this cannot be a full COMPLETE.
+        findings.append(_f("no_independent_source", "evidence is all "
+                           "company-published (owned/executive/investor); an "
+                           "independent, customer, or competitor source is "
+                           "needed to corroborate or challenge it", "warn"))
+        status = PARTIAL
+    elif len(active_classes) <= 1 and not accepted:
         status = PARTIAL
     elif blocking:
         status = PARTIAL

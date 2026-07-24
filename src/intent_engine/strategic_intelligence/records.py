@@ -222,6 +222,7 @@ class StrategicReport:
     source_class_coverage: dict = field(default_factory=dict)
     quality_findings: list = field(default_factory=list)
     limited_scope_accepted: bool = False
+    evidence_graph: dict = field(default_factory=dict)
 
     def observation(self, obs_id: str):
         for o in self.observations:
@@ -249,4 +250,5 @@ class StrategicReport:
             "source_class_coverage": self.source_class_coverage,
             "quality_findings": list(self.quality_findings),
             "limited_scope_accepted": self.limited_scope_accepted,
+            "evidence_graph": self.evidence_graph,
         }

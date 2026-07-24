@@ -15,7 +15,22 @@ from intent_engine.company_ingestion.validation import same_domain
 
 KNOWN_PATHS = ("/", "/product", "/products", "/solutions", "/pricing",
                "/about", "/customers", "/case-studies", "/blog", "/news",
-               "/careers")
+               "/careers", "/press", "/newsroom", "/investors",
+               "/investor-relations", "/engineering")
+
+# Map a same-domain path to its strategic source class. A company publishes
+# more than one vantage point: press/newsroom/leadership speak for executives;
+# investor-relations pages are investor material; customer stories are the
+# customer voice. Everything else is a plain company-owned page. This is a
+# generic, company-agnostic classification — no company-specific rules.
+_CLASS_RULES = (
+    ("investor_material", ("investor", "shareholder", "/ir", "earnings",
+                           "annual-report", "financ")),
+    ("executive_statement", ("press", "newsroom", "news", "media",
+                             "leadership", "keynote", "letter")),
+    ("customer_voice", ("customer", "case-stud", "case_stud", "testimonial",
+                        "success-stor", "stories")),
+)
 
 _TYPE_RULES = (
     ("pricing", ("pricing", "plans")),
@@ -42,6 +57,27 @@ def classify_path(path: str) -> str:
         if any(n in lowered for n in needles):
             return source_type
     return "product" if len(lowered.strip("/").split("/")) == 1 else "blog"
+
+
+def classify_source_class(path: str) -> str:
+    """Strategic source class for a same-domain path (company-agnostic)."""
+    lowered = (path or "/").lower()
+    for source_class, needles in _CLASS_RULES:
+        if any(n in lowered for n in needles):
+            return source_class
+    return "company_owned"
+
+
+def why_relevant(source_class: str, source_type: str) -> str:
+    return {
+        "investor_material": "investor-facing framing of strategy, growth, and "
+                             "risks in the company's own words",
+        "executive_statement": "how leadership publicly frames direction and "
+                               "priorities",
+        "customer_voice": "how customers describe value and outcomes, a check "
+                          "on the company's own claims",
+    }.get(source_class,
+          f"company-owned {source_type} page — primary positioning evidence")
 
 
 def why_useful(source_type: str) -> str:
@@ -75,11 +111,15 @@ def discover_candidates(*, company_url: str, homepage_links: list) -> list:
         if not same_domain(company_url, url):
             return                       # external URLs need explicit approval
         seen.add(url)
-        source_type = classify_path(urlparse(url).path)
+        path = urlparse(url).path
+        source_type = classify_path(path)
+        source_class = classify_source_class(path)
         candidates.append({
             "url": url, "source_type": source_type,
             "discovery_method": method, "same_domain": True,
-            "why_useful": why_useful(source_type)})
+            "source_class": source_class,
+            "why_useful": why_useful(source_type),
+            "why_relevant": why_relevant(source_class, source_type)})
 
     add(company_url, "entered")
     for link in homepage_links[:200]:

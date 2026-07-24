@@ -11,6 +11,9 @@ from intent_engine.company_ingestion.claims import (
     build_claims, executive_overview,
 )
 from intent_engine.company_ingestion.discovery import discover_candidates
+from intent_engine.company_ingestion.external_discovery import (
+    propose_external_candidates,
+)
 from intent_engine.company_ingestion.fetch import safe_fetch
 from intent_engine.company_ingestion.parsing import parse_html
 from intent_engine.company_ingestion.pasted import pasted_source
@@ -91,13 +94,20 @@ class CompanyIngestionService:
             links = parse_html(result["body"])["links"]
         candidates = discover_candidates(company_url=meta["website"],
                                          homepage_links=links)
+        # Bounded external-source proposals (customer voice etc.) broaden the
+        # evidence beyond company-owned pages. Off-domain, UNVERIFIED, and
+        # (like every candidate) fetched only after explicit approval.
+        candidates = candidates + propose_external_candidates(
+            company_name=meta.get("company_name", ""), domain=domain)
         for i, candidate in enumerate(candidates):
             candidate_id = f"cand-{hashlib.sha256(candidate['url'].encode()).hexdigest()[:12]}"
+            availability = candidate.get("availability")
+            if availability is None:
+                availability = ("PROPOSED" if result["ok"] or
+                                candidate["discovery_method"] != "homepage_link"
+                                else "UNVERIFIED")
             payload = dict(candidate, candidate_id=candidate_id,
-                           company_id=domain, rank=i,
-                           availability="PROPOSED" if result["ok"] or
-                           candidate["discovery_method"] != "homepage_link"
-                           else "UNVERIFIED")
+                           company_id=domain, rank=i, availability=availability)
             self._append("ci.candidate_discovered", run_id=run_id,
                          domain=domain, subject_type="candidate",
                          subject_id=candidate_id, payload=payload,
@@ -212,6 +222,7 @@ class CompanyIngestionService:
                 source_id=source_id, run_id=run_id, company_id=domain,
                 original_url=candidate["url"], final_url=result["final_url"],
                 source_type=candidate["source_type"],
+                source_class=candidate.get("source_class", "company_owned"),
                 status_code=result.get("status_code", 200),
                 mime_type=result.get("mime_type", "text/html"),
                 content_hash=parsed["content_hash"],
@@ -250,7 +261,8 @@ class CompanyIngestionService:
     # --- pasted evidence ----------------------------------------------------------
     def add_pasted(self, run_id: str, *, user_id: str, label: str,
                    origin: str, text: str, privacy: str,
-                   authorized: bool, date_known: str = "") -> dict:
+                   authorized: bool, date_known: str = "",
+                   source_class: str = "independent_reporting") -> dict:
         meta = self.run_meta(run_id)
         if meta is None or meta["user_id"] != user_id:
             raise IngestionError("pasted evidence must come from the run's "
@@ -258,7 +270,7 @@ class CompanyIngestionService:
         record = pasted_source(run_id=run_id, company_id=meta["domain"],
                                label=label, origin=origin, text=text,
                                privacy=privacy, authorized=authorized,
-                               date_known=date_known)
+                               date_known=date_known, source_class=source_class)
         self._append("ci.pasted_evidence_added", run_id=run_id,
                      domain=meta["domain"], actor_type="human",
                      actor_id=user_id, subject_type="source",

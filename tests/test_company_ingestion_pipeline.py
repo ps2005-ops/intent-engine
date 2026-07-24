@@ -40,14 +40,23 @@ def _approve_all(ci, run_id, *, user="user-1"):
 
 # --- discovery -----------------------------------------------------------------
 
-def test_discovery_bounded_deterministic_same_domain(pipeline):
+def test_discovery_bounded_deterministic_multi_class(pipeline):
     ci, _, run_id = pipeline
     first = ci.discover(run_id)
     again = ci.discover(run_id)                  # idempotent, no refetch
     assert [c["url"] for c in first] == [c["url"] for c in again]
-    assert len(first) <= MAX_CANDIDATES_SHOWN
-    assert all(c["same_domain"] for c in first)
-    assert first[0]["source_type"] == "homepage"
+    same = [c for c in first if c["same_domain"]]
+    external = [c for c in first if not c["same_domain"]]
+    # company-page discovery stays bounded and same-domain
+    assert len(same) <= MAX_CANDIDATES_SHOWN
+    assert same[0]["source_type"] == "homepage"
+    # every candidate carries a strategic source class
+    assert all(c.get("source_class") for c in first)
+    # bounded external proposals are off-domain, UNVERIFIED, and approval-gated
+    assert external, "expected bounded external-source proposals"
+    assert all(c["availability"] == "UNVERIFIED"
+               and c["discovery_method"] == "external_proposed"
+               for c in external)
     urls = [c["url"] for c in first]
     assert len(urls) == len(set(urls))           # deduplicated
 

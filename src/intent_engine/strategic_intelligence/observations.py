@@ -77,7 +77,10 @@ def derive_observations(documents) -> list:
         signals = _detect_signals(text)
         if not signals:
             continue
-        source_class = _SOURCE_CLASS.get(doc.get("source_type"), "company_owned")
+        # prefer the explicit class the ingestion pipeline recorded; fall back
+        # to the source_type mapping for older documents without one.
+        source_class = doc.get("source_class") or _SOURCE_CLASS.get(
+            doc.get("source_type"), "company_owned")
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
         excerpt = (doc.get("meta_description")
                    or doc.get("text_content", "")[:240]).strip()

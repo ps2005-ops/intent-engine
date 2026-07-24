@@ -21,7 +21,7 @@ PASTED_LABELS = {
 
 def pasted_source(*, run_id, company_id, label: str, origin: str,
                   text: str, privacy: str, authorized: bool,
-                  date_known: str = "") -> dict:
+                  date_known: str = "", source_class: str = "independent_reporting") -> dict:
     if not authorized:
         raise IngestionError(
             "pasted evidence requires confirmation that the user is "
@@ -42,7 +42,7 @@ def pasted_source(*, run_id, company_id, label: str, origin: str,
         content_hash=hashlib.sha256(text.encode()).hexdigest(),
         byte_count=len(text.encode()), title=label, text_content=text,
         freshness="CURRENT" if date_known else "UNKNOWN",
-        retrieval_status="OK", privacy=privacy,
+        retrieval_status="OK", privacy=privacy, source_class=source_class,
         origin_note=f"{PASTED_LABELS.get(privacy, 'User-provided')} — "
                     f"origin: {origin}"
                     + (f"; date: {date_known}" if date_known else ""))

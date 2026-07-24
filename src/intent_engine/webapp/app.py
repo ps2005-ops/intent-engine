@@ -1012,16 +1012,36 @@ class WebApp:
                     ("homepage", "product", "pricing", "about", "customers")
                     else "")
 
-        rows = "".join(
-            f'<li><label><input type="checkbox" name="cand" '
-            f'value="{_e(c["candidate_id"])}" {_checked(c)}> '
-            f'<strong>{_e(c["source_type"])}</strong> — '
-            f'<code>{_e(c["url"])}</code> '
-            f'({_e(c["discovery_method"])}'
-            f'{"" if c["same_domain"] else "; EXTERNAL"}'
-            f'{"; unverified" if c.get("availability") == "UNVERIFIED" else ""})'
-            f' · {_e(c["why_useful"])}</label></li>'
-            for c in candidates)
+        def _row(c):
+            note = c.get("why_relevant") or c.get("why_useful", "")
+            return (
+                f'<li><label><input type="checkbox" name="cand" '
+                f'value="{_e(c["candidate_id"])}" {_checked(c)}> '
+                f'<strong>{_e(c["source_type"])}</strong> — '
+                f'<code>{_e(c["url"])}</code> '
+                f'({_e(c["discovery_method"])}'
+                f'{"" if c["same_domain"] else "; EXTERNAL"}'
+                f'{"; unverified" if c.get("availability") == "UNVERIFIED" else ""})'
+                f' · {_e(note)}</label></li>')
+
+        # Group candidates by strategic source class so the founder sees WHAT
+        # kind of evidence they are approving, not a flat list of URLs.
+        class_titles = {
+            "company_owned": "Company-owned pages",
+            "executive_statement": "Executive statements (company-published)",
+            "investor_material": "Investor material (company-published)",
+            "customer_voice": "Customer evidence (independent)",
+            "competitor": "Competitor evidence (independent)",
+            "independent_reporting": "Independent reporting",
+        }
+        rows = ""
+        for cls, title in class_titles.items():
+            group = [c for c in candidates
+                     if c.get("source_class", "company_owned") == cls]
+            if not group:
+                continue
+            rows += (f'<h3>{title}</h3><ul>'
+                     + "".join(_row(c) for c in group) + '</ul>')
         alert = (f'<p role="alert"><strong>{_e(message)}</strong></p>'
                  if message else '')
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -1029,25 +1049,40 @@ class WebApp:
                 f'initial-scale=1"><title>Approve sources</title></head>'
                 f'<body>{self._nav(session, csrf)}<main>'
                 f'<h1>Choose the sources for this analysis</h1>{alert}'
-                f'<p>We found these public pages on '
-                f'<code>{_e(meta["domain"])}</code>. Founder Intelligence '
-                f'analyzes only the pages and evidence you approve. '
-                f'You may approve at most {MAX_APPROVED_SOURCES} sources per '
-                f'analysis. Public websites can be incomplete; a retrieved '
-                f'page may be outdated; the report does not represent '
+                f'<p>We found candidate evidence for '
+                f'<code>{_e(meta["domain"])}</code>, organized by source '
+                f'class. Founder Intelligence analyzes only the pages and '
+                f'evidence you approve. A strong strategic report needs more '
+                f'than company-owned pages — approve executive, investor, '
+                f'customer, competitor, or independent sources for a '
+                f'cross-source view. You may approve at most '
+                f'{MAX_APPROVED_SOURCES} sources per analysis. Public websites '
+                f'can be incomplete or outdated; the report does not represent '
                 f'internal company knowledge. The system does not '
                 f'automatically contact, publish to, or modify any '
                 f'website.</p>'
                 f'<form action="/runs/{_e(run_id)}/sources/approve" '
                 f'method="post"><input type="hidden" name="csrf" '
-                f'value="{_e(csrf)}"><ul>{rows}</ul>'
-                f'<h2>Optional: paste external evidence</h2>'
+                f'value="{_e(csrf)}">{rows}'
+                f'<h2>Add independent evidence (bounded, explicit)</h2>'
+                f'<p>Paste a short excerpt from an independent source — '
+                f'reporting, an executive interview, or a competitor page — '
+                f'and classify it. This is the safe, no-crawl way to add a '
+                f'cross-source vantage point.</p>'
                 f'<p><label for="plabel">Source label</label> '
                 f'<input id="plabel" name="pasted_label" '
                 f'value="{_e(pasted.get("pasted_label", ""))}"></p>'
                 f'<p><label for="porigin">Origin description</label> '
                 f'<input id="porigin" name="pasted_origin" '
                 f'value="{_e(pasted.get("pasted_origin", ""))}"></p>'
+                f'<p><label for="pclass">Source class</label> '
+                f'<select id="pclass" name="pasted_class">'
+                f'<option value="independent_reporting">Independent reporting'
+                f'</option><option value="customer_voice">Customer voice'
+                f'</option><option value="competitor">Competitor</option>'
+                f'<option value="executive_statement">Executive statement'
+                f'</option><option value="investor_material">Investor material'
+                f'</option></select></p>'
                 f'<p><label for="ptext">Pasted text</label> '
                 f'<textarea id="ptext" name="pasted_text">'
                 f'{_e(pasted.get("pasted_text", ""))}</textarea></p>'
@@ -1095,12 +1130,18 @@ class WebApp:
                 if form.get("pasted_authorized") is None:
                     return self._error_page(400, "pasted evidence requires "
                                                  "authorization confirmation")
+                pasted_class = form.get("pasted_class", "independent_reporting")
+                if pasted_class not in (
+                        "independent_reporting", "customer_voice", "competitor",
+                        "executive_statement", "investor_material"):
+                    pasted_class = "independent_reporting"
                 self.ci.add_pasted(
                     run_id, user_id=session["user_id"],
                     label=form.get("pasted_label", "pasted evidence"),
                     origin=form.get("pasted_origin", "user"),
                     text=form["pasted_text"],
-                    privacy="user_public_excerpt", authorized=True)
+                    privacy="user_public_excerpt", authorized=True,
+                    source_class=pasted_class)
             self.ci.fetch_approved(run_id)
             self._results[run_id] = self.ci.compose(run_id,
                                                     fi_service=self.fi)

@@ -21,6 +21,8 @@ _CONF_RANK = {"speculative": 0, "low": 1, "moderate": 2, "high": 3}
 # source classes that make a report more than one-sided
 _EXTERNAL_CLASSES = ("executive_statement", "investor_material",
                      "customer_voice", "competitor", "independent_reporting")
+# genuinely outside the company's own publishing (cross-source corroboration)
+_INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
 
 
 def _signals_present(observations) -> set:
@@ -47,9 +49,14 @@ def _confidence(matched_qual, support_classes, counter_count) -> tuple:
         f"{', '.join(sorted(support_classes))}",
     ]
     only_company = support_classes == {"company_owned"}
+    independent = support_classes & set(_INDEPENDENT_CLASSES)
     if only_company:
         reasons.append("all support comes from company-owned pages, which is "
                        "one-sided; independent corroboration is missing")
+    elif independent:
+        reasons.append("corroborated across an independent vantage point ("
+                       + ", ".join(sorted(independent)) + "), not only the "
+                       "company's own publishing")
     if counter_count:
         reasons.append(f"{counter_count} observation(s) point the other way "
                        "and are held as explicit counter-evidence")
@@ -222,6 +229,62 @@ def _decision_implications(hypotheses, blind_spots):
     return out
 
 
+def _build_evidence_graph(company_name, observations, hypotheses, patterns,
+                          blind_spots, questions) -> dict:
+    """A typed evidence graph linking sources → observations → hypotheses →
+    patterns / counter-observations / questions / decisions. This single
+    structure drives the report, the conversation, and downstream analytics —
+    there is no second representation."""
+    nodes, edges = [], []
+    seen_sources = set()
+    for o in observations:
+        nodes.append({"id": o.observation_id, "type": "observation",
+                      "label": o.text, "source_class": o.source_class,
+                      "directly_observed": o.directly_observed})
+        src = o.origin or o.source_title or o.source_class
+        if src and src not in seen_sources:
+            seen_sources.add(src)
+            nodes.append({"id": f"src:{src}", "type": "source",
+                          "label": o.source_title or src,
+                          "source_class": o.source_class})
+        if src:
+            edges.append({"from": o.observation_id, "to": f"src:{src}",
+                          "type": "from_source"})
+    for h in hypotheses:
+        nodes.append({"id": h.hypothesis_id, "type": "hypothesis",
+                      "label": h.title, "confidence": h.confidence})
+        for oid in h.supporting_observation_ids:
+            edges.append({"from": oid, "to": h.hypothesis_id,
+                          "type": "supports"})
+        for oid in h.counter_observation_ids:
+            edges.append({"from": oid, "to": h.hypothesis_id,
+                          "type": "contradicts"})
+        if h.pattern_id:
+            edges.append({"from": h.hypothesis_id, "to": f"pat:{h.pattern_id}",
+                          "type": "matches_pattern"})
+    for p in patterns:
+        nodes.append({"id": f"pat:{p.pattern_id}", "type": "pattern",
+                      "label": p.name})
+    for b in blind_spots:
+        nodes.append({"id": b.blind_spot_id, "type": "blind_spot",
+                      "label": b.observed_tension})
+        for oid in b.supporting_observation_ids:
+            edges.append({"from": oid, "to": b.blind_spot_id,
+                          "type": "reveals_tension"})
+    for i, q in enumerate(questions):
+        qid = f"q:{i}"
+        nodes.append({"id": qid, "type": "question", "label": q.question})
+        for ref in q.source_refs:
+            oid = ref.get("observation_id")
+            if oid:
+                edges.append({"from": oid, "to": qid, "type": "raises"})
+    return {"nodes": nodes, "edges": edges,
+            "counts": {"observations": len(observations),
+                       "hypotheses": len(hypotheses),
+                       "patterns": len(patterns),
+                       "edges": len(edges)}}
+
+
 def build_strategic_report(*, company_name, observations,
                            patterns=None, scaffolds=None,
                            user_accepts_limited_scope=False) -> StrategicReport:
@@ -283,12 +346,20 @@ def build_strategic_report(*, company_name, observations,
             if g not in evidence_gaps:
                 evidence_gaps.append(g)
     external_present = [c for c in _EXTERNAL_CLASSES if c in coverage]
+    independent_present = [c for c in _INDEPENDENT_CLASSES if c in coverage]
     if not external_present:
         evidence_gaps.insert(
             0, "the analysis rests only on company-owned pages; executive, "
                "investor, independent, and customer-voice sources are needed "
                "to corroborate or challenge these hypotheses")
+    elif not independent_present:
+        evidence_gaps.insert(
+            0, "all evidence is company-published (owned/executive/investor); "
+               "an independent, customer, or competitor source is needed for "
+               "cross-source corroboration")
 
+    graph = _build_evidence_graph(company_name, observations, hypotheses,
+                                  used_patterns, blind_spots, questions)
     report = StrategicReport(
         company_name=company_name, status="",
         thesis=thesis, shifts=shifts, hypotheses=hypotheses,
@@ -296,7 +367,7 @@ def build_strategic_report(*, company_name, observations,
         evidence_gaps=evidence_gaps,
         decision_implications=_decision_implications(hypotheses, blind_spots),
         observations=list(observations), source_class_coverage=coverage,
-        limited_scope_accepted=user_accepts_limited_scope)
+        limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph)
 
     # provisional status via the quality gate (importing here avoids a cycle)
     from intent_engine.strategic_intelligence.quality import evaluate_report
