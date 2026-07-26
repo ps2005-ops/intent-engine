@@ -11,6 +11,7 @@ from intent_engine.company_ingestion.claims import (
     build_claims, executive_overview,
 )
 from intent_engine.company_ingestion.discovery import discover_candidates
+from intent_engine.company_ingestion.edgar import propose_edgar_candidates
 from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
@@ -99,6 +100,14 @@ class CompanyIngestionService:
         # (like every candidate) fetched only after explicit approval.
         candidates = candidates + propose_external_candidates(
             company_name=meta.get("company_name", ""), domain=domain)
+        # Authoritative structured fallback: for public companies, official SEC
+        # EDGAR filings are permitted, server-rendered (non-JavaScript) HTML —
+        # so a run is not at the mercy of a JavaScript-only marketing site.
+        # Fully defensive: yields nothing (never raises) if the company is not
+        # a filer or SEC is unreachable, so discovery is never broken by it.
+        candidates = candidates + propose_edgar_candidates(
+            company_name=meta.get("company_name", ""),
+            transport=self.transport, resolver=self.resolver)
         for i, candidate in enumerate(candidates):
             candidate_id = f"cand-{hashlib.sha256(candidate['url'].encode()).hexdigest()[:12]}"
             availability = candidate.get("availability")
