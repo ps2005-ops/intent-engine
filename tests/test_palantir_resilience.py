@@ -244,6 +244,7 @@ def test_autorun_skips_source_page_and_completes_palantir(tmp_path):
     assert status.startswith("303")
     loc = headers["Location"]
     assert "/sources" not in loc                    # the 2nd page never appears
+    assert loc.endswith("/progress")                # lands on styled progress
     run_id = loc.split("/runs/")[1].split("/")[0]
     # the run already ran to a terminal, openable, styled result
     assert app.ci.store.run_state(run_id) == "PARTIAL"
@@ -254,6 +255,49 @@ def test_autorun_skips_source_page_and_completes_palantir(tmp_path):
     # visiting the (now-internal) source route just forwards to the finished run
     status, headers, _ = c.request("GET", f"/runs/{run_id}/sources")
     assert status.startswith("303")                 # approval exists → redirect
+
+
+def test_double_submit_creates_exactly_one_run(tmp_path):
+    """A2: a double-clicked / duplicate Analyze submit must not create a
+    second analysis run (deterministic run id + idempotent machinery)."""
+    app = _make(tmp_path, transport=palantir_transport, autorun_sources=True)
+    c = _start_demo(app)
+
+    def submit():
+        csrf = c.csrf()
+        return c.request(
+            "POST", "/analyze",
+            f"consent=on&csrf={csrf}&company_name=Palantir+Technologies"
+            f"&website={PALANTIR}")
+
+    st1, hd1, _ = submit()
+    st2, hd2, _ = submit()                              # the "double click"
+    assert st1.startswith("303") and st2.startswith("303")
+    rid1 = hd1["Location"].split("/runs/")[1].split("/")[0]
+    rid2 = hd2["Location"].split("/runs/")[1].split("/")[0]
+    assert rid1 == rid2                                 # same deterministic run
+    assert app.ci.store.run_ids() == [rid1]            # exactly ONE run exists
+    ids = [r["source_id"] for r in app.ci.store.retrieved(rid1)]
+    assert len(ids) == len(set(ids))                   # no duplicated evidence
+
+
+def test_progress_page_terminal_styled_stops_refresh(tmp_path):
+    """A2/A5/A6: auto-run lands on a styled progress page carrying the product
+    shell; a terminal run shows the result link and stops auto-refreshing."""
+    app = _make(tmp_path, transport=palantir_transport, autorun_sources=True)
+    c = _start_demo(app)
+    csrf = c.csrf()
+    _, hd, _ = c.request(
+        "POST", "/analyze",
+        f"consent=on&csrf={csrf}&company_name=Palantir+Technologies"
+        f"&website={PALANTIR}")
+    loc = hd["Location"]
+    assert loc.endswith("/progress")
+    st, _, body = c.request("GET", loc)
+    assert st == "200 OK"
+    assert "<style" in body and "<nav" in body         # styled product shell
+    assert "Open the result" in body                   # terminal → result link
+    assert "http-equiv=\"refresh\"" not in body        # terminal → refresh off
 
 
 def test_failed_guest_page_is_styled(tmp_path):

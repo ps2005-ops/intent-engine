@@ -568,10 +568,17 @@ class WebApp:
                 # deterministic result (restart-safe) and read its status.
                 result = self._result(run_id)
                 status = (result or {}).get("status") or status
+        # Auto-update without a manual refresh: while the run is still in a
+        # non-terminal state, the page reloads itself; in any terminal state the
+        # refresh is omitted so it stops (safe, JS-free, CSP-proof).
+        terminal = status in ("COMPLETE", "PARTIAL", "FAILED", "REJECTED")
+        refresh = ('' if terminal
+                   else '<meta http-equiv="refresh" content="4">')
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<title>Analysis progress</title></head><body>'
+                f'{refresh}<title>Analysis progress</title></head><body>'
                 f'{self._nav(session, session["csrf"])}<main>'
                 f'<h1>Analysis progress</h1>'
+                f'<p class="step-badge">{_e(status)}</p>'
                 f'<p>Run <code>{_e(run_id)}</code> status: '
                 f'<strong>{_e(status)}</strong></p>')
         if status == "FAILED":
@@ -590,9 +597,14 @@ class WebApp:
                     f'<p><a href="/runs/{_e(run_id)}">Open the result</a></p>')
         else:
             # Still in flight: show the current lifecycle stage without ever
-            # claiming a result already exists.
+            # claiming a result already exists. The page refreshes itself.
             tail = ('<p>These are real lifecycle stages, not decoration. This '
-                    'analysis is still in progress — no result exists yet.</p>')
+                    'analysis is still in progress — no result exists yet. '
+                    'This page updates automatically.</p>'
+                    '<p class="coverage">If this run has not reached a result '
+                    'after a while, it may be stale (e.g. the service '
+                    'restarted mid-run). You can '
+                    '<a href="/">start a new analysis</a>.</p>')
         return self._html(head + tail + '</main></body></html>')
 
     # --- honest failure surface (real-company runs) --------------------------
@@ -703,6 +715,10 @@ class WebApp:
                 return self._failed_run_page(session, run_id)
             result = self._real_result(run_id)
             if result is None:
+                # Auto-run mode never routes guests through manual source
+                # selection: (re)approve the recommended sources and run.
+                if self.config.autorun_sources:
+                    return self._autorun(session, run_id)
                 return self._redirect(f"/runs/{run_id}/sources")
             if result.get("status") == "FAILED" and not result.get("sections"):
                 return self._failed_run_page(session, run_id)
@@ -1172,21 +1188,28 @@ class WebApp:
 
     def _autorun(self, session, run_id):
         """Approve the recommended sources, retrieve, and compose in one shot,
-        then show the result — the manual source-review page is skipped. This
-        drives exactly the same service machinery as manual approval; consent
-        was already given on the analyze form."""
-        candidates = self.ci.store.candidates(run_id)
-        approved_ids = self._recommended_candidate_ids(candidates)
-        rejected = [c["candidate_id"] for c in candidates
-                    if c["candidate_id"] not in approved_ids]
-        try:
-            self.ci.approve(run_id, user_id=session["user_id"],
-                            approved_ids=approved_ids, rejected_ids=rejected)
-            self.ci.fetch_approved(run_id)
+        then land on the styled progress page — the manual source-review page
+        is skipped. Idempotent: approval/retrieval/compose are each idempotent,
+        so a double-clicked or duplicate submit never creates a second run.
+        Consent was already given on the analyze form."""
+        if self.ci.store.approval(run_id) is None:
+            candidates = self.ci.store.candidates(run_id)
+            approved_ids = self._recommended_candidate_ids(candidates)
+            rejected = [c["candidate_id"] for c in candidates
+                        if c["candidate_id"] not in approved_ids]
+            try:
+                self.ci.approve(run_id, user_id=session["user_id"],
+                                approved_ids=approved_ids, rejected_ids=rejected)
+                self.ci.fetch_approved(run_id)
+                self._results[run_id] = self._compose(run_id)
+            except IngestionError as exc:
+                return self._error_page(400, str(exc))
+        elif run_id not in self._results:
+            # Approval already exists (e.g. a duplicate submit after a restart):
+            # recompose from the persisted, already-retrieved sources rather
+            # than starting anything new.
             self._results[run_id] = self._compose(run_id)
-        except IngestionError as exc:
-            return self._error_page(400, str(exc))
-        return self._redirect(f"/runs/{run_id}")
+        return self._redirect(f"/runs/{run_id}/progress")
 
     def _sources_page(self, session, run_id, *, selected_ids=None,
                       message=None, pasted=None):
