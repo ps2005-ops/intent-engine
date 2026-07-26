@@ -116,6 +116,52 @@ code{background:#f4f4fa;padding:.05rem .3rem;border-radius:4px;font-size:.8rem}
 .avail-conflicted{border-left:3px solid #b8860b}
 .avail-stale{border-left:3px solid #999}
 .trust-note{background:#f6f8ff;border-radius:10px;padding:1rem;font-size:.9rem}
+/* --- shared product shell (nav, forms, controls, lifecycle states) --------- */
+nav{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;font-size:.85rem;
+background:#f6f8ff;border:1px solid #e6e6ef;border-radius:10px;padding:.55rem .9rem;
+margin-bottom:1.6rem;color:#555}
+nav a{color:#3a3a8c;text-decoration:none}nav a:hover{text-decoration:underline}
+nav form{display:inline;margin:0}
+nav button{background:transparent;color:#3a3a8c;border:0;padding:.1rem .2rem;
+font:inherit;font-weight:500;cursor:pointer;text-decoration:underline}
+nav button:hover{color:#2d2d70}
+label{display:block;margin:.4rem 0 .3rem;font-weight:500}
+input[type=text],input[type=email],input[type=password],input[type=url],
+input:not([type]),textarea,select{width:100%;max-width:34rem;box-sizing:border-box;
+padding:.55rem .7rem;border:1px solid #cfd0dc;border-radius:8px;font:inherit;
+background:#fff;color:inherit}
+textarea{min-height:6rem;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid #6b6be0;
+outline-offset:1px;border-color:#6b6be0}
+input[type=checkbox]{width:auto;margin-right:.5rem;vertical-align:baseline}
+button{background:#3a3a8c;color:#fff;border:0;border-radius:8px;padding:.6rem 1.15rem;
+font:inherit;font-weight:600;cursor:pointer}
+button:hover{background:#2d2d70}
+button:disabled{background:#b9b9d4;cursor:not-allowed}
+.btn-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:1.2rem 0}
+[role=alert]{background:#fff4f4;border:1px solid #f0c9c9;color:#8a1f1f;
+border-radius:8px;padding:.7rem .9rem;margin:1rem 0}
+[role=status]{background:#f0f6ff;border:1px solid #cfe0f5;border-radius:8px;
+padding:.7rem .9rem;margin:1rem 0}
+.coverage{background:#fffaf0;border:1px solid #f0e0c0;border-radius:8px;
+padding:.7rem .9rem;margin:1rem 0}
+details{border:1px solid #e6e6ef;border-radius:10px;padding:.6rem .9rem;
+margin:1.2rem 0;background:#fafaff}
+details>summary{cursor:pointer;font-weight:600;color:#3a3a8c}
+ul.source-list{list-style:none;padding:0;margin:.3rem 0 1.2rem}
+ul.source-list li{margin:.35rem 0}
+ul.source-list li label{display:block;font-weight:400;border:1px solid #e6e6ef;
+border-radius:8px;padding:.55rem .7rem;background:#fff;cursor:pointer;line-height:1.4}
+ul.source-list li label:hover{border-color:#c3c3e6;background:#fbfbff}
+ul.source-list .tag{display:inline-block;font-size:.72rem;font-weight:600;
+border-radius:999px;padding:.05rem .5rem;margin-left:.35rem;vertical-align:middle}
+.tag-authoritative{background:#e7f6ec;color:#1c6b3a}
+.tag-external{background:#f3eefc;color:#5b3aa0}
+.tag-unverified{background:#f4f4f4;color:#666}
+.stage{font-size:1rem;margin:1rem 0}
+.step-badge{display:inline-block;background:#eeeefc;border-radius:999px;
+padding:.15rem .75rem;font-size:.85rem;font-weight:600;color:#2d2d70}
+.count-note{font-size:.85rem;color:#555}
 """
 
 
@@ -168,8 +214,8 @@ def render_landing_html() -> str:
         '<p><label for="q">What are you trying to understand? (optional)</label>'
         '<input id="q" name="business_question"></p>'
         '<p><label><input type="checkbox" name="consent" required> I approve '
-        'analysis of the company information and supported public sources '
-        'shown here.</label></p>'
+        'analysis of this company using public and official sources — its '
+        'website and, for public companies, SEC filings.</label></p>'
         '<button type="submit">Analyze my company</button></form>'
         '<p class="trust-note">Every conclusion shows its evidence, confidence, '
         'and limitations. No autonomous actions. No invented internal data. '

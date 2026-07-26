@@ -51,6 +51,13 @@ class AppConfig:
     demo_mode: bool = False
     demo_ip_analyses_per_hour: int = 10      # per client IP, rolling hour
     demo_session_analyses_per_day: int = 25  # per anon session, rolling day
+    # Frictionless flow: when on (the default), submitting the analyze form
+    # auto-approves the recommended sources (core company pages + authoritative
+    # SEC filings) and runs straight through to the result — the separate
+    # source-review page is skipped. Consent is still explicit (the analyze
+    # form's checkbox). Set WEBAPP_AUTORUN_SOURCES=0 to restore the manual
+    # source-review step.
+    autorun_sources: bool = True
 
     def validate(self) -> None:
         if self.env not in ENVIRONMENTS:
@@ -126,6 +133,8 @@ def from_env(environ=None) -> AppConfig:
             "DEMO_MAX_ANALYSES_PER_HOUR", 10),
         demo_session_analyses_per_day=_pos_int(
             "DEMO_MAX_ANALYSES_PER_DAY", 25),
+        autorun_sources=env_map.get("WEBAPP_AUTORUN_SOURCES", "1").strip()
+        .lower() not in ("0", "false", "no", "off"),
     )
     config.validate()
     return config

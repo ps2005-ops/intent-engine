@@ -19,6 +19,7 @@ from intent_engine.founder_intelligence.fixtures import (
     DEMO_AS_OF, DEMO_COMPANY_NAME, DEMO_DOMAIN, demo_claims,
 )
 from intent_engine.founder_intelligence.presentation import (
+    _BASE_CSS as _APP_CSS,
     render_landing_html, render_report_preview, render_result_html,
 )
 from intent_engine.company_ingestion.records import (
@@ -288,9 +289,23 @@ class WebApp:
         session["analyses"] = session_hits
         return None
 
+    def _stylize(self, body: str) -> str:
+        """Ensure every hand-built page carries the shared product stylesheet
+        (and a responsive viewport). Pages that already embed their own
+        <style> (the presentation-layer landing/result renderers) are left
+        untouched, so the CSS is never applied twice."""
+        if "<style" in body or "</head>" not in body:
+            return body
+        head_extra = ""
+        if 'name="viewport"' not in body:
+            head_extra += ('<meta name="viewport" content="width=device-width,'
+                           'initial-scale=1">')
+        head_extra += f"<style>{_APP_CSS}</style>"
+        return body.replace("</head>", head_extra + "</head>", 1)
+
     def _html(self, body, *, status="200 OK", extra_headers=()):
         return status, [("Content-Type", "text/html; charset=utf-8"),
-                        *extra_headers], body
+                        *extra_headers], self._stylize(body)
 
     def _ok_json(self, obj):
         return "200 OK", [("Content-Type", "application/json")], json.dumps(obj)
@@ -316,7 +331,7 @@ class WebApp:
                 f'<p>{_e(message)}</p><p><a href="/">Back to start</a></p>'
                 f'</main></body></html>')
         return f"{code} {titles.get(code, 'Error')}", \
-            [("Content-Type", "text/html; charset=utf-8")], body
+            [("Content-Type", "text/html; charset=utf-8")], self._stylize(body)
 
     def _nav(self, session, csrf=""):
         if session is None:
@@ -508,6 +523,11 @@ class WebApp:
                 return self._error_page(403, "this run belongs to another "
                                              "account")
             self.ci.discover(run_id)
+            if self.config.autorun_sources:
+                # Frictionless default: no separate source-review page. Approve
+                # the recommended sources (consent was given on this form) and
+                # run straight through to the result.
+                return self._autorun(session, run_id)
             return self._redirect(f"/runs/{run_id}/sources")
         result = self.fi.run(company_name=DEMO_COMPANY_NAME,
                              website=f"https://{DEMO_DOMAIN}",
@@ -1134,6 +1154,40 @@ class WebApp:
     def _is_real_run(self, run_id):
         return self.ci.run_meta(run_id) is not None
 
+    @staticmethod
+    def _recommended_candidate_ids(candidates):
+        """The default source set: core company pages plus any authoritative
+        official filing (SEC / investor material), authoritative first, capped
+        at the per-run maximum. Shared by the source-review page (as the
+        pre-checked set) and by auto-run (as the approved set), so both agree."""
+        def rec(c):
+            return (c["source_type"] in
+                    ("homepage", "product", "pricing", "about", "customers")
+                    or c.get("source_class") == "investor_material")
+        ordered = sorted(candidates,
+                         key=lambda c: 0 if c.get("source_class")
+                         == "investor_material" else 1)
+        return [c["candidate_id"] for c in ordered if rec(c)][
+            :MAX_APPROVED_SOURCES]
+
+    def _autorun(self, session, run_id):
+        """Approve the recommended sources, retrieve, and compose in one shot,
+        then show the result — the manual source-review page is skipped. This
+        drives exactly the same service machinery as manual approval; consent
+        was already given on the analyze form."""
+        candidates = self.ci.store.candidates(run_id)
+        approved_ids = self._recommended_candidate_ids(candidates)
+        rejected = [c["candidate_id"] for c in candidates
+                    if c["candidate_id"] not in approved_ids]
+        try:
+            self.ci.approve(run_id, user_id=session["user_id"],
+                            approved_ids=approved_ids, rejected_ids=rejected)
+            self.ci.fetch_approved(run_id)
+            self._results[run_id] = self._compose(run_id)
+        except IngestionError as exc:
+            return self._error_page(400, str(exc))
+        return self._redirect(f"/runs/{run_id}")
+
     def _sources_page(self, session, run_id, *, selected_ids=None,
                       message=None, pasted=None):
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
@@ -1146,34 +1200,39 @@ class WebApp:
         csrf = session["csrf"]
         pasted = pasted or {}
 
-        def _checked(c):
-            # On a re-render (e.g. too many sources) honour exactly what the
-            # user had selected; on first render fall back to the sensible
-            # default set.
-            if selected_ids is not None:
-                return "checked" if c["candidate_id"] in selected_ids else ""
-            return ("checked" if c["source_type"] in
-                    ("homepage", "product", "pricing", "about", "customers")
-                    else "")
+        if selected_ids is not None:
+            selected = set(selected_ids)
+        else:
+            selected = set(self._recommended_candidate_ids(candidates))
+
+        def _tag(c):
+            if c.get("source_class") == "investor_material":
+                return ('<span class="tag tag-authoritative">official filing'
+                        '</span>')
+            if not c["same_domain"]:
+                extra = ('<span class="tag tag-unverified">unverified</span>'
+                         if c.get("availability") == "UNVERIFIED" else '')
+                return ('<span class="tag tag-external">external</span>'
+                        + extra)
+            return ''
 
         def _row(c):
             note = c.get("why_relevant") or c.get("why_useful", "")
+            checked = "checked" if c["candidate_id"] in selected else ""
             return (
                 f'<li><label><input type="checkbox" name="cand" '
-                f'value="{_e(c["candidate_id"])}" {_checked(c)}> '
-                f'<strong>{_e(c["source_type"])}</strong> — '
-                f'<code>{_e(c["url"])}</code> '
-                f'({_e(c["discovery_method"])}'
-                f'{"" if c["same_domain"] else "; EXTERNAL"}'
-                f'{"; unverified" if c.get("availability") == "UNVERIFIED" else ""})'
-                f' · {_e(note)}</label></li>')
+                f'value="{_e(c["candidate_id"])}" {checked}> '
+                f'<strong>{_e(c["source_type"])}</strong>{_tag(c)}<br>'
+                f'<code>{_e(c["url"])}</code><br>'
+                f'<span class="count-note">{_e(note)}</span></label></li>')
 
-        # Group candidates by strategic source class so the founder sees WHAT
-        # kind of evidence they are approving, not a flat list of URLs.
+        # Group candidates by strategic source class — authoritative official
+        # filings first — so the founder sees WHAT kind of evidence they are
+        # approving, not a flat list of URLs.
         class_titles = {
+            "investor_material": "Official filings & investor material",
             "company_owned": "Company-owned pages",
             "executive_statement": "Executive statements (company-published)",
-            "investor_material": "Investor material (company-published)",
             "customer_voice": "Customer evidence (independent)",
             "competitor": "Competitor evidence (independent)",
             "independent_reporting": "Independent reporting",
@@ -1184,42 +1243,43 @@ class WebApp:
                      if c.get("source_class", "company_owned") == cls]
             if not group:
                 continue
-            rows += (f'<h3>{title}</h3><ul>'
+            rows += (f'<h3>{_e(title)}</h3><ul class="source-list">'
                      + "".join(_row(c) for c in group) + '</ul>')
         alert = (f'<p role="alert"><strong>{_e(message)}</strong></p>'
                  if message else '')
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<meta name="viewport" content="width=device-width,'
-                f'initial-scale=1"><title>Approve sources</title></head>'
+                f'initial-scale=1"><title>Review sources — '
+                f'{_e(meta["company_name"])}</title></head>'
                 f'<body>{self._nav(session, csrf)}<main>'
-                f'<h1>Choose the sources for this analysis</h1>{alert}'
+                f'<p class="step-badge">Step 2 of 2 · Review sources</p>'
+                f'<h1>Review the sources for this analysis</h1>{alert}'
                 f'<p>We found candidate evidence for '
-                f'<code>{_e(meta["domain"])}</code>, organized by source '
-                f'class. Founder Intelligence analyzes only the pages and '
-                f'evidence you approve. A strong strategic report needs more '
-                f'than company-owned pages — approve executive, investor, '
-                f'customer, competitor, or independent sources for a '
-                f'cross-source view. You may approve at most '
-                f'{MAX_APPROVED_SOURCES} sources per analysis. Public websites '
-                f'can be incomplete or outdated; the report does not represent '
-                f'internal company knowledge. The system does not '
-                f'automatically contact, publish to, or modify any '
-                f'website.</p>'
+                f'<code>{_e(meta["domain"])}</code>. Recommended sources are '
+                f'already selected — you can approve them as they are, or '
+                f'adjust the selection. Founder Intelligence analyzes only the '
+                f'pages and evidence you approve, and never contacts, '
+                f'publishes to, or modifies any website. You may approve at '
+                f'most {MAX_APPROVED_SOURCES} sources per analysis.</p>'
                 f'<form action="/runs/{_e(run_id)}/sources/approve" '
                 f'method="post"><input type="hidden" name="csrf" '
                 f'value="{_e(csrf)}">{rows}'
-                f'<h2>Add independent evidence (bounded, explicit)</h2>'
+                f'<p class="count-note">Selected: '
+                f'<strong id="cand-count">{len(selected)}</strong> of '
+                f'{MAX_APPROVED_SOURCES} maximum.</p>'
+                f'<details><summary>Advanced: add your own evidence '
+                f'(optional)</summary>'
                 f'<p>Paste a short excerpt from an independent source — '
                 f'reporting, an executive interview, or a competitor page — '
                 f'and classify it. This is the safe, no-crawl way to add a '
-                f'cross-source vantage point.</p>'
-                f'<p><label for="plabel">Source label</label> '
+                f'cross-source vantage point. Leave it blank to skip.</p>'
+                f'<p><label for="plabel">Source label</label>'
                 f'<input id="plabel" name="pasted_label" '
                 f'value="{_e(pasted.get("pasted_label", ""))}"></p>'
-                f'<p><label for="porigin">Origin description</label> '
+                f'<p><label for="porigin">Origin description</label>'
                 f'<input id="porigin" name="pasted_origin" '
                 f'value="{_e(pasted.get("pasted_origin", ""))}"></p>'
-                f'<p><label for="pclass">Source class</label> '
+                f'<p><label for="pclass">Source class</label>'
                 f'<select id="pclass" name="pasted_class">'
                 f'<option value="independent_reporting">Independent reporting'
                 f'</option><option value="customer_voice">Customer voice'
@@ -1227,16 +1287,27 @@ class WebApp:
                 f'<option value="executive_statement">Executive statement'
                 f'</option><option value="investor_material">Investor material'
                 f'</option></select></p>'
-                f'<p><label for="ptext">Pasted text</label> '
+                f'<p><label for="ptext">Pasted text</label>'
                 f'<textarea id="ptext" name="pasted_text">'
                 f'{_e(pasted.get("pasted_text", ""))}</textarea></p>'
                 f'<p><label><input type="checkbox" name="pasted_authorized">'
                 f' I am authorized to provide this text; it is included '
-                f'only because I approve it.</label></p>'
+                f'only because I approve it.</label></p></details>'
                 f'<p><label><input type="checkbox" name="approve_consent" '
                 f'required> I approve retrieval and analysis of the '
                 f'selected public pages.</label></p>'
-                f'<button type="submit">Approve and analyze</button></form>'
+                f'<div class="btn-row">'
+                f'<button type="submit">Approve and analyze</button>'
+                f'<a href="/">Cancel</a></div></form>'
+                f'<script>(function(){{var max={MAX_APPROVED_SOURCES};'
+                f'var boxes=[].slice.call(document.querySelectorAll('
+                f'\'input[name="cand"]\'));'
+                f'var out=document.getElementById("cand-count");'
+                f'function sync(){{var n=boxes.filter(function(b){{'
+                f'return b.checked;}}).length;if(out){{out.textContent=n;}}'
+                f'boxes.forEach(function(b){{b.disabled=(!b.checked&&n>=max);'
+                f'}});}}boxes.forEach(function(b){{'
+                f'b.addEventListener("change",sync);}});sync();}})();</script>'
                 f'</main></body></html>')
         return self._html(body)
 
