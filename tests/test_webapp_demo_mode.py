@@ -74,8 +74,12 @@ def _all_403(url, timeout):
 
 
 def _make(tmp_path, *, demo_mode=True, clock=None, transport=_no_network,
-          **overrides):
+          autorun_sources=False, **overrides):
+    # Default OFF here so these tests exercise the manual source-approval route
+    # (still supported behind the WEBAPP_AUTORUN_SOURCES flag). The frictionless
+    # auto-run default is covered explicitly in test_palantir_resilience.py.
     base = dict(env="test", secret="s" * 40, demo_mode=demo_mode,
+                autorun_sources=autorun_sources,
                 web_store_path=tmp_path / "web.jsonl",
                 fi_store_path=tmp_path / "fi.jsonl",
                 ci_store_path=tmp_path / "ci.jsonl")
