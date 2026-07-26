@@ -196,3 +196,46 @@ No existing module's storage or write path is modified.
 10. Autonomous loop wiring (§18) in `growth_studio`, human-gated at Promote.
 
 Each ships with tests + docs before the next begins.
+
+---
+
+## 8. Acceptance matrix (kept current — updated 2026-07-26)
+
+Status: **REUSE** (existing, satisfies the module) · **NEW** (built in growth_os) ·
+**PARTIAL** · **MISSING**. *Op-verified* = exercised against a real provider with
+credentials (distinct from "adapter exists"). No real provider is verified yet —
+all new I/O is fake-only.
+
+| # | Module | Status | Where | Tested | Op-verified | Account-owner action |
+|---|---|---|---|---|---|---|
+| 1 | Growth Research | **NEW** | `growth_os/research` | ✅ | ✗ | source API keys (for real ingestion) |
+| 2 | Audience Intelligence | **PARTIAL** | `marketing/audience` (selection) | ✅ (existing) | ✗ | — (audience *model* still to build) |
+| 3 | Trend Intelligence | **NEW** | `growth_os/trends` | ✅ | ✗ | source API keys |
+| 4 | SEO Intelligence | **PARTIAL** | 3 existing files | ✗ | ✗ | Search Console OAuth (later) |
+| 5 | Content Intelligence | **MISSING** | — | — | — | — |
+| 6 | Brand Memory | **NEW** | `growth_os/brand` | ✅ | n/a | — |
+| — | Business/Exec Attention (§4) | **NEW** | `growth_os/attention` | ✅ | ✗ | — |
+| 7 | Campaign Planner | **REUSE** | `growth_studio` | ✅ (existing) | ✗ | — |
+| 8 | Content Creation | **REUSE** | `marketing` (generators/drafts) | ✅ (existing) | ✗ | — |
+| 9 | Media Generation | **NEW** | `growth_os/media` | ✅ | ✗ | Higgsfield stays MANUAL until API confirmed |
+| 10 | Publishing | **PARTIAL** | `marketing` (handoff only) | ✅ (existing) | ✗ | Publer key; connector framework still to build |
+| 11 | Email Marketing | **PARTIAL** | `marketing` | partial | ✗ | email provider key |
+| 12 | CRM | **REUSE** | `crm` | ✅ (existing) | ✗ | — |
+| 13 | Analytics & attribution | **PARTIAL** | `analytics` (metrics ✅; attribution missing) | ✅ (existing) | ✗ | GA4 / Search Console OAuth |
+| 14 | Experiment Engine | **REUSE** | `growth` | ✅ (existing) | ✗ | — |
+| 15 | Learning Engine | **REUSE + NEW** | `knowledge`/`learning` + growth_os candidates | ✅ | ✗ | — |
+| 16 | Personal AI integration | **MISSING** | — | — | — | — |
+| 17 | Growth dashboard | **MISSING** | — | — | — | — |
+| 18 | Autonomous orchestration | **PARTIAL** | `growth_studio` (needs new-module wiring) | ✅ (existing) | ✗ | — |
+
+**Commits so far (branch `growth-os`):** `cef71e6` foundation+research+brand ·
+`a2f6c03` trend+attention · `6c66d3f` media framework.
+
+**Publishing safety:** `PUBLISHING_ENABLED` defaults false; no channel auto-posts.
+
+**Not yet done (dependency order):** Content Intelligence (§5), SEO extension (§6),
+Publishing connector framework + state machine (§8), Email layer (§9), attribution
+models (§10), autonomous-loop wiring (§11), Personal AI read interface (§12),
+dashboard (§13), cost/rate config (§14), and the three end-to-end acceptance
+demonstrations (§17). The full acceptance loop is **not yet demonstrated** — see
+docs/GROWTH_OS_INTEGRATIONS.md for the connector reality.
