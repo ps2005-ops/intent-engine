@@ -64,7 +64,15 @@ if [[ "${GUARD_SKIP_PYTEST:-0}" != "1" ]]; then
   if ! "$PYTHON" -c "import sys" >/dev/null 2>&1; then
     PYTHON=python3
   fi
-  env -u ANTHROPIC_API_KEY "$PYTHON" -m pytest -q -p no:cacheprovider \
+  # Strip the git hook environment (GIT_DIR/GIT_INDEX_FILE/... are ABSOLUTE in a
+  # linked worktree) so NO test's git subprocess can be misdirected at this real
+  # repo/index — defense-in-depth behind each test sanitizing its own env
+  # (2026-07-26 worktree incident fix).
+  env -u ANTHROPIC_API_KEY \
+    -u GIT_DIR -u GIT_INDEX_FILE -u GIT_WORK_TREE -u GIT_COMMON_DIR \
+    -u GIT_OBJECT_DIRECTORY -u GIT_ALTERNATE_OBJECT_DIRECTORIES \
+    -u GIT_NAMESPACE -u GIT_PREFIX \
+    "$PYTHON" -m pytest -q -p no:cacheprovider \
     --deselect tests/test_simulator_e2e.py \
     --deselect tests/test_calendar_live.py \
     --deselect tests/test_macro_data_live.py \
