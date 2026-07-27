@@ -53,9 +53,13 @@ FAILURE_TYPES = ("timeout", "connection", "http_status", "too_large",
 PRIVACY_CLASSES = ("public", "user_public_excerpt", "user_internal")
 
 # Bounds (§41) — explicit and enforced.
-MAX_CANDIDATES_SHOWN = 20
+MAX_CANDIDATES_SHOWN = 32
 MAX_HOMEPAGE_LINKS = 20
-MAX_KNOWN_PATHS = 10
+# Known-path probes must cover the evidence families (identity, product, docs,
+# customers, pricing, strategy, investor, talent). A JavaScript-rendered site
+# exposes no usable homepage links, so these probes are the ONLY route to
+# company evidence — capping them at 10 starved the report of coverage.
+MAX_KNOWN_PATHS = 28
 MAX_APPROVED_SOURCES = 10
 MAX_RESPONSE_BYTES = 2_000_000
 MAX_TOTAL_BYTES_PER_RUN = 15_000_000

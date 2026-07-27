@@ -1170,21 +1170,52 @@ class WebApp:
     def _is_real_run(self, run_id):
         return self.ci.run_meta(run_id) is not None
 
-    @staticmethod
-    def _recommended_candidate_ids(candidates):
-        """The default source set: core company pages plus any authoritative
-        official filing (SEC / investor material), authoritative first, capped
-        at the per-run maximum. Shared by the source-review page (as the
-        pre-checked set) and by auto-run (as the approved set), so both agree."""
-        def rec(c):
-            return (c["source_type"] in
-                    ("homepage", "product", "pricing", "about", "customers")
-                    or c.get("source_class") == "investor_material")
-        ordered = sorted(candidates,
-                         key=lambda c: 0 if c.get("source_class")
-                         == "investor_material" else 1)
-        return [c["candidate_id"] for c in ordered if rec(c)][
-            :MAX_APPROVED_SOURCES]
+    # Evidence families an executive report needs. Selection takes a
+    # round-robin across these rather than the first N candidates, so a run
+    # cannot spend its whole source budget on one family (e.g. three SEC
+    # filings and nothing describing the product) — the 2026-07 report-quality
+    # incident. Order = priority when the budget cannot cover everything.
+    _EVIDENCE_FAMILIES = (
+        ("identity", lambda c: c["source_type"] in ("homepage", "about")),
+        ("investor", lambda c: c.get("source_class") == "investor_material"),
+        ("product", lambda c: c["source_type"] == "product"),
+        ("customers", lambda c: c["source_type"] == "customers"),
+        ("strategy", lambda c: c.get("source_class") == "executive_statement"
+         or c["source_type"] == "blog"),
+        ("independent", lambda c: c.get("source_class") in
+         ("customer_voice", "independent_reporting", "competitor")),
+        ("commercial", lambda c: c["source_type"] == "pricing"),
+        ("talent", lambda c: c["source_type"] == "careers"),
+    )
+
+    @classmethod
+    def _recommended_candidate_ids(cls, candidates):
+        """The default source set, chosen for EVIDENCE-FAMILY COVERAGE.
+
+        Takes one candidate from each family in priority order, then a second
+        pass, and so on, until the per-run budget is spent. This guarantees a
+        report is grounded in several independent kinds of evidence (identity,
+        product, investor, customers, strategy, ...) instead of many documents
+        from a single family. Shared by the source-review page (pre-checked
+        set) and auto-run (approved set), so both always agree."""
+        buckets = []
+        claimed = set()
+        for _name, matches in cls._EVIDENCE_FAMILIES:
+            group = [c for c in candidates
+                     if c["candidate_id"] not in claimed and matches(c)]
+            claimed.update(c["candidate_id"] for c in group)
+            buckets.append(group)
+        picked, depth = [], 0
+        while len(picked) < MAX_APPROVED_SOURCES:
+            progressed = False
+            for group in buckets:
+                if depth < len(group) and len(picked) < MAX_APPROVED_SOURCES:
+                    picked.append(group[depth]["candidate_id"])
+                    progressed = True
+            if not progressed:
+                break
+            depth += 1
+        return picked
 
     def _autorun(self, session, run_id):
         """Approve the recommended sources, retrieve, and compose in one shot,

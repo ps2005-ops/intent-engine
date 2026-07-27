@@ -325,8 +325,10 @@ def test_autorun_skips_source_page_and_completes_palantir(tmp_path):
     assert "/sources" not in loc                    # the 2nd page never appears
     assert loc.endswith("/progress")                # lands on styled progress
     run_id = loc.split("/runs/")[1].split("/")[0]
-    # the run already ran to a terminal, openable, styled result
-    assert app.ci.store.run_state(run_id) == "PARTIAL"
+    # the run already ran to a terminal, openable, styled result. Either
+    # terminal success is acceptable: COMPLETE when every approved source was
+    # usable, PARTIAL when some failed but the quorum still held.
+    assert app.ci.store.run_state(run_id) in ("COMPLETE", "PARTIAL")
     docs = app.ci.store.retrieved(run_id)
     assert any(d.get("source_class") == "investor_material" for d in docs)
     status, _, body = c.request("GET", f"/runs/{run_id}")

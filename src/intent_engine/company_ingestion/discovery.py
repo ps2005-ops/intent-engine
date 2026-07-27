@@ -13,10 +13,28 @@ from intent_engine.company_ingestion.records import (
 )
 from intent_engine.company_ingestion.validation import same_domain
 
-KNOWN_PATHS = ("/", "/product", "/products", "/solutions", "/pricing",
-               "/about", "/customers", "/case-studies", "/blog", "/news",
-               "/careers", "/press", "/newsroom", "/investors",
-               "/investor-relations", "/engineering")
+# Known-path probes, ordered by evidence family so a run reaches BEYOND the
+# homepage even when the site is JavaScript-rendered and its links are not in
+# the served HTML. Company-agnostic and bounded; every probe is still an
+# approval-gated candidate that is only fetched if it actually exists.
+KNOWN_PATHS = ("/",
+               # identity
+               "/about", "/about-us", "/company", "/leadership", "/team",
+               # products & platform
+               "/product", "/products", "/platform", "/platforms",
+               "/solutions", "/offerings", "/services",
+               # documentation / technical
+               "/docs", "/documentation", "/developers", "/api",
+               # customers & use cases
+               "/customers", "/case-studies", "/success-stories", "/partners",
+               # commercial
+               "/pricing", "/plans",
+               # strategy & communications
+               "/blog", "/news", "/press", "/newsroom", "/media",
+               # investor
+               "/investors", "/investor-relations", "/ir",
+               # talent
+               "/careers", "/jobs", "/engineering")
 
 # Map a same-domain path to its strategic source class. A company publishes
 # more than one vantage point: press/newsroom/leadership speak for executives;
@@ -35,10 +53,12 @@ _CLASS_RULES = (
 
 _TYPE_RULES = (
     ("pricing", ("pricing", "plans")),
-    ("product", ("product", "solution", "features", "platform", "how-it-works")),
-    ("about", ("about", "company", "team", "mission")),
+    ("product", ("product", "solution", "features", "platform", "offering",
+                 "how-it-works", "docs", "documentation", "developer", "api",
+                 "services")),
+    ("about", ("about", "company", "team", "mission", "leadership")),
     ("customers", ("customer", "case-stud", "case_stud", "testimonial",
-                   "success", "stories")),
+                   "success", "stories", "partner")),
     ("blog", ("blog", "news", "press", "newsroom", "articles", "updates")),
     ("careers", ("career", "jobs", "join", "hiring")),
 )
