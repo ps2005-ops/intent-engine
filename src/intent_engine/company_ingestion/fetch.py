@@ -46,7 +46,7 @@ def _default_transport(url: str, timeout: float):
 
 def safe_fetch(url: str, *, transport=None, resolver=None,
                timeout: float = CONNECT_TIMEOUT_S,
-               extra_mime_prefixes=()) -> FetchResult:
+               extra_mime_prefixes=(), binary: bool = False) -> FetchResult:
     """``extra_mime_prefixes`` narrowly widens the accepted content types for a
     single call — used only by sitemap discovery, which must read XML. The
     default retrieval path is unchanged (HTML/text only), so no analysed
@@ -118,6 +118,12 @@ def safe_fetch(url: str, *, transport=None, resolver=None,
                                             f"{mime!r}",
                                retryable=False, final_url=current,
                                redirects=redirects)
+        if binary:
+            # Raw bytes for binary evidence (PDF). Decoding would destroy it.
+            return FetchResult(ok=True, status_code=status, mime_type=mime,
+                               body=body, final_url=current,
+                               redirects=redirects, failure_type=None,
+                               safe_message="", retryable=False)
         try:
             text = body.decode("utf-8", errors="replace")
         except Exception:                                  # noqa: BLE001

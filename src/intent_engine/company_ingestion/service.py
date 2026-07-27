@@ -280,15 +280,42 @@ class CompanyIngestionService:
                                          "too_large",
                                          "run byte budget exhausted", False))
                 continue
-            result = safe_fetch(candidate["url"], transport=self.transport,
-                                resolver=self.resolver)
+            # Investor decks, shareholder letters and annual reports are often
+            # PDFs; fetch those as raw bytes through the same guarded path.
+            from intent_engine.company_ingestion.pdf import (
+                PDF_MIME_PREFIXES, PDF_OK, extract_pdf, is_pdf,
+            )
+            wants_pdf = is_pdf(url=candidate["url"])
+            result = safe_fetch(
+                candidate["url"], transport=self.transport,
+                resolver=self.resolver,
+                extra_mime_prefixes=PDF_MIME_PREFIXES if wants_pdf else (),
+                binary=wants_pdf)
             if not result["ok"]:
                 failed.append(self._fail(
                     run_id, domain, candidate_id, result["failure_type"],
                     result["safe_message"], result.get("retryable", False)))
                 continue
             self._transition(run_id, domain, "PARSING_SOURCES")
-            parsed = parse_html(result["body"])
+            body = result["body"]
+            if wants_pdf or is_pdf(mime=result.get("mime_type", ""),
+                                   body=body if isinstance(body, bytes) else b""):
+                raw = body if isinstance(body, bytes) else body.encode()
+                document = extract_pdf(raw, url=candidate["url"])
+                if document["status"] != PDF_OK:
+                    # An encrypted, malformed, or image-only PDF is recorded
+                    # as an honest failure — never admitted as empty evidence.
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, "parse_error",
+                        document["reason"], False))
+                    continue
+                parsed = {"title": document["title"] or candidate.get("title"),
+                          "meta_description": "",
+                          "text": document["text"],
+                          "content_hash": document["content_hash"],
+                          "modified_date": "", "links": []}
+            else:
+                parsed = parse_html(body)
             if not parsed["text"].strip():
                 # Fetched successfully but yielded no readable text — a
                 # JavaScript-only shell or an empty document. Record it as a
@@ -321,7 +348,8 @@ class CompanyIngestionService:
                 status_code=result.get("status_code", 200),
                 mime_type=result.get("mime_type", "text/html"),
                 content_hash=parsed["content_hash"],
-                byte_count=len(result["body"].encode()),
+                byte_count=(len(body) if isinstance(body, bytes)
+                            else len(body.encode())),
                 title=parsed["title"] or candidate.get("title"),
                 text_content=parsed["text"][:120_000],
                 meta_description=parsed["meta_description"][:500],
