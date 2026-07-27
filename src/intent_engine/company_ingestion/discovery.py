@@ -170,4 +170,27 @@ def discover_candidates(*, company_url: str, homepage_links: list) -> list:
     candidates.sort(key=lambda c: (_RANK.index(c["source_type"])
                                    if c["source_type"] in _RANK else 99,
                                    c["url"]))
-    return candidates[:MAX_CANDIDATES_SHOWN]
+    if len(candidates) <= MAX_CANDIDATES_SHOWN:
+        return candidates
+    # The cap must not be filled by whichever source type happens to be most
+    # numerous. A site with many product links would otherwise crowd out the
+    # single customer-story or pricing page entirely — the candidate never
+    # reaches approval, and the report reports that family as missing.
+    # Take a round-robin across source types so every type keeps a place.
+    buckets: dict = {}
+    for candidate in candidates:
+        buckets.setdefault(candidate["source_type"], []).append(candidate)
+    ordered_types = sorted(buckets, key=lambda t: _RANK.index(t)
+                           if t in _RANK else 99)
+    balanced, depth = [], 0
+    while len(balanced) < MAX_CANDIDATES_SHOWN:
+        progressed = False
+        for source_type in ordered_types:
+            group = buckets[source_type]
+            if depth < len(group) and len(balanced) < MAX_CANDIDATES_SHOWN:
+                balanced.append(group[depth])
+                progressed = True
+        if not progressed:
+            break
+        depth += 1
+    return balanced

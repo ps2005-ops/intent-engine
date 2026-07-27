@@ -5,6 +5,7 @@ restart-safe. No source is fetched before its explicit approval.
 from __future__ import annotations
 
 import hashlib
+import json
 
 from intent_engine.agentos.identity import stable_id as _kernel_stable_id
 from intent_engine.company_ingestion.claims import (
@@ -530,12 +531,18 @@ class CompanyIngestionService:
                 break                    # nothing new could be tried
             reason = ("missing evidence families: "
                       + ", ".join(gaps["missing_families"][:4]))
+            # The key is derived from the TARGETS, not just the pass number: a
+            # recompose after a restart legitimately plans a different set
+            # (earlier targets are already retrieved), and reusing the key
+            # would collide on differing content.
+            target_key = hashlib.sha256(
+                ",".join(sorted(extra)).encode()).hexdigest()[:12]
             self._append("ci.run_transitioned", run_id=run_id,
                          domain=self.run_meta(run_id)["domain"],
                          payload={"to": "DISCOVERING_SOURCES",
                                   "retry_pass": attempt, "reason": reason,
                                   "targets": list(extra)},
-                         idempotency_key=f"ci-retry:{run_id}:{attempt}")
+                         idempotency_key=f"ci-retry:{run_id}:{target_key}")
             attempted.update(extra)
             before = dict(gaps)
             self.fetch_approved(run_id, candidate_ids=extra)
@@ -607,8 +614,14 @@ class CompanyIngestionService:
         self._append("ci.quality_assessed", run_id=run_id,
                      domain=meta.get("domain", ""), subject_type="quality",
                      subject_id=run_id, payload=payload,
-                     idempotency_key=key or f"quality-final:{run_id}:"
-                                            f"{payload['retry_passes']}")
+                     # Content-derived: a recompose (e.g. after a restart)
+                     # legitimately produces a different diagnostic, and a
+                     # pass-number key would collide on differing content.
+                     idempotency_key=key or (
+                         "quality-final:" + run_id + ":" + hashlib.sha256(
+                             json.dumps(payload, sort_keys=True,
+                                        default=str).encode()
+                         ).hexdigest()[:12]))
 
     def quality_diagnostics(self, run_id: str):
         """The stored quality diagnostics for a run (operator surface)."""
