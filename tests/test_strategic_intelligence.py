@@ -638,7 +638,7 @@ def _strategic_webapp_run(tmp_path):
     _, h, _ = c.request("POST", "/analyze",
                         f"consent=on&csrf={c.csrf()}&company_name=Acme"
                         f"&website=https://acme.example")
-    rid = h["Location"].split("/runs/")[1].split("/sources")[0]
+    rid = h["Location"].split("/runs/")[1].split("/")[0]
     cands, picked, seen = app.ci.store.candidates(rid), [], set()
     for x in cands:
         if x["source_class"] not in seen:

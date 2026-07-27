@@ -134,10 +134,11 @@ def test_cross_user_isolation(app):
     assert status.startswith("403")
 
 
-def test_arbitrary_company_enters_source_approval_flow(app):
-    """V1.1: a real domain now enters bounded discovery + explicit source
-    approval (this test's transport has no network, so discovery degrades
-    honestly to known-path candidates)."""
+def test_arbitrary_company_autoruns_recommended_sources(app):
+    """V1.2: a real domain auto-approves the recommended sources and runs
+    straight through — there is no separate source-approval page. This test's
+    transport has no network, so every source fails and the run ends in an
+    honest, styled FAILED result rather than a dead-end."""
     c = Client(app)
     csrf = _login(c)
     status, headers, _ = c.request(
@@ -145,12 +146,14 @@ def test_arbitrary_company_enters_source_approval_flow(app):
         f"consent=on&csrf={csrf}&company_name=Real+Co"
         f"&website=https://real-company.example")
     assert status.startswith("303")
-    assert headers["Location"].endswith("/sources")
-    status, _, body = c.request("GET", headers["Location"])
+    loc = headers["Location"]
+    assert "/sources" not in loc                  # the 2nd page is gone
+    run_id = loc.split("/runs/")[1].split("/")[0]
+    assert app.ci.store.run_state(run_id) == "FAILED"    # no network → honest
+    status, _, body = c.request("GET", f"/runs/{run_id}")
     assert status == "200 OK"
-    assert "pages and evidence you approve" in body
-    assert 'name="cand"' in body                  # known-path candidates
-    assert "I approve retrieval and analysis" in body
+    assert "<style" in body                       # styled failure, not plain
+    assert "could not be completed" in body
 
 
 def test_expired_share_link(app):
