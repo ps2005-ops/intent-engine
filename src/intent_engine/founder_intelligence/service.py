@@ -34,6 +34,49 @@ from intent_engine.founder_intelligence.store import (
 )
 
 
+def _dont_believe_entries(cbs) -> list:
+    """What THIS run cannot yet support, derived from the evidence actually
+    present. Generic entries (of the "pricing may matter" or "customers may be
+    confused" kind) are never emitted — each entry names the missing evidence
+    and what would resolve it."""
+    def _has(section, prefix):
+        return any(c.claim_id.startswith(prefix)
+                   for c in cbs.get(section, []) or [])
+
+    entries = []
+    if not _has("market_view", "mv.customer_language"):
+        entries.append({
+            "id": "independent_view",
+            "headline": "We do not yet have an independent view of how this "
+                        "company is perceived.",
+            "why_insufficient": "every approved source in this run is "
+                                "published by the company itself, so nothing "
+                                "here can contradict its own positioning",
+            "what_would_change": "one independent source — market reporting, "
+                                 "an analyst note, a review site, or a "
+                                 "customer interview"})
+    if not _has("understanding", "u.pricing") or any(
+            c.claim_id == "u.pricing" and c.availability == "UNAVAILABLE"
+            for c in cbs.get("understanding", []) or []):
+        entries.append({
+            "id": "commercial_model",
+            "headline": "We cannot yet describe how this company charges.",
+            "why_insufficient": "no public pricing or packaging page was "
+                                "retrievable in this run",
+            "what_would_change": "a public pricing page, a published rate "
+                                 "card, or contract/procurement disclosure"})
+    if not _has("understanding", "u.customers"):
+        entries.append({
+            "id": "customer_outcomes",
+            "headline": "We cannot yet say what outcomes customers actually "
+                        "get.",
+            "why_insufficient": "no customer story, case study, or use-case "
+                                "evidence was retrievable",
+            "what_would_change": "an official customer story or case study, "
+                                 "or an approved independent account"})
+    return entries
+
+
 class FounderIntelligenceService:
     def __init__(self, path=DEFAULT_FI_PATH, *, llm_client=None,
                  model_version="fake-model.v0"):
@@ -170,22 +213,21 @@ class FounderIntelligenceService:
         company_lang = next((c for c in market if "company" in c.claim_id), None)
         customer_lang = next((c for c in market if "customer" in c.claim_id),
                              None)
-        visible_assumption = next((c for c in assumption
-                                   if c.claim_id.endswith("feature")), None)
-        complicating = next((c for c in assumption
-                             if c.claim_id.endswith("speed")), None)
+        # Take the assumptions as supplied rather than matching brittle
+        # claim-id suffixes: the first is the visible assumption, a second (if
+        # present) is the complicating evidence.
+        visible_assumption = assumption[0] if assumption else None
+        complicating = assumption[1] if len(assumption) > 1 else None
 
         hook = select_hook(blind_spot_claims=blind, market_view_claims=market,
                            persona_claims=persona)
 
         all_claims = [c for group in cbs.values()
                       if isinstance(group, list) for c in group]
-        dont_believe = [
-            {"id": "pricing", "headline": "We do not yet have enough evidence "
-             "to conclude pricing is the main constraint.",
-             "why_insufficient": "no pricing-sensitivity evidence is in the "
-             "approved sources", "what_would_change": "connected pricing or "
-             "win/loss evidence"}]
+        # Company-specific skepticism: state what THIS run cannot support,
+        # derived from the evidence families actually present. Never a generic
+        # "pricing may matter" entry.
+        dont_believe = _dont_believe_entries(cbs)
 
         return [
             _understanding.assemble_understanding(understanding),
@@ -199,7 +241,9 @@ class FounderIntelligenceService:
             _persp.assemble_dont_believe_yet(dont_believe),
             _questions.assemble_leadership_questions(
                 understanding + market + persona),
-            _persp.assemble_competitors(supported=competitor_supported),
+            _persp.assemble_competitors(
+                supported=bool(cbs.get("competitor")) or competitor_supported,
+                claims=cbs.get("competitor", ())),
             _persp.assemble_opportunities(opportunity),
         ]
 

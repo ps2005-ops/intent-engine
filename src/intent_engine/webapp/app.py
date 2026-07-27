@@ -1199,7 +1199,11 @@ class WebApp:
     # filings and nothing describing the product) — the 2026-07 report-quality
     # incident. Order = priority when the budget cannot cover everything.
     _EVIDENCE_FAMILIES = (
-        ("identity", lambda c: c["source_type"] in ("homepage", "about")),
+        # NOTE: identity must NOT swallow executive-class pages. A /leadership
+        # page is typed "about" but speaks for leadership; letting it take the
+        # identity slot starves the strategy family of its only candidate.
+        ("identity", lambda c: c["source_type"] in ("homepage", "about")
+         and c.get("source_class") != "executive_statement"),
         ("investor", lambda c: c.get("source_class") == "investor_material"),
         ("product", lambda c: c["source_type"] == "product"),
         ("customers", lambda c: c["source_type"] == "customers"),

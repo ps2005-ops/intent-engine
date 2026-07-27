@@ -18,15 +18,23 @@ from intent_engine.company_ingestion.validation import same_domain
 # the served HTML. Company-agnostic and bounded; every probe is still an
 # approval-gated candidate that is only fetched if it actually exists.
 KNOWN_PATHS = ("/",
-               # identity
-               "/about", "/about-us", "/company", "/leadership", "/team",
+               # identity. NOTE: "/leadership" is deliberately NOT probed here
+               # — it classifies as an executive-statement source, so guessing
+               # it can consume the strategy slot ahead of a newsroom page that
+               # actually carries content. Leadership pages still arrive
+               # through sitemap discovery when the company publishes one.
+               "/about", "/about-us", "/company", "/team",
                # products & platform
                "/product", "/products", "/platform", "/platforms",
                "/solutions", "/offerings", "/services",
                # documentation / technical
                "/docs", "/documentation", "/developers", "/api",
-               # customers & use cases
+               # customers & use cases. Large consumer companies publish these
+               # under a segment path (/business, /enterprise, /education)
+               # rather than /customers, and often omit them from the sitemap.
                "/customers", "/case-studies", "/success-stories", "/partners",
+               "/business", "/business/success-stories", "/enterprise",
+               "/education", "/customer-stories",
                # commercial
                "/pricing", "/plans",
                # strategy & communications
