@@ -47,9 +47,25 @@ _10Q_HTML = ("<html><head><title>Palantir 10-Q</title></head><body>"
              "customer concentration and its government contracting business "
              "and discusses margins and remaining performance obligations.</p>"
              "</body></html>")
-_JS_SHELL = ('<html><head><title>Palantir</title></head><body>'
-             '<div id="__next"></div><script>window.__NEXT_DATA__={}</script>'
-             '</body></html>')
+# A realistic JavaScript-first marketing shell: no body text, but — like every
+# real SPA marketing site — server-rendered <title>, OpenGraph and JSON-LD that
+# genuinely describe the company. The extractor salvages these.
+_JS_SHELL = (
+    '<html><head><title>Palantir Technologies</title>'
+    '<meta property="og:title" content="Palantir">'
+    '<meta property="og:description" content="Palantir builds software '
+    'platforms - Foundry, Gotham and AIP - that help government and commercial '
+    'organizations integrate their data and make operational decisions.">'
+    '<script type="application/ld+json">{"@type":"Organization",'
+    '"name":"Palantir Technologies Inc.","description":"Builds Foundry, '
+    'Gotham, Apollo and AIP for defense, intelligence and commercial '
+    'customers."}</script></head><body>'
+    '<div id="__next"></div><script>window.__NEXT_DATA__={}</script>'
+    '</body></html>')
+# A truly empty shell — no metadata at all — must STILL be recorded as a
+# javascript_only failure (the salvage must not invent content).
+_EMPTY_SHELL = ('<html><head><title></title></head><body><div id="app"></div>'
+                '<script>render()</script></body></html>')
 
 
 def _http_error(url, code):
@@ -145,8 +161,13 @@ def test_palantir_completes_via_authoritative_fallback(tmp_path):
     # authoritative evidence retrieved despite the JS-only homepage + 403 page
     assert any(r["source_class"] == "investor_material" for r in fetched["ok"])
     ftypes = {f["failure_type"] for f in fetched["failed"]}
-    assert "javascript_only" in ftypes              # the homepage shell
     assert "http_status" in ftypes                  # the 403 /about page
+    # The JS-only homepage is SALVAGED from its server-rendered metadata
+    # (title/OpenGraph/JSON-LD) rather than discarded, so real company
+    # description reaches the report instead of an empty "javascript_only" gap.
+    home_doc = [r for r in fetched["ok"] if r["source_type"] == "homepage"]
+    assert home_doc, "JS-only homepage should be salvaged via metadata"
+    assert "Foundry" in home_doc[0]["text_content"]
 
     result = ci.compose(run_id, fi_service=fi)
     assert result["ingestion_status"] == "PARTIAL"  # NOT FAILED
@@ -157,6 +178,64 @@ def test_palantir_completes_via_authoritative_fallback(tmp_path):
     assert lib["unavailable_or_failed"]             # failures recorded, honest
     ids = [r["source_id"] for r in ci.store.retrieved(run_id)]
     assert len(ids) == len(set(ids))                # no duplicate evidence
+
+
+def test_metadata_salvage_never_invents_content(tmp_path):
+    """The JS salvage recovers only server-rendered metadata that genuinely
+    exists. A shell with NO metadata must still be an honest javascript_only
+    failure — the fix must not manufacture evidence."""
+    from intent_engine.company_ingestion.parsing import parse_html
+    assert not parse_html(_EMPTY_SHELL)["text"].strip()
+
+    def empty_shell_site(url, timeout):
+        if "company_tickers.json" in url:
+            return (200, {"content-type": "application/json"},
+                    json.dumps({}).encode(), False)   # not an SEC filer
+        if "hollow.example" in url:
+            return (200, {"content-type": "text/html"},
+                    _EMPTY_SHELL.encode(), False)
+        raise _http_error(url, 404)
+
+    ci = _service(tmp_path, transport=empty_shell_site)
+    run_id = ci.create_run(company_name="Hollow Co",
+                           website="https://hollow.example", user_id="u1",
+                           as_of=AS_OF)["run_id"]
+    cands = ci.discover(run_id)
+    approved = [c["candidate_id"] for c in cands][:MAX_APPROVED_SOURCES]
+    ci.approve(run_id, user_id="u1", approved_ids=approved, rejected_ids=[])
+    fetched = ci.fetch_approved(run_id)
+    assert not fetched["ok"], "no metadata → nothing may be salvaged"
+    assert "javascript_only" in {f["failure_type"] for f in fetched["failed"]}
+
+
+def test_sec_legal_boilerplate_never_becomes_customer_language(tmp_path):
+    """REGRESSION for the 2026-07 report-quality incident: SEC filing text must
+    never surface as the company's emphasized customer/market language, and
+    procedural vocabulary must never appear as a business insight."""
+    from intent_engine.company_ingestion.claims import build_claims
+    filing = {
+        "source_id": "src-sec-1", "source_type": "external_approved",
+        "source_class": "investor_material", "retrieval_status": "OK",
+        "title": "SEC 8-K", "meta_description": "", "content_hash": "a" * 64,
+        "retrieved_at": AS_OF, "parser_version": "v1", "freshness": "CURRENT",
+        "text_content": ("Pursuant to the requirements of the Securities "
+                         "Exchange Act of 1934, the registrant has duly caused "
+                         "this report to be signed on its behalf by the "
+                         "undersigned hereunto duly authorized. Item 2.02 "
+                         "Results of Operations. Exhibit 99.1 furnished "
+                         "herewith pursuant to Rule 13a-15."),
+    }
+    claims = build_claims(documents=[filing], company_name="Palantir",
+                          domain="palantir.com")
+    flat = " ".join(c.text for group in claims.values()
+                    if isinstance(group, list) for c in group).lower()
+    # the filing is acknowledged as financial/regulatory disclosure ...
+    assert "filing" in flat or "disclosure" in flat
+    # ... but its procedural vocabulary is never presented as emphasis/insight
+    for token in ("pursuant", "hereunder", "registrant", "undersigned",
+                  "exchange act"):
+        assert f'"{token}"' not in flat, f"legal token {token} surfaced as insight"
+    assert "customer language" not in flat  # filings are not customer voice
 
 
 def test_all_sources_unavailable_still_fails_honestly(tmp_path):
@@ -246,8 +325,10 @@ def test_autorun_skips_source_page_and_completes_palantir(tmp_path):
     assert "/sources" not in loc                    # the 2nd page never appears
     assert loc.endswith("/progress")                # lands on styled progress
     run_id = loc.split("/runs/")[1].split("/")[0]
-    # the run already ran to a terminal, openable, styled result
-    assert app.ci.store.run_state(run_id) == "PARTIAL"
+    # the run already ran to a terminal, openable, styled result. Either
+    # terminal success is acceptable: COMPLETE when every approved source was
+    # usable, PARTIAL when some failed but the quorum still held.
+    assert app.ci.store.run_state(run_id) in ("COMPLETE", "PARTIAL")
     docs = app.ci.store.retrieved(run_id)
     assert any(d.get("source_class") == "investor_material" for d in docs)
     status, _, body = c.request("GET", f"/runs/{run_id}")

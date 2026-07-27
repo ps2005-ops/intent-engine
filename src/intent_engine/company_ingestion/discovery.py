@@ -13,10 +13,36 @@ from intent_engine.company_ingestion.records import (
 )
 from intent_engine.company_ingestion.validation import same_domain
 
-KNOWN_PATHS = ("/", "/product", "/products", "/solutions", "/pricing",
-               "/about", "/customers", "/case-studies", "/blog", "/news",
-               "/careers", "/press", "/newsroom", "/investors",
-               "/investor-relations", "/engineering")
+# Known-path probes, ordered by evidence family so a run reaches BEYOND the
+# homepage even when the site is JavaScript-rendered and its links are not in
+# the served HTML. Company-agnostic and bounded; every probe is still an
+# approval-gated candidate that is only fetched if it actually exists.
+KNOWN_PATHS = ("/",
+               # identity. NOTE: "/leadership" is deliberately NOT probed here
+               # — it classifies as an executive-statement source, so guessing
+               # it can consume the strategy slot ahead of a newsroom page that
+               # actually carries content. Leadership pages still arrive
+               # through sitemap discovery when the company publishes one.
+               "/about", "/about-us", "/company", "/team",
+               # products & platform
+               "/product", "/products", "/platform", "/platforms",
+               "/solutions", "/offerings", "/services",
+               # documentation / technical
+               "/docs", "/documentation", "/developers", "/api",
+               # customers & use cases. Large consumer companies publish these
+               # under a segment path (/business, /enterprise, /education)
+               # rather than /customers, and often omit them from the sitemap.
+               "/customers", "/case-studies", "/success-stories", "/partners",
+               "/business", "/business/success-stories", "/enterprise",
+               "/education", "/customer-stories",
+               # commercial
+               "/pricing", "/plans",
+               # strategy & communications
+               "/blog", "/news", "/press", "/newsroom", "/media",
+               # investor
+               "/investors", "/investor-relations", "/ir",
+               # talent
+               "/careers", "/jobs", "/engineering")
 
 # Map a same-domain path to its strategic source class. A company publishes
 # more than one vantage point: press/newsroom/leadership speak for executives;
@@ -35,10 +61,12 @@ _CLASS_RULES = (
 
 _TYPE_RULES = (
     ("pricing", ("pricing", "plans")),
-    ("product", ("product", "solution", "features", "platform", "how-it-works")),
-    ("about", ("about", "company", "team", "mission")),
+    ("product", ("product", "solution", "features", "platform", "offering",
+                 "how-it-works", "docs", "documentation", "developer", "api",
+                 "services")),
+    ("about", ("about", "company", "team", "mission", "leadership")),
     ("customers", ("customer", "case-stud", "case_stud", "testimonial",
-                   "success", "stories")),
+                   "success", "stories", "partner")),
     ("blog", ("blog", "news", "press", "newsroom", "articles", "updates")),
     ("careers", ("career", "jobs", "join", "hiring")),
 )
@@ -142,4 +170,27 @@ def discover_candidates(*, company_url: str, homepage_links: list) -> list:
     candidates.sort(key=lambda c: (_RANK.index(c["source_type"])
                                    if c["source_type"] in _RANK else 99,
                                    c["url"]))
-    return candidates[:MAX_CANDIDATES_SHOWN]
+    if len(candidates) <= MAX_CANDIDATES_SHOWN:
+        return candidates
+    # The cap must not be filled by whichever source type happens to be most
+    # numerous. A site with many product links would otherwise crowd out the
+    # single customer-story or pricing page entirely — the candidate never
+    # reaches approval, and the report reports that family as missing.
+    # Take a round-robin across source types so every type keeps a place.
+    buckets: dict = {}
+    for candidate in candidates:
+        buckets.setdefault(candidate["source_type"], []).append(candidate)
+    ordered_types = sorted(buckets, key=lambda t: _RANK.index(t)
+                           if t in _RANK else 99)
+    balanced, depth = [], 0
+    while len(balanced) < MAX_CANDIDATES_SHOWN:
+        progressed = False
+        for source_type in ordered_types:
+            group = buckets[source_type]
+            if depth < len(group) and len(balanced) < MAX_CANDIDATES_SHOWN:
+                balanced.append(group[depth])
+                progressed = True
+        if not progressed:
+            break
+        depth += 1
+    return balanced

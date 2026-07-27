@@ -87,24 +87,26 @@ def assemble_blind_spots(claims) -> IntelligenceSection:
     for claim in claims:
         if claim.availability != AVAIL_SUPPORTED:
             continue
+        # The card is built from the CLAIM, which already carries the
+        # company-specific signal, its counterevidence, and what would verify
+        # it. No templated headline or generic question is substituted.
+        sources = len({ref.artifact_id for ref in claim.source_refs})
         cards.append(InsightCard(
             insight_id=f"{SECTION_BLIND_SPOTS}.{claim.claim_id}",
             kind=SECTION_BLIND_SPOTS,
-            headline="You may be measuring acquisition more clearly than "
-                     "trust." if "messaging" in claim.claim_id
-            else claim.text,
+            headline=claim.text,
             availability=claim.availability, claims=(claim,),
             confidence=claim.confidence,
-            why_it_matters="every successful company develops blind spots; "
-                           "this is an observation worth examining",
-            alternative_explanation="the public view is incomplete; this may "
-                                    "be intentional or already understood "
-                                    "internally",
-            what_would_change_the_view="connected internal evidence or "
-                                       "founder-approved customer interviews",
-            question_to_investigate="are customers learning the category from "
-                                    "someone else before they learn from "
-                                    "you?"))
+            why_it_matters=f"drawn from {sources} independent source(s) in "
+                           f"this run that do not agree; an observation worth "
+                           f"examining, not a verdict",
+            alternative_explanation="this divergence may be deliberate — the "
+                                    "audiences for each source differ",
+            what_would_change_the_view="evidence from inside the company, or "
+                                       "an approved independent source "
+                                       "covering the same subject",
+            question_to_investigate="is this difference intentional, and does "
+                                    "anyone own the gap?"))
     section = IntelligenceSection(
         kind=SECTION_BLIND_SPOTS, title="Possible blind spots",
         cards=tuple(cards),
@@ -122,22 +124,24 @@ def assemble_assumptions(visible, complicating) -> IntelligenceSection:
             kind=SECTION_ASSUMPTIONS, title="Assumptions we would investigate",
             availability=AVAIL_UNAVAILABLE,
             note="no visible assumption is sufficiently supported to surface")
+    # The assumption claim already states the evidence, the uncertainty, how
+    # to confirm it and what would reject it — render THAT, not a template.
     card = InsightCard(
         insight_id=f"{SECTION_ASSUMPTIONS}.{visible.claim_id}",
         kind=SECTION_ASSUMPTIONS,
-        headline="Visible assumption: buyers choose primarily on feature "
-                 "breadth",
+        headline=visible.text,
         availability=AVAIL_SUPPORTED,
         claims=(visible,) + ((complicating,) if complicating else ()),
-        confidence="Moderate",
-        why_it_matters="worth testing because the visible evidence points "
-                       "two ways",
-        alternative_explanation="the visible assumption may hold for a "
-                                "segment we cannot see from outside",
-        what_would_change_the_view="founder-approved customer interviews or "
-                                   "connected sales evidence",
-        question_to_investigate="do buyers describe the decision the way the "
-                                "homepage does?")
+        confidence=visible.confidence or "Moderate",
+        why_it_matters=("the public positioning rests on it, and the approved "
+                        "evidence does not yet settle it"),
+        alternative_explanation=(complicating.text if complicating else
+                                 "the assumption may hold for a segment that "
+                                 "is not visible from outside"),
+        what_would_change_the_view="the confirmation and rejection conditions "
+                                   "stated in the assumption above",
+        question_to_investigate="which of those two conditions is cheapest to "
+                                "test first?")
     card.validate()
     section = IntelligenceSection(
         kind=SECTION_ASSUMPTIONS, title="Assumptions we would investigate",
@@ -162,11 +166,12 @@ def assemble_attention(claims) -> IntelligenceSection:
             kind=SECTION_ATTENTION, headline=claim.text,
             availability=claim.availability, claims=(claim,),
             confidence=band,
-            why_it_matters=f"{band} — surfaced by an owning subsystem",
-            alternative_explanation="the attention signal reflects the "
-                                    "visible view only",
-            question_to_investigate="what internal evidence would confirm or "
-                                    "lower this signal?"))
+            why_it_matters=f"{band} — the observed signal, its implication "
+                           f"and the next investigation are stated above",
+            alternative_explanation="this reflects the outside-in view only; "
+                                    "internal context may already account "
+                                    "for it",
+            question_to_investigate="who owns this signal today?"))
     section = IntelligenceSection(
         kind=SECTION_ATTENTION, title="Where leadership attention may be most "
         "valuable", cards=tuple(cards),
@@ -203,8 +208,11 @@ def assemble_competitors(supported=False, claims=()) -> IntelligenceSection:
         return IntelligenceSection(
             kind=SECTION_COMPETITORS, title="Companies worth comparing",
             availability=AVAIL_OUT_OF_SCOPE,
-            note="no subsystem reports competitor intelligence yet; a "
-                 "competitor set is not invented (dependency gap 2)")
+            note="No comparison is shown because no approved source names a "
+                 "competitor or alternative. A competitor list is never "
+                 "invented. To fill this in, add an independent source such "
+                 "as market reporting, an analyst note, or a competitor's own "
+                 "positioning page.")
     cards = tuple(InsightCard(
         insight_id=f"{SECTION_COMPETITORS}.{c.claim_id}",
         kind=SECTION_COMPETITORS, headline=c.text, availability=c.availability,
@@ -228,10 +236,11 @@ def assemble_opportunities(claims) -> IntelligenceSection:
             kind=SECTION_OPPORTUNITIES,
             headline=f"[{state}] {claim.text}", availability=claim.availability,
             claims=(claim,), confidence=claim.confidence,
-            why_it_matters="an opportunity to investigate, not a "
-                           "recommendation",
-            what_would_change_the_view="evidence that the benefiting persona "
-                                       "exists at scale"))
+            why_it_matters="the observation, the unverified hypothesis and "
+                           "the next validation step are kept distinct above; "
+                           "this is not a recommendation",
+            what_would_change_the_view="completing the validation step stated "
+                                       "in the opportunity"))
     section = IntelligenceSection(
         kind=SECTION_OPPORTUNITIES, title="Opportunities worth investigating",
         cards=tuple(cards),

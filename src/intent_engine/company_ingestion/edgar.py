@@ -40,6 +40,8 @@ TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik10}.json"
 ARCHIVE_DOC_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
                    "{accession_nodash}/{doc}")
+FILING_INDEX_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
+                    "{accession_nodash}/index.json")
 
 # Prefer small, text-bearing filings whose primary document parses cleanly and
 # stays well under the per-response byte cap. 10-K/10-Q primary documents are
@@ -87,6 +89,40 @@ def _fetch_bytes(url, *, transport, resolver, timeout=8.0) -> bytes:
     if isinstance(body, str):
         body = body.encode()
     return body
+
+
+def business_document(cik, accession_nodash, primary_doc, *, transport=None,
+                      resolver=None):
+    """Resolve the filing's BUSINESS-content document.
+
+    An 8-K's primary document is the procedural cover page ("pursuant to the
+    Securities Exchange Act ... Delaware ... Commission File Number") — legally
+    required, but useless as executive intelligence. The substance lives in
+    EXHIBIT 99.1 (the earnings release / press release). Prefer that when the
+    filing index lists it, and fall back to the primary document.
+
+    Returns (document_name, is_exhibit). Never raises.
+    """
+    try:
+        raw = _fetch_bytes(
+            FILING_INDEX_URL.format(cik=cik, accession_nodash=accession_nodash),
+            transport=transport, resolver=resolver)
+        items = json.loads(raw.decode("utf-8", "replace"))["directory"]["item"]
+    except Exception:                                       # noqa: BLE001
+        return primary_doc, False
+    best = None
+    for entry in items:
+        name = str(entry.get("name", ""))
+        low = name.lower()
+        if not low.endswith((".htm", ".html")):
+            continue
+        # ex99*.htm / *ex-99*.htm / exhibit99*.htm — the earnings release
+        if "ex99" in low.replace("-", "").replace("_", "") or \
+                "exhibit99" in low.replace("-", "").replace("_", ""):
+            # prefer 99.1 specifically when several exhibits exist
+            if best is None or "991" in low.replace("-", "").replace(".", ""):
+                best = name
+    return (best, True) if best else (primary_doc, False)
 
 
 def _tokens(name: str) -> set:
@@ -154,8 +190,14 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
         form, doc, acc = forms[i], docs[i], accessions[i]
         if not doc or not acc or not doc.lower().endswith((".htm", ".html")):
             continue
-        url = ARCHIVE_DOC_URL.format(cik=cik, accession_nodash=acc.replace(
-            "-", ""), doc=doc)
+        nodash = acc.replace("-", "")
+        # Prefer the filing's business content (Exhibit 99.1 earnings release)
+        # over the procedural cover page, so the report gets results and
+        # strategy commentary rather than filing boilerplate.
+        chosen, is_exhibit = business_document(
+            cik, nodash, doc, transport=transport, resolver=resolver)
+        url = ARCHIVE_DOC_URL.format(cik=cik, accession_nodash=nodash,
+                                     doc=chosen)
         if url in seen:
             continue
         seen.add(url)
@@ -166,12 +208,16 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
             "discovery_method": "external_proposed",
             "same_domain": False,
             "source_class": "investor_material",
-            "why_useful": "official SEC filing — authoritative disclosure",
+            "why_useful": ("official earnings release / exhibit — results and "
+                           "strategy commentary" if is_exhibit else
+                           "official SEC filing — authoritative disclosure"),
             "why_relevant": (f"official {form} filing from SEC EDGAR — "
                              "audited, authoritative, and served as plain HTML "
                              "(not a JavaScript-only marketing page)"),
             "availability": "PROPOSED",
-            "title": f"SEC {form}{f' ({date})' if date else ''}",
+            "title": (f"SEC {form} exhibit{f' ({date})' if date else ''}"
+                      if is_exhibit
+                      else f"SEC {form}{f' ({date})' if date else ''}"),
         })
         if len(out) >= limit:
             break

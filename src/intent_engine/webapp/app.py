@@ -592,6 +592,7 @@ class WebApp:
             note = ('' if status == "COMPLETE" else
                     '<p>Some approved sources could not be retrieved; the '
                     'result is based only on the evidence that was.</p>')
+            note += self._coverage_note(run_id, real)
             tail = (f'{note}<p>These are real lifecycle stages, not '
                     f'decoration.</p>'
                     f'<p><a href="/runs/{_e(run_id)}">Open the result</a></p>')
@@ -606,6 +607,28 @@ class WebApp:
                     'restarted mid-run). You can '
                     '<a href="/">start a new analysis</a>.</p>')
         return self._html(head + tail + '</main></body></html>')
+
+    def _coverage_note(self, run_id, real):
+        """A specific, non-technical statement of WHICH kinds of evidence the
+        report rests on and what is missing — shown instead of leaving the
+        reader to infer meaning from empty sections."""
+        if not real:
+            return ''
+        result = self._results.get(run_id) or {}
+        coverage = result.get("coverage")
+        if not coverage:
+            return ''
+        families = ", ".join(_e(f) for f in coverage["families"])
+        note = (f'<p class="coverage">Evidence coverage: '
+                f'{coverage["document_count"]} usable source(s) across '
+                f'{len(coverage["families"])} source '
+                f'{"family" if len(coverage["families"]) == 1 else "families"}'
+                f'{f" ({families})" if families else ""}.')
+        steps = coverage.get("next_evidence_steps") or []
+        if steps:
+            note += (' To strengthen this analysis, add '
+                     + _e("; ".join(steps[:3])) + '.')
+        return note + '</p>'
 
     # --- honest failure surface (real-company runs) --------------------------
     _FAILURE_LABELS = {
@@ -1170,21 +1193,64 @@ class WebApp:
     def _is_real_run(self, run_id):
         return self.ci.run_meta(run_id) is not None
 
-    @staticmethod
-    def _recommended_candidate_ids(candidates):
-        """The default source set: core company pages plus any authoritative
-        official filing (SEC / investor material), authoritative first, capped
-        at the per-run maximum. Shared by the source-review page (as the
-        pre-checked set) and by auto-run (as the approved set), so both agree."""
-        def rec(c):
-            return (c["source_type"] in
-                    ("homepage", "product", "pricing", "about", "customers")
-                    or c.get("source_class") == "investor_material")
-        ordered = sorted(candidates,
-                         key=lambda c: 0 if c.get("source_class")
-                         == "investor_material" else 1)
-        return [c["candidate_id"] for c in ordered if rec(c)][
-            :MAX_APPROVED_SOURCES]
+    # Evidence families an executive report needs. Selection takes a
+    # round-robin across these rather than the first N candidates, so a run
+    # cannot spend its whole source budget on one family (e.g. three SEC
+    # filings and nothing describing the product) — the 2026-07 report-quality
+    # incident. Order = priority when the budget cannot cover everything.
+    _EVIDENCE_FAMILIES = (
+        # NOTE: identity must NOT swallow executive-class pages. A /leadership
+        # page is typed "about" but speaks for leadership; letting it take the
+        # identity slot starves the strategy family of its only candidate.
+        ("identity", lambda c: c["source_type"] in ("homepage", "about")
+         and c.get("source_class") != "executive_statement"),
+        ("investor", lambda c: c.get("source_class") == "investor_material"),
+        ("product", lambda c: c["source_type"] == "product"),
+        ("customers", lambda c: c["source_type"] == "customers"),
+        ("strategy", lambda c: c.get("source_class") == "executive_statement"
+         or c["source_type"] == "blog"),
+        ("independent", lambda c: c.get("source_class") in
+         ("customer_voice", "independent_reporting", "competitor")),
+        ("commercial", lambda c: c["source_type"] == "pricing"),
+        ("talent", lambda c: c["source_type"] == "careers"),
+    )
+
+    @classmethod
+    def _recommended_candidate_ids(cls, candidates):
+        """The default source set, chosen for EVIDENCE-FAMILY COVERAGE.
+
+        Takes one candidate from each family in priority order, then a second
+        pass, and so on, until the per-run budget is spent. This guarantees a
+        report is grounded in several independent kinds of evidence (identity,
+        product, investor, customers, strategy, ...) instead of many documents
+        from a single family. Shared by the source-review page (pre-checked
+        set) and auto-run (approved set), so both always agree."""
+        # Within a family, prefer URLs the publisher actually lists (sitemap)
+        # over guessed known paths: a guess is frequently a 404/403, while a
+        # sitemap URL exists by construction.
+        def _verified_first(candidate):
+            why = candidate.get("why_relevant", "")
+            return 0 if "sitemap" in why else 1
+
+        buckets = []
+        claimed = set()
+        for _name, matches in cls._EVIDENCE_FAMILIES:
+            group = [c for c in candidates
+                     if c["candidate_id"] not in claimed and matches(c)]
+            group.sort(key=_verified_first)
+            claimed.update(c["candidate_id"] for c in group)
+            buckets.append(group)
+        picked, depth = [], 0
+        while len(picked) < MAX_APPROVED_SOURCES:
+            progressed = False
+            for group in buckets:
+                if depth < len(group) and len(picked) < MAX_APPROVED_SOURCES:
+                    picked.append(group[depth]["candidate_id"])
+                    progressed = True
+            if not progressed:
+                break
+            depth += 1
+        return picked
 
     def _autorun(self, session, run_id):
         """Approve the recommended sources, retrieve, and compose in one shot,
@@ -1421,13 +1487,17 @@ class WebApp:
     def _compose(self, run_id):
         """Compose the run, threading the persisted mental model so the report
         is a VIEW over the company's evolving state, then persist the new
-        snapshot and publish strategic events durably (idempotent)."""
+        snapshot and publish strategic events durably (idempotent).
+
+        Uses the quality-gated path: evidence is gathered to sufficiency —
+        with bounded, targeted rediscovery when a family is missing — before
+        the report is synthesised exactly once."""
         meta = self.ci.run_meta(run_id)
         domain = meta["domain"] if meta else ""
         previous_model = self.strategic_memory.latest_model(domain) \
             if domain else None
-        result = self.ci.compose(run_id, fi_service=self.fi,
-                                 previous_model=previous_model)
+        result = self.ci.compose_with_quality(run_id, fi_service=self.fi,
+                                              previous_model=previous_model)
         report = result.get("strategic_report")
         if report and domain:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])

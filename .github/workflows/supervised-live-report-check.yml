@@ -1,0 +1,52 @@
+# Supervised LIVE executive-report check — manual only.
+#
+# Deliberately NOT run on every commit: it makes real requests to public
+# company sites and SEC EDGAR. It is a release-validation aid, not CI.
+#
+# Required repository secrets (names only — never commit values):
+#   SEC_CONTACT_EMAIL  contact address sent in the SEC User-Agent, per SEC
+#                      fair-access guidance.
+# Optional:
+#   BROWSER_RENDERING_ENABLED  set to "1" only if this runner has Playwright
+#                              installed; the check works without it.
+name: supervised-live-report-check
+
+on:
+  workflow_dispatch:
+    inputs:
+      companies:
+        description: "Comma-separated domains to check"
+        required: false
+        default: "palantir.com,microsoft.com,nvidia.com,apple.com,shopify.com,snowflake.com"
+
+jobs:
+  live-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -r requirements.txt
+
+      - name: Run supervised live company analyses
+        env:
+          SEC_CONTACT_EMAIL: ${{ secrets.SEC_CONTACT_EMAIL }}
+        run: |
+          python scripts/live_report_check.py \
+            --companies "${{ github.event.inputs.companies }}" \
+            --out live-report-metrics.json
+
+      - name: Upload metrics artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-report-metrics
+          path: live-report-metrics.json
