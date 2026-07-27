@@ -6,6 +6,16 @@ build-backend = "setuptools.build_meta"
 name = "intent-engine"
 version = "0.1.0"
 requires-python = ">=3.9"
+# Runtime dependencies of the DEPLOYED service. Deployment builds with
+# `pip install -e .` (see render.yaml) and never reads requirements.txt, so a
+# dependency the deployed code needs has to be declared HERE or it is simply
+# absent in production. Everything else in the ingestion path is stdlib
+# (urllib); pypdf is the one exception, and without it every investor PDF
+# degrades to "PDF support is not installed in this deployment" forever.
+# requirements.txt keeps the exact pin for reproducible CI.
+dependencies = [
+    "pypdf>=5.1.0,<6",
+]
 
 [project.scripts]
 premortem = "intent_engine.simulator.cli:main"
