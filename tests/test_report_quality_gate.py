@@ -320,3 +320,38 @@ def test_failed_sources_are_shown_readably_not_as_internal_ids(tmp_path):
         assert not str(entry["origin"]).startswith("cand-")
         assert entry["title"] and entry["source_family"]
         assert entry["failure_type"]
+
+
+def test_dropped_sections_are_not_scored_as_populated():
+    """Release-gate metric correctness.
+
+    populated_share once used the sections PRESENT in the report as its
+    denominator, so a report that dropped ten of its eleven major sections
+    scored 1.0 — exactly the same as a complete report — because numerator
+    and denominator shrank together. A gate that cannot tell a whole report
+    from a gutted one is a false positive, not a gate.
+    """
+    from intent_engine.company_ingestion.quality import MAJOR_SECTIONS, assess
+
+    def section(kind):
+        text = (f"Substantive evidence-derived content about the company "
+                f"covering {kind.replace('_', ' ')} in enough detail to read "
+                f"as populated rather than a placeholder.")
+        return {"kind": kind, "text": text,
+                "cards": [{"claims": [{"text": text}]}]}
+
+    complete = assess({"sections": [section(k) for k in MAJOR_SECTIONS]}, [])
+    gutted = assess({"sections": [section(MAJOR_SECTIONS[0])]}, [])
+
+    assert complete["metrics"]["populated_share"] == 1.0
+    assert gutted["metrics"]["populated_share"] < complete["metrics"][
+        "populated_share"], "a gutted report must not score like a full one"
+    # 1 of 11 populated, not 1 of 1.
+    assert gutted["metrics"]["populated_share"] == round(
+        1 / len(MAJOR_SECTIONS), 3)
+    assert gutted["metrics"]["missing_sections"] == list(MAJOR_SECTIONS[1:])
+    assert gutted["metrics"]["present_sections"] == 1
+    assert gutted["metrics"]["major_sections"] == len(MAJOR_SECTIONS)
+    # placeholder_share is the complement, over the same denominator.
+    assert round(gutted["metrics"]["placeholder_share"]
+                 + gutted["metrics"]["populated_share"], 3) == 1.0

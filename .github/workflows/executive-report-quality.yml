@@ -20,6 +20,55 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Installs EXACTLY as the deployment does. Every other job here installs
+  # requirements.txt, which the deployment never reads (render.yaml builds with
+  # `pip install -e .`), so every other job is blind to the difference. That
+  # blindness is how pypdf came to be declared, tested and green everywhere
+  # while being absent from production, where every PDF silently degraded to
+  # "PDF support is not installed in this deployment".
+  production-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the way production installs
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .          # NO requirements.txt — this is the point
+
+      - name: Deployed imports and declared capabilities must be available
+        run: |
+          python - <<'EOF'
+          import intent_engine.webapp.app                  # noqa: F401
+          import intent_engine.company_ingestion.service   # noqa: F401
+          import intent_engine.company_ingestion.pdf       # noqa: F401
+          from intent_engine.company_ingestion.rendering import rendering_enabled
+
+          import pypdf
+          print("pypdf", pypdf.__version__)
+
+          # Rendering must be OFF unless deliberately enabled. A default-on
+          # renderer would ship a browser dependency into production silently.
+          assert rendering_enabled() is False, "browser rendering defaults ON"
+          EOF
+
+      - name: Declared dependencies must be pinned
+        run: |
+          python - <<'EOF'
+          import re, pathlib, sys
+          text = pathlib.Path("pyproject.toml").read_text()
+          block = re.search(r"dependencies\s*=\s*\[(.*?)\]", text, re.S)
+          assert block, "no [project] dependencies declared"
+          deps = re.findall(r'"([^"]+)"', block.group(1))
+          unpinned = [d for d in deps if "==" not in d]
+          assert not unpinned, f"unpinned production deps: {unpinned}"
+          print("pinned:", deps)
+          EOF
+
   report-quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20

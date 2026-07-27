@@ -13,7 +13,7 @@ import os
 
 # Bumped when the platform's runtime contract changes. Distinct from the
 # event schema version (events/envelope.COMPANY_EVENT_SCHEMA_VERSION).
-APP_VERSION = "1.4.0-unified-learning-runtime"
+APP_VERSION = "1.5.0-executive-intelligence"
 
 
 def deployed_commit() -> str:

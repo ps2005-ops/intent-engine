@@ -180,10 +180,17 @@ def assess(result: dict, documents: list, *, company_name: str = "") -> dict:
     flat = visible.lower()
     coverage = result.get("coverage") or assess_coverage(documents)
 
-    major = [by_kind[k] for k in MAJOR_SECTIONS if k in by_kind]
-    populated = [s for s in major if is_meaningfully_populated(s)]
-    placeholder_share = (
-        1.0 - (len(populated) / len(major))) if major else 1.0
+    # The denominator is every EXPECTED major section, not merely the ones
+    # that happen to be present. Scoring against present sections meant a
+    # report that dropped ten of its eleven sections scored populated_share
+    # 1.0 — identical to a complete report — because both the numerator and
+    # the denominator shrank together. Absent sections are now counted as
+    # unpopulated, which is what they are to a reader.
+    present = [by_kind[k] for k in MAJOR_SECTIONS if k in by_kind]
+    missing_sections = [k for k in MAJOR_SECTIONS if k not in by_kind]
+    populated = [s for s in present if is_meaningfully_populated(s)]
+    expected = len(MAJOR_SECTIONS)
+    placeholder_share = 1.0 - (len(populated) / expected)
 
     # --- evidence quality ---------------------------------------------------
     families = coverage.get("families", [])
@@ -221,10 +228,11 @@ def assess(result: dict, documents: list, *, company_name: str = "") -> dict:
         "source_families": len(families),
         "families": families,
         "family_dominance": coverage.get("dominant_share", 0.0),
-        "major_sections": len(major),
+        "major_sections": expected,
+        "present_sections": len(present),
+        "missing_sections": missing_sections,
         "populated_sections": len(populated),
-        "populated_share": round(
-            (len(populated) / len(major)) if major else 0.0, 3),
+        "populated_share": round(len(populated) / expected, 3),
         "placeholder_share": round(placeholder_share, 3),
         "has_company_description": has_description,
         "has_product_evidence": has_product,

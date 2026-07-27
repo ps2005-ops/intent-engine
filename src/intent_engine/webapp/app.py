@@ -1515,11 +1515,35 @@ class WebApp:
             # to persist while /readyz still said "ready". Probe it explicitly.
             self._probe_runtime_root_writable()
             return self._ok_json({"status": "ready", "env": self.config.env,
-                                  "runtime_root": str(self._runtime_root)})
+                                  "runtime_root": str(self._runtime_root),
+                                  "capabilities": self._capability_state()})
         except Exception as exc:                            # noqa: BLE001
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
                     json.dumps({"status": "not ready", "reason": str(exc)}))
+
+    def _capability_state(self) -> dict:
+        """Sanitized, OBSERVED runtime capability state — never a restatement
+        of intent.
+
+        pypdf was declared in requirements.txt but absent from pyproject, so
+        the deployment (which builds with `pip install -e .`) silently had no
+        PDF support at all while every test and config file said it did. There
+        was no way to tell from outside the process. These values are probed
+        live, so "PDF works in production" becomes checkable rather than
+        assumed.
+
+        Contains no secrets, no paths, no versions of anything private — only
+        whether an optional capability is actually available in THIS process.
+        """
+        try:
+            import pypdf                                   # noqa: F401
+            pdf_available = True
+        except ImportError:
+            pdf_available = False
+        from intent_engine.company_ingestion.rendering import rendering_enabled
+        return {"pdf_extraction": pdf_available,
+                "browser_rendering": rendering_enabled()}
 
     def _probe_runtime_root_writable(self) -> None:
         import os as _os
