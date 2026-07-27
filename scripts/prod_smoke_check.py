@@ -196,6 +196,10 @@ def check(base_url: str, domain: str, timeout: float) -> dict:
     step("result", status, el, bytes=len(report), citations=len(citations))
     out["result_bytes"] = len(report)
     out["citation_count"] = len(citations)
+    # Whether a PDF was actually retrieved. Recorded because the PDF path is
+    # otherwise unproven in production: reporting it as "seen: no" keeps that
+    # gap visible instead of letting silence read as success.
+    out["pdf_seen"] = bool(re.search(r"\.pdf\b", report, re.I))
     if status != 200:
         out["outcome"] = "FAIL"
         out["reason"] = f"result page HTTP {status}"

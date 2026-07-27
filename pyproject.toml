@@ -13,8 +13,13 @@ requires-python = ">=3.9"
 # (urllib); pypdf is the one exception, and without it every investor PDF
 # degrades to "PDF support is not installed in this deployment" forever.
 # requirements.txt keeps the exact pin for reproducible CI.
+# Pinned, not a range. A range meant a production build resolved to whatever
+# pypdf was newest that day (observed: 5.9.0) while CI tested the 5.1.0 pinned
+# in requirements.txt — two different libraries under one "verified" claim,
+# and two deploys of the same commit could differ. A frozen release must build
+# the same way twice.
 dependencies = [
-    "pypdf>=5.1.0,<6",
+    "pypdf==5.1.0",
 ]
 
 [project.scripts]

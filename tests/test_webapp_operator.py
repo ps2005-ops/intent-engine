@@ -128,3 +128,44 @@ def test_assistant_has_no_promote_or_publish_control(app):
     low = body.lower()
     assert 'action="/assistant' not in low
     assert "human-gated" in low                  # states the boundary
+
+
+def test_readyz_reports_observed_capability_state_not_intent(app):
+    """Release stabilization: /readyz must report what this process can
+    ACTUALLY do.
+
+    pypdf was declared in requirements.txt but not in pyproject, and the
+    deployment builds with `pip install -e .`, so production silently had no
+    PDF support while every config file and test claimed it did. Nothing
+    outside the process could tell. These values are probed live.
+    """
+    import json
+    import unittest.mock as mock
+    import builtins
+
+    c = Client(app)
+    status, _, body = c.request("GET", "/readyz")
+    assert status == "200 OK"
+    caps = json.loads(body)["capabilities"]
+
+    # pypdf is a declared install dependency, so it must really import here.
+    assert caps["pdf_extraction"] is True
+    # Rendering is off unless explicitly enabled, and must never be on by
+    # default — enabling it is a deliberate act, not a deployment accident.
+    assert caps["browser_rendering"] is False
+
+    # The value must track reality, not a constant: simulate the deployment
+    # that shipped without pypdf and confirm /readyz says so.
+    real_import = builtins.__import__
+
+    def no_pypdf(name, *a, **kw):
+        if name == "pypdf":
+            raise ImportError("No module named 'pypdf'")
+        return real_import(name, *a, **kw)
+
+    with mock.patch.object(builtins, "__import__", side_effect=no_pypdf):
+        _, _, body = c.request("GET", "/readyz")
+    assert json.loads(body)["capabilities"]["pdf_extraction"] is False
+
+    # And it must remain sanitized.
+    assert "SECRET" not in body.upper()
