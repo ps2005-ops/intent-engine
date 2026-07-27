@@ -1483,13 +1483,17 @@ class WebApp:
     def _compose(self, run_id):
         """Compose the run, threading the persisted mental model so the report
         is a VIEW over the company's evolving state, then persist the new
-        snapshot and publish strategic events durably (idempotent)."""
+        snapshot and publish strategic events durably (idempotent).
+
+        Uses the quality-gated path: evidence is gathered to sufficiency —
+        with bounded, targeted rediscovery when a family is missing — before
+        the report is synthesised exactly once."""
         meta = self.ci.run_meta(run_id)
         domain = meta["domain"] if meta else ""
         previous_model = self.strategic_memory.latest_model(domain) \
             if domain else None
-        result = self.ci.compose(run_id, fi_service=self.fi,
-                                 previous_model=previous_model)
+        result = self.ci.compose_with_quality(run_id, fi_service=self.fi,
+                                              previous_model=previous_model)
         report = result.get("strategic_report")
         if report and domain:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])

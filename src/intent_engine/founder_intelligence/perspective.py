@@ -162,7 +162,7 @@ def assemble_attention(claims) -> IntelligenceSection:
             kind=SECTION_ATTENTION, headline=claim.text,
             availability=claim.availability, claims=(claim,),
             confidence=band,
-            why_it_matters=f"{band} — surfaced by an owning subsystem",
+            why_it_matters=f"{band} — raised by the approved evidence",
             alternative_explanation="the attention signal reflects the "
                                     "visible view only",
             question_to_investigate="what internal evidence would confirm or "
@@ -203,8 +203,11 @@ def assemble_competitors(supported=False, claims=()) -> IntelligenceSection:
         return IntelligenceSection(
             kind=SECTION_COMPETITORS, title="Companies worth comparing",
             availability=AVAIL_OUT_OF_SCOPE,
-            note="no subsystem reports competitor intelligence yet; a "
-                 "competitor set is not invented (dependency gap 2)")
+            note="No comparison is shown because no approved source names a "
+                 "competitor or alternative. A competitor list is never "
+                 "invented. To fill this in, add an independent source such "
+                 "as market reporting, an analyst note, or a competitor's own "
+                 "positioning page.")
     cards = tuple(InsightCard(
         insight_id=f"{SECTION_COMPETITORS}.{c.claim_id}",
         kind=SECTION_COMPETITORS, headline=c.text, availability=c.availability,

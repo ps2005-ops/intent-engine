@@ -243,9 +243,15 @@ class CompanyIngestionService:
         return payload
 
     # --- retrieval -------------------------------------------------------------------
-    def fetch_approved(self, run_id: str) -> dict:
+    def fetch_approved(self, run_id: str, *, candidate_ids=None) -> dict:
         """Fetch ONLY approved candidates; idempotent per source+content;
-        partial success is honest."""
+        partial success is honest.
+
+        ``candidate_ids`` restricts/extends the fetch to an explicit set — used
+        by the quality retry loop to retrieve ADDITIONAL evidence for families
+        the first pass missed. Every id must still be a discovered candidate of
+        this run, and the original approval remains immutable.
+        """
         meta = self.run_meta(run_id)
         approval = self.store.approval(run_id)
         if approval is None:
@@ -255,10 +261,15 @@ class CompanyIngestionService:
         self._transition(run_id, domain, "FETCHING_APPROVED_SOURCES")
         candidates = {c["candidate_id"]: c
                       for c in self.store.candidates(run_id)}
+        targets = (list(candidate_ids) if candidate_ids is not None
+                   else list(approval["approved_candidate_ids"]))
+        unknown = [i for i in targets if i not in candidates]
+        if unknown:
+            raise IngestionError(f"cannot fetch unknown candidates: {unknown}")
         already = {r["source_id"]: r for r in self.store.retrieved(run_id)}
         total_bytes = sum(r.get("byte_count", 0) for r in already.values())
         ok, failed = [], []
-        for candidate_id in approval["approved_candidate_ids"]:
+        for candidate_id in targets:
             candidate = candidates[candidate_id]
             source_id = f"src-{candidate_id[5:]}"
             if source_id in already:
@@ -424,6 +435,14 @@ class CompanyIngestionService:
         coverage["next_evidence_steps"] = missing_family_guidance(
             coverage["missing_core"])
         result["coverage"] = coverage
+        # Deterministic report-quality gate: retrieval succeeding is not the
+        # same as the report being useful. Scored here so callers can decide to
+        # rediscover before publishing (see analyze_with_quality).
+        from intent_engine.company_ingestion.quality import (
+            assess as assess_quality,
+        )
+        result["quality"] = assess_quality(result, documents,
+                                           company_name=meta["company_name"])
         final = "COMPLETE" if not failures else "PARTIAL"
         # Honest downgrade: a run whose evidence does not span enough
         # independent families is never presented as COMPLETE, even when every
@@ -432,6 +451,96 @@ class CompanyIngestionService:
             final = "PARTIAL"
         self._transition(run_id, domain, final)
         result["ingestion_status"] = final
+        return result
+
+    # --- quality-gated composition (retry + targeted rediscovery) ------------
+    def compose_with_quality(self, run_id: str, *, fi_service,
+                             max_passes=None, **compose_kwargs) -> dict:
+        """Compose, score the report, and — when the quality gate says more
+        evidence would plausibly help — retrieve targeted additional sources
+        and compose again. Bounded, deterministic, and fully diagnosed.
+
+        Never fabricates: a retry only approves candidates that were ALREADY
+        discovered for this run, never re-requests a URL that failed, and stops
+        as soon as quality passes or the budget is spent. If the report is
+        still short of the bar, it is published as explicitly LIMITED — never
+        as complete.
+        """
+        from intent_engine.company_ingestion.quality import (
+            REPORT_QUALITY_FAIL, REPORT_QUALITY_PASS, REPORT_QUALITY_RETRYABLE,
+            downgrade_to_limited, evidence_gaps,
+        )
+        from intent_engine.company_ingestion.retry import (
+            MAX_RETRY_PASSES, plan_retry,
+        )
+        budget = MAX_RETRY_PASSES if max_passes is None else max_passes
+        # Gather evidence to sufficiency BEFORE synthesising. Composing once
+        # per evidence set would mint a second report run for the same
+        # (company, as_of) — so the retry loop runs on the evidence, not on a
+        # throwaway report, and the report is synthesised exactly once.
+        history = []
+        attempted: set = set()
+        for attempt in range(1, budget + 1):
+            gaps = evidence_gaps(self.store.retrieved(run_id))
+            if gaps["sufficient"]:
+                break
+            approval = self.store.approval(run_id) or {}
+            already = set(approval.get("approved_candidate_ids", ())) | attempted
+            failed_ids = {f.get("candidate_id")
+                          for f in self.store.failures(run_id)}
+            failed_urls = {c["url"] for c in self.store.candidates(run_id)
+                           if c["candidate_id"] in failed_ids}
+            extra = plan_retry(
+                missing_families=gaps["missing_families"],
+                candidates=self.store.candidates(run_id),
+                already_approved=already, failed_urls=failed_urls)
+            if not extra:
+                break                    # nothing new could be tried
+            reason = ("missing evidence families: "
+                      + ", ".join(gaps["missing_families"][:4]))
+            self._append("ci.run_transitioned", run_id=run_id,
+                         domain=self.run_meta(run_id)["domain"],
+                         payload={"to": "DISCOVERING_SOURCES",
+                                  "retry_pass": attempt, "reason": reason,
+                                  "targets": list(extra)},
+                         idempotency_key=f"ci-retry:{run_id}:{attempt}")
+            attempted.update(extra)
+            before = dict(gaps)
+            self.fetch_approved(run_id, candidate_ids=extra)
+            after = evidence_gaps(self.store.retrieved(run_id))
+            history.append({"pass": attempt, "reason": reason,
+                            "new_sources": list(extra),
+                            "families_before": before["families"],
+                            "families_after": after["families"],
+                            "documents_before": before["document_count"],
+                            "documents_after": after["document_count"]})
+
+        result = self.compose(run_id, fi_service=fi_service, **compose_kwargs)
+        if "quality" not in result:
+            # No source could be retrieved at all: compose already returned an
+            # honest FAILED run with no report to score. Rediscovery cannot
+            # help — record why and leave the failure exactly as it is.
+            result["quality_history"] = history + [
+                {"pass": "final", "outcome": REPORT_QUALITY_FAIL,
+                 "failed_rules": ["no approved source could be retrieved"]}]
+            result["quality_passes"] = sum(1 for h in history
+                                           if isinstance(h.get("pass"), int))
+            return result
+        history.append({"pass": "final",
+                        "outcome": result["quality"]["outcome"],
+                        "metrics": result["quality"]["metrics"],
+                        "failed_rules": result["quality"]["failed_rules"]})
+        if result["quality"]["outcome"] == REPORT_QUALITY_RETRYABLE:
+            result["quality"] = downgrade_to_limited(result["quality"])
+            history.append({"pass": "downgrade",
+                            "outcome": result["quality"]["outcome"],
+                            "note": "evidence rediscovery exhausted; "
+                                    "published as a clearly limited report"})
+        result["quality_history"] = history
+        result["quality_passes"] = sum(1 for h in history
+                                       if isinstance(h.get("pass"), int))
+        if result["quality"]["outcome"] == REPORT_QUALITY_PASS:
+            result.setdefault("quality_note", "")
         return result
 
     def _strategic_report(self, company_name, documents, extra_observations,
@@ -473,9 +582,19 @@ class CompanyIngestionService:
                 groups["external_public"].append(entry)
             else:
                 groups["company_website"].append(entry)
+        # Failed sources are shown by their READABLE identity (title/URL/host),
+        # never by an opaque internal candidate id.
+        from urllib.parse import urlparse
+        by_id = {c["candidate_id"]: c for c in self.store.candidates(run_id)}
         for failure in self.store.failures(run_id):
+            candidate = by_id.get(failure.get("candidate_id")) or {}
+            url = candidate.get("url", "")
+            host = (urlparse(url).hostname or "") if url else ""
             groups["unavailable_or_failed"].append(
-                {"origin": failure["candidate_id"],
+                {"title": candidate.get("title") or host or "Company page",
+                 "origin": url or host or "a requested page",
+                 "source_family": candidate.get("source_class",
+                                                "company_owned"),
                  "failure_type": failure["failure_type"],
                  "message": failure["safe_message"],
                  "retryable": failure["retryable"]})
