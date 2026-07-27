@@ -592,6 +592,7 @@ class WebApp:
             note = ('' if status == "COMPLETE" else
                     '<p>Some approved sources could not be retrieved; the '
                     'result is based only on the evidence that was.</p>')
+            note += self._coverage_note(run_id, real)
             tail = (f'{note}<p>These are real lifecycle stages, not '
                     f'decoration.</p>'
                     f'<p><a href="/runs/{_e(run_id)}">Open the result</a></p>')
@@ -606,6 +607,28 @@ class WebApp:
                     'restarted mid-run). You can '
                     '<a href="/">start a new analysis</a>.</p>')
         return self._html(head + tail + '</main></body></html>')
+
+    def _coverage_note(self, run_id, real):
+        """A specific, non-technical statement of WHICH kinds of evidence the
+        report rests on and what is missing — shown instead of leaving the
+        reader to infer meaning from empty sections."""
+        if not real:
+            return ''
+        result = self._results.get(run_id) or {}
+        coverage = result.get("coverage")
+        if not coverage:
+            return ''
+        families = ", ".join(_e(f) for f in coverage["families"])
+        note = (f'<p class="coverage">Evidence coverage: '
+                f'{coverage["document_count"]} usable source(s) across '
+                f'{len(coverage["families"])} source '
+                f'{"family" if len(coverage["families"]) == 1 else "families"}'
+                f'{f" ({families})" if families else ""}.')
+        steps = coverage.get("next_evidence_steps") or []
+        if steps:
+            note += (' To strengthen this analysis, add '
+                     + _e("; ".join(steps[:3])) + '.')
+        return note + '</p>'
 
     # --- honest failure surface (real-company runs) --------------------------
     _FAILURE_LABELS = {

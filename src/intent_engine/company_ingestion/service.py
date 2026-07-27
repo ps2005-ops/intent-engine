@@ -394,7 +394,22 @@ class CompanyIngestionService:
         result["strategic_report"] = self._strategic_report(
             meta["company_name"], documents, extra_observations,
             previous_model=previous_model)
+        # Semantic coverage: WHICH kinds of evidence the report rests on, and
+        # what is missing. A source count alone cannot express that three SEC
+        # filings say nothing about the product or its customers.
+        from intent_engine.company_ingestion.coverage import (
+            EVIDENCE_REPORT_READY, assess, missing_family_guidance,
+        )
+        coverage = assess(documents)
+        coverage["next_evidence_steps"] = missing_family_guidance(
+            coverage["missing_core"])
+        result["coverage"] = coverage
         final = "COMPLETE" if not failures else "PARTIAL"
+        # Honest downgrade: a run whose evidence does not span enough
+        # independent families is never presented as COMPLETE, even when every
+        # approved source happened to retrieve successfully.
+        if final == "COMPLETE" and coverage["state"] != EVIDENCE_REPORT_READY:
+            final = "PARTIAL"
         self._transition(run_id, domain, final)
         result["ingestion_status"] = final
         return result
