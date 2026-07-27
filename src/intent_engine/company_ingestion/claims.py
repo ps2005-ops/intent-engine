@@ -104,9 +104,23 @@ def _q(term: str) -> str:
     return '"' + term + '"'
 
 
+# Procedural / legal-filing vocabulary. SEC filings (esp. 8-K cover pages) are
+# dense with this; it is never a business insight, so it is excluded from every
+# term-frequency signal — otherwise "pursuant, rule, exchange" surfaces as the
+# company's "emphasized language" (2026-07 report-quality incident).
+_LEGAL_STOP = frozenset(
+    "pursuant rule under communications exchange act registrant hereby "
+    "hereunder herein thereof thereto whereas exhibit exhibits incorporated "
+    "reference signature signatures dated furnished section sections item "
+    "items form forms filing filed commission securities shall undersigned "
+    "duly authorized behalf date title statements statement report reports "
+    "quarterly annual fiscal amended".split())
+
+
 def _terms(text: str, *, top=8) -> list:
     words = re.findall(r"[a-z][a-z\-]{3,}", (text or "").lower())
-    counts = Counter(w for w in words if w not in _STOPWORDS)
+    counts = Counter(w for w in words
+                     if w not in _STOPWORDS and w not in _LEGAL_STOP)
     return [w for w, _ in counts.most_common(top)]
 
 
@@ -132,6 +146,17 @@ def build_claims(*, documents: list, company_name: str, domain: str,
     external_docs = [d for d in docs.values()
                      if d["source_type"] in ("pasted", "external_approved",
                                              "uploaded")]
+    # SEC / investor-material filings are NOT customer or market "language" —
+    # feeding them into term-frequency emphasis produced the legal-boilerplate
+    # "strongest observation". Separate them: customer_docs carry independent
+    # customer/market voice; investor_docs are financial/regulatory disclosure.
+    investor_docs = [d for d in external_docs
+                     if d.get("source_class") == "investor_material"]
+    customer_docs = [d for d in external_docs
+                     if d.get("source_class") in ("customer_voice",
+                                                  "independent_reporting",
+                                                  "competitor")
+                     or d["source_type"] == "pasted"]
 
     understanding, analytics, market, persona = [], [], [], []
     blind, assumption, attention, stale = [], [], [], []
@@ -242,13 +267,21 @@ def build_claims(*, documents: list, company_name: str, domain: str,
             f"{', '.join(_q(t) for t in _terms(' '.join(d['text_content'] for d in site_docs), top=5))}.",
             AVAIL_SUPPORTED, site_docs[:6], confidence="Moderate",
             transformation="grouped"))
-    if external_docs:
+    if customer_docs:
         market.append(_claim(
             "mv.customer_language",
-            f"Approved external evidence emphasizes: "
-            f"{', '.join(_q(t) for t in _terms(' '.join(d['text_content'] for d in external_docs), top=5))} "
+            f"Independent/customer evidence emphasizes: "
+            f"{', '.join(_q(t) for t in _terms(' '.join(d['text_content'] for d in customer_docs), top=5))} "
             f"(user-approved external sources).",
-            AVAIL_SUPPORTED, external_docs[:6], confidence="Moderate",
+            AVAIL_SUPPORTED, customer_docs[:6], confidence="Moderate",
+            transformation="grouped"))
+    if investor_docs:
+        market.append(_claim(
+            "mv.investor_disclosure",
+            f"Financial/regulatory disclosure: {len(investor_docs)} official "
+            f"filing(s) (SEC / investor material) were analyzed as financial "
+            f"and risk evidence — not as product or customer messaging.",
+            AVAIL_SUPPORTED, investor_docs[:6], confidence="Moderate",
             transformation="grouped"))
 
     # --- blind spot: only when two distinct sources genuinely diverge --------
@@ -272,10 +305,10 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 f"This may be intentional.", AVAIL_SUPPORTED,
                 [home, customers_docs[0]], confidence="Moderate",
                 transformation="grouped"))
-    if home and external_docs and not blind:
+    if home and customer_docs and not blind:
         home_terms = _home_terms(home)
         ext_terms = set(_terms(" ".join(d["text_content"]
-                                        for d in external_docs), top=10))
+                                        for d in customer_docs), top=10))
         divergent = list(ext_terms - home_terms)[:4]
         if divergent:
             blind.append(_claim(
@@ -297,9 +330,9 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 f"outcome language ({', '.join(_q(t) for t in home_outcomes[:3])}).",
                 AVAIL_PARTIAL, [home], confidence="Moderate",
                 transformation="summarized"))
-        if external_docs:
+        if customer_docs:
             ext_outcomes = _outcome_terms(
-                " ".join(d["text_content"] for d in external_docs))
+                " ".join(d["text_content"] for d in customer_docs))
             complicating = [t for t in ext_outcomes
                             if t not in home_outcomes]
             if complicating:
@@ -311,12 +344,14 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                     confidence="Moderate", transformation="summarized"))
 
     # --- attention: evidence gaps ----------------------------------------------
-    if not external_docs:
+    if not customer_docs:
         attention.append(_claim(
             "at.external_evidence",
-            "No external customer evidence was approved — the market view "
-            "is one-sided until review/interview evidence is added.",
-            AVAIL_PARTIAL, site_docs[:2] if site_docs else [],
+            "No independent customer/market evidence was approved — the market "
+            "view is one-sided (SEC/investor filings are not customer voice) "
+            "until review, interview, or news evidence is added.",
+            AVAIL_PARTIAL,
+            (site_docs or investor_docs or list(docs.values()))[:2],
             confidence="Moderate", transformation="summarized"))
     failed_note = [d for d in documents
                    if d.get("retrieval_status") not in ("OK", None)]
