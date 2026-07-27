@@ -1,0 +1,83 @@
+# Release-blocking executive-report quality gate.
+#
+# The 2026-07 incident shipped a demo whose report explained nothing about the
+# company. This workflow makes that un-shippable: it runs the deterministic
+# golden-company fixtures, the semantic coverage quorum, the report-quality
+# gate, the retry loop, PDF extraction and the renderer contract — all OFFLINE,
+# with no browser and no network — plus the versioned baselines and the
+# repository safety guard.
+#
+# It must fail if any golden report cannot explain its company, lacks product
+# or customer evidence, is filings-only, presents legal boilerplate as insight,
+# is dominated by unavailable sections, exposes opaque ids or internal
+# messages, or drops below its recorded baseline.
+name: executive-report-quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  report-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install -r requirements.txt
+          pip install pytest
+
+      # --- the release-blocking checks -----------------------------------
+      # NOTE: no browser is installed on purpose. Rendering is optional and
+      # the report must work without it; the renderer contract tests prove
+      # the provider degrades instead of failing.
+      - name: Golden-company demo reports (offline fixtures)
+        run: pytest tests/test_golden_demo_companies.py -q -p no:cacheprovider
+
+      - name: Versioned golden quality baselines
+        run: pytest tests/test_golden_baselines.py -q -p no:cacheprovider
+
+      - name: Report-quality gate and targeted retry loop
+        run: pytest tests/test_report_quality_gate.py -q -p no:cacheprovider
+
+      - name: Semantic evidence coverage quorum
+        run: pytest tests/test_evidence_coverage.py -q -p no:cacheprovider
+
+      - name: Palantir resilience and legal-boilerplate regressions
+        run: pytest tests/test_palantir_resilience.py -q -p no:cacheprovider
+
+      - name: PDF evidence extraction
+        run: pytest tests/test_pdf_extraction.py -q -p no:cacheprovider
+
+      - name: Optional renderer contract (no browser required)
+        run: pytest tests/test_rendering_provider.py -q -p no:cacheprovider
+
+      - name: Full offline suite
+        run: |
+          pytest -q -p no:cacheprovider \
+            --deselect tests/test_simulator_e2e.py \
+            --deselect tests/test_calendar_live.py \
+            --deselect tests/test_macro_data_live.py \
+            --deselect tests/test_market_resolution_live.py \
+            --deselect tests/test_scrap_estimate_live.py
+
+      - name: Repository safety guard
+        run: GUARD_PYTHON=python bash scripts/precommit_guard.sh
+
+      - name: Worktree must be clean after the suite
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::the test suite left artifacts in the worktree"
+            git status --porcelain
+            exit 1
+          fi

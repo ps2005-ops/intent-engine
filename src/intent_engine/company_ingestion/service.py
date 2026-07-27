@@ -471,6 +471,10 @@ class CompanyIngestionService:
         )
         result["quality"] = assess_quality(result, documents,
                                            company_name=meta["company_name"])
+        # Persist quality diagnostics for every composition, so an operator can
+        # always see why a run was published, retried, or limited.
+        self._record_quality(run_id, result,
+                             key=f"quality:{run_id}:{len(documents)}")
         final = "COMPLETE" if not failures else "PARTIAL"
         # Honest downgrade: a run whose evidence does not span enough
         # independent families is never presented as COMPLETE, even when every
@@ -567,9 +571,79 @@ class CompanyIngestionService:
         result["quality_history"] = history
         result["quality_passes"] = sum(1 for h in history
                                        if isinstance(h.get("pass"), int))
+        self._record_quality(run_id, result)
         if result["quality"]["outcome"] == REPORT_QUALITY_PASS:
             result.setdefault("quality_note", "")
         return result
+
+    def _record_quality(self, run_id, result, *, key=None) -> None:
+        """Persist report-quality diagnostics so an operator can see WHY a run
+        was published, retried, or limited. Deterministic and secret-free."""
+        quality = result.get("quality") or {}
+        history = result.get("quality_history") or []
+        metrics = dict(quality.get("metrics") or {})
+        initial = next((h for h in history if isinstance(h.get("pass"), int)),
+                       None)
+        payload = {
+            "run_id": run_id,
+            "outcome": quality.get("outcome"),
+            "failed_rules": list(quality.get("failed_rules") or [])[:12],
+            "retry_passes": result.get("quality_passes", 0),
+            "retry_reasons": [h.get("reason") for h in history
+                              if isinstance(h.get("pass"), int)],
+            "families_initial": (initial or {}).get("families_before", []),
+            "families_final": metrics.get("families", []),
+            "successful_sources": metrics.get("successful_sources"),
+            "populated_share": metrics.get("populated_share"),
+            "placeholder_share": metrics.get("placeholder_share"),
+            "has_product_evidence": metrics.get("has_product_evidence"),
+            "has_customer_evidence": metrics.get("has_customer_evidence"),
+            "has_strategy_evidence": metrics.get("has_strategy_evidence"),
+            "legal_as_insight": metrics.get("legal_as_insight", []),
+            "rules_version": quality.get("rules_version"),
+            "ingestion_status": result.get("ingestion_status"),
+        }
+        meta = self.run_meta(run_id) or {}
+        self._append("ci.quality_assessed", run_id=run_id,
+                     domain=meta.get("domain", ""), subject_type="quality",
+                     subject_id=run_id, payload=payload,
+                     idempotency_key=key or f"quality-final:{run_id}:"
+                                            f"{payload['retry_passes']}")
+
+    def quality_diagnostics(self, run_id: str):
+        """The stored quality diagnostics for a run (operator surface)."""
+        rows = [r.payload for r in self.store.for_run(run_id)
+                if r.event_type == "ci.quality_assessed"]
+        return rows[-1] if rows else None
+
+    def quality_overview(self) -> dict:
+        """Cross-run report-quality health for authenticated operators:
+        which runs failed, which were limited, and which evidence families are
+        most often missing."""
+        rows = [r for r in self.store.read_all()
+                if r.event_type == "ci.quality_assessed"]
+        by_outcome: dict = {}
+        missing_family_counts: dict = {}
+        runs = []
+        for row in rows:
+            payload = row.payload
+            outcome = payload.get("outcome") or "UNKNOWN"
+            by_outcome[outcome] = by_outcome.get(outcome, 0) + 1
+            for family in ("product", "customers", "strategy", "investor",
+                           "identity"):
+                if family not in (payload.get("families_final") or []):
+                    missing_family_counts[family] = \
+                        missing_family_counts.get(family, 0) + 1
+            runs.append({"run_id": payload.get("run_id"),
+                         "domain": row.company_domain,
+                         "outcome": outcome,
+                         "retry_passes": payload.get("retry_passes", 0),
+                         "sources": payload.get("successful_sources"),
+                         "populated_share": payload.get("populated_share")})
+        return {"total_runs": len(rows), "by_outcome": by_outcome,
+                "most_often_missing": sorted(missing_family_counts.items(),
+                                             key=lambda kv: -kv[1]),
+                "runs": runs[-50:]}
 
     def _strategic_report(self, company_name, documents, extra_observations,
                           previous_model=None):

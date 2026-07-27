@@ -139,7 +139,11 @@ def build_claims(*, documents: list, company_name: str, domain: str,
     for d in docs.values():
         by_type.setdefault(d["source_type"], []).append(d)
 
-    home = (by_type.get("homepage") or [None])[0]
+    # Identity evidence: the homepage when it is readable, otherwise the
+    # about/company page. A JavaScript-blocked homepage must not leave the
+    # report unable to say what the company is — the about page is the same
+    # first-party, directly-observed evidence.
+    home = (by_type.get("homepage") or by_type.get("about") or [None])[0]
     site_docs = [d for d in docs.values()
                  if d["source_type"] not in ("pasted", "external_approved",
                                              "uploaded")]
@@ -225,6 +229,17 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 + (f' — "{body_line[:200]}"' if body_line else ""),
                 AVAIL_SUPPORTED, [product_doc], confidence="High",
                 docs_by_id=docs))
+    # If identity came from the about page, the "homepage" wording would be
+    # wrong; the claims above phrase themselves generically enough, but a
+    # missing homepage is itself worth stating honestly.
+    if not by_type.get("homepage") and home is not None:
+        understanding.append(_claim(
+            "u.identity_source",
+            "The homepage could not be read (it requires JavaScript or "
+            "refused automated access); identity and offering above come "
+            "from the company's about/company page instead.",
+            AVAIL_PARTIAL, [home], confidence="High",
+            transformation="summarized"))
     for customer_doc in by_type.get("customers", [])[:1]:
         line = next((ln for ln in customer_doc["text_content"].split("\n")
                      if len(ln.split()) >= 5), "")

@@ -1,0 +1,92 @@
+{
+  "baseline_version": 1,
+  "rules_version": "report-quality.v1",
+  "updated": "2026-07-27",
+  "update_policy": "Baselines are RANGES, not prose snapshots. They may only be changed by an explicit, reviewed commit that states the reason and the before/after metrics. Tests must never rewrite this file automatically — a failing golden test means the report regressed until a human decides otherwise.",
+  "companies": {
+    "palantir.com": {
+      "name": "Palantir Technologies",
+      "min_successful_sources": 4,
+      "min_source_families": 3,
+      "requires_product_evidence": true,
+      "requires_customer_evidence": true,
+      "requires_strategy_evidence": true,
+      "min_populated_share": 0.40,
+      "max_placeholder_share": 0.60,
+      "max_legal_contamination": 0,
+      "max_opaque_ids": 0,
+      "max_internal_leaks": 0,
+      "allowed_outcomes": ["REPORT_QUALITY_PASS", "REPORT_QUALITY_LIMITED"]
+    },
+    "microsoft.com": {
+      "name": "Microsoft",
+      "min_successful_sources": 4,
+      "min_source_families": 3,
+      "requires_product_evidence": true,
+      "requires_customer_evidence": true,
+      "requires_strategy_evidence": true,
+      "min_populated_share": 0.40,
+      "max_placeholder_share": 0.60,
+      "max_legal_contamination": 0,
+      "max_opaque_ids": 0,
+      "max_internal_leaks": 0,
+      "allowed_outcomes": ["REPORT_QUALITY_PASS", "REPORT_QUALITY_LIMITED"]
+    },
+    "nvidia.com": {
+      "name": "NVIDIA",
+      "min_successful_sources": 4,
+      "min_source_families": 3,
+      "requires_product_evidence": true,
+      "requires_customer_evidence": true,
+      "requires_strategy_evidence": true,
+      "min_populated_share": 0.40,
+      "max_placeholder_share": 0.60,
+      "max_legal_contamination": 0,
+      "max_opaque_ids": 0,
+      "max_internal_leaks": 0,
+      "allowed_outcomes": ["REPORT_QUALITY_PASS", "REPORT_QUALITY_LIMITED"]
+    },
+    "apple.com": {
+      "name": "Apple",
+      "min_successful_sources": 4,
+      "min_source_families": 3,
+      "requires_product_evidence": true,
+      "requires_customer_evidence": true,
+      "requires_strategy_evidence": true,
+      "min_populated_share": 0.40,
+      "max_placeholder_share": 0.60,
+      "max_legal_contamination": 0,
+      "max_opaque_ids": 0,
+      "max_internal_leaks": 0,
+      "allowed_outcomes": ["REPORT_QUALITY_PASS", "REPORT_QUALITY_LIMITED"]
+    },
+    "shopify.com": {
+      "name": "Shopify",
+      "min_successful_sources": 4,
+      "min_source_families": 3,
+      "requires_product_evidence": true,
+      "requires_customer_evidence": true,
+      "requires_strategy_evidence": true,
+      "min_populated_share": 0.40,
+      "max_placeholder_share": 0.60,
+      "max_legal_contamination": 0,
+      "max_opaque_ids": 0,
+      "max_internal_leaks": 0,
+      "allowed_outcomes": ["REPORT_QUALITY_PASS", "REPORT_QUALITY_LIMITED"]
+    },
+    "snowflake.com": {
+      "name": "Snowflake",
+      "min_successful_sources": 4,
+      "min_source_families": 3,
+      "requires_product_evidence": true,
+      "requires_customer_evidence": true,
+      "requires_strategy_evidence": true,
+      "min_populated_share": 0.40,
+      "max_placeholder_share": 0.60,
+      "max_legal_contamination": 0,
+      "max_opaque_ids": 0,
+      "max_internal_leaks": 0,
+      "allowed_outcomes": ["REPORT_QUALITY_PASS", "REPORT_QUALITY_LIMITED"]
+    }
+  }
+}

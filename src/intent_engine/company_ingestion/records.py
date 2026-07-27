@@ -76,6 +76,8 @@ INGESTION_EVENTS = frozenset({
     "ci.candidate_discovered", "ci.approval_recorded",
     "ci.source_retrieved", "ci.retrieval_failed",
     "ci.pasted_evidence_added", "ci.claims_built",
+    # report-quality diagnostics (operator observability)
+    "ci.quality_assessed",
 })
 
 
