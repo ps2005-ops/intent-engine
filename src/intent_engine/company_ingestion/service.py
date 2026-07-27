@@ -163,6 +163,26 @@ class CompanyIngestionService:
         candidates = candidates + propose_edgar_candidates(
             company_name=meta.get("company_name", ""),
             transport=self.transport, resolver=self.resolver)
+        # Deduplicate by URL. The same page is legitimately found by more than
+        # one discovery path (a guessed known path AND the sitemap), and each
+        # produces a different payload for the same candidate_id — which would
+        # collide on the candidate's idempotency key and abort discovery.
+        #
+        # A SITEMAP-listed URL wins over a guessed known path for the same URL:
+        # the sitemap entry is publisher-verified and carries the publisher's
+        # own classification, whereas the guess is only a hypothesis. Order is
+        # otherwise preserved, so discovery stays deterministic.
+        def _verified(candidate):
+            return "sitemap" in candidate.get("why_relevant", "")
+
+        best_by_url: dict = {}
+        for candidate in candidates:
+            url = candidate["url"]
+            if url not in best_by_url:
+                best_by_url[url] = candidate
+            elif _verified(candidate) and not _verified(best_by_url[url]):
+                best_by_url[url] = candidate
+        candidates = list(best_by_url.values())
         for i, candidate in enumerate(candidates):
             candidate_id = f"cand-{hashlib.sha256(candidate['url'].encode()).hexdigest()[:12]}"
             availability = candidate.get("availability")

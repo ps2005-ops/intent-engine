@@ -208,6 +208,33 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 f"{audience}. We do not yet know whether this is "
                 f"intentional.", AVAIL_PARTIAL, [home],
                 confidence="Moderate", transformation="summarized"))
+    # --- products / platform: what the company actually offers ---------------
+    # Without this, a retrieved product or documentation page contributed
+    # nothing to the report and the offering stayed "Not available" even though
+    # the evidence was sitting in the approved set (2026-07 incident).
+    for product_doc in by_type.get("product", [])[:2]:
+        headline = (product_doc.get("title") or "").strip()
+        body_line = next(
+            (line for line in product_doc["text_content"].split("\n")
+             if len(line.split()) >= 3), "")
+        if headline:
+            understanding.append(_claim(
+                f"u.product.{product_doc['source_id']}",
+                f'Product/platform evidence (directly observed): '
+                f'"{headline[:120]}"'
+                + (f' — "{body_line[:200]}"' if body_line else ""),
+                AVAIL_SUPPORTED, [product_doc], confidence="High",
+                docs_by_id=docs))
+    for customer_doc in by_type.get("customers", [])[:1]:
+        line = next((ln for ln in customer_doc["text_content"].split("\n")
+                     if len(ln.split()) >= 5), "")
+        if line:
+            understanding.append(_claim(
+                "u.customers",
+                f'Customer/use-case evidence (company-published): '
+                f'"{line[:220]}"',
+                AVAIL_SUPPORTED, [customer_doc], confidence="Moderate",
+                docs_by_id=docs))
     if by_type.get("pricing"):
         pricing = by_type["pricing"][0]
         understanding.append(_claim(

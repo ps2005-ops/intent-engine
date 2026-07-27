@@ -1221,11 +1221,19 @@ class WebApp:
         product, investor, customers, strategy, ...) instead of many documents
         from a single family. Shared by the source-review page (pre-checked
         set) and auto-run (approved set), so both always agree."""
+        # Within a family, prefer URLs the publisher actually lists (sitemap)
+        # over guessed known paths: a guess is frequently a 404/403, while a
+        # sitemap URL exists by construction.
+        def _verified_first(candidate):
+            why = candidate.get("why_relevant", "")
+            return 0 if "sitemap" in why else 1
+
         buckets = []
         claimed = set()
         for _name, matches in cls._EVIDENCE_FAMILIES:
             group = [c for c in candidates
                      if c["candidate_id"] not in claimed and matches(c)]
+            group.sort(key=_verified_first)
             claimed.update(c["candidate_id"] for c in group)
             buckets.append(group)
         picked, depth = [], 0
