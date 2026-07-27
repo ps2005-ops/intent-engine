@@ -45,7 +45,12 @@ def _default_transport(url: str, timeout: float):
 
 
 def safe_fetch(url: str, *, transport=None, resolver=None,
-               timeout: float = CONNECT_TIMEOUT_S) -> FetchResult:
+               timeout: float = CONNECT_TIMEOUT_S,
+               extra_mime_prefixes=()) -> FetchResult:
+    """``extra_mime_prefixes`` narrowly widens the accepted content types for a
+    single call — used only by sitemap discovery, which must read XML. The
+    default retrieval path is unchanged (HTML/text only), so no analysed
+    evidence document can arrive as an unexpected content type."""
     transport = transport or _default_transport
     redirects = []
     current = url
@@ -106,8 +111,8 @@ def safe_fetch(url: str, *, transport=None, resolver=None,
                                retryable=False, final_url=current,
                                redirects=redirects)
         mime = (headers.get("content-type") or "").split(";")[0].strip()
-        if mime and not any(mime.startswith(p)
-                            for p in ACCEPTED_MIME_PREFIXES):
+        accepted = tuple(ACCEPTED_MIME_PREFIXES) + tuple(extra_mime_prefixes)
+        if mime and not any(mime.startswith(p) for p in accepted):
             return FetchResult(ok=False, failure_type="bad_mime",
                                safe_message=f"unsupported content type "
                                             f"{mime!r}",

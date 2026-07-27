@@ -76,6 +76,56 @@ class CompanyIngestionService:
                 return dict(row.payload, domain=row.company_domain)
         return None
 
+    # Sitemap evidence family -> (source_type, source_class) in the existing
+    # candidate contract, so sitemap-discovered URLs flow through the same
+    # approval, retrieval, and classification path as every other candidate.
+    _FAMILY_TO_TYPE = {
+        "investor": ("external_approved", "investor_material"),
+        "customers": ("customers", "company_owned"),
+        "documentation": ("product", "company_owned"),
+        "product": ("product", "company_owned"),
+        "newsroom": ("blog", "executive_statement"),
+        "leadership": ("about", "company_owned"),
+        "pricing": ("pricing", "company_owned"),
+        "careers": ("careers", "company_owned"),
+    }
+
+    def _sitemap_candidates(self, website: str) -> list:
+        """Publisher-listed URLs grouped by evidence family. Fully defensive:
+        any failure yields nothing, so discovery is never broken by it."""
+        from intent_engine.company_ingestion.sitemap import (
+            discover_from_sitemap,
+        )
+
+        def fetcher(url):
+            # sitemaps are served as XML; this widened MIME set applies ONLY to
+            # discovery reads, never to documents admitted as evidence.
+            return safe_fetch(url, transport=self.transport,
+                              resolver=self.resolver,
+                              extra_mime_prefixes=("application/xml",
+                                                   "text/xml"))
+
+        try:
+            found = discover_from_sitemap(website, fetcher=fetcher)
+        except Exception:                                   # noqa: BLE001
+            return []
+        out = []
+        for entry in found:
+            source_type, source_class = self._FAMILY_TO_TYPE.get(
+                entry["family"], ("product", "company_owned"))
+            out.append({
+                "url": entry["url"],
+                "source_type": source_type,
+                "discovery_method": "known_path",
+                "same_domain": True,
+                "source_class": source_class,
+                "why_useful": f"{entry['family']} evidence listed in the "
+                              "company's own sitemap",
+                "why_relevant": ("published by the company in its sitemap — a "
+                                 "real, canonical URL rather than a guess"),
+            })
+        return out
+
     # --- discovery ---------------------------------------------------------------
     def discover(self, run_id: str) -> list:
         """One bounded homepage fetch → candidate list. Idempotent: stored
@@ -95,6 +145,11 @@ class CompanyIngestionService:
             links = parse_html(result["body"])["links"]
         candidates = discover_candidates(company_url=meta["website"],
                                          homepage_links=links)
+        # Sitemap/robots discovery: the publisher's OWN list of real, canonical
+        # URLs. Guessed known-paths mostly 403/404; sitemap URLs exist by
+        # construction, and this works even when the homepage is JavaScript-
+        # rendered and exposes no links. robots.txt Disallow is honoured.
+        candidates = candidates + self._sitemap_candidates(meta["website"])
         # Bounded external-source proposals (customer voice etc.) broaden the
         # evidence beyond company-owned pages. Off-domain, UNVERIFIED, and
         # (like every candidate) fetched only after explicit approval.
