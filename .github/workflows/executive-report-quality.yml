@@ -25,6 +25,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history, not the default shallow clone. The suite includes a
+          # test that reads a real commit range (HEAD~2..HEAD); under
+          # fetch-depth 1 that range does not exist and the job fails on the
+          # checkout rather than on anything about the code.
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
