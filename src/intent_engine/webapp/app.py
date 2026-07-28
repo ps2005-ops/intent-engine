@@ -32,6 +32,7 @@ from intent_engine.founder_intelligence.presentation import (
 from intent_engine.company_ingestion.entities import (
     AMBIGUOUS, resolve_choice, resolve_entity,
 )
+from intent_engine.strategic_intelligence.editorial import is_meaningful
 from intent_engine.company_ingestion.records import (
     IngestionError, MAX_APPROVED_SOURCES,
 )
@@ -43,6 +44,56 @@ from intent_engine.webapp.sharing import SharingService
 from intent_engine.webapp.store import WebStore
 
 _e = _html.escape
+
+# The brief is the default landing surface, so its contrast is not a detail.
+# Every foreground/background pair here is at or above WCAG AA for its size.
+_BRIEF_CSS = """
+<style>
+.brief{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--bg:#ffffff;
+--panel:#f8fafc;--accent:#1d4ed8;--accent-ink:#ffffff;
+font:17px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+color:var(--ink);background:var(--bg);
+max-width:38rem;margin:0 auto;padding:8px 18px 40px}
+.brief h1{font-size:1.75rem;line-height:1.2;margin:.4rem 0 .2rem}
+.brief h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;
+color:var(--muted);margin:1.6rem 0 .35rem;font-weight:700}
+.brief p{margin:0 0 .5rem}
+.brief .stamp{color:var(--muted);font-size:.86rem;margin-bottom:1.2rem}
+.brief .b-part{border-top:1px solid var(--line);padding-top:.2rem}
+.brief ul,.brief ol{margin:.2rem 0;padding-left:1.2rem}
+.brief li{margin:0 0 .5rem}
+.brief .when{font-size:.78rem;font-weight:700;color:var(--muted);
+margin-right:.5rem}
+.brief a{color:var(--accent);text-decoration:underline}
+.brief .layers{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem;
+padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:8px}
+.brief .layers strong{color:var(--ink)}
+.brief .b-act{display:flex;gap:10px;flex-wrap:wrap;margin:1.8rem 0 1rem}
+.brief .b-act a{display:inline-block;padding:10px 18px;border-radius:9px;
+border:1px solid var(--line);text-decoration:none;color:var(--ink);
+font-weight:600;font-size:.95rem}
+.brief .b-act a.primary{background:var(--accent);color:var(--accent-ink);
+border-color:var(--accent)}
+.brief a:focus-visible,.brief button:focus-visible,
+.brief input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.brief .b-ask{border-top:1px solid var(--line);padding-top:1rem}
+.brief .b-ask label{display:block;font-size:.86rem;color:var(--muted);
+margin-bottom:.35rem}
+.brief .b-ask input{padding:9px 11px;border:1px solid var(--line);
+border-radius:8px;font-size:1rem;min-width:60%;background:var(--bg);
+color:var(--ink)}
+.brief .b-ask button{padding:9px 16px;border-radius:8px;border:0;
+background:var(--accent);color:var(--accent-ink);font-weight:600;
+font-size:.95rem;cursor:pointer}
+@media (max-width:600px){.brief{font-size:16px;padding:6px 14px 30px}
+.brief h1{font-size:1.45rem}.brief .b-ask input{min-width:100%}}
+@media (prefers-color-scheme:dark){
+.brief{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--bg:#0f141c;
+--panel:#161c26;--accent:#7aa2ff;--accent-ink:#0b1220}}
+@media print{.brief .layers,.brief .b-act,.brief .b-ask{display:none}
+.brief{max-width:none}}
+</style>
+"""
 
 _SECURITY_HEADERS = [
     ("X-Content-Type-Options", "nosniff"),
@@ -225,6 +276,12 @@ class WebApp:
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
             return self._report(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "brief":
+            return self._brief_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "slides":
+            return self._slides_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "full":
+            return self._run_page(session, parts[1], layer="full")
         if route == ("GET", "runs", 4) and parts[2] == "evidence":
             return self._evidence(session, parts[1], parts[3])
         if route == ("POST", "runs", 3) and parts[2] == "conversation":
@@ -809,7 +866,7 @@ class WebApp:
                 f'</main></body></html>')
         return self._html(body)
 
-    def _run_page(self, session, run_id):
+    def _run_page(self, session, run_id, *, layer="default"):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
         if self._is_real_run(run_id):
@@ -860,6 +917,14 @@ class WebApp:
         # executive report. The legacy claim/evidence sections are quarantined
         # into a collapsed technical appendix so they never weaken the exec view.
         if result.get("strategic_report"):
+            # The full report is not wrong; it is unreadable at the moment it
+            # matters. Fifteen minutes before a meeting, eleven sections and a
+            # technical appendix get skimmed, and a skimmed report is where a
+            # reader picks up the first confident sentence they see. Depth was
+            # never the problem — the default was. So the default is now the
+            # brief, and the depth is one click away and still complete.
+            if layer == "default":
+                return self._redirect(f"/runs/{run_id}/brief")
             return self._strategic_run_page(session, run_id, result,
                                             share_form, feedback_form)
 
@@ -1102,9 +1167,128 @@ class WebApp:
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Strategic Intelligence — '
                 f'{_e(report.get("company_name", ""))}</title></head><body>'
-                f'{self._nav(session, csrf)}<main>{strat}{actions}{appendix}'
+                f'{self._nav(session, csrf)}<main class="brief">'
+                # The way back to the shorter layers, on the longest one —
+                # this is the page a reader is most likely to want out of.
+                f'{self._layer_nav(run_id, "full")}</main>'
+                f'<main>{strat}{actions}{appendix}'
                 f'</main></body></html>')
-        return self._html(body)
+        return self._html(_BRIEF_CSS + body)
+
+    # --- the three layers ---------------------------------------------------
+    def _analysis_stamp(self, run_id):
+        """When this analysis ran and against which pipeline version — shown
+        on every layer, because a briefing with no date is a briefing whose
+        staleness the reader cannot judge."""
+        from intent_engine._version import version_info
+        meta = self.ci.run_meta(run_id) or {}
+        as_of = (meta.get("as_of") or "")[:10]
+        return as_of, version_info().get("app_version", "")
+
+    def _layer_nav(self, run_id, current):
+        """One consistent way between the three layers, on all three."""
+        links = (("brief", "Executive brief", f"/runs/{run_id}/brief"),
+                 ("slides", "Presentation", f"/runs/{run_id}/slides"),
+                 ("full", "Full analysis", f"/runs/{run_id}/full"))
+        return ('<nav class="layers" aria-label="Report depth">' + " ".join(
+            (f'<strong aria-current="page">{_e(label)}</strong>'
+             if key == current else f'<a href="{_e(href)}">{_e(label)}</a>')
+            for key, label, href in links) + '</nav>')
+
+    def _brief_page(self, session, run_id):
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        report = self._strategic_report_for(run_id)
+        if report is None:
+            return self._redirect(f"/runs/{run_id}/full")
+        from intent_engine.strategic_intelligence.brief import build_brief
+        as_of, version = self._analysis_stamp(run_id)
+        brief = build_brief(report, as_of=as_of, analysis_version=version)
+        csrf = session["csrf"] if session else ""
+
+        def _p(label, value):
+            return (f'<section class="b-part"><h2>{_e(label)}</h2>'
+                    f'<p>{_e(value)}</p></section>') if is_meaningful(value) \
+                else ''
+
+        signals = "".join(
+            f'<li>' + (f'<span class="when">{_e(s["date"])}</span>'
+                       if is_meaningful(s.get("date")) else '')
+            + f'{_e(s["text"])}</li>' for s in brief.signals)
+        questions = "".join(f'<li>{_e(q)}</li>' for q in brief.questions)
+        body = (
+            f'{_BRIEF_CSS}<main class="brief">'
+            f'{self._layer_nav(run_id, "brief")}'
+            f'<h1>{_e(brief.company)}</h1>'
+            f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
+            f'about a two-minute read</p>'
+            + _p("The central view", brief.thesis)
+            + (f'<section class="b-part"><h2>What supports it</h2>'
+               f'<ul class="signals">{signals}</ul></section>'
+               if signals else '')
+            + _p("What argues the other way", brief.counterpoint)
+            + _p("The tension to watch", brief.tension)
+            + _p("The decision this affects", brief.decision)
+            + (f'<section class="b-part"><h2>Questions for leadership</h2>'
+               f'<ol>{questions}</ol></section>' if questions else '')
+            + _p("What this cannot tell you", brief.limitation)
+            + f'<div class="b-act">'
+            f'<a class="primary" href="/runs/{_e(run_id)}/slides">'
+            f'Present this</a>'
+            f'<a href="/runs/{_e(run_id)}/full">Read the full analysis</a>'
+            f'</div>'
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
+            f'class="b-ask"><input type="hidden" name="csrf" '
+            f'value="{_e(csrf)}"><label for="q">Ask a question about '
+            f'{_e(brief.company)}</label> '
+            f'<input id="q" name="question" required>'
+            f'<button type="submit">Ask</button></form>'
+            f'</main>')
+        return self._html(self._page(f"{brief.company} — executive brief",
+                                     body, session, csrf))
+
+    def _slides_page(self, session, run_id):
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        report = self._strategic_report_for(run_id)
+        if report is None:
+            return self._redirect(f"/runs/{run_id}/full")
+        from intent_engine.strategic_intelligence.slides import (
+            build_slides, deck_is_presentable, meaningful_slide_count,
+            render_deck,
+        )
+        as_of, version = self._analysis_stamp(run_id)
+        csrf = session["csrf"] if session else ""
+        slides = build_slides(report, as_of=as_of, analysis_version=version)
+        if not deck_is_presentable(slides):
+            # Better to say so than to hand someone a three-slide deck in a
+            # meeting after promising a presentation.
+            body = (
+                f'<main>{self._layer_nav(run_id, "slides")}'
+                f'<h1>Not enough for a presentation</h1>'
+                f'<p>This analysis supports '
+                f'{meaningful_slide_count(slides)} substantive slide(s), and a '
+                f'presentation needs at least 5. The brief and the full '
+                f'analysis contain everything that was found.</p>'
+                f'<p><a href="/runs/{_e(run_id)}/brief">Read the executive '
+                f'brief</a> · <a href="/runs/{_e(run_id)}/full">Full '
+                f'analysis</a></p></main>')
+            return self._html(self._page("Presentation unavailable", body,
+                                         session, csrf))
+        deck = render_deck(slides, company=report.get("company_name", ""),
+                           as_of=as_of, analysis_version=version,
+                           run_id=run_id, csrf=csrf,
+                           full_analysis_url=f"/runs/{run_id}/full")
+        body = (f'<main>{self._layer_nav(run_id, "slides")}{deck}</main>')
+        return self._html(self._page(
+            f'{report.get("company_name", "")} — presentation', body, session,
+            csrf))
+
+    def _page(self, title, body, session, csrf):
+        return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                f'<meta name="viewport" content="width=device-width,'
+                f'initial-scale=1"><title>{_e(title)}</title></head><body>'
+                f'{self._nav(session, csrf)}{body}</body></html>')
 
     def _evidence(self, session, run_id, claim_id):
         if not self._owned(session, run_id):

@@ -650,9 +650,19 @@ def _strategic_webapp_run(tmp_path):
     return app, c, rid
 
 
+def test_webapp_strategic_run_defaults_to_the_brief(tmp_path):
+    """The default is the brief, because fifteen minutes before a meeting an
+    eleven-section report gets skimmed. The depth is one click away."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, _ = c.request("GET", f"/runs/{rid}")
+    assert status.startswith("303")
+    assert headers["Location"] == f"/runs/{rid}/brief"
+
+
 def test_webapp_strategic_run_quarantines_legacy(tmp_path):
     app, c, rid = _strategic_webapp_run(tmp_path)
-    status, _, body = c.request("GET", f"/runs/{rid}")
+    # the full analysis keeps every contract it had; it is no longer the default
+    status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
     # executive-first content is present
     assert "Decision most affected" in body and "card hypothesis" in body
