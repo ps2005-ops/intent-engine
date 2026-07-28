@@ -82,3 +82,9 @@ data/webapp.jsonl.lock
 data/company_ingestion.jsonl
 data/company_ingestion.jsonl.lock
 .venv-deploy/
+
+# local analyst response caches (scratch)
+.analyst-cache*/
+.daily-cache/
+.founder-cache/
+.fresh-cache*/
