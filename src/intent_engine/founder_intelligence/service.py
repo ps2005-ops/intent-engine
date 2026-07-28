@@ -29,7 +29,8 @@ from intent_engine.founder_intelligence.intake import (
 from intent_engine.founder_intelligence.records import (
     ASSEMBLING, ANALYZING, COMPLETE, FounderIntelligenceError,
     FounderIntelligenceEvent, IDENTITY_MISMATCH, IDENTITY_RESOLVED, INGESTING,
-    PARTIAL, REJECTED, VALIDATING, assert_trust_sequence, canonical_domain,
+    FAILED, PARTIAL, REJECTED, VALIDATING, assert_trust_sequence,
+    canonical_domain,
     json_normalize, now_iso,
 )
 from intent_engine.founder_intelligence.state import (
@@ -241,6 +242,50 @@ class FounderIntelligenceService:
         seed = f"run:{domain}:{as_of}:{analysis_fingerprint(company_input)}"
         run_id = self._stable_id(seed)
 
+        # REUSE A FINISHED RUN INSTEAD OF REPLAYING IT.
+        #
+        # The identity above is deterministic on purpose: same company, same
+        # approved evidence, same pipeline version is the SAME analysis. What
+        # was missing is the other half of that idea. The first caller
+        # completed the run; a later caller derived the same id and then
+        # executed the write path again, appending section events to a run
+        # that was already terminal:
+        #
+        #   FounderIntelligenceError: fi.section_assembled on a terminal run
+        #                             (COMPLETE)
+        #
+        # In production the store persists, so this was "the second person to
+        # analyse any given company gets a 500".
+        #
+        # Reuse is safe here for a structural reason, not a hopeful one: the
+        # returned result is a pure function of the arguments to this method.
+        # `_assemble_sections` reads nothing but its parameters, and identity
+        # resolution is likewise derived from the input. Identical inputs
+        # therefore reproduce the identical result, which is precisely the
+        # premise that makes the id deterministic. So a finished run is
+        # recomposed in memory and returned, and NOTHING is appended.
+        #
+        # Terminal-state protection is not weakened: this path exists so that
+        # the write path is never entered for a terminal run, rather than
+        # loosening the rule that rejects it.
+        existing = self.get_runs().runs.get(run_id)
+        prior = getattr(existing, "status", None) if existing else None
+        if prior in (COMPLETE, PARTIAL):
+            return self._recompose(
+                run_id=run_id, domain=domain, company_input=company_input,
+                claims_by_section=claims_by_section, as_of=as_of,
+                resolved_domain=resolved_domain,
+                competitor_supported=competitor_supported, reused=True)
+        if prior in (FAILED, REJECTED):
+            # A failed attempt must never be handed back as a success, and it
+            # must not be resumed either -- its run is terminal. Say so
+            # plainly and let the caller decide to retry, which produces a new
+            # identity once the evidence or the pipeline version changes.
+            raise FounderIntelligenceError(
+                f"the previous analysis of {domain} on {as_of} ended in "
+                f"{prior} and cannot be reused or resumed; retry with fresh "
+                f"evidence")
+
         # CREATED -> VALIDATING
         self._record("fi.run_created", run_id=run_id, company_domain=domain,
                      subject_type="run", subject_id=run_id,
@@ -321,6 +366,36 @@ class FounderIntelligenceService:
             "identity": identity.as_dict(),
             "sections": [s.as_dict() for s in sections],
             "limitations": limitations,
+            "note": "synthetic/approved-source analysis; every claim cites a "
+                    "source artifact and its freshness",
+        }
+
+    def _recompose(self, *, run_id, domain, company_input, claims_by_section,
+                   as_of, resolved_domain, competitor_supported,
+                   reused=False) -> dict:
+        """Rebuild a finished run's result without touching the event log.
+
+        Every step here is one of the pure steps `run()` performs. Nothing is
+        recorded, so a terminal run stays terminal and its recorded history
+        stays exactly as the original execution left it.
+        """
+        identity = resolve_identity(
+            company_name=company_input.company_name,
+            website=company_input.website, as_of=as_of,
+            resolved_domain=resolved_domain)
+        sections = self._assemble_sections(claims_by_section,
+                                           competitor_supported)
+        assert_trust_sequence(sections)
+        limitations = [l for s in sections for l in s.limitations]
+        complete = any(s.kind == "company_understanding"
+                       and s.availability == "SUPPORTED" for s in sections)
+        return {
+            "run_id": run_id, "company_domain": domain,
+            "status": COMPLETE if complete else PARTIAL,
+            "identity": identity.as_dict(),
+            "sections": [s.as_dict() for s in sections],
+            "limitations": limitations,
+            "reused": reused,
             "note": "synthetic/approved-source analysis; every claim cites a "
                     "source artifact and its freshness",
         }
