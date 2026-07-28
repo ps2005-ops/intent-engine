@@ -112,6 +112,28 @@ SHOPIFY = Site(
             "merchant-facing product teams.",
         ]),
     },
+    # Evidence nobody at the company wrote. Without at least one fixture that
+    # has this, "independent corroboration raises confidence" and
+    # "company-owned evidence caps it" are two rules that no case can tell
+    # apart, because every case scored an independent share of exactly zero.
+    external_pages={
+        "https://www.g2.com/products/shopify/reviews": _page(
+            "Shopify reviews — G2", [
+                "Reviewers running small stores consistently rate setup speed "
+                "highest and rate reporting depth lowest. Several reviews from "
+                "larger merchants say they moved to Shopify Plus for checkout "
+                "conversion and then found enterprise reporting thinner than "
+                "the platform they left.",
+                "A recurring complaint across reviews is app costs "
+                "accumulating on top of subscription pricing.",
+            ]),
+        "https://www.trustpilot.com/review/shopify.example": _page(
+            "Shopify — Trustpilot", [
+                "Merchant reviews describe fast onboarding and responsive "
+                "support, with repeated criticism of transaction fees when "
+                "payments are not taken through the first-party processor.",
+            ]),
+    },
 )
 
 PALANTIR = Site(

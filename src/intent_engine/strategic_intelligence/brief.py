@@ -286,11 +286,27 @@ def _build_headline(company, report, brief, documents) -> Headline:
     hypotheses = r.get("hypotheses") or []
     confidence = str((hypotheses[0].get("confidence") if hypotheses else "")
                      or "").strip().lower()
+    provenance = str((hypotheses[0].get("provenance") if hypotheses else "")
+                     or "").strip()
+    # How it is known belongs beside how much to trust it. "Moderate
+    # confidence" alone leaves a reader guessing whether that came from the
+    # company's own page or from someone outside it, and those call for
+    # different decisions.
+    _BASIS = {
+        "independently corroborated": "corroborated outside the company",
+        "customer-observed": "based on what customers said, not only the "
+                             "company",
+        "company-stated": "based on the company's own account of itself",
+        "pattern-supported": "based on a historical pattern, not on this "
+                             "company",
+        "inferred": "inferred from the evidence rather than stated anywhere",
+    }
     if brief.view_withheld:
         note = "No view is put forward: the evidence does not support one."
     elif confidence:
-        note = (f"Held as a {confidence}-confidence hypothesis, not a settled "
-                f"fact.")
+        basis = _BASIS.get(provenance, "")
+        note = (f"Held as a {confidence}-confidence hypothesis"
+                + (f", {basis}." if basis else ", not a settled fact."))
     else:
         note = "A hypothesis, not a settled fact."
     # The thesis's own second sentence states the confidence, and the note

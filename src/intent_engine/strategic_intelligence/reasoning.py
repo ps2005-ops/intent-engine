@@ -37,19 +37,56 @@ def _obs_with_any(observations, wanted) -> list:
     return [o for o in observations if wanted & set(o.signals)]
 
 
+# WHOSE ACCOUNT a source is, which is not the same question as what KIND of
+# page it is. A company's investor relations page and its product page are two
+# source classes and one vantage point: the company, describing itself. Three
+# such pages agreeing is not corroboration, it is a company being consistent —
+# and counting them as diversity is how a claim about how the market sees a
+# company reached "high confidence" on nothing but the company's own writing.
+_VANTAGE_OF = {
+    "company_owned": "the company",
+    "executive_statement": "the company",
+    "investor_material": "the company",
+    "customer_voice": "its customers",
+    "competitor": "a competitor",
+    "independent_reporting": "an independent observer",
+    "historical_pattern": "a historical pattern",
+}
+
+
+def _vantages(support_classes) -> set:
+    return {_VANTAGE_OF.get(c, "an unclassified source")
+            for c in support_classes}
+
+
+def _provenance(support_classes) -> str:
+    """How this claim is known, named for the strongest support behind it."""
+    classes = set(support_classes)
+    if classes & {"independent_reporting", "competitor"}:
+        return "independently corroborated"
+    if "customer_voice" in classes:
+        return "customer-observed"
+    if classes & {"company_owned", "executive_statement", "investor_material"}:
+        return "company-stated"
+    if "historical_pattern" in classes:
+        return "pattern-supported"
+    return "inferred"
+
+
 def _confidence(matched_qual, support_classes, counter_count) -> tuple:
     """Return (level, reasons). Confidence rises with the number of qualifying
-    signals matched and the diversity of source classes supporting them, and
-    is tempered when counter-evidence is present."""
+    signals matched and the number of distinct VANTAGE POINTS supporting them,
+    and is tempered when counter-evidence is present."""
     base = len(matched_qual)
-    diversity = len(support_classes)
+    vantages = _vantages(support_classes)
+    diversity = len(vantages)
     reasons = [
         f"{base} qualifying signal(s) matched: {', '.join(sorted(matched_qual))}",
-        f"supported by {diversity} source class(es): "
-        f"{', '.join(sorted(support_classes))}",
+        f"supported from {diversity} vantage point(s): "
+        f"{', '.join(sorted(vantages))}",
     ]
-    only_company = support_classes == {"company_owned"}
-    independent = support_classes & set(_INDEPENDENT_CLASSES)
+    only_company = vantages == {"the company"}
+    independent = set(support_classes) & set(_INDEPENDENT_CLASSES)
     if only_company:
         reasons.append("all support comes from company-owned pages, which is "
                        "one-sided; independent corroboration is missing")
@@ -69,9 +106,14 @@ def _confidence(matched_qual, support_classes, counter_count) -> tuple:
         level = "low"
     else:
         level = "speculative"
-    # one-sided or well-countered claims are not allowed to read as high
-    if only_company and level == "high":
+    # High confidence is a claim about the world, and the company's own account
+    # of itself cannot establish one however many of its pages agree. This is
+    # the hard cap: without a vantage point outside the company, the ceiling is
+    # moderate whatever the signal count reaches.
+    if not independent and level == "high":
         level = "moderate"
+        reasons.append("capped below high: no source outside the company "
+                       "corroborates this")
     if counter_count >= max(1, base) and _CONF_RANK[level] > 1:
         level = "low"
     return level, reasons
@@ -164,6 +206,7 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
         comparables=tuple(e.get("name", "")
                           for e in pattern.historical_examples),
         evidence_roles=tuple(roles),
+        provenance=_provenance(support_classes),
     )
     h.validate()
     return h

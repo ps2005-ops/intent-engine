@@ -41,6 +41,18 @@ OBSERVATION_TYPES = (
 
 CONFIDENCE_LEVELS = ("speculative", "low", "moderate", "high")
 
+# How a claim is known. Deliberately written the way a person would say it,
+# because these reach the page: a reader deciding what to do with a claim needs
+# to know whether the company asserted it, someone outside observed it, or the
+# analysis inferred it from a historical pattern. Ordered weakest to strongest.
+PROVENANCE_LEVELS = (
+    "pattern-supported",        # a historical analogue, not this company
+    "inferred",                 # combined from evidence, stated by nobody
+    "company-stated",           # the company said it about itself
+    "customer-observed",        # its customers described it
+    "independently corroborated",   # someone outside the company observed it
+)
+
 # How a piece of evidence relates to a hypothesis. Assigned per hypothesis, so
 # the same observation can support one and contradict another — but it may not
 # be BOTH support and contradiction for a single hypothesis without an explicit
@@ -165,10 +177,18 @@ class StrategicHypothesis:
     strongest_counter_ids: tuple = ()
     comparables: tuple = ()                # comparison company names
     evidence_roles: tuple = ()             # [(observation_id, role), ...]
+    # HOW this claim is known, in a reader's words. Confidence says how much to
+    # trust it; provenance says what kind of thing it is. A reader who cannot
+    # tell "the company says so" from "someone outside the company observed it"
+    # cannot judge either one, and the two were previously indistinguishable on
+    # the page.
+    provenance: str = "company-stated"
 
     def validate(self) -> None:
         _require(self.confidence in CONFIDENCE_LEVELS,
                  f"unknown confidence {self.confidence!r}")
+        _require(self.provenance in PROVENANCE_LEVELS,
+                 f"unknown provenance {self.provenance!r}")
         _require(bool(self.reasoning.strip()),
                  f"hypothesis {self.hypothesis_id} has no reasoning")
         _require(len(self.supporting_observation_ids) >= 1,

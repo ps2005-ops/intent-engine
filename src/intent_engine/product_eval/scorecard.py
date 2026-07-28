@@ -237,6 +237,23 @@ def score_report(*, brief=None, slides=(), report=None, documents=(),
         failures.append("a hypothesis is high-confidence on company-owned "
                         "evidence alone")
 
+    # Every displayed claim declares how it is known, and the declaration has
+    # to agree with the evidence behind it. A claim marked as corroborated
+    # outside the company while every source is the company's own page is
+    # worse than an unlabelled one: it is a false assurance in the exact place
+    # a careful reader looks.
+    provenances = [str(h.get("provenance", "")).strip() for h in hypotheses]
+    metrics["provenance"] = sorted(set(p for p in provenances if p))
+    metrics["unlabelled_claims"] = sum(1 for p in provenances if not p)
+    if hypotheses and metrics["unlabelled_claims"]:
+        failures.append(f"{metrics['unlabelled_claims']} claim(s) do not say "
+                        "how they are known")
+    outside = ("independently corroborated", "customer-observed")
+    if any(p in outside for p in provenances) and \
+            metrics["independent_share"] == 0:
+        failures.append("a claim says it is corroborated outside the company "
+                        "while every source is the company's own")
+
     # --- presentation --------------------------------------------------------
     slides = list(slides or ())
     metrics["slide_count"] = len(slides)
