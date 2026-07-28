@@ -49,6 +49,11 @@ class AppConfig:
     # The two caps are abuse guardrails for the public URL while the beta is
     # live; the kill switch is DEMO_MODE=false + redeploy.
     demo_mode: bool = False
+    # Server-side smoke-test token. Empty means the mechanism does not exist:
+    # no header is consulted and behaviour is byte-for-byte what it was. It is
+    # never rendered, never logged, and never sent to a client -- it is only
+    # ever compared against an inbound request header.
+    smoke_test_token: str = ""
     demo_ip_analyses_per_hour: int = 10      # per client IP, rolling hour
     demo_session_analyses_per_day: int = 25  # per anon session, rolling day
     # Frictionless flow: when on (the default), submitting the analyze form
@@ -129,6 +134,8 @@ def from_env(environ=None) -> AppConfig:
             "WEBAPP_BOOTSTRAP_PASSWORD_HASH", ""),
         bootstrap_token=env_map.get("WEBAPP_BOOTSTRAP_TOKEN", ""),
         demo_mode=demo_mode,
+        smoke_test_token=env_map.get(
+            "FOUNDER_INTELLIGENCE_SMOKE_TEST_TOKEN", "").strip(),
         demo_ip_analyses_per_hour=_pos_int(
             "DEMO_MAX_ANALYSES_PER_HOUR", 10),
         demo_session_analyses_per_day=_pos_int(

@@ -10,6 +10,7 @@ Honesty boundaries carried into the web layer:
 """
 from __future__ import annotations
 
+import hmac
 import html as _html
 import json
 import logging
@@ -392,7 +393,8 @@ class WebApp:
             self.auth.logout(sid)
             return self._redirect("/", clear_cookie=True)
         if path == "/analyze" and method == "POST":
-            result = self._analyze(session, form, remote)
+            result = self._analyze(session, form, remote,
+                                   smoke=self._is_smoke_test(environ))
             if minted_sid:
                 # carry the new demo session onto whatever the analysis
                 # returned, so the user stays signed into it
@@ -497,6 +499,42 @@ class WebApp:
             if first:
                 return first
         return environ.get("REMOTE_ADDR", "") or "unknown"
+
+    #: request header carrying the smoke-test token (server-side only)
+    SMOKE_TEST_HEADER = "HTTP_X_FOUNDER_INTELLIGENCE_SMOKE_TEST"
+
+    def _is_smoke_test(self, environ) -> bool:
+        """True when this request presents the configured smoke-test token.
+
+        Exists because engineering smoke traffic was consuming the same
+        allowance as real visitors, so repeated production checks returned 429
+        and live validation stalled twice.
+
+        Deliberately narrow. It is consulted in exactly one place -- the demo
+        rate limiter -- so a valid token buys nothing except the quota. Consent,
+        CSRF, run ownership, session isolation and every other boundary are
+        untouched by it.
+
+        With no token configured the mechanism does not exist: the header is
+        not read and behaviour is unchanged. An absent, empty or wrong token is
+        indistinguishable from an ordinary public request.
+        """
+        expected = (self.config.smoke_test_token or "").strip()
+        if not expected:
+            return False
+        presented = (environ.get(self.SMOKE_TEST_HEADER) or "").strip()
+        if not presented:
+            return False
+        # constant-time: a length-or-prefix leak here would let the token be
+        # recovered a character at a time
+        if not hmac.compare_digest(presented, expected):
+            return False
+        # Audited, because a bypass that leaves no trace is a bypass nobody can
+        # review. The event names what happened and nothing else -- no token,
+        # no prefix, no length.
+        _LOG.info("internal_smoke_test_rate_limit_bypass_used path=%s",
+                  environ.get("PATH_INFO", "?"))
+        return True
 
     def _demo_rate_limited(self, session, remote):
         """Anonymous-session abuse guardrail. Enforces a per-IP rolling-hour
@@ -643,52 +681,45 @@ class WebApp:
                                 f'<input type="hidden" name="csrf" '
                                 f'value="{_e(csrf)}"><button type="submit">', 1)
             if session.get("anonymous"):
-                # First contact. Someone who has just clicked "try the demo"
-                # does not yet know what the product is, and a company-name
-                # box explains nothing. Shown once, dismissed for the session.
-                intro = ''
-                if not session.get("onboarding_dismissed"):
-                    intro = (
-                        _BRIEF_CSS + _ONBOARDING_CSS
-                        + '<div class="brief">'
-                        + self._onboarding_html(dismissible=False)
-                        .replace('</section>',
-                                 f'<form action="/onboarding/dismiss" '
-                                 f'method="post" class="ob-dismiss">'
-                                 f'<input type="hidden" name="csrf" '
-                                 f'value="{_e(csrf)}">'
-                                 f'<button type="submit">Got it — start an '
-                                 f'analysis</button></form></section>')
-                        + '</div>')
-                # Prepared examples, offered up front. A guest with no company
-                # in mind types something arbitrary and meets the weakest case
-                # the product has; these are the ones that are known to work.
+                # METHODOLOGY DOES NOT GO BEFORE VALUE.
+                #
+                # This used to inject the whole "Before you start" explainer
+                # above the form: how retrieval works, what a hypothesis is,
+                # what confidence means, a glossary -- everything except a
+                # reason to care. A first-time visitor met a methodology
+                # document and had to scroll past it to reach the one box that
+                # does something.
+                #
+                # It also rendered SIX identical "Got it - start an analysis"
+                # buttons, because the injection did
+                #   .replace('</section>', form + '</section>')
+                # and str.replace with no count replaces EVERY occurrence --
+                # one per explainer section.
+                #
+                # The explainer still exists, in full, at /onboarding. It is
+                # now a link for people who want it rather than a wall for
+                # people who do not.
                 from intent_engine.company_ingestion.demo_tiers import (
-                    GOLDEN_COMPANIES, GOLDEN, presentation,
+                    GOLDEN_COMPANIES,
                 )
-                golden_mode = presentation(GOLDEN)
-                golden = "".join(
-                    f'<form action="/analyze" method="post" class="golden">'
+                examples = " · ".join(
+                    f'<button type="submit" form="ex{i}" class="linkish">'
+                    f'{_e(c["name"])}</button>'
+                    for i, c in enumerate(GOLDEN_COMPANIES))
+                forms = "".join(
+                    f'<form id="ex{i}" action="/analyze" method="post" '
+                    f'class="golden">'
                     f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
                     f'<input type="hidden" name="consent" value="1">'
                     f'<input type="hidden" name="company_name" '
                     f'value="{_e(c["name"])}">'
                     f'<input type="hidden" name="website" '
-                    f'value="{_e(c["website"])}">'
-                    f'<button type="submit">{_e(c["name"])}</button>'
-                    f'<span class="why">{_e(c["why"])}</span></form>'
-                    for c in GOLDEN_COMPANIES)
-                intro += (f'<section class="golden-list" aria-label="Prepared '
-                          f'examples"><h2>{_e(golden_mode["label"])}s</h2>'
-                          f'<p>{_e(golden_mode["summary"])}</p>{golden}'
-                          f'</section>')
-                page = page.replace(
-                    '<main>',
-                    '<main>' + intro + '<p role="status"><strong>Demo mode.'
-                    '</strong> '
-                    'You are in an anonymous, isolated demo session — no '
-                    'sign-in, no access to anyone else\'s data, no share '
-                    'links. Analyze a company below.</p>', 1)
+                    f'value="{_e(c["website"])}"></form>'
+                    for i, c in enumerate(GOLDEN_COMPANIES))
+                intro = (
+                    f'<p class="try-line">Not sure where to start? '
+                    f'Try {examples}.</p>{forms}')
+                page = page.replace('<main>', '<main>' + intro, 1)
         else:
             note = ('<p><strong>Early access:</strong> '
                     '<a href="/login">log in</a> to run an analysis.</p>')
@@ -815,7 +846,7 @@ class WebApp:
         except WebAppError as exc:
             status, headers, body = self._login_page(str(exc))
             return "401 Unauthorized", headers, body
-        return self._redirect("/onboarding", set_sid=sid)
+        return self._redirect("/", set_sid=sid)
 
     def _signup_page(self):
         if not self.config.registration_open:
@@ -841,12 +872,12 @@ class WebApp:
                               created_by=form.get("email", ""),
                               via_registration=True)
         sid = self.auth.login(form.get("email", ""), form.get("password", ""))
-        return self._redirect("/onboarding", set_sid=sid)
+        return self._redirect("/", set_sid=sid)
 
-    def _analyze(self, session, form, remote="unknown"):
+    def _analyze(self, session, form, remote="unknown", *, smoke=False):
         if form.get("consent") is None:
             return self._error_page(400, "consent is required")
-        limited = self._demo_rate_limited(session, remote)
+        limited = None if smoke else self._demo_rate_limited(session, remote)
         if limited is not None:
             return limited
         website = form.get("website", f"https://{DEMO_DOMAIN}")

@@ -59,8 +59,22 @@ def guest(tmp_path):
 
 
 # --- onboarding ---------------------------------------------------------------
-def test_a_first_time_guest_is_told_what_this_is(guest):
+def test_a_first_time_guest_meets_the_product_not_the_methodology(guest):
+    """The explainer moved OFF the landing page. A first-time visitor gets the
+    promise, the input and an example of the output; the methodology is one
+    click away for anyone who wants it."""
     _, _, page = guest.request("GET", "/")
+    assert "Before you start" not in page, "methodology is back in front of value"
+    assert 'action="/analyze"' in page              # the one thing to do
+    # ONE primary call to action. The old page rendered six identical
+    # "Got it - start an analysis" buttons because the explainer injection
+    # used str.replace on '</section>' with no count.
+    assert page.count("Read this company") == 1
+    assert 'href="/onboarding"' in page             # still reachable
+
+
+def test_the_methodology_page_still_tells_a_guest_what_this_is(guest):
+    _, _, page = guest.request("GET", "/onboarding")
     assert "Before you start" in page
     for heading in ("What this does", "How it works", "What it does not do",
                     "How to use it"):
@@ -68,21 +82,21 @@ def test_a_first_time_guest_is_told_what_this_is(guest):
 
 
 def test_onboarding_explains_the_limits_honestly(guest):
-    _, _, page = guest.request("GET", "/")
+    _, _, page = guest.request("GET", "/onboarding")
     assert "no access to anything inside the company" in page
     assert "private meetings" in page
     assert "hypothesis, not a" in page
 
 
 def test_onboarding_defines_the_words_that_would_otherwise_be_jargon(guest):
-    _, _, page = guest.request("GET", "/")
+    _, _, page = guest.request("GET", "/onboarding")
     for term in ("Outside-in", "Confidence", "Hypothesis", "Contradiction",
                  "Limited analysis"):
         assert f">{term}<" in page, f"undefined term: {term}"
 
 
 def test_onboarding_uses_no_internal_terminology(guest):
-    _, _, page = guest.request("GET", "/")
+    _, _, page = guest.request("GET", "/onboarding")
     intro = page.split('class="onboarding"')[1].split("</section>")[0] \
         if 'class="onboarding"' in page else page
     for internal in ("evidence family", "evidence families", "source_class",
@@ -91,16 +105,12 @@ def test_onboarding_uses_no_internal_terminology(guest):
         assert internal not in intro, f"internal term shown: {internal}"
 
 
-def test_onboarding_is_dismissible_and_stays_dismissed(guest):
+def test_the_landing_page_has_nothing_to_dismiss(guest):
+    """The dismiss flow existed because the explainer was in the way. It is
+    not in the way any more."""
     _, _, page = guest.request("GET", "/")
-    assert "Before you start" in page
-    status, _, _ = guest.request("POST", "/onboarding/dismiss",
-                                 f"csrf={guest.csrf()}")
-    assert status.startswith("303")
-    _, _, page = guest.request("GET", "/")
-    assert "Before you start" not in page
-    # and the analyse form is still right there
-    assert 'action="/analyze"' in page
+    assert "Got it" not in page
+    assert "ob-dismiss" not in page
 
 
 def test_onboarding_stays_reachable_after_dismissal(guest):

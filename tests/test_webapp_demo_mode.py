@@ -35,7 +35,8 @@ class Client:
         self.default_host = default_host
         self.xff = xff
 
-    def request(self, method, path, body="", host=None, xff=...):
+    def request(self, method, path, body="", host=None, xff=...,
+                env_extra=None):
         host = host or self.default_host
         env = {"REQUEST_METHOD": method, "PATH_INFO": path,
                "CONTENT_LENGTH": str(len(body)), "HTTP_HOST": host,
@@ -44,6 +45,8 @@ class Client:
         forwarded = self.xff if xff is ... else xff
         if forwarded:
             env["HTTP_X_FORWARDED_FOR"] = forwarded
+        # extra WSGI environ keys (request headers) for tests that need them
+        env.update(env_extra or {})
         out = {}
 
         def sr(status, headers):
@@ -220,7 +223,9 @@ def test_try_demo_mints_anonymous_ephemeral_session(tmp_path):
     assert app.web_store.users() == {}
     # the landing page now shows the demo banner + guest nav
     _, _, body = c.request("GET", "/")
-    assert "Demo mode" in body and "Guest demo session" in body
+    # The guest can still see they are in an anonymous demo session -- now
+    # from the nav rather than from a banner stacked on top of the product.
+    assert "Guest demo session" in body
 
 
 def test_anonymous_runs_demo_end_to_end(tmp_path):

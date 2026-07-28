@@ -102,6 +102,45 @@ def _render_section(section: dict) -> str:
     return "".join(parts)
 
 
+# Landing-page styling. Restraint is the point: one column, generous spacing,
+# one primary action, and type that carries the hierarchy instead of borders
+# and cards doing it. The old page read like an internal form because every
+# element had the same visual weight.
+_LANDING_CSS = """
+main{max-width:44rem}
+h1{font-size:2.3rem;line-height:1.15;letter-spacing:-.02em;margin:.2em 0 .5rem}
+.lede{font-size:1.12rem;line-height:1.6;color:#3a3a52;margin-bottom:2.4rem}
+.try-line{font-size:.92rem;color:#555;margin:-1.4rem 0 2rem}
+button.linkish{background:none;border:0;padding:0;font:inherit;
+  color:#3a3a8c;text-decoration:underline;cursor:pointer}
+form.golden{display:none}
+form.analyze{margin:0 0 2.6rem}
+.field-row{display:flex;gap:1rem;flex-wrap:wrap}
+.field-row .field{flex:1 1 15rem;display:flex;flex-direction:column}
+form.analyze label{font-size:.85rem;color:#444;margin-bottom:.25rem}
+form.analyze input[type=text],form.analyze input[type=url],
+form.analyze input:not([type]){width:100%;padding:.65rem .75rem;
+  border:1px solid #d5d5e2;border-radius:8px;font-size:1rem;background:#fff}
+form.analyze input::placeholder{color:#9a9ab0}
+details.opt{margin:1rem 0 .4rem;font-size:.92rem}
+details.opt summary{cursor:pointer;color:#3a3a8c}
+.consent{font-size:.88rem;color:#444;margin:1rem 0 1.2rem}
+form.analyze button[type=submit]{background:#2f2f7a;color:#fff;border:0;
+  border-radius:8px;padding:.7rem 1.4rem;font-size:1rem;cursor:pointer}
+.sample{border-top:1px solid #e9e9f2;padding-top:1.6rem;margin-top:.5rem}
+.sample h2,.assurance h2{font-size:.8rem;text-transform:uppercase;
+  letter-spacing:.08em;color:#77778f;font-weight:600}
+.sample-quote{font-size:1.12rem;line-height:1.55;color:#1a1a2e;
+  border-left:3px solid #2f2f7a;padding-left:1rem;margin:.8rem 0 1rem}
+.sample-note{color:#4a4a63;line-height:1.6}
+.assurance{border-top:1px solid #e9e9f2;padding-top:1.6rem;margin-top:2.4rem}
+.assurance p{color:#4a4a63;line-height:1.6}
+.assurance .more{font-size:.92rem}
+@media (max-width:640px){h1{font-size:1.75rem}.field-row{display:block}
+  .field-row .field{margin-bottom:.9rem}}
+"""
+
+
 _BASE_CSS = """
 body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:820px;
 margin:0 auto;padding:2rem;color:#1a1a2e;line-height:1.55}
@@ -198,28 +237,56 @@ def render_landing_html() -> str:
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Understand your company from the outside in</title>'
-        f'<style>{_BASE_CSS}</style></head><body><main>'
-        '<h1>Understand your company from the outside in.</h1>'
-        '<p>Enter your company and receive an evidence-backed view of how your '
-        'market, customers, and public signals appear from outside the '
-        'organization.</p>'
-        '<form action="/analyze" method="post" aria-label="Analyze a company">'
-        '<p><label for="company_name">Company name</label>'
-        '<input id="company_name" name="company_name" required></p>'
-        '<p><label for="website">Company website</label>'
-        '<input id="website" name="website" type="url" required></p>'
-        '<p><label for="role">Your role (optional)</label>'
-        '<input id="role" name="requester_role"></p>'
-        '<p><label for="q">What are you trying to understand? (optional)</label>'
-        '<input id="q" name="business_question"></p>'
-        '<p><label><input type="checkbox" name="consent" required> I approve '
-        'analysis of this company using public and official sources — its '
-        'website and, for public companies, SEC filings.</label></p>'
-        '<button type="submit">Analyze my company</button></form>'
-        '<p class="trust-note">Every conclusion shows its evidence, confidence, '
-        'and limitations. No autonomous actions. No invented internal data. '
-        'No hidden certainty.</p>'
+        '<title>Founder Intelligence — read a company from the outside</title>'
+        f'<style>{_BASE_CSS}{_LANDING_CSS}</style></head><body><main>'
+        # 1. The promise, in terms of what you get rather than what it is.
+        '<h1>Read a company the way its competitors wish they could.</h1>'
+        '<p class="lede">Give us a company. We read its public evidence — its '
+        'own pages, its filings and results where they exist, and what others '
+        'report about it — and explain what management appears to be doing, '
+        'what the business model says about why, and what the market may be '
+        'missing.</p>'
+        # 2. The input. One job on this screen.
+        '<form action="/analyze" method="post" aria-label="Analyze a company" '
+        'class="analyze">'
+        '<div class="field-row">'
+        '<span class="field"><label for="company_name">Company</label>'
+        '<input id="company_name" name="company_name" '
+        'placeholder="Cloudflare" required></span>'
+        '<span class="field"><label for="website">Website</label>'
+        '<input id="website" name="website" type="url" '
+        'placeholder="https://www.cloudflare.com" required></span>'
+        '</div>'
+        '<details class="opt"><summary>Add context (optional)</summary>'
+        '<p><label for="role">Your role</label>'
+        '<input id="role" name="requester_role" '
+        'placeholder="founder, investor, product lead"></label></p>'
+        '<p><label for="q">What are you trying to work out?</label>'
+        '<input id="q" name="business_question" '
+        'placeholder="are they moving upmarket?"></p></details>'
+        '<p class="consent"><label><input type="checkbox" name="consent" '
+        'required> Analyse this company from public and official sources.'
+        '</label></p>'
+        '<button type="submit">Read this company</button></form>'
+        # 3. What the result actually looks like. Concrete, not adjectives.
+        '<section class="sample" aria-label="What you get back">'
+        '<h2>What comes back</h2>'
+        '<p class="sample-quote">“Withholding first-party titles from day-one '
+        'subscription is not caution — it is the one lever protecting the '
+        'software margin that the discounted-hardware strategy depends on.”'
+        '</p>'
+        '<p class="sample-note">One conclusion like that, then why it follows: '
+        'the recent evidence behind it, how the company actually earns, the '
+        'trade-off leadership is managing, who is forced to respond, and what '
+        'would prove the reading wrong.</p></section>'
+        # 4. How evidence is handled — brief, and load-bearing for trust.
+        '<section class="assurance" aria-label="How evidence is handled">'
+        '<h2>Where it comes from</h2>'
+        '<p>Only public sources, each one linked. Where the evidence is thin, '
+        'it says so and stops rather than filling the gap. It has no access to '
+        'anything inside a company and never claims otherwise.</p>'
+        '<p class="more"><a href="/onboarding">How it works in detail</a></p>'
+        '</section>'
         '</main></body></html>')
 
 

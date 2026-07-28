@@ -158,7 +158,9 @@ def test_prepared_examples_are_offered_before_a_guest_has_to_guess(guest):
     _, _, page = guest.request("GET", "/")
     for company in GOLDEN_COMPANIES:
         assert company["name"] in page
-    assert "Prepared example" in page
+    # Still offered before a guest has to guess -- now as one quiet line
+    # under the form rather than a titled section competing with it.
+    assert "Not sure where to start" in page
 
 
 def test_no_raw_tier_name_ever_reaches_the_page(guest):

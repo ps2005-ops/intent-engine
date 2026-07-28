@@ -29,7 +29,8 @@ def test_server_startup_smoke(tmp_path):
         with urllib.request.urlopen(
                 f"http://127.0.0.1:{port}/", timeout=5) as resp:
             body = resp.read().decode()
-            assert "outside in" in body
+            # the landing page serves its actual job: the analysis form
+            assert 'action="/analyze"' in body
     finally:
         server.shutdown()
         server.server_close()
