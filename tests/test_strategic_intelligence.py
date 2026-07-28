@@ -687,7 +687,20 @@ def test_webapp_stripe_comparison_answer(tmp_path):
     assert status == "200 OK"
     assert "Comparison: Stripe" in body
     assert "Where the analogy breaks" in body
-    assert "hyp-product_to_platform" in body        # routed to infrastructure
+    # Routing still happens; it is simply no longer narrated to the reader. The
+    # page used to print "Discussing hypothesis hyp-product_to_platform ·
+    # operation: COMPARE", which is how the code talks to itself — to a reader
+    # it is noise that looks like a malfunction. Assert the routing through the
+    # ANSWER instead of through a leaked identifier.
+    assert "hyp-" not in body, "internal hypothesis ids never reach a reader"
+    assert "operation:" not in body
+    from intent_engine.strategic_intelligence.conversation import (
+        answer_strategic,
+    )
+    sa = answer_strategic("How is this similar to Stripe and where does the "
+                          "comparison break down?",
+                          app._strategic_report_for(rid))
+    assert sa["routing"]["selected_hypothesis"] == "hyp-product_to_platform"
 
 
 def test_render_is_responsive_and_styled(shopify_report):

@@ -162,6 +162,8 @@ class WebApp:
             self._scheduler = Scheduler(self._runtime_root).start()
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
+        # run_id -> the last answered topics, so a bare "Why?" has a subject.
+        self._conversation_context: dict = {}
         # Storage durability is MEASURED, once, at startup. Recording this
         # boot is what makes the next boot able to prove survival: finding an
         # earlier boot id in the ledger means a previous process wrote a file,
@@ -1364,27 +1366,53 @@ class WebApp:
             if sa["intent"] in ("EXPLAINED", "COMPARISON"):
                 return self._strategic_answer_page(session, run_id, sa)
         flat_claims = self._run_claims(run_id)
-        answer = self.fi.converse(run_id, question, run_claims=flat_claims)
+        # The previous turn's subject, so "Why?" and "Explain that" resolve
+        # against the conversation. Without this every turn starts from nothing
+        # and the assistant behaves like a search box that forgets you.
+        previous = self._conversation_context.get(run_id, ())
+        answer = self.fi.converse(run_id, question, run_claims=flat_claims,
+                                  previous_topics=previous)
+        self._conversation_context[run_id] = answer.get("topics", ())
+
         paragraphs, citations = [], []
         for p in (answer.get("answer") or {}).get("paragraphs", []):
-            paragraphs.append(f'<p>{_e(p.get("text", ""))}</p>')
+            paragraphs.append(p.get("text", ""))
             citations.extend(str(c) for c in p.get("citations", []))
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<title>Answer</title></head><body>'
-                f'{self._nav(session, session["csrf"])}<main>'
-                f'<h1>Answer</h1>'
-                # The classifier's enum was rendered here verbatim, so a
-                # tester asking a normal question was told
-                # "Intent: UNSUPPORTED". Internal classification names are not
-                # part of the product's vocabulary and never reach the reader.
-                f'{"".join(paragraphs)}'
-                f'<p>Cited artifacts: {_e(", ".join(citations) or "none")}</p>'
-                f'<p><small>Answers use only this run\'s approved evidence. '
-                f'A source that is not part of the approved evidence set '
-                f'must be added and approved before analysis.</small></p>'
-                f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
-                f'</main></body></html>')
-        return self._html(body)
+        # Concise first: the direct answer, then the rest behind a disclosure.
+        # A reader who asked a short question is not asking to read the report
+        # again, and burying the answer in paragraph four is how they end up
+        # taking the first confident sentence they see.
+        lead = paragraphs[0] if paragraphs else ""
+        rest = paragraphs[1:]
+        more = (f'<details class="more"><summary>Explain more</summary>'
+                + "".join(f'<p>{_e(p)}</p>' for p in rest) + '</details>') \
+            if rest else ''
+        cited = ("".join(f'<li>{_e(c)}</li>' for c in dict.fromkeys(citations))
+                 if citations else '')
+        body = (
+            f'{_BRIEF_CSS}<main class="brief">'
+            f'{self._layer_nav(run_id, "")}'
+            f'<h1>{_e(question[:120])}</h1>'
+            # The classifier's enum was rendered here verbatim, so a tester
+            # asking a normal question was told "Intent: UNSUPPORTED".
+            # Internal classification names are not part of the product's
+            # vocabulary and never reach a reader.
+            f'<p class="lead">{_e(lead)}</p>{more}'
+            + (f'<section class="b-part"><h2>Evidence</h2><ul>{cited}</ul>'
+               f'</section>' if cited else '')
+            + f'<p class="stamp">Answers use only this run\'s approved '
+            f'evidence. A source outside that set must be added and approved '
+            f'before it can be used.</p>'
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
+            f'class="b-ask"><input type="hidden" name="csrf" '
+            f'value="{_e(session["csrf"])}">'
+            f'<label for="q">Ask something else</label> '
+            f'<input id="q" name="question" required>'
+            f'<button type="submit">Ask</button></form>'
+            f'<p><a href="/runs/{_e(run_id)}/brief">Back to the brief</a></p>'
+            f'</main>')
+        return self._html(self._page("Answer", body, session,
+                                     session["csrf"]))
 
     def _strategic_report_for(self, run_id):
         """The run's strategic report dict, if it has one (real runs only)."""
@@ -1395,14 +1423,15 @@ class WebApp:
 
     def _strategic_answer_page(self, session, run_id, sa):
         routing = sa.get("routing", {})
-        label = (f'<p class="muted"><small>Discussing hypothesis '
-                 f'<strong>{_e(str(routing.get("selected_hypothesis") or "—"))}'
-                 f'</strong>'
-                 + (f' · comparison: <strong>'
-                    f'{_e(str(routing.get("selected_comparable")))}</strong>'
-                    if routing.get("selected_comparable") else "")
-                 + f' · operation: {_e(str(routing.get("operation", "")))}'
-                 f'</small></p>')
+        # This line used to read "Discussing hypothesis H2 · operation:
+        # EXPLAIN_HYPOTHESIS". A hypothesis id and an operation name are how
+        # the code talks to itself; to a reader they are noise that looks like
+        # a malfunction. Only the comparison subject is a real-world thing a
+        # reader recognises, so only it survives.
+        comparable = routing.get("selected_comparable")
+        label = (f'<p class="muted"><small>Comparison with '
+                 f'<strong>{_e(str(comparable))}</strong>.</small></p>'
+                 if comparable else '')
         back = (f'<p><a href="/runs/{_e(run_id)}">Back to report</a></p>'
                 f'<p><small>Outside-in only; grounded in this run\'s approved '
                 f'observations and the curated pattern library.</small></p>')

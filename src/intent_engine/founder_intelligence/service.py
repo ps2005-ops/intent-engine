@@ -317,11 +317,18 @@ class FounderIntelligenceService:
             _persp.assemble_opportunities(opportunity),
         ]
 
-    def converse(self, run_id: str, question: str, *, run_claims) -> dict:
-        """A public follow-up over THIS run's claims only."""
+    def converse(self, run_id: str, question: str, *, run_claims,
+                 previous_topics=()) -> dict:
+        """A public follow-up over THIS run's claims only.
+
+        `previous_topics` is the last turn's subject, so "Why?" and "Explain
+        that" resolve against the conversation instead of being rejected for
+        having no subject of their own.
+        """
         return _answer(question, run_claims=run_claims,
                        llm_client=self.llm_client,
-                       model_version=self.model_version)
+                       model_version=self.model_version,
+                       previous_topics=previous_topics)
 
     def record_feedback(self, run_id, company_domain, *, useful: str,
                         note: str = "", actor_id="founder") -> str:

@@ -220,7 +220,14 @@ def test_anonymous_runs_demo_end_to_end(tmp_path):
     assert status == "200 OK" and "replay" in body
     status, _, body = c.request(
         "POST", run_url + "/conversation", f"csrf={c.csrf()}&question=why?")
-    assert status == "200 OK" and "Cited artifacts" in body
+    # A bare "why?" as the FIRST question has no antecedent — there is
+    # nothing for it to point at. Inventing a subject would be worse than
+    # saying so, so the reply names what CAN be asked instead.
+    assert status == "200 OK"
+    assert "What does this company do?" in body
+    for internal in ("UNRECOGNISED", "INSUFFICIENT", "implication",
+                     "weakest_evidence", "recent_change"):
+        assert internal not in body, f"leaked internal name: {internal}"
 
 
 def test_anonymous_can_start_real_company_analysis(tmp_path):

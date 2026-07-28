@@ -106,7 +106,11 @@ def test_full_required_journey(app):
     status, _, body = c.request(
         "POST", run_url + "/conversation",
         f"csrf={csrf}&question=why do you think this?")
-    assert status == "200 OK" and "Cited artifacts" in body
+    # The answer page now leads with the direct answer and puts the
+    # citations under an "Evidence" heading, rather than a trailing
+    # "Cited artifacts:" line. The property that matters is unchanged:
+    # the answer shows what it rests on.
+    assert status == "200 OK" and "Evidence" in body
     # share → link works → revoke → link dead
     status, _, body = c.request("POST", run_url + "/share", f"csrf={csrf}")
     token = body.split("/shared/")[1].split("<")[0]
