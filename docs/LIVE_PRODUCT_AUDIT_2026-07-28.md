@@ -88,3 +88,53 @@ Stated plainly rather than left implied:
   against would be worthless.
 - **No human validation.** Zero people have used this.
 - **Nothing is deployed**, so no post-deployment verification exists.
+
+---
+
+# Post-deployment verification — `91eada2`
+
+PR #13 merged; Render redeployed. `/version` reports `91eada2`.
+
+## Verified fixed on production
+
+| Defect | Before (`ec337f5`) | After (`91eada2`) |
+|---|---|---|
+| Login dead end | `POST /analyze` anonymous → `303 /login`, form discarded | `303 /runs/<id>/progress` + `sid=…; HttpOnly; SameSite=Lax; Secure` |
+| Result behind a click | status page → "Open the result" | `GET …/progress` → `303 …/slides` |
+| Capability invisible | `/readyz` had no reasoning key | `capabilities.strategic_reasoning: false` — now checkable, not inferred |
+
+## OPEN REGRESSION — production 500
+
+`POST /analyze` for **Vercel** returned `500` repeatedly (error references
+`fd45f08fc39d`, `65dd3dfa504e`). The first Vercel run of the session succeeded
+(`01KYN705V618AQ59VHPFGQYZHY`); Datadog and Ramp also succeeded. Subsequent
+Vercel attempts failed.
+
+What was ruled out:
+- not the minted session — `auth.session(create_anonymous_session())` returns a
+  valid anonymous session with csrf, and the rate limiter accepts it
+- not request headers — the header bisect was confounded by the per-IP quota;
+  the later 429s were quota, not the header under test
+- not repeat-company collision — three fresh visitors analysing the same
+  company locally all succeed
+- not reproducible locally at all, including with an invalid cookie, an
+  established session, autorun on, and the real-company entity-resolution path
+
+The remaining difference between the passing local runs and the failing
+production ones is **real network retrieval**. Diagnosing further needs the
+server-side traceback.
+
+**Owner action:** Render dashboard → Logs → search `fd45f08fc39d` or
+`65dd3dfa504e`. I cannot read those logs.
+
+I have not attributed this to the deploy. It may predate it — the pre-deploy
+audit never ran Vercel.
+
+## Live validation not completed
+
+The per-IP demo quota is now exhausted from this address, so further live runs
+return 429. Of the 20 fresh technology companies the programme asks for, **3
+were run on production after deployment** (Vercel, Datadog, Ramp) and only
+their HTTP outcomes were captured — no rendered decks were inspected, because
+the runs that reached a deck belonged to a curl session and the browser session
+could not read them.
