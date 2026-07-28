@@ -78,7 +78,8 @@ letter-spacing:.03em;margin-bottom:2px}
 .si .ev .meta{color:#64748b;font-size:.76rem;margin-top:2px}
 .si details.more{margin:.5rem 0}
 .si details.more>summary{color:#2563eb;font-weight:600;font-size:.85rem;cursor:pointer}
-.si .prov{color:#94a3b8;font-size:.74rem}
+/* #94a3b8 measured 2.45:1 on white — under AA for text this small. */
+.si .prov{color:#64748b;font-size:.74rem}
 .si .tl{list-style:none;padding-left:0;margin:.4rem 0}
 .si .tl li{position:relative;padding:6px 0 6px 18px;border-left:2px solid #dbe3ee;
 margin-left:6px}
@@ -96,7 +97,26 @@ padding:12px 15px;margin:10px 0}
 .si{color:#e5e9f0}.si h1,.si h2,.si h3,.si h4{color:#f1f5f9}
 .si .hero{background:linear-gradient(180deg,#141a24,#0f141c);border-color:#232c3a}
 .si .card,.si .agenda{background:#141a24;border-color:#232c3a}
-.si .chip,.si table.lib{background:#0f141c}.si .badge{background:#1c2530;color:#c7d2e0;border-color:#2c3644}}
+.si .chip,.si table.lib{background:#0f141c}.si .badge{background:#1c2530;color:#c7d2e0;border-color:#2c3644}
+/* Six selectors this block originally missed. The first is the one that
+   mattered: .thesis kept #10203a — dark navy on the dark page, 1.13:1, the
+   most prominent sentence in the document rendered invisible. */
+.si .thesis{color:#e9eef6}
+.si .muted,.si .ev .meta{color:#9aa7b8}
+.si .kv b,.si table.lib th{color:#aebbcd}
+.si table.lib th,.si table.lib td{border-bottom-color:#232c3a}
+.si .actions a.ghost{background:#141a24;color:#e5e9f0;border-color:#2c3644}
+.si .st-COMPLETE{background:#10301f;color:#5fd08d}
+.si .st-PARTIAL_STRATEGIC_EVIDENCE{background:#33260d;color:#e0a44a}
+.si .st-INSUFFICIENT_STRATEGIC_EVIDENCE,.si .st-FAILED{background:#3a1a1a;
+color:#f08c86}
+.si .chip b,.si .tl .d{color:#aebbcd}
+.si .prov,.si .tl li::before{color:#8b98aa}
+.si details.more>summary{color:#7aa2ff}
+.si .badge.ind{background:#10301f;color:#5fd08d;border-color:#1d5237}
+.si .conf-high{background:#10301f;color:#5fd08d}
+.si .conf-moderate{background:#33260d;color:#e0a44a}
+.si .conf-low,.si .conf-speculative{background:#1c2530;color:#aebbcd}}
 </style>
 """
 
