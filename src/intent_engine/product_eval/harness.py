@@ -325,6 +325,16 @@ def _evaluate(case, ci, run_id, result) -> CaseResult:
     # What a small screen makes unusable.
     out.critical.extend(_evaluate_on_a_small_screen(scenario, slides))
 
+    # Do the layers agree with each other? A reader who moves between the
+    # headline, the brief and the deck is the only person who sees a
+    # disagreement, and a presentation-first product has exactly that reader.
+    if result.get("strategic_report") is not None:
+        from intent_engine.strategic_intelligence.consistency import check
+        agreement = check(result["strategic_report"], brief=brief,
+                          slides=slides, documents=documents)
+        out.critical.extend(f"inconsistent: {p}"
+                            for p in agreement["problems"])
+
     # The last read before a stranger sees it. Anything the critic blocks on
     # is something a sceptical reader would catch, so it is a failure here.
     if result.get("strategic_report") is not None:

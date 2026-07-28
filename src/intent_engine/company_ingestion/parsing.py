@@ -13,6 +13,27 @@ from html.parser import HTMLParser
 from intent_engine.company_ingestion.records import PARSER_VERSION
 
 _SKIP = {"script", "style", "noscript", "template", "svg", "iframe"}
+
+# Chrome: the parts of a page that are the SITE rather than the page. Their
+# text is real and visible, and it is never about this company in the way an
+# analysis needs — it is the menu, the cookie bar, the footer's legal links.
+#
+# Keeping it cost a real reader a real answer. Asked what Shopify does, the
+# product replied "What to build How to build After we build Personal practice
+# Go forth and build Everyone at Shopify works on product." — six navigation
+# labels and a heading, welded into something that parses as a sentence.
+# Downstream filters can reject that, but only after it has already crowded
+# out the paragraph that would have answered the question.
+_CHROME = {"nav", "header", "footer", "aside"}
+
+# Where a page keeps its actual content. When a page marks this up, the marked
+# region is the page and everything else is furniture.
+_MAIN = {"main", "article"}
+
+# Chrome removal must never empty a page. Some sites wrap everything in
+# <header>, and a page reduced to nothing is a worse outcome than a page with
+# a menu in it — so the stripped text is used only when enough of it survives.
+MIN_MAIN_TEXT_CHARS = 200
 # Below this much block-level body text, a page is treated as a hydration shell
 # and its server-rendered state is read as well. Sites that genuinely serve
 # their content as HTML clear this easily (Shopify's /about extracts 3.3k), so
@@ -40,6 +61,19 @@ class _Extractor(HTMLParser):
         self._skip_depth = 0
         self._block_stack: list = []
         self._buffer: list = []
+        # Open chrome/main regions, innermost last, as (tag, kind). A stack
+        # rather than counters because the region can be opened by a role
+        # attribute on a <div>, and the closing tag carries no attributes —
+        # so the only way to know what a </div> closes is to have recorded it.
+        # Tracked during parsing rather than filtered afterwards, because by
+        # the time a menu label is a line of text it is indistinguishable from
+        # a heading.
+        self._regions: list = []
+        # Blocks that were inside <main>/<article>, and blocks that were not
+        # inside chrome. Collected alongside `blocks` so the caller can choose,
+        # and so a page that marks up nothing still behaves exactly as before.
+        self.main_blocks: list = []
+        self.body_blocks: list = []
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -53,6 +87,12 @@ class _Extractor(HTMLParser):
         if tag in _SKIP:
             self._skip_depth += 1
             return
+        role = (attrs.get("role") or "").lower()
+        if tag in _CHROME or role in ("navigation", "banner", "contentinfo",
+                                      "complementary"):
+            self._regions.append((tag, "chrome"))
+        elif tag in _MAIN or role == "main":
+            self._regions.append((tag, "main"))
         if tag == "meta":
             if (attrs.get("name") or "").lower() == "description":
                 self.meta_description = (attrs.get("content") or "").strip()
@@ -82,6 +122,13 @@ class _Extractor(HTMLParser):
         if tag in _SKIP:
             self._skip_depth = max(0, self._skip_depth - 1)
             return
+        # Close the innermost region this tag opened, discarding anything left
+        # open inside it. Real pages leave tags unclosed, and a region that
+        # never closes would swallow the rest of the document.
+        for index in range(len(self._regions) - 1, -1, -1):
+            if self._regions[index][0] == tag:
+                del self._regions[index:]
+                break
         if tag in _BLOCK and self._block_stack:
             self._block_stack.pop()
             text = " ".join("".join(self._buffer).split())
@@ -90,11 +137,15 @@ class _Extractor(HTMLParser):
                 return
             if tag == "title" and not self.title:
                 self.title = text
-            elif tag.startswith("h") and len(tag) == 2:
+                return
+            if tag.startswith("h") and len(tag) == 2:
                 self.headings.append((tag, text))
-                self.blocks.append(text)
-            else:
-                self.blocks.append(text)
+            self.blocks.append(text)
+            kinds = {kind for _, kind in self._regions}
+            if "chrome" not in kinds:
+                self.body_blocks.append(text)
+                if "main" in kinds:
+                    self.main_blocks.append(text)
 
     def handle_data(self, data):
         if self._in_jsonld:
@@ -244,14 +295,31 @@ def parse_html(html: str) -> dict:
         extractor.feed(html or "")
     except Exception:                                      # noqa: BLE001
         pass                                # keep whatever was extracted
-    # boilerplate reduction: drop exact-duplicate lines (nav/footer echoes)
-    seen, lines = set(), []
-    for block in extractor.blocks:
-        key = block.lower()
-        if key in seen:
-            continue
-        seen.add(key)
-        lines.append(block)
+    # Prefer the page's own main region, then the page minus its chrome, then
+    # everything. Each fallback only applies when the narrower choice does not
+    # leave the page empty: stripping furniture must never cost a page that
+    # wraps its content in <header>, where having a menu in the text is the
+    # lesser harm.
+    def _dedupe(blocks):
+        """Drop exact-duplicate lines — the nav/footer echo left over when a
+        site marks up none of its regions."""
+        seen, lines = set(), []
+        for block in blocks:
+            key = block.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            lines.append(block)
+        return lines
+
+    for candidate in (extractor.main_blocks, extractor.body_blocks,
+                      extractor.blocks):
+        lines = _dedupe(candidate)
+        if len("\n".join(lines).strip()) >= MIN_MAIN_TEXT_CHARS:
+            break
+    else:
+        lines = _dedupe(extractor.blocks)
+    seen = {line.lower() for line in lines}
     text = "\n".join(lines)
     blocks_found = len(lines)
     extraction_mode = "body" if text.strip() else "none"

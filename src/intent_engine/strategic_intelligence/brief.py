@@ -295,7 +295,20 @@ def _what_it_does(company, report, documents) -> str:
         IDENTITY, PRODUCT, family_of,
     )
     best, best_score = "", 0
-    for document in documents or ():
+    # Pages in the order they are likely to answer THIS question. An about
+    # page is written to describe the company; a product page describes one
+    # thing it sells; a homepage is written to convert. The live run that
+    # produced "Learn about Shopify's product principles…" took whichever
+    # identity-family page happened to sort first.
+    def _page_rank(document):
+        url = (document.get("final_url") or "").lower()
+        for position, marker in enumerate(("/about", "/company", "/who-we-are",
+                                           "/mission", "/overview")):
+            if marker in url:
+                return position
+        return 9
+
+    for document in sorted(documents or (), key=_page_rank):
         if document.get("retrieval_status") != "OK":
             continue
         family = family_of(document)
@@ -310,10 +323,13 @@ def _what_it_does(company, report, documents) -> str:
         # the fourth sentence is not the page's description.
         candidates += [(s, 0) for s in
                        _SENTENCE.split(_without_leading_title(document))[:4]]
+        about_page = _page_rank(document) < 9
         for sentence, bonus in candidates:
             score = _describes_the_business(sentence, company) + bonus
             if family is PRODUCT:
                 score -= 1          # what it sells, one step from what it is
+            if about_page:
+                score += 1          # written to answer exactly this question
             if score > best_score:
                 best, best_score = sentence, score
     if best:

@@ -53,8 +53,15 @@ MAX_WORDS_PER_SLIDE = 90
 
 
 def _bullet(text, *, evidence=None, date=""):
+    # `evidence` is a list of evidence ids. A bare string is not one id, it is
+    # a sequence of characters, and `list("obs-1")` turns a citation into five
+    # of them — which is how the "what changed" slide came to carry thirty
+    # citations labelled "-", "n", "u", "p" and "g", each an invitation to
+    # check a source that does not exist.
+    if isinstance(evidence, str):
+        evidence = [evidence] if evidence.startswith("obs-") else []
     return {"text": " ".join(str(text or "").split()),
-            "evidence": list(evidence or []), "date": date}
+            "evidence": [e for e in (evidence or []) if e], "date": date}
 
 
 def _cap(bullets):
@@ -160,8 +167,10 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
 
     # 3. What changed recently
     change_bullets = [
+        # A shift's `evidence` is its EXCERPT — the words behind the change —
+        # not a citation id. The id it cites is `observation_id`.
         _bullet(shift.get("title", ""), date=shift.get("date", ""),
-                evidence=shift.get("evidence", []))
+                evidence=[shift.get("observation_id")])
         for shift in meaningful_items(r.get("shifts", []), key="title")]
     change_bullets += [
         _bullet(event.get("event", ""), date=event.get("date", ""))
