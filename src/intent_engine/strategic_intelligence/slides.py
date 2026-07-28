@@ -175,113 +175,126 @@ _URGENCY_WORDS = {"decide_now": "Decide now", "this_quarter": "This quarter",
 
 
 def build_founder_slides(analysis, *, company="") -> list:
-    """The deck a founder is shown when a verified analysis exists.
+    """The deck a founder is shown. It answers five questions and stops.
 
-    Ordered as a story rather than as a method. The old deck opened by
-    explaining the system -- how evidence was gathered, what a hypothesis is,
-    which signals matched -- which is the one thing a chief executive in a room
-    does not need. This one opens with what business they are really in and
-    does not mention the machinery at all.
+    An audit of the previous deck measured the real problem, which was not
+    repetition -- the highest similarity between any two fields was 0.32, and
+    the median was 0.04. The problem was volume and invisibility: 2,361 words
+    of reasoning produced 896 words on screen, and fifteen fields never
+    reached the founder at all. Among the invisible ones were what leadership
+    is protecting, where it might be blind, and the case for the whole reading
+    being wrong -- the most valuable things in the analysis.
 
-    `analysis` is the analyst's verified output (`strategic_analysis`).
+    So this deck is built backwards from the five questions a founder needs
+    answered, and anything that does not serve one of them is not built:
+
+        1  What business are they really in?
+        2  What game are they playing, and why?
+        3  What is leadership protecting, and what are they giving up?
+        4  What assumption is carrying the weight?
+        5  What should a competitor be afraid of?
+
+    The decision slides sit between 3 and 4 because that is where a reader
+    asks "so what do I do about it".
     """
     a = analysis or {}
     bm = a.get("business_model") or {}
     ins = a.get("the_insight") or {}
+    mm = a.get("mental_model") or {}
     decisions = a.get("decisions") or []
     comp = a.get("competitive") or {}
+    scen = a.get("scenarios") or {}
+    blind = a.get("blind_spots") or {}
+    assumptions = a.get("assumptions") or []
     cites = ins.get("citations") or []
 
+    from intent_engine.strategic_intelligence.analyst.priority import (
+        todays_decision, weakest_assumption,
+    )
     slides = []
 
-    # 0 - today. Only when there is something that has earned today; a
-    # manufactured daily action is how a product teaches people to skip it.
-    from intent_engine.strategic_intelligence.analyst.priority import (
-        todays_decision,
-    )
+    # 0 - today, only when something has earned it
     today = todays_decision(decisions)
     if today:
         slides.append(_slide("today", "What deserves today", [
             _bullet(today.get("decision", ""),
                     evidence=today.get("citations") or [], full=True),
             _bullet(_lead("Why now: ", today.get("cost_of_waiting", ""))),
-            _bullet(_lead("If we are wrong: ",
-                          today.get("what_would_invalidate_it", ""))),
         ], kind="today"))
 
     # 1 - what business are they really in
     slides.append(_slide("business", "What business they are really in", [
         _bullet(bm.get("one_line", ""), evidence=cites),
-        _bullet(_lead("Profit comes from ",
+        _bullet(_lead("The money comes from ",
                       bm.get("where_profit_comes_from", ""))),
-        _bullet(_lead("What customers really buy: ",
+        _bullet(_lead("What customers are really buying: ",
                       bm.get("what_customers_actually_buy", ""))),
-        _bullet(_lead("Value leaks where ",
-                      bm.get("where_value_leaks", ""))),
     ], kind="business_model"))
 
-    # 2 - the one sentence worth remembering
+    # 2 - the game, and the one sentence worth remembering
+    slides.append(_slide("game", "The game they are playing", [
+        _bullet(bm.get("the_game_they_are_playing", ""), full=True),
+        _bullet(_lead("It costs them ", bm.get("where_value_leaks", ""))),
+    ], kind="game"))
+
     slides.append(_slide("insight", "The insight", [
         _bullet(ins.get("sentence", ""), evidence=cites, full=True),
         _bullet(ins.get("paragraph", "")),
     ], kind="insight"))
 
-    # 3 - why it matters now, and the trade-off underneath it
-    tension = ins.get("tension") or {}
-    slides.append(_slide("why_now", "Why this matters now", [
-        _bullet(ins.get("why_now", ""), evidence=cites),
-        _bullet(_lead("The trade-off: ", tension.get("side_a", ""))),
-        _bullet(_lead("Against that: ", tension.get("side_b", ""))),
-        _bullet((ins.get("economics") or {}).get("mechanism", "")),
-    ], kind="tension"))
+    # 3 - what leadership is protecting and giving up
+    slides.append(_slide("mental_model", "What leadership is protecting", [
+        _bullet(_lead("They believe ", mm.get("they_believe", ""))),
+        _bullet(_lead("They are protecting ",
+                      mm.get("they_are_protecting", ""))),
+        _bullet(_lead("They have accepted losing ",
+                      mm.get("they_are_sacrificing", ""))),
+        _bullet(_lead("This could blind them to ",
+                      mm.get("where_this_could_blind_them", ""))),
+    ], kind="mental_model"))
 
-    # 4 - where one move leads
-    chain = ins.get("consequence_chain") or []
-    slides.append(_slide("chain", "Where this leads",
-                         [_bullet(step) for step in chain],
-                         kind="consequences"))
-
-    # 5 - the decisions themselves, the point of the whole exercise
-    for i, d in enumerate(decisions[:3]):
+    # the decisions
+    for i, d in enumerate(decisions[:2]):
         when = _URGENCY_WORDS.get(d.get("urgency", ""), "")
         slides.append(_slide(f"decision-{i + 1}",
                              f"The decision: {when}" if when
                              else "The decision", [
-            _bullet(d.get("decision", ""), evidence=d.get("citations") or []),
+            _bullet(d.get("decision", ""),
+                    evidence=d.get("citations") or [], full=True),
             _bullet(_lead("Waiting costs: ", d.get("cost_of_waiting", ""))),
-            _bullet(_lead("A competitor may move first: ",
+            _bullet(_lead("A rival may move first: ",
                           d.get("what_a_competitor_may_do_first", ""))),
-            _bullet(_lead("Upside: ", d.get("upside", ""))),
-            _bullet(_lead("Downside: ", d.get("downside", ""))),
         ], kind="decision"))
 
-    # 6 - who wins if this reading is right
-    slides.append(_slide("who_wins", "Who wins if this is right", [
+    # 4 - the assumption carrying the weight
+    weakest = weakest_assumption(assumptions) or {}
+    slides.append(_slide("assumption", "The assumption carrying the weight", [
+        _bullet(weakest.get("assumption", ""), full=True),
+        _bullet(_lead("It breaks if ", weakest.get("what_would_break_it", ""))),
+        _bullet(_lead("Almost nobody is discussing ",
+                      blind.get("almost_nobody_is_discussing", ""))),
+    ], kind="assumption"))
+
+    # 5 - what a competitor should be afraid of
+    slides.append(_slide("threat", "What rivals should fear", [
+        _bullet(comp.get("what_rivals_should_fear", ""), full=True),
         _bullet(_lead("Forcing the change: ",
                       comp.get("who_is_forcing_the_change", ""))),
-        _bullet(_lead("Benefits: ", comp.get("who_benefits", ""))),
-        _bullet(_lead("Has to respond: ", comp.get("who_must_respond", ""))),
-        _bullet(_lead("Can ignore it: ", comp.get("who_can_ignore_this", ""))),
-    ], kind="competitive"))
-
-    # 7 - and if it is wrong. Argued, not disclaimed.
-    slides.append(_slide("who_loses", "Who wins if this is wrong", [
-        _bullet(a.get("strongest_case_we_are_wrong", "")),
-        _bullet(_lead("Then the loser is ", comp.get("who_loses", ""))),
         _bullet(_lead("If nobody responds: ",
                       comp.get("if_nobody_responds", ""))),
+    ], kind="competitive"))
+
+    # and the case against, argued rather than disclaimed
+    slides.append(_slide("wrong", "Why this could be wrong", [
+        _bullet(a.get("strongest_case_we_are_wrong", ""), full=True),
+        _bullet(_lead("The wild card: ", scen.get("wild_card", ""))),
     ], kind="counterargument"))
 
-    # 8 - what to watch, and what should worry them
-    watch = [_bullet(d.get("what_to_watch", "")) for d in decisions[:3]]
+    # what to watch
+    watch = [_bullet(s) for s in (scen.get("leading_indicators") or [])[:2]]
     watch += [_bullet(q) for q in (a.get("questions") or [])[:2]]
-    slides.append(_slide("watch", "What to watch next", watch, kind="monitor"))
-
-    # 9 - what would change this reading
-    slides.append(_slide("evidence", "What would change this", [
-        _bullet(d.get("what_would_invalidate_it", "")) for d in decisions[:2]
-    ] + [_bullet(g) for g in (a.get("evidence_gaps") or [])[:2]],
-        kind="evidence"))
+    slides.append(_slide("watch", "What to watch, and what to ask",
+                         watch, kind="monitor"))
 
     return [s for s in slides if s]
 

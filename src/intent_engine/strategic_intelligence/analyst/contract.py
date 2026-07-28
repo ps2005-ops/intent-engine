@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 
 # Bump when the prompt or schema changes in a way that invalidates cached
 # analyses. The cache key includes this, so a bump re-runs every company.
-PROMPT_VERSION = "fi-decision-engine-2026-07-28"
+PROMPT_VERSION = "fi-five-insights-2026-07-28"
 
 URGENCY = ("decide_now", "this_quarter", "this_year", "watch_only")
 
@@ -103,10 +103,10 @@ class StrategicAnalysis:
     decisions: list = field(default_factory=list)
     competitive: dict = field(default_factory=dict)
     questions: list = field(default_factory=list)
+    mental_model: dict = field(default_factory=dict)
     assumptions: list = field(default_factory=list)
     blind_spots: dict = field(default_factory=dict)
     scenarios: dict = field(default_factory=dict)
-    board_questions: list = field(default_factory=list)
     strongest_case_we_are_wrong: str = ""
     evidence_gaps: list = field(default_factory=list)
     sufficient: bool = False
@@ -141,15 +141,40 @@ _BUSINESS_MODEL_SCHEMA = {
             "description": "The job being paid for, which is often not the "
                            "product the company describes.",
         },
-        "what_management_appears_to_optimise": {
+        "the_game_they_are_playing": {
             "type": "string",
-            "description": "Inferred from where it spends and what it "
-                           "repeats. Label as inference.",
+            "description": "Not what they sell -- what they are actually "
+                           "competing to win, and on what timescale. Two "
+                           "companies selling the same thing often play "
+                           "different games.",
         },
     },
     "required": ["one_line", "where_profit_comes_from", "where_value_leaks",
-                 "what_customers_actually_buy",
-                 "what_management_appears_to_optimise"],
+                 "what_customers_actually_buy", "the_game_they_are_playing"],
+}
+
+# Part of the audit's finding: the most valuable inferences about leadership
+# were spread across a business-model field and a blind-spot field, and NEITHER
+# reached the deck. They belong together, phrased the way an operator would say
+# them out loud.
+_MENTAL_MODEL_SCHEMA = {
+    "type": "object",
+    "description": "An outside-in reconstruction of how leadership appears to "
+                   "see its own situation. Inference from public behaviour "
+                   "only -- never a claim to know what anyone thinks.",
+    "properties": {
+        "they_believe": {"type": "string"},
+        "they_are_protecting": {"type": "string"},
+        "they_are_sacrificing": {
+            "type": "string",
+            "description": "What they have accepted losing. If nothing is "
+                           "being given up, it is not a strategy.",
+        },
+        "they_will_not_compromise_on": {"type": "string"},
+        "where_this_could_blind_them": {"type": "string"},
+    },
+    "required": ["they_believe", "they_are_protecting", "they_are_sacrificing",
+                 "where_this_could_blind_them"],
 }
 
 _THE_INSIGHT_SCHEMA = {
@@ -304,12 +329,8 @@ _BLIND_SPOTS_SCHEMA = {
                            "public conversation. If nothing qualifies, say so "
                            "rather than inventing one.",
         },
-        "where_management_may_be_biased": {"type": "string"},
-        "where_investors_may_be_biased": {"type": "string"},
-        "where_customers_may_disagree": {"type": "string"},
     },
-    "required": ["everyone_is_discussing", "almost_nobody_is_discussing",
-                 "where_management_may_be_biased"],
+    "required": ["everyone_is_discussing", "almost_nobody_is_discussing"],
 }
 
 _SCENARIOS_SCHEMA = {
@@ -317,7 +338,6 @@ _SCENARIOS_SCHEMA = {
     "description": "Reasoning, not prediction. No probabilities and no dates "
                    "unless the evidence carries them.",
     "properties": {
-        "base_case": {"type": "string"},
         "upside_case": {"type": "string"},
         "downside_case": {"type": "string"},
         "wild_card": {
@@ -331,8 +351,7 @@ _SCENARIOS_SCHEMA = {
                            "playing out.",
         },
     },
-    "required": ["base_case", "upside_case", "downside_case",
-                 "leading_indicators"],
+    "required": ["upside_case", "downside_case", "leading_indicators"],
 }
 
 _COMPETITIVE_SCHEMA = {
@@ -344,11 +363,18 @@ _COMPETITIVE_SCHEMA = {
         "who_benefits": {"type": "string"},
         "who_loses": {"type": "string"},
         "who_must_respond": {"type": "string"},
-        "who_can_ignore_this": {"type": "string"},
         "if_nobody_responds": {"type": "string"},
+        "what_rivals_should_fear": {
+            "type": "string",
+            "description": "The one capability or position this company has "
+                           "that a competitor cannot easily copy or answer. "
+                           "If there is not one, say so -- that is the more "
+                           "important finding.",
+        },
     },
     "required": ["who_is_forcing_the_change", "who_benefits", "who_loses",
-                 "who_must_respond", "if_nobody_responds"],
+                 "who_must_respond", "if_nobody_responds",
+                 "what_rivals_should_fear"],
 }
 
 ANALYSIS_SCHEMA = {
@@ -379,40 +405,40 @@ ANALYSIS_SCHEMA = {
         },
         "insufficiency_reason": {"type": "string"},
         "the_insight": _THE_INSIGHT_SCHEMA,
+        "mental_model": _MENTAL_MODEL_SCHEMA,
         "decisions": {
-            "type": "array", "items": _DECISION_SCHEMA,
-            "description": "Three to five, ordered by value to the reader. "
-                           "Fewer real decisions beats more padded ones.",
+            "type": "array", "items": _DECISION_SCHEMA, "maxItems": 3,
+            "description": "At most THREE. A founder with five minutes cannot "
+                           "hold more, and the fourth is always the weakest.",
         },
         "competitive": _COMPETITIVE_SCHEMA,
-        "questions": {
-            "type": "array", "items": {"type": "string"},
-            "description": "The questions that should keep this leadership "
-                           "team awake -- about their own fragile "
-                           "assumptions, not generic strategy prompts. "
-                           "'What assumption breaks this?' is the shape; "
-                           "'What are our goals?' is not.",
-        },
+
         "strongest_case_we_are_wrong": {
             "type": "string",
             "description": "The best argument against this entire reading, "
                            "made properly rather than as a disclaimer.",
         },
         "assumptions": {"type": "array", "items": _ASSUMPTION_SCHEMA,
-                        "description": "Two to four. The beliefs this reading "
-                                       "would not survive without."},
+                        "maxItems": 2,
+                        "description": "At most TWO -- the beliefs this "
+                                       "reading would not survive without. "
+                                       "A list of eight assumptions is a list "
+                                       "of none."},
         "blind_spots": _BLIND_SPOTS_SCHEMA,
         "scenarios": _SCENARIOS_SCHEMA,
-        "board_questions": {
-            "type": "array", "items": {"type": "string"},
-            "description": "What a board or investor will actually ask about "
-                           "this, phrased the way they would ask it.",
+        "questions": {
+            "type": "array", "items": {"type": "string"}, "maxItems": 3,
+            "description": "At most three, phrased the way a board member "
+                           "would actually ask them out loud. About this "
+                           "company's own fragile assumptions -- 'what "
+                           "assumption breaks this?' is the shape, 'what are "
+                           "our goals?' is not.",
         },
         "evidence_gaps": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["entity_scope", "business_model",
+    "required": ["entity_scope", "business_model", "mental_model",
                  "sufficient_for_strategic_analysis", "the_insight",
                  "decisions", "competitive", "questions", "assumptions",
-                 "blind_spots", "scenarios", "board_questions",
+                 "blind_spots", "scenarios",
                  "strongest_case_we_are_wrong", "evidence_gaps"],
 }

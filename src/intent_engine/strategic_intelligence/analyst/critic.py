@@ -111,11 +111,23 @@ def _is_calendar_year(raw: str) -> bool:
     return s.isdigit() and len(s) == 4 and 1900 <= int(s) <= 2100
 
 
+def _is_rhetorical_percentage(raw: str) -> bool:
+    """0% and 100% are emphasis, not statistics.
+
+    From a fresh semiconductor run: "zero customer concentration and still
+    100% exposure to the same foundry capacity problem" was rejected as a
+    fabricated figure and the whole analysis discarded. A measured statistic is
+    almost never exactly 100%; a rhetorical one almost always is.
+    """
+    s = _normalise_number(raw)
+    return s in ("0%", "100%")
+
+
 def _numbers_in(text: str) -> set:
     out = set()
     for m in _NUM_RE.finditer(text or ""):
         raw = m.group(0)
-        if _is_calendar_year(raw):
+        if _is_calendar_year(raw) or _is_rhetorical_percentage(raw):
             continue
         out.add(_normalise_number(raw))
     return out
@@ -171,7 +183,22 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
                 if _c not in _insight_cites:
                     _insight_cites.append(_c)
 
+    # Anchoring is measured over the sentence AND its explanation. Measured on
+    # the sentence alone the gate rejected this, from a fresh aerospace run:
+    #
+    #   "Aeronaut is unusually hard to replace and unusually easy to squeeze,
+    #    and both are true at the same time because of the same contracts."
+    #
+    # which is precisely the kind of sentence this product exists to produce.
+    # Its words are plain because good abstraction is plain; the specifics
+    # ("type certificate", "long-term agreements") live in the paragraph. A
+    # gate that rewards headlines for reusing source vocabulary is a gate that
+    # rewards paraphrase over insight.
+    _anchor_text = " ".join(filter(None, [
+        insight.get("sentence", ""), insight.get("paragraph", ""),
+        insight.get("why_now", "")]))
     insights = ([{"headline": insight.get("sentence", ""),
+                  "anchor_text": _anchor_text,
                   "citations": _insight_cites,
                   "tension": insight.get("tension") or {},
                   "economics": insight.get("economics") or {},
@@ -227,7 +254,8 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
                 "of saying something about this company",
                 where=f"insights[{i}].headline"))
 
-        grounded = _content_tokens(headline, extra_stop=company_tokens)
+        grounded = _content_tokens(ins.get("anchor_text") or headline,
+                                   extra_stop=company_tokens)
         anchored = grounded & evidence_vocab
         if len(anchored) < 2:
             findings.append(CriticFinding(
@@ -360,10 +388,15 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
     # --- 7c. assumptions must be falsifiable ---------------------------------
     for i, a in enumerate(analysis.get("assumptions") or []):
         if not (a.get("what_would_break_it") or "").strip():
+            # An assumption the model returned as a bare string never had the
+            # field, so rejecting it reports a shape problem as a content
+            # problem -- and on one fresh run produced 27 identical rejections.
             findings.append(CriticFinding(
                 "unfalsifiable_assumption",
                 f"assumption {i} states a belief with no way to find out it is "
-                "wrong", where=f"assumptions[{i}]"))
+                "wrong",
+                severity="warn" if a.get("_shape_recovered") else "reject",
+                where=f"assumptions[{i}]"))
 
     # --- 7d. a blind spot must actually be one -------------------------------
     blind = analysis.get("blind_spots") or {}

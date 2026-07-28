@@ -371,14 +371,33 @@ def test_number_that_appears_in_evidence_is_allowed():
 
 
 def test_generic_insight_is_rejected():
-    """The original failure: fluent, confident, true of anyone."""
+    """The original failure: fluent, confident, true of anyone.
+
+    Asserts the OUTCOME rather than which gate caught it. Anchoring is now
+    measured over the sentence plus its explanation, so a generic sentence
+    attached to a grounded paragraph clears anchoring and is caught on
+    density instead -- which is the correct division of labour between the
+    two checks.
+    """
     bad = _good()
     bad["the_insight"]["sentence"] = (
         "The company is absorbing adjacent tools until the work lives inside "
         "its platform ecosystem.")
     _, state, findings = _run(bad)
     assert state == ResultState.STRATEGICALLY_INSUFFICIENT
-    assert any(f.check == "generic_headline" for f in findings)
+    assert any(f.check.startswith("generic") for f in findings)
+
+
+def test_a_plainly_worded_insight_is_not_mistaken_for_a_generic_one():
+    """From a fresh aerospace run, rejected by the old sentence-only gate:
+    good abstraction uses plain words the source never used."""
+    ok = _good()
+    ok["the_insight"]["sentence"] = (
+        "They are unusually hard to replace and unusually easy to squeeze, "
+        "and both are true because of the same contracts.")
+    _, state, findings = _run(ok)
+    assert not any(f.check.startswith("generic") for f in findings)
+    assert state == ResultState.COMPLETE
 
 
 def test_real_product_names_wrapped_in_strategy_speak_are_rejected():
@@ -511,3 +530,36 @@ def test_verify_analysis_reports_every_problem_not_just_the_first():
                                company_name="Sony Interactive Entertainment")
     checks = {f.check for f in findings}
     assert {"citation_unresolvable", "no_counterargument"} <= checks
+
+
+# --- shape variation the model is allowed to produce ------------------------
+
+def test_assumptions_returned_as_plain_strings_do_not_crash():
+    """Found by a fresh cross-sector run: the model returned assumptions as
+    strings, which crashed the critic and -- before crashing -- rejected the
+    analysis for a missing falsifier that was an artifact of the shape."""
+    odd = _good()
+    odd["assumptions"] = ["Full-price buyers and subscribers are the same "
+                          "people.", "Hardware is still sold near cost."]
+    analysis, state, findings = _run(odd)
+    assert state in (ResultState.COMPLETE,
+                     ResultState.STRATEGICALLY_INSUFFICIENT)
+    assert all(isinstance(a, dict) for a in (analysis.assumptions if analysis
+                                             else []))
+
+
+def test_a_non_dict_section_does_not_crash():
+    odd = _good()
+    odd["competitive"] = "a sentence where an object was asked for"
+    odd["scenarios"] = None
+    analysis, state, _ = _run(odd)
+    assert state in (ResultState.COMPLETE,
+                     ResultState.STRATEGICALLY_INSUFFICIENT)
+
+
+def test_a_decision_returned_as_a_string_is_dropped_not_crashed():
+    odd = _good()
+    odd["decisions"] = odd["decisions"] + ["just a sentence"]
+    _, state, _ = _run(odd)
+    assert state in (ResultState.COMPLETE,
+                     ResultState.STRATEGICALLY_INSUFFICIENT)

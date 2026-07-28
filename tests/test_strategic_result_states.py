@@ -235,7 +235,17 @@ def test_a_verified_analysis_supersedes_the_scaffolds(tmp_path):
 
 
 def test_rejected_analysis_does_not_fall_back_to_scaffolds(tmp_path):
-    """A fluent but ungrounded analysis must leave the run visibly limited."""
+    """A fluent but ungrounded analysis must leave the run visibly limited.
+
+    Asserts the contract that matters -- rejected, and no scaffold presented
+    as a finding -- rather than naming the gate that catches it. A KNOWN
+    TRADE-OFF sits behind that: anchoring is measured over the sentence plus
+    its explanation so that plainly-worded good insight is not rejected for
+    using words the source did not, and a vague sentence attached to a
+    grounded paragraph can now clear the genericity gates on its own. It is
+    still caught whenever it carries strategy-speak, and rescuing real insight
+    is the more valuable side of that trade.
+    """
     bad = _decision_payload("obs-does-not-exist")
     bad["the_insight"]["sentence"] = ("The company is absorbing adjacent "
                                       "tools until the work lives inside it.")
@@ -245,7 +255,6 @@ def test_rejected_analysis_does_not_fall_back_to_scaffolds(tmp_path):
     assert report["reasoning_provenance"] == "pattern_library"
     checks = {f["check"] for f in report["critic_findings"]}
     assert "citation_unresolvable" in checks
-    assert "generic_headline" in checks
 
 
 def test_result_states_each_explain_themselves():

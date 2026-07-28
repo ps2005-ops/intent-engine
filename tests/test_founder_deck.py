@@ -17,7 +17,37 @@ ANALYSIS = {
                              "subscription revenue instead of unit revenue",
         "what_customers_actually_buy": "access to a catalogue and the friends "
                                        "already on it",
-        "what_management_appears_to_optimise": "install base (inferred)",
+        "the_game_they_are_playing": "Owning the only place a certain "
+                                     "catalogue can be played, for as long as "
+                                     "people want that catalogue.",
+    },
+    "mental_model": {
+        "they_believe": "players choose a console for its exclusive titles",
+        "they_are_protecting": "the full-price value of first-party releases",
+        "they_are_sacrificing": "subscriber growth they could have bought "
+                                "with day-one inclusion",
+        "they_will_not_compromise_on": "owning the studios outright",
+        "where_this_could_blind_them": "a generation that never expected to "
+                                       "buy a game outright",
+    },
+    "assumptions": [{
+        "assumption": "Full-price buyers and subscribers are the same people.",
+        "why_we_believe_it": "Both arrive through the same console.",
+        "what_would_break_it": "Subscribers skewing to players who never "
+                               "bought at full price.",
+        "how_load_bearing": "high", "confidence": "low",
+    }],
+    "scenarios": {
+        "upside_case": "both compound",
+        "downside_case": "matches late and loses both",
+        "wild_card": "a publisher pulls its catalogue from all subscriptions",
+        "leading_indicators": ["a first-party title appearing near launch"],
+    },
+    "blind_spots": {
+        "everyone_is_discussing": "whether Game Pass is profitable",
+        "almost_nobody_is_discussing": "that the catalogue depends on a "
+                                       "release cadence no studio can "
+                                       "guarantee every year",
     },
     "the_insight": {
         "sentence": "Withholding first-party titles from day-one PlayStation "
@@ -70,8 +100,10 @@ ANALYSIS = {
         "who_benefits": "Players buying fewer than three titles a year",
         "who_loses": "Third-party publishers relying on full-price launches",
         "who_must_respond": "PlayStation Studios leadership",
-        "who_can_ignore_this": "Nintendo",
         "if_nobody_responds": "Console margin stays tied to hardware cycles.",
+        "what_rivals_should_fear": "A studio roster deep enough that Sony can "
+                                   "withhold day-one titles and still sell "
+                                   "consoles.",
     },
     "questions": ["What happens the first year the catalogue has no flagship?"],
     "strongest_case_we_are_wrong": "Hardware cycles still drive the install "
@@ -118,10 +150,13 @@ def test_the_insight_is_its_own_slide():
 
 def test_the_story_runs_in_founder_order():
     kinds = [s["kind"] for s in build_founder_slides(ANALYSIS)]
-    for earlier, later in [("business_model", "insight"),
-                           ("insight", "tension"),
-                           ("tension", "decision"),
-                           ("decision", "counterargument"),
+    for earlier, later in [("business_model", "game"),
+                           ("game", "insight"),
+                           ("insight", "mental_model"),
+                           ("mental_model", "decision"),
+                           ("decision", "assumption"),
+                           ("assumption", "competitive"),
+                           ("competitive", "counterargument"),
                            ("counterargument", "monitor")]:
         assert kinds.index(earlier) < kinds.index(later), kinds
 
@@ -132,7 +167,31 @@ def test_every_deck_names_a_decision_with_its_cost_of_waiting():
     assert decision_slides
     text = " ".join(b["text"] for b in decision_slides[0]["bullets"]).lower()
     assert "waiting costs" in text
-    assert "competitor may move first" in text
+    assert "rival may move first" in text
+
+
+def test_the_five_questions_are_all_answered():
+    """The whole point of the deck: a founder with five minutes gets these."""
+    kinds = {s["kind"] for s in build_founder_slides(ANALYSIS)}
+    assert "business_model" in kinds      # what business are they really in
+    assert "game" in kinds                # what game are they playing
+    assert "mental_model" in kinds        # what is leadership protecting
+    assert "assumption" in kinds          # what carries the weight
+    assert "competitive" in kinds         # what rivals should fear
+
+
+def test_what_rivals_should_fear_reaches_the_deck():
+    slides = build_founder_slides(ANALYSIS)
+    threat = [s for s in slides if s["kind"] == "competitive"][0]
+    assert "studio roster deep enough" in threat["bullets"][0]["text"]
+
+
+def test_the_case_for_being_wrong_reaches_the_deck():
+    """Audited as only 44% visible before -- among the most valuable fields
+    in the analysis and the reader never saw it."""
+    slides = build_founder_slides(ANALYSIS)
+    wrong = [s for s in slides if s["kind"] == "counterargument"][0]
+    assert wrong["bullets"][0]["text"] == ANALYSIS["strongest_case_we_are_wrong"]
 
 
 def test_the_case_against_is_argued_not_omitted():
@@ -184,10 +243,9 @@ def test_trimming_never_stops_inside_a_bracket():
 def test_prefixed_fragments_read_as_clauses():
     slides = build_founder_slides(ANALYSIS)
     text = _all_text(slides)
-    assert "what customers really buy: not a box" in text or \
-        "what customers really buy: access" in text
-    # the bug this pins: "Customers are really buying Not a box"
-    assert "buying not a box" not in text
+    assert "what customers are really buying: access" in text
+    # the bug this pins: "Customers are really buying Access to..."
+    assert "really buying Access" not in text
 
 
 def test_no_empty_slides():

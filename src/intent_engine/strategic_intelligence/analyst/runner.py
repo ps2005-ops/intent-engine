@@ -40,6 +40,9 @@ MAX_ATTEMPTS = 2
 
 #: minimum evidence before it is worth asking for a strategic reading at all
 MIN_OBSERVATIONS = 3
+#: caps enforced in code, because schema maxItems is a request not a guarantee
+MAX_DECISIONS = 3
+MAX_ASSUMPTIONS = 2
 
 
 class AnalystUnavailable(RuntimeError):
@@ -54,6 +57,10 @@ reason only from it.
 
 You are not writing a report. You are giving advice. Write the way a person \
 speaks when they respect the reader's time and have nothing to prove.
+
+A founder has five minutes. When they close this they should know what business this company is really in, what game it is actually playing, what leadership is protecting, what assumption is carrying the weight, and what a competitor should be afraid of. Nothing you write that does not serve one of those five earns its place.
+
+Write less than you want to. Every sentence a founder skips costs you the one after it. Simple words, concrete nouns, no jargon: clear enough for a smart nineteen-year-old, worth the time of a chief executive.
 
 Start with the money. Before inferring any strategy, work out how the business \
 actually makes money, where profit really comes from, and where it leaks. The \
@@ -264,7 +271,52 @@ def analyse(company_name, observations, *, client=None, cache=None,
     return _verify_and_wrap(raw, observations, company_name, model, usage)
 
 
+def _normalise(raw):
+    """Coerce shape variation the model is allowed to produce.
+
+    Found by a fresh cross-sector run, not by any test: `assumptions` came back
+    as a list of plain strings rather than objects, which crashed the critic
+    outright and -- before the crash -- rejected the analysis for having no
+    falsifier, a complaint that was an artifact of the shape rather than a
+    judgement about the content.
+
+    A schema is a request, not a guarantee. Anything walking a model's output
+    has to survive the model answering the question a slightly different way.
+    """
+    if not isinstance(raw, dict):
+        return {}
+    out = dict(raw)
+    # A truncated response can leave a field holding a STRING where a list was
+    # asked for. Iterating it yields characters: one fresh run produced 1,131
+    # "assumptions", each a single character, each separately rejected.
+    for key in ("assumptions", "decisions", "questions", "evidence_gaps"):
+        if isinstance(out.get(key), str):
+            out[key] = []
+    fixed = []
+    for a in (out.get("assumptions") or []):
+        if isinstance(a, str) and len(a.split()) >= 4:
+            fixed.append({"assumption": a, "why_we_believe_it": "",
+                          "what_would_break_it": "", "how_load_bearing": "",
+                          "confidence": "", "_shape_recovered": True})
+        elif isinstance(a, dict):
+            fixed.append(a)
+    # maxItems in a schema is a request. One fresh run returned far more than
+    # the cap; a list of twenty assumptions is a list of none.
+    out["assumptions"] = fixed[:MAX_ASSUMPTIONS]
+    out["decisions"] = (out.get("decisions") or [])[:MAX_DECISIONS]
+    out["decisions"] = [d for d in (out.get("decisions") or [])
+                        if isinstance(d, dict)]
+    for key in ("entity_scope", "business_model", "the_insight", "competitive",
+                "blind_spots", "scenarios", "mental_model"):
+        if not isinstance(out.get(key), dict):
+            out[key] = {}
+    for key in ("questions", "evidence_gaps"):
+        out[key] = [q for q in (out.get(key) or []) if isinstance(q, str)]
+    return out
+
+
 def _verify_and_wrap(raw, observations, company_name, model, usage):
+    raw = _normalise(raw)
     findings = verify_analysis(raw, observations=observations,
                                company_name=company_name)
     if rejects(findings):
@@ -291,10 +343,10 @@ def _to_analysis(raw, model, usage) -> StrategicAnalysis:
         decisions=list(raw.get("decisions") or []),
         competitive=raw.get("competitive") or {},
         questions=list(raw.get("questions") or []),
+        mental_model=raw.get("mental_model") or {},
         assumptions=list(raw.get("assumptions") or []),
         blind_spots=raw.get("blind_spots") or {},
         scenarios=raw.get("scenarios") or {},
-        board_questions=list(raw.get("board_questions") or []),
         strongest_case_we_are_wrong=raw.get("strongest_case_we_are_wrong", ""),
         evidence_gaps=list(raw.get("evidence_gaps") or []),
         sufficient=bool(raw.get("sufficient_for_strategic_analysis")),
