@@ -42,6 +42,11 @@ SIGNAL_VOCABULARY = (
     "multi_product", "segment_split", "named_customers", "developer_surface",
     "services_motion", "pricing_published", "pricing_gated",
     "regulated_buyer", "consolidation",
+    # shapes a company with physical operations or formal disclosure exhibits.
+    # The neutral set above is software-shaped; without these a manufacturer's
+    # evidence matched one signal and produced no hypothesis.
+    "capacity_investment", "customer_concentration", "segment_reporting",
+    "disclosed_risk", "content_and_channel",
 )
 
 
@@ -382,6 +387,79 @@ PATTERN_LIBRARY = [
         limitations="Without disclosed revenue by segment, concentration is "
                     "inferred from emphasis, which can mislead.",
     ),
+    # --- shapes outside software ---------------------------------------------
+    # A conglomerate's evidence is segment reporting, capacity commitments and
+    # disclosed risk, none of which the software-shaped neutral patterns above
+    # can read. The result was a brief with no hypothesis: the reader was told
+    # what the company said about itself and nothing about what it meant.
+    _p(
+        pattern_id="capacity_ahead_of_demand",
+        name="Capacity committed ahead of the demand for it",
+        description="A company commits capital to capacity now against demand "
+                    "it expects later, from buyers it does not control.",
+        mechanism="Capacity is bought in large, slow increments while demand "
+                  "arrives in small, fast ones. Committing early wins share "
+                  "when the forecast holds and strands fixed cost when it "
+                  "does not — and the forecast usually rests on a handful of "
+                  "large customers whose own product cycles set the timing.",
+        historical_examples=[
+            {"name": "Memory and sensor fabrication cycles",
+             "note": "capacity added on forecast, then written down when "
+                     "handset demand moved",
+             "source": "https://www.sec.gov/"},
+            {"name": "Contract manufacturing capacity build-outs",
+             "note": "multi-year fab commitments against customer roadmaps",
+             "source": "https://www.sec.gov/"},
+        ],
+        when_it_applies="The company describes committing capital to capacity "
+                        "AND names a concentrated or cyclical set of buyers "
+                        "for it.",
+        when_it_does_not_apply="Capacity is rented or elastic, or demand is "
+                               "spread across many independent buyers.",
+        source_refs=[{"title": "curated pattern: capacity ahead of demand",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("capacity_investment", "customer_concentration",
+                            "segment_reporting"),
+        disconfirming_signals=("pricing_published",),
+        limitations="Utilisation and order books are not public, so whether "
+                    "committed capacity is actually filled cannot be seen "
+                    "from outside.",
+    ),
+    _p(
+        pattern_id="portfolio_run_as_one",
+        name="Separate businesses run as one portfolio",
+        description="A company reports distinct segments while describing "
+                    "them as a single, deliberately connected portfolio.",
+        mechanism="Owning both what is sold and the channel it reaches people "
+                  "through lets each business subsidise the other's "
+                  "acquisition cost. The same coupling makes per-business "
+                  "accountability harder to read from outside, and a weak "
+                  "segment can be carried far longer than it would survive "
+                  "alone.",
+        historical_examples=[
+            {"name": "Vertically integrated entertainment groups",
+             "note": "content and the device it plays on managed together",
+             "source": "https://www.sec.gov/"},
+            {"name": "Platform holders with first-party content",
+             "note": "hardware margin funded by content attach",
+             "source": "https://www.sec.gov/"},
+        ],
+        when_it_applies="The company reports several segments AND describes "
+                        "owning both the content or product and the channel "
+                        "that distributes it.",
+        when_it_does_not_apply="Segments are unrelated holdings with no "
+                               "described operational connection.",
+        source_refs=[{"title": "curated pattern: portfolio run as one",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("segment_reporting", "content_and_channel",
+                            "multi_product"),
+        disconfirming_signals=(),
+        limitations="Transfers between segments are not disclosed publicly, "
+                    "so which business subsidises which is inferred from "
+                    "structure rather than observed.",
+    ),
 ]
 
 # Hypothesis scaffolds — the reasoning the engine instantiates when a pattern
@@ -672,6 +750,73 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
         "decision_affected": "How much of the plan may depend on one budget "
                              "cycle.",
+    },
+    "capacity_ahead_of_demand": {
+        "title": "committing capital to capacity ahead of uncertain demand",
+        "statement": "{company} appears to be committing capital to capacity "
+                     "ahead of demand it does not control, concentrating the "
+                     "outcome in a small number of buyers' product cycles.",
+        "reasoning": "Stated capacity investment, a written-down dependence "
+                     "on a few buyers, and formal segment reporting together "
+                     "match the capacity-ahead-of-demand mechanism: fixed "
+                     "cost is committed in large increments against demand "
+                     "that arrives in small ones.",
+        "alternatives": [
+            "The capacity is pre-sold under long-term agreements, so the "
+            "commitment carries far less risk than it appears to.",
+            "Capacity is being added to replace ageing lines rather than to "
+            "serve growth.",
+        ],
+        "implications": [
+            "Whether a supply commitment should be treated as fixed or "
+            "renegotiable.",
+            "How exposed a plan is to one buyer's product cycle slipping.",
+        ],
+        "gaps": [
+            "Utilisation, order books and take-or-pay terms are not public.",
+        ],
+        "falsification": [
+            "Disclosed long-term purchase commitments covering the new "
+            "capacity.",
+            "Buyer diversification across many independent customers.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Whether to treat committed supply as a fixed "
+                             "cost or a negotiable one.",
+    },
+    "portfolio_run_as_one": {
+        "title": "running separately-reported businesses as a single "
+                 "portfolio",
+        "statement": "{company} reports distinct segments while describing "
+                     "them as one connected portfolio, which makes the "
+                     "performance of any single business hard to read from "
+                     "outside.",
+        "reasoning": "Formal segment reporting alongside language about "
+                     "owning both the content and the channel matches the "
+                     "portfolio mechanism: businesses that subsidise each "
+                     "other are managed together and disclosed apart.",
+        "alternatives": [
+            "The segments are genuinely independent and the portfolio framing "
+            "is investor-relations language rather than operating reality.",
+            "Connections between segments are real but small enough not to "
+            "affect how any one of them should be judged.",
+        ],
+        "implications": [
+            "Which business a partnership or supply agreement actually "
+            "depends on.",
+            "Whether a weak segment is being carried by a strong one.",
+        ],
+        "gaps": [
+            "Inter-segment transfers and shared cost allocations are not "
+            "disclosed.",
+        ],
+        "falsification": [
+            "Segment disclosure showing no material inter-segment revenue.",
+            "A divestment that leaves the remaining segments unaffected.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Which business in the group a commercial "
+                             "relationship actually rests on.",
     },
     "differentiator_commoditization": {
         "title": "watching its original differentiator commoditise",

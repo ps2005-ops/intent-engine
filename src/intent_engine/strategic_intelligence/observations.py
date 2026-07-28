@@ -83,6 +83,11 @@ _TYPE_FOR_SIGNAL = {
     "merchant_outcome_positioning": "messaging",
     "agentic_commerce": "channel_distribution",
     "distribution_shift": "channel_distribution",
+    "capacity_investment": "organizational",
+    "customer_concentration": "buyer_segment",
+    "segment_reporting": "organizational",
+    "disclosed_risk": "market_context",
+    "content_and_channel": "product_surface",
 }
 
 
@@ -207,6 +212,44 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
     "consolidation": ("one workspace", "single system", "replace several",
                       "all in one", "unified", "connected workspace",
                       "one place"),
+    # --- shapes that only a company with physical or disclosed operations
+    # exhibits. Added because the neutral set above is a SOFTWARE-shaped
+    # neutral set: it reads pricing pages, developer surfaces and workspace
+    # consolidation. A manufacturer whose evidence is segment reporting,
+    # capacity commitments and disclosed risk matched exactly one signal
+    # ("segments") and therefore produced a brief with no hypothesis behind
+    # it at all — a summary of what the company says, with nothing about what
+    # it means.
+    #
+    # committed capacity: money spent before the demand arrives
+    "capacity_investment": ("capacity expansion", "expansion of its image "
+                            "sensor", "fabrication capacity",
+                            "manufacturing capacity", "production capacity",
+                            "capital allocation", "capital expenditure",
+                            "sensor capacity", "expanding capacity",
+                            "new facility", "plant capacity"),
+    # a dependency the company itself has written down
+    "customer_concentration": ("limited number of customers",
+                               "small number of customers",
+                               "limited number of smartphone customers",
+                               "customer concentration",
+                               "largest customers accounted",
+                               "depend on a limited number",
+                               "dependence on a limited number"),
+    # formal segment reporting — a conglomerate shape, not a marketing one
+    "segment_reporting": ("business segments", "operating segments",
+                          "reportable segments", "segment revenue",
+                          "segment results", "segment reporting",
+                          "revenue and operating income for each"),
+    # disclosure-grade statements of what could go wrong
+    "disclosed_risk": ("risk factors", "principal risks", "risks disclosed",
+                       "risk factors disclosed", "material weakness",
+                       "these risks include"),
+    # owns both the content and the channel it reaches people through
+    "content_and_channel": ("intellectual property", "creators and users",
+                            "first-party content", "original content",
+                            "content and the hardware", "catalogue of titles",
+                            "content pipeline"),
 }
 
 # Neutral labels — what the signal MEANS, stated so it is true of any industry.
@@ -220,6 +263,13 @@ _NEUTRAL_LABEL = {
     "pricing_gated": "keeps pricing behind a sales conversation",
     "regulated_buyer": "sells into regulated or accredited environments",
     "consolidation": "positions itself as replacing several separate tools",
+    "capacity_investment": "is committing capital to capacity ahead of the "
+                           "demand for it",
+    "customer_concentration": "has written down a dependence on a few buyers",
+    "segment_reporting": "reports as several separate businesses",
+    "disclosed_risk": "discloses specific risks rather than generic caveats",
+    "content_and_channel": "owns both what is sold and the channel it reaches "
+                           "people through",
 }
 
 
