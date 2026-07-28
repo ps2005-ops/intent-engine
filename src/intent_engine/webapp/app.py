@@ -269,7 +269,7 @@ class WebApp:
         # honest answer is "unproven", and the feedback form says so rather
         # than promising a persistence nobody has checked.
         from intent_engine.webapp.feedback import FeedbackLog
-        from intent_engine.webapp.storage_state import probe_storage, record_boot
+        from intent_engine.webapp.storage_state import EPHEMERAL_LIKELY, probe_storage, record_boot
         record_boot(self._runtime_root)
         self._storage = probe_storage(self._runtime_root)
         self.feedback_log = FeedbackLog(self._runtime_root)
@@ -2684,9 +2684,28 @@ class WebApp:
             # Storage durability is reported as MEASURED, so an operator can
             # tell "proven to survive a restart here" from "writable, never
             # tested" without reading a path name and guessing.
-            return self._ok_json({"status": "ready", "env": self.config.env,
-                                  "runtime_root": str(self._runtime_root),
-                                  "storage": {
+            # PERSISTENCE FAILS LOUDLY.
+            #
+            # render.yaml declares a persistent disk at /var/data and sets
+            # RUNTIME_ROOT to it, but the running service reported
+            # runtime_root="data" with durability EPHEMERAL_LIKELY -- writing
+            # inside the container, wiped on every deploy. Completed analyses
+            # vanished, /analyses went empty and issued result URLs stopped
+            # working, while /readyz cheerfully said "ready".
+            #
+            # "ready" now means ready. A production service whose storage
+            # cannot survive a restart is degraded, and says which one-line
+            # change fixes it. Still 200, because the demo does work -- it
+            # just forgets.
+            from intent_engine.webapp.storage_state import (
+                EPHEMERAL_LIKELY as _EPHEMERAL,
+            )
+            ephemeral = (self._storage["durability"] == _EPHEMERAL)
+            degraded = ephemeral and self.config.env == "production"
+            payload = {"status": "degraded" if degraded else "ready",
+                       "env": self.config.env,
+                       "runtime_root": str(self._runtime_root),
+                       "storage": {
                                       "durability": self._storage["durability"],
                                       "writable": self._storage["writable"],
                                       "separate_filesystem":
@@ -2694,7 +2713,14 @@ class WebApp:
                                       "boot_count": self._storage["boot_count"],
                                       "accepting_feedback":
                                           self.feedback_available()},
-                                  "capabilities": self._capability_state()})
+                       "capabilities": self._capability_state()}
+            if degraded:
+                payload["degraded_reason"] = (
+                    "storage is not durable: completed analyses are lost on "
+                    "every deploy. Attach the persistent disk and set "
+                    "RUNTIME_ROOT to its mount path (render.yaml declares "
+                    "/var/data).")
+            return self._ok_json(payload)
         except Exception as exc:                            # noqa: BLE001
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
@@ -2890,7 +2916,16 @@ class WebApp:
             rows += (f'<li><a href="/runs/{_e(rid)}/slides">{_e(name)}</a>'
                      + (f' <span class="when">{_e(when)}</span>' if when
                         else '') + '</li>')
-        body = (f'<main><h1>Your analyses</h1>'
+        # Do not promise history the storage cannot keep. When the runtime
+        # root is not durable, every analysis here disappears on the next
+        # deploy -- so say that on the page that lists them, rather than
+        # letting someone come back to an empty list and conclude the product
+        # lost their work silently.
+        from intent_engine.webapp.storage_state import may_promise_persistence
+        caveat = ('' if may_promise_persistence(self._storage) else
+                  '<p class="caveat">These are kept only until the service '
+                  'next restarts. Open anything you want to keep now.</p>')
+        body = (f'<main><h1>Your analyses</h1>{caveat}'
                 + (f'<ul class="analyses">{rows}</ul>' if rows else
                    '<p>Nothing yet. <a href="/">Read a company</a> to start.'
                    '</p>')
