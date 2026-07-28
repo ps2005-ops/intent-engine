@@ -6,6 +6,7 @@ inaccessible. Plus isolation, error states, expired share, viewport,
 labels, and safe error pages.
 """
 import io
+import re
 
 import pytest
 
@@ -223,7 +224,13 @@ def test_production_host_check_and_safe_error_page(tmp_path):
     run_url = _run_demo(c2, csrf)
     status, _, body = c2.request("GET", run_url + "/progress")
     assert status.startswith("500")
-    assert "Traceback" not in body and "logged" in body
+    # This used to assert the literal word "logged", which is exactly how the
+    # page came to promise "It has been logged" while nothing logged anything.
+    # Assert the properties that actually matter instead: no traceback
+    # reaches the user, and they are given a reference an operator can find.
+    # tests/test_webapp_error_logging.py proves the log side.
+    assert "Traceback" not in body
+    assert re.search(r"reference [0-9a-f]{12}", body), body[:300]
 
 
 def test_empty_database_startup(tmp_path):

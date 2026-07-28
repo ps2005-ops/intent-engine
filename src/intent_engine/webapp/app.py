@@ -12,8 +12,15 @@ from __future__ import annotations
 
 import html as _html
 import json
+import logging
 import traceback
+import uuid
 from urllib.parse import parse_qs
+
+# Unhandled-request errors go here. stderr is what the deployment platform
+# captures, so this is the difference between a 500 that can be diagnosed and
+# one that leaves only an access-log line.
+_LOG = logging.getLogger("intent_engine.webapp")
 
 from intent_engine.founder_intelligence.fixtures import (
     DEMO_AS_OF, DEMO_COMPANY_NAME, DEMO_DOMAIN, demo_claims,
@@ -109,8 +116,24 @@ class WebApp:
         except WebAppError as exc:
             status, headers, body = self._error_page(400, str(exc))
         except Exception:                                   # noqa: BLE001
+            # The message used to promise "It has been logged" while the
+            # traceback was only ever computed when debug was on — in
+            # production it was formatted nowhere, written nowhere, and
+            # discarded. A 500 left nothing behind but an access-log line, so
+            # the one artefact needed to diagnose it never existed. Log it
+            # unconditionally, to stderr, which the platform captures.
+            #
+            # The error id is the bridge: the user can quote it, and an
+            # operator can grep for it, without any internal detail crossing
+            # the boundary.
+            error_id = uuid.uuid4().hex[:12]
+            _LOG.exception("unhandled error %s handling %s %s", error_id,
+                           environ.get("REQUEST_METHOD", "?"),
+                           environ.get("PATH_INFO", "?"))
             detail = (traceback.format_exc() if self.config.debug
-                      else "An internal error occurred. It has been logged.")
+                      else (f"An internal error occurred and has been "
+                            f"recorded (reference {error_id}). Quote this "
+                            f"reference if you report it."))
             status, headers, body = self._error_page(500, detail)
         headers = headers + _SECURITY_HEADERS
         payload = body.encode()
