@@ -60,6 +60,12 @@ color:var(--muted);margin:1.6rem 0 .35rem;font-weight:700}
 .brief p{margin:0 0 .5rem}
 .brief .stamp{color:var(--muted);font-size:.86rem;margin-bottom:1.2rem}
 .brief .b-part{border-top:1px solid var(--line);padding-top:.2rem}
+.brief .b-headline{background:var(--panel);border:1px solid var(--line);
+border-left:3px solid var(--accent);border-radius:6px;
+padding:.9rem 1rem;margin:0 0 1.1rem}
+.brief .b-headline .hl-does{font-size:1.02rem}
+.brief .b-headline .hl-view{font-weight:600}
+.brief .b-headline .hl-conf{color:var(--muted);font-size:.88rem;margin:0}
 .brief ul,.brief ol{margin:.2rem 0;padding-left:1.2rem}
 .brief li{margin:0 0 .5rem}
 .brief .when{font-size:.78rem;font-weight:700;color:var(--muted);
@@ -1515,7 +1521,8 @@ class WebApp:
             return self._redirect(f"/runs/{run_id}/full")
         from intent_engine.strategic_intelligence.brief import build_brief
         as_of, version = self._analysis_stamp(run_id)
-        brief = build_brief(report, as_of=as_of, analysis_version=version)
+        brief = build_brief(report, as_of=as_of, analysis_version=version,
+                            documents=self.ci.store.retrieved(run_id))
         csrf = session["csrf"] if session else ""
 
         def _p(label, value):
@@ -1533,6 +1540,14 @@ class WebApp:
             f'{self._layer_nav(run_id, "brief")}'
             f'<h1>{_e(brief.company)}</h1>'
             f'{self._analysis_provenance(run_id, as_of, version, csrf)}'
+            # The whole answer for a reader who will not scroll: what this
+            # company is, what we think is happening, and how much to trust
+            # it. Everything below is for the reader who continues.
+            + (f'<section class="b-headline">'
+               f'<p class="hl-does">{_e(brief.headline.does)}</p>'
+               f'<p class="hl-view">{_e(brief.headline.view)}</p>'
+               f'<p class="hl-conf">{_e(brief.headline.confidence)}</p>'
+               f'</section>' if is_meaningful(brief.headline.does) else '')
             + _p("The central view", brief.thesis)
             + (f'<section class="b-part"><h2>What supports it</h2>'
                f'<ul class="signals">{signals}</ul></section>'

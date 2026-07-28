@@ -201,7 +201,7 @@ def _brief_and_slides(result, documents=()):
     from intent_engine.strategic_intelligence.brief import build_brief
     from intent_engine.strategic_intelligence.slides import build_slides
     brief = build_brief(report, as_of="2026-07-28",
-                        analysis_version="eval")
+                        analysis_version="eval", documents=documents)
     # `documents` is not optional in practice: without it the factual slides
     # (what the company does, its products, its customers) are built from the
     # much smaller observation set and come out empty, so the deck the
@@ -246,6 +246,22 @@ def _unanswered(persona, brief, slides) -> list:
         if not (by_brief or by_slide):
             missing.append(question)
     return missing
+
+
+def _headline_stands_alone(headline) -> bool:
+    """Whether the opening lines are a complete answer rather than a fragment.
+
+    Both halves have to be there. "What is changing" without "what this
+    company is" is unusable to a reader who arrived knowing nothing, and it is
+    exactly the reader with thirty seconds who most often did.
+    """
+    from intent_engine.strategic_intelligence.editorial import is_meaningful
+    does = getattr(headline, "does", "")
+    view = getattr(headline, "view", "")
+    if not (is_meaningful(does) and is_meaningful(view)):
+        return False
+    # A "we could not find this" line is honest, but it is not an answer.
+    return "not described on any page" not in does.lower()
 
 
 def _field_present(brief, field_name) -> bool:
@@ -313,15 +329,46 @@ def _evaluate(case, ci, run_id, result) -> CaseResult:
         _unanswered(persona, brief, slides))
 
     # Persona-specific expectations.
+    #
+    # What this reader can afford is not always the whole brief. A reader with
+    # thirty seconds meets the headline — one complete unit, sixty words —
+    # and either stops there satisfied or reads on. Measuring them against the
+    # full brief said the product failed them; measuring them against a
+    # truncation would say it served them when it had only cut them off. So
+    # the headline is measured as the whole thing it is, and it still has to
+    # answer that reader's questions on its own.
+    headline = getattr(brief, "headline", None)
+    headline_words = getattr(headline, "word_count", 0)
     brief_words = score.metrics.get("brief_words", 0)
-    if brief_words > persona.word_budget:
-        out.critical.append(
-            f"{persona.label} reads ~{persona.word_budget} words; the brief is "
-            f"{brief_words}")
-    if score.metrics.get("brief_reading_seconds", 0) > persona.patience_s:
-        out.critical.append(
-            f"{persona.label} gives it {persona.patience_s}s; the brief needs "
-            f"{score.metrics['brief_reading_seconds']}s")
+    brief_seconds = score.metrics.get("brief_reading_seconds", 0)
+    from intent_engine.product_eval.scorecard import reading_seconds
+    over_budget = (brief_words > persona.word_budget
+                   or brief_seconds > persona.patience_s)
+    headline_seconds = reading_seconds(
+        " ".join(filter(None, (getattr(headline, "does", ""),
+                               getattr(headline, "view", ""),
+                               getattr(headline, "confidence", "")))))
+    reads_headline_only = (headline_words and over_budget
+                           and headline_words <= persona.word_budget
+                           and headline_seconds <= persona.patience_s)
+    out.metrics["headline_words"] = headline_words
+    out.metrics["reads_headline_only"] = bool(reads_headline_only)
+
+    if reads_headline_only:
+        if not _headline_stands_alone(headline):
+            out.critical.append(
+                f"{persona.label} only reaches the opening lines, and they do "
+                f"not say what the company does or what is thought to be "
+                f"happening")
+    else:
+        if brief_words > persona.word_budget:
+            out.critical.append(
+                f"{persona.label} reads ~{persona.word_budget} words; the "
+                f"brief is {brief_words}")
+        if brief_seconds > persona.patience_s:
+            out.critical.append(
+                f"{persona.label} gives it {persona.patience_s}s; the brief "
+                f"needs {brief_seconds}s")
 
     for breaker in persona.deal_breakers:
         if breaker == "jargon without explanation" and \

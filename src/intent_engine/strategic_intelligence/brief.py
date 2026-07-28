@@ -72,6 +72,36 @@ def fit_to_words(text: str, max_words: int) -> str:
     return " ".join(text.split()[:max_words]).rstrip(",;:") + "…"
 
 
+MAX_HEADLINE_WORDS = 60
+
+
+@dataclass
+class Headline:
+    """The whole answer for a reader who will not scroll.
+
+    Not a truncation of the brief — a truncated brief is a brief the reader
+    finished in the wrong place. This is the smallest complete unit: what the
+    company does, what we think is happening, and how much to trust it. Sixty
+    words, about fifteen seconds.
+
+    It creates no claim of its own. Every line is drawn from something the
+    brief already says, so a reader who stops here and a reader who reads on
+    have not been told different things.
+    """
+    does: str = ""
+    view: str = ""
+    confidence: str = ""
+
+    @property
+    def word_count(self) -> int:
+        return sum(_words(p) for p in (self.does, self.view, self.confidence))
+
+    def as_dict(self) -> dict:
+        return {"does": self.does, "view": self.view,
+                "confidence": self.confidence,
+                "word_count": self.word_count}
+
+
 @dataclass
 class ExecutiveBrief:
     company: str
@@ -88,6 +118,7 @@ class ExecutiveBrief:
     # True when the evidence supported no hypothesis and the brief says so
     # rather than leaving the most prominent line on the page blank.
     view_withheld: bool = False
+    headline: Headline = field(default_factory=Headline)
 
     @property
     def word_count(self) -> int:
@@ -110,6 +141,7 @@ class ExecutiveBrief:
                 "analysis_version": self.analysis_version,
                 "brief_version": self.brief_version,
                 "view_withheld": self.view_withheld,
+                "headline": self.headline.as_dict(),
                 "word_count": self.word_count}
 
 
@@ -123,8 +155,160 @@ def _first(items, *keys, default=""):
     return default
 
 
-def build_brief(report, *, as_of: str = "", analysis_version: str = "") \
-        -> ExecutiveBrief:
+# Verbs a company uses when it is saying what it actually does.
+_DOES_VERBS = (" is a ", " is the ", " provides ", " builds ", " makes ",
+               " sells ", " offers ", " serves ", " helps ", " powers ",
+               " delivers ", " runs ", " operates ", " supplies ",
+               " reconciles ", " combines ", " specialises ", " specializes ",
+               " lets ", " enables ",
+               # first person, which is how a company writes its own homepage
+               " we build ", " we make ", " we provide ", " we help ",
+               " we operate ", " we sell ", " we serve ")
+
+# Sentences about corporate STATUS. "Notion is a privately held software
+# company" scores well on every structural signal and tells a reader nothing
+# about what Notion is for.
+_STATUS_ONLY = ("privately held", "publicly traded", "publicly listed",
+                "do not publish", "does not publish", "no financial results",
+                "wholly owned subsidiary", "limited company")
+
+# Openings that are about the company's feelings or its founding, not its
+# business. Both are true and neither answers the question a stranger asked.
+_NOT_A_DESCRIPTION = ("our mission", "our vision", "our goal", "we believe",
+                      "our values", "our story", "our purpose")
+_HISTORY = ("was founded", "founded in", "opened in", "was started",
+            "started in", "began in")
+
+
+def _describes_the_business(sentence: str, company: str) -> int:
+    """How well one sentence answers "what does this company do".
+
+    Scored rather than taken in order, because the first sentence of an
+    identity page is as often a mission statement or a founding date as it is
+    a description. "Our mission is to make commerce better for everyone" and
+    "the practice opened in 2014 and is owned by the two dentists who work in
+    it" are both true, and a reader who has never heard of the company learns
+    nothing from either.
+    """
+    text = " " + " ".join((sentence or "").split()).lower() + " "
+    if _words(sentence) < 6:
+        return 0
+    score = 1
+    has_verb = any(v in text for v in _DOES_VERBS)
+    first_word = (company or "").split()[0].lower() if company else ""
+    names_company = bool(first_word) and first_word in text
+    if has_verb:
+        score += 2
+    if names_company and has_verb:
+        score += 2
+    if any(text.lstrip().startswith(" " + m) or f" {m}" in text[:24]
+           for m in _NOT_A_DESCRIPTION):
+        score -= 4
+    if any(h in text for h in _HISTORY) and not has_verb:
+        score -= 2
+    if any(s in text for s in _STATUS_ONLY):
+        score -= 3
+    # "Shopify Plus serves enterprise merchants…" is a sentence about a
+    # product line wearing the company's name. A capitalised word immediately
+    # after the company name is the tell.
+    if names_company and _is_sub_brand(sentence, company):
+        score -= 2
+    return score
+
+
+def _is_sub_brand(sentence: str, company: str) -> bool:
+    words = (sentence or "").split()
+    first = (company or "").split()[0] if company else ""
+    if not first or len(words) < 2:
+        return False
+    if words[0].strip(",.").lower() != first.lower():
+        return False
+    nxt = words[1].strip(",.:;")
+    return bool(nxt) and nxt[:1].isupper() and nxt.lower() not in ("the", "is")
+
+
+def _without_leading_title(document) -> str:
+    """The page's prose, without the heading the extractor kept in front of it.
+
+    Extraction concatenates the h1 with the body, so the first sentence of an
+    identity page reads "About Shopify Our mission is to make commerce better
+    for everyone." Two sentences welded together, and the first one is
+    navigation.
+    """
+    text = " ".join((document.get("text_content") or "").split())
+    title = " ".join((document.get("title") or "").split())
+    if title and text.lower().startswith(title.lower()):
+        text = text[len(title):].lstrip(" -—:·|")
+    return text
+
+
+def _what_it_does(company, report, documents) -> str:
+    """One sentence a reader who has never heard of this company can use.
+
+    The thesis answers "what is changing", which is a different question and
+    useless to someone who does not yet know what the company is. A reader
+    arriving at "Shopify appears to be expanding from a smaller-customer wedge
+    toward enterprise buyers" with no prior knowledge learns nothing.
+
+    Taken from the company's own description of itself, because for this one
+    question the company IS the authority — what it sells is not a contested
+    claim.
+    """
+    from intent_engine.company_ingestion.coverage import (
+        IDENTITY, PRODUCT, family_of,
+    )
+    best, best_score = "", 0
+    for document in documents or ():
+        if document.get("retrieval_status") != "OK":
+            continue
+        family = family_of(document)
+        if family not in (IDENTITY, PRODUCT):
+            continue
+        text = _without_leading_title(document)
+        # Only the opening of a page — a description that has not appeared by
+        # the fourth sentence is not the page's description.
+        for sentence in _SENTENCE.split(text)[:4]:
+            score = _describes_the_business(sentence, company)
+            if family is PRODUCT:
+                score -= 1          # what it sells, one step from what it is
+            if score > best_score:
+                best, best_score = sentence, score
+    if best:
+        return fit_to_words(best, 34)
+    # No identity page. Say that rather than inventing a description; a reader
+    # can tell the difference between "we did not find this" and silence.
+    return (f"What {company or 'this company'} does is not described on any "
+            f"page we could retrieve.")
+
+
+def _build_headline(company, report, brief, documents) -> Headline:
+    r = report.as_dict() if hasattr(report, "as_dict") else (report or {})
+    hypotheses = r.get("hypotheses") or []
+    confidence = str((hypotheses[0].get("confidence") if hypotheses else "")
+                     or "").strip().lower()
+    if brief.view_withheld:
+        note = "No view is put forward: the evidence does not support one."
+    elif confidence:
+        note = (f"Held as a {confidence}-confidence hypothesis, not a settled "
+                f"fact.")
+    else:
+        note = "A hypothesis, not a settled fact."
+    # The thesis's own second sentence states the confidence, and the note
+    # below states it again. Two lines apart, that is the repetition the whole
+    # editorial pass exists to remove — so the view keeps only its claim.
+    claim = _SENTENCE.split(brief.thesis.strip())[0] if brief.thesis else ""
+    headline = Headline(does=_what_it_does(company, r, documents),
+                        view=fit_to_words(claim, 40),
+                        confidence=note)
+    if headline.word_count > MAX_HEADLINE_WORDS:
+        over = headline.word_count - MAX_HEADLINE_WORDS
+        headline.view = fit_to_words(headline.view,
+                                     max(12, _words(headline.view) - over))
+    return headline
+
+
+def build_brief(report, *, as_of: str = "", analysis_version: str = "",
+                documents=()) -> ExecutiveBrief:
     """Assemble the brief from a strategic report. Deterministic.
 
     Selection is by rank, not by scoring: the report's own ordering already
@@ -198,7 +382,11 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "") \
         counterpoint=counterpoint, tension=tension, decision=decision,
         questions=questions, limitation=limitation, as_of=as_of,
         analysis_version=analysis_version, view_withheld=view_withheld)
-    return _enforce_budget(brief)
+    brief = _enforce_budget(brief)
+    # Built last, from the finished brief, so the headline can never say
+    # something the brief has since trimmed away.
+    brief.headline = _build_headline(company, r, brief, documents)
+    return brief
 
 
 def _enforce_budget(brief: ExecutiveBrief) -> ExecutiveBrief:
