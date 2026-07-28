@@ -138,3 +138,54 @@ were run on production after deployment** (Vercel, Datadog, Ramp) and only
 their HTTP outcomes were captured — no rendered decks were inspected, because
 the runs that reached a deck belonged to a curl session and the browser session
 could not read them.
+
+---
+
+# The 500, root-caused
+
+Reproduced by running the app locally against the **real network** — the one
+condition never previously tested. Fixture transports always succeeded, which
+is why five earlier reproduction attempts came back clean.
+
+## Layer 1 (fixed, `5e0f6cb`)
+
+```
+ValueError: idempotency_key 'complete:<run>' was already used for
+            different content
+```
+
+`fi.run_completed` was keyed on the run alone. That promised a run completes
+once with one result — untrue, because re-analysing produces a fresh set of
+limitations from freshly retrieved pages. The guard correctly refused the
+mismatch and the exception reached the user as "Something went wrong".
+
+Fixed by putting a digest of the recorded payload inside the key: an identical
+retry still collapses onto one event, a genuinely different result appends.
+
+## Layer 2 (NOT fixed — the real one)
+
+With layer 1 removed, the third visitor surfaces:
+
+```
+FounderIntelligenceError: fi.section_assembled on a terminal run (COMPLETE)
+```
+
+The FI run id is derived deterministically from
+`analysis_fingerprint(company_input)` — company + approved sources + pipeline
+version. Two analyses of the same company, with the same evidence, on the same
+build therefore resolve to **the same FI run**. The first completes it. The
+second re-runs the pipeline and tries to assemble sections onto a run that is
+already terminal.
+
+The determinism is deliberate and correct: identical analyses *should* be one
+run. The defect is that the second caller **re-executes** instead of
+**reusing** the completed result.
+
+**Where to fix:** `FounderIntelligenceService.run()`. Before assembling, check
+whether the derived run is already terminal; if so, rebuild and return its
+recorded result rather than replaying the write path. `compose_with_quality`
+→ `compose` → `fi_service.run` is the call chain.
+
+This is why the live symptom was "first analysis of a company works, every
+later one 500s". In production the store persists, so **the second person to
+look at any company hits it.**

@@ -110,6 +110,19 @@ def _dont_believe_entries(cbs) -> list:
     return entries
 
 
+def _payload_digest(payload) -> str:
+    """A short, stable digest of what an event records.
+
+    Used inside idempotency keys so that "record this again" collapses only
+    when it really is the same thing. See fi.run_completed for the live 500
+    this prevents.
+    """
+    import json as _json
+    blob = _json.dumps(json_normalize(payload), sort_keys=True,
+                       separators=(",", ":"), default=str)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
 class FounderIntelligenceService:
     def __init__(self, path=DEFAULT_FI_PATH, *, llm_client=None,
                  model_version="fake-model.v0"):
@@ -274,14 +287,34 @@ class FounderIntelligenceService:
                          subject_id=section.kind,
                          payload={"section_kind": section.kind,
                                   "availability": section.availability},
-                         idempotency_key=f"section:{run_id}:{section.kind}")
+                         idempotency_key=(
+                             f"section:{run_id}:{section.kind}:"
+                             f"{_payload_digest(section.as_dict())}"))
 
         limitations = [l for s in sections for l in s.limitations]
         complete = any(s.kind == "company_understanding"
                        and s.availability == "SUPPORTED" for s in sections)
+        # The key carries a digest of what is being recorded, not just the run
+        # it belongs to.
+        #
+        # This crashed the live service. An idempotency key is a promise that
+        # re-recording the SAME thing is safe; keyed on the run alone it also
+        # promised that a run completes exactly once with exactly one result,
+        # which is not true -- re-analysing a company produces a fresh set of
+        # limitations from freshly retrieved pages. The guard then did what it
+        # is supposed to do, refused the mismatch, and the exception reached
+        # the user as "Something went wrong". In production, where the store
+        # persists, that meant THE SECOND PERSON TO ANALYSE ANY GIVEN COMPANY
+        # got a 500.
+        #
+        # With the digest in the key, an identical retry still collapses onto
+        # the existing event, and a genuinely different result appends a new
+        # one instead of raising.
+        payload = {"complete": complete, "limitations": limitations}
         self._record("fi.run_completed", run_id=run_id, company_domain=domain,
-                     payload={"complete": complete, "limitations": limitations},
-                     idempotency_key=f"complete:{run_id}")
+                     payload=payload,
+                     idempotency_key=f"complete:{run_id}:"
+                                     f"{_payload_digest(payload)}")
         return {
             "run_id": run_id, "company_domain": domain,
             "status": COMPLETE if complete else PARTIAL,
