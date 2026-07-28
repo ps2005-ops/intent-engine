@@ -292,6 +292,24 @@ def _state_text(raw_blocks: list) -> list:
     return out
 
 
+def _terminated(line: str) -> str:
+    """A block that does not end a sentence, made to end one.
+
+    Headings and list items rarely carry a full stop, and every consumer that
+    splits text into sentences then welds the heading onto the paragraph
+    below it. A live run answered "what does this company do" with "We build
+    our company around mission-driven engineering We send our engineers into
+    the field…" — two separate blocks, read as one sentence.
+
+    A newline is not a sentence boundary to a sentence splitter, so the
+    boundary has to be in the text itself.
+    """
+    line = line.rstrip()
+    if not line or line[-1] in ".!?:;,":
+        return line
+    return line + "."
+
+
 def parse_html(html: str) -> dict:
     """Returns {title, meta_description, canonical_url, headings, text,
     links, content_hash, parser_version}. Deterministic."""
@@ -325,7 +343,7 @@ def parse_html(html: str) -> dict:
     else:
         lines = _dedupe(extractor.blocks)
     seen = {line.lower() for line in lines}
-    text = "\n".join(lines)
+    text = "\n".join(_terminated(line) for line in lines)
     blocks_found = len(lines)
     extraction_mode = "body" if text.strip() else "none"
     og = extractor.og
@@ -350,7 +368,12 @@ def parse_html(html: str) -> dict:
             body_lines = [line for line in lines if line.strip()]
             merged = body_lines + [r for r in recovered
                                    if r.lower() not in seen]
-            text = "\n".join(merged)
+            # Terminated here too. A JavaScript-rendered page reaches the
+            # reader through this branch, not the one above, so applying the
+            # sentence boundary only to HTML blocks left exactly the pages
+            # that need it most — the ones whose text is recovered from page
+            # state — welding a heading onto the paragraph after it.
+            text = "\n".join(_terminated(line) for line in merged)
             extraction_mode = "structured"
             blocks_found = len(merged)
     if not text.strip():

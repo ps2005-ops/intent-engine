@@ -713,3 +713,47 @@ def test_b4_focus_is_visible_on_every_interactive_surface():
     from intent_engine.webapp.app import _A11Y_CSS, _BRIEF_CSS
     for sheet in (_CSS, _BRIEF_CSS, _A11Y_CSS):
         assert ":focus-visible" in sheet
+
+
+def test_b5_the_company_must_be_the_subject_of_its_own_description():
+    """Five live runs in a row put a different kind of page furniture in the
+    opening line. The rule the keyword lists were groping towards is that a
+    description has the company as its SUBJECT."""
+    from intent_engine.strategic_intelligence.brief import (
+        _describes_the_business as score,
+    )
+    company = "Palantir Technologies"
+    good = "Palantir Technologies builds three platforms for its customers."
+    for bad in (
+        "Whatever their role, each Palantirian combines an uncompromising "
+        "engineering mindset with a focus on the mission.",
+        "With good data and the right technology, institutions can still "
+        "solve hard problems and change the world.",
+        "Palantir does not endorse, has not verified, and is not responsible "
+        "for any content of third-party websites.",
+        "Enabling government innovation by leveraging accredited, compliant "
+        "and proven technology at scale.",
+    ):
+        assert score(bad, company) < score(good, company), bad[:50]
+
+
+def test_b6_a_two_word_company_name_is_not_read_as_a_sub_brand():
+    """`Shopify Plus serves…` is a product line. `Palantir Technologies
+    builds…` is the company, and the check used to flag both."""
+    from intent_engine.strategic_intelligence.brief import _is_sub_brand
+    assert _is_sub_brand("Shopify Plus serves enterprise merchants.", "Shopify")
+    assert not _is_sub_brand("Palantir Technologies builds three platforms.",
+                             "Palantir Technologies")
+
+
+def test_b7_a_heading_does_not_weld_onto_the_paragraph_below_it():
+    """Blocks are joined with a newline, which no sentence splitter treats as
+    a boundary — so a heading and the paragraph after it read as one
+    sentence. Applies to recovered page state too, which is the branch a
+    JavaScript-rendered page arrives through."""
+    from intent_engine.company_ingestion.parsing import parse_html
+    html = ("<html><body><main><h2>We build our company around engineering</h2>"
+            "<p>We send our engineers into the field.</p></main></body></html>")
+    text = parse_html(html)["text"]
+    assert "engineering We send" not in text
+    assert "engineering." in text
