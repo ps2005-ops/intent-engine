@@ -329,8 +329,16 @@ _KEYS = """
 
 
 def render_deck(slides, *, company="", as_of="", analysis_version="",
-                run_id="", csrf="", full_analysis_url="") -> str:
-    """The whole deck as self-contained HTML."""
+                run_id="", csrf="", full_analysis_url="",
+                cite_labels=None) -> str:
+    """The whole deck as self-contained HTML.
+
+    ``cite_labels`` maps an evidence id to the READABLE name of the source
+    behind it. Without it the deck offered the reader forty-two links labelled
+    `obs-src-4856bb8a9f80` — the tester pack asks them to open a citation and
+    check it showed what they expected, and an opaque internal id cannot.
+    """
+    cite_labels = cite_labels or {}
     total = len(slides)
     dots = "".join(
         f'<a href="#slide-{_e(s["id"])}" aria-label="Go to slide {n + 1}: '
@@ -353,7 +361,8 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
             f'<details class="cites"><summary>Evidence behind this slide '
             f'({len(citations)})</summary><ul>'
             + "".join(f'<li><a href="/runs/{_e(run_id)}/evidence/{_e(c)}">'
-                      f'{_e(c)}</a></li>' for c in citations)
+                      f'{_e(cite_labels.get(c) or c)}</a></li>'
+                      for c in citations)
             + '</ul></details>') if citations and run_id else ''
         ask = (
             f'<form action="/runs/{_e(run_id)}/conversation" method="post" '

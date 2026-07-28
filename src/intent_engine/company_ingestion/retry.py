@@ -55,20 +55,55 @@ FAMILY_TARGETS = {
 
 
 def plan_retry(*, missing_families, candidates, already_approved,
-               failed_urls, limit=MAX_NEW_SOURCES_PER_PASS) -> list:
+               failed_urls, refusing_hosts=(),
+               limit=MAX_NEW_SOURCES_PER_PASS) -> list:
     """Choose additional candidate ids that could supply the missing families.
 
     Never re-approves an already-approved candidate and never retries a URL
     that already failed — a permanent failure (403, 404, policy block) does not
     become retrievable by asking again. Deterministic: ordered by family
     priority, then by matcher specificity, then by URL.
+
+    ``refusing_hosts`` are hosts this run has already WATCHED refuse it. By the
+    time a retry is planned that is no longer an inference: Sony's first pass
+    put fourteen requests to sony.com and every one came back 403. Retrying a
+    fifteenth path on the same host is not a second chance, it is the same
+    answer again — and it consumed the entire retry budget while the company's
+    SEC filings sat in the candidate list, retrievable, and were never tried.
+    Candidates on such a host sort LAST rather than being dropped, so if a run
+    has nothing else left it still tries and still records an honest failure.
     """
     approved = set(already_approved or ())
     failed = set(failed_urls or ())
+    refused = {h for h in (refusing_hosts or ()) if h}
     chosen: list = []
     seen = set(approved)
 
-    for family in missing_families:
+    def _refused_host(candidate):
+        from urllib.parse import urlparse
+        host = urlparse(candidate.get("url") or "").hostname or ""
+        return any(host == bad or host.endswith("." + bad) for bad in refused)
+
+    # Families whose gap can actually be FILLED come first. The retry budget is
+    # four sources; walking the families in a fixed order spent all four on
+    # identity/product/customers guesses against a host that had just refused
+    # fourteen requests, and never reached `investor`, whose SEC filings were
+    # the only retrievable evidence in the whole candidate list. Ordering by
+    # reachability is stable and changes nothing when every host is healthy.
+    def _reachable_options(family):
+        matchers = FAMILY_TARGETS.get(family) or ()
+        return sum(1 for c in candidates
+                   if c["candidate_id"] not in seen
+                   and c["url"] not in failed
+                   and not _refused_host(c)
+                   and any(matcher(c) for matcher in matchers))
+
+    ordered_families = sorted(
+        missing_families,
+        key=lambda f: (0 if _reachable_options(f) else 1,
+                       list(missing_families).index(f)))
+
+    for family in ordered_families:
         matchers = FAMILY_TARGETS.get(family)
         if not matchers:
             continue
@@ -83,7 +118,8 @@ def plan_retry(*, missing_families, candidates, already_approved,
                  if c["candidate_id"] not in seen
                  and c["url"] not in failed
                  and matcher(c)),
-                key=lambda c: (0 if "sitemap" in c.get("why_relevant", "")
+                key=lambda c: (1 if _refused_host(c) else 0,
+                               0 if "sitemap" in c.get("why_relevant", "")
                                else 1, len(c["url"]), c["url"]))
             for candidate in pool:
                 chosen.append(candidate["candidate_id"])

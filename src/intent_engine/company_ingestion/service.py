@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from urllib.parse import urlparse
 
 from intent_engine.agentos.identity import stable_id as _kernel_stable_id
 from intent_engine.company_ingestion.claims import (
@@ -33,7 +34,9 @@ from intent_engine.company_ingestion.store import DEFAULT_CI_PATH, IngestionStor
 from intent_engine.company_ingestion.validation import (
     canonical_domain, validate_candidate_url,
 )
-from intent_engine.founder_intelligence.records import assert_no_secret
+from intent_engine.founder_intelligence.records import (
+    SecretRejected, assert_no_secret,
+)
 
 CONSENT_VERSION = "v1.1-source-approval"
 
@@ -238,19 +241,30 @@ class CompanyIngestionService:
         # produces a different payload for the same candidate_id — which would
         # collide on the candidate's idempotency key and abort discovery.
         #
-        # A SITEMAP-listed URL wins over a guessed known path for the same URL:
-        # the sitemap entry is publisher-verified and carries the publisher's
-        # own classification, whereas the guess is only a hypothesis. Order is
-        # otherwise preserved, so discovery stays deterministic.
-        def _verified(candidate):
-            return "sitemap" in candidate.get("why_relevant", "")
+        # When the same URL arrives by several routes, keep the payload from
+        # the route that says the most about it:
+        #
+        #   0. a curated official source — a human asserted what this page is
+        #      and whose voice it speaks in;
+        #   1. a sitemap entry — publisher-verified to exist, and carries the
+        #      publisher's own classification;
+        #   2. a guessed known path — only a hypothesis.
+        #
+        # Keeping the guess instead silently demotes a curated source to a
+        # guess: Palantir's commercial-offerings page is both a registry entry
+        # AND a path we would have guessed, and because the guess was generated
+        # first it won — so the page ranked as a guess and was never selected.
+        def _route_rank(candidate):
+            if candidate.get("discovery_method") == "official_fallback":
+                return 0
+            return 1 if "sitemap" in candidate.get("why_relevant", "") else 2
 
         best_by_url: dict = {}
         for candidate in candidates:
             url = candidate["url"]
-            if url not in best_by_url:
-                best_by_url[url] = candidate
-            elif _verified(candidate) and not _verified(best_by_url[url]):
+            incumbent = best_by_url.get(url)
+            if incumbent is None or _route_rank(candidate) < \
+                    _route_rank(incumbent):
                 best_by_url[url] = candidate
         candidates = list(best_by_url.values())
         for i, candidate in enumerate(candidates):
@@ -278,6 +292,49 @@ class CompanyIngestionService:
                          idempotency_key=f"fail:{run_id}:homepage")
         self._transition(run_id, domain, "AWAITING_SOURCE_APPROVAL")
         return self.store.candidates(run_id)
+
+    # --- observed reachability ---------------------------------------------
+    # Failure types that mean "this host will not serve us", as opposed to
+    # "this particular page is missing". A 404 says nothing about the host.
+    _HOST_REFUSAL_FAILURES = ("http_status", "connection", "timeout",
+                              "blocked")
+
+    def refusing_hosts(self, run_id: str) -> set:
+        """Hosts this run has ALREADY watched refuse us.
+
+        Discovery fetches the homepage before anything is approved, so by the
+        time sources are selected we often already know the company's own
+        domain answers 403 to every request. Nothing consumed that knowledge:
+        selection ranked `sony.com` investor-relations pages above SEC filings
+        that were sitting there, retrievable, and the run admitted zero
+        documents while five candidates would have worked.
+
+        Deliberately conservative — only hosts we personally watched fail, and
+        only on failures that are about the host rather than the path.
+        """
+        meta = self.run_meta(run_id) or {}
+        by_id = {c["candidate_id"]: c for c in self.store.candidates(run_id)}
+        refused, seen_ok = set(), set()
+        for record in self.store.retrieved(run_id):
+            host = urlparse(record.get("final_url") or "").hostname
+            if host:
+                seen_ok.add(host)
+        for failure in self.store.failures(run_id):
+            if failure.get("failure_type") not in self._HOST_REFUSAL_FAILURES:
+                continue
+            message = failure.get("safe_message") or ""
+            if failure.get("failure_type") == "http_status" and \
+                    "404" in message:
+                continue                 # a missing page, not a closed door
+            candidate_id = failure.get("candidate_id")
+            if candidate_id == "homepage":
+                host = urlparse(meta.get("website") or "").hostname
+            else:
+                host = urlparse(
+                    (by_id.get(candidate_id) or {}).get("url") or "").hostname
+            if host:
+                refused.add(host)
+        return {h for h in refused if h not in seen_ok}
 
     # --- approval ------------------------------------------------------------------
     def approve(self, run_id: str, *, user_id: str, approved_ids: list,
@@ -383,7 +440,9 @@ class CompanyIngestionService:
                           "meta_description": "",
                           "text": document["text"],
                           "content_hash": document["content_hash"],
-                          "modified_date": "", "links": []}
+                          "modified_date": "", "links": [],
+                          "extraction_mode": "pdf",
+                          "blocks_found": 0}
             else:
                 parsed = parse_html(body)
             if not parsed["text"].strip():
@@ -410,7 +469,37 @@ class CompanyIngestionService:
                         freshness = "STALE"
                 except ValueError:
                     pass                 # a date we cannot parse stays CURRENT
-            record = retrieved_record(
+            # A source whose text trips the credential detector is DROPPED, not
+            # stored — but dropping it must cost this one source, never the
+            # run. The detector is deliberately blunt (any 13–16 digit run
+            # reads as a card number), and SEC EDGAR result pages concatenate
+            # commission file numbers into exactly that shape. Letting the
+            # exception escape turned one false positive on one public filing
+            # into a total analysis failure with a generic error page.
+            try:
+                record = self._build_record(
+                    source_id=source_id, run_id=run_id, domain=domain,
+                    candidate=candidate, result=result, parsed=parsed,
+                    body=body, freshness=freshness)
+            except SecretRejected as exc:
+                failed.append(self._fail(
+                    run_id, domain, candidate_id, "content_rejected",
+                    str(exc), False))
+                continue
+            total_bytes += record["byte_count"]
+            self._append("ci.source_retrieved", run_id=run_id, domain=domain,
+                         subject_type="source", subject_id=source_id,
+                         payload=record,
+                         idempotency_key=f"src:{run_id}:{source_id}:"
+                                         f"{record['content_hash'][:12]}")
+            ok.append(record)
+        return {"ok": ok, "failed": failed,
+                "status": "COMPLETE" if not failed
+                else ("PARTIAL" if ok else "FAILED")}
+
+    def _build_record(self, *, source_id, run_id, domain, candidate, result,
+                      parsed, body, freshness):
+        return retrieved_record(
                 source_id=source_id, run_id=run_id, company_id=domain,
                 original_url=candidate["url"], final_url=result["final_url"],
                 source_type=candidate["source_type"],
@@ -423,17 +512,9 @@ class CompanyIngestionService:
                 title=parsed["title"] or candidate.get("title"),
                 text_content=parsed["text"][:120_000],
                 meta_description=parsed["meta_description"][:500],
-                freshness=freshness)
-            total_bytes += record["byte_count"]
-            self._append("ci.source_retrieved", run_id=run_id, domain=domain,
-                         subject_type="source", subject_id=source_id,
-                         payload=record,
-                         idempotency_key=f"src:{run_id}:{source_id}:"
-                                         f"{record['content_hash'][:12]}")
-            ok.append(record)
-        return {"ok": ok, "failed": failed,
-                "status": "COMPLETE" if not failed
-                else ("PARTIAL" if ok else "FAILED")}
+                freshness=freshness,
+                extraction_mode=parsed.get("extraction_mode", "body"),
+                blocks_found=parsed.get("blocks_found") or 0)
 
     def _fail(self, run_id, domain, candidate_id, failure_type, message,
               retryable):
@@ -613,7 +694,8 @@ class CompanyIngestionService:
             extra = plan_retry(
                 missing_families=gaps["missing_families"],
                 candidates=self.store.candidates(run_id),
-                already_approved=already, failed_urls=failed_urls)
+                already_approved=already, failed_urls=failed_urls,
+                refusing_hosts=self.refusing_hosts(run_id))
             if not extra:
                 break                    # nothing new could be tried
             reason = ("missing evidence families: "

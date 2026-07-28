@@ -114,9 +114,50 @@ table{display:block;overflow-x:auto}}
 body{background:#0f141c;color:#f3f4f6}
 a{color:#7aa2ff}
 :where(h1,h2,h3,h4,h5,h6){color:#f3f4f6}
-:where(.card,.chip,.agenda,details,fieldset){background:#161c26;
+/* NOT :where() — that zeroes specificity, so these lost to the very class
+   rules they correct and the panels stayed light under a dark scheme. */
+:root .card,:root .chip,:root .agenda,:root details,
+:root fieldset{background:#161c26;border-color:#3a4454}
+:root .muted,:root .state,:root .limitation,:root small{color:#c3cad6}
+/* Components that define their own palette as custom properties (.brief and
+   .deck) kept LIGHT values in dark mode: the body went near-black while
+   var(--panel) stayed #f8fafc and var(--ink) stayed near-white, so the layer
+   nav rendered near-white text on a near-white bar at 1.04:1 — the tab you
+   were on was invisible. Re-point the variables rather than restyle
+   everything that uses them.
+
+   Two things here are load-bearing and easy to undo by accident:
+
+   1. The :root prefix. .brief and .deck ship their CSS in the BODY, which
+      lands after this stylesheet, so a bare `.deck` selector loses the
+      cascade to the very rule it is correcting. :root outranks it.
+   2. The absence of :where(). :where() zeroes specificity, so those rules
+      would lose to any plain class selector — including all of these. */
+:root .brief,:root .deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;
+--bg:#0f141c;--panel:#161c26;--accent:#7aa2ff;--accent-ink:#0f141c}
+:root nav,:root .trust-note,:root .panel{background:#161c26;
+border-color:#3a4454;color:#c3cad6}
+:root nav a,:root nav a:visited,:root nav button,
+:root details summary{color:#7aa2ff}
+:root code,:root pre{background:#1b2230;color:#e5e7eb}
+/* Buttons keep a white background from the base sheet; inheriting the dark
+   scheme's near-white text on it renders them at 1.1:1 — unreadable. */
+:root button,:root input,:root select,:root textarea{background:#1b2230;
+color:#f3f4f6;border-color:#3a4454}
+:root .why,:root .alt,:root .q,:root .unavailable,:root .state,
+:root .limitation,:root .muted,:root .when{color:#c3cad6}
+/* Deck surfaces that hard-code a light literal rather than var(--panel), and
+   so survived the variable re-pointing above: the citations drawer (#fafaff)
+   and the slide action buttons (white). Both need a selector at least as
+   specific as the deck's own. */
+:root .deck .cites,:root details.cites{background:#161c26;
 border-color:#3a4454}
-:where(.muted,.state,.limitation,small){color:#c3cad6}}
+:root .deck .act button,:root .deck .act a,:root .deck .nav a,
+:root .deck button{background:#1b2230;color:#f3f4f6;border-color:#3a4454}
+/* The full-analysis document (.si) carries its OWN dark palette, defined
+   beside its own stylesheet in the strategic-intelligence renderer. Do not
+   add .si rules here: overriding that palette from outside fights it instead
+   of completing it, and measurably makes contrast worse. */}
 @media print{
 nav,form,.actions,.b-act,.layers{display:none!important}
 body{background:#fff;color:#000}}
@@ -466,8 +507,16 @@ class WebApp:
         if 'name="viewport"' not in body:
             head_extra += ('<meta name="viewport" content="width=device-width,'
                            'initial-scale=1">')
-        if "<style" not in body:
-            head_extra += f"<style>{_APP_CSS}</style>"
+        # The shared stylesheet goes in the HEAD of EVERY page, including pages
+        # that bring their own. Skipping it left the brief — the page every
+        # analysis lands on — with a completely unstyled header: `<nav>` sits
+        # outside `main.brief`, so the brief's own scoped CSS never reached it
+        # and the reader got browser-default Times above a designed document.
+        #
+        # It goes in FIRST, so a page's own <style> comes later in the cascade
+        # and still wins; and the brief's rules are class-scoped, which beats
+        # these element selectors on specificity regardless of order.
+        head_extra += f"<style>{_APP_CSS}</style>"
         head_extra += _A11Y_CSS
         return body.replace("</head>", head_extra + "</head>", 1)
 
@@ -969,6 +1018,10 @@ class WebApp:
         "unsafe_redirect": ("unsafe redirect",
                             "the page redirected off the approved domain"),
         "parse_error": ("unreadable", "the page could not be decoded"),
+        "content_rejected": ("not stored",
+                             "the page was read, but its text looked like it "
+                             "contained a credential or personal identifier, "
+                             "so it was not kept"),
         "javascript_only": ("javascript-only",
                             "the page required JavaScript and served no "
                             "readable text"),
@@ -991,9 +1044,20 @@ class WebApp:
         return ftype
 
     def _failure_rows(self, run_id):
-        """Per-source (candidate, short-label, human-explanation, detail).
+        """Per-source (readable-source, short-label, human-explanation, detail).
+
+        The first element is what the READER should see — a page title or URL,
+        never an internal candidate id. `cand-c89e584c34f7` tells a person
+        nothing about which page failed, and a list of them reads as a system
+        malfunction rather than as a site declining to be read.
+
         The raw ``safe_message`` (which can contain raw exception text) is
-        included only in development — never in production."""
+        included only in development — never in production.
+        """
+        from urllib.parse import urlparse
+        by_id = {c["candidate_id"]: c
+                 for c in self.ci.store.candidates(run_id)}
+        meta = self.ci.run_meta(run_id) or {}
         rows = []
         for f in self.ci.store.failures(run_id):
             cat = self._failure_category(f)
@@ -1001,7 +1065,15 @@ class WebApp:
                 cat, ("unavailable", "the source could not be retrieved"))
             detail = (f' — {_e(str(f.get("safe_message", ""))[:200])}'
                       if self.config.debug else '')
-            rows.append((str(f.get("candidate_id", "")), label, human, detail))
+            candidate_id = str(f.get("candidate_id", ""))
+            if candidate_id == "homepage":
+                readable = meta.get("website") or "the company homepage"
+            else:
+                candidate = by_id.get(candidate_id) or {}
+                readable = (candidate.get("title") or candidate.get("url")
+                            or urlparse(candidate.get("url") or "").hostname
+                            or "a requested page")
+            rows.append((str(readable), label, human, detail))
         return rows
 
     def _failure_explanation(self, run_id, real):
@@ -1190,9 +1262,26 @@ class WebApp:
             found += (f'<h3>Sources that were read</h3><ul>{read_html}</ul>')
         missing = _ul(note.get("missing", []))
         blockers = _ul(note.get("blockers", [])[:5])
-        failures = self._failure_rows(run_id)
-        failed_html = (f"<h3>Sources that could not be read</h3>{failures}"
-                       if failures else "")
+        # Render the rows — never interpolate the list itself, which prints
+        # Python tuple syntax and internal candidate ids straight onto the
+        # page. Sony produces twenty-one of these, so the defect was invisible
+        # until the one company that most needed this page reached it.
+        #
+        # Identical failures are collapsed: "eleven pages, access refused" is
+        # the fact, and eleven near-identical lines bury it.
+        failure_rows = self._failure_rows(run_id)
+        grouped: dict = {}
+        for readable, label, human, detail in failure_rows:
+            grouped.setdefault((label, human, detail), []).append(readable)
+        items = []
+        for (label, human, detail), sources in grouped.items():
+            shown = ", ".join(_e(s) for s in sources[:3])
+            if len(sources) > 3:
+                shown += f" and {len(sources) - 3} more"
+            items.append(f"<li><strong>{_e(label)}</strong>: {_e(human)}"
+                         f"{detail}<br><span class='muted'>{shown}</span></li>")
+        failed_html = (f"<h3>Sources that could not be read</h3>"
+                       f"<ul>{''.join(items)}</ul>" if items else "")
 
         # Every one of these is a real, working next step — not a consolation.
         # The retry button is offered only when there is genuinely somewhere
@@ -1501,7 +1590,8 @@ class WebApp:
         deck = render_deck(slides, company=report.get("company_name", ""),
                            as_of=as_of, analysis_version=version,
                            run_id=run_id, csrf=csrf,
-                           full_analysis_url=f"/runs/{run_id}/full")
+                           full_analysis_url=f"/runs/{run_id}/full",
+                           cite_labels=self._citation_labels(run_id))
         body = (f'<main>{self._layer_nav(run_id, "slides")}{deck}</main>')
         return self._html(self._page(
             f'{report.get("company_name", "")} — presentation', body, session,
@@ -1542,6 +1632,26 @@ class WebApp:
                                 f'result</a></p></main></body></html>')
                         return self._html(body)
         return self._error_page(404, "no such claim in this run")
+
+    def _citation_labels(self, run_id):
+        """Evidence id -> the readable name of the source behind it.
+
+        Observation ids embed the source id they came from
+        (`obs-src-4856bb8a9f80` -> `src-4856bb8a9f80`), so a citation can be
+        named with the page it cites instead of an internal identifier.
+        """
+        from urllib.parse import urlparse
+        labels = {}
+        for record in self.ci.store.retrieved(run_id):
+            title = (record.get("title") or "").strip()
+            if not title:
+                title = urlparse(record.get("final_url") or "").hostname or ""
+            if not title:
+                continue
+            source_id = record["source_id"]
+            labels[source_id] = title
+            labels[f"obs-{source_id}"] = title
+        return labels
 
     def _source_id_for(self, run_id, entry):
         for record in self.ci.store.retrieved(run_id):
@@ -1985,7 +2095,7 @@ class WebApp:
     )
 
     @classmethod
-    def _recommended_candidate_ids(cls, candidates):
+    def _recommended_candidate_ids(cls, candidates, *, refusing_hosts=()):
         """The default source set, chosen for EVIDENCE-FAMILY COVERAGE.
 
         Takes one candidate from each family in priority order, then a second
@@ -1994,45 +2104,110 @@ class WebApp:
         product, investor, customers, strategy, ...) instead of many documents
         from a single family. Shared by the source-review page (pre-checked
         set) and auto-run (approved set), so both always agree."""
-        # Within a family, order by how much reason we have to believe the URL
-        # serves content *on this site, right now*:
+        # Within a family, order by RELEVANCE first and reachability second.
+        # These are different questions and were previously conflated:
         #
-        #   1. sitemap — the publisher is listing it live, today;
-        #   2. curated official URL from the entity registry — verified by
-        #      hand, but a constant that can go stale;
+        #   0. curated official URL from the entity registry — a human asserted
+        #      "this is the page that explains this company", which is a claim
+        #      about relevance that no automatic signal can make;
+        #   1. SEC EDGAR filing — the URL was just resolved from the live
+        #      submissions index, is served as plain HTML by the regulator, and
+        #      is authoritative about the business;
+        #   2. sitemap — the publisher lists it live today, so it resolves; but
+        #      a sitemap says nothing about whether the page is worth reading;
         #   3. guessed known path — frequently a 404/403.
         #
-        # The middle rank is what Sony needed: its homepage, robots.txt and
-        # sitemap all answer 403, so there are no sitemap URLs and every guess
-        # fails, leaving the curated IR/report pages as the only things that
-        # actually serve. Ranking curated URLs ABOVE sitemap URLs instead cost
-        # Palantir its product evidence — the registry's platform pages
-        # displaced the live sitemap entries in the product bucket. Publisher-
-        # live beats curated-constant; curated-constant beats a guess.
-        def _verified_first(candidate):
-            if "sitemap" in candidate.get("why_relevant", ""):
+        # Ranking sitemap above curated cost Palantir exactly the evidence the
+        # acceptance criteria name: /docs/ is in the sitemap and took the single
+        # product slot, while the registry's Foundry, Gotham and AIP pages —
+        # which carry the platform story — sat below it and were never fetched.
+        # It cost Sony everything: sony.com answers 403 to every request
+        # including robots.txt, so its only retrievable evidence is its EDGAR
+        # filings, which ranked level with guesses that could not succeed.
+        # ...and a GUESS aimed at a host we have already watched refuse us
+        # ranks below everything, because it cannot succeed and it is spending
+        # a slot that authoritative evidence needs. sony.com answers 403 to
+        # every request including its own robots.txt, so its guessed known
+        # paths are certain failures — and while they held the budget, Sony's
+        # SEC filings, retrievable and already discovered, went unselected and
+        # the run admitted nothing at all.
+        #
+        # The demotion deliberately does NOT touch curated or regulatory
+        # sources. One 403 on a homepage is a fact about that request, not a
+        # proof about every path on the domain: plenty of sites refuse a bare
+        # homepage or an unknown path and serve their investor pages perfectly
+        # well. A hand-verified URL is worth trying on a host that has turned
+        # us away; a guess is not.
+        refused = {h for h in refusing_hosts if h}
+
+        def _on_refusing_host(candidate):
+            from urllib.parse import urlparse
+            host = urlparse(candidate.get("url") or "").hostname or ""
+            return any(host == bad or host.endswith("." + bad)
+                       for bad in refused)
+
+        def _relevance_first(candidate):
+            method = candidate.get("discovery_method")
+            why = candidate.get("why_relevant", "")
+            if method == "official_fallback":
                 return 0
-            return (1 if candidate.get("discovery_method") ==
-                    "official_fallback" else 2)
+            if "SEC EDGAR" in why:
+                return 1
+            if _on_refusing_host(candidate):
+                return 9
+            return 2 if "sitemap" in why else 3
+
+        # Per-family quotas. Coverage across families is what stops a report
+        # resting on three filings and nothing else, but one page per family is
+        # too thin for the families that carry the most meaning: a company with
+        # three platforms cannot be described by whichever product page sorted
+        # first. Priority order still decides who gets scarce slots.
+        # product carries both halves of "what does this company sell": the
+        # platforms AND the market segments it sells them into. For Palantir
+        # that is five pages (Foundry, Gotham, AIP, government, commercial) and
+        # dropping any one of them loses a named part of the business.
+        _QUOTAS = {"product": 5, "customers": 2, "investor": 2}
 
         buckets = []
         claimed = set()
-        for _name, matches in cls._EVIDENCE_FAMILIES:
+        for name, matches in cls._EVIDENCE_FAMILIES:
             group = [c for c in candidates
                      if c["candidate_id"] not in claimed and matches(c)]
-            group.sort(key=_verified_first)
+            group.sort(key=_relevance_first)
             claimed.update(c["candidate_id"] for c in group)
-            buckets.append(group)
+            buckets.append((name, group))
         picked, depth = [], 0
         while len(picked) < MAX_APPROVED_SOURCES:
             progressed = False
-            for group in buckets:
+            for name, group in buckets:
+                if depth >= _QUOTAS.get(name, 1):
+                    continue
                 if depth < len(group) and len(picked) < MAX_APPROVED_SOURCES:
                     picked.append(group[depth]["candidate_id"])
                     progressed = True
             if not progressed:
                 break
             depth += 1
+        # Budget left over because some families had no candidates at all (the
+        # Sony case: nothing on the company's own domain can be retrieved). Fill
+        # it from the best remaining evidence rather than returning a short list
+        # — an unused slot is evidence thrown away.
+        if len(picked) < MAX_APPROVED_SOURCES:
+            taken = set(picked)
+            # A refused host is DEMOTED, never excluded. One 403 on a homepage
+            # is evidence about that request, not a proof about every path on
+            # the domain — plenty of sites refuse a bare homepage or a guessed
+            # path and serve their investor pages perfectly well. Ranking them
+            # last is enough: real evidence takes the slots first, and if the
+            # budget is still unspent we would rather try and record an honest
+            # failure than decide in advance that a door is shut.
+            remaining = [c for _name, group in buckets for c in group
+                         if c["candidate_id"] not in taken]
+            remaining.sort(key=_relevance_first)
+            for candidate in remaining:
+                if len(picked) >= MAX_APPROVED_SOURCES:
+                    break
+                picked.append(candidate["candidate_id"])
         return picked
 
     def _autorun(self, session, run_id):
@@ -2043,7 +2218,9 @@ class WebApp:
         Consent was already given on the analyze form."""
         if self.ci.store.approval(run_id) is None:
             candidates = self.ci.store.candidates(run_id)
-            approved_ids = self._recommended_candidate_ids(candidates)
+            approved_ids = self._recommended_candidate_ids(
+                candidates,
+                refusing_hosts=self.ci.refusing_hosts(run_id))
             rejected = [c["candidate_id"] for c in candidates
                         if c["candidate_id"] not in approved_ids]
             try:
@@ -2075,7 +2252,10 @@ class WebApp:
         if selected_ids is not None:
             selected = set(selected_ids)
         else:
-            selected = set(self._recommended_candidate_ids(candidates))
+            # Same reachability knowledge as auto-run, so the pre-checked set
+            # on the review page and the set auto-run approves never disagree.
+            selected = set(self._recommended_candidate_ids(
+                candidates, refusing_hosts=self.ci.refusing_hosts(run_id)))
 
         def _tag(c):
             if c.get("source_class") == "investor_material":
