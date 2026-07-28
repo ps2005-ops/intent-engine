@@ -13,6 +13,10 @@ from __future__ import annotations
 
 import html as _html
 
+from intent_engine.strategic_intelligence.editorial import (
+    consolidate_limitations, deduplicate, is_meaningful, meaningful_items,
+)
+
 _e = _html.escape
 
 _STATUS_LABEL = {
@@ -185,35 +189,57 @@ def render_strategic_report(report) -> str:
         f'{_CLASS_LABEL.get(c, c)} · {n}</span>'
         for c, n in sorted(r.get("source_class_coverage", {}).items()))
 
-    top_change = (r.get("shifts") or [{}])[0].get("title", "—")
-    top_surprise = (r.get("surprises") or [{}])[0].get("finding", "—")
-    top_opp = (r.get("opportunities") or [{}])[0].get("statement", "—")
-    top_vuln = (r.get("vulnerabilities") or [{}])[0].get("exposed_layer", "—")
+    top_change = (r.get("shifts") or [{}])[0].get("title", "")
+    top_surprise = (r.get("surprises") or [{}])[0].get("finding", "")
+    top_opp = (r.get("opportunities") or [{}])[0].get("statement", "")
+    top_vuln = (r.get("vulnerabilities") or [{}])[0].get("exposed_layer", "")
     top_agenda = (r.get("agenda") or [{}])[0]
+    agenda_line = top_agenda.get("inferred_discussion", "")
+    if agenda_line and top_agenda.get("meeting_relevance"):
+        agenda_line = (f'{agenda_line} <span class="badge">'
+                       f'{_e(top_agenda["meeting_relevance"])}</span>')
+
+    # The summary grid carries only the rows that have something in them. A row
+    # reading "Biggest opportunity: —" costs the reader attention and returns
+    # nothing, and a reader cannot tell an intentional dash from a bug.
+    kv_rows = "".join(
+        f'<b>{label}</b><span>{value if raw_html else _e(value)}</span>'
+        for label, value, raw_html in (
+            ("What changed recently", top_change, False),
+            ("Most important surprise", top_surprise, False),
+            ("Likely current discussion", agenda_line, True),
+            ("Biggest opportunity", top_opp, False),
+            ("Biggest vulnerability", top_vuln, False),
+            ("Decision most affected", thesis.get("why_care", ""), False),
+        ) if is_meaningful(value))
 
     # first viewport / hero — decisions & changes first
     hero = (
         f'<div class="hero"><div class="badges">'
         f'<span class="status st-{_e(status)}">{_e(_STATUS_LABEL.get(status,status))}</span>'
-        f'<span class="badge">Last researched: {_e(freshness)}</span>{coverage_badges}</div>'
+        + (f'<span class="badge">Last researched: {_e(freshness)}</span>'
+           if is_meaningful(freshness) else '')
+        + f'{coverage_badges}</div>'
         f'<h1>{_e(r.get("company_name",""))} — Strategic Intelligence</h1>'
         f'<p class="thesis">{_e(thesis.get("view",""))}</p>'
-        f'<div class="kv">'
-        f'<b>What changed recently</b><span>{_e(top_change)}</span>'
-        f'<b>Most important surprise</b><span>{_e(top_surprise)}</span>'
-        f'<b>Likely current discussion</b>'
-        f'<span>{_e(top_agenda.get("inferred_discussion","—"))}'
-        f' <span class="badge">{_e(top_agenda.get("meeting_relevance",""))}</span></span>'
-        f'<b>Biggest opportunity</b><span>{_e(top_opp)}</span>'
-        f'<b>Biggest vulnerability</b><span>{_e(top_vuln)}</span>'
-        f'<b>Decision most affected</b><span>{_e(thesis.get("why_care",""))}</span>'
-        f'</div>'
-        f'<div class="actions"><a href="#hypotheses">Explore reasoning</a>'
-        f'<a class="ghost" href="#agenda">Current agenda</a>'
-        f'<a class="ghost" href="#changed">What changed</a>'
-        f'<a class="ghost" href="#model">Mental model</a>'
-        f'<a class="ghost" href="#library">Source library</a></div>'
-        f'<p class="muted">Outside-in analysis of approved public sources and a '
+        + (f'<div class="kv">{kv_rows}</div>' if kv_rows else '')
+        # Jump links only to sections that exist. Suppressing an empty section
+        # while keeping its link would leave a control that silently does
+        # nothing, which is a worse failure than the empty section was.
+        + '<div class="actions">' + "".join(
+            f'<a{"" if primary else " class=ghost"} href="#{anchor}">'
+            f'{label}</a>'
+            for anchor, label, present, primary in (
+                ("hypotheses", "Explore reasoning", bool(hyps), True),
+                ("agenda", "Current agenda", bool(r.get("agenda")), False),
+                ("changed", "What changed", bool(r.get("what_changed")),
+                 False),
+                ("model", "Mental model",
+                 bool((r.get("mental_model") or {}).get("components")), False),
+                ("library", "Source library",
+                 any(r.get("source_library", {}).values()), False),
+            ) if present) + '</div>'
+        + f'<p class="muted">Outside-in analysis of approved public sources and a '
         f'curated historical-pattern library. No private or internal knowledge '
         f'is claimed, and no model is trained on this company; likely-agenda '
         f'items are inferred from public signals, never from private '
@@ -230,14 +256,25 @@ def render_strategic_report(report) -> str:
                          for a in _cap(r.get("agenda", [])))
     top_dec = "".join(f'<li>{_e(d["decision"])}</li>'
                       for d in _cap(r.get("decision_implications", [])))
-    top_unc = "".join(f'<li>{_e(g)}</li>' for g in _cap(r.get("evidence_gaps", [])))
-    summary = (
-        f'<h2>Executive summary</h2><div class="row">'
-        f'<div class="chip"><b>Key hypotheses</b><ul>{top_h}</ul></div>'
-        f'<div class="chip"><b>Likely leadership discussions</b><ul>{top_agenda or "<li>—</li>"}</ul></div>'
-        f'<div class="chip"><b>Decisions affected</b><ul>{top_dec or "<li>—</li>"}</ul></div>'
-        f'<div class="chip"><b>Major uncertainties</b><ul>{top_unc or "<li>—</li>"}</ul></div>'
-        f'</div>')
+    # The summary preview shows the same caveats the limitations section
+    # details, which is progressive disclosure — but it must not list the same
+    # caveat twice within itself.
+    top_unc = "".join(f'<li>{_e(g)}</li>' for g in
+                      _cap(deduplicate(meaningful_items(
+                          r.get("evidence_gaps", [])))))
+    # An empty chip is a heading promising something that never arrives. Chips
+    # with nothing in them are dropped, and if none survive the whole summary
+    # goes with them rather than leaving a bare "Executive summary" heading.
+    chips = "".join(
+        f'<div class="chip"><b>{label}</b><ul>{items}</ul></div>'
+        for label, items in (
+            ("Key hypotheses", top_h),
+            ("Likely leadership discussions", top_agenda),
+            ("Decisions affected", top_dec),
+            ("Major uncertainties", top_unc),
+        ) if items)
+    summary = (f'<h2>Executive summary</h2><div class="row">{chips}</div>'
+               if chips else '')
 
     # hypotheses
     hyp_html = "".join(_hypothesis_card(h, obs_by_id, pat_by_id) for h in hyps)
@@ -271,20 +308,24 @@ def render_strategic_report(report) -> str:
     timeline_section = (f'<h2 id="timeline">Strategic timeline</h2>'
                         f'<ul class="tl">{tl or "<li class=muted>No dated evidence.</li>"}</ul>')
 
-    # blind spots
+    # blind spots — deduplicated, and absent entirely when there are none
     blinds = "".join(
         f'<div class="card"><h3>{_e(b["observed_tension"])}</h3>'
         f'<p><strong>Why it may matter:</strong> {_e(b["why_it_may_matter"])}</p>'
         f'<p class="muted"><strong>Counter-explanation:</strong> {_e(b["counter_explanation"])}</p>'
         f'<p><strong>Decision affected:</strong> {_e(b["decision_affected"])}</p></div>'
-        for b in r.get("blind_spots", [])) or "<p class='muted'>—</p>"
+        for b in deduplicate(meaningful_items(r.get("blind_spots", []),
+                                              key="observed_tension"),
+                             key="observed_tension"))
 
     # leadership questions
     questions = "".join(
         f'<div class="card"><h3>{_e(q["question"])}</h3>'
         f'<p class="muted"><strong>Why we ask:</strong> {_e(q["why_it_matters"])}</p>'
         f'<p><strong>Decision affected:</strong> {_e(q["decision_affected"])}</p></div>'
-        for q in r.get("questions", [])) or "<p class='muted'>—</p>"
+        for q in deduplicate(meaningful_items(r.get("questions", []),
+                                              key="question"),
+                             key="question"))
 
     # source library
     lib = r.get("source_library", {})
@@ -308,7 +349,7 @@ def render_strategic_report(report) -> str:
                      f'<tr><th>Source</th><th>Class</th><th>Date</th>'
                      f'<th>Quality</th><th>Affected hypotheses</th></tr>{trs}</table>')
     library_section = (f'<details class="more" id="library"><summary>Source '
-                       f'library — all considered sources</summary>{lib_html or "<p class=muted>—</p>"}'
+                       f'library — all considered sources</summary>{lib_html}'
                        f'</details>')
 
     # technical appendix (signal traces, quality gate)
@@ -339,7 +380,8 @@ def render_strategic_report(report) -> str:
         f'<p><strong>Decision this affects:</strong> {_e(s["decision_affected"])}</p>'
         f'<p class="muted"><strong>What would resolve it:</strong> '
         f'{_e(s["what_would_resolve"])}</p></div>'
-        for s in r.get("surprises", [])) or "<p class='muted'>None detected.</p>"
+        for s in deduplicate(meaningful_items(r.get("surprises", []),
+                                             key="finding"), key="finding"))
 
     # opportunities
     opp_html = "".join(
@@ -349,7 +391,9 @@ def render_strategic_report(report) -> str:
         f'<p class="muted"><strong>Downside:</strong> {_e(o["downside"])} · '
         f'<strong>Difficulty:</strong> {_e(o["execution_difficulty"])}</p>'
         f'<p><strong>Decision this affects:</strong> {_e(o["decision_required"])}</p>'
-        f'</div>' for o in r.get("opportunities", [])) or "<p class='muted'>—</p>"
+        f'</div>' for o in deduplicate(
+            meaningful_items(r.get("opportunities", []), key="statement"),
+            key="statement"))
 
     # vulnerabilities
     vuln_html = "".join(
@@ -360,7 +404,9 @@ def render_strategic_report(report) -> str:
         f'<p><strong>What argues against this:</strong> {_e(v["counterpoint"])}</p>'
         f'<p><strong>Watch:</strong> {_e(v["leading_indicator"])} · '
         f'<strong>Decision:</strong> {_e(v["decision_affected"])}</p></div>'
-        for v in r.get("vulnerabilities", [])) or "<p class='muted'>—</p>"
+        for v in deduplicate(
+            meaningful_items(r.get("vulnerabilities", []),
+                             key="exposed_layer"), key="exposed_layer"))
 
     # underexamined questions
     uq_html = "".join(
@@ -369,8 +415,9 @@ def render_strategic_report(report) -> str:
         f'{_e(q["why_underexamined"])}</p>'
         f'<p><strong>What answers would imply:</strong> {_e(q["what_answers_imply"])}</p>'
         f'<p><strong>Decision this affects:</strong> {_e(q["decision_affected"])}</p>'
-        f'</div>' for q in r.get("underexamined_questions", [])) \
-        or "<p class='muted'>—</p>"
+        f'</div>' for q in deduplicate(
+            meaningful_items(r.get("underexamined_questions", []),
+                             key="question"), key="question"))
 
     # mental model panels
     mm = r.get("mental_model", {})
@@ -384,7 +431,7 @@ def render_strategic_report(report) -> str:
                      f'(v{mm.get("version",1)})</h2>'
                      f'<p class="muted">A living outside-in model — updated by '
                      f'new evidence, not rebuilt from zero.</p>'
-                     f'<div class="row">{panels or "<p class=muted>—</p>"}</div>')
+                     f'<div class="row">{panels}</div>') if panels else ''
 
     # what changed our view
     changed = r.get("what_changed", [])
@@ -414,17 +461,39 @@ def render_strategic_report(report) -> str:
                        '<p class="muted">Updates will appear here as new '
                        'evidence changes the model.</p>'))
 
+    # A heading is a promise that something follows. Sections with nothing in
+    # them are not rendered at all — not as a heading with a dash under it,
+    # which costs the reader attention and returns nothing, and which they
+    # cannot distinguish from a rendering bug.
+    def _titled(heading, content, anchor=""):
+        if not content:
+            return ''
+        attr = f' id="{anchor}"' if anchor else ''
+        return f'<h2{attr}>{heading}</h2>{content}'
+
+    # Every caveat in one place. The same limitation restated under six
+    # headings reads as six separate problems.
+    limitations = consolidate_limitations(r.get("evidence_gaps", []),
+                                          [f.get("message") for f in
+                                           r.get("quality_findings", [])])
+    limitations_section = _titled(
+        "What this analysis cannot tell you",
+        ("<ul>" + "".join(f'<li>{_e(x)}</li>' for x in limitations) + "</ul>")
+        if limitations else '')
+
     return (
         f'{_CSS}<section class="si" aria-label="Strategic Intelligence Report">'
         f'{hero}{summary}'
-        f'<h2 id="surprises">Strategic surprises</h2>{surprises_html}'
-        f'<h2 id="hypotheses">Strategic hypotheses</h2>{hyp_html}'
-        f'<h2 id="opportunities">Strategic opportunities</h2>{opp_html}'
-        f'<h2 id="vulnerabilities">Where the company is exposed</h2>{vuln_html}'
-        f'<h2>Questions that may be underexamined</h2>{uq_html}'
-        f'<h2>Possible blind spots</h2>{blinds}'
-        f'{model_section}{changed_section}{agenda_section}{feed_section}'
+        + _titled("Strategic surprises", surprises_html, "surprises")
+        + _titled("Strategic hypotheses", hyp_html, "hypotheses")
+        + _titled("Strategic opportunities", opp_html, "opportunities")
+        + _titled("Where the company is exposed", vuln_html,
+                  "vulnerabilities")
+        + _titled("Questions that may be underexamined", uq_html)
+        + _titled("Possible blind spots", blinds)
+        + f'{model_section}{changed_section}{agenda_section}{feed_section}'
         f'{timeline_section}'
-        f'<h2>Questions for leadership</h2>{questions}'
-        f'<h2>Source library &amp; provenance</h2>{library_section}{appendix}'
+        + _titled("Questions for leadership", questions)
+        + limitations_section
+        + f'<h2>Source library &amp; provenance</h2>{library_section}{appendix}'
         f'</section>')
