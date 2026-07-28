@@ -52,7 +52,21 @@ MAX_WORDS_PER_BULLET = 28
 MAX_WORDS_PER_SLIDE = 90
 
 
-def _bullet(text, *, evidence=None, date=""):
+def _lead(prefix: str, body: str) -> str:
+    """Prefix a fragment without producing "Customers are really buying Not a
+    box". The model writes each field as a standalone sentence, so its capital
+    has to give way when it becomes a clause."""
+    body = (body or "").strip()
+    if not body:
+        return ""
+    # only lower a leading capital when the word is not a proper noun
+    first, rest = body.split(" ", 1) if " " in body else (body, "")
+    if first[:1].isupper() and first[1:].islower() and not rest[:1].isupper():
+        body = first[0].lower() + first[1:] + (" " + rest if rest else "")
+    return f"{prefix}{body}"
+
+
+def _bullet(text, *, evidence=None, date="", full=False):
     # `evidence` is a list of evidence ids. A bare string is not one id, it is
     # a sequence of characters, and `list("obs-1")` turns a citation into five
     # of them — which is how the "what changed" slide came to carry thirty
@@ -61,7 +75,34 @@ def _bullet(text, *, evidence=None, date=""):
     if isinstance(evidence, str):
         evidence = [evidence] if evidence.startswith("obs-") else []
     return {"text": " ".join(str(text or "").split()),
-            "evidence": [e for e in (evidence or []) if e], "date": date}
+            "evidence": [e for e in (evidence or []) if e], "date": date,
+            "full": full}
+
+
+def _shorten(text: str) -> str:
+    """Trim to the budget, but end on a finished thought.
+
+    Cutting at exactly N words leaves a slide reading "...waiting does not
+    preserve optionality, it just delays finding out whether the current…",
+    which is worse than saying less. Prefer the last complete sentence or
+    clause that fits; fall back to a word cut only when the first clause is
+    itself too long.
+    """
+    words = text.split()
+    if len(words) <= MAX_WORDS_PER_BULLET:
+        return text
+    head = " ".join(words[:MAX_WORDS_PER_BULLET])
+    for stop in (". ", "; ", " -- ", ", "):
+        cut = head.rfind(stop)
+        # only worth it if a useful amount of the bullet survives
+        if cut > len(head) * 0.5:
+            kept = head[:cut].rstrip(" ,;-")
+            # never stop inside a bracket: "the network (multiplayer, cloud
+            # streaming." reads as a typo, not as concision
+            if kept.count("(") != kept.count(")"):
+                continue
+            return kept if kept.endswith(".") else kept + "."
+    return head + "…"
 
 
 def _cap(bullets):
@@ -76,9 +117,12 @@ def _cap(bullets):
     out, spent = [], 0
     for bullet in kept[:MAX_BULLETS_PER_SLIDE]:
         words = bullet["text"].split()
-        if len(words) > MAX_WORDS_PER_BULLET:
-            bullet = dict(bullet,
-                          text=" ".join(words[:MAX_WORDS_PER_BULLET]) + "…")
+        # `full` bullets are never trimmed. The insight is one sentence chosen
+        # to be the thing the reader remembers, and trimming it to the budget
+        # cut "...is not conservatism" off the end -- keeping the setup and
+        # deleting the point.
+        if len(words) > MAX_WORDS_PER_BULLET and not bullet.get("full"):
+            bullet = dict(bullet, text=_shorten(bullet["text"]))
             words = bullet["text"].split()
         # Keep the first bullet whatever it costs — a slide with a title and
         # nothing under it is worse than a slightly long one — then stop when
@@ -126,6 +170,107 @@ def _document_bullets(documents, families, *, limit=3):
     return out
 
 
+_URGENCY_WORDS = {"decide_now": "Decide now", "this_quarter": "This quarter",
+                  "this_year": "This year", "watch_only": "Watch only"}
+
+
+def build_founder_slides(analysis, *, company="") -> list:
+    """The deck a founder is shown when a verified analysis exists.
+
+    Ordered as a story rather than as a method. The old deck opened by
+    explaining the system -- how evidence was gathered, what a hypothesis is,
+    which signals matched -- which is the one thing a chief executive in a room
+    does not need. This one opens with what business they are really in and
+    does not mention the machinery at all.
+
+    `analysis` is the analyst's verified output (`strategic_analysis`).
+    """
+    a = analysis or {}
+    bm = a.get("business_model") or {}
+    ins = a.get("the_insight") or {}
+    decisions = a.get("decisions") or []
+    comp = a.get("competitive") or {}
+    cites = ins.get("citations") or []
+
+    slides = []
+
+    # 1 - what business are they really in
+    slides.append(_slide("business", "What business they are really in", [
+        _bullet(bm.get("one_line", ""), evidence=cites),
+        _bullet(_lead("Profit comes from ",
+                      bm.get("where_profit_comes_from", ""))),
+        _bullet(_lead("What customers really buy: ",
+                      bm.get("what_customers_actually_buy", ""))),
+        _bullet(_lead("Value leaks where ",
+                      bm.get("where_value_leaks", ""))),
+    ], kind="business_model"))
+
+    # 2 - the one sentence worth remembering
+    slides.append(_slide("insight", "The insight", [
+        _bullet(ins.get("sentence", ""), evidence=cites, full=True),
+        _bullet(ins.get("paragraph", "")),
+    ], kind="insight"))
+
+    # 3 - why it matters now, and the trade-off underneath it
+    tension = ins.get("tension") or {}
+    slides.append(_slide("why_now", "Why this matters now", [
+        _bullet(ins.get("why_now", ""), evidence=cites),
+        _bullet(_lead("The trade-off: ", tension.get("side_a", ""))),
+        _bullet(_lead("Against that: ", tension.get("side_b", ""))),
+        _bullet((ins.get("economics") or {}).get("mechanism", "")),
+    ], kind="tension"))
+
+    # 4 - where one move leads
+    chain = ins.get("consequence_chain") or []
+    slides.append(_slide("chain", "Where this leads",
+                         [_bullet(step) for step in chain],
+                         kind="consequences"))
+
+    # 5 - the decisions themselves, the point of the whole exercise
+    for i, d in enumerate(decisions[:3]):
+        when = _URGENCY_WORDS.get(d.get("urgency", ""), "")
+        slides.append(_slide(f"decision-{i + 1}",
+                             f"The decision: {when}" if when
+                             else "The decision", [
+            _bullet(d.get("decision", ""), evidence=d.get("citations") or []),
+            _bullet(_lead("Waiting costs: ", d.get("cost_of_waiting", ""))),
+            _bullet(_lead("A competitor may move first: ",
+                          d.get("what_a_competitor_may_do_first", ""))),
+            _bullet(_lead("Upside: ", d.get("upside", ""))),
+            _bullet(_lead("Downside: ", d.get("downside", ""))),
+        ], kind="decision"))
+
+    # 6 - who wins if this reading is right
+    slides.append(_slide("who_wins", "Who wins if this is right", [
+        _bullet(_lead("Forcing the change: ",
+                      comp.get("who_is_forcing_the_change", ""))),
+        _bullet(_lead("Benefits: ", comp.get("who_benefits", ""))),
+        _bullet(_lead("Has to respond: ", comp.get("who_must_respond", ""))),
+        _bullet(_lead("Can ignore it: ", comp.get("who_can_ignore_this", ""))),
+    ], kind="competitive"))
+
+    # 7 - and if it is wrong. Argued, not disclaimed.
+    slides.append(_slide("who_loses", "Who wins if this is wrong", [
+        _bullet(a.get("strongest_case_we_are_wrong", "")),
+        _bullet(_lead("Then the loser is ", comp.get("who_loses", ""))),
+        _bullet(_lead("If nobody responds: ",
+                      comp.get("if_nobody_responds", ""))),
+    ], kind="counterargument"))
+
+    # 8 - what to watch, and what should worry them
+    watch = [_bullet(d.get("what_to_watch", "")) for d in decisions[:3]]
+    watch += [_bullet(q) for q in (a.get("questions") or [])[:2]]
+    slides.append(_slide("watch", "What to watch next", watch, kind="monitor"))
+
+    # 9 - what would change this reading
+    slides.append(_slide("evidence", "What would change this", [
+        _bullet(d.get("what_would_invalidate_it", "")) for d in decisions[:2]
+    ] + [_bullet(g) for g in (a.get("evidence_gaps") or [])[:2]],
+        kind="evidence"))
+
+    return [s for s in slides if s]
+
+
 def build_slides(report, *, as_of: str = "", analysis_version: str = "",
                  brief=None, documents=()) -> list:
     """The deck, in narrative order, with every empty slide omitted.
@@ -138,6 +283,14 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     )
     r = report.as_dict() if hasattr(report, "as_dict") else (report or {})
     company = r.get("company_name", "")
+
+    # When a verified analysis exists, the founder deck replaces this one
+    # outright rather than being appended to it. Showing both would mean
+    # showing the same company twice: once as advice and once as method.
+    analysis = r.get("strategic_analysis")
+    if analysis and (analysis.get("decisions") or []):
+        return build_founder_slides(analysis, company=company)
+
     thesis = r.get("thesis") or {}
     slides = []
 
