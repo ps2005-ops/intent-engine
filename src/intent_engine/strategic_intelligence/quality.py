@@ -185,9 +185,19 @@ def evaluate_report(report) -> tuple:
     return status, findings
 
 
-def executive_insight_quality(report) -> tuple:
+def executive_insight_quality(report, documents=None) -> tuple:
     """Reject/downgrade insights that merely restate positioning, lack a
-    mechanism/decision, or could apply to any company. Returns (ok, findings)."""
+    mechanism/decision, or could apply to any company. Returns (ok, findings).
+
+    Two layers, deliberately. `insights.passes_specificity` is a fixed
+    vocabulary check written while looking at one company, so it certifies
+    sentences shaped like that company's and has nothing to say about a
+    conglomerate or a chip maker. When `documents` are supplied, the stronger
+    gate in `specificity` runs as well: it grounds "specific" in THIS run's own
+    evidence, which is the only place that word can be defined, and it catches
+    the shapes a word list structurally cannot — a filing acting as a business
+    subject, movement with no destination, advice with no evidence.
+    """
     from intent_engine.strategic_intelligence.insights import (
         is_generic_insight, passes_specificity,
     )
@@ -208,7 +218,40 @@ def executive_insight_quality(report) -> tuple:
         if is_generic_insight(h.get("statement", "")):
             findings.append(_f("generic_hypothesis", "hypothesis restates "
                                "generic positioning", "warn"))
+    findings.extend(_evidence_grounded_findings(r, company, documents))
     return (not findings, findings)
+
+
+def _evidence_grounded_findings(r, company, documents) -> list:
+    """The substitution test, run against the company's own evidence."""
+    if documents is None:
+        return []
+    from intent_engine.strategic_intelligence.specificity import (
+        REJECT, distinctive_terms, evaluate_claim,
+    )
+    terms = distinctive_terms(documents, company=company)
+    findings, seen = [], []
+    sections = (
+        ("surprise", [s.get("finding", "") for s in r.get("surprises", [])]),
+        ("opportunity", [o.get("statement", "")
+                         for o in r.get("opportunities", [])]),
+        ("hypothesis", [h.get("statement", "")
+                        for h in r.get("hypotheses", [])]),
+    )
+    for label, statements in sections:
+        for statement in statements:
+            if not statement:
+                continue
+            result = evaluate_claim(statement, company=company,
+                                    evidence_terms=terms,
+                                    seen_statements=list(seen))
+            seen.append(statement)
+            for finding in result["findings"]:
+                findings.append(_f(
+                    f"{label}_{finding['code']}",
+                    f"{label}: {finding['message']}",
+                    "block" if finding["verdict"] == REJECT else "warn"))
+    return findings
 
 
 def looks_low_value(payload) -> tuple:

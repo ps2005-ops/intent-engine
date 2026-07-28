@@ -170,6 +170,46 @@ def evidence_gaps(documents: list) -> dict:
             "dominant_share": coverage.get("dominant_share", 0.0)}
 
 
+def _unspecific_claims(result: dict, documents: list, *,
+                       company_name: str = "") -> list:
+    """Strategic claims the specificity gate rejects outright.
+
+    Only outright REJECTs are surfaced here. Downgrades (a claim that merely
+    survives substitution) are a matter of degree and are handled by ranking,
+    not by refusing to publish — treating them as hard failures would block
+    honest, if unremarkable, findings.
+    """
+    report = result.get("strategic_report")
+    if not report:
+        return []
+    from intent_engine.strategic_intelligence.specificity import (
+        REJECT, distinctive_terms, evaluate_claim,
+    )
+    terms = distinctive_terms(documents, company=company_name)
+    statements = []
+    for hypothesis in report.get("hypotheses", []) or []:
+        statements.append(hypothesis.get("statement")
+                          or hypothesis.get("title", ""))
+    for surprise in report.get("surprises", []) or []:
+        statements.append(surprise.get("finding", ""))
+    for opportunity in report.get("opportunities", []) or []:
+        statements.append(opportunity.get("statement", ""))
+    thesis = report.get("thesis") or {}
+    statements.append(thesis.get("view", ""))
+
+    rejected = []
+    for statement in statements:
+        if not (statement or "").strip():
+            continue
+        verdict = evaluate_claim(statement, company=company_name,
+                                 evidence_terms=terms)
+        if verdict["verdict"] == REJECT:
+            reason = next((f["message"] for f in verdict["findings"]
+                           if f["verdict"] == REJECT), "")
+            rejected.append(f"{statement[:60]} — {reason}")
+    return rejected
+
+
 def assess(result: dict, documents: list, *, company_name: str = "") -> dict:
     """Score a composed report. Returns a diagnostic dict with `outcome`,
     `failed_rules`, `metrics`, and `missing_families` (what a retry should go
@@ -223,6 +263,13 @@ def assess(result: dict, documents: list, *, company_name: str = "") -> dict:
     opaque_ids = bool(re.search(r"cand-[0-9a-f]{6,}", visible))
     internal_leak = sorted({m for m in _INTERNAL_MARKERS if m in flat})
 
+    # Claims that are not about this company. More evidence cannot repair
+    # these, so they are a HARD rule rather than a retryable one: "SEC 6-K is
+    # shifting where demand is captured" does not become true with a sixth
+    # source. It has to not be published.
+    unspecific = _unspecific_claims(result, documents,
+                                    company_name=company_name)
+
     metrics = {
         "successful_sources": len(usable_docs),
         "source_families": len(families),
@@ -241,6 +288,7 @@ def assess(result: dict, documents: list, *, company_name: str = "") -> dict:
         "legal_as_insight": legal_as_insight,
         "opaque_ids": opaque_ids,
         "internal_leak": internal_leak,
+        "unspecific_claims": unspecific,
         "rules_version": QUALITY_RULES_VERSION,
     }
 
@@ -255,6 +303,9 @@ def assess(result: dict, documents: list, *, company_name: str = "") -> dict:
     if internal_leak:
         hard.append(f"internal implementation terms exposed: "
                     f"{', '.join(internal_leak[:3])}")
+    if unspecific:
+        hard.append(f"claim is not about this company: "
+                    f"{'; '.join(unspecific[:3])}")
 
     # RETRYABLE rules: more/better evidence would plausibly fix them.
     retryable: list = []
