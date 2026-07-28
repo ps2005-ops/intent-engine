@@ -1,0 +1,8 @@
+{
+  "eval_set_version": "product-eval.v1",
+  "total_cases": 91,
+  "failed_cases": 0,
+  "pass_rate": 1.0,
+  "recorded_on": "2026-07-28",
+  "note": "Baseline for the product release gate. Lowering pass_rate or total_cases is a deliberate decision and must carry a reason in the commit that does it."
+}
