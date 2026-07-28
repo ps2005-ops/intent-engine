@@ -6,98 +6,99 @@ Written at a context handoff. Everything below is verified, not assumed.
 
 | | |
 |---|---|
-| **Deployed SHA** | `ac7aada` — verified via `/version` |
-| **main SHA** | `ac7aada` — deployed and in sync |
-| **Public URL** | https://intent-engine-oatc.onrender.com |
-| **Open PR** | none — [#13](https://github.com/ps2005-ops/intent-engine/pull/13) merged |
+| **Deployed SHA** | `68190a1` — verified via `/version` |
+| **main SHA** | `68190a1` (+ this doc) |
+| **PR** | none open; work goes straight to `main`, which Render auto-deploys |
 | **Working tree** | clean |
-| **Suite** | 2611 passed, 14 skipped |
+| **Suite** | 2626 passed, 14 skipped |
 | **Worktree** | `scratchpad/si2` on `feat/strategic-intelligence-v2`, tracking main |
+| **strategic_reasoning** | `false` — `ANTHROPIC_API_KEY` not set (owner) |
 
-## Done and verified live
+## Shipped and verified live this round
 
-**The repeated-analysis 500 is fixed.** Three separate anonymous visitors
-analysed the same company (Linear) on production: `303`, `303`, `303`.
+**Smoke-test access** (`FOUNDER_INTELLIGENCE_SMOKE_TEST_TOKEN`, header
+`X-Founder-Intelligence-Smoke-Test`, constant-time compare). Consulted in
+exactly one place, so a valid token buys the demo quota and nothing else —
+tests assert consent, CSRF and run ownership all still hold *with* a valid
+token. Absent variable ⇒ mechanism does not exist. Every bypass logs
+`internal_smoke_test_rate_limit_bypass_used`, never the token.
 
-Two layers, both fixed:
+**Methodology wall removed.** The landing page injected the whole "Before you
+start" explainer above the form, and rendered **six identical CTAs** because
+the injection used `.replace('</section>', …)` with no count — `str.replace`
+replaces every occurrence and the explainer emits one `</section>` per section.
+The explainer now lives only at `/onboarding`; new sessions land on the product.
 
-1. `complete:{run_id}` idempotency key collided when the same company was
-   re-analysed with different limitations. Key now carries a payload digest.
-2. The real one: run identity is deterministic per company + evidence +
-   pipeline version, so a second caller derived the same id and **re-executed
-   the write path against a terminal run** —
-   `fi.section_assembled on a terminal run (COMPLETE)`.
-   `run()` now resolves run state first: COMPLETE/PARTIAL recomposes in memory
-   and appends nothing; FAILED/REJECTED refuses plainly; otherwise normal.
+**Landing page rebuilt** around what the reader gets: a plain promise, two
+input boxes with real placeholders, a concrete example of an actual conclusion,
+and a short evidence statement. One primary CTA, enforced by a test.
 
-Reuse is safe structurally: the result is a pure function of the arguments
-(`_assemble_sections` reads only its parameters), which is the same premise
-that makes the id deterministic.
+**Two defects found by looking at the deployed page**, both fixed and
+redeployed: the examples footnote rendered *above the h1*; and every deck
+bullet carried the same retrieval date, reading as chronology that was not
+there.
 
-Real-network verification with a persistent store — the condition that hid this
-from 2,600 tests:
+**Live batch, all `303`, no 500s** — the repeated-analysis fix holds across
+fresh technology companies:
 
-```
-visitor 1: 303  sections=12  completed=1
-visitor 2: 303  sections=12  completed=1
-visitor 3: 303  sections=12  completed=1
-```
+| Company | Segment |
+|---|---|
+| Anthropic | AI infrastructure, late-stage private |
+| Retool | developer tooling, mid-sized private |
+| Wiz | cybersecurity, growth-stage |
+| Snowflake | data infrastructure, established public |
+| Arm Holdings | semiconductors, major platform |
 
-Also live-verified earlier: no login dead end (`303` to the run + `HttpOnly;
-SameSite=Lax; Secure` session), presentation-first (`/progress` → `303
-/slides`), and `/readyz` reporting `capabilities.strategic_reasoning`.
+## Blocked right now — one owner action unblocks it
 
-## Blocked right now — do this first
+**Rendered presentation/brief/analysis were NOT inspected for those five.**
+The 6th request of the hour hit the demo quota (429) and fell back to the
+landing page. This is the third time engineering traffic has exhausted the
+public allowance.
 
-**The per-IP demo quota blocks live validation.** Engineering traffic consumes
-the same allowance as user traffic; repeated smoke runs return `429`. This
-stopped rendered-page verification twice.
+The mechanism to fix it is built, tested and deployed. It needs the secret:
 
-Implement **Task 6** before resuming the UI loop, or every batch stalls:
+> **Owner action:** in the Render dashboard for `intent-engine-oatc`, add env
+> var `FOUNDER_INTELLIGENCE_SMOKE_TEST_TOKEN` with any long random value
+> (`openssl rand -hex 32`), `sync: false`.
 
-- add a smoke-test path that does not consume public quota
-- prefer: a config-gated token checked in `_demo_rate_limited`
-  (`src/intent_engine/webapp/app.py:501`), read from an env var, absent by
-  default, with an audit log line on every bypass
-- do **not** disable public limiting, embed the secret client-side, or make the
-  bypass discoverable
-
-## Then resume the loop
-
-**Task 8 UI defects, none started**, in impact order:
-
-1. Methodology wall on the primary journey, with **six identical "Got it —
-   start an analysis" buttons** (`_onboarding`, `app.py:352`)
-2. Landing page does not show a concrete example of the value
-3. Old executive-brief renderer (`_brief_page`, ~`app.py:1579`)
-4. Old full-analysis renderer (`_run_page`, ~`app.py:1159`)
-5. Brief/analysis do not use the grounded company model the deck uses
-6. Empty and sparse one-sentence cards
-7. Mobile readability unverified
-
-Per batch: deploy → confirm SHA → 5 fresh technology companies → inspect
-rendered pages in a browser → screenshot → rank defects → fix root causes →
-regression tests → redeploy → re-run failures + unrelated cases.
-
-Companies used so far (rotate away from these): Vercel, Datadog, Ramp, Linear,
-Cloudflare. Excluded by instruction: Chipotle, restaurants, Sony, Palantir,
-Shopify, Microsoft, Nintendo, prior synthetic fixtures.
-
-## Useful commands
+Then live batches run with:
 
 ```bash
-# real-network repeated-analysis reproduction (the one that found layer 2)
-cd scratchpad/si2 && .venv/bin/python -c "..."   # see git log for ac7aada
+curl -H "X-Founder-Intelligence-Smoke-Test: $TOKEN" ...
 ```
 
-Run the suite with the venv on PATH or the pre-commit guard fails:
-`PATH="/Users/prathamsharma/intent-engine/.venv/bin:$PATH" git commit`
+## Next task, in order
 
-## Owner-only
+1. **Re-run the five-company batch with the smoke header** and inspect the
+   rendered presentation, executive brief, full analysis and sources for each,
+   desktop and mobile. This is the step that was cut short.
+2. **Task 6 — executive-brief renderer.** Still the old field-serialised
+   layout (`_brief_page`, ~`app.py:1600`). Must read as one written argument.
+3. **Task 7 — full-analysis renderer** (`_run_page`, ~`app.py:1180`). Single
+   reading column, no unanswered headings, one sources section.
+4. **Task 5 — presentation narrative.** The founder deck exists
+   (`build_founder_slides`, `slides.py`) but only fires when a grounded
+   analysis is present; on the deterministic path the old deck still renders.
+   Decide what the deterministic deck should say and rebuild it.
 
-`ANTHROPIC_API_KEY` is not set in Render, so the grounded analyst is dark and
-`/readyz` reports `strategic_reasoning: false`. Everything else — retrieval,
-stability, UI, deployment — proceeds without it. After it is added, verify:
-`strategic_reasoning: true`, an analyst call succeeds, no secret is logged,
-timeout/fallback is understandable, and the deck/brief/analysis use grounded
-output.
+## Companies already used — rotate away
+
+Vercel, Datadog, Ramp, Linear, Cloudflare, Anthropic, Retool, Wiz, Snowflake,
+Arm. Excluded by instruction: Chipotle/restaurants, Sony, Palantir, Shopify,
+Microsoft, Nintendo, prior synthetic fixtures.
+
+Note: the product's own prepared examples on the landing page are still
+Palantir and Shopify (`GOLDEN_COMPANIES`, `demo_tiers.py`). Worth replacing
+with two current technology companies.
+
+## Notes for whoever continues
+
+- Run the suite with the venv on PATH or the pre-commit guard fails:
+  `PATH="/Users/prathamsharma/intent-engine/.venv/bin:$PATH" git commit`
+- Real-network local reproduction (this is how the repeated-analysis defect was
+  found; fixture transports hide it) — construct `AppConfig` with
+  `autorun_sources=True` and pass **no** `transport` to `WebApp`.
+- After the key is added, verify: `strategic_reasoning: true`, an analyst call
+  succeeds, no secret in logs, timeout/fallback understandable, and deck +
+  brief + analysis all use grounded output.
