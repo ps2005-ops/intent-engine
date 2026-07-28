@@ -15,6 +15,7 @@ import html as _html
 
 from intent_engine.strategic_intelligence.editorial import (
     consolidate_limitations, deduplicate, is_meaningful, meaningful_items,
+    shared_evidence,
 )
 
 _e = _html.escape
@@ -137,7 +138,11 @@ def _hypothesis_card(h, obs_by_id, pat_by_id):
     pat = pat_by_id.get(h.get("pattern_id", ""), {})
     conf = h.get("confidence", "")
 
-    strongest_sup = _obs_ev(sup[0], "sup") if sup else "<p class='muted'>—</p>"
+    # A dash here reads as a rendering bug. When there is no strong support,
+    # say so — that is itself a finding about the hypothesis.
+    strongest_sup = (_obs_ev(sup[0], "sup") if sup else
+                     '<p class="muted">No single strongest source; see all '
+                     'evidence below.</p>')
     strongest_con = _obs_ev(con[0], "con") if con else \
         '<p class="muted">No strong counter-evidence retrieved; see gaps.</p>'
 
@@ -154,9 +159,16 @@ def _hypothesis_card(h, obs_by_id, pat_by_id):
         f'<summary><h3 style="display:inline">{_e(h["title"])}</h3> '
         f'<span class="conf conf-{_e(conf)}">{_e(conf)}</span>'
         f'<p class="thesis" style="font-size:1rem">{_e(h["statement"])}</p>'
-        f'<div class="row"><div class="chip"><b>Why now</b>{_e(h.get("why_now","") or "—")}</div>'
-        f'<div class="chip"><b>Decision affected</b>'
-        f'{_e((h.get("decision_implications") or [""])[0])}</div></div>'
+        + ('<div class="row">'
+           + (f'<div class="chip"><b>Why now</b>{_e(h["why_now"])}</div>'
+              if is_meaningful(h.get("why_now")) else '')
+           + (f'<div class="chip"><b>Decision affected</b>'
+              f'{_e((h.get("decision_implications") or [""])[0])}</div>'
+              if is_meaningful((h.get("decision_implications") or [""])[0])
+              else '')
+           + '</div>'
+           if is_meaningful(h.get("why_now")) or is_meaningful(
+               (h.get("decision_implications") or [""])[0]) else '') + 
         f'<div class="row"><div class="chip"><b>Strongest support</b>{strongest_sup}</div>'
         f'<div class="chip"><b>Strongest counterpoint</b>{strongest_con}</div></div>'
         f'<p class="muted">▸ Expand for full reasoning, comparison, and all evidence.</p>'
@@ -276,8 +288,28 @@ def render_strategic_report(report) -> str:
     summary = (f'<h2>Executive summary</h2><div class="row">{chips}</div>'
                if chips else '')
 
-    # hypotheses
-    hyp_html = "".join(_hypothesis_card(h, obs_by_id, pat_by_id) for h in hyps)
+    # hypotheses. Evidence cited under EVERY hypothesis is printed under the
+    # first one and linked from the rest: a reader scrolling four cards saw
+    # the identical six-source block four times and learned nothing after the
+    # first. Volume of text and volume of insight had come apart.
+    repeated = shared_evidence([h.get("strongest_support_ids", [])
+                                for h in hyps])
+    ubiquitous = {e for e, n in repeated.items() if n >= max(2, len(hyps))}
+    hyp_html = ""
+    for position, hypothesis in enumerate(hyps):
+        card = dict(hypothesis)
+        if position > 0 and ubiquitous:
+            # Both id lists, not just the "strongest" one — the card renders
+            # the full supporting set as well, so filtering one path left the
+            # excerpt on the page anyway.
+            for field in ("strongest_support_ids",
+                          "supporting_observation_ids"):
+                card[field] = [e for e in hypothesis.get(field, [])
+                               if e not in ubiquitous]
+            card["shared_evidence_note"] = (
+                "Rests on the same evidence shown under the leading "
+                "hypothesis, plus anything listed here.")
+        hyp_html += _hypothesis_card(card, obs_by_id, pat_by_id)
 
     # current agenda
     agenda_cards = ""

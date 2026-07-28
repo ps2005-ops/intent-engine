@@ -1481,7 +1481,8 @@ class WebApp:
         )
         as_of, version = self._analysis_stamp(run_id)
         csrf = session["csrf"] if session else ""
-        slides = build_slides(report, as_of=as_of, analysis_version=version)
+        slides = build_slides(report, as_of=as_of, analysis_version=version,
+                              documents=self.ci.store.retrieved(run_id))
         if not deck_is_presentable(slides):
             # Better to say so than to hand someone a three-slide deck in a
             # meeting after promising a presentation.

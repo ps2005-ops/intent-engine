@@ -74,20 +74,53 @@ def _slide(slide_id, title, bullets, *, kind="content", note=""):
             "kind": kind, "note": note}
 
 
+def _document_bullets(documents, families, *, limit=3):
+    """Bullets drawn from retrieved documents, classified exactly as the
+    readiness gate classified them.
+
+    The gate counts DOCUMENTS; the report's observations are a much smaller,
+    analytically-selected subset that carries no `source_type` at all. Building
+    the factual slides from observations therefore promised seven subjects and
+    delivered three — the precise gate/renderer disagreement this module exists
+    to prevent. Using `family_of` here means both sides classify the same
+    evidence the same way, by construction.
+    """
+    from intent_engine.company_ingestion.coverage import family_of
+    out = []
+    for document in documents or ():
+        if document.get("retrieval_status") != "OK":
+            continue
+        if family_of(document) not in families:
+            continue
+        text = " ".join((document.get("text_content") or "").split())
+        if len(text) < 40:
+            continue
+        out.append(_bullet(text, date=document.get("date", "")))
+        if len(out) >= limit:
+            break
+    return out
+
+
 def build_slides(report, *, as_of: str = "", analysis_version: str = "",
-                 brief=None) -> list:
-    """The deck, in narrative order, with every empty slide omitted."""
+                 brief=None, documents=()) -> list:
+    """The deck, in narrative order, with every empty slide omitted.
+
+    `documents` are the run's retrieved sources. When supplied, the factual
+    slides are built from them — see `_document_bullets` for why.
+    """
+    from intent_engine.company_ingestion.coverage import (
+        COMMERCIAL, CUSTOMERS, IDENTITY, INDEPENDENT, PRODUCT,
+    )
     r = report.as_dict() if hasattr(report, "as_dict") else (report or {})
     company = r.get("company_name", "")
     thesis = r.get("thesis") or {}
     slides = []
 
     # 1. Company in one minute
-    identity_bullets = []
+    identity_bullets = _document_bullets(documents, {IDENTITY})
     for observation in meaningful_items(r.get("observations", []),
                                         key="excerpt"):
-        if observation.get("source_type") in ("homepage", "about") or \
-                observation.get("source_class") == "company_owned":
+        if observation.get("source_class") == "company_owned":
             identity_bullets.append(_bullet(
                 observation.get("excerpt", ""),
                 evidence=[observation.get("observation_id")],
@@ -118,21 +151,26 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     slides.append(_slide("changed", "What changed recently", change_bullets,
                          note="Only dated evidence appears here."))
 
-    # 4. Products, customers and market
-    market_bullets = []
+    # 4. Products, customers and market — the slide a reader most often wants
+    #    first, and the one that must actually name the products.
+    market_bullets = _document_bullets(
+        documents, {PRODUCT, CUSTOMERS, COMMERCIAL, INDEPENDENT}, limit=4)
     for observation in meaningful_items(r.get("observations", []),
                                         key="excerpt"):
-        if observation.get("source_type") in ("product", "customers",
-                                              "pricing") or \
-                observation.get("source_class") in ("customer_voice",
-                                                    "independent_reporting"):
+        if observation.get("source_class") in ("customer_voice",
+                                               "independent_reporting"):
             market_bullets.append(_bullet(
                 observation.get("excerpt", ""),
                 evidence=[observation.get("observation_id")]))
     slides.append(_slide("market", "Products, customers and market",
                          market_bullets))
 
-    # 5. Key strategic signals
+    # 5. Key strategic signals. Hypotheses first when synthesis produced any;
+    #    otherwise the investor and strategy material the company published,
+    #    which is a real signal slide rather than a substitute for one. A run
+    #    with strong evidence but no hypotheses is common and should not lose
+    #    a slide it can genuinely fill.
+    from intent_engine.company_ingestion.coverage import INVESTOR, STRATEGY
     signal_bullets = [
         _bullet(h.get("title", "") or h.get("statement", ""),
                 evidence=h.get("strongest_support_ids", []))
@@ -140,6 +178,8 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     signal_bullets += [
         _bullet(s.get("finding", ""))
         for s in meaningful_items(r.get("surprises", []), key="finding")]
+    if not signal_bullets:
+        signal_bullets = _document_bullets(documents, {INVESTOR, STRATEGY})
     slides.append(_slide("signals", "Key strategic signals", signal_bullets))
 
     # 6. Main tension or risk
