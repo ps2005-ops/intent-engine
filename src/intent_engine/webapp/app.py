@@ -2607,8 +2607,16 @@ class WebApp:
         except ImportError:
             pdf_available = False
         from intent_engine.company_ingestion.rendering import rendering_enabled
+        # Whether the grounded analyst can run in THIS process. Without it the
+        # product still works but never asserts a strategic conclusion, so
+        # "is the reasoning layer live?" must be checkable from outside rather
+        # than inferred from render.yaml -- which does not govern the running
+        # service and declares this variable only in a comment.
+        import os
         return {"pdf_extraction": pdf_available,
-                "browser_rendering": rendering_enabled()}
+                "browser_rendering": rendering_enabled(),
+                "strategic_reasoning": bool(
+                    os.environ.get("ANTHROPIC_API_KEY"))}
 
     def _probe_runtime_root_writable(self) -> None:
         import os as _os

@@ -43,10 +43,16 @@ CONSENT_VERSION = "v1.1-source-approval"
 
 class CompanyIngestionService:
     def __init__(self, path=DEFAULT_CI_PATH, *, transport=None,
-                 resolver=None):
+                 resolver=None, analyst_client=None, analyst_cache=None):
         self.store = IngestionStore(path)
         self.transport = transport      # injectable; None = real HTTP
         self.resolver = resolver        # injectable; False disables DNS check
+        # The reasoning backend. None means "not configured", which produces
+        # an honest EVIDENCE_LIMITED result -- never a template dressed up as
+        # a finding. Injected in tests with a recorded client so CI makes no
+        # model calls.
+        self._analyst_client = analyst_client
+        self._analyst_cache = analyst_cache
 
     # --- plumbing --------------------------------------------------------------
     def _append(self, event_type, *, run_id, domain, actor_type="system",
@@ -836,7 +842,7 @@ class CompanyIngestionService:
     def _strategic_report(self, company_name, documents, extra_observations,
                           previous_model=None):
         from intent_engine.strategic_intelligence.observations import (
-            derive_observations,
+            derive_analyst_evidence, derive_observations,
         )
         from intent_engine.strategic_intelligence.reasoning import (
             build_strategic_report,
@@ -848,7 +854,62 @@ class CompanyIngestionService:
         report = build_strategic_report(company_name=company_name,
                                         observations=observations,
                                         previous_model=previous_model)
-        return report.as_dict()
+        payload = report.as_dict()
+
+        # --- the reasoning layer ------------------------------------------
+        # The pattern library above produced `payload["hypotheses"]`. Those
+        # are scaffolds: useful as structure, not trustworthy as insight,
+        # which is the whole reason this layer exists. So the result is
+        # labelled with WHERE its reasoning came from, and the analyst's
+        # verified output supersedes the scaffolds when it is available.
+        #
+        # When the analyst is not available the scaffolds are NOT quietly
+        # presented as strategic conclusions. The state says so.
+        from intent_engine.strategic_intelligence.analyst import (
+            AnalystUnavailable, ResultState, analyse,
+        )
+        evidence = derive_analyst_evidence(documents)
+        evidence += list(extra_observations or ())
+
+        payload["reasoning_provenance"] = "pattern_library"
+        payload["result_state"] = ResultState.EVIDENCE_LIMITED
+        payload["strategic_analysis"] = None
+        try:
+            analysis, state, findings = analyse(
+                company_name, evidence,
+                client=self._analyst_client, cache=self._analyst_cache,
+                entity_hint=self._entity_hint(company_name, documents))
+        except AnalystUnavailable:
+            payload["result_state"] = ResultState.EVIDENCE_LIMITED
+            payload["result_state_detail"] = (
+                "No reasoning backend is configured, so no strategic "
+                "conclusion is asserted. The evidence below was retrieved and "
+                "verified; the patterns shown are structural scaffolds, not "
+                "findings about this company.")
+            return payload
+
+        payload["result_state"] = state
+        payload["critic_findings"] = [
+            {"check": f.check, "severity": f.severity, "message": f.message}
+            for f in findings]
+        if analysis is not None:
+            payload["strategic_analysis"] = analysis.to_dict()
+            if state == ResultState.COMPLETE:
+                payload["reasoning_provenance"] = "grounded_analyst"
+        payload["result_state_detail"] = ResultState.EXPLANATION.get(state, "")
+        return payload
+
+    @staticmethod
+    def _entity_hint(company_name, documents):
+        """Tell the analyst when the evidence spans more than one entity."""
+        hosts = {(d.get("final_url") or "").split("/")[2].lower()
+                 for d in documents if (d.get("final_url") or "").count("/") > 2}
+        if len(hosts) > 1:
+            return ("Retrieved evidence spans more than one host "
+                    f"({', '.join(sorted(hosts)[:5])}). Establish which legal "
+                    "entity each fact belongs to before attributing it to "
+                    f"{company_name}.")
+        return None
 
     # --- evidence library ---------------------------------------------------------
     def evidence_library(self, run_id: str) -> dict:
