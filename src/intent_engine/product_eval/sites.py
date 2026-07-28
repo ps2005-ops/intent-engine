@@ -37,6 +37,16 @@ class Site:
     blocked: tuple = ()                # fragments that answer 403
     missing: tuple = ()                # fragments that answer 404
     serves_sitemap: bool = True
+    # Absolute URLs on OTHER hosts that this company's evidence really lives
+    # on: curated investor-relations pages, SEC filings, a customer's own
+    # announcement. Matched by prefix, so one entry can stand for a family of
+    # query-string variants the way a real archive does.
+    #
+    # Without these the fixtures could only ever model a company that answers
+    # on its own domain — which quietly excluded the multinational case, where
+    # the primary domain refuses automated access and every usable source is
+    # somewhere else.
+    external_pages: dict = field(default_factory=dict)
 
 
 def _page(title, paragraphs):
@@ -149,7 +159,12 @@ PALANTIR = Site(
     },
 )
 
-# --- public, blocked / thin ---------------------------------------------------
+# --- public, primary domain refuses automated access ---------------------------
+# The multinational case. Every request to the entered domain answers 403, and
+# the evidence that exists is on hosts a homepage crawl can never reach: the
+# curated corporate and investor pages, and the filings archive. A product that
+# only knows how to read the domain it was given returns nothing here — which
+# is exactly what it did before the curated-source fallback existed.
 SONY = Site(
     "sony", "Sony Group Corporation", "https://sony.example", "public",
     pages={
@@ -163,6 +178,56 @@ SONY = Site(
     blocked=("/", "/about", "/products", "/customers", "/news", "/pricing",
              "/careers", "/investors", "/robots.txt", "/sitemap.xml"),
     serves_sitemap=False,
+    external_pages={
+        "https://www.sony.com/en/SonyInfo/CorporateInfo/": _page(
+            "Sony Group Corporation — corporate information", [
+                "Sony Group Corporation is a creative entertainment company "
+                "with a solid foundation of technology. The group operates "
+                "through Game and Network Services, Music, Pictures, "
+                "Entertainment Technology and Services, Imaging and Sensing "
+                "Solutions and Financial Services segments.",
+                "Headquartered in Tokyo, the group sells hardware, content "
+                "and services to consumers and supplies image sensors to "
+                "other manufacturers.",
+            ]),
+        "https://www.sony.com/en/SonyInfo/IR/library/presen/er/": _page(
+            "Consolidated financial results — fiscal 2026 first quarter", [
+                "Game and Network Services recorded higher revenue in the "
+                "quarter on network services and add-on content, while "
+                "hardware unit sales declined year on year.",
+                "Imaging and Sensing Solutions revenue rose on mobile sensor "
+                "demand. Pictures revenue fell against a prior-year "
+                "theatrical comparison.",
+            ]),
+        "https://www.sony.com/en/SonyInfo/IR/": _page(
+            "Sony investor relations", [
+                "Sony reports segment revenue and operating income for each "
+                "of its six business segments every quarter. The group's "
+                "stated capital allocation priority for fiscal 2026 is "
+                "investment in entertainment intellectual property and image "
+                "sensor capacity.",
+            ]),
+        "https://www.sony.com/en/SonyInfo/News/": _page(
+            "Sony newsroom", [
+                "July 2026: Sony announced an expansion of its image sensor "
+                "fabrication capacity, citing demand from smartphone "
+                "manufacturers and automotive customers.",
+                "Leadership has described the group strategy as connecting "
+                "creators and users directly, with entertainment content and "
+                "the hardware it plays on managed as one portfolio rather "
+                "than as separate businesses.",
+            ]),
+        "https://www.sec.gov/cgi-bin/browse-edgar": _page(
+            "Sony Group Corporation Form 20-F annual report", [
+                "Sony Group Corporation files an annual report on Form 20-F "
+                "as a foreign private issuer. The report describes segment "
+                "results, principal risks and related-party arrangements for "
+                "the fiscal year ended March 2026.",
+                "Risk factors disclosed include dependence on a limited "
+                "number of smartphone customers for image sensors, and "
+                "competition in game platforms.",
+            ]),
+    },
 )
 
 # --- private startups ---------------------------------------------------------
@@ -280,6 +345,18 @@ def site_transport(site: Site):
     """A transport that serves this fixture and nothing else."""
     def _tx(url, timeout):
         low = url.lower().split("#")[0].rstrip("/") or "/"
+        if not low.startswith(site.website.lower().rstrip("/")):
+            # Off-domain: only the curated external sources this fixture
+            # declares exist. Everything else on the internet answers 404,
+            # which is what makes the fixture a closed world.
+            # Longest prefix first, so /IR/library/presen/er/ is not swallowed
+            # by /IR/.
+            for prefix, body in sorted(site.external_pages.items(),
+                                       key=lambda kv: -len(kv[0])):
+                if low.startswith(prefix.lower().rstrip("/")):
+                    return (200, {"content-type": "text/html"},
+                            body.encode(), False)
+            raise _http_error(url, 404)
         path = low.split(site.website.lower().rstrip("/"), 1)[-1] or "/"
         if not path.startswith("/"):
             path = "/" + path

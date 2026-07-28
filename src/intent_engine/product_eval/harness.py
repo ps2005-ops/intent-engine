@@ -155,7 +155,7 @@ def _compose(company_key: str):
     return ci, run_id, result
 
 
-def _brief_and_slides(result):
+def _brief_and_slides(result, documents=()):
     report = result.get("strategic_report")
     if not report:
         return None, []
@@ -163,9 +163,61 @@ def _brief_and_slides(result):
     from intent_engine.strategic_intelligence.slides import build_slides
     brief = build_brief(report, as_of="2026-07-28",
                         analysis_version="eval")
+    # `documents` is not optional in practice: without it the factual slides
+    # (what the company does, its products, its customers) are built from the
+    # much smaller observation set and come out empty, so the deck the
+    # evaluation scored was shorter than the one a reader is served. The
+    # harness measured a product nobody uses.
     slides = build_slides(report, as_of="2026-07-28",
-                          analysis_version="eval", brief=brief)
+                          analysis_version="eval", brief=brief,
+                          documents=documents)
     return brief, slides
+
+
+# What each of the ten standard questions LOOKS like in a composed analysis.
+# A persona declaring it must answer "what decision could this affect" is only
+# a gate if something checks that the answer is on the page; otherwise the
+# persona list is documentation. Each entry is (brief field, slide ids) — the
+# reader can be served by either layer, because either is where they might
+# land.
+_ANSWERED_BY = {
+    "what does this company do": (("thesis",), ("company", "market")),
+    "what appears to be changing": ((), ("changed", "signals")),
+    "the most important strategic hypothesis": (("thesis",), ("view",)),
+    "why it matters": (("decision", "tension"), ("view", "tension")),
+    "what evidence supports it": ((), ("signals", "market", "evidence")),
+    "what evidence weakens it": (("counterpoint",), ("tension", "evidence")),
+    "what decision it could affect": (("decision",), ("view",)),
+    "what to investigate next": (("questions",), ("questions", "opportunity")),
+    "how confident to be": ((), ("view", "evidence")),
+    "what could not be determined": (("limitation",), ("evidence",)),
+}
+
+
+def _unanswered(persona, brief, slides) -> list:
+    """The questions this reader needs that the analysis does not answer."""
+    from intent_engine.strategic_intelligence.editorial import is_meaningful
+    filled = {s.get("id") for s in slides or ()
+              if s.get("bullets") or s.get("body")}
+    missing = []
+    for question in persona.must_answer:
+        fields, slide_ids = _ANSWERED_BY.get(question, ((), ()))
+        by_brief = any(_field_present(brief, f) for f in fields)
+        by_slide = bool(filled & set(slide_ids))
+        if not (by_brief or by_slide):
+            missing.append(question)
+    return missing
+
+
+def _field_present(brief, field_name) -> bool:
+    from intent_engine.strategic_intelligence.editorial import is_meaningful
+    if brief is None:
+        return False
+    value = getattr(brief, field_name, None)
+    if isinstance(value, (list, tuple)):
+        return any(is_meaningful(v if isinstance(v, str) else
+                                 (v or {}).get("text", "")) for v in value)
+    return is_meaningful(value)
 
 
 def _evaluate(case, ci, run_id, result) -> CaseResult:
@@ -175,7 +227,7 @@ def _evaluate(case, ci, run_id, result) -> CaseResult:
                      scenario=scenario.key, company=case["company"])
 
     documents = ci.store.retrieved(run_id)
-    brief, slides = _brief_and_slides(result)
+    brief, slides = _brief_and_slides(result, documents)
     score = score_report(brief=brief, slides=slides,
                          report=result.get("strategic_report"),
                          documents=documents,
@@ -201,6 +253,14 @@ def _evaluate(case, ci, run_id, result) -> CaseResult:
     # Structural failures are critical for everyone.
     out.critical.extend(score.failures)
     out.soft.extend(score.warnings)
+
+    # The questions this reader came with. This is the difference between "the
+    # pipeline finished" and "the person got what they came for".
+    for question in _unanswered(persona, brief, slides):
+        out.critical.append(
+            f"{persona.label} cannot answer: {question}")
+    out.metrics["unanswered_questions"] = len(
+        _unanswered(persona, brief, slides))
 
     # Persona-specific expectations.
     brief_words = score.metrics.get("brief_words", 0)
@@ -285,6 +345,10 @@ def _cluster_key(reason: str) -> str:
     """Group failure reasons that are the same defect wearing different
     numbers, so the ledger points at causes rather than instances."""
     low = reason.lower()
+    # An unanswered question clusters by the QUESTION, not by who asked it —
+    # five personas failing on "what evidence weakens it" is one defect.
+    if "cannot answer:" in low:
+        return "unanswered: " + reason.split("cannot answer:")[-1].strip()
     for marker, key in (
             ("words; the standard", "brief too long (absolute)"),
             ("reads ~", "brief too long for this persona"),

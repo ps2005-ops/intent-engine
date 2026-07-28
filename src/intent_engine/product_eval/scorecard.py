@@ -252,6 +252,23 @@ def score_report(*, brief=None, slides=(), report=None, documents=(),
     if overfull:
         failures.append(f"{len(overfull)} slide(s) exceed "
                         f"{THRESHOLDS['slide_words_max']} words")
+    # A deck that got past the readiness gate promised a presentation. Four
+    # slides is a paragraph with arrows, and the release standard names five as
+    # the floor — so it has to be a failure here, not a band in a dimension
+    # nobody gates on.
+    if brief_text and metrics["slide_count"] < THRESHOLDS[
+            "min_meaningful_slides"]:
+        failures.append(f"only {metrics['slide_count']} meaningful slide(s); "
+                        f"{THRESHOLDS['min_meaningful_slides']} is the floor "
+                        f"for a presentation")
+
+    # A brief with no hypothesis behind it is a summary wearing an analysis's
+    # clothes. Sony reached six sources, four evidence families and a rendered
+    # brief with ZERO hypotheses, and every gate passed it.
+    if brief_text and not hypotheses:
+        failures.append("a brief was produced with no strategic hypothesis "
+                        "behind it — the reader is told what the company says, "
+                        "not what it means")
 
     # --- outcome -------------------------------------------------------------
     score.metrics = metrics
@@ -281,18 +298,25 @@ def score_report(*, brief=None, slides=(), report=None, documents=(),
     # scores it as ready. That is exactly how the product could return nothing
     # for Palantir, Linear and Notion while the scorecard said
     # PRODUCT_READY_WITH_LIMITATIONS.
+    #
+    # But there are two ways to show a reader nothing, and only one of them is
+    # a defect. Declining on purpose — the readiness gate looked at the
+    # evidence and said this may not become a report — is the product working:
+    # the reader gets an explanation instead of a confident-looking page built
+    # on one source. Producing nothing *after* passing that gate is the bug.
+    # Scoring them the same made a correct refusal read as a quality failure,
+    # and left the real defect sharing a bucket with it.
+    declined_on_purpose = (readiness or {}).get("may_synthesize") is False
     produced_nothing = not hypotheses and not brief_text and not slides
-    if produced_nothing and docs:
+    if produced_nothing and docs and not declined_on_purpose:
         failures.append("evidence was retrieved but no brief, hypothesis or "
                         "slide was produced — the reader gets an empty result")
         score.failures = failures
 
-    if not docs:
+    if not docs or declined_on_purpose:
         score.outcome = INSUFFICIENT_EVIDENCE
     elif failures:
         score.outcome = FAILED_PRODUCT_QUALITY
-    elif (readiness or {}).get("may_synthesize") is False:
-        score.outcome = INSUFFICIENT_EVIDENCE
     elif metrics["independent_share"] == 0 or warnings:
         score.outcome = PRODUCT_READY_WITH_LIMITATIONS
     else:
