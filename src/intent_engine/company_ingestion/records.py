@@ -78,6 +78,9 @@ INGESTION_EVENTS = frozenset({
     "ci.pasted_evidence_added", "ci.claims_built",
     # report-quality diagnostics (operator observability)
     "ci.quality_assessed",
+    # WHO the run is about, asserted before synthesis and independently of
+    # whatever the run manages to retrieve.
+    "ci.entity_identified",
 })
 
 

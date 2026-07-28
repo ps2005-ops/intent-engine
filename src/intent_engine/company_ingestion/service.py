@@ -13,6 +13,9 @@ from intent_engine.company_ingestion.claims import (
 )
 from intent_engine.company_ingestion.discovery import discover_candidates
 from intent_engine.company_ingestion.edgar import propose_edgar_candidates
+from intent_engine.company_ingestion.entities import (
+    entity_identity_facts, official_fallback_candidates, resolve_entity,
+)
 from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
@@ -76,6 +79,48 @@ class CompanyIngestionService:
             if row.event_type == "ci.run_created":
                 return dict(row.payload, domain=row.company_domain)
         return None
+
+    # --- entity identity ---------------------------------------------------
+    def _identity_for(self, run_id: str, meta: dict) -> dict:
+        """Resolve and persist WHO this run is about, independently of what it
+        manages to retrieve.
+
+        The Sony failure was not only a retrieval failure. The run had no
+        asserted identity at all, so the entity became a side effect of the
+        documents: one 6-K arrived, and the report was about whatever that
+        filing was about. Establishing identity first means a thin evidence set
+        produces a thin report about the RIGHT company, not a confident report
+        about the wrong one.
+
+        Recorded once per run (append-only, idempotent). Returns a dict with
+        `entity_resolved`, the stored facts, and — for in-process callers only —
+        the profile under `_profile`, which is never persisted.
+        """
+        resolution = resolve_entity(company_name=meta.get("company_name", ""),
+                                    website=meta.get("website", ""))
+        payload = {"run_id": run_id,
+                   "status": resolution.status,
+                   "reason": resolution.reason,
+                   "entity_resolved": resolution.resolved,
+                   "choices": resolution.as_dict()["choices"]}
+        if resolution.resolved:
+            payload.update(entity_identity_facts(resolution.profile))
+            payload["entity_id"] = resolution.profile.entity_id
+        self._append("ci.entity_identified", run_id=run_id,
+                     domain=meta["domain"], subject_type="identity",
+                     subject_id=payload.get("entity_id", "unresolved"),
+                     payload=payload,
+                     idempotency_key=f"identity:{run_id}")
+        out = dict(payload)
+        out["_profile"] = resolution.profile
+        return out
+
+    def entity_identity(self, run_id: str) -> dict:
+        """The persisted identity record for a run, or {} if none."""
+        for row in self.store.for_run(run_id):
+            if row.event_type == "ci.entity_identified":
+                return dict(row.payload)
+        return {}
 
     # Sitemap evidence family -> (source_type, source_class) in the existing
     # candidate contract, so sitemap-discovered URLs flow through the same
@@ -164,6 +209,19 @@ class CompanyIngestionService:
         candidates = candidates + propose_edgar_candidates(
             company_name=meta.get("company_name", ""),
             transport=self.transport, resolver=self.resolver)
+        # Curated official sources for a KNOWN entity. This is what stops a
+        # multinational whose primary domain refuses automated access from
+        # collapsing into whatever single filing happened to be reachable:
+        # investor relations, earnings, annual/integrated reports, newsroom and
+        # segment pages live at stable URLs that are not derivable from a
+        # homepage we could not read. Bounded, approval-gated, and classified by
+        # authority + entity relationship, so a subsidiary page can never be
+        # read as the parent speaking.
+        identity = self._identity_for(run_id, meta)
+        if identity.get("entity_resolved"):
+            candidates = candidates + official_fallback_candidates(
+                identity["_profile"], exclude_urls=[c["url"]
+                                                    for c in candidates])
         # Deduplicate by URL. The same page is legitimately found by more than
         # one discovery path (a guessed known path AND the sitemap), and each
         # produces a different payload for the same candidate_id — which would

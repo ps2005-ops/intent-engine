@@ -29,6 +29,9 @@ from intent_engine.founder_intelligence.presentation import (
     _BASE_CSS as _APP_CSS,
     render_landing_html, render_report_preview, render_result_html,
 )
+from intent_engine.company_ingestion.entities import (
+    AMBIGUOUS, resolve_choice, resolve_entity,
+)
 from intent_engine.company_ingestion.records import (
     IngestionError, MAX_APPROVED_SOURCES,
 )
@@ -521,12 +524,30 @@ class WebApp:
         if limited is not None:
             return limited
         website = form.get("website", f"https://{DEMO_DOMAIN}")
+        company_name = form.get("company_name", "")[:120]
+        # WHICH company? A name like "Sony" denotes a parent, a games
+        # subsidiary, an electronics subsidiary and more. Picking one for the
+        # user produces a confident report about the wrong company — strictly
+        # worse than asking. Asked once, before any work, and answered by an
+        # explicit choice that carries its own website (the choice form posts
+        # no website field, so this must settle both).
+        chosen = form.get("entity_id", "")
+        if chosen:
+            picked = resolve_choice(chosen)
+            if picked.resolved:
+                company_name = picked.profile.legal_name
+                website = f"https://{picked.profile.primary_domain}"
         if DEMO_DOMAIN not in website:
+            if not chosen:
+                resolution = resolve_entity(company_name=company_name,
+                                            website=website)
+                if resolution.status == AMBIGUOUS:
+                    return self._disambiguation_page(
+                        session, resolution, form)
             # REAL company path: validate → discover → source approval.
             try:
                 run = self.ci.create_run(
-                    company_name=form.get("company_name", "")[:120]
-                    or "(unnamed company)",
+                    company_name=company_name or "(unnamed company)",
                     website=website, user_id=session["user_id"],
                     as_of=__import__("datetime").datetime.now(
                         __import__("datetime").timezone.utc
@@ -576,6 +597,42 @@ class WebApp:
             # deterministic demo produces one run id; never reassign it
             return self._error_page(403, "this run belongs to another account")
         return self._redirect(f"/runs/{run_id}/progress")
+
+    def _disambiguation_page(self, session, resolution, form):
+        """Ask which company was meant, once, before any analysis runs.
+
+        Presented as plain business facts — legal name, country, listing —
+        because a business reader distinguishes companies by those, not by an
+        entity id. The parent is listed first (the likeliest reading) but every
+        option is an equal, explicit choice.
+        """
+        csrf = session["csrf"] if session else ""
+        payload = resolution.as_dict()
+        cards = "".join(
+            f'<form action="/analyze" method="post" class="choice">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="consent" value="1">'
+            f'<input type="hidden" name="entity_id" '
+            f'value="{_e(c["entity_id"])}">'
+            f'<input type="hidden" name="business_question" '
+            f'value="{_e(form.get("business_question", ""))}">'
+            f'<h3>{_e(c["legal_name"])}</h3>'
+            f'<p class="state">{_e(c["describe"])}</p>'
+            f'<p class="why">{_e(c["note"])}</p>'
+            f'<button type="submit">Analyse {_e(c["legal_name"])}</button>'
+            f'</form>' for c in payload["choices"])
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Which company do you mean?</title>'
+            f'</head><body>{self._nav(session, csrf)}<main>'
+            f'<h1>Which company do you mean?</h1>'
+            f'<p>{_e(payload["reason"])}. These are different companies with '
+            f'different products, results and risks, so the answer depends on '
+            f'which one you want.</p>{cards}'
+            f'<p><a href="/">Start over with a different company</a></p>'
+            f'</main></body></html>')
+        return self._html(body)
 
     def _progress(self, session, run_id):
         if not self._owned(session, run_id):
@@ -1251,12 +1308,26 @@ class WebApp:
         product, investor, customers, strategy, ...) instead of many documents
         from a single family. Shared by the source-review page (pre-checked
         set) and auto-run (approved set), so both always agree."""
-        # Within a family, prefer URLs the publisher actually lists (sitemap)
-        # over guessed known paths: a guess is frequently a 404/403, while a
-        # sitemap URL exists by construction.
+        # Within a family, order by how much reason we have to believe the URL
+        # serves content *on this site, right now*:
+        #
+        #   1. sitemap — the publisher is listing it live, today;
+        #   2. curated official URL from the entity registry — verified by
+        #      hand, but a constant that can go stale;
+        #   3. guessed known path — frequently a 404/403.
+        #
+        # The middle rank is what Sony needed: its homepage, robots.txt and
+        # sitemap all answer 403, so there are no sitemap URLs and every guess
+        # fails, leaving the curated IR/report pages as the only things that
+        # actually serve. Ranking curated URLs ABOVE sitemap URLs instead cost
+        # Palantir its product evidence — the registry's platform pages
+        # displaced the live sitemap entries in the product bucket. Publisher-
+        # live beats curated-constant; curated-constant beats a guess.
         def _verified_first(candidate):
-            why = candidate.get("why_relevant", "")
-            return 0 if "sitemap" in why else 1
+            if "sitemap" in candidate.get("why_relevant", ""):
+                return 0
+            return (1 if candidate.get("discovery_method") ==
+                    "official_fallback" else 2)
 
         buckets = []
         claimed = set()
