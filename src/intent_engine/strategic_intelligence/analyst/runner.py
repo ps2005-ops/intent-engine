@@ -27,7 +27,12 @@ from intent_engine.strategic_intelligence.analyst.critic import (
 log = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "claude-sonnet-5"
-MAX_OUTPUT_TOKENS = 4000
+# The decision-shaped contract asks for a business-model reconstruction, an
+# insight with a consequence chain, three to five decisions each with upside,
+# downside, cost of waiting and a falsifier, plus competitive dynamics and
+# questions. At 4000 that truncated on a five-document run and the whole
+# analysis was lost to a retry that truncated identically.
+MAX_OUTPUT_TOKENS = 8000
 MAX_EVIDENCE_ITEMS = 40
 MAX_EXCERPT_CHARS = 700
 REQUEST_TIMEOUT_S = 60.0
@@ -42,22 +47,33 @@ class AnalystUnavailable(RuntimeError):
 
 
 SYSTEM_PROMPT = """\
-You are a strategy partner briefing a chief executive. You have been given the \
-complete evidence retrieved about one company. You may reason only from that \
-evidence.
+You are the advisor a founder calls before a decision they cannot take back. \
+Think like a former operator, a board member, an investor and a competitor at \
+once. You have the complete evidence retrieved about one company, and you may \
+reason only from it.
 
-What makes an insight worth the reader's time:
+You are not writing a report. You are giving advice. Write the way a person \
+speaks when they respect the reader's time and have nothing to prove.
 
-- It is about THIS company. If your sentence would read just as well with a \
-different company's name in it, it is not an insight; delete it.
-- It names a real trade-off. Strategy is what a company gives up. A claim with \
-no tension in it is a description.
-- It reaches the financial statements. Say which lever moves -- margin, \
-capital, pricing, retention, distribution, switching cost -- and how.
-- It is comparative. A position only exists relative to competitors, \
-substitutes, or the norm in that industry.
-- It argues against itself. State the strongest case that you are wrong.
-- It changes a decision. If nothing a leader does depends on it, it is trivia.
+Start with the money. Before inferring any strategy, work out how the business \
+actually makes money, where profit really comes from, and where it leaks. The \
+gap between what a company sells and what its customers are actually paying \
+for is where most real insight lives.
+
+Then find the one thing worth remembering. Test it: would a competent \
+executive at this company read your sentence and think "I hadn't looked at it \
+that way"? If they would nod and move on, it is a summary. Delete it and look \
+harder. In particular, reject anything that is a restatement of the company's \
+own homepage, an industry cliche, or a sentence that would survive swapping in \
+a different company's name.
+
+Then say what to DO. Every decision you name must be a real fork with two \
+sides a reasonable person could take, not a topic to explore. Say what it \
+costs to wait, because the cost of waiting is usually the whole argument. Say \
+what a competitor might do first.
+
+Show the chain. One move causes another. Follow it as far as the evidence \
+supports and then stop -- three honest links beat five invented ones.
 
 Hard rules:
 
@@ -78,11 +94,18 @@ agreeing is a company being consistent, not corroboration.
 6. Recency of retrieval is not recency of publication. A page fetched today \
 may describe something from years ago.
 
+7. Write like a strategist, not like software. Never use the words \
+"supporting evidence", "decision affected", "likely agenda", "current \
+discussion", "strategic hypothesis" or "affected functions" in anything a \
+reader sees. Say "this matters because", "the choice is", "watch for".
+
+8. Say each thing once. If an idea belongs in the insight, it does not also \
+belong in a decision and in a question. Repetition reads as padding.
+
 If the evidence is descriptive marketing rather than strategic signal, set \
 sufficient_for_strategic_analysis to false, explain why, and return no \
-insights. That is a correct answer and it is strongly preferred to a \
-confident-sounding invention. One well-evidenced insight beats three weak \
-ones."""
+decisions. That is a correct answer and it is strongly preferred to a \
+confident-sounding invention. Three real decisions beat five padded ones."""
 
 
 def _evidence_pack(observations, company_name, *, entity_hint=None) -> str:
@@ -215,9 +238,13 @@ def analyse(company_name, observations, *, client=None, cache=None,
             break
         except Exception as exc:                    # noqa: BLE001 - bounded
             last_error = exc
-            log.warning("analyst call failed (attempt %d/%d): %s",
-                        attempt, MAX_ATTEMPTS, type(exc).__name__)
-            if attempt == MAX_ATTEMPTS:
+            # Truncation is deterministic: the same prompt will truncate the
+            # same way, so retrying only spends a second call to fail again.
+            truncated = "max_tokens" in str(exc)
+            log.warning("analyst call failed (attempt %d/%d): %s%s",
+                        attempt, MAX_ATTEMPTS, type(exc).__name__,
+                        " (truncated - not retrying)" if truncated else "")
+            if truncated or attempt == MAX_ATTEMPTS:
                 return (None, ResultState.FAILED, [])
 
     if raw is None:                                  # pragma: no cover
@@ -241,7 +268,7 @@ def _verify_and_wrap(raw, observations, company_name, model, usage):
         analysis = _to_analysis(raw, model, usage)
         return (analysis, ResultState.STRATEGICALLY_INSUFFICIENT, findings)
 
-    if not (raw.get("insights") or []):
+    if not (raw.get("decisions") or []):
         analysis = _to_analysis(raw, model, usage)
         return (analysis, ResultState.STRATEGICALLY_INSUFFICIENT, findings)
 
@@ -251,8 +278,12 @@ def _verify_and_wrap(raw, observations, company_name, model, usage):
 def _to_analysis(raw, model, usage) -> StrategicAnalysis:
     return StrategicAnalysis(
         entity_scope=raw.get("entity_scope") or {},
-        business_model=raw.get("business_model", ""),
-        insights=list(raw.get("insights") or []),
+        business_model=raw.get("business_model") or {},
+        the_insight=raw.get("the_insight") or {},
+        decisions=list(raw.get("decisions") or []),
+        competitive=raw.get("competitive") or {},
+        questions=list(raw.get("questions") or []),
+        strongest_case_we_are_wrong=raw.get("strongest_case_we_are_wrong", ""),
         evidence_gaps=list(raw.get("evidence_gaps") or []),
         sufficient=bool(raw.get("sufficient_for_strategic_analysis")),
         insufficiency_reason=raw.get("insufficiency_reason", ""),

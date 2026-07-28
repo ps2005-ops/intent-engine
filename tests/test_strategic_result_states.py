@@ -83,62 +83,89 @@ def test_without_a_backend_the_run_is_evidence_limited_not_confident(tmp_path):
         report["result_state_detail"].lower()
 
 
-def test_a_verified_analysis_supersedes_the_scaffolds(tmp_path):
-    good = {
+
+def _decision_payload(citation):
+    return {
         "entity_scope": {"analysed_entity": "Examplecorp",
                          "is_subsidiary": False},
-        "business_model": "Sells commerce infrastructure to merchants.",
+        "business_model": {
+            "one_line": "Sells commerce infrastructure to merchants.",
+            "where_profit_comes_from": "Take rate on storefront checkout.",
+            "where_value_leaks": "Partner apps capture merchant workflows "
+                                 "the platform does not monetise.",
+            "what_customers_actually_buy": "Time to a working storefront.",
+            "what_management_appears_to_optimise": "Merchant count and take "
+                                                   "rate (inferred).",
+        },
         "sufficient_for_strategic_analysis": True,
         "insufficiency_reason": "",
-        "evidence_gaps": ["No pricing disclosed."],
-        "insights": [{
-            "headline": "Examplecorp is taking the checkout and storefront "
-                        "surfaces its own app developers built businesses on, "
-                        "which raises take rate but puts partner supply at "
-                        "risk.",
-            "what_is_changing": "First-party commerce components now cover "
-                                "what partner apps did.",
+        "the_insight": {
+            "sentence": "Examplecorp is taking the checkout and storefront "
+                        "surfaces its own app developers built businesses "
+                        "on, which raises take rate but puts partner supply "
+                        "at risk.",
+            "paragraph": "The commerce components sold to enterprise "
+                         "merchants cover what partner apps used to.",
             "why_now": "The enterprise tier and app store are both live.",
             "tension": {"side_a": "Owning checkout captures more of each "
                                   "merchant transaction.",
                         "side_b": "Partner app developers supply the breadth "
                                   "that wins merchants in the first place.",
                         "why_it_exists": "The most valuable surfaces are the "
-                                         "ones partners also want.",
-                        "decision_owner": "Platform leadership",
-                        "what_would_resolve_it": "Disclosure of partner-app "
-                                                 "revenue share."},
+                                         "ones partners also want."},
             "economics": {"mechanism": "Owning checkout raises take rate per "
                                        "merchant transaction; losing partner "
                                        "apps lowers merchant retention.",
                           "levers": ["revenue_mix", "switching_costs",
                                      "retention"]},
-            "competitive": {"compared_to": ["Adobe Commerce"],
-                            "how_this_company_differs": "It sells storefront "
-                                                        "and point of sale "
-                                                        "together rather than "
-                                                        "licensing software.",
-                            "likely_responder": "Adobe Commerce",
-                            "second_order_effect": "Partner app developers "
-                                                   "hedge onto competing "
-                                                   "commerce platforms."},
-            "counterargument": {"strongest_case_against": "Partner apps may "
-                                                          "grow faster than "
-                                                          "first-party "
-                                                          "components.",
-                                "what_would_disprove_this": "Rising "
-                                                            "partner-sourced "
-                                                            "merchant "
-                                                            "revenue."},
-            "decision_affected": "Whether to build or partner for the next "
-                                 "merchant-facing surface.",
-            "monitor": ["Partner app store listings"],
+            "consequence_chain": [
+                "First-party components replace partner app functions.",
+                "Partner developers see less upside and build elsewhere.",
+                "Merchant breadth narrows and acquisition slows.",
+            ],
+            "citations": [citation],
+        },
+        "decisions": [{
+            "decision": "Build the next merchant-facing surface first-party, "
+                        "or leave it to the partner ecosystem.",
+            "why_it_matters": "It sets whether breadth or take rate is the "
+                              "growth engine.",
+            "urgency": "this_quarter",
+            "cost_of_waiting": "Partner developers commit roadmaps a quarter "
+                               "ahead; waiting forfeits this cycle.",
+            "what_a_competitor_may_do_first": "A rival platform courts the "
+                                              "same app developers with "
+                                              "better revenue share.",
+            "upside": "Higher take rate per merchant.",
+            "downside": "Thinner app catalogue and slower merchant growth.",
+            "what_would_invalidate_it": "Partner-sourced merchant revenue "
+                                        "growing faster than first-party.",
+            "what_to_watch": "New listings in the partner app store.",
             "confidence": "low",
-            "confidence_rationale": "Low -- three company-owned pages only, "
-                                    "with no partner or merchant evidence.",
-            "citations": [],
+            "confidence_rationale": "Low -- company-owned pages only, with "
+                                    "no partner or merchant evidence.",
+            "missing_evidence": "Partner revenue share.",
+            "citations": [citation],
         }],
+        "competitive": {
+            "who_is_forcing_the_change": "Merchants asking for one bill.",
+            "who_benefits": "Large merchants wanting fewer vendors.",
+            "who_loses": "App developers whose function is absorbed.",
+            "who_must_respond": "Partner app developers.",
+            "who_can_ignore_this": "Merchants on bespoke stacks.",
+            "if_nobody_responds": "The app catalogue thins quietly.",
+        },
+        "questions": [
+            "If partner developers stopped building tomorrow, how long "
+            "before merchants noticed?",
+        ],
+        "strongest_case_we_are_wrong": "Partner apps may grow faster than "
+                                       "first-party components.",
+        "evidence_gaps": ["No pricing disclosed."],
     }
+
+
+def test_a_verified_analysis_supersedes_the_scaffolds(tmp_path):
     ci = CompanyIngestionService(tmp_path / "ci.jsonl", transport=_transport,
                                  resolver=False)
     fi = FounderIntelligenceService(tmp_path / "fi.jsonl")
@@ -148,58 +175,31 @@ def test_a_verified_analysis_supersedes_the_scaffolds(tmp_path):
     rid = run["run_id"]
     cands = ci.discover(rid)
     ci.approve(rid, user_id="u1",
-               approved_ids=[c["candidate_id"] for c in cands][:14], rejected_ids=[])
+               approved_ids=[c["candidate_id"] for c in cands][:14],
+               rejected_ids=[])
     ci.fetch_approved(rid)
-    # cite whatever the pipeline actually derived, so the citation resolves
     from intent_engine.strategic_intelligence.observations import (
         derive_analyst_evidence,
     )
-    docs = list(ci.store.retrieved(rid))
-    ev = derive_analyst_evidence(docs)
+    ev = derive_analyst_evidence(list(ci.store.retrieved(rid)))
     assert ev, "fixture must yield analyst evidence"
-    good["insights"][0]["citations"] = [ev[0].observation_id]
 
-    ci._analyst_client = RecordedClient(good)
-    result = ci.compose(rid, fi_service=fi)
-    report = result["strategic_report"]
+    ci._analyst_client = RecordedClient(_decision_payload(ev[0].observation_id))
+    report = ci.compose(rid, fi_service=fi)["strategic_report"]
     assert report["result_state"] == ResultState.COMPLETE
     assert report["reasoning_provenance"] == "grounded_analyst"
-    assert report["strategic_analysis"]["insights"][0]["headline"].startswith(
-        "Examplecorp is taking the checkout")
+    analysis = report["strategic_analysis"]
+    assert analysis["the_insight"]["sentence"].startswith("Examplecorp is "
+                                                          "taking the checkout")
+    assert analysis["decisions"][0]["cost_of_waiting"]
 
 
 def test_rejected_analysis_does_not_fall_back_to_scaffolds(tmp_path):
     """A fluent but ungrounded analysis must leave the run visibly limited."""
-    bad = {
-        "entity_scope": {"analysed_entity": "Examplecorp",
-                         "is_subsidiary": False},
-        "business_model": "Sells software.",
-        "sufficient_for_strategic_analysis": True,
-        "insufficiency_reason": "",
-        "evidence_gaps": [],
-        "insights": [{
-            "headline": "The company is absorbing adjacent tools until the "
-                        "work lives inside it.",
-            "what_is_changing": "Breadth is growing.",
-            "why_now": "Now.",
-            "tension": {"side_a": "depth", "side_b": "breadth",
-                        "why_it_exists": "focus",
-                        "what_would_resolve_it": "disclosure"},
-            "economics": {"mechanism": "switching cost rises",
-                          "levers": ["switching_costs"]},
-            "competitive": {"compared_to": ["Someone"],
-                            "how_this_company_differs": "broader",
-                            "second_order_effect": "rivals respond"},
-            "counterargument": {"strongest_case_against": "integrations",
-                                "what_would_disprove_this": "churn"},
-            "decision_affected": "depth or adjacency",
-            "confidence": "moderate",
-            "confidence_rationale": "Moderate on company pages alone.",
-            "citations": ["obs-does-not-exist"],
-        }],
-    }
-    result = _run(tmp_path, client=RecordedClient(bad))
-    report = result["strategic_report"]
+    bad = _decision_payload("obs-does-not-exist")
+    bad["the_insight"]["sentence"] = ("The company is absorbing adjacent "
+                                      "tools until the work lives inside it.")
+    report = _run(tmp_path, client=RecordedClient(bad))["strategic_report"]
     assert report["result_state"] == ResultState.STRATEGICALLY_INSUFFICIENT
     assert report["strategic_analysis"] is None
     assert report["reasoning_provenance"] == "pattern_library"

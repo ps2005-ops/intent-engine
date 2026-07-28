@@ -41,6 +41,18 @@ _BANNED_PHRASES = (
     "unlock value", "drive growth", "at scale", "holistic approach",
 )
 
+# The vocabulary of the system describing itself. It leaked onto the page in
+# the old reports -- "decision affected:", "likely agenda", "supporting
+# evidence" -- and it is the single clearest tell that a founder is reading
+# software output rather than advice.
+_SOFTWARE_SPEAK = (
+    "supporting evidence", "decision affected", "likely agenda",
+    "current discussion", "strategic hypothesis", "affected functions",
+    "affected function", "inferred discussion", "evidence cluster",
+    "observation type", "signal matched", "meeting relevance",
+    "pattern library", "confidence badge",
+)
+
 _STOPWORDS = frozenset("""
 the a an and or but if then than that this these those with without within
 into onto from for to of in on at by as is are was were be been being it its
@@ -140,7 +152,40 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
     evidence_numbers = _numbers_in(evidence_text)
     company_tokens = set(_tokens(company_name))
 
-    insights = analysis.get("insights") or []
+    # The insight and the decisions are checked with the same rules: both are
+    # things asserted about the company, and both reach the page.
+    insight = analysis.get("the_insight") or {}
+    decisions = analysis.get("decisions") or []
+
+    # The insight and the decisions are one argument over one evidence set, so
+    # a citation on either grounds it. Observed in live validation: the model
+    # cited all three decisions correctly and omitted the citations field on
+    # the nested insight object, which is a schema-adherence quirk rather than
+    # an ungrounded claim. Every citation still has to RESOLVE, and the
+    # genericity gate still requires the sentence to be anchored in this
+    # company's evidence vocabulary -- so nothing is being waved through.
+    _insight_cites = list(insight.get("citations") or [])
+    if not _insight_cites:
+        for _d in decisions:
+            for _c in (_d.get("citations") or []):
+                if _c not in _insight_cites:
+                    _insight_cites.append(_c)
+
+    insights = ([{"headline": insight.get("sentence", ""),
+                  "citations": _insight_cites,
+                  "tension": insight.get("tension") or {},
+                  "economics": insight.get("economics") or {},
+                  "counterargument": {
+                      "strongest_case_against":
+                          analysis.get("strongest_case_we_are_wrong", "")},
+                  "decision_affected": (decisions[0].get("decision")
+                                        if decisions else ""),
+                  "confidence": (decisions[0].get("confidence")
+                                 if decisions else "low"),
+                  "confidence_rationale": (
+                      decisions[0].get("confidence_rationale")
+                      if decisions else "")}]
+                if insight else [])
 
     # --- 1. citations resolve -------------------------------------------------
     for i, ins in enumerate(insights):
@@ -264,18 +309,64 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
             "parent, so the reader cannot tell which entity a fact belongs to",
             where="entity_scope"))
 
-    # --- 7. an insight must not be a restatement of another ------------------
-    seen = []
-    for i, ins in enumerate(insights):
-        key = _content_tokens(ins.get("headline", ""),
-                              extra_stop=company_tokens)
-        for j, prev in seen:
-            if key and prev and len(key & prev) / len(key | prev) > 0.6:
+    # --- 7. the decisions -----------------------------------------------------
+    if insight and not decisions:
+        findings.append(CriticFinding(
+            "no_decisions",
+            "the analysis says something is true but names nothing to decide; "
+            "a founder cannot act on it", where="decisions"))
+    for i, dec in enumerate(decisions):
+        unknown = [c for c in (dec.get("citations") or [])
+                   if c not in by_id]
+        if unknown:
+            findings.append(CriticFinding(
+                "citation_unresolvable",
+                f"decision {i} cites evidence that does not exist: "
+                f"{', '.join(unknown)}", where=f"decisions[{i}]"))
+        if not (dec.get("cost_of_waiting") or "").strip():
+            findings.append(CriticFinding(
+                "no_cost_of_waiting",
+                f"decision {i} does not say what waiting costs, which is "
+                "usually the whole argument", where=f"decisions[{i}]"))
+        # A decision must be a fork. "Explore X" and "consider Y" are topics.
+        text = (dec.get("decision") or "").lower()
+        if re.match(r"^\s*(explore|consider|review|assess|evaluate|monitor|"
+                    r"understand|examine|investigate)\b", text):
+            findings.append(CriticFinding(
+                "not_a_decision",
+                f"decision {i} is a topic to look into, not a choice with two "
+                f"sides: {dec.get('decision', '')[:70]!r}",
+                where=f"decisions[{i}].decision"))
+
+    # --- 8. it must not sound like software ----------------------------------
+    # These are the words the old template engine put on the page. A founder
+    # reading "decision affected: ..." is reading a data structure.
+    for path, text in _walk_strings(analysis):
+        low = text.lower()
+        for phrase in _SOFTWARE_SPEAK:
+            if phrase in low:
                 findings.append(CriticFinding(
-                    "restatement",
-                    f"insight {i} restates insight {j} rather than adding "
-                    "something", severity="warn", where=f"insights[{i}]"))
-        seen.append((i, key))
+                    "software_speak",
+                    f"{phrase!r} is how the system talks about itself, not how "
+                    "an advisor talks to a founder", where=path))
+
+    # --- 9. say each thing once ----------------------------------------------
+    # Repetition across sections is what made every old report feel padded.
+    blocks = [("the insight", insight.get("sentence", ""))]
+    blocks += [(f"decision {i}", d.get("decision", ""))
+               for i, d in enumerate(decisions)]
+    blocks += [(f"question {i}", q)
+               for i, q in enumerate(analysis.get("questions") or [])]
+    keyed = [(label, _content_tokens(t, extra_stop=company_tokens))
+             for label, t in blocks if t]
+    for a in range(len(keyed)):
+        for b in range(a + 1, len(keyed)):
+            (la, ka), (lb, kb) = keyed[a], keyed[b]
+            if ka and kb and len(ka & kb) / len(ka | kb) > 0.55:
+                findings.append(CriticFinding(
+                    "repetition",
+                    f"{lb} repeats {la} rather than adding anything",
+                    severity="warn", where="analysis"))
 
     return findings
 

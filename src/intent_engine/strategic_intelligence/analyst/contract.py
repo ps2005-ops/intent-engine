@@ -1,10 +1,14 @@
-"""The analyst's output contract, and the result states a run can end in.
+"""What the analyst must produce, and the result states a run can end in.
 
-The schema is deliberately demanding. Every field on an insight exists because
-its absence was a specific complaint about the old reports: no economics, no
-comparison, no second-order thinking, no disagreement, unexplained confidence
-labels. A model asked for prose returns prose; a model asked for THIS returns
-an argument that can be checked field by field.
+The shape changed once, deliberately. The first version asked for INSIGHTS,
+and got insights: true, well-evidenced, and shaped like analysis. A founder
+does not need analysis. They need to know what to do on Monday, what it costs
+to wait, and what a competitor might do first.
+
+So the top-level unit is a DECISION, and every field on it exists because a
+founder would ask for it out loud. A model that cannot say what would
+invalidate a decision, or what is lost by waiting, should fail to produce the
+decision rather than produce it without them.
 """
 from __future__ import annotations
 
@@ -12,7 +16,9 @@ from dataclasses import asdict, dataclass, field
 
 # Bump when the prompt or schema changes in a way that invalidates cached
 # analyses. The cache key includes this, so a bump re-runs every company.
-PROMPT_VERSION = "sa2-2026-07-28"
+PROMPT_VERSION = "fi-decisions-2026-07-28"
+
+URGENCY = ("decide_now", "this_quarter", "this_year", "watch_only")
 
 ECONOMIC_LEVERS = (
     "revenue", "revenue_mix", "gross_margin", "operating_leverage",
@@ -80,8 +86,12 @@ class AnalysisRejected(Exception):
 @dataclass
 class StrategicAnalysis:
     entity_scope: dict = field(default_factory=dict)
-    business_model: str = ""
-    insights: list = field(default_factory=list)
+    business_model: dict = field(default_factory=dict)
+    the_insight: dict = field(default_factory=dict)
+    decisions: list = field(default_factory=list)
+    competitive: dict = field(default_factory=dict)
+    questions: list = field(default_factory=list)
+    strongest_case_we_are_wrong: str = ""
     evidence_gaps: list = field(default_factory=list)
     sufficient: bool = False
     insufficiency_reason: str = ""
@@ -94,38 +104,66 @@ class StrategicAnalysis:
         return asdict(self)
 
 
-# The forced tool-call schema. `required` is doing real work: a model that
-# cannot supply a counterargument or an economic mechanism for a claim should
-# fail to produce the claim, rather than produce it without them.
-_INSIGHT_SCHEMA = {
+_BUSINESS_MODEL_SCHEMA = {
     "type": "object",
+    "description": "Reconstruct how the money actually works before inferring "
+                   "any strategy. Where these differ from each other is "
+                   "usually where the interesting question is.",
     "properties": {
-        "headline": {
+        "one_line": {"type": "string",
+                     "description": "What it sells, to whom, and how it is "
+                                    "actually paid."},
+        "where_profit_comes_from": {"type": "string"},
+        "where_value_leaks": {
             "type": "string",
-            "description": "One sentence, stated about THIS company using its "
-                           "own products, segments or markets by name. It must "
-                           "be false or meaningless if applied to a different "
-                           "company. Never use the words platform, ecosystem, "
-                           "digital transformation, synergy or leverage as the "
-                           "substance of the claim.",
+            "description": "Where the business creates value it does not "
+                           "capture, or spends money that does not become "
+                           "advantage.",
         },
-        "what_is_changing": {"type": "string"},
-        "why_now": {
+        "what_customers_actually_buy": {
             "type": "string",
-            "description": "The specific evidence making this timely, with "
-                           "its date where known.",
+            "description": "The job being paid for, which is often not the "
+                           "product the company describes.",
         },
+        "what_management_appears_to_optimise": {
+            "type": "string",
+            "description": "Inferred from where it spends and what it "
+                           "repeats. Label as inference.",
+        },
+    },
+    "required": ["one_line", "where_profit_comes_from", "where_value_leaks",
+                 "what_customers_actually_buy",
+                 "what_management_appears_to_optimise"],
+}
+
+_THE_INSIGHT_SCHEMA = {
+    "type": "object",
+    "description": "The one thing worth remembering. If a reader keeps only "
+                   "one sentence from the whole analysis, this is it.",
+    "properties": {
+        "sentence": {
+            "type": "string",
+            "description": "One sentence. It must be specific enough that it "
+                           "would be false or meaningless about any other "
+                           "company, and non-obvious enough that a competent "
+                           "executive would not already have said it.",
+        },
+        "paragraph": {
+            "type": "string",
+            "description": "Why it is true and why it changes something. No "
+                           "hedging, no restating the sentence.",
+        },
+        "why_now": {"type": "string"},
         "tension": {
             "type": "object",
+            "description": "The trade-off leadership is actually managing. "
+                           "Strategy is what a company gives up.",
             "properties": {
                 "side_a": {"type": "string"},
                 "side_b": {"type": "string"},
                 "why_it_exists": {"type": "string"},
-                "decision_owner": {"type": "string"},
-                "what_would_resolve_it": {"type": "string"},
             },
-            "required": ["side_a", "side_b", "why_it_exists",
-                         "what_would_resolve_it"],
+            "required": ["side_a", "side_b", "why_it_exists"],
         },
         "economics": {
             "type": "object",
@@ -142,53 +180,78 @@ _INSIGHT_SCHEMA = {
             },
             "required": ["mechanism", "levers"],
         },
-        "competitive": {
-            "type": "object",
-            "properties": {
-                "compared_to": {"type": "array", "items": {"type": "string"},
-                                "description": "Named, relevant competitors "
-                                               "or substitutes."},
-                "how_this_company_differs": {"type": "string"},
-                "likely_responder": {"type": "string"},
-                "second_order_effect": {"type": "string"},
-            },
-            "required": ["compared_to", "how_this_company_differs",
-                         "second_order_effect"],
+        "consequence_chain": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Three to five links, each following from the last: "
+                           "first-order effect, then what that causes, then "
+                           "what THAT causes. Stop where the evidence stops "
+                           "supporting the chain rather than inventing a "
+                           "fourth link.",
         },
-        "counterargument": {
-            "type": "object",
-            "properties": {
-                "strongest_case_against": {"type": "string"},
-                "what_would_disprove_this": {"type": "string"},
-            },
-            "required": ["strongest_case_against", "what_would_disprove_this"],
-        },
-        "decision_affected": {
+        "citations": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["sentence", "paragraph", "why_now", "tension", "economics",
+                 "consequence_chain", "citations"],
+}
+
+_DECISION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "decision": {
             "type": "string",
-            "description": "A decision leadership actually faces, phrased so "
-                           "the reader can tell what changes depending on it.",
+            "description": "The choice itself, phrased the way a CEO would say "
+                           "it out loud. Not a topic and not an area to "
+                           "explore -- a fork with two real sides.",
         },
-        "monitor": {"type": "array", "items": {"type": "string"}},
+        "why_it_matters": {"type": "string"},
+        "urgency": {"type": "string", "enum": list(URGENCY)},
+        "cost_of_waiting": {
+            "type": "string",
+            "description": "What is lost or foreclosed by deciding six months "
+                           "from now instead of now. If waiting is cheap, say "
+                           "so plainly -- that is useful too.",
+        },
+        "what_a_competitor_may_do_first": {"type": "string"},
+        "upside": {"type": "string"},
+        "downside": {"type": "string"},
+        "what_would_invalidate_it": {"type": "string"},
+        "what_to_watch": {
+            "type": "string",
+            "description": "The specific observable that would change this "
+                           "decision -- a filing line, a pricing page, a "
+                           "competitor launch.",
+        },
         "confidence": {"type": "string",
                        "enum": ["low", "moderate", "high"]},
         "confidence_rationale": {
             "type": "string",
-            "description": "Plain language, naming the evidence. e.g. "
-                           "'Low -- three company-owned pages, no filing or "
-                           "independent reporting.' Never a bare label.",
+            "description": "Plain language naming the evidence. Never a bare "
+                           "label.",
         },
-        "citations": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "observation_id values from the evidence pack that "
-                           "support this insight. Every material claim must be "
-                           "traceable to one.",
-        },
+        "missing_evidence": {"type": "string"},
+        "citations": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["headline", "what_is_changing", "why_now", "tension",
-                 "economics", "competitive", "counterargument",
-                 "decision_affected", "confidence", "confidence_rationale",
-                 "citations"],
+    "required": ["decision", "why_it_matters", "urgency", "cost_of_waiting",
+                 "what_a_competitor_may_do_first", "upside", "downside",
+                 "what_would_invalidate_it", "what_to_watch", "confidence",
+                 "confidence_rationale", "citations"],
+}
+
+_COMPETITIVE_SCHEMA = {
+    "type": "object",
+    "description": "Not a list of competitors. Who is applying the pressure, "
+                   "and who has to do something about it.",
+    "properties": {
+        "who_is_forcing_the_change": {"type": "string"},
+        "who_benefits": {"type": "string"},
+        "who_loses": {"type": "string"},
+        "who_must_respond": {"type": "string"},
+        "who_can_ignore_this": {"type": "string"},
+        "if_nobody_responds": {"type": "string"},
+    },
+    "required": ["who_is_forcing_the_change", "who_benefits", "who_loses",
+                 "who_must_respond", "if_nobody_responds"],
 }
 
 ANALYSIS_SCHEMA = {
@@ -203,34 +266,45 @@ ANALYSIS_SCHEMA = {
                 "scope_note": {
                     "type": "string",
                     "description": "If the evidence mixes parent-level and "
-                                   "subsidiary-level facts, say so here. Never "
-                                   "silently attribute a group-level fact to a "
-                                   "subsidiary.",
+                                   "subsidiary-level facts, say so. Never "
+                                   "silently attribute a group-level fact to "
+                                   "a subsidiary.",
                 },
             },
             "required": ["analysed_entity", "is_subsidiary"],
         },
-        "business_model": {
-            "type": "string",
-            "description": "One sentence: what it sells, to whom, and how the "
-                           "money is actually made.",
-        },
+        "business_model": _BUSINESS_MODEL_SCHEMA,
         "sufficient_for_strategic_analysis": {
             "type": "boolean",
-            "description": "False when the evidence is descriptive rather than "
-                           "strategic. Answering false is a correct and "
+            "description": "False when the evidence is descriptive rather "
+                           "than strategic. Answering false is a correct and "
                            "expected outcome; inventing a thesis is not.",
         },
         "insufficiency_reason": {"type": "string"},
-        "insights": {
-            "type": "array", "items": _INSIGHT_SCHEMA,
-            "description": "At most three. One well-evidenced insight is "
-                           "better than three weak ones. Empty is correct when "
-                           "the evidence supports nothing non-obvious.",
+        "the_insight": _THE_INSIGHT_SCHEMA,
+        "decisions": {
+            "type": "array", "items": _DECISION_SCHEMA,
+            "description": "Three to five, ordered by value to the reader. "
+                           "Fewer real decisions beats more padded ones.",
+        },
+        "competitive": _COMPETITIVE_SCHEMA,
+        "questions": {
+            "type": "array", "items": {"type": "string"},
+            "description": "The questions that should keep this leadership "
+                           "team awake -- about their own fragile "
+                           "assumptions, not generic strategy prompts. "
+                           "'What assumption breaks this?' is the shape; "
+                           "'What are our goals?' is not.",
+        },
+        "strongest_case_we_are_wrong": {
+            "type": "string",
+            "description": "The best argument against this entire reading, "
+                           "made properly rather than as a disclaimer.",
         },
         "evidence_gaps": {"type": "array", "items": {"type": "string"}},
     },
     "required": ["entity_scope", "business_model",
-                 "sufficient_for_strategic_analysis", "insights",
-                 "evidence_gaps"],
+                 "sufficient_for_strategic_analysis", "the_insight",
+                 "decisions", "competitive", "questions",
+                 "strongest_case_we_are_wrong", "evidence_gaps"],
 }
