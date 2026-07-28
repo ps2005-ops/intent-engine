@@ -54,6 +54,22 @@ class Client:
                 self.cookie = "" if "Max-Age=0" in v else v.split(";")[0]
         return out["status"], dict(out["headers"]), payload
 
+    def get(self, path, hops=4):
+        """GET, following redirects — what a reader's browser does.
+
+        Entry routes legitimately redirect (a run with a strategic report
+        sends the reader to the brief). A test that asserts the ENTRY route
+        renders is asserting a routing detail; a test that follows the
+        redirect is asserting the reader lands somewhere real.
+        """
+        status, headers, body = "", {}, ""
+        for _ in range(hops):
+            status, headers, body = self.request("GET", path)
+            if not status.startswith("30") or "Location" not in headers:
+                break
+            path = headers["Location"]
+        return status, body
+
     def sid(self):
         return self.cookie.split("=", 1)[1] if self.cookie else None
 
@@ -438,8 +454,11 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
     restored = app2.auth.session(c.sid())
     assert restored["anonymous"] is True and restored["user_id"] == anon_uid
 
-    # the owner can open the real result, recomposed from stored documents
-    status, _, body = c.request("GET", f"/runs/{run_id}")
+    # the owner can open the real result, recomposed from stored documents.
+    # The entry route now sends a run WITH a strategic report to the brief, so
+    # the evidence library lives one layer in — check the full analysis, which
+    # is where a reader looking for the source list actually goes.
+    status, body = c.get(f"/runs/{run_id}/full")
     assert status == "200 OK" and "Evidence Library" in body
 
     # a different anonymous session (fresh cookie) cannot reach the run

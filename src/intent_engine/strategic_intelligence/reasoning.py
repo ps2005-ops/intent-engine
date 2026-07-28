@@ -209,6 +209,68 @@ def _build_blind_spots(observations):
     return blind
 
 
+# --- portfolio selection ------------------------------------------------------
+# Showing five hypotheses because five pattern rules matched is not analysis,
+# it is a search result. The observed complaint was precise: the same evidence
+# reappeared under several headings, the same mechanism was restated, and the
+# strongest insight ended up buried among near-duplicates.
+#
+# A reader can hold one central view and a couple of things that qualify it.
+# So the portfolio is capped, and a hypothesis earns its place only by adding
+# something the ones above it did not already say.
+MAX_DISPLAYED_HYPOTHESES = 3
+# Sharing evidence is normal and often correct — two real forces can rest on
+# the same facts. What is NOT useful is a hypothesis that rests on almost
+# exactly the same evidence AND leads to the same decision: that is one
+# hypothesis printed twice, and it is what buried the strong insight.
+NEAR_IDENTICAL_EVIDENCE = 0.85
+
+
+def _decision_key(hypothesis) -> str:
+    first = (hypothesis.decision_implications or [""])[0]
+    return " ".join(str(first).lower().split())[:80]
+
+
+def _is_restatement(candidate, chosen) -> bool:
+    """True when a candidate adds neither new evidence nor a new decision."""
+    mine = set(candidate.supporting_observation_ids)
+    if not mine:
+        return True
+    for other in chosen:
+        theirs = set(other.supporting_observation_ids)
+        if not theirs:
+            continue
+        overlap = len(mine & theirs) / len(mine)
+        if overlap >= NEAR_IDENTICAL_EVIDENCE and \
+                _decision_key(candidate) == _decision_key(other):
+            return True
+    return False
+
+
+def select_portfolio(hypotheses, *, limit=MAX_DISPLAYED_HYPOTHESES) -> list:
+    """One primary thesis, then hypotheses that add something new.
+
+    Ordered by confidence and evidence weight, then filtered so a reader is
+    never handed the same claim twice under different pattern names.
+    Deterministic: same inputs, same portfolio.
+    """
+    ranked = sorted(
+        hypotheses,
+        key=lambda h: (_CONF_RANK[h.confidence],
+                       len(h.supporting_observation_ids),
+                       len(h.counter_observation_ids),
+                       h.pattern_id),
+        reverse=True)
+    chosen = []
+    for candidate in ranked:
+        if len(chosen) >= limit:
+            break
+        if chosen and _is_restatement(candidate, chosen):
+            continue
+        chosen.append(candidate)
+    return chosen
+
+
 def _build_questions(hypotheses, observations):
     obs_by_id = {o.observation_id: o for o in observations}
     questions = []
@@ -560,10 +622,7 @@ def build_strategic_report(*, company_name, observations,
             kept.append(h)
     hypotheses = kept
 
-    hypotheses.sort(
-        key=lambda h: (_CONF_RANK[h.confidence],
-                       len(h.supporting_observation_ids)), reverse=True)
-    hypotheses = hypotheses[:5]
+    hypotheses = select_portfolio(hypotheses)
 
     fired_pattern_ids = {h.pattern_id for h in hypotheses}
     used_patterns = [p for p in patterns if p.pattern_id in fired_pattern_ids]
