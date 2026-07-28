@@ -311,6 +311,28 @@ _PALANTIR = EntityProfile(
         OfficialSource("https://www.palantir.com/platforms/aip/",
                        "segment", "Palantir — AIP platform",
                        AUTHORITY_OFFICIAL_PRIMARY),
+        # Palantir's business is conventionally described as two segments,
+        # government and commercial, and a reader who is not told which half
+        # they are looking at has not understood the company. Neither split is
+        # derivable from the platform pages: Foundry, Gotham and AIP describe
+        # what the software does, not who buys it. These are the pages where
+        # Palantir states the segmentation itself.
+        OfficialSource("https://www.palantir.com/offerings/"
+                       "government-web-services/",
+                       "segment", "Palantir — government and public sector",
+                       AUTHORITY_OFFICIAL_PRIMARY,
+                       note="the government half of the business, in the "
+                            "company's own words"),
+        OfficialSource("https://www.palantir.com/offerings/",
+                       "segment", "Palantir — commercial industry offerings",
+                       AUTHORITY_OFFICIAL_PRIMARY,
+                       note="the commercial half: the industries Palantir "
+                            "sells into outside government"),
+        OfficialSource("https://www.palantir.com/impact/",
+                       "customers", "Palantir — named customer outcomes",
+                       AUTHORITY_OFFICIAL_SECONDARY,
+                       note="named deployments and outcomes; the company's "
+                            "own customer proof"),
         OfficialSource("https://investors.palantir.com/",
                        "investor", "Palantir — investor relations",
                        AUTHORITY_OFFICIAL_PRIMARY),
@@ -510,6 +532,7 @@ _KIND_TO_SOURCE_TYPE = {
     "strategy": "blog",
     "newsroom": "blog",
     "segment": "product",
+    "customers": "customers",
     "filing": "external_approved",
 }
 
@@ -522,6 +545,7 @@ _KIND_TO_SOURCE_CLASS = {
     "strategy": "executive_statement",
     "newsroom": "executive_statement",
     "segment": "company_owned",
+    "customers": "company_owned",
     "filing": "investor_material",
 }
 
