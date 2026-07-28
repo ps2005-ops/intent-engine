@@ -121,6 +121,39 @@ def why_useful(source_type: str) -> str:
     }.get(source_type, "supporting public context")
 
 
+# Language/region prefixes and query locales that mark a page as a TRANSLATION
+# of one already reachable in English, rather than as new evidence.
+#
+# Deliberately conservative: only two-letter codes in a leading path segment
+# (optionally region-qualified, "de", "de-DE", "pt_BR"), and only when the
+# segment is not a real word the site might use as a section. "in" is excluded
+# because /in/ is far more often a product path than India.
+_LOCALE_CODES = frozenset("""
+af ar az be bg bn bs ca cs cy da de el es et eu fa fi fr ga gl he hi hr hu hy
+id is it ja ka kk km kn ko lt lv mk ml mn mr ms my nb ne nl nn no pa pl pt ro
+ru si sk sl sq sr sv sw ta te th tl tr uk ur uz vi zh
+""".split())
+#: never treat these as locales even though they look like codes
+_NOT_LOCALES = frozenset({"in", "no", "it", "is", "be", "as", "at", "so",
+                          "id", "my", "me", "us", "ai", "app", "api"})
+
+
+def is_localised_path(path: str) -> bool:
+    """True when the first path segment is a language/region code.
+
+    Matches /de/..., /de-DE/..., /pt_BR/..., /zh-hans/... and the bare /de.
+    Does not match /india/, /internal/, /design/ -- only exact codes.
+    """
+    segments = [seg for seg in (path or "").split("/") if seg]
+    if not segments:
+        return False
+    first = segments[0].lower()
+    root = first.replace("_", "-").split("-")[0]
+    if root in _NOT_LOCALES:
+        return False
+    return root in _LOCALE_CODES and len(root) == 2
+
+
 def discover_candidates(*, company_url: str, homepage_links: list) -> list:
     """Deterministic bounded candidate list from homepage links + known
     paths. Returns [{url, source_type, discovery_method, same_domain,
@@ -139,6 +172,18 @@ def discover_candidates(*, company_url: str, homepage_links: list) -> list:
             return
         if not same_domain(company_url, url):
             return                       # external URLs need explicit approval
+        if is_localised_path(urlparse(url).path):
+            # Localised duplicates of pages that also exist in English.
+            #
+            # Figma returned "Not enough public evidence" after reading eight
+            # real sources, because discovery had walked into its German blog
+            # ("Tag: Fallstudie", "Tag: Produktupdates") and the readable-
+            # language gate then voided the whole run. The English equivalents
+            # of those same pages existed and were never fetched.
+            #
+            # Dropping them costs nothing: a localised page is a translation
+            # of a page already reachable, not additional evidence.
+            return
         seen.add(url)
         path = urlparse(url).path
         source_type = classify_path(path)
