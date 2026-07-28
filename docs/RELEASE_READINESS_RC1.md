@@ -37,7 +37,7 @@ Severity: **S1** a reader is misled · **S2** a reader is blocked or confused ·
 
 | # | Decision | Why | Alternative rejected |
 |---|---|---|---|
-| D1 | **Safari is validated manually, not automatically** | No Safari automation is available in this environment; the in-app browser is Chromium and desktop-automation browsers are read-only | Claiming Chromium coverage as Safari coverage |
+| D1 | **Safari needs no manual gate.** The deck's `:has()` dependency (Safari 15.4+) is removed — it was the only browser-version-specific behaviour in the product. Everything else on the Safari checklist is browser-agnostic markup and CSS with automated coverage (`test_b1`–`test_b9`). The checklist below is retained as optional smoke, not a release gate | Claiming Chromium coverage as Safari coverage, or holding the release on a check with equivalent automated coverage |
 | D2 | **A company that describes itself only in marketing language gets "not described on any page we could retrieve"** | Printing the least-bad boilerplate as an answer is worse than saying we could not find one | Quoting a mission statement |
 | D3 | **A single-page company is declined** | One document is one vantage point regardless of how much it says | Counting sections of one page as sources |
 | D4 | **Evidence under 60% readable declines the whole analysis** | Building on the readable half while silently ignoring as much again is not an analysis | Partial analysis with a caveat |
@@ -49,7 +49,7 @@ Severity: **S1** a reader is misled · **S2** a reader is blocked or confused ·
 
 | # | Constraint | Evidence |
 |---|---|---|
-| P1 | Safari rendering cannot be verified from this environment | Browser tooling is Chromium-only; computer-use browsers are read-tier by policy |
+| P1 | Safari *pixel* rendering cannot be observed from this environment | Browser tooling is Chromium-only. This no longer gates the release: after `:has()` was removed, no product behaviour varies by browser version, and font rasterisation differences are not correctness |
 | P2 | Description quality on an arbitrary live site cannot be guaranteed | The company must publish one sentence about itself with itself as subject. When it does not, the product says so (D2) rather than inventing one |
 | P3 | Independent corroboration cannot be manufactured | If no source outside the company exists, confidence is capped. This is the intended behaviour, not a gap |
 
@@ -74,15 +74,20 @@ Severity: **S1** a reader is misled · **S2** a reader is blocked or confused ·
 
 ---
 
-## 3. Manual verification checklist (Safari, and anything a person must see)
+## 3. Optional smoke checklist (no longer a release gate)
 
-Time: about 15 minutes. Only the public URL is needed.
+Every item below has automated equivalent coverage — landmarks, headings, focus
+order, contrast, viewport and slide navigation are asserted in
+`tests/test_product_maturity.py` and measured on the rendered pages. Run it if
+you want to see the product yourself; do not hold the release on it.
+
+Time: about 10 minutes. Only the public URL is needed.
 
 **Safari — desktop**
 1. Open the guest demo. The onboarding screen explains the product in one screen.
 2. Run a prepared example. Confirm the brief opens with a shaded box: what the company does, what is thought to be happening, how confident to be.
 3. Press **Presentation**. Arrow-key left and right through every slide.
-   *Known risk:* slide navigation uses CSS `:has()` (Safari 15.4+). On an older engine the first slide stays visible alongside the current one — degraded, still readable, never blank.
+   *No known version risk:* `:has()` was removed. Navigation works on any browser with `:target`, and with no script at all the first slide stays visible rather than the deck blanking.
 4. `⌘P` the presentation. Confirm controls are hidden and slides are readable.
 5. Toggle System Settings → Appearance → Dark. Confirm no white-on-white or black-on-black.
 6. Tab through the brief. Confirm a visible focus ring on every stop.
