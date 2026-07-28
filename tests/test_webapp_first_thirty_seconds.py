@@ -117,3 +117,48 @@ def test_brief_stamp_carries_no_internal_version(tmp_path):
     assert "produced by the current version of the product" not in stamp
     assert "Analysis version" not in stamp
     assert "source(s)" in stamp          # what the reader actually needs
+
+
+# --- operator surfaces are not a guest surface -----------------------------
+
+def test_a_demo_guest_cannot_read_the_operations_dashboard(tmp_path):
+    """Seen on production: an anonymous guest who typed /dashboard was shown
+    missing-credential names, the full deployed commit, scheduler state and
+    status.json. The gate only asked whether a session existed, and a demo
+    session is a session."""
+    app = _make(tmp_path)
+    c = _start_demo(app)
+    for path in ("/dashboard", "/learning", "/assistant"):
+        status, _, body = c.request("GET", path)
+        assert status.startswith("404"), f"{path} reachable by a guest"
+        for leak in ("TIINGO_API_KEY", "FRED_API_KEY", "status.json",
+                     "scheduler"):
+            assert leak not in body
+
+
+def test_a_guest_can_find_their_own_analyses_again(tmp_path):
+    """Closing the tab used to lose the result: no index, no history, and the
+    only way back was a URL the reader no longer had."""
+    app = _make(tmp_path, transport=brightlake)
+    c = _start_demo(app)
+    csrf = c.csrf()
+    _, headers, _ = c.request(
+        "POST", "/analyze", f"consent=on&csrf={csrf}&website={DEMO_URL}")
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    status, _, page = c.request("GET", "/analyses")
+    assert status.startswith("200")
+    assert run_id in page, "the analysis this session just ran is not listed"
+    _, _, home = c.request("GET", "/")
+    assert 'href="/analyses"' in home, "no route back to your own analyses"
+
+
+def test_one_guest_cannot_see_another_guests_analyses(tmp_path):
+    app = _make(tmp_path, transport=brightlake)
+    owner = _start_demo(app)
+    csrf = owner.csrf()
+    _, headers, _ = owner.request(
+        "POST", "/analyze", f"consent=on&csrf={csrf}&website={DEMO_URL}")
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    other = _start_demo(app)
+    _, _, page = other.request("GET", "/analyses")
+    assert run_id not in page

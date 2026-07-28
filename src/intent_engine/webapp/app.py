@@ -445,13 +445,30 @@ class WebApp:
             return self._retry_evidence(session, parts[1])
         if route == ("POST", "runs", 3) and parts[2] == "fresh":
             return self._fresh_analysis(session, parts[1])
-        if parts and parts[0] in ("learning", "dashboard", "assistant") \
-                and session is None:
-            return self._redirect("/login")
+        # The operator surfaces are for operators. The gate only asked whether
+        # a session existed, and an anonymous demo session is a session -- so
+        # any guest who typed /dashboard was shown the operations console:
+        # missing-credential names (TIINGO_API_KEY, FRED_API_KEY), the full
+        # deployed commit, scheduler job state and status.json. None of that is
+        # a product surface, and a visitor evaluating the product should never
+        # be looking at its plumbing.
+        if parts and parts[0] in ("learning", "dashboard", "assistant"):
+            if session is None:
+                return self._redirect("/login")
+            if session.get("anonymous"):
+                # A demo session is a session, which is all the old gate
+                # asked, so any guest who typed /dashboard was shown the
+                # operations console. 404 rather than a redirect: a guest has
+                # no account to log into, and pointing them at a login page
+                # they cannot pass is the dead end this programme keeps
+                # removing.
+                return self._error_page(404, "no such page")
         if route == ("GET", "learning", 1):
             return self._learning_page(session)
         if route == ("GET", "learning", 2):
             return self._learning_explain_page(session, parts[1])
+        if route == ("GET", "analyses", 1) and session is not None:
+            return self._my_analyses(session)
         if route == ("GET", "dashboard", 1):
             return self._dashboard_page(session)
         if path in ("/feedback", "/feedback.jsonl") and method == "GET":
@@ -632,7 +649,14 @@ class WebApp:
             return ('<nav aria-label="Session"><a href="/">Home</a> · '
                     '<a href="/login">Log in</a></nav>')
         if session.get("anonymous"):
+            # A link back to your own analyses. Without it, navigating away
+            # from a result loses it: there was no index, no history and no
+            # way to reach a run again except the URL you no longer have.
+            mine = ('<a href="/analyses">Your analyses</a> · '
+                    if self.web_store.runs_owned_by(session["user_id"])
+                    else '')
             return (f'<nav aria-label="Session"><a href="/">Home</a> · '
+                    f'{mine}'
                     f'<span>Guest demo session</span> '
                     f'<form action="/logout" method="post" '
                     f'style="display:inline">'
@@ -2840,6 +2864,31 @@ class WebApp:
         if pending_promotions:
             items.append(f"{pending_promotions} candidate(s) awaiting your promotion")
         return items or ["nothing needs attention"]
+
+    def _my_analyses(self, session):
+        """Every analysis this session has started, newest first.
+
+        Closing the tab used to lose the result permanently: there was no
+        index, no history, and the only route back was a URL the reader no
+        longer had.
+        """
+        run_ids = list(reversed(
+            self.web_store.runs_owned_by(session["user_id"])))
+        rows = ""
+        for rid in run_ids:
+            meta = self.ci.run_meta(rid) or {}
+            name = meta.get("company_name") or "Analysis"
+            when = (meta.get("as_of") or "")[:10]
+            rows += (f'<li><a href="/runs/{_e(rid)}/slides">{_e(name)}</a>'
+                     + (f' <span class="when">{_e(when)}</span>' if when
+                        else '') + '</li>')
+        body = (f'<main><h1>Your analyses</h1>'
+                + (f'<ul class="analyses">{rows}</ul>' if rows else
+                   '<p>Nothing yet. <a href="/">Read a company</a> to start.'
+                   '</p>')
+                + '</main>')
+        return self._html(self._page("Your analyses", body, session,
+                                     session.get("csrf", "")))
 
     def _dashboard_page(self, session):
         st = self._platform_status()
