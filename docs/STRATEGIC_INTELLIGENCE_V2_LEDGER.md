@@ -147,3 +147,70 @@ Not attempted in this pass, in rough value order:
    real blind reviewers.
 5. **Adversarial suite** (§20) — partially covered by the regression tests;
    not a systematic pass.
+
+---
+
+# Part 2 — Founder value
+
+The architecture was right and the output was still shaped like analysis. A
+founder does not need analysis; they need to know what to do, what it costs to
+wait, and what a competitor might do first.
+
+## What changed
+
+| Before | After |
+|---|---|
+| `insights[]` — things that are true | `decisions[]` — forks with two sides, each with urgency, cost of waiting, what a rival may do first, upside, downside, falsifier |
+| `business_model` a one-line string | where profit comes from, **where value leaks**, what customers *actually* buy, what management appears to optimise — established *before* any strategy is inferred |
+| conclusions buried in sections | **The Insight** — one sentence, its own slide, never truncated |
+| second-order asserted in one field | an explicit `consequence_chain` that stops where the evidence stops |
+| competitors listed | who is *forcing* the change, who benefits, who loses, who must respond, who can ignore it |
+| deck opened with methodology | deck opens with what business they are really in |
+
+## New gates
+
+- `not_a_decision` — "Explore opportunities in X" is a topic, not a decision
+- `no_cost_of_waiting` — usually the whole argument
+- `software_speak` — "decision affected", "supporting evidence", "likely
+  agenda", "affected functions" may never reach a reader
+- `repetition` — no idea may appear as the insight *and* a decision *and* a
+  question
+
+## Defects found by using it, not by testing it
+
+1. 4000 output tokens truncated on a five-document run — and the retry
+   truncated identically, spending two calls to fail the same way. Raised to
+   8000; truncation is now recognised as deterministic and not retried.
+2. The model cited all decisions and omitted the nested insight's citations.
+   The insight and decisions are one argument over one evidence set, so either
+   grounds it — every citation must still resolve.
+3. **The Insight was being trimmed to the bullet budget**, cutting "...is not
+   conservatism" off the end: keeping the setup and deleting the point.
+4. Bullets cut mid-clause; now they end on a finished thought and never stop
+   inside a bracket.
+5. Prefixing produced "Customers are really buying Not a box".
+
+## Founder test, four sectors
+
+| Company | The Insight | Urgency called |
+|---|---|---|
+| Sony Interactive | Withholding first-party titles from day-one PS Plus is not conservatism — it is the lever protecting the attach economics the discounted-hardware strategy depends on | this year |
+| Northvale (bank) | The sticky cheap deposits that are the funding advantage are the same asset making above-peer CRE concentration dangerous — both sit on one balance sheet as loans reprice | this quarter |
+| Palantir | The growth story is told in commercial revenue but the cost structure was built for government contracts, and nobody has shown the margin math reconciles | this year |
+| Meridian (healthcare) | Spending capital as if approval is a formality, when one rejection strands the manufacturing investment entirely | decide now |
+
+Urgency is calibrated rather than manufactured: Northvale's deposit-pricing
+decision self-rates "watch only" with "low near-term cost — this is a pricing
+posture question, not a structural one".
+
+## Still not done
+
+- **No human founder has read this.** The stop condition is blind reviewers
+  saying they would use it before a major decision. That has not happened, and
+  it is the only test that settles the question.
+- Presentation-first *routing* — the deck is built and rendered, but the
+  webapp still requires a click to reach it; auto-open and the final-slide
+  hand-off to the brief are not wired.
+- The executive brief and full analysis still render the old structure.
+- Follow-up assistant still reads the deterministic report.
+- Frozen baseline comparison against a generic prompt.
