@@ -1,0 +1,307 @@
+"""The evaluation harness — 50+ deterministic product-review situations.
+
+Each case is (persona, scenario, company fixture). Running it composes a real
+report through the real pipeline against a deterministic offline site, scores
+it, and then asks the PERSONA's question: given how long this reader stays and
+what they need to leave with, did this work for them?
+
+A case fails critically when the persona hits one of its deal-breakers, or
+cannot answer a question it needs answered. Those are the only failures that
+block a release; everything else is a score movement to be traded off
+deliberately.
+"""
+from __future__ import annotations
+
+import os
+import tempfile
+from dataclasses import asdict, dataclass, field
+
+from intent_engine.product_eval.personas import (
+    PERSONAS, PERSONAS_BY_KEY, SCENARIOS_BY_KEY,
+)
+from intent_engine.product_eval.scorecard import (
+    THRESHOLDS, _words, score_report,
+)
+from intent_engine.product_eval.sites import SITES, site_transport
+
+EVAL_SET_VERSION = "product-eval.v1"
+
+
+@dataclass
+class CaseResult:
+    case_id: str
+    persona: str
+    scenario: str
+    company: str
+    outcome: str = ""
+    critical: list = field(default_factory=list)
+    soft: list = field(default_factory=list)
+    metrics: dict = field(default_factory=dict)
+
+    @property
+    def failed(self) -> bool:
+        return bool(self.critical)
+
+    def as_dict(self) -> dict:
+        return asdict(self)
+
+
+# (persona, scenario, company) — 50+ combinations chosen so every persona and
+# every scenario appears, and the awkward pairs (thirty-second reader on a
+# sparse company; small-business owner on a multinational) are covered on
+# purpose rather than by accident.
+CASE_MATRIX = (
+    ("busy_founder", "strong_evidence", "shopify"),
+    ("busy_founder", "company_owned_only", "palantir"),
+    ("busy_founder", "startup_no_filings", "linear"),
+    ("enterprise_exec", "strong_evidence", "shopify"),
+    ("enterprise_exec", "contradictory", "palantir"),
+    ("enterprise_exec", "presentation", "shopify"),
+    ("sales_leader", "strong_evidence", "shopify"),
+    ("sales_leader", "meeting_prep" if False else "presentation", "palantir"),
+    ("sales_leader", "no_customer_evidence", "sony"),
+    ("product_manager", "strong_evidence", "shopify"),
+    ("product_manager", "js_heavy", "palantir"),
+    ("investor", "strong_evidence", "shopify"),
+    ("investor", "company_owned_only", "linear"),
+    ("investor", "no_financials", "notion"),
+    ("consultant", "strong_evidence", "shopify"),
+    ("consultant", "contradictory", "palantir"),
+    ("market_analyst", "stale", "sony"),
+    ("market_analyst", "strong_evidence", "shopify"),
+    ("smb_owner", "startup_no_filings", "linear"),
+    ("smb_owner", "local_business", "corner_cafe"),
+    ("smb_owner", "strong_evidence", "shopify"),
+    ("technical_founder", "js_heavy", "palantir"),
+    ("technical_founder", "startup_no_filings", "linear"),
+    ("sceptical_expert", "company_owned_only", "palantir"),
+    ("sceptical_expert", "contradictory", "shopify"),
+    ("sceptical_expert", "weak_evidence", "sony"),
+    ("first_time_visitor", "strong_evidence", "shopify"),
+    ("first_time_visitor", "weak_evidence", "sony"),
+    ("first_time_visitor", "startup_no_filings", "linear"),
+    ("mobile_user", "presentation", "shopify"),
+    ("mobile_user", "strong_evidence", "palantir"),
+    ("five_minutes", "strong_evidence", "shopify"),
+    ("five_minutes", "js_heavy", "palantir"),
+    ("thirty_seconds", "strong_evidence", "shopify"),
+    ("thirty_seconds", "weak_evidence", "sony"),
+    ("thirty_seconds", "startup_no_filings", "linear"),
+    ("knows_company", "strong_evidence", "shopify"),
+    ("knows_company", "js_heavy", "palantir"),
+    ("knows_nothing", "strong_evidence", "shopify"),
+    ("knows_nothing", "startup_no_filings", "notion"),
+    ("knows_nothing", "local_business", "corner_cafe"),
+    ("competitor_context", "strong_evidence", "shopify"),
+    ("competitor_context", "no_customer_evidence", "palantir"),
+    ("risk_seeker", "contradictory", "shopify"),
+    ("risk_seeker", "company_owned_only", "palantir"),
+    ("risk_seeker", "weak_evidence", "sony"),
+    ("meeting_prep", "strong_evidence", "shopify"),
+    ("meeting_prep", "startup_no_filings", "linear"),
+    ("meeting_prep", "js_heavy", "palantir"),
+    ("simple_explanation", "strong_evidence", "shopify"),
+    ("simple_explanation", "startup_no_filings", "notion"),
+    ("simple_explanation", "local_business", "corner_cafe"),
+    ("busy_founder", "retrieval_failed", "blocked_co"),
+    ("first_time_visitor", "retrieval_failed", "blocked_co"),
+    ("investor", "sparse", "ghost_co"),
+    ("smb_owner", "sparse", "ghost_co"),
+    ("enterprise_exec", "identity_ambiguous", "sony"),
+)
+
+
+def build_cases() -> list:
+    """The versioned case list. Deterministic and order-stable."""
+    cases = []
+    for index, (persona, scenario, company) in enumerate(CASE_MATRIX):
+        cases.append({
+            "case_id": f"c{index:03d}-{persona}-{scenario}-{company}",
+            "persona": persona,
+            "scenario": scenario,
+            "company": company,
+        })
+    return cases
+
+
+def _compose(company_key: str):
+    """Run the real pipeline against a deterministic offline site."""
+    from intent_engine.company_ingestion.service import CompanyIngestionService
+    from intent_engine.founder_intelligence.service import (
+        FounderIntelligenceService,
+    )
+    from intent_engine.webapp.app import WebApp
+
+    site = SITES[company_key]
+    tmp = tempfile.mkdtemp(prefix="peval-")
+    ci = CompanyIngestionService(os.path.join(tmp, "ci.jsonl"),
+                                 transport=site_transport(site),
+                                 resolver=False)
+    fi = FounderIntelligenceService(os.path.join(tmp, "fi.jsonl"))
+    run = ci.create_run(company_name=site.name, website=site.website,
+                        user_id="evaluator",
+                        as_of="2026-07-28T00:00:00+00:00")
+    run_id = run["run_id"]
+    candidates = ci.discover(run_id)
+    picked = WebApp._recommended_candidate_ids(
+        candidates, refusing_hosts=ci.refusing_hosts(run_id))
+    if not picked:
+        picked = [c["candidate_id"] for c in candidates[:1]]
+    ci.approve(run_id, user_id="evaluator", approved_ids=picked,
+               rejected_ids=[c["candidate_id"] for c in candidates
+                             if c["candidate_id"] not in picked])
+    ci.fetch_approved(run_id)
+    result = ci.compose_with_quality(run_id, fi_service=fi)
+    return ci, run_id, result
+
+
+def _brief_and_slides(result):
+    report = result.get("strategic_report")
+    if not report:
+        return None, []
+    from intent_engine.strategic_intelligence.brief import build_brief
+    from intent_engine.strategic_intelligence.slides import build_slides
+    brief = build_brief(report, as_of="2026-07-28",
+                        analysis_version="eval")
+    slides = build_slides(report, as_of="2026-07-28",
+                          analysis_version="eval", brief=brief)
+    return brief, slides
+
+
+def _evaluate(case, ci, run_id, result) -> CaseResult:
+    persona = PERSONAS_BY_KEY[case["persona"]]
+    scenario = SCENARIOS_BY_KEY[case["scenario"]]
+    out = CaseResult(case_id=case["case_id"], persona=persona.key,
+                     scenario=scenario.key, company=case["company"])
+
+    documents = ci.store.retrieved(run_id)
+    brief, slides = _brief_and_slides(result)
+    score = score_report(brief=brief, slides=slides,
+                         report=result.get("strategic_report"),
+                         documents=documents,
+                         quality=result.get("quality"),
+                         readiness=result.get("readiness"))
+    out.outcome = score.outcome
+    out.metrics = score.metrics
+
+    # A scenario that SHOULD refuse is not failing when it refuses.
+    refused = score.outcome == "INSUFFICIENT_EVIDENCE"
+    if scenario.expects_refusal:
+        if not refused:
+            out.critical.append(
+                "produced a confident-looking report where the evidence does "
+                "not support one")
+        return out
+    if refused:
+        if scenario.expects_limited:
+            return out
+        out.critical.append("refused on a scenario that has usable evidence")
+        return out
+
+    # Structural failures are critical for everyone.
+    out.critical.extend(score.failures)
+    out.soft.extend(score.warnings)
+
+    # Persona-specific expectations.
+    brief_words = score.metrics.get("brief_words", 0)
+    if brief_words > persona.word_budget:
+        out.critical.append(
+            f"{persona.label} reads ~{persona.word_budget} words; the brief is "
+            f"{brief_words}")
+    if score.metrics.get("brief_reading_seconds", 0) > persona.patience_s:
+        out.critical.append(
+            f"{persona.label} gives it {persona.patience_s}s; the brief needs "
+            f"{score.metrics['brief_reading_seconds']}s")
+
+    for breaker in persona.deal_breakers:
+        if breaker == "jargon without explanation" and \
+                score.metrics.get("jargon_per_100_words", 0) > 2.0:
+            out.critical.append(f"{persona.label}: {breaker}")
+        if breaker == "generic risk boilerplate" and \
+                score.metrics.get("thesis_generic"):
+            out.critical.append(f"{persona.label}: {breaker}")
+        if breaker == "confidence unsupported by independent evidence" and \
+                score.metrics.get("high_confidence_count", 0) and \
+                score.metrics.get("independent_share", 0) < 0.2:
+            out.critical.append(f"{persona.label}: {breaker}")
+        if breaker == "claim stronger than its source" and \
+                score.metrics.get("metadata_only_documents", 0) and \
+                score.metrics.get("hypothesis_count", 0):
+            out.critical.append(f"{persona.label}: {breaker}")
+        if breaker == "assumes public filings exist" and \
+                scenario.company_type != "public" and \
+                any("investor" in f for f in score.failures):
+            out.critical.append(f"{persona.label}: {breaker}")
+
+    # Startup/local companies must never be judged against filings.
+    if scenario.company_type != "public":
+        if any("investor" in str(f).lower() or "filing" in str(f).lower()
+               for f in out.critical):
+            out.critical.append(
+                "a private company is being held to public-company evidence")
+    return out
+
+
+def run_cases(cases=None, *, stop_on_first=False) -> dict:
+    """Run every case and summarise. Pure offline; no network, no model."""
+    cases = cases or build_cases()
+    results, by_persona = [], {}
+    composed_cache = {}
+    for case in cases:
+        key = case["company"]
+        if key not in composed_cache:
+            composed_cache[key] = _compose(key)
+        ci, run_id, result = composed_cache[key]
+        outcome = _evaluate(case, ci, run_id, result)
+        results.append(outcome)
+        bucket = by_persona.setdefault(outcome.persona,
+                                       {"total": 0, "failed": 0})
+        bucket["total"] += 1
+        bucket["failed"] += 1 if outcome.failed else 0
+        if stop_on_first and outcome.failed:
+            break
+
+    failed = [r for r in results if r.failed]
+    clusters = {}
+    for r in failed:
+        for reason in r.critical:
+            key = _cluster_key(reason)
+            clusters.setdefault(key, {"count": 0, "cases": []})
+            clusters[key]["count"] += 1
+            clusters[key]["cases"].append(r.case_id)
+    return {
+        "eval_set_version": EVAL_SET_VERSION,
+        "total_cases": len(results),
+        "failed_cases": len(failed),
+        "pass_rate": round(1 - len(failed) / max(1, len(results)), 3),
+        "by_persona": by_persona,
+        "failure_clusters": dict(sorted(clusters.items(),
+                                        key=lambda kv: -kv[1]["count"])),
+        "results": [r.as_dict() for r in results],
+    }
+
+
+def _cluster_key(reason: str) -> str:
+    """Group failure reasons that are the same defect wearing different
+    numbers, so the ledger points at causes rather than instances."""
+    low = reason.lower()
+    for marker, key in (
+            ("words; the standard", "brief too long (absolute)"),
+            ("reads ~", "brief too long for this persona"),
+            ("gives it", "brief too slow for this persona"),
+            ("repeats text", "repetition"),
+            ("re-cited across", "evidence reuse"),
+            ("hypotheses shown", "too many hypotheses"),
+            ("true of any company", "generic thesis"),
+            ("high-confidence on company-owned", "confidence miscalibrated"),
+            ("slide(s) have no content", "empty slides"),
+            ("exceed", "overfull slides"),
+            ("jargon", "jargon"),
+            ("refused on a scenario", "over-refusal"),
+            ("confident-looking report", "under-refusal"),
+            ("public-company evidence", "wrong evidence model"),
+            ("claim stronger than its source", "thin evidence, strong claim"),
+    ):
+        if marker in low:
+            return key
+    return reason[:60]
