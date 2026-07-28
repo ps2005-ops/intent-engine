@@ -235,10 +235,11 @@ PATTERN_LIBRARY = [
 # facts. `threshold` = minimum qualifying signals that must be present.
 HYPOTHESIS_SCAFFOLDS = {
     "product_to_platform": {
-        "title": "Moving from software product toward commerce infrastructure",
+        "title": "moving from selling a product toward operating the "
+                 "rails beneath it",
         "statement": "{company} appears to be repositioning from selling "
                      "software toward operating the payment, identity, data, "
-                     "and distribution rails that commerce runs on.",
+                     "and distribution rails its market runs on.",
         "reasoning": "Infrastructure-level positioning, expanding ownership of "
                      "checkout/identity rails, and growing first-party product "
                      "breadth together match the product→platform mechanism: "
@@ -270,9 +271,10 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
     },
     "smb_wedge_to_enterprise": {
-        "title": "Expanding from an SMB wedge toward enterprise and platform",
+        "title": "expanding from a smaller-customer wedge toward "
+                 "enterprise and platform",
         "statement": "{company} appears to be extending from its "
-                     "small-merchant base toward larger enterprise buyers and "
+                     "smaller-customer base toward larger enterprise buyers and "
                      "a broader platform.",
         "reasoning": "An explicit enterprise motion alongside growing product "
                      "breadth matches the SMB-wedge→enterprise mechanism: "
@@ -300,11 +302,11 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
     },
     "human_to_agent_workflow": {
-        "title": "Agentic commerce implies a shift from human browsing to "
-                 "AI-mediated purchasing",
+        "title": "positioning for demand mediated by AI agents rather "
+                 "than by people",
         "statement": "{company} appears to be positioning for buying that is "
-                     "mediated by AI agents rather than human storefront "
-                     "browsing, shifting where demand is captured.",
+                     "mediated by AI agents rather than by people directly, "
+                     "shifting where demand is captured.",
         "reasoning": "Agent/AI-commerce endpoints plus a distribution shift "
                      "plus ownership of checkout/identity match the "
                      "human→agent-workflow mechanism: when agents transact, "
@@ -333,7 +335,8 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
     },
     "single_product_to_ecosystem": {
-        "title": "Product breadth is building a controlled ecosystem",
+        "title": "building a controlled ecosystem out of its product "
+                 "breadth",
         "statement": "{company}'s expanding first-party product breadth plus a "
                      "partner ecosystem appears to be turning it into an "
                      "operating system for its domain.",
@@ -364,8 +367,8 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
     },
     "ecosystem_control_vs_openness": {
-        "title": "A tension between enabling partners and controlling the "
-                 "highest-value commerce layers",
+        "title": "both enabling partners and consolidating the "
+                 "highest-value layers for itself",
         "statement": "{company} appears to be both courting partners and "
                      "consolidating ownership of checkout, identity, and data "
                      "— goals that pull against each other.",
@@ -398,8 +401,8 @@ HYPOTHESIS_SCAFFOLDS = {
         "threshold": 2,
     },
     "differentiator_commoditization": {
-        "title": "The original storefront differentiator may be commoditizing",
-        "statement": "{company}'s original storefront-creation advantage may "
+        "title": "watching its original differentiator commoditise",
+        "statement": "{company}'s original core-product advantage may "
                      "be becoming table stakes, pushing value toward adjacent "
                      "rails and data.",
         "reasoning": "Widespread availability of the original product surface "
