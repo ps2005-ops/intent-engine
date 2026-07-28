@@ -1653,7 +1653,43 @@ class WebApp:
                                 f'<p><a href="/runs/{_e(run_id)}">Back to '
                                 f'result</a></p></main></body></html>')
                         return self._html(body)
+        # Observation ids, which is what the presentation and the brief
+        # actually cite. This route only ever searched legacy claim ids, so
+        # every "Evidence behind this slide" link answered 404 — the product
+        # invited a reader to check a source and then failed them at the
+        # moment they decided to trust it.
+        page = self._observation_evidence_page(session, run_id, claim_id)
+        if page is not None:
+            return page
         return self._error_page(404, "no such claim in this run")
+
+    def _observation_evidence_page(self, session, run_id, observation_id):
+        """The evidence behind one cited observation, or None if unknown."""
+        report = self._strategic_report_for(run_id)
+        if not report:
+            return None
+        observation = next(
+            (o for o in (report.get("observations") or [])
+             if o.get("observation_id") == observation_id), None)
+        if observation is None:
+            return None
+        label = self._citation_labels(run_id).get(observation_id, "")
+        url = observation.get("source_url") or ""
+        link = (f'<p><a href="{_e(url)}" rel="noopener noreferrer nofollow" '
+                f'target="_blank">Open the source page</a></p>') if url else ''
+        body = (
+            f'{_BRIEF_CSS}<main class="brief">'
+            f'<h1>Evidence</h1>'
+            f'<p class="lead">{_e(observation.get("excerpt") or observation.get("text") or "")}</p>'
+            + (f'<p class="stamp">From {_e(label or observation.get("source_title") or "a retrieved page")}'
+               + (f' · {_e(observation.get("date"))}' if observation.get("date") else '')
+               + '</p>')
+            + link
+            + f'<p><a href="/runs/{_e(run_id)}/slides">Back to the '
+              f'presentation</a> · <a href="/runs/{_e(run_id)}/brief">Back to '
+              f'the brief</a></p></main>')
+        return self._html(self._page("Evidence", body, session,
+                                     session.get("csrf", "")))
 
     def _citation_labels(self, run_id):
         """Evidence id -> the readable name of the source behind it.

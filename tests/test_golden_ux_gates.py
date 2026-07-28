@@ -452,3 +452,22 @@ def test_an_operator_can_retrieve_the_feedback(palantir):
     status, page = client.get("/feedback")
     assert status.startswith("200")
     assert "Dense but useful" in page
+
+
+def test_every_citation_on_the_presentation_resolves(shopify):
+    """Found in production: the evidence route only ever searched legacy claim
+    ids, while the deck and the brief cite OBSERVATION ids. Every "Evidence
+    behind this slide" link answered 404 — the product invited a reader to
+    check a source and then failed them at the moment they decided to trust
+    it."""
+    app, client, company = shopify
+    run_id = _analyse(client, company.name, company.base)
+    _, deck = client.get(f"/runs/{run_id}/slides")
+    hrefs = re.findall(rf'href="(/runs/{run_id}/evidence/[^"]+)"', deck)
+    assert hrefs, "the deck offered no citations to check"
+    for href in hrefs:
+        status, _, body = client.request("GET", href)
+        assert status.startswith("200"), f"{href} -> {status}"
+        assert "Traceback" not in body
+        # It must show the evidence, not an empty shell.
+        assert len(_visible(body).split()) > 12, href
