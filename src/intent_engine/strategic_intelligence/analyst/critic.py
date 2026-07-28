@@ -338,6 +338,48 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
                 f"sides: {dec.get('decision', '')[:70]!r}",
                 where=f"decisions[{i}].decision"))
 
+    # --- 7b. a recommendation has to resolve ---------------------------------
+    from intent_engine.strategic_intelligence.analyst.priority import (
+        NON_ANSWERS,
+    )
+    for i, dec in enumerate(decisions):
+        if not dec.get("verdict"):
+            findings.append(CriticFinding(
+                "no_verdict",
+                f"decision {i} never says what to do about it today",
+                where=f"decisions[{i}].verdict"))
+        blob = " ".join(str(v) for v in dec.values() if isinstance(v, str))
+        for phrase in NON_ANSWERS:
+            if phrase in blob.lower():
+                findings.append(CriticFinding(
+                    "unresolved_recommendation",
+                    f"decision {i} says {phrase!r}, which is the absence of a "
+                    "recommendation wearing the clothes of one",
+                    where=f"decisions[{i}]"))
+
+    # --- 7c. assumptions must be falsifiable ---------------------------------
+    for i, a in enumerate(analysis.get("assumptions") or []):
+        if not (a.get("what_would_break_it") or "").strip():
+            findings.append(CriticFinding(
+                "unfalsifiable_assumption",
+                f"assumption {i} states a belief with no way to find out it is "
+                "wrong", where=f"assumptions[{i}]"))
+
+    # --- 7d. a blind spot must actually be one -------------------------------
+    blind = analysis.get("blind_spots") or {}
+    nobody = (blind.get("almost_nobody_is_discussing") or "").strip()
+    everyone = (blind.get("everyone_is_discussing") or "").strip()
+    if nobody and everyone and _content_tokens(nobody, company_tokens) and \
+            len(_content_tokens(nobody, company_tokens)
+                & _content_tokens(everyone, company_tokens)) / max(
+                1, len(_content_tokens(nobody, company_tokens)
+                       | _content_tokens(everyone, company_tokens))) > 0.5:
+        findings.append(CriticFinding(
+            "false_blind_spot",
+            "what 'almost nobody is discussing' is the same thing as what "
+            "'everyone is discussing'", severity="warn",
+            where="blind_spots"))
+
     # --- 8. it must not sound like software ----------------------------------
     # These are the words the old template engine put on the page. A founder
     # reading "decision affected: ..." is reading a data structure.

@@ -896,6 +896,27 @@ class CompanyIngestionService:
             payload["strategic_analysis"] = analysis.to_dict()
             if state == ResultState.COMPLETE:
                 payload["reasoning_provenance"] = "grounded_analyst"
+                # What changed since last time, and the one screen built from
+                # it. A founder opening this every morning wants the delta,
+                # not the same analysis again.
+                from intent_engine.strategic_intelligence.analyst.memory import (
+                    compare,
+                )
+                from intent_engine.strategic_intelligence.analyst.priority import (
+                    daily_view,
+                )
+                prior = (previous_model or {}).get("strategic_analysis") \
+                    if isinstance(previous_model, dict) else None
+                memory = compare(
+                    payload["strategic_analysis"], prior,
+                    evidence_count=len(evidence),
+                    previous_evidence_count=(previous_model or {}).get(
+                        "evidence_count") if isinstance(previous_model, dict)
+                    else None)
+                payload["strategic_memory"] = memory
+                payload["daily_view"] = daily_view(
+                    payload["strategic_analysis"], memory=memory)
+                payload["evidence_count"] = len(evidence)
         payload["result_state_detail"] = ResultState.EXPLANATION.get(state, "")
         return payload
 

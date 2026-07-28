@@ -141,12 +141,52 @@ def _decision_payload(citation):
             "what_would_invalidate_it": "Partner-sourced merchant revenue "
                                         "growing faster than first-party.",
             "what_to_watch": "New listings in the partner app store.",
+            "business_impact": "high",
+            "reversibility": "one_way_door",
+            "verdict": "do_now",
+            "cheapest_experiment": "Ask ten partner developers what they are "
+                                   "building next quarter.",
             "confidence": "low",
             "confidence_rationale": "Low -- company-owned pages only, with "
                                     "no partner or merchant evidence.",
             "missing_evidence": "Partner revenue share.",
             "citations": [citation],
         }],
+        "assumptions": [{
+            "assumption": "Partner apps still supply breadth merchants value.",
+            "why_we_believe_it": "The app store is promoted as a reason to "
+                                 "choose the platform.",
+            "what_would_break_it": "Merchants naming first-party components "
+                                   "as the reason they stay.",
+            "how_load_bearing": "high",
+            "confidence": "low",
+        }],
+        "blind_spots": {
+            "everyone_is_discussing": "Take rate.",
+            "almost_nobody_is_discussing": "That partner developers commit "
+                                           "roadmaps a quarter ahead, so the "
+                                           "damage is done before it shows.",
+            "where_management_may_be_biased": "First-party revenue is easier "
+                                              "to measure than partner "
+                                              "breadth.",
+            "where_investors_may_be_biased": "Take rate is a cleaner metric "
+                                             "than ecosystem health.",
+            "where_customers_may_disagree": "Merchants may not care who "
+                                            "built the surface.",
+        },
+        "scenarios": {
+            "base_case": "Partner apps thin slowly and take rate rises.",
+            "upside_case": "First-party surfaces raise take rate without "
+                           "losing app breadth.",
+            "downside_case": "Developers leave and merchant acquisition "
+                             "slows before the take rate gain lands.",
+            "wild_card": "A rival platform offers developers a materially "
+                         "better revenue share.",
+            "leading_indicators": ["New listings in the partner app store."],
+        },
+        "board_questions": [
+            "What share of merchant retention depends on apps we do not own?",
+        ],
         "competitive": {
             "who_is_forcing_the_change": "Merchants asking for one bill.",
             "who_benefits": "Large merchants wanting fewer vendors.",
@@ -213,3 +253,37 @@ def test_result_states_each_explain_themselves():
         assert ResultState.EXPLANATION[state].strip()
     # only COMPLETE may render a strategic presentation
     assert ResultState.PRESENTABLE == (ResultState.COMPLETE,)
+
+
+def test_a_completed_run_carries_the_daily_view_and_memory(tmp_path):
+    """A founder opening this wants the delta and one screen, not the same
+    analysis again."""
+    ci = CompanyIngestionService(tmp_path / "ci.jsonl", transport=_transport,
+                                 resolver=False)
+    fi = FounderIntelligenceService(tmp_path / "fi.jsonl")
+    run = ci.create_run(company_name="Examplecorp",
+                        website="https://example.test", user_id="u1",
+                        as_of="2026-07-24T00:00:00+00:00")
+    rid = run["run_id"]
+    cands = ci.discover(rid)
+    ci.approve(rid, user_id="u1",
+               approved_ids=[c["candidate_id"] for c in cands][:14],
+               rejected_ids=[])
+    ci.fetch_approved(rid)
+    from intent_engine.strategic_intelligence.observations import (
+        derive_analyst_evidence,
+    )
+    ev = derive_analyst_evidence(list(ci.store.retrieved(rid)))
+    ci._analyst_client = RecordedClient(_decision_payload(ev[0].observation_id))
+    report = ci.compose(rid, fi_service=fi)["strategic_report"]
+
+    view = report["daily_view"]
+    assert view["headline"]
+    assert view["biggest_threat"]
+    assert view["competitor_to_watch"]
+    assert view["todays_decision"]["decision"].startswith("Build the next")
+    assert view["most_uncertain_assumption"]
+    assert view["nobody_is_discussing"]
+    # no previous run, so it must say that rather than imply nothing changed
+    assert report["strategic_memory"]["first_run"] is True
+    assert "first look" in view["what_changed"].lower()

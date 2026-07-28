@@ -119,6 +119,11 @@ def _good():
             "what_would_invalidate_it": "Evidence that attach revenue is "
                                         "growing faster than subscription.",
             "what_to_watch": "Day-one catalogue announcements.",
+            "business_impact": "high",
+            "reversibility": "costly_to_reverse",
+            "verdict": "research",
+            "cheapest_experiment": "Put one mid-tier title in at launch and "
+                                   "measure attach against a comparable.",
             "confidence": "moderate",
             "confidence_rationale": "Moderate -- company pages plus one "
                                     "independent analysis, no subscriber "
@@ -126,6 +131,56 @@ def _good():
             "missing_evidence": "Subscriber counts and attach rates.",
             "citations": ["obs-1", "obs-3"],
         }],
+        "assumptions": [{
+            "assumption": "Full-price buyers and subscription buyers are "
+                          "largely the same people.",
+            "why_we_believe_it": "Both are reached through the same console "
+                                 "and store.",
+            "what_would_break_it": "Evidence that subscribers skew toward "
+                                   "players who never bought at full price.",
+            "how_load_bearing": "high",
+            "confidence": "low",
+        }, {
+            "assumption": "Hardware is still sold near cost.",
+            "why_we_believe_it": "Stated by independent analysis (obs-3).",
+            "what_would_break_it": "Disclosure of positive hardware margin.",
+            "how_load_bearing": "high",
+            "confidence": "moderate",
+        }],
+        "blind_spots": {
+            "everyone_is_discussing": "Whether Game Pass is profitable.",
+            "almost_nobody_is_discussing": "That the catalogue's value "
+                                           "depends on a release cadence no "
+                                           "studio can guarantee every year.",
+            "where_management_may_be_biased": "Studios leadership is judged "
+                                              "on launch units, which argues "
+                                              "against day-one inclusion.",
+            "where_investors_may_be_biased": "Recurring revenue is rewarded "
+                                             "with a higher multiple than "
+                                             "unit sales.",
+            "where_customers_may_disagree": "Players may value owning a title "
+                                            "more than access to it.",
+        },
+        "scenarios": {
+            "base_case": "Sony holds the line and subscription grows slowly "
+                         "on back catalogue.",
+            "upside_case": "Attach revenue holds while subscription grows, "
+                           "and both compound.",
+            "downside_case": "Day-one expectations harden industry-wide and "
+                             "Sony matches late, losing unit revenue without "
+                             "gaining the subscriber lead.",
+            "wild_card": "A major third-party publisher pulls its catalogue "
+                         "from all subscriptions, resetting expectations.",
+            "leading_indicators": [
+                "A first-party title appearing in Extra or Premium near "
+                "launch.",
+                "Third-party publishers renegotiating catalogue terms.",
+            ],
+        },
+        "board_questions": [
+            "If we never put first-party titles in on day one, what is our "
+            "subscriber growth ceiling?",
+        ],
         "competitive": {
             "who_is_forcing_the_change": "Microsoft, by normalising day-one "
                                          "subscription access.",

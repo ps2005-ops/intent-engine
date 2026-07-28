@@ -194,6 +194,21 @@ def build_founder_slides(analysis, *, company="") -> list:
 
     slides = []
 
+    # 0 - today. Only when there is something that has earned today; a
+    # manufactured daily action is how a product teaches people to skip it.
+    from intent_engine.strategic_intelligence.analyst.priority import (
+        todays_decision,
+    )
+    today = todays_decision(decisions)
+    if today:
+        slides.append(_slide("today", "What deserves today", [
+            _bullet(today.get("decision", ""),
+                    evidence=today.get("citations") or [], full=True),
+            _bullet(_lead("Why now: ", today.get("cost_of_waiting", ""))),
+            _bullet(_lead("If we are wrong: ",
+                          today.get("what_would_invalidate_it", ""))),
+        ], kind="today"))
+
     # 1 - what business are they really in
     slides.append(_slide("business", "What business they are really in", [
         _bullet(bm.get("one_line", ""), evidence=cites),

@@ -58,6 +58,9 @@ ANALYSIS = {
         "what_would_invalidate_it": "Attach revenue growing faster than "
                                     "subscription revenue.",
         "what_to_watch": "Day-one catalogue announcements.",
+        "business_impact": "high",
+        "reversibility": "costly_to_reverse",
+        "verdict": "do_now",
         "confidence": "moderate",
         "confidence_rationale": "Moderate -- one independent source.",
         "citations": ["obs-1"],
@@ -85,16 +88,32 @@ def _all_text(slides):
     return " ".join(b["text"] for s in slides for b in s["bullets"]).lower()
 
 
-def test_deck_opens_with_the_business_not_the_method():
+def test_deck_opens_with_what_deserves_today():
     slides = build_founder_slides(ANALYSIS)
-    assert slides[0]["kind"] == "business_model"
-    assert "really in" in slides[0]["title"].lower()
+    assert slides[0]["kind"] == "today"
+    assert "today" in slides[0]["title"].lower()
 
 
-def test_the_insight_is_its_own_slide_and_comes_second():
+def test_deck_never_opens_with_the_method():
+    kinds = [s["kind"] for s in build_founder_slides(ANALYSIS)]
+    assert kinds[1] == "business_model"
+    assert "evidence" not in kinds[:3]
+
+
+def test_no_today_slide_when_nothing_has_earned_today():
+    """Manufacturing a daily action is how a product teaches people to
+    ignore it."""
+    import copy
+    a = copy.deepcopy(ANALYSIS)
+    a["decisions"][0]["verdict"] = "wait"
+    assert build_founder_slides(a)[0]["kind"] == "business_model"
+
+
+def test_the_insight_is_its_own_slide():
     slides = build_founder_slides(ANALYSIS)
-    assert slides[1]["kind"] == "insight"
-    assert slides[1]["title"] == "The insight"
+    insight = [s for s in slides if s["kind"] == "insight"]
+    assert len(insight) == 1
+    assert insight[0]["title"] == "The insight"
 
 
 def test_the_story_runs_in_founder_order():
@@ -183,7 +202,7 @@ def test_deck_is_presentable():
 def test_build_slides_prefers_the_founder_deck_when_an_analysis_exists():
     report = {"company_name": "Sony Interactive Entertainment",
               "strategic_analysis": ANALYSIS}
-    assert build_slides(report)[0]["kind"] == "business_model"
+    assert build_slides(report)[0]["kind"] == "today"
 
 
 def test_build_slides_falls_back_when_there_is_no_analysis():

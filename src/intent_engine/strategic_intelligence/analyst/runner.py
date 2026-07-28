@@ -99,7 +99,15 @@ may describe something from years ago.
 discussion", "strategic hypothesis" or "affected functions" in anything a \
 reader sees. Say "this matters because", "the choice is", "watch for".
 
-8. Say each thing once. If an idea belongs in the insight, it does not also \
+8. Every decision must end in one of: do it now, monitor it, research it, wait, or ignore it. "It depends" is the absence of a recommendation wearing the clothes of one. If you genuinely cannot tell, the answer is "research" plus the cheapest experiment that would settle it.
+
+9. Say how reversible each decision is. A one-way door deserves weeks of thought; an easily reversed call deserves a day and should not consume attention. Most decisions are not high impact -- say so.
+
+10. Name what you are assuming, and what would break each assumption. A founder who knows which belief is load-bearing knows what to watch.
+
+11. Say what almost nobody is discussing. That is the most valuable thing an outside view can offer. If nothing qualifies, say nothing qualifies -- inventing a blind spot is worse than admitting the obvious things are the only things.
+
+12. Say each thing once. If an idea belongs in the insight, it does not also \
 belong in a decision and in a question. Repetition reads as padding.
 
 If the evidence is descriptive marketing rather than strategic signal, set \
@@ -283,6 +291,10 @@ def _to_analysis(raw, model, usage) -> StrategicAnalysis:
         decisions=list(raw.get("decisions") or []),
         competitive=raw.get("competitive") or {},
         questions=list(raw.get("questions") or []),
+        assumptions=list(raw.get("assumptions") or []),
+        blind_spots=raw.get("blind_spots") or {},
+        scenarios=raw.get("scenarios") or {},
+        board_questions=list(raw.get("board_questions") or []),
         strongest_case_we_are_wrong=raw.get("strongest_case_we_are_wrong", ""),
         evidence_gaps=list(raw.get("evidence_gaps") or []),
         sufficient=bool(raw.get("sufficient_for_strategic_analysis")),

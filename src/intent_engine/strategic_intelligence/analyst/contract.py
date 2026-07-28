@@ -16,9 +16,21 @@ from dataclasses import asdict, dataclass, field
 
 # Bump when the prompt or schema changes in a way that invalidates cached
 # analyses. The cache key includes this, so a bump re-runs every company.
-PROMPT_VERSION = "fi-decisions-2026-07-28"
+PROMPT_VERSION = "fi-decision-engine-2026-07-28"
 
 URGENCY = ("decide_now", "this_quarter", "this_year", "watch_only")
+
+# What a founder should actually DO about a decision. "It depends" is not on
+# this list and never will be: a recommendation that does not resolve to one of
+# these has not been made.
+VERDICTS = ("do_now", "monitor", "research", "wait", "ignore")
+
+IMPACT = ("high", "medium", "low")
+
+# Reversibility is the single most useful decision property a founder can be
+# told, and the one generic advice never supplies. A one-way door deserves
+# weeks of deliberation; an easily reversible call deserves a day.
+REVERSIBILITY = ("one_way_door", "costly_to_reverse", "easily_reversible")
 
 ECONOMIC_LEVERS = (
     "revenue", "revenue_mix", "gross_margin", "operating_leverage",
@@ -91,6 +103,10 @@ class StrategicAnalysis:
     decisions: list = field(default_factory=list)
     competitive: dict = field(default_factory=dict)
     questions: list = field(default_factory=list)
+    assumptions: list = field(default_factory=list)
+    blind_spots: dict = field(default_factory=dict)
+    scenarios: dict = field(default_factory=dict)
+    board_questions: list = field(default_factory=list)
     strongest_case_we_are_wrong: str = ""
     evidence_gaps: list = field(default_factory=list)
     sufficient: bool = False
@@ -222,6 +238,27 @@ _DECISION_SCHEMA = {
                            "decision -- a filing line, a pricing page, a "
                            "competitor launch.",
         },
+        "business_impact": {
+            "type": "string", "enum": list(IMPACT),
+            "description": "How much of the business outcome actually turns "
+                           "on this. Most decisions are not high.",
+        },
+        "reversibility": {
+            "type": "string", "enum": list(REVERSIBILITY),
+            "description": "A one-way door deserves weeks; an easily "
+                           "reversible call deserves a day.",
+        },
+        "verdict": {
+            "type": "string", "enum": list(VERDICTS),
+            "description": "What the founder should do about it TODAY. "
+                           "'ignore' and 'wait' are real answers and are "
+                           "better than false urgency.",
+        },
+        "cheapest_experiment": {
+            "type": "string",
+            "description": "The least expensive way to learn which side of "
+                           "this is right, if one exists.",
+        },
         "confidence": {"type": "string",
                        "enum": ["low", "moderate", "high"]},
         "confidence_rationale": {
@@ -232,10 +269,70 @@ _DECISION_SCHEMA = {
         "missing_evidence": {"type": "string"},
         "citations": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["decision", "why_it_matters", "urgency", "cost_of_waiting",
+    "required": ["decision", "why_it_matters", "urgency", "business_impact",
+                 "reversibility", "verdict", "cost_of_waiting",
                  "what_a_competitor_may_do_first", "upside", "downside",
                  "what_would_invalidate_it", "what_to_watch", "confidence",
                  "confidence_rationale", "citations"],
+}
+
+_ASSUMPTION_SCHEMA = {
+    "type": "object",
+    "description": "What this whole reading rests on. A founder who knows "
+                   "which belief is load-bearing knows what to watch.",
+    "properties": {
+        "assumption": {"type": "string"},
+        "why_we_believe_it": {"type": "string"},
+        "what_would_break_it": {"type": "string"},
+        "how_load_bearing": {"type": "string", "enum": list(IMPACT)},
+        "confidence": {"type": "string",
+                       "enum": ["low", "moderate", "high"]},
+    },
+    "required": ["assumption", "why_we_believe_it", "what_would_break_it",
+                 "how_load_bearing", "confidence"],
+}
+
+_BLIND_SPOTS_SCHEMA = {
+    "type": "object",
+    "description": "The most valuable part of an outside view: what the room "
+                   "is not saying.",
+    "properties": {
+        "everyone_is_discussing": {"type": "string"},
+        "almost_nobody_is_discussing": {
+            "type": "string",
+            "description": "The thing that matters and is absent from the "
+                           "public conversation. If nothing qualifies, say so "
+                           "rather than inventing one.",
+        },
+        "where_management_may_be_biased": {"type": "string"},
+        "where_investors_may_be_biased": {"type": "string"},
+        "where_customers_may_disagree": {"type": "string"},
+    },
+    "required": ["everyone_is_discussing", "almost_nobody_is_discussing",
+                 "where_management_may_be_biased"],
+}
+
+_SCENARIOS_SCHEMA = {
+    "type": "object",
+    "description": "Reasoning, not prediction. No probabilities and no dates "
+                   "unless the evidence carries them.",
+    "properties": {
+        "base_case": {"type": "string"},
+        "upside_case": {"type": "string"},
+        "downside_case": {"type": "string"},
+        "wild_card": {
+            "type": "string",
+            "description": "Low likelihood, high consequence, and not what "
+                           "anyone is planning for.",
+        },
+        "leading_indicators": {
+            "type": "array", "items": {"type": "string"},
+            "description": "What would be observable FIRST if a case is "
+                           "playing out.",
+        },
+    },
+    "required": ["base_case", "upside_case", "downside_case",
+                 "leading_indicators"],
 }
 
 _COMPETITIVE_SCHEMA = {
@@ -301,10 +398,21 @@ ANALYSIS_SCHEMA = {
             "description": "The best argument against this entire reading, "
                            "made properly rather than as a disclaimer.",
         },
+        "assumptions": {"type": "array", "items": _ASSUMPTION_SCHEMA,
+                        "description": "Two to four. The beliefs this reading "
+                                       "would not survive without."},
+        "blind_spots": _BLIND_SPOTS_SCHEMA,
+        "scenarios": _SCENARIOS_SCHEMA,
+        "board_questions": {
+            "type": "array", "items": {"type": "string"},
+            "description": "What a board or investor will actually ask about "
+                           "this, phrased the way they would ask it.",
+        },
         "evidence_gaps": {"type": "array", "items": {"type": "string"}},
     },
     "required": ["entity_scope", "business_model",
                  "sufficient_for_strategic_analysis", "the_insight",
-                 "decisions", "competitive", "questions",
+                 "decisions", "competitive", "questions", "assumptions",
+                 "blind_spots", "scenarios", "board_questions",
                  "strongest_case_we_are_wrong", "evidence_gaps"],
 }
