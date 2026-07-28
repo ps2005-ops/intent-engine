@@ -266,3 +266,14 @@ def test_no_page_leaks_an_internal_state_name(guest):
                          "EVIDENCE_REPORT_READY", "DURABLE_PROVEN",
                          "may_synthesize", "source_class"):
             assert internal not in body, f"{name} leaked {internal}"
+
+
+def test_the_examples_line_sits_below_the_form_not_above_the_headline(guest):
+    """Seen on the deployed page: injected at '<main>', the examples footnote
+    rendered above the h1, so the first thing a visitor read was a note about
+    examples rather than what the product does."""
+    _, _, page = guest.request("GET", "/")
+    assert "Not sure where to start" in page
+    assert page.index("<h1") < page.index("Not sure where to start"), \
+        "the examples line renders above the headline"
+    assert page.index('action="/analyze"') < page.index("Not sure where to start")

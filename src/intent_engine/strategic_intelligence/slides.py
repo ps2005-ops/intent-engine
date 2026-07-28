@@ -577,9 +577,15 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
     for n, slide in enumerate(slides):
         prev_id = slides[n - 1]["id"] if n > 0 else slides[-1]["id"]
         next_id = slides[(n + 1) % total]["id"]
+        # A date earns its place only when it distinguishes one bullet from
+        # another. Every bullet carried the SAME retrieval date -- the day the
+        # run happened -- which read as chronology that was not there.
+        _dates = {b.get("date") for b in slide["bullets"]
+                  if is_meaningful(b.get("date"))}
+        _dated = len(_dates) > 1
         bullets = "".join(
             f'<li>' + (f'<span class="when">{_e(b["date"])}</span>'
-                       if is_meaningful(b.get("date")) else '')
+                       if _dated and is_meaningful(b.get("date")) else '')
             + f'{_e(b["text"])}</li>' for b in slide["bullets"])
         citations = sorted({c for b in slide["bullets"]
                             for c in b.get("evidence", []) if c})

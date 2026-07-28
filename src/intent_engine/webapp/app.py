@@ -719,7 +719,10 @@ class WebApp:
                 intro = (
                     f'<p class="try-line">Not sure where to start? '
                     f'Try {examples}.</p>{forms}')
-                page = page.replace('<main>', '<main>' + intro, 1)
+                # After the form, not before the headline. Injected at
+                # '<main>' it rendered above the h1, so the first thing a
+                # visitor read was a footnote about examples.
+                page = page.replace('</form>', '</form>' + intro, 1)
         else:
             note = ('<p><strong>Early access:</strong> '
                     '<a href="/login">log in</a> to run an analysis.</p>')

@@ -269,3 +269,26 @@ def test_build_slides_falls_back_when_there_is_no_analysis():
     report = {"company_name": "Acme", "strategic_analysis": None,
               "observations": [], "hypotheses": [], "thesis": {}}
     assert isinstance(build_slides(report), list)
+
+
+def test_identical_dates_are_not_repeated_on_every_bullet():
+    """Every bullet carried the same retrieval date, which read as chronology
+    that was not there."""
+    from intent_engine.strategic_intelligence.slides import render_deck
+    slides = [{"id": "s1", "title": "T", "kind": "insight", "note": "",
+               "bullets": [{"text": "one", "evidence": [], "date": "2026-07-28",
+                            "full": False},
+                           {"text": "two", "evidence": [], "date": "2026-07-28",
+                            "full": False}]}]
+    assert "2026-07-28" not in render_deck(slides, company="X")
+
+
+def test_genuinely_different_dates_are_still_shown():
+    from intent_engine.strategic_intelligence.slides import render_deck
+    slides = [{"id": "s1", "title": "T", "kind": "insight", "note": "",
+               "bullets": [{"text": "one", "evidence": [], "date": "2026-07-28",
+                            "full": False},
+                           {"text": "two", "evidence": [], "date": "2025-01-02",
+                            "full": False}]}]
+    html = render_deck(slides, company="X")
+    assert "2026-07-28" in html and "2025-01-02" in html
