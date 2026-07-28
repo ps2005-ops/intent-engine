@@ -2504,6 +2504,15 @@ class WebApp:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])
             self.strategic_memory.publish(
                 domain, report.get("analytics_events", []), run_id=run_id)
+        # The last read before a stranger sees it. Attached rather than
+        # applied: a critic that edits is a second author with less context
+        # than the first, and its corrections would reach the reader
+        # unreviewed. What it finds becomes a stated limitation, which is
+        # worth more than a silent fix.
+        if report is not None:
+            from intent_engine.strategic_intelligence.critic import critique
+            result["critique"] = critique(
+                report, documents=self.ci.store.retrieved(run_id))
         # Record what produced this, so a later reuse can be checked rather
         # than assumed.
         from intent_engine._version import version_info

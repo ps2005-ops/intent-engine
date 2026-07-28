@@ -454,6 +454,48 @@ def test_49b_the_deck_survives_a_phone(composed):
     assert not fixed, f"fixed widths in the deck: {fixed}"
 
 
+def test_49c_the_critic_catches_what_a_sceptical_reader_would(composed):
+    """Constructed to fail on every class the critic exists for. A critic
+    only run against reports that pass is not known to work."""
+    from intent_engine.strategic_intelligence.critic import critique
+    verdict = critique({
+        "company_name": "Acme",
+        "thesis": {"view": "The company will certainly dominate."},
+        "questions": [{"question": "What is the competitive landscape?"}],
+        "hypotheses": [{
+            "hypothesis_id": "h1", "confidence": "low",
+            "statement": "Acme will always win because history proves this "
+                         "company is right.",
+            "reasoning": "as Stripe did, the same way that AWS grew"}],
+    })
+    codes = {f["code"] for f in verdict["findings"]}
+    assert verdict["publishable"] is False
+    assert {"generic_leadership_question", "analogy_used_as_evidence",
+            "claim_stronger_than_its_confidence"} <= codes
+
+
+def test_49d_the_critic_passes_a_report_that_is_actually_sound(composed):
+    from intent_engine.strategic_intelligence.critic import critique
+    for key in GOLDEN + SMALL:
+        verdict = critique(composed[key]["report"],
+                           documents=composed[key]["documents"])
+        assert verdict["publishable"], f"{key}: {verdict['blocking']}"
+
+
+def test_49e_the_critic_never_rewrites_the_report(composed):
+    """It reports; the caller decides. An editing critic is a second author
+    whose corrections reach the reader unreviewed."""
+    import copy
+
+    from intent_engine.strategic_intelligence.critic import critique
+    report = composed["shopify"]["report"]
+    before = copy.deepcopy(report.as_dict() if hasattr(report, "as_dict")
+                           else report)
+    critique(report, documents=composed["shopify"]["documents"])
+    after = report.as_dict() if hasattr(report, "as_dict") else report
+    assert before == after
+
+
 def test_50_a_backend_completion_is_not_a_product_pass():
     """The whole point of the scorecard: finishing is not succeeding."""
     score = score_report(

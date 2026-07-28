@@ -325,6 +325,18 @@ def _evaluate(case, ci, run_id, result) -> CaseResult:
     # What a small screen makes unusable.
     out.critical.extend(_evaluate_on_a_small_screen(scenario, slides))
 
+    # The last read before a stranger sees it. Anything the critic blocks on
+    # is something a sceptical reader would catch, so it is a failure here.
+    if result.get("strategic_report") is not None:
+        from intent_engine.strategic_intelligence.critic import critique
+        verdict = critique(result["strategic_report"], documents=documents)
+        out.metrics["critic_findings"] = len(verdict["findings"])
+        for finding in verdict["findings"]:
+            if finding["severity"] == "block":
+                out.critical.append(f"critic: {finding['message']}")
+            else:
+                out.soft.append(f"critic: {finding['message']}")
+
     # The questions this reader came with. This is the difference between "the
     # pipeline finished" and "the person got what they came for".
     for question in _unanswered(persona, brief, slides):
