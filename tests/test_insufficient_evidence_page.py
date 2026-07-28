@@ -87,7 +87,7 @@ def _run_thin(client):
 def test_thin_evidence_never_renders_a_strategic_dashboard(client):
     _, (status, _, page) = _run_thin(client)
     assert status.startswith("200")
-    assert "Not enough public evidence" in page
+    assert "Limited analysis" in page
     # none of the report furniture — a reader must not think they got a report
     for section in ("Strategic hypotheses", "Blind spots",
                     "Leadership questions", "Comparable patterns"):

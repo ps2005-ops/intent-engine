@@ -162,3 +162,21 @@ def test_one_guest_cannot_see_another_guests_analyses(tmp_path):
     other = _start_demo(app)
     _, _, page = other.request("GET", "/analyses")
     assert run_id not in page
+
+
+def test_a_limited_result_does_not_blame_the_company(tmp_path):
+    """OBSERVED LIVE on Figma: the heading read "Not enough public evidence
+    for Figma" -- directly above a body explaining that SOME kinds of evidence
+    were missing and there were places left to look. The heading blamed the
+    company for publishing too little; the body said the search was
+    incomplete. Both cannot be true, and the heading is what a reader keeps."""
+    app = _make(tmp_path)
+    _, _, page = app._insufficient_evidence_page(
+        None, "RUNID",
+        {"insufficient_evidence": {
+            "headline": "Some kinds of evidence are missing, and there are "
+                        "places left to look.",
+            "source_count": 4, "found": [], "missing": [], "unreadable": [],
+            "actions": []}})
+    assert "Limited analysis" in page
+    assert "Not enough public evidence" not in page

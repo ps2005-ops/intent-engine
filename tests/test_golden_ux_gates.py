@@ -335,7 +335,7 @@ def test_sony_either_presents_properly_or_refuses_honestly(sony):
                 _, deck = client.get(f"/runs/{run_id}/slides")
                 assert "Not enough for a presentation" in deck
     else:
-        assert "Not enough public evidence" in page
+        assert "Limited analysis" in page
         assert "What was missing" in page
 
 

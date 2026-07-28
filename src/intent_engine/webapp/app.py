@@ -1421,13 +1421,21 @@ class WebApp:
              f'<br><span class="why">{_e(why)}</span></p>')
             for url, method, label, why in actions)
 
+        # "Not enough public evidence for Figma" sat directly above a body
+        # explaining that SOME kinds of evidence were missing and there were
+        # places left to look. The heading blamed the company for publishing
+        # too little; the body said the search was incomplete. They cannot both
+        # be true, and the heading is the part a reader remembers.
+        #
+        # "Limited analysis" states the situation without accusing anyone, and
+        # the body then says exactly what is missing and what to do about it.
+        heading = f'Limited analysis of {_e(company)}'
         body = (
             f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width,'
-            f'initial-scale=1"><title>Not enough public evidence — '
-            f'{_e(company)}</title></head><body>'
+            f'initial-scale=1"><title>{heading}</title></head><body>'
             f'{self._nav(session, csrf)}<main>'
-            f'<h1>Not enough public evidence for {_e(company)}</h1>'
+            f'<h1>{heading}</h1>'
             f'<p class="lead">{_e(note.get("headline", ""))} '
             f'Rather than show a briefing that looks complete and is not, '
             f'here is exactly where it stands.</p>'
