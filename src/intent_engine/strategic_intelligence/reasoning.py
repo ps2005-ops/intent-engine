@@ -9,6 +9,9 @@ no randomness: the same evidence always yields the same report.
 """
 from __future__ import annotations
 
+from intent_engine.strategic_intelligence.observations import (
+    qualifying_signals_of,
+)
 from intent_engine.strategic_intelligence.patterns import (
     HYPOTHESIS_SCAFFOLDS, PATTERN_LIBRARY, TENSIONS,
 )
@@ -26,9 +29,15 @@ _INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
 
 
 def _signals_present(observations) -> set:
+    """Signals that may QUALIFY a hypothesis.
+
+    Weak observations contribute none. This used to union every observation's
+    signals, so a marketing snippet full of calls-to-action could push a
+    hypothesis over its threshold by itself.
+    """
     present = set()
     for o in observations:
-        present.update(o.signals)
+        present.update(qualifying_signals_of(o))
     return present
 
 
