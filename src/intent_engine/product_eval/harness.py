@@ -147,6 +147,8 @@ CASE_MATRIX = (
     ("enterprise_exec", "pipeline_upgrade", "shopify"),
     ("mobile_user", "low_bandwidth", "palantir"),
     ("thirty_seconds", "cold_start", "shopify"),
+    ("mobile_user", "mobile", "shopify"),
+    ("first_time_visitor", "mobile", "brightledger"),
 )
 
 
@@ -319,6 +321,9 @@ def _evaluate(case, ci, run_id, result) -> CaseResult:
     out.critical.extend(_evaluate_adversarial(
         scenario, documents, result.get("strategic_report"), brief, slides,
         score))
+
+    # What a small screen makes unusable.
+    out.critical.extend(_evaluate_on_a_small_screen(scenario, slides))
 
     # The questions this reader came with. This is the difference between "the
     # pipeline finished" and "the person got what they came for".
@@ -612,6 +617,40 @@ def _evaluate_adversarial(scenario, documents, report, brief, slides,
             score.metrics.get("independent_share", 0) == 0:
         problems.append("confidence is high on evidence the company published "
                         "about itself")
+    return problems
+
+
+def _evaluate_on_a_small_screen(scenario, slides) -> list:
+    """The deck, met on a phone.
+
+    Checked against the rendered HTML rather than the slide objects, because
+    the failures a phone produces — a fixed pixel width, a table that will not
+    wrap, no viewport declaration — exist only after rendering. A structural
+    check would pass a deck that scrolls sideways.
+    """
+    if "layout" not in scenario.tags or not slides:
+        return []
+    import re
+
+    from intent_engine.strategic_intelligence.slides import render_deck
+    html = render_deck(slides, company="Evaluated Co", as_of="2026-07-28",
+                       analysis_version="eval")
+    low = html.lower()
+    problems = []
+    # A FIXED width scrolls sideways; a max-width is the fix for it, so the
+    # pattern has to exclude max- and min- rather than match "width" anywhere.
+    # (An earlier version of this check did not, and reported `max-width:900px`
+    # — the responsive rule — as the defect.)
+    for match in re.finditer(r"(?<![a-z-])width:\s*(\d+)px", low):
+        if int(match.group(1)) > 480:
+            problems.append(f"the deck sets a fixed width of "
+                            f"{match.group(1)}px, which scrolls sideways on a "
+                            f"phone")
+    if "@media (max-width" not in low.replace(" ", " "):
+        problems.append("the deck has no small-screen rules at all")
+    if "<table" in low and "overflow-x" not in low:
+        problems.append("a table can exceed the screen with nothing to "
+                        "scroll it")
     return problems
 
 

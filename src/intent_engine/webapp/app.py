@@ -1481,11 +1481,15 @@ class WebApp:
         mode = presentation(tier)
         documents = self.ci.store.retrieved(run_id)
         fresh = sum(1 for d in documents if d.get("retrieval_status") == "OK")
-        reused = run_id in self._results and bool(documents)
+        # "Compatible" used to be a word with nothing behind it: any stored
+        # result was served again whatever had changed underneath it. It now
+        # reports an answer that was actually checked.
+        compat = self._cache_compatibility(run_id)
+        state = ("produced by the current version of the product"
+                 if compat["reusable"] else "freshly analysed")
         return (
             f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
-            f'{fresh} source(s) read · '
-            f'{"reusing a compatible earlier analysis" if reused else "fresh"}'
+            f'{fresh} source(s) read · {_e(state)}'
             f' · about a two-minute read</p>'
             f'<p class="stamp"><strong>{_e(mode["label"])}.</strong> '
             f'{_e(mode["summary"])}</p>'
@@ -2460,7 +2464,26 @@ class WebApp:
             if self.ci.store.approval(run_id) is None:
                 return None
             self._results[run_id] = self._compose(run_id)
+        elif not self._cache_compatibility(run_id)["reusable"]:
+            # A stored analysis is served again only while it still agrees with
+            # the product that would produce it. Otherwise the fixes that
+            # stopped every company being described as a commerce company, or
+            # that capped confidence without an outside source, never reach
+            # anyone whose analysis predates them — they see the old answer
+            # under today's date and cannot tell.
+            self._results[run_id] = self._compose(run_id)
         return self._results.get(run_id)
+
+    def _cache_compatibility(self, run_id) -> dict:
+        """Whether the stored analysis for this run is still this product's
+        answer, and what to tell a reader if it is not."""
+        from intent_engine._version import version_info
+        from intent_engine.company_ingestion.run_compatibility import assess
+        stored = self._results.get(run_id)
+        if stored is None:
+            return {"reusable": False, "changed": [], "reason": ""}
+        return assess(stored,
+                      app_version=version_info().get("app_version", ""))
 
     def _compose(self, run_id):
         """Compose the run, threading the persisted mental model so the report
@@ -2481,7 +2504,12 @@ class WebApp:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])
             self.strategic_memory.publish(
                 domain, report.get("analytics_events", []), run_id=run_id)
-        return result
+        # Record what produced this, so a later reuse can be checked rather
+        # than assumed.
+        from intent_engine._version import version_info
+        from intent_engine.company_ingestion.run_compatibility import stamp
+        return stamp(result,
+                     app_version=version_info().get("app_version", ""))
 
     def _ready(self):
         try:
