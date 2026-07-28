@@ -270,7 +270,22 @@ def assess_readiness(*, documents, identity=None, failures=(),
         expectations_for, infer_mode,
     )
     documents = list(documents) + observations_as_documents(extra_observations)
-    usable = usable_documents(documents)
+    retrieved = usable_documents(documents)
+    # A page we cannot read is not evidence, so it is set aside rather than
+    # counted and then held against the run.
+    #
+    # Figma reported "not enough public evidence" after reading EIGHT sources
+    # across four families. Half were German blog tag pages: they counted as
+    # usable, dragged the readable share under the threshold, and voided a run
+    # whose four English sources were perfectly good. Retrieval had done its
+    # job; the arithmetic was wrong.
+    #
+    # The share is still measured over everything retrieved, so "we could not
+    # read some of this company's evidence" remains a finding the reader is
+    # told rather than something quietly dropped.
+    readable = english_share(retrieved)
+    usable = [d for d in retrieved if is_english(d)] or retrieved
+    unreadable_count = len(retrieved) - len(usable)
     counts: dict = {}
     for document in usable:
         family = family_of(document)
@@ -280,7 +295,6 @@ def assess_readiness(*, documents, identity=None, failures=(),
     dominant, dominant_share = _share(counts, total)
     units = slide_units(documents)
     dated = [d for d in usable if is_dated(d)]
-    readable = english_share(usable)
 
     # Identity is a precondition, not a check: a report about nobody in
     # particular has nothing to be right or wrong about.
@@ -376,6 +390,7 @@ def assess_readiness(*, documents, identity=None, failures=(),
         "dominant_share": round(dominant_share, 3),
         "dated_source_count": len(dated),
         "readable_share": round(readable, 3),
+        "set_aside_unreadable": unreadable_count,
         "slide_units": units,
         "missing_families": missing_families,
         "retry_plan": retry_plan,
