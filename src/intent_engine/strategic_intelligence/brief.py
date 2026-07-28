@@ -85,6 +85,9 @@ class ExecutiveBrief:
     as_of: str = ""
     analysis_version: str = ""
     brief_version: str = BRIEF_VERSION
+    # True when the evidence supported no hypothesis and the brief says so
+    # rather than leaving the most prominent line on the page blank.
+    view_withheld: bool = False
 
     @property
     def word_count(self) -> int:
@@ -106,6 +109,7 @@ class ExecutiveBrief:
                 "as_of": self.as_of,
                 "analysis_version": self.analysis_version,
                 "brief_version": self.brief_version,
+                "view_withheld": self.view_withheld,
                 "word_count": self.word_count}
 
 
@@ -135,6 +139,19 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "") \
     # which is the same claim earlier in its life.
     central = thesis.get("view", "") or _first(r.get("hypotheses", []),
                                                "statement", "title")
+
+    # A brief whose most prominent line is blank is not a shorter brief; it is
+    # one where the reader supplies the missing claim themselves, usually from
+    # the first confident sentence further down. Say the thing instead: the
+    # evidence described the company and supported no view worth putting
+    # forward. That is a finding, and it is the honest one.
+    view_withheld = bool(thesis.get("view_withheld"))
+    if not is_meaningful(central):
+        view_withheld = True
+        central = (f"The public evidence describes what "
+                   f"{company or 'this company'} does, but none of it "
+                   f"supports a strategic view strongly enough to put one "
+                   f"forward.")
 
     # Three signals, deduplicated across the sections they can come from — a
     # shift and a surprise describing the same event is one signal.
@@ -180,7 +197,7 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "") \
         company=company, thesis=central, signals=signals,
         counterpoint=counterpoint, tension=tension, decision=decision,
         questions=questions, limitation=limitation, as_of=as_of,
-        analysis_version=analysis_version)
+        analysis_version=analysis_version, view_withheld=view_withheld)
     return _enforce_budget(brief)
 
 

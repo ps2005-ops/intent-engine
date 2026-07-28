@@ -299,10 +299,15 @@ def _build_questions(hypotheses, observations):
 
 def _build_thesis(company_name, hypotheses, blind_spots):
     if not hypotheses:
+        # Flagged rather than left for a caller to recognise by its wording.
+        # Downstream gates need to tell "the product declined to form a view
+        # and said so" apart from "the product formed a view", and matching on
+        # the sentence would break the moment the sentence is edited.
         return {"view": f"There is not yet enough approved strategic evidence "
                         f"to form a defensible outside-in view of "
                         f"{company_name}.",
-                "transition": "", "tension": "", "why_care": ""}
+                "transition": "", "tension": "", "why_care": "",
+                "view_withheld": True}
     top = hypotheses[0]
     tension = (blind_spots[0].observed_tension if blind_spots
                else "how much to invest ahead of the transition")

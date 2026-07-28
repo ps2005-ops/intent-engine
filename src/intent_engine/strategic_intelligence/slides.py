@@ -45,6 +45,11 @@ MIN_MEANINGFUL_SLIDES = 5
 # reader is also being talked at.
 MAX_BULLETS_PER_SLIDE = 5
 MAX_WORDS_PER_BULLET = 28
+# The per-bullet cap alone permits 5 × 28 = 140 words on one slide, which is
+# most of a page. A slide is bounded by what a reader can take in while someone
+# is talking over it, so the WHOLE slide has a budget and bullets are dropped
+# once it is spent — the last bullet is the one the room never reaches anyway.
+MAX_WORDS_PER_SLIDE = 90
 
 
 def _bullet(text, *, evidence=None, date=""):
@@ -55,13 +60,20 @@ def _bullet(text, *, evidence=None, date=""):
 def _cap(bullets):
     """Bounded, deduplicated bullets — the no-wall-of-text rule, mechanically."""
     kept = deduplicate(meaningful_items(bullets, key="text"), key="text")
-    out = []
+    out, spent = [], 0
     for bullet in kept[:MAX_BULLETS_PER_SLIDE]:
         words = bullet["text"].split()
         if len(words) > MAX_WORDS_PER_BULLET:
             bullet = dict(bullet,
                           text=" ".join(words[:MAX_WORDS_PER_BULLET]) + "…")
+            words = bullet["text"].split()
+        # Keep the first bullet whatever it costs — a slide with a title and
+        # nothing under it is worse than a slightly long one — then stop when
+        # the slide's budget is spent.
+        if out and spent + len(words) > MAX_WORDS_PER_SLIDE:
+            break
         out.append(bullet)
+        spent += len(words)
     return out
 
 

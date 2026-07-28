@@ -171,7 +171,8 @@ def observations_as_documents(observations) -> list:
 
 
 def assess_readiness(*, documents, identity=None, failures=(),
-                     extra_observations=(), attempt: int = 1) -> dict:
+                     extra_observations=(), attempt: int = 1,
+                     mode=None) -> dict:
     """Decide whether this evidence may become a report, and if not, what next.
 
     `identity` is the persisted `ci.entity_identified` payload, or None.
@@ -181,7 +182,14 @@ def assess_readiness(*, documents, identity=None, failures=(),
     source-addition hook; they count as evidence like any other.
     `attempt` is 1-based; the retry budget is spent when it reaches
     MAX_DISCOVERY_ATTEMPTS.
+    `mode` is the research mode to hold this company to. When omitted it is
+    inferred from the evidence. The public-company numbers below are the
+    defaults, so a run that infers `public_company` is assessed exactly as it
+    was before modes existed.
     """
+    from intent_engine.company_ingestion.research_modes import (
+        expectations_for, infer_mode,
+    )
     documents = list(documents) + observations_as_documents(extra_observations)
     usable = usable_documents(documents)
     counts: dict = {}
@@ -198,46 +206,65 @@ def assess_readiness(*, documents, identity=None, failures=(),
     # particular has nothing to be right or wrong about.
     identity_ok = _identity_is_resolved(identity)
 
+    # Which evidence model this company is held to. Inferred from the evidence
+    # rather than declared, because a user who could classify their own target
+    # correctly would not need the product.
+    inferred = infer_mode(usable, identity=identity)
+    research_mode = mode or inferred["mode"]
+    expects = expectations_for(research_mode)
+    min_sources = expects["min_sources_full"]
+    min_families = expects["min_families_full"]
+    min_units = expects["min_slide_units"]
+
     checks = [
         _check("identity_resolved", identity_ok,
                "the company this report is about is established"
                if identity_ok else
                "the company could not be identified confidently"),
-        _check("source_count", total >= MIN_SOURCES_FULL,
-               f"{total} usable source(s); {MIN_SOURCES_FULL} needed for a "
+        _check("source_count", total >= min_sources,
+               f"{total} usable source(s); {min_sources} needed for a "
                f"full report"),
-        _check("evidence_families", len(families) >= MIN_FAMILIES_FULL,
+        _check("evidence_families", len(families) >= min_families,
                f"{len(families)} kind(s) of evidence "
-               f"({', '.join(families) or 'none'}); {MIN_FAMILIES_FULL} "
+               f"({', '.join(families) or 'none'}); {min_families} "
                f"needed"),
         _check("official_identity_or_product",
                bool(set(families) & set(_OFFICIAL_IDENTITY_ROLE)),
                "an official page describing the company or its products"),
+        # A private company has no investor family and a corner shop has no
+        # strategy page. Demanding them reports only that the company is not
+        # public, which is not a finding.
         _check("direction_source",
                bool(set(families) & set(_DIRECTION_ROLE)),
                "a strategy, investor, or leadership source showing where the "
-               "company says it is going"),
+               "company says it is going",
+               required_for_full=expects["requires_direction_source"]),
         _check("market_source",
                bool(set(families) & set(_MARKET_ROLE)),
                "a customer, use-case, partnership, or independent market "
-               "source, as a check on the company's own account"),
+               "source, as a check on the company's own account",
+               required_for_full=expects["requires_market_source"]),
         _check("dated_evidence", bool(dated),
                f"{len(dated)} dated source(s), needed before anything can be "
                f"called a recent change"),
-        _check("presentable_material", len(units) >= MIN_SLIDE_UNITS,
+        _check("presentable_material", len(units) >= min_units,
                f"{len(units)} distinct subject(s) with real material; "
-               f"{MIN_SLIDE_UNITS} needed for a presentation"),
+               f"{min_units} needed for a presentation"),
         _check("no_dominant_family",
                total == 0 or dominant_share <= MAX_FAMILY_SHARE,
                (f"{int(dominant_share * 100)}% of the evidence is "
                 f"'{dominant}'" if dominant else "no evidence")),
     ]
-    failed = [c for c in checks if not c["ok"]]
+    # A check this mode does not require cannot block a full report. It is
+    # still reported, because "no investor material" is worth knowing about a
+    # private company even though it is not a defect in one.
+    unmet = [c for c in checks if not c["ok"]]
+    failed = [c for c in unmet if c["required_for_full"]]
     missing_families = _missing_families(counts)
     retry_plan = _retry_plan(missing_families, failures, attempt)
 
     material = _material_level(total=total, families=families, units=units,
-                               failed=failed)
+                               failed=failed, expects=expects)
     state = _decide(identity_ok=identity_ok, material=material,
                     retry_plan=retry_plan)
 
@@ -247,6 +274,15 @@ def assess_readiness(*, documents, identity=None, failures=(),
         "attempt": attempt,
         "checks": checks,
         "failed_checks": [c["name"] for c in failed],
+        "unmet_checks": [c["name"] for c in unmet],
+        "research_mode": research_mode,
+        "research_mode_label": inferred["label"]
+        if research_mode == inferred["mode"] else research_mode,
+        "research_mode_why": inferred["why"],
+        "research_mode_expectation": inferred["expectation"]
+        if research_mode == inferred["mode"] else "",
+        "requires_hypothesis": expects["requires_hypothesis"],
+        "expects_financial_disclosure": expects["expects_financial_disclosure"],
         "document_count": total,
         "families": families,
         "family_counts": counts,
@@ -327,7 +363,7 @@ def _retry_plan(missing_families, failures, attempt) -> dict:
     }
 
 
-def _material_level(*, total, families, units, failed) -> str:
+def _material_level(*, total, families, units, failed, expects=None) -> str:
     """How much this evidence can honestly carry: 'full', 'limited', 'none'.
 
     Deliberately independent of whether a retry is worth running. Those are
@@ -337,9 +373,18 @@ def _material_level(*, total, families, units, failed) -> str:
     """
     if not failed:
         return "full"
+    # A small business genuinely has fewer distinct subjects to present, so the
+    # limited floor moves with the mode too — otherwise the mode would relax
+    # the full standard and then refuse at the limited one, which is the same
+    # refusal wearing a different number.
+    min_units_limited = MIN_SLIDE_UNITS_LIMITED
+    if expects and expects.get("min_slide_units", MIN_SLIDE_UNITS) < \
+            MIN_SLIDE_UNITS:
+        min_units_limited = min(MIN_SLIDE_UNITS_LIMITED,
+                                expects["min_slide_units"] - 1)
     if (total >= MIN_SOURCES_LIMITED
             and len(families) >= MIN_FAMILIES_LIMITED
-            and len(units) >= MIN_SLIDE_UNITS_LIMITED):
+            and len(units) >= min_units_limited):
         return "limited"
     return "none"
 

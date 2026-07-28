@@ -265,10 +265,25 @@ def score_report(*, brief=None, slides=(), report=None, documents=(),
     # A brief with no hypothesis behind it is a summary wearing an analysis's
     # clothes. Sony reached six sources, four evidence families and a rendered
     # brief with ZERO hypotheses, and every gate passed it.
-    if brief_text and not hypotheses:
-        failures.append("a brief was produced with no strategic hypothesis "
-                        "behind it — the reader is told what the company says, "
-                        "not what it means")
+    #
+    # Except for a business where a strategic hypothesis would have to be
+    # invented rather than observed. A dental practice with a services page,
+    # published prices and reviews has a complete public footprint; demanding a
+    # thesis from it produces a manufactured one, which is worse than none.
+    metrics["research_mode"] = (readiness or {}).get("research_mode", "")
+    metrics["view_withheld"] = bool(getattr(brief, "view_withheld", False))
+    hypothesis_required = (readiness or {}).get("requires_hypothesis", True)
+    if brief_text and not hypotheses and hypothesis_required:
+        if metrics["view_withheld"]:
+            # Saying "the evidence supports no view" is a legitimate product
+            # answer, but never a good outcome — it stays a limitation so the
+            # pressure to find one does not quietly disappear.
+            warnings.append("no strategic view could be supported by this "
+                            "evidence, and the brief says so")
+        else:
+            failures.append("a brief was produced with no strategic "
+                            "hypothesis behind it — the reader is told what "
+                            "the company says, not what it means")
 
     # --- outcome -------------------------------------------------------------
     score.metrics = metrics

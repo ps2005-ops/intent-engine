@@ -113,8 +113,29 @@ def test_company_owned_pages_alone_cannot_pass():
                  _doc("product"), _doc("homepage")]
     a = assess_readiness(documents=documents, identity=RESOLVED_IDENTITY)
     assert a["state"] != READY_FOR_FULL_REPORT
-    assert "direction_source" in a["failed_checks"]
     assert "market_source" in a["failed_checks"]
+    # Five undifferentiated company pages read as a private company, and a
+    # private company has no investor family to find — so the missing
+    # direction source is reported without being counted against it. What the
+    # gate must not lose is that it is still missing, and that company-owned
+    # pages alone still cannot carry a full report.
+    assert "direction_source" in a["unmet_checks"]
+    assert a["research_mode"] == "private_company"
+
+
+def test_a_public_company_is_still_required_to_show_its_direction():
+    """Modes may relax what is EXPECTED, never what is true. A filer that
+    publishes no strategy or investor material fails the same check it always
+    did — otherwise adding modes would have quietly weakened the gate for the
+    companies it was already right about."""
+    documents = [_doc("homepage", text="Northwind Freight files a Form 10-K "
+                                       "with the Securities and Exchange "
+                                       "Commission each year."),
+                 _doc("product"), _doc("about"), _doc("product"),
+                 _doc("homepage")]
+    a = assess_readiness(documents=documents, identity=RESOLVED_IDENTITY)
+    assert a["research_mode"] == "public_company"
+    assert "direction_source" in a["failed_checks"]
 
 
 def test_undated_evidence_cannot_support_recent_change_claims():
