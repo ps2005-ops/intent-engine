@@ -309,7 +309,14 @@ def _live_transport(url, timeout):
     elif "g2.com" in u or "trustpilot" in u or "capterra" in u:
         body = f"<html><head><title>Reviews</title></head><body><p>{_REVIEWS}</p></body></html>"
     elif "acme.example" in u:
-        body = f"<html><head><title>Acme</title></head><body><p>{_HOME}</p></body></html>"
+        # Each path serves its OWN page, as a real site does. Serving one body
+        # for every path made "five company-owned sources" mean one document
+        # fetched five times, which the readiness gate now counts as the one
+        # piece of evidence it is — the same misconfiguration the echo-site
+        # fixture exists to catch.
+        path = u.split("acme.example", 1)[-1].strip("/") or "home"
+        body = (f"<html><head><title>Acme {path}</title></head><body>"
+                f"<p>Acme {path} page. {_HOME}</p></body></html>")
     else:
         raise urllib.error.HTTPError(url, 404, "nf",
                                      _email.message_from_string(""), None)

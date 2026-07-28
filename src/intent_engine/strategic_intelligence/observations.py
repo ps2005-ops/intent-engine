@@ -83,6 +83,11 @@ _TYPE_FOR_SIGNAL = {
     "merchant_outcome_positioning": "messaging",
     "agentic_commerce": "channel_distribution",
     "distribution_shift": "channel_distribution",
+    "capacity_investment": "organizational",
+    "customer_concentration": "buyer_segment",
+    "segment_reporting": "organizational",
+    "disclosed_risk": "market_context",
+    "content_and_channel": "product_surface",
 }
 
 
@@ -97,6 +102,7 @@ _TYPE_FOR_SIGNAL = {
 # detector can honestly say WHAT SHAPE it saw; it cannot say what industry the
 # company is in, and it must not imply one.
 _SIGNAL_LABEL = {
+    # neutral set is merged in below the commerce entries (see _NEUTRAL_LABEL)
     "infrastructure_positioning": "positions itself as infrastructure others "
                                   "build on",
     "checkout_identity_rails": "is consolidating transaction / identity rails",
@@ -157,12 +163,131 @@ def in_commerce_domain(text: str) -> bool:
     return sum(1 for a in _DOMAIN_ANCHORS if a in low) >= MIN_DOMAIN_ANCHORS
 
 
-def _detect_signals(text: str) -> list:
-    low = " " + text.lower() + " "
-    if not in_commerce_domain(text):
-        return []
-    return [sig for sig, phrases in _SIGNAL_KEYWORDS.items()
+# --- domain-neutral signals ---------------------------------------------------
+# The commerce set above is one domain library. These are shapes that any
+# company can exhibit and that any reader would recognise as strategically
+# meaningful, so a company outside commerce is not left with nothing to say.
+#
+# This gap was invisible until the product evaluation measured it: once the
+# domain gate correctly stopped commerce patterns firing on Palantir, Linear
+# and Notion, those companies produced no thesis, no hypothesis and no slides
+# at all — and the pipeline still reported success, because "no hypothesis" is
+# not an error anywhere downstream.
+#
+# Keep these OBSERVABLE. Each one should be something you could point at on a
+# page, not a judgement about the company.
+_NEUTRAL_SIGNAL_KEYWORDS = {
+    # several distinct named products or platforms
+    "multi_product": ("platforms", "our products", "product suite",
+                      "three platforms", "two platforms", "modules",
+                      "product family", "one platform for"),
+    # the company names more than one kind of buyer
+    "segment_split": ("government and commercial", "public and private sector",
+                      "enterprise and small", "consumer and business",
+                      "segments", "business units", "public sector",
+                      "commercial customers", "government customers"),
+    # specific named customers or deployments, not "trusted by thousands"
+    "named_customers": ("case study", "case studies", "customer story",
+                        "customer stories", "deployments include",
+                        "named deployments", "customers include"),
+    # a surface third parties can build on
+    "developer_surface": ("api", "sdk", "developer docs", "documentation",
+                          "changelog", "webhooks", "integrations",
+                          "open source"),
+    # people-heavy delivery rather than self-serve
+    "services_motion": ("forward deployed", "embed alongside",
+                        "professional services", "implementation team",
+                        "on site with", "bespoke deployment",
+                        "solutions engineering"),
+    # price is published vs gated
+    "pricing_published": ("per seat", "per user", "starts at", "free plan",
+                          "monthly price", "pricing page", "per month"),
+    "pricing_gated": ("contact sales", "request a quote", "talk to sales",
+                      "custom pricing", "quoted"),
+    # buyers in regulated or accredited environments
+    "regulated_buyer": ("defence", "defense", "intelligence community",
+                        "accredited", "compliance", "regulated", "government "
+                        "systems", "public procurement", "fedramp"),
+    # explicit consolidation of previously separate tools
+    "consolidation": ("one workspace", "single system", "replace several",
+                      "all in one", "unified", "connected workspace",
+                      "one place"),
+    # --- shapes that only a company with physical or disclosed operations
+    # exhibits. Added because the neutral set above is a SOFTWARE-shaped
+    # neutral set: it reads pricing pages, developer surfaces and workspace
+    # consolidation. A manufacturer whose evidence is segment reporting,
+    # capacity commitments and disclosed risk matched exactly one signal
+    # ("segments") and therefore produced a brief with no hypothesis behind
+    # it at all — a summary of what the company says, with nothing about what
+    # it means.
+    #
+    # committed capacity: money spent before the demand arrives
+    "capacity_investment": ("capacity expansion", "expansion of its image "
+                            "sensor", "fabrication capacity",
+                            "manufacturing capacity", "production capacity",
+                            "capital allocation", "capital expenditure",
+                            "sensor capacity", "expanding capacity",
+                            "new facility", "plant capacity"),
+    # a dependency the company itself has written down
+    "customer_concentration": ("limited number of customers",
+                               "small number of customers",
+                               "limited number of smartphone customers",
+                               "customer concentration",
+                               "largest customers accounted",
+                               "depend on a limited number",
+                               "dependence on a limited number"),
+    # formal segment reporting — a conglomerate shape, not a marketing one
+    "segment_reporting": ("business segments", "operating segments",
+                          "reportable segments", "segment revenue",
+                          "segment results", "segment reporting",
+                          "revenue and operating income for each"),
+    # disclosure-grade statements of what could go wrong
+    "disclosed_risk": ("risk factors", "principal risks", "risks disclosed",
+                       "risk factors disclosed", "material weakness",
+                       "these risks include"),
+    # owns both the content and the channel it reaches people through
+    "content_and_channel": ("intellectual property", "creators and users",
+                            "first-party content", "original content",
+                            "content and the hardware", "catalogue of titles",
+                            "content pipeline"),
+}
+
+# Neutral labels — what the signal MEANS, stated so it is true of any industry.
+_NEUTRAL_LABEL = {
+    "multi_product": "sells several distinct products rather than one",
+    "segment_split": "serves more than one clearly different buyer",
+    "named_customers": "publishes named customers rather than logos alone",
+    "developer_surface": "exposes a surface others can build on",
+    "services_motion": "delivers through people, not only through software",
+    "pricing_published": "publishes its prices",
+    "pricing_gated": "keeps pricing behind a sales conversation",
+    "regulated_buyer": "sells into regulated or accredited environments",
+    "consolidation": "positions itself as replacing several separate tools",
+    "capacity_investment": "is committing capital to capacity ahead of the "
+                           "demand for it",
+    "customer_concentration": "has written down a dependence on a few buyers",
+    "segment_reporting": "reports as several separate businesses",
+    "disclosed_risk": "discloses specific risks rather than generic caveats",
+    "content_and_channel": "owns both what is sold and the channel it reaches "
+                           "people through",
+}
+
+
+def _detect_neutral_signals(text: str) -> list:
+    low = " " + (text or "").lower() + " "
+    return [sig for sig, phrases in _NEUTRAL_SIGNAL_KEYWORDS.items()
             if any(p in low for p in phrases)]
+
+
+def _detect_signals(text: str) -> list:
+    """Domain signals when the document is in that domain, plus the neutral
+    set always. A company outside every domain library still has a strategy."""
+    low = " " + text.lower() + " "
+    signals = list(_detect_neutral_signals(text))
+    if in_commerce_domain(text):
+        signals += [sig for sig, phrases in _SIGNAL_KEYWORDS.items()
+                    if any(p in low for p in phrases)]
+    return signals
 
 
 def _normalize_url(url: str) -> str:
@@ -188,8 +313,24 @@ def derive_observations(documents) -> list:
 
     Deduplicates repeated pages, filters title-only / generic-marketing noise
     into weak evidence, and records a real strategic signal (not a page title)
-    for each observation. Only documents carrying at least one strategic signal
-    become observations at all."""
+    for each observation.
+
+    Only documents carrying at least one strategic signal become observations.
+
+    KNOWN LIMITATION (measured, not theoretical). A run can retrieve real
+    pages, match no signal, and therefore produce no observations, no report
+    and no brief — while the pipeline still reports success. The product
+    evaluation catches this as "evidence was retrieved but no brief,
+    hypothesis or slide was produced"; it currently affects companies whose
+    pages are purely descriptive.
+
+    Admitting signal-free documents as descriptive observations is NOT the
+    fix: it was tried, and it breaks the meaning of an observation across the
+    reasoning layer (76 tests, which are right to object — an observation is
+    the unit patterns match against). The fix belongs one level up, where a
+    run with documents but no strategic report should still render an
+    evidence-grounded descriptive brief instead of redirecting to nothing.
+    """
     observations, seen = [], set()
     for doc in documents:
         # collapse duplicate pages: same content hash or same normalized URL
@@ -241,3 +382,19 @@ def derive_observations(documents) -> list:
             weak=weak,
             evidence_quality="weak" if weak else "strong"))
     return observations
+
+# The neutral signals participate in exactly the same maps as the domain ones,
+# so nothing downstream needs to know there are two libraries.
+_SIGNAL_KEYWORDS.update(_NEUTRAL_SIGNAL_KEYWORDS)
+_SIGNAL_LABEL.update(_NEUTRAL_LABEL)
+_TYPE_FOR_SIGNAL.update({
+    "multi_product": "product_surface",
+    "consolidation": "product_surface",
+    "developer_surface": "infrastructure_platform",
+    "segment_split": "buyer_segment",
+    "regulated_buyer": "buyer_segment",
+    "named_customers": "monetization_ecosystem",
+    "services_motion": "messaging",
+    "pricing_published": "messaging",
+    "pricing_gated": "buyer_segment",
+})

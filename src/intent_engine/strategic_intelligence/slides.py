@@ -29,7 +29,7 @@ from __future__ import annotations
 import html as _html
 
 from intent_engine.strategic_intelligence.editorial import (
-    deduplicate, is_meaningful, meaningful_items,
+    addresses_the_system, deduplicate, is_meaningful, meaningful_items,
 )
 
 _e = _html.escape
@@ -45,23 +45,48 @@ MIN_MEANINGFUL_SLIDES = 5
 # reader is also being talked at.
 MAX_BULLETS_PER_SLIDE = 5
 MAX_WORDS_PER_BULLET = 28
+# The per-bullet cap alone permits 5 × 28 = 140 words on one slide, which is
+# most of a page. A slide is bounded by what a reader can take in while someone
+# is talking over it, so the WHOLE slide has a budget and bullets are dropped
+# once it is spent — the last bullet is the one the room never reaches anyway.
+MAX_WORDS_PER_SLIDE = 90
 
 
 def _bullet(text, *, evidence=None, date=""):
+    # `evidence` is a list of evidence ids. A bare string is not one id, it is
+    # a sequence of characters, and `list("obs-1")` turns a citation into five
+    # of them — which is how the "what changed" slide came to carry thirty
+    # citations labelled "-", "n", "u", "p" and "g", each an invitation to
+    # check a source that does not exist.
+    if isinstance(evidence, str):
+        evidence = [evidence] if evidence.startswith("obs-") else []
     return {"text": " ".join(str(text or "").split()),
-            "evidence": list(evidence or []), "date": date}
+            "evidence": [e for e in (evidence or []) if e], "date": date}
 
 
 def _cap(bullets):
-    """Bounded, deduplicated bullets — the no-wall-of-text rule, mechanically."""
+    """Bounded, deduplicated bullets — the no-wall-of-text rule, mechanically.
+
+    Also the last place a page that talks to the system can be stopped: a
+    bullet is the product speaking, and a quotation is indistinguishable from
+    an assertion once it is on a slide in front of a room.
+    """
     kept = deduplicate(meaningful_items(bullets, key="text"), key="text")
-    out = []
+    kept = [b for b in kept if not addresses_the_system(b.get("text", ""))]
+    out, spent = [], 0
     for bullet in kept[:MAX_BULLETS_PER_SLIDE]:
         words = bullet["text"].split()
         if len(words) > MAX_WORDS_PER_BULLET:
             bullet = dict(bullet,
                           text=" ".join(words[:MAX_WORDS_PER_BULLET]) + "…")
+            words = bullet["text"].split()
+        # Keep the first bullet whatever it costs — a slide with a title and
+        # nothing under it is worse than a slightly long one — then stop when
+        # the slide's budget is spent.
+        if out and spent + len(words) > MAX_WORDS_PER_SLIDE:
+            break
         out.append(bullet)
+        spent += len(words)
     return out
 
 
@@ -142,8 +167,10 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
 
     # 3. What changed recently
     change_bullets = [
+        # A shift's `evidence` is its EXCERPT — the words behind the change —
+        # not a citation id. The id it cites is `observation_id`.
         _bullet(shift.get("title", ""), date=shift.get("date", ""),
-                evidence=shift.get("evidence", []))
+                evidence=[shift.get("observation_id")])
         for shift in meaningful_items(r.get("shifts", []), key="title")]
     change_bullets += [
         _bullet(event.get("event", ""), date=event.get("date", ""))
@@ -249,6 +276,12 @@ font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 color:var(--ink);background:var(--bg);max-width:900px;margin:0 auto;
 padding:8px 16px 32px}
 .deck *{box-sizing:border-box}
+/* Available to assistive technology, absent from the visual design. Not
+   display:none, which would remove it from the accessibility tree too and
+   leave the page with no heading again. */
+.deck-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;
+border:0}
 .deck .slide{display:none}
 /* Order matters. The first slide is shown unconditionally, then hidden again
    only once some OTHER slide is targeted. Written the other way round — hiding
@@ -258,7 +291,13 @@ padding:8px 16px 32px}
    entirely readable. */
 .deck .slide:first-of-type{display:block}
 .deck .slide:target{display:block}
-.deck:has(.slide:target) .slide:first-of-type:not(:target){display:none}
+/* Hiding the first slide once another is targeted used to need :has(), which
+   is Safari 15.4+ — the one place in the product whose correctness depended on
+   a browser version, and the reason a Safari pass was a release blocker rather
+   than a formality. A class toggled on navigation does the same job in every
+   browser, and when the script never runs the behaviour is what it always was:
+   the first slide stays visible. */
+.deck.is-navigated .slide:first-of-type:not(:target){display:none}
 .deck .stage{border:1px solid var(--line);border-radius:14px;
 background:var(--panel);padding:24px 26px;min-height:340px}
 .deck h2{font-size:1.5rem;line-height:1.25;margin:0 0 14px;color:var(--ink)}
@@ -313,6 +352,15 @@ _KEYS = """
    unaffected. */
 (function(){
   var deck=document.currentScript.parentNode;
+  /* Mark the deck as navigated whenever a slide is targeted, so the first
+     slide can be hidden without :has(). Runs on load too, because a deck can
+     be opened directly at #slide-3 from a link or a refresh. */
+  function sync(){
+    var t=deck.querySelector('.slide:target');
+    deck.classList[t?'add':'remove']('is-navigated');
+  }
+  sync();
+  window.addEventListener('hashchange',sync);
   document.addEventListener('keydown',function(ev){
     if(ev.metaKey||ev.ctrlKey||ev.altKey)return;
     var t=(ev.target&&ev.target.tagName||'').toLowerCase();
@@ -395,7 +443,14 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
             f'<p class="meta">{_e(company)} · analysed {_e(as_of)} · '
             f'analysis version {_e(analysis_version)}</p>'
             f'</section>')
-    return (_CSS + f'<div class="deck" role="region" '
+    # A visually-hidden <h1>. The deck had no top-level heading at all: each
+    # slide is an <h2>, so a screen-reader user met a page whose outline began
+    # at the second level and never learned whose presentation they were in.
+    # Hidden rather than shown because the deck's design puts the company name
+    # in the status bar, and a duplicate title would push the first slide down
+    # the screen for everyone else.
+    return (_CSS + f'<h1 class="deck-title">{_e(company)} — presentation</h1>'
+            f'<div class="deck" role="region" '
             f'aria-roledescription="carousel" '
             f'aria-label="{_e(company)} presentation">'
             + "".join(out) + _KEYS + '</div>')

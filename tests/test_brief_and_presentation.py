@@ -272,12 +272,14 @@ def test_the_deck_works_without_javascript():
 
 
 def test_the_deck_degrades_rather_than_blanking_without_has_support():
-    """The rule order matters: hide-then-reveal-via-:has renders blank on a
-    browser without :has. Reveal-then-hide degrades to a visible first slide."""
+    """The deck no longer depends on :has() at all — it was Safari 15.4+ and
+    the only browser-version dependency in the product. What must survive is
+    the degradation it was chosen for: with no script and no :has, the first
+    slide stays visible rather than the deck rendering blank."""
     css = _deck_html().replace("\n", "")
-    first_of_type = css.index(".slide:first-of-type{display:block}")
-    has_rule = css.index(":has(.slide:target)")
-    assert first_of_type < has_rule
+    assert ":has(" not in re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    assert ".slide{display:none}" in css
+    assert ".slide:first-of-type{display:block}" in css
 
 
 def test_the_deck_supports_keyboard_navigation():

@@ -304,7 +304,7 @@ def test_guest_lifecycle_pages_are_styled_and_run_completes(tmp_path):
 
     # progress + result pages are styled too
     for path in (f"/runs/{run_id}/progress", f"/runs/{run_id}"):
-        status, _, body = c.request("GET", path)
+        status, body = c.get(path)          # follow redirects, as a reader does
         assert status == "200 OK", (path, status)
         assert "<style" in body, f"{path} must be styled"
 
@@ -331,7 +331,12 @@ def test_autorun_skips_source_page_and_completes_palantir(tmp_path):
     assert app.ci.store.run_state(run_id) in ("COMPLETE", "PARTIAL")
     docs = app.ci.store.retrieved(run_id)
     assert any(d.get("source_class") == "investor_material" for d in docs)
-    status, _, body = c.request("GET", f"/runs/{run_id}")
+    # Palantir now matches domain-neutral patterns, so its run HAS a strategic
+    # report and the entry route sends the reader to the brief — the same
+    # default every other company gets. Follow it as a reader would; the
+    # assertion is that the destination is a real styled page, not that the
+    # entry route happens to render one itself.
+    status, body = c.get(f"/runs/{run_id}")
     assert status == "200 OK" and "<style" in body
     # visiting the (now-internal) source route just forwards to the finished run
     status, headers, _ = c.request("GET", f"/runs/{run_id}/sources")

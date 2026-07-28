@@ -126,6 +126,22 @@ jobs:
             --deselect tests/test_market_resolution_live.py \
             --deselect tests/test_scrap_estimate_live.py
 
+      # Whether the PRODUCT still works for the people who use it, which the
+      # suite above does not ask. Every persona, on every kind of company,
+      # including the ones that go wrong: a golden company that stops filling
+      # a presentation, a startup held to public-company evidence, a follow-up
+      # question that comes back as an internal result, a page that talks to
+      # the system and is believed.
+      #
+      # The baseline it compares against is committed, so lowering it is a
+      # decision that appears in a diff with a reason attached rather than a
+      # threshold quietly moved to make a build pass.
+      - name: Customer-simulation release gate
+        run: python scripts/product_release_gate.py
+
+      - name: Product release criteria
+        run: pytest tests/test_product_maturity.py -q -p no:cacheprovider
+
       - name: Repository safety guard
         run: GUARD_PYTHON=python bash scripts/precommit_guard.sh
 

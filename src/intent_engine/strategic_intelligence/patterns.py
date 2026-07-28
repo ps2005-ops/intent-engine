@@ -15,17 +15,38 @@ Controlled signal vocabulary (the only tags observations and patterns share):
     distribution_shift           partner_ecosystem_enablement
     enterprise_expansion         platform_control
     smb_simplicity               data_network
+
+and a domain-neutral set, so a company outside the commerce library is not
+left with nothing to say:
+
+    multi_product                pricing_published
+    segment_split                pricing_gated
+    named_customers              regulated_buyer
+    developer_surface            consolidation
+    services_motion
 """
 from __future__ import annotations
 
 from intent_engine.strategic_intelligence.records import ComparablePattern
 
 SIGNAL_VOCABULARY = (
+    # commerce-domain signals (read only from documents that are about
+    # commerce at all — see the domain gate in observations.py)
     "infrastructure_positioning", "checkout_identity_rails", "agentic_commerce",
     "distribution_shift", "enterprise_expansion", "smb_simplicity",
     "product_breadth", "merchant_outcome_positioning",
     "partner_ecosystem_enablement", "platform_control", "storefront_creation",
     "data_network",
+    # domain-neutral signals — shapes any company can exhibit, so a company
+    # outside every domain library still gets a strategy rather than silence
+    "multi_product", "segment_split", "named_customers", "developer_surface",
+    "services_motion", "pricing_published", "pricing_gated",
+    "regulated_buyer", "consolidation",
+    # shapes a company with physical operations or formal disclosure exhibits.
+    # The neutral set above is software-shaped; without these a manufacturer's
+    # evidence matched one signal and produced no hypothesis.
+    "capacity_investment", "customer_concentration", "segment_reporting",
+    "disclosed_risk", "content_and_channel",
 )
 
 
@@ -228,6 +249,217 @@ PATTERN_LIBRARY = [
         limitations="Commoditization is gradual and contested; a strong brand "
                     "can sustain premium pricing well past technical parity.",
     ),
+
+    # --- domain-neutral patterns ---------------------------------------------
+    # Everything above is a COMMERCE library. Once the domain gate correctly
+    # stopped those firing outside commerce, companies like Palantir, Linear
+    # and Notion produced no thesis, no hypothesis and no slides — and nothing
+    # downstream treats "no hypothesis" as an error, so the pipeline reported
+    # success on an empty result. 26 of 32 failing evaluation cases were this.
+    #
+    # These four work from shapes any company exhibits. They are deliberately
+    # modest: each says something a reader could check on the company's own
+    # pages, and none pretends to know the industry.
+    _p(
+        pattern_id="services_to_product",
+        name="Services motion → repeatable product",
+        description="A company that delivers through people tries to turn "
+                    "that delivery into software others can run themselves.",
+        mechanism="Human-delivered implementation earns trust and reveals the "
+                  "real workflow, but it scales linearly with headcount. The "
+                  "company productises what it learned, trading margin per "
+                  "engagement for reach — and risks the product being thinner "
+                  "than the service it replaces.",
+        historical_examples=[
+            {"name": "Accenture → industry platforms",
+             "note": "consulting engagements productised into repeatable "
+                     "industry solutions",
+             "source": "https://newsroom.accenture.com/"},
+            {"name": "Palantir forward-deployed model",
+             "note": "on-site engineering became Foundry and AIP as products",
+             "source": "https://www.palantir.com/newsroom/"},
+        ],
+        when_it_applies="The company describes embedding alongside customers "
+                        "AND ships named, separately-purchasable products.",
+        when_it_does_not_apply="Delivery is entirely self-serve, or the "
+                               "engagement model shows no product surface.",
+        source_refs=[{"title": "curated pattern: services→product",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("services_motion", "multi_product",
+                            "developer_surface"),
+        disconfirming_signals=("pricing_published",),
+        limitations="Public pages rarely disclose the revenue mix, so the "
+                    "balance between services and product is not observable "
+                    "from outside.",
+    ),
+    _p(
+        pattern_id="single_to_multi_segment",
+        name="One buyer → two different buyers",
+        description="A company that served one kind of customer starts "
+                    "selling to a materially different one.",
+        mechanism="A second segment brings volume but different procurement, "
+                  "compliance and support expectations. The organisation "
+                  "gradually splits — pricing, roadmap and sales motion pull "
+                  "apart — and the original segment's experience is usually "
+                  "what degrades first.",
+        historical_examples=[
+            {"name": "Slack SMB → enterprise",
+             "note": "self-serve teams alongside enterprise grid deployments",
+             "source": "https://slack.com/blog"},
+            {"name": "AWS startups → public sector",
+             "note": "a separate accredited region and procurement path",
+             "source": "https://aws.amazon.com/blogs/publicsector/"},
+        ],
+        when_it_applies="The company names two clearly different buyer "
+                        "groups, and at least one is regulated or "
+                        "enterprise-shaped.",
+        when_it_does_not_apply="Only one buyer group is ever described, or "
+                               "the second is an aspiration with no evidence.",
+        source_refs=[{"title": "curated pattern: segment split",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("segment_split", "regulated_buyer",
+                            "pricing_gated"),
+        disconfirming_signals=(),
+        limitations="Segment language on marketing pages often runs ahead of "
+                    "actual revenue mix.",
+    ),
+    _p(
+        pattern_id="tool_to_system_of_record",
+        name="Point tool → system of record",
+        description="A focused tool absorbs adjacent jobs until it becomes "
+                    "the place the work lives.",
+        mechanism="Each adjacent feature is individually small, but together "
+                  "they move the customer's source of truth. Switching cost "
+                  "rises sharply once other systems read from it — and the "
+                  "product's original sharpness is what pays for that "
+                  "breadth.",
+        historical_examples=[
+            {"name": "Notion",
+             "note": "notes tool absorbed wikis, projects and databases",
+             "source": "https://www.notion.so/blog"},
+            {"name": "Figma",
+             "note": "a design tool became the place design work is stored "
+                     "and reviewed",
+             "source": "https://www.figma.com/blog/"},
+        ],
+        when_it_applies="The company positions itself as replacing several "
+                        "separate tools AND ships multiple product surfaces.",
+        when_it_does_not_apply="The product stays deliberately narrow and "
+                               "integrates rather than absorbs.",
+        source_refs=[{"title": "curated pattern: tool→system of record",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("consolidation", "multi_product",
+                            "developer_surface"),
+        disconfirming_signals=(),
+        limitations="Consolidation claims are marketing language; whether the "
+                    "source of truth actually moved is not visible publicly.",
+    ),
+    _p(
+        pattern_id="buyer_concentration_exposure",
+        name="Concentrated buyer exposure",
+        description="A large share of the business appears to depend on one "
+                    "buyer type whose budget moves for reasons outside the "
+                    "company's control.",
+        mechanism="Regulated and public-sector buyers are sticky and "
+                  "high-value, which makes them attractive and then makes "
+                  "them structural. Procurement cycles, political budgets and "
+                  "accreditation regimes then set the growth rate, and "
+                  "diversification takes years because the second segment "
+                  "buys nothing like the first.",
+        historical_examples=[
+            {"name": "Public-sector-heavy software vendors",
+             "note": "growth tracked appropriation cycles rather than product",
+             "source": "https://www.gao.gov/"},
+        ],
+        when_it_applies="Regulated or government buyers are named prominently "
+                        "AND the company describes distinct segments.",
+        when_it_does_not_apply="Buyers are diversified across many unrelated "
+                               "industries with no regulated concentration.",
+        source_refs=[{"title": "curated pattern: buyer concentration",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("regulated_buyer", "segment_split",
+                            "named_customers"),
+        disconfirming_signals=("pricing_published",),
+        limitations="Without disclosed revenue by segment, concentration is "
+                    "inferred from emphasis, which can mislead.",
+    ),
+    # --- shapes outside software ---------------------------------------------
+    # A conglomerate's evidence is segment reporting, capacity commitments and
+    # disclosed risk, none of which the software-shaped neutral patterns above
+    # can read. The result was a brief with no hypothesis: the reader was told
+    # what the company said about itself and nothing about what it meant.
+    _p(
+        pattern_id="capacity_ahead_of_demand",
+        name="Capacity committed ahead of the demand for it",
+        description="A company commits capital to capacity now against demand "
+                    "it expects later, from buyers it does not control.",
+        mechanism="Capacity is bought in large, slow increments while demand "
+                  "arrives in small, fast ones. Committing early wins share "
+                  "when the forecast holds and strands fixed cost when it "
+                  "does not — and the forecast usually rests on a handful of "
+                  "large customers whose own product cycles set the timing.",
+        historical_examples=[
+            {"name": "Memory and sensor fabrication cycles",
+             "note": "capacity added on forecast, then written down when "
+                     "handset demand moved",
+             "source": "https://www.sec.gov/"},
+            {"name": "Contract manufacturing capacity build-outs",
+             "note": "multi-year fab commitments against customer roadmaps",
+             "source": "https://www.sec.gov/"},
+        ],
+        when_it_applies="The company describes committing capital to capacity "
+                        "AND names a concentrated or cyclical set of buyers "
+                        "for it.",
+        when_it_does_not_apply="Capacity is rented or elastic, or demand is "
+                               "spread across many independent buyers.",
+        source_refs=[{"title": "curated pattern: capacity ahead of demand",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("capacity_investment", "customer_concentration",
+                            "segment_reporting"),
+        disconfirming_signals=("pricing_published",),
+        limitations="Utilisation and order books are not public, so whether "
+                    "committed capacity is actually filled cannot be seen "
+                    "from outside.",
+    ),
+    _p(
+        pattern_id="portfolio_run_as_one",
+        name="Separate businesses run as one portfolio",
+        description="A company reports distinct segments while describing "
+                    "them as a single, deliberately connected portfolio.",
+        mechanism="Owning both what is sold and the channel it reaches people "
+                  "through lets each business subsidise the other's "
+                  "acquisition cost. The same coupling makes per-business "
+                  "accountability harder to read from outside, and a weak "
+                  "segment can be carried far longer than it would survive "
+                  "alone.",
+        historical_examples=[
+            {"name": "Vertically integrated entertainment groups",
+             "note": "content and the device it plays on managed together",
+             "source": "https://www.sec.gov/"},
+            {"name": "Platform holders with first-party content",
+             "note": "hardware margin funded by content attach",
+             "source": "https://www.sec.gov/"},
+        ],
+        when_it_applies="The company reports several segments AND describes "
+                        "owning both the content or product and the channel "
+                        "that distributes it.",
+        when_it_does_not_apply="Segments are unrelated holdings with no "
+                               "described operational connection.",
+        source_refs=[{"title": "curated pattern: portfolio run as one",
+                      "origin": "strategic_pattern_library"}],
+        confidence="moderate",
+        qualifying_signals=("segment_reporting", "content_and_channel",
+                            "multi_product"),
+        disconfirming_signals=(),
+        limitations="Transfers between segments are not disclosed publicly, "
+                    "so which business subsidises which is inferred from "
+                    "structure rather than observed.",
+    ),
 ]
 
 # Hypothesis scaffolds — the reasoning the engine instantiates when a pattern
@@ -399,6 +631,192 @@ HYPOTHESIS_SCAFFOLDS = {
             "and partner apps are not fully public.",
         ],
         "threshold": 2,
+    },
+    # --- domain-neutral scaffolds --------------------------------------------
+    "services_to_product": {
+        "title": "turning a people-delivered service into a repeatable "
+                 "product",
+        "statement": "{company} appears to be converting what it learned "
+                     "delivering work alongside customers into products those "
+                     "customers can run themselves.",
+        "reasoning": "An explicit embedded or forward-deployed delivery model "
+                     "alongside several separately-named products matches the "
+                     "services-to-product mechanism: the engagement teaches "
+                     "the workflow, and the product is the attempt to sell it "
+                     "without the engagement.",
+        "alternatives": [
+            "The products are packaging around what remains a services "
+            "business.",
+            "The delivery model is a go-to-market choice for a product that "
+            "was always a product.",
+        ],
+        "implications": [
+            "Whether to price the product independently of the engagement.",
+            "How much implementation to keep as paid work versus absorb.",
+        ],
+        "gaps": [
+            "Revenue split between services and product is not public.",
+        ],
+        "falsification": [
+            "Published pricing that assumes no implementation engagement.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Whether the next hire is an engineer or an "
+                             "implementation consultant.",
+    },
+    "single_to_multi_segment": {
+        "title": "selling to a second kind of buyer that behaves nothing like "
+                 "the first",
+        "statement": "{company} appears to serve two clearly different buyer "
+                     "groups whose procurement, compliance and support needs "
+                     "pull the organisation in different directions.",
+        "reasoning": "Distinct named segments plus regulated-buyer language "
+                     "and gated pricing match the segment-split mechanism: "
+                     "the second buyer arrives with requirements the first "
+                     "never had.",
+        "alternatives": [
+            "One segment is aspirational marketing rather than real revenue.",
+            "The segments share a single product and no real split exists.",
+        ],
+        "implications": [
+            "Whether to run one roadmap or two.",
+            "Which segment sets the support and compliance bar.",
+        ],
+        "gaps": [
+            "Revenue by segment is not disclosed on public pages.",
+        ],
+        "falsification": [
+            "Evidence that one named segment contributes negligible revenue.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Which buyer the roadmap is allowed to "
+                             "disappoint.",
+    },
+    "tool_to_system_of_record": {
+        "title": "absorbing adjacent tools until the work lives inside it",
+        "statement": "{company} appears to be broadening from a focused tool "
+                     "toward being the place a team's work is stored, which "
+                     "raises switching cost and blunts the original product's "
+                     "sharpness.",
+        "reasoning": "Explicit consolidation language plus several product "
+                     "surfaces and a build-on surface match the "
+                     "tool-to-system-of-record mechanism.",
+        "alternatives": [
+            "The breadth is packaging; the source of truth still lives "
+            "elsewhere.",
+            "Integrations, not absorption, are doing the work.",
+        ],
+        "implications": [
+            "Whether to keep investing in depth or in adjacency.",
+            "How much integration surface to expose to would-be replacements.",
+        ],
+        "gaps": [
+            "Whether customers actually moved their source of truth is not "
+            "observable from outside.",
+        ],
+        "falsification": [
+            "Customers describing it as a companion to a system of record "
+            "rather than the record itself.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Whether the next release deepens the core or "
+                             "adds another surface.",
+    },
+    "buyer_concentration_exposure": {
+        "title": "leaning on a buyer type whose budget it does not control",
+        "statement": "{company}'s public emphasis suggests meaningful "
+                     "dependence on regulated or public-sector buyers, whose "
+                     "purchasing moves on cycles the company cannot "
+                     "influence.",
+        "reasoning": "Prominent regulated-buyer language, named deployments "
+                     "in those environments and an explicit segment split "
+                     "match the buyer-concentration mechanism.",
+        "alternatives": [
+            "Regulated buyers are prominent in marketing but small in "
+            "revenue.",
+            "The commercial segment is already large enough to absorb a "
+            "public-sector slowdown.",
+        ],
+        "implications": [
+            "How much runway to hold against a procurement cycle.",
+            "Whether diversification is a stated goal or an accident.",
+        ],
+        "gaps": [
+            "Revenue concentration is not disclosed on public pages.",
+        ],
+        "falsification": [
+            "Disclosed segment revenue showing no concentration.",
+        ],
+        "threshold": 2,
+        "decision_affected": "How much of the plan may depend on one budget "
+                             "cycle.",
+    },
+    "capacity_ahead_of_demand": {
+        "title": "committing capital to capacity ahead of uncertain demand",
+        "statement": "{company} appears to be committing capital to capacity "
+                     "ahead of demand it does not control, concentrating the "
+                     "outcome in a small number of buyers' product cycles.",
+        "reasoning": "Stated capacity investment, a written-down dependence "
+                     "on a few buyers, and formal segment reporting together "
+                     "match the capacity-ahead-of-demand mechanism: fixed "
+                     "cost is committed in large increments against demand "
+                     "that arrives in small ones.",
+        "alternatives": [
+            "The capacity is pre-sold under long-term agreements, so the "
+            "commitment carries far less risk than it appears to.",
+            "Capacity is being added to replace ageing lines rather than to "
+            "serve growth.",
+        ],
+        "implications": [
+            "Whether a supply commitment should be treated as fixed or "
+            "renegotiable.",
+            "How exposed a plan is to one buyer's product cycle slipping.",
+        ],
+        "gaps": [
+            "Utilisation, order books and take-or-pay terms are not public.",
+        ],
+        "falsification": [
+            "Disclosed long-term purchase commitments covering the new "
+            "capacity.",
+            "Buyer diversification across many independent customers.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Whether to treat committed supply as a fixed "
+                             "cost or a negotiable one.",
+    },
+    "portfolio_run_as_one": {
+        "title": "running separately-reported businesses as a single "
+                 "portfolio",
+        "statement": "{company} reports distinct segments while describing "
+                     "them as one connected portfolio, which makes the "
+                     "performance of any single business hard to read from "
+                     "outside.",
+        "reasoning": "Formal segment reporting alongside language about "
+                     "owning both the content and the channel matches the "
+                     "portfolio mechanism: businesses that subsidise each "
+                     "other are managed together and disclosed apart.",
+        "alternatives": [
+            "The segments are genuinely independent and the portfolio framing "
+            "is investor-relations language rather than operating reality.",
+            "Connections between segments are real but small enough not to "
+            "affect how any one of them should be judged.",
+        ],
+        "implications": [
+            "Which business a partnership or supply agreement actually "
+            "depends on.",
+            "Whether a weak segment is being carried by a strong one.",
+        ],
+        "gaps": [
+            "Inter-segment transfers and shared cost allocations are not "
+            "disclosed.",
+        ],
+        "falsification": [
+            "Segment disclosure showing no material inter-segment revenue.",
+            "A divestment that leaves the remaining segments unaffected.",
+        ],
+        "threshold": 2,
+        "decision_affected": "Which business in the group a commercial "
+                             "relationship actually rests on.",
     },
     "differentiator_commoditization": {
         "title": "watching its original differentiator commoditise",

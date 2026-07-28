@@ -45,9 +45,19 @@ def _tokens(text: str) -> set:
 
 
 def _detect_operation(q: str) -> str:
+    """Which operation the question is asking for.
+
+    Comparison is tried LAST, and only ever wins when the caller can also name
+    something to compare with. Its cues are the loosest in the set — a bare
+    "like" appears in "this seems like a stretch, what argues against it?",
+    which is a request for counter-evidence and was being routed to a
+    comparison against nothing. The answer structure for comparison has no
+    entry in the lead table, so that question did not degrade: it raised
+    KeyError and the reader got an error page for asking a normal question.
+    """
     low = " " + q.lower() + " "
-    for op in ("comparison", "falsification", "contradiction", "implication",
-               "agenda"):
+    for op in ("falsification", "contradiction", "implication", "agenda",
+               "comparison"):
         if any(cue in low for cue in _OP_CUES[op]):
             return op
     return "support"
@@ -164,6 +174,10 @@ def answer_strategic(question: str, report) -> dict:
     obs_by_id = {o["observation_id"]: o for o in r.get("observations", [])}
     operation = _detect_operation(question)
     comparable, cmp_pattern = _detect_comparable(question, r)
+    # A comparison with nothing to compare against is not a comparison. Read it
+    # as the question underneath: what does the evidence say.
+    if operation == "comparison" and not comparable:
+        operation = "support"
 
     # routing: a named comparable pins the hypothesis whose pattern cites it
     hyp = _hyp_by_pattern(r, cmp_pattern) if cmp_pattern else None
@@ -216,7 +230,11 @@ def answer_strategic(question: str, report) -> dict:
         "agenda": "This is likely on the current leadership agenda because "
                   + (hyp.get("why_now") or "recent public signals point to it")
                   + ".",
-    }[operation]
+    }
+    # Total by construction. A routing layer that can name an operation the
+    # answer layer cannot render is one new cue word away from an error page,
+    # and the reader who finds it will have asked something perfectly ordinary.
+    lead = lead.get(operation, lead["support"])
 
     return {
         "conversation_version": CONVERSATION_VERSION, "intent": "EXPLAINED",

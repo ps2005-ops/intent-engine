@@ -178,7 +178,12 @@ def _hypothesis_card(h, obs_by_id, pat_by_id):
         f'<details class="card hypothesis">'
         f'<summary><h3 style="display:inline">{_e(h["title"])}</h3> '
         f'<span class="conf conf-{_e(conf)}">{_e(conf)}</span>'
-        f'<p class="thesis" style="font-size:1rem">{_e(h["statement"])}</p>'
+        # How it is known, beside how much to trust it. Confidence alone left
+        # a reader unable to tell the company's own account from an outside
+        # observation, and those call for different decisions.
+        + (f'<span class="prov">{_e(h["provenance"])}</span>'
+           if is_meaningful(h.get("provenance")) else '')
+        + f'<p class="thesis" style="font-size:1rem">{_e(h["statement"])}</p>'
         + ('<div class="row">'
            + (f'<div class="chip"><b>Why now</b>{_e(h["why_now"])}</div>'
               if is_meaningful(h.get("why_now")) else '')

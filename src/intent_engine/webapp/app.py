@@ -60,6 +60,12 @@ color:var(--muted);margin:1.6rem 0 .35rem;font-weight:700}
 .brief p{margin:0 0 .5rem}
 .brief .stamp{color:var(--muted);font-size:.86rem;margin-bottom:1.2rem}
 .brief .b-part{border-top:1px solid var(--line);padding-top:.2rem}
+.brief .b-headline{background:var(--panel);border:1px solid var(--line);
+border-left:3px solid var(--accent);border-radius:6px;
+padding:.9rem 1rem;margin:0 0 1.1rem}
+.brief .b-headline .hl-does{font-size:1.02rem}
+.brief .b-headline .hl-view{font-weight:600}
+.brief .b-headline .hl-conf{color:var(--muted);font-size:.88rem;margin:0}
 .brief ul,.brief ol{margin:.2rem 0;padding-left:1.2rem}
 .brief li{margin:0 0 .5rem}
 .brief .when{font-size:.78rem;font-weight:700;color:var(--muted);
@@ -1427,11 +1433,14 @@ class WebApp:
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Strategic Intelligence — '
                 f'{_e(report.get("company_name", ""))}</title></head><body>'
-                f'{self._nav(session, csrf)}<main class="brief">'
-                # The way back to the shorter layers, on the longest one —
-                # this is the page a reader is most likely to want out of.
-                f'{self._layer_nav(run_id, "full")}</main>'
-                f'<main>{strat}{actions}{appendix}'
+                f'{self._nav(session, csrf)}'
+                # One <main> per page. The layer nav used to sit in a <main>
+                # of its own, so a screen reader met two main landmarks and
+                # "skip to main content" could land on either — on the longest
+                # page in the product, where getting out matters most.
+                f'<main>'
+                f'<div class="brief">{self._layer_nav(run_id, "full")}</div>'
+                f'{strat}{actions}{appendix}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
 
@@ -1475,11 +1484,15 @@ class WebApp:
         mode = presentation(tier)
         documents = self.ci.store.retrieved(run_id)
         fresh = sum(1 for d in documents if d.get("retrieval_status") == "OK")
-        reused = run_id in self._results and bool(documents)
+        # "Compatible" used to be a word with nothing behind it: any stored
+        # result was served again whatever had changed underneath it. It now
+        # reports an answer that was actually checked.
+        compat = self._cache_compatibility(run_id)
+        state = ("produced by the current version of the product"
+                 if compat["reusable"] else "freshly analysed")
         return (
             f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
-            f'{fresh} source(s) read · '
-            f'{"reusing a compatible earlier analysis" if reused else "fresh"}'
+            f'{fresh} source(s) read · {_e(state)}'
             f' · about a two-minute read</p>'
             f'<p class="stamp"><strong>{_e(mode["label"])}.</strong> '
             f'{_e(mode["summary"])}</p>'
@@ -1515,7 +1528,8 @@ class WebApp:
             return self._redirect(f"/runs/{run_id}/full")
         from intent_engine.strategic_intelligence.brief import build_brief
         as_of, version = self._analysis_stamp(run_id)
-        brief = build_brief(report, as_of=as_of, analysis_version=version)
+        brief = build_brief(report, as_of=as_of, analysis_version=version,
+                            documents=self.ci.store.retrieved(run_id))
         csrf = session["csrf"] if session else ""
 
         def _p(label, value):
@@ -1533,6 +1547,14 @@ class WebApp:
             f'{self._layer_nav(run_id, "brief")}'
             f'<h1>{_e(brief.company)}</h1>'
             f'{self._analysis_provenance(run_id, as_of, version, csrf)}'
+            # The whole answer for a reader who will not scroll: what this
+            # company is, what we think is happening, and how much to trust
+            # it. Everything below is for the reader who continues.
+            + (f'<section class="b-headline">'
+               f'<p class="hl-does">{_e(brief.headline.does)}</p>'
+               f'<p class="hl-view">{_e(brief.headline.view)}</p>'
+               f'<p class="hl-conf">{_e(brief.headline.confidence)}</p>'
+               f'</section>' if is_meaningful(brief.headline.does) else '')
             + _p("The central view", brief.thesis)
             + (f'<section class="b-part"><h2>What supports it</h2>'
                f'<ul class="signals">{signals}</ul></section>'
@@ -2445,7 +2467,26 @@ class WebApp:
             if self.ci.store.approval(run_id) is None:
                 return None
             self._results[run_id] = self._compose(run_id)
+        elif not self._cache_compatibility(run_id)["reusable"]:
+            # A stored analysis is served again only while it still agrees with
+            # the product that would produce it. Otherwise the fixes that
+            # stopped every company being described as a commerce company, or
+            # that capped confidence without an outside source, never reach
+            # anyone whose analysis predates them — they see the old answer
+            # under today's date and cannot tell.
+            self._results[run_id] = self._compose(run_id)
         return self._results.get(run_id)
+
+    def _cache_compatibility(self, run_id) -> dict:
+        """Whether the stored analysis for this run is still this product's
+        answer, and what to tell a reader if it is not."""
+        from intent_engine._version import version_info
+        from intent_engine.company_ingestion.run_compatibility import assess
+        stored = self._results.get(run_id)
+        if stored is None:
+            return {"reusable": False, "changed": [], "reason": ""}
+        return assess(stored,
+                      app_version=version_info().get("app_version", ""))
 
     def _compose(self, run_id):
         """Compose the run, threading the persisted mental model so the report
@@ -2466,7 +2507,21 @@ class WebApp:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])
             self.strategic_memory.publish(
                 domain, report.get("analytics_events", []), run_id=run_id)
-        return result
+        # The last read before a stranger sees it. Attached rather than
+        # applied: a critic that edits is a second author with less context
+        # than the first, and its corrections would reach the reader
+        # unreviewed. What it finds becomes a stated limitation, which is
+        # worth more than a silent fix.
+        if report is not None:
+            from intent_engine.strategic_intelligence.critic import critique
+            result["critique"] = critique(
+                report, documents=self.ci.store.retrieved(run_id))
+        # Record what produced this, so a later reuse can be checked rather
+        # than assumed.
+        from intent_engine._version import version_info
+        from intent_engine.company_ingestion.run_compatibility import stamp
+        return stamp(result,
+                     app_version=version_info().get("app_version", ""))
 
     def _ready(self):
         try:

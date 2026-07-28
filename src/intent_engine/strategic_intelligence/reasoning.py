@@ -37,19 +37,56 @@ def _obs_with_any(observations, wanted) -> list:
     return [o for o in observations if wanted & set(o.signals)]
 
 
+# WHOSE ACCOUNT a source is, which is not the same question as what KIND of
+# page it is. A company's investor relations page and its product page are two
+# source classes and one vantage point: the company, describing itself. Three
+# such pages agreeing is not corroboration, it is a company being consistent —
+# and counting them as diversity is how a claim about how the market sees a
+# company reached "high confidence" on nothing but the company's own writing.
+_VANTAGE_OF = {
+    "company_owned": "the company",
+    "executive_statement": "the company",
+    "investor_material": "the company",
+    "customer_voice": "its customers",
+    "competitor": "a competitor",
+    "independent_reporting": "an independent observer",
+    "historical_pattern": "a historical pattern",
+}
+
+
+def _vantages(support_classes) -> set:
+    return {_VANTAGE_OF.get(c, "an unclassified source")
+            for c in support_classes}
+
+
+def _provenance(support_classes) -> str:
+    """How this claim is known, named for the strongest support behind it."""
+    classes = set(support_classes)
+    if classes & {"independent_reporting", "competitor"}:
+        return "independently corroborated"
+    if "customer_voice" in classes:
+        return "customer-observed"
+    if classes & {"company_owned", "executive_statement", "investor_material"}:
+        return "company-stated"
+    if "historical_pattern" in classes:
+        return "pattern-supported"
+    return "inferred"
+
+
 def _confidence(matched_qual, support_classes, counter_count) -> tuple:
     """Return (level, reasons). Confidence rises with the number of qualifying
-    signals matched and the diversity of source classes supporting them, and
-    is tempered when counter-evidence is present."""
+    signals matched and the number of distinct VANTAGE POINTS supporting them,
+    and is tempered when counter-evidence is present."""
     base = len(matched_qual)
-    diversity = len(support_classes)
+    vantages = _vantages(support_classes)
+    diversity = len(vantages)
     reasons = [
         f"{base} qualifying signal(s) matched: {', '.join(sorted(matched_qual))}",
-        f"supported by {diversity} source class(es): "
-        f"{', '.join(sorted(support_classes))}",
+        f"supported from {diversity} vantage point(s): "
+        f"{', '.join(sorted(vantages))}",
     ]
-    only_company = support_classes == {"company_owned"}
-    independent = support_classes & set(_INDEPENDENT_CLASSES)
+    only_company = vantages == {"the company"}
+    independent = set(support_classes) & set(_INDEPENDENT_CLASSES)
     if only_company:
         reasons.append("all support comes from company-owned pages, which is "
                        "one-sided; independent corroboration is missing")
@@ -69,9 +106,14 @@ def _confidence(matched_qual, support_classes, counter_count) -> tuple:
         level = "low"
     else:
         level = "speculative"
-    # one-sided or well-countered claims are not allowed to read as high
-    if only_company and level == "high":
+    # High confidence is a claim about the world, and the company's own account
+    # of itself cannot establish one however many of its pages agree. This is
+    # the hard cap: without a vantage point outside the company, the ceiling is
+    # moderate whatever the signal count reaches.
+    if not independent and level == "high":
         level = "moderate"
+        reasons.append("capped below high: no source outside the company "
+                       "corroborates this")
     if counter_count >= max(1, base) and _CONF_RANK[level] > 1:
         level = "low"
     return level, reasons
@@ -164,6 +206,7 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
         comparables=tuple(e.get("name", "")
                           for e in pattern.historical_examples),
         evidence_roles=tuple(roles),
+        provenance=_provenance(support_classes),
     )
     h.validate()
     return h
@@ -209,6 +252,68 @@ def _build_blind_spots(observations):
     return blind
 
 
+# --- portfolio selection ------------------------------------------------------
+# Showing five hypotheses because five pattern rules matched is not analysis,
+# it is a search result. The observed complaint was precise: the same evidence
+# reappeared under several headings, the same mechanism was restated, and the
+# strongest insight ended up buried among near-duplicates.
+#
+# A reader can hold one central view and a couple of things that qualify it.
+# So the portfolio is capped, and a hypothesis earns its place only by adding
+# something the ones above it did not already say.
+MAX_DISPLAYED_HYPOTHESES = 3
+# Sharing evidence is normal and often correct — two real forces can rest on
+# the same facts. What is NOT useful is a hypothesis that rests on almost
+# exactly the same evidence AND leads to the same decision: that is one
+# hypothesis printed twice, and it is what buried the strong insight.
+NEAR_IDENTICAL_EVIDENCE = 0.85
+
+
+def _decision_key(hypothesis) -> str:
+    first = (hypothesis.decision_implications or [""])[0]
+    return " ".join(str(first).lower().split())[:80]
+
+
+def _is_restatement(candidate, chosen) -> bool:
+    """True when a candidate adds neither new evidence nor a new decision."""
+    mine = set(candidate.supporting_observation_ids)
+    if not mine:
+        return True
+    for other in chosen:
+        theirs = set(other.supporting_observation_ids)
+        if not theirs:
+            continue
+        overlap = len(mine & theirs) / len(mine)
+        if overlap >= NEAR_IDENTICAL_EVIDENCE and \
+                _decision_key(candidate) == _decision_key(other):
+            return True
+    return False
+
+
+def select_portfolio(hypotheses, *, limit=MAX_DISPLAYED_HYPOTHESES) -> list:
+    """One primary thesis, then hypotheses that add something new.
+
+    Ordered by confidence and evidence weight, then filtered so a reader is
+    never handed the same claim twice under different pattern names.
+    Deterministic: same inputs, same portfolio.
+    """
+    ranked = sorted(
+        hypotheses,
+        key=lambda h: (_CONF_RANK[h.confidence],
+                       len(h.supporting_observation_ids),
+                       len(h.counter_observation_ids),
+                       h.pattern_id),
+        reverse=True)
+    chosen = []
+    for candidate in ranked:
+        if len(chosen) >= limit:
+            break
+        if chosen and _is_restatement(candidate, chosen):
+            continue
+        chosen.append(candidate)
+    return chosen
+
+
 def _build_questions(hypotheses, observations):
     obs_by_id = {o.observation_id: o for o in observations}
     questions = []
@@ -237,10 +342,15 @@ def _build_questions(hypotheses, observations):
 
 def _build_thesis(company_name, hypotheses, blind_spots):
     if not hypotheses:
+        # Flagged rather than left for a caller to recognise by its wording.
+        # Downstream gates need to tell "the product declined to form a view
+        # and said so" apart from "the product formed a view", and matching on
+        # the sentence would break the moment the sentence is edited.
         return {"view": f"There is not yet enough approved strategic evidence "
                         f"to form a defensible outside-in view of "
                         f"{company_name}.",
-                "transition": "", "tension": "", "why_care": ""}
+                "transition": "", "tension": "", "why_care": "",
+                "view_withheld": True}
     top = hypotheses[0]
     tension = (blind_spots[0].observed_tension if blind_spots
                else "how much to invest ahead of the transition")
@@ -560,10 +670,7 @@ def build_strategic_report(*, company_name, observations,
             kept.append(h)
     hypotheses = kept
 
-    hypotheses.sort(
-        key=lambda h: (_CONF_RANK[h.confidence],
-                       len(h.supporting_observation_ids)), reverse=True)
-    hypotheses = hypotheses[:5]
+    hypotheses = select_portfolio(hypotheses)
 
     fired_pattern_ids = {h.pattern_id for h in hypotheses}
     used_patterns = [p for p in patterns if p.pattern_id in fired_pattern_ids]
