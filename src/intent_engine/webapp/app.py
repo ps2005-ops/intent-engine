@@ -95,6 +95,56 @@ font-size:.95rem;cursor:pointer}
 </style>
 """
 
+# The floor every page meets, whatever else it brings. Deliberately small and
+# additive — it grants visible focus, a readable dark scheme, a responsive
+# minimum and print rules, and takes no design decisions that could fight a
+# page's own stylesheet. Applied last so it wins on the properties it sets.
+_A11Y_CSS = """
+<style>
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+outline:3px solid #1d4ed8;outline-offset:2px}
+img,svg,video,table{max-width:100%}
+pre,code{overflow-x:auto;max-width:100%}
+@media (max-width:600px){
+body{font-size:16px}
+main{padding-left:14px;padding-right:14px}
+table{display:block;overflow-x:auto}}
+@media (prefers-color-scheme:dark){
+:root{color-scheme:dark}
+body{background:#0f141c;color:#f3f4f6}
+a{color:#7aa2ff}
+:where(h1,h2,h3,h4,h5,h6){color:#f3f4f6}
+:where(.card,.chip,.agenda,details,fieldset){background:#161c26;
+border-color:#3a4454}
+:where(.muted,.state,.limitation,small){color:#c3cad6}}
+@media print{
+nav,form,.actions,.b-act,.layers{display:none!important}
+body{background:#fff;color:#000}}
+</style>
+"""
+
+_ONBOARDING_CSS = """
+<style>
+.onboarding{border:1px solid var(--line);border-radius:14px;
+background:var(--panel);padding:20px 22px;margin:12px 0 22px}
+.onboarding h1{font-size:1.4rem;margin:0 0 .2rem}
+.onboarding h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;
+color:var(--muted);margin:1.2rem 0 .3rem;font-weight:700}
+.onboarding .ob-part{border-top:0}
+.onboarding ul{margin:.2rem 0;padding-left:1.15rem}
+.onboarding li{margin:0 0 .35rem}
+.onboarding dl.glossary{margin:.3rem 0}
+.onboarding dl.glossary dt{font-weight:700;margin-top:.6rem}
+.onboarding dl.glossary dd{margin:.1rem 0 0;color:var(--muted)}
+.onboarding .ob-dismiss{margin-top:1.4rem}
+.onboarding .ob-dismiss a,.onboarding .ob-dismiss button{display:inline-block;
+padding:10px 18px;border-radius:9px;background:var(--accent);
+color:var(--accent-ink);text-decoration:none;font-weight:600;border:0;
+font-size:.95rem;cursor:pointer}
+@media print{.onboarding{display:none}}
+</style>
+"""
+
 _SECURITY_HEADERS = [
     ("X-Content-Type-Options", "nosniff"),
     ("X-Frame-Options", "DENY"),
@@ -254,6 +304,10 @@ class WebApp:
             return self._ok_json(version_info())
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
+        if path == "/onboarding/dismiss" and method == "POST":
+            if session is not None:
+                session["onboarding_dismissed"] = True
+            return self._redirect("/")
         if path == "/login":
             return (self._login_page(None) if method == "GET"
                     else self._login_post(form))
@@ -393,17 +447,26 @@ class WebApp:
         return None
 
     def _stylize(self, body: str) -> str:
-        """Ensure every hand-built page carries the shared product stylesheet
-        (and a responsive viewport). Pages that already embed their own
-        <style> (the presentation-layer landing/result renderers) are left
-        untouched, so the CSS is never applied twice."""
-        if "<style" in body or "</head>" not in body:
+        """Ensure every page carries the shared stylesheet and the
+        accessibility baseline.
+
+        The baseline is applied even to pages that embed their own <style>.
+        Skipping those was how the least-styled page in the product stayed
+        that way: the synthetic demo result renders its own CSS, so it was
+        exempted from the shared one — and it is the first result a guest ever
+        sees. The baseline only adds visible focus, a readable dark scheme, a
+        responsive floor and print rules, so it cannot fight a page's own
+        design; the full stylesheet is still applied only where absent.
+        """
+        if "</head>" not in body:
             return body
         head_extra = ""
         if 'name="viewport"' not in body:
             head_extra += ('<meta name="viewport" content="width=device-width,'
                            'initial-scale=1">')
-        head_extra += f"<style>{_APP_CSS}</style>"
+        if "<style" not in body:
+            head_extra += f"<style>{_APP_CSS}</style>"
+        head_extra += _A11Y_CSS
         return body.replace("</head>", head_extra + "</head>", 1)
 
     def _html(self, body, *, status="200 OK", extra_headers=()):
@@ -490,9 +553,27 @@ class WebApp:
                                 f'<input type="hidden" name="csrf" '
                                 f'value="{_e(csrf)}"><button type="submit">', 1)
             if session.get("anonymous"):
+                # First contact. Someone who has just clicked "try the demo"
+                # does not yet know what the product is, and a company-name
+                # box explains nothing. Shown once, dismissed for the session.
+                intro = ''
+                if not session.get("onboarding_dismissed"):
+                    intro = (
+                        _BRIEF_CSS + _ONBOARDING_CSS
+                        + '<div class="brief">'
+                        + self._onboarding_html(dismissible=False)
+                        .replace('</section>',
+                                 f'<form action="/onboarding/dismiss" '
+                                 f'method="post" class="ob-dismiss">'
+                                 f'<input type="hidden" name="csrf" '
+                                 f'value="{_e(csrf)}">'
+                                 f'<button type="submit">Got it — start an '
+                                 f'analysis</button></form></section>')
+                        + '</div>')
                 page = page.replace(
                     '<main>',
-                    '<main><p role="status"><strong>Demo mode.</strong> '
+                    '<main>' + intro + '<p role="status"><strong>Demo mode.'
+                    '</strong> '
                     'You are in an anonymous, isolated demo session — no '
                     'sign-in, no access to anyone else\'s data, no share '
                     'links. Analyze a company below.</p>', 1)
@@ -514,30 +595,86 @@ class WebApp:
                                 note + '<form action="/analyze"', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
 
+    # One screen, written for a business owner who has never seen this and is
+    # not going to read a manual. No internal terminology, nothing about
+    # pipelines or evidence families — what it does, how, what it does not do,
+    # and how to use it. The old version described the product's early-access
+    # limitations to someone who had not yet learned what the product was.
+    _ONBOARDING = (
+        ("What this does",
+         "It builds a briefing on a company from public evidence — the kind "
+         "of preparation you would do before a meeting, done for you and "
+         "linked back to its sources.",
+         []),
+        ("How it works",
+         "",
+         ["It finds official and permitted public sources for the company.",
+          "It checks whether the evidence is broad enough to be worth a "
+          "briefing.",
+          "It organises what it found into products, customers, strategy, "
+          "risks and market signals.",
+          "It writes a short executive briefing you can read in two minutes.",
+          "It links every important finding back to the source it came from.",
+          "It marks clearly where it is reasoning rather than reporting."]),
+        ("What it does not do",
+         "",
+         ["It has no access to anything inside the company.",
+          "It knows nothing about private meetings or internal plans.",
+          "Not every company publishes enough for a useful briefing, and it "
+          "will say so rather than guess.",
+          "Where it reasons beyond the evidence, that is a hypothesis, not a "
+          "fact."]),
+        ("How to use it",
+         "",
+         ["Start with the brief — one page, the central view and what "
+          "supports it.",
+          "Move through the slides if you are presenting or want it in "
+          "order.",
+          "Open the evidence behind anything you would repeat out loud.",
+          "Ask follow-up questions in plain English."]),
+    )
+
+    # The five words that would otherwise be jargon on first contact.
+    _GLOSSARY = (
+        ("Outside-in", "Built only from what the company and others have "
+                       "published publicly — never from inside knowledge."),
+        ("Confidence", "How much the evidence actually supports a statement. "
+                       "Low confidence is not a hedge; it means treat this as "
+                       "a lead, not a fact."),
+        ("Hypothesis", "A possible explanation that fits the evidence but is "
+                       "not established. Worth testing, not worth repeating "
+                       "as fact."),
+        ("Contradiction", "Two credible sources that disagree. Shown rather "
+                          "than resolved, because which one is right is often "
+                          "the interesting question."),
+        ("Limited analysis", "The company publishes too little for a full "
+                             "briefing. What was found is still shown, with "
+                             "what was missing."),
+    )
+
+    def _onboarding_html(self, *, dismissible=True, run_id=""):
+        blocks = ""
+        for heading, lead, items in self._ONBOARDING:
+            bullets = ("<ul>" + "".join(f"<li>{_e(i)}</li>" for i in items)
+                       + "</ul>") if items else ""
+            blocks += (f'<section class="ob-part"><h2>{_e(heading)}</h2>'
+                       + (f'<p>{_e(lead)}</p>' if lead else '')
+                       + bullets + '</section>')
+        glossary = "".join(f'<dt>{_e(term)}</dt><dd>{_e(meaning)}</dd>'
+                           for term, meaning in self._GLOSSARY)
+        dismiss = ('<p class="ob-dismiss"><a href="/">Got it — start an '
+                   'analysis</a></p>') if dismissible else ''
+        return (f'<section class="onboarding" aria-label="How this works">'
+                f'<h1>Before you start</h1>{blocks}'
+                f'<section class="ob-part"><h2>A few words used here</h2>'
+                f'<dl class="glossary">{glossary}</dl></section>'
+                f'{dismiss}</section>')
+
     def _onboarding(self, session):
-        if session is None:
-            return self._redirect("/login")
-        csrf = session["csrf"]
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<meta name="viewport" content="width=device-width,'
-                f'initial-scale=1"><title>Getting started</title></head><body>'
-                f'{self._nav(session, csrf)}<main>'
-                '<h1>Getting started</h1>'
-                '<p>Founder Intelligence produces an evidence-backed, '
-                'outside-in view of a company. In early access, live '
-                'ingestion of arbitrary company websites is not yet '
-                'available — start with the synthetic demo company to see '
-                'the complete experience: proof of understanding first, '
-                'then perspective, then a cited conversation.</p>'
-                '<ol><li>Run the demo from the <a href="/">home page</a> '
-                '(use any name and the demo website, or just submit the '
-                'form).</li><li>Open each section and expand the evidence '
-                'behind any claim.</li><li>Ask a follow-up question — every '
-                'answer cites its sources.</li><li>Create a share link for '
-                'your cofounder, and revoke it when done.</li></ol>'
-                f'<p>Password reset: {_e(PASSWORD_RESET_STATUS)}.</p>'
-                '</main></body></html>')
-        return self._html(body)
+        csrf = session["csrf"] if session else ""
+        body = (f'{_BRIEF_CSS}{_ONBOARDING_CSS}<main class="brief">'
+                f'{self._onboarding_html()}</main>')
+        return self._html(self._page("Before you start", body, session, csrf))
 
     def _login_page(self, message):
         note = f'<p role="alert">{_e(message)}</p>' if message else ""
