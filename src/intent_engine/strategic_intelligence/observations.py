@@ -452,6 +452,85 @@ def _is_weak(excerpt: str, title: str, signals: list) -> bool:
     return generic_hits >= 2 and len(signals) <= 1
 
 
+#: below this, a page has no substance worth reasoning over
+MIN_ANALYST_EXCERPT_CHARS = 120
+
+
+def derive_analyst_evidence(documents) -> list:
+    """Evidence for the grounded analyst -- every strategic page, signal or not.
+
+    `derive_observations` below requires a controlled-vocabulary signal match,
+    because a signal is the unit the PATTERN LIBRARY matches against. For the
+    analyst that requirement is not just unnecessary, it is harmful: the
+    analyst reads excerpts and reasons over them, so a document that matches no
+    keyword is not uninformative to it.
+
+    The cost of conflating the two was measured. An independent analysis of
+    console economics -- hardware sold near cost, margin recovered through
+    software attach and subscriptions, and a named contrast with a competitor's
+    day-one first-party strategy -- matched zero signals and was dropped
+    entirely. That is the single most valuable document in the set, and the one
+    an independent vantage point is hardest to get.
+
+    So the two consumers get two derivations from the same documents. This one
+    filters on whether a human would consider the page evidence at all: is it a
+    strategic page, and does it actually say something.
+    """
+    evidence, seen = [], set()
+    for doc in documents:
+        key = doc.get("content_hash") or _normalize_url(
+            doc.get("final_url", ""))
+        norm = _normalize_url(doc.get("final_url", ""))
+        if key in seen or (norm and norm in seen):
+            continue
+        seen.add(key)
+        if norm:
+            seen.add(norm)
+
+        title = doc.get("title", "")
+        if page_kind(doc.get("final_url", ""), title) != "strategic":
+            continue
+
+        body = (doc.get("text_content") or "").strip()
+        excerpt = (body or doc.get("meta_description") or "").strip()
+        if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
+            continue
+
+        source_class = doc.get("source_class") or _SOURCE_CLASS.get(
+            doc.get("source_type"), "company_owned")
+        text = " ".join(filter(None, [
+            title, doc.get("meta_description", ""), body]))
+        signals = _detect_signals(text, source_class)
+        weak = _is_weak(excerpt, title, signals)
+        dominant = signals[0] if signals else ""
+        entity = (title or norm).split("—")[0].strip()[:80]
+        evidence.append(StrategicObservation(
+            observation_id=f"obs-{doc.get('source_id', '')}",
+            text=(f"{entity or 'The company'} "
+                  f"{_SIGNAL_LABEL[dominant]}" if dominant
+                  else excerpt[:200]),
+            observation_type=_TYPE_FOR_SIGNAL.get(dominant, "messaging"),
+            source_refs=[{"subsystem": "company_ingestion",
+                          "artifact_type": "retrieved_source",
+                          "artifact_id": doc.get("source_id", ""),
+                          "source_class": source_class}],
+            confidence="moderate",
+            freshness=doc.get("freshness", "CURRENT"),
+            directly_observed=True,
+            signals=tuple(signals),
+            source_class=source_class,
+            excerpt=excerpt[:1200],
+            source_title=title or source_class,
+            origin=doc.get("final_url", ""),
+            date=(doc.get("retrieved_at", "") or "")[:10],
+            strategic_signal=_SIGNAL_LABEL.get(dominant, ""),
+            relevance=_SIGNAL_RELEVANCE.get(dominant, "retrieved evidence"),
+            entity=entity,
+            weak=weak,
+            evidence_quality="weak" if weak else "strong"))
+    return evidence
+
+
 def derive_observations(documents) -> list:
     """Build StrategicObservations from retrieved ingestion documents.
 

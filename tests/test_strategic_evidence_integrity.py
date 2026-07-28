@@ -184,6 +184,45 @@ COMMERCE_DOCS = [
 ]
 
 
+# --- 7. the analyst gets evidence the pattern library would discard --------
+
+_ANALYST_DOC = _doc(
+    "i1", "Industry analysis: console economics",
+    "Analysts note PlayStation hardware has historically been sold near or "
+    "below cost early in a cycle, with margin recovered through software "
+    "attach and subscriptions. Microsoft has placed first-party titles into "
+    "Game Pass on release day; Sony has largely declined to do so.",
+    url="https://analyst.test/console-economics",
+    source_class="independent_reporting")
+
+
+def test_independent_analysis_is_dropped_by_signal_matching():
+    """Documents the gap this exists to close: the single most valuable
+    source in a run matches no controlled-vocabulary signal."""
+    assert derive_observations([_ANALYST_DOC]) == []
+
+
+def test_analyst_evidence_keeps_it():
+    from intent_engine.strategic_intelligence.observations import (
+        derive_analyst_evidence,
+    )
+    ev = derive_analyst_evidence([_ANALYST_DOC])
+    assert len(ev) == 1
+    assert ev[0].source_class == "independent_reporting"
+    assert "Game Pass" in ev[0].excerpt
+
+
+def test_analyst_evidence_still_excludes_careers_and_thin_pages():
+    from intent_engine.strategic_intelligence.observations import (
+        derive_analyst_evidence,
+    )
+    careers = _doc("c9", "Careers", "We are hiring across many teams and "
+                   "functions in every region where we operate today.",
+                   url="https://example.com/careers/")
+    thin = _doc("t9", "Home", "Welcome.", url="https://example.com/")
+    assert derive_analyst_evidence([careers, thin]) == []
+
+
 def test_sony_produces_no_services_to_product_hypothesis():
     from intent_engine.strategic_intelligence.reasoning import (
         build_strategic_report,
