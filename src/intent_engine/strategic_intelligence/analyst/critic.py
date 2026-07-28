@@ -87,10 +87,25 @@ def _normalise_number(raw: str) -> str:
     return re.sub(r"[\s,]", "", (raw or "").lower())
 
 
+def _is_calendar_year(raw: str) -> bool:
+    """A year is a temporal reference, not a claim about the company.
+
+    Caught in cross-sector validation: a bank analysis that said a loan book
+    "reprices through 2026" was rejected as an invented figure, discarding an
+    otherwise sound analysis. Dates are how you say WHEN, and the analyst is
+    required to say when.
+    """
+    s = _normalise_number(raw)
+    return s.isdigit() and len(s) == 4 and 1900 <= int(s) <= 2100
+
+
 def _numbers_in(text: str) -> set:
     out = set()
     for m in _NUM_RE.finditer(text or ""):
-        out.add(_normalise_number(m.group(0)))
+        raw = m.group(0)
+        if _is_calendar_year(raw):
+            continue
+        out.add(_normalise_number(raw))
     return out
 
 

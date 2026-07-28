@@ -177,6 +177,27 @@ def test_invented_number_is_rejected():
     assert any(f.check == "invented_number" for f in findings)
 
 
+def test_calendar_years_are_not_invented_figures():
+    """Found in cross-sector validation: a sound bank analysis was thrown away
+    because it said a loan book reprices through 2026."""
+    ok = _good_analysis()
+    ok["insights"][0]["why_now"] = ("Tiered pricing is live and the catalogue "
+                                    "commitment runs through 2026 (obs-1).")
+    _, state, findings = analyse("Sony Interactive Entertainment", SIE_OBS,
+                                 client=RecordedClient(ok))
+    assert not any(f.check == "invented_number" for f in findings)
+    assert state == ResultState.COMPLETE
+
+
+def test_a_real_figure_is_still_caught_alongside_a_year():
+    bad = _good_analysis()
+    bad["insights"][0]["why_now"] = ("By 2026 subscription revenue reached "
+                                     "$4,200 million.")
+    _, _, findings = analyse("Sony Interactive Entertainment", SIE_OBS,
+                             client=RecordedClient(bad))
+    assert any(f.check == "invented_number" for f in findings)
+
+
 def test_number_that_appears_in_evidence_is_allowed():
     obs = list(SIE_OBS) + [
         _obs("obs-4", "Disclosed margin",
