@@ -168,7 +168,7 @@ def _hypothesis_card(h, obs_by_id, pat_by_id):
               else '')
            + '</div>'
            if is_meaningful(h.get("why_now")) or is_meaningful(
-               (h.get("decision_implications") or [""])[0]) else '') + 
+               (h.get("decision_implications") or [""])[0]) else '') +
         f'<div class="row"><div class="chip"><b>Strongest support</b>{strongest_sup}</div>'
         f'<div class="chip"><b>Strongest counterpoint</b>{strongest_con}</div></div>'
         f'<p class="muted">▸ Expand for full reasoning, comparison, and all evidence.</p>'
