@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Merge commit | `ff4daad` (PR #10, merge commit, not squashed) |
-| Deployed commit | `ff4daad` — confirmed via the live `/version` endpoint |
+| Merge commit | `ff4daad` (PR #10) then `ec337f5` (PR #11 hotfix) — both merge commits, not squashed |
+| Deployed commit | `ec337f5` — confirmed via the live `/version` endpoint |
 | Previous production commit | `5e9133b` |
-| **Rollback point** | `5e9133b` — `git revert -m 1 ff4daad`, then redeploy |
+| **Rollback point** | `5e9133b` — `git revert -m 1 ec337f5 && git revert -m 1 ff4daad`, then redeploy |
 | Tests at merge | 2,494 passed, 14 skipped |
 | Customer simulation | 113/113 |
 | Environment | `production`, `boot_count: 1`, no boot loop, PDF extraction available |
@@ -38,6 +38,16 @@ by this release.
 
 The live smoke test found that every citation on the presentation answered 404:
 the evidence route searched only legacy claim ids while the deck cites
-observation ids. Fixed on `fix/citations-resolve` (PR #11) with a regression
-test confirmed to fail without it. **Not merged.** Production currently serves
-`ff4daad`, in which slide citations do not open.
+observation ids. Fixed on `fix/citations-resolve` (PR #11) with a regression test confirmed to
+fail without it. **Merged as `ec337f5` and deployed.** Re-verified live: all
+six citations on a Palantir deck return 200 with real evidence and no
+traceback.
+
+## Live smoke test on `ec337f5`
+
+Palantir: brief by default, deck opens, one slide visible, arrow navigation,
+no `:has()` in served CSS, description reads "We make products for
+human-driven analysis of real-world data", follow-up answers without internal
+wording, all citations resolve. Shopify: 9 slides, none empty, description is
+not navigation or legal text. Sony: declines honestly in 332 words, renders no
+empty finished-looking report. Unknown run: styled 404, no traceback.
