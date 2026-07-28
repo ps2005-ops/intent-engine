@@ -174,6 +174,22 @@ _STATUS_ONLY = ("privately held", "publicly traded", "publicly listed",
                 "do not publish", "does not publish", "no financial results",
                 "wholly owned subsidiary", "limited company")
 
+# A company's claim to be the best or the biggest. It is the company's opinion
+# of itself, it is not checkable from the page it is on, and it is exactly what
+# a reader would repeat out loud believing the product had established it.
+#
+# Northwind's about page says it is "the largest cold-chain carrier in the
+# region" and, in the very next sentence, "a small independent operator
+# competing against the largest carriers". The product picked the flattering
+# one and made it the opening line.
+_SELF_SUPERLATIVE = (
+    "the largest", "the leading", "leading provider", "the biggest",
+    "number one", "the best", "world-class", "market leader",
+    "the most trusted", "the premier", "the fastest-growing", "unrivalled",
+    "unrivaled", "the undisputed", "next-generation solutions",
+    "best-in-class", "industry-leading",
+)
+
 # Openings that are about the company's feelings or its founding, not its
 # business. Both are true and neither answers the question a stranger asked.
 _NOT_A_DESCRIPTION = ("our mission", "our vision", "our goal", "we believe",
@@ -220,6 +236,10 @@ def _describes_the_business(sentence: str, company: str) -> int:
         score -= 2
     if any(s in text for s in _STATUS_ONLY):
         score -= 3
+    if any(s in text for s in _SELF_SUPERLATIVE):
+        # Not a description of the business — a claim about its standing, made
+        # by the only party who cannot settle it.
+        score -= 5
     if _reads_like_navigation(sentence):
         score -= 5
     # "Shopify Plus serves enterprise merchants…" is a sentence about a
@@ -332,7 +352,13 @@ def _what_it_does(company, report, documents) -> str:
                 score += 1          # written to answer exactly this question
             if score > best_score:
                 best, best_score = sentence, score
-    if best:
+    # A floor, not just a ranking. Every candidate scoring at or below the
+    # baseline means nothing on these pages describes the business — the
+    # company published mission statements and superlatives and no sentence
+    # about what it sells. Returning the least-bad marketing line would tell a
+    # reader "Momentum Global's mission is to transform how the world works"
+    # as though it were an answer.
+    if best and best_score > 1:
         return fit_to_words(best, 34)
     # No identity page. Say that rather than inventing a description; a reader
     # can tell the difference between "we did not find this" and silence.

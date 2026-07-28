@@ -499,6 +499,16 @@ SITES = {s.key: s for s in (SHOPIFY, PALANTIR, SONY, LINEAR, NOTION,
                             HOSTILE_CO, BLOCKED_CO, GHOST_CO)}
 
 
+def all_sites() -> dict:
+    """Every fixture, including the second adversarial set.
+
+    Imported lazily so `adversarial` can build on `Site` and `_page` from here
+    without the two modules importing each other at module scope.
+    """
+    from intent_engine.product_eval.adversarial import ADVERSARIAL_SITES
+    return dict(SITES, **ADVERSARIAL_SITES)
+
+
 def site_transport(site: Site):
     """A transport that serves this fixture and nothing else."""
     def _tx(url, timeout):

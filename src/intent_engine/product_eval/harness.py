@@ -22,7 +22,9 @@ from intent_engine.product_eval.personas import (
 from intent_engine.product_eval.scorecard import (
     THRESHOLDS, _words, score_report,
 )
-from intent_engine.product_eval.sites import SITES, site_transport
+from intent_engine.product_eval.sites import SITES, all_sites, site_transport
+
+ALL_SITES = all_sites()
 
 EVAL_SET_VERSION = "product-eval.v1"
 
@@ -149,6 +151,36 @@ CASE_MATRIX = (
     ("thirty_seconds", "cold_start", "shopify"),
     ("mobile_user", "mobile", "shopify"),
     ("first_time_visitor", "mobile", "brightledger"),
+    # --- second adversarial pass -------------------------------------------
+    # None of the cases above are reused. A suite that has been optimised
+    # against measures how well the code fits it, so these are new companies
+    # and new pathologies: a site that serves one page for every path, a
+    # company that publishes in another language, a page that contradicts
+    # itself in consecutive sentences, a site whose markup never closes, a
+    # company whose name is a common word, metadata that disagrees with the
+    # body, one enormous page, and a site that says nothing at length.
+    ("first_time_visitor", "strong_evidence", "apex"),
+    ("startup_tester", "startup_no_filings", "apex"),
+    ("knows_nothing", "strong_evidence", "stale_meta"),
+    ("sceptical_expert", "contradictory", "stale_meta"),
+    ("smb_owner", "weak_evidence", "one_pager"),
+    ("busy_founder", "weak_evidence", "one_pager"),
+    ("investor", "duplicate_pages", "echo_site"),
+    ("sceptical_expert", "duplicate_pages", "echo_site"),
+    ("risk_seeker", "contradictory", "contradictory"),
+    ("multinational_tester", "contradictory", "contradictory"),
+    ("enterprise_exec", "followup_hostile", "contradictory"),
+    ("technical_founder", "js_heavy", "broken_markup"),
+    ("product_manager", "strong_evidence", "broken_markup"),
+    ("multinational_tester", "unreadable_language", "non_english"),
+    ("first_time_visitor", "unreadable_language", "non_english"),
+    ("simple_explanation", "weak_evidence", "all_sizzle"),
+    ("consultant", "weak_evidence", "all_sizzle"),
+    ("thirty_seconds", "weak_evidence", "all_sizzle"),
+    ("meeting_prep", "followup_natural", "apex"),
+    ("knows_company", "followup_simplify", "apex"),
+    ("mobile_user", "mobile", "contradictory"),
+    ("five_minutes", "presentation", "apex"),
 )
 
 
@@ -173,7 +205,7 @@ def _compose(company_key: str):
     )
     from intent_engine.webapp.app import WebApp
 
-    site = SITES[company_key]
+    site = ALL_SITES.get(company_key) or SITES[company_key]
     tmp = tempfile.mkdtemp(prefix="peval-")
     ci = CompanyIngestionService(os.path.join(tmp, "ci.jsonl"),
                                  transport=site_transport(site),

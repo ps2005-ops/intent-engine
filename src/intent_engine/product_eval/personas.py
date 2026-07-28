@@ -188,6 +188,15 @@ SCENARIOS = (
              notes="a result from an incompatible version is not reused"),
     Scenario("cold_start", "first request against a cold deployment",
              tags=("performance",)),
+    # Evidence that was retrieved perfectly and cannot be read. Distinct from
+    # sparse evidence: there is plenty of it, and declining is still correct.
+    Scenario("unreadable_language", "company publishes in another language",
+             expects_limited=True, tags=("coverage",),
+             notes="retrieval succeeded; the analysis could not read it"),
+    # A site that serves the same page for every path. Distinct from sparse
+    # evidence too: every count looks healthy and there is one document.
+    Scenario("duplicate_pages", "every page is the same page",
+             expects_limited=True, tags=("coverage",)),
     Scenario("low_bandwidth", "slow connection, little patience",
              tags=("performance", "layout")),
 )

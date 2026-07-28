@@ -21,8 +21,15 @@ UNREGISTERED_IDENTITY = {"entity_resolved": False, "status": "UNKNOWN",
 
 
 def _doc(source_type="product", source_class="company_owned",
-         text="Brightlake sells a warehouse routing platform to mid-market "
-              "distributors, updated in March 2026.", status="OK"):
+         text=None, status="OK"):
+    # Distinct text per source type. The default used to be one sentence
+    # shared by every document, which made "three sources" in a test mean
+    # three copies of the same sentence — and the gate now counts that as the
+    # one piece of evidence it is. The tests meant three DIFFERENT sources.
+    if text is None:
+        text = (f"Brightlake's {source_type} page: Brightlake sells a "
+                f"warehouse routing platform to mid-market distributors, "
+                f"updated in March 2026.")
     return {"source_type": source_type, "source_class": source_class,
             "text_content": text, "retrieval_status": status,
             "title": f"{source_type} page"}

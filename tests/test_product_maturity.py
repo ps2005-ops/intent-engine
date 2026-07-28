@@ -531,3 +531,148 @@ def test_50_a_backend_completion_is_not_a_product_pass():
         documents=[{"source_class": "company_owned", "source_type": "about"}],
         readiness={"may_synthesize": True})
     assert score.outcome != "PRODUCT_READY"
+
+
+# --- second adversarial pass --------------------------------------------------
+# Five defects the first suite could not find, each pinned by the case that
+# found it. The fixtures they run against share nothing with the first set.
+ADVERSARIAL = ("apex", "stale_meta", "one_pager", "echo_site", "contradictory",
+               "broken_markup", "non_english", "all_sizzle")
+
+
+@pytest.fixture(scope="module")
+def adversarial():
+    out = {}
+    for key in ADVERSARIAL:
+        ci, run_id, result = _compose(key)
+        documents = ci.store.retrieved(run_id)
+        brief, slides = _brief_and_slides(result, documents)
+        out[key] = {"result": result, "documents": documents, "brief": brief,
+                    "slides": slides,
+                    "report": result.get("strategic_report"),
+                    "readiness": result.get("readiness") or {}}
+    return out
+
+
+def test_a1_one_page_served_for_every_path_is_one_source(adversarial):
+    """A misconfigured site served its homepage for nine paths. Every coverage
+    gate read it as breadth; it is one document wearing nine hats."""
+    entry = adversarial["echo_site"]
+    assert len(entry["documents"]) >= 8          # nine were retrieved
+    assert entry["readiness"]["document_count"] == 1   # one was counted
+    assert entry["readiness"]["may_synthesize"] is False
+
+
+def test_a2_duplicate_detection_survives_differing_urls():
+    from intent_engine.company_ingestion.readiness import usable_documents
+    same = "Vantage Systems is a technology company delivering solutions."
+    docs = [{"retrieval_status": "OK", "text_content": same,
+             "final_url": f"https://v.example/{n}"} for n in range(5)]
+    assert len(usable_documents(docs)) == 1
+
+
+def test_a3_unreadable_evidence_is_declined_not_silently_dropped(adversarial):
+    """Retrieval worked; the analysis could not read it. Producing nothing and
+    saying nothing was the defect."""
+    entry = adversarial["non_english"]
+    assert entry["documents"]                     # retrieval succeeded
+    assert entry["readiness"]["readable_share"] < 0.6
+    assert entry["readiness"]["may_synthesize"] is False
+    assert "readable_language" in entry["readiness"]["failed_checks"]
+
+
+def test_a4_terse_english_is_not_mistaken_for_another_language():
+    """The first version of this check accused an ordinary English company,
+    because short marketing prose contains almost no function words. Refusing
+    a real company is worse than the silence it replaced."""
+    from intent_engine.company_ingestion.readiness import is_english
+    assert is_english({"text_content":
+                       "Northwind Freight operates a temperature-controlled "
+                       "road network across northern Europe, moving "
+                       "pharmaceutical and food cargo under continuous "
+                       "monitoring at every stage of transit."})
+    assert not is_english({"text_content":
+                           "Die Sonnenberg Werke fertigen Präzisionsgetriebe "
+                           "für Windkraftanlagen und industrielle Antriebe an "
+                           "drei Standorten in Deutschland und Polen."})
+
+
+def test_a5_a_company_does_not_get_to_call_itself_the_largest(adversarial):
+    """Northwind's about page says it is the largest carrier in the region and,
+    in the next sentence, a small independent operator. The product used to
+    pick the flattering one and open with it."""
+    does = adversarial["contradictory"]["brief"].headline.does.lower()
+    assert "largest" not in does
+    assert "operates a temperature-controlled" in does
+
+
+def test_a6_a_company_that_says_nothing_is_not_quoted_saying_it(adversarial):
+    """Every page well-formed, every page empty of substance. The least-bad
+    marketing line is not an answer."""
+    does = adversarial["all_sizzle"]["brief"].headline.does
+    assert "not described on any page" in does
+    assert "mission" not in does.lower()
+
+
+def test_a7_unclosed_markup_does_not_lose_the_page(adversarial):
+    entry = adversarial["broken_markup"]
+    assert entry["report"] is not None
+    assert "inspection drones" in entry["brief"].headline.does.lower()
+
+
+def test_a8_a_stale_meta_description_does_not_win(adversarial):
+    """The meta tag claims AI solutions for every industry; the body says data
+    quality tooling. The body is right."""
+    does = adversarial["stale_meta"]["brief"].headline.does.lower()
+    assert "artificial intelligence solutions for every industry" not in does
+    assert "data quality" in does
+
+
+def test_a9_a_common_word_company_name_still_resolves(adversarial):
+    entry = adversarial["apex"]
+    assert entry["report"] is not None
+    assert "scheduling software" in entry["brief"].headline.does.lower()
+
+
+def test_a10_navigation_is_removed_at_the_parser():
+    from intent_engine.company_ingestion.parsing import parse_html
+    html = ("<html><head><title>Acme</title></head><body>"
+            "<nav><a href=/a>What to build</a><a href=/b>How to build</a></nav>"
+            "<main><p>Acme builds routing software that plans delivery routes "
+            "for logistics operators across Europe.</p></main>"
+            "<footer><p>Privacy policy Terms of service</p></footer>"
+            "</body></html>")
+    text = parse_html(html)["text"]
+    assert "What to build" not in text
+    assert "Privacy policy" not in text
+    assert "routing software" in text
+
+
+def test_a11_chrome_removal_never_empties_a_page():
+    """Some sites wrap everything in <header>. A page reduced to nothing is
+    worse than a page with a menu in it."""
+    from intent_engine.company_ingestion.parsing import parse_html
+    body = ("Tiny Co provides bookkeeping for independent contractors and "
+            "files their quarterly returns. ") * 4
+    html = f"<html><body><header><p>{body}</p></header></body></html>"
+    assert "bookkeeping" in parse_html(html)["text"]
+
+
+def test_a12_a_slide_never_cites_a_single_character():
+    """`list("obs-1")` turns one citation into five, and each rendered as an
+    invitation to check a source that does not exist."""
+    from intent_engine.strategic_intelligence.slides import _bullet
+    assert _bullet("x", evidence="an excerpt, not an id")["evidence"] == []
+    assert _bullet("x", evidence="obs-src-1")["evidence"] == ["obs-src-1"]
+    assert _bullet("x", evidence=["obs-a", None])["evidence"] == ["obs-a"]
+
+
+@pytest.mark.parametrize("key", ADVERSARIAL)
+def test_a13_the_layers_agree_on_every_adversarial_company(adversarial, key):
+    from intent_engine.strategic_intelligence.consistency import check
+    entry = adversarial[key]
+    if entry["report"] is None:
+        pytest.skip("this fixture declines to produce a report, correctly")
+    verdict = check(entry["report"], brief=entry["brief"],
+                    slides=entry["slides"], documents=entry["documents"])
+    assert verdict["consistent"], verdict["problems"]

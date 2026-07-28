@@ -76,11 +76,90 @@ _QUARTER = re.compile(r"\bq[1-4]\b|\bquarter\b|\bfiscal year\b|\bfy\d{2,4}\b")
 
 
 def usable_documents(documents) -> list:
-    """Documents that actually carry readable text. A 403 with a status line is
-    not evidence, and neither is an empty 200."""
-    return [d for d in documents
-            if d.get("retrieval_status") == "OK"
-            and len((d.get("text_content") or "").strip()) >= 40]
+    """Documents that actually carry readable text, counted once each.
+
+    A 403 with a status line is not evidence, and neither is an empty 200 —
+    and neither are nine copies of the same page. A misconfigured site that
+    serves its homepage for every path produced nine "sources" across seven
+    "families", which every coverage gate read as breadth. It is one document
+    wearing seven hats, and a report built on it says one thing seven times.
+
+    Deduplicated on the text itself rather than on a content hash, because the
+    same page served under nine URLs differs in its canonical tag and its
+    hash, and is identical in the only respect that matters.
+    """
+    seen, out = set(), []
+    for document in documents:
+        if document.get("retrieval_status") != "OK":
+            continue
+        text = (document.get("text_content") or "").strip()
+        if len(text) < 40:
+            continue
+        fingerprint = " ".join(text.lower().split())[:400]
+        if fingerprint in seen:
+            continue
+        seen.add(fingerprint)
+        out.append(document)
+    return out
+
+
+# Function words and letters that belong to a language this analysis cannot
+# read. The test looks for these RATHER than for English markers, and the
+# difference matters: a first attempt tested for the presence of English words
+# and declared a perfectly ordinary English company unreadable, because short
+# marketing prose ("Northwind Freight operates a temperature-controlled road
+# network") happens to contain almost no function words. Refusing a real
+# company is far worse than the silence it was meant to replace, so the burden
+# of proof sits on the accusation.
+_FOREIGN_MARKERS = (
+    " der ", " die ", " das ", " und ", " für ", " mit ", " von ", " ist ",
+    " eine ", " einen ", " sich ", " nicht ", " werden ",       # de
+    " le ", " la ", " les ", " des ", " est ", " sont ", " pour ", " dans ",
+    " nous ", " sur ",                                          # fr
+    " el ", " los ", " las ", " una ", " para ", " con ", " son ", " nuestra ",
+    " nuestro ",                                                # es
+    " il ", " lo ", " gli ", " per ", " con ", " sono ", " nostra ",   # it
+    " de ", " het ", " een ", " voor ", " zijn ",               # nl
+)
+_FOREIGN_LETTERS = "äöüßàâçéèêëîïôùûñõáíóúåæø"
+# Below this share of documents, the evidence is not in a language this
+# analysis can read. Set above a half deliberately: at exactly half, a report
+# would be built on the readable pages while silently ignoring as much again.
+MIN_ENGLISH_SHARE = 0.6
+
+
+def is_english(document: dict) -> bool:
+    """Whether this document is readable by the analysis.
+
+    True unless there is positive evidence otherwise — an unreadable document
+    stops a report, so the test must be one that fires on foreign text and not
+    on terse English.
+    """
+    text = " " + " ".join((document.get("text_content") or "").lower().split()) \
+        + " "
+    if len(text) < 120:
+        return True                     # too short to judge; do not accuse it
+    foreign_words = sum(1 for m in _FOREIGN_MARKERS if m in text)
+    accented = sum(1 for ch in text if ch in _FOREIGN_LETTERS)
+    # Both signals, or a great deal of one. A single stray "de" in an English
+    # sentence about a French customer is not a language.
+    return not (foreign_words >= 4 or accented >= 6
+                or (foreign_words >= 2 and accented >= 2))
+
+
+def english_share(documents) -> float:
+    """How much of this evidence is in a language the analysis can read.
+
+    A company that publishes only in German produced four usable sources, no
+    brief, no hypothesis and no slide, and said nothing about why. Retrieval
+    worked perfectly; the analysis simply had nothing to match on. Silence is
+    the wrong answer to that — "we could not read this company's evidence" is
+    a finding, and a reader can act on it.
+    """
+    documents = list(documents or ())
+    if not documents:
+        return 1.0
+    return sum(1 for d in documents if is_english(d)) / len(documents)
 
 
 def is_dated(document: dict) -> bool:
@@ -201,6 +280,7 @@ def assess_readiness(*, documents, identity=None, failures=(),
     dominant, dominant_share = _share(counts, total)
     units = slide_units(documents)
     dated = [d for d in usable if is_dated(d)]
+    readable = english_share(usable)
 
     # Identity is a precondition, not a check: a report about nobody in
     # particular has nothing to be right or wrong about.
@@ -254,6 +334,11 @@ def assess_readiness(*, documents, identity=None, failures=(),
                total == 0 or dominant_share <= MAX_FAMILY_SHARE,
                (f"{int(dominant_share * 100)}% of the evidence is "
                 f"'{dominant}'" if dominant else "no evidence")),
+        _check("readable_language", readable >= MIN_ENGLISH_SHARE,
+               "this company publishes in a language this analysis cannot "
+               "read, so its evidence was retrieved but not understood"
+               if readable < MIN_ENGLISH_SHARE else
+               "the evidence is in a language this analysis can read"),
     ]
     # A check this mode does not require cannot block a full report. It is
     # still reported, because "no investor material" is worth knowing about a
@@ -264,7 +349,8 @@ def assess_readiness(*, documents, identity=None, failures=(),
     retry_plan = _retry_plan(missing_families, failures, attempt)
 
     material = _material_level(total=total, families=families, units=units,
-                               failed=failed, expects=expects)
+                               failed=failed, expects=expects,
+                               readable=readable)
     state = _decide(identity_ok=identity_ok, material=material,
                     retry_plan=retry_plan)
 
@@ -289,6 +375,7 @@ def assess_readiness(*, documents, identity=None, failures=(),
         "dominant_family": dominant,
         "dominant_share": round(dominant_share, 3),
         "dated_source_count": len(dated),
+        "readable_share": round(readable, 3),
         "slide_units": units,
         "missing_families": missing_families,
         "retry_plan": retry_plan,
@@ -363,7 +450,8 @@ def _retry_plan(missing_families, failures, attempt) -> dict:
     }
 
 
-def _material_level(*, total, families, units, failed, expects=None) -> str:
+def _material_level(*, total, families, units, failed, expects=None,
+                    readable=1.0) -> str:
     """How much this evidence can honestly carry: 'full', 'limited', 'none'.
 
     Deliberately independent of whether a retry is worth running. Those are
@@ -371,6 +459,12 @@ def _material_level(*, total, families, units, failed, expects=None) -> str:
     one more look" as "refuse to say anything" would suppress a genuinely
     useful three-family view, which is its own kind of dishonesty.
     """
+    # Evidence that was retrieved but not understood cannot carry a report at
+    # any level. Producing nothing and saying nothing is the failure this
+    # replaces: the reader deserves "we could not read this company's
+    # evidence", which is a finding they can act on.
+    if readable < MIN_ENGLISH_SHARE:
+        return "none"
     if not failed:
         return "full"
     # A small business genuinely has fewer distinct subjects to present, so the

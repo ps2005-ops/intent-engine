@@ -32,8 +32,13 @@ _MAIN = {"main", "article"}
 
 # Chrome removal must never empty a page. Some sites wrap everything in
 # <header>, and a page reduced to nothing is a worse outcome than a page with
-# a menu in it — so the stripped text is used only when enough of it survives.
-MIN_MAIN_TEXT_CHARS = 200
+# a menu in it — so the stripped text is used only when something survives.
+#
+# Deliberately the same floor `usable_documents` applies: "survived" means
+# there is a document here, not "there is a lot here". Set higher, a short but
+# perfectly good <main> loses to the whole page including its menu, which is
+# the failure this exists to prevent rather than a safeguard against it.
+MIN_MAIN_TEXT_CHARS = 40
 # Below this much block-level body text, a page is treated as a hydration shell
 # and its server-rendered state is read as well. Sites that genuinely serve
 # their content as HTML clear this easily (Shopify's /about extracts 3.3k), so
