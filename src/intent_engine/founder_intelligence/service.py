@@ -130,12 +130,35 @@ class FounderIntelligenceService:
         an older discovery policy or quality ruleset must not be served as if
         the current pipeline had produced it.
         """
+        from intent_engine._version import version_info
+        from intent_engine.company_ingestion.entities import (
+            ENTITY_REGISTRY_VERSION,
+        )
+        from intent_engine.company_ingestion.records import PARSER_VERSION
+        from intent_engine.founder_intelligence.identity import (
+            IDENTITY_VERSION,
+        )
+        from intent_engine.strategic_intelligence.brief import BRIEF_VERSION
+        from intent_engine.strategic_intelligence.slides import SLIDES_VERSION
         return "|".join([
+            # The deployed application itself. Without it, a code change that
+            # altered wording but bumped no component version would serve an
+            # old run as if the current build had produced it.
+            f"app={version_info().get('app_version', '')}",
             f"analysis={ANALYSIS_VERSION}",
+            # Identity resolution: if the entity registry changes, a run that
+            # resolved "Sony" to a subsidiary must not be reused now that it
+            # resolves to the group.
+            f"identity={IDENTITY_VERSION}+{ENTITY_REGISTRY_VERSION}",
             f"discovery={DISCOVERY_POLICY_VERSION}",
+            # Extraction: a parser change alters what the same page yields.
+            f"extraction={PARSER_VERSION}",
             f"evidence={EVIDENCE_TAXONOMY_VERSION}",
             f"quality={QUALITY_RULES_VERSION}",
             f"synthesis={SYNTHESIS_VERSION}",
+            # Presentation: the brief and the deck ARE the product now, so a
+            # change in how they are built is a change in what the user gets.
+            f"presentation={BRIEF_VERSION}+{SLIDES_VERSION}",
         ])
 
     def _record(self, event_type, *, run_id, company_domain, actor_type="system",

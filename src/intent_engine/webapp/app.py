@@ -361,6 +361,8 @@ class WebApp:
             return self._feedback(session, parts[1], form)
         if route == ("POST", "runs", 3) and parts[2] == "retry":
             return self._retry_evidence(session, parts[1])
+        if route == ("POST", "runs", 3) and parts[2] == "fresh":
+            return self._fresh_analysis(session, parts[1])
         if parts and parts[0] in ("learning", "dashboard", "assistant") \
                 and session is None:
             return self._redirect("/login")
@@ -570,6 +572,28 @@ class WebApp:
                                  f'<button type="submit">Got it — start an '
                                  f'analysis</button></form></section>')
                         + '</div>')
+                # Prepared examples, offered up front. A guest with no company
+                # in mind types something arbitrary and meets the weakest case
+                # the product has; these are the ones that are known to work.
+                from intent_engine.company_ingestion.demo_tiers import (
+                    GOLDEN_COMPANIES, GOLDEN, presentation,
+                )
+                golden_mode = presentation(GOLDEN)
+                golden = "".join(
+                    f'<form action="/analyze" method="post" class="golden">'
+                    f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+                    f'<input type="hidden" name="consent" value="1">'
+                    f'<input type="hidden" name="company_name" '
+                    f'value="{_e(c["name"])}">'
+                    f'<input type="hidden" name="website" '
+                    f'value="{_e(c["website"])}">'
+                    f'<button type="submit">{_e(c["name"])}</button>'
+                    f'<span class="why">{_e(c["why"])}</span></form>'
+                    for c in GOLDEN_COMPANIES)
+                intro += (f'<section class="golden-list" aria-label="Prepared '
+                          f'examples"><h2>{_e(golden_mode["label"])}s</h2>'
+                          f'<p>{_e(golden_mode["summary"])}</p>{golden}'
+                          f'</section>')
                 page = page.replace(
                     '<main>',
                     '<main>' + intro + '<p role="status"><strong>Demo mode.'
@@ -1342,6 +1366,58 @@ class WebApp:
              if key == current else f'<a href="{_e(href)}">{_e(label)}</a>')
             for key, label, href in links) + '</nav>')
 
+    def _analysis_provenance(self, run_id, as_of, version, csrf):
+        """When this ran, on what, in which mode, and how to get a fresh one.
+
+        A briefing with no date is a briefing whose staleness the reader cannot
+        judge, and one that silently reused a cached run is a briefing whose
+        freshness they have been misled about. Both are shown.
+        """
+        from intent_engine.company_ingestion.demo_tiers import (
+            classify, presentation,
+        )
+        identity = self.ci.entity_identity(run_id) or {}
+        result = self._results.get(run_id) or {}
+        readiness = (result.get("readiness") or {}).get("state", "")
+        tier = classify(entity_id=identity.get("entity_id", ""),
+                        website=(self.ci.run_meta(run_id) or {}).get(
+                            "website", ""),
+                        readiness_state=readiness)
+        mode = presentation(tier)
+        documents = self.ci.store.retrieved(run_id)
+        fresh = sum(1 for d in documents if d.get("retrieval_status") == "OK")
+        reused = run_id in self._results and bool(documents)
+        return (
+            f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
+            f'{fresh} source(s) read · '
+            f'{"reusing a compatible earlier analysis" if reused else "fresh"}'
+            f' · about a two-minute read</p>'
+            f'<p class="stamp"><strong>{_e(mode["label"])}.</strong> '
+            f'{_e(mode["summary"])}</p>'
+            f'<form action="/runs/{_e(run_id)}/fresh" method="post" '
+            f'class="freshen"><input type="hidden" name="csrf" '
+            f'value="{_e(csrf)}">'
+            f'<button type="submit">Run a fresh analysis</button>'
+            f'<span class="why"> — ignores anything cached and retrieves '
+            f'again. Analysis version <code>{_e(version)}</code>.</span>'
+            f'</form>')
+
+    def _fresh_analysis(self, session, run_id):
+        """Deliberately bypass the compatible-result cache.
+
+        The point of the button is that the user does not have to trust our
+        judgement about whether the cached run is still good. A stale
+        low-quality report must never be able to trap someone with no way out
+        of it.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._error_page(404, "no such run for this account")
+        meta = self.ci.run_meta(run_id) or {}
+        self._results.pop(run_id, None)
+        form = {"consent": "1", "company_name": meta.get("company_name", ""),
+                "website": meta.get("website", ""), "csrf": session["csrf"]}
+        return self._analyze(session, form)
+
     def _brief_page(self, session, run_id):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
@@ -1367,8 +1443,7 @@ class WebApp:
             f'{_BRIEF_CSS}<main class="brief">'
             f'{self._layer_nav(run_id, "brief")}'
             f'<h1>{_e(brief.company)}</h1>'
-            f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
-            f'about a two-minute read</p>'
+            f'{self._analysis_provenance(run_id, as_of, version, csrf)}'
             + _p("The central view", brief.thesis)
             + (f'<section class="b-part"><h2>What supports it</h2>'
                f'<ul class="signals">{signals}</ul></section>'
