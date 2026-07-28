@@ -235,6 +235,8 @@ class WebApp:
             return self._share_revoke(session, parts[1], form)
         if route == ("POST", "runs", 3) and parts[2] == "feedback":
             return self._feedback(session, parts[1], form)
+        if route == ("POST", "runs", 3) and parts[2] == "retry":
+            return self._retry_evidence(session, parts[1])
         if parts and parts[0] in ("learning", "dashboard", "assistant") \
                 and session is None:
             return self._redirect("/login")
@@ -825,6 +827,14 @@ class WebApp:
                 return self._redirect(f"/runs/{run_id}/sources")
             if result.get("status") == "FAILED" and not result.get("sections"):
                 return self._failed_run_page(session, run_id)
+            # The gate said no. There is no strategic report to render, and a
+            # report-shaped page with the findings removed is exactly the
+            # "empty but finished-looking" artefact this must never produce.
+            # Show what was found, what was missing, and what to do next.
+            readiness = result.get("readiness") or {}
+            if readiness and not readiness.get("may_synthesize", True):
+                return self._insufficient_evidence_page(session, run_id,
+                                                        result)
         else:
             result = self._result(run_id)
         if result is None:
@@ -878,6 +888,135 @@ class WebApp:
                   f'preview</a></p></section></main>')
         page = page.replace("</main>", extras, 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
+
+    def _has_untried_sources(self, run_id) -> bool:
+        """Whether any discovered source has neither been retrieved nor
+        failed — i.e. whether a second look has anywhere to go."""
+        candidates = self.ci.store.candidates(run_id)
+        if not candidates:
+            return False
+        retrieved = {d.get("original_url") for d in
+                     self.ci.store.retrieved(run_id)}
+        retrieved |= {d.get("final_url") for d in
+                      self.ci.store.retrieved(run_id)}
+        failed_ids = {f.get("candidate_id")
+                      for f in self.ci.store.failures(run_id)}
+        return any(c["candidate_id"] not in failed_ids
+                   and c["url"] not in retrieved for c in candidates)
+
+    def _retry_evidence(self, session, run_id):
+        """One more targeted pass at the specific missing evidence.
+
+        Recomposition is what does the work: `compose_with_quality` gathers
+        evidence to sufficiency, approving only candidates already discovered
+        for this run and never re-requesting a URL that failed. So this is a
+        genuine second look, not a page refresh dressed up as one — and the
+        budget inside it is finite, so it cannot become a loop.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._error_page(404, "no such run for this account")
+        try:
+            self._results[run_id] = self._compose(run_id)
+        except IngestionError as exc:
+            return self._error_page(400, str(exc))
+        return self._redirect(f"/runs/{run_id}")
+
+    def _insufficient_evidence_page(self, session, run_id, result):
+        """The honest alternative to an empty report.
+
+        A reader who gets this must be able to answer three questions without
+        asking anyone: what DID it find, what was it missing, and what can I do
+        now. The last one matters most — a dead end with no next step reads as
+        a broken product, which is why every route out is offered explicitly.
+        """
+        csrf = session["csrf"] if session else ""
+        readiness = result.get("readiness") or {}
+        note = result.get("readiness_explanation") or {}
+        meta = self.ci.run_meta(run_id) or {}
+        company = meta.get("company_name", "this company")
+
+        def _ul(items, empty=""):
+            rows = "".join(f"<li>{_e(str(i))}</li>" for i in items if i)
+            return f"<ul>{rows}</ul>" if rows else empty
+
+        found = _ul(note.get("found", []),
+                    "<p class='unavailable'>No usable public source could be "
+                    "read.</p>")
+        # Evidence that WAS retrieved is never discarded just because there is
+        # too little of it to support a briefing. It is the reader's, it cost a
+        # real fetch, and seeing it is how they judge whether to add more.
+        read_html = "".join(
+            f'<li><a href="{_e(d["final_url"])}" rel="nofollow noopener">'
+            f'{_e(d.get("title") or d["final_url"])}</a></li>'
+            for d in self.ci.store.retrieved(run_id)
+            if d.get("retrieval_status") == "OK")
+        if read_html:
+            found += (f'<h3>Sources that were read</h3><ul>{read_html}</ul>')
+        missing = _ul(note.get("missing", []))
+        blockers = _ul(note.get("blockers", [])[:5])
+        failures = self._failure_rows(run_id)
+        failed_html = (f"<h3>Sources that could not be read</h3>{failures}"
+                       if failures else "")
+
+        # Every one of these is a real, working next step — not a consolation.
+        # The retry button is offered only when there is genuinely somewhere
+        # new to look. The composition path already spends its own targeted
+        # retry budget before it ever gets here, so offering "try again"
+        # unconditionally would hand the reader a button that can only repeat
+        # itself — the most corrosive kind of dead end, because it looks like
+        # progress. It becomes live again once a source has been added.
+        actions = []
+        if self._has_untried_sources(run_id):
+            actions.append(
+                (f'/runs/{run_id}/retry', 'post',
+                 'Look again for the missing evidence',
+                 'Runs one more targeted search for the specific kinds of '
+                 'source that are missing, skipping everything that already '
+                 'failed.'))
+        actions += [
+            ('/', 'get', 'Run a fresh analysis',
+             'Start again from scratch, ignoring anything cached.'),
+            (f'/runs/{run_id}/sources', 'get', 'Add an official source',
+             'If you know an official page, report or filing, add it and the '
+             'analysis will use it.'),
+            ('/', 'get', 'Correct the company',
+             'If this is the wrong entity — a subsidiary rather than the '
+             'group, or a similarly named company — enter it again.'),
+            ('/', 'get', 'Try a prepared company',
+             'Palantir and Shopify are validated end to end and show the '
+             'full experience.'),
+        ]
+        action_html = "".join(
+            (f'<form action="{_e(url)}" method="post" class="action">'
+             f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+             f'<button type="submit">{_e(label)}</button>'
+             f'<p class="why">{_e(why)}</p></form>')
+            if method == 'post' else
+            (f'<p class="action"><a href="{_e(url)}">{_e(label)}</a>'
+             f'<br><span class="why">{_e(why)}</span></p>')
+            for url, method, label, why in actions)
+
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Not enough public evidence — '
+            f'{_e(company)}</title></head><body>'
+            f'{self._nav(session, csrf)}<main>'
+            f'<h1>Not enough public evidence for {_e(company)}</h1>'
+            f'<p class="lead">{_e(note.get("headline", ""))} '
+            f'Rather than show a briefing that looks complete and is not, '
+            f'here is exactly where it stands.</p>'
+            f'<h2>What was found</h2>'
+            f'<p class="state">{note.get("source_count", 0)} usable '
+            f'source(s).</p>{found}'
+            f'<h2>What was missing</h2>{missing}{blockers}'
+            f'{failed_html}'
+            f'<h2>What you can do</h2>{action_html}'
+            f'<p class="limitation">A company can be perfectly healthy and '
+            f'still publish little in public. Missing evidence is a statement '
+            f'about what could be read, not about the company.</p>'
+            f'</main></body></html>')
+        return self._html(body)
 
     def _legacy_sections_html(self, run_id, result):
         """The legacy executive-overview + evidence-library HTML (used inline
