@@ -227,8 +227,10 @@ def test_anonymous_runs_demo_end_to_end(tmp_path):
     app = _make(tmp_path)
     c = _start_demo(app)
     run_url = _run_demo(c)
-    status, _, body = c.request("GET", run_url + "/progress")
-    assert status == "200 OK" and "COMPLETE" in body
+    status, headers, body = c.request("GET", run_url + "/progress")
+    # finished runs go straight to the presentation now
+    assert status.startswith("303"), status
+    assert headers["Location"].endswith("/slides"), headers["Location"]
     status, _, body = c.request("GET", run_url)
     assert status == "200 OK"
     claim_id = body.split("/evidence/")[1].split('"')[0]
@@ -446,10 +448,14 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
     c.app = app2
     assert app2.auth._sessions == {}                 # nothing in memory yet
 
-    # the same signed cookie is transparently restored — no login redirect
-    status, _, body = c.request("GET", f"/runs/{run_id}/progress")
+    # the same signed cookie is transparently restored — no login redirect.
+    # A finished run continues on to the presentation; the guarantee under
+    # test is that it is NOT sent to /login.
+    status, hdrs2, body = c.request("GET", f"/runs/{run_id}/progress")
+    assert hdrs2.get("Location", "") != "/login"
+    assert status.startswith("303") and hdrs2["Location"].endswith("/slides")
+    status, _, body = c.request("GET", hdrs2["Location"])
     assert status == "200 OK"
-    assert "Open the result" in body                 # COMPLETE/PARTIAL only
     # the restored session is the same anonymous identity, still anonymous
     restored = app2.auth.session(c.sid())
     assert restored["anonymous"] is True and restored["user_id"] == anon_uid
@@ -562,7 +568,9 @@ def test_failed_progress_page_offers_no_result_link(tmp_path):
     app, c, run_id = _make_failed_real_run(tmp_path)
     status, _, body = c.request("GET", f"/runs/{run_id}/progress")
     assert status == "200 OK"
-    assert "FAILED" in body
+    # The heading must state the failure plainly; the old raw enum badge
+    # was replaced, not the honesty it carried.
+    assert "could not be completed" in body
     assert "Open the result" not in body             # no fake result path
     assert "could not be completed" in body
     assert "Start a new analysis" in body            # safe start-over
@@ -692,9 +700,9 @@ def test_incident_render_redeploy_midrun_failed_tesla_run(tmp_path):
         "/progress")
     assert app_a.ci.store.run_state(run_id) == "FAILED"      # Tesla 403 → FAILED
 
-    # progress on the OLD instance: honest FAILED, no fake "Open the result"
+    # progress on the OLD instance: honest failure, no fake "Open the result"
     status, _, body = c.request("GET", f"/runs/{run_id}/progress")
-    assert status == "200 OK" and "FAILED" in body
+    assert status == "200 OK" and "could not be completed" in body
     assert "Open the result" not in body
 
     # ==> Deploying... : a brand-new process takes over on the same disk+secret

@@ -92,8 +92,12 @@ def test_full_required_journey(app):
     csrf = _login(c)
     # start demo run → progress
     run_url = _run_demo(c, csrf)
-    status, _, body = c.request("GET", run_url + "/progress")
-    assert status == "200 OK" and "COMPLETE" in body
+    status, headers, body = c.request("GET", run_url + "/progress")
+    # A finished run no longer stops on a status page: it opens the
+    # presentation. Presentation-first is the product decision; this is the
+    # journey asserting it rather than the old "Open the result" click.
+    assert status.startswith("303"), status
+    assert headers["Location"].endswith("/slides"), headers["Location"]
     # result — Company Understanding present, no company score
     status, _, body = c.request("GET", run_url)
     assert status == "200 OK"
