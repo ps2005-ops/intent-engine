@@ -676,3 +676,40 @@ def test_a13_the_layers_agree_on_every_adversarial_company(adversarial, key):
     verdict = check(entry["report"], brief=entry["brief"],
                     slides=entry["slides"], documents=entry["documents"])
     assert verdict["consistent"], verdict["problems"]
+
+
+# --- browser and accessibility contracts --------------------------------------
+# Found by loading the real pages in a browser rather than by reading the code.
+def test_b1_the_presentation_has_a_top_level_heading():
+    """Every slide is an <h2>. Without an <h1> the page outline begins at the
+    second level and a screen-reader user never learns whose deck this is."""
+    from intent_engine.strategic_intelligence.slides import render_deck
+    deck = render_deck([{"id": "a", "title": "One", "kind": "content",
+                         "bullets": [{"text": "A bullet", "evidence": [],
+                                      "date": ""}], "note": ""}],
+                       company="Acme")
+    assert "<h1" in deck
+    assert "Acme" in deck.split("<h1", 1)[1][:120]
+
+
+def test_b2_the_hidden_heading_stays_in_the_accessibility_tree():
+    """display:none would remove it from the tree too, leaving the page with
+    no heading again."""
+    from intent_engine.strategic_intelligence.slides import _CSS
+    rule = _CSS.split(".deck-title{", 1)[1].split("}", 1)[0]
+    assert "display:none" not in rule
+    assert "clip-path" in rule or "clip:" in rule
+
+
+def test_b3_the_deck_declares_small_screen_rules_and_print_rules():
+    from intent_engine.strategic_intelligence.slides import _CSS
+    assert "@media (max-width" in _CSS
+    assert "@media print" in _CSS
+    assert "prefers-color-scheme" in _CSS
+
+
+def test_b4_focus_is_visible_on_every_interactive_surface():
+    from intent_engine.strategic_intelligence.slides import _CSS
+    from intent_engine.webapp.app import _A11Y_CSS, _BRIEF_CSS
+    for sheet in (_CSS, _BRIEF_CSS, _A11Y_CSS):
+        assert ":focus-visible" in sheet

@@ -1433,11 +1433,14 @@ class WebApp:
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Strategic Intelligence — '
                 f'{_e(report.get("company_name", ""))}</title></head><body>'
-                f'{self._nav(session, csrf)}<main class="brief">'
-                # The way back to the shorter layers, on the longest one —
-                # this is the page a reader is most likely to want out of.
-                f'{self._layer_nav(run_id, "full")}</main>'
-                f'<main>{strat}{actions}{appendix}'
+                f'{self._nav(session, csrf)}'
+                # One <main> per page. The layer nav used to sit in a <main>
+                # of its own, so a screen reader met two main landmarks and
+                # "skip to main content" could land on either — on the longest
+                # page in the product, where getting out matters most.
+                f'<main>'
+                f'<div class="brief">{self._layer_nav(run_id, "full")}</div>'
+                f'{strat}{actions}{appendix}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
 

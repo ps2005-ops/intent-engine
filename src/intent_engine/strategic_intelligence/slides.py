@@ -276,6 +276,12 @@ font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 color:var(--ink);background:var(--bg);max-width:900px;margin:0 auto;
 padding:8px 16px 32px}
 .deck *{box-sizing:border-box}
+/* Available to assistive technology, absent from the visual design. Not
+   display:none, which would remove it from the accessibility tree too and
+   leave the page with no heading again. */
+.deck-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;
+border:0}
 .deck .slide{display:none}
 /* Order matters. The first slide is shown unconditionally, then hidden again
    only once some OTHER slide is targeted. Written the other way round — hiding
@@ -422,7 +428,14 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
             f'<p class="meta">{_e(company)} · analysed {_e(as_of)} · '
             f'analysis version {_e(analysis_version)}</p>'
             f'</section>')
-    return (_CSS + f'<div class="deck" role="region" '
+    # A visually-hidden <h1>. The deck had no top-level heading at all: each
+    # slide is an <h2>, so a screen-reader user met a page whose outline began
+    # at the second level and never learned whose presentation they were in.
+    # Hidden rather than shown because the deck's design puts the company name
+    # in the status bar, and a duplicate title would push the first slide down
+    # the screen for everyone else.
+    return (_CSS + f'<h1 class="deck-title">{_e(company)} — presentation</h1>'
+            f'<div class="deck" role="region" '
             f'aria-roledescription="carousel" '
             f'aria-label="{_e(company)} presentation">'
             + "".join(out) + _KEYS + '</div>')
