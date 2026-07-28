@@ -8,7 +8,36 @@ produce a one-sided observation set that the quality gate marks partial.
 """
 from __future__ import annotations
 
+import re
+from functools import lru_cache
+
 from intent_engine.strategic_intelligence.records import StrategicObservation
+
+
+# --- phrase matching ----------------------------------------------------------
+#
+# Detection used to be `phrase in text`, which matches ACROSS WORD BOUNDARIES.
+# The three-letter signal phrase "api" is a substring of "capital", "rapid",
+# "therapies" and "capitalise", so every company that discussed capital
+# allocation was reported as exposing "a surface others can build on". Sony
+# Interactive Entertainment's corporate page tripped it on the single sentence
+# "our capital allocation supports ... the rapid growth of our network".
+#
+# Matching is now anchored to word boundaries, with internal whitespace allowed
+# to vary (spaces, hyphens and slashes) so "point of sale" still matches
+# "point-of-sale".
+@lru_cache(maxsize=8192)
+def _phrase_pattern(phrase: str) -> "re.Pattern":
+    parts = [re.escape(w) for w in phrase.split()]
+    return re.compile(r"(?<!\w)" + r"[\s\-/]+".join(parts) + r"(?!\w)", re.I)
+
+
+def _has_phrase(text: str, phrase: str) -> bool:
+    return _phrase_pattern(phrase).search(text) is not None
+
+
+def _any_phrase(text: str, phrases) -> bool:
+    return any(_has_phrase(text, p) for p in phrases)
 
 # document source_type -> strategic source_class
 _SOURCE_CLASS = {
@@ -48,10 +77,12 @@ _SIGNAL_KEYWORDS = {
     "enterprise_expansion": ("shopify plus", "large merchants",
                              "commerce components", "enterprise merchants",
                              "upmarket", "move upmarket", "enterprise tier"),
+    # "simple", "easy to", "simplicity" and "fast setup" were removed: they are
+    # marketing adjectives every consumer page uses and they carry no strategic
+    # content. What remains describes a small-merchant GO-TO-MARKET.
     "smb_simplicity": ("anyone can sell", "start your business",
                        "no code", "no-code", "small business owners",
-                       "launch your store", "sell online in minutes",
-                       "simple", "easy to", "fast setup", "simplicity"),
+                       "launch your store", "sell online in minutes"),
     "product_breadth": ("point of sale", "fulfillment network",
                         "merchant capital", "everything you need to sell",
                         "one platform for", "unified suite"),
@@ -149,18 +180,33 @@ _WEAK_PHRASES = (
 # This is a floor, not a classifier. It is deliberately cheap and obvious:
 # a commerce company says these words constantly, and a defence-analytics
 # company essentially never does.
+# The anchors are MERCHANT-SIDE ONLY, and that distinction is the whole point.
+# The previous list contained "checkout", "cart", "buyer", "shopping", "retail"
+# and "marketplace" — the ordinary vocabulary of ANY consumer storefront. The
+# PlayStation Store page ("add to cart and checkout securely ... every buyer")
+# therefore opened the commerce gate, after which the bare adjectives "simple"
+# and "easy to" matched `smb_simplicity` and a console business was handed a
+# small-merchant strategy, with "SMB / Product" named as an affected function.
+#
+# Selling commerce infrastructure TO merchants and OPERATING a store are
+# different businesses. Only the former says "merchant", "seller", "commerce",
+# "sell online", "point of sale". The discrimination is done by the CONTENT of
+# this list, not by a count: one merchant-side term is enough, because a games
+# storefront can say "cart", "checkout", "buyer" and "shopping" all day without
+# ever saying "merchant".
 _DOMAIN_ANCHORS = (
-    "merchant", "commerce", "storefront", "checkout", "shopper", "retail",
-    "e-commerce", "ecommerce", "online store", "seller", "point of sale",
-    "shopping", "buyer", "cart", "marketplace",
+    "merchant", "merchants", "seller", "sellers", "e-commerce", "ecommerce",
+    "commerce", "storefront", "storefronts", "online store", "point of sale",
+    "dropshipping", "sell online", "your store",
 )
 MIN_DOMAIN_ANCHORS = 1
 
 
 def in_commerce_domain(text: str) -> bool:
-    """True when a document is plausibly about commerce at all."""
-    low = " " + (text or "").lower() + " "
-    return sum(1 for a in _DOMAIN_ANCHORS if a in low) >= MIN_DOMAIN_ANCHORS
+    """True when a document is plausibly about selling commerce capability."""
+    low = text or ""
+    return sum(1 for a in _DOMAIN_ANCHORS
+               if _has_phrase(low, a)) >= MIN_DOMAIN_ANCHORS
 
 
 # --- domain-neutral signals ---------------------------------------------------
@@ -177,22 +223,28 @@ def in_commerce_domain(text: str) -> bool:
 # Keep these OBSERVABLE. Each one should be something you could point at on a
 # page, not a judgement about the company.
 _NEUTRAL_SIGNAL_KEYWORDS = {
-    # several distinct named products or platforms
-    "multi_product": ("platforms", "our products", "product suite",
-                      "three platforms", "two platforms", "modules",
-                      "product family", "one platform for"),
-    # the company names more than one kind of buyer
+    # several distinct named products or platforms. Bare "platforms" and
+    # "modules" were removed — one plural noun is not evidence of a portfolio.
+    "multi_product": ("our products", "product suite", "three platforms",
+                      "two platforms", "product family", "one platform for",
+                      "our platforms", "product portfolio"),
+    # the company names more than one kind of buyer. Bare "segments" was
+    # removed: it matched any sentence containing the word, including
+    # "customer segments" in a marketing page.
     "segment_split": ("government and commercial", "public and private sector",
                       "enterprise and small", "consumer and business",
-                      "segments", "business units", "public sector",
+                      "business units", "public sector",
                       "commercial customers", "government customers"),
     # specific named customers or deployments, not "trusted by thousands"
     "named_customers": ("case study", "case studies", "customer story",
                         "customer stories", "deployments include",
                         "named deployments", "customers include"),
-    # a surface third parties can build on
-    "developer_surface": ("api", "sdk", "developer docs", "documentation",
-                          "changelog", "webhooks", "integrations",
+    # a surface third parties can build on. Bare "documentation" was removed
+    # (legal, support and help pages all have documentation); "api" is now
+    # boundary-matched so it no longer fires inside "capital" or "rapid".
+    "developer_surface": ("api", "apis", "rest api", "graphql", "public api",
+                          "sdk", "developer docs", "developer documentation",
+                          "developer portal", "webhooks", "integrations",
                           "open source"),
     # people-heavy delivery rather than self-serve
     "services_motion": ("forward deployed", "embed alongside",
@@ -205,13 +257,20 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
     "pricing_gated": ("contact sales", "request a quote", "talk to sales",
                       "custom pricing", "quoted"),
     # buyers in regulated or accredited environments
+    # Bare "compliance" and "regulated" were removed — every B2B page has a
+    # compliance footer; that is not a regulated BUYER.
     "regulated_buyer": ("defence", "defense", "intelligence community",
-                        "accredited", "compliance", "regulated", "government "
-                        "systems", "public procurement", "fedramp"),
-    # explicit consolidation of previously separate tools
+                        "accredited", "regulated industries",
+                        "regulated environments", "government systems",
+                        "public procurement", "fedramp"),
+    # explicit consolidation of previously separate tools. Bare "unified" was
+    # removed: it is one of the most common words in corporate English, and on
+    # its own it produced "absorbing adjacent tools until the work lives inside
+    # it" for a company that had merely called itself a unified organisation.
     "consolidation": ("one workspace", "single system", "replace several",
-                      "all in one", "unified", "connected workspace",
-                      "one place"),
+                      "all in one", "connected workspace", "one place",
+                      "unified platform", "unified suite",
+                      "single source of truth"),
     # --- shapes that only a company with physical or disclosed operations
     # exhibits. Added because the neutral set above is a SOFTWARE-shaped
     # neutral set: it reads pricing pages, developer surfaces and workspace
@@ -246,10 +305,11 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                        "risk factors disclosed", "material weakness",
                        "these risks include"),
     # owns both the content and the channel it reaches people through
-    "content_and_channel": ("intellectual property", "creators and users",
-                            "first-party content", "original content",
-                            "content and the hardware", "catalogue of titles",
-                            "content pipeline"),
+    # Bare "intellectual property" was removed: it is legal-footer boilerplate.
+    "content_and_channel": ("creators and users", "first-party content",
+                            "original content", "content and the hardware",
+                            "catalogue of titles", "catalog of titles",
+                            "content pipeline", "owned content"),
 }
 
 # Neutral labels — what the signal MEANS, stated so it is true of any industry.
@@ -273,21 +333,105 @@ _NEUTRAL_LABEL = {
 }
 
 
+# --- claims that only count when somebody ELSE makes them ---------------------
+#
+# "Simple", "easy to use", "fast setup", "helps you grow" are meaningless as
+# SELF-description: every company on earth says them, which is why they were
+# removed from the detectors above. They are not meaningless as OUTSIDE
+# description. When independent reviewers or customers repeatedly say a product
+# is chosen FOR its simplicity, that is real evidence about the value
+# proposition and the buyer it wins.
+#
+# So the rule is about who is speaking, not about the words. These phrases
+# qualify a signal only from a vantage point that is not the company's own.
+_OUTSIDE_ONLY_PHRASES = {
+    "smb_simplicity": ("simple", "simplicity", "easy to", "fast setup",
+                       "easy to use", "straightforward"),
+    "merchant_outcome_positioning": ("helped us grow", "grew our sales",
+                                     "increased our revenue"),
+}
+_OUTSIDE_VANTAGE_CLASSES = frozenset(
+    {"customer_voice", "independent_reporting", "competitor"})
+
+
 def _detect_neutral_signals(text: str) -> list:
-    low = " " + (text or "").lower() + " "
     return [sig for sig, phrases in _NEUTRAL_SIGNAL_KEYWORDS.items()
-            if any(p in low for p in phrases)]
+            if _any_phrase(text or "", phrases)]
 
 
-def _detect_signals(text: str) -> list:
+def _detect_signals(text: str, source_class: str = "company_owned") -> list:
     """Domain signals when the document is in that domain, plus the neutral
     set always. A company outside every domain library still has a strategy."""
-    low = " " + text.lower() + " "
+    text = text or ""
     signals = list(_detect_neutral_signals(text))
     if in_commerce_domain(text):
         signals += [sig for sig, phrases in _SIGNAL_KEYWORDS.items()
-                    if any(p in low for p in phrases)]
+                    if _any_phrase(text, phrases)]
+        if source_class in _OUTSIDE_VANTAGE_CLASSES:
+            signals += [sig for sig, phrases in _OUTSIDE_ONLY_PHRASES.items()
+                        if sig not in signals and _any_phrase(text, phrases)]
     return signals
+
+
+# --- what KIND of page this is ------------------------------------------------
+#
+# Distinct from source_class (whose account it is). A company's careers page and
+# its product page are both company_owned, but only one of them is evidence of
+# strategy.
+#
+# This was the qualifying evidence for Sony Interactive Entertainment's
+# "turning a people-delivered service into a repeatable product" hypothesis: a
+# CAREERS page listing job families ("solutions engineering", "professional
+# services", "implementation team"). Those phrases describe who the company is
+# hiring, not how it delivers value — and a recruiting page is the one place
+# where every large company sounds like a consulting firm.
+_NON_STRATEGIC_URL_MARKERS = {
+    "careers": ("/careers", "/career", "/jobs", "/job/", "/join-us",
+                "/life-at", "/working-at", "greenhouse.io", "lever.co",
+                "myworkdayjobs", "/recruiting", "/vacancies"),
+    "legal": ("/legal", "/terms", "/tos", "/privacy", "/cookie", "/gdpr",
+              "/patents", "/trademark", "/accessibility-statement",
+              "/modern-slavery", "/imprint"),
+    "support": ("/support", "/help", "/faq", "/contact", "/customer-service",
+                "/returns", "/warranty", "/troubleshoot", "/service-status"),
+}
+_NON_STRATEGIC_TITLE_MARKERS = {
+    "careers": ("careers", "jobs at", "work with us", "join our team",
+                "life at", "open roles", "open positions"),
+    "legal": ("terms of service", "terms of use", "terms and conditions",
+              "privacy policy", "privacy notice", "cookie policy",
+              "cookie notice", "legal notice"),
+    "support": ("help centre", "help center", "support centre",
+                "support center", "frequently asked questions",
+                "contact us", "customer support"),
+}
+
+
+def page_kind(url: str, title: str = "") -> str:
+    """Classify a retrieved page. 'strategic' means it may carry strategy."""
+    u = (url or "").lower()
+    t = (title or "").strip().lower()
+    for kind, markers in _NON_STRATEGIC_URL_MARKERS.items():
+        if any(m in u for m in markers):
+            return kind
+    for kind, markers in _NON_STRATEGIC_TITLE_MARKERS.items():
+        if any(t.startswith(m) or m in t for m in markers):
+            return kind
+    return "strategic"
+
+
+def qualifying_signals_of(observation) -> set:
+    """The signals an observation may use to QUALIFY a hypothesis.
+
+    Weak evidence — a page title, a snippet that is mostly calls-to-action —
+    can still appear as context, but it must never be the reason a strategic
+    claim fires. Previously `_signals_present` unioned every observation's
+    signals regardless of quality, so a marketing snippet could push a
+    hypothesis over its threshold on its own.
+    """
+    if getattr(observation, "weak", False):
+        return set()
+    return set(observation.signals)
 
 
 def _normalize_url(url: str) -> str:
@@ -306,6 +450,85 @@ def _is_weak(excerpt: str, title: str, signals: list) -> bool:
     generic_hits = sum(1 for p in _WEAK_PHRASES if p in low)
     # marketing-dominated snippet with only a single, non-specific signal
     return generic_hits >= 2 and len(signals) <= 1
+
+
+#: below this, a page has no substance worth reasoning over
+MIN_ANALYST_EXCERPT_CHARS = 120
+
+
+def derive_analyst_evidence(documents) -> list:
+    """Evidence for the grounded analyst -- every strategic page, signal or not.
+
+    `derive_observations` below requires a controlled-vocabulary signal match,
+    because a signal is the unit the PATTERN LIBRARY matches against. For the
+    analyst that requirement is not just unnecessary, it is harmful: the
+    analyst reads excerpts and reasons over them, so a document that matches no
+    keyword is not uninformative to it.
+
+    The cost of conflating the two was measured. An independent analysis of
+    console economics -- hardware sold near cost, margin recovered through
+    software attach and subscriptions, and a named contrast with a competitor's
+    day-one first-party strategy -- matched zero signals and was dropped
+    entirely. That is the single most valuable document in the set, and the one
+    an independent vantage point is hardest to get.
+
+    So the two consumers get two derivations from the same documents. This one
+    filters on whether a human would consider the page evidence at all: is it a
+    strategic page, and does it actually say something.
+    """
+    evidence, seen = [], set()
+    for doc in documents:
+        key = doc.get("content_hash") or _normalize_url(
+            doc.get("final_url", ""))
+        norm = _normalize_url(doc.get("final_url", ""))
+        if key in seen or (norm and norm in seen):
+            continue
+        seen.add(key)
+        if norm:
+            seen.add(norm)
+
+        title = doc.get("title", "")
+        if page_kind(doc.get("final_url", ""), title) != "strategic":
+            continue
+
+        body = (doc.get("text_content") or "").strip()
+        excerpt = (body or doc.get("meta_description") or "").strip()
+        if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
+            continue
+
+        source_class = doc.get("source_class") or _SOURCE_CLASS.get(
+            doc.get("source_type"), "company_owned")
+        text = " ".join(filter(None, [
+            title, doc.get("meta_description", ""), body]))
+        signals = _detect_signals(text, source_class)
+        weak = _is_weak(excerpt, title, signals)
+        dominant = signals[0] if signals else ""
+        entity = (title or norm).split("—")[0].strip()[:80]
+        evidence.append(StrategicObservation(
+            observation_id=f"obs-{doc.get('source_id', '')}",
+            text=(f"{entity or 'The company'} "
+                  f"{_SIGNAL_LABEL[dominant]}" if dominant
+                  else excerpt[:200]),
+            observation_type=_TYPE_FOR_SIGNAL.get(dominant, "messaging"),
+            source_refs=[{"subsystem": "company_ingestion",
+                          "artifact_type": "retrieved_source",
+                          "artifact_id": doc.get("source_id", ""),
+                          "source_class": source_class}],
+            confidence="moderate",
+            freshness=doc.get("freshness", "CURRENT"),
+            directly_observed=True,
+            signals=tuple(signals),
+            source_class=source_class,
+            excerpt=excerpt[:1200],
+            source_title=title or source_class,
+            origin=doc.get("final_url", ""),
+            date=(doc.get("retrieved_at", "") or "")[:10],
+            strategic_signal=_SIGNAL_LABEL.get(dominant, ""),
+            relevance=_SIGNAL_RELEVANCE.get(dominant, "retrieved evidence"),
+            entity=entity,
+            weak=weak,
+            evidence_quality="weak" if weak else "strong"))
+    return evidence
 
 
 def derive_observations(documents) -> list:
@@ -342,18 +565,24 @@ def derive_observations(documents) -> list:
         if norm:
             seen.add(norm)
 
-        text = " ".join(filter(None, [
-            doc.get("title", ""), doc.get("meta_description", ""),
-            doc.get("text_content", "")]))
-        signals = _detect_signals(text)
-        if not signals:
+        title = doc.get("title", "")
+        # Careers / legal / support pages are retrieved and kept for the source
+        # library, but they are not evidence of strategy and must not qualify a
+        # hypothesis. See `page_kind`.
+        if page_kind(doc.get("final_url", ""), title) != "strategic":
             continue
+
+        text = " ".join(filter(None, [
+            title, doc.get("meta_description", ""),
+            doc.get("text_content", "")]))
         source_class = doc.get("source_class") or _SOURCE_CLASS.get(
             doc.get("source_type"), "company_owned")
+        signals = _detect_signals(text, source_class)
+        if not signals:
+            continue
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
         excerpt = (doc.get("meta_description")
                    or doc.get("text_content", "")[:280]).strip()
-        title = doc.get("title", "")
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0]
         entity = (title or norm).split("—")[0].strip()[:80]

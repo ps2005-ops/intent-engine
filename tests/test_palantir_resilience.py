@@ -379,10 +379,13 @@ def test_progress_page_terminal_styled_stops_refresh(tmp_path):
         f"&website={PALANTIR}")
     loc = hd["Location"]
     assert loc.endswith("/progress")
-    st, _, body = c.request("GET", loc)
+    st, hdrs2, body = c.request("GET", loc)
+    # A terminal run now goes straight to the presentation rather than
+    # rendering a status page with an "Open the result" link on it.
+    assert st.startswith("303") and hdrs2["Location"].endswith("/slides")
+    st, _, body = c.request("GET", hdrs2["Location"])
     assert st == "200 OK"
     assert "<style" in body and "<nav" in body         # styled product shell
-    assert "Open the result" in body                   # terminal → result link
     assert "http-equiv=\"refresh\"" not in body        # terminal → refresh off
 
 

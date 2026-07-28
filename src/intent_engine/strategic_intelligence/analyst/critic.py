@@ -1,0 +1,450 @@
+"""Deterministic verification of the analyst's output.
+
+Everything here runs without a network and without a model. That is the point:
+the reasoning is probabilistic, so the checking must not be. A finding at
+severity "reject" discards the whole analysis and the run reports an honest
+limited state instead -- it never falls through to the generic scaffolds,
+because a plausible-sounding wrong answer is worse than a visible gap.
+
+The genericity check is the one that addresses the original complaint. A
+sentence like "absorbing adjacent tools until the work lives inside it" is
+fluent, confident, and equally true of Atlassian, Notion, Monday, Adobe,
+Microsoft and Salesforce -- which is what makes it worthless. The test is
+therefore not "does this read well" but "is this anchored to words that appear
+in the evidence for THIS company".
+"""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+
+# Strategy-speak: fluent, universally applicable, and empty as the SUBSTANCE of
+# a claim. These may appear in a headline, but they cannot be what the headline
+# is made of.
+_GENERIC_VOCAB = frozenset("""
+platform platforms ecosystem ecosystems digital transformation synergy
+synergies leverage leveraging scale scaling growth innovative innovation
+solution solutions strategic strategy value proposition customer customers
+market markets business businesses product products service services
+technology technologies enterprise enterprises operational efficiency
+optimize optimizing optimise robust seamless holistic comprehensive
+end-to-end best-in-class world-class cutting-edge next-generation
+capabilities capability offering offerings vertical horizontal adjacent
+expanding expansion positioning positioned differentiated differentiation
+competitive advantage moat future company companies organisation organization
+""".split())
+
+# Phrases that are pure filler. Their presence in a headline is disqualifying.
+_BANNED_PHRASES = (
+    "digital transformation", "best-in-class", "world-class",
+    "cutting-edge", "next-generation", "paradigm shift", "synergy",
+    "unlock value", "drive growth", "at scale", "holistic approach",
+)
+
+# The vocabulary of the system describing itself. It leaked onto the page in
+# the old reports -- "decision affected:", "likely agenda", "supporting
+# evidence" -- and it is the single clearest tell that a founder is reading
+# software output rather than advice.
+_SOFTWARE_SPEAK = (
+    "supporting evidence", "decision affected", "likely agenda",
+    "current discussion", "strategic hypothesis", "affected functions",
+    "affected function", "inferred discussion", "evidence cluster",
+    "observation type", "signal matched", "meeting relevance",
+    "pattern library", "confidence badge",
+)
+
+_STOPWORDS = frozenset("""
+the a an and or but if then than that this these those with without within
+into onto from for to of in on at by as is are was were be been being it its
+their there here what which who whom whose how why when where while more most
+less least much many few own same so not no nor can could will would should
+may might must have has had do does did about over under between across
+toward towards after before during through against among both each other
+""".split())
+
+_NUM_RE = re.compile(r"""
+    (?P<currency>[$€£¥]\s?\d[\d,]*(?:\.\d+)?)
+  | (?P<percent>\d[\d,]*(?:\.\d+)?\s?%)
+  | (?P<scaled>\d[\d,]*(?:\.\d+)?\s?(?:million|billion|trillion|bn|m\b|k\b))
+  | (?P<big>\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d{4,})
+""", re.I | re.X)
+
+_INDEPENDENT_CLASSES = frozenset(
+    {"independent_reporting", "customer_voice", "competitor",
+     "investor_material"})
+
+
+@dataclass
+class CriticFinding:
+    check: str
+    message: str
+    severity: str = "reject"        # "reject" | "warn"
+    where: str = ""
+
+    @property
+    def rejects(self) -> bool:
+        return self.severity == "reject"
+
+
+def _tokens(text: str) -> list:
+    return re.findall(r"[a-z0-9][a-z0-9\-']+", (text or "").lower())
+
+
+def _content_tokens(text: str, extra_stop=()) -> set:
+    stop = _STOPWORDS | _GENERIC_VOCAB | set(extra_stop)
+    return {t for t in _tokens(text) if len(t) >= 4 and t not in stop}
+
+
+def _normalise_number(raw: str) -> str:
+    return re.sub(r"[\s,]", "", (raw or "").lower())
+
+
+def _is_calendar_year(raw: str) -> bool:
+    """A year is a temporal reference, not a claim about the company.
+
+    Caught in cross-sector validation: a bank analysis that said a loan book
+    "reprices through 2026" was rejected as an invented figure, discarding an
+    otherwise sound analysis. Dates are how you say WHEN, and the analyst is
+    required to say when.
+    """
+    s = _normalise_number(raw)
+    return s.isdigit() and len(s) == 4 and 1900 <= int(s) <= 2100
+
+
+def _is_rhetorical_percentage(raw: str) -> bool:
+    """0% and 100% are emphasis, not statistics.
+
+    From a fresh semiconductor run: "zero customer concentration and still
+    100% exposure to the same foundry capacity problem" was rejected as a
+    fabricated figure and the whole analysis discarded. A measured statistic is
+    almost never exactly 100%; a rhetorical one almost always is.
+    """
+    s = _normalise_number(raw)
+    return s in ("0%", "100%")
+
+
+def _numbers_in(text: str) -> set:
+    out = set()
+    for m in _NUM_RE.finditer(text or ""):
+        raw = m.group(0)
+        if _is_calendar_year(raw) or _is_rhetorical_percentage(raw):
+            continue
+        out.add(_normalise_number(raw))
+    return out
+
+
+def _walk_strings(node, path="") -> list:
+    """Every string in the analysis, with a path for error messages."""
+    out = []
+    if isinstance(node, str):
+        out.append((path, node))
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            out.extend(_walk_strings(v, f"{path}.{k}" if path else str(k)))
+    elif isinstance(node, (list, tuple)):
+        for i, v in enumerate(node):
+            out.extend(_walk_strings(v, f"{path}[{i}]"))
+    return out
+
+
+def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
+    """Return findings. Any finding with severity 'reject' invalidates the run.
+
+    `observations` are the StrategicObservation objects that were offered to the
+    analyst -- the only things it was allowed to reason from.
+    """
+    findings = []
+    by_id = {o.observation_id: o for o in observations}
+
+    evidence_text = " ".join(
+        " ".join(filter(None, [getattr(o, "text", ""), getattr(o, "excerpt", ""),
+                               getattr(o, "source_title", "")]))
+        for o in observations)
+    evidence_vocab = _content_tokens(evidence_text)
+    evidence_numbers = _numbers_in(evidence_text)
+    company_tokens = set(_tokens(company_name))
+
+    # The insight and the decisions are checked with the same rules: both are
+    # things asserted about the company, and both reach the page.
+    insight = analysis.get("the_insight") or {}
+    decisions = analysis.get("decisions") or []
+
+    # The insight and the decisions are one argument over one evidence set, so
+    # a citation on either grounds it. Observed in live validation: the model
+    # cited all three decisions correctly and omitted the citations field on
+    # the nested insight object, which is a schema-adherence quirk rather than
+    # an ungrounded claim. Every citation still has to RESOLVE, and the
+    # genericity gate still requires the sentence to be anchored in this
+    # company's evidence vocabulary -- so nothing is being waved through.
+    _insight_cites = list(insight.get("citations") or [])
+    if not _insight_cites:
+        for _d in decisions:
+            for _c in (_d.get("citations") or []):
+                if _c not in _insight_cites:
+                    _insight_cites.append(_c)
+
+    # Anchoring is measured over the sentence AND its explanation. Measured on
+    # the sentence alone the gate rejected this, from a fresh aerospace run:
+    #
+    #   "Aeronaut is unusually hard to replace and unusually easy to squeeze,
+    #    and both are true at the same time because of the same contracts."
+    #
+    # which is precisely the kind of sentence this product exists to produce.
+    # Its words are plain because good abstraction is plain; the specifics
+    # ("type certificate", "long-term agreements") live in the paragraph. A
+    # gate that rewards headlines for reusing source vocabulary is a gate that
+    # rewards paraphrase over insight.
+    _anchor_text = " ".join(filter(None, [
+        insight.get("sentence", ""), insight.get("paragraph", ""),
+        insight.get("why_now", "")]))
+    insights = ([{"headline": insight.get("sentence", ""),
+                  "anchor_text": _anchor_text,
+                  "citations": _insight_cites,
+                  "tension": insight.get("tension") or {},
+                  "economics": insight.get("economics") or {},
+                  "counterargument": {
+                      "strongest_case_against":
+                          analysis.get("strongest_case_we_are_wrong", "")},
+                  "decision_affected": (decisions[0].get("decision")
+                                        if decisions else ""),
+                  "confidence": (decisions[0].get("confidence")
+                                 if decisions else "low"),
+                  "confidence_rationale": (
+                      decisions[0].get("confidence_rationale")
+                      if decisions else "")}]
+                if insight else [])
+
+    # --- 1. citations resolve -------------------------------------------------
+    for i, ins in enumerate(insights):
+        cites = ins.get("citations") or []
+        if not cites:
+            findings.append(CriticFinding(
+                "citation_missing",
+                f"insight {i} ({ins.get('headline', '')[:60]!r}) cites no "
+                "evidence", where=f"insights[{i}]"))
+            continue
+        unknown = [c for c in cites if c not in by_id]
+        if unknown:
+            findings.append(CriticFinding(
+                "citation_unresolvable",
+                f"insight {i} cites observation id(s) that do not exist: "
+                f"{', '.join(unknown)}", where=f"insights[{i}]"))
+
+    # --- 2. no invented numbers ----------------------------------------------
+    # Only figures that assert something about the company are checked --
+    # percentages, currency, and magnitudes. A phrase like "over three years"
+    # is reasoning about a horizon, not a claim about a financial fact.
+    for path, text in _walk_strings(analysis):
+        for num in _numbers_in(text):
+            if num not in evidence_numbers:
+                findings.append(CriticFinding(
+                    "invented_number",
+                    f"the figure {num!r} appears in the analysis but in no "
+                    f"retrieved source", where=path))
+
+    # --- 3. genericity --------------------------------------------------------
+    for i, ins in enumerate(insights):
+        headline = ins.get("headline", "") or ""
+        low = headline.lower()
+        hit = [p for p in _BANNED_PHRASES if p in low]
+        if hit:
+            findings.append(CriticFinding(
+                "generic_filler",
+                f"insight {i} headline uses filler ({', '.join(hit)}) instead "
+                "of saying something about this company",
+                where=f"insights[{i}].headline"))
+
+        grounded = _content_tokens(ins.get("anchor_text") or headline,
+                                   extra_stop=company_tokens)
+        anchored = grounded & evidence_vocab
+        if len(anchored) < 2:
+            findings.append(CriticFinding(
+                "generic_headline",
+                f"insight {i} headline is not anchored to this company's "
+                f"evidence (grounding terms found: "
+                f"{sorted(anchored) or 'none'}). A headline that survives "
+                "swapping the company name is not an insight",
+                where=f"insights[{i}].headline"))
+
+        # Anchoring alone is gameable: naming two real products and wrapping
+        # them in strategy-speak ("PlayStation is expanding its subscription
+        # platform ecosystem") clears the anchor test while saying nothing.
+        # So also measure how much of the sentence IS strategy-speak.
+        substantive = [t for t in _tokens(headline)
+                       if len(t) >= 4 and t not in _STOPWORDS
+                       and t not in company_tokens]
+        if substantive:
+            generic_share = (sum(1 for t in substantive if t in _GENERIC_VOCAB)
+                             / len(substantive))
+            if generic_share >= 0.4:
+                findings.append(CriticFinding(
+                    "generic_density",
+                    f"insight {i} headline is {generic_share:.0%} "
+                    "strategy-speak; the specific words are decoration on a "
+                    "sentence that would fit any company",
+                    where=f"insights[{i}].headline"))
+
+    # --- 4. required substance -----------------------------------------------
+    for i, ins in enumerate(insights):
+        tension = ins.get("tension") or {}
+        if not (tension.get("side_a") and tension.get("side_b")):
+            findings.append(CriticFinding(
+                "no_tension", f"insight {i} states no real trade-off",
+                where=f"insights[{i}].tension"))
+        econ = ins.get("economics") or {}
+        if not econ.get("mechanism"):
+            findings.append(CriticFinding(
+                "no_economic_mechanism",
+                f"insight {i} does not explain how this reaches the financial "
+                "statements", where=f"insights[{i}].economics"))
+        counter = ins.get("counterargument") or {}
+        if not counter.get("strongest_case_against"):
+            findings.append(CriticFinding(
+                "no_counterargument",
+                f"insight {i} offers no case against itself",
+                where=f"insights[{i}].counterargument"))
+        if not ins.get("decision_affected"):
+            findings.append(CriticFinding(
+                "no_decision", f"insight {i} affects no stated decision",
+                where=f"insights[{i}]"))
+
+    # --- 5. confidence may not exceed the evidence ---------------------------
+    for i, ins in enumerate(insights):
+        cited = [by_id[c] for c in (ins.get("citations") or []) if c in by_id]
+        classes = {getattr(o, "source_class", "") for o in cited}
+        independent = classes & _INDEPENDENT_CLASSES
+        conf = (ins.get("confidence") or "").lower()
+        if conf == "high" and not independent:
+            findings.append(CriticFinding(
+                "confidence_exceeds_evidence",
+                f"insight {i} claims high confidence from company-owned "
+                "sources only; one vantage point cannot corroborate itself",
+                where=f"insights[{i}].confidence"))
+        rationale = (ins.get("confidence_rationale") or "").strip()
+        if len(rationale.split()) < 5:
+            findings.append(CriticFinding(
+                "unexplained_confidence",
+                f"insight {i} gives a confidence label without explaining it "
+                "in plain language", severity="warn",
+                where=f"insights[{i}].confidence_rationale"))
+
+    # --- 6. entity scope ------------------------------------------------------
+    scope = analysis.get("entity_scope") or {}
+    if scope.get("is_subsidiary") and not (scope.get("parent") or "").strip():
+        findings.append(CriticFinding(
+            "unnamed_parent",
+            "the analysis says this is a subsidiary but does not name the "
+            "parent, so the reader cannot tell which entity a fact belongs to",
+            where="entity_scope"))
+
+    # --- 7. the decisions -----------------------------------------------------
+    if insight and not decisions:
+        findings.append(CriticFinding(
+            "no_decisions",
+            "the analysis says something is true but names nothing to decide; "
+            "a founder cannot act on it", where="decisions"))
+    for i, dec in enumerate(decisions):
+        unknown = [c for c in (dec.get("citations") or [])
+                   if c not in by_id]
+        if unknown:
+            findings.append(CriticFinding(
+                "citation_unresolvable",
+                f"decision {i} cites evidence that does not exist: "
+                f"{', '.join(unknown)}", where=f"decisions[{i}]"))
+        if not (dec.get("cost_of_waiting") or "").strip():
+            findings.append(CriticFinding(
+                "no_cost_of_waiting",
+                f"decision {i} does not say what waiting costs, which is "
+                "usually the whole argument", where=f"decisions[{i}]"))
+        # A decision must be a fork. "Explore X" and "consider Y" are topics.
+        text = (dec.get("decision") or "").lower()
+        if re.match(r"^\s*(explore|consider|review|assess|evaluate|monitor|"
+                    r"understand|examine|investigate)\b", text):
+            findings.append(CriticFinding(
+                "not_a_decision",
+                f"decision {i} is a topic to look into, not a choice with two "
+                f"sides: {dec.get('decision', '')[:70]!r}",
+                where=f"decisions[{i}].decision"))
+
+    # --- 7b. a recommendation has to resolve ---------------------------------
+    from intent_engine.strategic_intelligence.analyst.priority import (
+        NON_ANSWERS,
+    )
+    for i, dec in enumerate(decisions):
+        if not dec.get("verdict"):
+            findings.append(CriticFinding(
+                "no_verdict",
+                f"decision {i} never says what to do about it today",
+                where=f"decisions[{i}].verdict"))
+        blob = " ".join(str(v) for v in dec.values() if isinstance(v, str))
+        for phrase in NON_ANSWERS:
+            if phrase in blob.lower():
+                findings.append(CriticFinding(
+                    "unresolved_recommendation",
+                    f"decision {i} says {phrase!r}, which is the absence of a "
+                    "recommendation wearing the clothes of one",
+                    where=f"decisions[{i}]"))
+
+    # --- 7c. assumptions must be falsifiable ---------------------------------
+    for i, a in enumerate(analysis.get("assumptions") or []):
+        if not (a.get("what_would_break_it") or "").strip():
+            # An assumption the model returned as a bare string never had the
+            # field, so rejecting it reports a shape problem as a content
+            # problem -- and on one fresh run produced 27 identical rejections.
+            findings.append(CriticFinding(
+                "unfalsifiable_assumption",
+                f"assumption {i} states a belief with no way to find out it is "
+                "wrong",
+                severity="warn" if a.get("_shape_recovered") else "reject",
+                where=f"assumptions[{i}]"))
+
+    # --- 7d. a blind spot must actually be one -------------------------------
+    blind = analysis.get("blind_spots") or {}
+    nobody = (blind.get("almost_nobody_is_discussing") or "").strip()
+    everyone = (blind.get("everyone_is_discussing") or "").strip()
+    if nobody and everyone and _content_tokens(nobody, company_tokens) and \
+            len(_content_tokens(nobody, company_tokens)
+                & _content_tokens(everyone, company_tokens)) / max(
+                1, len(_content_tokens(nobody, company_tokens)
+                       | _content_tokens(everyone, company_tokens))) > 0.5:
+        findings.append(CriticFinding(
+            "false_blind_spot",
+            "what 'almost nobody is discussing' is the same thing as what "
+            "'everyone is discussing'", severity="warn",
+            where="blind_spots"))
+
+    # --- 8. it must not sound like software ----------------------------------
+    # These are the words the old template engine put on the page. A founder
+    # reading "decision affected: ..." is reading a data structure.
+    for path, text in _walk_strings(analysis):
+        low = text.lower()
+        for phrase in _SOFTWARE_SPEAK:
+            if phrase in low:
+                findings.append(CriticFinding(
+                    "software_speak",
+                    f"{phrase!r} is how the system talks about itself, not how "
+                    "an advisor talks to a founder", where=path))
+
+    # --- 9. say each thing once ----------------------------------------------
+    # Repetition across sections is what made every old report feel padded.
+    blocks = [("the insight", insight.get("sentence", ""))]
+    blocks += [(f"decision {i}", d.get("decision", ""))
+               for i, d in enumerate(decisions)]
+    blocks += [(f"question {i}", q)
+               for i, q in enumerate(analysis.get("questions") or [])]
+    keyed = [(label, _content_tokens(t, extra_stop=company_tokens))
+             for label, t in blocks if t]
+    for a in range(len(keyed)):
+        for b in range(a + 1, len(keyed)):
+            (la, ka), (lb, kb) = keyed[a], keyed[b]
+            if ka and kb and len(ka & kb) / len(ka | kb) > 0.55:
+                findings.append(CriticFinding(
+                    "repetition",
+                    f"{lb} repeats {la} rather than adding anything",
+                    severity="warn", where="analysis"))
+
+    return findings
+
+
+def rejects(findings) -> bool:
+    return any(f.rejects for f in findings)

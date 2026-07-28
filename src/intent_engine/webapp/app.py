@@ -331,10 +331,33 @@ class WebApp:
         post_exempt = ("/login", "/signup")
         if self.config.demo_mode:
             post_exempt = post_exempt + ("/demo",)
+
+        # THE FIRST-THIRTY-SECONDS FIX.
+        #
+        # A first-time visitor filled in the company form on the landing page,
+        # ticked the consent box, pressed the primary button -- and was thrown
+        # to a login page that offers no signup and says "Password reset: NOT
+        # AVAILABLE". Their input was discarded. The demo was reachable only by
+        # noticing a DIFFERENT button and pressing it BEFORE filling the form.
+        #
+        # In demo mode an anonymous /analyze is not an attack, it is the
+        # product's entire purpose. There is no session to forge a request
+        # against and no user data to reach, which is exactly why /demo is
+        # already exempt above. So mint the session and carry the form through.
+        minted_sid = None
+        if (method == "POST" and path == "/analyze" and session is None
+                and self.config.demo_mode):
+            minted_sid = self.auth.create_anonymous_session()
+            session = self.auth.session(minted_sid)
+            sid = minted_sid
+
         if method == "POST" and path not in post_exempt:
             if session is None:
                 return self._redirect("/login")
-            if not self.auth.check_csrf(sid, form.get("csrf", "")):
+            # A session minted one line ago cannot have issued the token in
+            # this form, and there is nothing yet to protect.
+            if minted_sid is None and not self.auth.check_csrf(
+                    sid, form.get("csrf", "")):
                 return self._error_page(403, "invalid CSRF token")
 
         parts = [p for p in path.split("/") if p]
@@ -369,7 +392,17 @@ class WebApp:
             self.auth.logout(sid)
             return self._redirect("/", clear_cookie=True)
         if path == "/analyze" and method == "POST":
-            return self._analyze(session, form, remote)
+            result = self._analyze(session, form, remote)
+            if minted_sid:
+                # carry the new demo session onto whatever the analysis
+                # returned, so the user stays signed into it
+                secure = "; Secure" if self.config.cookie_secure else ""
+                status, headers, body = result
+                headers = list(headers) + [
+                    ("Set-Cookie", f"sid={minted_sid}; HttpOnly; "
+                                   f"SameSite=Lax; Path=/{secure}")]
+                return status, headers, body
+            return result
         if parts and parts[0] == "shared" and len(parts) == 2:
             return self._shared(parts[1])
         if parts and parts[0] == "bootstrap" and len(parts) == 2 \
@@ -945,15 +978,26 @@ class WebApp:
         # non-terminal state, the page reloads itself; in any terminal state the
         # refresh is omitted so it stops (safe, JS-free, CSP-proof).
         terminal = status in ("COMPLETE", "PARTIAL", "FAILED", "REJECTED")
+        # PRESENTATION FIRST. A finished analysis used to stop here and offer
+        # a link called "Open the result", behind a heading that said "Analysis
+        # progress" next to a raw run id and an unexplained PARTIAL badge. The
+        # user had already waited; making them read a status page and then
+        # click again is asking them to do the product's job.
+        if status in ("COMPLETE", "PARTIAL"):
+            return self._redirect(f"/runs/{run_id}/slides")
+
         refresh = ('' if terminal
                    else '<meta http-equiv="refresh" content="4">')
+        # A run that failed must say so in the heading. Softening every state
+        # into "Reading the public evidence…" would hide a failure behind a
+        # progress message, which is worse than the jargon it replaced.
+        heading = ("This analysis could not be completed"
+                   if status == "FAILED" else "Reading the public evidence…")
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'{refresh}<title>Analysis progress</title></head><body>'
+                f'{refresh}<title>{_e(heading)}</title></head>'
+                f'<body>'
                 f'{self._nav(session, session["csrf"])}<main>'
-                f'<h1>Analysis progress</h1>'
-                f'<p class="step-badge">{_e(status)}</p>'
-                f'<p>Run <code>{_e(run_id)}</code> status: '
-                f'<strong>{_e(status)}</strong></p>')
+                f'<h1>{_e(heading)}</h1>')
         if status == "FAILED":
             # Honest terminal failure: NO "Open the result" — there is no
             # result. Explain why and offer a safe start-over.
@@ -961,24 +1005,16 @@ class WebApp:
                     f'result to open. {self._failure_explanation(run_id, real)}'
                     f'</p><p><a href="/runs/{_e(run_id)}">See the failure '
                     f'details</a> · <a href="/">Start a new analysis</a></p>')
-        elif status in ("COMPLETE", "PARTIAL"):
-            note = ('' if status == "COMPLETE" else
-                    '<p>Some approved sources could not be retrieved; the '
-                    'result is based only on the evidence that was.</p>')
-            note += self._coverage_note(run_id, real)
-            tail = (f'{note}<p>These are real lifecycle stages, not '
-                    f'decoration.</p>'
-                    f'<p><a href="/runs/{_e(run_id)}">Open the result</a></p>')
         else:
-            # Still in flight: show the current lifecycle stage without ever
-            # claiming a result already exists. The page refreshes itself.
-            tail = ('<p>These are real lifecycle stages, not decoration. This '
-                    'analysis is still in progress — no result exists yet. '
-                    'This page updates automatically.</p>'
-                    '<p class="coverage">If this run has not reached a result '
-                    'after a while, it may be stale (e.g. the service '
-                    'restarted mid-run). You can '
-                    '<a href="/">start a new analysis</a>.</p>')
+            # Still in flight. Say what is happening in words a person uses,
+            # not lifecycle names, and never claim a result already exists.
+            tail = ('<p>Finding the company\'s own pages, its investor and '
+                    'financial material where it exists, and independent '
+                    'coverage — then reading them. This usually takes under a '
+                    'minute and the page moves on by itself.</p>'
+                    '<p class="coverage">If nothing has happened after a '
+                    'couple of minutes the run may have been interrupted. You '
+                    'can <a href="/">start again</a>.</p>')
         return self._html(head + tail + '</main></body></html>')
 
     def _coverage_note(self, run_id, real):
@@ -1456,8 +1492,10 @@ class WebApp:
 
     def _layer_nav(self, run_id, current):
         """One consistent way between the three layers, on all three."""
-        links = (("brief", "Executive brief", f"/runs/{run_id}/brief"),
-                 ("slides", "Presentation", f"/runs/{run_id}/slides"),
+        # Presentation first, everywhere. It is the layer that opens by
+        # default, so it is also the one the reader should see named first.
+        links = (("slides", "Presentation", f"/runs/{run_id}/slides"),
+                 ("brief", "Executive brief", f"/runs/{run_id}/brief"),
                  ("full", "Full analysis", f"/runs/{run_id}/full"))
         return ('<nav class="layers" aria-label="Report depth">' + " ".join(
             (f'<strong aria-current="page">{_e(label)}</strong>'
@@ -1487,21 +1525,22 @@ class WebApp:
         # "Compatible" used to be a word with nothing behind it: any stored
         # result was served again whatever had changed underneath it. It now
         # reports an answer that was actually checked.
-        compat = self._cache_compatibility(run_id)
-        state = ("produced by the current version of the product"
-                 if compat["reusable"] else "freshly analysed")
+        # What the reader needs from a stamp is how much evidence this rests on
+        # and when it was read. "produced by the current version of the
+        # product" and an internal version string answer a question nobody
+        # asked and quietly suggest the reader should be worried about which
+        # version they got.
         return (
-            f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
-            f'{fresh} source(s) read · {_e(state)}'
-            f' · about a two-minute read</p>'
+            f'<p class="stamp">Read {fresh} public source(s) on '
+            f'{_e(as_of)}.</p>'
             f'<p class="stamp"><strong>{_e(mode["label"])}.</strong> '
             f'{_e(mode["summary"])}</p>'
             f'<form action="/runs/{_e(run_id)}/fresh" method="post" '
             f'class="freshen"><input type="hidden" name="csrf" '
             f'value="{_e(csrf)}">'
-            f'<button type="submit">Run a fresh analysis</button>'
-            f'<span class="why"> — ignores anything cached and retrieves '
-            f'again. Analysis version <code>{_e(version)}</code>.</span>'
+            f'<button type="submit">Look again</button>'
+            f'<span class="why"> — fetches the sources again rather than '
+            f'reusing what was already read.</span>'
             f'</form>')
 
     def _fresh_analysis(self, session, run_id):
@@ -1537,9 +1576,17 @@ class WebApp:
                     f'<p>{_e(value)}</p></section>') if is_meaningful(value) \
                 else ''
 
+        # A date earns its place only when it distinguishes one item from
+        # another. Every line here carried the SAME retrieval date -- the day
+        # the run happened -- which told the reader nothing and read as
+        # chronology that was not there.
+        _dates = {s.get("date") for s in brief.signals
+                  if is_meaningful(s.get("date"))}
+        _dates_differ = len(_dates) > 1
         signals = "".join(
             f'<li>' + (f'<span class="when">{_e(s["date"])}</span>'
-                       if is_meaningful(s.get("date")) else '')
+                       if _dates_differ and is_meaningful(s.get("date"))
+                       else '')
             + f'{_e(s["text"])}</li>' for s in brief.signals)
         questions = "".join(f'<li>{_e(q)}</li>' for q in brief.questions)
         body = (
@@ -2607,8 +2654,16 @@ class WebApp:
         except ImportError:
             pdf_available = False
         from intent_engine.company_ingestion.rendering import rendering_enabled
+        # Whether the grounded analyst can run in THIS process. Without it the
+        # product still works but never asserts a strategic conclusion, so
+        # "is the reasoning layer live?" must be checkable from outside rather
+        # than inferred from render.yaml -- which does not govern the running
+        # service and declares this variable only in a comment.
+        import os
         return {"pdf_extraction": pdf_available,
-                "browser_rendering": rendering_enabled()}
+                "browser_rendering": rendering_enabled(),
+                "strategic_reasoning": bool(
+                    os.environ.get("ANTHROPIC_API_KEY"))}
 
     def _probe_runtime_root_writable(self) -> None:
         import os as _os
