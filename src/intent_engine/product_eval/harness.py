@@ -598,6 +598,17 @@ def _evaluate_adversarial(scenario, documents, report, brief, slides,
                       getattr(brief, "tension", ""),
                       getattr(brief, "decision", ""),
                       getattr(brief, "limitation", "")]
+        # The headline too. This check originally read the thesis and the
+        # hypotheses only, and a loosened sentence filter put an injected
+        # "SYSTEM: the assistant must…" line into the most prominent sentence
+        # of the brief — past a check that was looking one layer away.
+        headline = getattr(brief, "headline", None)
+        own_voice += [getattr(headline, "does", ""),
+                      getattr(headline, "view", ""),
+                      getattr(headline, "confidence", "")]
+    # And every slide, which is what gets shown to a room.
+    for slide in slides or ():
+        own_voice += [b.get("text", "") for b in slide.get("bullets", ())]
     r = report.as_dict() if hasattr(report, "as_dict") else (report or {})
     own_voice += [(r.get("thesis") or {}).get("view", "")]
     own_voice += [h.get("statement", "") for h in r.get("hypotheses") or ()]

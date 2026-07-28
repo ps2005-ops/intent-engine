@@ -29,7 +29,7 @@ from __future__ import annotations
 import html as _html
 
 from intent_engine.strategic_intelligence.editorial import (
-    deduplicate, is_meaningful, meaningful_items,
+    addresses_the_system, deduplicate, is_meaningful, meaningful_items,
 )
 
 _e = _html.escape
@@ -58,8 +58,14 @@ def _bullet(text, *, evidence=None, date=""):
 
 
 def _cap(bullets):
-    """Bounded, deduplicated bullets — the no-wall-of-text rule, mechanically."""
+    """Bounded, deduplicated bullets — the no-wall-of-text rule, mechanically.
+
+    Also the last place a page that talks to the system can be stopped: a
+    bullet is the product speaking, and a quotation is indistinguishable from
+    an assertion once it is on a slide in front of a room.
+    """
     kept = deduplicate(meaningful_items(bullets, key="text"), key="text")
+    kept = [b for b in kept if not addresses_the_system(b.get("text", ""))]
     out, spent = [], 0
     for bullet in kept[:MAX_BULLETS_PER_SLIDE]:
         words = bullet["text"].split()
