@@ -162,6 +162,17 @@ class WebApp:
             self._scheduler = Scheduler(self._runtime_root).start()
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
+        # Storage durability is MEASURED, once, at startup. Recording this
+        # boot is what makes the next boot able to prove survival: finding an
+        # earlier boot id in the ledger means a previous process wrote a file,
+        # ended, and the file is still here. Until that has been observed the
+        # honest answer is "unproven", and the feedback form says so rather
+        # than promising a persistence nobody has checked.
+        from intent_engine.webapp.feedback import FeedbackLog
+        from intent_engine.webapp.storage_state import probe_storage, record_boot
+        record_boot(self._runtime_root)
+        self._storage = probe_storage(self._runtime_root)
+        self.feedback_log = FeedbackLog(self._runtime_root)
 
     # --- plumbing -------------------------------------------------------------
     def __call__(self, environ, start_response):
@@ -303,6 +314,11 @@ class WebApp:
             return self._learning_explain_page(session, parts[1])
         if route == ("GET", "dashboard", 1):
             return self._dashboard_page(session)
+        if path in ("/feedback", "/feedback.jsonl") and method == "GET":
+            if session is None:
+                return self._redirect("/login")
+            return self._operator_feedback(session, export=path.endswith(
+                ".jsonl"))
         if path == "/status.json" and method == "GET":
             if session is None:
                 return self._redirect("/login")
@@ -903,15 +919,7 @@ class WebApp:
             f'<form action="/runs/{_e(run_id)}/share" method="post">'
             f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
             f'<button type="submit">Create share link</button></form>')
-        feedback_form = (
-            f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
-            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
-            f'<fieldset><legend>Was this useful?</legend>'
-            f'<label><input type="radio" name="useful" value="yes" required> '
-            f'Yes</label> <label><input type="radio" name="useful" '
-            f'value="partly"> Partly</label> <label><input type="radio" '
-            f'name="useful" value="no"> No</label></fieldset>'
-            f'<button type="submit">Send feedback</button></form>')
+        feedback_form = self._feedback_form(run_id, csrf)
 
         # V1.2: when the run has a Strategic Intelligence Report it IS the
         # executive report. The legacy claim/evidence sections are quarantined
@@ -1514,23 +1522,136 @@ class WebApp:
                 f'</main></body></html>')
         return self._html(body)
 
+    def feedback_available(self) -> bool:
+        """Whether this deployment may accept feedback at all.
+
+        Gated on demonstrated durability, not on the write appearing to work.
+        Collecting feedback under a false promise is worse than not collecting
+        it: a tester who believes their comment was received does not send it
+        again, so the loss is silent and permanent.
+        """
+        from intent_engine.webapp.storage_state import may_promise_persistence
+        return may_promise_persistence(self._storage)
+
+    def _feedback_form(self, run_id, csrf, page="result"):
+        from intent_engine.webapp.storage_state import explain_storage
+        if not self.feedback_available():
+            return (
+                f'<section class="fb" aria-label="Feedback"><h2>Feedback</h2>'
+                f'<p>Feedback is temporarily unavailable on this deployment, '
+                f'so the form is switched off rather than accepting something '
+                f'that would not be kept.</p>'
+                f'<p class="limitation">{_e(explain_storage(self._storage))} '
+                f'Durable storage has to be attached before feedback can be '
+                f'promised.</p></section>')
+        return (
+            f'<form action="/runs/{_e(run_id)}/feedback" method="post" '
+            f'class="fb"><input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="page" value="{_e(page)}">'
+            f'<fieldset><legend>Was this useful?</legend>'
+            f'<label><input type="radio" name="useful" value="yes" required> '
+            f'Yes</label> <label><input type="radio" name="useful" '
+            f'value="partly"> Partly</label> <label><input type="radio" '
+            f'name="useful" value="no"> No</label></fieldset>'
+            f'<label for="fbnote">Anything else? (optional)</label>'
+            f'<input id="fbnote" name="note" maxlength="4000">'
+            f'<button type="submit">Send feedback</button></form>')
+
     def _feedback(self, session, run_id, form):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
-        meta = self.ci.run_meta(run_id)
-        self.fi.record_feedback(run_id,
-                                meta["domain"] if meta else DEMO_DOMAIN,
-                                useful=form.get("useful", "partly"),
-                                note=form.get("note", ""),
-                                actor_id=session["user_id"])
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<title>Thanks</title></head><body>'
-                f'{self._nav(session, session["csrf"])}<main>'
-                f'<h1>Thank you</h1><p>Feedback recorded as founder input — '
-                f'it never silently changes the intelligence.</p>'
+        csrf = session["csrf"]
+        if not self.feedback_available():
+            return self._error_page(
+                503, "Feedback is temporarily unavailable on this deployment. "
+                     "Rather than accept a comment that would not be kept, "
+                     "the form is switched off until durable storage is "
+                     "attached.")
+        meta = self.ci.run_meta(run_id) or {}
+        from intent_engine._version import version_info
+        from intent_engine.webapp.feedback import FeedbackNotDurable
+        info = version_info()
+        try:
+            record = self.feedback_log.record(
+                run_id=run_id,
+                company=meta.get("company_name", DEMO_COMPANY_NAME),
+                page=form.get("page", "result")[:40],
+                rating=form.get("useful", "partly"),
+                comment=form.get("note", ""),
+                deployed_commit=info.get("commit", ""),
+                analysis_version=info.get("app_version", ""),
+                category=form.get("category", ""),
+                user_id=session["user_id"])
+        except (FeedbackNotDurable, ValueError) as exc:
+            # No success page. The whole defect being fixed is a page that said
+            # "recorded" because the code reached the next line.
+            return self._error_page(
+                503, f"Your feedback could not be saved, so it has not been "
+                     f"recorded: {exc}. Nothing was kept — please try again "
+                     f"later rather than assuming it was received.")
+        # Keep the existing founder-input trail as well, so nothing that read
+        # it before starts reading less.
+        try:
+            self.fi.record_feedback(run_id, meta.get("domain", DEMO_DOMAIN),
+                                    useful=form.get("useful", "partly"),
+                                    note=form.get("note", ""),
+                                    actor_id=session["user_id"])
+        except Exception:                                   # noqa: BLE001
+            pass                    # the durable record is the one that counts
+        body = (f'<main><h1>Thank you</h1>'
+                f'<p>Your feedback was saved and read back to confirm it. '
+                f'Reference <code>{_e(record.feedback_id)}</code>.</p>'
+                f'<p>It is recorded as founder input — it never silently '
+                f'changes the intelligence.</p>'
                 f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
-                f'</main></body></html>')
-        return self._html(body)
+                f'</main>')
+        return self._html(self._page("Thank you", body, session, csrf))
+
+    def _operator_feedback(self, session, *, export=False):
+        """Everything that was collected, and the storage state behind it.
+
+        Both halves matter: a list of records without the durability state
+        invites the same mistake the success page made, so an operator reading
+        this sees what was kept AND whether keeping is proven.
+        """
+        from intent_engine.webapp.storage_state import explain_storage
+        rows = self.feedback_log.all()
+        if export:
+            return ("200 OK",
+                    [("Content-Type", "application/x-ndjson"),
+                     ("Content-Disposition",
+                      'attachment; filename="feedback.jsonl"')],
+                    self.feedback_log.export_jsonl())
+        summary = self.feedback_log.summary()
+        table = "".join(
+            f'<tr><td>{_e(r.get("submitted_at", "")[:19])}</td>'
+            f'<td>{_e(r.get("company", ""))}</td>'
+            f'<td>{_e(r.get("page", ""))}</td>'
+            f'<td>{_e(r.get("rating", ""))}</td>'
+            f'<td>{_e((r.get("comment") or "")[:160])}</td>'
+            f'<td><code>{_e(r.get("run_id", "")[:12])}</code></td>'
+            f'<td><code>{_e((r.get("deployed_commit") or "")[:8])}</code></td>'
+            f'</tr>' for r in reversed(rows))
+        body = (
+            f'{_BRIEF_CSS}<main class="brief"><h1>Feedback</h1>'
+            f'<p class="stamp">{summary["total"]} record(s) · '
+            f'{summary["with_comment"]} with a comment</p>'
+            f'<h2>Storage</h2>'
+            f'<p>{_e(explain_storage(self._storage))}</p>'
+            f'<p class="stamp">Runtime root <code>'
+            f'{_e(self._storage["runtime_root"])}</code> · '
+            f'{"writable" if self._storage["writable"] else "NOT writable"} · '
+            f'{self._storage["boot_count"]} boot(s) recorded · accepting '
+            f'feedback: {"yes" if self.feedback_available() else "no"}</p>'
+            + (f'<h2>Records</h2><table><tr><th>When</th><th>Company</th>'
+               f'<th>Page</th><th>Rating</th><th>Comment</th><th>Run</th>'
+               f'<th>Commit</th></tr>{table}</table>'
+               f'<p><a href="/feedback.jsonl">Export as JSONL</a></p>'
+               if rows else '<p>No feedback has been recorded on this '
+                            'deployment.</p>')
+            + '</main>')
+        return self._html(self._page("Feedback", body, session,
+                                     session["csrf"]))
 
     def _shared(self, token):
         run_id = self.sharing.resolve(token)
@@ -1934,8 +2055,19 @@ class WebApp:
             # and WRITABLE — otherwise the scheduler's jobs would silently fail
             # to persist while /readyz still said "ready". Probe it explicitly.
             self._probe_runtime_root_writable()
+            # Storage durability is reported as MEASURED, so an operator can
+            # tell "proven to survive a restart here" from "writable, never
+            # tested" without reading a path name and guessing.
             return self._ok_json({"status": "ready", "env": self.config.env,
                                   "runtime_root": str(self._runtime_root),
+                                  "storage": {
+                                      "durability": self._storage["durability"],
+                                      "writable": self._storage["writable"],
+                                      "separate_filesystem":
+                                          self._storage["separate_filesystem"],
+                                      "boot_count": self._storage["boot_count"],
+                                      "accepting_feedback":
+                                          self.feedback_available()},
                                   "capabilities": self._capability_state()})
         except Exception as exc:                            # noqa: BLE001
             return ("503 Service Unavailable",

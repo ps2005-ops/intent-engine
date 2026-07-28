@@ -12,6 +12,7 @@ import pytest
 
 from intent_engine.webapp.app import WebApp
 from intent_engine.webapp.config import AppConfig
+from intent_engine.webapp.storage_state import record_boot
 
 
 class Client:
@@ -50,6 +51,14 @@ def app(tmp_path):
                        web_store_path=tmp_path / "web.jsonl",
                        fi_store_path=tmp_path / "fi.jsonl",
                        ci_store_path=tmp_path / "ci.jsonl")
+    # Feedback is gated on PROVEN storage durability, and the only proof is a
+    # record written by an EARLIER PROCESS still being present. Two WebApp
+    # instances inside one interpreter are not a restart — the boot id is
+    # per-process and recording is idempotent against it, deliberately, so
+    # nothing can manufacture a second boot by constructing twice. Seed a
+    # previous process's boot record instead: that is what a redeploy onto a
+    # persistent disk leaves behind.
+    record_boot(tmp_path, boot_id="previous-process-boot")
     application = WebApp(config, now_fn=lambda: clock["t"],
                          transport=_no_network, resolver=False)
     application._clock = clock
