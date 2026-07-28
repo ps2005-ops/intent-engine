@@ -23,7 +23,14 @@ def validate_input(*, company_name: str, website: str, requester_role=None,
     company_input = CompanyInput(
         company_name=company_name, website=website,
         requester_role=requester_role, business_question=business_question,
-        approved_inputs=tuple(approved_inputs), consent_version=consent_version)
+        # Sorted deliberately. The approved source SET defines the analysis;
+        # the order discovery happened to return them in is incidental. Two
+        # analyses that retrieved the same sources in a different order were
+        # otherwise recorded with different content under the same identity,
+        # which raised an idempotency conflict and surfaced to the user as
+        # HTTP 500 — the failure the external tester hit on Palantir.
+        approved_inputs=tuple(sorted(approved_inputs)),
+        consent_version=consent_version)
     company_input.validate()
     # each approved input origin is also url-checked (no internal targets)
     for origin in approved_inputs:

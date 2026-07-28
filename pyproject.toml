@@ -18,8 +18,18 @@ requires-python = ">=3.9"
 # in requirements.txt — two different libraries under one "verified" claim,
 # and two deploys of the same commit could differ. A frozen release must build
 # the same way twice.
+# pydantic is imported by intent_engine.learning.records, which WebApp.__init__
+# imports to build the read-only learning surface. It was in requirements.txt
+# only, so a clean `pip install -e .` deployment imported the webapp module
+# fine and then raised ModuleNotFoundError the moment it CONSTRUCTED the app —
+# the service could not start at all. It survived only because the live
+# instance was built before the dependency moved, which is not a property any
+# future deploy can rely on. Found by booting the installed package in a
+# clean-room, which is the only check that exercises construction rather than
+# import.
 dependencies = [
     "pypdf==5.1.0",
+    "pydantic==2.13.4",
 ]
 
 [project.scripts]

@@ -15,6 +15,11 @@ data/phase0_trial_log.jsonl
 data/*.db
 data/*.db-shm
 data/*.db-wal
+# Per-process boot records used to MEASURE storage durability. Runtime state,
+# never source: committing one would let a fresh checkout inherit another
+# machine's boot history and "prove" a durability it has not demonstrated.
+data/.boot_ledger.jsonl
+data/feedback.jsonl
 data/.fuse_hidden*
 data/cache/
 credentials/

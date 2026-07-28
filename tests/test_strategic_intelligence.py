@@ -650,9 +650,19 @@ def _strategic_webapp_run(tmp_path):
     return app, c, rid
 
 
+def test_webapp_strategic_run_defaults_to_the_brief(tmp_path):
+    """The default is the brief, because fifteen minutes before a meeting an
+    eleven-section report gets skimmed. The depth is one click away."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, _ = c.request("GET", f"/runs/{rid}")
+    assert status.startswith("303")
+    assert headers["Location"] == f"/runs/{rid}/brief"
+
+
 def test_webapp_strategic_run_quarantines_legacy(tmp_path):
     app, c, rid = _strategic_webapp_run(tmp_path)
-    status, _, body = c.request("GET", f"/runs/{rid}")
+    # the full analysis keeps every contract it had; it is no longer the default
+    status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
     # executive-first content is present
     assert "Decision most affected" in body and "card hypothesis" in body
@@ -677,7 +687,20 @@ def test_webapp_stripe_comparison_answer(tmp_path):
     assert status == "200 OK"
     assert "Comparison: Stripe" in body
     assert "Where the analogy breaks" in body
-    assert "hyp-product_to_platform" in body        # routed to infrastructure
+    # Routing still happens; it is simply no longer narrated to the reader. The
+    # page used to print "Discussing hypothesis hyp-product_to_platform ·
+    # operation: COMPARE", which is how the code talks to itself — to a reader
+    # it is noise that looks like a malfunction. Assert the routing through the
+    # ANSWER instead of through a leaked identifier.
+    assert "hyp-" not in body, "internal hypothesis ids never reach a reader"
+    assert "operation:" not in body
+    from intent_engine.strategic_intelligence.conversation import (
+        answer_strategic,
+    )
+    sa = answer_strategic("How is this similar to Stripe and where does the "
+                          "comparison break down?",
+                          app._strategic_report_for(rid))
+    assert sa["routing"]["selected_hypothesis"] == "hyp-product_to_platform"
 
 
 def test_render_is_responsive_and_styled(shopify_report):

@@ -13,12 +13,18 @@ from intent_engine.company_ingestion.claims import (
 )
 from intent_engine.company_ingestion.discovery import discover_candidates
 from intent_engine.company_ingestion.edgar import propose_edgar_candidates
+from intent_engine.company_ingestion.entities import (
+    entity_identity_facts, official_fallback_candidates, resolve_entity,
+)
 from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
 from intent_engine.company_ingestion.fetch import safe_fetch
 from intent_engine.company_ingestion.parsing import parse_html
 from intent_engine.company_ingestion.pasted import pasted_source
+from intent_engine.company_ingestion.readiness import (
+    assess_readiness, explain as explain_readiness,
+)
 from intent_engine.company_ingestion.records import (
     IngestionError, IngestionEvent, MAX_APPROVED_SOURCES,
     MAX_TOTAL_BYTES_PER_RUN, failure_record, retrieved_record,
@@ -76,6 +82,56 @@ class CompanyIngestionService:
             if row.event_type == "ci.run_created":
                 return dict(row.payload, domain=row.company_domain)
         return None
+
+    # --- entity identity ---------------------------------------------------
+    def _identity_for(self, run_id: str, meta: dict) -> dict:
+        """Resolve and persist WHO this run is about, independently of what it
+        manages to retrieve.
+
+        The Sony failure was not only a retrieval failure. The run had no
+        asserted identity at all, so the entity became a side effect of the
+        documents: one 6-K arrived, and the report was about whatever that
+        filing was about. Establishing identity first means a thin evidence set
+        produces a thin report about the RIGHT company, not a confident report
+        about the wrong one.
+
+        Recorded once per run (append-only, idempotent). Returns a dict with
+        `entity_resolved`, the stored facts, and — for in-process callers only —
+        the profile under `_profile`, which is never persisted.
+        """
+        resolution = resolve_entity(company_name=meta.get("company_name", ""),
+                                    website=meta.get("website", ""))
+        payload = {"run_id": run_id,
+                   "status": resolution.status,
+                   "reason": resolution.reason,
+                   "entity_resolved": resolution.resolved,
+                   "choices": resolution.as_dict()["choices"]}
+        if resolution.resolved:
+            payload.update(entity_identity_facts(resolution.profile))
+            payload["entity_id"] = resolution.profile.entity_id
+        elif meta.get("company_name") and meta["domain"]:
+            # The registry is small by design, so "not in the registry" is the
+            # normal case, not a failure. A name plus a domain that validated
+            # still names a subject well enough to analyse — what is NOT
+            # acceptable is having neither, which is the only case the
+            # readiness gate treats as an unresolved identity.
+            payload["fallback_subject"] = meta["company_name"]
+            payload["fallback_domain"] = meta["domain"]
+        self._append("ci.entity_identified", run_id=run_id,
+                     domain=meta["domain"], subject_type="identity",
+                     subject_id=payload.get("entity_id", "unresolved"),
+                     payload=payload,
+                     idempotency_key=f"identity:{run_id}")
+        out = dict(payload)
+        out["_profile"] = resolution.profile
+        return out
+
+    def entity_identity(self, run_id: str) -> dict:
+        """The persisted identity record for a run, or {} if none."""
+        for row in self.store.for_run(run_id):
+            if row.event_type == "ci.entity_identified":
+                return dict(row.payload)
+        return {}
 
     # Sitemap evidence family -> (source_type, source_class) in the existing
     # candidate contract, so sitemap-discovered URLs flow through the same
@@ -164,6 +220,19 @@ class CompanyIngestionService:
         candidates = candidates + propose_edgar_candidates(
             company_name=meta.get("company_name", ""),
             transport=self.transport, resolver=self.resolver)
+        # Curated official sources for a KNOWN entity. This is what stops a
+        # multinational whose primary domain refuses automated access from
+        # collapsing into whatever single filing happened to be reachable:
+        # investor relations, earnings, annual/integrated reports, newsroom and
+        # segment pages live at stable URLs that are not derivable from a
+        # homepage we could not read. Bounded, approval-gated, and classified by
+        # authority + entity relationship, so a subsidiary page can never be
+        # read as the parent speaking.
+        identity = self._identity_for(run_id, meta)
+        if identity.get("entity_resolved"):
+            candidates = candidates + official_fallback_candidates(
+                identity["_profile"], exclude_urls=[c["url"]
+                                                    for c in candidates])
         # Deduplicate by URL. The same page is legitimately found by more than
         # one discovery path (a guessed known path AND the sitemap), and each
         # produces a different payload for the same candidate_id — which would
@@ -405,7 +474,7 @@ class CompanyIngestionService:
 
     # --- composition ------------------------------------------------------------------
     def compose(self, run_id: str, *, fi_service, competitor_approved=False,
-                extra_observations=(), previous_model=None):
+                extra_observations=(), previous_model=None, attempt: int = 1):
         """Build real claims and run the existing Founder Intelligence
         composition. Deterministic; restart-safe (rebuilds from stored
         documents).
@@ -436,6 +505,16 @@ class CompanyIngestionService:
                                            claims.items()
                                            if isinstance(v, list)}},
                      idempotency_key=f"claims:{run_id}:{len(documents)}")
+        # THE GATE. Decided before synthesis, on the evidence alone, because
+        # synthesis is willing: given one filing it still produces a thesis,
+        # hypotheses and leadership questions laid out exactly like a report
+        # built on twenty sources, and the reader cannot tell the difference.
+        # A warning would not help — a warning still renders the report, and
+        # the rendered report is what does the damage.
+        readiness = assess_readiness(
+            documents=documents, identity=self.entity_identity(run_id),
+            failures=failures, extra_observations=extra_observations,
+            attempt=attempt)
         self._transition(run_id, domain, "ASSEMBLING_REPORT")
         result = fi_service.run(
             company_name=meta["company_name"], website=meta["website"],
@@ -451,9 +530,17 @@ class CompanyIngestionService:
         # reasoning engine over them. Additive — the legacy sections are
         # untouched. Company-owned-only evidence is honestly marked partial by
         # the strategic quality gate.
-        result["strategic_report"] = self._strategic_report(
-            meta["company_name"], documents, extra_observations,
-            previous_model=previous_model)
+        result["readiness"] = readiness
+        result["readiness_explanation"] = explain_readiness(readiness)
+        if readiness["may_synthesize"]:
+            result["strategic_report"] = self._strategic_report(
+                meta["company_name"], documents, extra_observations,
+                previous_model=previous_model)
+        else:
+            # No strategic dashboard is built at all. Not a hidden one, not an
+            # empty one — the section simply does not exist, so there is
+            # nothing for a renderer to accidentally present as a finding.
+            result["strategic_report"] = None
         # Semantic coverage: WHICH kinds of evidence the report rests on, and
         # what is missing. A source count alone cannot express that three SEC
         # filings say nothing about the product or its customers.
@@ -554,7 +641,13 @@ class CompanyIngestionService:
                             "documents_before": before["document_count"],
                             "documents_after": after["document_count"]})
 
-        result = self.compose(run_id, fi_service=fi_service, **compose_kwargs)
+        # The evidence-gathering loop above IS the readiness gate's retry. Tell
+        # the gate how many passes were actually spent, or it would report
+        # "worth another look" to a user whose budget is already gone — and
+        # offer them a retry button that could only repeat itself.
+        spent = 1 + sum(1 for h in history if isinstance(h.get("pass"), int))
+        result = self.compose(run_id, fi_service=fi_service, attempt=spent,
+                              **compose_kwargs)
         if "quality" not in result:
             # No source could be retrieved at all: compose already returned an
             # honest FAILED run with no report to score. Rediscovery cannot

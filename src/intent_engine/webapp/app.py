@@ -12,8 +12,15 @@ from __future__ import annotations
 
 import html as _html
 import json
+import logging
 import traceback
+import uuid
 from urllib.parse import parse_qs
+
+# Unhandled-request errors go here. stderr is what the deployment platform
+# captures, so this is the difference between a 500 that can be diagnosed and
+# one that leaves only an access-log line.
+_LOG = logging.getLogger("intent_engine.webapp")
 
 from intent_engine.founder_intelligence.fixtures import (
     DEMO_AS_OF, DEMO_COMPANY_NAME, DEMO_DOMAIN, demo_claims,
@@ -22,6 +29,10 @@ from intent_engine.founder_intelligence.presentation import (
     _BASE_CSS as _APP_CSS,
     render_landing_html, render_report_preview, render_result_html,
 )
+from intent_engine.company_ingestion.entities import (
+    AMBIGUOUS, resolve_choice, resolve_entity,
+)
+from intent_engine.strategic_intelligence.editorial import is_meaningful
 from intent_engine.company_ingestion.records import (
     IngestionError, MAX_APPROVED_SOURCES,
 )
@@ -33,6 +44,106 @@ from intent_engine.webapp.sharing import SharingService
 from intent_engine.webapp.store import WebStore
 
 _e = _html.escape
+
+# The brief is the default landing surface, so its contrast is not a detail.
+# Every foreground/background pair here is at or above WCAG AA for its size.
+_BRIEF_CSS = """
+<style>
+.brief{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--bg:#ffffff;
+--panel:#f8fafc;--accent:#1d4ed8;--accent-ink:#ffffff;
+font:17px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+color:var(--ink);background:var(--bg);
+max-width:38rem;margin:0 auto;padding:8px 18px 40px}
+.brief h1{font-size:1.75rem;line-height:1.2;margin:.4rem 0 .2rem}
+.brief h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;
+color:var(--muted);margin:1.6rem 0 .35rem;font-weight:700}
+.brief p{margin:0 0 .5rem}
+.brief .stamp{color:var(--muted);font-size:.86rem;margin-bottom:1.2rem}
+.brief .b-part{border-top:1px solid var(--line);padding-top:.2rem}
+.brief ul,.brief ol{margin:.2rem 0;padding-left:1.2rem}
+.brief li{margin:0 0 .5rem}
+.brief .when{font-size:.78rem;font-weight:700;color:var(--muted);
+margin-right:.5rem}
+.brief a{color:var(--accent);text-decoration:underline}
+.brief .layers{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem;
+padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:8px}
+.brief .layers strong{color:var(--ink)}
+.brief .b-act{display:flex;gap:10px;flex-wrap:wrap;margin:1.8rem 0 1rem}
+.brief .b-act a{display:inline-block;padding:10px 18px;border-radius:9px;
+border:1px solid var(--line);text-decoration:none;color:var(--ink);
+font-weight:600;font-size:.95rem}
+.brief .b-act a.primary{background:var(--accent);color:var(--accent-ink);
+border-color:var(--accent)}
+.brief a:focus-visible,.brief button:focus-visible,
+.brief input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.brief .b-ask{border-top:1px solid var(--line);padding-top:1rem}
+.brief .b-ask label{display:block;font-size:.86rem;color:var(--muted);
+margin-bottom:.35rem}
+.brief .b-ask input{padding:9px 11px;border:1px solid var(--line);
+border-radius:8px;font-size:1rem;min-width:60%;background:var(--bg);
+color:var(--ink)}
+.brief .b-ask button{padding:9px 16px;border-radius:8px;border:0;
+background:var(--accent);color:var(--accent-ink);font-weight:600;
+font-size:.95rem;cursor:pointer}
+@media (max-width:600px){.brief{font-size:16px;padding:6px 14px 30px}
+.brief h1{font-size:1.45rem}.brief .b-ask input{min-width:100%}}
+@media (prefers-color-scheme:dark){
+.brief{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--bg:#0f141c;
+--panel:#161c26;--accent:#7aa2ff;--accent-ink:#0b1220}}
+@media print{.brief .layers,.brief .b-act,.brief .b-ask{display:none}
+.brief{max-width:none}}
+</style>
+"""
+
+# The floor every page meets, whatever else it brings. Deliberately small and
+# additive — it grants visible focus, a readable dark scheme, a responsive
+# minimum and print rules, and takes no design decisions that could fight a
+# page's own stylesheet. Applied last so it wins on the properties it sets.
+_A11Y_CSS = """
+<style>
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+outline:3px solid #1d4ed8;outline-offset:2px}
+img,svg,video,table{max-width:100%}
+pre,code{overflow-x:auto;max-width:100%}
+@media (max-width:600px){
+body{font-size:16px}
+main{padding-left:14px;padding-right:14px}
+table{display:block;overflow-x:auto}}
+@media (prefers-color-scheme:dark){
+:root{color-scheme:dark}
+body{background:#0f141c;color:#f3f4f6}
+a{color:#7aa2ff}
+:where(h1,h2,h3,h4,h5,h6){color:#f3f4f6}
+:where(.card,.chip,.agenda,details,fieldset){background:#161c26;
+border-color:#3a4454}
+:where(.muted,.state,.limitation,small){color:#c3cad6}}
+@media print{
+nav,form,.actions,.b-act,.layers{display:none!important}
+body{background:#fff;color:#000}}
+</style>
+"""
+
+_ONBOARDING_CSS = """
+<style>
+.onboarding{border:1px solid var(--line);border-radius:14px;
+background:var(--panel);padding:20px 22px;margin:12px 0 22px}
+.onboarding h1{font-size:1.4rem;margin:0 0 .2rem}
+.onboarding h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;
+color:var(--muted);margin:1.2rem 0 .3rem;font-weight:700}
+.onboarding .ob-part{border-top:0}
+.onboarding ul{margin:.2rem 0;padding-left:1.15rem}
+.onboarding li{margin:0 0 .35rem}
+.onboarding dl.glossary{margin:.3rem 0}
+.onboarding dl.glossary dt{font-weight:700;margin-top:.6rem}
+.onboarding dl.glossary dd{margin:.1rem 0 0;color:var(--muted)}
+.onboarding .ob-dismiss{margin-top:1.4rem}
+.onboarding .ob-dismiss a,.onboarding .ob-dismiss button{display:inline-block;
+padding:10px 18px;border-radius:9px;background:var(--accent);
+color:var(--accent-ink);text-decoration:none;font-weight:600;border:0;
+font-size:.95rem;cursor:pointer}
+@media print{.onboarding{display:none}}
+</style>
+"""
 
 _SECURITY_HEADERS = [
     ("X-Content-Type-Options", "nosniff"),
@@ -101,6 +212,19 @@ class WebApp:
             self._scheduler = Scheduler(self._runtime_root).start()
         self._results: dict = {}   # run_id -> composed result cache
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
+        # run_id -> the last answered topics, so a bare "Why?" has a subject.
+        self._conversation_context: dict = {}
+        # Storage durability is MEASURED, once, at startup. Recording this
+        # boot is what makes the next boot able to prove survival: finding an
+        # earlier boot id in the ledger means a previous process wrote a file,
+        # ended, and the file is still here. Until that has been observed the
+        # honest answer is "unproven", and the feedback form says so rather
+        # than promising a persistence nobody has checked.
+        from intent_engine.webapp.feedback import FeedbackLog
+        from intent_engine.webapp.storage_state import probe_storage, record_boot
+        record_boot(self._runtime_root)
+        self._storage = probe_storage(self._runtime_root)
+        self.feedback_log = FeedbackLog(self._runtime_root)
 
     # --- plumbing -------------------------------------------------------------
     def __call__(self, environ, start_response):
@@ -109,8 +233,24 @@ class WebApp:
         except WebAppError as exc:
             status, headers, body = self._error_page(400, str(exc))
         except Exception:                                   # noqa: BLE001
+            # The message used to promise "It has been logged" while the
+            # traceback was only ever computed when debug was on — in
+            # production it was formatted nowhere, written nowhere, and
+            # discarded. A 500 left nothing behind but an access-log line, so
+            # the one artefact needed to diagnose it never existed. Log it
+            # unconditionally, to stderr, which the platform captures.
+            #
+            # The error id is the bridge: the user can quote it, and an
+            # operator can grep for it, without any internal detail crossing
+            # the boundary.
+            error_id = uuid.uuid4().hex[:12]
+            _LOG.exception("unhandled error %s handling %s %s", error_id,
+                           environ.get("REQUEST_METHOD", "?"),
+                           environ.get("PATH_INFO", "?"))
             detail = (traceback.format_exc() if self.config.debug
-                      else "An internal error occurred. It has been logged.")
+                      else (f"An internal error occurred and has been "
+                            f"recorded (reference {error_id}). Quote this "
+                            f"reference if you report it."))
             status, headers, body = self._error_page(500, detail)
         headers = headers + _SECURITY_HEADERS
         payload = body.encode()
@@ -164,6 +304,10 @@ class WebApp:
             return self._ok_json(version_info())
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
+        if path == "/onboarding/dismiss" and method == "POST":
+            if session is not None:
+                session["onboarding_dismissed"] = True
+            return self._redirect("/")
         if path == "/login":
             return (self._login_page(None) if method == "GET"
                     else self._login_post(form))
@@ -199,6 +343,12 @@ class WebApp:
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
             return self._report(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "brief":
+            return self._brief_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "slides":
+            return self._slides_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "full":
+            return self._run_page(session, parts[1], layer="full")
         if route == ("GET", "runs", 4) and parts[2] == "evidence":
             return self._evidence(session, parts[1], parts[3])
         if route == ("POST", "runs", 3) and parts[2] == "conversation":
@@ -209,6 +359,10 @@ class WebApp:
             return self._share_revoke(session, parts[1], form)
         if route == ("POST", "runs", 3) and parts[2] == "feedback":
             return self._feedback(session, parts[1], form)
+        if route == ("POST", "runs", 3) and parts[2] == "retry":
+            return self._retry_evidence(session, parts[1])
+        if route == ("POST", "runs", 3) and parts[2] == "fresh":
+            return self._fresh_analysis(session, parts[1])
         if parts and parts[0] in ("learning", "dashboard", "assistant") \
                 and session is None:
             return self._redirect("/login")
@@ -218,6 +372,11 @@ class WebApp:
             return self._learning_explain_page(session, parts[1])
         if route == ("GET", "dashboard", 1):
             return self._dashboard_page(session)
+        if path in ("/feedback", "/feedback.jsonl") and method == "GET":
+            if session is None:
+                return self._redirect("/login")
+            return self._operator_feedback(session, export=path.endswith(
+                ".jsonl"))
         if path == "/status.json" and method == "GET":
             if session is None:
                 return self._redirect("/login")
@@ -290,17 +449,26 @@ class WebApp:
         return None
 
     def _stylize(self, body: str) -> str:
-        """Ensure every hand-built page carries the shared product stylesheet
-        (and a responsive viewport). Pages that already embed their own
-        <style> (the presentation-layer landing/result renderers) are left
-        untouched, so the CSS is never applied twice."""
-        if "<style" in body or "</head>" not in body:
+        """Ensure every page carries the shared stylesheet and the
+        accessibility baseline.
+
+        The baseline is applied even to pages that embed their own <style>.
+        Skipping those was how the least-styled page in the product stayed
+        that way: the synthetic demo result renders its own CSS, so it was
+        exempted from the shared one — and it is the first result a guest ever
+        sees. The baseline only adds visible focus, a readable dark scheme, a
+        responsive floor and print rules, so it cannot fight a page's own
+        design; the full stylesheet is still applied only where absent.
+        """
+        if "</head>" not in body:
             return body
         head_extra = ""
         if 'name="viewport"' not in body:
             head_extra += ('<meta name="viewport" content="width=device-width,'
                            'initial-scale=1">')
-        head_extra += f"<style>{_APP_CSS}</style>"
+        if "<style" not in body:
+            head_extra += f"<style>{_APP_CSS}</style>"
+        head_extra += _A11Y_CSS
         return body.replace("</head>", head_extra + "</head>", 1)
 
     def _html(self, body, *, status="200 OK", extra_headers=()):
@@ -387,9 +555,49 @@ class WebApp:
                                 f'<input type="hidden" name="csrf" '
                                 f'value="{_e(csrf)}"><button type="submit">', 1)
             if session.get("anonymous"):
+                # First contact. Someone who has just clicked "try the demo"
+                # does not yet know what the product is, and a company-name
+                # box explains nothing. Shown once, dismissed for the session.
+                intro = ''
+                if not session.get("onboarding_dismissed"):
+                    intro = (
+                        _BRIEF_CSS + _ONBOARDING_CSS
+                        + '<div class="brief">'
+                        + self._onboarding_html(dismissible=False)
+                        .replace('</section>',
+                                 f'<form action="/onboarding/dismiss" '
+                                 f'method="post" class="ob-dismiss">'
+                                 f'<input type="hidden" name="csrf" '
+                                 f'value="{_e(csrf)}">'
+                                 f'<button type="submit">Got it — start an '
+                                 f'analysis</button></form></section>')
+                        + '</div>')
+                # Prepared examples, offered up front. A guest with no company
+                # in mind types something arbitrary and meets the weakest case
+                # the product has; these are the ones that are known to work.
+                from intent_engine.company_ingestion.demo_tiers import (
+                    GOLDEN_COMPANIES, GOLDEN, presentation,
+                )
+                golden_mode = presentation(GOLDEN)
+                golden = "".join(
+                    f'<form action="/analyze" method="post" class="golden">'
+                    f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+                    f'<input type="hidden" name="consent" value="1">'
+                    f'<input type="hidden" name="company_name" '
+                    f'value="{_e(c["name"])}">'
+                    f'<input type="hidden" name="website" '
+                    f'value="{_e(c["website"])}">'
+                    f'<button type="submit">{_e(c["name"])}</button>'
+                    f'<span class="why">{_e(c["why"])}</span></form>'
+                    for c in GOLDEN_COMPANIES)
+                intro += (f'<section class="golden-list" aria-label="Prepared '
+                          f'examples"><h2>{_e(golden_mode["label"])}s</h2>'
+                          f'<p>{_e(golden_mode["summary"])}</p>{golden}'
+                          f'</section>')
                 page = page.replace(
                     '<main>',
-                    '<main><p role="status"><strong>Demo mode.</strong> '
+                    '<main>' + intro + '<p role="status"><strong>Demo mode.'
+                    '</strong> '
                     'You are in an anonymous, isolated demo session — no '
                     'sign-in, no access to anyone else\'s data, no share '
                     'links. Analyze a company below.</p>', 1)
@@ -411,30 +619,86 @@ class WebApp:
                                 note + '<form action="/analyze"', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
 
+    # One screen, written for a business owner who has never seen this and is
+    # not going to read a manual. No internal terminology, nothing about
+    # pipelines or evidence families — what it does, how, what it does not do,
+    # and how to use it. The old version described the product's early-access
+    # limitations to someone who had not yet learned what the product was.
+    _ONBOARDING = (
+        ("What this does",
+         "It builds a briefing on a company from public evidence — the kind "
+         "of preparation you would do before a meeting, done for you and "
+         "linked back to its sources.",
+         []),
+        ("How it works",
+         "",
+         ["It finds official and permitted public sources for the company.",
+          "It checks whether the evidence is broad enough to be worth a "
+          "briefing.",
+          "It organises what it found into products, customers, strategy, "
+          "risks and market signals.",
+          "It writes a short executive briefing you can read in two minutes.",
+          "It links every important finding back to the source it came from.",
+          "It marks clearly where it is reasoning rather than reporting."]),
+        ("What it does not do",
+         "",
+         ["It has no access to anything inside the company.",
+          "It knows nothing about private meetings or internal plans.",
+          "Not every company publishes enough for a useful briefing, and it "
+          "will say so rather than guess.",
+          "Where it reasons beyond the evidence, that is a hypothesis, not a "
+          "fact."]),
+        ("How to use it",
+         "",
+         ["Start with the brief — one page, the central view and what "
+          "supports it.",
+          "Move through the slides if you are presenting or want it in "
+          "order.",
+          "Open the evidence behind anything you would repeat out loud.",
+          "Ask follow-up questions in plain English."]),
+    )
+
+    # The five words that would otherwise be jargon on first contact.
+    _GLOSSARY = (
+        ("Outside-in", "Built only from what the company and others have "
+                       "published publicly — never from inside knowledge."),
+        ("Confidence", "How much the evidence actually supports a statement. "
+                       "Low confidence is not a hedge; it means treat this as "
+                       "a lead, not a fact."),
+        ("Hypothesis", "A possible explanation that fits the evidence but is "
+                       "not established. Worth testing, not worth repeating "
+                       "as fact."),
+        ("Contradiction", "Two credible sources that disagree. Shown rather "
+                          "than resolved, because which one is right is often "
+                          "the interesting question."),
+        ("Limited analysis", "The company publishes too little for a full "
+                             "briefing. What was found is still shown, with "
+                             "what was missing."),
+    )
+
+    def _onboarding_html(self, *, dismissible=True, run_id=""):
+        blocks = ""
+        for heading, lead, items in self._ONBOARDING:
+            bullets = ("<ul>" + "".join(f"<li>{_e(i)}</li>" for i in items)
+                       + "</ul>") if items else ""
+            blocks += (f'<section class="ob-part"><h2>{_e(heading)}</h2>'
+                       + (f'<p>{_e(lead)}</p>' if lead else '')
+                       + bullets + '</section>')
+        glossary = "".join(f'<dt>{_e(term)}</dt><dd>{_e(meaning)}</dd>'
+                           for term, meaning in self._GLOSSARY)
+        dismiss = ('<p class="ob-dismiss"><a href="/">Got it — start an '
+                   'analysis</a></p>') if dismissible else ''
+        return (f'<section class="onboarding" aria-label="How this works">'
+                f'<h1>Before you start</h1>{blocks}'
+                f'<section class="ob-part"><h2>A few words used here</h2>'
+                f'<dl class="glossary">{glossary}</dl></section>'
+                f'{dismiss}</section>')
+
     def _onboarding(self, session):
-        if session is None:
-            return self._redirect("/login")
-        csrf = session["csrf"]
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<meta name="viewport" content="width=device-width,'
-                f'initial-scale=1"><title>Getting started</title></head><body>'
-                f'{self._nav(session, csrf)}<main>'
-                '<h1>Getting started</h1>'
-                '<p>Founder Intelligence produces an evidence-backed, '
-                'outside-in view of a company. In early access, live '
-                'ingestion of arbitrary company websites is not yet '
-                'available — start with the synthetic demo company to see '
-                'the complete experience: proof of understanding first, '
-                'then perspective, then a cited conversation.</p>'
-                '<ol><li>Run the demo from the <a href="/">home page</a> '
-                '(use any name and the demo website, or just submit the '
-                'form).</li><li>Open each section and expand the evidence '
-                'behind any claim.</li><li>Ask a follow-up question — every '
-                'answer cites its sources.</li><li>Create a share link for '
-                'your cofounder, and revoke it when done.</li></ol>'
-                f'<p>Password reset: {_e(PASSWORD_RESET_STATUS)}.</p>'
-                '</main></body></html>')
-        return self._html(body)
+        csrf = session["csrf"] if session else ""
+        body = (f'{_BRIEF_CSS}{_ONBOARDING_CSS}<main class="brief">'
+                f'{self._onboarding_html()}</main>')
+        return self._html(self._page("Before you start", body, session, csrf))
 
     def _login_page(self, message):
         note = f'<p role="alert">{_e(message)}</p>' if message else ""
@@ -498,12 +762,30 @@ class WebApp:
         if limited is not None:
             return limited
         website = form.get("website", f"https://{DEMO_DOMAIN}")
+        company_name = form.get("company_name", "")[:120]
+        # WHICH company? A name like "Sony" denotes a parent, a games
+        # subsidiary, an electronics subsidiary and more. Picking one for the
+        # user produces a confident report about the wrong company — strictly
+        # worse than asking. Asked once, before any work, and answered by an
+        # explicit choice that carries its own website (the choice form posts
+        # no website field, so this must settle both).
+        chosen = form.get("entity_id", "")
+        if chosen:
+            picked = resolve_choice(chosen)
+            if picked.resolved:
+                company_name = picked.profile.legal_name
+                website = f"https://{picked.profile.primary_domain}"
         if DEMO_DOMAIN not in website:
+            if not chosen:
+                resolution = resolve_entity(company_name=company_name,
+                                            website=website)
+                if resolution.status == AMBIGUOUS:
+                    return self._disambiguation_page(
+                        session, resolution, form)
             # REAL company path: validate → discover → source approval.
             try:
                 run = self.ci.create_run(
-                    company_name=form.get("company_name", "")[:120]
-                    or "(unnamed company)",
+                    company_name=company_name or "(unnamed company)",
                     website=website, user_id=session["user_id"],
                     as_of=__import__("datetime").datetime.now(
                         __import__("datetime").timezone.utc
@@ -553,6 +835,42 @@ class WebApp:
             # deterministic demo produces one run id; never reassign it
             return self._error_page(403, "this run belongs to another account")
         return self._redirect(f"/runs/{run_id}/progress")
+
+    def _disambiguation_page(self, session, resolution, form):
+        """Ask which company was meant, once, before any analysis runs.
+
+        Presented as plain business facts — legal name, country, listing —
+        because a business reader distinguishes companies by those, not by an
+        entity id. The parent is listed first (the likeliest reading) but every
+        option is an equal, explicit choice.
+        """
+        csrf = session["csrf"] if session else ""
+        payload = resolution.as_dict()
+        cards = "".join(
+            f'<form action="/analyze" method="post" class="choice">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="consent" value="1">'
+            f'<input type="hidden" name="entity_id" '
+            f'value="{_e(c["entity_id"])}">'
+            f'<input type="hidden" name="business_question" '
+            f'value="{_e(form.get("business_question", ""))}">'
+            f'<h3>{_e(c["legal_name"])}</h3>'
+            f'<p class="state">{_e(c["describe"])}</p>'
+            f'<p class="why">{_e(c["note"])}</p>'
+            f'<button type="submit">Analyse {_e(c["legal_name"])}</button>'
+            f'</form>' for c in payload["choices"])
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Which company do you mean?</title>'
+            f'</head><body>{self._nav(session, csrf)}<main>'
+            f'<h1>Which company do you mean?</h1>'
+            f'<p>{_e(payload["reason"])}. These are different companies with '
+            f'different products, results and risks, so the answer depends on '
+            f'which one you want.</p>{cards}'
+            f'<p><a href="/">Start over with a different company</a></p>'
+            f'</main></body></html>')
+        return self._html(body)
 
     def _progress(self, session, run_id):
         if not self._owned(session, run_id):
@@ -727,7 +1045,7 @@ class WebApp:
                 f'</main></body></html>')
         return self._html(body)
 
-    def _run_page(self, session, run_id):
+    def _run_page(self, session, run_id, *, layer="default"):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
         if self._is_real_run(run_id):
@@ -745,6 +1063,14 @@ class WebApp:
                 return self._redirect(f"/runs/{run_id}/sources")
             if result.get("status") == "FAILED" and not result.get("sections"):
                 return self._failed_run_page(session, run_id)
+            # The gate said no. There is no strategic report to render, and a
+            # report-shaped page with the findings removed is exactly the
+            # "empty but finished-looking" artefact this must never produce.
+            # Show what was found, what was missing, and what to do next.
+            readiness = result.get("readiness") or {}
+            if readiness and not readiness.get("may_synthesize", True):
+                return self._insufficient_evidence_page(session, run_id,
+                                                        result)
         else:
             result = self._result(run_id)
         if result is None:
@@ -756,20 +1082,20 @@ class WebApp:
             f'<form action="/runs/{_e(run_id)}/share" method="post">'
             f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
             f'<button type="submit">Create share link</button></form>')
-        feedback_form = (
-            f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
-            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
-            f'<fieldset><legend>Was this useful?</legend>'
-            f'<label><input type="radio" name="useful" value="yes" required> '
-            f'Yes</label> <label><input type="radio" name="useful" '
-            f'value="partly"> Partly</label> <label><input type="radio" '
-            f'name="useful" value="no"> No</label></fieldset>'
-            f'<button type="submit">Send feedback</button></form>')
+        feedback_form = self._feedback_form(run_id, csrf)
 
         # V1.2: when the run has a Strategic Intelligence Report it IS the
         # executive report. The legacy claim/evidence sections are quarantined
         # into a collapsed technical appendix so they never weaken the exec view.
         if result.get("strategic_report"):
+            # The full report is not wrong; it is unreadable at the moment it
+            # matters. Fifteen minutes before a meeting, eleven sections and a
+            # technical appendix get skimmed, and a skimmed report is where a
+            # reader picks up the first confident sentence they see. Depth was
+            # never the problem — the default was. So the default is now the
+            # brief, and the depth is one click away and still complete.
+            if layer == "default":
+                return self._redirect(f"/runs/{run_id}/brief")
             return self._strategic_run_page(session, run_id, result,
                                             share_form, feedback_form)
 
@@ -798,6 +1124,135 @@ class WebApp:
                   f'preview</a></p></section></main>')
         page = page.replace("</main>", extras, 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
+
+    def _has_untried_sources(self, run_id) -> bool:
+        """Whether any discovered source has neither been retrieved nor
+        failed — i.e. whether a second look has anywhere to go."""
+        candidates = self.ci.store.candidates(run_id)
+        if not candidates:
+            return False
+        retrieved = {d.get("original_url") for d in
+                     self.ci.store.retrieved(run_id)}
+        retrieved |= {d.get("final_url") for d in
+                      self.ci.store.retrieved(run_id)}
+        failed_ids = {f.get("candidate_id")
+                      for f in self.ci.store.failures(run_id)}
+        return any(c["candidate_id"] not in failed_ids
+                   and c["url"] not in retrieved for c in candidates)
+
+    def _retry_evidence(self, session, run_id):
+        """One more targeted pass at the specific missing evidence.
+
+        Recomposition is what does the work: `compose_with_quality` gathers
+        evidence to sufficiency, approving only candidates already discovered
+        for this run and never re-requesting a URL that failed. So this is a
+        genuine second look, not a page refresh dressed up as one — and the
+        budget inside it is finite, so it cannot become a loop.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._error_page(404, "no such run for this account")
+        try:
+            self._results[run_id] = self._compose(run_id)
+        except IngestionError as exc:
+            return self._error_page(400, str(exc))
+        return self._redirect(f"/runs/{run_id}")
+
+    def _insufficient_evidence_page(self, session, run_id, result):
+        """The honest alternative to an empty report.
+
+        A reader who gets this must be able to answer three questions without
+        asking anyone: what DID it find, what was it missing, and what can I do
+        now. The last one matters most — a dead end with no next step reads as
+        a broken product, which is why every route out is offered explicitly.
+        """
+        csrf = session["csrf"] if session else ""
+        readiness = result.get("readiness") or {}
+        note = result.get("readiness_explanation") or {}
+        meta = self.ci.run_meta(run_id) or {}
+        company = meta.get("company_name", "this company")
+
+        def _ul(items, empty=""):
+            rows = "".join(f"<li>{_e(str(i))}</li>" for i in items if i)
+            return f"<ul>{rows}</ul>" if rows else empty
+
+        found = _ul(note.get("found", []),
+                    "<p class='unavailable'>No usable public source could be "
+                    "read.</p>")
+        # Evidence that WAS retrieved is never discarded just because there is
+        # too little of it to support a briefing. It is the reader's, it cost a
+        # real fetch, and seeing it is how they judge whether to add more.
+        read_html = "".join(
+            f'<li><a href="{_e(d["final_url"])}" rel="nofollow noopener">'
+            f'{_e(d.get("title") or d["final_url"])}</a></li>'
+            for d in self.ci.store.retrieved(run_id)
+            if d.get("retrieval_status") == "OK")
+        if read_html:
+            found += (f'<h3>Sources that were read</h3><ul>{read_html}</ul>')
+        missing = _ul(note.get("missing", []))
+        blockers = _ul(note.get("blockers", [])[:5])
+        failures = self._failure_rows(run_id)
+        failed_html = (f"<h3>Sources that could not be read</h3>{failures}"
+                       if failures else "")
+
+        # Every one of these is a real, working next step — not a consolation.
+        # The retry button is offered only when there is genuinely somewhere
+        # new to look. The composition path already spends its own targeted
+        # retry budget before it ever gets here, so offering "try again"
+        # unconditionally would hand the reader a button that can only repeat
+        # itself — the most corrosive kind of dead end, because it looks like
+        # progress. It becomes live again once a source has been added.
+        actions = []
+        if self._has_untried_sources(run_id):
+            actions.append(
+                (f'/runs/{run_id}/retry', 'post',
+                 'Look again for the missing evidence',
+                 'Runs one more targeted search for the specific kinds of '
+                 'source that are missing, skipping everything that already '
+                 'failed.'))
+        actions += [
+            ('/', 'get', 'Run a fresh analysis',
+             'Start again from scratch, ignoring anything cached.'),
+            (f'/runs/{run_id}/sources', 'get', 'Add an official source',
+             'If you know an official page, report or filing, add it and the '
+             'analysis will use it.'),
+            ('/', 'get', 'Correct the company',
+             'If this is the wrong entity — a subsidiary rather than the '
+             'group, or a similarly named company — enter it again.'),
+            ('/', 'get', 'Try a prepared company',
+             'Palantir and Shopify are validated end to end and show the '
+             'full experience.'),
+        ]
+        action_html = "".join(
+            (f'<form action="{_e(url)}" method="post" class="action">'
+             f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+             f'<button type="submit">{_e(label)}</button>'
+             f'<p class="why">{_e(why)}</p></form>')
+            if method == 'post' else
+            (f'<p class="action"><a href="{_e(url)}">{_e(label)}</a>'
+             f'<br><span class="why">{_e(why)}</span></p>')
+            for url, method, label, why in actions)
+
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Not enough public evidence — '
+            f'{_e(company)}</title></head><body>'
+            f'{self._nav(session, csrf)}<main>'
+            f'<h1>Not enough public evidence for {_e(company)}</h1>'
+            f'<p class="lead">{_e(note.get("headline", ""))} '
+            f'Rather than show a briefing that looks complete and is not, '
+            f'here is exactly where it stands.</p>'
+            f'<h2>What was found</h2>'
+            f'<p class="state">{note.get("source_count", 0)} usable '
+            f'source(s).</p>{found}'
+            f'<h2>What was missing</h2>{missing}{blockers}'
+            f'{failed_html}'
+            f'<h2>What you can do</h2>{action_html}'
+            f'<p class="limitation">A company can be perfectly healthy and '
+            f'still publish little in public. Missing evidence is a statement '
+            f'about what could be read, not about the company.</p>'
+            f'</main></body></html>')
+        return self._html(body)
 
     def _legacy_sections_html(self, run_id, result):
         """The legacy executive-overview + evidence-library HTML (used inline
@@ -883,9 +1338,180 @@ class WebApp:
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Strategic Intelligence — '
                 f'{_e(report.get("company_name", ""))}</title></head><body>'
-                f'{self._nav(session, csrf)}<main>{strat}{actions}{appendix}'
+                f'{self._nav(session, csrf)}<main class="brief">'
+                # The way back to the shorter layers, on the longest one —
+                # this is the page a reader is most likely to want out of.
+                f'{self._layer_nav(run_id, "full")}</main>'
+                f'<main>{strat}{actions}{appendix}'
                 f'</main></body></html>')
-        return self._html(body)
+        return self._html(_BRIEF_CSS + body)
+
+    # --- the three layers ---------------------------------------------------
+    def _analysis_stamp(self, run_id):
+        """When this analysis ran and against which pipeline version — shown
+        on every layer, because a briefing with no date is a briefing whose
+        staleness the reader cannot judge."""
+        from intent_engine._version import version_info
+        meta = self.ci.run_meta(run_id) or {}
+        as_of = (meta.get("as_of") or "")[:10]
+        return as_of, version_info().get("app_version", "")
+
+    def _layer_nav(self, run_id, current):
+        """One consistent way between the three layers, on all three."""
+        links = (("brief", "Executive brief", f"/runs/{run_id}/brief"),
+                 ("slides", "Presentation", f"/runs/{run_id}/slides"),
+                 ("full", "Full analysis", f"/runs/{run_id}/full"))
+        return ('<nav class="layers" aria-label="Report depth">' + " ".join(
+            (f'<strong aria-current="page">{_e(label)}</strong>'
+             if key == current else f'<a href="{_e(href)}">{_e(label)}</a>')
+            for key, label, href in links) + '</nav>')
+
+    def _analysis_provenance(self, run_id, as_of, version, csrf):
+        """When this ran, on what, in which mode, and how to get a fresh one.
+
+        A briefing with no date is a briefing whose staleness the reader cannot
+        judge, and one that silently reused a cached run is a briefing whose
+        freshness they have been misled about. Both are shown.
+        """
+        from intent_engine.company_ingestion.demo_tiers import (
+            classify, presentation,
+        )
+        identity = self.ci.entity_identity(run_id) or {}
+        result = self._results.get(run_id) or {}
+        readiness = (result.get("readiness") or {}).get("state", "")
+        tier = classify(entity_id=identity.get("entity_id", ""),
+                        website=(self.ci.run_meta(run_id) or {}).get(
+                            "website", ""),
+                        readiness_state=readiness)
+        mode = presentation(tier)
+        documents = self.ci.store.retrieved(run_id)
+        fresh = sum(1 for d in documents if d.get("retrieval_status") == "OK")
+        reused = run_id in self._results and bool(documents)
+        return (
+            f'<p class="stamp">Executive brief · analysed {_e(as_of)} · '
+            f'{fresh} source(s) read · '
+            f'{"reusing a compatible earlier analysis" if reused else "fresh"}'
+            f' · about a two-minute read</p>'
+            f'<p class="stamp"><strong>{_e(mode["label"])}.</strong> '
+            f'{_e(mode["summary"])}</p>'
+            f'<form action="/runs/{_e(run_id)}/fresh" method="post" '
+            f'class="freshen"><input type="hidden" name="csrf" '
+            f'value="{_e(csrf)}">'
+            f'<button type="submit">Run a fresh analysis</button>'
+            f'<span class="why"> — ignores anything cached and retrieves '
+            f'again. Analysis version <code>{_e(version)}</code>.</span>'
+            f'</form>')
+
+    def _fresh_analysis(self, session, run_id):
+        """Deliberately bypass the compatible-result cache.
+
+        The point of the button is that the user does not have to trust our
+        judgement about whether the cached run is still good. A stale
+        low-quality report must never be able to trap someone with no way out
+        of it.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._error_page(404, "no such run for this account")
+        meta = self.ci.run_meta(run_id) or {}
+        self._results.pop(run_id, None)
+        form = {"consent": "1", "company_name": meta.get("company_name", ""),
+                "website": meta.get("website", ""), "csrf": session["csrf"]}
+        return self._analyze(session, form)
+
+    def _brief_page(self, session, run_id):
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        report = self._strategic_report_for(run_id)
+        if report is None:
+            return self._redirect(f"/runs/{run_id}/full")
+        from intent_engine.strategic_intelligence.brief import build_brief
+        as_of, version = self._analysis_stamp(run_id)
+        brief = build_brief(report, as_of=as_of, analysis_version=version)
+        csrf = session["csrf"] if session else ""
+
+        def _p(label, value):
+            return (f'<section class="b-part"><h2>{_e(label)}</h2>'
+                    f'<p>{_e(value)}</p></section>') if is_meaningful(value) \
+                else ''
+
+        signals = "".join(
+            f'<li>' + (f'<span class="when">{_e(s["date"])}</span>'
+                       if is_meaningful(s.get("date")) else '')
+            + f'{_e(s["text"])}</li>' for s in brief.signals)
+        questions = "".join(f'<li>{_e(q)}</li>' for q in brief.questions)
+        body = (
+            f'{_BRIEF_CSS}<main class="brief">'
+            f'{self._layer_nav(run_id, "brief")}'
+            f'<h1>{_e(brief.company)}</h1>'
+            f'{self._analysis_provenance(run_id, as_of, version, csrf)}'
+            + _p("The central view", brief.thesis)
+            + (f'<section class="b-part"><h2>What supports it</h2>'
+               f'<ul class="signals">{signals}</ul></section>'
+               if signals else '')
+            + _p("What argues the other way", brief.counterpoint)
+            + _p("The tension to watch", brief.tension)
+            + _p("The decision this affects", brief.decision)
+            + (f'<section class="b-part"><h2>Questions for leadership</h2>'
+               f'<ol>{questions}</ol></section>' if questions else '')
+            + _p("What this cannot tell you", brief.limitation)
+            + f'<div class="b-act">'
+            f'<a class="primary" href="/runs/{_e(run_id)}/slides">'
+            f'Present this</a>'
+            f'<a href="/runs/{_e(run_id)}/full">Read the full analysis</a>'
+            f'</div>'
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
+            f'class="b-ask"><input type="hidden" name="csrf" '
+            f'value="{_e(csrf)}"><label for="q">Ask a question about '
+            f'{_e(brief.company)}</label> '
+            f'<input id="q" name="question" required>'
+            f'<button type="submit">Ask</button></form>'
+            f'</main>')
+        return self._html(self._page(f"{brief.company} — executive brief",
+                                     body, session, csrf))
+
+    def _slides_page(self, session, run_id):
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        report = self._strategic_report_for(run_id)
+        if report is None:
+            return self._redirect(f"/runs/{run_id}/full")
+        from intent_engine.strategic_intelligence.slides import (
+            build_slides, deck_is_presentable, meaningful_slide_count,
+            render_deck,
+        )
+        as_of, version = self._analysis_stamp(run_id)
+        csrf = session["csrf"] if session else ""
+        slides = build_slides(report, as_of=as_of, analysis_version=version,
+                              documents=self.ci.store.retrieved(run_id))
+        if not deck_is_presentable(slides):
+            # Better to say so than to hand someone a three-slide deck in a
+            # meeting after promising a presentation.
+            body = (
+                f'<main>{self._layer_nav(run_id, "slides")}'
+                f'<h1>Not enough for a presentation</h1>'
+                f'<p>This analysis supports '
+                f'{meaningful_slide_count(slides)} substantive slide(s), and a '
+                f'presentation needs at least 5. The brief and the full '
+                f'analysis contain everything that was found.</p>'
+                f'<p><a href="/runs/{_e(run_id)}/brief">Read the executive '
+                f'brief</a> · <a href="/runs/{_e(run_id)}/full">Full '
+                f'analysis</a></p></main>')
+            return self._html(self._page("Presentation unavailable", body,
+                                         session, csrf))
+        deck = render_deck(slides, company=report.get("company_name", ""),
+                           as_of=as_of, analysis_version=version,
+                           run_id=run_id, csrf=csrf,
+                           full_analysis_url=f"/runs/{run_id}/full")
+        body = (f'<main>{self._layer_nav(run_id, "slides")}{deck}</main>')
+        return self._html(self._page(
+            f'{report.get("company_name", "")} — presentation', body, session,
+            csrf))
+
+    def _page(self, title, body, session, csrf):
+        return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                f'<meta name="viewport" content="width=device-width,'
+                f'initial-scale=1"><title>{_e(title)}</title></head><body>'
+                f'{self._nav(session, csrf)}{body}</body></html>')
 
     def _evidence(self, session, run_id, claim_id):
         if not self._owned(session, run_id):
@@ -953,24 +1579,53 @@ class WebApp:
             if sa["intent"] in ("EXPLAINED", "COMPARISON"):
                 return self._strategic_answer_page(session, run_id, sa)
         flat_claims = self._run_claims(run_id)
-        answer = self.fi.converse(run_id, question, run_claims=flat_claims)
+        # The previous turn's subject, so "Why?" and "Explain that" resolve
+        # against the conversation. Without this every turn starts from nothing
+        # and the assistant behaves like a search box that forgets you.
+        previous = self._conversation_context.get(run_id, ())
+        answer = self.fi.converse(run_id, question, run_claims=flat_claims,
+                                  previous_topics=previous)
+        self._conversation_context[run_id] = answer.get("topics", ())
+
         paragraphs, citations = [], []
         for p in (answer.get("answer") or {}).get("paragraphs", []):
-            paragraphs.append(f'<p>{_e(p.get("text", ""))}</p>')
+            paragraphs.append(p.get("text", ""))
             citations.extend(str(c) for c in p.get("citations", []))
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<title>Answer</title></head><body>'
-                f'{self._nav(session, session["csrf"])}<main>'
-                f'<h1>Answer</h1>'
-                f'<p>Intent: {_e(str(answer.get("intent", "")))}</p>'
-                f'{"".join(paragraphs)}'
-                f'<p>Cited artifacts: {_e(", ".join(citations) or "none")}</p>'
-                f'<p><small>Answers use only this run\'s approved evidence. '
-                f'A source that is not part of the approved evidence set '
-                f'must be added and approved before analysis.</small></p>'
-                f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
-                f'</main></body></html>')
-        return self._html(body)
+        # Concise first: the direct answer, then the rest behind a disclosure.
+        # A reader who asked a short question is not asking to read the report
+        # again, and burying the answer in paragraph four is how they end up
+        # taking the first confident sentence they see.
+        lead = paragraphs[0] if paragraphs else ""
+        rest = paragraphs[1:]
+        more = (f'<details class="more"><summary>Explain more</summary>'
+                + "".join(f'<p>{_e(p)}</p>' for p in rest) + '</details>') \
+            if rest else ''
+        cited = ("".join(f'<li>{_e(c)}</li>' for c in dict.fromkeys(citations))
+                 if citations else '')
+        body = (
+            f'{_BRIEF_CSS}<main class="brief">'
+            f'{self._layer_nav(run_id, "")}'
+            f'<h1>{_e(question[:120])}</h1>'
+            # The classifier's enum was rendered here verbatim, so a tester
+            # asking a normal question was told "Intent: UNSUPPORTED".
+            # Internal classification names are not part of the product's
+            # vocabulary and never reach a reader.
+            f'<p class="lead">{_e(lead)}</p>{more}'
+            + (f'<section class="b-part"><h2>Evidence</h2><ul>{cited}</ul>'
+               f'</section>' if cited else '')
+            + f'<p class="stamp">Answers use only this run\'s approved '
+            f'evidence. A source outside that set must be added and approved '
+            f'before it can be used.</p>'
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
+            f'class="b-ask"><input type="hidden" name="csrf" '
+            f'value="{_e(session["csrf"])}">'
+            f'<label for="q">Ask something else</label> '
+            f'<input id="q" name="question" required>'
+            f'<button type="submit">Ask</button></form>'
+            f'<p><a href="/runs/{_e(run_id)}/brief">Back to the brief</a></p>'
+            f'</main>')
+        return self._html(self._page("Answer", body, session,
+                                     session["csrf"]))
 
     def _strategic_report_for(self, run_id):
         """The run's strategic report dict, if it has one (real runs only)."""
@@ -981,14 +1636,15 @@ class WebApp:
 
     def _strategic_answer_page(self, session, run_id, sa):
         routing = sa.get("routing", {})
-        label = (f'<p class="muted"><small>Discussing hypothesis '
-                 f'<strong>{_e(str(routing.get("selected_hypothesis") or "—"))}'
-                 f'</strong>'
-                 + (f' · comparison: <strong>'
-                    f'{_e(str(routing.get("selected_comparable")))}</strong>'
-                    if routing.get("selected_comparable") else "")
-                 + f' · operation: {_e(str(routing.get("operation", "")))}'
-                 f'</small></p>')
+        # This line used to read "Discussing hypothesis H2 · operation:
+        # EXPLAIN_HYPOTHESIS". A hypothesis id and an operation name are how
+        # the code talks to itself; to a reader they are noise that looks like
+        # a malfunction. Only the comparison subject is a real-world thing a
+        # reader recognises, so only it survives.
+        comparable = routing.get("selected_comparable")
+        label = (f'<p class="muted"><small>Comparison with '
+                 f'<strong>{_e(str(comparable))}</strong>.</small></p>'
+                 if comparable else '')
         back = (f'<p><a href="/runs/{_e(run_id)}">Back to report</a></p>'
                 f'<p><small>Outside-in only; grounded in this run\'s approved '
                 f'observations and the curated pattern library.</small></p>')
@@ -1108,23 +1764,136 @@ class WebApp:
                 f'</main></body></html>')
         return self._html(body)
 
+    def feedback_available(self) -> bool:
+        """Whether this deployment may accept feedback at all.
+
+        Gated on demonstrated durability, not on the write appearing to work.
+        Collecting feedback under a false promise is worse than not collecting
+        it: a tester who believes their comment was received does not send it
+        again, so the loss is silent and permanent.
+        """
+        from intent_engine.webapp.storage_state import may_promise_persistence
+        return may_promise_persistence(self._storage)
+
+    def _feedback_form(self, run_id, csrf, page="result"):
+        from intent_engine.webapp.storage_state import explain_storage
+        if not self.feedback_available():
+            return (
+                f'<section class="fb" aria-label="Feedback"><h2>Feedback</h2>'
+                f'<p>Feedback is temporarily unavailable on this deployment, '
+                f'so the form is switched off rather than accepting something '
+                f'that would not be kept.</p>'
+                f'<p class="limitation">{_e(explain_storage(self._storage))} '
+                f'Durable storage has to be attached before feedback can be '
+                f'promised.</p></section>')
+        return (
+            f'<form action="/runs/{_e(run_id)}/feedback" method="post" '
+            f'class="fb"><input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="page" value="{_e(page)}">'
+            f'<fieldset><legend>Was this useful?</legend>'
+            f'<label><input type="radio" name="useful" value="yes" required> '
+            f'Yes</label> <label><input type="radio" name="useful" '
+            f'value="partly"> Partly</label> <label><input type="radio" '
+            f'name="useful" value="no"> No</label></fieldset>'
+            f'<label for="fbnote">Anything else? (optional)</label>'
+            f'<input id="fbnote" name="note" maxlength="4000">'
+            f'<button type="submit">Send feedback</button></form>')
+
     def _feedback(self, session, run_id, form):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
-        meta = self.ci.run_meta(run_id)
-        self.fi.record_feedback(run_id,
-                                meta["domain"] if meta else DEMO_DOMAIN,
-                                useful=form.get("useful", "partly"),
-                                note=form.get("note", ""),
-                                actor_id=session["user_id"])
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<title>Thanks</title></head><body>'
-                f'{self._nav(session, session["csrf"])}<main>'
-                f'<h1>Thank you</h1><p>Feedback recorded as founder input — '
-                f'it never silently changes the intelligence.</p>'
+        csrf = session["csrf"]
+        if not self.feedback_available():
+            return self._error_page(
+                503, "Feedback is temporarily unavailable on this deployment. "
+                     "Rather than accept a comment that would not be kept, "
+                     "the form is switched off until durable storage is "
+                     "attached.")
+        meta = self.ci.run_meta(run_id) or {}
+        from intent_engine._version import version_info
+        from intent_engine.webapp.feedback import FeedbackNotDurable
+        info = version_info()
+        try:
+            record = self.feedback_log.record(
+                run_id=run_id,
+                company=meta.get("company_name", DEMO_COMPANY_NAME),
+                page=form.get("page", "result")[:40],
+                rating=form.get("useful", "partly"),
+                comment=form.get("note", ""),
+                deployed_commit=info.get("commit", ""),
+                analysis_version=info.get("app_version", ""),
+                category=form.get("category", ""),
+                user_id=session["user_id"])
+        except (FeedbackNotDurable, ValueError) as exc:
+            # No success page. The whole defect being fixed is a page that said
+            # "recorded" because the code reached the next line.
+            return self._error_page(
+                503, f"Your feedback could not be saved, so it has not been "
+                     f"recorded: {exc}. Nothing was kept — please try again "
+                     f"later rather than assuming it was received.")
+        # Keep the existing founder-input trail as well, so nothing that read
+        # it before starts reading less.
+        try:
+            self.fi.record_feedback(run_id, meta.get("domain", DEMO_DOMAIN),
+                                    useful=form.get("useful", "partly"),
+                                    note=form.get("note", ""),
+                                    actor_id=session["user_id"])
+        except Exception:                                   # noqa: BLE001
+            pass                    # the durable record is the one that counts
+        body = (f'<main><h1>Thank you</h1>'
+                f'<p>Your feedback was saved and read back to confirm it. '
+                f'Reference <code>{_e(record.feedback_id)}</code>.</p>'
+                f'<p>It is recorded as founder input — it never silently '
+                f'changes the intelligence.</p>'
                 f'<p><a href="/runs/{_e(run_id)}">Back to result</a></p>'
-                f'</main></body></html>')
-        return self._html(body)
+                f'</main>')
+        return self._html(self._page("Thank you", body, session, csrf))
+
+    def _operator_feedback(self, session, *, export=False):
+        """Everything that was collected, and the storage state behind it.
+
+        Both halves matter: a list of records without the durability state
+        invites the same mistake the success page made, so an operator reading
+        this sees what was kept AND whether keeping is proven.
+        """
+        from intent_engine.webapp.storage_state import explain_storage
+        rows = self.feedback_log.all()
+        if export:
+            return ("200 OK",
+                    [("Content-Type", "application/x-ndjson"),
+                     ("Content-Disposition",
+                      'attachment; filename="feedback.jsonl"')],
+                    self.feedback_log.export_jsonl())
+        summary = self.feedback_log.summary()
+        table = "".join(
+            f'<tr><td>{_e(r.get("submitted_at", "")[:19])}</td>'
+            f'<td>{_e(r.get("company", ""))}</td>'
+            f'<td>{_e(r.get("page", ""))}</td>'
+            f'<td>{_e(r.get("rating", ""))}</td>'
+            f'<td>{_e((r.get("comment") or "")[:160])}</td>'
+            f'<td><code>{_e(r.get("run_id", "")[:12])}</code></td>'
+            f'<td><code>{_e((r.get("deployed_commit") or "")[:8])}</code></td>'
+            f'</tr>' for r in reversed(rows))
+        body = (
+            f'{_BRIEF_CSS}<main class="brief"><h1>Feedback</h1>'
+            f'<p class="stamp">{summary["total"]} record(s) · '
+            f'{summary["with_comment"]} with a comment</p>'
+            f'<h2>Storage</h2>'
+            f'<p>{_e(explain_storage(self._storage))}</p>'
+            f'<p class="stamp">Runtime root <code>'
+            f'{_e(self._storage["runtime_root"])}</code> · '
+            f'{"writable" if self._storage["writable"] else "NOT writable"} · '
+            f'{self._storage["boot_count"]} boot(s) recorded · accepting '
+            f'feedback: {"yes" if self.feedback_available() else "no"}</p>'
+            + (f'<h2>Records</h2><table><tr><th>When</th><th>Company</th>'
+               f'<th>Page</th><th>Rating</th><th>Comment</th><th>Run</th>'
+               f'<th>Commit</th></tr>{table}</table>'
+               f'<p><a href="/feedback.jsonl">Export as JSONL</a></p>'
+               if rows else '<p>No feedback has been recorded on this '
+                            'deployment.</p>')
+            + '</main>')
+        return self._html(self._page("Feedback", body, session,
+                                     session["csrf"]))
 
     def _shared(self, token):
         run_id = self.sharing.resolve(token)
@@ -1225,12 +1994,26 @@ class WebApp:
         product, investor, customers, strategy, ...) instead of many documents
         from a single family. Shared by the source-review page (pre-checked
         set) and auto-run (approved set), so both always agree."""
-        # Within a family, prefer URLs the publisher actually lists (sitemap)
-        # over guessed known paths: a guess is frequently a 404/403, while a
-        # sitemap URL exists by construction.
+        # Within a family, order by how much reason we have to believe the URL
+        # serves content *on this site, right now*:
+        #
+        #   1. sitemap — the publisher is listing it live, today;
+        #   2. curated official URL from the entity registry — verified by
+        #      hand, but a constant that can go stale;
+        #   3. guessed known path — frequently a 404/403.
+        #
+        # The middle rank is what Sony needed: its homepage, robots.txt and
+        # sitemap all answer 403, so there are no sitemap URLs and every guess
+        # fails, leaving the curated IR/report pages as the only things that
+        # actually serve. Ranking curated URLs ABOVE sitemap URLs instead cost
+        # Palantir its product evidence — the registry's platform pages
+        # displaced the live sitemap entries in the product bucket. Publisher-
+        # live beats curated-constant; curated-constant beats a guess.
         def _verified_first(candidate):
-            why = candidate.get("why_relevant", "")
-            return 0 if "sitemap" in why else 1
+            if "sitemap" in candidate.get("why_relevant", ""):
+                return 0
+            return (1 if candidate.get("discovery_method") ==
+                    "official_fallback" else 2)
 
         buckets = []
         claimed = set()
@@ -1514,8 +2297,19 @@ class WebApp:
             # and WRITABLE — otherwise the scheduler's jobs would silently fail
             # to persist while /readyz still said "ready". Probe it explicitly.
             self._probe_runtime_root_writable()
+            # Storage durability is reported as MEASURED, so an operator can
+            # tell "proven to survive a restart here" from "writable, never
+            # tested" without reading a path name and guessing.
             return self._ok_json({"status": "ready", "env": self.config.env,
                                   "runtime_root": str(self._runtime_root),
+                                  "storage": {
+                                      "durability": self._storage["durability"],
+                                      "writable": self._storage["writable"],
+                                      "separate_filesystem":
+                                          self._storage["separate_filesystem"],
+                                      "boot_count": self._storage["boot_count"],
+                                      "accepting_feedback":
+                                          self.feedback_available()},
                                   "capabilities": self._capability_state()})
         except Exception as exc:                            # noqa: BLE001
             return ("503 Service Unavailable",

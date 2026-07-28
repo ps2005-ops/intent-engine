@@ -220,7 +220,14 @@ def test_anonymous_runs_demo_end_to_end(tmp_path):
     assert status == "200 OK" and "replay" in body
     status, _, body = c.request(
         "POST", run_url + "/conversation", f"csrf={c.csrf()}&question=why?")
-    assert status == "200 OK" and "Cited artifacts" in body
+    # A bare "why?" as the FIRST question has no antecedent — there is
+    # nothing for it to point at. Inventing a subject would be worse than
+    # saying so, so the reply names what CAN be asked instead.
+    assert status == "200 OK"
+    assert "What does this company do?" in body
+    for internal in ("UNRECOGNISED", "INSUFFICIENT", "implication",
+                     "weakest_evidence", "recent_change"):
+        assert internal not in body, f"leaked internal name: {internal}"
 
 
 def test_anonymous_can_start_real_company_analysis(tmp_path):
@@ -613,7 +620,18 @@ def test_blocked_source_does_not_fail_run_when_other_evidence_succeeds(
     # some sources failed, but real evidence was retrieved → PARTIAL, not FAILED
     assert app.ci.store.run_state(run_id) == "PARTIAL"
     status, _, body = c.request("GET", f"/runs/{run_id}")
-    assert status == "200 OK" and "Evidence Library" in body
+    assert status == "200 OK"
+    # The evidence that DID retrieve is still the reader's, whether or not
+    # there was enough of it to support a briefing. Only one family survived
+    # the blocks here, so the readiness gate declines to synthesise — but the
+    # retrieved source is shown rather than discarded, which is the property
+    # this test exists to protect.
+    retrieved = [d for d in app.ci.store.retrieved(run_id)
+                 if d["retrieval_status"] == "OK"]
+    assert retrieved
+    assert "Sources that were read" in body
+    for document in retrieved:
+        assert document["final_url"] in body
 
 
 # --- production incident replay (Render redeploy mid-run) -------------------

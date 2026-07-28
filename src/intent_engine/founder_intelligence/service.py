@@ -9,7 +9,13 @@ run may use another run's or another company's claims.
 """
 from __future__ import annotations
 
+import hashlib
+
+from intent_engine.company_ingestion.quality import (
+    QUALITY_RULES_VERSION,
+)
 from intent_engine.agentos.identity import stable_id as _kernel_stable_id
+
 from intent_engine.founder_intelligence import (
     confidence as _confidence, perspective as _persp, questions as _questions,
     understanding as _understanding,
@@ -32,6 +38,33 @@ from intent_engine.founder_intelligence.state import (
 from intent_engine.founder_intelligence.store import (
     DEFAULT_FI_PATH, FounderIntelligenceStore,
 )
+
+
+# Pipeline component versions. These participate in run identity (see
+# FounderIntelligenceService.analysis_version), so bumping one deliberately
+# invalidates cached runs produced by the older behaviour rather than serving
+# them as current.
+ANALYSIS_VERSION = "1.1.0"
+DISCOVERY_POLICY_VERSION = "1.1.0"
+EVIDENCE_TAXONOMY_VERSION = "1.0.0"
+SYNTHESIS_VERSION = "1.1.0"
+
+
+def analysis_fingerprint(company_input) -> str:
+    """Short, stable digest of everything that defines one analysis.
+
+    Covers the approved source set AND the pipeline version, so two analyses
+    of the same company on the same day are the SAME run only when they used
+    the same evidence and the same code. Anything else is genuinely a
+    different analysis and gets its own identity instead of colliding with an
+    existing record.
+    """
+    approved = tuple(sorted(getattr(company_input, "approved_inputs", ()) or ()))
+    seed = "|".join((
+        FounderIntelligenceService.analysis_version(),
+        "approved=" + ",".join(str(a) for a in approved),
+    ))
+    return hashlib.sha256(seed.encode()).hexdigest()[:12]
 
 
 def _dont_believe_entries(cbs) -> list:
@@ -88,6 +121,46 @@ class FounderIntelligenceService:
     def _stable_id(self, key: str) -> str:
         return _kernel_stable_id(self.store, key)
 
+    @staticmethod
+    def analysis_version() -> str:
+        """The pipeline version a run was produced by.
+
+        Bump any component here and previously cached runs stop being reused,
+        because the run identity changes. That is the point: a run produced by
+        an older discovery policy or quality ruleset must not be served as if
+        the current pipeline had produced it.
+        """
+        from intent_engine._version import version_info
+        from intent_engine.company_ingestion.entities import (
+            ENTITY_REGISTRY_VERSION,
+        )
+        from intent_engine.company_ingestion.records import PARSER_VERSION
+        from intent_engine.founder_intelligence.identity import (
+            IDENTITY_VERSION,
+        )
+        from intent_engine.strategic_intelligence.brief import BRIEF_VERSION
+        from intent_engine.strategic_intelligence.slides import SLIDES_VERSION
+        return "|".join([
+            # The deployed application itself. Without it, a code change that
+            # altered wording but bumped no component version would serve an
+            # old run as if the current build had produced it.
+            f"app={version_info().get('app_version', '')}",
+            f"analysis={ANALYSIS_VERSION}",
+            # Identity resolution: if the entity registry changes, a run that
+            # resolved "Sony" to a subsidiary must not be reused now that it
+            # resolves to the group.
+            f"identity={IDENTITY_VERSION}+{ENTITY_REGISTRY_VERSION}",
+            f"discovery={DISCOVERY_POLICY_VERSION}",
+            # Extraction: a parser change alters what the same page yields.
+            f"extraction={PARSER_VERSION}",
+            f"evidence={EVIDENCE_TAXONOMY_VERSION}",
+            f"quality={QUALITY_RULES_VERSION}",
+            f"synthesis={SYNTHESIS_VERSION}",
+            # Presentation: the brief and the deck ARE the product now, so a
+            # change in how they are built is a change in what the user gets.
+            f"presentation={BRIEF_VERSION}+{SLIDES_VERSION}",
+        ])
+
     def _record(self, event_type, *, run_id, company_domain, actor_type="system",
                 actor_id="founder_intelligence", source="system", payload=None,
                 subject_type=None, subject_id=None, idempotency_key=None,
@@ -132,20 +205,40 @@ class FounderIntelligenceService:
             requester_role=requester_role, business_question=business_question,
             approved_inputs=approved_inputs)
         domain = canonical_domain(website)
-        run_id = self._stable_id(f"run:{domain}:{as_of}")
+        # INCIDENT FIX: the identity seed must cover everything that defines
+        # the analysis, not just the company and the date.
+        #
+        # It was `run:{domain}:{as_of}`. The recorded payload, however,
+        # embeds `approved_inputs` — the actual source set — which legitimately
+        # differs between two analyses of the same company on the same day,
+        # because discovery is affected by which pages respond. So the second
+        # analysis reused the key with different content and `_record` raised
+        #   ValueError: idempotency_key 'run:palantir.com:<date>' was already
+        #   used for different content
+        # surfacing to the tester as HTTP 500. Palantir and Shopify failed this
+        # way; Sony only survived because both its runs produced identical
+        # near-empty content, so the fingerprints happened to match.
+        #
+        # Folding the analysis fingerprint in means: identical inputs AND
+        # identical pipeline version still collapse to one run (the
+        # idempotent-retry contract below is preserved), while a genuinely
+        # different analysis gets its own identity instead of colliding. It
+        # also stops a stale low-quality run from trapping the user after the
+        # pipeline improves — a new version simply cannot reuse the old id.
+        seed = f"run:{domain}:{as_of}:{analysis_fingerprint(company_input)}"
+        run_id = self._stable_id(seed)
 
         # CREATED -> VALIDATING
         self._record("fi.run_created", run_id=run_id, company_domain=domain,
                      subject_type="run", subject_id=run_id,
                      payload={"input": company_input.as_dict(),
                               "consent": consent_record(company_input)},
-                     # BUG FIX (V1.0.1, justified): this key must equal the
-                     # key `_stable_id` looks up ("run:{domain}:{as_of}"),
-                     # or a retry mints a fresh run_id and duplicates the
+                     # This key MUST stay equal to the seed `_stable_id` looks
+                     # up, or a retry mints a fresh run_id and duplicates the
                      # run — violating the documented idempotent-retry
                      # contract. Discovered by the web layer's cross-user
                      # isolation test.
-                     idempotency_key=f"run:{domain}:{as_of}")
+                     idempotency_key=seed)
         self._transition(run_id, domain, VALIDATING)
 
         # identity
@@ -247,11 +340,18 @@ class FounderIntelligenceService:
             _persp.assemble_opportunities(opportunity),
         ]
 
-    def converse(self, run_id: str, question: str, *, run_claims) -> dict:
-        """A public follow-up over THIS run's claims only."""
+    def converse(self, run_id: str, question: str, *, run_claims,
+                 previous_topics=()) -> dict:
+        """A public follow-up over THIS run's claims only.
+
+        `previous_topics` is the last turn's subject, so "Why?" and "Explain
+        that" resolve against the conversation instead of being rejected for
+        having no subject of their own.
+        """
         return _answer(question, run_claims=run_claims,
                        llm_client=self.llm_client,
-                       model_version=self.model_version)
+                       model_version=self.model_version,
+                       previous_topics=previous_topics)
 
     def record_feedback(self, run_id, company_domain, *, useful: str,
                         note: str = "", actor_id="founder") -> str:

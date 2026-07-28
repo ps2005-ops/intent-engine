@@ -6,11 +6,13 @@ inaccessible. Plus isolation, error states, expired share, viewport,
 labels, and safe error pages.
 """
 import io
+import re
 
 import pytest
 
 from intent_engine.webapp.app import WebApp
 from intent_engine.webapp.config import AppConfig
+from intent_engine.webapp.storage_state import record_boot
 
 
 class Client:
@@ -49,6 +51,14 @@ def app(tmp_path):
                        web_store_path=tmp_path / "web.jsonl",
                        fi_store_path=tmp_path / "fi.jsonl",
                        ci_store_path=tmp_path / "ci.jsonl")
+    # Feedback is gated on PROVEN storage durability, and the only proof is a
+    # record written by an EARLIER PROCESS still being present. Two WebApp
+    # instances inside one interpreter are not a restart — the boot id is
+    # per-process and recording is idempotent against it, deliberately, so
+    # nothing can manufacture a second boot by constructing twice. Seed a
+    # previous process's boot record instead: that is what a redeploy onto a
+    # persistent disk leaves behind.
+    record_boot(tmp_path, boot_id="previous-process-boot")
     application = WebApp(config, now_fn=lambda: clock["t"],
                          transport=_no_network, resolver=False)
     application._clock = clock
@@ -96,7 +106,11 @@ def test_full_required_journey(app):
     status, _, body = c.request(
         "POST", run_url + "/conversation",
         f"csrf={csrf}&question=why do you think this?")
-    assert status == "200 OK" and "Cited artifacts" in body
+    # The answer page now leads with the direct answer and puts the
+    # citations under an "Evidence" heading, rather than a trailing
+    # "Cited artifacts:" line. The property that matters is unchanged:
+    # the answer shows what it rests on.
+    assert status == "200 OK" and "Evidence" in body
     # share → link works → revoke → link dead
     status, _, body = c.request("POST", run_url + "/share", f"csrf={csrf}")
     token = body.split("/shared/")[1].split("<")[0]
@@ -223,7 +237,13 @@ def test_production_host_check_and_safe_error_page(tmp_path):
     run_url = _run_demo(c2, csrf)
     status, _, body = c2.request("GET", run_url + "/progress")
     assert status.startswith("500")
-    assert "Traceback" not in body and "logged" in body
+    # This used to assert the literal word "logged", which is exactly how the
+    # page came to promise "It has been logged" while nothing logged anything.
+    # Assert the properties that actually matter instead: no traceback
+    # reaches the user, and they are given a reference an operator can find.
+    # tests/test_webapp_error_logging.py proves the log side.
+    assert "Traceback" not in body
+    assert re.search(r"reference [0-9a-f]{12}", body), body[:300]
 
 
 def test_empty_database_startup(tmp_path):
