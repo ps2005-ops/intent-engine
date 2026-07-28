@@ -13,6 +13,11 @@ from html.parser import HTMLParser
 from intent_engine.company_ingestion.records import PARSER_VERSION
 
 _SKIP = {"script", "style", "noscript", "template", "svg", "iframe"}
+# Below this much block-level body text, a page is treated as a hydration shell
+# and its server-rendered state is read as well. Sites that genuinely serve
+# their content as HTML clear this easily (Shopify's /about extracts 3.3k), so
+# the ordinary path is untouched.
+MIN_BODY_TEXT_CHARS = 600
 _BLOCK = {"p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "td", "th",
           "blockquote", "figcaption", "dt", "dd", "title"}
 
@@ -29,7 +34,9 @@ class _Extractor(HTMLParser):
         self.links: list = []
         self.og: dict = {}
         self._jsonld_raw: list = []
+        self._state_raw: list = []
         self._in_jsonld = False
+        self._in_state = False
         self._skip_depth = 0
         self._block_stack: list = []
         self._buffer: list = []
@@ -39,6 +46,9 @@ class _Extractor(HTMLParser):
         if tag == "script" and (attrs.get("type") or "").lower() == \
                 "application/ld+json":
             self._in_jsonld = True          # capture the structured-data body
+            return
+        if tag == "script" and _is_state_script(attrs):
+            self._in_state = True           # server-rendered page state
             return
         if tag in _SKIP:
             self._skip_depth += 1
@@ -66,6 +76,9 @@ class _Extractor(HTMLParser):
         if tag == "script" and self._in_jsonld:
             self._in_jsonld = False
             return
+        if tag == "script" and self._in_state:
+            self._in_state = False
+            return
         if tag in _SKIP:
             self._skip_depth = max(0, self._skip_depth - 1)
             return
@@ -86,6 +99,9 @@ class _Extractor(HTMLParser):
     def handle_data(self, data):
         if self._in_jsonld:
             self._jsonld_raw.append(data)
+            return
+        if self._in_state:
+            self._state_raw.append(data)
             return
         if self._skip_depth == 0 and self._block_stack:
             self._buffer.append(data)
@@ -122,6 +138,104 @@ def _jsonld_text(raw_blocks: list) -> list:
     return out
 
 
+# --- server-rendered page state ----------------------------------------------
+# A modern framework site (Next.js, Nuxt, SvelteKit, Remix) ships its page
+# content TWICE: once as DOM the browser will build, and once as a JSON blob the
+# client hydrates from. Sites built with the Next.js Pages Router ship ONLY the
+# JSON — the served <body> is an empty mount point, and every word of real
+# copy lives in <script id="__NEXT_DATA__" type="application/json">.
+#
+# This is server-rendered, first-party content delivered in the ordinary
+# response to an ordinary permitted request. Reading it is not a bypass of
+# anything: no access control, no robots rule, and no client-side execution is
+# involved — it is the same bytes the page already sent us, parsed as what they
+# are. Discarding it was the reason a 692 KB Palantir page was admitted as 120
+# characters of og:description.
+_STATE_SCRIPT_IDS = {"__next_data__", "__nuxt_data__", "__nuxt__",
+                     "__remix_context__", "__sveltekit_data__",
+                     "__initial_state__", "__apollo_state__"}
+
+# Keys whose values are machine identifiers, asset paths or layout hints rather
+# than prose. Skipping them keeps image alt-junk ("SCE FC 23 Card (3:2)") out of
+# the evidence text.
+_STATE_NOISE_KEYS = {
+    "id", "key", "slug", "url", "href", "src", "srcset", "path", "type",
+    "class", "classname", "style", "width", "height", "color", "icon",
+    "filename", "mimetype", "contenttype", "hash", "sha", "uuid", "guid",
+    "buildid", "locale", "lang", "align", "variant", "theme", "token",
+    "alt", "aria-label", "arialabel", "caption", "filepath", "asseturl",
+}
+MAX_STATE_STRINGS = 400
+MAX_STATE_CHARS = 60_000
+
+
+def _is_state_script(attrs: dict) -> bool:
+    """True for a <script> that carries server-rendered page state as JSON."""
+    script_id = (attrs.get("id") or "").strip().lower()
+    if script_id in _STATE_SCRIPT_IDS:
+        return True
+    mime = (attrs.get("type") or "").strip().lower()
+    return mime == "application/json" and bool(script_id)
+
+
+def _looks_like_prose(text: str) -> bool:
+    """Sentence-shaped copy, not an identifier, class name, or asset label."""
+    stripped = text.strip()
+    if len(stripped) < 25 or len(stripped) > 2000:
+        return False
+    words = stripped.split()
+    if len(words) < 5:
+        return False
+    if stripped.startswith(("http://", "https://", "/", "#", "{", "[", "<")):
+        return False
+    # identifier-ish: no spaces around, or dominated by non-letters
+    letters = sum(1 for ch in stripped if ch.isalpha() or ch.isspace())
+    if letters / len(stripped) < 0.75:
+        return False
+    # camelCase / snake_case / kebab blobs masquerading as sentences
+    if any(len(word) > 40 for word in words):
+        return False
+    return True
+
+
+def _state_text(raw_blocks: list) -> list:
+    """Prose recovered from server-rendered page state. Deterministic and
+    bounded: document order, de-duplicated, capped in both count and size."""
+    import json
+    out: list = []
+    seen: set = set()
+    budget = {"chars": 0}
+
+    def walk(node, key=""):
+        if len(out) >= MAX_STATE_STRINGS or budget["chars"] >= MAX_STATE_CHARS:
+            return
+        if isinstance(node, dict):
+            for child_key, value in node.items():
+                walk(value, str(child_key).lower())
+        elif isinstance(node, list):
+            for item in node:
+                walk(item, key)
+        elif isinstance(node, str):
+            if key in _STATE_NOISE_KEYS:
+                return
+            text = " ".join(node.split())
+            if not _looks_like_prose(text):
+                return
+            fingerprint = text.lower()
+            if fingerprint in seen:
+                return
+            seen.add(fingerprint)
+            out.append(text)
+            budget["chars"] += len(text)
+
+    for raw in raw_blocks:
+        try:
+            walk(json.loads(raw))
+        except (ValueError, TypeError, RecursionError):
+            continue
+    return out
+
+
 def parse_html(html: str) -> dict:
     """Returns {title, meta_description, canonical_url, headings, text,
     links, content_hash, parser_version}. Deterministic."""
@@ -139,13 +253,33 @@ def parse_html(html: str) -> dict:
         seen.add(key)
         lines.append(block)
     text = "\n".join(lines)
+    blocks_found = len(lines)
+    extraction_mode = "body" if text.strip() else "none"
     og = extractor.og
     meta_description = extractor.meta_description or og.get("og:description",
                                                             "")
-    # SALVAGE: a JavaScript-rendered page yields no body text, but its
-    # server-rendered metadata (title, OpenGraph, JSON-LD) still describes the
-    # company. Recover that rather than discarding the source entirely — it is
-    # directly observed, first-party content, not an inference.
+    # SALVAGE, in order of how much the recovered text is worth.
+    #
+    # A framework-rendered page yields little or no BODY text, but the response
+    # still carries the content in two other places: the server-rendered page
+    # state (a JSON blob the client hydrates from) and the page metadata
+    # (title, OpenGraph, JSON-LD). Both are first-party content already present
+    # in the bytes we were served.
+    #
+    # Page state is tried FIRST because it is the real article — paragraphs,
+    # product descriptions, named customers — whereas metadata is a one-line
+    # summary. Admitting a 692 KB document as 120 characters of og:description
+    # is what made a Palantir report that never mentioned Foundry look healthy
+    # to every downstream gate.
+    if len(text.strip()) < MIN_BODY_TEXT_CHARS:
+        recovered = _state_text(extractor._state_raw)
+        if recovered:
+            body_lines = [line for line in lines if line.strip()]
+            merged = body_lines + [r for r in recovered
+                                   if r.lower() not in seen]
+            text = "\n".join(merged)
+            extraction_mode = "structured"
+            blocks_found = len(merged)
     if not text.strip():
         salvaged = []
         for value in (extractor.title, og.get("og:title"),
@@ -156,6 +290,8 @@ def parse_html(html: str) -> dict:
             if value not in salvaged:
                 salvaged.append(value)
         text = "\n".join(salvaged)
+        if text.strip():
+            extraction_mode = "metadata"
     return {
         "title": extractor.title or og.get("og:title", ""),
         "meta_description": meta_description,
@@ -166,4 +302,9 @@ def parse_html(html: str) -> dict:
         "links": extractor.links,
         "content_hash": hashlib.sha256((html or "").encode()).hexdigest(),
         "parser_version": PARSER_VERSION,
+        # Diagnostics: WHERE the text came from, and how many document blocks
+        # the parser actually found. "we fetched 692 KB and admitted 120
+        # characters of og:description" is otherwise invisible downstream.
+        "extraction_mode": extraction_mode,
+        "blocks_found": blocks_found,
     }

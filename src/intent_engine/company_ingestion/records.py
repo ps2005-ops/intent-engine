@@ -48,7 +48,13 @@ RETRIEVAL_STATUSES = ("OK", "FAILED", "UNAVAILABLE", "SKIPPED")
 
 FAILURE_TYPES = ("timeout", "connection", "http_status", "too_large",
                  "bad_mime", "unsafe_redirect", "blocked", "parse_error",
-                 "javascript_only")
+                 "javascript_only",
+                 # The page WAS retrieved, but its text tripped the credential
+                 # scanner and was refused before storage. Reporting that as
+                 # "blocked" told the reader the address failed a safety check,
+                 # which is a different and more alarming thing than "we read
+                 # this page and chose not to keep it".
+                 "content_rejected")
 
 PRIVACY_CLASSES = ("public", "user_public_excerpt", "user_internal")
 
@@ -60,7 +66,12 @@ MAX_HOMEPAGE_LINKS = 20
 # exposes no usable homepage links, so these probes are the ONLY route to
 # company evidence — capping them at 10 starved the report of coverage.
 MAX_KNOWN_PATHS = 28
-MAX_APPROVED_SOURCES = 10
+# Eight evidence families take eight of these on the first pass, so a cap of 10
+# left the product family a single slot — one page to describe a company with
+# three named platforms AND two named market segments. Fourteen lets the
+# highest-value families (product, customers, investor) take their quota
+# without starving the rest, and stays far inside MAX_TOTAL_BYTES_PER_RUN.
+MAX_APPROVED_SOURCES = 14
 MAX_RESPONSE_BYTES = 2_000_000
 MAX_TOTAL_BYTES_PER_RUN = 15_000_000
 MAX_REDIRECTS = 5
@@ -174,7 +185,8 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
                      content_hash, byte_count, title, text_content,
                      meta_description="", freshness="CURRENT",
                      retrieval_status="OK", privacy="public",
-                     origin_note="", source_class="company_owned") -> dict:
+                     origin_note="", source_class="company_owned",
+                     extraction_mode="body", blocks_found=0) -> dict:
     assert_no_secret(text_content[:20000], where="retrieved source text")
     if privacy not in PRIVACY_CLASSES:
         raise IngestionError(f"unknown privacy class {privacy!r}")
@@ -191,7 +203,11 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
             "parser_version": PARSER_VERSION,
             "freshness": freshness, "retrieval_status": retrieval_status,
             "privacy": privacy, "origin_note": origin_note,
-            "source_class": source_class}
+            "source_class": source_class,
+            # WHERE the text came from. A document recovered only from
+            # og:description is not the same evidence as a document whose body
+            # was read, and every gate downstream was blind to the difference.
+            "extraction_mode": extraction_mode, "blocks_found": blocks_found}
 
 
 def failure_record(*, failure_id, run_id, candidate_id, failure_type,
