@@ -291,7 +291,13 @@ border:0}
    entirely readable. */
 .deck .slide:first-of-type{display:block}
 .deck .slide:target{display:block}
-.deck:has(.slide:target) .slide:first-of-type:not(:target){display:none}
+/* Hiding the first slide once another is targeted used to need :has(), which
+   is Safari 15.4+ — the one place in the product whose correctness depended on
+   a browser version, and the reason a Safari pass was a release blocker rather
+   than a formality. A class toggled on navigation does the same job in every
+   browser, and when the script never runs the behaviour is what it always was:
+   the first slide stays visible. */
+.deck.is-navigated .slide:first-of-type:not(:target){display:none}
 .deck .stage{border:1px solid var(--line);border-radius:14px;
 background:var(--panel);padding:24px 26px;min-height:340px}
 .deck h2{font-size:1.5rem;line-height:1.25;margin:0 0 14px;color:var(--ink)}
@@ -346,6 +352,15 @@ _KEYS = """
    unaffected. */
 (function(){
   var deck=document.currentScript.parentNode;
+  /* Mark the deck as navigated whenever a slide is targeted, so the first
+     slide can be hidden without :has(). Runs on load too, because a deck can
+     be opened directly at #slide-3 from a link or a refresh. */
+  function sync(){
+    var t=deck.querySelector('.slide:target');
+    deck.classList[t?'add':'remove']('is-navigated');
+  }
+  sync();
+  window.addEventListener('hashchange',sync);
   document.addEventListener('keydown',function(ev){
     if(ev.metaKey||ev.ctrlKey||ev.altKey)return;
     var t=(ev.target&&ev.target.tagName||'').toLowerCase();

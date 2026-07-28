@@ -10,6 +10,8 @@ against inputs that pass is a gate nobody has tried to open.
 """
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from intent_engine.company_ingestion.readiness import assess_readiness
@@ -757,3 +759,24 @@ def test_b7_a_heading_does_not_weld_onto_the_paragraph_below_it():
     text = parse_html(html)["text"]
     assert "engineering We send" not in text
     assert "engineering." in text
+
+
+def test_b8_the_deck_depends_on_no_browser_version_specific_css():
+    """`:has()` is Safari 15.4+. It was the only place in the product whose
+    correctness depended on a browser version, and therefore the reason a
+    manual Safari pass was a release blocker rather than a formality."""
+    from intent_engine.strategic_intelligence.slides import _CSS, _KEYS
+    # Comments explain why it is gone; the rules are what must not contain it.
+    rules = re.sub(r"/\*.*?\*/", "", _CSS, flags=re.S)
+    assert ":has(" not in rules
+    # The replacement must degrade the same way when the script never runs:
+    # the first slide stays visible rather than the deck going blank.
+    assert ".deck .slide:first-of-type{display:block}" in _CSS
+    assert "is-navigated" in _CSS and "is-navigated" in _KEYS
+
+
+def test_b9_the_deck_syncs_its_navigated_state_on_load_and_on_hashchange():
+    """A deck can be opened directly at #slide-3 from a link or a refresh."""
+    from intent_engine.strategic_intelligence.slides import _KEYS
+    assert "hashchange" in _KEYS
+    assert _KEYS.count("sync()") >= 1
