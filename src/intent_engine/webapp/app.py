@@ -985,7 +985,10 @@ class WebApp:
                 f'<title>Answer</title></head><body>'
                 f'{self._nav(session, session["csrf"])}<main>'
                 f'<h1>Answer</h1>'
-                f'<p>Intent: {_e(str(answer.get("intent", "")))}</p>'
+                # The classifier's enum was rendered here verbatim, so a
+                # tester asking a normal question was told
+                # "Intent: UNSUPPORTED". Internal classification names are not
+                # part of the product's vocabulary and never reach the reader.
                 f'{"".join(paragraphs)}'
                 f'<p>Cited artifacts: {_e(", ".join(citations) or "none")}</p>'
                 f'<p><small>Answers use only this run\'s approved evidence. '

@@ -29,12 +29,98 @@ from intent_engine.founder_intelligence.records import FounderIntelligenceError
 CONVERSATION_VERSION = "fi_conversation.v1"
 NARRATIVE_PROMPT_VERSION = "fi_narrative.v1"
 
-# Supported public follow-up intents (closed).
-_SUPPORTED = (
-    "why do you think", "show", "evidence", "how fresh", "contradict",
-    "confidence", "change your view", "persona", "market", "assumption",
-    "investigate", "explain", "board", "brief",
-)
+# Topics a follow-up can be about, and the natural phrasings people actually
+# use. This replaced a flat keyword whitelist that a first-time tester broke
+# immediately: "What does this company actually do?" contained none of the
+# magic words and was rejected as UNSUPPORTED — the most basic question anyone
+# asks about a company.
+#
+# Matching a topic does two things: it decides that the question IS answerable,
+# and it decides WHICH claims are relevant. The old code did only the first,
+# so "Explain this in simple terms" matched on "explain" and then returned
+# every claim in the run — which is how a request for a plain-English summary
+# came back as "Pricing model: not determinable from the approved sources".
+_TOPICS = {
+    "identity": ("what does", "what do they", "what is this company",
+                 "what's this company", "who are they", "who is this company",
+                 "what does this company do", "about this company",
+                 "describe the company", "explain the company"),
+    "products": ("product", "sell", "offering", "service", "platform",
+                 "what do they sell", "software"),
+    "customers": ("customer", "who buys", "client", "user base", "audience",
+                  "who uses", "use case"),
+    "risks": ("risk", "threat", "concern", "weakness", "danger", "downside",
+              "what could go wrong", "vulnerab"),
+    "recent_change": ("recent", "changed", "change", "latest", "new",
+                      "happening", "news", "development"),
+    "opportunity": ("opportunit", "growth", "upside", "expand", "potential"),
+    "evidence": ("evidence", "source", "proof", "cite", "citation",
+                 "how do you know", "where did", "back this up"),
+    "confidence": ("confidence", "confident", "how sure", "how certain",
+                   "reliable", "trust this"),
+    "contradiction": ("contradict", "counter", "disagree", "against this",
+                      "change your view", "challenge"),
+    "leadership": ("leadership", "board", "executive", "management",
+                   "should i ask", "investigate", "questions for"),
+    "market": ("market", "competitor", "compare", "industry", "landscape",
+               "rivals", "alternatives"),
+    "summary": ("summar", "overview", "tldr", "tl;dr", "in short", "brief",
+                "simple terms", "simply", "simpler", "easier to understand",
+                "plain english", "explain this", "eli5", "recap",
+                "the gist", "key points", "main points", "takeaway"),
+    "limitation": ("limitation", "limited", "why so short", "missing",
+                   "what don't you know", "what do you not know", "gap",
+                   "incomplete", "not enough evidence"),
+    "persona": ("persona", "who is this for", "buyer"),
+    # "Why does this matter?" is one of the commonest follow-ups and matched
+    # nothing at all before.
+    "implication": ("why is this important", "why does this matter",
+                    "why it matters", "so what", "importance", "impact",
+                    "what does this mean", "significance"),
+    "assumption": ("assumption", "assume", "hypothes"),
+}
+
+# Topics that legitimately speak over the whole run rather than a slice of it.
+_BROAD_TOPICS = ("summary", "identity", "limitation", "confidence", "evidence")
+
+# Kept for backwards compatibility with callers that imported it.
+_SUPPORTED = tuple(sorted({p for ps in _TOPICS.values() for p in ps}))
+
+
+def detect_topics(question: str) -> tuple:
+    """Which topics a question is about. Empty when nothing is recognised.
+
+    Deterministic and offline on purpose: a follow-up must behave the same way
+    every time, and must not depend on a model being reachable.
+    """
+    lowered = " ".join((question or "").lower().split())
+    hits = [topic for topic, phrases in _TOPICS.items()
+            if any(p in lowered for p in phrases)]
+    # Longest-phrase wins for the common "explain this simply" case, which
+    # matches both `identity` and `summary`; summary is the better answer.
+    if "summary" in hits and len(hits) > 1:
+        hits = ["summary"] + [h for h in hits if h != "summary"]
+    return tuple(hits)
+
+
+def _relevant_claims(topics: tuple, speakable: tuple) -> tuple:
+    """Narrow the run's claims to the ones the question is actually about.
+
+    Returning everything is what produced an answer about pricing to a request
+    for a simple explanation.
+    """
+    if not topics or any(t in _BROAD_TOPICS for t in topics):
+        return speakable
+    wanted = tuple(w for t in topics for w in _TOPICS[t])
+    scoped = tuple(
+        c for c in speakable
+        if any(w in (getattr(c, "claim_id", "") or "").lower()
+               or w in (getattr(c, "text", "") or "").lower()
+               for w in wanted))
+    # Never answer with something unrelated just to have an answer.
+    return scoped
+
+
 # Causal phrasings the workspace may not assert unless a source supports it.
 _CAUSAL = ("reduces", "reducing", "causes", "causing", "because of you",
            "is lowering", "drives down", "hurts")
@@ -42,23 +128,39 @@ _CAUSAL = ("reduces", "reducing", "causes", "causing", "because of you",
 
 def run_claim_set(question: str, run_claims: list) -> ClaimSet:
     """Build a closed ClaimSet from THIS run's claims only."""
-    lowered = " ".join((question or "").lower().split())
-    if not any(marker in lowered for marker in _SUPPORTED):
-        from intent_engine.personal.adapters.base import out_of_scope_claim
-        return ClaimSet(intent="UNSUPPORTED", claims=(out_of_scope_claim(
-            "fi.unsupported",
-            "this question is outside the supported follow-up capabilities; "
-            "ask about the evidence, confidence, freshness, personas, market "
-            "view, or assumptions"),))
-    # a supported follow-up speaks only over this run's supported claims
+    topics = detect_topics(question)
     speakable = tuple(c for c in run_claims
                       if c.availability not in (AVAIL_OUT_OF_SCOPE,))
+
+    if not topics:
+        # Not "unsupported" — just not understood. The reply names things the
+        # user can actually ask instead of describing our internals.
+        from intent_engine.personal.adapters.base import out_of_scope_claim
+        return ClaimSet(intent="UNRECOGNISED", claims=(out_of_scope_claim(
+            "fi.unrecognised",
+            "I can answer questions about this company and this analysis. I "
+            "could not tell what you meant. Try \"What does this company "
+            "do?\", \"Who are its customers?\", \"What are the main risks?\", "
+            "or \"Summarise this simply\"."),))
+
     if not speakable:
         from intent_engine.personal.adapters.base import unavailable_claim
         return ClaimSet(intent="INSUFFICIENT", claims=(unavailable_claim(
             "fi.insufficient",
             "there is not yet enough supported evidence to answer this"),))
-    return ClaimSet(intent="SUPPORTED", claims=speakable)
+
+    relevant = _relevant_claims(topics, speakable)
+    if not relevant:
+        # Understood, but this run holds nothing on that subject. Saying so is
+        # the honest answer; substituting an unrelated claim is not.
+        from intent_engine.personal.adapters.base import unavailable_claim
+        subject = topics[0].replace("_", " ")
+        return ClaimSet(intent="INSUFFICIENT", claims=(unavailable_claim(
+            "fi.insufficient",
+            f"this analysis does not yet contain evidence about {subject} "
+            f"for this company; the evidence library shows which sources "
+            f"were retrieved and which failed"),))
+    return ClaimSet(intent="SUPPORTED", claims=relevant)
 
 
 def answer(question: str, *, run_claims: list, llm_client=None,
