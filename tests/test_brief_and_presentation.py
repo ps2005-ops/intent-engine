@@ -225,10 +225,17 @@ def test_no_slide_becomes_a_wall_of_text():
 
 
 def test_slides_follow_the_narrative_order():
+    # The deck is the founder presentation now, not the old field-ordered one.
+    # Order is: the claim, why it matters, the decision, the case against,
+    # what to watch, what could not be established -- omitting any screen the
+    # available reasoning cannot fill honestly.
     ids = [s["id"] for s in build_slides(_rich_report())]
-    expected = ["company", "view", "changed", "market", "signals", "tension",
-                "opportunity", "questions", "evidence"]
-    assert ids == [i for i in expected if i in ids]
+    expected = ["today", "business", "game", "insight", "why_now",
+                "mental_model", "decision-1", "decision-2", "assumption",
+                "threat", "wrong", "watch", "gaps"]
+    assert ids == [i for i in expected if i in ids], ids
+    assert ids[0] in ("today", "insight"), \
+        f"the deck must not open with a company description: {ids[0]}"
 
 
 def test_evidence_is_not_repeated_across_slides():
@@ -240,7 +247,11 @@ def test_evidence_is_not_repeated_across_slides():
                 seen[citation] = seen.get(citation, 0) + 1
     # a citation may legitimately support two different subjects, but the same
     # block must not be reprinted under every slide
-    assert not any(count >= len(slides) - 1 for count in seen.values())
+    # A citation may legitimately support two different screens; reprinting
+    # the same evidence block under nearly every screen is the padding this
+    # guards against. An absolute bound, because the deck is now deliberately
+    # short and a relative one tightens as it shortens.
+    assert not any(count > 3 for count in seen.values()), seen
 
 
 # --- the rendered deck ---------------------------------------------------------

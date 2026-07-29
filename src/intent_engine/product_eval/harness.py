@@ -253,17 +253,34 @@ def _brief_and_slides(result, documents=()):
 # persona list is documentation. Each entry is (brief field, slide ids) — the
 # reader can be served by either layer, because either is where they might
 # land.
+# Which screen answers which reader question.
+#
+# Updated when the presentation became one founder-facing deck for both
+# reasoning paths. The old ids ("view", "signals", "changed", "market") were
+# the field-ordered deck's and no longer exist, so every persona question
+# silently counted as unanswered and the pass rate fell to 0.54 -- the harness
+# measuring a product that had been replaced rather than a product that had
+# regressed. The guarantee is unchanged: each question must be answered
+# somewhere a reader will actually look.
 _ANSWERED_BY = {
-    "what does this company do": (("thesis",), ("company", "market")),
-    "what appears to be changing": ((), ("changed", "signals")),
-    "the most important strategic hypothesis": (("thesis",), ("view",)),
-    "why it matters": (("decision", "tension"), ("view", "tension")),
-    "what evidence supports it": ((), ("signals", "market", "evidence")),
-    "what evidence weakens it": (("counterpoint",), ("tension", "evidence")),
-    "what decision it could affect": (("decision",), ("view",)),
-    "what to investigate next": (("questions",), ("questions", "opportunity")),
-    "how confident to be": ((), ("view", "evidence")),
-    "what could not be determined": (("limitation",), ("evidence",)),
+    "what does this company do": (("thesis",),
+                                  ("business", "insight", "company", "market")),
+    "what appears to be changing": ((), ("insight", "why_now", "game",
+                                         "changed", "signals")),
+    "the most important strategic hypothesis": (("thesis",),
+                                                ("insight", "view")),
+    "why it matters": (("decision", "tension"),
+                       ("why_now", "insight", "view", "tension")),
+    "what evidence supports it": ((), ("insight", "decision-1", "gaps",
+                                       "signals", "market", "evidence")),
+    "what evidence weakens it": (("counterpoint",),
+                                 ("wrong", "why_now", "tension", "evidence")),
+    "what decision it could affect": (("decision",),
+                                      ("decision-1", "today", "view")),
+    "what to investigate next": (("questions",),
+                                 ("watch", "questions", "opportunity")),
+    "how confident to be": ((), ("gaps", "view", "evidence")),
+    "what could not be determined": (("limitation",), ("gaps", "evidence")),
 }
 
 

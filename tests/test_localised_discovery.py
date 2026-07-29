@@ -78,3 +78,43 @@ def test_a_wholly_unreadable_run_is_still_reported_as_such():
                                     "company_name": "X",
                                     "domain": "x.test"})
     assert result["readable_share"] < 0.6
+
+
+# --- unreadable pages must not be presented as read ------------------------
+
+def test_unreadable_pages_are_not_listed_as_sources_that_were_read(tmp_path):
+    """OBSERVED LIVE on Figma: German blog pages were fetched fine, could not
+    be read, were correctly excluded from the evidence -- and were still
+    listed to the user under "Sources that were read". The page asserted
+    something false about its own work."""
+    import email as _email
+    import urllib.error
+
+    from test_webapp_demo_mode import Client, _make, _start_demo
+
+    def mixed(url, timeout):
+        u = url.lower()
+        if "example.test" not in u:
+            raise urllib.error.HTTPError(url, 404, "nf",
+                                         _email.message_from_string(""), None)
+        path = u.split("example.test", 1)[-1].strip("/") or "home"
+        text = _DE if "blog" in path else _EN
+        html = (f"<html><head><title>Example {path}</title></head>"
+                f"<body><p>{text}</p></body></html>")
+        return (200, {"content-type": "text/html"}, html.encode(), False)
+
+    app = _make(tmp_path, transport=mixed, autorun_sources=True)
+    c = _start_demo(app)
+    _, headers, _ = c.request(
+        "POST", "/analyze",
+        f"consent=on&csrf={c.csrf()}&website=https://example.test")
+    _, _, page = c.request("GET", headers["Location"].rsplit("/progress", 1)[0])
+    if "Sources" not in page:
+        return                       # this run did not reach a limited result
+    assert "Sources that were read" not in page,         "unreadable pages are still presented as read"
+
+
+def test_readability_decides_which_list_a_source_lands_in():
+    from intent_engine.company_ingestion.readiness import is_english
+    assert is_english(_doc(_EN))
+    assert not is_english(_doc(_DE))

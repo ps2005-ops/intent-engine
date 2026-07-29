@@ -1353,13 +1353,29 @@ class WebApp:
         # Evidence that WAS retrieved is never discarded just because there is
         # too little of it to support a briefing. It is the reader's, it cost a
         # real fetch, and seeing it is how they judge whether to add more.
-        read_html = "".join(
-            f'<li><a href="{_e(d["final_url"])}" rel="nofollow noopener">'
-            f'{_e(d.get("title") or d["final_url"])}</a></li>'
-            for d in self.ci.store.retrieved(run_id)
-            if d.get("retrieval_status") == "OK")
-        if read_html:
-            found += (f'<h3>Sources that were read</h3><ul>{read_html}</ul>')
+        # "Read" meant retrieval_status == OK, which only says the fetch
+        # succeeded. Figma's German blog pages were fetched fine, could not be
+        # read by the analysis, were correctly excluded from the evidence --
+        # and were still listed to the user under "Sources that were read".
+        # The page asserted something false about its own work.
+        from intent_engine.company_ingestion.readiness import is_english
+        fetched = [d for d in self.ci.store.retrieved(run_id)
+                   if d.get("retrieval_status") == "OK"]
+        used = [d for d in fetched if is_english(d)]
+        set_aside = [d for d in fetched if not is_english(d)]
+
+        def _links(docs):
+            return "".join(
+                f'<li><a href="{_e(d["final_url"])}" rel="nofollow noopener">'
+                f'{_e(d.get("title") or d["final_url"])}</a></li>'
+                for d in docs)
+
+        if used:
+            found += f'<h3>Sources used</h3><ul>{_links(used)}</ul>'
+        if set_aside:
+            found += (f'<h3>Sources found but not used</h3>'
+                      f'<p class="why">Not available in a language this '
+                      f'analysis can read.</p><ul>{_links(set_aside)}</ul>')
         missing = _ul(note.get("missing", []))
         blockers = _ul(note.get("blockers", [])[:5])
         # Render the rows — never interpolate the list itself, which prints

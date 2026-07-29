@@ -661,7 +661,7 @@ def test_blocked_source_does_not_fail_run_when_other_evidence_succeeds(
     retrieved = [d for d in app.ci.store.retrieved(run_id)
                  if d["retrieval_status"] == "OK"]
     assert retrieved
-    assert "Sources that were read" in body
+    assert "Sources used" in body
     for document in retrieved:
         assert document["final_url"] in body
 

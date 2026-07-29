@@ -38,7 +38,12 @@ SLIDES_VERSION = "si_slides.v1"
 
 # Below this a deck is not a presentation, it is a paragraph with arrows. The
 # same floor the readiness gate applies to `slide_units`.
-MIN_MEANINGFUL_SLIDES = 5
+# Lowered from 5 when the presentation stopped padding itself. A
+# deterministic run legitimately produces four or five strong
+# screens, and the old floor would have bounced those readers to
+# the full analysis -- undoing presentation-first to satisfy a
+# count.
+MIN_MEANINGFUL_SLIDES = 4
 
 # How much text a slide may carry before it stops being a slide. A wall of text
 # on a slide is strictly worse than the same text in a document, because the
@@ -174,6 +179,138 @@ _URGENCY_WORDS = {"decide_now": "Decide now", "this_quarter": "This quarter",
                   "this_year": "This year", "watch_only": "Watch only"}
 
 
+_CONFIDENCE_LEAD = {
+    "high": "This reading is well supported",
+    "moderate": "This reading is reasonably supported",
+    "low": "Treat this as a lead rather than a finding",
+}
+
+
+def _confidence_in_plain_words(level: str, rationale: str) -> str:
+    """State how far to trust the reading, in a sentence a person would say.
+
+    "Confidence: low" is a label. The reasoning layer already knows WHY --
+    how many vantage points, whether anything independent corroborates it --
+    and that reason is the part worth showing.
+    """
+    lead = _CONFIDENCE_LEAD.get((level or "").lower())
+    reason = (rationale or "").strip().rstrip(".")
+    if not lead:
+        return reason and f"{reason[0].upper()}{reason[1:]}."
+    return f"{lead}: {reason}." if reason else f"{lead}."
+
+
+def founder_view_from_report(report) -> dict:
+    """Adapt a deterministic report into the founder presentation contract.
+
+    THE POINT OF THIS FUNCTION is that there is one founder-facing product,
+    not two. Before it, a grounded run rendered the founder deck and every
+    other run rendered a different deck that opened with "{company} in one
+    minute" and closed on "Key strategic signals" -- a company description
+    followed by internal vocabulary. Which product you saw depended on whether
+    an API key happened to be configured.
+
+    Both paths now populate the same contract and render through the same
+    system. The deterministic path fills FEWER fields, deliberately: it cannot
+    honestly reconstruct a business model, name what management is protecting,
+    or say what a competitor will do, so it leaves those empty and the
+    renderer omits those screens. A shorter honest presentation, not the same
+    shape padded out.
+
+    Nothing here invents language. Every string is one the reasoning layer
+    already produced from this company's evidence, and that layer already
+    hedges ("appears to be", "the evidence supports this as a low-confidence
+    hypothesis"), which is the register this path should be speaking in.
+    """
+    r = report.as_dict() if hasattr(report, "as_dict") else (report or {})
+    thesis = r.get("thesis") or {}
+    hypotheses = r.get("hypotheses") or []
+    top = hypotheses[0] if hypotheses else {}
+    if hasattr(top, "as_dict"):
+        top = top.as_dict()
+
+    def _first(seq):
+        seq = list(seq or ())
+        return seq[0] if seq else ""
+
+    claim = thesis.get("transition") or top.get("statement") or ""
+    if not claim:
+        # Nothing honest to lead with. The caller falls back, and the
+        # limited-analysis page (which explains what was and was not found)
+        # is the right destination for these -- not a padded deck.
+        return {}
+
+    decision = thesis.get("why_care") or ""
+    falsifier = _first(top.get("falsification_questions"))
+    questions = [q.get("question", "") if isinstance(q, dict) else str(q)
+                 for q in (r.get("questions") or [])]
+
+    view = {
+        # The one claim, stated first. Not a company description.
+        "the_insight": {
+            "sentence": claim,
+            "paragraph": top.get("reasoning", ""),
+            "why_now": _why_now_in_plain_words(top.get("why_now", "")),
+            "tension": {"side_a": thesis.get("tension", ""),
+                        "side_b": "", "why_it_exists": ""},
+            "economics": {"mechanism": "", "levers": []},
+            "consequence_chain": [],
+            "citations": list(top.get("strongest_support_ids") or []),
+        },
+        # Deterministically we can name the decision the evidence bears on,
+        # but not its urgency or reversibility -- so those stay empty and the
+        # ranking layer is told not to promote anything to "today".
+        "decisions": ([{
+            "decision": decision,
+            "why_it_matters": "",
+            "cost_of_waiting": "",
+            "what_a_competitor_may_do_first": "",
+            "upside": "", "downside": "",
+            "what_would_invalidate_it": falsifier,
+            "what_to_watch": falsifier,
+            "confidence": top.get("confidence", ""),
+            "confidence_rationale": _readable_confidence_reason(
+                top.get("confidence_reasons")),
+            "citations": list(top.get("strongest_support_ids") or []),
+        }] if decision else []),
+        "strongest_case_we_are_wrong": _first(
+            top.get("alternative_explanations")),
+        "questions": questions[:3],
+        "evidence_gaps": list(r.get("evidence_gaps") or [])[:2],
+        # Left empty on purpose -- see the docstring. The renderer drops the
+        # screens these would have filled.
+        "business_model": {}, "mental_model": {}, "competitive": {},
+        "scenarios": {}, "assumptions": [],
+        #: deterministic reasoning never claims something deserves today
+        "supports_urgency": False,
+    }
+    return view
+
+
+def _readable_confidence_reason(reasons) -> str:
+    """The reasoning layer emits several reasons, the first of which is a
+    signal-matching trace ("3 qualifying signal(s) matched: ..."). That is the
+    system describing its own machinery. Prefer a reason about the EVIDENCE."""
+    for reason in (reasons or ()):
+        low = str(reason).lower()
+        if "signal" in low or "qualifying" in low:
+            continue
+        return str(reason)
+    return ""
+
+
+def _why_now_in_plain_words(why_now: str) -> str:
+    """The reasoning layer says "Recent public signal (2026-07-20, Pricing)
+    keeps this timely", which is the system describing its own inputs. A
+    reader wants the date and the page, not the word "signal"."""
+    import re
+    match = re.search(r"\(([^,]+),\s*(.+?)\)", why_now or "")
+    if not match:
+        return "" if "signal" in (why_now or "").lower() else (why_now or "")
+    when, where = match.group(1).strip(), match.group(2).strip()
+    return f"The most recent evidence is {where} ({when})."
+
+
 def build_founder_slides(analysis, *, company="") -> list:
     """The deck a founder is shown. It answers five questions and stops.
 
@@ -214,7 +351,8 @@ def build_founder_slides(analysis, *, company="") -> list:
     slides = []
 
     # 0 - today, only when something has earned it
-    today = todays_decision(decisions)
+    today = todays_decision(decisions) if a.get("supports_urgency", True) \
+        else None
     if today:
         slides.append(_slide("today", "What deserves today", [
             _bullet(today.get("decision", ""),
@@ -241,6 +379,18 @@ def build_founder_slides(analysis, *, company="") -> list:
         _bullet(ins.get("sentence", ""), evidence=cites, full=True),
         _bullet(ins.get("paragraph", "")),
     ], kind="insight"))
+
+    # Why it matters now, and the trade-off underneath it. Restored after the
+    # five-questions rebuild dropped it: the tension is one of the few things
+    # the deterministic path can state honestly from its own reasoning, and
+    # without this screen it had nowhere to appear at all.
+    tension = ins.get("tension") or {}
+    slides.append(_slide("why_now", "Why this matters now", [
+        _bullet(ins.get("why_now", "")),
+        _bullet(_lead("The trade-off: ", tension.get("side_a", ""))),
+        _bullet(_lead("Against that: ", tension.get("side_b", ""))),
+        _bullet((ins.get("economics") or {}).get("mechanism", "")),
+    ], kind="tension"))
 
     # 3 - what leadership is protecting and giving up
     slides.append(_slide("mental_model", "What leadership is protecting", [
@@ -296,6 +446,24 @@ def build_founder_slides(analysis, *, company="") -> list:
     slides.append(_slide("watch", "What to watch, and what to ask",
                          watch, kind="monitor"))
 
+    # What this could not establish. Not a disclaimer -- a reader deciding how
+    # far to trust the reading needs to know which part of the picture is
+    # missing, and it is the one screen the deterministic path can always fill
+    # honestly from its own coverage.
+    # How far to trust it, in a sentence, and what is missing.
+    #
+    # The persona evaluation caught this: rebuilding the deck dropped
+    # confidence entirely and 17 cases failed on "unanswered: how confident to
+    # be". A reader deciding what to do with a reading needs to know how well
+    # supported it is, and "low" on its own is a label, not an answer.
+    first = (decisions or [{}])[0]
+    confidence_line = _confidence_in_plain_words(
+        first.get("confidence", ""), first.get("confidence_rationale", ""))
+    slides.append(_slide("gaps", "How far to trust this", (
+        [_bullet(confidence_line, full=True)] if confidence_line else []
+    ) + [_bullet(g) for g in (a.get("evidence_gaps") or [])[:3]],
+        kind="gaps"))
+
     return [s for s in slides if s]
 
 
@@ -315,9 +483,14 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # When a verified analysis exists, the founder deck replaces this one
     # outright rather than being appended to it. Showing both would mean
     # showing the same company twice: once as advice and once as method.
+    # ONE founder-facing product. A grounded analysis fills the contract
+    # richly; a deterministic report fills less of it. Both render here.
     analysis = r.get("strategic_analysis")
     if analysis and (analysis.get("decisions") or []):
         return build_founder_slides(analysis, company=company)
+    adapted = founder_view_from_report(r)
+    if adapted:
+        return build_founder_slides(adapted, company=company)
 
     thesis = r.get("thesis") or {}
     slides = []
