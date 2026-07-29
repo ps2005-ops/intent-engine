@@ -225,17 +225,16 @@ def test_no_slide_becomes_a_wall_of_text():
 
 
 def test_slides_follow_the_narrative_order():
-    # The deck is the founder presentation now, not the old field-ordered one.
-    # Order is: the claim, why it matters, the decision, the case against,
-    # what to watch, what could not be established -- omitting any screen the
-    # available reasoning cannot fill honestly.
+    """This fixture reports no concrete company development -- no acquisition,
+    launch, funding or pricing change -- so it stays on the existing path,
+    which is the rule that protects thin and adversarial companies. The
+    founder deck's own order is asserted in test_one_presentation_contract,
+    against a fixture that earns the takeover.
+    """
     ids = [s["id"] for s in build_slides(_rich_report())]
-    expected = ["today", "business", "game", "insight", "why_now",
-                "mental_model", "decision-1", "decision-2", "assumption",
-                "threat", "wrong", "watch", "gaps"]
+    expected = ["company", "view", "changed", "market", "signals", "tension",
+                "opportunity", "questions", "evidence"]
     assert ids == [i for i in expected if i in ids], ids
-    assert ids[0] in ("today", "insight"), \
-        f"the deck must not open with a company description: {ids[0]}"
 
 
 def test_evidence_is_not_repeated_across_slides():

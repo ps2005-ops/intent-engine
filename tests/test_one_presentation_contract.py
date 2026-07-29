@@ -19,10 +19,23 @@ from intent_engine.strategic_intelligence.slides import (
 )
 
 
+# The deterministic founder deck is only taken over when a concrete company
+# development was retrieved -- that is the rule protecting thin and
+# adversarial companies. So this fixture contains one.
+_ACQUISITION = dict(
+    source_id="m9", title="Examplecorp Acquires Ledgerly",
+    final_url="https://example.com/press/acquires-ledgerly",
+    meta_description="",
+    text_content="Examplecorp has acquired Ledgerly, adding reconciliation "
+                 "to the commerce platform used by merchants and sellers "
+                 "for storefront and checkout operations.",
+    retrieved_at="2026-07-20T00:00:00Z", freshness="CURRENT")
+
+
 def _report():
     return build_strategic_report(
         company_name="Examplecorp",
-        observations=derive_observations(COMMERCE_DOCS))
+        observations=derive_observations(list(COMMERCE_DOCS) + [_ACQUISITION]))
 
 
 def _deck():
@@ -37,13 +50,13 @@ def test_the_deterministic_path_renders_the_founder_deck():
         assert legacy not in kinds, f"old deterministic deck still rendering: {legacy}"
 
 
-def test_the_first_screen_is_a_conclusion_not_a_company_overview():
+def test_the_first_screen_is_a_concrete_fact_not_a_company_overview():
     first = _deck()[0]
     assert first["kind"] == "insight"
     assert "in one minute" not in first["title"].lower()
-    assert "overview" not in first["title"].lower()
-    # and it says something specific about this company
-    assert "Examplecorp" in first["bullets"][0]["text"]
+    # the lead is the retrieved development, not a pattern title
+    lead = first["bullets"][0]["text"]
+    assert "Examplecorp acquired Ledgerly" in lead, lead
 
 
 def test_no_internal_vocabulary_reaches_the_reader():
@@ -79,6 +92,17 @@ def test_the_deterministic_path_never_claims_something_deserves_today():
     tell how reversible or urgent a decision is."""
     assert "today" not in [s["kind"] for s in _deck()]
     assert founder_view_from_report(_report())["supports_urgency"] is False
+
+
+def test_a_run_with_no_concrete_development_keeps_the_existing_path():
+    """The governing rule: only replace the fallback when there is a real fact
+    strong enough to earn the takeover. COMMERCE_DOCS alone reports no company
+    ACTION -- only product and marketing pages -- so the adapter declines and
+    every existing behaviour is untouched."""
+    plain = build_strategic_report(
+        company_name="Examplecorp",
+        observations=derive_observations(COMMERCE_DOCS))
+    assert founder_view_from_report(plain) == {}
 
 
 def test_why_now_is_stated_in_plain_words():

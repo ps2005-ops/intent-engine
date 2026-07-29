@@ -200,6 +200,19 @@ def _confidence_in_plain_words(level: str, rationale: str) -> str:
     return f"{lead}: {reason}." if reason else f"{lead}."
 
 
+def _lower_first(text: str) -> str:
+    """Lower a leading capital so a sentence can become a clause -- unless the
+    first word is a proper noun, which gives "that sentry appears to be"."""
+    text = (text or "").strip()
+    if not text:
+        return ""
+    first = text.split(" ", 1)[0].strip(".,:;")
+    if len(first) > 1 and first[0].isupper() and any(c.isupper()
+                                                     for c in first[1:]):
+        return text
+    return text[0].lower() + text[1:]
+
+
 def founder_view_from_report(report) -> dict:
     """Adapt a deterministic report into the founder presentation contract.
 
@@ -233,12 +246,46 @@ def founder_view_from_report(report) -> dict:
         seq = list(seq or ())
         return seq[0] if seq else ""
 
+    # THE TAKEOVER GATE.
+    #
+    # Only replace the fallback when there is a real fact strong enough to
+    # earn it. Sentry's run retrieved a page titled "Sentry Acquires Codecov"
+    # -- a named acquisition -- and the deck opened instead with "broadening
+    # from a focused tool toward being the place a team's work is stored",
+    # which is the tool_to_system_of_record scaffold and reads identically for
+    # Notion, Linear or Atlassian.
+    #
+    # The gate is deliberately narrow. An earlier attempt took the deck over
+    # whenever page titles existed at all, which pushed a dental practice and
+    # a hostile site into asserting a shape they could not fill. No concrete
+    # development means this returns {} and every existing path is untouched.
+    from intent_engine.strategic_intelligence.concrete import (
+        reads_as_taxonomy, select_founder_claim_anchor,
+    )
+    anchor = select_founder_claim_anchor(r.get("observations") or [],
+                                         company=r.get("company_name", ""))
     claim = thesis.get("transition") or top.get("statement") or ""
-    if not claim:
-        # Nothing honest to lead with. The caller falls back, and the
+    if not anchor:
+        # Nothing concrete to lead with. The caller falls back, and the
         # limited-analysis page (which explains what was and was not found)
         # is the right destination for these -- not a padded deck.
         return {}
+
+    # FACT first, in the company's own words. The scaffold reading may follow
+    # as an interpretation, and only if it is not built from ontology
+    # vocabulary -- a reader can check "Sentry acquired Codecov" against the
+    # world and cannot check "becoming the place a team's work is stored".
+    fact = anchor["fact"]
+    supporting = [t for t in anchor.get("supporting") or [] if t]
+    interpretation = ""
+    if claim and not reads_as_taxonomy(claim):
+        interpretation = f"A plausible reading is that {_lower_first(claim)}"
+    elif top.get("reasoning") and not reads_as_taxonomy(top["reasoning"]):
+        interpretation = top["reasoning"]
+    paragraph = " ".join(x for x in [
+        (f"Alongside: {' '.join(supporting)}" if supporting else ""),
+        interpretation,
+    ] if x).strip()
 
     decision = thesis.get("why_care") or ""
     falsifier = _first(top.get("falsification_questions"))
@@ -248,14 +295,16 @@ def founder_view_from_report(report) -> dict:
     view = {
         # The one claim, stated first. Not a company description.
         "the_insight": {
-            "sentence": claim,
-            "paragraph": top.get("reasoning", ""),
+            "sentence": fact,
+            "paragraph": paragraph,
             "why_now": _why_now_in_plain_words(top.get("why_now", "")),
             "tension": {"side_a": thesis.get("tension", ""),
                         "side_b": "", "why_it_exists": ""},
             "economics": {"mechanism": "", "levers": []},
             "consequence_chain": [],
-            "citations": list(top.get("strongest_support_ids") or []),
+            "citations": [anchor["observation_id"]] if anchor.get(
+                "observation_id") else list(
+                top.get("strongest_support_ids") or []),
         },
         # Deterministically we can name the decision the evidence bears on,
         # but not its urgency or reversibility -- so those stay empty and the
