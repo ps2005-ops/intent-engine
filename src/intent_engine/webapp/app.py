@@ -31,7 +31,7 @@ from intent_engine.founder_intelligence.presentation import (
     render_landing_html, render_report_preview, render_result_html,
 )
 from intent_engine.company_ingestion.entities import (
-    AMBIGUOUS, resolve_choice, resolve_entity,
+    AMBIGUOUS, name_from_domain, resolve_choice, resolve_entity,
 )
 from intent_engine.strategic_intelligence.editorial import is_meaningful
 from intent_engine.company_ingestion.records import (
@@ -928,6 +928,17 @@ class WebApp:
                 if resolution.status == AMBIGUOUS:
                     return self._disambiguation_page(
                         session, resolution, form)
+                # The landing form asks for a website, not a name, so almost
+                # every real visit arrives with company_name empty -- and the
+                # report was then headed "(unnamed company)" while citing
+                # "About Sentry | Sentry" three lines below it. The name was
+                # available twice over and used neither time: the registry had
+                # already resolved the domain and its legal_name was thrown
+                # away, and failing that the domain itself carries the name.
+                if not company_name and resolution.resolved:
+                    company_name = resolution.profile.legal_name
+                if not company_name:
+                    company_name = name_from_domain(website)
             # REAL company path: validate → discover → source approval.
             try:
                 run = self.ci.create_run(

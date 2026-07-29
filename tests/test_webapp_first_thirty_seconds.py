@@ -3,7 +3,9 @@
 Every case here was observed on the deployed product at ec337f5 by using it as
 a first-time user, not by reading code.
 """
+from company_fixture_pages import BASE as BRIGHTLAKE
 from company_fixture_pages import transport as brightlake
+from intent_engine.company_ingestion.entities import name_from_domain
 from intent_engine.webapp.app import WebApp
 from intent_engine.webapp.config import AppConfig
 from test_webapp_demo_mode import DEMO_URL, Client, _make, _start_demo
@@ -83,6 +85,62 @@ def test_an_anonymous_session_still_cannot_read_another_visitors_run(tmp_path):
     status, _, _ = intruder.request("GET", run_path)
     assert status.startswith("404"), \
         f"another visitor could read the run: {status}"
+
+
+# --- the company has a name -------------------------------------------------
+
+def test_a_visitor_who_typed_only_a_website_still_gets_a_named_company(tmp_path):
+    """OBSERVED LIVE at 101bf7a on sentry.io: every layer was headed
+    "(unnamed company)" -- the browser tab, the h1, and the sentence "What
+    (unnamed company) does is not described on any page we could retrieve" --
+    on a report whose own evidence list cited "About Sentry | Sentry" and
+    whose central claim read "Sentry acquired Codecov."
+
+    The landing form asks for a website, not a name, so company_name is empty
+    on essentially every real visit. The whole fixture suite missed it because
+    `_start_real` helpfully passes company_name=Acme, which no real form does.
+    """
+    app = _make(tmp_path, transport=brightlake)
+    c = _start_demo(app)
+    csrf = c.csrf()
+    status, headers, _ = c.request(          # NO company_name, as the form posts
+        "POST", "/analyze", f"consent=on&csrf={csrf}&website={BRIGHTLAKE}")
+    assert status.startswith("303"), status
+    run_id = headers["Location"].split("/runs/")[1].rsplit("/sources", 1)[0]
+
+    _, _, page = c.request("GET", f"/runs/{run_id}/sources")
+    assert "(unnamed company)" not in page, \
+        "the reader is shown '(unnamed company)' for a company whose name " \
+        "is in the domain they just typed"
+    assert "Brightlake" in page
+
+
+def test_a_name_is_read_from_the_domain_not_invented(tmp_path):
+    assert name_from_domain("https://sentry.io") == "Sentry"
+    assert name_from_domain("https://www.figma.com") == "Figma"
+    assert name_from_domain("https://blog.example.com") == "Example"
+    assert name_from_domain("https://acme-corp.io") == "Acme Corp"
+    assert name_from_domain("https://bbc.co.uk") == "Bbc"   # two-label suffix
+    # Nothing to read means nothing claimed -- an empty name is honest, and
+    # the "(unnamed company)" wording still stands behind it for these.
+    assert name_from_domain("https://192.168.1.1") == ""
+    assert name_from_domain("localhost") == ""
+    assert name_from_domain("") == ""
+
+
+def test_a_typed_name_still_wins_over_the_domain(tmp_path):
+    """The domain is the fallback, never an override: a visitor who typed
+    "PlayStation" for sony.com must not be silently renamed "Sony"."""
+    app = _make(tmp_path, transport=brightlake)
+    c = _start_demo(app)
+    csrf = c.csrf()
+    _, headers, _ = c.request(
+        "POST", "/analyze",
+        f"consent=on&csrf={csrf}&company_name=Northwind&website={BRIGHTLAKE}")
+    run_id = headers["Location"].split("/runs/")[1].rsplit("/sources", 1)[0]
+    _, _, page = c.request("GET", f"/runs/{run_id}/sources")
+    assert "Northwind" in page
+    assert "Brightlake Example" not in page
 
 
 # --- internal language ------------------------------------------------------

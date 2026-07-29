@@ -6,13 +6,13 @@ Written at a context handoff. Verified live, not assumed.
 
 | | |
 |---|---|
-| **Deployed SHA** | `dcadb1b` verified live |
-| **main SHA** | see `git log -1` — one commit ahead, **deploy not yet verified** |
+| **Deployed SHA** | `101bf7a` verified live (three layers inspected) |
+| **main SHA** | see `git log -1` — one commit ahead (company-name fix), **deploy not yet verified** |
 | **Working tree** | clean |
 | **`/readyz`** | `degraded` — non-durable storage, honestly reported |
 | **strategic_reasoning** | `false` — `ANTHROPIC_API_KEY` unset (owner) |
 
-## Verified live on `dcadb1b`
+## What `dcadb1b` looked like (the starting point)
 
 | layer | anchor present | taxonomy leaks |
 |---|---|---|
@@ -23,7 +23,7 @@ Written at a context handoff. Verified live, not assumed.
 So the shared claim reached the brief, and the full analysis was still
 selecting its own thesis from `thesis["view"]`.
 
-## Fixed and pushed (deploy NOT yet verified)
+## Fixed and shipped in `101bf7a`
 
 The pattern title reached a reader from **seven** distinct selection points.
 Each is now filtered where the visible item is chosen — never globally:
@@ -47,12 +47,43 @@ Codecov."** with all five phrases absent across all three layers, asserted by
 27 behavioural tests in `test_sentry_deck_regression.py` that read rendered
 output rather than source strings.
 
+## Deployment B — DONE, verified live on `101bf7a`
+
+Sentry re-run on production, run `01KYNVZG815XHR6DV9NEGTNDYR`:
+
+| layer | leaks | opens on |
+|---|---|---|
+| `/slides` | **none** | "Sentry acquired Codecov." |
+| `/brief` | **none** | "Sentry acquired Codecov." |
+| `/full` | **none** | "Sentry acquired Codecov." |
+
+All five phrases absent from all three layers, and the full analysis now
+opens on the same claim as the deck. That closes the three-layer programme.
+
+## Found by that inspection — the company had no name
+
+Every layer was headed **"(unnamed company)"** — tab title, `h1`, and the
+sentence *"What (unnamed company) does is not described on any page we could
+retrieve"* — on a report citing "About Sentry | Sentry" and claiming "Sentry
+acquired Codecov."
+
+The landing form asks for a website, not a name, so `company_name` is empty on
+essentially every real visit. The name was available twice and used neither
+time: `resolve_entity` already ran, and its `profile.legal_name` was computed
+and thrown away; failing that, the domain itself carries the name.
+
+Fixed in `_analyze`: resolved legal name first, then `name_from_domain()`
+(`sentry.io` → Sentry, `bbc.co.uk` → Bbc, an IP or single label → `""`, and
+the "(unnamed company)" wording still stands behind those). A typed name still
+wins — the domain is a fallback, never an override.
+
+The whole fixture suite missed this because `_start_real` passes
+`company_name=Acme`, which no real form does. **Treat that helper as a liar:
+when checking first-visit behaviour, post what the form posts.**
+
 ## Next task — exact
 
-1. **Deploy and verify.** Re-run Sentry and check `/slides`, `/brief`, `/full`
-   for the five phrases (the loop used in this session is in the transcript).
-   Do not report Deployment B complete until production output is inspected.
-2. **`_brief_page` layout** (`app.py` ~1600) — the claim is shared and clean,
+1. **`_brief_page` layout** (`app.py` ~1600) — the claim is shared and clean,
    but the page is still field-shaped cards, not one reading column (Task 6).
 3. **`_run_page` layout** (`app.py` ~1180) — same: content is now clean, the
    structure is still a schema dump (Task 5).

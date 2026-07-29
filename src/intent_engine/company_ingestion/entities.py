@@ -78,6 +78,53 @@ def _host(url: str) -> str:
     return host[4:] if host.startswith("www.") else host
 
 
+# Suffixes that are two labels long, so the name sits one label further left.
+# Deliberately a short list of the common ones rather than the full public
+# suffix list: getting "bbc" from bbc.co.uk matters, and an unlisted suffix
+# degrades to the label before the last dot, which is still a real word from
+# the company's own domain.
+_TWO_LABEL_SUFFIXES = frozenset({
+    "co.uk", "org.uk", "ac.uk", "gov.uk", "me.uk",
+    "co.jp", "or.jp", "ne.jp", "com.au", "net.au", "org.au",
+    "co.nz", "com.br", "com.mx", "com.ar", "co.in", "co.za",
+    "com.sg", "com.hk", "com.tr", "co.kr", "com.cn", "com.tw",
+})
+
+
+def name_from_domain(website: str) -> str:
+    """A display name taken from the company's own domain.
+
+    A visitor who types only a website has still told us the company's name
+    -- it is in the domain. Reading it there is not a guess: sentry.io is
+    Sentry's own domain, and the alternative shipped "(unnamed company)" as a
+    heading on a report that cited "About Sentry | Sentry" three lines below.
+
+    Registry resolution is always preferred; this is the fallback for the
+    long tail no registry covers. Returns "" when the host carries no name
+    to read (a bare IP, a single label, an empty string), because an empty
+    name is honest and a wrong one is not.
+    """
+    host = _host(website)
+    if not host or any(ch.isdigit() for ch in host.split(".")[-1]):
+        return ""                      # no TLD, or an IP literal
+    labels = [label for label in host.split(".") if label]
+    if len(labels) < 2:
+        return ""
+    if len(labels) >= 3 and ".".join(labels[-2:]) in _TWO_LABEL_SUFFIXES:
+        core = labels[-3]
+    else:
+        core = labels[-2]
+    words = [w for w in re.split(r"[-_]+", core) if w]
+    if not words:
+        return ""
+    # `_host` lowercases, so internal capitalisation is already gone by here:
+    # gitlab.com yields "Gitlab", bbc.co.uk yields "Bbc". A domain cannot tell
+    # us which letters a company capitalises, and inventing them would be a
+    # guess. The user can always type the exact name; this is the fallback for
+    # when they did not.
+    return " ".join(w.capitalize() for w in words)
+
+
 @dataclass(frozen=True)
 class OfficialSource:
     """One curated, official URL for an entity, classified before use."""
