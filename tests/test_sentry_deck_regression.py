@@ -118,3 +118,28 @@ def test_no_screen_is_padded_to_reach_a_count(deck):
         assert slide["bullets"], f"empty screen rendered: {slide['id']}"
         for bullet in slide["bullets"]:
             assert bullet["text"].strip()
+
+
+# --- the brief must make the same argument as the deck ---------------------
+
+def test_the_brief_opens_with_the_same_claim_as_the_deck(deck):
+    """One company, one central claim. The brief used to select its own from
+    the scaffold, so the same run opened two different ways -- and the brief's
+    was the one that kept "system of record" alive on production after the
+    deck was already clean."""
+    from intent_engine.strategic_intelligence.brief import build_brief
+    report = build_strategic_report(company_name="Sentry",
+                                    observations=SENTRY_OBS)
+    brief = build_brief(report, as_of="2026-07-29")
+    assert brief.thesis == deck[0]["bullets"][0]["text"] == \
+        "Sentry acquired Codecov."
+
+
+def test_the_brief_carries_no_taxonomy_in_its_central_claim():
+    from intent_engine.strategic_intelligence.brief import build_brief
+    report = build_strategic_report(company_name="Sentry",
+                                    observations=SENTRY_OBS)
+    thesis = build_brief(report, as_of="2026-07-29").thesis.lower()
+    for phrase in ("system of record", "broadening from a focused tool",
+                   "adjacent tools"):
+        assert phrase not in thesis, phrase

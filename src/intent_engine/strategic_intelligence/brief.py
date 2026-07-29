@@ -532,10 +532,30 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
     company = r.get("company_name", "")
     thesis = (r.get("thesis") or {})
 
-    # One thesis. The view if there is one; otherwise the leading hypothesis,
-    # which is the same claim earlier in its life.
-    central = thesis.get("view", "") or _first(r.get("hypotheses", []),
-                                               "statement", "title")
+    # ONE CENTRAL CLAIM ACROSS ALL THREE LAYERS.
+    #
+    # The presentation leads with the concrete development the run retrieved
+    # ("Sentry acquired Codecov."). The brief used to select its own claim
+    # from `thesis["view"]`, so the same company got two different openings --
+    # and the brief's was the scaffold one, which is how "system of record"
+    # survived on production after the deck was clean.
+    #
+    # Same anchor, same rule: only when a real reported action earns it.
+    from intent_engine.strategic_intelligence.concrete import (
+        reads_as_taxonomy, select_founder_claim_anchor,
+    )
+    _anchor = select_founder_claim_anchor(r.get("observations") or [],
+                                          company=company)
+    _scaffold = thesis.get("view", "") or _first(r.get("hypotheses", []),
+                                                 "statement", "title")
+    if _anchor:
+        central = _anchor["fact"]
+    elif _scaffold and reads_as_taxonomy(_scaffold):
+        # No concrete anchor and the only available claim is ontology. Saying
+        # what was found is honest; saying this is not.
+        central = ""
+    else:
+        central = _scaffold
 
     # A brief whose most prominent line is blank is not a shorter brief; it is
     # one where the reader supplies the missing claim themselves, usually from

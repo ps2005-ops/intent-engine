@@ -6,75 +6,65 @@ Written at a context handoff. Verified live, not assumed.
 
 | | |
 |---|---|
-| **Deployed SHA** | `4292db7` — verified via `/version` |
-| **main SHA** | `4292db7` + this doc |
+| **Deployed SHA** | `f0bbfb2` verified. A newer commit is pushed, deploy unverified |
+| **main SHA** | see `git log -1` |
 | **Working tree** | clean |
 | **`/readyz`** | `degraded` — non-durable storage, honestly reported |
 | **strategic_reasoning** | `false` — `ANTHROPIC_API_KEY` unset (owner) |
 
-## Shipped and verified live
+## Verified live on production (`f0bbfb2`)
 
-The Sentry defect is fixed on production:
+**Presentation is clean.** Sentry opens on "Sentry acquired Codecov.", cited to
+the acquisition page. Checked on the deployed deck and absent:
+`system of record`, `tool-to-system-of-record`, `broadening from a focused
+tool`, `strategic signal`, `analysis version`.
 
-| | |
+**The watch item is gone.** It used to say "Customers describing it as a
+companion to a system of record rather than the record itself" — the pattern's
+own falsification question, which a reader cannot observe. Filtered at the
+point the watch bullet is SELECTED (`founder_view_from_report`), nowhere else.
+Sentry has no company-specific observable to substitute, so the watch screen is
+honestly omitted rather than filled with filler.
+
+**Still leaking on production, in the OLD renderers only:**
+
+| layer | leaks |
 |---|---|
-| before | "broadening from a focused tool toward being the place a team's work is stored" |
-| after | **"Sentry acquired Codecov."** cited to *Sentry Acquires Codecov \| Sentry* |
+| `/slides` | none |
+| `/brief` | `system of record` |
+| `/full` | `system of record`, `tool-to-system-of-record`, `broadening from a focused tool` |
 
-Live checks on the deployed deck: `broadening from a focused tool` **absent**,
-`tool-to-system-of-record` **absent**, `analysis version` **absent**,
-presentation-first intact (`/progress → 303 /slides`), confidence screen intact.
+## Pushed but not yet deploy-verified
 
-**The governing rule**, implemented in `select_founder_claim_anchor()`
-(`strategic_intelligence/concrete.py`) and independently tested: only replace
-the fallback when a real reported ACTION exists — not an observation count, a
-source count, a pattern, or the company name in a title.
+The brief now opens from the **same** anchor as the deck
+(`brief.py:build_brief`) instead of selecting its own from `thesis["view"]` —
+that divergence is why the brief kept the scaffold claim alive after the deck
+was clean. When no anchor exists and the only candidate is ontology, the
+central claim is left empty rather than asserted.
 
-Two ways I got that rule wrong and fixed, both caught by fixtures:
+## Next task — exact
 
-- A pricing **page** is not an action. Matching it handed the takeover to the
-  adversarial fixture (`Hostile Co pricing`) and dropped it to
-  `FAILED_PRODUCT_QUALITY`. Only a reported pricing **change** counts now.
-- Title Case capitalises every word, so shape cannot tell "Codecov" from
-  "Acquires". The first cut produced "Sentry acquired codecov". The default is
-  now PRESERVE; only words positively recognised as ordinary English are
-  lowered.
+1. **Deploy and verify** the pushed commit; re-run the three-layer leak check
+   (the loop in this session's transcript checks `/slides`, `/brief`, `/full`
+   for the five phrases).
+2. **`_run_page` (`app.py` ~1180)** — the full analysis still renders scaffold
+   hypotheses directly, which is where the remaining two leaks live. It is the
+   last renderer selecting its own claim. Apply the same rule: open from the
+   shared anchor, and where a section's only content is taxonomy, omit the
+   section rather than filter its words.
+3. **`_brief_page` (`app.py` ~1600)** — the claim is now shared, but the page
+   is still field-shaped cards rather than one reading column (Task 4).
+4. **Landing examples** — now unblocked. "Sentry acquired Codecov." is verified
+   live output and can be used as a labelled *Example analysis*.
+5. **Five-company rendered batch incl. mobile** — still never completed.
 
-Thin/adversarial preservation is asserted **at the gate**, not inferred from
-text: bloom_dental, hostile_co and a development-free commerce fixture all
-return `{}`. `test_product_maturity` and `test_product_eval` unchanged and green.
+## Do not
 
-## The one defect this round did NOT fix
-
-`system of record` still reaches the reader, on the **"What to watch, and what
-to ask"** screen:
-
-> "Customers describing it as a companion to a system of record rather than the
-> record itself."
-
-That is the pattern's `falsification_questions[0]`, rendered by the `watch`
-screen in `build_founder_slides` (`slides.py`). It survives because taxonomy
-filtering is applied only at claim construction — deliberately, since the
-previous global filter in `_cap()` stripped honest limitation and
-counter-evidence prose and broke several persona cases.
-
-**Next exact task:** filter taxonomy from the `watch` screen's bullets in
-`build_founder_slides` (questions and `what_to_watch` only), leaving the
-counterargument screen and the limitation/confidence prose untouched. Then
-re-run `test_product_maturity.py` and `test_product_eval.py` — they are what
-catch over-reach — and re-run Sentry live.
-
-## Then
-
-- Executive brief (`_brief_page`, ~`app.py:1600`) — still field-shaped; should
-  open from the same selected anchor rather than regenerating a claim
-- Full analysis (`_run_page`, ~`app.py:1180`) — still schema-shaped
-- Landing examples still Palantir/Shopify (`GOLDEN_COMPANIES`, `demo_tiers.py`).
-  Now unblocked: "Sentry acquired Codecov." is verified live output.
-- Five-company rendered batch incl. mobile — still never completed
-- Scorecard floor is 5 meaningful slides (`product_eval/scorecard.py`); an
-  honest short deck can trip it. Task 9 asked for coverage-based
-  presentability rather than raw count — not done.
+- Restore the global `_cap()` taxonomy filter. It stripped honest limitation
+  and counter-evidence prose and broke several persona cases.
+- Filter source text, limitations, evaluator explanations, operator pages or
+  genuine counterarguments. A counterargument that names the mechanism being
+  doubted is doing its job.
 
 ## Companies used — rotate away
 
@@ -98,4 +88,5 @@ Arm, Figma, Sentry.
 
 - Suite needs the venv on PATH or the pre-commit guard fails:
   `PATH="/Users/prathamsharma/intent-engine/.venv/bin:$PATH" git commit`
-- Real-network local run: `AppConfig(autorun_sources=True)`, **no** `transport`.
+- `test_product_maturity.py` and `test_product_eval.py` are what catch
+  over-reach. Run them after every narrowing change, before the full suite.
