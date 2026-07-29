@@ -430,5 +430,9 @@ def test_the_full_analysis_still_contains_everything(tmp_path):
     app, c, rid = _webapp_run(tmp_path)
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
-    assert "Technical appendix" in body
+    # "Everything" means the full argument and its provenance -- not the
+    # legacy extraction view, which was a <details> of internal claim ids and
+    # is gone. The Sources section is what a reader auditing the report needs.
+    assert "Technical appendix" not in body
     assert "Every source considered" in body
+    assert ">Sources<" in body

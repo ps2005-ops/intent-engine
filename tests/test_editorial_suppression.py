@@ -281,12 +281,60 @@ def test_suppression_does_not_hide_sections_that_have_content():
 def test_limitations_are_consolidated_into_one_section():
     report = _bare_report()
     report["evidence_gaps"] = ["No pricing evidence", "No pricing evidence."]
-    report["quality_findings"] = [{"message": "No independent corroboration"}]
+    # A finding reaches the reader through its CODE, not its message -- the
+    # message is written for the gate that raised it.
+    report["quality_findings"] = [{"code": "no_independent_source",
+                                   "message": "evidence is all "
+                                   "company-published (owned/executive/"
+                                   "investor); an independent, customer, or "
+                                   "competitor source is needed"}]
     html = render_strategic_report(report)
     assert html.count("What we still do not know") == 1
     # There is now ONE place caveats live, so the old summary-preview/detail
     # split cannot restate them -- and within it a caveat appears once.
     limitations_block = html.split("What we still do not know")[1]
     assert limitations_block.count("No pricing evidence") == 1
-    assert html.count("No independent corroboration") == 1
+    assert html.count("Every source is published by the company itself") == 1
+    # and the gate's own wording, with its source-class taxonomy, is not it
+    assert "owned/executive/investor" not in html
+
+
+def test_every_quality_finding_code_is_classified():
+    """A code this table does not name is dropped, so the failure mode for a
+    NEW code is silence rather than "empty key sections: strategic_hypotheses"
+    on a founder's report. Silence is still a defect, so it fails here instead.
+    """
+    import pathlib
+    import re as _re
+    from intent_engine.strategic_intelligence.editorial import (
+        _READER_LIMITATION,
+    )
+    src = pathlib.Path(
+        "src/intent_engine/strategic_intelligence/quality.py").read_text()
+    produced = set(_re.findall(r'_f\("([a-z_]+)"', src))
+    assert produced, "no finding codes found -- has quality.py moved?"
+    unclassified = produced - set(_READER_LIMITATION)
+    assert not unclassified, (
+        "quality.py raises findings this table does not classify, so they "
+        f"reach no reader and no page: {sorted(unclassified)}")
+
+
+def test_machinery_findings_never_reach_the_reader():
+    """Measured on a live Airbnb report, which ended on these two lines."""
+    report = _bare_report()
+    report["quality_findings"] = [
+        {"code": "too_few_hypotheses",
+         "message": "only 0 strategic hypotheses (need >= 3)"},
+        {"code": "too_many_empty_sections",
+         "message": "empty key sections: strategic_hypotheses, "
+                    "comparable_patterns, blind_spots, leadership_questions"},
+        {"code": "no_implication",
+         "message": "hyp-a1b2 has no decision implication"},
+    ]
+    html = render_strategic_report(report)
+    assert "need >= 3" not in html
+    assert "strategic_hypotheses" not in html and "blind_spots" not in html
+    assert "hyp-a1b2" not in html
+    # the one with reader meaning survives, in the reader's language
+    assert "has not been tested against an alternative" in html
 

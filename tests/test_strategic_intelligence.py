@@ -5,6 +5,7 @@ conversation, the Shopify acceptance run through the real compose pipeline,
 and a regression capture of the previous website-summarizer failure mode.
 """
 import io
+import re
 
 import pytest
 
@@ -679,7 +680,47 @@ def test_webapp_strategic_run_defaults_to_the_brief(tmp_path):
     assert headers["Location"] == f"/runs/{rid}/brief"
 
 
-def test_webapp_strategic_run_quarantines_legacy(tmp_path):
+def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,
+                                                          monkeypatch):
+    """Measured on a live Duolingo run, not hypothesised.
+
+    Ten sources retrieved, status COMPLETE, the readiness gate satisfied --
+    and no strategic report, because the pages are JS-rendered and extraction
+    got titles and meta descriptions rather than bodies, so no signal matched.
+    `derive_observations` documents this outcome and says the fix belongs one
+    level up, at the page.
+
+    What that reader used to get was the legacy claim/evidence view: an
+    "Executive Overview" of field labels, an internal claim id printed beside
+    each one, and a "Strongest supported observation" that was the five words
+    the company's own pages repeat most. It is the likeliest first impression
+    the product makes on a company whose site does not server-render.
+    """
+    monkeypatch.setattr(
+        "intent_engine.strategic_intelligence.observations."
+        "derive_observations", lambda *a, **k: [])
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, _, body = c.request("GET", f"/runs/{rid}/full")
+    assert status == "200 OK"
+
+    # not the schema dump, in any of its parts
+    assert "Executive Overview" not in body and "Evidence Library" not in body
+    assert not re.search(r"\[(?:u|mv|c)\.[a-z_]+", body), \
+        "an internal claim id reached the reader"
+    assert "Strongest supported observation" not in body
+
+    # the honest page, and a reason that fits THIS reader rather than the
+    # readiness note's "some kinds of evidence are missing"
+    assert "Limited analysis" in body
+    assert "none carried the dated, checkable material" in body
+    # it still answers the three questions that page exists to answer
+    assert "What was found" in body and "What was missing" in body
+    assert "What you can do" in body
+    # and the sources that were read are named, not withheld
+    assert "Pages read" in body
+
+
+def test_webapp_strategic_run_carries_no_legacy_extraction_view(tmp_path):
     app, c, rid = _strategic_webapp_run(tmp_path)
     # the full analysis keeps every contract it had; it is no longer the default
     status, _, body = c.request("GET", f"/runs/{rid}/full")
@@ -688,13 +729,22 @@ def test_webapp_strategic_run_quarantines_legacy(tmp_path):
     assert "It bears on one decision in particular" in body
     assert ">Why that evidence matters<" in body
     assert ">What happened<" in body and ">Sources<" in body
-    # legacy material is ONLY inside the collapsed technical appendix
-    assert "Technical appendix" in body
-    assert body.index("Technical appendix") < body.index("Evidence Library")
+    # The legacy claim/evidence view is GONE, not collapsed. Quarantining it
+    # behind <details> still put it one click from a report a founder is about
+    # to rely on, under a summary naming the system's own build history.
+    assert "Technical appendix" not in body
+    assert "legacy source extraction" not in body
+    assert "Evidence Library" not in body and "Executive Overview" not in body
+    # and with it the internal claim ids it printed beside every line
+    assert not re.search(r"\[(?:u|mv|c)\.[a-z_]+", body), \
+        "an internal claim id reached the reader"
     # no legacy low-value structures leak into the executive view
     lo = body.lower()
     for banned in ("most repeated words", "out of scope", "not available"):
         assert banned not in lo
+    # the sources a reader can audit are still on the page — that is what the
+    # appendix was standing in for, and it is now a first-class section
+    assert ">Sources<" in body
     # company-specific suggested questions, not generic
     assert "How is this transition similar to" in body
 

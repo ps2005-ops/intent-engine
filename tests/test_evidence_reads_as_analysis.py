@@ -2,6 +2,8 @@
 
 Every case here was read off the deployed product, not inferred from code.
 """
+import re
+
 import pytest
 
 from intent_engine.strategic_intelligence.observations import (
@@ -60,6 +62,40 @@ def test_every_signal_states_a_consequence(signal):
     assert signal in _SIGNAL_RELEVANCE, \
         f"{signal} has no stated consequence, so its bullet cannot say why " \
         f"it matters"
+
+
+@pytest.mark.parametrize("signal", sorted(_SIGNAL_RELEVANCE))
+def test_the_consequence_is_not_the_label_in_other_words(signal):
+    """Having a clause is not the same as the clause saying something.
+
+    Live on Airbnb: "Airbnb is committing capital to capacity ahead of the
+    demand for it, so capital is committed before the demand that would
+    justify it has arrived." The clause after "so" is the label with its words
+    reordered, which reads as analysis and carries none -- worse than stopping
+    at the observation, because it spends the reader's attention to say
+    nothing. Four of twenty-seven were paraphrases when this was written.
+
+    Measured as new content words: a real consequence introduces ideas the
+    observation did not contain ("margin follows headcount", "a stronger claim
+    than a logo wall"). A paraphrase reuses the same nouns.
+    """
+    label = dict(_SIGNAL_LABEL, **_NEUTRAL_LABEL).get(signal, "")
+    if not label:
+        pytest.skip(f"{signal} has no label to compare against")
+    stop = {"that", "than", "with", "this", "they", "them", "their", "have",
+            "which", "what", "when", "where", "from", "into", "onto", "over",
+            "does", "make", "makes", "made", "also", "still", "would",
+            "could", "other", "others", "same", "more", "most", "less"}
+
+    def content(text):
+        return {w for w in re.findall(r"[a-z]{4,}", text.lower())
+                if w not in stop}
+    fresh = content(_SIGNAL_RELEVANCE[signal]) - content(label)
+    assert len(fresh) >= 3, (
+        f"{signal}: the consequence restates the observation.\n"
+        f"  label:  {label}\n"
+        f"  clause: {_SIGNAL_RELEVANCE[signal]}\n"
+        f"  new content words: {sorted(fresh)}")
 
 
 def test_a_signal_with_no_consequence_stops_cleanly():

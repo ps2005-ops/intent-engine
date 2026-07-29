@@ -113,7 +113,10 @@ def test_every_way_out_is_offered(client):
     assert "Run a fresh analysis" in page
     assert "Add an official source" in page
     assert "Correct the company" in page
-    assert "Try a prepared company" in page
+    # "Try a prepared company ... validated end to end" described the product's
+    # own test coverage to a founder; the offer is the same, the words are now
+    # about what they would see.
+    assert "See a worked example" in page
 
 
 def test_missing_evidence_is_not_presented_as_a_claim_about_the_company(client):

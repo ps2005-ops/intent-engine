@@ -17,10 +17,11 @@ in an appendix that a founder would still open.
 from __future__ import annotations
 
 import html as _html
+import re
 
 from intent_engine.strategic_intelligence.editorial import (
     consolidate_limitations, deduplicate, is_meaningful, lower_first,
-    meaningful_items, shared_evidence, strip_machinery,
+    meaningful_items, reader_limitations, shared_evidence, strip_machinery,
 )
 
 _e = _html.escape
@@ -327,6 +328,12 @@ def render_strategic_report(report) -> str:
     # ------------------------------------------------------------------
     seen: set = set()
 
+    def _key(text: str) -> str:
+        return " ".join((text or "").lower().split()).rstrip(".?!")
+
+    def _first_key(text: str) -> str:
+        return _key(re.split(r"(?<=[.?!])\s", (text or "").strip(), 1)[0])
+
     def _claim_seen(text: str) -> bool:
         """Has the page already made this point, in any wording?
 
@@ -336,9 +343,7 @@ def render_strategic_report(report) -> str:
         are frequently the same question. Comparing the first sentence catches
         that without needing the two lists to agree upstream.
         """
-        first = re.split(r"(?<=[.?!])\s", (text or "").strip(), 1)[0]
-        key = " ".join(first.lower().split()).rstrip(".?!")
-        return bool(key) and key in seen
+        return bool(_first_key(text)) and _first_key(text) in seen
 
     def _once(text: str) -> str:
         """A sentence the page has already used is not said again.
@@ -347,11 +352,20 @@ def render_strategic_report(report) -> str:
         the hypothesis card, the vulnerability card and the agenda, because
         four fields held it. Deduplicating at the point of writing is what
         makes each section carry something the last one did not.
+
+        Keyed on the first sentence as well as the whole string, because a
+        trailing clause was enough to defeat a whole-string key. On a live
+        Airbnb report "What happened" and "Why that evidence matters" printed
+        the identical sentence, differing only by the " (Recorded 2026-07-29.)"
+        that the timeline appends. Whichever section writes it first keeps it,
+        and the sections are written in reading order, so the dated statement
+        of what happened wins over the undated restatement below it.
         """
-        key = " ".join((text or "").lower().split()).rstrip(".")
-        if not key or key in seen:
+        key, first = _key(text), _first_key(text)
+        if not key or key in seen or (first and first in seen):
             return ""
         seen.add(key)
+        seen.add(first)
         return text
 
     def _p(text, *, muted=False) -> str:
@@ -565,7 +579,7 @@ def render_strategic_report(report) -> str:
     # 6 ── REMAINING UNCERTAINTY ----------------------------------------
     uncertainty_items = list(consolidate_limitations(
         r.get("evidence_gaps", []),
-        [f.get("message") for f in r.get("quality_findings", [])]))
+        reader_limitations(r.get("quality_findings", []))))
     for q in meaningful_items(r.get("underexamined_questions", []),
                               key="question"):
         if not reads_as_taxonomy(q.get("question", "")):

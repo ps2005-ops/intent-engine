@@ -467,10 +467,12 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
 
     # the owner can open the real result, recomposed from stored documents.
     # The entry route now sends a run WITH a strategic report to the brief, so
-    # the evidence library lives one layer in — check the full analysis, which
-    # is where a reader looking for the source list actually goes.
+    # check the full analysis, which is where a reader looking for the source
+    # list actually goes. The list lives under "Sources" -- the legacy
+    # "Evidence Library" that used to prove this page had rendered was the
+    # claim-id dump, and it is gone.
     status, body = c.get(f"/runs/{run_id}/full")
-    assert status == "200 OK" and "Evidence Library" in body
+    assert status == "200 OK" and ">Sources<" in body
 
     # a different anonymous session (fresh cookie) cannot reach the run
     other = _start_demo(app2)
@@ -661,7 +663,9 @@ def test_blocked_source_does_not_fail_run_when_other_evidence_succeeds(
     retrieved = [d for d in app.ci.store.retrieved(run_id)
                  if d["retrieval_status"] == "OK"]
     assert retrieved
-    assert "Sources used" in body
+    # "Sources used" over the fetched list overclaimed — a page can be read and
+    # still not be usable evidence — so the heading now says what it lists.
+    assert "Pages read" in body
     for document in retrieved:
         assert document["final_url"] in body
 

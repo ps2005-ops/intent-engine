@@ -168,8 +168,8 @@ _SIGNAL_RELEVANCE = {
     "checkout_identity_rails": "so the durable advantage would sit in the "
                                "rails rather than the product above them",
     "agentic_commerce": "so the buyer it designs for may stop being a person",
-    "distribution_shift": "so where demand is captured is moving, and the "
-                          "channel it grew on may stop paying for itself",
+    "distribution_shift": "so the channel it grew on may stop paying for "
+                          "itself before the new one covers the gap",
     "enterprise_expansion": "so the roadmap now has two buyers to satisfy, "
                             "and they rarely want the same thing",
     "smb_simplicity": "so the promise that wins small customers is the one an "
@@ -207,16 +207,16 @@ _SIGNAL_RELEVANCE = {
                        "same time",
     "consolidation": "so a customer who leaves later has to rebuild more than "
                      "one workflow to do it",
-    "capacity_investment": "so capital is committed before the demand that "
-                           "would justify it has arrived",
+    "capacity_investment": "so the cost lands now while the payoff depends on "
+                           "demand that has not arrived yet",
     "customer_concentration": "so a small number of buyers can move the whole "
                               "revenue line",
     "segment_reporting": "so the parts can be valued separately, and a weak "
                          "one has nowhere to hide",
-    "disclosed_risk": "so the risks named are specific enough to check rather "
-                      "than boilerplate",
-    "content_and_channel": "so it controls both what is sold and how it "
-                           "reaches the people who buy it",
+    "disclosed_risk": "so these are the exposures management expects to be "
+                      "held to, and each one can be checked against outcomes",
+    "content_and_channel": "so it keeps the margin a distributor would take, "
+                           "and no one else sits between it and the buyer",
 }
 # generic marketing / navigation language that is weak strategic evidence
 _WEAK_PHRASES = (

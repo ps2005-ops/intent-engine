@@ -1306,6 +1306,28 @@ class WebApp:
             return self._strategic_run_page(session, run_id, result,
                                             share_form, feedback_form)
 
+        # A real run can retrieve pages, match no strategic signal, and so
+        # produce no report while the pipeline still reports success — the
+        # KNOWN LIMITATION named in `derive_observations`, which says outright
+        # that the fix belongs one level up. This is that level.
+        #
+        # What it fell through to was the legacy claim/evidence dump: an
+        # "Executive Overview" of field labels, internal claim ids printed
+        # beside each line ("[u.offering]", "[mv.company_language]"), and a
+        # "Strongest supported observation" that was a list of the five words
+        # the company's pages use most. Every route into it is a reader who
+        # asked for an analysis of a real company, so it is the likeliest
+        # first impression the product makes, not an edge case.
+        #
+        # The honest page already exists and answers the three questions this
+        # reader has — what was found, what was missing, what to do now.
+        if self._is_real_run(run_id):
+            return self._insufficient_evidence_page(
+                session, run_id, result,
+                reason="The pages that could be read describe what the "
+                       "company offers, but none carried the dated, checkable "
+                       "material a strategic reading has to rest on.")
+
         page = render_result_html(result)
         if result.get("overview"):
             page = page.replace("<main>",
@@ -1364,13 +1386,21 @@ class WebApp:
             return self._error_page(400, str(exc))
         return self._redirect(f"/runs/{run_id}")
 
-    def _insufficient_evidence_page(self, session, run_id, result):
+    def _insufficient_evidence_page(self, session, run_id, result, *,
+                                    reason=""):
         """The honest alternative to an empty report.
 
         A reader who gets this must be able to answer three questions without
         asking anyone: what DID it find, what was it missing, and what can I do
         now. The last one matters most — a dead end with no next step reads as
         a broken product, which is why every route out is offered explicitly.
+
+        `reason` replaces the readiness headline for callers whose situation
+        the readiness note does not describe. A run that passed the gate and
+        then matched no strategic signal is not short of evidence — it is
+        short of the KIND of evidence a reading rests on — and telling that
+        reader "some kinds of evidence are missing, and there are places left
+        to look" would be answering a question they did not ask.
         """
         csrf = session["csrf"] if session else ""
         readiness = result.get("readiness") or {}
@@ -1400,13 +1430,40 @@ class WebApp:
         set_aside = [d for d in fetched if not is_english(d)]
 
         def _links(docs):
-            return "".join(
-                f'<li><a href="{_e(d["final_url"])}" rel="nofollow noopener">'
-                f'{_e(d.get("title") or d["final_url"])}</a></li>'
-                for d in docs)
+            # Ten links all reading "Duolingo" identify nothing, and that is
+            # the normal case: a page's <title> is usually the site's name, so
+            # the list of what was read became ten identical words. The path is
+            # what tells a reader WHICH page — and for a filing whose title is
+            # its accession filename ("duol-20260603") it is the readable part.
+            from urllib.parse import urlsplit
+            rows = []
+            for d in docs:
+                url = d["final_url"]
+                bits = urlsplit(url)
+                where = (bits.netloc + bits.path).rstrip("/")
+                title = (d.get("title") or "").strip()
+                label = _e(title) if title else _e(where)
+                trail = (f' <span class="muted">{_e(where)}</span>'
+                         if title and title.lower() != where.lower() else "")
+                rows.append(f'<li><a href="{_e(url)}" rel="nofollow noopener">'
+                            f'{label}</a>{trail}</li>')
+            return "".join(rows)
 
         if used:
-            found += f'<h3>Sources used</h3><ul>{_links(used)}</ul>'
+            # "Sources used" over the full fetched list overclaimed: a page can
+            # be read and still not be usable evidence, which is exactly the
+            # gap between the two numbers this page shows.
+            found += f'<h3>Pages read</h3><ul>{_links(used)}</ul>'
+
+        # Two numbers that disagree read as a broken page. "6 usable source(s)"
+        # sat directly above a list of ten, because one counts evidence and the
+        # other counts fetches. Both are true and the reader needs both, so the
+        # sentence relates them rather than printing one and listing the other.
+        usable = note.get("source_count") or 0
+        read_line = f"{len(used)} page(s) read"
+        if usable and usable != len(used):
+            read_line += f"; {usable} carried usable evidence"
+        read_line += "."
         if set_aside:
             found += (f'<h3>Sources found but not used</h3>'
                       f'<p class="why">Not available in a language this '
@@ -1458,9 +1515,9 @@ class WebApp:
             ('/', 'get', 'Correct the company',
              'If this is the wrong entity — a subsidiary rather than the '
              'group, or a similarly named company — enter it again.'),
-            ('/', 'get', 'Try a prepared company',
-             'Palantir and Shopify are validated end to end and show the '
-             'full experience.'),
+            ('/', 'get', 'See a worked example',
+             'Palantir and Shopify publish enough in public to show what a '
+             'complete analysis looks like.'),
         ]
         action_html = "".join(
             (f'<form action="{_e(url)}" method="post" class="action">'
@@ -1487,12 +1544,11 @@ class WebApp:
             f'initial-scale=1"><title>{heading}</title></head><body>'
             f'{self._nav(session, csrf)}<main>'
             f'<h1>{heading}</h1>'
-            f'<p class="lead">{_e(note.get("headline", ""))} '
+            f'<p class="lead">{_e(reason or note.get("headline", ""))} '
             f'Rather than show a briefing that looks complete and is not, '
             f'here is exactly where it stands.</p>'
             f'<h2>What was found</h2>'
-            f'<p class="state">{note.get("source_count", 0)} usable '
-            f'source(s).</p>{found}'
+            f'<p class="state">{read_line}</p>{found}'
             f'<h2>What was missing</h2>{missing}{blockers}'
             f'{failed_html}'
             f'<h2>What you can do</h2>{action_html}'
@@ -1578,10 +1634,17 @@ class WebApp:
             f'<button type="submit">Ask</button></form>'
             f'<p class="muted">Suggested, company-specific:</p>{suggested}'
             f'{share_form}{feedback_form}</section>')
-        # legacy content quarantined; never in the primary executive flow
-        appendix = (
-            f'<details><summary>Technical appendix — legacy source extraction'
-            f'</summary>{self._legacy_sections_html(run_id, result)}</details>')
+        # There is no technical appendix. It was a <details> headed "Technical
+        # appendix — legacy source extraction" holding the claim/evidence dump:
+        # internal claim ids beside every line, and a vocabulary ("legacy
+        # source extraction") that describes the system's own build history to
+        # someone who came to read about a company. Quarantining it was not
+        # enough — a founder opens a collapsed section on a report they are
+        # about to rely on, and what they found there said "prototype".
+        #
+        # Nothing is lost that the reader had a use for: the Sources section
+        # lists every source with its link, which is the auditability the
+        # appendix was standing in for.
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Strategic Intelligence — '
@@ -1593,7 +1656,7 @@ class WebApp:
                 # page in the product, where getting out matters most.
                 f'<main>'
                 f'<div class="brief">{self._layer_nav(run_id, "full")}</div>'
-                f'{strat}{actions}{appendix}'
+                f'{strat}{actions}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
 

@@ -255,6 +255,78 @@ def merge_overlapping(hypotheses, *, statement_key="statement",
     return merged
 
 
+# A quality finding explains a DOWNGRADE to the system that applied it, so its
+# message is written in the machinery's own terms. All three layers printed
+# those messages straight at the reader, and a live Airbnb report closed with:
+#
+#   only 0 strategic hypotheses (need >= 3)
+#   empty key sections: strategic_hypotheses, comparable_patterns, blind_spots,
+#   leadership_questions, decision_implications
+#
+# — field names, an internal threshold, and a count of things the reader was
+# never told existed. Others name hypothesis ids ("hyp-a1b2 has no decision
+# implication"). This is the clearest "internal prototype" tell in the product.
+#
+# Every code is classified once, here: either it says something the reader can
+# act on, in their language, or it is telemetry and does not reach the page.
+# Unknown codes are dropped rather than printed raw — safe because
+# `test_every_quality_finding_code_is_classified` fails when quality.py grows a
+# code this table does not name, so nothing goes silently missing either.
+_READER_LIMITATION = {
+    "thesis_generic":
+        "The public evidence describes what the company does, but not enough "
+        "to support a reading of why it is doing it.",
+    "too_few_hypotheses":
+        "No competing explanation could be built from this evidence, so this "
+        "reading has not been tested against an alternative.",
+    "evidence_titles_only":
+        "Only page titles and marketing copy could be extracted — nothing "
+        "detailed enough to rest a reading on.",
+    "evidence_ids_only":
+        "Some evidence could not be shown as readable text.",
+    "no_temporal_coverage":
+        "Nothing retrieved carried a date, so nothing here can be called a "
+        "recent change.",
+    "single_source_class":
+        "Everything read is the company's own pages, so nothing here has been "
+        "checked against an outside account.",
+    "no_independent_source":
+        "Every source is published by the company itself. An independent, "
+        "customer or competitor source would be needed to corroborate it.",
+    "unsupported_internal":
+        "A claim could not be traced to a public source and was removed.",
+    # Telemetry. Each names the machinery (a field, an id, a threshold) and
+    # tells a reader nothing they could act on — and where the underlying gap
+    # does concern them, the page already says so by omitting the section.
+    "too_many_empty_sections": None,
+    "weak_hypothesis_coverage": None,
+    "no_reasoning": None,
+    "no_counter_or_gap": None,
+    "no_implication": None,
+    "no_falsification": None,
+    "question_no_why": None,
+    "question_no_decision": None,
+    "pattern_no_mechanism": None,
+    "generic_surprise": None,
+    "generic_opportunity": None,
+    "generic_hypothesis": None,
+}
+
+
+def reader_limitations(findings) -> list:
+    """The quality findings a reader can act on, in the reader's language.
+
+    Order follows the findings; duplicates collapse, because several codes can
+    map to the same honest sentence and a caveat said twice reads as two.
+    """
+    out: list = []
+    for finding in findings or ():
+        sentence = _READER_LIMITATION.get((finding or {}).get("code", ""))
+        if sentence and sentence not in out:
+            out.append(sentence)
+    return out
+
+
 def consolidate_limitations(*groups) -> list:
     """One limitations section, not the same caveat under six headings."""
     seen, out = [], []

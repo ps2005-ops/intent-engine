@@ -717,12 +717,12 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # 9. Evidence and limitations. Not a content slide — it never counts
     #    toward the minimum, or a deck could reach five on disclaimers alone.
     from intent_engine.strategic_intelligence.editorial import (
-        consolidate_limitations,
+        consolidate_limitations, reader_limitations,
     )
     limitation_bullets = [
         _bullet(x) for x in consolidate_limitations(
             r.get("evidence_gaps", []),
-            [f.get("message") for f in r.get("quality_findings", [])])]
+            reader_limitations(r.get("quality_findings", [])))]
     coverage = r.get("source_class_coverage", {}) or {}
     if coverage:
         limitation_bullets.insert(0, _bullet(

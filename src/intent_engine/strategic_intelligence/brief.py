@@ -32,7 +32,7 @@ from dataclasses import dataclass, field
 
 from intent_engine.strategic_intelligence.editorial import (
     addresses_the_system, consolidate_limitations, deduplicate, is_meaningful,
-    meaningful_items,
+    meaningful_items, reader_limitations,
 )
 
 BRIEF_VERSION = "si_brief.v1"
@@ -629,7 +629,7 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
 
     limitations = consolidate_limitations(
         r.get("evidence_gaps", []),
-        [f.get("message") for f in r.get("quality_findings", [])])
+        reader_limitations(r.get("quality_findings", [])))
     limitation = limitations[0] if limitations else ""
 
     brief = ExecutiveBrief(
