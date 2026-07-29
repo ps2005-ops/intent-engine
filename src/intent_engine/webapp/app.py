@@ -48,6 +48,30 @@ _e = _html.escape
 
 # The brief is the default landing surface, so its contrast is not a detail.
 # Every foreground/background pair here is at or above WCAG AA for its size.
+def central_view_after_headline(thesis: str, headline_view: str) -> str:
+    """What "The central view" should say once the headline has spoken.
+
+    OBSERVED LIVE on Sentry: the brief said "Sentry acquired Codecov." in the
+    headline block and then again, ten words below, under "The central view".
+    `headline.view` IS the thesis's first sentence -- see `_build_headline` --
+    so a single-sentence thesis was printed twice in a 250-500 word brief
+    whose stated design rule is that nothing gets a second slot.
+
+    The headline keeps the claim, because that is the block written for a
+    reader who will not scroll. This returns what the headline did NOT say,
+    which is "" when the thesis was only that one sentence -- and an empty
+    section renders as nothing at all.
+
+    A thesis that does not open with the headline is returned untouched: the
+    two are then saying different things, and both belong on the page.
+    """
+    thesis = " ".join((thesis or "").split())
+    lead = " ".join((headline_view or "").split())
+    if lead and thesis.startswith(lead):
+        return thesis[len(lead):].strip()
+    return thesis
+
+
 _BRIEF_CSS = """
 <style>
 .brief{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--bg:#ffffff;
@@ -1669,6 +1693,10 @@ class WebApp:
                     f'<p>{_e(value)}</p></section>') if is_meaningful(value) \
                 else ''
 
+        central = central_view_after_headline(
+            brief.thesis,
+            brief.headline.view if is_meaningful(brief.headline.does) else "")
+
         # A date earns its place only when it distinguishes one item from
         # another. Every line here carried the SAME retrieval date -- the day
         # the run happened -- which told the reader nothing and read as
@@ -1695,7 +1723,7 @@ class WebApp:
                f'<p class="hl-view">{_e(brief.headline.view)}</p>'
                f'<p class="hl-conf">{_e(brief.headline.confidence)}</p>'
                f'</section>' if is_meaningful(brief.headline.does) else '')
-            + _p("The central view", brief.thesis)
+            + _p("The central view", central)
             + (f'<section class="b-part"><h2>What supports it</h2>'
                f'<ul class="signals">{signals}</ul></section>'
                if signals else '')

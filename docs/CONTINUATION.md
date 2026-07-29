@@ -120,16 +120,39 @@ The whole fixture suite missed this because `_start_real` passes
 `company_name=Acme`, which no real form does. **Treat that helper as a liar:
 when checking first-visit behaviour, post what the form posts.**
 
+## Verified clean on `79e6746`
+
+Re-ran the three companies that leaked. All nine layer-views clean:
+
+| company | `/slides` | `/brief` | `/full` |
+|---|---|---|---|
+| Hugging Face | none | none | none |
+| Stripe | none | none | none |
+| CrowdStrike | none | none | none |
+
+Decks stayed substantial (3.0k–4.4k chars), so filtering did not collapse
+real companies onto the limited-analysis page — only the pure-scaffold case
+falls through, which is the intent.
+
 ## Next task — exact
 
-1. **`_brief_page` layout** (`app.py` ~1600) — the claim is shared and clean,
-   but the page is still field-shaped cards, not one reading column (Task 6).
-3. **`_run_page` layout** (`app.py` ~1180) — same: content is now clean, the
-   structure is still a schema dump (Task 5).
-4. **Landing examples** — unblocked. "Sentry acquired Codecov." is verified
-   live output; use it as a labelled *Example analysis* with the interpretation
-   and uncertainty beneath.
-5. **Five-company rendered batch incl. mobile** — still never done.
+1. **`_run_page` layout** (`app.py` ~1180) — content is now clean, the
+   structure is still a schema dump (Task 5). This is the biggest remaining
+   gap.
+2. **Landing examples** — unblocked. "Sentry acquired Codecov." is verified
+   live output; use it as a labelled *Example analysis* with the
+   interpretation and uncertainty beneath.
+3. **Mobile inspection at four widths with real screenshots** — the five
+   companies have been run and read, but never *looked at* on a phone.
+4. **Brief signal quality.** Visible on live Sentry and not yet fixed: the
+   "What supports it" bullets concatenate a page TITLE with a generic clause
+   ("API Authentication Bypass | Sentry Blog exposes a surface others can
+   build on"), and one bullet is raw homepage marketing copy ("Bugs aren't
+   great. But your code can be…"). Grammatically broken and not evidence.
+   Same defect shape in the deck's derived questions, which inherit those
+   titles ("Linear customers publishes named customers rather than logos
+   alone"). The generator is `observations.py` — `_SIGNAL_LABEL` and the
+   `f"{entity} {label}"` construction around line 589.
 
 ## One thing fixed on the way out
 

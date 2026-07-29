@@ -362,10 +362,50 @@ def test_the_brief_page_reads_as_a_brief(tmp_path):
     status, _, body = c.request("GET", f"/runs/{rid}/brief")
     assert status == "200 OK"
     assert "Executive brief" in body
-    assert "The central view" in body
     # short enough to be a brief: the visible prose, not the markup
     prose = re.sub(r"<[^>]+>", " ", body.split('<main class="brief">')[1])
     assert len(prose.split()) < 700, "the brief must not become the report"
+
+
+def test_the_brief_states_its_claim_once(tmp_path):
+    """OBSERVED LIVE on Sentry: the brief said "Sentry acquired Codecov." in
+    the headline block and again, ten words below, under "The central view".
+
+    `headline.view` IS the thesis's first sentence, so a one-sentence thesis
+    was printed twice in a 250-500 word brief whose stated design rule is that
+    nothing gets a second slot. This asserted the heading was PRESENT, which
+    was the duplication rather than a defence against it."""
+    app, c, rid = _webapp_run(tmp_path)
+    _, _, body = c.request("GET", f"/runs/{rid}/brief")
+    prose = re.sub(r"\s+", " ",
+                   re.sub(r"<[^>]+>", " ",
+                          body.split('<main class="brief">')[1]))
+    from intent_engine.strategic_intelligence.brief import build_brief
+    brief = build_brief(app._strategic_report_for(rid), as_of="2026-07-29")
+    claim = " ".join((brief.headline.view or "").split())
+    assert claim, "no central claim to check"
+    assert prose.count(claim) == 1, \
+        f"the brief states its central claim {prose.count(claim)} times"
+
+
+def test_the_central_view_survives_when_it_adds_something():
+    """Suppression is for the DUPLICATE only. A thesis carrying more than its
+    first sentence must still reach the reader -- dropping the whole section
+    whenever a headline exists would lose real content."""
+    from intent_engine.webapp.app import central_view_after_headline as after
+
+    lead = "Sentry acquired Codecov."
+    # nothing beyond the headline -> the section disappears
+    assert after(lead, lead) == ""
+    assert after("  Sentry acquired   Codecov. ", lead) == ""
+    # a real second sentence survives, without its duplicated opener
+    assert after(f"{lead} The buyer was the smaller of the two.", lead) == \
+        "The buyer was the smaller of the two."
+    # a thesis that does NOT open with the headline is left alone
+    assert after("Something else entirely.", lead) == \
+        "Something else entirely."
+    # no headline shown -> the thesis is the only place the claim appears
+    assert after(lead, "") == lead
 
 
 def test_all_three_layers_are_reachable_from_each_other(tmp_path):
