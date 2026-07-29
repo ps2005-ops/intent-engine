@@ -204,3 +204,117 @@ def test_the_layers_are_not_verbatim_duplicates(deck):
     full_text = re.sub(r"<[^>]+>", " ", _full_html())
     assert len(full_text) > len(deck_text), \
         "the full analysis carries no more detail than the deck"
+
+
+# --- the OTHER deck: real evidence, no concrete development ------------------
+#
+# Everything above exercises the founder deck, which only takes over when a
+# concrete fact earns it. Sentry had one ("Sentry Acquires Codecov"), so these
+# tests never reached `build_report_slides` -- the fallback deck for a company
+# with real evidence and nothing concrete to lead with.
+#
+# That fallback was measured on production across five companies at f1d350c.
+# Every company that produced a deck leaked into it:
+#
+#   Hugging Face   system of record, broadening from a focused tool,
+#                  strategic signal
+#   Stripe         the same three
+#   CrowdStrike    two of the three
+#   GitLab, Nvidia limited-evidence page, nothing to leak into
+#
+# The brief and the full analysis were clean for all five. The fallback deck
+# was simply never filtered.
+
+def _scaffold_report(company="Huggingface"):
+    """A report whose every interpretive field is the pattern library talking:
+    the thesis, the hypothesis, the blind spot, the vulnerability, the
+    opportunity and the leadership question all come from one scaffold."""
+    from intent_engine.strategic_intelligence.patterns import (
+        HYPOTHESIS_SCAFFOLDS,
+    )
+    scaffold = HYPOTHESIS_SCAFFOLDS["tool_to_system_of_record"]
+    statement = scaffold["statement"].format(company=company)
+    return {
+        "company_name": company,
+        "thesis": {"view": f"{company} appears to be {scaffold['title']}.",
+                   "transition": statement,
+                   "why_care": "Whether to keep investing in depth or in "
+                               "adjacency."},
+        "hypotheses": [{"title": scaffold["title"], "statement": statement,
+                        "reasoning": "The signals match the "
+                                     "tool-to-system-of-record mechanism.",
+                        "confidence": "low",
+                        "strongest_support_ids": ["obs-1"]}],
+        "observations": [{"observation_id": "obs-1",
+                          "excerpt": "We are helping the community work "
+                                     "together.",
+                          "source_class": "company_owned",
+                          "date": "2026-07-01"}],
+        "blind_spots": [{"observed_tension": statement}],
+        "vulnerabilities": [{"exposed_layer": "the system of record",
+                             "mechanism": "broadening from a focused tool"}],
+        "opportunities": [{"statement": "A move toward being the system of "
+                                        "record."}],
+        "questions": [{"question": "How far toward a system of record do we "
+                                   "go?"}],
+        "surprises": [], "shifts": [], "timeline": [],
+        "evidence_gaps": ["all evidence is company-published"],
+        "quality_findings": [],
+        "source_class_coverage": {"company_owned": 5},
+    }
+
+
+def _fallback_deck():
+    return build_slides(_scaffold_report(), as_of="2026-07-29",
+                        analysis_version="v1", documents=[])
+
+
+@pytest.mark.parametrize("phrase", TAXONOMY)
+def test_the_fallback_deck_carries_no_taxonomy(phrase):
+    import json
+    assert phrase.lower() not in json.dumps(_fallback_deck()).lower(), phrase
+
+
+def test_a_deck_with_nothing_concrete_is_not_presentable():
+    """The point of dropping those bullets is NOT to ship a shorter deck of
+    the same generic claims -- it is to stop presenting one at all. With the
+    library's sentences removed there is not enough left to present, so the
+    reader is sent to the limited-analysis page that says what was and was
+    not found. A padded deck would be the failure this whole programme is
+    about."""
+    assert deck_is_presentable(_fallback_deck()) is False
+
+
+def test_the_fallback_deck_still_keeps_what_is_real():
+    """Dropped, not sanitised: the company's own words and the genuine
+    decision survive -- only the library's sentences go."""
+    deck = _fallback_deck()
+    text = " ".join(b["text"] for s in deck for b in s["bullets"])
+    assert "helping the community work together" in text
+    assert "depth or in adjacency" in text
+
+
+def test_a_dropped_library_question_is_replaced_by_a_checkable_one():
+    """Linear's ONLY leadership question was "Customers describing it as a
+    companion to a system of record rather than the record itself" -- the
+    pattern's own falsification question. Filtering it left a reader preparing
+    for a meeting with nothing to investigate, and the persona harness caught
+    it. It had been PASSING on that sentence, so the answer was never really
+    there.
+
+    The replacement is drawn from the run's own dated findings, so it names
+    something actually retrieved -- not the library's question reworded, and
+    not the limitations list promoted to look like an action."""
+    report = _scaffold_report()
+    report["shifts"] = [{"title": "Northstar pricing publishes its prices",
+                         "date": "2026-07-01", "observation_id": "obs-1"}]
+    deck = build_slides(report, as_of="2026-07-29", analysis_version="v1",
+                        documents=[])
+    questions = [s for s in deck if s["id"] == "questions"]
+    assert questions, "nothing left for a reader to investigate"
+    text = questions[0]["bullets"][0]["text"]
+    assert "Northstar pricing publishes its prices" in text
+    assert "system of record" not in text.lower()
+    # the company name keeps its capital -- an earlier version lowercased the
+    # whole sentence and shipped "northstar pricing publishes its prices"
+    assert "northstar" not in text

@@ -559,6 +559,27 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     if adapted:
         return build_founder_slides(adapted, company=company)
 
+    # The deck below is the fallback for a company with real evidence but no
+    # concrete development to lead with. It was the LAST founder-facing surface
+    # still printing the pattern library verbatim.
+    #
+    # Measured on production across five companies: every one that produced a
+    # deck at all leaked here -- Hugging Face and Stripe carried "system of
+    # record", "broadening from a focused tool" and "strategic signal";
+    # CrowdStrike two of the three. The brief and the full analysis were clean
+    # for all five, because those were filtered and this was not. Three of
+    # three analysable companies is the norm, not an edge case.
+    #
+    # Same discipline as everywhere else: filter where the visible item is
+    # chosen. A rejected bullet is DROPPED, never reworded -- and `_slide`
+    # returns None once nothing is left, so an empty slide removes itself
+    # rather than standing there as a heading over silence.
+    from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
+
+    def _concrete(text):
+        text = (text or "").strip()
+        return text if text and not reads_as_taxonomy(text) else ""
+
     thesis = r.get("thesis") or {}
     slides = []
 
@@ -575,13 +596,18 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
                          identity_bullets[:3],
                          note="From the company's own public pages."))
 
-    # 2. Central strategic view
+    # 2. Central strategic view. `thesis["view"]` and `thesis["transition"]`
+    #    are the pattern library's own sentences with the company name
+    #    substituted in -- the exact source removed from the full analysis's
+    #    _central_claim. "Huggingface appears to be absorbing adjacent tools
+    #    until the work lives inside it" is a slide a reader cannot check, and
+    #    it reads identically for Notion, Linear or Atlassian.
     view_bullets = []
-    if is_meaningful(thesis.get("view")):
+    if _concrete(thesis.get("view")):
         view_bullets.append(_bullet(thesis["view"]))
-    if is_meaningful(thesis.get("transition")):
+    if _concrete(thesis.get("transition")):
         view_bullets.append(_bullet(thesis["transition"]))
-    if is_meaningful(thesis.get("why_care")):
+    if _concrete(thesis.get("why_care")):
         view_bullets.append(_bullet(f"Why it matters: {thesis['why_care']}"))
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
@@ -619,42 +645,81 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     #    with strong evidence but no hypotheses is common and should not lose
     #    a slide it can genuinely fill.
     from intent_engine.company_ingestion.coverage import INVESTOR, STRATEGY
+    # A hypothesis "title" IS a pattern name -- the library's label for the
+    # shape, not a finding about this company. Dropped rather than reworded;
+    # the surprises and the published investor material below are real.
     signal_bullets = [
         _bullet(h.get("title", "") or h.get("statement", ""),
                 evidence=h.get("strongest_support_ids", []))
-        for h in meaningful_items(r.get("hypotheses", []), key="title")]
+        for h in meaningful_items(r.get("hypotheses", []), key="title")
+        if _concrete(h.get("title", "") or h.get("statement", ""))]
     signal_bullets += [
         _bullet(s.get("finding", ""))
-        for s in meaningful_items(r.get("surprises", []), key="finding")]
+        for s in meaningful_items(r.get("surprises", []), key="finding")
+        if _concrete(s.get("finding", ""))]
     if not signal_bullets:
         signal_bullets = _document_bullets(documents, {INVESTOR, STRATEGY})
-    slides.append(_slide("signals", "Key strategic signals", signal_bullets))
+    # "Key strategic signals" is analyst vocabulary for a reader who never
+    # asked for a signal. What they are looking at is published evidence.
+    slides.append(_slide("signals", "What the company has published",
+                         signal_bullets))
 
-    # 6. Main tension or risk
+    # 6. Main tension or risk. A blind spot's "observed tension" is often the
+    #    scaffold statement again, and a vulnerability's exposed layer and
+    #    mechanism are the library's own vocabulary for the shape.
     tension_bullets = [
         _bullet(b.get("observed_tension", ""))
         for b in meaningful_items(r.get("blind_spots", []),
-                                  key="observed_tension")]
+                                  key="observed_tension")
+        if _concrete(b.get("observed_tension", ""))]
     tension_bullets += [
-        _bullet(f"Exposed: {v.get('exposed_layer', '')} — "
-                f"{v.get('mechanism', '')}")
-        for v in meaningful_items(r.get("vulnerabilities", []),
-                                  key="exposed_layer")]
+        _bullet(line) for line in (
+            f"Exposed: {v.get('exposed_layer', '')} — {v.get('mechanism', '')}"
+            for v in meaningful_items(r.get("vulnerabilities", []),
+                                      key="exposed_layer"))
+        if _concrete(line)]
     slides.append(_slide("tension", "The main tension", tension_bullets))
 
     # 7. Opportunity to investigate
     opportunity_bullets = [
         _bullet(o.get("statement", ""))
         for o in meaningful_items(r.get("opportunities", []),
-                                  key="statement")]
+                                  key="statement")
+        if _concrete(o.get("statement", ""))]
     slides.append(_slide("opportunity", "An opportunity worth investigating",
                          opportunity_bullets,
                          note="A question to test, not a recommendation."))
 
-    # 8. Questions for leadership
+    # 8. Questions for leadership. The same filter the brief and the full
+    #    analysis apply: "How far toward a system of record do we go?" is the
+    #    library asking its own falsification question in a founder's voice.
     question_bullets = [
         _bullet(q.get("question", ""))
-        for q in meaningful_items(r.get("questions", []), key="question")]
+        for q in meaningful_items(r.get("questions", []), key="question")
+        if _concrete(q.get("question", ""))]
+    if not question_bullets:
+        # Linear's ONLY leadership question was "Customers describing it as a
+        # companion to a system of record rather than the record itself" --
+        # the pattern's own falsification question. Filtering it left a reader
+        # preparing for a meeting with nothing to investigate, and the persona
+        # harness said so. It had been passing on that sentence, which means
+        # the answer was never really there.
+        #
+        # The honest replacement is not the library's question reworded, and
+        # it is not the limitations list moved up a slide -- that is a
+        # disclaimer wearing an action's clothes, and the evidence slide
+        # already carries it. It is the run's OWN dated findings, turned back
+        # into the thing a founder would go and check. Every one of these
+        # names something actually retrieved from this company.
+        # Not _lower_first here: these titles OPEN with the company name, and
+        # lowercasing turned "Linear pricing publishes its prices" into
+        # "linear pricing publishes its prices" in the reader's own deck.
+        question_bullets = [
+            _bullet(f"Confirm with an independent or customer source: "
+                    f"{title.rstrip('.')}.")
+            for title in (s.get("title", "") for s in
+                          meaningful_items(r.get("shifts", []), key="title"))
+            if _concrete(title)][:2]
     slides.append(_slide("questions", "Questions for leadership",
                          question_bullets))
 

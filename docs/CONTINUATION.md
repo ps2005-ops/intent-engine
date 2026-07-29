@@ -58,7 +58,46 @@ Sentry re-run on production, run `01KYNVZG815XHR6DV9NEGTNDYR`:
 | `/full` | **none** | "Sentry acquired Codecov." |
 
 All five phrases absent from all three layers, and the full analysis now
-opens on the same claim as the deck. That closes the three-layer programme.
+opens on the same claim as the deck.
+
+**That was true for Sentry and not in general.** Sentry has a concrete fact
+("acquired Codecov"), so its deck is built by the founder path. Running four
+more companies showed the OTHER deck — the fallback for a company with real
+evidence and nothing concrete — was never filtered at all.
+
+## The fallback deck — measured on five companies at `f1d350c`
+
+| company | `/slides` | `/brief` | `/full` |
+|---|---|---|---|
+| GitLab | none *(limited-evidence page)* | none | none |
+| Hugging Face | **3 leaks** | none | none |
+| Stripe | **3 leaks** | none | none |
+| CrowdStrike | **2 leaks** | none | none |
+| Nvidia | none *(limited-evidence page)* | none | none |
+
+Three of three companies that produced a deck leaked; brief and full were
+clean for all five. `build_report_slides` printed `thesis["view"]` and
+`thesis["transition"]` — the same scaffold removed from `_central_claim` —
+plus hypothesis titles, blind-spot tensions, vulnerability mechanisms,
+opportunity statements and leadership questions, under a heading reading
+"Key strategic signals".
+
+Now filtered at all seven selection points, and the heading is "What the
+company has published".
+
+The persona harness then caught real over-reach, which is what it is for:
+Linear's ONLY leadership question was the pattern's own falsification question
+("Customers describing it as a companion to a system of record…"), so
+filtering it left a meeting-prep reader with nothing to investigate. **The
+harness had been passing on that sentence** — the answer was never really
+there. When no question survives, the deck now derives one from the run's own
+dated findings ("Confirm with an independent or customer source: Linear
+pricing publishes its prices."), which names something actually retrieved.
+Not the library's question reworded, and not the limitations list promoted to
+look like an action. Critically, once the library's sentences are gone a
+pure-scaffold company falls BELOW `MIN_MEANINGFUL_SLIDES` and gets the
+limited-analysis page instead — which is the point. A shorter deck of the same
+generic claims would have been the failure, not the fix.
 
 ## Found by that inspection — the company had no name
 
