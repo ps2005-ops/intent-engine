@@ -800,8 +800,10 @@ def render_deck(slides, *, company="", as_of="", analysis_version="",
             + (f'<a href="{_e(full_analysis_url)}">View full analysis</a>'
                if full_analysis_url else '')
             + f'</div>'
-            f'<p class="meta">{_e(company)} · analysed {_e(as_of)} · '
-            f'analysis version {_e(analysis_version)}</p>'
+            # The build version was printed under every slide. It answers a
+            # question no reader has, and reads as an internal artefact on a
+            # page meant to be shown in a meeting.
+            f'<p class="meta">{_e(company)} · {_e(as_of)}</p>'
             f'</section>')
     # A visually-hidden <h1>. The deck had no top-level heading at all: each
     # slide is an <h2>, so a screen-reader user met a page whose outline began

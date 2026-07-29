@@ -6,93 +6,95 @@ Written at a context handoff. Everything below is verified, not assumed.
 
 | | |
 |---|---|
-| **Deployed SHA** | `94f4e18` — verified via `/version` |
-| **main SHA** | `94f4e18` (+ this doc) |
-| **PR** | none open; `main` auto-deploys |
+| **Deployed SHA** | `62661cd` — verified. A newer commit is pushed and awaiting deploy |
+| **main SHA** | see `git log -1` (slide build-version removal + this doc) |
 | **Working tree** | clean |
-| **`/readyz`** | `status: degraded` — honest about non-durable storage |
+| **`/readyz`** | `status: degraded` — non-durable storage, honestly reported |
 | **strategic_reasoning** | `false` — `ANTHROPIC_API_KEY` unset (owner) |
-| **Smoke token** | not configured — engineering traffic still spends public quota |
 
-## Verified live this round
+## Shipped this round
 
-**Figma, the case that was broken.** `/progress → 303 /slides`
-(presentation-first), heading reads **"Limited analysis of Figma"**, 4 usable
-sources with the German pages set aside, and the reason is specific rather
-than blaming the company: *"Some kinds of evidence are missing, and there are
-places left to look."*
+**One founder-facing product.** Which presentation a visitor saw used to
+depend on whether an API key was configured. Grounded runs rendered the founder
+deck; every other run — which in production is every run — rendered a deck
+opening with `"{company} in one minute"` and closing on `"Key strategic
+signals"`.
 
-**Persistence diagnosed precisely.** `render.yaml` declares a persistent disk
-at `/var/data` and sets `RUNTIME_ROOT` to it. The running service reports
-`runtime_root: "data"`, `durability: EPHEMERAL_LIKELY` — writing inside the
-container, erased on every deploy. **The blueprint is correct and is not what
-the live service runs.**
+`founder_view_from_report()` (`slides.py`) adapts a deterministic report into
+the same contract the grounded path fills; `build_slides` routes both through
+one renderer. The deterministic path deliberately fills fewer fields — it
+cannot honestly reconstruct a business model or predict a competitor — so those
+screens are omitted rather than padded.
 
-Two halves were ours and are now fixed and deployed:
+**Verified live on Sentry** (fresh company), presentation-first, 6 screens:
 
-- `/readyz` reports `status: degraded` in production when storage is not
-  durable, with `degraded_reason` naming the fix. **Verified live.** Still
-  HTTP 200 — the demo works, it just forgets. Test-mode and genuinely durable
-  services are unaffected, so it does not cry wolf.
-- `/analyses` no longer promises history it cannot keep: it says the analyses
-  are kept only until the next restart.
+> **The insight** — "Sentry appears to be broadening from a focused tool toward
+> being the place a team's work is stored, which raises switching cost and
+> blunts the original product's sharpness."
+> Then: Why this matters now · The decision · Why this could be wrong ·
+> What to watch · How far to trust this
 
-**Durability is tested at the layer this repo controls:** create an analysis,
-destroy and rebuild the application over the same files, and the run, the
-history and deterministic reuse are all still there — no duplicated completion
-events, no cross-visitor access. Those pass, which locates the defect exactly:
-**the code persists correctly; the deployed service is not pointed at the
-disk.**
+**Three things the rebuild taught, each fixed:**
+- the tension had no screen after the five-questions rebuild — restored
+- confidence vanished; the persona eval caught it (17 cases, "unanswered: how
+  confident to be") — the closing screen now says how far to trust the reading
+- the eval harness mapped questions to the OLD slide ids, so it scored a
+  product that had been replaced rather than one that regressed — it now
+  accepts both vocabularies, because thin reports still fall back to the
+  legacy deck
+
+**Source states corrected.** "Sources that were read" listed pages that were
+fetched but unreadable. Now "Sources used" and "Sources found but not used"
+with the reason in plain words.
+
+## The honest weakness — read this first
+
+The renderer is now good. **The deterministic content is still scaffold
+prose.** From the live Sentry run:
+
+> "broadening from a focused tool toward being the place a team's work is
+> stored" — the `tool_to_system_of_record` scaffold
+> "The trade-off: how much to invest ahead of the transition" — generic
+
+This is the same genericity problem earlier programmes fixed for the grounded
+path. The presentation layer now shows it clearly instead of burying it. **The
+next real quality step is either grounded reasoning (owner: API key) or making
+the deterministic path lead with company-specific evidence rather than pattern
+titles.**
 
 ## Next task, in order
 
-1. **Task 6/7 — presentation renderer.** The deterministic path still renders
-   the old deck. `build_founder_slides` (`slides.py`) only fires when a
-   grounded analysis exists; `build_slides` falls through to the legacy deck
-   otherwise. Make one founder-facing presentation contract that both paths
-   populate — start at `build_slides` in
-   `src/intent_engine/strategic_intelligence/slides.py`.
-2. **Task 8 — executive brief.** `_brief_page`, ~`app.py:1600`. Still
-   field-by-field.
-3. **Task 9 — full analysis.** `_run_page`, ~`app.py:1180`. Still schema-shaped.
-4. **Task 10 — landing examples** still Palantir and Shopify
+1. **Deploy and verify** the pending commit; re-run Sentry.
+2. **Task 7 — executive brief.** `_brief_page`, ~`app.py:1600`, still
+   field-by-field. Should read as one argument.
+3. **Task 8 — full analysis.** `_run_page`, ~`app.py:1180`, still schema-shaped.
+4. **Task 11 — landing examples** still Palantir/Shopify
    (`GOLDEN_COMPANIES`, `demo_tiers.py`).
-5. **Task 12 — full five-company rendered batch.** Never completed end to end;
-   quota cuts it short every time.
-
-## Known unfixed defects
-
-- The "Sources that were read" list on a limited result still shows the
-  unreadable German pages without marking them as set aside. They are excluded
-  from the counts correctly; the list does not say so.
-- Runs still vanish on redeploy in production until the disk is attached.
-
-## Live testing constraints
-
-- Runs do not survive a redeploy (see above), so inspect a run in the session
-  that created it, before the next deploy.
-- Public demo quota is ~10 analyses/hour/IP and engineering traffic shares it.
+5. **Task 13 — five-company rendered batch**, incl. mobile. Never completed.
+6. Deterministic content quality (see above).
 
 ## Companies used — rotate away
 
 Vercel, Datadog, Ramp, Linear, Cloudflare, Anthropic, Retool, Wiz, Snowflake,
-Arm, Figma. Excluded: Chipotle/restaurants, Sony, Palantir, Shopify,
+Arm, Figma, Sentry. Excluded: Chipotle/restaurants, Sony, Palantir, Shopify,
 Microsoft, Nintendo.
 
-## Owner actions (exact)
+## Constraints
 
-1. **Attach the persistent disk** to `intent-engine-oatc` and set
-   `RUNTIME_ROOT=/var/data`. `render.yaml` already declares both; the running
-   service is not using them. Until then `/readyz` will keep reporting
-   `degraded` and analyses will be lost on every deploy.
-2. `FOUNDER_INTELLIGENCE_SMOKE_TEST_TOKEN` (`openssl rand -hex 32`,
-   `sync: false`) — unblocks repeated live validation.
-3. `ANTHROPIC_API_KEY` — activates grounded reasoning.
+- Runs do not survive a redeploy (ephemeral storage) — inspect a run in the
+  session that created it, before the next deploy.
+- Public demo quota ~10 analyses/hour/IP, shared with engineering traffic.
+
+## Owner actions (unchanged)
+
+1. Attach the Render persistent disk and set `RUNTIME_ROOT=/var/data`
+   (`render.yaml` already declares both; the service is not using them).
+2. `FOUNDER_INTELLIGENCE_SMOKE_TEST_TOKEN` (`openssl rand -hex 32`).
+3. `ANTHROPIC_API_KEY`.
 
 ## Notes
 
-- Run the suite with the venv on PATH or the pre-commit guard fails:
+- Suite needs the venv on PATH or the pre-commit guard fails:
   `PATH="/Users/prathamsharma/intent-engine/.venv/bin:$PATH" git commit`
-- Real-network local reproduction (how the repeated-analysis and Figma defects
-  were found; fixture transports hide both): build `AppConfig` with
-  `autorun_sources=True` and pass **no** `transport` to `WebApp`.
+- Real-network local reproduction: `AppConfig(autorun_sources=True)` and pass
+  **no** `transport` to `WebApp`.

@@ -315,11 +315,16 @@ def test_every_slide_offers_ask_about_this_slide():
     assert html.count("Ask about this slide") == total
 
 
-def test_every_slide_shows_the_analysis_date_and_version():
-    html = _deck_html()
-    total = len(build_slides(_rich_report()))
-    assert html.count("analysed 2026-07-27") == total
-    assert html.count("analysis version 1.5.0") == total
+def test_every_slide_is_dated_but_carries_no_build_version():
+    """The date tells a reader how current the reading is. The build version
+    answers a question no reader has, and was printed under every screen of a
+    deck meant to be shown in a meeting."""
+    html = render_deck(build_slides(_rich_report()), company="Acme",
+                       as_of="2026-07-29",
+                       analysis_version="9.9.9-internal-build")
+    assert "2026-07-29" in html
+    assert "9.9.9-internal-build" not in html
+    assert "analysis version" not in html.lower()
 
 
 def test_the_deck_links_to_the_full_analysis():

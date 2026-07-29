@@ -96,3 +96,13 @@ def test_why_now_is_stated_in_plain_words():
 def test_a_report_with_nothing_to_say_produces_no_founder_deck():
     empty = founder_view_from_report({"thesis": {}, "hypotheses": []})
     assert empty == {}
+
+
+def test_no_build_version_is_printed_under_every_slide():
+    """Seen live: "analysis version 1.5.0-executive-intelligence" repeated on
+    every screen of a deck meant to be shown in a meeting."""
+    from intent_engine.strategic_intelligence.slides import render_deck
+    html = render_deck(_deck(), company="Examplecorp", as_of="2026-07-29",
+                       analysis_version="9.9.9-internal-build")
+    assert "9.9.9-internal-build" not in html
+    assert "analysis version" not in html.lower()
