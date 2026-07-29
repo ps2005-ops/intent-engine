@@ -134,7 +134,58 @@ def _obs_ev(o, kind):
             f'<div class="meta">{meta}</div></div>')
 
 
+from intent_engine.strategic_intelligence.concrete import (
+    reads_as_taxonomy,
+)
+
+
+def _central_claim(r, thesis) -> str:
+    """The same claim the presentation and the brief open with.
+
+    This page used to select its own from thesis["view"], so one company got
+    three different theses and this one was the scaffold. One analysis, one
+    central claim.
+    """
+    from intent_engine.strategic_intelligence.concrete import (
+        select_founder_claim_anchor,
+    )
+    anchor = select_founder_claim_anchor(r.get("observations") or [],
+                                         company=r.get("company_name", ""))
+    if anchor:
+        return anchor["fact"]
+    view = thesis.get("view", "") or ""
+    return "" if reads_as_taxonomy(view) else view
+
+
+def _reasoning_block(h) -> str:
+    """The hypothesis's own reasoning, unless it is ontology.
+
+    "Explicit consolidation language plus several product surfaces and a
+    build-on surface match the tool-to-system-of-record mechanism" describes
+    the pattern library matching itself. A reader cannot check it against the
+    company, because none of it came from the company.
+    """
+    text = h.get("reasoning", "") or ""
+    if not text or reads_as_taxonomy(text):
+        return ""
+    return f'<p><strong>Reasoning.</strong> {_e(text)}</p>'
+
+
 def _pattern_block(pat):
+    """The comparable-pattern chip, or nothing.
+
+    It printed the pattern-library entry's own NAME to the reader -- "Point
+    tool -> system of record" -- followed by the library's generic mechanism
+    text. That is the internal taxonomy, not a finding about this company, and
+    it is where "system of record" reached the full analysis on production.
+    The historical examples survive only when the entry is not itself named in
+    ontology vocabulary.
+    """
+    if not pat:
+        return ""
+    if reads_as_taxonomy(pat.get("name", "")) or reads_as_taxonomy(
+            pat.get("mechanism", "")):
+        return ""
     ex = "".join(f'<li>{_e(e.get("name",""))} — {_e(e.get("note",""))} '
                  f'<span class="prov">{_e(e.get("source",""))}</span></li>'
                  for e in pat.get("historical_examples", []))
@@ -198,7 +249,7 @@ def _hypothesis_card(h, obs_by_id, pat_by_id):
         f'<div class="chip"><b>Strongest counterpoint</b>{strongest_con}</div></div>'
         f'<p class="muted">▸ Expand for full reasoning, comparison, and all evidence.</p>'
         f'</summary>'
-        f'<div><p><strong>Reasoning.</strong> {_e(h.get("reasoning",""))}</p>'
+        f'<div>{_reasoning_block(h)}'
         f'<h4>Alternative explanations</h4><ul>{alts}</ul>'
         f'<h4>Comparison</h4>{_pattern_block(pat) if pat else ""}'
         f'<h4>Confidence: {_e(conf)}</h4><ul>{reasons}</ul>'
@@ -231,7 +282,12 @@ def render_strategic_report(report) -> str:
     top_opp = (r.get("opportunities") or [{}])[0].get("statement", "")
     top_vuln = (r.get("vulnerabilities") or [{}])[0].get("exposed_layer", "")
     top_agenda = (r.get("agenda") or [{}])[0]
+    # Last of the selection points that let the pattern title reach a reader:
+    # the summary "Likely current discussion" line, separate from the agenda
+    # cards below it.
     agenda_line = top_agenda.get("inferred_discussion", "")
+    if reads_as_taxonomy(agenda_line):
+        agenda_line = ""
     if agenda_line and top_agenda.get("meeting_relevance"):
         agenda_line = (f'{agenda_line} <span class="badge">'
                        f'{_e(top_agenda["meeting_relevance"])}</span>')
@@ -258,7 +314,7 @@ def render_strategic_report(report) -> str:
            if is_meaningful(freshness) else '')
         + f'{coverage_badges}</div>'
         f'<h1>{_e(r.get("company_name",""))} — Strategic Intelligence</h1>'
-        f'<p class="thesis">{_e(thesis.get("view",""))}</p>'
+        f'<p class="thesis">{_e(_central_claim(r, thesis))}</p>'
         + (f'<div class="kv">{kv_rows}</div>' if kv_rows else '')
         # Jump links only to sections that exist. Suppressing an empty section
         # while keeping its link would leave a control that silently does
@@ -285,12 +341,17 @@ def render_strategic_report(report) -> str:
     # executive summary (caps of 3)
     def _cap(items, n=3):
         return items[:n]
+    # The executive summary lists hypothesis TITLES, which are pattern names.
+    # Filtered at this selection point like every other founder-facing list;
+    # a chip left with nothing in it is dropped by the code just below.
     top_h = "".join(
         f'<li><strong>{_e(h["title"])}</strong> '
         f'<span class="conf conf-{_e(h["confidence"])}">{_e(h["confidence"])}</span></li>'
-        for h in _cap(hyps))
-    top_agenda = "".join(f'<li>{_e(a["inferred_discussion"])}</li>'
-                         for a in _cap(r.get("agenda", [])))
+        for h in _cap(hyps) if not reads_as_taxonomy(h.get("title", "")))
+    top_agenda = "".join(
+        f'<li>{_e(a["inferred_discussion"])}</li>'
+        for a in _cap(r.get("agenda", []))
+        if not reads_as_taxonomy(a.get("inferred_discussion", "")))
     top_dec = "".join(f'<li>{_e(d["decision"])}</li>'
                       for d in _cap(r.get("decision_implications", [])))
     # The summary preview shows the same caveats the limitations section
@@ -320,6 +381,17 @@ def render_strategic_report(report) -> str:
     repeated = shared_evidence([h.get("strongest_support_ids", [])
                                 for h in hyps])
     ubiquitous = {e for e, n in repeated.items() if n >= max(2, len(hyps))}
+    # A hypothesis whose title AND statement are both ontology has nothing to
+    # show a founder. "absorbing adjacent tools until the work lives inside
+    # it" / "broadening from a focused tool toward being the place a team's
+    # work is stored" was the last place that language reached production.
+    #
+    # The card is dropped rather than reworded: there is no company-specific
+    # sentence underneath it to promote, and the evidence it rests on is
+    # already shown under Evidence.
+    hyps = [h for h in hyps
+            if not (reads_as_taxonomy(h.get("title", ""))
+                    and reads_as_taxonomy(h.get("statement", "")))]
     hyp_html = ""
     for position, hypothesis in enumerate(hyps):
         card = dict(hypothesis)
@@ -338,7 +410,8 @@ def render_strategic_report(report) -> str:
 
     # current agenda
     agenda_cards = ""
-    for a in r.get("agenda", []):
+    for a in [a for a in r.get("agenda", [])
+              if not reads_as_taxonomy(a.get("inferred_discussion", ""))]:
         sig = "".join(f"<li>{_e(s)}</li>" for s in a.get("public_signals", []))
         against = "".join(f"<li>{_e(s)}</li>" for s in a.get("evidence_against", []))
         agenda_cards += (
@@ -350,8 +423,15 @@ def render_strategic_report(report) -> str:
             f'<p><strong>Affected functions:</strong> '
             f'{_e(", ".join(a.get("affected_functions", [])))}</p>'
             f'<p><strong>Likely decision:</strong> {_e(a["likely_decision"])}</p>'
-            f'<p class="muted"><strong>What would confirm:</strong> '
-            f'{_e(a["what_would_confirm"])}</p></div>')
+            # "What would confirm" is the pattern's falsification question,
+            # the same sentence already filtered out of the deck's watch items
+            # and the brief's questions. It reaches the reader from three
+            # selection points and needed filtering at each; this is the last.
+            + (f'<p class="muted"><strong>What would confirm:</strong> '
+               f'{_e(a["what_would_confirm"])}</p>'
+               if not reads_as_taxonomy(a.get("what_would_confirm", ""))
+               else '')
+            + '</div>')
     agenda_section = (
         f'<h2 id="agenda">Likely current leadership agenda</h2>'
         f'<p class="muted">Inferred from recent public signals — NOT knowledge '
@@ -380,9 +460,14 @@ def render_strategic_report(report) -> str:
         f'<div class="card"><h3>{_e(q["question"])}</h3>'
         f'<p class="muted"><strong>Why we ask:</strong> {_e(q["why_it_matters"])}</p>'
         f'<p><strong>Decision affected:</strong> {_e(q["decision_affected"])}</p></div>'
+        # Same narrow rule as the deck's watch items and the brief's
+        # questions: a question a reader cannot observe is not a question.
+        # This page reads the report directly, so it needs the filter at its
+        # own selection point -- filtering the brief did not cover it.
         for q in deduplicate(meaningful_items(r.get("questions", []),
                                               key="question"),
-                             key="question"))
+                             key="question")
+        if not reads_as_taxonomy(q.get("question", "")))
 
     # source library
     lib = r.get("source_library", {})

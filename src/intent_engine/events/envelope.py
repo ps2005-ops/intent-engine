@@ -190,7 +190,16 @@ class CompanyEvent:
     def content_fingerprint(self) -> str:
         """The logical content an idempotency_key locks in: retrying the
         SAME publish returns the original; reusing the key for different
-        content is a caller bug and is rejected."""
+        content is a caller bug and is rejected.
+
+        Timestamps and the minted id are excluded: a retry naturally carries
+        a fresh clock but MUST carry the same facts. `occurred_at` defaults
+        to `_now()` at second resolution, so leaving it in made idempotency
+        hold only for retries landing inside the same wall-clock second —
+        a retry a second later was rejected as "different content", which is
+        both wrong and the opposite of what a retry needs. Every other record
+        type in the codebase already excludes all three.
+        """
         core = {k: v for k, v in asdict(self).items()
-                if k not in ("event_id", "recorded_at")}
+                if k not in ("event_id", "recorded_at", "occurred_at")}
         return json.dumps(core, sort_keys=True)

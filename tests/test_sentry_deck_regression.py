@@ -143,3 +143,64 @@ def test_the_brief_carries_no_taxonomy_in_its_central_claim():
     for phrase in ("system of record", "broadening from a focused tool",
                    "adjacent tools"):
         assert phrase not in thesis, phrase
+
+
+# --- all three layers, one argument ----------------------------------------
+
+TAXONOMY = ("system of record", "tool-to-system-of-record",
+            "broadening from a focused tool", "strategic signal",
+            "adjacent tools")
+
+
+def _report():
+    return build_strategic_report(company_name="Sentry",
+                                  observations=SENTRY_OBS)
+
+
+def _full_html():
+    from intent_engine.strategic_intelligence.render import (
+        render_strategic_report,
+    )
+    return render_strategic_report(_report().as_dict())
+
+
+def _brief_obj():
+    from intent_engine.strategic_intelligence.brief import build_brief
+    return build_brief(_report(), as_of="2026-07-29")
+
+
+@pytest.mark.parametrize("phrase", TAXONOMY)
+def test_the_full_analysis_carries_no_taxonomy(phrase):
+    """Three separate sources put this on production: the pattern library's
+    own entry name, the hypothesis reasoning that describes the library
+    matching itself, and the hypothesis title."""
+    import re
+    text = re.sub(r"<[^>]+>", " ", _full_html()).lower()
+    assert phrase.lower() not in text, phrase
+
+
+@pytest.mark.parametrize("phrase", TAXONOMY)
+def test_the_brief_carries_no_taxonomy(phrase):
+    brief = _brief_obj()
+    text = " ".join([brief.thesis] + list(brief.questions)
+                    + [getattr(brief, "limitation", "") or ""]).lower()
+    assert phrase.lower() not in text, phrase
+
+
+def test_all_three_layers_share_one_factual_anchor(deck):
+    """One analysis, one central claim -- not three renderers inventing three
+    theses."""
+    import re
+    anchor = "Sentry acquired Codecov."
+    assert deck[0]["bullets"][0]["text"] == anchor
+    assert _brief_obj().thesis == anchor
+    assert anchor.rstrip(".") in re.sub(r"<[^>]+>", " ", _full_html())
+
+
+def test_the_layers_are_not_verbatim_duplicates(deck):
+    """They share the argument, not the words."""
+    import re
+    deck_text = " ".join(b["text"] for s in deck for b in s["bullets"])
+    full_text = re.sub(r"<[^>]+>", " ", _full_html())
+    assert len(full_text) > len(deck_text), \
+        "the full analysis carries no more detail than the deck"

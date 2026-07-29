@@ -600,10 +600,18 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
                 or _first(r.get("decision_implications", []), "decision")
                 or _first(r.get("questions", []), "decision_affected"))
 
-    questions = [q.get("question", "") for q in
-                 deduplicate(meaningful_items(r.get("questions", []),
-                                              key="question"),
-                             key="question")][:QUESTION_COUNT]
+    # Leadership questions are founder-facing, so taxonomy is filtered where
+    # they are SELECTED -- the same narrow boundary used for the deck's watch
+    # items, not a global sweep. The brief was still asking the reader to
+    # watch for "customers describing it as a companion to a system of record
+    # rather than the record itself", which is the pattern's own falsification
+    # question and not a thing anyone can observe.
+    questions = [q for q in
+                 (q.get("question", "") for q in
+                  deduplicate(meaningful_items(r.get("questions", []),
+                                               key="question"),
+                              key="question"))
+                 if q and not reads_as_taxonomy(q)][:QUESTION_COUNT]
 
     limitations = consolidate_limitations(
         r.get("evidence_gaps", []),

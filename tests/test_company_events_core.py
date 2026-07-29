@@ -101,6 +101,26 @@ def test_same_key_different_content_fails(tmp_path):
                  payload={"resolve_by": "2028-06-06"})
 
 
+def test_a_retry_a_second_later_is_still_the_same_event(tmp_path):
+    """`occurred_at` defaults to the clock at second resolution, and the
+    fingerprint used to include it. Two identical publishes therefore agreed
+    only while they landed inside the same wall-clock second: straddle the
+    boundary and the retry was rejected as "different content".
+
+    That is exactly backwards -- a retry is by definition later than the
+    call it retries -- and it made every duplicate-publish test in the suite
+    a coin flip on where the second boundary fell. Caught as an intermittent
+    failure in test_marketing_publishing.py, whose two back-to-back dry-run
+    publishes are the same shape as `_publish` here."""
+    bus = _bus(tmp_path)
+    first = _publish(bus, idempotency_key="k-1", occurred_at="2026-07-28T10:00:00+00:00")
+    later = _publish(bus, idempotency_key="k-1", occurred_at="2026-07-28T11:30:00+00:00")
+
+    assert later.duplicate is True
+    assert later.event.event_id == first.event.event_id     # the ORIGINAL back
+    assert bus.store.log_path.read_text().count("\n") == 1  # zero lines added
+
+
 def test_malformed_log_fails_clearly(tmp_path):
     bus = _bus(tmp_path)
     _publish(bus)
