@@ -847,7 +847,7 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.reasoning import (
             build_strategic_report,
         )
-        observations = derive_observations(documents)
+        observations = derive_observations(documents, company=company_name)
         observations += list(extra_observations or ())
         if not observations:
             return None

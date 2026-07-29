@@ -580,9 +580,23 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
     for surprise in meaningful_items(r.get("surprises", []), key="finding"):
         candidates.append({"text": surprise.get("finding", ""),
                            "date": "", "source": ""})
-    for observation in meaningful_items(r.get("observations", []),
-                                        key="excerpt"):
-        candidates.append({"text": observation.get("excerpt", ""),
+    # The observation's `text`, not its `excerpt`. An excerpt is whatever the
+    # page happened to say, and under "What supports it" the live Sentry brief
+    # therefore offered, as a reason to believe its central claim: "Bugs
+    # aren't great. But your code can be. And if it isn't, we'll make sure you
+    # never hear the end of it." That is the homepage tagline. `text` is the
+    # analytical sentence built from the same observation -- what the company
+    # does and why that matters -- which is what a supporting bullet is for.
+    # The excerpt remains on the observation for anyone checking the source.
+    # `text` where there is one, `excerpt` only as a fallback. Observations
+    # built by `derive_observations` always carry `text`; hand-built ones and
+    # other producers may not, and dropping those would lose real signals.
+    for observation in r.get("observations", []) or ():
+        support = (observation.get("text")
+                   or observation.get("excerpt") or "").strip()
+        if not is_meaningful(support):
+            continue
+        candidates.append({"text": support,
                            "date": observation.get("date", ""),
                            "source": observation.get("source_class", "")})
     signals = deduplicate(candidates, key="text")[:SIGNAL_COUNT]

@@ -148,14 +148,75 @@ _SIGNAL_LABEL = {
     "storefront_creation": "retains its original core product surface",
     "data_network": "is building a cross-customer data / distribution network",
 }
+# WHY EACH SIGNAL MATTERS — the mechanism, then the consequence.
+#
+# A supporting bullet that only restates the observation is not analysis. Live,
+# the Sentry brief offered "API Authentication Bypass | Sentry Blog exposes a
+# surface others can build on" as a reason to believe something: a page title
+# welded to a label, answering neither "why does this matter" nor "so what".
+#
+# Each clause below completes the sentence "<Company> <label>, <clause>" and
+# has to survive a founder asking "so what?" once. Written in plain language,
+# not analyst vocabulary: these are read by someone deciding what to do, not
+# by the system that produced them. Five of the twenty-six had a clause and
+# the rest fell back to "retrieved evidence", which is not a reason.
 _SIGNAL_RELEVANCE = {
-    "infrastructure_positioning": "bears on whether value is moving from the "
-                                  "product to the rails beneath it",
-    "checkout_identity_rails": "bears on where durable advantage and lock-in sit",
-    "agentic_commerce": "bears on a possible distribution shift to AI buyers",
-    "enterprise_expansion": "bears on an up-market move and a tension with "
-                            "smaller customers",
-    "product_breadth": "bears on ecosystem lock-in vs value-proposition clarity",
+    # --- commerce set ---
+    "infrastructure_positioning": "so its growth depends on other companies "
+                                  "building on top of it, not only on its own "
+                                  "selling",
+    "checkout_identity_rails": "so the durable advantage would sit in the "
+                               "rails rather than the product above them",
+    "agentic_commerce": "so the buyer it designs for may stop being a person",
+    "distribution_shift": "so where demand is captured is moving, and the "
+                          "channel it grew on may stop paying for itself",
+    "enterprise_expansion": "so the roadmap now has two buyers to satisfy, "
+                            "and they rarely want the same thing",
+    "smb_simplicity": "so the promise that wins small customers is the one an "
+                      "enterprise push would strain",
+    "product_breadth": "so each addition buys lock-in and spends some of the "
+                       "original product's sharpness",
+    "merchant_outcome_positioning": "so it is judged on its customers' "
+                                    "results rather than on its own feature "
+                                    "list",
+    "partner_ecosystem_enablement": "so part of what it sells is built by "
+                                    "people it does not employ",
+    "platform_control": "so it is taking ownership of layers its customers "
+                        "would otherwise control themselves",
+    "storefront_creation": "so the original product still carries the "
+                           "customer relationship, whatever is added around "
+                           "it",
+    "data_network": "so the product improves as more customers use it, which "
+                    "is the hardest thing for a newcomer to copy",
+    # --- neutral set ---
+    "multi_product": "so attention and engineering are split across products "
+                     "that compete with each other for both",
+    "segment_split": "so one roadmap has to serve buyers who want different "
+                     "things",
+    "named_customers": "so those customers agreed to be named, which is a "
+                       "stronger claim than a logo wall",
+    "developer_surface": "so other people's work comes to depend on it, and "
+                         "that dependence is hard to unwind",
+    "services_motion": "so growth needs people as well as software, and "
+                       "margin follows headcount",
+    "pricing_published": "so competitors can price against it directly and "
+                         "customers can compare without a conversation",
+    "pricing_gated": "so price is set deal by deal, which protects margin and "
+                     "slows the sales cycle",
+    "regulated_buyer": "so compliance becomes a moat and a constraint at the "
+                       "same time",
+    "consolidation": "so a customer who leaves later has to rebuild more than "
+                     "one workflow to do it",
+    "capacity_investment": "so capital is committed before the demand that "
+                           "would justify it has arrived",
+    "customer_concentration": "so a small number of buyers can move the whole "
+                              "revenue line",
+    "segment_reporting": "so the parts can be valued separately, and a weak "
+                         "one has nowhere to hide",
+    "disclosed_risk": "so the risks named are specific enough to check rather "
+                      "than boilerplate",
+    "content_and_channel": "so it controls both what is sold and how it "
+                           "reaches the people who buy it",
 }
 # generic marketing / navigation language that is weak strategic evidence
 _WEAK_PHRASES = (
@@ -531,7 +592,21 @@ def derive_analyst_evidence(documents) -> list:
     return evidence
 
 
-def derive_observations(documents) -> list:
+def observation_sentence(subject: str, signal: str, label: str) -> str:
+    """"<Company> <what it does>, <why that matters>." — one analytical claim.
+
+    The clause is dropped rather than faked when a signal has no stated
+    consequence: a sentence that stops after the label is still true, and
+    padding it with "which is a strategic signal" would be the template
+    wording this product exists to avoid.
+    """
+    subject = " ".join((subject or "The company").split())
+    sentence = f"{subject} {label}".rstrip(" .")
+    because = _SIGNAL_RELEVANCE.get(signal, "")
+    return f"{sentence}, {because}." if because else f"{sentence}."
+
+
+def derive_observations(documents, *, company: str = "") -> list:
     """Build StrategicObservations from retrieved ingestion documents.
 
     Deduplicates repeated pages, filters title-only / generic-marketing noise
@@ -586,7 +661,19 @@ def derive_observations(documents) -> list:
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0]
         entity = (title or norm).split("—")[0].strip()[:80]
-        strategic = f"{entity or 'The company'} {_SIGNAL_LABEL.get(dominant, 'shows a strategic signal')}"
+        # The SUBJECT of a strategic claim is the company, never the page it
+        # was found on. Taking it from the title produced, verbatim on
+        # production: "API Authentication Bypass | Sentry Blog exposes a
+        # surface others can build on" and "Linear customers publishes named
+        # customers rather than logos alone" -- a headline welded to a label,
+        # ungrammatical, and attributing the company's behaviour to a URL.
+        #
+        # The clause after the label answers the question a bullet exists to
+        # answer: why does this matter? Without it the sentence restates the
+        # observation and stops.
+        strategic = observation_sentence(
+            company or "The company", dominant,
+            _SIGNAL_LABEL.get(dominant, "shows a strategic signal"))
         observations.append(StrategicObservation(
             observation_id=f"obs-{doc.get('source_id', '')}",
             text=strategic[:200],
