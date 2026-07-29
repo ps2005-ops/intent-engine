@@ -288,9 +288,27 @@ def founder_view_from_report(report) -> dict:
     ] if x).strip()
 
     decision = thesis.get("why_care") or ""
-    falsifier = _first(top.get("falsification_questions"))
-    questions = [q.get("question", "") if isinstance(q, dict) else str(q)
-                 for q in (r.get("questions") or [])]
+    # WATCH ITEMS ARE FOUNDER-FACING, so taxonomy is filtered HERE -- at the
+    # point where the visible item is selected, not by sanitising every string
+    # in the system.
+    #
+    # The live Sentry deck told a reader to watch for "customers describing it
+    # as a companion to a system of record rather than the record itself".
+    # That is the pattern's own falsification question. A reader cannot observe
+    # it, cannot check it, and has never heard the phrase.
+    #
+    # A rejected item is dropped, not replaced: there is no company-specific
+    # observable to substitute, and generic filler would be worse than a
+    # shorter screen.
+    def _watchable(text):
+        text = (text or "").strip()
+        return text if text and not reads_as_taxonomy(text) else ""
+
+    falsifier = _watchable(_first(top.get("falsification_questions")))
+    questions = [q for q in
+                 (_watchable(q.get("question", "") if isinstance(q, dict)
+                             else str(q))
+                  for q in (r.get("questions") or [])) if q]
 
     view = {
         # The one claim, stated first. Not a company description.
