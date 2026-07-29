@@ -431,4 +431,4 @@ def test_the_full_analysis_still_contains_everything(tmp_path):
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
     assert "Technical appendix" in body
-    assert "Source library" in body
+    assert "Every source considered" in body

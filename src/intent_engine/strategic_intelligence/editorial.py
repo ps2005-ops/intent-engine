@@ -115,6 +115,49 @@ def meaningful_items(items, key=None) -> list:
     return out
 
 
+# Sentences in which the system describes its own matching rather than the
+# company. The reasoning layer appends these to `why_it_matters`, so the full
+# analysis rendered, to a founder: "…if it fails, that view is wrong. 4
+# qualifying signal(s) matched: checkout_identity_rails,
+# infrastructure_positioning, platform_control, product_breadth" -- snake_case
+# internal identifiers, in a paragraph about what to watch for.
+_MACHINERY = ("qualifying signal", "vantage point", "signal(s) matched",
+              "signal trace", "disconfirming signal")
+
+
+def strip_machinery(text: str) -> str:
+    """Drop the sentences where the system talks about its own inputs.
+
+    Sentence-level rather than whole-value, because the machinery is appended
+    to prose that is genuinely useful: the first half of `why_it_matters`
+    explains why the question is worth asking, and only the tail is the
+    matcher's trace.
+    """
+    kept = []
+    for sentence in re.split(r"(?<=[.!?])\s+", (text or "").strip()):
+        low = sentence.lower()
+        if any(marker in low for marker in _MACHINERY):
+            continue
+        # a bare list of snake_case identifiers is never reader-facing prose
+        if re.fullmatch(r"[a-z0-9_,\s]+", sentence) and "_" in sentence:
+            continue
+        kept.append(sentence)
+    return " ".join(kept).strip()
+
+
+def lower_first(text: str) -> str:
+    """Lower a leading capital so a sentence can become a clause -- unless the
+    first word is a proper noun, which gives "that sentry appears to be"."""
+    text = (text or "").strip()
+    if not text:
+        return ""
+    first = text.split(" ", 1)[0].strip(".,:;")
+    if len(first) > 1 and first[0].isupper() and any(c.isupper()
+                                                     for c in first[1:]):
+        return text
+    return text[0].lower() + text[1:]
+
+
 def _tokens(text: str) -> set:
     return {t for t in _WORD.findall((text or "").lower())
             if t not in _STOPWORDS and len(t) > 2}

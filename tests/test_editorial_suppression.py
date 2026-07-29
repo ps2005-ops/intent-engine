@@ -231,10 +231,9 @@ def test_the_rendered_page_contains_no_standalone_dashes():
 
 def test_empty_sections_are_absent_not_blank():
     html = render_strategic_report(_bare_report())
-    for heading in ("Strategic surprises", "Strategic hypotheses",
-                    "Strategic opportunities", "Possible blind spots",
-                    "Questions for leadership",
-                    "Questions that may be underexamined"):
+    for heading in ("What happened", "The evidence",
+                    "Why that evidence matters", "What else could explain it",
+                    "What to monitor"):
         assert f">{heading}<" not in html, \
             f"empty section still rendered a heading: {heading}"
 
@@ -267,8 +266,15 @@ def test_suppression_does_not_hide_sections_that_have_content():
         "why_it_matters": "It decides where the sales motion goes",
         "decision_affected": "Q4 pricing"}]
     html = render_strategic_report(report)
-    assert ">Possible blind spots<" in html
-    assert ">Questions for leadership<" in html
+    # The blind spot is a real finding and must reach the reader -- the
+    # tension itself, not only the counter-explanation beneath it.
+    assert "Hiring for enterprise sales while marketing to solo merchants" \
+        in html
+    # embedded as a clause, so its leading capital gives way
+    assert "the two motions need different pricing" in html
+    # and the question survives as something to monitor
+    assert "Which segment does the new pricing tier target?" in html
+    assert ">What to monitor<" in html
     assert "Hiring for enterprise sales" in html
 
 
@@ -277,10 +283,10 @@ def test_limitations_are_consolidated_into_one_section():
     report["evidence_gaps"] = ["No pricing evidence", "No pricing evidence."]
     report["quality_findings"] = [{"message": "No independent corroboration"}]
     html = render_strategic_report(report)
-    assert html.count("What this analysis cannot tell you") == 1
-    # The summary preview and the detailed section are progressive disclosure,
-    # not duplication — but neither may list the same caveat twice.
-    limitations_block = html.split("What this analysis cannot tell you")[1]
+    assert html.count("What we still do not know") == 1
+    # There is now ONE place caveats live, so the old summary-preview/detail
+    # split cannot restate them -- and within it a caveat appears once.
+    limitations_block = html.split("What we still do not know")[1]
     assert limitations_block.count("No pricing evidence") == 1
-    summary_block = html.split("Major uncertainties")[1].split("</div>")[0]
-    assert summary_block.count("No pricing evidence") == 1
+    assert html.count("No independent corroboration") == 1
+

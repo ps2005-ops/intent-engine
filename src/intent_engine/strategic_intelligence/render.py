@@ -1,21 +1,26 @@
-"""V1.2 executive-first strategic report rendering.
+"""The full strategic report — an argument, not a record layout.
 
-A polished, progressively-disclosed executive intelligence view — not an
-evidence dump. The first viewport carries the thesis, the most important
-change, the key tension, the decision most affected, and confidence. Below it:
-a tight executive summary, collapsed hypothesis cards that expand to the full
-reasoning, a strongest-evidence-first drawer, a current-agenda section
-(explicitly inferred from public signals), a chronological timeline, and a full
-source library for auditability. Human-readable reasoning is always primary;
-technical ids and signal traces live in a secondary appendix.
+The page is the eight moves an analyst makes in order: what we think is
+happening, what happened, the evidence, why that evidence matters, what else
+could explain it, what we still do not know, what to monitor, and where it all
+came from. Each section is prose and each disappears entirely when it has
+nothing to say, so a thin run reads as a short honest page rather than a set of
+empty headings.
+
+Two rules hold the structure together. No sentence is printed twice anywhere on
+the page, deduplicated where it is written rather than after the fact (`_once`,
+and `_claim_seen` for the same question asked with and without its reason).
+And nothing describing the system's own machinery reaches the reader — signal
+traces and snake_case identifiers are filtered at the point of use, not hidden
+in an appendix that a founder would still open.
 """
 from __future__ import annotations
 
 import html as _html
 
 from intent_engine.strategic_intelligence.editorial import (
-    consolidate_limitations, deduplicate, is_meaningful, meaningful_items,
-    shared_evidence,
+    consolidate_limitations, deduplicate, is_meaningful, lower_first,
+    meaningful_items, shared_evidence, strip_machinery,
 )
 
 _e = _html.escape
@@ -277,36 +282,19 @@ def render_strategic_report(report) -> str:
         f'{_CLASS_LABEL.get(c, c)} · {n}</span>'
         for c, n in sorted(r.get("source_class_coverage", {}).items()))
 
-    top_change = (r.get("shifts") or [{}])[0].get("title", "")
-    top_surprise = (r.get("surprises") or [{}])[0].get("finding", "")
-    top_opp = (r.get("opportunities") or [{}])[0].get("statement", "")
-    top_vuln = (r.get("vulnerabilities") or [{}])[0].get("exposed_layer", "")
-    top_agenda = (r.get("agenda") or [{}])[0]
-    # Last of the selection points that let the pattern title reach a reader:
-    # the summary "Likely current discussion" line, separate from the agenda
-    # cards below it.
-    agenda_line = top_agenda.get("inferred_discussion", "")
-    if reads_as_taxonomy(agenda_line):
-        agenda_line = ""
-    if agenda_line and top_agenda.get("meeting_relevance"):
-        agenda_line = (f'{agenda_line} <span class="badge">'
-                       f'{_e(top_agenda["meeting_relevance"])}</span>')
-
-    # The summary grid carries only the rows that have something in them. A row
-    # reading "Biggest opportunity: —" costs the reader attention and returns
-    # nothing, and a reader cannot tell an intentional dash from a bug.
-    kv_rows = "".join(
-        f'<b>{label}</b><span>{value if raw_html else _e(value)}</span>'
-        for label, value, raw_html in (
-            ("What changed recently", top_change, False),
-            ("Most important surprise", top_surprise, False),
-            ("Likely current discussion", agenda_line, True),
-            ("Biggest opportunity", top_opp, False),
-            ("Biggest vulnerability", top_vuln, False),
-            ("Decision most affected", thesis.get("why_care", ""), False),
-        ) if is_meaningful(value))
-
-    # first viewport / hero — decisions & changes first
+    # The first viewport: who this is about, what we think, and how it was
+    # built. Nothing else.
+    #
+    # It used to carry a six-row label/value grid -- "What changed recently",
+    # "Most important surprise", "Biggest opportunity", "Biggest
+    # vulnerability" -- which was field serialization in the most prominent
+    # place on the page AND a duplicate of the sections below it. A reader met
+    # "Independent reporting describes retail moving toward AI shopping
+    # agents" in the grid and then again, verbatim, under What happened.
+    #
+    # The decision the claim bears on is the one line worth surfacing here,
+    # and it now reads as a sentence in the section below rather than as a
+    # value beside a bold label.
     hero = (
         f'<div class="hero"><div class="badges">'
         f'<span class="status st-{_e(status)}">{_e(_STATUS_LABEL.get(status,status))}</span>'
@@ -315,161 +303,317 @@ def render_strategic_report(report) -> str:
         + f'{coverage_badges}</div>'
         f'<h1>{_e(r.get("company_name",""))} — Strategic Intelligence</h1>'
         f'<p class="thesis">{_e(_central_claim(r, thesis))}</p>'
-        + (f'<div class="kv">{kv_rows}</div>' if kv_rows else '')
-        # Jump links only to sections that exist. Suppressing an empty section
-        # while keeping its link would leave a control that silently does
-        # nothing, which is a worse failure than the empty section was.
-        + '<div class="actions">' + "".join(
-            f'<a{"" if primary else " class=ghost"} href="#{anchor}">'
-            f'{label}</a>'
-            for anchor, label, present, primary in (
-                ("hypotheses", "Explore reasoning", bool(hyps), True),
-                ("agenda", "Current agenda", bool(r.get("agenda")), False),
-                ("changed", "What changed", bool(r.get("what_changed")),
-                 False),
-                ("model", "Mental model",
-                 bool((r.get("mental_model") or {}).get("components")), False),
-                ("library", "Source library",
-                 any(r.get("source_library", {}).values()), False),
-            ) if present) + '</div>'
         + f'<p class="muted">Outside-in analysis of approved public sources and a '
         f'curated historical-pattern library. No private or internal knowledge '
         f'is claimed, and no model is trained on this company; likely-agenda '
         f'items are inferred from public signals, never from private '
         f'meetings.</p></div>')
 
-    # executive summary (caps of 3)
-    def _cap(items, n=3):
-        return items[:n]
-    # The executive summary lists hypothesis TITLES, which are pattern names.
-    # Filtered at this selection point like every other founder-facing list;
-    # a chip left with nothing in it is dropped by the code just below.
-    top_h = "".join(
-        f'<li><strong>{_e(h["title"])}</strong> '
-        f'<span class="conf conf-{_e(h["confidence"])}">{_e(h["confidence"])}</span></li>'
-        for h in _cap(hyps) if not reads_as_taxonomy(h.get("title", "")))
-    top_agenda = "".join(
-        f'<li>{_e(a["inferred_discussion"])}</li>'
-        for a in _cap(r.get("agenda", []))
-        if not reads_as_taxonomy(a.get("inferred_discussion", "")))
-    top_dec = "".join(f'<li>{_e(d["decision"])}</li>'
-                      for d in _cap(r.get("decision_implications", [])))
-    # The summary preview shows the same caveats the limitations section
-    # details, which is progressive disclosure — but it must not list the same
-    # caveat twice within itself.
-    top_unc = "".join(f'<li>{_e(g)}</li>' for g in
-                      _cap(deduplicate(meaningful_items(
-                          r.get("evidence_gaps", [])))))
-    # An empty chip is a heading promising something that never arrives. Chips
-    # with nothing in them are dropped, and if none survive the whole summary
-    # goes with them rather than leaving a bare "Executive summary" heading.
-    chips = "".join(
-        f'<div class="chip"><b>{label}</b><ul>{items}</ul></div>'
-        for label, items in (
-            ("Key hypotheses", top_h),
-            ("Likely leadership discussions", top_agenda),
-            ("Decisions affected", top_dec),
-            ("Major uncertainties", top_unc),
-        ) if items)
-    summary = (f'<h2>Executive summary</h2><div class="row">{chips}</div>'
-               if chips else '')
-
-    # hypotheses. Evidence cited under EVERY hypothesis is printed under the
-    # first one and linked from the rest: a reader scrolling four cards saw
-    # the identical six-source block four times and learned nothing after the
-    # first. Volume of text and volume of insight had come apart.
-    repeated = shared_evidence([h.get("strongest_support_ids", [])
-                                for h in hyps])
-    ubiquitous = {e for e, n in repeated.items() if n >= max(2, len(hyps))}
-    # A hypothesis whose title AND statement are both ontology has nothing to
-    # show a founder. "absorbing adjacent tools until the work lives inside
-    # it" / "broadening from a focused tool toward being the place a team's
-    # work is stored" was the last place that language reached production.
+    # ------------------------------------------------------------------
+    # The report a reader actually reads.
     #
-    # The card is dropped rather than reworded: there is no company-specific
-    # sentence underneath it to promote, and the evidence it rests on is
-    # already shown under Evidence.
-    hyps = [h for h in hyps
-            if not (reads_as_taxonomy(h.get("title", ""))
-                    and reads_as_taxonomy(h.get("statement", "")))]
-    hyp_html = ""
-    for position, hypothesis in enumerate(hyps):
-        card = dict(hypothesis)
-        if position > 0 and ubiquitous:
-            # Both id lists, not just the "strongest" one — the card renders
-            # the full supporting set as well, so filtering one path left the
-            # excerpt on the page anyway.
-            for field in ("strongest_support_ids",
-                          "supporting_observation_ids"):
-                card[field] = [e for e in hypothesis.get(field, [])
-                               if e not in ubiquitous]
-            card["shared_evidence_note"] = (
-                "Rests on the same evidence shown under the leading "
-                "hypothesis, plus anything listed here.")
-        hyp_html += _hypothesis_card(card, obs_by_id, pat_by_id)
+    # This page was fourteen sections of `<strong>Label:</strong> value`, one
+    # per schema field -- "Exposed: X / Mechanism: Y / Why exposure may be
+    # rising: Z" -- which is the record laid out sideways, not an argument.
+    # The same conclusion appeared under several headings because several
+    # fields happened to contain it.
+    #
+    # It is now eight sections in the order an analyst would argue in: what we
+    # think, what happened, what we saw, why that supports the claim, what
+    # else could explain it, what we still do not know, what to watch, and
+    # where it all came from. Every section is prose, every section disappears
+    # when it has nothing, and no sentence is printed twice anywhere on the
+    # page (see `_once`).
+    # ------------------------------------------------------------------
+    seen: set = set()
 
-    # current agenda
-    agenda_cards = ""
-    for a in [a for a in r.get("agenda", [])
-              if not reads_as_taxonomy(a.get("inferred_discussion", ""))]:
-        sig = "".join(f"<li>{_e(s)}</li>" for s in a.get("public_signals", []))
-        against = "".join(f"<li>{_e(s)}</li>" for s in a.get("evidence_against", []))
-        agenda_cards += (
-            f'<div class="agenda"><h3>{_e(a["inferred_discussion"])} '
-            f'<span class="conf conf-{_e(a["confidence"])}">{_e(a["confidence"])}</span></h3>'
-            f'<p class="muted"><strong>Why likely timely:</strong> {_e(a["why_timely"])}</p>'
-            f'<div class="row"><div class="chip"><b>Public signals</b><ul>{sig}</ul></div>'
-            f'<div class="chip"><b>Evidence against</b><ul>{against}</ul></div></div>'
-            f'<p><strong>Affected functions:</strong> '
-            f'{_e(", ".join(a.get("affected_functions", [])))}</p>'
-            f'<p><strong>Likely decision:</strong> {_e(a["likely_decision"])}</p>'
-            # "What would confirm" is the pattern's falsification question,
-            # the same sentence already filtered out of the deck's watch items
-            # and the brief's questions. It reaches the reader from three
-            # selection points and needed filtering at each; this is the last.
-            + (f'<p class="muted"><strong>What would confirm:</strong> '
-               f'{_e(a["what_would_confirm"])}</p>'
-               if not reads_as_taxonomy(a.get("what_would_confirm", ""))
-               else '')
-            + '</div>')
-    agenda_section = (
-        f'<h2 id="agenda">Likely current leadership agenda</h2>'
-        f'<p class="muted">Inferred from recent public signals — NOT knowledge '
-        f'of any private meeting.</p>{agenda_cards or "<p class=muted>Not enough dated evidence to infer an agenda.</p>"}')
+    def _claim_seen(text: str) -> bool:
+        """Has the page already made this point, in any wording?
 
-    # timeline
-    tl = "".join(
-        f'<li><span class="d">{_e(t["date"])}</span>'
-        f'<span class="badge">{_CLASS_LABEL.get(t["source_class"], t["source_class"])}</span> '
-        f'{_e(t["event"])}</li>' for t in timeline)
-    timeline_section = (f'<h2 id="timeline">Strategic timeline</h2>'
-                        f'<ul class="tl">{tl or "<li class=muted>No dated evidence.</li>"}</ul>')
+        `_once` compares whole sentences, so "Does X? We ask because Y." and a
+        bare "Does X?" were two different strings and both reached the page --
+        the leadership questions and the hypotheses' falsification questions
+        are frequently the same question. Comparing the first sentence catches
+        that without needing the two lists to agree upstream.
+        """
+        first = re.split(r"(?<=[.?!])\s", (text or "").strip(), 1)[0]
+        key = " ".join(first.lower().split()).rstrip(".?!")
+        return bool(key) and key in seen
 
-    # blind spots — deduplicated, and absent entirely when there are none
-    blinds = "".join(
-        f'<div class="card"><h3>{_e(b["observed_tension"])}</h3>'
-        f'<p><strong>Why it may matter:</strong> {_e(b["why_it_may_matter"])}</p>'
-        f'<p class="muted"><strong>Counter-explanation:</strong> {_e(b["counter_explanation"])}</p>'
-        f'<p><strong>Decision affected:</strong> {_e(b["decision_affected"])}</p></div>'
-        for b in deduplicate(meaningful_items(r.get("blind_spots", []),
-                                              key="observed_tension"),
-                             key="observed_tension"))
+    def _once(text: str) -> str:
+        """A sentence the page has already used is not said again.
 
-    # leadership questions
-    questions = "".join(
-        f'<div class="card"><h3>{_e(q["question"])}</h3>'
-        f'<p class="muted"><strong>Why we ask:</strong> {_e(q["why_it_matters"])}</p>'
-        f'<p><strong>Decision affected:</strong> {_e(q["decision_affected"])}</p></div>'
-        # Same narrow rule as the deck's watch items and the brief's
-        # questions: a question a reader cannot observe is not a question.
-        # This page reads the report directly, so it needs the filter at its
-        # own selection point -- filtering the brief did not cover it.
-        for q in deduplicate(meaningful_items(r.get("questions", []),
-                                              key="question"),
-                             key="question")
-        if not reads_as_taxonomy(q.get("question", "")))
+        The old page could state the same conclusion in the executive summary,
+        the hypothesis card, the vulnerability card and the agenda, because
+        four fields held it. Deduplicating at the point of writing is what
+        makes each section carry something the last one did not.
+        """
+        key = " ".join((text or "").lower().split()).rstrip(".")
+        if not key or key in seen:
+            return ""
+        seen.add(key)
+        return text
 
-    # source library
+    def _p(text, *, muted=False) -> str:
+        text = _once(text) if is_meaningful(text) else ""
+        cls = ' class="muted"' if muted else ""
+        return f"<p{cls}>{_e(text)}</p>" if text else ""
+
+    def _section(heading, body, anchor="") -> str:
+        if not body:
+            return ""
+        attr = f' id="{anchor}"' if anchor else ""
+        return f"<h2{attr}>{_e(heading)}</h2>{body}"
+
+    def _sentences(items) -> str:
+        return "".join(_p(x) for x in items)
+
+    # 1 ── MAIN INTERPRETATION -----------------------------------------
+    # The claim is already in the hero; this adds only what the hero could
+    # not: how far to trust it, and the decision it bears on.
+    lead = hyps[0] if hyps else {}
+    interpretation = "".join([
+        _p(thesis.get("transition", "")
+           if not reads_as_taxonomy(thesis.get("transition", "")) else ""),
+        _p(lead.get("statement", "")
+           if not reads_as_taxonomy(lead.get("statement", "")) else ""),
+        _p(f"This is held as a {lead['confidence']}-confidence reading of the "
+           f"public evidence, not a settled fact."
+           if lead.get("confidence") else ""),
+        _p(f"It bears on one decision in particular: "
+           f"{lower_first(thesis['why_care'])}"
+           if is_meaningful(thesis.get("why_care")) else ""),
+    ] + [
+        # What leadership is likely weighing right now, inferred from public
+        # signals only. Kept here rather than in its own section because it is
+        # part of the interpretation, not a separate finding -- and said once.
+        _p(f"On current evidence, leadership is likely weighing "
+           f"{lower_first(a['inferred_discussion'])}"
+           + (f" The decision in front of them: "
+              f"{lower_first(a['likely_decision'])}"
+              if is_meaningful(a.get("likely_decision")) else ""))
+        for a in (r.get("agenda") or ())
+        if is_meaningful(a.get("inferred_discussion"))
+        and not reads_as_taxonomy(a.get("inferred_discussion", ""))
+    ] + [
+        _p("This is inferred from public signals, never from knowledge of any "
+           "private meeting.", muted=True)
+        if any(is_meaningful(a.get("inferred_discussion"))
+               and not reads_as_taxonomy(a.get("inferred_discussion", ""))
+               for a in (r.get("agenda") or ())) else "",
+    ])
+
+    # 2 ── WHAT HAPPENED ------------------------------------------------
+    happened_items = []
+    for shift in meaningful_items(r.get("shifts", []), key="title"):
+        if reads_as_taxonomy(shift.get("title", "")):
+            continue
+        when = shift.get("date", "")
+        happened_items.append(
+            f"{shift['title'].rstrip('.')}."
+            + (f" (Recorded {when}.)" if is_meaningful(when) else ""))
+    for event in meaningful_items(timeline, key="event"):
+        if reads_as_taxonomy(event.get("event", "")):
+            continue
+        happened_items.append(
+            f"{event['event'].rstrip('.')}."
+            + (f" (Recorded {event['date']}.)"
+               if is_meaningful(event.get("date")) else ""))
+    for change in r.get("what_changed", []) or ():
+        if is_meaningful(change.get("new_view")):
+            happened_items.append(
+                f"Our reading of {change.get('component','').replace('_',' ')} "
+                f"changed: {lower_first(change['new_view'])}"
+                + (f" Previously: {lower_first(change['previous_view'])}"
+                   if is_meaningful(change.get("previous_view")) else ""))
+    # A surprise IS something that happened -- the finding belongs with the
+    # other developments, and only its explanation belongs further down.
+    for s in meaningful_items(r.get("surprises", []), key="finding"):
+        if not reads_as_taxonomy(s.get("finding", "")):
+            happened_items.append(s["finding"])
+    happened = _sentences(happened_items)
+
+    # 3 ── EVIDENCE -----------------------------------------------------
+    # Quoted and attributed. This is the one place a page excerpt belongs:
+    # as a quotation the reader can check, never as the analysis itself.
+    # Evidence that CUTS AGAINST the claim is marked as such and shown beside
+    # the evidence that supports it. A report that shows only what agrees with
+    # it is advocacy, and the reader cannot tell which they are looking at
+    # unless the page says so.
+    counter_ids = {i for h in hyps
+                   for i in (h.get("counter_observation_ids") or [])}
+    evidence_rows, counter_rows = [], []
+    for o in r.get("observations", []) or ():
+        quote = (o.get("excerpt") or "").strip()
+        if not is_meaningful(quote):
+            continue
+        if " ".join(quote.lower().split()) in seen:
+            continue
+        meta = " · ".join(x for x in [
+            o.get("source_title", ""),
+            _CLASS_LABEL.get(o.get("source_class", ""),
+                             o.get("source_class", "")),
+            o.get("date", "")] if x)
+        against = o.get("observation_id") in counter_ids
+        row = (f'<div class="ev {"con" if against else "sup"}">'
+               f'<div>“{_e(quote)}”</div>'
+               f'<div class="meta">{_e(meta)}</div></div>')
+        # Separate budgets. A single shared cap filled with supporting quotes
+        # first and pushed the contradicting evidence off the page entirely --
+        # which is precisely the evidence a sceptical reader came for.
+        if against:
+            if len(counter_rows) < 3:
+                counter_rows.append(row)
+        elif len(evidence_rows) < 6:
+            evidence_rows.append(row)
+    evidence = ""
+    if evidence_rows:
+        evidence += ('<p class="muted">What supports the reading:</p>'
+                     + "".join(evidence_rows))
+    if counter_rows:
+        evidence += ('<p class="muted">What cuts against it:</p>'
+                     + "".join(counter_rows))
+    if evidence and coverage_badges:
+        evidence += (f'<p class="muted">Read across: '
+                     f'{_e(", ".join(f"{n} {_CLASS_LABEL.get(c, c).lower()}" for c, n in sorted(r.get("source_class_coverage", {}).items()) if n))}.</p>')
+
+    # 4 ── WHY THE EVIDENCE MATTERS -------------------------------------
+    # The mechanism, not the restatement. Each observation now carries its
+    # own consequence clause (see observations._SIGNAL_RELEVANCE), and the
+    # hypothesis reasoning is used only when it is about the company rather
+    # than about the pattern library matching itself.
+    why_items = []
+    for o in r.get("observations", []) or ():
+        text = (o.get("text") or "").strip()
+        if is_meaningful(text) and not reads_as_taxonomy(text):
+            why_items.append(text)
+    for h in hyps:
+        reasoning = (h.get("reasoning") or "").strip()
+        if is_meaningful(reasoning) and not reads_as_taxonomy(reasoning):
+            why_items.append(reasoning)
+    for v in meaningful_items(r.get("vulnerabilities", []),
+                              key="exposed_layer"):
+        mechanism = (v.get("mechanism") or "").strip()
+        if is_meaningful(mechanism) and not reads_as_taxonomy(mechanism):
+            why_items.append(
+                f"{mechanism.rstrip('.')}, which is why "
+                f"{lower_first(v.get('exposed_layer', 'this layer'))} is the "
+                f"exposed part.")
+    for o in meaningful_items(r.get("opportunities", []), key="statement"):
+        if is_meaningful(o.get("why_now")) and not reads_as_taxonomy(
+                o.get("statement", "")):
+            why_items.append(f"{o['statement'].rstrip('.')} — "
+                             f"{lower_first(o['why_now'])}")
+    # A blind spot is a tension the evidence shows and the company may not be
+    # pricing in. Dropping it lost a real finding; it belongs with the rest of
+    # the reasoning, stated as one sentence rather than a four-field card.
+    for b in meaningful_items(r.get("blind_spots", []),
+                              key="observed_tension"):
+        tension = (b.get("observed_tension") or "").strip()
+        if not is_meaningful(tension) or reads_as_taxonomy(tension):
+            continue
+        why_items.append(
+            f"{tension.rstrip('.')}"
+            + (f", which matters because {lower_first(b['why_it_may_matter'])}"
+               if is_meaningful(b.get("why_it_may_matter")) else "."))
+    for s in meaningful_items(r.get("surprises", []), key="finding"):
+        if is_meaningful(s.get("why_surprising")):
+            why_items.append(s["why_surprising"])
+    why = _sentences(why_items[:10])
+
+    # The historical analogue, as a sentence rather than a labelled chip.
+    # This is real comparative analysis and was worth keeping -- but only
+    # when the library entry is named in language about companies rather than
+    # about itself, which is the same gate `_pattern_block` applied.
+    for h in hyps:
+        pattern = pat_by_id.get(h.get("pattern_id", ""), {})
+        if not pattern or reads_as_taxonomy(pattern.get("name", "")) \
+                or reads_as_taxonomy(pattern.get("mechanism", "")):
+            continue
+        examples = [e.get("name", "") for e in
+                    pattern.get("historical_examples", []) if e.get("name")]
+        why += _p(
+            f"This resembles a pattern seen before — {pattern['name']}: "
+            f"{lower_first(pattern.get('mechanism', ''))}"
+            + (f" It has played out at {', '.join(examples[:3])}."
+               if examples else "")
+            + (f" Where the comparison breaks down: "
+               f"{lower_first(pattern['when_it_does_not_apply'])}"
+               if is_meaningful(pattern.get("when_it_does_not_apply")) else ""))
+        break              # one analogue, not one per hypothesis
+
+    # 5 ── ALTERNATIVE EXPLANATIONS -------------------------------------
+    # A report that argues one way and never the other is advocacy.
+    alt_items = []
+    for s in meaningful_items(r.get("surprises", []), key="finding"):
+        if is_meaningful(s.get("alternative_explanation")):
+            alt_items.append(s["alternative_explanation"])
+    for v in meaningful_items(r.get("vulnerabilities", []),
+                              key="exposed_layer"):
+        if is_meaningful(v.get("counterpoint")):
+            alt_items.append(v["counterpoint"])
+    for b in meaningful_items(r.get("blind_spots", []),
+                              key="observed_tension"):
+        if is_meaningful(b.get("counter_explanation")):
+            alt_items.append(b["counter_explanation"])
+    for h in hyps:
+        for a in h.get("alternative_explanations", []) or ():
+            if is_meaningful(a) and not reads_as_taxonomy(a):
+                alt_items.append(a)
+    alternatives = _sentences(alt_items[:6])
+
+    # 6 ── REMAINING UNCERTAINTY ----------------------------------------
+    uncertainty_items = list(consolidate_limitations(
+        r.get("evidence_gaps", []),
+        [f.get("message") for f in r.get("quality_findings", [])]))
+    for q in meaningful_items(r.get("underexamined_questions", []),
+                              key="question"):
+        if not reads_as_taxonomy(q.get("question", "")):
+            uncertainty_items.append(
+                f"{q['question'].rstrip('?')}? "
+                f"{q.get('why_underexamined', '')}".strip())
+    for h in hyps:
+        for gap in h.get("evidence_gaps", []) or ():
+            if is_meaningful(gap) and not reads_as_taxonomy(gap):
+                uncertainty_items.append(gap)
+    uncertainty = _sentences(uncertainty_items[:8])
+
+    # 7 ── WHAT TO MONITOR ----------------------------------------------
+    # Observable things, phrased as things to look for. A falsification
+    # question written in the pattern library's vocabulary is not
+    # observable by a reader and is dropped at this selection point too.
+    monitor_items = []
+    for v in meaningful_items(r.get("vulnerabilities", []),
+                              key="exposed_layer"):
+        indicator = (v.get("leading_indicator") or "").strip()
+        if is_meaningful(indicator) and not reads_as_taxonomy(indicator):
+            monitor_items.append(indicator.rstrip(".") + ".")
+    for q in meaningful_items(r.get("questions", []), key="question"):
+        if not reads_as_taxonomy(q.get("question", "")):
+            # A question without its reason is a prompt, not a brief. The
+            # old card carried "Why we ask:" beneath it; the reason belongs
+            # in the same sentence rather than under a label.
+            reason = strip_machinery(q.get("why_it_matters", ""))
+            monitor_items.append(
+                q["question"]
+                + (f" We ask because {lower_first(reason)}"
+                   if is_meaningful(reason) else ""))
+    for a in r.get("agenda", []) or ():
+        confirm = (a.get("what_would_confirm") or "").strip()
+        if is_meaningful(confirm) and not reads_as_taxonomy(confirm):
+            monitor_items.append(confirm)
+    # What would settle a surprise, and what would change our mind about a
+    # hypothesis, are both things to watch for rather than things we know.
+    for s in meaningful_items(r.get("surprises", []), key="finding"):
+        if is_meaningful(s.get("what_would_resolve")):
+            monitor_items.append(s["what_would_resolve"])
+    for h in hyps:
+        for question in h.get("falsification_questions", []) or ():
+            if is_meaningful(question) and not reads_as_taxonomy(question):
+                monitor_items.append(question)
+    monitor = _sentences(monitor_items[:8])
+
+    # 8 ── SOURCES -------------------------------------------------------
     lib = r.get("source_library", {})
     lib_titles = {"used_in_reasoning": "Used in reasoning",
                   "corroborating": "Independent corroboration",
@@ -484,158 +628,32 @@ def render_strategic_report(report) -> str:
         trs = "".join(
             f'<tr><td>{_e(s.get("title",""))}</td>'
             f'<td>{_CLASS_LABEL.get(s.get("source_class",""), s.get("source_class",""))}</td>'
-            f'<td>{_e(s.get("date",""))}</td><td>{_e(s.get("evidence_quality",""))}</td>'
-            f'<td>{_e(", ".join(s.get("affected_hypotheses", [])))}</td></tr>'
+            f'<td>{_e(s.get("date",""))}</td>'
+            f'<td>{_e(s.get("evidence_quality",""))}</td></tr>'
             for s in rows)
         lib_html += (f'<h4>{title} ({len(rows)})</h4><table class="lib">'
                      f'<tr><th>Source</th><th>Class</th><th>Date</th>'
-                     f'<th>Quality</th><th>Affected hypotheses</th></tr>{trs}</table>')
-    library_section = (f'<details class="more" id="library"><summary>Source '
-                       f'library — all considered sources</summary>{lib_html}'
-                       f'</details>')
-
-    # technical appendix (signal traces, quality gate)
-    traces = "".join(f'<li><code>{_e(h["hypothesis_id"])}</code>: '
-                     f'{_e(h.get("signal_trace",""))}</li>' for h in hyps)
-    findings = "".join(f'<li>{_e(f["message"])}</li>'
-                       for f in r.get("quality_findings", [])) or "<li>All gates passed.</li>"
-    appendix = (f'<details class="more"><summary>Technical appendix — signal '
-                f'traces &amp; quality gate</summary><ul>{traces}</ul>'
-                f'<h4>Quality gate</h4><ul>{findings}</ul></details>')
-
-    # strategic surprises
-    surprises_html = "".join(
-        f'<div class="card"><h3>{_e(s["finding"])} '
-        f'<span class="badge">{_e(s.get("meeting_relevance",""))}</span></h3>'
-        f'<p class="muted"><strong>Why it is surprising:</strong> '
-        f'{_e(s["why_surprising"])}</p>'
-        f'<div class="row"><div class="chip"><b>On one side</b>'
-        + "".join(f'<div class="ev sup">“{_e(x["excerpt"])}” '
-                  f'<span class="meta">{_e(x["source_title"])}</span></div>'
-                  for x in s["evidence_side_a"]) + '</div>'
-        f'<div class="chip"><b>On the other</b>'
-        + "".join(f'<div class="ev con">“{_e(x["excerpt"])}” '
-                  f'<span class="meta">{_e(x["source_title"])}</span></div>'
-                  for x in s["evidence_side_b"]) + '</div></div>'
-        f'<p><strong>What argues the other way:</strong> '
-        f'{_e(s["alternative_explanation"])}</p>'
-        f'<p><strong>Decision this affects:</strong> {_e(s["decision_affected"])}</p>'
-        f'<p class="muted"><strong>What would resolve it:</strong> '
-        f'{_e(s["what_would_resolve"])}</p></div>'
-        for s in deduplicate(meaningful_items(r.get("surprises", []),
-                                             key="finding"), key="finding"))
-
-    # opportunities
-    opp_html = "".join(
-        f'<div class="card"><h3>{_e(o["statement"])}</h3>'
-        f'<p><strong>Why now:</strong> {_e(o["why_now"])}</p>'
-        f'<p><strong>The asymmetry:</strong> {_e(o["asymmetry"])}</p>'
-        f'<p class="muted"><strong>Downside:</strong> {_e(o["downside"])} · '
-        f'<strong>Difficulty:</strong> {_e(o["execution_difficulty"])}</p>'
-        f'<p><strong>Decision this affects:</strong> {_e(o["decision_required"])}</p>'
-        f'</div>' for o in deduplicate(
-            meaningful_items(r.get("opportunities", []), key="statement"),
-            key="statement"))
-
-    # vulnerabilities
-    vuln_html = "".join(
-        f'<div class="card"><h3>Exposed: {_e(v["exposed_layer"])}</h3>'
-        f'<p><strong>Mechanism:</strong> {_e(v["mechanism"])}</p>'
-        f'<p class="muted"><strong>Why exposure may be rising:</strong> '
-        f'{_e(v["why_increasing"])} ({_e(v["market_force"])})</p>'
-        f'<p><strong>What argues against this:</strong> {_e(v["counterpoint"])}</p>'
-        f'<p><strong>Watch:</strong> {_e(v["leading_indicator"])} · '
-        f'<strong>Decision:</strong> {_e(v["decision_affected"])}</p></div>'
-        for v in deduplicate(
-            meaningful_items(r.get("vulnerabilities", []),
-                             key="exposed_layer"), key="exposed_layer"))
-
-    # underexamined questions
-    uq_html = "".join(
-        f'<div class="card"><h3>{_e(q["question"])}</h3>'
-        f'<p class="muted"><strong>Why it may be underexamined:</strong> '
-        f'{_e(q["why_underexamined"])}</p>'
-        f'<p><strong>What answers would imply:</strong> {_e(q["what_answers_imply"])}</p>'
-        f'<p><strong>Decision this affects:</strong> {_e(q["decision_affected"])}</p>'
-        f'</div>' for q in deduplicate(
-            meaningful_items(r.get("underexamined_questions", []),
-                             key="question"), key="question"))
-
-    # mental model panels
-    mm = r.get("mental_model", {})
-    panels = "".join(
-        f'<div class="chip"><b>{_e(name.replace("_"," ").title())} '
-        f'· {_e(c.get("confidence",""))}</b>{_e(c.get("current_state",""))}'
-        + (f'<p class="muted">Was: {_e(c["prior_state"])}</p>'
-           if c.get("prior_state") else "") + '</div>'
-        for name, c in mm.get("components", {}).items())
-    model_section = (f'<h2 id="model">Company mental model '
-                     f'(v{mm.get("version",1)})</h2>'
-                     f'<p class="muted">A living outside-in model — updated by '
-                     f'new evidence, not rebuilt from zero.</p>'
-                     f'<div class="row">{panels}</div>') if panels else ''
-
-    # what changed our view
-    changed = r.get("what_changed", [])
-    changed_html = "".join(
-        f'<div class="card"><h3>{_e(ch["component"].replace("_"," ").title())} '
-        f'— {_e(ch["kind"])}</h3>'
-        + (f'<p><strong>Previous view:</strong> {_e(ch["previous_view"])}</p>'
-           if ch.get("previous_view") else "")
-        + f'<p><strong>New view:</strong> {_e(ch["new_view"])}</p>'
-        f'<p class="muted"><strong>Confidence:</strong> '
-        f'{_e(ch["old_confidence"] or "—")} → {_e(ch["new_confidence"] or "—")} · '
-        f'{_e(ch["reason"])}</p></div>' for ch in changed)
-    changed_section = (
-        f'<h2 id="changed">What changed our view?</h2>'
-        + (changed_html if changed else
-           '<p class="muted">First analysis of this company — no prior model '
-           'to compare yet. Future evidence will update this.</p>'))
-
-    # intelligence feed
-    feed = r.get("feed", [])
-    feed_html = "".join(
-        f'<li><span class="d">{_e(f["date"])}</span> {_e(f["model_change"])} '
-        f'<span class="badge">{_e(f["confidence_change"])}</span></li>'
-        for f in feed)
-    feed_section = (f'<h2 id="feed">Intelligence feed</h2>'
-                    + (f'<ul class="tl">{feed_html}</ul>' if feed else
-                       '<p class="muted">Updates will appear here as new '
-                       'evidence changes the model.</p>'))
-
-    # A heading is a promise that something follows. Sections with nothing in
-    # them are not rendered at all — not as a heading with a dash under it,
-    # which costs the reader attention and returns nothing, and which they
-    # cannot distinguish from a rendering bug.
-    def _titled(heading, content, anchor=""):
-        if not content:
-            return ''
-        attr = f' id="{anchor}"' if anchor else ''
-        return f'<h2{attr}>{heading}</h2>{content}'
-
-    # Every caveat in one place. The same limitation restated under six
-    # headings reads as six separate problems.
-    limitations = consolidate_limitations(r.get("evidence_gaps", []),
-                                          [f.get("message") for f in
-                                           r.get("quality_findings", [])])
-    limitations_section = _titled(
-        "What this analysis cannot tell you",
-        ("<ul>" + "".join(f'<li>{_e(x)}</li>' for x in limitations) + "</ul>")
-        if limitations else '')
+                     f'<th>Quality</th></tr>{trs}</table>')
+    # No quality-gate block here. `consolidate_limitations` already folds
+    # every quality finding into "What we still do not know", so repeating the
+    # list under Sources printed "No independent corroboration" twice on one
+    # page -- the same caveat read as two separate problems.
+    sources = ""
+    if lib_html:
+        sources += (f'<details class="more" id="library"><summary>Every source '
+                    f'considered, and how each was used</summary>{lib_html}'
+                    f'</details>')
 
     return (
         f'{_CSS}<section class="si" aria-label="Strategic Intelligence Report">'
-        f'{hero}{summary}'
-        + _titled("Strategic surprises", surprises_html, "surprises")
-        + _titled("Strategic hypotheses", hyp_html, "hypotheses")
-        + _titled("Strategic opportunities", opp_html, "opportunities")
-        + _titled("Where the company is exposed", vuln_html,
-                  "vulnerabilities")
-        + _titled("Questions that may be underexamined", uq_html)
-        + _titled("Possible blind spots", blinds)
-        + f'{model_section}{changed_section}{agenda_section}{feed_section}'
-        f'{timeline_section}'
-        + _titled("Questions for leadership", questions)
-        + limitations_section
-        + f'<h2>Source library &amp; provenance</h2>{library_section}{appendix}'
-        f'</section>')
+        f'{hero}'
+        + _section("What we think is happening", interpretation,
+                   "interpretation")
+        + _section("What happened", happened, "changed")
+        + _section("The evidence", evidence, "evidence")
+        + _section("Why that evidence matters", why, "hypotheses")
+        + _section("What else could explain it", alternatives, "alternatives")
+        + _section("What we still do not know", uncertainty, "uncertainty")
+        + _section("What to monitor", monitor, "monitor")
+        + _section("Sources", sources, "sources")
+        + f'</section>')

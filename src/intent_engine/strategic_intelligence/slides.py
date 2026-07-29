@@ -29,7 +29,8 @@ from __future__ import annotations
 import html as _html
 
 from intent_engine.strategic_intelligence.editorial import (
-    addresses_the_system, deduplicate, is_meaningful, meaningful_items,
+    addresses_the_system, deduplicate, is_meaningful, lower_first,
+    meaningful_items,
 )
 
 _e = _html.escape
@@ -200,17 +201,7 @@ def _confidence_in_plain_words(level: str, rationale: str) -> str:
     return f"{lead}: {reason}." if reason else f"{lead}."
 
 
-def _lower_first(text: str) -> str:
-    """Lower a leading capital so a sentence can become a clause -- unless the
-    first word is a proper noun, which gives "that sentry appears to be"."""
-    text = (text or "").strip()
-    if not text:
-        return ""
-    first = text.split(" ", 1)[0].strip(".,:;")
-    if len(first) > 1 and first[0].isupper() and any(c.isupper()
-                                                     for c in first[1:]):
-        return text
-    return text[0].lower() + text[1:]
+_lower_first = lower_first
 
 
 def founder_view_from_report(report) -> dict:

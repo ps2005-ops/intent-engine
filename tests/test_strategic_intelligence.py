@@ -124,15 +124,23 @@ def test_comparable_patterns_have_mechanism_and_limits(shopify_report):
 
 def test_show_evidence_renders_reasoning_before_provenance_ids(shopify_report):
     html = render_strategic_report(shopify_report)
-    # human-readable reasoning and evidence excerpts are primary
-    assert "Reasoning." in html
-    assert "Strongest support" in html and "Strongest counterpoint" in html
-    # raw artifact/replay ids do NOT appear in the human-facing body; the
-    # technical signal trace / provenance is quarantined to the appendix
+    # human-readable reasoning and evidence excerpts are primary. The
+    # "Reasoning." label went with the field-shaped cards; the reasoning
+    # itself is now a sentence under "Why that evidence matters".
+    assert ">Why that evidence matters<" in html
+    # supporting and contradicting evidence are still distinguished, as
+    # labelled prose rather than two chips
+    assert "What supports the reading" in html
+    assert "What cuts against it" in html
+    # raw artifact/replay ids never appear in the human-facing body. The
+    # "Technical appendix" that used to hold them is gone -- signal traces and
+    # hypothesis ids are the system describing itself, and the page a founder
+    # reads is not where they belong.
     assert "artifact_id" not in html and "replay_id" not in html
-    assert "Technical appendix" in html
-    # reasoning appears before the technical appendix (progressive disclosure)
-    assert html.index("Reasoning.") < html.index("Technical appendix")
+    assert "Technical appendix" not in html
+    assert "signal_trace" not in html
+    # the argument comes before the sourcing, not after it
+    assert html.index("Why that evidence matters") < html.index(">Sources<")
     low, reasons = looks_low_value(html)
     assert not low, reasons
 
@@ -241,17 +249,22 @@ def test_new_shopify_report_rejects_low_value_structures(shopify_report):
                    "the company talks about", "visible audience"):
         assert banned not in lowered, banned
     # the core comparative-analysis section is present with a mechanism
-    assert "comparable pattern" in lowered and "mechanism:" in lowered
+    # the historical analogue survives as prose rather than a labelled chip
+    assert "resembles a pattern seen before" in lowered
     # every rendered leadership question explains itself ("why we ask")
-    assert "why we ask" in lowered
-    # hypothesis cards, blind spots, timeline, agenda, and source library render
-    assert 'class="card hypothesis"' in lowered
-    assert "possible blind spots" in lowered
-    assert "strategic timeline" in lowered
-    assert "likely current leadership agenda" in lowered
-    assert "source library" in lowered
-    # executive-first: first viewport shows thesis + decision most affected
-    assert "decision most affected" in lowered
+    assert "we ask because" in lowered
+    # the reasoning, the tensions, the dated developments, the inferred
+    # agenda and the sourcing all still reach the reader -- as an argument in
+    # eight sections rather than fourteen field-shaped card grids
+    assert ">why that evidence matters<" in lowered
+    assert ">what happened<" in lowered
+    assert ">what else could explain it<" in lowered
+    assert ">what to monitor<" in lowered
+    assert ">sources<" in lowered
+    assert "leadership is likely weighing" in lowered
+    # the decision the claim bears on is still stated -- as a sentence, not
+    # as a value beside a bold label in a six-row grid
+    assert "it bears on one decision in particular" in lowered
 
 
 # --- G: the acceptance evidence flows through the REAL compose pipeline ------
@@ -672,8 +685,9 @@ def test_webapp_strategic_run_quarantines_legacy(tmp_path):
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
     # executive-first content is present
-    assert "Decision most affected" in body and "card hypothesis" in body
-    assert "Strategic timeline" in body and "Source library" in body
+    assert "It bears on one decision in particular" in body
+    assert ">Why that evidence matters<" in body
+    assert ">What happened<" in body and ">Sources<" in body
     # legacy material is ONLY inside the collapsed technical appendix
     assert "Technical appendix" in body
     assert body.index("Technical appendix") < body.index("Evidence Library")
