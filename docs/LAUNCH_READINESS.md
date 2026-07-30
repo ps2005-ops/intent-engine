@@ -212,6 +212,34 @@ is where both defects looked fine.
    prepared_example` keeps it off the landing page.
 6. **`/readyz` reports `degraded`** while storage is non-durable. This is
    accurate and intentional.
+7. **Extraction artefacts survive into quoted evidence.** Seen on production:
+   the Airbnb evidence quote opens `“Exhibit 99.1. 1 §:)airbnb. Q1 2026 Key
+   Financial Measures Revenue $2.7B…”` — the `§:)airbnb` is a mangled logo
+   glyph from the filing's HTML. The quote is honest and the numbers after it
+   are real, so this is cosmetic, but it is the kind of thing a reader reads
+   as breakage. Note it is a *quote* rather than the product's own prose:
+   `_readable_excerpt` cleans the bullets built from documents, and does not
+   touch observation excerpts, which are shown verbatim on purpose. Fixing it
+   means normalising glyph noise at parse time, not filtering the quote.
+
+## Production verification
+
+Deployed and verified after this milestone.
+
+| | |
+|---|---|
+| **URL** | `https://intent-engine-oatc.onrender.com` |
+| **`/version`** | `b988cd23477904d2b8d95f9893849e8dab6ee762` — the milestone head |
+| **`/readyz`** | `degraded`, storage `EPHEMERAL_LIKELY`, honestly reported |
+| **`browser_rendering`** | `false` — confirms limitation 1 in production, not just locally |
+| **`strategic_reasoning`** | `false` — deterministic path is the product |
+
+A live Airbnb run on production (`01KYTCFH3QQMQ4TY067ZCFA7RX`) returned 200 on
+all three layers and was scanned for the same seven leak classes: **all
+clean**. The full analysis was read end to end and carries the reworded
+methodology note, the reworded withheld view, reader-facing limitations, and
+the feedback copy with the hosting detail removed. Inspected on production,
+not localhost.
 
 ## Owner actions
 
