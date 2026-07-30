@@ -264,6 +264,7 @@ not only at reading markets. Recorded per cycle, before the build.
 | 1 | market-evidence adapter | evidence collection returns nothing | — (no metric named in advance) | `no_strategic_reading` 3→2, yield 0→36% | **wrong bottleneck** | Reasoned from the gate I could *see* (`no_market_evidence`) without checking that the records showing it came from an injected test fake, not production |
 | 2 | strategic-reading yield | no outside source ever approved | — (no metric named in advance) | `independent_source` 0/11→1/11, yield 36%→45% | **wrong bottleneck** | Read a metric (`no_outside_source`) as a fact about the world — companies lack independent coverage — instead of inspecting the stage before it, where the candidates were present all along |
 | 3 | strategic-reading yield *(carried from cycle 2)* | **market-evidence adapter** | LV 0 → **1–3** | LV 0 → **1** | **correct, at the floor** | First cycle with a stated numeric prediction, and the first correct one. Landed at the floor for the reason given in advance: only Shopify clears every earlier gate |
+| 4 | resolution / outcome scoring | **the objective function itself** | — | LV shown gameable 0→10 by one constant; replaced | **wrong bottleneck** | Ranked features behind the metric without testing whether the metric survived being made a target. A one-day-old KPI is the least-tested component in the system, not the most trusted |
 
 Cycles 1 and 2 named no numeric prediction in advance, so their error is
 recorded as categorical (wrong bottleneck) rather than as a magnitude. Cycle 3
@@ -409,3 +410,94 @@ one gradable evaluation per cycle needs thirty cycles to reach the A-M5
 threshold. That argues universe breadth becomes #1 immediately after
 resolution — the first time in the phase it will have been the right answer.
 Recorded now so the next cycle can test it rather than rediscover it.
+
+---
+
+## Cycle 4 — 2026-07-30 · the metric was the bottleneck
+
+### Measured first, on the metric itself
+
+Cycle 3's Learning Velocity was one day old. Rather than rank features, this
+cycle applied the metric-integrity test to LV. It failed:
+
+| `MIN_ABS_RETURN` | Learning Velocity |
+|---|---|
+| `0.02` (shipped) | 0 |
+| `0.0001` (one edit) | **10** |
+
+Ten companies moving inside the noise floor. Same evidence, same reasoning,
+same prices — LV rose 10× for a system that had become **worse**, since it
+would now be predicting noise confidently. Full write-up in
+[`METRIC_INTEGRITY.md`](METRIC_INTEGRITY.md).
+
+**The highest-leverage bottleneck was the objective function**, not any
+feature behind it. A wrong objective misdirects every future cycle, so its
+expected cost compounds faster than anything it would have ranked.
+
+### Learning Value replaces Learning Velocity
+
+Weighted by resolution quality × information gain × novelty × calibration
+impact — with a hard rule: **three of those four cannot be measured today and
+are therefore not estimated.**
+
+Zero predictions have resolved, there is no knowledge base, and `A-M5` gates
+calibration behind ≥30 resolutions. Implementing the full formula with guessed
+factors would be strictly worse than the metric it replaces: moving LV costs a
+code edit; moving a self-assigned factor costs an opinion. Unmeasurable factors
+return `UNMEASURABLE`, and the score **refuses to produce a number** while any
+are missing — because a partial product silently treats unknown as 1.0, which
+makes an unmeasured system score like a fully-understood one.
+
+### Novelty, and the correction it needed
+
+Novelty is measurable now and is the factor that guards the quantity-over-
+quality failure. The first implementation used flat tiers and **failed the
+motivating case**:
+
+| | resolvable | novelty-weighted (v1) | novelty-weighted (final) |
+|---|---|---|---|
+| A: 100 momentum trades | 100 | 50.5 ❌ | **5.19** |
+| B: 20 varied evaluations | 20 | 12.0 | **9.13** |
+| gaming: same trade ×10 | 10 | — | **1.55** |
+
+Flat per-company credit still let A win. Fixed with harmonic decay within a
+shape — `1/(1+k)` — chosen because that is how repeated sampling of one
+hypothesis behaves, not because it produces a preferred ordering. A hundred
+repeats are now worth about five first attempts.
+
+### Opportunity coverage
+
+Measured on the real universe, and it found a blind spot the engine could not
+see about itself:
+
+```
+counts: {sector: 3, industry: 4, market_cap: 0, region: 0}
+sector concentration: 0.5
+gaps: 8 of 10 sectors, ALL market caps, ALL regions
+```
+
+`market_cap` and `region` read **0 because those fields do not exist on
+`CompanyProfile`**. The engine cannot measure its own coverage on two of five
+dimensions. Reported as gaps rather than a score, deliberately — "no
+healthcare, no small-cap, no international" names the next companies to add;
+"coverage 0.4" invites optimising the number.
+
+### Ranking after this cycle
+
+1. **Resolution and outcome scoring** — unchanged at #1. Three of four Learning
+   Value factors turn on the moment outcomes exist. It is the single change
+   that unblocks the most measurement.
+2. **Universe breadth, now with coverage targets** — no longer "add companies"
+   but "add the eight missing sectors, and add the `market_cap` and `region`
+   fields so the gap can be measured at all".
+3. Strategic-reading yield — unchanged, still producing better WATCH records
+   rather than gradable ones.
+
+### Prediction for the next cycle — recorded now
+
+Resolution will move `resolution_quality` from `UNMEASURABLE` to measurable
+for **1** evaluation (the single baseline BUY), leaving Learning Value still
+unscored because `information_gain` and `calibration_impact` need a knowledge
+base and ≥30 resolutions respectively. **Predicted: LV score remains `None`,
+`unmeasurable_factors` drops from 3 to 2.** If it returns a number, something
+has been faked.
