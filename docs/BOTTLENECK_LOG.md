@@ -265,6 +265,7 @@ not only at reading markets. Recorded per cycle, before the build.
 | 2 | strategic-reading yield | no outside source ever approved | — (no metric named in advance) | `independent_source` 0/11→1/11, yield 36%→45% | **wrong bottleneck** | Read a metric (`no_outside_source`) as a fact about the world — companies lack independent coverage — instead of inspecting the stage before it, where the candidates were present all along |
 | 3 | strategic-reading yield *(carried from cycle 2)* | **market-evidence adapter** | LV 0 → **1–3** | LV 0 → **1** | **correct, at the floor** | First cycle with a stated numeric prediction, and the first correct one. Landed at the floor for the reason given in advance: only Shopify clears every earlier gate |
 | 4 | resolution / outcome scoring | **the objective function itself** | — | LV shown gameable 0→10 by one constant; replaced | **wrong bottleneck** | Ranked features behind the metric without testing whether the metric survived being made a target. A one-day-old KPI is the least-tested component in the system, not the most trusted |
+| 5 | grading (resolution) | grading — **but of all decisions, not just positions** | decisions graded 9% | decisions graded **100%**; refusal justification measurable at n=10 | **target right, scope wrong** | Equated "decision" with "position". Refusals are 91% of what this engine does, and an explicit Decision Quality component was going unmeasured. Falsification caught it before implementation, not after |
 
 Cycles 1 and 2 named no numeric prediction in advance, so their error is
 recorded as categorical (wrong bottleneck) rather than as a magnitude. Cycle 3
@@ -501,3 +502,87 @@ unscored because `information_gain` and `calibration_impact` need a knowledge
 base and ≥30 resolutions respectively. **Predicted: LV score remains `None`,
 `unmeasurable_factors` drops from 3 to 2.** If it returns a number, something
 has been faked.
+
+---
+
+## Cycle 5 — 2026-07-30 · falsification changed the scope, not the target
+
+### Falsification protocol, run before any code
+
+Standing #1 was resolution / outcome scoring. Four alternatives were generated
+and each estimated by **Decision Quality** improvement, not learning:
+
+| alternative | DQ effect | verdict |
+|---|---|---|
+| Universe breadth | more decisions, still ungraded → DQ unmeasurable | rejected |
+| Strategic-reading yield | converts NO_TRADE → WATCH; both refusals, both ungraded | rejected |
+| Calibration | blocked by `A-M5` until n≥30 | impossible |
+| **Grading refusals, not just positions** | grades 91% of decisions instead of 9% | **dominates** |
+
+### What falsification found
+
+The ranking **survived** — grading is #1 — but its scope was wrong, and the
+wrong scope was expensive:
+
+```
+BUY / SELL         1 of 11 decisions  ( 9%)  ← what resolution would grade
+WATCH / NO_TRADE  10 of 11 decisions  (91%)  ← ungraded, permanently
+```
+
+"Refuses when evidence is insufficient" is an explicit Decision Quality
+component and was **not measured at all**. A resolution layer that graded only
+positions would have measured 9% of decisions and declared the loop closed.
+
+Trying to disprove the ranking did not overturn it. It stopped the right build
+from being done wrongly — which is the point of the protocol.
+
+### Causal chain, with evidence at each arrow
+
+```
+Grade refusals as first-class decisions
+        ↓  (share_of_decisions_graded 9% → 100%)
+Capability: the engine can evaluate its own refusals
+        ↓  (refusal_justification_rate 1.0, n=10, confidence MEDIUM)
+Behaviour: every gate cited is checked against a real list
+        ↓  (material_miss_rate 0.1, n=10 — Palantir forwent 31%)
+Metric: opportunity cost separated from correctness
+        ↓
+Decision Quality: a justified refusal that missed a 31% move is recorded as a
+GOOD decision with a bad outcome — the engine cannot learn to chase moves it
+had no evidence for
+```
+
+The last arrow is the one that matters. Grading that refusal as an error would
+have taught the engine to take positions on insufficient evidence whenever the
+coin landed well — actively destroying the capability being measured.
+
+### Metric confidence, now carried everywhere
+
+| metric | value | n | confidence |
+|---|---|---|---|
+| share of decisions graded | 1.00 | 11 | high |
+| refusal justification rate | 1.00 | 10 | medium |
+| material miss rate | 0.10 | 10 | medium |
+| position accuracy | 1.00 | **1** | **low** |
+
+Position accuracy is 100% and worth almost nothing — one sample. Reporting it
+without its confidence is how a system talks itself into certainty it has not
+earned.
+
+### Counterfactual — what would have changed my mind
+
+I would have built universe breadth instead if refusals had turned out to be a
+minority of decisions, or if `refusal_justification_rate` had come back near
+1.0 with **high** confidence, meaning refusal quality was already understood
+and not worth instrumenting. Neither held: refusals are 91%, and the rate rests
+on n=10.
+
+### Ranking after this cycle
+
+1. **Sample size** — every rate above is `low`/`medium` confidence. Nothing
+   reaches `A-M5`'s n≥30. The binding constraint is now decisions per cycle,
+   which makes universe breadth #1 for the first time in the phase — exactly as
+   predicted in cycle 3.
+2. Knowledge extraction — `information_gain` is the last Learning Value factor
+   with no path to measurement.
+3. Strategic-reading yield — unchanged.
