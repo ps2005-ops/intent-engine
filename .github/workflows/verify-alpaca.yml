@@ -1,0 +1,69 @@
+name: Verify Alpaca paper config
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check config and authenticate (read-only, no orders)
+        env:
+          ALPACA_PAPER_API_KEY: ${{ secrets.ALPACA_PAPER_API_KEY }}
+          ALPACA_PAPER_SECRET_KEY: ${{ secrets.ALPACA_PAPER_SECRET_KEY }}
+          ALPACA_PAPER_BASE_URL: ${{ secrets.ALPACA_PAPER_BASE_URL }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+
+          api_key = os.environ.get("ALPACA_PAPER_API_KEY", "")
+          api_secret = os.environ.get("ALPACA_PAPER_SECRET_KEY", "")
+          base_url = os.environ.get("ALPACA_PAPER_BASE_URL", "")
+          expected_base = "https://paper-api.alpaca.markets"
+
+          errors = []
+          if not api_key:
+              errors.append("ALPACA_PAPER_API_KEY missing")
+          if not api_secret:
+              errors.append("ALPACA_PAPER_SECRET_KEY missing")
+          if base_url != expected_base:
+              errors.append(
+                  f"ALPACA_PAPER_BASE_URL mismatch (expected {expected_base!r}, "
+                  f"got {base_url!r})"
+              )
+
+          if errors:
+              print("RESULT: FAIL")
+              for e in errors:
+                  print(f"CONFIG ERROR: {e}")
+              raise SystemExit(1)
+
+          req = urllib.request.Request(
+              base_url.rstrip("/") + "/v2/account",
+              headers={
+                  "APCA-API-KEY-ID": api_key,
+                  "APCA-API-SECRET-KEY": api_secret,
+              },
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=15) as resp:
+                  account = json.loads(resp.read().decode())
+          except urllib.error.HTTPError as e:
+              print("RESULT: FAIL")
+              print(f"CONFIG ERROR: authentication failed (HTTP {e.code})")
+              raise SystemExit(1)
+          except Exception as e:
+              print("RESULT: FAIL")
+              print(f"CONFIG ERROR: connection error ({type(e).__name__})")
+              raise SystemExit(1)
+
+          is_paper = "paper-api.alpaca.markets" in base_url
+          print("RESULT: PASS")
+          print(f"account_type: {'PAPER' if is_paper else 'UNKNOWN/LIVE'}")
+          print(f"buying_power: {account.get('buying_power')}")
+          print(f"account_status: {account.get('status')}")
+          print("connection_status: connected")
+          PY

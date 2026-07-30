@@ -1,0 +1,27 @@
+# D. Intraday reconciliation — mid-session order/position status sync.
+name: intraday-paper-reconciliation
+
+on:
+  schedule:
+    - cron: "23 17 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override trading date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: intraday-paper-reconciliation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: intraday-paper-reconciliation
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 15

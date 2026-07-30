@@ -32,6 +32,21 @@ dependencies = [
     "pydantic==2.13.4",
 ]
 
+# The Postgres driver for `storage.durable`, which is the hosted runtime's
+# truth. It is NOT a hard dependency: `durable.py` imports sqlite3 at module
+# load and reaches for psycopg lazily, only when DATABASE_URL names a
+# postgresql:// backend. So development, CI and the offline suite need neither
+# the driver nor a server, and a deployment that has not been pointed at
+# Postgres yet is unaffected.
+#
+# It is declared as an extra rather than a dependency for that reason, and
+# because it carries a compiled wheel. The moment DATABASE_URL is set to
+# Postgres, the install has to become `pip install -e .[postgres]` or the
+# first durable write raises ImportError at runtime rather than at build time
+# — which is the failure this project has already had once with pydantic.
+[project.optional-dependencies]
+postgres = ["psycopg[binary]==3.2.3"]
+
 [project.scripts]
 premortem = "intent_engine.simulator.cli:main"
 delegate = "intent_engine.voice.cli:main"
