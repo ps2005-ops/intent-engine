@@ -831,3 +831,104 @@ must be checked against a reality run before it is acted on.
 Consecutive cycles without core framework modification: **1** (this one). The
 first cycle in the project that changed no framework and no architecture — it
 ran the engine and measured what happened.
+
+---
+
+## Cycle 9 — 2026-07-30 · the loop is closed
+
+### The blocker was one credential, and it turned out not to be
+
+Tiingo, Polygon, Alpha Vantage, Finnhub, Twelve Data and IEX all need a key
+this environment lacks. Stooq now answers with a JavaScript bot-challenge
+instead of CSV. **Yahoo's chart endpoint answers with real daily OHLC and needs
+no key** — measured, not assumed, and it is the only route from "decision" to
+"graded decision" available today.
+
+### First resolved predictions in the project's history
+
+```
+companies priced        : 14/15   (OLO: HTTP error)
+paper trades opened     : 66
+PREDICTIONS RESOLVED    : 66
+position accuracy       : 0.500
+```
+
+### The result is a coin flip, and that is the most useful possible answer
+
+`momentum_persists.v1`: **33 supported, 33 refuted, support rate 0.500.**
+Confidence began at 0.55 and, after 66 recorded revisions, ended at **0.55** —
+the belief-revision machinery moved it up 33 times and down 33 times and
+landed exactly where it started.
+
+The baseline has **no measurable edge**. That was its stated design — a prior
+of 0.55 with no demonstrated skill — and it is now measured rather than
+asserted. **The bar every future signal has to beat is 0.500**, and it is on
+the record before anyone knew what it would be.
+
+Had this come back at 0.62 the correct response would have been suspicion, not
+celebration: a momentum rule beating the market on 66 samples usually means a
+lookahead bug. 0.500 is what a correct implementation of a no-edge rule looks
+like.
+
+### Accuracy by sector — real, and mostly too small to read
+
+| sector | n | accuracy |
+|---|---|---|
+| Technology | 19 | 0.474 |
+| Consumer Discretionary | 9 | 0.778 |
+| Consumer | 6 | 0.667 |
+| Healthcare | 6 | 0.667 |
+| Financials | 5 | 0.800 |
+| Consumer Staples | 5 | 0.000 |
+| Utilities | 5 | 0.400 |
+| Industrials | 5 | 0.400 |
+| Energy | 3 | 0.000 |
+| Materials | 3 | 0.333 |
+
+Financials at 0.80 and Consumer Staples at 0.00 are the kind of numbers that
+invite a story. **Both rest on n=5.** Under the metric-confidence rule every
+one of these is `low`, and none may inform a decision. They are recorded
+because the *shape* — that sector-level variation exists at all — is what
+argues for the coverage work done in cycle 7.
+
+### What this grades, and what it does not
+
+`baseline_momentum.v1` **in isolation**. The strategic gates are not applied,
+because company evidence cannot be time-travelled: a website shows today's
+content, and using it for a decision dated three months ago would be lookahead
+of the worst kind — invisible and flattering.
+
+So this answers one question honestly — *does the baseline have an edge?* — and
+is not a measurement of the whole engine.
+
+Lookahead is refused structurally, not by convention: `PriceSeries.on` never
+returns a price after the date requested, `trading_window` refuses to grade a
+horizon that has not elapsed, and decision dates are spaced 14 days apart so
+overlapping windows cannot resample one market move and report it as several
+independent tests.
+
+### Readiness, against the checklist
+
+| | |
+|---|---|
+| Architecture · Research · Decision engine · Paper trading | ready |
+| Hypothesis tracking · Falsification · Market exposure | ready |
+| **Outcome resolution** | **ready — 66 resolved** |
+| **Automatic grading** | **ready — position accuracy, by sector, by hypothesis** |
+| **Continuous learning from reality** | **ready — 66 belief revisions recorded** |
+
+`A-M5`'s n≥30 threshold is passed at n=66 — for this signal, on this replay.
+It is not passed for the *engine*, whose full path still has zero resolved
+decisions, and no accuracy claim is made about it.
+
+### Ranking after this cycle
+
+1. **A signal that beats 0.500** — the bar now exists and nothing clears it.
+   Every earlier bottleneck was about making measurement possible; this is the
+   first one about being *right*.
+2. **Strategic-reading yield** — `view_withheld` 7/16 on reality. Still the
+   gate on the full path.
+3. **JS-rendered retrieval** — 6/16 produce no evidence.
+
+Framework stability: **2** consecutive cycles without core framework
+modification.
