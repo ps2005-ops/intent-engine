@@ -164,6 +164,14 @@ nav form{display:inline;margin:0}
 nav button{background:transparent;color:#3a3a8c;border:0;padding:.1rem .2rem;
 font:inherit;font-weight:500;cursor:pointer;text-decoration:underline}
 nav button:hover{color:#2d2d70}
+/* On a phone every nav item is a thumb target, and at the shell's 0.85rem
+   they were 18-20px tall -- under the 24px minimum, on the control a reader
+   uses to get out of a page. Desktop is unchanged: the extra height comes
+   from padding that only applies where pointing is imprecise. */
+@media (max-width:600px){
+nav{gap:.35rem .9rem;padding:.5rem .8rem}
+nav a,nav button{display:inline-flex;align-items:center;min-height:44px;
+padding:.1rem .15rem}}
 label{display:block;margin:.4rem 0 .3rem;font-weight:500}
 input[type=text],input[type=email],input[type=password],input[type=url],
 input:not([type]),textarea,select{width:100%;max-width:34rem;box-sizing:border-box;

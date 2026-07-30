@@ -1655,7 +1655,12 @@ class WebApp:
                 # "skip to main content" could land on either — on the longest
                 # page in the product, where getting out matters most.
                 f'<main>'
-                f'<div class="brief">{self._layer_nav(run_id, "full")}</div>'
+                # Bare, as every other layer renders it. Wrapping it in
+                # `.brief` gave the nav that class's white background,
+                # 38rem cap and 40px bottom padding, so on a phone the layer
+                # links sat in a stray white panel with a band of dead space
+                # under them -- the first thing below the site nav.
+                f'{self._layer_nav(run_id, "full")}'
                 f'{strat}{actions}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
