@@ -15,6 +15,7 @@ thing. That is right, and its failure mode is that "smallest" becomes
 | P1 | Belief revision uses a fixed ±0.05 step, not a Bayesian update | cycle 6 | The likelihoods a real update needs have not been measured; inventing them puts a precise number on a guess | ≥30 resolutions give a measured base rate |
 | P2 | `BASELINE_PROBABILITY = 0.55` is a stated prior, not a measurement | cycle 3 | Momentum has no demonstrated edge on this universe | Resolved outcomes justify a different number, through the promotion wall |
 | P3 | `_KIND_TO_SOURCE_CLASS` maps unknown kinds to `company_owned` | cycle 2 | Conservative default, but it silently under-credits genuine outside sources whose kind is unrecognised | Evidence kinds are enumerated at the source rather than inferred |
+| P5 | `regime="calm"` is hardcoded in every run | cycle 3 | No regime has ever been observed, so every lesson is implicitly single-regime and cannot be known to generalise | A real regime signal, which needs `FRED_API_KEY` |
 | P4 | Hypothesis ↔ signal is 1:1 | cycle 7 | Only one signal exists, so the distinction is currently free | A second signal tests the same hypothesis |
 
 ## Deferred capabilities
@@ -34,6 +35,7 @@ thing. That is right, and its failure mode is that "smallest" becomes
 | A2 | `MATERIAL_MOVE = 5%` separates a real miss from noise | Round number, chosen before any data | Observed distribution of forgone moves showing a different break |
 | A3 | The six listed gates are all legitimate refusal reasons | Each was derived from a real measurement | A gate that fires often and always precedes a large forgone move |
 | A4 | Strategic reading is a prerequisite for a position | The reasoner's ordering assumes it | Positions taken on market evidence alone calibrating as well or better |
+| ~~A5~~ | ~~Offline fixtures approximate reality well enough to rank bottlenecks~~ | — | **DISPROVEN, cycle 8.** Fixtures gave 45% strategic-reading yield against reality's 19%, and reported `independent_source` 1/11 where reality gives 0/16. Fixtures stay valid for regression tests; they are no longer sufficient for ranking |
 
 ## Placeholder lifetime
 

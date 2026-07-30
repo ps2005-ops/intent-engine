@@ -746,3 +746,88 @@ design, and must be justified as such or replaced.
 2. Theory-of-the-system framework (`D4`) — unblocked once this cycle restores
    the market/process balance.
 3. Strategic-reading yield — unchanged.
+
+---
+
+## Cycle 8 — 2026-07-30 · first contact with reality
+
+### Reality exposure, measured before anything was built
+
+| | |
+|---|---|
+| real companies researched over live network | **0** |
+| real prices fetched | **0** |
+| real outcomes graded | **0** |
+| observed market regimes | **0** (`regime="calm"` hardcoded everywhere) |
+| cycles touching live market data | **0 of 7** |
+
+Every conclusion in this log up to here came from offline fixtures and
+synthetic price series. Engineering-to-reality ratio: **7:0**.
+
+### What is actually blocked, and what was not
+
+Real **prices** need a credential this environment does not have — no
+`TIINGO_API_KEY`, and Stooq now serves a JavaScript bot-challenge instead of
+CSV. That is a genuine external blocker and an owner action.
+
+Real **company research** needs no credential at all. It has been available
+every one of the last seven cycles and was never used. So this cycle ran the
+real ingestion over the real websites of all 16 universe companies.
+
+### Fixtures versus reality — the same pipeline, the same reasoner
+
+| metric | fixtures | **REAL** | |
+|---|---|---|---|
+| produced evidence | 8/11 (73%) | 10/16 (62%) | modest |
+| strategic-reading yield | 5/11 (45%) | **3/16 (19%)** | **collapsed** |
+| independent source found | 1/11 | **0/16** | **went to zero** |
+| dominant gate | `not_tradable` | **`view_withheld` (7/16)** | different failure |
+
+### What only reality could show
+
+**Cycle 2's headline fix does nothing in reality.** `select_diverse` moved
+`independent_source` from 0/11 to 1/11 on fixtures and was the cycle's
+measured success. On real companies it is **0/16**. The fix is real and the
+code is correct; its effect in reality is nil, because real company domains do
+not host third-party sources — discovery sees the company's own domain and SEC
+and nothing else. The fixture had customer-voice pages on the company's own
+host, which no real company does.
+
+**My cycle-2 prediction was right and the fixture measurement overturned it
+wrongly.** I predicted `view_withheld` would dominate; fixtures said
+`no_outside_source`; reality says `view_withheld`, 7 of 16. The measurement
+apparatus was confidently wrong because the instrument was unrepresentative.
+
+**Six of sixteen produced zero evidence** — J&J, Toyota, Infosys, Linde,
+Caterpillar, Duolingo. Large companies with rich public websites. This is the
+JS-rendering limitation, now measured on reality rather than inferred.
+
+**Caterpillar took 116s against a ~8s median.** A latency outlier no fixture
+could produce.
+
+### The assumption this disproves
+
+`A5` (new): *offline fixtures approximate reality closely enough to rank
+bottlenecks.* **Disproven.** Fixtures were systematically easier — 45% yield
+versus 19% — and easier in a way that inverted at least one ranking.
+
+Fixtures remain correct for regression tests, where determinism is the point.
+They are no longer sufficient for **ranking**, and every future ranking claim
+must be checked against a reality run before it is acted on.
+
+### Ranking after this cycle — from real data for the first time
+
+1. **Strategic-reading yield** — `view_withheld` 7/16 on reality. It has been
+   ranked #3 for three cycles on fixture evidence. Real data promotes it.
+2. **Retrieval on JS-rendered sites** — 6/16 produce nothing at all. Known,
+   external, and now sized.
+3. **Outside sources** — 0/16 and *not* fixable by selection, which cycle 2
+   believed. It needs a source of genuinely third-party evidence, which is a
+   different capability entirely.
+4. Price credential — the only blocker on grading anything.
+
+### Framework stability
+
+Consecutive cycles without core framework modification: **1** (this one). The
+first cycle in the project that changed no framework and no architecture — it
+ran the engine and measured what happened.
