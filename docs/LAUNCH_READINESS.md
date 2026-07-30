@@ -6,7 +6,7 @@ measured on rendered output, not inferred from code.
 | | |
 |---|---|
 | **Branch** | `feat/strategic-intelligence-v2` |
-| **Head SHA** | `91113fa` |
+| **Last code commit** | `91113fa` — everything measured below was measured against it; the commits after it are documentation only |
 | **Suite** | 2809 passed, 14 skipped |
 | **Five-company validation** | Duolingo, Toast, Novo Nordisk, John Deere, Airbnb — 15 layer-views, all clean |
 | **Mobile** | inspected at 375×812 in a browser; two defects found and fixed |
