@@ -145,14 +145,24 @@ def _withheld_view_is_withheld_everywhere(r, brief, slides) -> list:
     if brief is not None and not getattr(brief, "view_withheld", False):
         problems.append("the report declines to form a view and the brief "
                         "presents one")
+    # Matching on a phrase ("not yet enough") made this checker depend on the
+    # exact wording of a sentence produced in another module -- and broke the
+    # moment that sentence was reworded, which `reasoning.py` predicted in a
+    # comment at the point it writes it. The slide is honouring the decision
+    # when it carries the report's OWN withheld-view sentence, whatever that
+    # sentence currently says.
+    withheld_view = _norm((r.get("thesis") or {}).get("view", ""))
     for slide in slides or ():
         if slide.get("id") == "view" and slide.get("bullets"):
             texts = " ".join(_norm(b.get("text"))
                              for b in slide["bullets"])
-            if "not yet enough" not in texts and "no view" not in texts:
-                problems.append("the report declines to form a view and the "
-                                "presentation states one")
-                break
+            if withheld_view and withheld_view in texts:
+                continue
+            if "no view" in texts:
+                continue
+            problems.append("the report declines to form a view and the "
+                            "presentation states one")
+            break
     return problems
 
 

@@ -271,6 +271,19 @@ def render_landing_html() -> str:
         # 3. What the result actually looks like. Concrete, not adjectives.
         '<section class="sample" aria-label="What you get back">'
         '<h2>What comes back</h2>'
+        # The quote sat here unlabelled, so it read as something the product
+        # had just produced about someone. It is an example, from a particular
+        # moment, and saying so is what stops it implying a live result.
+        #
+        # The company is deliberately not named. It is a console maker, and
+        # `test_sony_is_not_offered_as_a_prepared_example` keeps that company
+        # off this page on purpose -- it is the hardest case the product
+        # handles, so putting its name under "what comes back" would be
+        # showcasing the weakest example rather than a representative one.
+        '<p class="sample-note"><strong>Example analysis.</strong> Real '
+        'output, on a consumer hardware and games company, built from public '
+        'sources. Kept here as an illustration rather than refreshed, so it '
+        'is not a current reading of anyone.</p>'
         '<p class="sample-quote">“Withholding first-party titles from day-one '
         'subscription is not caution — it is the one lever protecting the '
         'software margin that the discounted-hardware strategy depends on.”'

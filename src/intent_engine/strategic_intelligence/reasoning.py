@@ -355,9 +355,11 @@ def _build_thesis(company_name, hypotheses, blind_spots):
         # Downstream gates need to tell "the product declined to form a view
         # and said so" apart from "the product formed a view", and matching on
         # the sentence would break the moment the sentence is edited.
-        return {"view": f"There is not yet enough approved strategic evidence "
-                        f"to form a defensible outside-in view of "
-                        f"{company_name}.",
+        # "Approved strategic evidence" and "defensible outside-in view" are
+        # the pipeline's words for its own steps. The reader needs the fact,
+        # which is that the public record did not carry enough to read from.
+        return {"view": f"What {company_name} has published is not enough to "
+                        f"read a strategy from, so none is put forward here.",
                 "transition": "", "tension": "", "why_care": "",
                 "view_withheld": True}
     top = hypotheses[0]
@@ -698,14 +700,14 @@ def build_strategic_report(*, company_name, observations,
     independent_present = [c for c in _INDEPENDENT_CLASSES if c in coverage]
     if not external_present:
         evidence_gaps.insert(
-            0, "the analysis rests only on company-owned pages; executive, "
-               "investor, independent, and customer-voice sources are needed "
-               "to corroborate or challenge these hypotheses")
+            0, "the analysis rests only on the company's own website; a "
+               "filing, an investor statement, a customer or an independent "
+               "report would be needed to test any of it")
     elif not independent_present:
         evidence_gaps.insert(
-            0, "all evidence is company-published (owned/executive/investor); "
-               "an independent, customer, or competitor source is needed for "
-               "cross-source corroboration")
+            0, "every source here is published by the company itself, so "
+               "nothing in this reading has been checked against an outside "
+               "account of it")
 
     graph = _build_evidence_graph(company_name, observations, hypotheses,
                                   used_patterns, blind_spots, questions)

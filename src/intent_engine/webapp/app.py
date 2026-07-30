@@ -2175,16 +2175,20 @@ class WebApp:
         return may_promise_persistence(self._storage)
 
     def _feedback_form(self, run_id, csrf, page="result"):
-        from intent_engine.webapp.storage_state import explain_storage
         if not self.feedback_available():
+            # The honesty stays: the form is off because a comment would not
+            # be kept, and saying so is the whole point. What went with it was
+            # the reason in the operator's terms -- "Storage is writable but
+            # sits on the same filesystem as the application image, which is
+            # usually replaced on redeploy. Survival has not been
+            # demonstrated." That is a paragraph about our hosting at the foot
+            # of someone's report on their competitor. It is still reported in
+            # full at /readyz, where the person who can act on it looks.
             return (
                 f'<section class="fb" aria-label="Feedback"><h2>Feedback</h2>'
-                f'<p>Feedback is temporarily unavailable on this deployment, '
-                f'so the form is switched off rather than accepting something '
-                f'that would not be kept.</p>'
-                f'<p class="limitation">{_e(explain_storage(self._storage))} '
-                f'Durable storage has to be attached before feedback can be '
-                f'promised.</p></section>')
+                f'<p>Feedback is switched off here for now — we could not '
+                f'promise to keep what you sent, and asking anyway would be '
+                f'worse than not asking.</p></section>')
         return (
             f'<form action="/runs/{_e(run_id)}/feedback" method="post" '
             f'class="fb"><input type="hidden" name="csrf" value="{_e(csrf)}">'

@@ -304,11 +304,16 @@ def render_strategic_report(report) -> str:
         + f'{coverage_badges}</div>'
         f'<h1>{_e(r.get("company_name",""))} — Strategic Intelligence</h1>'
         f'<p class="thesis">{_e(_central_claim(r, thesis))}</p>'
-        + f'<p class="muted">Outside-in analysis of approved public sources and a '
-        f'curated historical-pattern library. No private or internal knowledge '
-        f'is claimed, and no model is trained on this company; likely-agenda '
-        f'items are inferred from public signals, never from private '
-        f'meetings.</p></div>')
+        # "Outside-in analysis of approved public sources and a curated
+        # historical-pattern library" describes the pipeline: "approved" is a
+        # step in the run, and the pattern library is a component. What the
+        # reader needs from this line is the boundary of what the product can
+        # know, which is the second half and is worth saying plainly.
+        + f'<p class="muted">Built only from public sources, each one listed '
+        f'below. Nothing here comes from inside the company, and no part of '
+        f'this is trained on it. Where the report describes what leadership '
+        f'is likely weighing, that is inferred from what the company has '
+        f'published — never from any private meeting.</p></div>')
 
     # ------------------------------------------------------------------
     # The report a reader actually reads.
