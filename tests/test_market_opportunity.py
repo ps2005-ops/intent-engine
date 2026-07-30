@@ -14,6 +14,7 @@ from intent_engine.market.opportunity import (
     NO_OUTSIDE_SOURCE,
     NO_STRATEGIC_READING,
     NOT_TRADABLE,
+    VIEW_WITHHELD,
     MarketEvidence,
     classify,
 )
@@ -122,7 +123,26 @@ def test_a_withheld_strategic_view_is_no_trade_not_a_guess():
     opp = classify(_Company(), _report(thesis=""), as_of="2026-07-30",
                    market=_up())
     assert opp.classification == "NO_TRADE"
-    assert NO_STRATEGIC_READING in opp.blocked_by
+    # evidence WAS read here, so the reason is the withheld view
+    assert VIEW_WITHHELD in opp.blocked_by
+
+
+def test_nothing_retrieved_and_nothing_readable_are_different_facts():
+    """They were one gate, and the `blocked_by` distribution was undiagnosable
+    for it: "we could fetch nothing" and "we fetched plenty and correctly
+    declined to read a strategy from it" looked identical, and they need
+    opposite responses — fix the retrieval, versus do nothing at all."""
+    nothing = classify(_Company(), _report(thesis="", observations=0),
+                       as_of="2026-07-30", market=_up())
+    plenty = classify(_Company(), _report(thesis="", observations=6),
+                      as_of="2026-07-30", market=_up())
+
+    assert nothing.blocked_by == (NO_STRATEGIC_READING,)
+    assert plenty.blocked_by == (VIEW_WITHHELD,)
+    assert nothing.classification == plenty.classification == "NO_TRADE"
+    # and the reason a reader sees says which of the two it was
+    assert "Nothing could be retrieved" in nothing.rationale
+    assert "source(s) were read" in plenty.rationale
 
 
 def test_the_gate_named_is_the_first_one_that_stopped_it():

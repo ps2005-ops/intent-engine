@@ -57,7 +57,17 @@ CLASSIFICATIONS = ("BUY", "SELL", "HOLD", "WATCH", "NO_TRADE")
 # become the thing we group by when asking "what stopped us trading this
 # month?" — the ranked-backlog question the daily system review has to answer.
 NOT_TRADABLE = "not_tradable"
+# Nothing was retrieved. A RETRIEVAL problem, and actionable: a broken site, a
+# blocked crawl, a company that publishes nothing.
 NO_STRATEGIC_READING = "no_strategic_reading"
+# Evidence WAS read and the strategic layer declined to form a view from it.
+# Not a problem at all — it is the honest gate doing its job — and it must not
+# share a name with the case above. They were one gate, which made the
+# `blocked_by` distribution undiagnosable: "we could not fetch anything" and
+# "we fetched plenty and correctly declined" looked identical, and they need
+# opposite responses. The whole value of that distribution is telling them
+# apart.
+VIEW_WITHHELD = "view_withheld"
 NO_DATED_EVIDENCE = "no_dated_evidence"
 NO_OUTSIDE_SOURCE = "no_outside_source"
 NO_MARKET_EVIDENCE = "no_market_evidence"
@@ -304,15 +314,23 @@ def classify(company, report: Optional[dict], *, as_of: str,
                     "as company knowledge rather than a position.",
                     (NOT_TRADABLE,))
 
-    # 2. The strategic layer declined to form a view, or produced none. Its
-    #    gate has already decided the evidence was too thin; re-deciding that
-    #    here with a different threshold is how two gates start disagreeing.
+    # 2. No view. Two very different situations, told apart because they need
+    #    opposite responses: nothing was retrieved (fix the retrieval), or
+    #    plenty was retrieved and the strategic gate correctly declined to read
+    #    a strategy from it (nothing to fix). Collapsing them was hiding which
+    #    of the two the daily cycle was actually hitting.
     if not thesis:
+        if not observations:
+            return _out("NO_TRADE",
+                        "Nothing could be retrieved about this company, so "
+                        "there is no reading to take a position on.",
+                        (NO_STRATEGIC_READING,))
         return _out("NO_TRADE",
-                    "The public evidence did not support a reading of what "
-                    "this company is doing, so there is nothing to take a "
-                    "position on.",
-                    (NO_STRATEGIC_READING,))
+                    f"{len(observations)} source(s) were read, and what the "
+                    f"company publishes is not enough to read a strategy "
+                    f"from — so no view is put forward and no position "
+                    f"follows from one.",
+                    (VIEW_WITHHELD,))
 
     # 3. Nothing dated. Without a date there is no "recent", so there is no
     #    change to trade and no way to say later whether we were early or wrong.

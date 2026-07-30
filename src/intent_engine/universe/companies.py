@@ -51,6 +51,12 @@ class CompanyProfile(BaseModel):
     is_public: bool
     ticker: Optional[str] = None
     exchange: Optional[str] = None
+    # The company's own site. Required for research: the ingestion pipeline is
+    # domain-driven (it discovers sources from a domain), and `evidence_sources`
+    # below is a list of source KINDS ("10-Q", "shareholder letter") rather than
+    # anywhere to fetch. Without this the autonomous research cycle has nothing
+    # to point at, which is why it produced no evidence at all.
+    website: Optional[str] = None
     tradable_instrument: Optional[str] = None   # symbol Alpaca actually trades
     sector: Optional[str] = None
     industry: Optional[str] = None
@@ -182,6 +188,7 @@ def default_universe() -> CompanyPredictionUniverse:
         CompanyProfile(
             company_id="shopify", canonical_name="Shopify Inc.",
             classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.shopify.com",
             ticker="SHOP", exchange="NYSE", tradable_instrument="SHOP",
             sector="Technology", industry="E-commerce platform",
             business_model="commerce platform + merchant services",
@@ -196,6 +203,7 @@ def default_universe() -> CompanyPredictionUniverse:
         CompanyProfile(
             company_id="cloudflare", canonical_name="Cloudflare, Inc.",
             classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.cloudflare.com",
             ticker="NET", exchange="NYSE", tradable_instrument="NET",
             sector="Technology", industry="Internet infrastructure / security",
             business_model="usage + subscription infrastructure",
@@ -210,6 +218,7 @@ def default_universe() -> CompanyPredictionUniverse:
         CompanyProfile(
             company_id="duolingo", canonical_name="Duolingo, Inc.",
             classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.duolingo.com",
             ticker="DUOL", exchange="NASDAQ", tradable_instrument="DUOL",
             sector="Consumer", industry="Consumer subscription / edtech",
             business_model="freemium consumer subscription + ads",
@@ -225,6 +234,7 @@ def default_universe() -> CompanyPredictionUniverse:
         CompanyProfile(
             company_id="stripe", canonical_name="Stripe, Inc.",
             classification=CompanyClass.PRIVATE_COMPANY, is_public=False,
+            website="https://stripe.com",
             ticker=None, exchange=None, tradable_instrument=None,
             sector="Fintech", industry="Payments infrastructure",
             business_model="payments take-rate + platform",
