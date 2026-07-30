@@ -6,11 +6,19 @@ which bottleneck sits behind which — that rediscovery cost three cycles.
 **Read it top-down for "why does this matter", bottom-up for "what is blocked".**
 
 ```
+MISSION
+│
 DECISION QUALITY                                    ← the capability
 │   correct decisions · correct refusals · calibrated
 │   confidence · robust across regimes · improves over time
 │
-├── Learning Value                          [partially measurable]
+├── Knowledge Quality                       [hypothesis-shaped]
+│   ├── Hypothesis quality axis ............. MEASURABLE (cycle 6)
+│   ├── Belief revision ..................... MEASURABLE (cycle 6)
+│   ├── Expected information gain ........... MEASURABLE (cycle 6)
+│   └── Knowledge graph ..................... DEFERRED, see below
+│
+├── Learning Value                    [infrastructure, not the goal]
 │   ├── Resolution Quality .................. MEASURABLE (cycle 5)
 │   ├── Novelty ............................. MEASURABLE (cycle 4)
 │   ├── Information Gain .................... blocked: no knowledge base
@@ -48,3 +56,22 @@ tests them instead of rediscovering them.
 
 A node is not "done" when its code exists. It is done when the node **above**
 it moved, measured the same way before and after.
+
+
+## Deliberately deferred
+
+Applied test: *will this be exercised within the next 5–10 development
+cycles?* At roughly one gradable decision per cycle, three capabilities fail
+it. They are recorded rather than built, so the architecture grows in response
+to demonstrated need rather than anticipated need.
+
+| capability | why deferred | what would unblock it |
+|---|---|---|
+| **Knowledge graph** — "held 17× under high inflation for mid-cap SaaS" | needs hundreds of resolutions across multiple regimes; ten cycles produce ~10 | sustained sample volume AND more than one observed regime |
+| **Execution quality** | there are no fills in the market path — nothing to grade | paper orders actually filling from market decisions |
+| **Calibration quality** | `A-M5` forbids accuracy claims below n≥30 | 30 resolved predictions plus a human calibration review |
+
+The smallest version of each *is* built where it will be used: hypotheses
+carry a confidence history (belief revision without a graph), and quality is
+four axes rather than one — decision, outcome, hypothesis, and the two still
+blocked.

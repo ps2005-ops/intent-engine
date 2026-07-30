@@ -266,6 +266,7 @@ not only at reading markets. Recorded per cycle, before the build.
 | 3 | strategic-reading yield *(carried from cycle 2)* | **market-evidence adapter** | LV 0 → **1–3** | LV 0 → **1** | **correct, at the floor** | First cycle with a stated numeric prediction, and the first correct one. Landed at the floor for the reason given in advance: only Shopify clears every earlier gate |
 | 4 | resolution / outcome scoring | **the objective function itself** | — | LV shown gameable 0→10 by one constant; replaced | **wrong bottleneck** | Ranked features behind the metric without testing whether the metric survived being made a target. A one-day-old KPI is the least-tested component in the system, not the most trusted |
 | 5 | grading (resolution) | grading — **but of all decisions, not just positions** | decisions graded 9% | decisions graded **100%**; refusal justification measurable at n=10 | **target right, scope wrong** | Equated "decision" with "position". Refusals are 91% of what this engine does, and an explicit Decision Quality component was going unmeasured. Falsification caught it before implementation, not after |
+| 6 | universe breadth / sample size | **hypotheses must precede breadth** | n=30 samples | same n=30, worth **3.4× more** (novelty 4.0 → 13.7) | **wrong ordering** | Treated sample COUNT as the constraint when sample DIVERSITY was. Our own novelty metric, built in cycle 4 to catch this exact failure, falsified the plan when finally pointed at it |
 
 Cycles 1 and 2 named no numeric prediction in advance, so their error is
 recorded as categorical (wrong bottleneck) rather than as a magnitude. Cycle 3
@@ -585,4 +586,80 @@ on n=10.
    predicted in cycle 3.
 2. Knowledge extraction — `information_gain` is the last Learning Value factor
    with no path to measurement.
+3. Strategic-reading yield — unchanged.
+
+---
+
+## Cycle 6 — 2026-07-30 · the standing #1 was falsified by our own metric
+
+### Falsification, and this time the ranking did NOT survive
+
+Standing #1 was universe breadth (sample size). Both paths reach `A-M5`'s
+n≥30; the question is what those thirty samples are worth:
+
+| path to n=30 | samples | novelty-weighted | distinct shapes |
+|---|---|---|---|
+| A — expand universe first (one hypothesis) | 30 | **4.0** | 1 |
+| B — hypotheses first, then expand | 30 | **13.7** | 6 |
+
+**B is worth 3.4× more.** Path A is cycle 4's System-A failure rebuilt
+deliberately: thirty samples of one rule. Expanding the universe *before*
+hypotheses exist manufactures exactly the low-novelty volume the novelty
+metric was built two cycles ago to catch.
+
+The falsification was performed with a metric this project already owned,
+against a ranking this project already held. That is the first time the
+measurement apparatus has overturned a plan without new instrumentation.
+
+### Scope test applied before building
+
+*Will this be exercised within the next 5–10 cycles?* At ~1 gradable decision
+per cycle, three of seven proposed capabilities fail:
+
+| capability | verdict |
+|---|---|
+| explicit hypothesis per decision | **build** — fires on the first resolution |
+| hypothesis quality axis | **build** — measurable the moment one resolves |
+| expected information gain | **build** — serves the very next bottleneck |
+| belief revision (smallest) | **build** — fires on the first outcome |
+| knowledge graph | defer — needs hundreds of resolutions across regimes |
+| execution quality | defer — no fills exist to grade |
+| calibration quality | defer — `A-M5` blocks below n≥30 |
+
+Three deferred with the reason and the unblocking condition recorded.
+
+### What changed
+
+A position is now a *consequence* of a hypothesis rather than the unit itself.
+The baseline's hypothesis — "recent price direction persists" — was always
+being asserted; leaving it implicit is what made *"was the trade wrong or was
+the idea wrong?"* unanswerable.
+
+The four combinations, and the two that matter:
+
+| hypothesis | decision | diagnosis |
+|---|---|---|
+| supported | right | the reasoning worked |
+| **supported** | **wrong** | **timing or execution — not reasoning** |
+| **refuted** | **right** | **right for the wrong reason — rewards bad reasoning if counted a success** |
+| refuted | wrong | the idea was wrong |
+
+### Honest limits of what was built
+
+Belief revision uses a **fixed 0.05 step, not a Bayesian update**. The
+likelihoods a proper update needs are exactly what has not been measured yet,
+and inventing them would put a precise-looking number on a guess — the failure
+`METRIC_INTEGRITY.md` exists to prevent. The step is a stated placeholder,
+replaced when calibration data can derive one.
+
+Retirement requires n≥10 before it can fire. Killing a correct hypothesis
+after three unlucky outcomes is the most likely damage this feature could do.
+
+### Ranking after this cycle
+
+1. **Universe breadth** — returns to #1, now *behind* hypotheses rather than
+   ahead of them, which is the whole point of this cycle. Expansion now
+   produces attributable, multi-hypothesis samples.
+2. Knowledge extraction — `information_gain` remains the last Learning Value
+   factor with no measurement path.
 3. Strategic-reading yield — unchanged.
