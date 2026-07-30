@@ -54,9 +54,19 @@ def test_eligibility_excludes_private_and_produces_intents(tmp_path):
     intents, results = intents_for_predictions(preds, default_universe(),
                                                regime="calm", as_of=AS_OF)
     instruments = {i.instrument for i in intents}
-    assert instruments == {"SHOP", "NET", "DUOL"}      # 3 tradables, no private
+    # The property is "every tradable, and no private company" -- not a literal
+    # set, which pinned this test to the seed universe's size and broke the
+    # moment breadth was added for measured coverage reasons.
+    universe = default_universe()
+    assert instruments == {c.tradable_instrument for c in universe.tradable()
+                           if c.prediction_eligible}
+    assert "stripe" not in {i.instrument for i in intents}
+    private = [c for c in universe.companies if not c.tradable_instrument]
+    assert private, "the private-company case must still be represented"
     # every private/proxy prediction is a non-eligible result, never an intent
-    assert all(i.instrument in ("SHOP", "NET", "DUOL") for i in intents)
+    tradable_symbols = {c.tradable_instrument for c in universe.tradable()
+                        if c.prediction_eligible}
+    assert all(i.instrument in tradable_symbols for i in intents)
 
 
 def test_resolution_scores_and_links_pnl(tmp_path):

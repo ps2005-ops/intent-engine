@@ -130,6 +130,12 @@ class Opportunity:
     # 61%". Without it the first real signal and the placeholder it beat are
     # averaged together and neither can be judged.
     market_source: str = ""
+    # WHICH claim about the world this position is a consequence of. Distinct
+    # from `market_source`: that is the machinery, this is the assertion. They
+    # are 1:1 today because there is one signal, and they separate the moment a
+    # second signal tests the same hypothesis -- at which point "was the trade
+    # wrong or the idea wrong?" needs both to be answerable.
+    hypothesis_id: str = ""
     # provenance and self-knowledge
     evidence_count: int = 0
     dated_evidence_count: int = 0
@@ -157,6 +163,7 @@ class Opportunity:
             "upside_pct": self.upside_pct, "downside_pct": self.downside_pct,
             "risk_reward": self.risk_reward,
             "market_source": self.market_source,
+            "hypothesis_id": self.hypothesis_id,
             "evidence_count": self.evidence_count,
             "dated_evidence_count": self.dated_evidence_count,
             "independent_source": self.independent_source,
@@ -268,7 +275,8 @@ def _quality(*, evidence: int, dated: int, independent: bool,
 def classify(company, report: Optional[dict], *, as_of: str,
              market: Optional[MarketEvidence] = None,
              regime: str = "unknown",
-             calibration: Optional[dict] = None) -> Opportunity:
+             calibration: Optional[dict] = None,
+             hypothesis_id: str = "") -> Opportunity:
     """Exactly one classification, with every gate that stopped it named.
 
     The order of the gates is the order a careful analyst would apply them,
@@ -306,6 +314,7 @@ def classify(company, report: Optional[dict], *, as_of: str,
             horizon_days=market.horizon_days if classification in ("BUY", "SELL") else None,
             upside_pct=market.upside_pct, downside_pct=market.downside_pct,
             risk_reward=market.risk_reward, market_source=market.source,
+            hypothesis_id=hypothesis_id,
             evidence_count=len(observations), dated_evidence_count=len(dated),
             independent_source=independent, regime=regime, quality=quality,
             blocked_by=blocked, calibration=calibration)

@@ -39,7 +39,12 @@ def test_assemble_has_all_section17_views():
     assert {"shopify", "cloudflare", "duolingo", "stripe",
             "stripe_proxy_ipay"} <= ids
     assert data["database_health"]["ok"] is True
-    assert data["reconciliation"]["filled_orders"] == 3
+    # one filled order per prediction-eligible tradable; counting the seed's
+    # three pinned this to universe size rather than to the behaviour
+    from intent_engine.universe.companies import default_universe
+    expected_fills = len([c for c in default_universe().tradable()
+                          if c.prediction_eligible])
+    assert data["reconciliation"]["filled_orders"] == expected_fills
     assert "usage" in data["budget"]
     # the private company shows no tradability
     stripe = next(c for c in data["universe"] if c["company_id"] == "stripe")

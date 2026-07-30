@@ -59,6 +59,12 @@ class CompanyProfile(BaseModel):
     website: Optional[str] = None
     tradable_instrument: Optional[str] = None   # symbol Alpaca actually trades
     sector: Optional[str] = None
+    # Coverage measurement reported market_cap and region as 0 for the whole
+    # universe -- not "we cover none", but "the engine cannot see these
+    # dimensions at all". A lesson learned only on mega-cap North American
+    # technology does not generalise, and nothing could detect that.
+    market_cap: Optional[str] = None            # mega | large | mid | small | micro
+    region: Optional[str] = None
     industry: Optional[str] = None
     business_model: Optional[str] = None
     competitors: List[str] = Field(default_factory=list)
@@ -186,7 +192,8 @@ def default_universe() -> CompanyPredictionUniverse:
     the real universe is chosen by the founder (see MANUAL ACTIONS)."""
     companies = [
         CompanyProfile(
-            company_id="shopify", canonical_name="Shopify Inc.",
+            company_id="shopify",
+            market_cap="large", region="North America", canonical_name="Shopify Inc.",
             classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
             website="https://www.shopify.com",
             ticker="SHOP", exchange="NYSE", tradable_instrument="SHOP",
@@ -201,7 +208,8 @@ def default_universe() -> CompanyPredictionUniverse:
             prediction_eligible=True, paper_trading_eligible=True,
             inclusion_reason="liquid large-cap commerce platform; rich filings"),
         CompanyProfile(
-            company_id="cloudflare", canonical_name="Cloudflare, Inc.",
+            company_id="cloudflare",
+            market_cap="large", region="North America", canonical_name="Cloudflare, Inc.",
             classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
             website="https://www.cloudflare.com",
             ticker="NET", exchange="NYSE", tradable_instrument="NET",
@@ -216,7 +224,8 @@ def default_universe() -> CompanyPredictionUniverse:
             prediction_eligible=True, paper_trading_eligible=True,
             inclusion_reason="structurally different (infra/usage) vs Shopify"),
         CompanyProfile(
-            company_id="duolingo", canonical_name="Duolingo, Inc.",
+            company_id="duolingo",
+            market_cap="mid", region="North America", canonical_name="Duolingo, Inc.",
             classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
             website="https://www.duolingo.com",
             ticker="DUOL", exchange="NASDAQ", tradable_instrument="DUOL",
@@ -232,7 +241,8 @@ def default_universe() -> CompanyPredictionUniverse:
             inclusion_reason="third structural model: consumer subscription"),
         # -- one PRIVATE company: researched + strategic reasoning only -------
         CompanyProfile(
-            company_id="stripe", canonical_name="Stripe, Inc.",
+            company_id="stripe",
+            market_cap="large", region="North America", canonical_name="Stripe, Inc.",
             classification=CompanyClass.PRIVATE_COMPANY, is_public=False,
             website="https://stripe.com",
             ticker=None, exchange=None, tradable_instrument=None,
@@ -249,7 +259,8 @@ def default_universe() -> CompanyPredictionUniverse:
                              "only — no direct instrument exists"),
         # -- one labelled PROXY for the private company (class D) -------------
         CompanyProfile(
-            company_id="stripe_proxy_ipay", canonical_name="Fintech ETF (IPAY)",
+            company_id="stripe_proxy_ipay",
+            market_cap="large", region="North America", canonical_name="Fintech ETF (IPAY)",
             classification=CompanyClass.BENCHMARK_OR_PROXY, is_public=True,
             ticker="IPAY", exchange="NYSE ARCA", tradable_instrument="IPAY",
             sector="Fintech", industry="Payments ETF",
@@ -260,7 +271,137 @@ def default_universe() -> CompanyPredictionUniverse:
             proxy_instrument="IPAY", proxy_of="stripe",
             inclusion_reason="LABELLED PROXY for Stripe exposure — proxy "
                              "performance is NOT Stripe's own performance"),
+        # -- BREADTH (cycle 7) ------------------------------------------------
+        # Chosen to close the coverage gaps measurement actually found: eight
+        # missing sectors, every market-cap bucket, every region outside North
+        # America. Deliberately NOT more technology large-caps -- the engine
+        # already had three, and a fourth would add samples without adding a
+        # dimension it could learn along.
+        #
+        # Each is public, liquid and files publicly, so the evidence pipeline
+        # has something real to read. Paper-trading eligible: no capital is at
+        # risk anywhere in this system.
+        CompanyProfile(
+            company_id="johnson_johnson", canonical_name="Johnson & Johnson",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.jnj.com",
+            ticker="JNJ", exchange="NYSE", tradable_instrument="JNJ",
+            sector="Healthcare", industry="Pharmaceuticals and medical devices",
+            market_cap="mega", region="North America",
+            peer_group="pharma_large",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="defensive healthcare mega-cap; the engine had no healthcare at all"),
+        CompanyProfile(
+            company_id="jpmorgan", canonical_name="JPMorgan Chase & Co.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.jpmorganchase.com",
+            ticker="JPM", exchange="NYSE", tradable_instrument="JPM",
+            sector="Financials", industry="Diversified banking",
+            market_cap="mega", region="North America",
+            peer_group="money_center_bank",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="financials are absent, and banks respond to macro unlike any current holding"),
+        CompanyProfile(
+            company_id="exxon_mobil", canonical_name="Exxon Mobil Corporation",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://corporate.exxonmobil.com",
+            ticker="XOM", exchange="NYSE", tradable_instrument="XOM",
+            sector="Energy", industry="Integrated oil and gas",
+            market_cap="mega", region="North America",
+            peer_group="integrated_energy",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="energy is absent and is the clearest cyclical in the market"),
+        CompanyProfile(
+            company_id="caterpillar", canonical_name="Caterpillar Inc.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.caterpillar.com",
+            ticker="CAT", exchange="NYSE", tradable_instrument="CAT",
+            sector="Industrials", industry="Heavy machinery",
+            market_cap="large", region="North America",
+            peer_group="capital_goods",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="industrials absent; a classic early-cycle bellwether"),
+        CompanyProfile(
+            company_id="nextera", canonical_name="NextEra Energy, Inc.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.nexteraenergy.com",
+            ticker="NEE", exchange="NYSE", tradable_instrument="NEE",
+            sector="Utilities", industry="Regulated and renewable utility",
+            market_cap="large", region="North America",
+            peer_group="regulated_utility",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="utilities absent; rate-sensitive in a way nothing else here is"),
+        CompanyProfile(
+            company_id="procter_gamble", canonical_name="The Procter & Gamble Company",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://us.pg.com",
+            ticker="PG", exchange="NYSE", tradable_instrument="PG",
+            sector="Consumer Staples", industry="Household and personal products",
+            market_cap="mega", region="North America",
+            peer_group="consumer_staples",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="staples absent; the defensive counterweight to every growth name held"),
+        CompanyProfile(
+            company_id="linde", canonical_name="Linde plc",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.linde.com",
+            ticker="LIN", exchange="NASDAQ", tradable_instrument="LIN",
+            sector="Materials", industry="Industrial gases",
+            market_cap="large", region="Europe",
+            peer_group="industrial_gases",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="materials absent, and the first European domicile in the universe"),
+        CompanyProfile(
+            company_id="asml", canonical_name="ASML Holding N.V.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.asml.com",
+            ticker="ASML", exchange="NASDAQ", tradable_instrument="ASML",
+            sector="Technology", industry="Semiconductor lithography",
+            market_cap="mega", region="Europe",
+            peer_group="semiconductor_equipment",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="European technology with a monopoly structure unlike any US holding"),
+        CompanyProfile(
+            company_id="toyota", canonical_name="Toyota Motor Corporation",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://global.toyota",
+            ticker="TM", exchange="NYSE", tradable_instrument="TM",
+            sector="Consumer Discretionary", industry="Automobiles",
+            market_cap="mega", region="Asia",
+            peer_group="automotive",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first Asian domicile; a manufacturer, which the universe had none of"),
+        CompanyProfile(
+            company_id="infosys", canonical_name="Infosys Limited",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.infosys.com",
+            ticker="INFY", exchange="NYSE", tradable_instrument="INFY",
+            sector="Technology", industry="IT services and consulting",
+            market_cap="large", region="Emerging",
+            peer_group="it_services",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first emerging-market domicile; a services model, not a product one"),
+        CompanyProfile(
+            company_id="etsy", canonical_name="Etsy, Inc.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.etsy.com",
+            ticker="ETSY", exchange="NASDAQ", tradable_instrument="ETSY",
+            sector="Consumer Discretionary", industry="Online marketplace",
+            market_cap="mid", region="North America",
+            peer_group="ecommerce_marketplace",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="mid-cap; the universe was entirely large and mega outside Duolingo"),
+        CompanyProfile(
+            company_id="olo", canonical_name="Olo Inc.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.olo.com",
+            ticker="OLO", exchange="NYSE", tradable_instrument="OLO",
+            sector="Technology", industry="Restaurant commerce software",
+            market_cap="small", region="North America",
+            peer_group="vertical_saas",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first small-cap; small-caps behave differently enough to be their own test"),
     ]
     return CompanyPredictionUniverse(
-        version=UNIVERSE_SCHEMA_VERSION, label="seed-3public-1private-1proxy",
+        version=UNIVERSE_SCHEMA_VERSION, label="breadth-v1-15public-1private-1proxy",
         companies=companies).validate()

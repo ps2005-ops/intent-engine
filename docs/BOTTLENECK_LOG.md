@@ -663,3 +663,86 @@ after three unlucky outcomes is the most likely damage this feature could do.
 2. Knowledge extraction — `information_gain` remains the last Learning Value
    factor with no measurement path.
 3. Strategic-reading yield — unchanged.
+
+---
+
+## Cycle 7 — 2026-07-30 · the balance rule fired, and it fired against the new idea
+
+### The rule triggered on arrival
+
+The engineering/research balance rule says: two consecutive process-only cycles
+force the next one to improve market capability. Measured:
+
+| # | cycle | kind |
+|---|---|---|
+| 4 | metric integrity / Learning Value | PROCESS |
+| 5 | decision quality grading | PROCESS |
+| 6 | hypothesis framework | PROCESS |
+
+**Three consecutive**, against a threshold of two. The escape clause requires
+proving an engineering bottleneck yields substantially greater Decision Quality
+gains:
+
+- theory-of-the-system framework → better architectural decisions → DQ **indirect**
+- universe breadth → more samples → n toward 30 → calibration measurable → DQ **direct**
+
+The clause does not apply. So the theory framework — the newest and most
+interesting proposal — was **deferred** (`D4`), and this cycle built market
+capability instead. That is the rule working as designed: it caught the project
+about to optimise the optimiser for a fourth straight cycle.
+
+### Built: breadth, along the dimensions measurement said were missing
+
+Coverage had reported `market_cap: 0, region: 0` — not "we cover none" but
+**the engine could not see those dimensions at all**. Both are now fields, and
+twelve companies were added to close the measured gaps.
+
+| | before | after |
+|---|---|---|
+| prediction-eligible companies | 4 | **16** |
+| sectors | 3 | **11** |
+| market-cap buckets | **0** | 4 |
+| regions | **0** | 4 |
+| sector concentration | 0.50 | **0.31** |
+| remaining gaps | 8 sectors, all caps, all regions | Communication Services, micro-cap |
+
+Deliberately **not** more technology large-caps: the engine already had three,
+and a fourth adds samples without adding a dimension it can learn along. Each
+addition names the gap it closes.
+
+### And it is breadth done in the right order
+
+Cycle 6 established that expanding before hypotheses exist manufactures
+low-novelty volume (30 samples worth 4.0 instead of 13.7). Hypotheses landed
+first, so every decision now carries `hypothesis_id` and this expansion
+produces attributable samples rather than thirty repetitions of one rule.
+
+### Two tests were coupled to the seed universe
+
+`test_eligibility_excludes_private_and_produces_intents` asserted
+`{"SHOP", "NET", "DUOL"}` and `test_assemble_has_all_section17_views` asserted
+`filled_orders == 3`. Both were pinned to universe *size* rather than to the
+property they protect — private companies never produce intents; one fill per
+eligible tradable. Rewritten to express the property, so the next breadth
+change does not break them.
+
+### Architectural debt register opened
+
+`ARCHITECTURAL_DEBT.md` records four placeholders, four deferred capabilities
+and four unproven assumptions, each with its introducing cycle and unblocking
+condition. The oldest placeholders — the 0.55 baseline prior and the
+`company_owned` default for unknown evidence kinds — are cycles 2–3 old and are
+the two most likely to be mistaken for settled design.
+
+Standing rule adopted: a placeholder surviving five cycles without its
+unblocking condition getting closer is no longer a placeholder, it is the
+design, and must be justified as such or replaced.
+
+### Ranking after this cycle
+
+1. **Resolution actually running** — 16 eligible companies now produce
+   gradable decisions per cycle instead of 1, so n≥30 is reachable in ~2
+   cycles rather than ~30. Nothing grades them yet.
+2. Theory-of-the-system framework (`D4`) — unblocked once this cycle restores
+   the market/process balance.
+3. Strategic-reading yield — unchanged.

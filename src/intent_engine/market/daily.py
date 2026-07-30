@@ -191,9 +191,16 @@ def daily_opportunity_sweep(ctx, as_of: str) -> Dict:
         market = _market_for(state)
         if market.is_empty:
             market = _baseline_market(ctx, company, as_of)
+        # The hypothesis a position would be testing. Attached from the signal
+        # that produced the view, so every gradable decision is attributable to
+        # a claim rather than only to a rule.
+        from intent_engine.market.hypothesis import BASELINE_HYPOTHESIS
+        from intent_engine.market.signals import BASELINE_SOURCE
+        hypothesis_id = (BASELINE_HYPOTHESIS.hypothesis_id
+                         if market.source == BASELINE_SOURCE else "")
         opportunity = classify(
             company, _report_for(state, evidence), as_of=as_of,
-            market=market, regime=ctx.regime,
+            market=market, regime=ctx.regime, hypothesis_id=hypothesis_id,
             calibration=calibration_by_company.get(company.company_id, {}))
 
         # EVERY result is stored, which is the whole point of the job.
