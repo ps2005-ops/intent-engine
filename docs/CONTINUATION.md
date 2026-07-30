@@ -2,12 +2,30 @@
 
 Written at a context handoff. Verified live, not assumed.
 
+> ## ✅ Founder Intelligence is complete
+>
+> The demo-perfection milestone finished at **`91113fa`** on
+> `feat/strategic-intelligence-v2`. Suite: **2809 passed, 14 skipped**.
+> Five fresh companies validated end to end, 15 layer-views clean of every
+> leak class, no page repeating a text block. Mobile inspected at 375×812.
+>
+> **Read [`LAUNCH_READINESS.md`](LAUNCH_READINESS.md) first** — it carries the
+> architecture summary, what changed, the demo checklist, the five-company and
+> mobile validation, known limitations, owner actions and the roadmap.
+>
+> **Not deployed.** Production is still on the previously verified SHA. Merging
+> and deploying `91113fa`, then re-running the demo checklist against
+> production, is the one remaining step and it is an owner action.
+>
+> Everything below this box is the record of how the product got here. It is
+> history, not a task list.
+
 ## State
 
 | | |
 |---|---|
-| **Deployed SHA** | `101bf7a` verified live (three layers inspected) |
-| **main SHA** | see `git log -1` — one commit ahead (company-name fix), **deploy not yet verified** |
+| **Milestone head** | `91113fa` — demo perfection complete, **not deployed** |
+| **Deployed SHA** | `101bf7a` verified live (three layers inspected) — now well behind |
 | **Working tree** | clean |
 | **`/readyz`** | `degraded` — non-durable storage, honestly reported |
 | **strategic_reasoning** | `false` — `ANTHROPIC_API_KEY` unset (owner) |
@@ -134,25 +152,33 @@ Decks stayed substantial (3.0k–4.4k chars), so filtering did not collapse
 real companies onto the limited-analysis page — only the pure-scaffold case
 falls through, which is the intent.
 
-## Next task — exact
+## The task list that closed this milestone — all done
 
-1. **`_run_page` layout** (`app.py` ~1180) — content is now clean, the
-   structure is still a schema dump (Task 5). This is the biggest remaining
-   gap.
-2. **Landing examples** — unblocked. "Sentry acquired Codecov." is verified
-   live output; use it as a labelled *Example analysis* with the
-   interpretation and uncertainty beneath.
-3. **Mobile inspection at four widths with real screenshots** — the five
-   companies have been run and read, but never *looked at* on a phone.
-4. **Brief signal quality.** Visible on live Sentry and not yet fixed: the
-   "What supports it" bullets concatenate a page TITLE with a generic clause
-   ("API Authentication Bypass | Sentry Blog exposes a surface others can
-   build on"), and one bullet is raw homepage marketing copy ("Bugs aren't
-   great. But your code can be…"). Grammatically broken and not evidence.
-   Same defect shape in the deck's derived questions, which inherit those
-   titles ("Linear customers publishes named customers rather than logos
-   alone"). The generator is `observations.py` — `_SIGNAL_LABEL` and the
-   `f"{entity} {label}"` construction around line 589.
+1. ~~**`_run_page` layout**~~ — done in `b5d80ee`. Fourteen field-shaped
+   sections became the eight moves of an argument, and `381f2f5` took the
+   legacy claim-id view off the fallback path entirely.
+2. ~~**Landing examples**~~ — done in `5b1a99f`. Labelled *Example analysis*,
+   stated as not current. The company is deliberately unnamed: it is the
+   console maker a golden gate keeps off that page.
+3. ~~**Mobile inspection**~~ — done in `91113fa`. 375×812, live browser, on a
+   real Airbnb run. Two defects found and fixed; no overflow anywhere.
+4. ~~**Brief signal quality**~~ — done in `36ea85b` (the company is the
+   grammatical subject, all 27 signals state a consequence) and `198e351`
+   (raw page furniture no longer reaches a slide or a bullet).
+
+See [`LAUNCH_READINESS.md`](LAUNCH_READINESS.md) for what each fix actually
+changed, and for the limitations that remain open.
+
+## What is genuinely next
+
+**Live Trading Training System.** Founder Intelligence is the stable
+foundation now; treat it as one.
+
+The one thing that would most improve Founder Intelligence if picked up later
+is **retrieval on JS-rendered sites**. Three of the five validation companies
+produced no strategic report for that single reason. It is a retrieval gap,
+not a reasoning gap, and closing it converts those runs from an honest
+limited page into a full report.
 
 ## One thing fixed on the way out
 
