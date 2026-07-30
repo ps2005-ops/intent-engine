@@ -123,6 +123,13 @@ class Opportunity:
     upside_pct: Optional[float] = None
     downside_pct: Optional[float] = None
     risk_reward: Optional[float] = None
+    # WHICH signal produced the market view. Recorded on every opportunity so a
+    # later calibration review can segment by source and hold each one to its
+    # own record -- the difference between "the engine is 55% accurate" and
+    # "baseline_momentum.v1 is 55% accurate and the thing that replaced it is
+    # 61%". Without it the first real signal and the placeholder it beat are
+    # averaged together and neither can be judged.
+    market_source: str = ""
     # provenance and self-knowledge
     evidence_count: int = 0
     dated_evidence_count: int = 0
@@ -149,6 +156,7 @@ class Opportunity:
             "horizon_days": self.horizon_days,
             "upside_pct": self.upside_pct, "downside_pct": self.downside_pct,
             "risk_reward": self.risk_reward,
+            "market_source": self.market_source,
             "evidence_count": self.evidence_count,
             "dated_evidence_count": self.dated_evidence_count,
             "independent_source": self.independent_source,
@@ -297,7 +305,7 @@ def classify(company, report: Optional[dict], *, as_of: str,
             probability=market.probability if classification in ("BUY", "SELL") else None,
             horizon_days=market.horizon_days if classification in ("BUY", "SELL") else None,
             upside_pct=market.upside_pct, downside_pct=market.downside_pct,
-            risk_reward=market.risk_reward,
+            risk_reward=market.risk_reward, market_source=market.source,
             evidence_count=len(observations), dated_evidence_count=len(dated),
             independent_source=independent, regime=regime, quality=quality,
             blocked_by=blocked, calibration=calibration)

@@ -100,12 +100,11 @@ def _report_for(state: Dict[str, Any],
 
 
 def _market_for(state: Dict[str, Any]) -> MarketEvidence:
-    """The market view, when something has produced one.
+    """A market view supplied on the company's state, if anything put one there.
 
-    Nothing does yet. This reads the slot rather than inventing a value, so
-    that wiring a real market-evidence adapter later is a change in ONE place
-    and every existing record already says `no_market_evidence` was why it did
-    not trade.
+    Kept as the first source so a richer signal can be attached upstream
+    without touching this job. When it is absent the sweep falls back to the
+    baseline below.
     """
     raw = (state or {}).get("market_evidence")
     if not isinstance(raw, dict):
@@ -118,6 +117,37 @@ def _market_for(state: Dict[str, Any]) -> MarketEvidence:
         downside_pct=raw.get("downside_pct"),
         catalysts=tuple(raw.get("catalysts") or ()),
         source=str(raw.get("source") or ""))
+
+
+def _lookback_days(as_of: str, sessions: int = 30) -> list:
+    """Calendar days back from `as_of`, most recent last.
+
+    Calendar rather than trading days on purpose: `price_history` drops any
+    date the price source cannot answer, so weekends and holidays fall out on
+    their own. Reimplementing a market calendar here would duplicate
+    `runtime/market_calendar` to produce the same list.
+    """
+    from datetime import date, timedelta
+    end = date.fromisoformat(as_of[:10])
+    return [(end - timedelta(days=n)).isoformat()
+            for n in range(sessions, -1, -1)]
+
+
+def _baseline_market(ctx, company, as_of: str) -> MarketEvidence:
+    """The labelled baseline: real price history, no claim of skill.
+
+    Its purpose is to make predictions RESOLVABLE. Learning Velocity -- the
+    count of evaluations that can ever be graded -- was zero for the whole
+    phase because nothing supplied this input, so nothing downstream of it
+    (resolution, post-mortems, calibration) had anything to run on.
+    """
+    from intent_engine.market.signals import baseline_market_evidence
+    symbol = getattr(company, "tradable_instrument", None)
+    price_at = getattr(ctx, "price_at", None)
+    if not symbol or price_at is None:
+        return MarketEvidence()
+    return baseline_market_evidence(price_at, symbol,
+                                    _lookback_days(as_of))
 
 
 def daily_opportunity_sweep(ctx, as_of: str) -> Dict:
@@ -157,9 +187,13 @@ def daily_opportunity_sweep(ctx, as_of: str) -> Dict:
 
         state = states.get(company.company_id, {}) or {}
         evidence = evidence_for(ctx.store, company.company_id)
+        # An upstream-supplied view wins; otherwise the labelled baseline.
+        market = _market_for(state)
+        if market.is_empty:
+            market = _baseline_market(ctx, company, as_of)
         opportunity = classify(
             company, _report_for(state, evidence), as_of=as_of,
-            market=_market_for(state), regime=ctx.regime,
+            market=market, regime=ctx.regime,
             calibration=calibration_by_company.get(company.company_id, {}))
 
         # EVERY result is stored, which is the whole point of the job.

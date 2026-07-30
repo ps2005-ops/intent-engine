@@ -67,6 +67,28 @@ flaw disclosed, rather than re-run until it looked better — but the cheaper
 move is to check what the harness *actually* varies before reading anything
 into the output.
 
+### A metric can be zero for a structural reason, and volume will not fix it
+
+Learning Velocity — evaluations that can ever be graded — was 0 for the entire
+phase. Two of the three top-ranked bottlenecks had a measured expected LV gain
+of *exactly zero*: fixing strategic-reading yield perfectly, or multiplying the
+universe tenfold, both produce more records that can never be graded.
+
+The lesson generalises past this system: **when a metric is structurally zero,
+ranking work by how much it improves the inputs is meaningless.** The only
+question worth asking is which change makes the metric non-zero at all.
+
+### The first correct engineering prediction, and why it was correct
+
+Cycles 1 and 2 predicted the wrong bottleneck. Cycle 3 predicted LV 0 → 1–3
+and got 1 — at the floor, for the reason stated in advance: only one company
+cleared every earlier gate.
+
+What changed was not better intuition. It was naming a *number* before
+building, which forces the reasoning to be explicit enough to be wrong. The two
+earlier cycles named no number, so their errors could only be recorded as
+categorical.
+
 ### Self-inflicted bottlenecks do not prove a fast loop
 
 Both bottlenecks closed so far were introduced by the immediately preceding

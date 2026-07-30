@@ -16,6 +16,7 @@ from intent_engine.founder_intelligence.service import FounderIntelligenceServic
 from intent_engine.market.daily import _report_for
 from intent_engine.market.evidence import founder_intelligence_research_fn
 from intent_engine.market.opportunity import classify
+from intent_engine.market.signals import baseline_market_evidence
 from intent_engine.product_eval.sites import SITES, site_transport
 
 AS_OF = "2026-07-30"
@@ -48,8 +49,21 @@ def main():
             out = research(company, AS_OF)
         except Exception as exc:                       # noqa: BLE001
             out = {"evidence": [], "thesis": "", "error": type(exc).__name__}
+        # A deterministic price series per company: a fixed drift so the
+        # baseline has something real to read, and no randomness so the
+        # measurement is reproducible.
+        drift = {"shopify": 0.9, "palantir": -0.7, "sony": 0.2}.get(key, 0.0)
+
+        def _price_at(symbol, day, _d=drift):
+            idx = int(day[-2:])
+            return 100.0 + _d * idx
+
+        market = (baseline_market_evidence(
+                      _price_at, company.tradable_instrument,
+                      [f"2026-07-{d:02d}" for d in range(1, 31)])
+                  if company.tradable_instrument else None)
         opp = classify(company, _report_for(out, out.get("evidence")),
-                       as_of=AS_OF)
+                       as_of=AS_OF, market=market)
         rows.append({
             "company": key,
             "type": site.company_type,
@@ -60,6 +74,8 @@ def main():
             "quality": opp.quality,
             "dated": opp.dated_evidence_count,
             "indep": opp.independent_source,
+            "resolvable": opp.to_signal() is not None,
+            "src": opp.market_source,
         })
 
     print(f"{'company':<14}{'type':<9}{'ev':>3}{'dated':>6}{'ind':>5}"
@@ -92,7 +108,12 @@ def main():
         dict(collections.Counter(r["gate"] for r in rows)), indent=1))
     print("classification:", json.dumps(
         dict(collections.Counter(r["classification"] for r in rows)), indent=1))
+    gradable = [r for r in rows if r["resolvable"]]
     print("tradable fixtures:", len(tradable))
+    print()
+    print(f"LEARNING VELOCITY (gradable evaluations/cycle): {len(gradable)}")
+    for r in gradable:
+        print(f"   {r['company']:<12} {r['classification']:<5} via {r['src']}")
     return rows
 
 

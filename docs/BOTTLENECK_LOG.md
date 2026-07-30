@@ -251,3 +251,161 @@ invent one.
 
 **Do not treat #1 as decided.** Two cycles running, the measurement has
 overturned the predicted next step.
+
+---
+
+## Engineering prediction accuracy
+
+The engine should get better at predicting the impact of its own engineering,
+not only at reading markets. Recorded per cycle, before the build.
+
+| cycle | predicted #1 | actual #1 | predicted gain | actual gain | error | root cause of the error |
+|---|---|---|---|---|---|---|
+| 1 | market-evidence adapter | evidence collection returns nothing | — (no metric named in advance) | `no_strategic_reading` 3→2, yield 0→36% | **wrong bottleneck** | Reasoned from the gate I could *see* (`no_market_evidence`) without checking that the records showing it came from an injected test fake, not production |
+| 2 | strategic-reading yield | no outside source ever approved | — (no metric named in advance) | `independent_source` 0/11→1/11, yield 36%→45% | **wrong bottleneck** | Read a metric (`no_outside_source`) as a fact about the world — companies lack independent coverage — instead of inspecting the stage before it, where the candidates were present all along |
+| 3 | strategic-reading yield *(carried from cycle 2)* | **market-evidence adapter** | LV 0 → **1–3** | LV 0 → **1** | **correct, at the floor** | First cycle with a stated numeric prediction, and the first correct one. Landed at the floor for the reason given in advance: only Shopify clears every earlier gate |
+
+Cycles 1 and 2 named no numeric prediction in advance, so their error is
+recorded as categorical (wrong bottleneck) rather than as a magnitude. Cycle 3
+is the first with a stated numeric prediction, which is what makes an error
+bar possible at all.
+
+**Pattern across three cycles.** Every wrong prediction has the same shape: a
+terminal gate was read as a *finding about the domain* when it was a *finding
+about the stage before it*. The correction each time came from measuring one
+layer upstream. That is now the first thing to check, not the last.
+
+---
+
+## Cycle 3 — 2026-07-30
+
+### Learning Velocity, defined so it can be measured
+
+> **LV — the number of evaluations produced per cycle that can EVER yield a
+> right/wrong verdict.**
+
+An evaluation that can never be graded accumulates; it does not teach. This
+definition is deliberately harsh on volume: a hundred WATCH records with
+excellent reasoning have an LV of zero, because nothing in them will ever be
+confirmed or refuted.
+
+### Measured
+
+```
+evaluations produced       : 11
+RESOLVABLE (can be graded) :  0
+LEARNING VELOCITY          :  0
+terminal classification    : {WATCH: 3, NO_TRADE: 8}
+```
+
+**LV is zero and has been zero for the entire phase.** Every path terminates
+unresolvable. The loop is open: records accumulate and nothing ever tells the
+engine whether it was right.
+
+### Second-order thinking overturns the carried prediction
+
+The ranking said strategic-reading yield. Applying "if this bottleneck
+disappears, what becomes the next one?":
+
+| candidate | if fixed perfectly | resulting LV |
+|---|---|---|
+| Strategic-reading yield | the 3 companies with evidence and no view advance — to `no_outside_source` or `no_market_evidence`, still WATCH | **0** |
+| Universe breadth ×10 | 110 evaluations instead of 11, all still WATCH/NO_TRADE | **0** |
+| **Market-evidence adapter** | BUY/SELL becomes reachable → prediction → resolution → calibration | **> 0** |
+
+Two of the three top-ranked bottlenecks have a measured expected LV gain of
+**exactly zero**. They make the system better at producing records it can
+never grade. Only closing the loop moves LV off zero, and nothing downstream
+of it — post-mortems, calibration, knowledge extraction, weekly meta-review —
+can exist until it does.
+
+This is the third cycle running in which the predicted next bottleneck was
+wrong. It is the first in which the LV metric caught it *before* any code was
+written rather than after.
+
+### Prediction for this cycle — recorded before implementation
+
+**Hypothesis.** LV is zero because no component supplies market evidence, and
+the reasoner correctly refuses to invent a direction from a strategic thesis.
+Supplying an explicitly-labelled baseline signal closes the loop.
+
+**What will be built.** A momentum baseline over real price history — not a
+claim of skill. Its purpose is to make predictions *resolvable*, establish the
+bar any future signal must beat, and generate the ≥30 resolved predictions
+that `A-M5` requires before any accuracy claim is permitted. It is the on-ramp
+to calibration, not an attempt at alpha.
+
+**Predicted metric movement:**
+
+| metric | now | predicted after |
+|---|---|---|
+| Learning Velocity (gradable/cycle) | 0 | **1–3** |
+| companies reaching BUY/SELL | 0 | 1–3 |
+| terminal gate `no_market_evidence` | 1 | 0 |
+
+Prediction is deliberately narrow: only Shopify currently clears every earlier
+gate, so 1 is the floor. Sony and Palantir would join only if they also clear
+`no_outside_source`, which they do not. **Predicting >3 would be predicting a
+fix to a different bottleneck.**
+
+**Expected downstream effect.** Resolution, post-mortems and calibration
+become buildable for the first time — they are currently unbuildable, not
+merely unbuilt.
+
+**Expected risk.** A baseline with no demonstrated edge will produce wrong
+predictions. That is acceptable and is the point: a wrong resolved prediction
+has strictly more learning value than an ungradable WATCH. The risk to guard
+is not being wrong — it is the baseline being *mistaken for skill*, which is
+why the signal source is recorded on every opportunity and labelled
+unvalidated.
+
+### Measured result — predicted vs actual
+
+| metric | before | predicted | **actual** |
+|---|---|---|---|
+| Learning Velocity (gradable/cycle) | 0 | 1–3 | **1** |
+| companies reaching BUY/SELL | 0 | 1–3 | **1** (Shopify, via `baseline_momentum.v1`) |
+| terminal gate `no_market_evidence` | 1 | 0 | **0** |
+
+**Prediction correct, at the floor of the stated range** — and for the reason
+given in advance rather than by luck: only Shopify clears every earlier gate,
+so 1 was named as the floor and 3 would have required Sony and Palantir to
+also pass `no_outside_source`, which they do not. Predicting more would have
+been predicting a fix to a different bottleneck.
+
+**Learning Velocity is non-zero for the first time in the phase.** The loop is
+closed: an evaluation now exists that will eventually be graded right or
+wrong.
+
+### What this does and does not claim
+
+It does not claim skill. `baseline_momentum.v1` is a momentum rule with a
+stated prior of 0.55 and no demonstrated edge, and every record it produces
+carries `market_source` so calibration can hold it to its own account rather
+than averaging it in with whatever replaces it.
+
+Its value is that it is a *baseline*: without one, "our signal is good" is
+unfalsifiable, because there is nothing it had to beat. And it is the on-ramp
+`A-M5` requires — accuracy claims are gated behind ≥30 live-resolved
+predictions, and there is no route to thirty resolutions without first making
+predictions that resolve.
+
+### Bottleneck ranking after this cycle
+
+1. **Resolution and outcome scoring** — LV is 1 per cycle, but nothing yet
+   *grades* the prediction. Until resolution runs, LV is potential rather than
+   realised. This is now the highest-leverage item by the same argument that
+   promoted the market signal: everything downstream is unbuildable without it.
+2. **Universe breadth** — finally a true multiplier. Every company added now
+   has a path to a gradable evaluation, which was not true in cycles 1 or 2.
+3. **Strategic-reading yield** — 3 of 8, ranked #1 by the previous cycle and
+   demoted twice by second-order analysis. It produces better WATCH records,
+   not gradable ones.
+
+### Second-order check on that ranking
+
+If resolution existed, the next binding constraint would be **sample size**:
+one gradable evaluation per cycle needs thirty cycles to reach the A-M5
+threshold. That argues universe breadth becomes #1 immediately after
+resolution — the first time in the phase it will have been the right answer.
+Recorded now so the next cycle can test it rather than rediscover it.
