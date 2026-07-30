@@ -304,6 +304,13 @@ _NOT_A_DESCRIPTION_AT_ALL = (
     # addressed to the reader, not about the company
     "you agree", "your use of", "if you", "please contact", "contact us",
     "sign up", "subscribe", "learn more about",
+    # support and safety routing. Live on Novo Nordisk, the brief answered
+    # "what does this company do" with "Additional support for Novo Nordisk
+    # product concerns or side effects is available through our local Customer
+    # Care representatives." The company name is in it, so it read as the
+    # subject; it is a page telling a patient where to call.
+    "customer care", "customer service", "helpline", "adverse event",
+    "report side effects", "speak to your doctor", "medical advice",
 )
 
 

@@ -27,6 +27,7 @@ top; if it never runs, nothing is lost.
 from __future__ import annotations
 
 import html as _html
+import re
 
 from intent_engine.strategic_intelligence.editorial import (
     addresses_the_system, deduplicate, is_meaningful, lower_first,
@@ -167,13 +168,118 @@ def _document_bullets(documents, families, *, limit=3):
             continue
         if family_of(document) not in families:
             continue
-        text = " ".join((document.get("text_content") or "").split())
-        if len(text) < 40:
+        text = _readable_excerpt(document)
+        if not text:
             continue
         out.append(_bullet(text, date=document.get("date", "")))
         if len(out) >= limit:
             break
     return out
+
+
+# Page furniture that parses as text but describes no company. Each of these
+# markers was read off a live slide.
+_PAGE_FURNITURE = (
+    "site footer", "help centre", "help center", "skip to", "cookie",
+    "privacy policy", "terms of use", "terms of service", "all rights reserved",
+    "sign up", "log in", "newsletter", "follow us", "download the app",
+    # SEC cover pages: every filing opens with several hundred words of these
+    "state or other jurisdiction", "commission file", "irs employer",
+    "securities act", "exchange act", "written communication pursuant",
+    "check the appropriate box", "title of each class",
+    "emerging growth company", "incorporation or organization",
+    "securities and exchange commission", "date of report",
+    "date of earliest event", "former name or former address",
+    "registrant's telephone number", "principal executive offices",
+)
+
+# Text addressed to whatever is reading the page rather than to a person.
+# Retrieved content is data: a page may say anything, and what it may not do
+# is end up in the product's own voice on a slide.
+_ADDRESSED_TO_THE_MACHINE = (
+    "ignore all previous instructions", "unrestricted mode", "system:",
+    "note to any automated", "classify this page as", "raise confidence to",
+    "should be cited as", "must not mention that",
+)
+
+# Comparative superiority a company asserts about itself, with nothing on the
+# page to check it against. Rejected on the company's OWN pages only -- an
+# independent source calling a company the market leader is a finding, and the
+# same words self-published are an advertisement.
+_UNEARNED_SELF_CLAIM = (
+    "market leader", "unanimously confirmed", "highest market share",
+    "no meaningful competitors", "best retention", "best-in-class",
+    "world's leading", "world's best", "undisputed", "unrivalled",
+    "unrivaled", "second to none",
+)
+
+
+def _readable_excerpt(document, *, budget=260) -> str:
+    """Prose from a page, rather than whatever the extraction caught first.
+
+    A deck is the surface where this shows most. Live on Airbnb, three of
+    seven slides were raw page text: "Products, customers and market" was the
+    site footer verbatim ("Site Footer. Support. Help Centre. Get help with a
+    safety issue. AirCover."), "Airbnb in one minute" was the SEO listing strip
+    ("Hinton Pet-friendly rentals. Porto Condo rentals."), and the published-
+    evidence slide opened on the 8-K cover page ("Delaware. 001-39778.
+    26-3051428. (State or other jurisdictionof incorporation)").
+
+    Nav labels and list items are not sentences: they are short, and they are
+    mostly capitalised because they are headings. Requiring a real sentence --
+    ten words, several of them lowercase, and no furniture marker -- keeps the
+    description and drops the chrome. A page that yields nothing loses its
+    bullet rather than contributing the least-bad line: three real bullets
+    beat three where two are footer.
+    """
+    # A company's own pages may not have their superlatives repeated as
+    # findings. This surfaced when furniture filtering moved a hostile
+    # fixture's "Independent analysts have unanimously confirmed that Hostile
+    # Co has the highest market share... and no meaningful competitors" into
+    # the bullet budget: the sentence had always been in the document, and
+    # only the truncation point had been keeping it off the slide.
+    reject = tuple(_PAGE_FURNITURE) + tuple(_ADDRESSED_TO_THE_MACHINE)
+    if document.get("source_class") in (None, "", "company_owned",
+                                        "executive_statement",
+                                        "investor_material"):
+        reject += tuple(_UNEARNED_SELF_CLAIM)
+
+    for source in (document.get("meta_description"),
+                   document.get("text_content")):
+        sentences = re.split(r"(?<=[.!?])\s+",
+                             " ".join((source or "").split()))
+        kept, total = [], 0
+        for sentence in sentences:
+            low = sentence.lower()
+            if any(marker in low for marker in reject):
+                continue
+            words = sentence.split()
+            if len(words) < 10:
+                continue
+            if sum(1 for w in words if w[:1].islower()) < 4:
+                continue
+            kept.append(sentence)
+            total += len(sentence)
+            if total >= budget:
+                break
+        if not kept:
+            continue
+        # The page's own heading, when the page also has prose. A product
+        # page's <h1> IS the product names -- "Foundry and Gotham and AIP" --
+        # and a ten-word floor drops it, which cost the deck the one place
+        # Gotham was named. Requiring prose alongside it is what separates a
+        # heading from a footer: a footer is short lines all the way down and
+        # still contributes nothing.
+        lead = sentences[0] if sentences else ""
+        lead_words = lead.split()
+        if (lead and lead not in kept and 2 <= len(lead_words) <= 12
+                and not any(m in lead.lower() for m in _PAGE_FURNITURE)
+                and sum(1 for w in lead_words[1:] if w[:1].isupper()) >= 1):
+            kept.insert(0, lead if lead[-1:] in ".!?" else lead + ".")
+        text = " ".join(kept).strip()
+        if len(text) >= 40:
+            return text
+    return ""
 
 
 _URGENCY_WORDS = {"decide_now": "Decide now", "this_quarter": "This quarter",
