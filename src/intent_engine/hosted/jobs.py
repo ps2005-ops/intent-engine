@@ -22,6 +22,7 @@ from intent_engine.hosted.candidates import (
     candidate_from_company_state,
 )
 from intent_engine.hosted.reports import write_daily_report
+from intent_engine.market.daily import daily_opportunity_sweep
 from intent_engine.paper.reconciliation import (
     close_resolved_positions,
     mark_positions,
@@ -244,6 +245,11 @@ def monthly_promotion_review(ctx, as_of: str) -> Dict:
 
 JOBS: Dict[str, Callable] = {
     "company-intelligence-refresh": company_intelligence_refresh,
+    # Classifies every eligible company and stores every result, including the
+    # rejections. Runs BEFORE prediction generation: it is the job that decides
+    # what is worth a position, and the one that produces the records the whole
+    # learning loop is measured on.
+    "daily-opportunity-sweep": daily_opportunity_sweep,
     "daily-prediction-generation": daily_prediction_generation,
     "paper-order-submit": paper_order_submit,
     "intraday-paper-reconciliation": intraday_paper_reconciliation,
