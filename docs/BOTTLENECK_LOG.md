@@ -7,6 +7,30 @@ asserted — every entry carries the number that decided it.
 
 Written newest-last, so the file reads as a history.
 
+## Bottleneck half-life
+
+The standing KPI for this phase. Markets are what the engine is learning
+*about*; half-life is how fast it is learning **to improve itself**, which is
+the thing that compounds.
+
+> **Half-life** — the number of days a verified bottleneck stays the #1
+> bottleneck before it is eliminated or overtaken.
+
+A shrinking half-life means the loop is tightening. A growing one means
+either the problems are getting genuinely harder or the measurement is getting
+slower — and the two are told apart by whether the *metric* moved, not by
+whether code shipped.
+
+| # | Bottleneck | Discovered | Metric before | Root cause | Fixed | Metric after | Days as #1 |
+|---|---|---|---|---|---|---|---|
+| 1 | No evidence collected at all | 2026-07-30 | 0 evidence rows/company; 100% `no_strategic_reading` | `research_fn` was a placeholder returning `{}`; universe carried no `website` to research | 2026-07-30 | dated, source-classed evidence for 8/11 companies | **<1** |
+| 2 | No outside source ever approved | 2026-07-30 | `independent_source` **0/11**; 3/3 readable tradables died at `no_outside_source` | `candidates[:8]` took discovery order; ~30 `company_owned` rank above 3 `customer_voice`, so outside sources were never approved | 2026-07-30 | `independent_source` 1/11; yield 36% → 45%; first company reaches the deepest gate | **<1** |
+
+Both were found and closed inside a day, but neither is evidence of a fast
+loop yet — they were both *self-inflicted*, introduced by the previous cycle
+and caught by the next measurement. The number worth watching starts when a
+bottleneck is external to the code just written.
+
 ---
 
 ## Cycle 1 — 2026-07-30
@@ -142,3 +166,88 @@ larger constraint, and the point of this log is that the previous cycle's
 "obvious next step" was wrong.
 
 ---
+
+## Cycle 2 — 2026-07-30
+
+### What I predicted, and why prediction is not measurement
+
+I closed cycle 1 saying: *"`view_withheld` may turn out to be the dominant
+gate, and that would make strategic-reading yield — not company count — the
+real constraint."*
+
+**Measurement disproved it.** Yield was not the binding gate, and neither was
+universe breadth, the standing roadmap item.
+
+### The instrument
+
+Eleven offline company fixtures (`product_eval/sites.py`), each on its own
+domain, run through the real ingestion and the real reasoner. Deterministic,
+network-free, and deliberately including the hard cases: a blocked site, a
+nonexistent company, two local businesses, and a site that argues with the
+analyst. This replaced cycle 1's flawed harness, which forced every company
+onto one fixture domain and collapsed them into a single run.
+
+### Ranked bottlenecks
+
+| rank | bottleneck | measurement | why ranked here |
+|---|---|---|---|
+| **1** | **No outside source is ever approved** | `independent_source` **0/11**. Every tradable company that formed a reading died at `no_outside_source` — **3 of 3** | A gate that can never pass. Not "fails sometimes": structurally unreachable, so no amount of upstream work could move it |
+| 2 | Strategic-reading yield | 4/11 overall, 4/8 of those with evidence | Real, but it gates *some* companies. #1 gated **all** of them |
+| 3 | Universe breadth | 4 tradable, 3 sectors vs 20–50/day and 7+ sectors | Still a multiplier — and multiplying a pipeline that cannot reach a position just produces more WATCH rows |
+| 4 | Retrieval on JS-rendered sites | 3/11 produced no evidence | Known, external, unchanged |
+
+### Root cause of #1
+
+Not a missing capability — discovery **was** finding outside sources, for
+every single company:
+
+```
+candidate source_classes: {company_owned: 30, executive_statement: 2,
+                           investor_material: 2, customer_voice: 3}
+retrieved doc source_classes: {company_owned: 3, executive_statement: 1,
+                               investor_material: 1}
+```
+
+The `customer_voice` candidates were discovered and never approved, because
+my own cycle-1 adapter approved `candidates[:8]` — the first eight in
+discovery order, which are all company pages. **A one-line slice made the gate
+it was feeding impossible to pass.**
+
+### Fix
+
+`select_diverse`: round-robin across source classes, outside classes drawn
+first so they cannot be crowded out, discovery order preserved *within* a
+class because that ranking is the ingestion layer's judgement.
+
+### Measured effect
+
+| metric | before | after |
+|---|---|---|
+| `independent_source` | **0/11** | 1/11 |
+| strategic-reading yield | 4/11 (36%) | **5/11 (45%)** |
+| yield among companies with evidence | 50% | **62%** |
+| view-withheld rate | 4/8 | 3/8 |
+| Shopify: gate → quality | `no_outside_source` → 0.525 | **`no_market_evidence` → 0.80** |
+
+Shopify is the first company in the corpus to reach the deepest gate in the
+pipeline: a dated, independently-corroborated reading with nothing left
+blocking it but the market signal.
+
+**Why 1/11 and not more, stated honestly.** Palantir and Sony still report
+`no_outside_source`. Their fixtures *declare* customer-voice candidates but do
+not serve those URLs, so retrieval 404s. That is the fixture having no outside
+source to find, and `no_outside_source` is then the correct answer rather than
+a defect. The fix works where an outside source actually exists; it cannot
+invent one.
+
+### Bottleneck ranking after this cycle
+
+1. **Strategic-reading yield** — 3 of 8 companies with evidence still produce
+   no view. Now the top gate for companies that have evidence.
+2. **Universe breadth** — unchanged, and now genuinely a multiplier on a
+   pipeline that can reach the deepest gate.
+3. Market-evidence adapter — reachable for the first time, and therefore no
+   longer speculative to build.
+
+**Do not treat #1 as decided.** Two cycles running, the measurement has
+overturned the predicted next step.

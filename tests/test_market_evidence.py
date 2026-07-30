@@ -162,3 +162,84 @@ def test_evidence_moves_the_company_past_the_first_gate(research):
     # to prove.
     assert real.blocked_by[0] in (VIEW_WITHHELD, NO_MARKET_EVIDENCE,
                                   "no_outside_source", "no_dated_evidence")
+
+
+# --- source selection --------------------------------------------------------
+def test_selection_spreads_across_source_classes_not_discovery_order():
+    """The measured defect: discovery returns ~30 `company_owned` candidates
+    ahead of 3 `customer_voice` ones, so `candidates[:8]` took eight company
+    pages and zero outside sources — for every company, every time. That made
+    `no_outside_source`, the gate those sources feed, structurally unreachable.
+    """
+    from intent_engine.market.evidence import select_diverse
+
+    candidates = ([{"candidate_id": f"own-{i}", "source_class": "company_owned"}
+                   for i in range(30)]
+                  + [{"candidate_id": f"cust-{i}",
+                      "source_class": "customer_voice"} for i in range(3)]
+                  + [{"candidate_id": "inv-0",
+                      "source_class": "investor_material"}])
+
+    naive = [c["candidate_id"] for c in candidates[:8]]
+    assert not any(c.startswith("cust") for c in naive), \
+        "the fixture no longer reproduces the defect this guards"
+
+    picked = select_diverse(candidates, 8)
+    classes = {c["source_class"] for c in picked}
+    assert len(picked) == 8
+    assert "customer_voice" in classes, "an outside source was crowded out"
+    assert "investor_material" in classes
+    assert "company_owned" in classes, "the company's own pages still matter"
+
+
+def test_selection_preserves_discovery_order_within_a_class():
+    """Ranking within a class is the ingestion layer's judgement, and this is
+    not the place to second-guess it."""
+    from intent_engine.market.evidence import select_diverse
+
+    candidates = [{"candidate_id": f"own-{i}", "source_class": "company_owned"}
+                  for i in range(6)]
+    picked = [c["candidate_id"] for c in select_diverse(candidates, 4)]
+    assert picked == ["own-0", "own-1", "own-2", "own-3"]
+
+
+def test_selection_never_exceeds_the_budget():
+    from intent_engine.market.evidence import select_diverse
+
+    candidates = [{"candidate_id": f"c-{i}",
+                   "source_class": ["a", "b", "c"][i % 3]} for i in range(20)]
+    assert len(select_diverse(candidates, 5)) == 5
+    assert len(select_diverse(candidates, 100)) == 20
+    assert select_diverse([], 5) == []
+
+
+def test_an_outside_source_reaches_the_reasoner_end_to_end():
+    """The whole point, measured on a fixture that actually hosts one."""
+    import pathlib
+    import tempfile
+
+    from intent_engine.market.daily import _report_for
+    from intent_engine.product_eval.sites import SITES, site_transport
+
+    site = SITES["shopify"]
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    ci = CompanyIngestionService(tmp / "ci.jsonl",
+                                 transport=site_transport(site),
+                                 resolver=False)
+    fi = FounderIntelligenceService(tmp / "fi.jsonl")
+
+    class _Pub:
+        company_id = "shopify"
+        canonical_name = site.name
+        website = site.website
+        strategic_priorities = []
+        tradable_instrument = "SHOP"
+
+    out = founder_intelligence_research_fn(ci, fi, max_sources=8)(_Pub(), AS_OF)
+    opp = classify(_Pub(), _report_for(out, out["evidence"]), as_of=AS_OF)
+
+    assert opp.independent_source, \
+        "no outside source survived to the reasoner"
+    assert "no_outside_source" not in opp.blocked_by
+    # and it therefore reaches the deepest gate in the current pipeline
+    assert opp.blocked_by == (NO_MARKET_EVIDENCE,)

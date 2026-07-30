@@ -58,6 +58,46 @@ _SOURCE_CLASS_TO_KIND = {
 # ownership check still holds without inventing a fake user account.
 SYSTEM_ACTOR = "system:market-research"
 
+# Source classes that are somebody OTHER than the company talking. The
+# reasoner requires one of these before a reading can become a position, so
+# which candidates get approved decides whether that gate is reachable at all.
+_OUTSIDE_CLASSES = ("independent_reporting", "customer_voice",
+                    "competitor_statement", "analyst_coverage")
+
+
+def select_diverse(candidates: list, limit: int) -> list:
+    """Approve a SPREAD of source classes, not the first N in discovery order.
+
+    Measured defect, not a hypothetical. Discovery returns roughly thirty
+    `company_owned` candidates ahead of three `customer_voice` ones, so a
+    `candidates[:8]` slice took eight company pages and zero outside sources —
+    for every company, every time. Across eleven fixtures that produced
+    `independent_source: 0/11`, and every tradable company that formed a
+    reading then died at `no_outside_source`. The slice made the gate it was
+    feeding structurally unreachable, which is worse than a gate that
+    sometimes fails: it could never pass.
+
+    Round-robin across classes, outside classes drawn first so they cannot be
+    crowded out by the company's own pages. Within a class, discovery order is
+    preserved — that ranking is the ingestion layer's judgement and this is not
+    the place to second-guess it.
+    """
+    by_class: Dict[str, List[dict]] = {}
+    for candidate in candidates or ():
+        key = candidate.get("source_class") or "company_owned"
+        by_class.setdefault(key, []).append(candidate)
+
+    # outside classes first, then everything else alphabetically for stability
+    order = sorted(by_class, key=lambda k: (k not in _OUTSIDE_CLASSES, k))
+    out: List[dict] = []
+    while len(out) < limit and any(by_class[k] for k in order):
+        for key in order:
+            if len(out) >= limit:
+                break
+            if by_class[key]:
+                out.append(by_class[key].pop(0))
+    return out
+
 
 def _observation_rows(report: dict, *, as_of: str) -> List[dict]:
     """Strategic observations as hosted evidence rows.
@@ -130,7 +170,8 @@ def founder_intelligence_research_fn(
                                         actor_type="system")
             run_id = run["run_id"]
             candidates = ci_service.discover(run_id)
-            approved = [c["candidate_id"] for c in candidates][:max_sources]
+            approved = [c["candidate_id"]
+                        for c in select_diverse(candidates, max_sources)]
             if not approved:
                 return {"evidence": [], "thesis": "", "priorities": [],
                         "skipped": "no public source could be discovered"}
