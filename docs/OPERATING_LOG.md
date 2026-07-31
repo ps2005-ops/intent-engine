@@ -1062,3 +1062,120 @@ not hypotheses — is what holds it there.
 
 Stated plainly: this recommendation exists **because Day 8's contrary
 conclusion was based on my own measurement error**, now corrected.
+
+---
+
+## 2026-07-31 — Day 10 · industry evidence adapter
+
+### FALSIFICATION — 4 of 5 checks pass, 1 fails and is stated
+
+| check | result |
+|---|---|
+| 1. blocks the most executable paths | ✅ 84 of 168, 3× any other |
+| 2. retrievable in production | ✅ HTTP 200, 100 company-specific items |
+| 3. timestamped correctly | ✅ `pubDate` on **100/100** |
+| 4. replayable honestly | ❌ **87 days** of depth against 3650 needed |
+| 5. satisfies the evidence framework | ✅ INDUSTRY by authorship |
+
+No other category dominates all eight criteria — institutional/regulatory win
+replay depth at 3× fewer paths. Proceeded, with check 4 recorded as a hard
+limitation rather than worked around.
+
+> **Industry evidence is a LIVE-PATH capability only.** It can unlock live
+> decisions and can never validate a signal. 87 days cannot support a
+> ten-year walk-forward.
+
+### ADAPTER METRICS (8 companies, live)
+
+| | |
+|---|---|
+| documents discovered | **175** |
+| accepted (independent **and** relevant) | **5** |
+| rejected | 170 |
+| retrieval failures | 0 |
+| by category | industry 126 · analyst 21 · **company 28** |
+| relevance rate | **2.9%** |
+| replay depth | 87 days |
+| timestamp failures | 0 (documents without a readable date are dropped) |
+| lookahead violations | **0** — anything after `as_of` is rejected, never clamped |
+
+**28 documents were classified COMPANY** — a company's own press releases
+syndicated through a news aggregator. That is the specific gaming route this
+adapter had to keep shut, and it is shut by authorship: the venue never
+overrides the author.
+
+The 2.9% relevance rate is the honest number. Most coverage of a company says
+nothing about customer adoption, and admitting it would corroborate a claim it
+cannot speak to.
+
+### CAUSAL VALIDATION — the mandatory test
+
+| company | with industry | without | verdict |
+|---|---|---|---|
+| duolingo | **BUY** | WATCH | **GENUINE** |
+| caterpillar | **SELL** | WATCH | **GENUINE** |
+
+```
+duolingo    2026-07-28  Investing.com   "Scotiabank raises Duolingo stock
+                                         price target on user growth"
+caterpillar 2026-07-29  Yahoo Finance   "Caterpillar shrugs off tariff hit
+                                         as demand holds"
+```
+
+Removing the industry evidence returns both to WATCH. **Zero spuriously
+unlocked.** The gate that changed is `no_outside_source` → cleared; the
+decision then rests on the wired signal as it always did.
+
+**Honest imperfection:** the Duolingo document reports an *analyst* action but
+is published by a news outlet, so publisher-based classification calls it
+INDUSTRY. Defensible — the journalist is the author and is independent — but
+the category reflects who wrote it, not what it is about, and that distinction
+will matter when ANALYST becomes its own retrievable category.
+
+### EXECUTIVE SUMMARY
+
+| | |
+|---|---|
+| Overall / Refusal Decision Quality | **1.000** · n=28 · medium |
+| Position Decision Quality | **UNMEASURABLE** — adapter is built and validated but **not wired into the daily sweep**; no paper trade has been opened |
+| Paper trades opened / closed | **0 / 0** |
+| Win rate · Total return · Expectancy · Profit factor | **UNMEASURABLE** (n=0) |
+| Sharpe · Sortino · Max drawdown · Equity curve · SPY alpha | **UNMEASURABLE** (n=0) |
+| Open positions | **0** |
+| Signals beating baseline | **0 of 11** |
+| Framework stability | **0** (engineering cycle) |
+
+### DECISION IMPACT
+
+- **Hypotheses now unlockable:** customer_adoption, expectation_shift,
+  competitive_position — the three that accept INDUSTRY.
+- **Still blocked:** governance (needs institutional/regulatory),
+  macro_sensitivity (needs macro).
+- **New BUY / SELL demonstrated:** 1 / 1, both causally genuine.
+- **Did position Decision Quality become measurable?** **Not yet** — the
+  adapter is not wired into `daily_opportunity_sweep`. The prompt scoped this
+  cycle to the adapter alone, and wiring it is an operating decision, not part
+  of building it.
+
+### NEXT STEPS
+
+1. **Did the adapter increase capability?** **Yes** — two decisions exist that
+   could not previously exist, and both fail without the evidence.
+2. **Did it merely increase metrics?** **No.** `independent_source` moved
+   because genuinely independent, genuinely relevant documents were retrieved
+   — not because anything was relabelled. 28 company press releases were
+   *rejected* on exactly that principle.
+3. **Did it unlock previously unreachable decisions?** Yes, verified by
+   ablation.
+4. **Did it improve Decision Quality?** Not yet measurably. It makes position
+   DQ *reachable*, which is a precondition, not the improvement.
+5. **Is another engineering cycle justified?** **No.**
+
+### RECOMMENDATION
+
+**CONTINUE OPERATING.**
+
+Wire the adapter into the daily sweep as an operating action and accumulate
+real decisions. The measured priority is now real-world performance data, not
+further architecture — 3005 passing, and the first genuinely unlockable
+positions in ten days are waiting on operation rather than on engineering.
