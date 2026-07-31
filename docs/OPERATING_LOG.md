@@ -834,3 +834,113 @@ counting again. 2990 passing (+12).
 ### Recommendation
 
 **CONTINUE OPERATING.**
+
+---
+
+## 2026-07-31 — Day 8 · the top category unlocks nothing
+
+### EXECUTIVE SUMMARY
+
+| | |
+|---|---|
+| Overall Decision Quality | **1.000** · n=28 · medium |
+| Position Decision Quality | **UNMEASURABLE** — no position has ever been opened (n=0) |
+| Refusal Decision Quality | **1.000** · n=28 · medium |
+| Paper trades opened / closed | **0 / 0** |
+| Win rate · Total return · Expectancy · Profit factor | **UNMEASURABLE** (n=0 trades) |
+| Sharpe · Sortino · Max drawdown | **UNMEASURABLE** (n=0 trades, no equity curve) |
+| Open positions | **0** |
+| Signals beating baseline | **0 of 11** |
+| Framework stability | **1** (reset Day 7) |
+
+### Evidence gap, aggregated: 28 companies × 6 hypothesis kinds = 168 paths
+
+| missing category | paths blocked | share |
+|---|---|---|
+| **industry** | **84** | **33%** |
+| customer_voice | 28 | 11% |
+| institutional | 28 | 11% |
+| regulatory | 28 | 11% |
+| macro | 28 | 11% |
+| analyst | 28 | 11% |
+| alternative | 28 | 11% |
+
+`industry` blocks 3× any other, because it appears in the required set of
+three hypothesis kinds (customer_adoption, expectation_shift,
+competitive_position) where every other category appears in one.
+
+- **Independence failures: 140** (no independent evidence of any kind)
+- **Relevance failures: 0** — we never hold independent-but-irrelevant
+  evidence, because we hold no independent evidence at all
+- **Categories present but irrelevant: none**
+- **Viable paths today: `price_behaviour` × 28** — the only kind needing no
+  company corroboration
+
+### Falsification of the top-ranked category
+
+| category | paths | retrieval (measured) | replay depth | lookahead |
+|---|---|---|---|---|
+| **industry** | **84** | **HTTP 200** (TechCrunch, GlobeNewswire RSS) | **POOR** — RSS carries recent items only | low |
+| customer_voice | 28 | **HTTP 403** | poor | low |
+| institutional | 28 | HTTP 200 (EDGAR) | **STRONG** — 10y, point-in-time by construction | low |
+| regulatory | 28 | HTTP 200 (EDGAR) | **STRONG** | low |
+| macro | 28 | HTTP 400 (needs key) | strong | **REVISIONS** — FRED series are revised, so today's value for a past date is lookahead |
+| analyst | 28 | no free source | none | n/a |
+| alternative | 28 | no free source | none | high |
+
+Industry wins paths, DQ breadth and retrieval. It **loses historical replay** —
+RSS carries recent items only, and walk-forward replay is this project's only
+way to test a signal. Institutional and regulatory win replay depth and are
+already retrievable, at 3× fewer paths.
+
+**No category clearly dominates across the eight criteria.**
+
+### The decisive test: what would acquiring it actually change?
+
+Simulated, not argued:
+
+```
+today                        WATCH   gate=no_outside_source
+                                     missing=[customer_voice, industry]
++ industry evidence          WATCH   gate=no_market_evidence   missing=[]
++ industry AND a signal      BUY     gate=-
+```
+
+Acquiring the highest-ranked category moves the gate one step deeper and
+**produces no trade**, because the next gate is the market signal — and all
+eleven signals are retired, none beating 0.500.
+
+> The evidence gap is real and it is **not the binding constraint**. Building
+> the adapter would have bought a deeper refusal, not a decision.
+
+### Report
+
+- **Blocked hypotheses by category** — above; industry 84, all others 28.
+- **Marginal paths each category would validly unlock** — industry 84,
+  every other 28. No double-counting: each is the count of paths where that
+  category *alone* satisfies the requirement.
+- **Categories present but irrelevant** — none.
+- **Independence failures** — 140. **Relevance failures** — 0.
+- **Strategic-reading yield** — 3/28 (11%).
+- **Independent-evidence yield by category** — customer_voice 0/28,
+  industry 0/28, institutional 0/28, regulatory 0/28, macro 0/28,
+  analyst 0/28, alternative 0/28. **Zero across all seven.**
+- **Highest measured bottleneck** — **no signal beats the baseline.** It sits
+  *behind* the evidence gap, and closing the evidence gap does not reach it.
+- **Is engineering justified?** **No.** The adapter would change a refusal
+  reason and no decision.
+
+### Live cycle
+
+28 companies · **0/0/0/2/26** · **0 paper trades** · 28 justified refusals ·
+yield 3/28 · independent-evidence yield 0/28 across all categories. No trade
+forced, no gate relaxed, no retired signal revived.
+
+### RECOMMENDATION
+
+**CONTINUE OPERATING.**
+
+Two independent reasons, either sufficient: no category clearly dominates the
+eight criteria, and the top-ranked one demonstrably unlocks zero decisions
+today. The next advance is a signal that beats 0.500 — not more evidence to
+feed signals that do not exist.
