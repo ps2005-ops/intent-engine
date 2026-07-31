@@ -253,3 +253,97 @@ fix was to an adapter, not to the framework.
 The day's two most valuable outputs are both things that were *not* claimed:
 the 0.359 result, and the evidence that would have leaked into every future
 replay.
+
+---
+
+## 2026-07-30 — Day 3 · more data made the sample *smaller*
+
+Instruction: stop looking for price transforms; the bottleneck is effective
+sample size. Increase independent information events without lookahead.
+
+### What was added
+
+- **History: 400 days → 10 years.** Measured before use: `range=10y` returns
+  2513 daily bars against ~275 for 400d. (`range=max` was rejected — it
+  silently switches to a coarser interval and returns 135 bars.)
+- **Event types: 6 → 16.** Added ownership (SC 13D/G, Form 4) and proxy
+  (DEF 14A, DEFA14A, amendments) alongside the original event and periodic
+  forms. Each is a different information shock, not more rows of the same one.
+- **`market/sampling.py`** — n_eff computed always, not by hand. Day 2's
+  correction was done manually; a result that must be manually second-guessed
+  will eventually not be.
+
+### The result, and it is not what more data was supposed to do
+
+| signal | rows | events | **windows** | n_eff | design effect | accuracy | verdict |
+|---|---|---|---|---|---|---|---|
+| `event_drift.v1` | 1518 | 1393 | **5** | 5 | **303×** | 0.4921 | unmeasurable (n_eff < 30) |
+| `report_drift.v1` | 263 | 263 | **49** | 49 | 5.4× | **0.5019** | **indistinguishable from 0.500** |
+| `ownership_drift.v1` | 4849 | 2131 | **9** | 9 | **539×** | 0.4745 | unmeasurable (n_eff < 30) |
+| `proxy_drift.v1` | 162 | 160 | **26** | 26 | 6.2× | 0.6049 | unmeasurable (n_eff < 30) |
+
+**Rows went up ~5×. Independent windows went DOWN for every dense event type.**
+
+The mechanism is arithmetic, and it inverts the intuition that drove this
+day's instruction. A 21-day horizon over ten years admits at most ~174
+non-overlapping windows. Fourteen companies filing 8-Ks and Form 4s
+continuously produce windows that overlap *everywhere*, so the union collapses
+to **5 contiguous spans**. Collecting more of a dense event type does not add
+independence — it merges what independence there was.
+
+Quarterly reports survive precisely because they are **naturally spaced**: 263
+filings, 49 independent windows.
+
+> **Event frequency is the enemy of independence.** The refinement from
+> "observations" to "independent information events" was right and does not go
+> far enough: 1393 genuinely distinct 8-K events still yield 5 windows, because
+> independence is a property of *time*, not of the event count.
+
+### Day 2's false discovery is now definitively dead
+
+`report_drift.v1` was 0.359 over 13 months and looked significant. Over ten
+years and 49 independent windows it is **0.5019** — the first properly-powered
+result in this project, and it sits on the baseline. The Day 2 caution was
+correct, and this is the confirmation.
+
+### The tempting one, refused
+
+`proxy_drift.v1` at **0.6049** is the most alpha-shaped number the project has
+produced. n_eff = 26, below `A-M5`'s 30. **Unmeasurable, not promising.**
+
+Pre-registered for a future day rather than claimed now: if proxy-filing drift
+survives to n_eff ≥ 30 *without* changing the rule that produced it, it becomes
+testable. Changing the rule to reach 30 faster would be fitting the test to the
+answer.
+
+### Signals retired today
+
+`event_drift.v1` and `ownership_drift.v1` — not because they lost, but because
+they **cannot be measured at any sample size reachable this way**. Design
+effects of 303× and 539× mean a naive error bar is ~17× and ~23× too narrow.
+Retired immediately, per instruction.
+
+### Live cycle
+
+Unchanged from Day 2 and re-run: 16 companies, 0/0/0/2/14, **0 paper trades**,
+16 justified refusals. No trade forced, no gate relaxed.
+
+### Next measured bottleneck
+
+**Horizon length, not data volume.** n_eff is bounded above by
+`history ÷ horizon`. Ten years at a 21-day horizon caps independence at ~174
+windows however many companies or event types are added — and dense events
+land far below that cap.
+
+Three levers, ranked by measured effect on n_eff:
+1. **Shorter horizon** — 5-day windows would raise the ceiling ~4×, and is the
+   only lever that raises the *cap* rather than approaching it.
+2. **Sparser event types** — quarterly reports already demonstrate this: 263
+   rows → 49 windows, versus 4849 rows → 9.
+3. **More companies** — adds cross-section, adds **no** new windows. Confirmed
+   directly by this run, and it was ranked #2 as recently as Day 2.
+
+### Recommendation
+
+**CONTINUE OPERATING.** Framework stability: **5** — `sampling.py` is new
+measurement, not a framework change. 2978 passing.

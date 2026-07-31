@@ -22,11 +22,20 @@ import urllib.request
 from datetime import date, timedelta
 
 from intent_engine.market.prices import PriceUnavailable, fetch_series
+from intent_engine.market.sampling import band, measure
 from intent_engine.universe.companies import default_universe
 
 HORIZON = 21
 EVENT_FORMS = {"8-K", "6-K"}
 REPORT_FORMS = {"10-Q", "10-K", "20-F", "40-F"}
+# Day 3: more event TYPES, because each is a different information shock and
+# therefore a different independent event -- not merely more rows of the same
+# kind. Ownership and proxy filings were excluded on Day 2 for no reason
+# beyond not having thought of them.
+OWNERSHIP_FORMS = {"SC 13D", "SC 13D/A", "SC 13G", "SC 13G/A", "4"}
+PROXY_FORMS = {"DEF 14A", "DEFA14A", "8-K/A", "10-Q/A", "10-K/A"}
+ALL_FORMS = EVENT_FORMS | REPORT_FORMS | OWNERSHIP_FORMS | PROXY_FORMS
+HISTORY_RANGE = "10y"
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/eventbake")
 OUT.mkdir(parents=True, exist_ok=True)
 _UA = {"User-Agent": "intent-engine research (contact: ops@example.com)"}
@@ -65,8 +74,9 @@ def main():
         print(f"EDGAR ticker map unavailable: {exc}")
         return []
 
-    results = {"event_drift.v1": {"n": 0, "correct": 0},
-               "report_drift.v1": {"n": 0, "correct": 0}}
+    results = {name: {"n": 0, "correct": 0, "rows": []}
+               for name in ("event_drift.v1", "report_drift.v1",
+                            "ownership_drift.v1", "proxy_drift.v1")}
     per_form = collections.defaultdict(lambda: [0, 0])
     skipped = collections.Counter()
     covered = 0
@@ -78,7 +88,7 @@ def main():
             skipped["no_cik"] += 1
             continue
         try:
-            series = fetch_series(symbol, days=400)
+            series = fetch_series(symbol, range_=HISTORY_RANGE)
             filings = _filings(cik)
         except (PriceUnavailable, Exception) as exc:    # noqa: BLE001
             skipped["fetch_failed"] += 1
@@ -88,7 +98,7 @@ def main():
 
         first_close = min(series.closes) if series.closes else None
         for form, filed in filings:
-            if form not in EVENT_FORMS and form not in REPORT_FORMS:
+            if form not in ALL_FORMS:
                 continue
             if first_close is None or filed < first_close:
                 skipped["before_price_history"] += 1
@@ -120,9 +130,15 @@ def main():
             move = (exit_price - entry) / entry
             right = (move > 0) if direction == "up" else (move < 0)
             name = ("event_drift.v1" if form in EVENT_FORMS
-                    else "report_drift.v1")
+                    else "report_drift.v1" if form in REPORT_FORMS
+                    else "ownership_drift.v1" if form in OWNERSHIP_FORMS
+                    else "proxy_drift.v1")
             results[name]["n"] += 1
             results[name]["correct"] += 1 if right else 0
+            results[name]["rows"].append({
+                "company_id": company.company_id, "entry_day": entry_day,
+                "exit_day": exit_day,
+                "event_key": f"{company.company_id}:{form}:{filed}"})
             per_form[form][0] += 1
             per_form[form][1] += 1 if right else 0
 
@@ -131,23 +147,19 @@ def main():
     print("=" * 72)
     print(f"companies with CIK + prices: {covered}/{len(universe)}")
     print(f"skipped: {dict(skipped)}\n")
-    print(f"{'signal':<22}{'n':>5}{'accuracy':>11}{'2σ band':>12}  verdict")
+    print(f"{'signal':<20}{'rows':>6}{'events':>8}{'windows':>9}{'n_eff':>7}"
+          f"{'DE':>6}{'acc':>8}  verdict")
     rows = []
     for name, r in results.items():
         n, c = r["n"], r["correct"]
         acc = round(c / n, 4) if n else None
-        se = math.sqrt(0.25 / n) if n else None
-        if n < 30:
-            verdict = f"UNMEASURABLE (n<30, A-M5)"
-        elif se and abs(acc - 0.5) > 2 * se:
-            verdict = "DISTINGUISHABLE from 0.500"
-        else:
-            verdict = "indistinguishable from 0.500"
-        band = f"±{round(2*se,3)}" if se else "—"
-        rows.append({"signal": name, "n": n, "accuracy": acc,
-                     "verdict": verdict})
-        print(f"{name:<22}{n:>5}{(acc if acc is not None else '—'):>11}"
-              f"{band:>12}  {verdict}")
+        size = measure(r["rows"])
+        verdict = band(acc, size)
+        rows.append({"signal": name, **verdict})
+        print(f"{name:<20}{size.observations:>6}{size.events:>8}"
+              f"{size.windows:>9}{size.n_eff:>7}"
+              f"{str(size.design_effect):>6}"
+              f"{(acc if acc is not None else '—'):>8}  {verdict['verdict']}")
 
     print("\nby form type:")
     for form, (n, c) in sorted(per_form.items()):

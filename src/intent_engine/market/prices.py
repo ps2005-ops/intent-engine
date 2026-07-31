@@ -96,13 +96,18 @@ def _fetch(url: str, timeout: float) -> dict:
 
 
 def fetch_series(symbol: str, *, days: int = 400, timeout: float = 20.0,
-                 opener=None) -> PriceSeries:
+                 opener=None, range_: str = "") -> PriceSeries:
     """Daily closes for `symbol`. Raises `PriceUnavailable` rather than guessing.
 
     `opener` is injectable so the offline suite exercises this parsing without
     a network call — the parsing is where the bugs live, not the socket.
     """
-    url = _ENDPOINT.format(symbol=symbol) + f"?range={max(days, 5)}d&interval=1d"
+    # `range_` takes a Yahoo range token ("10y"). Measured: 10y returns 2513
+    # daily bars where 400d returns ~275 -- a ~9x increase in independent market
+    # windows, which is the bottleneck this is here to relieve. "max" is NOT
+    # used: it silently switches to a coarser interval and returns 135 bars.
+    span = range_ or f"{max(days, 5)}d"
+    url = _ENDPOINT.format(symbol=symbol) + f"?range={span}&interval=1d"
     try:
         payload = (opener or _fetch)(url, timeout)
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
