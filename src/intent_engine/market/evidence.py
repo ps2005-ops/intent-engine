@@ -120,6 +120,21 @@ def _observation_rows(report: dict, *, as_of: str) -> List[dict]:
         # we saw it today -- and `refresh_company`'s leakage check then treats
         # it as same-day rather than future-dated.
         published = str(obs.get("date") or "")[:10] or as_of[:10]
+        # LEAKAGE. The strategic layer dates an otherwise-undated observation
+        # to the RETRIEVAL time, which is now -- not to the decision date. When
+        # `as_of` is today (a live daily run) the two agree and nothing is
+        # wrong. When `as_of` is in the past -- every historical replay, which
+        # is the only way this engine can be evaluated -- the observation is
+        # dated AFTER the decision it is feeding, and the decision is made with
+        # information that did not exist.
+        #
+        # Dropped rather than clamped: moving the date back to `as_of` would
+        # assert the evidence existed then, which is precisely what is not
+        # known. A dropped row is a visible gap; a clamped one is an invisible
+        # fabrication. Caught by the pre-commit suite on the day this project
+        # was told to use only point-in-time information.
+        if published > as_of[:10]:
+            continue
         rows.append({
             "kind": _SOURCE_CLASS_TO_KIND.get(source_class, "product"),
             "summary": summary[:600],

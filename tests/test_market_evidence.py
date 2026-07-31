@@ -10,6 +10,7 @@ old placeholder and through this adapter, and what the opportunity reasoner
 does with each.
 """
 import tempfile
+from datetime import date as _date
 
 import pytest
 from company_fixture_pages import BASE as FIXTURE_BASE
@@ -28,7 +29,14 @@ from intent_engine.market.opportunity import (
     classify,
 )
 
-AS_OF = "2026-07-30"
+# The RUN DATE, not a fixed past date. These tests exercise the LIVE path:
+# evidence retrieved now, decision made now. Pinning `as_of` to a past date
+# while retrieving live content is the leakage case itself, and three tests in
+# this file were quietly passing *because* the adapter leaked -- the
+# retrieval-dated observations they relied on are future-dated relative to a
+# past `as_of`, and are now correctly dropped. The past-`as_of` behaviour is
+# covered explicitly by the two leakage tests at the end of this file.
+AS_OF = _date.today().isoformat()
 
 
 class _Company:
@@ -243,3 +251,47 @@ def test_an_outside_source_reaches_the_reasoner_end_to_end():
     assert "no_outside_source" not in opp.blocked_by
     # and it therefore reaches the deepest gate in the current pipeline
     assert opp.blocked_by == (NO_MARKET_EVIDENCE,)
+
+
+def test_evidence_dated_after_the_decision_is_dropped_not_clamped():
+    """The leakage bug this adapter shipped with, pinned.
+
+    The strategic layer dates an otherwise-undated observation to the
+    RETRIEVAL time. When `as_of` is today those agree. When `as_of` is in the
+    past -- every historical replay, which is the only way this engine can be
+    evaluated -- the observation is dated AFTER the decision it feeds, and the
+    decision consumes information that did not exist.
+
+    Dropped, not clamped: moving the date back to `as_of` would assert the
+    evidence existed then, which is exactly what is unknown. A dropped row is
+    a visible gap; a clamped one is an invisible fabrication.
+    """
+    from intent_engine.market.evidence import _observation_rows
+
+    report = {"observations": [
+        {"text": "dated before the decision", "date": "2026-07-01",
+         "source_class": "company_owned"},
+        {"text": "dated AFTER the decision", "date": "2026-07-31",
+         "source_class": "company_owned"},
+        {"text": "undated, so dated to the run", "date": "",
+         "source_class": "company_owned"},
+    ]}
+    rows = _observation_rows(report, as_of="2026-07-30")
+
+    assert len(rows) == 2, "the future-dated observation survived"
+    assert all(r["published_at"] <= "2026-07-30" for r in rows)
+    # and the surviving rows are the right two -- not a clamped copy of the
+    # future one wearing an acceptable date
+    assert {r["summary"] for r in rows} == {
+        "dated before the decision", "undated, so dated to the run"}
+
+
+def test_a_live_run_where_as_of_is_today_loses_nothing():
+    """The guard must not cost anything in the normal case: when `as_of` is
+    the run date, retrieval-dated observations are same-day and legitimate."""
+    from intent_engine.market.evidence import _observation_rows
+
+    report = {"observations": [
+        {"text": "seen today", "date": "2026-07-31",
+         "source_class": "company_owned"}]}
+    assert len(_observation_rows(report, as_of="2026-07-31")) == 1
