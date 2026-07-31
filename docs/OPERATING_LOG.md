@@ -562,3 +562,143 @@ this project cannot currently reach.
 ### Recommendation
 
 **CONTINUE OPERATING.** Framework stability: **7**. 2978 passing.
+
+---
+
+## 2026-07-31 — Day 6 · why the engine has never opened a trade
+
+### EXECUTIVE SUMMARY
+
+| | |
+|---|---|
+| Decision Quality (refusals) | **1.000** · n=28 · medium |
+| Decision Quality (positions) | **UNMEASURABLE** — no position has ever existed |
+| Paper Trade Win Rate | **UNMEASURABLE** (n=0) |
+| Total Return | **UNMEASURABLE** (n=0) |
+| Sharpe Ratio | **UNMEASURABLE** (n=0) |
+| Maximum Drawdown | **UNMEASURABLE** (n=0) |
+| Open Positions | **0** |
+| Signals Beating Baseline | **0 of 11 tested** |
+| Framework Stability | **8** |
+
+### FALSIFICATION — the finding of the day
+
+Six operating days, 28 companies, **zero paper trades**. Not caution. Traced:
+
+```
+discovery      → finds 3 customer_voice candidates (Shopify AND Comcast)
+select_diverse → correctly approves 2, outside-classes first
+retrieval      → G2          HTTP 403
+                 Trustpilot  HTTP 403
+               → 0 outside sources retrieved, on every run
+reasoner       → no_outside_source cannot pass
+               → BUY/SELL structurally unreachable
+```
+
+`independent_source` has been **0 on every live run**: 0/16, 0/16, 0/16, 0/28,
+0/28. The gate is not selective — it has never once passed in reality.
+
+### The fix that was available, and refused
+
+EDGAR carries filings made **by other entities about** a company. An SC 13G
+filed by Vanguard about Shopify is Vanguard's statement, not Shopify's:
+technically third-party, free, point-in-time, and it does not block automated
+access. Reclassifying those as independent would move `independent_source`
+from 0/28 to ~28/28 and unlock trading immediately.
+
+**Not built.** A passive ownership disclosure does not check a company's
+account of its own strategy, which is the only reason the gate exists. It
+would move the metric and improve the capability by nothing — the exact
+failure `METRIC_INTEGRITY.md` exists to prevent, and the first time that
+temptation has been concrete rather than theoretical.
+
+### DECISION QUALITY
+
+| | value | n | confidence |
+|---|---|---|---|
+| Overall | 1.000 | 28 | medium |
+| Position | UNMEASURABLE | 0 | — |
+| Refusal | 1.000 | 28 | medium |
+
+Every refusal cited a listed gate; zero unjustified.
+
+### TRADING PERFORMANCE · RETURN · RISK · PORTFOLIO
+
+**All UNMEASURABLE (n=0).** Trades opened 0 · closed 0 · win/loss/breakeven
+rate, holding period, total and per-trade return, median, best, worst, profit
+factor, expectancy (R and %), Sharpe, Sortino, max drawdown, volatility,
+risk-adjusted return, average risk/reward, equity curve, cumulative return,
+benchmark (SPY) comparison and alpha vs benchmark.
+
+Open positions 0 · sector/region/market-cap exposure none · cash 100% (paper)
+· average position size n/a.
+
+Benchmark comparison is the right metric to have asked for and cannot be
+populated: there is no equity curve to compare against SPY.
+
+### SIGNAL PERFORMANCE
+
+| signal | accuracy | baseline | n_eff | CI (strictest) | DE | status |
+|---|---|---|---|---|---|---|
+| `momentum_persists.v1` | 0.5000 | — | 66 | (0.377, 0.623) | — | **RETIRED** (is the baseline) |
+| `mean_reversion.v1` | 0.5000 | 0.500 | 66 | (0.377, 0.623) | — | RETIRED |
+| `strong_trend.v1` | 0.4706 | 0.500 | 34 | (0.329, 0.671) | — | RETIRED |
+| `calm_trend.v1` | 0.5000 | 0.500 | 24 | — | — | RETIRED (unmeasurable) |
+| `event_drift.v1` @3d | 0.4959 | 0.500 | **8** (regional) | (0.146, 0.854) | 3.8–624× | RETIRED |
+| `report_drift.v1` @5d | 0.5341 | 0.500 | 96 | (0.398, 0.602) | 2.8× | RETIRED |
+| `insider_buy.v1` @90d | 0.4809 | 0.500 | 1 | — | 4352× | RETIRED (unmeasurable) |
+| `activist_stake.v1` @120d | 0.5000 | 0.500 | 3 | — | 6.0× | RETIRED (unmeasurable) |
+| `proxy_drift.v1` @90d | 0.5108 | 0.500 | 10 | — | 13.9× | RETIRED (unmeasurable) |
+
+**Active signals: 0. Signals beating baseline: 0.**
+
+### LEARNING
+
+Hypotheses proposed 11 · retired 11 · revised 66 (all `momentum_persists.v1`,
+confidence 0.55 → 0.55). Decision Quality change: none measurable. Calibration
+change: none — `A-M5` unreached on the live path. Learning Value:
+**unscored**; `information_gain` and `calibration_impact` remain UNMEASURABLE.
+
+Engineering Prediction Accuracy: **6 predictions, 1 correct** (cycle 3, LV
+0→1–3, landed at 1). Four wrong bottleneck, one wrong scope, one wrong
+direction (Day 4, adaptive horizons — I predicted less independent evidence
+and got 5.7× more).
+
+### OPERATIONAL HEALTH
+
+28 companies · 28 opportunities · **0/0/0/2/26** BUY/SELL/HOLD/WATCH/NO_TRADE ·
+0 trades opened · 0 closed · **28 refusals** · strategic-reading yield 3/28
+(11%) · independent-source yield **0/28** · framework stability 8.
+
+Gates: `no_strategic_reading` 14 · `view_withheld` 11 · `no_outside_source` 2 ·
+`not_tradable` 1.
+
+Yield fell 19% → 14% → 11% as the universe grew — the added companies are
+harder to read, not the reading worse.
+
+### NEXT STEPS
+
+1. **Highest measured bottleneck — outside-source retrieval.** The only
+   independent sources discovery finds are review aggregators that return 403.
+2. **Why it dominates.** It is the single cause of every UNMEASURABLE metric in
+   this report. Not one trading, return, risk or portfolio number can exist
+   until it clears.
+3. **Expected Decision Quality impact.** Large but *slow*: it would open the
+   position half of Decision Quality, which currently has n=0. At 28 companies
+   and a 21-day horizon, `A-M5`'s n≥30 is months away.
+4. **Expected Learning Value impact.** Unblocks `resolution_quality` on the
+   live path; `information_gain` and `calibration_impact` stay blocked.
+5. **Is engineering justified? No.** The only fix reachable today games the
+   gate rather than solving it. Genuine outside evidence needs a news or
+   analyst feed that does not refuse automated access — a capability this
+   project cannot currently reach, and not something to fake.
+
+### RECOMMENDATION
+
+**CONTINUE OPERATING.**
+
+Operation is not blocked: research runs daily, refusals are graded and
+justified, and the replay path produces properly-powered results. What is
+blocked is the trading half — and the honest response is to record that
+precisely rather than to unlock it by weakening the gate that makes the
+records trustworthy.
