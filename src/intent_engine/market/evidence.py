@@ -164,6 +164,8 @@ def founder_intelligence_research_fn(
     max_sources: int = 8,
     actor: str = SYSTEM_ACTOR,
     on_error: Optional[Callable[[str, Exception], None]] = None,
+    industry: bool = True,
+    industry_limit: int = 25,
 ) -> Callable[[Any, str], Dict]:
     """A `research_fn` that runs the real Founder Intelligence pipeline.
 
@@ -203,12 +205,38 @@ def founder_intelligence_research_fn(
 
         report = (result or {}).get("strategic_report") or {}
         rows = _observation_rows(report, as_of=as_of)
+
+        # INDUSTRY EVIDENCE. Third-party coverage of this company, published on
+        # or before `as_of`. The adapter enforces point-in-time itself
+        # (anything newer is rejected, never clamped) and classifies by
+        # AUTHORSHIP, so a company press release syndicated through a news feed
+        # comes back as COMPANY and cannot corroborate anything.
+        #
+        # Failure here is recorded and skipped: a research sweep that stops
+        # because one news feed is unreachable teaches less than one that
+        # covers the rest and says which failed.
+        industry_rows: List[dict] = []
+        if industry:
+            try:
+                from intent_engine.market.industry import (
+                    fetch_industry_evidence,
+                )
+                for doc in fetch_industry_evidence(name, as_of=as_of,
+                                                   limit=industry_limit):
+                    if doc.is_independent:
+                        industry_rows.append(doc.as_evidence_row())
+            except Exception as exc:  # noqa: BLE001 — one feed, not the sweep
+                if on_error is not None:
+                    on_error(getattr(company, "company_id", ""), exc)
+
+        rows = rows + industry_rows
         return {
             "thesis": _thesis_of(report),
             "priorities": list(getattr(company, "strategic_priorities", ())),
             "evidence": rows,
             # carried for the record; the reasoner reads the rebuilt view
             "readiness_state": ((result or {}).get("readiness") or {}).get("state", ""),
+            "industry_documents": len(industry_rows),
         }
 
     return research_fn

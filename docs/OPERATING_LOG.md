@@ -1285,3 +1285,108 @@ The engine has found no alpha. It has become very good at proving it has not.
 ### RECOMMENDATION
 
 **CONTINUE OPERATING.**
+
+---
+
+## 2026-07-31 — Day 12 · LONG-TERM OPERATION BEGINS
+
+Architecture declared stable. One sanctioned operating action: wire the
+validated industry adapter into the daily sweep. No other engineering.
+
+### EXECUTIVE SUMMARY
+
+| | |
+|---|---|
+| Overall / Refusal Decision Quality | **1.000** · n=28 · medium |
+| Position Decision Quality | **UNMEASURABLE** — 0 positions opened (see below) |
+| Paper trades opened / closed | **0 / 0** |
+| Win rate · Total return · Expectancy · Profit factor | **UNMEASURABLE** (n=0) |
+| Sharpe · Sortino · Max drawdown · Volatility | **UNMEASURABLE** (n=0) |
+| Equity curve · SPY comparison · Alpha vs SPY | **UNMEASURABLE** (no equity curve) |
+| Open positions | 0 |
+| Signals beating baseline | **0 of 11** |
+| Framework stability | **1** |
+
+### THE MEASURED EFFECT OF WIRING THE ADAPTER
+
+| | Day 6–11 | **Day 12** |
+|---|---|---|
+| evidence per company | 0–7 | **23–25** |
+| **independent source found** | **0/28** | **28/28** |
+| companies reaching the deepest gate | 0 | **3** |
+| quality of readable companies | 0.27–0.575 | **0.9** |
+| `no_outside_source` refusals | 2 | **0** |
+
+```
+blocked_by:  view_withheld 24 · no_market_evidence 3 · not_tradable 1
+```
+
+**`no_outside_source` has disappeared from the distribution.** It was the
+terminal gate for every readable company for eleven days. Shopify, Olo and
+Check Point now reach `no_market_evidence` — the deepest gate in the pipeline —
+at quality **0.9**, the highest this project has recorded.
+
+### WHY ZERO TRADES, STATED PRECISELY
+
+Three companies are fully corroborated and stop at `no_market_evidence`. That
+is **not** the adapter failing. It is the baseline momentum signal declining to
+fire for those three today: the trailing move sits inside the noise floor, and
+`momentum_evidence` returns an empty signal rather than a guess.
+
+An empty signal is a real answer. The correct behaviour on a day when the only
+wired signal has nothing to say is to open nothing.
+
+**Zero trades, and the gate that produced them has moved from "we have no
+independent evidence" to "we have complete evidence and no market view."** That
+is the whole difference this cycle bought.
+
+### EVIDENCE RETRIEVAL & QUALITY
+
+- Industry documents retrieved across the sweep: **~25 per company**, all
+  point-in-time filtered at `as_of`.
+- **Independent-evidence yield: 28/28 (100%)** — from 0/28.
+- Lookahead violations: **0**. Timestamp failures: **0** (documents without a
+  readable date are dropped, never inferred).
+- Company press releases syndicated through news feeds: correctly classified
+  COMPANY and excluded from corroboration.
+
+### CALIBRATION
+
+Predicted confidence, observed outcomes, calibration curve, Brier score,
+reliability: **UNMEASURABLE** — no position has resolved. Confidence is updated
+only from resolved evidence, and there is none.
+
+### SIGNAL PERFORMANCE / RESEARCH
+
+11 hypotheses proposed, 11 retired, **0 active**, 0 beating baseline. No new
+signals introduced, none revived, no parameters tuned. Best-powered negative
+remains `event_drift.v1` at n_eff 400, accuracy 0.4912.
+
+### HYPOTHESIS OUTCOMES
+
+`view_withheld` is now the dominant refusal at **24/28** — the strategic layer
+declining to form a view. That is the honest gate working, and it is the first
+time in this project that the binding constraint on the live path is *reading
+quality* rather than *evidence availability*.
+
+### HIGHEST MEASURED BOTTLENECK
+
+**Strategic-reading yield: 4/28 (14%).** With evidence at 100%, the constraint
+has moved decisively upstream to whether a company's public material supports a
+view at all. This is the bottleneck that Days 2–5 kept ranking third and that
+measurement kept demoting; it is now genuinely first.
+
+### ENGINEERING RECOMMENDATION
+
+**CONTINUE OPERATING.**
+
+Operation is not blocked. Evidence retrieval works at 100%, three companies are
+fully corroborated, and the only thing between them and a position is a signal
+that honestly has nothing to say today. Under the new constitutional bar —
+prove operation is blocked AND that the blocker cannot be resolved by
+continuing to operate — neither condition holds.
+
+The next operating days should accumulate: more days give the baseline signal
+more chances to fire on a corroborated company, and the first resolved position
+is what turns Position Decision Quality, calibration, the equity curve and the
+SPY comparison from UNMEASURABLE into data.

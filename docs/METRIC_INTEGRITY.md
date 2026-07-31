@@ -97,3 +97,31 @@ declines to score itself is behaving correctly, not failing.
 
 Question 5 is the cheapest and catches the most. LV would have scored a
 noise-predicting system 10× higher than the real one.
+
+---
+
+## The evidence bar rises with confidence in the system
+
+Adopted Day 12, from eleven days of measured experience.
+
+**Architectural changes require stronger evidence than operational ones.**
+
+| change type | examples | required evidence |
+|---|---|---|
+| **Operational** | a new evidence adapter, a new source, a new hypothesis, wiring a validated component | **one measured bottleneck** |
+| **Architectural** | the reasoning model, the evidence model, the decision graph, the metric definitions | **all three**: (1) a measured failure in production, (2) a falsification showing the current architecture is inadequate, (3) proof the replacement resolves it *without weakening any integrity guarantee* |
+
+The asymmetry is the point. Early on, architecture was changed almost every
+cycle and each change was right — the model was genuinely wrong. That cannot
+remain true indefinitely, and a system that keeps redesigning itself at the
+same rate after its architecture is sound is not learning, it is churning.
+
+Day 11 is the template for what an architectural change must look like at this
+stage: a measured inadequacy (13 source/subject mismatches in 175 real
+documents), a falsification attempt that failed, and a validation proving
+**zero reasoning outcomes changed**. Semantic precision improved; nothing was
+loosened.
+
+**Engineering is now exceptional.** Before writing code, prove operation is
+blocked AND that the blocker cannot be resolved by continuing to operate.
+Otherwise the answer is to operate.
