@@ -1390,3 +1390,98 @@ The next operating days should accumulate: more days give the baseline signal
 more chances to fire on a corroborated company, and the first resolved position
 is what turns Position Decision Quality, calibration, the equity curve and the
 SPY comparison from UNMEASURABLE into data.
+
+---
+
+## 2026-07-31 — Day 13 · decision funnel, and a retraction
+
+### RETRACTION — Day 12's bottleneck ranking was premature
+
+Day 12 named strategic-reading yield "the highest measured bottleneck" from a
+**single** operating cycle. That was wrong on method, and it is the same error
+this project spent eleven days learning to avoid. One day cannot separate:
+
+1. **reading yield** — the company's material does not support a view;
+2. **signal inactivity** — the signal correctly declines to fire today;
+3. **market conditions** — there is genuinely nothing to trade.
+
+Only (1) is a deficiency. (2) and (3) are the system working, and a signal that
+fires every day has stopped discriminating. Ranking them together would make
+*"trade more often"* look like an improvement — the exact failure
+`METRIC_INTEGRITY.md` exists to prevent.
+
+**The ranking is withdrawn** until history supports one.
+
+### DECISION FUNNEL — now a permanent daily report
+
+| stage | Day 12 | Day 13 | conversion (D13) |
+|---|---|---|---|
+| evaluated | 28 | 28 | — |
+| tradable | 27 | 27 | 96% |
+| independent evidence | 27 | 27 | **100%** |
+| **strategic view** | **3** | **2** | **7%** |
+| signal evaluated | 3 | 2 | 100% |
+| **signal fired** | **0** | **0** | **0%** |
+| positions opened | 0 | 0 | — |
+| positions resolved | 0 | 0 | — |
+
+Terminals (partition of evaluated): BUY 0 · SELL 0 · WATCH 2 (7%) ·
+NO_TRADE 26 (93%).
+
+**Largest conversion loss both days: `strategic_view`** — 27 → 3, then 27 → 2.
+
+### The funnel is NOT yet allowed to name a bottleneck
+
+`dominant_bottleneck` returns **`insufficient history` (2 days, 3 needed)** by
+construction. A stage must dominate the loss across a majority of days before
+it is called a bottleneck. That refusal is asserted by a test, so the method
+error made on Day 12 cannot be repeated by accident.
+
+### Building the funnel found three real modelling errors
+
+Measurement caught all three; none were reasoned away.
+
+1. **`no_trade: 833%`** — terminal classifications were treated as chain links,
+   so NO_TRADE was measured against SELL=0. They **partition** the evaluated
+   set rather than filtering it; they now report share-of-evaluated.
+2. **`independent_evidence: 104%`** — 28 of 27 tradable, because the private
+   company has independent evidence and can never be traded. A funnel stage
+   that can exceed its predecessor is not a funnel. The subset property is now
+   enforced rather than assumed.
+3. **`no_trade: 0` on a day with 25 NO_TRADE decisions** — introduced by my own
+   fix to (2), which nested the terminals inside the chain's early-exits.
+   Terminals are counted in their own pass over every evaluated company.
+
+### EXECUTIVE SUMMARY
+
+Overall / Refusal Decision Quality **1.000** (n=28, medium). Position Decision
+Quality, win rate, total return, expectancy, profit factor, Sharpe, Sortino,
+max drawdown, volatility, equity curve, SPY comparison, alpha:
+**UNMEASURABLE — 0 positions opened.** Calibration curve and Brier:
+**UNMEASURABLE — 0 resolutions.** Signals beating baseline **0 of 11**.
+Framework stability **2**.
+
+### OPERATIONAL
+
+28 companies · 0/0/0/2/26 · 0 paper trades · 28 justified refusals ·
+independent-evidence yield **27/27 tradable (100%)** · strategic-reading yield
+2/28 (7%, down from 14%).
+
+That yield moved 14% → 7% between two consecutive days on an identical
+universe. **That variance is itself the argument against ranking from one
+day** — a stage whose output halves overnight is not a stable measurement of a
+deficiency.
+
+### HIGHEST MEASURED BOTTLENECK
+
+**Not yet determinable — 2 days of history, 3 required.**
+
+`strategic_view` led the conversion loss on both days and is the *candidate*.
+It is not the answer until it survives a third day, and the honest position is
+that the engine does not yet know.
+
+### ENGINEERING RECOMMENDATION
+
+**CONTINUE OPERATING.** Neither condition holds: operation is not blocked, and
+nothing here cannot be resolved by continuing to operate. What this needs is
+days, not code.
