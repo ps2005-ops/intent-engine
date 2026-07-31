@@ -1,11 +1,53 @@
 # Research asset ledger
 
-What durable knowledge this project has created — as distinct from what it did
-on any given day. Operational metrics reset; these do not.
+A **living scientific record**, not an activity log. What this project knows,
+when it learned it, when it was last checked, and whether it is still believed.
 
 A research asset is a finding that **changes what future work should do**. A
 day that produces none is an operating day, not a research day, and both are
 legitimate.
+
+## Knowledge decay
+
+> Previously accepted conclusions remain open to re-evaluation. When evidence
+> contradicts an asset it transitions **Accepted → Under Review → Confirmed or
+> Retired**. No historical conclusion is immutable.
+>
+> **Confidence belongs to evidence, not to age.**
+
+This is the opposite failure to the one the project spent fifteen days
+avoiding. Early on the risk was concluding too fast; after months of operation
+the risk is treating old conclusions as settled because they are old. An asset
+that has not been re-validated is not thereby stronger.
+
+`Last validated` is therefore a required column. An asset whose last validation
+is far behind the present is a candidate for review regardless of how confident
+it once was.
+
+---
+
+## Cumulative ledger
+
+| # | asset | class | confidence | first observed | last validated | still believed |
+|---|---|---|---|---|---|---|
+| N1 | Price-transform signals have no edge on this universe | negative | high | Day 1 | Day 15 | **yes** |
+| N2 | 8-K/6-K event drift does not exist at detectable magnitude | negative | high (n_eff 400) | Day 4 | Day 15 | **yes** |
+| N3 | Periodic-report drift does not exist | negative | medium-high | Day 4 | Day 15 | **yes** |
+| N4 | Slow-mechanism hypotheses are unmeasurable at reachable data depth | negative | high | Day 4 | Day 15 | **yes** |
+| P1 | Industry evidence causally unlocks decisions | positive | medium (n=2, ablation) | Day 10 | Day 12 | **yes** |
+| M1 | Effective sample size, not row count | technique | high | Day 3 | Day 15 | **yes** |
+| M2 | Event frequency is the enemy of independence | principle | high | Day 3 | Day 5 | **yes** |
+| M3 | Fixtures are insufficient for ranking | principle | high | Day 8 | Day 8 | **yes** |
+| M4 | Independence and relevance are separate conditions | architecture | high | Day 7 | Day 11 | **yes** |
+| M5 | Authorship ≠ subject | architecture | high | Day 11 | Day 11 | **yes** |
+| M6 | Calendar time is not evidence | measurement | high | Day 14 | Day 16 | **yes** |
+| M7 | Horizons belong to mechanisms, never to power | principle | high | Day 4 | Day 4 | **yes** |
+| M8 | Intuition about this system's bottlenecks is ~14% accurate | meta | medium (n=7) | Day 3 | Day 16 | **yes** |
+
+**Assets under review: 0. Retired: 0.**
+
+Two assets — M3 (Day 8) and M5, M7 — have not been re-validated since they were
+first established. Flagged here rather than silently trusted.
 
 ---
 

@@ -278,7 +278,15 @@ def stage_stability(history: Sequence[dict], stage: str,
     # A normal-ish interval on a small sample is a rough guide, not a claim.
     half = 1.96 * (stdev / (len(values) ** 0.5)) if stdev else 0.0
     interval = (round(mean - half, 3), round(mean + half, 3))
-    status = STABLE if (cv is not None and cv <= MAX_STABLE_CV) else UNSTABLE
+    # A stage with ZERO dispersion is maximally stable, not unstable. CV is
+    # undefined when the mean is 0 (x/0), and the first version fell through to
+    # UNSTABLE -- so `signal_fired`, flat at 0.00 for five consecutive days,
+    # was reported as too noisy to rank on. It is the single most stable
+    # observation in the report, and it says the signal has never once fired.
+    if stdev == 0:
+        status = STABLE
+    else:
+        status = STABLE if (cv is not None and cv <= MAX_STABLE_CV) else UNSTABLE
     return StageStability(stage, len(values), today, round(mean, 3),
                           round(median, 3), round(stdev, 3),
                           (round(cv, 3) if cv is not None else None),
@@ -394,3 +402,47 @@ def evidence_maturity(history: Sequence[dict], stage: str,
                     candidate_streak=candidate_streak(history, stage),
                     confidence=stability.status,
                     days_to_earliest_promotion=remaining)
+
+
+# ---------------------------------------------------------------------------
+# RESEARCH VELOCITY
+#
+# Not code written, not trades opened. What the project LEARNED this cycle.
+#
+# Zero is a legitimate value and is printed as zero. A research system that
+# feels obliged to report a discovery every day will eventually manufacture
+# one, and manufacturing findings is the failure this whole framework exists
+# to prevent.
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class ResearchVelocity:
+    new_positive: int = 0
+    new_negative: int = 0
+    strengthened: int = 0
+    weakened: int = 0
+    hypotheses_retired: int = 0
+    techniques_adopted: int = 0
+
+    @property
+    def net_knowledge_gain(self) -> int:
+        """Findings weakened count AGAINST the total. A day that undermines a
+        previously held conclusion has negative velocity, and that is correct:
+        the project knows less than it thought it did."""
+        return (self.new_positive + self.new_negative + self.strengthened
+                + self.techniques_adopted - self.weakened)
+
+    def as_dict(self) -> dict:
+        return {"new_positive": self.new_positive,
+                "new_negative": self.new_negative,
+                "strengthened": self.strengthened, "weakened": self.weakened,
+                "hypotheses_retired": self.hypotheses_retired,
+                "techniques_adopted": self.techniques_adopted,
+                "net_knowledge_gain": self.net_knowledge_gain}
+
+    def render(self) -> str:
+        d = self.as_dict()
+        lines = [f"  {k.replace('_', ' '):<26}{v:>+4}" if k == "net_knowledge_gain"
+                 else f"  {k.replace('_', ' '):<26}{v:>4}"
+                 for k, v in d.items()]
+        return "\n".join(lines)

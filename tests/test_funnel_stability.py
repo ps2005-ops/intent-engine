@@ -119,3 +119,29 @@ def test_the_streak_breaks_when_another_stage_leads():
     history[1]["largest_loss"] = {"stage": "signal_fired", "lost": 1,
                                   "from": 2, "rate": 0.5}
     assert candidate_streak(history, "strategic_view") == 1
+
+
+# --- research velocity -------------------------------------------------------
+def test_a_day_that_learns_nothing_reports_zero():
+    """A research system obliged to report a discovery daily will eventually
+    manufacture one."""
+    from intent_engine.market.funnel import ResearchVelocity
+    assert ResearchVelocity().net_knowledge_gain == 0
+
+
+def test_weakening_a_finding_is_negative_velocity():
+    """A day that undermines a held conclusion means the project knows LESS
+    than it thought. That must not read as progress."""
+    from intent_engine.market.funnel import ResearchVelocity
+    assert ResearchVelocity(weakened=2).net_knowledge_gain == -2
+    assert ResearchVelocity(new_negative=1, weakened=3).net_knowledge_gain == -2
+
+
+def test_a_stage_with_zero_variance_is_maximally_stable_not_unstable():
+    """`signal_fired` flat at 0.00 for five days is the most stable
+    observation available, and it says the signal has never fired. CV is
+    undefined at mean 0, and falling through to UNSTABLE inverted the meaning.
+    """
+    s = stage_stability(_history([0.0, 0.0, 0.0, 0.0, 0.0]), "strategic_view")
+    assert s.stdev == 0.0
+    assert s.status == STABLE, "zero dispersion must not read as noisy"

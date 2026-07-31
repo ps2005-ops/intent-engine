@@ -1697,3 +1697,120 @@ production failure; nothing here is unresolvable by continuing to operate.
 ---
 
 **CONTINUE OPERATING.** 3032 passing.
+
+---
+
+## 2026-07-31 — Day 16 · the first promotion
+
+### THE DECISION — the constitution obliged one, and one was made
+
+```
+>>> VERDICT: BOTTLENECK  (strategic_view)
+    led the loss on 5 of 5 days and is statistically stable (CV 20%)
+    mean 0.089  median 0.074  sd 0.018  CV 0.204
+    95% interval [0.073, 0.105]  trend stable
+```
+
+**`strategic_view` is promoted to #1 bottleneck.** First promotion in sixteen
+days.
+
+The path there is the point. Day 12 asserted it from one cycle and was wrong on
+method. Day 13 withdrew it. Day 14 replaced calendar time with confidence.
+Day 15 measured it at 80% mature and refused. Today it cleared both conditions
+— 5/5 observations, CV 20% — and **the same constitution that blocked it four
+times now obliged the decision.**
+
+Strategic-reading yield is **8.9% [7.3%, 10.5%]**, stable. Roughly one company
+in eleven produces a view the reasoner can act on.
+
+### FUNNEL STABILITY — first day with real statistics
+
+| stage | today | mean | median | sd | CV | trend | status |
+|---|---|---|---|---|---|---|---|
+| tradable | 0.96 | 0.96 | 0.96 | 0.00 | 0.00 | stable | **STABLE** |
+| independent_evidence | 1.00 | 1.00 | 1.00 | 0.00 | 0.00 | stable | **STABLE** |
+| **strategic_view** | **0.11** | **0.089** | 0.074 | 0.018 | **0.20** | stable | **STABLE** |
+| signal_evaluated | 1.00 | 1.00 | 1.00 | 0.00 | 0.00 | stable | **STABLE** |
+| **signal_fired** | **0.00** | **0.00** | 0.00 | **0.00** | — | flat | **STABLE** |
+| no_trade | 0.89 | 0.91 | 0.93 | 0.02 | 0.02 | stable | **STABLE** |
+
+### A defect the report itself exposed
+
+`signal_fired`, `buy` and `sell` were first reported **UNSTABLE**. All three sit
+at exactly 0.00 with **standard deviation 0.00** — perfectly stable. CV is
+undefined at mean 0, and the status logic fell through to UNSTABLE.
+
+Zero dispersion is *maximally* stable, and this was inverting the meaning of
+the single most stable observation in the report: **the signal has never once
+fired, and that fact is now correctly classified.** Fixed, with a regression.
+
+### RESEARCH VELOCITY — new permanent metric
+
+```
+new positive                 0
+new negative                 0
+strengthened                 1     (M6 — calendar time is not evidence)
+weakened                     0
+hypotheses retired           0
+techniques adopted           2     (evidence maturity, research velocity)
+net knowledge gain          +3
+```
+
+Weakened findings count **against** the total. A day that undermines a held
+conclusion has negative velocity, because the project then knows less than it
+thought — asserted by test, so it cannot read as progress.
+
+### RESEARCH ASSET LEDGER — now cumulative
+
+Thirteen assets, each with class, confidence, first observed, last validated
+and whether it is still believed. **Under review: 0. Retired: 0.**
+
+Three assets have not been re-validated since first establishment (M3, M5, M7)
+and are flagged rather than silently trusted.
+
+### KNOWLEDGE DECAY — constitutional principle adopted
+
+> Accepted conclusions remain open to re-evaluation. Contradicting evidence
+> moves an asset **Accepted → Under Review → Confirmed or Retired**. No
+> historical conclusion is immutable. **Confidence belongs to evidence, not to
+> age.**
+
+This guards the opposite failure to the one the project spent fifteen days
+avoiding. Early the risk was concluding too fast; after months of operation the
+risk is treating old conclusions as settled *because* they are old. `Last
+validated` is a required column for exactly that reason.
+
+### EXECUTIVE SUMMARY
+
+Overall / Refusal Decision Quality **1.000** (n=28, medium). Position Decision
+Quality, win rate, total return, expectancy, profit factor, Sharpe, Sortino,
+max drawdown, volatility, equity curve, SPY comparison, alpha vs SPY:
+**UNMEASURABLE — 0 positions opened.** Calibration, reliability, Brier, ECE:
+**UNMEASURABLE — 0 resolutions.** Signals beating baseline **0 of 11**.
+Framework stability **5**.
+
+### DECISION FUNNEL
+
+28 evaluated · 27 tradable (96%) · 27 independent evidence (100%) ·
+**3 strategic view (11%)** · 3 signal evaluated (100%) · 0 signal fired ·
+0 positions. Terminals: BUY 0 · SELL 0 · WATCH 3 · NO_TRADE 25.
+
+### HIGHEST MEASURED BOTTLENECK
+
+**`strategic_view` — PROMOTED.** Conversion 8.9% [7.3%, 10.5%], stable across
+5 of 5 observations.
+
+Second, and now measurable: **`signal_fired` at a stable 0.00.** The signal has
+not fired once in five operating days on companies that cleared every earlier
+gate. That is a genuine finding and it is not yet a deficiency — a momentum
+baseline measured at 0.500 declining to fire is the honest behaviour, and
+distinguishing "correctly quiet" from "broken" needs the calibration data that
+only resolved positions can provide.
+
+### ENGINEERING RECOMMENDATION
+
+The Engineering Constitution requires a measured production failure plus proof
+it cannot be resolved by operating. A promoted bottleneck is **not** a failure —
+it is the instrument working. Neither condition is met.
+
+**CONTINUE OPERATING.** 3035 passing.
