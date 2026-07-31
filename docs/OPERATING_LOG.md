@@ -944,3 +944,121 @@ Two independent reasons, either sufficient: no category clearly dominates the
 eight criteria, and the top-ranked one demonstrably unlocks zero decisions
 today. The next advance is a signal that beats 0.500 — not more evidence to
 feed signals that do not exist.
+
+---
+
+## 2026-07-31 — Day 9 · falsification failed, and it corrected Day 8
+
+### THE CLAIM UNDER TEST
+
+> "The primary bottleneck is no longer evidence retrieval. It is the absence
+> of viable hypotheses."
+
+**FALSIFIED.** Given every evidence category, today's wired signal fires and
+produces a position on every hypothesis kind:
+
+```
+wired signal: baseline_momentum.v1   fires? True   direction=up
+
+  customer_adoption     BUY   gate=-
+  governance            BUY   gate=-
+  macro_sensitivity     BUY   gate=-
+  expectation_shift     BUY   gate=-
+  competitive_position  BUY   gate=-
+  price_behaviour       BUY   gate=-
+```
+
+The engine is not short of hypotheses that could trade. It is short of the
+evidence to corroborate them.
+
+### Day 8 was wrong, and this is the correction
+
+Day 8 reported: *"acquiring the top-ranked category moves the gate one step
+deeper and produces no trade."* That statement is **false**, and it was the
+load-bearing sentence in that day's recommendation.
+
+The error: my Day 8 simulation passed **no market evidence**, so the reasoner
+stopped at `no_market_evidence`. The live sweep calls `_baseline_market()`,
+which computes momentum from real prices and **fires**. I conflated *"retired
+as an alpha claim"* with *"not wired"* — `baseline_momentum.v1` is measured at
+0.500 and remains the live signal.
+
+Day 8's conclusion (CONTINUE OPERATING, no adapter) rested on that error. The
+correct reading of Day 8's own data is the opposite: an evidence adapter would
+unlock real decisions today.
+
+### Which means the Signal Discovery Engine is NOT the work
+
+The Day 9 instruction was conditional — *"if the answer is no, accept the
+ranking"* — and the answer is **yes**. Building a hypothesis generator would
+be solving a problem the measurement says this engine does not have. Nine
+existing hypothesis kinds already reach BUY the moment they are corroborated.
+
+**Not built.**
+
+### Re-ranked, on corrected facts
+
+| | unlocks | retrievable | replay depth | live-path value |
+|---|---|---|---|---|
+| **industry** | **84 paths / 3 kinds** | **HTTP 200 (RSS)** | poor | **high** |
+| institutional / regulatory | 28 paths / 1 kind | HTTP 200 (EDGAR) | strong | medium |
+| customer_voice | 28 | HTTP 403 | poor | blocked |
+| macro | 28 | needs key | strong (revision risk) | blocked |
+| analyst / alternative | 28 | no free source | none | blocked |
+
+Industry's weakness is historical replay depth. That weakness applies to
+**signal testing**, not to **live decisions** — and live decisions are where
+every UNMEASURABLE metric in this report comes from. With the Day 8 error
+corrected, **industry dominates for the capability that is actually blocked.**
+
+### What an industry adapter would and would not buy
+
+**Would:** position Decision Quality from `n=0` to measurable · paper trades ·
+win rate, expectancy, drawdown, Sharpe, equity curve, SPY comparison · the
+first live resolutions toward `A-M5`'s n≥30.
+
+**Would not:** an edge. The signal that would fire is measured at **0.500**.
+These would be honest, gradable, calibration-producing coin flips — valuable
+as feedback, worthless as alpha, and they must not be reported as the latter.
+
+### Live cycle
+
+28 companies · **0/0/0/2/26** · **0 paper trades** · 28 justified refusals ·
+yield 3/28 · independent-evidence yield 0/28 across all seven categories.
+
+Unchanged from Day 8, run on the same universe and the same code. No trade
+forced, no gate relaxed, no retired hypothesis revived.
+
+### Performance metrics
+
+Overall / Refusal Decision Quality **1.000** (n=28, medium). Position Decision
+Quality, win rate, total return, expectancy, profit factor, Sharpe, Sortino,
+max drawdown, open positions, equity curve, SPY comparison: **UNMEASURABLE —
+zero paper trades have ever been opened.** Signals beating baseline **0 of
+11**. Framework stability **2**.
+
+### Report against the requested fields
+
+- **Hypotheses proposed:** 0 — the generator was not built, and the reason is
+  measured rather than declined.
+- **Rejected before testing:** n/a.
+- **Testable today:** all six existing kinds, *if corroborated*.
+- **Blocked by missing point-in-time data:** all six, on evidence not
+  mechanism.
+- **Entering replay:** 0.
+- **Immediately retired:** 0.
+- **Expected independent evidence required:** industry for three kinds;
+  customer_voice, institutional, regulatory, macro, analyst, alternative for
+  one each.
+
+### RECOMMENDATION
+
+**PAUSE FOR ONE EVIDENCE ADAPTER — industry.**
+
+The first time in nine days this project has recommended engineering. The bar
+was *"a measured blocker prevents meaningful learning"*: position Decision
+Quality has been `n=0` for nine days, and today's measurement shows evidence —
+not hypotheses — is what holds it there.
+
+Stated plainly: this recommendation exists **because Day 8's contrary
+conclusion was based on my own measurement error**, now corrected.
