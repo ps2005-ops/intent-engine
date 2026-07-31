@@ -1179,3 +1179,109 @@ Wire the adapter into the daily sweep as an operating action and accumulate
 real decisions. The measured priority is now real-world performance data, not
 further architecture — 3005 passing, and the first genuinely unlockable
 positions in ten days are waiting on operation rather than on engineering.
+
+---
+
+## 2026-07-31 — Day 11 · evidence semantics · FINAL architectural change
+
+### FALSIFICATION — measured on 175 real documents, not argued
+
+> *Can every document be represented accurately using only one category?*
+
+**No.**
+
+| | |
+|---|---|
+| documents analysed | 175 |
+| **source/subject mismatches** | **13 (7%)** |
+| documents with **multiple** subjects | **10 (19% of classified)** |
+
+The mismatches are not edge cases with a single shape:
+
+```
+industry  + analyst_opinion    8   journalists reporting an analyst action
+analyst   + earnings           2   analyst outlets writing about results
+analyst   + macro              2   analyst outlets writing about the cycle
+```
+
+One category cannot hold these. And 19% carrying more than one subject means
+the subject axis is not single-valued either — it is a **set**.
+
+### The change
+
+`SOURCE` (who wrote it — single, from authorship) and `SUBJECTS` (what it is
+about — a set, from content), represented independently.
+
+### The guarantee, asserted rather than promised
+
+**Gates continue to key on SOURCE alone.** Subjects are recorded for future
+reasoning and grant nothing today.
+
+```
+describe("third_party_filing", "Merchant adoption accelerates")
+  -> subjects: [customer_adoption]        ← recorded
+  -> assess(["third_party_filing"], "customer_adoption").satisfied = False
+```
+
+An institutional document *about* customer adoption still cannot corroborate a
+customer-adoption claim. A semantics change that quietly widened a gate would
+be the worst possible outcome of this cycle, so it is pinned by a test that
+walks every hypothesis kind and asserts the verdict is byte-identical to
+before.
+
+### VALIDATION — the two documents that unlocked trades
+
+| | duolingo | caterpillar |
+|---|---|---|
+| **old** | `category=industry` | `category=industry` |
+| **new** | `source=industry` `subjects=[analyst_opinion]` | `source=industry` `subjects=[macro]` |
+| decision changes | **No** | **No** |
+| gate changes | **No** | **No** |
+| category changes | **No** | **No** |
+
+The Caterpillar document turns out to be about **macro** — a tariff/demand
+story — which the one-dimensional model recorded as plain industry coverage.
+That information now exists and is doing nothing, which is exactly right: it
+becomes usable when a macro-sensitivity hypothesis has a macro source to pair
+it with.
+
+**No reasoning outcome changed. This was a semantics improvement only.**
+
+3012 passing (+7).
+
+### RETURNING TO OPERATING MODE
+
+This is the final architectural change. No further framework redesign without
+measurement proving it necessary.
+
+The standing operating priority, in order:
+
+1. **Wire the industry adapter into `daily_opportunity_sweep`** — an operating
+   action, not engineering. Two genuine positions are waiting on it.
+2. Accumulate paper trades.
+3. Build a real equity curve and a SPY comparison.
+4. Reach enough resolved outcomes to make Position Decision Quality measurable
+   (`A-M5`: n ≥ 30).
+5. Pause for engineering **only** if operating data reveals a new measured
+   bottleneck.
+
+### Where this project stands after eleven days
+
+| | |
+|---|---|
+| Hypotheses proposed / retired | 11 / 11 |
+| Signals beating baseline | **0** |
+| Best-powered negative result | `event_drift.v1`, n_eff 400, 0.4912 |
+| Measured baseline | **0.500** — the bar, established before anyone knew it |
+| Paper trades opened | **0** |
+| Position Decision Quality | UNMEASURABLE |
+| Refusal Decision Quality | 1.000, n=28 |
+| False discoveries caught | **3** — a 0.359 clustering artifact, a 0.6049 wrong-horizon artifact, and my own Day 8 measurement error |
+| Lookahead bugs caught | **2** — the evidence adapter's retrieval-dated observations, and a stale `as_of` in the operating harness |
+| Gaming routes refused | **2** — 13G relabelling, and subject-based gate widening |
+
+The engine has found no alpha. It has become very good at proving it has not.
+
+### RECOMMENDATION
+
+**CONTINUE OPERATING.**

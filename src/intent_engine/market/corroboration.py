@@ -198,3 +198,90 @@ def assess(source_classes: Sequence[str], *,
         required=tuple(sorted(requirement.required)),
         missing=tuple(missing),
         satisfied=not missing)
+
+
+# ---------------------------------------------------------------------------
+# TWO DIMENSIONS: who produced it, and what it is about.
+#
+# Measured on 175 real documents: 13 (7%) express a SOURCE that differs from
+# their SUBJECT -- eight are journalists reporting an analyst action, four are
+# analyst outlets writing about earnings or macro. A further 19% of classified
+# documents carry MORE THAN ONE subject. One category cannot represent them.
+#
+# The Day 10 case that exposed this: Investing.com reporting "Scotiabank raises
+# Duolingo price target". Authorship says INDUSTRY (a journalist wrote it);
+# content says analyst opinion. Both are true, and collapsing them loses half
+# the information.
+#
+# GATES ARE UNCHANGED. Corroboration continues to key on SOURCE alone, exactly
+# as before. Subjects are recorded for future reasoning and grant nothing
+# today: no gate is weakened, no hypothesis broadened, no evidence satisfies a
+# requirement it previously could not. This is a semantics change, and the
+# regression suite asserts that it changes no decision.
+# ---------------------------------------------------------------------------
+
+class Subject:
+    """What a document is ABOUT. Independent of who wrote it."""
+    CUSTOMER_ADOPTION = "customer_adoption"
+    ANALYST_OPINION = "analyst_opinion"
+    EARNINGS = "earnings"
+    GOVERNANCE = "governance"
+    REGULATION = "regulation"
+    COMPETITION = "competition"
+    MACRO = "macro"
+    CAPITAL_ALLOCATION = "capital_allocation"
+    PRODUCT = "product"
+    PRICING = "pricing"
+
+
+_SUBJECT_TERMS = {
+    Subject.ANALYST_OPINION: ("analyst", "price target", "upgrade",
+                              "downgrade", "rating", "initiates coverage",
+                              "consensus", "estimate"),
+    Subject.EARNINGS: ("earnings", "revenue", "eps", "quarterly results",
+                       "guidance", "beat", "missed"),
+    Subject.GOVERNANCE: ("board", "chief executive", "ceo ", "proxy",
+                         "activist", "lawsuit", "probe", "resign"),
+    Subject.REGULATION: ("regulator", "antitrust", "ruling", "fine",
+                         "compliance", "investigation by"),
+    Subject.COMPETITION: ("competitor", "rival", " vs ", "versus",
+                          "market share"),
+    Subject.CUSTOMER_ADOPTION: ("merchant", "customer", "adoption", "users",
+                                "subscriber", "churn", "retention"),
+    Subject.MACRO: ("tariff", "inflation", "interest rate", "recession",
+                    "economy"),
+    Subject.CAPITAL_ALLOCATION: ("buyback", "dividend", "acquisition",
+                                 "capex", "divest", "raises capital"),
+    Subject.PRODUCT: ("launch", "new feature", "platform", "release",
+                      "partnership"),
+    Subject.PRICING: ("price increase", "pricing", "discount", "fee change"),
+}
+
+
+def subjects_of(text: str) -> tuple:
+    """Every subject a document speaks to. A SET, because 19% of real documents
+    carry more than one and forcing a single value discards the rest."""
+    low = (text or "").lower()
+    return tuple(sorted(s for s, terms in _SUBJECT_TERMS.items()
+                        if any(t in low for t in terms)))
+
+
+@dataclass(frozen=True)
+class EvidenceSemantics:
+    """Source and subject, kept apart."""
+    source: str
+    subjects: tuple = ()
+
+    @property
+    def is_independent(self) -> bool:
+        return is_independent(self.source)
+
+    def as_dict(self) -> dict:
+        return {"source": self.source, "subjects": list(self.subjects),
+                "independent": self.is_independent}
+
+
+def describe(source_class: str, text: str = "") -> EvidenceSemantics:
+    """Two-dimensional description. `source` still decides every gate."""
+    return EvidenceSemantics(source=category_of(source_class),
+                             subjects=subjects_of(text))
