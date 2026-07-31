@@ -130,6 +130,11 @@ class Opportunity:
     # 61%". Without it the first real signal and the placeholder it beat are
     # averaged together and neither can be judged.
     market_source: str = ""
+    # WHICH evidence categories were present, and which the claim needed and
+    # did not get. "no_outside_source" alone could not distinguish "we found
+    # nothing independent" from "we found plenty of the wrong kind".
+    evidence_categories: tuple = ()
+    missing_categories: tuple = ()
     # WHICH claim about the world this position is a consequence of. Distinct
     # from `market_source`: that is the machinery, this is the assertion. They
     # are 1:1 today because there is one signal, and they separate the moment a
@@ -163,6 +168,8 @@ class Opportunity:
             "upside_pct": self.upside_pct, "downside_pct": self.downside_pct,
             "risk_reward": self.risk_reward,
             "market_source": self.market_source,
+            "evidence_categories": list(self.evidence_categories),
+            "missing_categories": list(self.missing_categories),
             "hypothesis_id": self.hypothesis_id,
             "evidence_count": self.evidence_count,
             "dated_evidence_count": self.dated_evidence_count,
@@ -199,12 +206,22 @@ def _dated(observations: List[dict]) -> List[dict]:
     return [o for o in observations if (o.get("date") or "").strip()]
 
 
-def _has_independent(report: dict, observations: List[dict]) -> bool:
+def _source_classes(report: dict, observations: List[dict]) -> List[str]:
     coverage = report.get("source_class_coverage") or {}
-    if any(coverage.get(c) for c in _INDEPENDENT_CLASSES):
-        return True
-    return any(o.get("source_class") in _INDEPENDENT_CLASSES
-               for o in observations)
+    classes = [c for c, n in coverage.items() if n]
+    classes += [o.get("source_class") for o in observations
+                if o.get("source_class")]
+    return [c for c in classes if c]
+
+
+def _has_independent(report: dict, observations: List[dict]) -> bool:
+    """Kept for the record view. Corroboration is now decided by
+    `corroboration.assess`, which asks the two questions this cannot: is the
+    author independent of the subject, and is the evidence of a kind that can
+    speak to THIS claim."""
+    from intent_engine.market.corroboration import category_of, is_independent
+    return any(is_independent(category_of(c))
+               for c in _source_classes(report, observations))
 
 
 def _thesis_text(report: dict) -> str:
@@ -276,7 +293,8 @@ def classify(company, report: Optional[dict], *, as_of: str,
              market: Optional[MarketEvidence] = None,
              regime: str = "unknown",
              calibration: Optional[dict] = None,
-             hypothesis_id: str = "") -> Opportunity:
+             hypothesis_id: str = "",
+             hypothesis_kind: str = "") -> Opportunity:
     """Exactly one classification, with every gate that stopped it named.
 
     The order of the gates is the order a careful analyst would apply them,
@@ -298,6 +316,14 @@ def classify(company, report: Optional[dict], *, as_of: str,
     uncertainty = _first_sentences(report.get("evidence_gaps"), 4)
     monitoring = _first_sentences(report.get("questions"), 4)
 
+    from intent_engine.market.corroboration import (
+        assess as _assess_cat, category_of as _cat, is_independent as _indep,
+    )
+    _all_classes = _source_classes(report, observations)
+    _categories = sorted({_cat(c) for c in _all_classes})
+    _missing = _assess_cat(_all_classes,
+                           hypothesis_kind=hypothesis_kind or "").missing
+
     quality = _quality(evidence=len(observations), dated=len(dated),
                        independent=independent, alternatives=len(alternatives),
                        has_thesis=bool(thesis))
@@ -317,7 +343,9 @@ def classify(company, report: Optional[dict], *, as_of: str,
             hypothesis_id=hypothesis_id,
             evidence_count=len(observations), dated_evidence_count=len(dated),
             independent_source=independent, regime=regime, quality=quality,
-            blocked_by=blocked, calibration=calibration)
+            blocked_by=blocked, calibration=calibration,
+            evidence_categories=tuple(_categories),
+            missing_categories=tuple(_missing))
 
     # 1. A private company cannot be a position. This is not a shortcoming of
     #    the analysis and the reasoning above is still worth keeping: it is how
@@ -358,14 +386,18 @@ def classify(company, report: Optional[dict], *, as_of: str,
                     "early or late to.",
                     (NO_DATED_EVIDENCE,))
 
-    # 4. Everything is the company's own account of itself. A position taken
-    #    purely on what a company says about itself is a position on its
-    #    marketing.
-    if not independent:
+    # 4. Corroboration, typed. Two conditions that used to be one hardcoded
+    #    list: the author must be independent of the subject, AND the evidence
+    #    must be of a kind that can speak to THIS claim. Customer reviews do
+    #    not corroborate a governance claim however many there are, and a
+    #    third-party ownership filing does not corroborate a customer-adoption
+    #    claim however independent its author.
+    from intent_engine.market.corroboration import assess as _assess
+    corroboration = _assess(_source_classes(report, observations),
+                            hypothesis_kind=hypothesis_kind or "")
+    if not corroboration.satisfied:
         return _out("WATCH",
-                    "Every source is the company's own, so this reading has "
-                    "not been checked against an outside account and is not "
-                    "yet worth a position.",
+                    f"Not yet worth a position: {corroboration.reason}.",
                     (NO_OUTSIDE_SOURCE,))
 
     # 5. The strategic reading is sound and checkable — and still says nothing

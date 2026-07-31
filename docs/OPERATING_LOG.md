@@ -702,3 +702,135 @@ justified, and the replay path produces properly-powered results. What is
 blocked is the trading half — and the honest response is to record that
 precisely rather than to unlock it by weakening the gate that makes the
 records trustworthy.
+
+---
+
+## 2026-07-31 — Day 7 · one engineering cycle · typed independent evidence
+
+### FALSIFICATION — the premise was wrong, the architecture still failed
+
+**The proposed premise was factually false.** The gate did not require one
+category. Measured:
+
+```
+gate accepts       : analyst_coverage, competitor_statement,
+                     customer_voice, independent_reporting   (4 categories)
+discovery produces : customer_voice                          (1 category)
+accepted-but-never-found : analyst_coverage, competitor_statement,
+                           independent_reporting
+```
+
+The narrowness was in **discovery**, not the gate. Saying otherwise would have
+been fixing the wrong layer.
+
+**But the architecture failed anyway, from first principles.** The gate exists
+because *"a position taken purely on what a company says about itself is a
+position on its marketing."* That sentence contains two conditions the gate
+collapsed into one hardcoded list:
+
+| condition | question | old gate |
+|---|---|---|
+| **Independence** | is the AUTHOR someone other than the subject? | approximated by a class list |
+| **Relevance** | does this evidence bear on THIS claim? | **not modelled at all** |
+
+Both were wrong at the edges:
+
+- An **SC 13D** is authored by an activist, not the company — genuinely
+  independent, and rejected because its class was not listed.
+- **Customer reviews** were accepted as corroboration for *any* claim,
+  including governance claims they say nothing about.
+
+### The one engineering task
+
+`market/corroboration.py`. Seven categories, kept distinct and never collapsed
+into a score — a single "corroboration score" would let strong evidence of the
+wrong kind substitute for weak evidence of the right kind, which is the exact
+failure being fixed.
+
+Requirements are stated **per hypothesis kind**, and `required` is a set of
+alternatives rather than a conjunction: a customer-adoption claim is
+corroborated by customers **or** by an industry observer reporting the same
+adoption — but never by a macro series, which cannot speak to one company's
+customers.
+
+### The anti-gaming property, now structural
+
+Day 6 found that reclassifying SC 13G as an outside source would move
+`independent_source` from 0/28 to ~28/28 and unlock trading while improving
+capability by nothing. That was refused by restraint. **It is now impossible by
+construction:**
+
+```
+assess(["third_party_filing"], hypothesis_kind="customer_adoption")
+  -> independent_present: institutional   (the filing IS recognised as
+                                           independent — that was never the issue)
+  -> missing:             customer_voice
+  -> satisfied:           False
+```
+
+No relabelling connects them, because the category a filing belongs to is a
+fact about its author, not a knob. Asserted by test.
+
+`investor_material` — a company's own SEC filing — remains **COMPANY**, not
+regulatory. The venue is official; the author is still the subject.
+
+### VALIDATION — the causal chain, re-run and typed
+
+Against what a live company actually retrieves today (`company_owned`,
+`executive_statement`, `investor_material`):
+
+| hypothesis kind | status | missing |
+|---|---|---|
+| customer_adoption | blocked | `customer_voice` or `industry` |
+| governance | blocked | `institutional` or `regulatory` |
+| macro_sensitivity | blocked | `macro` |
+| expectation_shift | blocked | `analyst` or `industry` |
+| competitive_position | blocked | `alternative` or `industry` |
+| **price_behaviour** | **unlocked** | — |
+
+A refusal now says *"a customer_adoption claim needs customer_voice or
+industry; independent evidence present: none"* instead of `no_outside_source`.
+
+### Report
+
+- **Previous architecture** — one global gate, membership in a 4-class list,
+  identical for every claim, no concept of relevance.
+- **New architecture** — 7 typed categories; independence decided by
+  authorship; relevance decided per hypothesis kind; both checked separately
+  and never traded off.
+- **Categories observed live** — company only (3 source classes → 1 category).
+- **Categories missing** — customer_voice, industry, institutional, regulatory,
+  macro, analyst, alternative. **Six of seven never appear.**
+- **Decision paths unlocked** — one: `price_behaviour`, which correctly
+  requires no company corroboration because it asserts nothing about the
+  business. It remains gated on dated evidence and on the market signal.
+- **Decision paths still blocked** — all five company-claim kinds.
+- **Does BUY/SELL remain unreachable?** On company claims, **yes**. The
+  measured blocker is unchanged: no independent evidence of any category is
+  retrievable.
+- **Did the measured blocker change?** It became *precise*. It was
+  "`no_outside_source`, cause unknown". It is now "six of seven evidence
+  categories are never retrieved, and here is which claim each would unlock".
+- **Did Decision Quality increase?** Not measurably — refusal justification was
+  already 1.000. The refusals are now *diagnostic*, which is a prerequisite for
+  improving it rather than an improvement itself.
+- **Did capability increase?** **Yes.** The engine can now express what would
+  corroborate a claim, and can distinguish "found nothing independent" from
+  "found plenty of the wrong kind". It could not before.
+
+### Was this worth one engineering cycle?
+
+Yes, and the honest reason is not that it unlocked a trade — it unlocked none.
+It is that the previous model **could not have been fixed by more data**.
+Retrieving G2 successfully would have satisfied `no_outside_source` for a
+governance claim, which is wrong, and nothing in the old architecture could
+notice.
+
+### Returning to operating mode
+
+No further architecture work. **Framework stability resets to 0** and starts
+counting again. 2990 passing (+12).
+
+### Recommendation
+
+**CONTINUE OPERATING.**
