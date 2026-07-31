@@ -12,6 +12,7 @@ has ever seen.
 """
 import collections
 import json
+from datetime import date as _date
 import pathlib
 import sys
 import tempfile
@@ -25,7 +26,13 @@ from intent_engine.market.evidence import founder_intelligence_research_fn
 from intent_engine.market.opportunity import classify
 from intent_engine.universe.companies import default_universe
 
-AS_OF = "2026-07-30"
+# The RUN DATE. A live operating cycle decides today using today's evidence.
+# This was hardcoded to a past date, and the leakage guard then correctly
+# stripped every retrieval-dated observation as future-dated -- the whole
+# cycle's evidence vanished and quality fell to 0.1 across the board. The guard
+# was right; the script was asking it to evaluate a historical decision with
+# live content, which is the exact thing the guard exists to refuse.
+AS_OF = _date.today().isoformat()
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/reality")
 OUT.mkdir(parents=True, exist_ok=True)
 

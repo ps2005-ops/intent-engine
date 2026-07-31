@@ -347,3 +347,111 @@ Three levers, ranked by measured effect on n_eff:
 
 **CONTINUE OPERATING.** Framework stability: **5** — `sampling.py` is new
 measurement, not a framework change. 2978 passing.
+
+---
+
+## 2026-07-30 — Day 4 · the honest horizon and the powerful one coincided
+
+Instruction: horizons belong to hypotheses, justified before testing, fixed,
+and **never shortened for power**.
+
+Horizons pre-registered with mechanism justifications in
+[`PREREGISTRATION_day4_horizons.md`](PREREGISTRATION_day4_horizons.md).
+
+### Results — all five retired
+
+| hypothesis | horizon | rows | events | windows | n_eff | DE | accuracy | verdict |
+|---|---|---|---|---|---|---|---|---|
+| `event_drift.v1` | 3d | 1529 | 1402 | **400** | 400 | 3.8× | 0.4912 | **retire — on baseline** |
+| `report_drift.v1` | 5d | 264 | 264 | **96** | 96 | 2.8× | 0.5341 | **retire — on baseline** |
+| `proxy_drift.v1` | 90d | 139 | 137 | 10 | 10 | 13.9× | 0.5108 | retire — unmeasurable |
+| `activist_stake.v1` | 120d | 18 | 18 | 3 | 3 | 6.0× | 0.5000 | retire — unmeasurable |
+| `insider_buy.v1` | 90d | 4352 | 1806 | **1** | 1 | **4352×** | 0.4809 | retire — unmeasurable |
+
+2σ bands on n_eff: `event_drift` (0.450, 0.550) · `report_drift` (0.398, 0.602).
+Both contain 0.500.
+
+### My pre-registered prediction was wrong
+
+I predicted adaptive horizons would **reduce** independent evidence. Measured:
+
+| | Day 3 (uniform 21d) | Day 4 (adaptive) |
+|---|---|---|
+| total independent windows | 89 | **510** (5.7×) |
+| measurable hypotheses (n_eff ≥ 30) | 1 | **2** |
+
+The reasoning behind the prediction was sound and incomplete. I saw that long
+horizons cut `n_eff` hard — true, and `insider_buy` at 90d collapses 4352 rows
+into **one** window, a design effect of 4352×. What I missed is that the *fast*
+mechanisms are also the *dense* ones. Matching an 8-K to a 3-day horizon fixes
+the mechanism fit and the power problem in the same move, because unscheduled
+news genuinely resolves in days.
+
+> **The honest horizon and the powerful horizon coincided — for fast
+> mechanisms.** Not by construction and not by tuning: a mechanism that
+> resolves quickly generates independent windows quickly. Slow mechanisms stay
+> genuinely unmeasurable, which is the true statement about them.
+
+This is the answer to the day's question. Adaptive horizons **do** increase
+independent evidence, without lookahead and without multiple-testing bias —
+five hypotheses, one fixed justified horizon each, all five reported.
+
+### Day 3's tempting number is dead
+
+`proxy_drift.v1` scored **0.6049** on Day 3 at a 21-day horizon. Its mechanism
+— governance and compensation changes resolving over an annual cycle — implies
+90 days. At its own horizon it is **0.5108**.
+
+The most alpha-shaped number this project produced was an artifact of testing a
+slow mechanism at a fast horizon. It was never claimed, and now it is retired.
+
+### `event_drift.v1` is the best-powered result in the project
+
+n_eff = 400 independent windows, design effect 3.8×, accuracy **0.4912**, band
+(0.450, 0.550). This is not "we lack evidence" — it is a properly-powered
+negative result. **8-K/6-K drift over 3 days does not exist at a magnitude this
+data could detect.** Retired with confidence rather than for want of power.
+
+### The leakage guard caught the operating script
+
+The live cycle ran first with gates `no_dated_evidence: 2,
+no_strategic_reading: 13` and quality **0.1** everywhere — a collapse from
+Day 3.
+
+Cause: `reality_run.py` had `AS_OF` hardcoded to a past date while retrieving
+live content. Yesterday's leakage guard correctly stripped every
+retrieval-dated observation as future-dated, and the cycle's evidence vanished.
+
+**The guard was right and the script was wrong.** A live operating cycle
+decides today using today's evidence; `AS_OF` is now the run date. Re-run
+restores `no_outside_source: 2, view_withheld: 7, no_strategic_reading: 6`,
+quality 0.575 — matching Day 3.
+
+Worth stating plainly: a guard added one day caught a latent defect in the
+operating harness the next. That is the guard earning its place.
+
+### Live cycle
+
+16 companies · **0/0/0/2/14** · **0 paper trades** · 16 justified refusals.
+Evidence 10/16, yield 3/16, independent 0/16. No trade forced, no gate relaxed.
+
+### Signals surviving: zero
+
+Nine hypotheses have now been proposed, tested and retired across four days.
+None beat 0.500. Two were retired **with adequate power** (n_eff 400 and 96);
+the rest are unmeasurable with reachable data.
+
+### Next measured bottleneck
+
+**The universe is 14 companies.** Every remaining slow-mechanism hypothesis
+fails on `n_eff` because activist stakes and proxy contests are rare *per
+company* — 18 SC 13D filings in ten years across fourteen companies.
+
+This is the first time more companies is the right answer, and it is right for
+a reason that did not hold before: at **short** horizons, cross-sectional
+breadth now adds windows rather than merging them. Day 3 measured the opposite
+because everything ran at 21 days. The lever changed when the horizons did.
+
+### Recommendation
+
+**CONTINUE OPERATING.** Framework stability: **6**. 2978 passing.
