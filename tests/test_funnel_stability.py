@@ -87,3 +87,35 @@ def test_no_conversion_loss_yet_is_a_candidate_not_a_conclusion():
     verdict = promote_bottleneck([_day(0.1, loss=False)])
     assert verdict["verdict"] == "CANDIDATE BOTTLENECK"
     assert verdict["stage"] is None
+
+
+# --- evidence maturity -------------------------------------------------------
+def test_maturity_says_how_far_away_the_answer_is_not_merely_that_it_is_away():
+    """"Insufficient history" is honest and uninformative on its own: it does
+    not say whether the answer is one day out or twenty."""
+    from intent_engine.market.funnel import evidence_maturity
+    m = evidence_maturity(_history([0.11, 0.07, 0.07]), "strategic_view")
+    assert m.observations == 3 and m.required == 5
+    assert m.maturity == 0.6
+    assert m.days_to_earliest_promotion == 2
+    assert m.candidate_streak == 3
+    assert m.confidence == INSUFFICIENT
+    assert not m.must_decide
+
+
+def test_reaching_the_floor_obliges_a_decision():
+    """Continuing to gather data purely to avoid committing is as wrong as
+    committing too early -- and is the failure a cautious project develops."""
+    from intent_engine.market.funnel import evidence_maturity
+    m = evidence_maturity(_history([0.10, 0.11, 0.10, 0.12, 0.11]),
+                          "strategic_view")
+    assert m.must_decide and m.maturity == 1.0
+    assert m.days_to_earliest_promotion == 0
+
+
+def test_the_streak_breaks_when_another_stage_leads():
+    from intent_engine.market.funnel import candidate_streak
+    history = _history([0.1, 0.1, 0.1])
+    history[1]["largest_loss"] = {"stage": "signal_fired", "lost": 1,
+                                  "from": 2, "rate": 0.5}
+    assert candidate_streak(history, "strategic_view") == 1

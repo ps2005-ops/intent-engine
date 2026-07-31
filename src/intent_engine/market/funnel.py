@@ -328,3 +328,69 @@ def promote_bottleneck(history: Sequence[dict], window: int = 7) -> dict:
             "reason": (f"led the loss on {days} of {len(history)} days and is "
                        f"statistically stable (CV {stability.cv:.0%})"),
             "stability": stability.as_dict()}
+
+
+# ---------------------------------------------------------------------------
+# EVIDENCE MATURITY
+#
+# How close a candidate is to being decidable, stated as a number rather than
+# as "not yet". "Insufficient history" is honest and uninformative on its own:
+# it does not say whether the answer is one day away or twenty, and a system
+# whose default output is uncertainty owes the reader that distinction.
+#
+# It also enforces the other half of the promotion constitution. Once the
+# floor is reached the system must DECIDE — promote or reject. Continuing to
+# gather data purely to avoid committing is as wrong as committing too early,
+# and is the failure mode a project this cautious is most likely to develop.
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Maturity:
+    stage: str
+    observations: int
+    required: int
+    candidate_streak: int
+    confidence: str
+    days_to_earliest_promotion: int
+
+    @property
+    def maturity(self) -> float:
+        return round(min(self.observations / self.required, 1.0), 3)
+
+    @property
+    def must_decide(self) -> bool:
+        """The floor is reached: gathering more data is no longer neutral."""
+        return self.observations >= self.required
+
+    def as_dict(self) -> dict:
+        return {"stage": self.stage, "observations": self.observations,
+                "required": self.required, "maturity": self.maturity,
+                "candidate_streak": self.candidate_streak,
+                "confidence": self.confidence,
+                "days_to_earliest_promotion":
+                    self.days_to_earliest_promotion,
+                "must_decide": self.must_decide}
+
+
+def candidate_streak(history: Sequence[dict], stage: str) -> int:
+    """Consecutive days this stage led the conversion loss, most recent first."""
+    streak = 0
+    for day in reversed(history):
+        loss = day.get("largest_loss") or {}
+        if loss.get("stage") == stage:
+            streak += 1
+        else:
+            break
+    return streak
+
+
+def evidence_maturity(history: Sequence[dict], stage: str,
+                      window: int = 7) -> Maturity:
+    stability = stage_stability(history, stage, window)
+    observed = stability.observations
+    remaining = max(MIN_OBSERVATIONS - observed, 0)
+    return Maturity(stage=stage, observations=observed,
+                    required=MIN_OBSERVATIONS,
+                    candidate_streak=candidate_streak(history, stage),
+                    confidence=stability.status,
+                    days_to_earliest_promotion=remaining)

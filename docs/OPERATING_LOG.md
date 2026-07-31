@@ -1577,3 +1577,123 @@ decide.
 ### ENGINEERING RECOMMENDATION
 
 **CONTINUE OPERATING.** 3029 passing. What this needs remains days, not code.
+
+---
+
+## 2026-07-31 — Day 15 · evidence maturity · research asset ledger
+
+### EXECUTIVE SUMMARY
+
+| | |
+|---|---|
+| Overall Decision Quality | **1.000** · n=28 · medium |
+| Position Decision Quality | **UNMEASURABLE** — 0 positions ever opened |
+| Refusal Decision Quality | **1.000** · n=28 · medium |
+| Paper trades opened / closed | **0 / 0** |
+| Win rate · Total return · Expectancy · Profit factor | **UNMEASURABLE** (n=0) |
+| Sharpe · Sortino · Max drawdown · Volatility | **UNMEASURABLE** (n=0) |
+| Equity curve · SPY comparison · Alpha vs SPY | **UNMEASURABLE** — no equity curve exists |
+| Framework stability | **4** |
+
+### DECISION FUNNEL
+
+| stage | count | conversion |
+|---|---|---|
+| evaluated | 28 | — |
+| tradable | 27 | 96% |
+| independent evidence | 27 | **100%** |
+| **strategic view** | **2** | **7%** |
+| signal evaluated | 2 | 100% |
+| signal fired | 0 | 0% |
+| positions opened | 0 | — |
+
+Terminals: BUY 0 · SELL 0 · WATCH 2 (7%) · NO_TRADE 26 (93%).
+**Largest conversion loss: `strategic_view`, 27 → 2.**
+
+### FUNNEL STABILITY
+
+All twelve stages: **INSUFFICIENT HISTORY** at 4 observations against a floor
+of 5. No mean, median, standard deviation, CV or interval printed — below the
+floor those quantities are meaningless, and printing them invites reading them.
+
+### EVIDENCE MATURITY — `strategic_view`
+
+| | |
+|---|---|
+| observations | **4 / 5** |
+| maturity | **80%** |
+| candidate streak | **4** consecutive days leading the loss |
+| confidence | INSUFFICIENT HISTORY |
+| earliest promotion | **1 more operating day** |
+| must decide now? | **No** |
+
+This is the report that "insufficient history" was missing. It was honest and
+uninformative: it never said whether the answer was one day away or twenty.
+**It is one day away.**
+
+### PROMOTION CONSTITUTION — the other half
+
+The constitution now binds in both directions. Once the floor is reached the
+system **must decide** — promote or reject. `must_decide` becomes True at 5
+observations and is asserted by test.
+
+Continuing to gather data purely to avoid committing is as wrong as committing
+too early, and is precisely the failure mode a project this cautious is most
+likely to develop. Tomorrow, `strategic_view` gets a verdict.
+
+### RESEARCH ASSET LEDGER — new permanent record
+
+Durable knowledge, as distinct from daily metrics. Full ledger:
+[`RESEARCH_ASSETS.md`](RESEARCH_ASSETS.md).
+
+| asset class | count | highlight |
+|---|---|---|
+| **Validated negative results** | 4 | `event_drift.v1` ruled out at **n_eff 400** — the best-powered result in the project |
+| **Validated positive results** | 1 | industry evidence causally changes decisions (ablation, n=2) |
+| **Integrity failures found** | 7 | all caught by measurement; all fixed; all with regressions |
+| **Measurement techniques adopted** | 7 | n_eff, design effect, pre-registration, ablation, metric-integrity test, confidence-over-calendar, independence÷relevance |
+
+**Engineering prediction accuracy: 7 predictions, 1 correct (14%).** That
+number is itself a research asset — it is the strongest available argument for
+measuring before building, and it is measured rather than asserted.
+
+Today's contribution: **0 new negative results, 0 new positive results, 2 new
+measurement techniques** (evidence maturity, the must-decide obligation).
+
+### CALIBRATION · PORTFOLIO · SIGNAL PERFORMANCE
+
+Calibration curve, reliability, Brier score, expected calibration error:
+**UNMEASURABLE** — no position has resolved, and only resolved positions may
+influence calibration.
+
+Portfolio: 0 open, 100% cash (paper), no sector/region/cap exposure.
+
+Signals: 11 proposed, 11 retired, **0 active, 0 beating baseline**. No new
+signals, none revived, no parameters tuned.
+
+### EVIDENCE QUALITY
+
+Independent-evidence yield **27/27 tradable (100%)**. ~25 industry documents
+per company, all point-in-time filtered. Lookahead violations **0**. Timestamp
+failures **0**. Company press releases syndicated through news feeds correctly
+classified COMPANY and excluded from corroboration.
+
+### HYPOTHESIS STATUS
+
+Six hypothesis kinds defined; `price_behaviour` is the only one reachable
+without company corroboration, and it requires a market signal that did not
+fire today. All eleven tested signal-hypotheses remain retired.
+
+### ENGINEERING RECOMMENDATION
+
+Neither condition of the Engineering Constitution is met. No measured
+production failure; nothing here is unresolvable by continuing to operate.
+
+### HIGHEST MEASURED BOTTLENECK
+
+**CANDIDATE BOTTLENECK: `strategic_view`** — 4/5 observations, 80% mature,
+4-day streak. Not promoted. One more operating day.
+
+---
+
+**CONTINUE OPERATING.** 3032 passing.
