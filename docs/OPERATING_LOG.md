@@ -1485,3 +1485,95 @@ that the engine does not yet know.
 **CONTINUE OPERATING.** Neither condition holds: operation is not blocked, and
 nothing here cannot be resolved by continuing to operate. What this needs is
 days, not code.
+
+---
+
+## 2026-07-31 — Day 14 · funnel stability · the default output is uncertainty
+
+### FUNNEL STABILITY — new permanent report
+
+| stage | today | mean | median | sd | CV | trend | status |
+|---|---|---|---|---|---|---|---|
+| tradable | 0.96 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| independent_evidence | 1.00 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| **strategic_view** | **0.07** | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| signal_evaluated | 1.00 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| signal_fired | 0.00 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| buy / sell | 0.00 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| watch | 0.07 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+| no_trade | 0.93 | — | — | — | — | unknown | **INSUFFICIENT HISTORY** |
+
+Every stage reports `INSUFFICIENT HISTORY` at 3 observations against a floor of
+5. **No mean, median, standard deviation, CV or interval is printed** — below
+the floor a dispersion estimate is not a weak number, it is a meaningless one,
+and printing it invites reading it.
+
+### THE VERDICT
+
+```
+CANDIDATE BOTTLENECK
+  stage : strategic_view
+  reason: 3 observation(s); 5 needed before dispersion means anything
+```
+
+`strategic_view` has now led the conversion loss on **three consecutive days**
+(11%, 7%, 7%). Under Day 13's calendar rule that would have been promoted to
+#1 today. Under the confidence rule it is still a **candidate**, and that is
+the change working.
+
+### The rule that replaced calendar time
+
+A stage becomes #1 only when **both** hold:
+
+1. **Sufficient history** — ≥ 5 observations.
+2. **Statistical stability** — CV ≤ 40%. A stage swinging ±40% of its own mean
+   is measuring conditions, not capability.
+
+Day 13's three-day minimum was better than Day 12's one day and still wrong:
+
+```
+Day 1: 3%   Day 2: 8%   Day 3: 4%
+```
+
+satisfies "three days" and establishes nothing. **Calendar time is not
+evidence.** Asserted by a test that feeds exactly that series and requires a
+CANDIDATE verdict.
+
+### Constitutional principle adopted
+
+> **The default output of this system is uncertainty.** A conclusion must earn
+> its way out through repeated, stable measurement. Until it does, the honest
+> output is that the engine does not know — and saying so is a result, not a
+> failure to produce one.
+
+The record it rests on: three self-corrections, each catching a conclusion
+before it was optimised around, and **each time the corrected answer was less
+conclusive than the original**. That is the direction an honest instrument
+moves in.
+
+### EXECUTIVE SUMMARY
+
+Overall / Refusal Decision Quality **1.000** (n=28, medium). Position Decision
+Quality, win rate, total return, expectancy, profit factor, Sharpe, Sortino,
+max drawdown, volatility, equity curve, SPY comparison, alpha vs SPY:
+**UNMEASURABLE — 0 positions opened.** Calibration curve, Brier, reliability:
+**UNMEASURABLE — 0 resolutions.** Signals beating baseline **0 of 11**.
+Framework stability **3**.
+
+### OPERATIONAL
+
+28 companies · 0/0/0/2/26 · 0 paper trades · 28 justified refusals ·
+independent-evidence yield **27/27 tradable (100%)** · strategic-reading yield
+2/28 (7%).
+
+Three days of funnel history: strategic_view 11% → 7% → 7%.
+
+### HIGHEST MEASURED BOTTLENECK
+
+**CANDIDATE: `strategic_view`.** Not promoted. Two more observations are
+needed before its dispersion means anything, and only then does stability
+decide.
+
+### ENGINEERING RECOMMENDATION
+
+**CONTINUE OPERATING.** 3029 passing. What this needs remains days, not code.

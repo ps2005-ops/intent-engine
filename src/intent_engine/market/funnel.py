@@ -195,3 +195,136 @@ def dominant_bottleneck(history: Sequence[dict], *, min_days: int = 3
     return {"stage": stage, "days_dominant": days, "of_days": len(history),
             "verdict": ("dominant" if days > len(history) / 2
                         else "no stage dominates")}
+
+
+# ---------------------------------------------------------------------------
+# FUNNEL STABILITY
+#
+# Day 12 named a bottleneck from one cycle. Day 13 replaced that with a
+# three-day minimum, which is better and still wrong: 3%, 8%, 4% over three
+# days tells you almost nothing. Calendar time is not evidence.
+#
+# The rule is now about CONFIDENCE. A stage may only be promoted to #1 when
+# there is enough history AND its conversion rate is statistically stable.
+# Otherwise it is a CANDIDATE, and saying so is the honest output.
+#
+# The default output of this system is uncertainty. A conclusion has to earn
+# its way out through repeated, stable measurement.
+# ---------------------------------------------------------------------------
+
+STABLE, UNSTABLE, INSUFFICIENT = "STABLE", "UNSTABLE", "INSUFFICIENT HISTORY"
+
+# Below this many observations, no dispersion estimate is worth reading.
+MIN_OBSERVATIONS = 5
+# Coefficient of variation above which a stage is too noisy to rank on. A
+# stage swinging ±40% of its own mean is measuring conditions, not capability.
+MAX_STABLE_CV = 0.40
+
+
+@dataclass(frozen=True)
+class StageStability:
+    stage: str
+    observations: int
+    today: Optional[float]
+    mean: Optional[float]
+    median: Optional[float]
+    stdev: Optional[float]
+    cv: Optional[float]
+    trend: str
+    interval: Optional[tuple]
+    status: str
+
+    def as_dict(self) -> dict:
+        return {"stage": self.stage, "observations": self.observations,
+                "today": self.today, "mean": self.mean, "median": self.median,
+                "stdev": self.stdev, "cv": self.cv, "trend": self.trend,
+                "interval": list(self.interval) if self.interval else None,
+                "status": self.status}
+
+
+def _trend(values: Sequence[float]) -> str:
+    """Direction over the window, stated coarsely on purpose.
+
+    A precise slope on five noisy points is false precision, and this exists to
+    flag movement worth looking at, not to forecast.
+    """
+    if len(values) < 3:
+        return "unknown"
+    half = len(values) // 2
+    early = sum(values[:half]) / half
+    late = sum(values[-half:]) / half
+    if early == 0:
+        return "rising" if late > 0 else "flat"
+    change = (late - early) / abs(early)
+    return "rising" if change > 0.2 else "falling" if change < -0.2 else "stable"
+
+
+def stage_stability(history: Sequence[dict], stage: str,
+                    window: int = 7) -> StageStability:
+    """Is this stage's conversion rate stable enough to rank on?"""
+    import statistics
+    series = [d.get("rates", {}).get(stage) for d in history[-window:]]
+    values = [v for v in series if v is not None]
+    today = values[-1] if values else None
+
+    if len(values) < MIN_OBSERVATIONS:
+        return StageStability(stage, len(values), today, None, None, None,
+                              None, "unknown", None, INSUFFICIENT)
+
+    mean = statistics.fmean(values)
+    median = statistics.median(values)
+    stdev = statistics.pstdev(values)
+    cv = (stdev / mean) if mean else None
+    # A normal-ish interval on a small sample is a rough guide, not a claim.
+    half = 1.96 * (stdev / (len(values) ** 0.5)) if stdev else 0.0
+    interval = (round(mean - half, 3), round(mean + half, 3))
+    status = STABLE if (cv is not None and cv <= MAX_STABLE_CV) else UNSTABLE
+    return StageStability(stage, len(values), today, round(mean, 3),
+                          round(median, 3), round(stdev, 3),
+                          (round(cv, 3) if cv is not None else None),
+                          _trend(values), interval, status)
+
+
+def stability_report(history: Sequence[dict], window: int = 7) -> List[dict]:
+    return [stage_stability(history, s, window).as_dict()
+            for s in CHAIN[1:] + TERMINALS]
+
+
+def promote_bottleneck(history: Sequence[dict], window: int = 7) -> dict:
+    """A stage becomes #1 only on sufficient history AND stability.
+
+    Replaces the calendar rule outright. Three days of 3%, 8%, 4% satisfies
+    "three days" and establishes nothing, so the test is dispersion rather
+    than duration.
+    """
+    tally: Dict[str, int] = {}
+    for day in history:
+        loss = day.get("largest_loss")
+        if loss:
+            tally[loss["stage"]] = tally.get(loss["stage"], 0) + 1
+    if not tally:
+        return {"verdict": "CANDIDATE BOTTLENECK", "stage": None,
+                "reason": "no conversion loss recorded yet"}
+
+    stage, days = max(tally.items(), key=lambda kv: kv[1])
+    stability = stage_stability(history, stage, window)
+    if stability.status == INSUFFICIENT:
+        return {"verdict": "CANDIDATE BOTTLENECK", "stage": stage,
+                "reason": (f"{stability.observations} observation(s); "
+                           f"{MIN_OBSERVATIONS} needed before dispersion "
+                           f"means anything"),
+                "stability": stability.as_dict()}
+    if stability.status == UNSTABLE:
+        return {"verdict": "CANDIDATE BOTTLENECK", "stage": stage,
+                "reason": (f"conversion varies too much to rank on "
+                           f"(CV {stability.cv:.0%} > {MAX_STABLE_CV:.0%}) — "
+                           f"this is measuring conditions, not capability"),
+                "stability": stability.as_dict()}
+    if days <= len(history) / 2:
+        return {"verdict": "CANDIDATE BOTTLENECK", "stage": stage,
+                "reason": f"led the loss on only {days} of {len(history)} days",
+                "stability": stability.as_dict()}
+    return {"verdict": "BOTTLENECK", "stage": stage,
+            "reason": (f"led the loss on {days} of {len(history)} days and is "
+                       f"statistically stable (CV {stability.cv:.0%})"),
+            "stability": stability.as_dict()}

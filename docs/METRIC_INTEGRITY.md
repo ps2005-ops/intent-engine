@@ -125,3 +125,50 @@ loosened.
 **Engineering is now exceptional.** Before writing code, prove operation is
 blocked AND that the blocker cannot be resolved by continuing to operate.
 Otherwise the answer is to operate.
+
+---
+
+## The default output is uncertainty
+
+Adopted Day 14.
+
+**A conclusion must earn its way out of uncertainty through repeated, stable
+measurement.** Until it does, the honest output is that the engine does not
+know — and saying so is a result, not a failure to produce one.
+
+### Bottleneck promotion
+
+A stage may be promoted to **#1 bottleneck** only when **both** hold:
+
+1. **Sufficient history** — at least 5 observations, below which no dispersion
+   estimate is worth reading.
+2. **Statistical stability** — coefficient of variation ≤ 40%. A stage swinging
+   ±40% of its own mean is measuring market conditions, not capability.
+
+Otherwise the output is **CANDIDATE BOTTLENECK**, with the reason stated.
+
+### Why this replaced the calendar rule
+
+Day 13 required three operating days. Better than one, and still wrong:
+
+```
+Day 1: 3%   Day 2: 8%   Day 3: 4%
+```
+
+satisfies "three days" and establishes nothing. **Calendar time is not
+evidence.** The test is dispersion, not duration.
+
+### The record this rule is built on
+
+Three self-corrections, each catching a conclusion before it was optimised
+around:
+
+| day | the conclusion | what corrected it |
+|---|---|---|
+| 3 | a 0.359 signal, apparently significant | clustering — 64 rows in 15 windows |
+| 9 | Day 8's "the adapter unlocks nothing" | my own simulation omitted the wired signal |
+| 13 | "strategic-reading yield is #1" | one cycle cannot separate deficiency from conditions |
+
+Each time the corrected answer was *less* conclusive than the original. That is
+the direction an honest instrument moves in, and it is the reason this rule
+exists.
