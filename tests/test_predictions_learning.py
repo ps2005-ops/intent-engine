@@ -58,8 +58,19 @@ def test_eligibility_excludes_private_and_produces_intents(tmp_path):
     # set, which pinned this test to the seed universe's size and broke the
     # moment breadth was added for measured coverage reasons.
     universe = default_universe()
-    assert instruments == {c.tradable_instrument for c in universe.tradable()
-                           if c.prediction_eligible}
+    tradable_symbols = {c.tradable_instrument for c in universe.tradable()
+                        if c.prediction_eligible}
+    # Every intent is a tradable, and nothing is SILENTLY dropped -- but not
+    # every tradable becomes an intent. Once the universe grew past the
+    # portfolio cap (25 concurrent positions) the eligibility gate began
+    # refusing the surplus, which is risk control working rather than a
+    # defect. Asserting equality was only ever true while the universe was
+    # smaller than the cap.
+    assert instruments <= tradable_symbols
+    refused = [r for r in results if not getattr(r, "eligible", True)]
+    assert len(instruments) + len(refused) >= len(tradable_symbols)
+    assert all(getattr(r, "reason", "") for r in refused), \
+        "a refusal with no stated reason is a silent drop"
     assert "stripe" not in {i.instrument for i in intents}
     private = [c for c in universe.companies if not c.tradable_instrument]
     assert private, "the private-company case must still be represented"

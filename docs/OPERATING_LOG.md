@@ -455,3 +455,110 @@ because everything ran at 21 days. The lever changed when the horizons did.
 ### Recommendation
 
 **CONTINUE OPERATING.** Framework stability: **6**. 2978 passing.
+
+---
+
+## 2026-07-30 — Day 5 · breadth tripled the rows and cut independent evidence
+
+### Falsification first — the ranking survived, but it had to be proven
+
+| candidate | verdict |
+|---|---|
+| **A. More historical years** | **Capped.** Yahoo daily stops at 10y; `range=max` silently switches to a coarser interval (135 bars). No lever. |
+| **C. More sparse event types** | **Self-defeating.** Sparse is the problem: SC 13D gave 18 rows / 3 windows across 14 companies over 10 years. |
+| **D. Better strategic-reading yield** | **Zero replay effect.** Yield gates the live path; replay uses EDGAR + prices and never consults the strategic reading. Real bottleneck, wrong one. |
+| **B. More companies** | **#1 — and proven not pseudo-breadth.** |
+
+B was not assumed. Marginal *new* event dates per company added: 100% for the
+first, ~65% by the fourteenth, mean **87 new dates each** for the last five. 14
+companies covered 1065 unique event dates = 29.2% of calendar days, against a
+3-day window ceiling of 1216 — **816 windows of headroom**.
+
+### Expansion: 15 → 27 tradables, chosen for diversity not convenience
+
+Added across regions the engine had never seen — Latin America, Australia,
+Middle East, Africa — plus the last missing sector (Communication Services) and
+two small-caps. **Regions 4 → 8. Sectors 11 → 12. Sector concentration 0.31 →
+0.21.**
+
+### The result, and it is the warning made real
+
+| clustering definition | n | 2σ band |
+|---|---|---|
+| raw observations | **4991** | (0.486, 0.514) |
+| unique events | 4008 | (0.484, 0.516) |
+| unique event dates | 1957 | (0.477, 0.523) |
+| **non-overlapping windows** | **246** | (0.436, 0.564) |
+| regime clusters (quarter) | 41 | (0.344, 0.656) |
+| company clusters | 26 | (0.304, 0.696) |
+| sector clusters | 11 | (0.198, 0.802) |
+| **regional clusters (strictest)** | **8** | (0.146, 0.854) |
+
+Accuracy **0.4959**. Under the strictest defensible clustering — regional,
+n=8 — **unmeasurable**, and indistinguishable from 0.500 under every other.
+
+### Breadth increased row count and DESTROYED independent evidence
+
+| | Day 4 (14 co) | Day 5 (27 co) | |
+|---|---|---|---|
+| raw observations | 1529 | **4991** | ↑ 3.3× |
+| unique event dates | 1065 | **1957** | ↑ 1.8× |
+| **non-overlapping windows** | **400** | **246** | **↓ 38%** |
+
+Unique event dates nearly doubled. **Independent windows fell by more than a
+third.** With 1957 event dates across 3650 calendar days, 54% of days now carry
+an event, and 3-day windows chain into 246 contiguous blocks instead of
+standing apart.
+
+> Adding companies added **dates** and destroyed **independence**. Independence
+> is a property of non-overlapping *time*, and denser events overlap more. The
+> falsification measured the right quantity — marginal new dates — and dates
+> turned out not to be the binding unit.
+
+### Answering the four questions directly
+
+1. **Row count** — increased, 3.3×.
+2. **Independent evidence** — **decreased**, −38% on windows, and the strictest
+   clustering (regional, n=8) is worse than Day 4's.
+3. **Measurable hypotheses** — **no increase**. Under regional clustering,
+   zero.
+4. **Decision Quality potential** — unchanged for signal discovery. Genuinely
+   improved for the *live* path, which now evaluates 28 companies across 8
+   regions instead of 16 across 4 — but that is a different capability from
+   finding alpha, and conflating them is the error this day was designed to
+   catch.
+
+### The portfolio cap held
+
+Two tests failed on expansion. Not defects: the eligibility gate refused the
+surplus with *"portfolio at max open positions (25)"* against a 27-tradable
+universe. Risk control working. The tests asserted every tradable becomes an
+intent, which was only true while the universe was smaller than the cap; they
+now assert the real property — every prediction becomes an intent **or** carries
+a stated refusal reason, and nothing is silently dropped.
+
+### Live cycle
+
+28 companies · **0/0/0/3/25** · **0 paper trades** · 28 justified refusals.
+Four companies formed a reading (up from three); yield 4/28 = 14%, down from
+19% because the added companies are harder to read, not because reading got
+worse. Independent sources still **0/28**. No trade forced, no gate relaxed.
+
+### Next measured bottleneck
+
+**Temporal density is now the constraint, and more of anything makes it
+worse.** Three levers remain, and two are closed:
+
+- more companies → measured this day to *reduce* independent windows
+- more years → capped by the price feed
+- **shorter horizons** → raises the window ceiling, but Day 4 established
+  horizons belong to mechanisms and must not be shortened for power
+
+The honest conclusion is that **event-drift hypotheses on a 10-year daily
+window are exhausted**. Getting more independent evidence needs a genuinely
+different axis — intraday resolution, or a data source with point-in-time depth
+this project cannot currently reach.
+
+### Recommendation
+
+**CONTINUE OPERATING.** Framework stability: **7**. 2978 passing.

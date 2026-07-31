@@ -401,7 +401,140 @@ def default_universe() -> CompanyPredictionUniverse:
             peer_group="vertical_saas",
             prediction_eligible=True, paper_trading_eligible=True,
             inclusion_reason="first small-cap; small-caps behave differently enough to be their own test"),
+        # -- CROSS-SECTIONAL BREADTH (cycle/day 5) ----------------------------
+        # Chosen for DATE, REGION, VENUE and REGIME diversity -- not for ease of
+        # retrieval, which is the pseudo-breadth failure: a universe that looks
+        # diverse while every filing lands in the same US earnings weeks under
+        # the same macro regime.
+        #
+        # The falsification that justified this is in the operating log: each
+        # added company still contributes ~87 genuinely NEW event dates, and
+        # 14 companies cover only 29% of calendar days against a 3-day window
+        # ceiling with 816 windows of headroom.
+        #
+        # Regions deliberately outside North America and Western Europe, and
+        # the Communication Services / micro-cap gaps closed.
+        CompanyProfile(
+            company_id="comcast", canonical_name="Comcast Corporation",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://corporate.comcast.com",
+            ticker="CMCSA", exchange="NASDAQ", tradable_instrument="CMCSA",
+            sector="Communication Services", industry="Cable and media",
+            market_cap="mega", region="North America",
+            peer_group="cable_media",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="closes the last missing sector"),
+        CompanyProfile(
+            company_id="mercadolibre", canonical_name="MercadoLibre, Inc.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://investor.mercadolibre.com",
+            ticker="MELI", exchange="NASDAQ", tradable_instrument="MELI",
+            sector="Consumer Discretionary", industry="Latin American e-commerce",
+            market_cap="large", region="Latin America",
+            peer_group="ecommerce_marketplace",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first Latin American exposure; a different macro cycle entirely"),
+        CompanyProfile(
+            company_id="vale", canonical_name="Vale S.A.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://vale.com",
+            ticker="VALE", exchange="NYSE", tradable_instrument="VALE",
+            sector="Materials", industry="Iron ore and nickel mining",
+            market_cap="large", region="Latin America",
+            peer_group="mining",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="Brazilian commodity cycle -- macro exposure unlike anything held"),
+        CompanyProfile(
+            company_id="bhp", canonical_name="BHP Group Limited",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.bhp.com",
+            ticker="BHP", exchange="NYSE", tradable_instrument="BHP",
+            sector="Materials", industry="Diversified mining",
+            market_cap="mega", region="Australia",
+            peer_group="mining",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first Australian domicile and reporting calendar"),
+        CompanyProfile(
+            company_id="honda", canonical_name="Honda Motor Co., Ltd.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://global.honda",
+            ticker="HMC", exchange="NYSE", tradable_instrument="HMC",
+            sector="Consumer Discretionary", industry="Automobiles and motorcycles",
+            market_cap="large", region="Asia",
+            peer_group="automotive",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="second Japanese issuer; 6-K cadence differs from Toyota's"),
+        CompanyProfile(
+            company_id="hdfc_bank", canonical_name="HDFC Bank Limited",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.hdfcbank.com",
+            ticker="HDB", exchange="NYSE", tradable_instrument="HDB",
+            sector="Financials", industry="Indian retail banking",
+            market_cap="large", region="Emerging",
+            peer_group="retail_bank",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="Indian rate cycle; emerging-market financials absent"),
+        CompanyProfile(
+            company_id="checkpoint", canonical_name="Check Point Software",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.checkpoint.com",
+            ticker="CHKP", exchange="NASDAQ", tradable_instrument="CHKP",
+            sector="Technology", industry="Cybersecurity software",
+            market_cap="mid", region="Middle East",
+            peer_group="security_software",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first Israeli issuer and Middle East region"),
+        CompanyProfile(
+            company_id="canadian_national", canonical_name="Canadian National Railway",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.cn.ca",
+            ticker="CNI", exchange="NYSE", tradable_instrument="CNI",
+            sector="Industrials", industry="Freight rail",
+            market_cap="large", region="North America",
+            peer_group="rail",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="Canadian venue and reporting regime; rail is a distinct cycle"),
+        CompanyProfile(
+            company_id="america_movil", canonical_name="America Movil",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.americamovil.com",
+            ticker="AMX", exchange="NYSE", tradable_instrument="AMX",
+            sector="Communication Services", industry="Latin American telecom",
+            market_cap="large", region="Latin America",
+            peer_group="telecom",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="Mexican telecom; regulated LatAm exposure"),
+        CompanyProfile(
+            company_id="sea_limited", canonical_name="Sea Limited",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.sea.com",
+            ticker="SE", exchange="NYSE", tradable_instrument="SE",
+            sector="Consumer Discretionary", industry="Southeast Asian internet",
+            market_cap="large", region="Asia",
+            peer_group="internet_platform",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="Singapore domicile; SE Asian consumer cycle"),
+        CompanyProfile(
+            company_id="sasol", canonical_name="Sasol Limited",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.sasol.com",
+            ticker="SSL", exchange="NYSE", tradable_instrument="SSL",
+            sector="Energy", industry="Integrated chemicals and energy",
+            market_cap="small", region="Africa",
+            peer_group="chemicals",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="first African domicile; small-cap energy"),
+        CompanyProfile(
+            company_id="grifols", canonical_name="Grifols S.A.",
+            classification=CompanyClass.PUBLIC_AND_TRADABLE, is_public=True,
+            website="https://www.grifols.com",
+            ticker="GRFS", exchange="NASDAQ", tradable_instrument="GRFS",
+            sector="Healthcare", industry="Plasma-derived medicines",
+            market_cap="small", region="Europe",
+            peer_group="biopharma",
+            prediction_eligible=True, paper_trading_eligible=True,
+            inclusion_reason="small-cap European healthcare; a filing calendar unlike the US majors"),
     ]
     return CompanyPredictionUniverse(
-        version=UNIVERSE_SCHEMA_VERSION, label="breadth-v1-15public-1private-1proxy",
+        version=UNIVERSE_SCHEMA_VERSION, label="breadth-v2-27public-1private-1proxy",
         companies=companies).validate()
