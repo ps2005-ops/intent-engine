@@ -91,6 +91,9 @@ def load(path, *, expected_ticker: str = "",
 def consume(payload: dict, *, expected_ticker: str = "",
             today: Optional[str] = None) -> MarketContext:
     """Validate identity, version and freshness, then build descriptive text."""
+    if not isinstance(payload, dict):
+        return unavailable("market snapshot is not a JSON object",
+                           expected_ticker)
     version = (payload or {}).get("export_version")
     if version != SUPPORTED_VERSION:
         # Refuses rather than best-efforts an unknown schema: a field that
@@ -106,7 +109,8 @@ def consume(payload: dict, *, expected_ticker: str = "",
             f"snapshot is for {ticker}, not {expected_ticker}", ticker)
 
     latest = payload.get("latest_completed_market_date")
-    freshness = payload.get("freshness") or {}
+    freshness = payload.get("freshness")
+    freshness = freshness if isinstance(freshness, dict) else {}
     age = freshness.get("age_days")
     if latest and today:
         try:
@@ -147,11 +151,21 @@ def _modules(payload: dict) -> tuple:
     statements = []
     limitations = []
 
-    price = payload.get("price_change") or {}
-    relative = payload.get("benchmark_relative") or {}
+    # TYPE GUARD. Found by production-parity validation: an export whose
+    # `price_change` is a string (or any non-mapping) raised AttributeError
+    # and took the whole founder page down. "Fails closed" has to mean the
+    # market module goes unavailable, not that the product crashes -- a
+    # malformed upstream artefact must never be able to break a founder's
+    # result.
+    def _mapping(value):
+        return value if isinstance(value, dict) else {}
+
+    price = _mapping(payload.get("price_change"))
+    relative = _mapping(payload.get("benchmark_relative"))
     series = {}
     for window, field in price.items():
-        if (field or {}).get("status") == "observed" and field.get(
+        field = _mapping(field)
+        if field.get("status") == "observed" and field.get(
                 "value") is not None:
             series[window] = field["value"]
     if series:
@@ -170,9 +184,9 @@ def _modules(payload: dict) -> tuple:
         limitations.append("Share-price history was not available, so no "
                            "market trajectory is shown.")
 
-    rel = {w: (f or {}).get("value") for w, f in relative.items()
-           if (f or {}).get("status") == "observed"
-           and (f or {}).get("value") is not None}
+    rel = {w: _mapping(f).get("value") for w, f in relative.items()
+           if _mapping(f).get("status") == "observed"
+           and _mapping(f).get("value") is not None}
     if rel:
         modules["benchmark_relative"] = {
             "series": rel,
@@ -185,7 +199,7 @@ def _modules(payload: dict) -> tuple:
         }
         statements.append(_relative_sentence(rel))
 
-    vol = payload.get("volatility") or {}
+    vol = _mapping(payload.get("volatility"))
     if vol.get("value") is not None and vol.get("status") in ("observed",
                                                               "inferred"):
         modules["volatility"] = {
@@ -198,7 +212,7 @@ def _modules(payload: dict) -> tuple:
             "what_to_watch": "Whether it subsides after the next disclosure.",
         }
 
-    dd = payload.get("drawdown") or {}
+    dd = _mapping(payload.get("drawdown"))
     if dd.get("value") is not None and dd.get("status") == "observed":
         modules["drawdown"] = {
             "value": dd["value"],
@@ -210,14 +224,14 @@ def _modules(payload: dict) -> tuple:
             "what_to_watch": "Whether the low holds on the next weak news.",
         }
 
-    fundamentals = payload.get("fundamentals") or {}
+    fundamentals = _mapping(payload.get("fundamentals"))
     if fundamentals.get("status") == "unmeasurable":
         limitations.append(
             "No verified revenue, earnings or margin data is available for "
             "this company, so no financial trajectory is shown. Estimated "
             "figures are deliberately not substituted.")
 
-    signal = payload.get("signal") or {}
+    signal = _mapping(payload.get("signal"))
     if signal.get("state"):
         modules["signal"] = {
             "state": signal["state"],

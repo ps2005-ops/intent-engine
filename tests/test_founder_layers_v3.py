@@ -467,3 +467,47 @@ def test_the_gate_catches_controls_placed_before_the_answer():
             '<div>Why this matters</div><h1>x</h1></main>')
     result = G.check(_rich(), html)
     assert any("before the founder answer" in f for f in result.failures)
+
+
+# --- market-export states: found by production-parity validation ------------
+@pytest.mark.parametrize("bad", [
+    "a string", 123, None, [],
+    {"export_version": "market_intel_export.v1", "ticker": "ACME",
+     "latest_completed_market_date": "2026-07-31", "price_change": "oops"},
+    {"export_version": "market_intel_export.v1", "ticker": "ACME",
+     "latest_completed_market_date": "2026-07-31", "volatility": "bad",
+     "freshness": "nope"},
+])
+def test_a_malformed_export_fails_closed_and_never_crashes(bad):
+    """FOUND BY PARITY: `price_change` as a string raised AttributeError and
+    took the whole founder page down. "Fails closed" must mean the market
+    module goes unavailable -- not that a malformed upstream artefact can
+    break a founder's result."""
+    ctx = M.consume(bad, expected_ticker="ACME")
+    assert ctx.available is False
+    assert ctx.reason
+    # and the dashboard still renders every other tile
+    modules = L.build_dashboard(_rich(market=ctx.as_dict()))
+    assert len(modules) >= 4
+    html = R.render_dashboard(modules)
+    assert "Unavailable" in html
+    assert ">0%<" not in html and ">$0<" not in html
+
+
+def test_a_partial_export_renders_only_what_exists():
+    partial = {"export_version": "market_intel_export.v1", "ticker": "ACME",
+               "latest_completed_market_date": "2026-07-31",
+               "freshness": {"age_days": 1},
+               "price_change": {"1m": {"value": -0.05, "status": "observed"}},
+               "fundamentals": {"status": "unmeasurable"}}
+    ctx = M.consume(partial, expected_ticker="ACME")
+    assert ctx.available
+    assert set(ctx.modules) == {"price"}
+    assert any("verified revenue" in l for l in ctx.limitations)
+
+
+def test_a_stale_export_is_flagged_and_still_usable():
+    from tests.test_founder_brief_v3 import _export
+    ctx = M.consume(_export(), expected_ticker="ACME", today="2026-10-01")
+    assert ctx.stale and ctx.available
+    assert any("days old" in l for l in ctx.limitations)
