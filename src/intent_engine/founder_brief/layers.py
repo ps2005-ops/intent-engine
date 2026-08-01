@@ -336,6 +336,20 @@ def _alternatives(report: dict) -> List[str]:
 # ===========================================================================
 # EXECUTIVE BRIEF
 # ===========================================================================
+# When no reading was asserted, a brief built from thesis fields has almost
+# nothing to draw on -- it measured 168 words. The answer is not filler: it is
+# that a LIMITED brief has a different and genuinely useful structure, built
+# from what WAS established rather than from a conclusion that was withheld.
+LIMITED_SECTIONS = (
+    ("bottom_line", "The bottom line"),
+    ("verified", "What we verified"),
+    ("why_limited", "Why the limitation matters"),
+    ("customer_view", "What a customer or investor can currently see"),
+    ("decision", "The decision"),
+    ("could_change", "What could change this assessment"),
+    ("next", "What to do next"),
+)
+
 BRIEF_SECTIONS = (
     ("bottom_line", "The bottom line"),
     ("changed", "What changed"),
@@ -376,6 +390,9 @@ def build_executive_brief(brief, report: Optional[dict] = None,
                             "does, but none of it supports a strategic view "
                             "strongly enough to put one forward.")
 
+    if not k:
+        return _limited_brief(brief, report, ledger, withheld_line)
+
     raw = {
         "bottom_line": [k.interpretation if k else withheld_line,
                         _first_text(report.get("strategic_analysis"))],
@@ -408,6 +425,101 @@ def build_executive_brief(brief, report: Optional[dict] = None,
             "within_budget": words <= hi,
             "note": ("Sections with nothing new to say are omitted rather "
                      "than padded.")}
+
+
+def _limited_brief(brief, report: dict, ledger: Ledger,
+                   withheld_line: str) -> dict:
+    """The executive brief for a company whose reading was withheld.
+
+    Every section is built from material the run actually established. Nothing
+    infers adoption, economics, leadership intent or defensibility -- those are
+    precisely what the missing evidence would have been needed for, and
+    supplying them here would undo the withholding one layer down.
+    """
+    observations = [o for o in (report.get("observations") or ())
+                    if isinstance(o, dict)]
+    dated = [o for o in observations if (o.get("date") or "")[:4].isdigit()]
+    independent = [o for o in observations
+                   if o.get("source_class") not in
+                   ("company_owned", "executive_statement", None, "")]
+    gaps = [g if isinstance(g, str) else g.get("text", "")
+            for g in (report.get("evidence_gaps") or ())]
+    questions = [q if isinstance(q, str) else q.get("text", "")
+                 for q in (report.get("questions") or ())]
+
+    bottom = withheld_line or (
+        "The public material describes what this company does, but none of it "
+        "carries the dated, independently-reported substance a strategic "
+        "reading has to rest on. That is a finding about the evidence, not a "
+        "verdict on the business.")
+
+    verified = []
+    for o in (dated or observations)[:3]:
+        text = " ".join(str(o.get("text") or o.get("summary") or "").split())
+        when = str(o.get("date") or "")[:10]
+        if text:
+            verified.append(f"{when + ' — ' if when else ''}{text}")
+
+    why_limited = (
+        f"Of {len(observations)} retrieved source(s), {len(independent)} come "
+        f"from someone other than the company and {len(dated)} carry a date. "
+        f"Without dated, independent material there is no way to tell a "
+        f"direction from a snapshot, so any conclusion about where this "
+        f"business is heading would be the analysis filling in the gap rather "
+        f"than reading it. Decisions that depend on trajectory — hiring "
+        f"ahead of demand, pricing changes, competitive positioning — cannot "
+        f"be made confidently on this basis.")
+
+    customer_view = (
+        "A prospective customer, partner or investor researching this company "
+        "sees exactly what this analysis saw. Where pricing, proof of use or "
+        "independent coverage is absent here, it is absent for them too — and "
+        "they will not ask; they will move on. That is the practical cost of "
+        "the gap, and it is felt before any strategic question is settled.")
+
+    decision = (
+        "Whether to close the evidence gap publicly — pricing, a named "
+        "customer outcome, a dated product record — or accept that every "
+        "evaluation of this company starts from an unverified position. The "
+        "first is cheap and controllable; the second compounds quietly.")
+
+    could_change = []
+    for gap in gaps[:2]:
+        if gap:
+            could_change.append(f"{gap} would materially change this.")
+    for question in questions[:1]:
+        if question:
+            could_change.append(f"An answer to: {question}")
+    if not could_change:
+        could_change.append(
+            "Independent reporting, a dated customer outcome, or published "
+            "pricing would each move this assessment.")
+
+    raw = {
+        "bottom_line": [bottom],
+        "verified": verified or ["No dated, checkable claim could be "
+                                 "established from the public material."],
+        "why_limited": [why_limited],
+        "customer_view": [customer_view],
+        "decision": [decision],
+        "could_change": could_change,
+        "next": list(brief.next_actions)[:3],
+    }
+    sections = []
+    for key, title in LIMITED_SECTIONS:
+        paragraphs = [x for x in (ledger.fresh(v) for v in raw.get(key, []))
+                      if x]
+        if paragraphs:
+            sections.append({"key": key, "title": title,
+                             "paragraphs": paragraphs})
+    words = sum(len(p.split()) for s in sections for p in s["paragraphs"])
+    return {"sections": sections, "words": words,
+            "budget": {"min": EXEC_LIMITED_MIN, "max": EXEC_LIMITED_MAX},
+            "within_budget": EXEC_LIMITED_MIN <= words <= EXEC_LIMITED_MAX,
+            "limited": True,
+            "note": ("Built from what was established. Nothing here infers "
+                     "adoption, economics or strategy — those are what the "
+                     "missing evidence would have been needed for.")}
 
 
 # ===========================================================================

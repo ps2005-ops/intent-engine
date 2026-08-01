@@ -89,6 +89,24 @@ summary{cursor:pointer;color:var(--accent);font-size:.9rem}
 """
 
 
+def _citations(evidence_ids, run_id: str, label: str = "Evidence") -> str:
+    """Expandable citations, visually secondary but keyboard-reachable.
+
+    Behind a <details> on purpose: a founder reading a 60-second answer is not
+    reading source ids, and a wall of them above the fold is the "source
+    metadata wall" this rebuild removed. One click away, every one resolves
+    through the real evidence route.
+    """
+    ids = [str(e) for e in (evidence_ids or ()) if e]
+    if not ids or not run_id:
+        return ""
+    links = "".join(
+        f'<li><a href="/runs/{_e(run_id)}/evidence/{_e(i)}">{_e(i)}</a></li>'
+        for i in dict.fromkeys(ids))
+    return (f'<details class="cites"><summary>{_e(label)} '
+            f'({len(set(ids))})</summary><ul>{links}</ul></details>')
+
+
 def _p(text: str) -> str:
     return f"<p>{_e(text)}</p>" if text else ""
 
@@ -132,6 +150,7 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
         if k.decision:
             out.append('<div class="decision"><span class="lbl">Decision '
                        f'affected</span>{_e(_clip(k.decision, 30))}</div>')
+        out.append(_citations(k.evidence_ids, run_id, "What this rests on"))
         out.append("</div>")
     elif b.withheld_reason and not (b.verified or b.unclear):
         # A withheld reading in a non-sparse mode used to render NOTHING here.
@@ -411,12 +430,14 @@ def render_story(sections, *, run_id: str = "") -> str:
     return "".join(out)
 
 
-def render_executive_brief(built) -> str:
+def render_executive_brief(built, *, run_id: str = "",
+                           evidence_ids=()) -> str:
     out = [LAYER_CSS, '<h2>Executive brief</h2>']
     for s in built.get("sections", []):
         out.append(f'<h3>{_e(s["title"])}</h3>')
         for p in s["paragraphs"]:
             out.append(f"<p>{_e(p)}</p>")
+    out.append(_citations(evidence_ids, run_id, "Sources behind this"))
     budget = built.get("budget", {})
     out.append(f'<p class="small muted">{built.get("words", 0)} words '
                f'(target {budget.get("min")}–{budget.get("max")}). '

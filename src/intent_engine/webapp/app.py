@@ -1865,6 +1865,14 @@ class WebApp:
         return self._html(self._page(f"{a.question[:60]}", "".join(parts),
                                      session, session.get("csrf", "")))
 
+    @staticmethod
+    def _observation_ids(report):
+        """Evidence ids a founder-facing layer may cite. Only ids that exist
+        on the report -- a citation that cannot resolve is worse than none."""
+        return [o.get("observation_id") for o in (report or {}).get(
+            "observations", []) if isinstance(o, dict)
+            and o.get("observation_id")][:8]
+
     def _executive_brief_page(self, session, run_id):
         """The executive brief — depth WITHOUT repetition.
 
@@ -1900,7 +1908,10 @@ class WebApp:
         built = fl.build_executive_brief(brief, report, ledger,
                                          withheld_line=withheld_line)
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — executive '
-                f'brief</h1>' + fr.render_executive_brief(built)
+                f'brief</h1>'
+                + fr.render_executive_brief(
+                    built, run_id=run_id,
+                    evidence_ids=self._observation_ids(report))
                 + fr._deeper(run_id) + "</main>")
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))

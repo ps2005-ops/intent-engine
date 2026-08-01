@@ -42,7 +42,8 @@ class GateResult:
                 "checked": self.checked}
 
 
-def check(brief, html: str = "") -> GateResult:
+def check(brief, html: str = "", *, qa=None,
+          citations: Optional[dict] = None) -> GateResult:
     """Every release rule, evaluated. Returns the failures, not just a bool."""
     failures: List[str] = []
     b = brief
@@ -122,7 +123,31 @@ def check(brief, html: str = "") -> GateResult:
             failures.append(f"action copy implies unapproved execution: "
                             f"'{banned}'")
 
-    return GateResult(not failures, tuple(failures), 12)
+    # --- v3 release gates ---------------------------------------------------
+    # 13. a withheld reading may not reappear anywhere
+    if getattr(b, "withheld_reason", "") and b.key_insight is not None:
+        failures.append("a withheld strategic reading reached a "
+                        "founder-facing layer")
+
+    # 14. Q&A must not contradict the brief
+    if qa is not None:
+        from intent_engine.founder_brief import consistency as CO
+        result = CO.check(brief=b, qa=qa)
+        failures.extend(result.failures)
+
+    # 15. every displayed citation must resolve
+    for href, status in (citations or {}).items():
+        if status != 200:
+            failures.append(f"a displayed citation returned {status}: {href}")
+
+    # 16. interface controls may not precede the intelligence
+    if html:
+        ctl = html.find("ui-controls")
+        answer = html.find("Why this matters")
+        if 0 <= ctl < answer:
+            failures.append("follow-up controls appear before the founder "
+                            "answer")
+    return GateResult(not failures, tuple(failures), 16)
 
 
 def comprehension(brief) -> dict:

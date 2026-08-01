@@ -9,6 +9,7 @@ import pytest
 
 from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
+from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import layers as L
 from intent_engine.founder_brief import market as M
 from intent_engine.founder_brief import render as R
@@ -368,3 +369,101 @@ def test_interface_controls_are_excluded_from_the_intelligence_budget():
             + " ".join(["control"] * 200) + "</p></section></main>")
     assert L.intelligence_words(html) == 250
     assert L.visible_words(html) == 450
+
+
+# --- limited executive brief: depth without padding -------------------------
+def test_a_withheld_run_gets_the_limited_brief_structure():
+    """168 words of nothing became 380+ words of what WAS established.
+
+    The fix is not filler: a withheld reading has a different and genuinely
+    useful structure, built from evidence rather than from a conclusion that
+    does not exist.
+    """
+    report = {"result_state": "EVIDENCE_LIMITED",
+              "result_state_detail": "No strategic conclusion is asserted.",
+              "observations": [
+                  {"text": "Published a pricing page listing three tiers.",
+                   "date": "2026-04-02", "source_class": "company_owned"},
+                  {"text": "Trade press noted a partnership.",
+                   "date": "2026-03-01",
+                   "source_class": "independent_reporting"}],
+              "evidence_gaps": ["No customer outcome has been published."],
+              "questions": ["Who is the buyer?"]}
+    b = B.build(company="Acme", mode=B.PRIVATE_COMPANY, report=report,
+                observations=report["observations"])
+    built = L.build_executive_brief(b, report, L.Ledger())
+    keys = [s["key"] for s in built["sections"]]
+    assert built.get("limited") is True
+    for required in ("bottom_line", "verified", "why_limited",
+                     "customer_view", "decision", "could_change"):
+        assert required in keys, required
+    # Depth, not word count alone: every section must carry real content
+    # derived from the run rather than boilerplate.
+    for section in built["sections"]:
+        assert all(len(p.split()) >= 5 for p in section["paragraphs"])
+    verified = [s for s in built["sections"] if s["key"] == "verified"][0]
+    assert "pricing page" in " ".join(verified["paragraphs"]).lower()
+    assert built["words"] >= 200, built["words"]
+
+
+def test_the_limited_brief_never_infers_what_it_cannot_see():
+    report = {"result_state": "EVIDENCE_LIMITED", "observations": []}
+    b = B.build(company="Acme", mode=B.PRIVATE_COMPANY, report=report)
+    text = " ".join(p for s in L.build_executive_brief(
+        b, report, L.Ledger())["sections"] for p in s["paragraphs"]).lower()
+    for invented in ("market share", "unit economics", "revenue grew",
+                     "customers adopted", "the board", "investors believe"):
+        assert invented not in text, invented
+
+
+def test_the_limited_brief_states_what_would_change_it():
+    report = {"result_state": "EVIDENCE_LIMITED", "observations": [],
+              "evidence_gaps": ["No customer outcome has been published."]}
+    b = B.build(company="Acme", mode=B.PRIVATE_COMPANY, report=report)
+    built = L.build_executive_brief(b, report, L.Ledger())
+    change = [s for s in built["sections"] if s["key"] == "could_change"]
+    assert change and change[0]["paragraphs"]
+
+
+# --- citations --------------------------------------------------------------
+def test_the_primary_brief_cites_what_the_insight_rests_on():
+    html = R.render_brief(_rich(), run_id="r1")
+    assert "/runs/r1/evidence/" in html
+    assert "What this rests on" in html
+
+
+def test_citations_are_secondary_not_a_metadata_wall():
+    """Behind a disclosure: a founder reading a 60-second answer is not
+    reading source ids, and they must not cost reading budget."""
+    html = R.render_brief(_rich(), run_id="r1")
+    main = html.split('<main class="fb">')[1]
+    assert "<details class=\"cites\"" in html
+    assert L.intelligence_words(main) <= L.PRIMARY_MAX
+
+
+def test_no_citation_is_emitted_without_a_run_to_resolve_against():
+    assert "/evidence/" not in R.render_brief(_rich(), run_id="")
+
+
+# --- extended release gate --------------------------------------------------
+def test_the_gate_catches_a_revived_withheld_reading():
+    b = _rich()
+    b.withheld_reason = "No strategic conclusion is asserted."
+    result = G.check(b, R.render_brief(b, run_id="r1"))
+    assert not result.passed
+    assert any("withheld" in f for f in result.failures)
+
+
+def test_the_gate_catches_a_failing_citation():
+    b = _rich()
+    result = G.check(b, R.render_brief(b, run_id="r1"),
+                     citations={"/runs/r1/evidence/obs-9": 404})
+    assert not result.passed
+    assert any("404" in f for f in result.failures)
+
+
+def test_the_gate_catches_controls_placed_before_the_answer():
+    html = ('<main class="fb"><section class="ui-controls">ask</section>'
+            '<div>Why this matters</div><h1>x</h1></main>')
+    result = G.check(_rich(), html)
+    assert any("before the founder answer" in f for f in result.failures)
