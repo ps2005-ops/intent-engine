@@ -209,9 +209,15 @@ def test_a_control_is_not_a_lifecycle_state_and_cannot_be_promoted():
 
 
 def test_the_allocation_rule_is_preregistered_and_versioned():
-    assert PE.ALLOCATION_VERSION == "paper_alloc.v1"
+    """v2 added the aggregate, notional and sector caps. A material change to
+    an allocation rule MUST bump the version -- this assertion failing on a
+    silent edit is the behaviour it exists for."""
+    assert PE.ALLOCATION_VERSION == "paper_alloc.v2"
     assert PE.MAX_CONCURRENT_PER_STRATEGY == 20
     assert PE.NOTIONAL_PER_POSITION == 1000.0
+    assert PE.MAX_AGGREGATE_CONTROL_POSITIONS == 45
+    assert PE.MAX_CONTROL_NOTIONAL == 45_000.0
+    assert PE.MAX_PER_SECTOR == 8
 
 
 def test_no_brokerage_reference_in_the_paper_engine():

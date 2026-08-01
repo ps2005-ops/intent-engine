@@ -352,19 +352,32 @@ def paper_entries_step(series_fn: Optional[Callable] = None) -> Callable:
                     "opened": 0}
         series = series_fn or _price_cache(ctx.root)
         securities = UT.universe_for(UT.TIER_1)
+        books = {s.key: PE.PaperBook(s.key, root=str(ctx.root))
+                 for s in LIB.specs()}
+        # AGGREGATE capacity and GRADUATION, recomputed every cycle. A control
+        # that has proven the pipeline drops to a canary rather than continuing
+        # to consume capacity a genuine challenger could use.
+        all_resolved = [r for b in books.values() for r in b.resolutions()]
+        graduation = PE.graduation_status(all_resolved)
+        canary = graduation["graduated"]
         opened, by_strategy = 0, {}
         for spec in LIB.specs():
-            book = PE.PaperBook(spec.key, root=str(ctx.root))
+            book = books[spec.key]
+            aggregate = sum(len(b.open_positions()) for b in books.values())
             entries = PE.open_entries(
                 strategy_key=spec.key, signal_fn=LIB.SIGNALS[spec.key],
                 primary_horizon=spec.horizons.horizons[0],
                 securities=securities, series_for=series, as_of=ctx.as_of,
-                book=book)
+                book=book, aggregate_open=aggregate, canary=canary)
             by_strategy[spec.key] = {"opened": len(entries),
                                      "open_total": len(book.open_positions())}
             opened += len(entries)
         return {"opened": opened, "by_strategy": by_strategy,
-                "mode": PE.PAPER_CONTROL, "alpha_claim": False}
+                "mode": graduation["mode"], "alpha_claim": False,
+                "label": PE.CONTROL_LABEL, "graduation": graduation,
+                "aggregate_open": sum(len(b.open_positions())
+                                      for b in books.values()),
+                "aggregate_cap": PE.MAX_AGGREGATE_CONTROL_POSITIONS}
     return step
 
 
@@ -378,15 +391,21 @@ def paper_resolve_step(series_fn: Optional[Callable] = None) -> Callable:
             return {"skipped": "dry run does not resolve paper positions",
                     "resolved": 0}
         series = series_fn or _price_cache(ctx.root)
-        resolved, books = 0, {}
+        resolved, books, all_res = 0, {}, []
         for spec in LIB.specs():
             book = PE.PaperBook(spec.key, root=str(ctx.root))
             closed = PE.resolve_due(book=book, series_for=series,
                                     today=ctx.as_of)
             resolved += len(closed)
             books[spec.key] = PE.book_summary(book)
+            all_res.extend(book.resolutions())
         return {"resolved": resolved, "books": books,
-                "mode": PE.PAPER_CONTROL, "alpha_claim": False}
+                "mode": PE.PAPER_CONTROL, "alpha_claim": False,
+                "label": PE.CONTROL_LABEL,
+                "engine_calibration": PE.engine_calibration(all_res),
+                "strategy_calibration": PE.strategy_calibration(
+                    "all control strategies", False, all_res),
+                "graduation": PE.graduation_status(all_res)}
     return step
 
 

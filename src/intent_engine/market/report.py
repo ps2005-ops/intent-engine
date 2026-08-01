@@ -357,6 +357,43 @@ def _learning_acceleration(ctx) -> list:
                   "calibration. They are not evidence of alpha, and a win "
                   "rate here is not a result.*", ""]
 
+    # PAPER CONTROL — its own section, deliberately NOT in the headline
+    # executive trading metrics. A control win rate sitting beside Sharpe would
+    # be read as performance no matter how it is captioned.
+    resolve = ctx.results.get("paper_resolve") or {}
+    grad = (resolve.get("graduation")
+            or (ctx.results.get("paper_entries") or {}).get("graduation") or {})
+    eng = resolve.get("engine_calibration") or {}
+    if books or grad:
+        lines += ["### PAPER CONTROL — INFRASTRUCTURE VALIDATION ONLY", "",
+                  f"`{__import__('intent_engine.market.paper_engine', fromlist=['x']).CONTROL_LABEL}`",
+                  "",
+                  f"- control strategies active: {len(books)}",
+                  f"- positions opened this cycle: "
+                  f"{(ctx.results.get('paper_entries') or {}).get('opened', 0)}",
+                  f"- positions resolved this cycle: "
+                  f"{resolve.get('resolved', 0)}",
+                  f"- aggregate open / cap: "
+                  f"{(ctx.results.get('paper_entries') or {}).get('aggregate_open', 0)}"
+                  f" / {(ctx.results.get('paper_entries') or {}).get('aggregate_cap', '—')}",
+                  f"- cost-accounting coverage: "
+                  f"{eng.get('cost_accounting_coverage', 'UNMEASURABLE')}",
+                  f"- benchmark coverage: "
+                  f"{eng.get('benchmark_coverage', 'UNMEASURABLE')}",
+                  f"- engine calibration: "
+                  f"{'measurable' if eng.get('measurable') else 'UNMEASURABLE'}",
+                  f"- strategy calibration: **INELIGIBLE** — no control "
+                  f"strategy has passed its statistical gates",
+                  f"- infrastructure objective achieved: "
+                  f"{grad.get('graduated', False)}"
+                  + (f" (mode {grad.get('mode')})" if grad else ""),
+                  f"- unmet graduation conditions: {grad.get('unmet', '—')}",
+                  "",
+                  "*Control results are excluded from ranking, promotion, FDR "
+                  "selection and every alpha claim. Validated strategies: "
+                  "**0**. Control performance: **not evidence of edge**.*",
+                  ""]
+
     lines += ["### learning throughput", "", "```", tp.render(), "```", "",
               f"**Limiting factor: {limiting['factor']}** — "
               f"{limiting['detail']}",
