@@ -67,3 +67,62 @@ failures; it is not enough to conclude the product works.
 
 Do not summarise into a score. Record what each person said, including the
 parts that contradict each other.
+
+---
+
+## Running it against this build (added for the v3 interface)
+
+### Starting the tester on the founder brief
+
+The analysis form is on the landing page: company name, website, consent. When
+it finishes, **the app currently lands on the presentation deck** at
+`/runs/<id>/slides`, not the founder brief. Until that default changes, send
+the tester to `/runs/<id>` yourself and start the 60-second clock there — the
+seven questions above are about the founder brief, and timing them on the deck
+measures a different screen.
+
+### The three results to prepare
+
+| # | shape | prepare it as |
+|---|---|---|
+| 1 | rich public company | see the caveat below — a genuinely rich result cannot be produced live in an environment where `/readyz` reports `strategic_reasoning: false` |
+| 2 | private / small company | any small company with a real site |
+| 3 | limited result | a JS-rendered site; these reliably produce the limited page |
+
+**Check `/readyz` before you start.** If `strategic_reasoning` is `false`, every
+run takes the limited path regardless of the company, and the tester will be
+judging the limited experience three times over. That is worth testing, but do
+not record it as a verdict on the rich experience.
+
+### Exploring the layers, in this order
+
+1. `/runs/<id>` — the founder brief. Sixty seconds, then the seven questions.
+2. `/runs/<id>/dashboard` — ask which tiles they actually read, and whether an
+   "Unavailable" tile felt honest or broken.
+3. `/runs/<id>/story` — ask them to reach a section from the sticky nav.
+4. `/runs/<id>/brief` — the executive brief. **Ask directly: did this repeat
+   the first screen?** Repetition is the failure this layer exists to avoid,
+   and a tester will excuse it unless asked.
+
+### Three Q&A prompts
+
+Use these verbatim, on the same run:
+
+1. "What does this company do?"
+2. "What is the biggest risk here?"
+3. "What should I do next?"
+
+Then ask: **did any answer contradict the brief?** On a limited result the
+assistant must refuse a strategic conclusion rather than supply one. If it
+offers a confident direction the brief withheld, that is the most serious
+failure in this pack — record it verbatim.
+
+### Additional things to record
+
+| measure | how |
+|---|---|
+| repetition | which layers felt like the same text twice, in their words |
+| generic-AI comparison | show the same company to a generic chat assistant; ask which they would rather have and why |
+| willingness to pay | a number, and what it is anchored on |
+
+Nothing in this file is filled in. No human has run it.
