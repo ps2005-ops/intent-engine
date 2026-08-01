@@ -355,10 +355,85 @@ BRIEF_SECTIONS = (
     ("changed", "What changed"),
     ("why", "Why it matters"),
     ("decision", "The decision"),
-    ("context", "Economic and market context"),
+    ("business", "Business and economic context"),
+    ("context", "Market and financial context"),
+    ("who", "Who benefits and who loses"),
     ("wrong", "What could make this wrong"),
     ("next", "What to do or watch next"),
 )
+
+# The mental model's components, in the order a reader needs them: what the
+# company sells, how it grows, how demand reaches it, what is hard to copy.
+# These are the fields that answer "how does this business actually work",
+# and the executive brief never read any of them.
+_BUSINESS_COMPONENTS = ("value_proposition", "growth_engine",
+                        "distribution_model", "strategic_assets",
+                        "competitive_position")
+
+
+def _sentences_of(text: str, limit: int = 2) -> str:
+    """At most `limit` sentences, so one long joined field cannot become a
+    paragraph nobody finishes."""
+    parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+|;\s+", text or "")
+             if p.strip()]
+    return " ".join(parts[:limit])
+
+
+def _component_text(model: dict, name: str) -> str:
+    """One mental-model component as a readable sentence, or ''."""
+    component = ((model or {}).get("components") or {}).get(name) or {}
+    return _sentences_of(component.get("current_state") or "")
+
+
+def _exposure_texts(items, limit: int = 2) -> List[str]:
+    """Vulnerabilities as sentences a reader can follow.
+
+    Concatenating `exposed_layer` + `mechanism` + `market_force` produced
+    "demand capture at the storefront if buying is mediated by AI agents ...
+    AI shopping agents / answer engines" -- three fields welded together with
+    no punctuation and no grammar. The fields are right; the joining was not.
+    """
+    out: List[str] = []
+    for item in (items or ()):
+        if len(out) >= limit or not isinstance(item, dict):
+            continue
+        layer = (item.get("exposed_layer") or "").strip()
+        how = (item.get("mechanism") or "").strip()
+        force = (item.get("market_force") or "").strip()
+        if not (layer and how):
+            continue
+        sentence = f"{layer[:1].upper()}{layer[1:]} is the exposed layer: {how}"
+        if not sentence.endswith("."):
+            sentence += "."
+        if force:
+            sentence += f" The pressure comes from {force}."
+        out.append(sentence)
+    return out
+
+
+def _field_texts(items, *fields, limit: int = 2) -> List[str]:
+    """The first `limit` non-empty values of `fields` across `items`.
+
+    The report carries its reasoning as dicts (`blind_spots`,
+    `vulnerabilities`, `surprises`, `decision_implications`), and the brief
+    only ever called `_first_text`, which reads one string from one item and
+    discards the rest.
+    """
+    out: List[str] = []
+    for item in (items or ()):
+        if len(out) >= limit:
+            break
+        if isinstance(item, str):
+            if item.strip():
+                out.append(_sentences_of(item))
+            continue
+        if not isinstance(item, dict):
+            continue
+        parts = [str(item.get(f)).strip() for f in fields
+                 if isinstance(item.get(f), str) and item.get(f).strip()]
+        if parts:
+            out.append(_sentences_of(" ".join(parts), limit=3))
+    return out
 
 
 def build_executive_brief(brief, report: Optional[dict] = None,
@@ -393,29 +468,85 @@ def build_executive_brief(brief, report: Optional[dict] = None,
     if not k:
         return _limited_brief(brief, report, ledger, withheld_line)
 
+    # WHERE THE DEPTH WAS.
+    #
+    # This mapping read six fields and called `_first_text` on four of them,
+    # which returns ONE string from ONE item. Meanwhile the report carried the
+    # hypothesis's causal reasoning, a mental model of how the business makes
+    # money, named vulnerabilities with their mechanism, second-order
+    # surprises, and the alternatives behind each decision -- none of it
+    # reachable from here. That is why an evidence-rich brief measured 131
+    # words against a 500-900 budget: not missing analysis, unread analysis.
+    thesis = report.get("thesis") or {}
+    hypotheses = [h for h in (report.get("hypotheses") or ())
+                  if isinstance(h, dict)]
+    lead = hypotheses[0] if hypotheses else {}
+    model = report.get("mental_model") or {}
+
     raw = {
         "bottom_line": [k.interpretation if k else withheld_line,
+                        _sentences_of(thesis.get("transition") or ""),
                         _first_text(report.get("strategic_analysis"))],
-        "changed": [c["what"] for c in (brief.what_changed or ())],
-        "why": [(report.get("thesis") or {}).get("tension", ""),
-                _first_text(report.get("decision_implications"))],
-        "decision": [k.decision if k else "",
-                     _first_text(report.get("opportunities"))],
+        "changed": ([c["what"] for c in (brief.what_changed or ())]
+                    + _field_texts(report.get("shifts"), "title", "evidence")
+                    + _field_texts(report.get("timeline"), "event")),
+        # `why_now` is deliberately NOT here. It reads "Recent public signal
+        # (2024-11-01, Independent analysis) keeps this timely" -- provenance
+        # wearing the clothes of a reason, and it was the entire "Why it
+        # matters" section until the causal fields were wired in.
+        "why": [_sentences_of(lead.get("reasoning") or "", limit=3),
+                _sentences_of(thesis.get("tension") or ""),
+                *_field_texts(report.get("decision_implications"),
+                              "why_it_matters", limit=1),
+                # The consequence, in economic terms. `why_now` on an
+                # opportunity states what erodes if the reading is right --
+                # which is the question this section exists to answer, and
+                # the only one of these fields the 60-second screen has not
+                # already spent.
+                *_field_texts(report.get("opportunities"),
+                              "why_now", limit=1)],
+        "decision": ([k.decision if k else ""]
+                     + _field_texts(report.get("decision_implications"),
+                                    "decision", "why_it_matters")
+                     + _field_texts(report.get("opportunities"),
+                                    "statement", "why_now", "asymmetry")),
+        # How the business actually works. Every one of these is a field the
+        # reasoning layer already populated and the brief never opened.
+        "business": [t for t in
+                     (_component_text(model, name)
+                      for name in _BUSINESS_COMPONENTS) if t],
         "context": [m.get("what_changed", "")
                     for m in (market.get("modules") or {}).values()],
-        "wrong": [_first_text(report.get("blind_spots")),
-                  *_alternatives(report),
-                  _first_text(report.get("evidence_gaps"))],
+        # Only where the evidence names a party. `vulnerabilities` states the
+        # exposed layer and the mechanism; `surprises` states who a move
+        # encroaches on. Neither is inferred here.
+        "who": (_exposure_texts(report.get("vulnerabilities"))
+                + _field_texts(report.get("surprises"),
+                               "finding", "why_surprising")),
+        "wrong": (_field_texts(report.get("blind_spots"),
+                               "observed_tension", "why_it_may_matter")
+                  + [_sentences_of(a) for a in _alternatives(report)]
+                  + _field_texts(report.get("underexamined_questions"),
+                                 "question", "why_underexamined", limit=1)
+                  + _field_texts(report.get("questions"),
+                                 "question", "why_it_matters", limit=1)
+                  + _field_texts(report.get("evidence_gaps"), limit=1)),
         "next": list(brief.next_actions),
     }
 
+    # Up to three paragraphs where the material genuinely differs, two where
+    # it does not. The ledger has already removed anything an earlier layer
+    # said, so a third paragraph can only be new information -- padding is not
+    # reachable through it.
+    wide = {"business", "who", "wrong", "why", "decision", "changed"}
     sections = []
     for key, title in BRIEF_SECTIONS:
         paragraphs = [t for t in (ledger.fresh(x) for x in raw.get(key, []))
                       if t]
         if paragraphs:
             sections.append({"key": key, "title": title,
-                             "paragraphs": paragraphs[:2]})
+                             "paragraphs": paragraphs[:3 if key in wide
+                                                     else 2]})
 
     lo, hi = (EXEC_RICH_MIN, EXEC_RICH_MAX) if rich else (EXEC_LIMITED_MIN,
                                                           EXEC_LIMITED_MAX)

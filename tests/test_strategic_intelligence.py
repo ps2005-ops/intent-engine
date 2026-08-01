@@ -1041,3 +1041,43 @@ def test_the_assistant_never_prints_a_raw_engine_object(tmp_path):
                      "'counter_evidence'", "'confidence_reasons'",
                      "'falsification'", "'alternative_explanations'"):
             assert leak not in body, f"{leak} leaked for {question}"
+
+
+# --- founder-first hierarchy: completion lands on the brief ------------------
+def test_completion_redirects_to_the_founder_brief_not_the_deck(tmp_path):
+    """A finished analysis used to redirect to /slides.
+
+    That was the right fix against an eleven-section report, but the deck is
+    not the shortest useful thing in the product any more -- the 60-second
+    brief is, and a deck is still a document to work through.
+    """
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, _ = c.request("GET", f"/runs/{rid}/progress")
+    assert status.startswith("303"), status
+    assert headers["Location"] == f"/runs/{rid}", headers["Location"]
+
+
+def test_the_deck_and_every_other_layer_stay_reachable(tmp_path):
+    """Founder-first must not mean founder-only."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    for layer in ("slides", "dashboard", "story", "brief", "full"):
+        status, _, body = c.request("GET", f"/runs/{rid}/{layer}")
+        assert status == "200 OK", (layer, status)
+        assert "<main" in body, layer
+
+
+def test_the_default_run_page_is_the_founder_brief(tmp_path):
+    """The destination itself must be the brief, not a redirect back to it."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, _, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+    assert "Why this matters" in body
+    assert body.count("<main") == 1
+
+
+def test_an_unfinished_run_does_not_masquerade_as_a_founder_brief(tmp_path):
+    """Only COMPLETE/PARTIAL may redirect; anything else keeps its status page
+    so a failed run cannot be read as a finished answer."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, body = c.request("GET", "/runs/NOT-A-REAL-RUN/progress")
+    assert status.startswith("404"), status

@@ -230,18 +230,72 @@ def _chrome(page_html: str, nav: str) -> str:
     return page_html.replace("<body>", f"<body>{nav}", 1)
 
 
+class _Unset:
+    """Distinguishes "caller passed None on purpose" from "caller said nothing"."""
+
+
+_UNSET = _Unset()
+
+
+def _analyst_cache_for(config):
+    """Evidence-keyed analyst cache, co-located with the ingestion store.
+
+    Re-opening a report must not pay for a second model call, and a repeated
+    analysis of the same evidence is the single largest avoidable cost here.
+    The cache key already includes the prompt version and model, so a changed
+    prompt invalidates it rather than serving a stale reading.
+    """
+    try:
+        from intent_engine.strategic_intelligence.analyst.runner import FileCache
+        ci_path = pathlib.Path(getattr(config, "ci_store_path",
+                                       "data/company_ingestion.jsonl"))
+        return FileCache(ci_path.parent / "analyst_cache")
+    except Exception:  # noqa: BLE001 - the cache is best-effort by contract
+        return None
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
     def __init__(self, config, *, now_fn=None, transport=None,
-                 resolver=None):
+                 resolver=None, analyst_client=_UNSET):
         config.validate()
         self.config = config
         self.web_store = WebStore(config.web_store_path)
         self.fi = FounderIntelligenceService(config.fi_store_path)
+        # THE REASONING BACKEND WAS NEVER WIRED IN.
+        #
+        # `CompanyIngestionService` accepts `analyst_client`, and this call
+        # never passed one -- so `analyse()` raised AnalystUnavailable on every
+        # request no matter what the environment held, and every run took the
+        # limited path. `/readyz` reported `strategic_reasoning` from the
+        # presence of an env var, which is why the two disagreed: the variable
+        # could be set while nothing could ever use it.
+        #
+        # `default_client()` returns None when no key is configured, so the
+        # honest no-backend path is preserved exactly. Tests never reach it:
+        # env="test" refuses to build a client, so a stray .env cannot turn a
+        # test run into live model calls. Tests that want the analyst inject a
+        # recorded client explicitly.
+        ci_analyst = analyst_client
+        if ci_analyst is _UNSET:
+            ci_analyst = None
+            if config.env != "test":
+                from intent_engine.strategic_intelligence.analyst.runner import (
+                    default_client,
+                )
+                try:
+                    ci_analyst = default_client()
+                except Exception:  # noqa: BLE001 - never fail to boot on this
+                    _LOG.warning("analyst client unavailable; "
+                                 "continuing without a reasoning backend")
+                    ci_analyst = None
+        self._analyst_client = ci_analyst
         self.ci = CompanyIngestionService(
             getattr(config, "ci_store_path", "data/company_ingestion.jsonl"),
-            transport=transport, resolver=resolver)
+            transport=transport, resolver=resolver,
+            analyst_client=ci_analyst,
+            analyst_cache=_analyst_cache_for(config))
         self.auth = AuthService(self.web_store, config, now_fn=now_fn)
         self.sharing = SharingService(self.web_store, now_fn=now_fn)
         from pathlib import Path as _Path
@@ -1076,13 +1130,18 @@ class WebApp:
         # non-terminal state, the page reloads itself; in any terminal state the
         # refresh is omitted so it stops (safe, JS-free, CSP-proof).
         terminal = status in ("COMPLETE", "PARTIAL", "FAILED", "REJECTED")
-        # PRESENTATION FIRST. A finished analysis used to stop here and offer
-        # a link called "Open the result", behind a heading that said "Analysis
-        # progress" next to a raw run id and an unexplained PARTIAL badge. The
-        # user had already waited; making them read a status page and then
-        # click again is asking them to do the product's job.
+        # FOUNDER BRIEF FIRST.
+        #
+        # The original fix here was "do not stop on a status page" and it sent
+        # the reader to the deck, which was right at the time -- the deck beat
+        # an eleven-section report. It is no longer the shortest useful thing
+        # in the product: the 60-second founder brief is, and a deck is still
+        # a document someone has to work through before they learn anything.
+        #
+        # So completion lands on /runs/<id>. The deck keeps its own route and
+        # its place in the layer nav; it is one click away, not compulsory.
         if status in ("COMPLETE", "PARTIAL"):
-            return self._redirect(f"/runs/{run_id}/slides")
+            return self._redirect(f"/runs/{run_id}")
 
         refresh = ('' if terminal
                    else '<meta http-equiv="refresh" content="4">')
@@ -1893,7 +1952,12 @@ class WebApp:
         ledger = fl.Ledger()
         if brief.key_insight:
             k = brief.key_insight
-            ledger.spend(k.fact, k.so_what, k.decision)
+            # `interpretation` was missing from this list while the 60-second
+            # screen renders it (render.py, right under the headline), so the
+            # executive brief opened with the paragraph the reader had just
+            # finished. The ledger can only suppress what it is told was
+            # shown; every field the primary view prints belongs here.
+            ledger.spend(k.fact, k.interpretation, k.so_what, k.decision)
         for change in (brief.what_changed or ())[:2]:
             ledger.spend(change.get("what", ""))
         # When the reading was WITHHELD, reuse the conclusion the strategic
@@ -3222,11 +3286,15 @@ class WebApp:
         # "is the reasoning layer live?" must be checkable from outside rather
         # than inferred from render.yaml -- which does not govern the running
         # service and declares this variable only in a comment.
-        import os
+        # Report the CLIENT THIS PROCESS HOLDS, not the presence of an
+        # environment variable. The two disagreed: nothing passed an analyst
+        # client to the ingestion service, so the variable could be set --
+        # and this endpoint say "true" -- while every single run still took
+        # the limited path. A capability probe that cannot be wrong in that
+        # direction is the only kind worth publishing.
         return {"pdf_extraction": pdf_available,
                 "browser_rendering": rendering_enabled(),
-                "strategic_reasoning": bool(
-                    os.environ.get("ANTHROPIC_API_KEY"))}
+                "strategic_reasoning": self._analyst_client is not None}
 
     def _probe_runtime_root_writable(self) -> None:
         import os as _os

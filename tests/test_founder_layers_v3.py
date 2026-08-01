@@ -632,3 +632,123 @@ def test_transition_claims_are_caught_in_the_engines_own_words():
     assert not _looks_strategic("The pricing page lists three tiers and was "
                                 "updated in April.")
     assert not _looks_strategic("")
+
+
+# --- rich executive-brief depth --------------------------------------------
+def _rich_report():
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    from intent_engine.strategic_intelligence.shopify_fixture import (
+        SHOPIFY_COMPANY, shopify_observations,
+    )
+    return build_strategic_report(company_name=SHOPIFY_COMPANY,
+                                  observations=shopify_observations()).as_dict()
+
+
+def _rich_pair():
+    """A rich brief plus its executive brief, built the way the app builds
+    them (ledger preloaded with the 60-second screen)."""
+    report = _rich_report()
+    obs = [o for o in report["observations"] if isinstance(o, dict)]
+    independent = sum(1 for o in obs if o.get("source_class") not in
+                      ("company_owned", "executive_statement", None, ""))
+    brief = B.build(company="Shopify",
+                    mode=B.classify_mode(is_public=True, evidence_count=len(obs),
+                                         independent_sources=independent,
+                                         has_thesis=True),
+                    report=report, observations=obs, market=None)
+    ledger = L.Ledger()
+    k = brief.key_insight
+    # Mirrors _executive_brief_page exactly, including `interpretation` --
+    # which the 60-second screen renders and the ledger used to omit.
+    ledger.spend(k.fact, k.interpretation, k.so_what, k.decision)
+    for change in (brief.what_changed or ())[:2]:
+        ledger.spend(change.get("what", ""))
+    return brief, report, L.build_executive_brief(brief, report, ledger)
+
+
+def test_an_evidence_rich_brief_reaches_its_depth_budget():
+    """It measured 131 words against a 500-900 budget.
+
+    The analysis was not missing -- the hypothesis's reasoning, the mental
+    model of how the business makes money, named vulnerabilities and the
+    second-order surprises were all in the report, and this layer read six
+    fields with `_first_text`, which returns one string from one item.
+    """
+    _, _, built = _rich_pair()
+    assert built["budget"] == {"min": L.EXEC_RICH_MIN, "max": L.EXEC_RICH_MAX}
+    assert L.EXEC_RICH_MIN <= built["words"] <= L.EXEC_RICH_MAX, built["words"]
+    assert built["within_budget"]
+
+
+def test_the_rich_brief_covers_the_sections_a_founder_was_promised():
+    _, _, built = _rich_pair()
+    keys = {s["key"] for s in built["sections"]}
+    for required in ("bottom_line", "changed", "why", "decision",
+                     "business", "who", "wrong", "next"):
+        assert required in keys, required
+
+
+def test_no_rich_section_repeats_another():
+    """Depth, not length: a floor invites reaching it by saying one thing
+    three times, so the floor and this check have to travel together."""
+    from intent_engine.founder_brief.consistency import _overlap
+    _, _, built = _rich_pair()
+    paragraphs = [(s["title"], p) for s in built["sections"]
+                  for p in s["paragraphs"]]
+    for i, (t1, p1) in enumerate(paragraphs):
+        for t2, p2 in paragraphs[i + 1:]:
+            assert _overlap(p1, p2) <= 0.6, f"{t1} vs {t2}"
+
+
+def test_the_rich_brief_does_not_restate_the_sixty_second_screen():
+    """Paragraph against paragraph, not against the page's whole vocabulary.
+
+    Two paragraphs about one company share its nouns -- "checkout",
+    "merchants", "rails" -- without either restating the other. What must not
+    happen is an executive-brief paragraph that IS a primary-brief paragraph.
+    """
+    from intent_engine.founder_brief.consistency import _overlap
+    brief, _, built = _rich_pair()
+    primary = [re.sub(r"<[^>]+>", " ", p) for p in
+               re.findall(r"<p[^>]*>(.*?)</p>",
+                          R.render_brief(brief, run_id="r1"), re.S)]
+    for section in built["sections"]:
+        for paragraph in section["paragraphs"]:
+            for shown in primary:
+                assert _overlap(paragraph, shown) <= 0.6, (
+                    f"{section['title']}: {paragraph[:70]!r} restates "
+                    f"{shown[:70]!r}")
+
+
+def test_the_gate_refuses_a_rich_brief_padded_by_duplication():
+    import copy
+    brief, _, built = _rich_pair()
+    html = R.render_brief(brief, run_id="r1")
+    assert G.check(brief, html, executive=built).passed
+    padded = copy.deepcopy(built)
+    padded["sections"][-1]["paragraphs"] = [padded["sections"][0]["paragraphs"][0]]
+    result = G.check(brief, html, executive=padded)
+    assert not result.passed
+    assert any("twice" in f for f in result.failures), result.failures
+
+
+def test_a_rich_brief_never_leaks_internal_vocabulary():
+    from intent_engine.founder_brief.contract import INTERNAL_VOCABULARY
+    _, _, built = _rich_pair()
+    body = " ".join(p for s in built["sections"]
+                    for p in s["paragraphs"]).lower()
+    assert not [t for t in INTERNAL_VOCABULARY if t in body]
+
+
+def test_why_it_matters_is_not_provenance_metadata():
+    """`why_now` reads "Recent public signal (2024-11-01, ...) keeps this
+    timely" -- provenance wearing the clothes of a reason, and it was the
+    entire section until the causal fields were wired in."""
+    _, _, built = _rich_pair()
+    why = [s for s in built["sections"] if s["key"] == "why"]
+    assert why, "the rich brief dropped 'why it matters' entirely"
+    text = " ".join(why[0]["paragraphs"]).lower()
+    assert "keeps this timely" not in text
+    assert "recent public signal" not in text

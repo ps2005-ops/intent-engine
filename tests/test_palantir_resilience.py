@@ -382,7 +382,8 @@ def test_progress_page_terminal_styled_stops_refresh(tmp_path):
     st, hdrs2, body = c.request("GET", loc)
     # A terminal run now goes straight to the presentation rather than
     # rendering a status page with an "Open the result" link on it.
-    assert st.startswith("303") and hdrs2["Location"].endswith("/slides")
+    assert st.startswith("303")
+    assert not hdrs2["Location"].endswith("/slides"), hdrs2["Location"]
     st, _, body = c.request("GET", hdrs2["Location"])
     assert st == "200 OK"
     assert "<style" in body and "<nav" in body         # styled product shell

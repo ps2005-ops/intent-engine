@@ -101,6 +101,20 @@ def check(*, brief, dashboard=None, story=None, executive=None,
         if k and bottom and not _compatible(bottom, k.interpretation, 0.15):
             failures.append("the executive brief opens with a different "
                             "thesis from the brief")
+        # DEPTH IS NOT WORD COUNT. A brief can reach its floor by saying the
+        # same thing in three sections, which is the failure mode a floor
+        # invites, so the floor and the duplication check have to travel
+        # together or the first one makes the product worse.
+        paragraphs = [(s.get("title", ""), p)
+                      for s in executive.get("sections", [])
+                      for p in s.get("paragraphs", [])]
+        for (t1, p1), (t2, p2) in _pairs(paragraphs):
+            if _overlap(p1, p2) > 0.6:
+                failures.append(
+                    f"the executive brief says the same thing twice "
+                    f"('{t1}' and '{t2}'), so its length is duplication "
+                    f"rather than depth")
+                break
         if not executive.get("within_budget", True):
             budget = executive.get("budget") or {}
             words = executive.get("words", 0)
@@ -150,6 +164,22 @@ def check(*, brief, dashboard=None, story=None, executive=None,
             failures.append(f"confidence disagrees across layers: brief says "
                             f"{brief.confidence!r}, Q&A says {qa.confidence!r}")
     return ConsistencyResult(not failures, tuple(failures), checked)
+
+
+def _pairs(items):
+    for i, first in enumerate(items):
+        for second in items[i + 1:]:
+            yield first, second
+
+
+def _overlap(a: str, b: str) -> float:
+    """Content-word Jaccard. Two paragraphs built from the same sentence score
+    near 1.0 however they are punctuated."""
+    ta = set(re.findall(r"[a-z0-9]{4,}", (a or "").lower()))
+    tb = set(re.findall(r"[a-z0-9]{4,}", (b or "").lower()))
+    if not ta or not tb:
+        return 0.0
+    return len(ta & tb) / len(ta | tb)
 
 
 def _looks_strategic(text: str) -> bool:
