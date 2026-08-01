@@ -93,6 +93,21 @@ def _p(text: str) -> str:
     return f"<p>{_e(text)}</p>" if text else ""
 
 
+def _clip(text: str, words: int) -> str:
+    """Trim for the PRIMARY view only.
+
+    The full sentence stays on the insight object, so the decision story and
+    executive brief still show it complete. This is a reading-budget decision
+    about one screen, not a truncation of the intelligence -- the 60-second
+    brief has ~250 words to spend and a 60-word interpretation spends a
+    quarter of them before the reader reaches the decision.
+    """
+    parts = (text or "").split()
+    if len(parts) <= words:
+        return text or ""
+    return " ".join(parts[:words]).rstrip(",;:") + "…"
+
+
 def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
     """The whole 60-second screen. One `<main>`, one `<h1>`."""
     b = brief
@@ -110,13 +125,13 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
         k = b.key_insight
         out.append("<h2>The most important thing</h2>")
         out.append('<div class="card headline">')
-        out.append(f"<h3>{_e(k.fact)}</h3>")
-        out.append(_p(k.interpretation))
+        out.append(f"<h3>{_e(_clip(k.fact, 34))}</h3>")
+        out.append(_p(_clip(k.interpretation, 38)))
         out.append('<div class="sowhat"><span class="lbl">Why this '
-                   f'matters</span>{_e(k.so_what)}</div>')
+                   f'matters</span>{_e(_clip(k.so_what, 34))}</div>')
         if k.decision:
             out.append('<div class="decision"><span class="lbl">Decision '
-                       f'affected</span>{_e(k.decision)}</div>')
+                       f'affected</span>{_e(_clip(k.decision, 30))}</div>')
         out.append("</div>")
     elif b.verified or b.unclear:
         out.append("<h2>What a customer can actually verify</h2>")
@@ -130,13 +145,25 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
                    'here cannot be verified by them either.</div>')
         out.append("</div>")
 
+    # --- what I would do next, BEFORE the history -----------------------------
+    # Order is the product decision: a reader who stops after the decision must
+    # already have the action. "What changed" is context for a reader who has
+    # not stopped, so it comes after.
+    if b.next_actions:
+        out.append("<h2>What I would do next</h2>")
+        out.append('<div class="card"><ol class="actions">')
+        out.extend(f"<li>{_e(_clip(a, 26))}</li>"
+                   for a in b.next_actions[:3])
+        out.append("</ol></div>")
+
     # --- what changed --------------------------------------------------------
     if b.what_changed:
         out.append("<h2>What changed</h2><ul class=\"changed\">")
-        for item in b.what_changed:
+        for item in b.what_changed[:2]:
             when = f'<span class="when">{_e(item["when"])}</span>' if item.get(
                 "when") else ""
-            out.append(f'<li class="card">{when}{_e(item["what"])}</li>')
+            out.append(f'<li class="card">{when}'
+                       f'{_e(_clip(item["what"], 22))}</li>')
         out.append("</ul>")
 
     # --- sparse-mode product -------------------------------------------------
@@ -148,52 +175,53 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
             out.append(f'<li class="{cls}">{_e(item["item"])} — {mark}</li>')
         out.append("</ul>")
     if b.claimed:
-        out.append('<h2>Claimed, but not independently shown</h2>')
+        out.append('<h2>Claimed, not shown</h2>')
         out.append('<div class="card"><ul>')
-        out.extend(f"<li>{_e(c)}</li>" for c in b.claimed)
+        out.extend(f"<li>{_e(_clip(c, 20))}</li>" for c in b.claimed[:2])
         out.append("</ul></div>")
     if b.unclear:
         out.append("<h2>What is unclear</h2><div class=\"card\"><ul>")
-        out.extend(f"<li>{_e(u)}</li>" for u in b.unclear)
+        out.extend(f"<li>{_e(_clip(u, 16))}</li>" for u in b.unclear[:2])
         out.append("</ul></div>")
-
-    # --- actions -------------------------------------------------------------
-    if b.next_actions:
-        out.append("<h2>What I would do next</h2>")
-        out.append('<div class="card"><ol class="actions">')
-        out.extend(f"<li>{_e(a)}</li>" for a in b.next_actions)
-        out.append("</ol></div>")
 
     if b.internal_questions:
         out.append("<h2>Three questions to answer internally</h2>")
         out.append('<div class="card"><ol class="actions">')
-        out.extend(f"<li>{_e(q)}</li>" for q in b.internal_questions)
+        out.extend(f"<li>{_e(_clip(q, 22))}</li>"
+                   for q in b.internal_questions)
         out.append("</ol></div>")
     if b.public_proofs:
-        out.append("<h2>Three public proofs that would build trust</h2>")
-        out.append('<div class="card"><ol class="actions">')
-        out.extend(f"<li>{_e(p)}</li>" for p in b.public_proofs)
-        out.append("</ol></div>")
+        # Secondary by design: these are what to publish LATER. The diagnosis
+        # of what is true NOW is the primary product, and putting six more
+        # bullets above the fold would push the reading budget past a
+        # 60-second read.
+        out.append('<details><summary>Three public proofs that would build '
+                   'trust</summary><ol class="actions">')
+        out.extend(f"<li>{_e(_clip(p, 20))}</li>" for p in b.public_proofs)
+        out.append("</ol></details>")
 
     # --- risk / unknown ------------------------------------------------------
     if b.biggest_risk or b.biggest_unknown:
         out.append("<h2>Risk and unknown</h2><div class=\"grid2\">")
         if b.biggest_risk:
             out.append('<div class="card"><span class="lbl small muted">'
-                       f'Biggest risk</span>{_e(b.biggest_risk)}</div>')
+                       f'Biggest risk</span>'
+                       f'{_e(_clip(b.biggest_risk, 26))}</div>')
         if b.biggest_unknown:
             out.append('<div class="card"><span class="lbl small muted">'
-                       f'Biggest unknown</span>{_e(b.biggest_unknown)}</div>')
+                       f'Biggest unknown</span>'
+                       f'{_e(_clip(b.biggest_unknown, 26))}</div>')
         out.append("</div>")
 
-    # --- market context ------------------------------------------------------
-    out.append(render_market(b.market_context))
+    # Market context belongs on the dashboard, not the 60-second screen: it is
+    # supporting detail, and it was costing ~60 words of the reading budget
+    # before the reader reached confidence.
 
     # --- confidence, last because it qualifies everything above --------------
     if b.confidence:
         out.append("<h2>How confident is this</h2><div class=\"card\">")
         out.append(f'<p><span class="conf">{_e(b.confidence)}.</span> '
-                   f'{_e(b.confidence_reason)}</p>')
+                   f'{_e(_clip(b.confidence_reason, 30))}</p>')
         if b.limitations:
             out.append('<details><summary>What this analysis could not see'
                        '</summary><ul>')
@@ -251,3 +279,149 @@ def _deeper(run_id: str) -> str:
         f'<a href="/runs/{rid}/sources">Evidence and sources</a>'
         f'<a href="/runs/{rid}/full">Full research</a>'
         "</nav>")
+
+
+# ===========================================================================
+# LAYER RENDERERS — dashboard, decision story, executive brief, actions
+# ===========================================================================
+LAYER_CSS = """
+<style>
+.dash{display:grid;gap:.7rem;grid-template-columns:1fr 1fr;margin:.5rem 0}
+@media(max-width:760px){.dash{grid-template-columns:1fr}}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
+padding:1rem 1.1rem}
+.tile h3{margin:0 0 .4rem;font-size:1rem}
+.tile .rows{margin:.5rem 0 0;padding:0;list-style:none;font-size:.92rem}
+.tile .rows li{display:flex;gap:.6rem;padding:.3rem 0;
+border-top:1px solid var(--line)}
+.tile .rows .k{color:var(--muted);min-width:7.5rem;flex:0 0 auto}
+.tile.off{opacity:.85}
+.story section{scroll-margin-top:4.2rem;padding:1.3rem 0;
+border-top:1px solid var(--line)}
+.story section:first-of-type{border-top:0}
+.storynav{position:sticky;top:0;z-index:5;background:var(--bg);
+border-bottom:1px solid var(--line);padding:.5rem 0;margin:0 0 .5rem;
+display:flex;gap:.4rem;overflow-x:auto;flex-wrap:nowrap;
+-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.storynav a{white-space:nowrap;font-size:.84rem;color:var(--muted);
+text-decoration:none;padding:.25rem .55rem;border-radius:999px}
+.storynav a[aria-current="true"]{color:var(--accent);
+border:1px solid var(--accent)}
+.prog{height:3px;background:var(--accent);width:0;position:sticky;top:0;z-index:6}
+.act{border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;
+margin:.55rem 0;background:var(--card)}
+.act dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+color:var(--muted);font-weight:700;margin-top:.5rem}
+.act dd{margin:.15rem 0 0}
+.approve{background:var(--soft);border-radius:8px;padding:.6rem .8rem;
+margin:.7rem 0 0;font-size:.9rem}
+@media print{.storynav,.prog{display:none}}
+</style>
+"""
+
+
+def render_dashboard(modules) -> str:
+    """Tiles that each answer what changed / so what / what to watch.
+
+    An unavailable module is rendered as a stated gap. It is not hidden,
+    because a missing section a reader cannot see is a missing section they
+    assume was checked.
+    """
+    out = [LAYER_CSS, '<h2>Executive intelligence</h2>', '<div class="dash">']
+    for m in modules:
+        d = m if isinstance(m, dict) else m.as_dict()
+        if not d.get("available"):
+            out.append(f'<div class="tile off"><h3>{_e(d["title"])}</h3>'
+                       f'<p class="small muted">Unavailable — '
+                       f'{_e(d.get("unavailable_reason", ""))}</p></div>')
+            continue
+        out.append(f'<div class="tile"><h3>{_e(d["title"])}</h3>')
+        if d.get("what_changed"):
+            out.append(f'<p>{_e(d["what_changed"])}</p>')
+        if d.get("rows"):
+            out.append('<ul class="rows">')
+            for row in d["rows"]:
+                out.append(f'<li><span class="k">{_e(str(row.get("label","")))}'
+                           f'</span><span>{_e(str(row.get("value","")))}</span>'
+                           f'</li>')
+            out.append("</ul>")
+        if d.get("so_what"):
+            out.append('<div class="sowhat"><span class="lbl">Why this '
+                       f'matters</span>{_e(d["so_what"])}</div>')
+        if d.get("what_to_watch"):
+            out.append(f'<p class="small muted">What to watch: '
+                       f'{_e(d["what_to_watch"])}</p>')
+        if d.get("text_alternative"):
+            # Textual equivalent for screen readers and print, where a visual
+            # tile conveys nothing on its own.
+            out.append(f'<p class="small muted visually-alt">'
+                       f'{_e(d["text_alternative"])}</p>')
+        out.append("</div>")
+    out.append("</div>")
+    from intent_engine.founder_brief.layers import MARKET_DISCLAIMER
+    out.append(f'<p class="small muted">{_e(MARKET_DISCLAIMER)}</p>')
+    return "".join(out)
+
+
+def render_story(sections, *, run_id: str = "") -> str:
+    """Scrollable narrative. Every section is reachable by scrolling alone —
+    no Next button stands between the reader and the answer."""
+    out = [LAYER_CSS, '<div class="prog" id="prog" aria-hidden="true"></div>',
+           '<nav class="storynav" aria-label="Sections">']
+    for i, s in enumerate(sections):
+        current = ' aria-current="true"' if i == 0 else ""
+        out.append(f'<a href="#{_e(s["key"])}"{current}>{_e(s["title"])}</a>')
+    out.append("</nav><div class=\"story\">")
+    for s in sections:
+        out.append(f'<section id="{_e(s["key"])}" tabindex="-1">'
+                   f'<h2>{_e(s["title"])}</h2>')
+        for p in s["paragraphs"]:
+            out.append(f"<p>{_e(p)}</p>")
+        out.append("</section>")
+    out.append("</div>")
+    out.append(
+        '<script>(function(){var p=document.getElementById("prog");'
+        'var ls=[].slice.call(document.querySelectorAll(".storynav a"));'
+        'function u(){var h=document.documentElement;'
+        'p.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight||1)*100)+"%";'
+        'var best=null;[].slice.call(document.querySelectorAll(".story section"))'
+        '.forEach(function(s){if(s.getBoundingClientRect().top<120)best=s.id;});'
+        'ls.forEach(function(a){a.setAttribute("aria-current",'
+        'a.getAttribute("href")==="#"+best?"true":"false");});}'
+        'addEventListener("scroll",u,{passive:true});u();})();</script>')
+    return "".join(out)
+
+
+def render_executive_brief(built) -> str:
+    out = [LAYER_CSS, '<h2>Executive brief</h2>']
+    for s in built.get("sections", []):
+        out.append(f'<h3>{_e(s["title"])}</h3>')
+        for p in s["paragraphs"]:
+            out.append(f"<p>{_e(p)}</p>")
+    budget = built.get("budget", {})
+    out.append(f'<p class="small muted">{built.get("words", 0)} words '
+               f'(target {budget.get("min")}–{budget.get("max")}). '
+               f'{_e(built.get("note", ""))}</p>')
+    return "".join(out)
+
+
+def render_actions(actions) -> str:
+    """Prepared artefacts. Every card states what will NOT happen."""
+    if not actions:
+        return ""
+    out = [LAYER_CSS, "<h2>What this can prepare for you</h2>",
+           '<p class="small muted">Intelligence is above. These are artefacts '
+           'the product can draft from it — nothing leaves this page.</p>']
+    for a in actions:
+        d = a if isinstance(a, dict) else a.as_dict()
+        out.append(f'<div class="act"><h3>{_e(d["title"])}</h3><dl>')
+        for label, key in (("Intelligence", "intelligence"),
+                           ("Recommended action", "recommended_action"),
+                           ("Why", "why"),
+                           ("Expected result", "expected_result")):
+            if d.get(key):
+                out.append(f'<dt>{label}</dt><dd>{_e(d[key])}</dd>')
+        out.append("</dl>")
+        out.append(f'<p class="approve"><strong>Approval required.</strong> '
+                   f'{_e(d["approval_required"])}</p></div>')
+    return "".join(out)

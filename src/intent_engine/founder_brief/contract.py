@@ -69,6 +69,16 @@ _DECISION_SIGNALS = (
     "position", "target", "scope", "launch", "retain", "churn",
 )
 
+# A decision needs an alternative. Without one it is an instruction.
+_TRADEOFF_MARKERS = ("whether", " vs", "versus", " or ", "rather than",
+                     "instead of", "without", "before", "trade-off",
+                     "tradeoff", "at the expense of", "while still")
+
+# Advice that applies to every company and therefore informs about none.
+_GENERIC = ("monitor this", "monitor closely", "keep an eye", "watch this",
+            "stay informed", "continue to monitor", "review regularly",
+            "track progress", "be aware", "consider carefully")
+
 _STOPWORDS = frozenset("""
 a an and are as at be been but by for from had has have in into is it its of
 on or over that the their there this to was were what which who will with
@@ -103,7 +113,13 @@ MAX_RESTATEMENT_OVERLAP = 0.6
 
 @dataclass(frozen=True)
 class FounderInsight:
-    """One thing worth a founder's attention, with its consequence attached."""
+    """One thing worth a founder's attention, with its consequence attached.
+
+    Complete and renderer-independent: every field a layer could need is here,
+    so the dashboard, decision story, executive brief and Q&A all speak from
+    one object. A renderer that had to fill a gap would fill it differently
+    each time, and the layers would quietly start contradicting each other.
+    """
     fact: str
     interpretation: str
     so_what: str
@@ -113,13 +129,35 @@ class FounderInsight:
     confidence: str = ""
     major: bool = True
     source_label: str = ""
+    # completed contract
+    next_action: str = ""
+    confidence_reason: str = ""
+    limitations: tuple = ()
+    company_mode: str = ""
+    audience_relevance: str = ""
+
+    # aliases the spec names differently from the internal field
+    @property
+    def decision_affected(self) -> str:
+        return self.decision
+
+    @property
+    def next_check(self) -> str:
+        return self.watch
 
     def as_dict(self) -> dict:
         return {"fact": self.fact, "interpretation": self.interpretation,
                 "so_what": self.so_what, "decision": self.decision,
-                "watch": self.watch, "evidence_ids": list(self.evidence_ids),
-                "confidence": self.confidence, "major": self.major,
-                "source_label": self.source_label,
+                "decision_affected": self.decision,
+                "next_action": self.next_action,
+                "watch": self.watch, "next_check": self.watch,
+                "evidence_ids": list(self.evidence_ids),
+                "confidence": self.confidence,
+                "confidence_reason": self.confidence_reason,
+                "limitations": list(self.limitations),
+                "company_mode": self.company_mode,
+                "audience_relevance": self.audience_relevance,
+                "major": self.major, "source_label": self.source_label,
                 "contract": CONTRACT_VERSION}
 
 
@@ -159,6 +197,31 @@ def validate(insight: FounderInsight, *, require_evidence: bool = True
             s in insight.decision.lower() for s in _DECISION_SIGNALS):
         problems.append("the decision names no choice, risk or priority a "
                         "founder could act on")
+
+    # A DECISION IS A TRADE-OFF. "Improve onboarding" is a task; "whether to
+    # fund enterprise delivery OR protect self-serve" is a decision. Without
+    # the alternative there is nothing to decide, and the reader is being told
+    # what to do rather than what to weigh.
+    if insight.major and insight.decision and not any(
+            m in insight.decision.lower() for m in _TRADEOFF_MARKERS):
+        problems.append("the decision states no trade-off (no 'whether', "
+                        "'vs', 'or', 'without', 'before'); a recommendation "
+                        "is not a decision")
+
+    # Generic advice that survives every edit because it applies to anything.
+    for text, label in ((insight.next_action, "next_action"),
+                        (insight.watch, "watch")):
+        low = (text or "").lower().strip()
+        if low and any(low.startswith(g) or low == g.rstrip() for g in _GENERIC):
+            problems.append(f"{label} is generic advice ({low[:40]!r}); it "
+                            f"names no concrete investigation")
+
+    if insight.confidence and insight.major:
+        strong = insight.confidence.lower() in ("high", "strong", "certain")
+        if strong and len(insight.evidence_ids) < 3:
+            problems.append(
+                f"confidence '{insight.confidence}' is stronger than its "
+                f"evidence ({len(insight.evidence_ids)} item(s))")
 
     for name in ("fact", "interpretation", "so_what", "decision", "watch"):
         leaked = _internal_terms(getattr(insight, name) or "")

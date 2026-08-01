@@ -450,6 +450,10 @@ class WebApp:
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
             return self._report(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "story":
+            return self._story_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "dashboard":
+            return self._intelligence_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "brief":
             return self._brief_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "slides":
@@ -1762,6 +1766,89 @@ class WebApp:
         form = {"consent": "1", "company_name": meta.get("company_name", ""),
                 "website": meta.get("website", ""), "csrf": session["csrf"]}
         return self._analyze(session, form)
+
+    def _founder_layers(self, run_id):
+        """Everything the deeper layers need, built from ONE brief.
+
+        Shared so the dashboard, story and executive brief cannot drift apart
+        or repeat one another -- the dedup ledger is threaded through them in
+        reading order.
+        """
+        from intent_engine.founder_brief import build as fb
+        from intent_engine.founder_brief import layers as fl
+        from intent_engine.founder_brief import market as fm
+
+        result = self._result(run_id) or {}
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        independent = sum(
+            1 for o in observations
+            if o.get("source_class") not in ("company_owned",
+                                             "executive_statement", None, ""))
+        thesis = report.get("thesis") or {}
+        identity = self.ci.entity_identity(run_id) or {}
+        ticker = identity.get("ticker") or ""
+        mode = fb.classify_mode(
+            is_public=bool(ticker), evidence_count=len(observations),
+            independent_sources=independent,
+            has_thesis=bool(thesis.get("view"))
+            and not thesis.get("view_withheld"))
+        market = None
+        if ticker:
+            try:
+                snap = (pathlib.Path(self.config.data_dir) / "reports"
+                        / "market" / "export" / f"{ticker}.json")
+                market = fm.load(snap, expected_ticker=ticker).as_dict()
+            except Exception:  # noqa: BLE001 - degrade, never fail the page
+                market = fm.unavailable("snapshot unreadable").as_dict()
+        name = (identity.get("canonical_name") or identity.get("name")
+                or result.get("company") or "This company")
+        brief = fb.build(company=name, mode=mode, report=report,
+                         observations=observations, market=market)
+        return brief, report, name
+
+    def _intelligence_page(self, session, run_id):
+        """The executive INTELLIGENCE dashboard for one company.
+
+        Named `_intelligence_page`, not `_dashboard_page`: the webapp already
+        has a `_dashboard_page` for platform status, and Python would silently
+        have kept whichever was defined last -- which is how a founder-facing
+        route ends up serving an operator page.
+        """
+        from intent_engine.founder_brief import layers as fl
+        from intent_engine.founder_brief import render as fr
+        brief, report, name = self._founder_layers(run_id)
+        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — '
+                f'intelligence</h1>'
+                + fr.render_dashboard(fl.build_dashboard(brief, report))
+                + fr._deeper(run_id) + "</main>")
+        return self._html(self._page(f"{name} — intelligence", body, session,
+                                     session.get("csrf", "")))
+
+    def _story_page(self, session, run_id):
+        from intent_engine.founder_brief import layers as fl
+        from intent_engine.founder_brief import render as fr
+        brief, report, name = self._founder_layers(run_id)
+        ledger = fl.Ledger()
+        # The 60-second brief was read first, so its sentences are spent.
+        if brief.key_insight:
+            # The fact and the implication were on the first screen, so the
+            # story must not restate them. The DECISION is deliberately NOT
+            # spent: it is the section the whole narrative builds toward, and
+            # deduplicating it away leaves the story without its climax.
+            # Orientation repetition is permitted; a missing mandated section
+            # is not.
+            ledger.spend(brief.key_insight.fact, brief.key_insight.so_what)
+        sections = fl.build_story(brief, report, ledger)
+        actions = fl.build_actions(brief)
+        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — the '
+                f'decision story</h1>'
+                + fr.render_story(sections, run_id=run_id)
+                + fr.render_actions(actions)
+                + fr._deeper(run_id) + "</main>")
+        return self._html(self._page(f"{name} — decision story", body,
+                                     session, session.get("csrf", "")))
 
     def _founder_brief_page(self, session, run_id, result):
         """The 60-SECOND FOUNDER BRIEF — the default completed-result view.

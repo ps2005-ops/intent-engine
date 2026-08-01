@@ -423,13 +423,13 @@ def _sparse_brief(brief: FounderBrief,
         for item in missing) or (
         "No dated, independently-reported activity could be found.",)
 
+    # Tight on purpose. These are the highest-value lines in a sparse brief
+    # and they compete for the same 60 seconds as everything else.
     brief.internal_questions = (
-        "Who is the single customer this is built for, and can a stranger tell "
-        "that within ten seconds of landing on the site?",
-        "What is the one proof point that would most reduce a buyer's doubt, "
-        "and why is it not public?",
-        "If pricing is not visible, is that a deliberate sales motion or an "
-        "unresolved decision?",
+        "Who is this built for, and can a stranger tell in ten seconds?",
+        "Which single proof would most reduce a buyer's doubt — and why is it "
+        "not public?",
+        "Is hidden pricing a deliberate sales motion, or an unmade decision?",
     )
     brief.public_proofs = (
         "A named customer story with a concrete before-and-after.",
@@ -438,25 +438,21 @@ def _sparse_brief(brief: FounderBrief,
         "maintained.",
     )
     brief.next_actions = (
-        "Pick the one proof from the list below that is cheapest to publish "
-        "and publish it.",
-        "Answer the three internal questions in writing — they are the ones a "
-        "buyer is asking silently.",
-        "Re-run this analysis after the site changes to see what a stranger "
-        "can now verify.",
+        "Publish the cheapest proof from the list below.",
+        "Answer the three questions in writing — a buyer is asking them "
+        "silently.",
+        "Re-run this after the site changes to see what a stranger can verify.",
     )
     brief.biggest_risk = (
-        "A prospective customer cannot independently confirm the claims on "
-        "the site, so the burden of proof falls entirely on a sales "
-        "conversation.")
+        "Nothing on the site is independently confirmable, so the whole burden "
+        "of proof falls on a sales conversation.")
     brief.biggest_unknown = (
-        "Whether the business is working — nothing public shows adoption, "
-        "retention or economics, and this analysis does not guess at them.")
+        "Whether the business is working. Nothing public shows adoption, "
+        "retention or economics, and this does not guess.")
     brief.confidence = "Low, by construction"
     brief.confidence_reason = (
-        "Only the company's own material could be found. This is a diagnosis "
-        "of what is VISIBLE, not of whether the strategy is sound — those are "
-        "different questions and only the first is answerable from here.")
+        "Only the company's own material was found. This diagnoses what is "
+        "VISIBLE, not whether the strategy is sound.")
     brief.limitations = (
         "No independent reporting, filings or customer evidence was found.",
         "Nothing here describes adoption, revenue, margins or defensibility. "
