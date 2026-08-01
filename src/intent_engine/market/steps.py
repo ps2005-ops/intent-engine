@@ -339,6 +339,64 @@ def assets_step(ctx: C.CycleContext) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# replay — NIGHT ONLY, and strictly bounded
+# ---------------------------------------------------------------------------
+# The night cycle spends whatever budget is left on replay. It is last in the
+# step list and capped in seconds, because a research tool that delays the
+# operating cycle has become an outage. A run that hits its cap returns
+# `exhausted_budget` and resumes from its checkpoint next night -- a partial
+# result, never a failure.
+REPLAY_BUDGET_SECONDS = 240.0
+
+
+def replay_step(series_fn: Optional[Callable] = None,
+                budget_seconds: float = REPLAY_BUDGET_SECONDS) -> Callable:
+    def step(ctx: C.CycleContext) -> dict:
+        from intent_engine.market import experiments as EX
+        from intent_engine.market import replay as RP
+        from intent_engine.market import strategy_library as LIB
+        from intent_engine.market import universe_tiers as UT
+
+        if ctx.dry_run:
+            return {"skipped": "dry run does not touch replay history",
+                    "observations": 0}
+        # Replay only ever reads windows that ENDED before the holdout. The
+        # live operating date is irrelevant to it, and using it would walk
+        # straight into the holdout as the calendar advances.
+        start, end, window = "2015-01-01", "2022-12-31", "research"
+        securities = UT.universe_for(UT.TIER_1)
+        cache = pathlib.Path(ctx.root) / "reports/market/replay/price_cache"
+
+        def cached(symbol: str) -> dict:
+            path = cache / f"{symbol}.json"
+            if path.exists():
+                try:
+                    return json.loads(path.read_text())
+                except json.JSONDecodeError:
+                    return {}
+            return {}
+
+        fetch = series_fn or cached
+        per = budget_seconds / max(len(LIB.specs()), 1)
+        runs, total = [], 0
+        for spec in LIB.specs():
+            result = RP.run_replay(
+                strategy_key=spec.key, signal_fn=LIB.SIGNALS[spec.key],
+                horizons=spec.horizons.horizons, securities=securities,
+                series_for=fetch, start=start, end=end, window=window,
+                tier=UT.TIER_1, costs=spec.cost_model,
+                budget=RP.Budget(max_seconds=per), root=str(ctx.root))
+            sample = EX.effective_sample(result.observations)
+            runs.append({**result.as_dict(),
+                         "effective_sample": sample.as_dict()})
+            total += len(result.observations)
+        return {"runs": runs, "observations": total,
+                "budget_seconds": budget_seconds,
+                "window": window, "tier": UT.TIER_1}
+    return step
+
+
+# ---------------------------------------------------------------------------
 # health + report
 # ---------------------------------------------------------------------------
 def health_step(ctx: C.CycleContext) -> dict:
@@ -377,6 +435,7 @@ def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("funnel", funnel_step),
         ("positions", positions_step),
         ("assets", assets_step),
+        ("replay", replay_step(series_fn=None)),
         ("health", health_step),
         ("report", report_step),
     ]

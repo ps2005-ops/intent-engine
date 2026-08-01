@@ -238,6 +238,10 @@ def render_report(ctx) -> Tuple[str, dict]:
 
     lines += [
         "",
+        "## LEARNING ACCELERATION",
+        "",
+    ] + _learning_acceleration(ctx) + [
+        "",
         "## ENGINEERING RECOMMENDATION",
         "",
         f"**{_recommendation(funnel, health)}**",
@@ -265,6 +269,76 @@ def render_report(ctx) -> Tuple[str, dict]:
         ]
     payload["recommendation"] = _recommendation(funnel, health)
     return "\n".join(lines), payload
+
+
+def _learning_acceleration(ctx) -> list:
+    """The Day 18 permanent section.
+
+    Live and replay learning are reported SEPARATELY and never averaged: replay
+    resolves ten years in minutes, the live path resolves one position in 21
+    days. Averaging them would let replay's productivity flatter a live path
+    that has never opened a position.
+    """
+    from intent_engine.market import throughput as TP
+    from intent_engine.market import universe_tiers as UT
+
+    replay = ctx.results.get("replay") or {}
+    funnel = (ctx.results.get("funnel") or {}).get("funnel") or {}
+    counts = funnel.get("counts") or {}
+    opportunity = ctx.results.get("opportunity") or {}
+
+    raw = eff = 0
+    for run in replay.get("runs") or ():
+        sample = run.get("effective_sample") or {}
+        raw += sample.get("n_raw") or 0
+        eff += sample.get("n_effective") or 0
+
+    live = TP.LiveLearningRate(
+        securities_evaluated=counts.get("evaluated", 0),
+        strategic_views=counts.get("strategic_view", 0),
+        signal_opportunities=opportunity.get("observable", 0),
+        signal_fires=counts.get("signal_fired", 0),
+        positions_opened=counts.get("positions_opened", 0),
+        positions_resolved=counts.get("positions_resolved", 0))
+    tp = TP.LearningThroughput(resolved_raw=raw, resolved_effective=eff)
+    limiting = TP.limiting_factor(live, tp)
+
+    try:
+        universe = UT.composition(UT.universe_for(UT.TIER_1))
+        tier_line = (f"tier 1 — {universe['total']} securities "
+                     f"({universe['by_type']}), "
+                     f"{universe['delisted_retained']} delisted retained")
+    except Exception:  # noqa: BLE001 - a report never dies on a lookup
+        tier_line = "UNMEASURABLE — universe could not be composed"
+
+    lines = [
+        f"- universe: {tier_line}",
+        f"- active strategies: 3 registered (`baseline_momentum.v1`, "
+        f"`mean_reversion.v1`, `volatility_breakout.v1`); 2 refused at "
+        f"GATE 1 for missing point-in-time data",
+        f"- replay jobs this cycle: {len(replay.get('runs') or ())}"
+        + (f"  ({replay.get('skipped')})" if replay.get("skipped") else ""),
+        f"- replay observations: **{raw} raw / {eff} effective**"
+        + (f" (design effect {round(raw/eff, 1)}x)" if eff else ""),
+        "",
+        "### live learning rate (separate, never averaged with replay)",
+        "",
+        "```",
+    ]
+    for key, value in live.as_dict().items():
+        if key == "note":
+            continue
+        lines.append(f"  {key.replace('_', ' '):<28}"
+                     f"{'—' if value is None else value}")
+    lines += ["```", "",
+              "### learning throughput", "", "```", tp.render(), "```", "",
+              f"**Limiting factor: {limiting['factor']}** — "
+              f"{limiting['detail']}",
+              "",
+              "*Replay observations are NOT independent. The effective count "
+              "is the one that carries information; the raw count is shown "
+              "only so the gap between them stays visible.*"]
+    return lines
 
 
 def _dq(funnel: dict) -> str:

@@ -109,3 +109,9 @@ reports/market/*_night.md
 reports/market/*_night.json
 reports/market/latest_*.json
 reports/market/signal_audit.jsonl
+
+# Day 18 — replay working state. Checkpoints and the price cache are
+# machine-specific and regenerable; the RESULTS (pilot_replay.json,
+# experiments.jsonl, strategies.jsonl) are research and stay tracked.
+reports/market/replay/price_cache/
+reports/market/replay/replay_*.json

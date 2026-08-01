@@ -2067,3 +2067,126 @@ the two companies the question could not be answered.
 signal is broken, exactly as zero fires was not evidence it was working. What
 changed is that the question is now measurable, under a definition registered
 before the answer was known.
+
+---
+
+## 2026-08-01 — Day 18 · buying measurement capacity
+
+### THE PREMISE WAS HALF WRONG, AND MEASURING IT FIRST IS WHY
+
+The brief said: expand the universe from 28 to 200–500 to raise the learning
+rate. Measured before writing any code:
+
+| | |
+|---|---|
+| live research cost | **20–28 s per security** (day-16 553 s/28, day-17 780 s/28) |
+| strategic-view yield | **0.086** over 6 observations |
+| positions ever opened | **0** |
+| live resolution latency | **21 days** |
+
+`500 × 25 s ≈ 3.5 h per cycle`, ~6.9 h/day across two cycles. A 06:30 pre-market
+cycle cannot take three and a half hours. **Universe expansion on the live
+evidence path is not merely insufficient — it is infeasible.**
+
+Worse: `opportunity.classify` applies *"a strategic reading must exist"* as gate
+2, before anything about the hypothesis is consulted. A sector ETF has no
+company narrative, so **every ETF the mission asked for would terminate at
+`no_strategic_reading` forever**, no matter how much retrieval was thrown at it.
+
+So the binding constraint was never size. It was **the coupling of every
+position to a company narrative**.
+
+### THE INTERVENTION, AND WHY IT IS NOT A WEAKENED GATE
+
+A price-behaviour path that does not require a narrative — held to *stricter*
+requirements the narrative path never had: minimum bars, liquidity floor,
+explicit costs, point-in-time membership, holdout protection.
+
+The distinction is the whole argument, so it is stated plainly:
+`corroboration.REQUIREMENTS["price_behaviour"]` has declared since **Day 11**
+that a price claim needs no company evidence — *"a price/momentum claim asserts
+nothing about the business"*. The reasoner has simply never been able to act on
+it. Requiring a company narrative before a mean-reversion trade is a **category
+error**, not a safety margin.
+
+**Nothing was removed from the narrative path.** Gates 2–4 apply unchanged to
+every fundamental claim, asserted by test.
+
+### THE RESULT — 179,013 observations, and no edge anywhere
+
+```
+strategy                 n_raw   n_eff   mean net    p      design effect
+baseline_momentum.v1     86301      77   -0.00156   0.89       1121x
+mean_reversion.v1        37334      77   -0.00104   0.82        162x
+volatility_breakout.v1   55378      77   -0.00182   0.72        240x
+```
+
+Seven strategy-horizon tests. **All p ≥ 0.72. Zero survive Benjamini–Hochberg
+at q = 0.10.** Win rates 48.5–50.1%. Profit factors 0.93–0.95 — losing after a
+10 bps round trip. The leaderboard **refuses to rank**: the intervals overlap.
+
+This is the preregistered expected outcome. **The cycle bought measurement
+capacity, not profit**, and it converted "we cannot tell" into a measured
+negative across three independent families. Recorded as asset **N5**.
+
+### THE BUG THAT ALMOST HID ALL OF IT
+
+The first pilot returned `n_effective = 1` for every strategy and every test
+came back UNMEASURABLE. The cause: `effective_sample` merged holding windows
+across **all** securities pooled together, and with 77 securities trading daily
+the union of every holding period is one continuous interval from 2015 to 2022.
+
+AAPL's 20-day window and XOM's 20-day window over the same dates are correlated
+— they share a market factor — but they are **not one observation**. Windows
+merge *within* a security; cross-sectional dependence is a separate dimension
+(`sector_week`). Fixed, and the binding dimension became `security` at 77, which
+is the conservative cluster-robust answer this project's doctrine asks for.
+
+The failure mode is worth keeping: an effective-sample routine that is too
+aggressive does not produce a wrong number, it produces **no number**, and a
+column of UNMEASURABLE is easy to mistake for insufficient data. Asset **M10**.
+
+### WHAT WAS REFUSED
+
+`earnings_revision` and `sector_relative_strength` are **not implemented**.
+GATE 1 fails: there is no point-in-time analyst-estimate feed and no
+point-in-time sector-membership history. Today's sector labels applied across
+ten years silently reclassify every company that changed sector, and current
+consensus applied to a past date is lookahead. Recorded in `REFUSED` as a
+finding, not omitted.
+
+### SURVIVORSHIP, STATED RATHER THAN SOLVED
+
+The universe retains known failures — **SIVB, FRC, TWTR** — with delisting dates,
+and a test asserts SIVB is in the sample right up to 2023-03-17 and out after.
+But there is no point-in-time index reconstruction here, so companies that
+failed before this file was authored are absent and unrecoverable.
+`SURVIVORSHIP_LIMITATION` prints in every report that uses a tier. Option (B),
+labelled as option (B).
+
+### LEARNING THROUGHPUT
+
+Named *throughput*, not "information gain", because it is not entropy reduction
+and borrowing that word would be exactly the false rigour this project keeps
+refusing. `resolved_raw` is deliberately **excluded** from the score — a metric
+counting rows would rise every time a threshold was loosened.
+
+Live and replay rates are reported **separately and never averaged**: replay
+resolves ten years in minutes, live resolves one position in 21 days.
+
+### ENGINEERING PREDICTION — cycle 8
+
+Predicted: resolvable experiments per operating day from **0 → ≥ 10³**, with
+live positions staying near 0. **Correct.** 179,013 raw / 77 effective; live
+positions 0. First numeric prediction to land in the interior rather than at a
+floor.
+
+### WHAT DID NOT CHANGE
+
+No broker. No credentials. No narrative gate weakened. No holdout read. No
+threshold tuned on evaluation data. Tier 2 is **not populated** and
+`universe_for(2)` raises rather than silently substituting a smaller list.
+
+### ENGINEERING RECOMMENDATION
+
+**CONTINUE OPERATING.** Engineering returns to exceptional status.

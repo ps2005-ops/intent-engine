@@ -27,7 +27,7 @@ from intent_engine.market.assets import (
 DAY = {1: "2026-07-15", 3: "2026-07-17", 4: "2026-07-18", 5: "2026-07-19",
        7: "2026-07-21", 8: "2026-07-22", 10: "2026-07-24", 11: "2026-07-25",
        12: "2026-07-26", 14: "2026-07-28", 15: "2026-07-29",
-       16: "2026-07-30", 17: "2026-07-31"}
+       16: "2026-07-30", 17: "2026-07-31", 18: "2026-08-01"}
 
 ASSETS = [
     dict(asset_id="N1", asset_class=VALIDATED_NEGATIVE,
@@ -150,6 +150,54 @@ ASSETS = [
                        "ambiguous",
          impact="blocks the most tempting form of p-hacking here",
          evidence=("PREREGISTRATION_day4_horizons.md",)),
+    # --- Day 18 ------------------------------------------------------------
+    dict(asset_id="N5", asset_class=VALIDATED_NEGATIVE,
+         title="Three price-behaviour families show no edge after costs",
+         claim="baseline_momentum, mean_reversion and volatility_breakout all "
+               "return negative net expectancy (-0.10% to -0.18%) over 2015-"
+               "2022 on 77 securities. Seven strategy-horizon tests, all "
+               "p >= 0.72, zero survive Benjamini-Hochberg FDR at q=0.10.",
+         confidence=0.85, first=18, last=18, sample_size=179013,
+         effective_sample_size=77,
+         scope="tier-1 universe, 2015-2022 research window, 10 bps round trip",
+         limitations="n_eff 77 (clustered by security); survivorship-aware "
+                     "approximation only; holdout untouched",
+         contradiction="a price family clearing costs at n_eff >= 100 on the "
+                       "validation window",
+         impact="extends N1 from four price transforms to three independent "
+                "families measured WITH costs; the family is closed harder",
+         evidence=("reports/market/pilot_replay.json",
+                   "docs/PREREGISTRATION_day18_learning_rate.md")),
+    dict(asset_id="M10", asset_class=MEASUREMENT_TECHNIQUE,
+         title="Effective sample size must cluster per security, not pooled",
+         claim="Merging holding windows across all securities collapses a "
+               "dense daily panel into ONE interval: 179,013 observations "
+               "reported n_eff = 1 and every test was unmeasurable. Windows "
+               "merge WITHIN a security; cross-sectional dependence is a "
+               "separate dimension.",
+         confidence=0.9, first=18, last=18,
+         scope="every panel-data effective-sample computation",
+         limitations="found on one panel; the principle is general",
+         contradiction="a panel where pooled merging is the correct clustering",
+         impact="design effect on this panel is 162x-1121x; without the fix "
+                "the machinery silently refused to measure anything",
+         evidence=("tests/test_learning_acceleration.py::"
+                   "test_different_securities_are_not_collapsed_into_one_window",)),
+    dict(asset_id="M11", asset_class=ARCHITECTURE_PRINCIPLE,
+         title="A position gate must match the claim it is gating",
+         claim="Requiring a company strategic narrative before a price-"
+               "behaviour trade is a category error, not a safety margin. It "
+               "made ETFs structurally untradable and capped resolvable "
+               "experiments at zero.",
+         confidence=0.85, first=18, last=18,
+         scope="the opportunity gate chain",
+         limitations="argued from structure plus a measured yield of 8.6% at "
+                     "25s/security; not yet validated by a live position",
+         contradiction="a price strategy whose results improve when narrative "
+                       "evidence is required",
+         impact="separates evidence STANDARD from evidence KIND; the narrative "
+                "gates are unchanged for fundamental claims",
+         evidence=("docs/PREREGISTRATION_day18_learning_rate.md",)),
     # --- Day 17 ------------------------------------------------------------
     dict(asset_id="I1", asset_class=INTEGRITY_FAILURE,
          title="Point-in-time guards must compare timezone-consistent frames",

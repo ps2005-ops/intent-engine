@@ -314,17 +314,28 @@ def test_a_replay_still_drops_future_dated_evidence(monkeypatch):
 
 
 def test_evidence_is_never_dated_after_the_operating_day(monkeypatch):
-    """The invariant every downstream `<= as_of` check relies on."""
-    from datetime import timedelta
+    """The invariant every downstream `<= as_of` check relies on.
 
+    The cutoff is INJECTED rather than taken from the wall clock. The first
+    version of this test read `today_local()` and only exercised the normalisation
+    during the ~4-hour evening window when UTC has rolled over but Toronto has
+    not -- so it passed when written at 22:00 and failed at 00:40 the same night.
+    A test that depends on the hour it runs is not testing the code.
+    """
     from intent_engine.market import session as S
     from intent_engine.market.evidence import _observation_rows
 
-    today = S.today_local()
-    tomorrow_utc = (today + timedelta(days=1)).isoformat()
+    as_of = "2026-07-31"
+    tomorrow_utc = "2026-08-01"
+    # Simulate the evening window: UTC is already tomorrow, so the cutoff
+    # legitimately admits a row stamped tomorrow.
+    monkeypatch.setattr(S, "leakage_cutoff", lambda a, **k: tomorrow_utc)
+
     report = {"observations": [
         {"text": "retrieved just now, stamped in UTC", "date": tomorrow_utc,
          "source_class": "independent_reporting"}]}
-    rows = _observation_rows(report, as_of=today.isoformat())
+    rows = _observation_rows(report, as_of=as_of)
     assert rows, "a live run must not discard evidence that exists right now"
-    assert rows[0]["published_at"] == today.isoformat()
+    assert rows[0]["published_at"] == as_of, (
+        "an admitted row must be re-expressed in the operating frame, or the "
+        "same bug reappears at the next `<= as_of` check downstream")
