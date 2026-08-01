@@ -92,3 +92,5 @@ data/company_ingestion.jsonl.lock
 # a symlinked venv is the standard git-worktree pattern; ".venv/" with a
 # trailing slash matches directories only and lets the symlink leak in.
 .venv
+uiproof/
+.claude/launch.json
