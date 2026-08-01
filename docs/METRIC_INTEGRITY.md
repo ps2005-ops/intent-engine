@@ -172,3 +172,89 @@ around:
 Each time the corrected answer was *less* conclusive than the original. That is
 the direction an honest instrument moves in, and it is the reason this rule
 exists.
+
+---
+
+## Stability is not desirability
+
+Adopted Day 17.
+
+Day 16 fixed a defect where zero dispersion was reported UNSTABLE. The fix was
+right, and it created the **opposite** hazard, which is subtler: once
+`signal_fired` at a flat 0.00 correctly reports STABLE, a reader skimming a
+column of green STABLE labels sees a healthy funnel — and one of those rows is
+saying the engine has never once acted.
+
+A coefficient of variation answers *"is this number reliable?"*. It cannot
+answer *"is this number good?"*, and it must not be read as though it did.
+
+So stability and interpretation are **two columns, always**:
+
+| interpretation | meaning |
+|---|---|
+| `STABLE AT A HEALTHY VALUE` | reliable, and converting most of what reaches it |
+| `STABLE AT ZERO` | reliable, and converting nothing |
+| `STABLE AT A DEGRADED VALUE` | reliable, and losing most of what reaches it |
+| `STABLE BUT NOT YET INTERPRETABLE` | reliable, but the number has no better/worse direction |
+
+An unstable or under-observed stage gets **no** interpretation at all. Assigning
+one would be the false precision this exists to avoid.
+
+The last row matters more than it looks. A terminal share — `NO_TRADE` at 89% —
+is neither healthy nor degraded; it is the shape of the decision mix. Calling it
+"degraded" would create pressure to trade more, which is the precise failure
+this document opens by forbidding.
+
+---
+
+## Improvement is not activity
+
+Adopted Day 17, when the engine began running unattended.
+
+An unattended system runs whether or not it has anything to say, which creates a
+new pressure the manual cycles never had: **the temptation to justify the run**.
+
+A cycle improves the system when it produces any of — another valid operating
+observation, greater statistical power, a resolved position, better calibration
+evidence, a strengthened *or weakened* research asset, a validated negative, a
+detected integrity failure, a corrected defect, better reproducibility, better
+uptime, sharper diagnostics, a justified reduction in uncertainty, or **proof
+that nothing warranted changing**.
+
+It is never: more trades, more BUY/SELL decisions, a higher apparent win rate
+from too few observations, more code, more hypotheses, more indicators, weaker
+gates, optimistic estimates, or a positive finding every day.
+
+**`NET KNOWLEDGE GAIN: 0` is a legitimate result and prints as zero.** A
+research system that feels obliged to report a discovery every day will
+eventually manufacture one.
+
+The accounting is stated explicitly so it cannot be quietly reweighted on a
+disappointing day:
+
+```
+NET = (new_positive + new_negative + strengthened + confirmed
+       + integrity_failures_found + techniques_adopted)
+    - (weakened + placed_under_review)
+```
+
+Three deliberate choices, each asserted by test:
+
+* A validated **negative** counts the same as a positive. A metric that scored
+  only positives would reward never testing anything you might lose.
+* `weakened` and `placed_under_review` **subtract**. A day that undermines a
+  held conclusion leaves the project knowing less than it thought.
+* `retired` is **neutral**. The knowledge was booked when the asset went under
+  review; counting the retirement too would pay twice for one discovery, and
+  counting it negatively would punish the ledger for finishing its own process.
+
+### The anti-Goodhart test, applied to uptime
+
+Unattended operation introduces metrics that are trivially gameable by doing
+less: uptime rises if cycles do nothing, step reliability rises if steps are
+removed, and `NET KNOWLEDGE GAIN` rises if every observation is called a
+finding.
+
+None of them rank work. They are **health** signals — they answer "is the engine
+running?", never "is the engine learning?" — and the report keeps them in a
+separate section for exactly that reason.

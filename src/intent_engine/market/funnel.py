@@ -35,6 +35,12 @@ CHAIN = (
     "independent_evidence",
     "strategic_view",
     "signal_evaluated",
+    # Day 17. A qualifying opportunity was OBSERVABLE at decision time --
+    # inserted above `signal_fired` because "the signal was silent" and "there
+    # was nothing to be loud about" are different facts, and without this stage
+    # the funnel cannot tell them apart. Point-in-time by construction; see
+    # `signal_opportunity.observable_opportunity`.
+    "signal_opportunity",
     "signal_fired",
     "positions_opened",
     "positions_resolved",
@@ -48,7 +54,13 @@ CHAIN = (
 # artefacts of forcing a branch into a sequence.
 TERMINALS = ("buy", "sell", "watch", "no_trade")
 
-STAGES = CHAIN + TERMINALS
+# OFF-CHAIN DIAGNOSTICS. Neither filters nor partitions -- an anomaly counter.
+# `false_fire` is the signal firing WITHOUT a qualifying opportunity, which is
+# not a step toward a position and must never be netted into one. It is carried
+# beside the funnel so it stays countable and visible at zero.
+DIAGNOSTICS = ("false_fire",)
+
+STAGES = CHAIN + TERMINALS + DIAGNOSTICS
 
 
 @dataclass(frozen=True)
@@ -67,6 +79,11 @@ class Funnel:
         """
         if stage in TERMINALS:
             total = self.counts.get("evaluated", 0)
+            return (self.counts.get(stage, 0) / total) if total else None
+        if stage in DIAGNOSTICS:
+            # Measured against the stage it is an anomaly OF, not against the
+            # top: a false fire is a property of signal evaluation.
+            total = self.counts.get("signal_evaluated", 0)
             return (self.counts.get(stage, 0) / total) if total else None
         index = CHAIN.index(stage)
         if index == 0:
@@ -112,6 +129,11 @@ class Funnel:
             rate = self.rate(stage)
             shown = "—" if rate is None else f"{rate:.0%}"
             lines.append(f"{stage:<24}{self.counts.get(stage, 0):>7}{shown:>9}")
+        lines.append(f"{'--- diagnostics ---':<24}")
+        for stage in DIAGNOSTICS:
+            rate = self.rate(stage)
+            shown = "—" if rate is None else f"{rate:.0%}"
+            lines.append(f"{stage:<24}{self.counts.get(stage, 0):>7}{shown:>9}")
         loss = self.largest_loss
         if loss:
             lines.append(f"\nlargest conversion loss: {loss['stage']} "
@@ -121,7 +143,8 @@ class Funnel:
 
 
 def from_rows(rows: Sequence[dict], *, as_of: str,
-              signal_fired: int = 0, positions: int = 0,
+              signal_fired: int = 0, signal_opportunity: int = 0,
+              positions: int = 0,
               resolved: int = 0, correct: int = 0) -> Funnel:
     """Build a funnel from a live cycle's per-company rows."""
     counts = {s: 0 for s in STAGES}
@@ -154,10 +177,25 @@ def from_rows(rows: Sequence[dict], *, as_of: str,
         cls = (row.get("classification") or "").lower()
         if cls in TERMINALS:
             counts[cls] += 1
-    counts["signal_fired"] = signal_fired
-    counts["positions_opened"] = positions
-    counts["positions_resolved"] = resolved
-    counts["positions_correct"] = correct
+    # SUBSET DISCIPLINE. These stages are computed outside the per-company
+    # rows, so the invariant is ENFORCED here rather than trusted -- a caller
+    # that miscounts must not be able to make a stage larger than the one above
+    # it. That defect produced `independent_evidence: 104%` once already and is
+    # not getting in through a second door.
+    #
+    # `signal_fired` counts CORRECT FIRES: fired WITH a qualifying opportunity.
+    # A fire without one is not progress down this funnel -- it is an anomaly,
+    # and it gets its own named line (`false_fire`) instead of being buried
+    # inside a conversion rate. Historically this changes nothing (the signal
+    # has fired zero times, so correct fires and total fires are both zero),
+    # and it keeps the chain a genuine chain.
+    counts["signal_opportunity"] = min(signal_opportunity,
+                                       counts["signal_evaluated"])
+    counts["signal_fired"] = min(signal_fired, counts["signal_opportunity"])
+    counts["false_fire"] = max(signal_fired - counts["signal_fired"], 0)
+    counts["positions_opened"] = min(positions, counts["signal_fired"])
+    counts["positions_resolved"] = min(resolved, counts["positions_opened"])
+    counts["positions_correct"] = min(correct, counts["positions_resolved"])
     return Funnel(as_of=as_of, counts=counts)
 
 
@@ -221,6 +259,46 @@ MIN_OBSERVATIONS = 5
 MAX_STABLE_CV = 0.40
 
 
+# ---------------------------------------------------------------------------
+# INTERPRETATION — stability is not desirability.
+#
+# Day 16 fixed the inverse defect: zero dispersion was being reported UNSTABLE.
+# The fix was right and it created the opposite hazard, which is subtler. Once
+# `signal_fired` at a flat 0.00 reports STABLE, a reader skimming a column of
+# green STABLE labels sees a healthy funnel — and one of those rows is saying
+# the engine has never once acted.
+#
+# A coefficient of variation answers "is this number reliable?". It cannot
+# answer "is this number good?", and it must not be read as though it did. So
+# stability and interpretation are two columns, always.
+# ---------------------------------------------------------------------------
+STABLE_HEALTHY = "STABLE AT A HEALTHY VALUE"
+STABLE_AT_ZERO = "STABLE AT ZERO"
+STABLE_DEGRADED = "STABLE AT A DEGRADED VALUE"
+NOT_INTERPRETABLE = "STABLE BUT NOT YET INTERPRETABLE"
+
+# A chain stage converting below this, stably, is losing most of what reaches
+# it. Not a target and never optimised against — it decides a LABEL, and the
+# anti-Goodhart test applies: moving this constant changes what the report
+# calls the number, and changes nothing about the engine.
+DEGRADED_BELOW = 0.25
+
+
+def interpret(stage: str, status: str, mean: Optional[float]) -> Optional[str]:
+    """What a stable rate MEANS. Returns None when there is no stability claim
+    to interpret — an unstable or under-observed stage has no interpretation,
+    and inventing one would be the false precision this avoids."""
+    if status != STABLE or mean is None:
+        return None
+    if stage in TERMINALS or stage in DIAGNOSTICS:
+        # A terminal share has no better/worse direction: NO_TRADE at 89% is
+        # not "healthy" or "degraded", it is the shape of the decision mix.
+        return NOT_INTERPRETABLE
+    if mean == 0:
+        return STABLE_AT_ZERO
+    return STABLE_DEGRADED if mean < DEGRADED_BELOW else STABLE_HEALTHY
+
+
 @dataclass(frozen=True)
 class StageStability:
     stage: str
@@ -234,12 +312,17 @@ class StageStability:
     interval: Optional[tuple]
     status: str
 
+    @property
+    def interpretation(self) -> Optional[str]:
+        return interpret(self.stage, self.status, self.mean)
+
     def as_dict(self) -> dict:
         return {"stage": self.stage, "observations": self.observations,
                 "today": self.today, "mean": self.mean, "median": self.median,
                 "stdev": self.stdev, "cv": self.cv, "trend": self.trend,
                 "interval": list(self.interval) if self.interval else None,
-                "status": self.status}
+                "status": self.status,
+                "interpretation": self.interpretation}
 
 
 def _trend(values: Sequence[float]) -> str:
@@ -295,7 +378,7 @@ def stage_stability(history: Sequence[dict], stage: str,
 
 def stability_report(history: Sequence[dict], window: int = 7) -> List[dict]:
     return [stage_stability(history, s, window).as_dict()
-            for s in CHAIN[1:] + TERMINALS]
+            for s in CHAIN[1:] + TERMINALS + DIAGNOSTICS]
 
 
 def promote_bottleneck(history: Sequence[dict], window: int = 7) -> dict:

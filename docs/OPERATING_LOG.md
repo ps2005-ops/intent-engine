@@ -1814,3 +1814,256 @@ it cannot be resolved by operating. A promoted bottleneck is **not** a failure �
 it is the instrument working. Neither condition is met.
 
 **CONTINUE OPERATING.** 3035 passing.
+
+---
+
+## 2026-07-31 — Day 17 · the engine starts running itself
+
+Sixteen days of operating cycles were started by a human. Today the engine got
+day and night cycles, a scheduler, a supervisor, and the guarantees that make
+running unattended safe rather than merely automatic.
+
+The most important result was not any of that.
+
+### THE FINDING — an integrity failure that produced a plausible zero
+
+Building the 20:30 night cycle is what exposed it. The full offline suite,
+green for sixteen days, failed twice on `test_market_evidence.py` — and it
+failed at HEAD, before any of today's code existed. Confirmed by stashing
+everything and re-running.
+
+```
+local (operating) date : 2026-07-31        # America/Toronto, 21:43
+UTC date               : 2026-08-01
+```
+
+Ingestion stamps an otherwise-undated observation with the **retrieval time in
+UTC**. The leakage guard compared that against `as_of`, a calendar day in the
+**operating timezone**:
+
+```python
+if published > as_of[:10]:      # 2026-08-01 > 2026-07-31
+    continue                    # -> every observation dropped
+```
+
+**Between 20:00 and midnight America/Toronto, every single night, the evidence
+pipeline collected nothing.** No exception. No warning. The output was
+`evidence: 0` — a number that reads exactly like *"nothing was published
+today"* and would have entered the rolling means as a real measurement.
+
+The night cycle is scheduled for **20:30**. It sits inside that window every
+night of the year.
+
+**What makes this the day's result rather than a footnote:** an integrity guard
+can fail by being too STRICT, and that failure is silent, because over-strictness
+produces a plausible zero rather than an error. Every previous lookahead bug in
+this project was the guard being too loose. This is the mirror image, and it had
+been shipped and green for sixteen days.
+
+The fix is timezone-aware and **does not weaken the guard**:
+
+* **replay** (`as_of` in the past) — cutoff is `as_of`, strictly. Unchanged.
+  This is the only path on which a signal can be evaluated, so it is the only
+  path where lookahead could flatter a result.
+* **live** (`as_of` is today) — the decision instant is *now*, so anything
+  retrievable now existed at decision time; the cutoff extends to the current
+  UTC date.
+
+Admitted rows are then re-expressed in the operating frame, so
+`published_at <= as_of` stays true everywhere — otherwise the same bug simply
+reappears at the next `<= as_of` check downstream. That normalisation is
+**structurally unreachable during replay**, because there the cutoff *is*
+`as_of`. Both adapters (`evidence.py`, `industry.py`) had the identical bug.
+
+Recorded as asset **I1**, class `integrity_failure`.
+
+### WHAT WAS BUILT
+
+**Two cycles.** `day` at 06:30 and `night` at 20:30 `America/Toronto`, every
+calendar day. Day reads the previous session's completed bar; night reads
+today's. Neither ever presents a re-read bar as a new session.
+
+**Market-session awareness.** `TRADING_DAY / EARLY_CLOSE / WEEKEND / HOLIDAY`
+crossed with `BAR_AVAILABLE / BAR_NOT_YET_PUBLISHED / BAR_STALE / BAR_UNCHANGED
+/ BAR_UNAVAILABLE`. Only `BAR_AVAILABLE` may advance a sample.
+
+> The guard this exists for: re-reading Friday's close on Saturday and Sunday
+> would inflate the sample by 40% and narrow every confidence interval, and
+> **nothing would error.**
+
+**Four independent duplicate guards**, deliberately different in kind: the
+schedule window (checked before the lock, so a mistimed fire costs nothing),
+the durable run identity `YYYY-MM-DD:<cycle>:America/Toronto`, an flock shared
+by both cycles so day and night cannot overlap, and a re-check under the lock
+for the two-process race. A DST repeated hour maps to one operating day.
+
+**Signal opportunity.** The layer that answers the question Day 16 could not:
+`signal_fired = 0.00, sd = 0.00` is identical whether the signal is correctly
+quiet or broken. Pre-registered as `volatility_feasibility.v1`
+(`docs/PREREGISTRATION_day17_opportunity.md`) **before any result was computed**,
+with parameters inherited from constants shipped on Phase 2 day 1 — asserted by
+test, so the pre-registration is not decorative.
+
+Decision-time labels only: `CORRECTLY_QUIET`, `MISSED_OPPORTUNITY_CANDIDATE`,
+`CORRECT_FIRE`, `FALSE_FIRE_CANDIDATE`, `UNMEASURABLE`. Outcomes attach on a
+separate axis, only after a horizon fully elapses, and **never rewrite the live
+label**. A candidate stays a candidate precisely because confirming it needs
+information that did not exist when the decision was made.
+
+**Paper only, fail closed.** `TRADING_MODE` accepts exactly one value. Unset
+resolves to `PAPER`; anything else *refuses to start* rather than being coerced
+to something safe-looking — the error is the useful output, because it says the
+operator's intent and the system's capability disagree. A test asserts no
+order-submission symbol exists anywhere in `cycle.py` or `steps.py`.
+
+### A FUNNEL STAGE THAT DID NOT FIT
+
+`signal_opportunity` was specified to sit between `signal_evaluated` and
+`signal_fired`. It does not: a **false fire** is a fire *without* a qualifying
+opportunity, so `signal_fired ⊄ signal_opportunity` and the chain's subset
+invariant breaks at exactly that edge.
+
+Clamping would have hidden it. Instead `signal_fired` counts **correct** fires
+and `false_fire` becomes an off-chain diagnostic with its own line. The anomaly
+gets *more* visible, not less, and the chain stays a genuine chain. Numerically
+this changes nothing historically — the signal has fired zero times.
+
+### STABILITY IS NOT DESIRABILITY
+
+Day 16's fix created the opposite hazard. Once `signal_fired` at a flat 0.00
+correctly reports STABLE, a reader skimming a column of green STABLE labels
+sees a healthy funnel — and one of those rows says the engine has never acted.
+
+Stability and interpretation are now two columns: `STABLE AT A HEALTHY VALUE`,
+`STABLE AT ZERO`, `STABLE AT A DEGRADED VALUE`, `STABLE BUT NOT YET
+INTERPRETABLE`. An unstable or under-observed stage gets **no** interpretation.
+A terminal share gets `NOT YET INTERPRETABLE` — `NO_TRADE` at 89% is neither
+healthy nor degraded, and calling it degraded would create pressure to trade
+more. Recorded as asset **M9**.
+
+### THE LEDGER BECAME DURABLE
+
+Thirteen assets migrated from a markdown table into an append-only revision log,
+**with their real first-observed and last-validated dates** — an asset not
+re-tested since day 4 does not get a fresh timestamp for being migrated, which
+would be exactly the age-for-evidence substitution Knowledge Decay forbids.
+
+Two Day 17 assets added: **I1** (integrity failure) and **M9** (technique).
+15 assets, 15 still believed, 0 under review, 0 retired. Never re-validated:
+**M3, M5, M7, I1, M9** — the first three unchanged from Day 16, which is the
+consistency check that says the migration preserved history rather than
+inventing it.
+
+A retired asset **cannot be revived** — the transition table has no edge out of
+`RETIRED`. Reaching the same conclusion again requires a new asset with its own
+evidence, and the old retirement stays visible beside it.
+
+### RESEARCH VELOCITY
+
+```
+new positive                   0
+new negative                   0
+strengthened                   0
+weakened                       0
+placed under review            0
+confirmed                      0
+retired                        0
+integrity failures found       1     (I1)
+techniques adopted             1     (M9)
+hypotheses retired             0
+net knowledge gain            +2
+```
+
+`retired` is **neutral** in the net — the knowledge was booked when an asset
+went under review; counting the retirement again would pay twice for one
+discovery, and counting it negatively would punish the ledger for finishing its
+own process. `weakened` and `placed_under_review` subtract. All asserted by test.
+
+### ENGINEERING PREDICTION — cycle 7
+
+Predicted: unattended operation, not `strategic_view`, because at one cycle a
+day every downstream metric is blocked on observation count. Expected gain:
+cycles/day 1 → 2.
+
+Got the throughput doubling. **The larger result was not in my prediction at
+all** — scheduling work found a correctness bug. Recorded as *target right,
+unpredicted finding dominated*. The running tally stays honest about how weak
+engineering intuition is on this project.
+
+### WHAT DID NOT CHANGE
+
+No new signal. No tuned threshold. No revived hypothesis. No broker. No
+architectural redesign. `strategic_view` remains the promoted bottleneck and was
+**not** engineered against — a promotion is a measurement, not a mandate, and
+the five preconditions for acting on it are unmet.
+
+Position Decision Quality, win rate, return, expectancy, profit factor, Sharpe,
+Sortino, drawdown, volatility, equity curve, SPY, alpha: **UNMEASURABLE — 0
+positions ever opened.** Calibration, Brier, ECE: **UNMEASURABLE — 0
+resolutions.** Signals beating baseline: **0 of 11**.
+
+### ENGINEERING RECOMMENDATION
+
+**CONTINUE OPERATING.**
+
+An integrity failure was found and fixed, which is the Engineering
+Constitution's own trigger for engineering — and it has been engineered. What
+remains is to run.
+
+---
+
+### LIVE VERIFICATION — a real unattended night cycle, inside the broken window
+
+Run at **21:47 America/Toronto** — inside the 20:00–24:00 window where the
+evidence pipeline had been silently collecting nothing.
+
+```
+2026-07-31:night:America/Toronto  COMPLETED
+  ok research · ok reconcile · ok opportunity · ok resolve_outcomes
+  ok funnel · ok positions · ok assets · ok health · ok report
+```
+
+`TRADING_DAY` · `BAR_AVAILABLE` (probed from SPY, not inferred from the
+calendar) · new market observation: **yes**.
+
+```
+evaluated              28
+tradable               27   96%
+independent_evidence   27  100%
+strategic_view          2    7%
+signal_evaluated        2  100%
+signal_opportunity      1   50%
+signal_fired            0    0%
+--- diagnostics ---
+false_fire              0    0%
+```
+
+**Evidence was collected.** Before today's fix this run would have produced
+`evidence: 0` for all 28 companies and recorded it as a measurement.
+
+#### The first signal-opportunity measurement in the project's history
+
+```
+shopify  SHOP  bars=501  expected 21d move 17.50%  qualifies -> MISSED_OPPORTUNITY_CANDIDATE
+olo      OLO   bars=0    no price data             -> UNMEASURABLE
+```
+
+This is the distinction Day 16 could not make. `signal_fired = 0` is no longer
+one undifferentiated number:
+
+* **SHOP** moves 17.5% over the horizon against a 2% noise floor. A qualifying
+  opportunity plainly existed and the signal was silent. That is a **candidate
+  miss** — and it stays a *candidate*, because confirming it needs the realised
+  outcome and the horizon does not elapse until **2026-08-21**.
+* **OLO** returned no price data. Reported `UNMEASURABLE`, **not**
+  `CORRECTLY_QUIET`.
+
+That second point is the one worth keeping. Had missing data defaulted to
+"correctly quiet", the report would have said *half the silences were correct* —
+a flattering number assembled from an absence. It says instead that for one of
+the two companies the question could not be answered.
+
+**No conclusion is drawn from n=1.** One candidate miss is not evidence the
+signal is broken, exactly as zero fires was not evidence it was working. What
+changed is that the question is now measurable, under a definition registered
+before the answer was known.

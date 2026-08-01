@@ -88,3 +88,24 @@ data/company_ingestion.jsonl.lock
 .daily-cache/
 .founder-cache/
 .fresh-cache*/
+
+# Day 17 — unattended market operation. Runtime state, never source.
+#
+# Locks are per-process; run records and per-cycle reports are MACHINE-SPECIFIC
+# operating history. Committing them would let a fresh checkout inherit another
+# machine's uptime and "prove" an operational record it has not demonstrated —
+# the same reasoning as data/.boot_ledger.jsonl above.
+#
+# NOT ignored, deliberately: reports/funnel_history.json and
+# reports/market/research_assets.jsonl. Those are RESEARCH — the measurements
+# and the beliefs — and they are the only thing this project actually owns.
+/locks/
+/status/
+/dryrun/
+data/dryrun/
+reports/market/*_day.md
+reports/market/*_day.json
+reports/market/*_night.md
+reports/market/*_night.json
+reports/market/latest_*.json
+reports/market/signal_audit.jsonl

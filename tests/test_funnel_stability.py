@@ -145,3 +145,82 @@ def test_a_stage_with_zero_variance_is_maximally_stable_not_unstable():
     s = stage_stability(_history([0.0, 0.0, 0.0, 0.0, 0.0]), "strategic_view")
     assert s.stdev == 0.0
     assert s.status == STABLE, "zero dispersion must not read as noisy"
+
+
+# ---------------------------------------------------------------------------
+# INTERPRETATION — Day 17. Stability is not desirability.
+#
+# Day 16 fixed the inverse defect (zero dispersion read as UNSTABLE) and
+# created the opposite hazard: a column of green STABLE labels, one of which
+# says the engine has never acted.
+# ---------------------------------------------------------------------------
+from intent_engine.market.funnel import (            # noqa: E402
+    DEGRADED_BELOW, NOT_INTERPRETABLE, STABLE_AT_ZERO, STABLE_DEGRADED,
+    STABLE_HEALTHY, interpret,
+)
+
+
+def test_a_flat_zero_stage_is_stable_at_zero_not_healthy():
+    """`signal_fired` at 0.00 with sd 0.00 is the most stable observation in
+    the report AND the most alarming. Both, simultaneously."""
+    stability = stage_stability(_history([0.0] * 6, stage="signal_fired"),
+                                "signal_fired")
+    assert stability.status == STABLE
+    assert stability.stdev == 0.0
+    assert stability.interpretation == STABLE_AT_ZERO
+
+
+def test_a_stable_high_conversion_is_healthy():
+    stability = stage_stability(_history([0.96] * 6, stage="tradable"),
+                                "tradable")
+    assert stability.interpretation == STABLE_HEALTHY
+
+
+def test_a_stable_low_conversion_is_degraded_not_healthy():
+    """strategic_view at ~9% is statistically stable and is losing 91% of what
+    reaches it. The report must say both."""
+    stability = stage_stability(
+        _history([0.09, 0.10, 0.08, 0.09, 0.11, 0.07]), "strategic_view")
+    assert stability.status == STABLE
+    assert stability.interpretation == STABLE_DEGRADED
+
+
+def test_an_unstable_stage_has_no_interpretation():
+    """Inventing one would be exactly the false precision this avoids."""
+    stability = stage_stability(
+        _history([0.0, 0.6, 0.05, 0.5, 0.0, 0.7]), "strategic_view")
+    assert stability.status == UNSTABLE
+    assert stability.interpretation is None
+
+
+def test_an_under_observed_stage_has_no_interpretation():
+    stability = stage_stability(_history([0.5, 0.5]), "strategic_view")
+    assert stability.status == INSUFFICIENT
+    assert stability.interpretation is None
+
+
+def test_a_terminal_share_is_not_interpretable_as_good_or_bad():
+    """NO_TRADE at 89% is neither healthy nor degraded — it is the shape of
+    the decision mix."""
+    assert interpret("no_trade", STABLE, 0.89) == NOT_INTERPRETABLE
+    assert interpret("watch", STABLE, 0.11) == NOT_INTERPRETABLE
+
+
+def test_the_degraded_boundary_is_explicit():
+    assert interpret("strategic_view", STABLE, DEGRADED_BELOW) == STABLE_HEALTHY
+    assert interpret("strategic_view", STABLE,
+                     DEGRADED_BELOW - 0.001) == STABLE_DEGRADED
+
+
+def test_interpretation_is_carried_in_the_serialised_report():
+    rows = stability_report(_history([0.0] * 6, stage="signal_fired"))
+    fired = [r for r in rows if r["stage"] == "signal_fired"][0]
+    assert fired["interpretation"] == STABLE_AT_ZERO
+    assert "interpretation" in rows[0]
+
+
+def test_every_chain_and_terminal_and_diagnostic_stage_is_reported():
+    from intent_engine.market.funnel import CHAIN, DIAGNOSTICS, TERMINALS
+    rows = stability_report(_history([0.1] * 6))
+    stages = {r["stage"] for r in rows}
+    assert stages == set(CHAIN[1:]) | set(TERMINALS) | set(DIAGNOSTICS)

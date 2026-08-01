@@ -295,3 +295,36 @@ def test_a_live_run_where_as_of_is_today_loses_nothing():
         {"text": "seen today", "date": "2026-07-31",
          "source_class": "company_owned"}]}
     assert len(_observation_rows(report, as_of="2026-07-31")) == 1
+
+
+# --- Day 17: the timezone-boundary leak, measured and fixed ------------------
+def test_a_replay_still_drops_future_dated_evidence(monkeypatch):
+    """The guard that matters is untouched. Replay is the ONLY path on which a
+    signal can be evaluated, so it is the only path where lookahead could
+    flatter a result."""
+    from intent_engine.market.evidence import _observation_rows
+
+    report = {"observations": [
+        {"text": "tomorrow's news", "date": "2020-06-02",
+         "source_class": "independent_reporting"},
+        {"text": "in the past", "date": "2020-05-30",
+         "source_class": "independent_reporting"}]}
+    rows = _observation_rows(report, as_of="2020-06-01")
+    assert [r["published_at"] for r in rows] == ["2020-05-30"]
+
+
+def test_evidence_is_never_dated_after_the_operating_day(monkeypatch):
+    """The invariant every downstream `<= as_of` check relies on."""
+    from datetime import timedelta
+
+    from intent_engine.market import session as S
+    from intent_engine.market.evidence import _observation_rows
+
+    today = S.today_local()
+    tomorrow_utc = (today + timedelta(days=1)).isoformat()
+    report = {"observations": [
+        {"text": "retrieved just now, stamped in UTC", "date": tomorrow_utc,
+         "source_class": "independent_reporting"}]}
+    rows = _observation_rows(report, as_of=today.isoformat())
+    assert rows, "a live run must not discard evidence that exists right now"
+    assert rows[0]["published_at"] == today.isoformat()

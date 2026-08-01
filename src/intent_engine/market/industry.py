@@ -206,7 +206,12 @@ def fetch_industry_evidence(company_name: str, *, as_of: str,
         raise IndustryUnavailable(f"{company_name}: malformed feed") from exc
 
     retrieved = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    cutoff = as_of[:10]
+    # DAY 17. Timezone-aware, for the same reason as `evidence.py`: a feed
+    # publishes in UTC and `as_of` is a calendar day in the operating timezone,
+    # so a naive comparison rejected everything published "today" during the
+    # evening hours -- including the 20:30 night cycle. Replay stays strict.
+    from intent_engine.market.session import leakage_cutoff
+    cutoff = leakage_cutoff(as_of)
     out: List[IndustryDocument] = []
     for item in root.findall(".//item"):
         published = _published_iso(item.findtext("pubDate"))
@@ -216,6 +221,10 @@ def fetch_industry_evidence(company_name: str, *, as_of: str,
         # assert the document existed then, which is what is not known.
         if published > cutoff:
             continue
+        # Same operating-frame normalisation as `evidence.py`, and unreachable
+        # during replay for the same reason (`cutoff == as_of` there).
+        if published > as_of[:10]:
+            published = as_of[:10]
         source_el = item.find("{*}source")
         publisher = ((source_el.text if source_el is not None else None)
                      or item.findtext("source") or "")

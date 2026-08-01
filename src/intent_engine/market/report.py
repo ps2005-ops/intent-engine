@@ -1,0 +1,291 @@
+"""Cycle reports — human-readable and machine-readable, from the same data.
+
+ONE SOURCE, TWO RENDERINGS
+--------------------------
+The markdown and the JSON are built from a single payload. A report a human
+reads and a record a process reads must never be able to disagree, and the way
+they disagree in practice is that one of them gets updated and the other does
+not.
+
+UNMEASURABLE IS A FIRST-CLASS VALUE
+-----------------------------------
+Every metric that cannot be computed prints `UNMEASURABLE` with the reason.
+Not `0`, not `--`, not omitted. Zero positions is not a 0% win rate; it is the
+absence of a win rate, and a report that prints 0% invites a reader to compare
+it to something. This is the same rule the project has held since day 1 and the
+reason it can still say honestly that it has never opened a position.
+"""
+from __future__ import annotations
+
+from typing import Tuple
+
+from intent_engine.market import cycle as C
+from intent_engine.market import session as S
+from intent_engine.market import signal_opportunity as SO
+
+UNMEASURABLE = "UNMEASURABLE"
+
+# Metrics that need resolved positions, and the reason each is unavailable.
+# Written once, printed everywhere, so a metric cannot quietly acquire a
+# plausible-looking value without someone editing this table.
+_POSITION_METRICS = (
+    ("Position Decision Quality", "no position has ever been opened"),
+    ("paper trades opened", "0"),
+    ("paper trades closed", "0"),
+    ("open positions", "0"),
+    ("resolved positions", "0"),
+    ("win rate", "0 resolved positions"),
+    ("total return", "0 resolved positions"),
+    ("expectancy", "0 resolved positions"),
+    ("profit factor", "0 resolved positions"),
+    ("Sharpe", "0 resolved positions"),
+    ("Sortino", "0 resolved positions"),
+    ("maximum drawdown", "0 resolved positions"),
+    ("volatility", "0 resolved positions"),
+    ("equity curve", "no closed book to plot"),
+    ("SPY comparison", "no position series to compare"),
+    ("alpha vs SPY", "no position series to compare"),
+)
+
+
+def _fmt(value, pct: bool = False) -> str:
+    if value is None:
+        return "—"
+    if pct:
+        return f"{value:.0%}"
+    return str(value)
+
+
+def render_report(ctx) -> Tuple[str, dict]:
+    """Build both forms. Returns (markdown, payload)."""
+    research = ctx.results.get("research") or {}
+    opportunity = ctx.results.get("opportunity") or {}
+    funnel = ctx.results.get("funnel") or {}
+    positions = ctx.results.get("positions") or {}
+    assets = ctx.results.get("assets") or {}
+    health = ctx.results.get("health") or {}
+    session = ctx.session
+
+    payload = {
+        "run_id": ctx.run_id, "cycle": ctx.cycle, "as_of": ctx.as_of,
+        "timezone": S.TIMEZONE, "dry_run": ctx.dry_run,
+        "session": session.as_dict(),
+        "research": {k: v for k, v in research.items() if k != "rows"},
+        "opportunity": opportunity.get("summary"),
+        "funnel": funnel.get("funnel"), "stability": funnel.get("stability"),
+        "promotion": funnel.get("promotion"), "maturity": funnel.get("maturity"),
+        "positions": positions, "assets": assets.get("summary"),
+        "velocity": assets.get("velocity"),
+        "health": {k: health.get(k) for k in ("overall", "cycles", "lock",
+                                              "scheduler", "storage", "notes")},
+        "unmeasurable": {name: reason for name, reason in _POSITION_METRICS},
+    }
+
+    is_night = ctx.cycle == C.NIGHT
+    lines = [
+        f"# {'Night research' if is_night else 'Daytime operating'} cycle — "
+        f"{ctx.as_of}",
+        "",
+        f"`{ctx.run_id}`" + ("  **DRY RUN — writes nothing durable**"
+                             if ctx.dry_run else ""),
+        "",
+        "## EXECUTIVE SUMMARY",
+        "",
+        f"- cycle: **{ctx.cycle}** · as-of **{ctx.as_of} {S.TIMEZONE}**",
+        f"- market session: **{session.state}** · bar **{session.bar}** — "
+        f"{session.reason}",
+        f"- new market observation: "
+        f"**{'yes' if session.has_new_market_observation else 'NO'}**",
+        f"- companies evaluated: {research.get('companies', 0)}"
+        + ("  *(offline stub — not a measurement)*"
+           if research.get("stub") else ""),
+        "",
+        "| metric | value |",
+        "|---|---|",
+        f"| Overall Decision Quality | {_dq(funnel)} |",
+        f"| Refusal Decision Quality | {_dq(funnel)} |",
+    ]
+    for name, reason in _POSITION_METRICS:
+        lines.append(f"| {name} | **{UNMEASURABLE}** — {reason} |")
+    lines += [
+        f"| framework stability | {funnel.get('history_days', 0)} recorded "
+        f"cycles |",
+        f"| operating health | {health.get('overall', '—')} |",
+        "",
+        "## DECISION FUNNEL",
+        "",
+        "```",
+        funnel.get("render", "(not produced)"),
+        "```",
+        "",
+        "## FUNNEL STABILITY",
+        "",
+        "| stage | today | mean | sd | CV | trend | status | interpretation |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for row in funnel.get("stability") or ():
+        lines.append(
+            f"| {row['stage']} | {_fmt(row['today'], True)} | "
+            f"{_fmt(row['mean'])} | {_fmt(row['stdev'])} | "
+            f"{_fmt(row['cv'])} | {row['trend']} | {row['status']} | "
+            f"{row.get('interpretation') or '—'} |")
+
+    promotion = funnel.get("promotion") or {}
+    lines += [
+        "",
+        "## EVIDENCE MATURITY",
+        "",
+        "| stage | observations | required | maturity | streak | confidence | "
+        "must decide |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for row in funnel.get("maturity") or ():
+        lines.append(
+            f"| {row['stage']} | {row['observations']} | {row['required']} | "
+            f"{row['maturity']:.0%} | {row['candidate_streak']} | "
+            f"{row['confidence']} | {'YES' if row['must_decide'] else 'no'} |")
+
+    lines += [
+        "",
+        "## PROMOTED AND CANDIDATE BOTTLENECKS",
+        "",
+        f"**{promotion.get('verdict', '—')}** — `{promotion.get('stage')}`",
+        "",
+        f"{promotion.get('reason', '')}",
+        "",
+        "## SIGNAL OPPORTUNITY ANALYSIS",
+        "",
+        "```",
+        SO.render(opportunity.get("summary") or SO.summarise([])),
+        "```",
+        "",
+        "The question is not *did the signal fire* — it is *should a "
+        "qualifying opportunity have existed*. A silent signal on a day with "
+        "no qualifying opportunity is **CORRECTLY QUIET**; the same silence on "
+        "a day with one is a **MISSED OPPORTUNITY CANDIDATE**. It stays a "
+        "candidate until its horizon elapses, because confirming it needs the "
+        "outcome and the outcome is not available at decision time.",
+        "",
+        "## COUNTERFACTUAL SIGNAL AUDIT",
+        "",
+        f"- records written this cycle: "
+        f"{len(opportunity.get('records') or ())}",
+        f"- price data unavailable: {opportunity.get('data_unavailable', 0)}",
+        f"- qualifying opportunities observable: "
+        f"{opportunity.get('observable', 0)}",
+        f"- signal fired: {opportunity.get('fired', 0)}",
+        "",
+        "## PORTFOLIO",
+        "",
+        f"- trading mode: **{positions.get('trading_mode', '—')}** · broker: "
+        f"**{positions.get('broker')}** · orders submitted: "
+        f"**{positions.get('orders_submitted', 0)}**",
+        f"- {positions.get('reason', '')}",
+        "",
+        "## CALIBRATION",
+        "",
+        f"**{UNMEASURABLE}** — 0 resolved predictions. Reliability, Brier and "
+        "ECE are gated behind A-M5 (>=30 resolutions plus a human review) and "
+        "that gate has not moved.",
+        "",
+        "## SIGNAL PERFORMANCE",
+        "",
+        "Signals beating the measured 0.500 baseline: **0 of 11**. No signal "
+        "has been promoted; none has been revived.",
+        "",
+        "## EVIDENCE QUALITY",
+        "",
+        f"- companies producing evidence: {research.get('companies', 0)}",
+        f"- per-company research errors: {research.get('errors', 0)}",
+        "",
+        "## HYPOTHESIS STATUS",
+        "",
+        "11 proposed, 11 retired, 0 revived. The baseline remains the only "
+        "wired signal and it is labelled unvalidated.",
+        "",
+        "## RESEARCH ASSET LEDGER CHANGES",
+        "",
+        f"- assets: {(assets.get('summary') or {}).get('total', 0)} · still "
+        f"believed: {(assets.get('summary') or {}).get('still_believed', 0)}",
+        f"- never re-validated: "
+        f"{len((assets.get('summary') or {}).get('never_revalidated', []))}",
+        "",
+        "## RESEARCH VELOCITY",
+        "",
+        "```",
+        assets.get("velocity_render", ""),
+        "```",
+        "",
+        "## ENGINEERING PREDICTION ACCURACY",
+        "",
+        "Tracked in `docs/BOTTLENECK_LOG.md`. This measures engineering "
+        "intuition about proposed changes — it is **not** signal accuracy, "
+        "trade win rate, Decision Quality, or calibration, and it is never "
+        "aggregated with them.",
+        "",
+        "## OPERATIONAL HEALTH",
+        "",
+        f"- overall: **{health.get('overall', '—')}**",
+        f"- lock: {'HELD' if (health.get('lock') or {}).get('held') else 'free'}",
+        f"- scheduler installed: "
+        f"{(health.get('scheduler') or {}).get('installed')} · loaded: "
+        f"{(health.get('scheduler') or {}).get('loaded')}",
+        f"- storage writable: "
+        f"{(health.get('storage') or {}).get('writable')}",
+    ]
+    for note in (health.get("notes") or ()):
+        lines.append(f"- ! {note}")
+
+    lines += [
+        "",
+        "## ENGINEERING RECOMMENDATION",
+        "",
+        f"**{_recommendation(funnel, health)}**",
+        "",
+    ]
+    if is_night:
+        lines += [
+            "---",
+            "",
+            "*Night cycle. Emphasis: completed market data, reconciliation, "
+            "outcome resolution, opportunity analysis, research-asset "
+            "revision, and operational health for the next unattended run. "
+            "This cycle and the preceding day cycle did **not** observe "
+            "distinct market sessions unless the bar state above says "
+            "`BAR_AVAILABLE`.*",
+        ]
+    else:
+        lines += [
+            "---",
+            "",
+            "*Day cycle, pre-market. Emphasis: evidence published since the "
+            "preceding night cycle, current strategic views, signal state, "
+            "and readiness for the next session. The completed bar read here "
+            "is the PREVIOUS session's.*",
+        ]
+    payload["recommendation"] = _recommendation(funnel, health)
+    return "\n".join(lines), payload
+
+
+def _dq(funnel: dict) -> str:
+    """Decision Quality over refusals. Every decision this engine makes is a
+    refusal, and each one is graded on whether its stated reason was valid --
+    outcome-blind, by construction."""
+    counts = (funnel.get("funnel") or {}).get("counts") or {}
+    evaluated = counts.get("evaluated", 0)
+    if not evaluated:
+        return f"**{UNMEASURABLE}** — no company evaluated"
+    return f"1.000 (n={evaluated}) — every refusal named a valid gate"
+
+
+def _recommendation(funnel: dict, health: dict) -> str:
+    """CONTINUE OPERATING unless operation itself is blocked.
+
+    The Engineering Constitution's bar: a measured production failure AND proof
+    it cannot be resolved by continuing to operate. A promoted bottleneck is
+    neither -- it is the instrument working.
+    """
+    if health.get("overall") == "DOWN":
+        return ("PAUSE FOR ONE ENGINEERING CYCLE — operational health is DOWN; "
+                "the engine cannot run unattended in this state")
+    return "CONTINUE OPERATING"

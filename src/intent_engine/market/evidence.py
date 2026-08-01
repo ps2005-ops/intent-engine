@@ -107,6 +107,9 @@ def _observation_rows(report: dict, *, as_of: str) -> List[dict]:
     `evidence_count` — a number later used to judge whether a company was well
     covered — with rows that say nothing.
     """
+    from intent_engine.market.session import leakage_cutoff
+    _cutoff = leakage_cutoff(as_of)
+
     rows: List[dict] = []
     for obs in (report.get("observations") or ()):
         if not isinstance(obs, dict):
@@ -133,8 +136,26 @@ def _observation_rows(report: dict, *, as_of: str) -> List[dict]:
         # known. A dropped row is a visible gap; a clamped one is an invisible
         # fabrication. Caught by the pre-commit suite on the day this project
         # was told to use only point-in-time information.
-        if published > as_of[:10]:
+        #
+        # DAY 17. The cutoff is timezone-aware. `published` is stamped in UTC;
+        # `as_of` is a calendar day in the OPERATING timezone. Comparing them
+        # naively dropped every observation between 20:00 and midnight local,
+        # every night -- silently, as `evidence: 0`. Replay stays strict; see
+        # `session.leakage_cutoff`.
+        if published > _cutoff:
             continue
+        # Express the admitted date in the OPERATING frame. An observation
+        # retrieved at 21:00 Toronto carries a UTC stamp of tomorrow; the
+        # decision frame calls that instant today, and leaving the row dated
+        # `as_of + 1` would just make every downstream `<= as_of` check drop it
+        # again -- the same bug, one layer further on.
+        #
+        # This is NOT the replay clamp the paragraph above forbids, and it
+        # cannot become it: during replay `_cutoff == as_of`, so anything
+        # later was already dropped and this line is unreachable. It only ever
+        # renames "now, in UTC" to "now, in the operating timezone".
+        if published > as_of[:10]:
+            published = as_of[:10]
         rows.append({
             "kind": _SOURCE_CLASS_TO_KIND.get(source_class, "product"),
             "summary": summary[:600],
