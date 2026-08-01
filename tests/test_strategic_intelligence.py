@@ -671,13 +671,59 @@ def _strategic_webapp_run(tmp_path):
     return app, c, rid
 
 
-def test_webapp_strategic_run_defaults_to_the_brief(tmp_path):
-    """The default is the brief, because fifteen minutes before a meeting an
-    eleven-section report gets skimmed. The depth is one click away."""
+def test_webapp_strategic_run_defaults_to_the_founder_brief(tmp_path):
+    """The default must not be a report the reader has to work through.
+
+    ORIGINAL SAFEGUARD, unchanged: fifteen minutes before a meeting an
+    eleven-section report gets skimmed, and a skimmed report is where a reader
+    picks up the first confident sentence they see. This test existed to stop
+    the default being that report.
+
+    WHAT CHANGED (v3): the destination. The executive brief at 500-900 words
+    was still "everything" to someone with fifteen minutes, so the default is
+    now the 60-SECOND FOUNDER BRIEF -- strictly less to read than what this
+    test previously protected. The safeguard holds more strongly, not less.
+
+    The assertions below still catch the original failure: if the default ever
+    returns the full analysis again, the eleven-section markers appear and the
+    founder-brief markers do not.
+    """
     app, c, rid = _strategic_webapp_run(tmp_path)
-    status, headers, _ = c.request("GET", f"/runs/{rid}")
-    assert status.startswith("303")
-    assert headers["Location"] == f"/runs/{rid}/brief"
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+
+    # it IS the founder brief
+    assert "Why this matters" in body
+
+    # ... and it is NOT the full report — the original failure this catches
+    assert "Executive Overview" not in body
+    assert "Evidence Library" not in body
+    assert "Strongest supported observation" not in body
+    assert not re.search(r"\[(?:u|mv|c)\.[a-z_]+", body), \
+        "an internal claim id reached the default view"
+
+    # depth remains reachable, never required
+    assert f"/runs/{rid}/full" in body
+
+
+def test_the_default_route_never_reverts_to_a_deeper_layer(tmp_path):
+    """REGRESSION GUARD for the v3 routing decision.
+
+    The specific reversion this prevents: someone restores the old redirect and
+    /runs/{id} quietly becomes the executive brief or the full analysis again.
+    That change would be invisible in every other test, because both of those
+    pages render perfectly well -- they are just not a 60-second answer.
+    """
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert not status.startswith("30"), (
+        "the default must be served directly; a redirect to a deeper layer is "
+        "the reversion this guards")
+    assert "Location" not in headers
+    # the 60-second contract, asserted on the rendered default
+    for marker in ("Why this matters", "What I would do next",
+                   "How confident is this"):
+        assert marker in body, marker
 
 
 def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,

@@ -1328,12 +1328,24 @@ class WebApp:
         # The honest page already exists and answers the three questions this
         # reader has — what was found, what was missing, what to do now.
         if self._is_real_run(run_id):
-            # V3: a company with little public material gets a USEFUL bounded
-            # product -- what a customer can verify, what is only claimed,
-            # what is unclear, and what to publish -- instead of a dead end.
-            # The old refusal was accurate and useless, and it was the
-            # customer's sharpest complaint.
-            return self._founder_brief_page(session, run_id, result)
+            # V3: on the DEFAULT route a company with little public material
+            # gets a useful bounded product -- what a customer can verify,
+            # what is only claimed, what is unclear, what to publish --
+            # instead of a dead end. That was the customer's sharpest
+            # complaint.
+            #
+            # LAYER-AWARE, deliberately. `/full` still returns the honest
+            # limited-analysis page: a reader who explicitly asked for full
+            # research is owed the full-research answer, including "there was
+            # not enough here", and silently substituting a summary for it
+            # would be a second, quieter dead end.
+            if layer == "default":
+                return self._founder_brief_page(session, run_id, result)
+            return self._insufficient_evidence_page(
+                session, run_id, result,
+                reason="The pages that could be read describe what the "
+                       "company offers, but none carried the dated, checkable "
+                       "material a strategic reading has to rest on.")
 
         page = render_result_html(result)
         if result.get("overview"):

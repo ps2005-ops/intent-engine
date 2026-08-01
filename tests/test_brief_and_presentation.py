@@ -350,11 +350,21 @@ def _webapp_run(tmp_path):
     return _strategic_webapp_run(tmp_path)
 
 
-def test_the_guest_default_is_the_brief_not_the_full_report(tmp_path):
+def test_the_guest_default_is_the_founder_brief_not_the_full_report(tmp_path):
+    """ORIGINAL SAFEGUARD unchanged: the default must not be the full report.
+
+    v3 changed only the destination -- the 60-second founder brief, which is
+    strictly less to read than the executive brief this test previously
+    accepted. The assertions still catch the original failure: a default that
+    reverted to the full analysis would carry its section markers and would
+    not carry the founder-brief ones.
+    """
     app, c, rid = _webapp_run(tmp_path)
-    status, headers, _ = c.request("GET", f"/runs/{rid}")
-    assert status.startswith("303")
-    assert headers["Location"] == f"/runs/{rid}/brief"
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+    assert "Why this matters" in body
+    assert "Executive Overview" not in body
+    assert "Evidence Library" not in body
 
 
 def test_the_brief_page_reads_as_a_brief(tmp_path):

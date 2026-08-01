@@ -137,13 +137,28 @@ def test_a_sparse_brief_says_it_diagnoses_visibility_not_strategy():
 
 # --- the rich case ----------------------------------------------------------
 def _rich(market=None):
+    # The REAL pipeline vocabulary, not an invented one: `tension`,
+    # `why_care`, `falsification_questions` and `supporting_observation_ids`
+    # are the field names the strategic report actually emits. Testing against
+    # the real shape is the only way this fixture stays honest.
     report = {"thesis": {
         "view": "Growth is shifting from self-serve to enterprise contracts.",
-        "reasoning": "Three of four dated announcements name enterprise buyers.",
-        "implication": "Revenue becomes lumpier and leans on a few long deals.",
-        "decision": "Whether to fund enterprise delivery or protect self-serve.",
-        "watch": "Whether the next two announcements are also enterprise.",
-        "evidence_ids": ("ev-1", "ev-2")},
+        "transition": "Acme is moving from self-serve signups to negotiated "
+                      "enterprise agreements.",
+        "tension": "Revenue becomes lumpier and leans on a few long deals "
+                   "while the brand still promises self-serve simplicity.",
+        "why_care": "Whether to fund enterprise delivery capacity or protect "
+                    "self-serve onboarding spend."},
+        "hypotheses": [{
+            "statement": "Growth is shifting toward enterprise contracts.",
+            "reasoning": "Three of four dated announcements name enterprise "
+                         "buyers and the pricing page removed the top "
+                         "self-serve tier.",
+            "falsification_questions": [
+                "Whether the next two customer announcements are also "
+                "enterprise."],
+            "supporting_observation_ids": ["ev-1", "ev-2"],
+            "confidence": "low"}],
         "questions": ["Which segment retains revenue?"],
         "evidence_gaps": ["No disclosed revenue split by segment."]}
     obs = [{"text": "Multi-year agreement with a logistics operator.",

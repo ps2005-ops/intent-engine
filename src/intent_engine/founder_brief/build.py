@@ -253,36 +253,63 @@ def _insight_candidates(report: dict,
     Every candidate then goes through `validate`, so a conclusion that cannot
     state its consequence is dropped here rather than rendered as a headline
     with an empty "so what" underneath it.
+
+    THE FIELD NAMES ARE THE WHOLE INTEGRATION
+    -----------------------------------------
+    The strategic pipeline already produces every field this contract needs --
+    under its own vocabulary. `thesis.why_care` IS the decision. `thesis.
+    tension` IS the implication. `hypothesis.falsification_questions` ARE the
+    next checks. Nothing had to be generated; it had to be *mapped*.
+
+    That is the customer's complaint in one function: the intelligence was
+    there and the presentation could not reach it.
     """
     out: List[FounderInsight] = []
     thesis = report.get("thesis") or {}
     view = thesis.get("view") or ""
+    hypotheses = [h for h in (report.get("hypotheses") or ())
+                  if isinstance(h, dict)]
+    lead = hypotheses[0] if hypotheses else {}
+
     if view and not thesis.get("view_withheld"):
         out.append(FounderInsight(
-            fact=_sentence(view, 240),
-            interpretation=_sentence(thesis.get("reasoning")
-                                     or thesis.get("because") or "", 240),
-            so_what=_sentence(thesis.get("implication")
-                              or thesis.get("so_what") or "", 240),
-            decision=_sentence(thesis.get("decision")
-                               or thesis.get("decision_affected") or "", 200),
-            watch=_sentence(thesis.get("watch")
-                            or _first(report.get("questions")), 200),
-            evidence_ids=tuple(thesis.get("evidence_ids") or ()),
-            confidence=str(thesis.get("confidence") or "")))
-    for hypothesis in (report.get("hypotheses") or ())[:3]:
-        if not isinstance(hypothesis, dict):
-            continue
+            fact=_sentence(view, 260),
+            # the MECHANISM, which is what turns an observation into a reading
+            interpretation=_sentence(
+                lead.get("reasoning") or thesis.get("transition") or "", 300),
+            # the TENSION is why a founder should care: two things that cannot
+            # both stay true
+            so_what=_sentence(
+                thesis.get("tension")
+                or _first(report.get("decision_implications")), 280),
+            # `why_care` is phrased as a real choice ("whether to X vs Y")
+            decision=_sentence(
+                thesis.get("why_care")
+                or _first(report.get("decision_implications")), 240),
+            watch=_sentence(
+                _first(lead.get("falsification_questions"))
+                or _first(report.get("underexamined_questions"))
+                or _first(report.get("questions")), 220),
+            evidence_ids=tuple(lead.get("supporting_observation_ids")
+                               or lead.get("strongest_support_ids") or ()),
+            confidence=str(lead.get("confidence") or "")))
+
+    for hypothesis in hypotheses[:3]:
         out.append(FounderInsight(
-            fact=_sentence(hypothesis.get("claim")
-                           or hypothesis.get("statement") or "", 240),
-            interpretation=_sentence(hypothesis.get("reasoning") or "", 240),
-            so_what=_sentence(hypothesis.get("implication")
-                              or hypothesis.get("so_what") or "", 240),
-            decision=_sentence(hypothesis.get("decision") or "", 200),
-            watch=_sentence(hypothesis.get("falsifier")
-                            or hypothesis.get("watch") or "", 200),
-            evidence_ids=tuple(hypothesis.get("evidence_ids") or ()),
+            fact=_sentence(hypothesis.get("statement")
+                           or hypothesis.get("title") or "", 260),
+            interpretation=_sentence(hypothesis.get("reasoning") or "", 300),
+            so_what=_sentence(
+                _first(hypothesis.get("decision_implications"))
+                or thesis.get("tension") or "", 280),
+            decision=_sentence(
+                _first(hypothesis.get("decision_implications"))
+                or thesis.get("why_care") or "", 240),
+            watch=_sentence(_first(hypothesis.get("falsification_questions"))
+                            or _first(hypothesis.get("evidence_gaps")), 220),
+            evidence_ids=tuple(hypothesis.get("supporting_observation_ids")
+                               or hypothesis.get("strongest_support_ids")
+                               or ()),
             confidence=str(hypothesis.get("confidence") or "")))
     return out
 
