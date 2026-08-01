@@ -260,19 +260,32 @@ def leakage_cutoff(as_of: str, *, utc_today: Optional[str] = None) -> str:
     return max(day, utc_today)
 
 
-def within_window(now: datetime, hour: int, minute: int,
-                  tolerance_minutes: int = 90) -> bool:
-    """Is `now` inside the scheduled local-time window?
+def within_window(now: datetime, hour: int, minute: int) -> bool:
+    """Is this a legitimate time for the cycle to run on THIS operating day?
 
-    THE DAYLIGHT-SAVING GUARD. launchd fires on the MACHINE's local time. If
-    that is not the operating timezone -- or if a DST transition shifts the
-    wall clock -- a job can fire at the wrong hour, or twice. This is checked
-    before the lock is taken so a mistimed fire costs nothing.
+    THE RULE: at or after the scheduled time, on the same operating day.
 
-    Note this is a WINDOW check, not a duplicate check. Duplicate protection is
-    the run identity (one record per operating day per cycle type), which is
-    what actually makes a repeated 1:30am hour during a fall-back transition
-    harmless.
+    A narrow symmetric tolerance (the first version used +/-90 minutes) is
+    wrong on a laptop, and wrong in the expensive direction. launchd runs a
+    missed `StartCalendarInterval` job when the machine wakes, so a laptop
+    asleep at 20:30 that opens at 23:00 fires then -- and a +/-90 minute window
+    would reject it. The cycle would be silently skipped every time the machine
+    was closed at the scheduled minute, which for a personal laptop is most
+    days. The guard would have been the single largest cause of missed cycles.
+
+    "At or after, same operating day" keeps everything the window was actually
+    for:
+
+    * an EARLY fire (wrong timezone, a machine whose clock is hours behind) is
+      still rejected -- it has not reached the scheduled time yet;
+    * a fire on the NEXT operating day is rejected by the date rolling over,
+      because `now`'s date is what forms the run identity;
+    * a fall-back DST repeated hour is harmless, because both instants belong
+      to the same operating day and the run identity already collapses them.
+
+    Duplicate protection was never this function's job -- the run identity does
+    it, durably and across reboots. Checked before the lock so a genuinely
+    early fire costs nothing.
     """
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-    return abs((now - target).total_seconds()) <= tolerance_minutes * 60
+    return now >= target

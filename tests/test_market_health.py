@@ -186,3 +186,32 @@ def test_a_genuine_gap_after_the_first_run_is_still_detected(tmp_path):
                      env={}).cycles[C.NIGHT]["missed_recent"]
     assert "2026-07-28" in missed and "2026-07-30" in missed
     assert "2026-07-26" not in missed          # before the first run
+
+
+def test_a_slot_that_passed_before_installation_is_not_missed(tmp_path):
+    """It was never going to fire and can never be filled. Reporting it makes
+    the hourly supervisor exit nonzero for a week over a gap no action closes —
+    and a health check that is always red is one nobody reads."""
+    _record(tmp_path, C.NIGHT, as_of="2026-07-29")
+    (tmp_path / "status").mkdir(parents=True, exist_ok=True)
+    (tmp_path / H.INSTALL_MARKER).write_text(
+        json.dumps({"installed_at": "2026-07-31T02:00:00+00:00"}))
+    health = H.check(tmp_path, repo=REPO, now=NOW, env={})
+    assert health.cycles[C.NIGHT]["missed_recent"] == []
+    assert health.cycles[C.DAY]["missed_recent"] == []
+
+
+def test_a_gap_after_installation_is_still_detected(tmp_path):
+    """The suppression must not swallow a real outage."""
+    _record(tmp_path, C.NIGHT, as_of="2026-07-25")
+    (tmp_path / "status").mkdir(parents=True, exist_ok=True)
+    (tmp_path / H.INSTALL_MARKER).write_text(
+        json.dumps({"installed_at": "2026-07-28T02:00:00+00:00"}))
+    missed = H.check(tmp_path, repo=REPO, now=NOW,
+                     env={}).cycles[C.NIGHT]["missed_recent"]
+    assert "2026-07-30" in missed
+    assert "2026-07-26" not in missed        # before installation
+
+
+def test_installed_at_is_absent_when_never_installed(tmp_path):
+    assert H.installed_at(tmp_path) is None

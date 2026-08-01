@@ -290,9 +290,11 @@ def test_paper_is_recorded_on_every_run(tmp_path):
 
 
 # --- schedule window / DST --------------------------------------------------
-def test_a_mistimed_fire_is_skipped_without_taking_the_lock(tmp_path):
+def test_an_early_fire_is_skipped_without_taking_the_lock(tmp_path):
+    """A wrong-timezone machine fires before the scheduled time. Rejected
+    before the lock, so it costs nothing and cannot block a correct fire."""
     result = run(tmp_path, enforce_window=True,
-                 now=datetime(2026, 7, 31, 14, 0, tzinfo=ZoneInfo(S.TIMEZONE)))
+                 now=datetime(2026, 7, 31, 3, 0, tzinfo=ZoneInfo(S.TIMEZONE)))
     assert result.status == C.SKIPPED_DUPLICATE
     assert "outside the" in result.reason
     # Checked on the path directly: `lock_state` probes by acquiring, which
@@ -302,6 +304,15 @@ def test_a_mistimed_fire_is_skipped_without_taking_the_lock(tmp_path):
 
 def test_the_scheduled_time_passes_the_window_check(tmp_path):
     assert run(tmp_path, enforce_window=True).status == C.COMPLETED
+
+
+def test_a_late_fire_after_a_wake_from_sleep_still_runs(tmp_path):
+    """launchd runs a missed calendar job on wake. Rejecting it would silently
+    skip the cycle every time the laptop was closed at the scheduled minute."""
+    result = run(tmp_path, cycle=C.NIGHT, enforce_window=True,
+                 now=datetime(2026, 7, 31, 23, 10, tzinfo=ZoneInfo(S.TIMEZONE)))
+    assert result.status == C.COMPLETED
+
 
 
 def test_a_dst_repeated_hour_produces_one_operating_day_not_two(tmp_path):

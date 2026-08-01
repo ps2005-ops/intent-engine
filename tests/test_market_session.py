@@ -111,15 +111,39 @@ def test_the_operating_timezone_is_explicit_not_the_machines():
     assert S.now_local().tzinfo is not None
 
 
-def test_within_window_accepts_the_scheduled_time_and_rejects_a_wild_miss():
-    now = datetime(2026, 7, 31, 6, 35, tzinfo=ZoneInfo(S.TIMEZONE))
-    assert S.within_window(now, 6, 30)
-    assert not S.within_window(now, 20, 30)
+def test_the_window_accepts_the_scheduled_time_and_anything_after_it_today():
+    """At or after the scheduled time, same operating day."""
+    tz = ZoneInfo(S.TIMEZONE)
+    assert S.within_window(datetime(2026, 7, 31, 6, 30, tzinfo=tz), 6, 30)
+    assert S.within_window(datetime(2026, 7, 31, 6, 35, tzinfo=tz), 6, 30)
 
 
-def test_dst_spring_forward_does_not_invalidate_the_scheduled_window():
-    """2026-03-08 02:00 -> 03:00 in America/Toronto. A 06:30 fire is still
-    06:30 local and must be accepted."""
+def test_a_laptop_that_wakes_hours_late_still_runs_its_cycle():
+    """THE reason the symmetric +/-90 minute window was wrong. launchd runs a
+    missed calendar job on wake; a narrow window would reject it and silently
+    skip the cycle every time the machine was closed at the scheduled minute.
+    On a personal laptop that is most days."""
+    tz = ZoneInfo(S.TIMEZONE)
+    woke_late = datetime(2026, 7, 31, 23, 10, tzinfo=tz)
+    assert S.within_window(woke_late, 20, 30)
+
+
+def test_an_early_fire_is_still_rejected():
+    """A wrong-timezone machine, or a clock hours behind, has not reached the
+    scheduled time and must not run."""
+    tz = ZoneInfo(S.TIMEZONE)
+    assert not S.within_window(datetime(2026, 7, 31, 3, 30, tzinfo=tz), 20, 30)
+    assert not S.within_window(datetime(2026, 7, 31, 5, 0, tzinfo=tz), 6, 30)
+
+
+def test_the_next_operating_day_gets_its_own_identity_not_a_late_window():
+    """A night fire at 00:30 is a NEW operating day whose 20:30 has not
+    arrived, so it is rejected -- the date rolling over is the guard."""
+    tz = ZoneInfo(S.TIMEZONE)
+    assert not S.within_window(datetime(2026, 8, 1, 0, 30, tzinfo=tz), 20, 30)
+
+
+def test_dst_spring_forward_still_accepts_the_scheduled_time():
     now = datetime(2026, 3, 8, 6, 30, tzinfo=ZoneInfo(S.TIMEZONE))
     assert S.within_window(now, 6, 30)
 

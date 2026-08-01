@@ -137,6 +137,16 @@ for f in "$STAGE"/*.plist; do
   fi
 done
 
+# Record WHEN scheduling began. A slot that passed before this instant was
+# never going to fire and can never be filled, so `status` must not report it
+# as a missed run for the next week — see market/health.installed_at.
+mkdir -p "$ROOT/status"
+printf '{\n "installed_at": "%s",\n "labels": ["%s.day", "%s.night", "%s.health"]\n}\n' \
+  "$(date -u +%Y-%m-%dT%H:%M:%S+00:00)" \
+  "$LABEL_PREFIX" "$LABEL_PREFIX" "$LABEL_PREFIX" \
+  > "$ROOT/status/scheduler_installed.json"
+echo "marker       $ROOT/status/scheduler_installed.json"
+
 echo
 echo "installed. verify with:"
 echo "  launchctl list | grep $LABEL_PREFIX"

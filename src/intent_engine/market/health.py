@@ -77,6 +77,25 @@ def launchd_state(label: str) -> dict:
             "plist": str(plist), "loaded": loaded}
 
 
+INSTALL_MARKER = "status/scheduler_installed.json"
+
+
+def installed_at(root) -> Optional[str]:
+    """When the scheduler was installed, if it ever was.
+
+    Written by `ops/install_autonomous.sh`. Read rather than inferred from
+    plist mtimes, which change on every reinstall and would silently reset the
+    missed-run window.
+    """
+    path = pathlib.Path(root) / INSTALL_MARKER
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text()).get("installed_at")
+    except (json.JSONDecodeError, OSError):  # pragma: no cover
+        return None
+
+
 def next_expected(cycle: str, now: Optional[datetime] = None) -> str:
     now = now or S.now_local()
     hour, minute = C.SCHEDULE[cycle]
@@ -117,6 +136,15 @@ def missed_runs(store: C.RunStore, cycle: str,
     # from before installation is noise, and noise here trains the reader to
     # stop reading the field that is supposed to catch a real outage.
     first = min((r.get("as_of") for r in rows if r.get("as_of")), default=None)
+    # Nor before the SCHEDULER was installed. A slot that passed while nothing
+    # was scheduled was never going to fire, and it can never be filled -- so
+    # reporting it as missed means the supervisor cries wolf every hour for a
+    # week over a gap no action can close. Same reasoning as the first-run
+    # clamp above: a health check that is always red is a health check nobody
+    # reads.
+    installed = installed_at(store.root)
+    if installed:
+        first = max(first, installed[:10]) if first else installed[:10]
     hour, minute = C.SCHEDULE[cycle]
     out = []
     for back in range(days):

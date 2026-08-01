@@ -87,9 +87,11 @@ A plist on disk schedules nothing until launchd loads it. `status` reports
 
 ### Cron fallback (not recommended)
 
-launchd is correct on macOS: it survives reboot, handles DST, and records exit
-status. If you must use cron, note it does **not** run missed jobs after a
-wake, and `--enforce-window` will then skip a late fire:
+launchd is correct on macOS: it survives reboot, handles DST, records exit
+status, and **runs a missed calendar job when the machine wakes** — which
+matters on a laptop, since the scheduled minute often passes while the lid is
+shut. cron does none of that; a cycle whose slot passed while the machine was
+asleep is simply lost:
 
 ```cron
 30 6  * * * cd ~/intent-engine-market && TRADING_MODE=PAPER PYTHONPATH=src .venv/bin/python -m intent_engine.market day   --root data
@@ -110,6 +112,15 @@ python -m intent_engine.market runs   --root data --limit 20
 storage writability, lock held/age, scheduler installed/loaded, last run and
 last success per cycle, next expected run, missed runs, per-step reliability
 over the last 14 runs, git commit and cleanliness, and the latest error.
+
+### Missed runs, and when they are counted
+
+A cycle is reported missed only when its slot passed **after** the scheduler was
+installed and after the first recorded run. The installer writes
+`status/scheduler_installed.json` for exactly this reason: a slot that passed
+before scheduling existed was never going to fire and can never be filled, so
+counting it would leave the hourly supervisor red for a week over a gap no
+action closes — and a health check that is always red is one nobody reads.
 
 ### Logs
 
@@ -144,6 +155,11 @@ Trigger a scheduled job through launchd itself:
 launchctl kickstart -k gui/$(id -u)/com.intentengine.market.night
 ```
 
+This runs the real cycle under launchd, with launchd's environment and exit-code
+recording. It still respects every guard: if that cycle already completed for
+the operating day it short-circuits to `SKIPPED_DUPLICATE` in well under a
+second, and if the scheduled time has not yet arrived it skips.
+
 ---
 
 ## 5. Run statuses
@@ -174,8 +190,12 @@ reboot, a DST transition, and a laptop that changed timezone.
 
 Four independent guards:
 
-1. **Schedule window** (`--enforce-window`) — a fire outside the local-time
-   window is skipped before the lock is taken.
+1. **Schedule window** (`--enforce-window`) — a fire *before* the scheduled
+   time on that operating day is skipped before the lock is taken. It is a
+   one-sided check: at-or-after is valid, so a laptop that wakes at 23:00 still
+   runs its 20:30 cycle, while a wrong-timezone machine firing early does not.
+   A narrow symmetric tolerance would have been the single largest cause of
+   missed cycles on a personal machine.
 2. **Run identity** — one completed record per operating day per cycle.
 3. **flock** — two processes at the same instant. Day and night share **one**
    lock, so a slow day run cannot overlap the night run.
