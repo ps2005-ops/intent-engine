@@ -40,6 +40,27 @@ MARKET_DISCLAIMER = ("Descriptive market context, not an investment "
                      "recommendation.")
 
 
+# Interface controls are not report prose. A follow-up form, its label and its
+# suggested-question chips are how a founder ASKS for more -- counting them
+# against the intelligence budget would force the product to choose between
+# being answerable and being brief, which is a false trade.
+UI_CONTROL_MARKER = "ui-controls"
+
+
+def intelligence_words(html: str) -> int:
+    """Words of FOUNDER INTELLIGENCE, excluding interface controls.
+
+    This is the number the 220-300 budget governs. `visible_words` still
+    reports total DOM text, so the split is visible rather than a way to hide
+    prose inside a control -- a test asserts essential intelligence cannot be
+    moved into the control block.
+    """
+    stripped = re.sub(
+        r'<section[^>]*class="[^"]*' + UI_CONTROL_MARKER + r'[^"]*".*?</section>',
+        " ", html or "", flags=re.S | re.I)
+    return visible_words(stripped)
+
+
 def visible_words(html: str) -> int:
     """Words a reader actually SEES on load.
 
@@ -327,7 +348,8 @@ BRIEF_SECTIONS = (
 
 
 def build_executive_brief(brief, report: Optional[dict] = None,
-                          ledger: Optional[Ledger] = None) -> dict:
+                          ledger: Optional[Ledger] = None,
+                          withheld_line: str = "") -> dict:
     """Deepens the first screen without repeating it.
 
     The ledger is passed in ALREADY LOADED with the 60-second brief's
@@ -341,8 +363,21 @@ def build_executive_brief(brief, report: Optional[dict] = None,
     market = brief.market_context or {}
     rich = brief.mode == "PUBLIC_INFORMATION_RICH"
 
+    # THE WITHHELD CASE. When no reading cleared the evidence bar the brief
+    # must SAY so and say what is established instead. Rendering an executive
+    # brief with no bottom line leaves the reader to conclude the analysis
+    # simply failed -- which is both wrong and the failure the sparse primary
+    # view already fixed one layer up.
+    if not k:
+        withheld_line = (withheld_line
+                         or report.get("result_state_detail")
+                         or _first_text(report.get("strategic_analysis"))
+                         or "The public evidence describes what this company "
+                            "does, but none of it supports a strategic view "
+                            "strongly enough to put one forward.")
+
     raw = {
-        "bottom_line": [k.interpretation if k else "",
+        "bottom_line": [k.interpretation if k else withheld_line,
                         _first_text(report.get("strategic_analysis"))],
         "changed": [c["what"] for c in (brief.what_changed or ())],
         "why": [(report.get("thesis") or {}).get("tension", ""),

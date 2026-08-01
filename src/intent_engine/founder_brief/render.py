@@ -133,6 +133,21 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
             out.append('<div class="decision"><span class="lbl">Decision '
                        f'affected</span>{_e(_clip(k.decision, 30))}</div>')
         out.append("</div>")
+    elif b.withheld_reason and not (b.verified or b.unclear):
+        # A withheld reading in a non-sparse mode used to render NOTHING here.
+        # The reader was left with a page that looked like the analysis had
+        # simply failed. It did not: it declined, and the reason is the honest
+        # headline.
+        out.append("<h2>The most important thing</h2>")
+        out.append('<div class="card headline">')
+        out.append("<h3>No strategic conclusion is being asserted about this "
+                   "company.</h3>")
+        out.append(_p(_clip(b.withheld_reason, 40)))
+        out.append('<div class="sowhat"><span class="lbl">Why this matters'
+                   '</span>Treat what follows as verified activity, not as a '
+                   'reading of strategy. A confident-sounding conclusion here '
+                   'would be the product overstating what it found.</div>')
+        out.append("</div>")
     elif b.verified or b.unclear:
         out.append("<h2>What a customer can actually verify</h2>")
         out.append('<div class="card headline">')
@@ -272,12 +287,16 @@ def render_market(context) -> str:
 def _deeper(run_id: str) -> str:
     """Depth is offered, never required."""
     rid = _e(run_id)
+    # `Presentation` stays reachable: /slides is a working layer and dropping
+    # its only link orphaned it. Depth is offered, never required.
     return (
         '<nav class="deeper" aria-label="More depth">'
         f'<a href="/runs/{rid}/story">The full story</a>'
+        f'<a href="/runs/{rid}/dashboard">Intelligence</a>'
         f'<a href="/runs/{rid}/brief">Executive brief</a>'
+        f'<a href="/runs/{rid}/slides">Presentation</a>'
         f'<a href="/runs/{rid}/sources">Evidence and sources</a>'
-        f'<a href="/runs/{rid}/full">Full research</a>'
+        f'<a href="/runs/{rid}/full">Full analysis</a>'
         "</nav>")
 
 

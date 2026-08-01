@@ -373,7 +373,10 @@ def test_the_brief_page_reads_as_a_brief(tmp_path):
     assert status == "200 OK"
     assert "Executive brief" in body
     # short enough to be a brief: the visible prose, not the markup
-    prose = re.sub(r"<[^>]+>", " ", body.split('<main class="brief">')[1])
+    # v3 layout marker: the executive brief is now rendered by the founder
+    # renderer (<main class="fb">). The safeguard below -- a brief must not
+    # become the report -- is unchanged and still the point of this test.
+    prose = re.sub(r"<[^>]+>", " ", body.split('<main class="fb">')[1])
     assert len(prose.split()) < 700, "the brief must not become the report"
 
 
@@ -389,7 +392,7 @@ def test_the_brief_states_its_claim_once(tmp_path):
     _, _, body = c.request("GET", f"/runs/{rid}/brief")
     prose = re.sub(r"\s+", " ",
                    re.sub(r"<[^>]+>", " ",
-                          body.split('<main class="brief">')[1]))
+                          body.split('<main class="fb">')[1]))
     from intent_engine.strategic_intelligence.brief import build_brief
     brief = build_brief(app._strategic_report_for(rid), as_of="2026-07-29")
     claim = " ".join((brief.headline.view or "").split())

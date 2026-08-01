@@ -29,11 +29,33 @@ def test_the_primary_view_fits_the_reading_budget():
 
 
 def test_a_real_run_lands_inside_the_full_reading_budget(tmp_path):
+    """The budget governs FOUNDER INTELLIGENCE, not interface controls.
+
+    A follow-up form and its suggested questions are how a founder asks for
+    more. Counting them against the reading budget would force a choice
+    between being answerable and being brief, which is a false trade.
+    """
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, c, rid = _strategic_webapp_run(tmp_path)
     _, _, body = c.request("GET", f"/runs/{rid}")
-    words = L.visible_words(body.split('<main class="fb">')[1])
-    assert L.PRIMARY_MIN <= words <= L.PRIMARY_MAX, words
+    main = body.split('<main class="fb">')[1]
+    intelligence = L.intelligence_words(main)
+    assert L.PRIMARY_MIN <= intelligence <= L.PRIMARY_MAX, intelligence
+    # and the split is reported, so prose cannot be hidden inside a control
+    assert L.visible_words(main) > intelligence
+
+
+def test_essential_intelligence_cannot_hide_inside_a_control():
+    """The anti-gaming check for the budget split: moving the decision into
+    the control block would shrink the measured intelligence while making the
+    product worse."""
+    html = R.render_brief(_rich(), run_id="r1")
+    assert "Why this matters" in html
+    controls_only = re.search(
+        r'<section[^>]*class="[^"]*ui-controls[^"]*".*?</section>', html, re.S)
+    if controls_only:
+        for essential in ("Why this matters", "Decision affected"):
+            assert essential not in controls_only.group(0)
 
 
 def test_the_sparse_primary_view_also_fits():
@@ -283,3 +305,66 @@ def test_story_sections_are_deep_linkable_and_focusable():
     for section in L.build_story(_rich()):
         assert f'id="{section["key"]}"' in html
     assert 'tabindex="-1"' in html      # focusable for keyboard deep links
+
+
+# --- the readiness gate: the most serious defect found in this pass ---------
+def test_a_withheld_report_never_produces_a_founder_insight():
+    """FOUND BY test_the_brief_states_its_claim_once.
+
+    `thesis.view` can be POPULATED with a templated sentence while the report
+    asserts no conclusion (`result_state = EVIDENCE_LIMITED`, "no strategic
+    conclusion is asserted"). Reading `view` alone revived a claim the report
+    had withheld -- on the primary screen. The founder layers now inherit the
+    same readiness state the strategic brief honours.
+    """
+    report = {"result_state": "EVIDENCE_LIMITED",
+              "result_state_detail": "No reasoning backend is configured.",
+              "thesis": {"view": "The company is shifting toward a platform.",
+                         "tension": "x", "why_care": "whether to invest or not"},
+              "hypotheses": [{"statement": "s", "reasoning": "r",
+                              "supporting_observation_ids": ["ev-1"]}]}
+    b = B.build(company="Acme", mode=B.PRIVATE_COMPANY, report=report,
+                observations=[{"text": "t", "date": "2026-01-01",
+                               "observation_id": "ev-1"}])
+    assert b.key_insight is None, "a withheld reading was revived"
+    assert b.withheld_reason
+
+
+@pytest.mark.parametrize("state", sorted(B._WITHHELD_STATES))
+def test_every_withheld_state_is_honoured(state):
+    report = {"result_state": state,
+              "thesis": {"view": "A confident sounding conclusion.",
+                         "tension": "t", "why_care": "whether to x or y"}}
+    assert B.build(company="X", mode=B.PRIVATE_COMPANY,
+                   report=report).key_insight is None
+
+
+def test_a_withheld_run_still_answers_why_it_matters():
+    """A withheld reading used to render NOTHING, so the page looked like the
+    analysis had failed. It did not fail -- it declined, and that is the
+    headline."""
+    report = {"result_state": "EVIDENCE_LIMITED",
+              "result_state_detail": "No reasoning backend is configured, so "
+                                     "no strategic conclusion is asserted.",
+              "thesis": {"view": "v", "tension": "t", "why_care": "w"}}
+    b = B.build(company="Acme", mode=B.PRIVATE_COMPANY, report=report,
+                observations=[{"text": "t", "date": "2026-01-01"}])
+    html = R.render_brief(b, run_id="r1")
+    assert "No strategic conclusion is being asserted" in html
+    assert "Why this matters" in html
+
+
+def test_the_presentation_layer_stays_reachable():
+    """Dropping its only link orphaned a working layer."""
+    html = R.render_brief(_rich(), run_id="r1")
+    for href in ("/story", "/dashboard", "/brief", "/slides", "/sources",
+                 "/full"):
+        assert href in html, href
+
+
+def test_interface_controls_are_excluded_from_the_intelligence_budget():
+    html = ('<main class="fb"><p>' + " ".join(["word"] * 250) + "</p>"
+            '<section class="ui-controls"><p>'
+            + " ".join(["control"] * 200) + "</p></section></main>")
+    assert L.intelligence_words(html) == 250
+    assert L.visible_words(html) == 450

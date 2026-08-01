@@ -71,6 +71,13 @@ MODE_SCOPE = {
 }
 
 # Never inferable from a marketing site, however confident the copy sounds.
+# Result states in which the report asserts no strategic conclusion. Any of
+# these means the founder-facing layers must withhold one too.
+_WITHHELD_STATES = frozenset({
+    "EVIDENCE_LIMITED", "INSUFFICIENT_EVIDENCE", "WITHHELD", "NO_SIGNAL",
+    "LIMITED", "REFUSED",
+})
+
 NEVER_INVENT = ("leadership discussions", "strategic pivots",
                 "customer adoption", "unit economics", "defensibility",
                 "market share", "revenue", "margins", "retention")
@@ -117,6 +124,7 @@ class FounderBrief:
     limitations: tuple = ()
     dropped: tuple = ()
     market_context: Optional[dict] = None
+    withheld_reason: str = ""
     verified: tuple = ()
     claimed: tuple = ()
     customer_can_see: tuple = ()
@@ -199,6 +207,8 @@ def build(*, company: str, mode: str, report: Optional[dict] = None,
         observations, report, brief.key_insight)
     brief.market_context = market
     if not brief.key_insight:
+        brief.withheld_reason = " ".join(str(
+            report.get("result_state_detail") or "").split())
         brief.limitations = (
             "No single conclusion cleared the evidence bar, so none is "
             "presented as the headline. What was found is below.",)
@@ -266,6 +276,18 @@ def _insight_candidates(report: dict,
     """
     out: List[FounderInsight] = []
     thesis = report.get("thesis") or {}
+
+    # THE READINESS GATE, inherited rather than re-derived.
+    #
+    # `thesis.view` can be populated with a templated sentence even when the
+    # report asserts NO conclusion -- `result_state = EVIDENCE_LIMITED` with
+    # "no strategic conclusion is asserted". Reading `view` alone revived a
+    # claim the report had withheld, on the primary screen, which is the most
+    # serious thing this product could do. The strategic brief already honours
+    # this state; the founder brief now honours the same one.
+    if str(report.get("result_state") or "").upper() in _WITHHELD_STATES:
+        return []
+
     view = thesis.get("view") or ""
     hypotheses = [h for h in (report.get("hypotheses") or ())
                   if isinstance(h, dict)]

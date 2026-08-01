@@ -455,7 +455,7 @@ class WebApp:
         if route == ("GET", "runs", 3) and parts[2] == "dashboard":
             return self._intelligence_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "brief":
-            return self._brief_page(session, parts[1])
+            return self._executive_brief_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "slides":
             return self._slides_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "full":
@@ -1613,6 +1613,20 @@ class WebApp:
                 f'approved sources listed below. It does not represent internal '
                 f'company knowledge.</p>{lib_html}</section>')
 
+    def _founder_questions(self, report):
+        """Follow-ups a first-time reader actually asks, plus report-specific
+        ones. The plain questions come first because "what does this company
+        do?" is the most common real question and the report-derived ones
+        assume the reader already has a thesis in mind.
+
+        Never phrased so as to imply a withheld thesis is established.
+        """
+        plain = ["What does this company do?",
+                 "Why does this matter?",
+                 "What should I do next?"]
+        return (plain + [q for q in self._suggested_questions(report)
+                         if q not in plain])[:5]
+
     def _suggested_questions(self, report):
         """Company-specific follow-ups derived from the report, not generic."""
         hyps = report.get("hypotheses", [])
@@ -1808,6 +1822,89 @@ class WebApp:
                          observations=observations, market=market)
         return brief, report, name
 
+    def _founder_answer_page(self, session, run_id, answer):
+        """One answer, in the same shape as every other founder surface."""
+        from intent_engine.founder_brief import render as fr
+        a = answer
+        parts = [f'{fr.BRIEF_CSS}<main class="fb">',
+                 f'<h1>{_e(a.question[:120])}</h1>',
+                 f'<div class="card headline"><p>{_e(a.direct_answer)}</p>']
+        if a.so_what:
+            parts.append('<div class="sowhat"><span class="lbl">Why this '
+                         f'matters</span>{_e(a.so_what)}</div>')
+        if a.decision_affected:
+            parts.append('<div class="decision"><span class="lbl">Decision '
+                         f'affected</span>{_e(a.decision_affected)}</div>')
+        parts.append("</div>")
+        if a.strongest_evidence or a.weakest_evidence:
+            parts.append('<h2>Evidence</h2><div class="card">')
+            if a.strongest_evidence:
+                parts.append(f'<p><strong>Strongest.</strong> '
+                             f'{_e(a.strongest_evidence)}</p>')
+            if a.weakest_evidence:
+                parts.append(f'<p><strong>Weakest.</strong> '
+                             f'{_e(a.weakest_evidence)}</p>')
+            if a.fact_or_interpretation:
+                parts.append(f'<p class="small muted">'
+                             f'{_e(a.fact_or_interpretation)}</p>')
+            parts.append("</div>")
+        if a.what_could_change:
+            parts.append('<h2>What could change this answer</h2>'
+                         f'<div class="card"><p>{_e(a.what_could_change)}</p>'
+                         "</div>")
+        if a.confidence:
+            parts.append(f'<p class="small muted">Confidence: '
+                         f'{_e(a.confidence)}.</p>')
+        # An answer that resolved nothing must still tell the reader what CAN
+        # be asked. Dropping this turned "I could not find a subject for that"
+        # into a dead end -- the same failure the sparse report page had.
+        report = ((self._result(run_id) or {}).get("strategic_report") or {})
+        parts.append(self._ask_form(run_id, report, session))
+        parts.append(fr._deeper(run_id))
+        parts.append("</main>")
+        return self._html(self._page(f"{a.question[:60]}", "".join(parts),
+                                     session, session.get("csrf", "")))
+
+    def _executive_brief_page(self, session, run_id):
+        """The executive brief — depth WITHOUT repetition.
+
+        Built from the same `FounderBrief` as every other layer, with the
+        dedup ledger pre-loaded with what the 60-second screen already said.
+        That is what stops this becoming a longer copy of the summary above
+        it, which is what the legacy renderer had become.
+        """
+        from intent_engine.founder_brief import layers as fl
+        from intent_engine.founder_brief import render as fr
+        brief, report, name = self._founder_layers(run_id)
+        ledger = fl.Ledger()
+        if brief.key_insight:
+            k = brief.key_insight
+            ledger.spend(k.fact, k.so_what, k.decision)
+        for change in (brief.what_changed or ())[:2]:
+            ledger.spend(change.get("what", ""))
+        # When the reading was WITHHELD, reuse the conclusion the strategic
+        # brief already reached rather than authoring a second version of it.
+        # One source of truth for "what did this report conclude".
+        withheld_line = ""
+        if brief.key_insight is None:
+            try:
+                from intent_engine.strategic_intelligence.brief import (
+                    build_brief,
+                )
+                legacy = build_brief(self._strategic_report_for(run_id),
+                                     as_of="")
+                withheld_line = " ".join(
+                    (legacy.headline.view or "").split())
+            except Exception:  # noqa: BLE001 - the brief still renders
+                withheld_line = ""
+        built = fl.build_executive_brief(brief, report, ledger,
+                                         withheld_line=withheld_line)
+        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — executive '
+                f'brief</h1>' + fr.render_executive_brief(built)
+                + fr._deeper(run_id) + "</main>")
+        return self._html(self._page(f"{name} — executive brief", body,
+                                     session, session.get("csrf", "")))
+
     def _intelligence_page(self, session, run_id):
         """The executive INTELLIGENCE dashboard for one company.
 
@@ -1902,9 +1999,34 @@ class WebApp:
                 or result.get("company") or "This company")
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
-        body = fr.render_brief(brief, run_id=run_id)
+        # The assistant belongs ON the default screen. Dropping it was a real
+        # regression: a founder who has just read a 60-second answer is exactly
+        # the person with a follow-up question, and making them navigate first
+        # is how a conversation never starts.
+        body = (fr.render_brief(brief, run_id=run_id)
+                + self._ask_form(run_id, report, session))
         return self._html(self._page(f"{name} — founder brief", body,
                                      session, session.get("csrf", "")))
+
+    def _ask_form(self, run_id, report, session):
+        """The one-click assistant, with company-specific suggestions."""
+        csrf = session.get("csrf", "")
+        suggested = "".join(
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
+            f'style="display:inline-block;margin:3px">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="question" value="{_e(q)}">'
+            f'<button type="submit" class="ghost">{_e(q)}</button></form>'
+            for q in self._founder_questions(report or {}))
+        return (
+            f'<section class="ui-controls" aria-label="Ask a follow-up">'
+            f'<h2>Ask a follow-up</h2>'
+            f'<form action="/runs/{_e(run_id)}/conversation" method="post">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<label for="q">Your question</label> '
+            f'<input id="q" name="question" required style="min-width:60%">'
+            f'<button type="submit">Ask</button></form>'
+            f'<p class="muted small">Suggested:</p>{suggested}</section>')
 
     def _brief_page(self, session, run_id):
         if not self._owned(session, run_id):
@@ -2136,14 +2258,41 @@ class WebApp:
         # Prefer a strategic answer when the run has a strategic report and the
         # question maps to one of its hypotheses: reasoning chain + citations +
         # counter-evidence + confidence + falsification, not a card echo.
+        # V3: Q&A answers from the SHARED founder intelligence object.
+        #
+        # Before this, Q&A independently re-interpreted the report -- two
+        # interpreters over one report, which is two products. The brief could
+        # say the evidence was thin while the assistant answered with
+        # confidence, and a founder had no way to tell which to trust.
+        #
+        # The conversation engine still produces the ANSWER TEXT. What it no
+        # longer decides is the implication, the decision, the confidence or
+        # whether a withheld thesis may be revived.
+        from intent_engine.founder_brief import qa as fqa
+        brief, _report, _name = self._founder_layers(run_id)
         strat = self._strategic_report_for(run_id)
+        engine_text = ""
         if strat is not None:
             from intent_engine.strategic_intelligence.conversation import (
                 answer_strategic,
             )
             sa = answer_strategic(question, strat)
-            if sa["intent"] in ("EXPLAINED", "COMPARISON"):
+            # COMPARISON keeps its own page: it renders a side-by-side the
+            # founder-answer shape cannot express, and collapsing it into a
+            # single "direct answer" loses the comparison itself. Only
+            # EXPLAINED is reframed through the shared object.
+            if sa["intent"] == "COMPARISON":
                 return self._strategic_answer_page(session, run_id, sa)
+            if sa["intent"] == "EXPLAINED":
+                engine_text = " ".join(
+                    str(p.get("text", "")) for p in (sa.get("paragraphs") or ())
+                ) or str(sa.get("answer", ""))
+        observations = [o for o in ((_report or {}).get("observations") or ())
+                        if isinstance(o, dict)]
+        founder_answer = fqa.answer(question, brief,
+                                    engine_answer=engine_text,
+                                    observations=observations)
+        return self._founder_answer_page(session, run_id, founder_answer)
         flat_claims = self._run_claims(run_id)
         # The previous turn's subject, so "Why?" and "Explain that" resolve
         # against the conversation. Without this every turn starts from nothing
