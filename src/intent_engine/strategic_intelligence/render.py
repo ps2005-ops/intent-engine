@@ -650,7 +650,11 @@ def render_strategic_report(report) -> str:
             f'<td>{_e(s.get("date",""))}</td>'
             f'<td>{_e(s.get("evidence_quality",""))}</td></tr>'
             for s in rows)
-        lib_html += (f'<h4>{title} ({len(rows)})</h4><table class="lib">'
+        # h3, not h4: these sit directly under the "Sources" h2, so an h4 was
+        # a skipped level -- a screen reader announces a heading that has no
+        # parent. The h4s inside a hypothesis block are correct because each
+        # block is titled with its own h3.
+        lib_html += (f'<h3>{title} ({len(rows)})</h3><table class="lib">'
                      f'<tr><th>Source</th><th>Class</th><th>Date</th>'
                      f'<th>Quality</th></tr>{trs}</table>')
     # No quality-gate block here. `consolidate_limitations` already folds

@@ -231,9 +231,44 @@ def test_the_executive_brief_omits_sections_it_cannot_support():
     assert "context" not in keys          # no market data for a sparse company
 
 
-def test_the_executive_brief_respects_its_word_budget():
+def test_the_executive_brief_never_exceeds_its_ceiling():
     built = L.build_executive_brief(_rich(), {}, L.Ledger())
-    assert built["within_budget"], built["words"]
+    assert built["words"] <= built["budget"]["max"], built["words"]
+
+
+def test_a_rich_brief_below_its_floor_is_reported_as_short():
+    """`within_budget` used to mean "not too long", so a rich executive brief
+    that collapsed to a fraction of its promised depth reported True.
+
+    A rich brief built from an empty report has almost nothing to say. That is
+    a legitimate state for the LAYER, but it is not "within budget", and the
+    release gate can only refuse a depth failure it is told about.
+    """
+    built = L.build_executive_brief(_rich(), {}, L.Ledger())
+    assert built["budget"] == {"min": L.EXEC_RICH_MIN, "max": L.EXEC_RICH_MAX}
+    assert built["words"] < L.EXEC_RICH_MIN
+    assert not built["within_budget"], built["words"]
+
+
+def test_the_gate_refuses_a_rich_brief_that_misses_its_depth():
+    """The executive brief was built by every caller and passed to nobody, so
+    a depth failure could not reach the gate at all."""
+    b = _rich()
+    built = L.build_executive_brief(b, {}, L.Ledger())
+    html = R.render_brief(b, run_id="r1")
+    assert G.check(b, html).passed          # unchanged without the brief
+    result = G.check(b, html, executive=built)
+    assert not result.passed
+    assert any("depth" in f for f in result.failures), result.failures
+
+
+def test_an_executive_brief_inside_its_budget_still_passes():
+    """The floor must refuse short briefs, not every brief."""
+    built = {"sections": [], "words": L.EXEC_RICH_MIN + 10,
+             "budget": {"min": L.EXEC_RICH_MIN, "max": L.EXEC_RICH_MAX},
+             "within_budget": True}
+    assert G.check(_rich(), R.render_brief(_rich(), run_id="r1"),
+                   executive=built).passed
 
 
 # --- action layer -----------------------------------------------------------
@@ -511,3 +546,89 @@ def test_a_stale_export_is_flagged_and_still_usable():
     ctx = M.consume(_export(), expected_ticker="ACME", today="2026-10-01")
     assert ctx.stale and ctx.available
     assert any("days old" in l for l in ctx.limitations)
+
+
+# --- the withheld thesis must stay withheld in Q&A --------------------------
+REVIVED = ("Yes — on balance the evidence supports that moving from selling "
+           "a product toward operating the rails beneath it.")
+
+
+def test_the_revived_thesis_check_can_actually_fire():
+    """`qa.withheld` is set to `brief.key_insight is None` -- the same value
+    the check compared it against -- so `withheld and not qa.withheld` was
+    always False and this rule could never fail on ANY input.
+
+    This is the gate half of the defence, tested against a hand-built answer
+    so it keeps working even though `qa.answer` now refuses at source.
+    """
+    from intent_engine.founder_brief import consistency as CO
+    from intent_engine.founder_brief import qa as fqa
+    b = _sparse()
+    assert b.key_insight is None
+    a = fqa.FounderAnswer(question="What does this company do?",
+                          direct_answer=REVIVED, withheld=True)
+    result = CO.check(brief=b, qa=a)
+    assert not result.passed
+    assert any("revived" in f for f in result.failures), result.failures
+
+
+def test_a_withheld_brief_refuses_the_engines_reading_at_source():
+    """The engine answers from the strategic report, which still holds the
+    hypothesis the brief declined to assert -- so an ordinary question was
+    enough to carry it onto the page.
+
+    A founder asking "what does this company do?" was shown "the evidence
+    supports that moving from selling a product toward operating the rails
+    beneath it", under a brief that had just said no conclusion was being
+    asserted.
+    """
+    from intent_engine.founder_brief import consistency as CO
+    from intent_engine.founder_brief import qa as fqa
+    b = _sparse()
+    a = fqa.answer("What does this company do?", b,
+                   engine_answer=REVIVED, observations=[])
+    assert REVIVED not in a.direct_answer
+    assert CO.check(brief=b, qa=a).passed
+
+
+def test_a_supported_brief_still_uses_the_engines_answer():
+    """The guard must refuse revivals, not every engine answer."""
+    from intent_engine.founder_brief import qa as fqa
+    b = _rich()
+    assert b.key_insight is not None
+    a = fqa.answer("What does this company do?", b,
+                   engine_answer=REVIVED, observations=[])
+    assert "rails beneath it" in a.direct_answer
+
+
+def test_the_refusal_itself_is_not_mistaken_for_a_revival():
+    """The check must refuse revivals, not every answer on a withheld run."""
+    from intent_engine.founder_brief import consistency as CO
+    from intent_engine.founder_brief import qa as fqa
+    b = _sparse()
+    a = fqa.answer("What is the strategy here?", b, engine_answer="",
+                   observations=[])
+    assert CO.check(brief=b, qa=a).passed
+
+
+def test_transition_claims_are_caught_in_the_engines_own_words():
+    """The literal list missed the vocabulary the engine actually emits.
+
+    Its own `thesis.view` reads "appears to be repositioning from selling
+    software toward operating the payment rails" -- which contains neither
+    "is repositioning" nor "is moving toward", so it passed a check written
+    to stop exactly that sentence.
+    """
+    from intent_engine.founder_brief.consistency import _looks_strategic
+    assert _looks_strategic("Shopify appears to be repositioning from selling "
+                            "software toward operating the payment rails.")
+    assert _looks_strategic("moving from selling a product toward operating "
+                            "the rails beneath it")
+    assert _looks_strategic("The company is shifting from self-serve to "
+                            "enterprise.")
+    # and the honest sentences stay honest
+    assert not _looks_strategic("I am not going to give you a strategic read "
+                                "on this company.")
+    assert not _looks_strategic("The pricing page lists three tiers and was "
+                                "updated in April.")
+    assert not _looks_strategic("")

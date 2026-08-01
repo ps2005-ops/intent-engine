@@ -32,6 +32,7 @@ import re
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence
 
+from intent_engine.founder_brief.consistency import _looks_strategic
 from intent_engine.founder_brief.contract import INTERNAL_VOCABULARY
 
 # Questions that ask for a strategic conclusion rather than a fact.
@@ -110,6 +111,17 @@ def answer(question: str, brief, *, engine_answer: str = "",
             "Independent coverage, dated customer evidence, or public pricing "
             "would all move this.")
         return out
+
+    # THE ENGINE STILL HOLDS THE READING THE BRIEF REFUSED.
+    #
+    # `answer_strategic` answers from the strategic report, which keeps its
+    # hypothesis whether or not the brief judged the evidence strong enough to
+    # assert it. So an ordinary, non-strategic question -- "what does this
+    # company do?" -- was enough to carry that hypothesis onto the page under
+    # a brief that had just said no conclusion was being asserted. The refusal
+    # above only inspects the QUESTION; the reading arrives in the ANSWER.
+    if withheld and _looks_strategic(engine_answer):
+        engine_answer = ""
 
     out.direct_answer = _plain(engine_answer) or (
         k.fact if k else "There is not enough public evidence to answer that "

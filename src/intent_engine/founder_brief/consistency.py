@@ -102,7 +102,18 @@ def check(*, brief, dashboard=None, story=None, executive=None,
             failures.append("the executive brief opens with a different "
                             "thesis from the brief")
         if not executive.get("within_budget", True):
-            failures.append("the executive brief exceeds its word budget")
+            budget = executive.get("budget") or {}
+            words = executive.get("words", 0)
+            if words > budget.get("max", 10 ** 9):
+                failures.append("the executive brief exceeds its word budget")
+            else:
+                # The failure the customer actually reported: an executive
+                # brief that is shorter than the depth it promises is not a
+                # concise brief, it is a missing one.
+                failures.append(
+                    f"the executive brief carries {words} words against a "
+                    f"{budget.get('min')}-{budget.get('max')} budget, so it "
+                    f"does not deliver the depth its layer promises")
 
     # --- actions ------------------------------------------------------------
     if actions is not None:
@@ -119,7 +130,13 @@ def check(*, brief, dashboard=None, story=None, executive=None,
     # --- Q&A ----------------------------------------------------------------
     if qa is not None:
         checked += 1
-        if withheld and not qa.withheld and _looks_strategic(qa.direct_answer):
+        # `qa.withheld` is set to `brief.key_insight is None` -- the SAME value
+        # as `withheld` -- so `withheld and not qa.withheld` was always False
+        # and this check could never fire on any input. The decision-story
+        # check one block up is the correct form: judge the TEXT, because the
+        # flag only records that the answer object knew the brief withheld,
+        # never that the sentence it carries is safe.
+        if withheld and _looks_strategic(qa.direct_answer):
             failures.append("Q&A revived a strategic claim the primary "
                             "experience refused")
         if k and qa.decision_affected and not _compatible(
@@ -136,13 +153,32 @@ def check(*, brief, dashboard=None, story=None, executive=None,
 
 
 def _looks_strategic(text: str) -> bool:
-    """Does this assert a direction the evidence did not support?"""
-    low = (text or "").lower()
+    """Does this assert a direction the evidence did not support?
+
+    The literal list missed the vocabulary the reasoning engine ACTUALLY
+    emits. Its own `thesis.view` reads "appears to be repositioning from
+    selling software toward operating the payment rails", and the answer that
+    reached a founder read "moving from selling a product toward operating
+    the rails beneath it" -- neither contains "is repositioning" or "is moving
+    toward", so both passed a check written to stop exactly them.
+
+    So match the SHAPE of a transition claim -- a movement verb travelling
+    from one thing to another -- rather than adding two more literals and
+    waiting for the third phrasing.
+    """
+    low = " ".join((text or "").lower().split())
     if "not going to give you a strategic read" in low:
         return False
-    return any(m in low for m in (
-        "is shifting", "is moving toward", "is repositioning", "strategy is",
-        "the company is becoming", "is transitioning", "pivoting"))
+    if any(m in low for m in (
+            "is shifting", "is moving toward", "is repositioning",
+            "strategy is", "the company is becoming", "is transitioning",
+            "pivoting")):
+        return True
+    # "<movement verb> ... from <x> to/toward <y>" -- the transition shape.
+    return bool(re.search(
+        r"\b(shift(?:s|ing|ed)?|mov(?:e|es|ing|ed)|reposition(?:s|ing|ed)?|"
+        r"transition(?:s|ing|ed)?|evolv(?:e|es|ing|ed)|pivot(?:s|ing|ed)?)\b"
+        r"[^.]{0,80}?\bfrom\b[^.]{0,80}?\b(to|toward|towards|into)\b", low))
 
 
 def _contradicts_confidence(a: str, b: str) -> bool:

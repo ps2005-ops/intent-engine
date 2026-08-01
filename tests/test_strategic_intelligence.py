@@ -1006,3 +1006,38 @@ def test_companies_differ_across_all_intelligence():
         {h.pattern_id for h in sh.hypotheses} != {h.pattern_id for h in li.hypotheses}
     assert {v["exposed_layer"] for v in sh.vulnerabilities} != \
         {v["exposed_layer"] for v in cf.vulnerabilities}
+
+
+def test_heading_levels_never_skip_a_level(shopify_report):
+    """A screen reader announces a skipped level as a heading with no parent.
+
+    The source-library sub-headings sat directly under the "Sources" h2 as
+    h4s, so the full analysis page went h2 -> h4. Found in a browser at
+    375px, not by any assertion in this file.
+    """
+    html = render_strategic_report(shopify_report)
+    levels = [int(m) for m in re.findall(r"<h([1-6])", html)]
+    assert levels, "no headings rendered"
+    for previous, nxt in zip(levels, levels[1:]):
+        assert nxt - previous <= 1, (
+            f"heading level jumped h{previous} -> h{nxt}: {levels}")
+
+
+def test_the_assistant_never_prints_a_raw_engine_object(tmp_path):
+    """A founder asked "what does this company do?" and was shown a dict.
+
+    On the EXPLAINED branch `answer_strategic` returns a STRUCTURED dict and
+    no `paragraphs` key, so the fallback str()'d the dict itself onto the
+    page: "{'direct_answer': ..., 'reasoning': ...}". Found in a browser, not
+    by any assertion here -- the route returned 200 the whole time.
+    """
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    for question in ("What+does+this+company+do%3F", "Why+does+this+matter%3F"):
+        status, _, body = c.request(
+            "POST", f"/runs/{rid}/conversation",
+            f"csrf={c.csrf()}&question={question}")
+        assert status == "200 OK"
+        for leak in ("{'direct_answer'", '{"direct_answer"', "'reasoning':",
+                     "'counter_evidence'", "'confidence_reasons'",
+                     "'falsification'", "'alternative_explanations'"):
+            assert leak not in body, f"{leak} leaked for {question}"

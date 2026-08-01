@@ -43,7 +43,8 @@ class GateResult:
 
 
 def check(brief, html: str = "", *, qa=None,
-          citations: Optional[dict] = None) -> GateResult:
+          citations: Optional[dict] = None,
+          executive: Optional[dict] = None) -> GateResult:
     """Every release rule, evaluated. Returns the failures, not just a bool."""
     failures: List[str] = []
     b = brief
@@ -129,10 +130,14 @@ def check(brief, html: str = "", *, qa=None,
         failures.append("a withheld strategic reading reached a "
                         "founder-facing layer")
 
-    # 14. Q&A must not contradict the brief
-    if qa is not None:
+    # 14. Q&A must not contradict the brief, and the executive brief must
+    #     carry the depth its budget promises. The executive brief was built
+    #     by every caller and passed to NOBODY, so its budget was computed on
+    #     every request and never read -- a depth failure could not reach this
+    #     gate at all.
+    if qa is not None or executive is not None:
         from intent_engine.founder_brief import consistency as CO
-        result = CO.check(brief=b, qa=qa)
+        result = CO.check(brief=b, qa=qa, executive=executive)
         failures.extend(result.failures)
 
     # 15. every displayed citation must resolve
@@ -147,7 +152,7 @@ def check(brief, html: str = "", *, qa=None,
         if 0 <= ctl < answer:
             failures.append("follow-up controls appear before the founder "
                             "answer")
-    return GateResult(not failures, tuple(failures), 16)
+    return GateResult(not failures, tuple(failures), 17)
 
 
 def comprehension(brief) -> dict:

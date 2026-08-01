@@ -1816,7 +1816,13 @@ class WebApp:
                 market = fm.load(snap, expected_ticker=ticker).as_dict()
             except Exception:  # noqa: BLE001 - degrade, never fail the page
                 market = fm.unavailable("snapshot unreadable").as_dict()
+        # `company_name` is what the presentation deck has always used, so a
+        # run whose identity record is absent (every anonymous demo run) was
+        # headed "Shopify — presentation" on one layer and "This company" on
+        # the founder brief beside it. The name was in the report the whole
+        # time; only this path declined to read it.
         name = (identity.get("canonical_name") or identity.get("name")
+                or report.get("company_name")
                 or result.get("company") or "This company")
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
@@ -2006,7 +2012,13 @@ class WebApp:
                 market = fm.unavailable(
                     "market snapshot could not be read").as_dict()
 
+        # `company_name` is what the presentation deck has always used, so a
+        # run whose identity record is absent (every anonymous demo run) was
+        # headed "Shopify — presentation" on one layer and "This company" on
+        # the founder brief beside it. The name was in the report the whole
+        # time; only this path declined to read it.
         name = (identity.get("canonical_name") or identity.get("name")
+                or report.get("company_name")
                 or result.get("company") or "This company")
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
@@ -2295,9 +2307,19 @@ class WebApp:
             if sa["intent"] == "COMPARISON":
                 return self._strategic_answer_page(session, run_id, sa)
             if sa["intent"] == "EXPLAINED":
-                engine_text = " ".join(
-                    str(p.get("text", "")) for p in (sa.get("paragraphs") or ())
-                ) or str(sa.get("answer", ""))
+                # On the EXPLAINED branch `answer` is a STRUCTURED dict and
+                # there is no `paragraphs` key at all, so the old fallback
+                # str()'d the dict itself onto the page: a founder who asked
+                # "what does this company do?" was shown
+                # "{'direct_answer': ..., 'reasoning': ...}".
+                engine = sa.get("answer")
+                if isinstance(engine, dict):
+                    engine_text = str(engine.get("direct_answer") or "")
+                else:
+                    engine_text = " ".join(
+                        str(p.get("text", ""))
+                        for p in (sa.get("paragraphs") or ())
+                    ) or str(engine or "")
         observations = [o for o in ((_report or {}).get("observations") or ())
                         if isinstance(o, dict)]
         founder_answer = fqa.answer(question, brief,

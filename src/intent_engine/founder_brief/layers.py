@@ -420,9 +420,15 @@ def build_executive_brief(brief, report: Optional[dict] = None,
     lo, hi = (EXEC_RICH_MIN, EXEC_RICH_MAX) if rich else (EXEC_LIMITED_MIN,
                                                           EXEC_LIMITED_MAX)
     words = sum(len(p.split()) for s in sections for p in s["paragraphs"])
+    # BOTH bounds, like the limited brief one function below. Reporting only
+    # the ceiling made `within_budget` mean "not too long", so a rich brief
+    # that collapsed to a fraction of its promised depth -- because sections
+    # were dropped or deduplicated away -- reported True and every gate above
+    # it went green. A budget that is only ever checked from one side cannot
+    # detect the failure it exists to detect.
     return {"sections": sections, "words": words,
             "budget": {"min": lo, "max": hi},
-            "within_budget": words <= hi,
+            "within_budget": lo <= words <= hi,
             "note": ("Sections with nothing new to say are omitted rather "
                      "than padded.")}
 
