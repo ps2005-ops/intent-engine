@@ -2190,3 +2190,73 @@ threshold tuned on evaluation data. Tier 2 is **not populated** and
 ### ENGINEERING RECOMMENDATION
 
 **CONTINUE OPERATING.** Engineering returns to exceptional status.
+
+---
+
+### Day 18b — closing the gap the goal actually named
+
+The authorization for this cycle asked for *"more independent, valid,
+resolvable **paper trading** observations."* Day 18 delivered 179,013 **replay**
+observations and **zero paper positions**. Replay is not paper trading, so on
+its own terms the goal was not met.
+
+**Compliance first.** The brief said not to rebuild the scheduler, locks, cycle
+identities, market-session handling, report retention, health checks or
+paper-mode safety. Audited: `git diff fd9ca79..HEAD` over all of those paths is
+**empty**. Only `steps.py` and `report.py` changed, additively.
+
+#### The tension, and why a third label rather than a promotion
+
+No strategy passed its gates — p ≥ 0.72, zero FDR survivors. `PAPER_CHALLENGER`
+requires all eight, so promoting one would be exactly the gate-weakening the
+brief forbids.
+
+But Position Decision Quality, calibration, Brier and the equity curve have been
+UNMEASURABLE for eighteen days **not because any strategy is bad — because zero
+positions have ever completed the round trip.** Those are properties of the
+*engine*, not of a strategy.
+
+So: **`PAPER_CONTROL`** — runs live paper, makes **no alpha claim**, exists to
+exercise the pipeline. Held to the integrity gates (data, rationale,
+implementation, costs); exempt from the edge gates (replay adequacy, holdout,
+FDR) precisely because it claims no edge. Three guards stop it being a back
+door: it is **not a lifecycle state** (so it cannot be mistaken for a rung on
+the ladder), every row carries `alpha_claim: false`, and the leaderboard already
+refuses to rank anything that has not survived FDR.
+
+Nothing lowered a threshold. The caps only ever *reduce* trading: one position
+per (strategy, security), 20 concurrent per strategy so `baseline_momentum`
+(firing on ~74% of security-days) cannot drown out the strategies that fire
+rarely, and one position per signal at the **primary horizon only** — opening
+one per horizon would create six near-identical positions and then count them
+as six observations.
+
+#### It works, and it immediately caught the trap it was built for
+
+A walk-forward through 2022 on the real engine: **939 opened, 881 resolved**,
+books isolated per strategy, caps enforced.
+
+```
+strategy                  naive read              honest read
+baseline_momentum.v1   +2.27%, 61% win, n=100  ->  n_eff 24  UNMEASURABLE
+mean_reversion.v1      -0.25%,          n=431  ->  n_eff 75  p = 0.67
+volatility_breakout.v1 -0.19%,          n=350  ->  n_eff 65  p = 0.82
+```
+
+**A 61% win rate and +2.27% mean return looked like alpha and is not a result.**
+Clustered by security it is 24 independent observations, below the floor of 30,
+and the machinery returned UNMEASURABLE instead of a claim. 2022 was a down
+year and a momentum rule that went short would profit from the regime — which is
+what a design effect of 4.2× and an effective floor exist to catch. Zero FDR
+discoveries.
+
+#### A behaviour change worth stating
+
+A dead price feed now makes `paper_entries` **fail** rather than report
+"opened 0". `opportunity` still absorbs it, because "we looked and could not
+tell" is a real measurement. But zero positions because the feed was down is not
+the same fact as zero because nothing fired, and recording the first as the
+second is the failure-becomes-a-zero error this project refuses. The cycle goes
+PARTIAL, names the step, and still writes the report.
+
+**3336 passed, 6 skipped.** CONTINUE OPERATING.

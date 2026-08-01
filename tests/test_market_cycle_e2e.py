@@ -49,8 +49,8 @@ def test_a_complete_day_cycle_runs_every_step(tmp_path):
     result = _run(tmp_path)
     assert result.status == C.COMPLETED, result.reason
     assert [s.name for s in result.steps] == [
-        "research", "opportunity", "funnel", "positions", "assets", "health",
-        "report"]
+        "research", "opportunity", "funnel", "positions", "paper_entries",
+        "assets", "health", "report"]
     assert all(s.ok for s in result.steps)
 
 
@@ -199,18 +199,34 @@ def test_repeated_ingestion_of_the_same_bar_does_not_advance_history(tmp_path):
 
 
 # --- source failure isolation -----------------------------------------------
-def test_a_total_price_source_failure_isolates_to_one_step(tmp_path):
+def test_a_total_price_source_failure_isolates_and_never_becomes_a_zero(tmp_path):
+    """Two different correct behaviours, and the difference is the point.
+
+    `opportunity` ABSORBS a dead feed: "we looked and could not tell" is a real
+    measurement, recorded as data_unavailable.
+
+    `paper_entries` must NOT absorb it. "Opened 0 positions" because the feed
+    was down is not the same fact as "opened 0 positions because nothing
+    fired", and recording the first as the second is exactly the
+    failure-becomes-a-zero error this project refuses. So the cycle goes
+    PARTIAL and names the step -- which is still not a dead cycle.
+    """
     def dead(symbol):
         raise ConnectionError("price feed down")
 
     result = _run(tmp_path, steps=STEPS.day_steps(
         research_fn=lambda ctx: (_rows(), 0), series_fn=dead))
-    # opportunity records "data unavailable" rather than the cycle dying
-    assert result.status == C.COMPLETED
+    assert result.status == C.PARTIAL
+    assert "paper_entries" in result.reason
+
     opportunity = [s for s in result.steps if s.name == "opportunity"][0]
     assert opportunity.ok
     assert opportunity.detail["data_unavailable"] > 0
     assert opportunity.detail["observable"] == 0
+
+    # the report is still produced -- it is what a human needs in order to see
+    # that the feed was down
+    assert result.report_paths.get("md")
 
 
 def test_a_partial_research_failure_still_produces_a_report(tmp_path):

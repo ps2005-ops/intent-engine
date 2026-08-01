@@ -319,6 +319,78 @@ def resolve_outcomes_step(series_fn: Optional[Callable] = None) -> Callable:
 
 
 # ---------------------------------------------------------------------------
+# live paper positions from price-behaviour signals — CONTROLS, not alpha
+# ---------------------------------------------------------------------------
+def _price_cache(root):
+    cache = pathlib.Path(root) / "reports/market/replay/price_cache"
+
+    def series(symbol: str) -> dict:
+        path = cache / f"{symbol}.json"
+        if path.exists():
+            try:
+                return json.loads(path.read_text())
+            except json.JSONDecodeError:
+                return {}
+        return {}
+    return series
+
+
+def paper_entries_step(series_fn: Optional[Callable] = None) -> Callable:
+    """DAY cycle. Open paper positions for signals that fired today.
+
+    Runs on the tier-1 SECURITY universe rather than the curated company
+    universe, which is the entire point: an ETF has no narrative and could
+    never reach this stage through the strategic-reading gate.
+    """
+    def step(ctx: C.CycleContext) -> dict:
+        from intent_engine.market import paper_engine as PE
+        from intent_engine.market import strategy_library as LIB
+        from intent_engine.market import universe_tiers as UT
+
+        if ctx.dry_run:
+            return {"skipped": "dry run does not open paper positions",
+                    "opened": 0}
+        series = series_fn or _price_cache(ctx.root)
+        securities = UT.universe_for(UT.TIER_1)
+        opened, by_strategy = 0, {}
+        for spec in LIB.specs():
+            book = PE.PaperBook(spec.key, root=str(ctx.root))
+            entries = PE.open_entries(
+                strategy_key=spec.key, signal_fn=LIB.SIGNALS[spec.key],
+                primary_horizon=spec.horizons.horizons[0],
+                securities=securities, series_for=series, as_of=ctx.as_of,
+                book=book)
+            by_strategy[spec.key] = {"opened": len(entries),
+                                     "open_total": len(book.open_positions())}
+            opened += len(entries)
+        return {"opened": opened, "by_strategy": by_strategy,
+                "mode": PE.PAPER_CONTROL, "alpha_claim": False}
+    return step
+
+
+def paper_resolve_step(series_fn: Optional[Callable] = None) -> Callable:
+    """NIGHT cycle. Close every position whose horizon has fully elapsed."""
+    def step(ctx: C.CycleContext) -> dict:
+        from intent_engine.market import paper_engine as PE
+        from intent_engine.market import strategy_library as LIB
+
+        if ctx.dry_run:
+            return {"skipped": "dry run does not resolve paper positions",
+                    "resolved": 0}
+        series = series_fn or _price_cache(ctx.root)
+        resolved, books = 0, {}
+        for spec in LIB.specs():
+            book = PE.PaperBook(spec.key, root=str(ctx.root))
+            closed = PE.resolve_due(book=book, series_for=series,
+                                    today=ctx.as_of)
+            resolved += len(closed)
+            books[spec.key] = PE.book_summary(book)
+        return {"resolved": resolved, "books": books,
+                "mode": PE.PAPER_CONTROL, "alpha_claim": False}
+    return step
+
+
+# ---------------------------------------------------------------------------
 # research assets
 # ---------------------------------------------------------------------------
 def assets_step(ctx: C.CycleContext) -> dict:
@@ -420,6 +492,7 @@ def day_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("opportunity", opportunity_step(series_fn)),
         ("funnel", funnel_step),
         ("positions", positions_step),
+        ("paper_entries", paper_entries_step(series_fn)),
         ("assets", assets_step),
         ("health", health_step),
         ("report", report_step),
@@ -430,6 +503,7 @@ def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
     return [
         ("research", research_step(research_fn)),
         ("reconcile", reconcile_step),
+        ("paper_resolve", paper_resolve_step(series_fn)),
         ("opportunity", opportunity_step(series_fn)),
         ("resolve_outcomes", resolve_outcomes_step(series_fn)),
         ("funnel", funnel_step),

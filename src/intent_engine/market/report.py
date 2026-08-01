@@ -330,8 +330,34 @@ def _learning_acceleration(ctx) -> list:
             continue
         lines.append(f"  {key.replace('_', ' '):<28}"
                      f"{'—' if value is None else value}")
-    lines += ["```", "",
-              "### learning throughput", "", "```", tp.render(), "```", "",
+    lines += ["```", ""]
+
+    # Live paper books, each labelled a CONTROL. A win rate printed without
+    # that label will eventually be read as an edge by someone skimming, and
+    # these strategies have no measured edge at all.
+    paper = (ctx.results.get("paper_resolve")
+             or ctx.results.get("paper_entries") or {})
+    books = paper.get("books") or {}
+    if books:
+        lines += ["### live paper books (CONTROL — no alpha claim)", "",
+                  "| strategy | open | resolved | win% | mean net | equity |",
+                  "|---|---|---|---|---|---|"]
+        for key, b in sorted(books.items()):
+            wr = ("—" if b.get("win_rate") is None
+                  else f"{b['win_rate'] * 100:.1f}%")
+            mn = ("—" if b.get("mean_net_return") is None
+                  else f"{b['mean_net_return']:+.5f}")
+            lines.append(f"| `{key}` | {b.get('open_positions', 0)} | "
+                         f"{b.get('resolved', 0)} | {wr} | {mn} | "
+                         f"{b.get('equity', 0):,.0f} |")
+        lines += ["",
+                  "*These strategies have **no measured edge** (Day 18: "
+                  "p >= 0.72, zero FDR survivors). The positions exist to "
+                  "exercise and measure the resolution pipeline and to feed "
+                  "calibration. They are not evidence of alpha, and a win "
+                  "rate here is not a result.*", ""]
+
+    lines += ["### learning throughput", "", "```", tp.render(), "```", "",
               f"**Limiting factor: {limiting['factor']}** — "
               f"{limiting['detail']}",
               "",
