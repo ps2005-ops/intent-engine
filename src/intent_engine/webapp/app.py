@@ -13,6 +13,7 @@ from __future__ import annotations
 import hmac
 import html as _html
 import json
+import pathlib
 import logging
 import traceback
 import uuid
@@ -1302,7 +1303,12 @@ class WebApp:
             # never the problem — the default was. So the default is now the
             # brief, and the depth is one click away and still complete.
             if layer == "default":
-                return self._redirect(f"/runs/{run_id}/brief")
+                # V3: the default is the 60-SECOND FOUNDER BRIEF, not the
+                # executive brief. The customer's message was that founders
+                # should not have to read everything -- and the executive
+                # brief, at 500-900 words, is still "everything" to someone
+                # with fifteen minutes. Depth is one click away and unchanged.
+                return self._founder_brief_page(session, run_id, result)
             return self._strategic_run_page(session, run_id, result,
                                             share_form, feedback_form)
 
@@ -1322,11 +1328,12 @@ class WebApp:
         # The honest page already exists and answers the three questions this
         # reader has — what was found, what was missing, what to do now.
         if self._is_real_run(run_id):
-            return self._insufficient_evidence_page(
-                session, run_id, result,
-                reason="The pages that could be read describe what the "
-                       "company offers, but none carried the dated, checkable "
-                       "material a strategic reading has to rest on.")
+            # V3: a company with little public material gets a USEFUL bounded
+            # product -- what a customer can verify, what is only claimed,
+            # what is unclear, and what to publish -- instead of a dead end.
+            # The old refusal was accurate and useless, and it was the
+            # customer's sharpest complaint.
+            return self._founder_brief_page(session, run_id, result)
 
         page = render_result_html(result)
         if result.get("overview"):
@@ -1743,6 +1750,62 @@ class WebApp:
         form = {"consent": "1", "company_name": meta.get("company_name", ""),
                 "website": meta.get("website", ""), "csrf": session["csrf"]}
         return self._analyze(session, form)
+
+    def _founder_brief_page(self, session, run_id, result):
+        """The 60-SECOND FOUNDER BRIEF — the default completed-result view.
+
+        Serves every company mode from one route. A rich public company and a
+        one-page marketing site both land here; what differs is which sections
+        have material behind them, not which page the reader gets. That is the
+        point of the mode system -- equally USEFUL, not equally detailed.
+        """
+        from intent_engine.founder_brief import build as fb
+        from intent_engine.founder_brief import market as fm
+        from intent_engine.founder_brief import render as fr
+
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        if not observations:
+            observations = [o for o in (result.get("observations") or ())
+                            if isinstance(o, dict)]
+
+        independent = sum(
+            1 for o in observations
+            if o.get("source_class") not in ("company_owned",
+                                             "executive_statement", None, ""))
+        thesis = report.get("thesis") or {}
+        has_view = bool(thesis.get("view")) and not thesis.get("view_withheld")
+        identity = self.ci.entity_identity(run_id) or {}
+        ticker = identity.get("ticker") or ""
+
+        mode = fb.classify_mode(
+            is_public=bool(ticker), evidence_count=len(observations),
+            independent_sources=independent, has_thesis=has_view,
+            has_financials=False)
+
+        # Market context comes ONLY from the versioned export, and only when
+        # a snapshot has actually been published. Absent or unreadable, the
+        # section renders "Unavailable" -- never a zero, and never a 500: a
+        # founder-facing page must not die because an upstream research
+        # artefact is missing.
+        market = None
+        if ticker:
+            try:
+                snapshot = (pathlib.Path(self.config.data_dir) / "reports"
+                            / "market" / "export" / f"{ticker}.json")
+                market = fm.load(snapshot, expected_ticker=ticker).as_dict()
+            except Exception:  # noqa: BLE001 - degrade, never fail the page
+                market = fm.unavailable(
+                    "market snapshot could not be read").as_dict()
+
+        name = (identity.get("canonical_name") or identity.get("name")
+                or result.get("company") or "This company")
+        brief = fb.build(company=name, mode=mode, report=report,
+                         observations=observations, market=market)
+        body = fr.render_brief(brief, run_id=run_id)
+        return self._html(self._page(f"{name} — founder brief", body,
+                                     session, session.get("csrf", "")))
 
     def _brief_page(self, session, run_id):
         if not self._owned(session, run_id):
