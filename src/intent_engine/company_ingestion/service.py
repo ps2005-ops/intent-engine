@@ -623,6 +623,8 @@ class CompanyIngestionService:
             result["strategic_report"] = self._strategic_report(
                 meta["company_name"], documents, extra_observations,
                 previous_model=previous_model)
+            self._record_reasoning(run_id, domain, documents,
+                                   result["strategic_report"])
         else:
             # No strategic dashboard is built at all. Not a hidden one, not an
             # empty one — the section simply does not exist, so there is
@@ -810,6 +812,78 @@ class CompanyIngestionService:
                 if r.event_type == "ci.quality_assessed"]
         return rows[-1] if rows else None
 
+    def _record_reasoning(self, run_id, domain, documents, report) -> None:
+        """One event per synthesis attempt: did the rich path actually land?
+
+        OPERATOR-ONLY. None of this reaches a founder screen. It exists
+        because "the reasoning backend is configured" and "a grounded analysis
+        was accepted" turned out to be very different things, and nothing in
+        the system recorded the difference.
+        """
+        report = report or {}
+        findings = report.get("critic_findings") or []
+        causes: dict = {}
+        for finding in findings:
+            causes[finding.get("check", "unknown")] = \
+                causes.get(finding.get("check", "unknown"), 0) + 1
+        from intent_engine.strategic_intelligence.observations import (
+            derive_analyst_evidence,
+        )
+        evidence = derive_analyst_evidence(documents)
+        independent = sum(
+            1 for o in evidence
+            if getattr(o, "source_class", "") not in
+            ("company_owned", "executive_statement", "", None))
+        filings = sum(1 for d in documents
+                      if "sec.gov" in (d.get("final_url") or ""))
+        self._append(
+            "ci.reasoning_assessed", run_id=run_id, domain=domain,
+            subject_type="reasoning", subject_id=run_id,
+            payload={"run_id": run_id,
+                     "attempted": bool(report),
+                     "result_state": report.get("result_state"),
+                     "provenance": report.get("reasoning_provenance"),
+                     "accepted": report.get("reasoning_provenance")
+                     == "grounded_analyst",
+                     "rejection_causes": causes,
+                     "documents": len(documents),
+                     "analyst_evidence": len(evidence),
+                     "independent_sources": independent,
+                     "filings": filings},
+            idempotency_key=f"reasoning:{run_id}:{len(documents)}")
+
+    def reasoning_overview(self) -> dict:
+        """Rich-analysis acceptance, for operators. Never founder-facing."""
+        rows = [r.payload for r in self.store.read_all()
+                if r.event_type == "ci.reasoning_assessed"]
+        if not rows:
+            return {"attempts": 0, "accepted": 0, "acceptance_rate": 0.0,
+                    "top_rejection_causes": [], "averages": {}}
+        attempts = len(rows)
+        accepted = sum(1 for r in rows if r.get("accepted"))
+        causes: dict = {}
+        for r in rows:
+            for cause, n in (r.get("rejection_causes") or {}).items():
+                causes[cause] = causes.get(cause, 0) + n
+        def mean(key):
+            values = [r.get(key) or 0 for r in rows]
+            return round(sum(values) / len(values), 2) if values else 0.0
+        return {
+            "attempts": attempts,
+            "accepted": accepted,
+            "rejected": attempts - accepted,
+            "acceptance_rate": round(100.0 * accepted / attempts, 1),
+            "top_rejection_causes": sorted(causes.items(),
+                                           key=lambda kv: -kv[1]),
+            "averages": {"documents": mean("documents"),
+                         "analyst_evidence": mean("analyst_evidence"),
+                         "independent_sources": mean("independent_sources"),
+                         "filings": mean("filings")},
+            "by_result_state": {
+                state: sum(1 for r in rows if r.get("result_state") == state)
+                for state in {r.get("result_state") for r in rows}},
+        }
+
     def quality_overview(self) -> dict:
         """Cross-run report-quality health for authenticated operators:
         which runs failed, which were limited, and which evidence families are
@@ -850,7 +924,20 @@ class CompanyIngestionService:
         observations = derive_observations(documents, company=company_name)
         observations += list(extra_observations or ())
         if not observations:
-            return None
+            # MEASURED: 2 of 5 real companies (Toyota, Costco) died here with
+            # usable evidence in hand. `derive_observations` requires a
+            # controlled-vocabulary SIGNAL match because a signal is the unit
+            # the PATTERN LIBRARY matches against -- a requirement the analyst
+            # does not share and which observations.py itself calls harmful to
+            # conflate. Returning None here meant no signal keyword => no
+            # analyst call at all, on evidence the analyst could have read.
+            #
+            # So fall back to the analyst's own derivation. The pattern library
+            # simply matches nothing and contributes no hypotheses, which is
+            # the honest outcome; the analyst still gets to read the evidence.
+            observations = derive_analyst_evidence(documents)
+            if not observations:
+                return None
         report = build_strategic_report(company_name=company_name,
                                         observations=observations,
                                         previous_model=previous_model)

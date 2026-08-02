@@ -89,6 +89,10 @@ INGESTION_EVENTS = frozenset({
     "ci.pasted_evidence_added", "ci.claims_built",
     # report-quality diagnostics (operator observability)
     "ci.quality_assessed",
+    # Operator-only: did the RICH path actually land? "The reasoning backend
+    # is configured" and "a grounded analysis was accepted" proved to be very
+    # different things, and nothing recorded the difference.
+    "ci.reasoning_assessed",
     # WHO the run is about, asserted before synthesis and independently of
     # whatever the run manages to retrieve.
     "ci.entity_identified",

@@ -741,10 +741,17 @@ def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,
     each one, and a "Strongest supported observation" that was the five words
     the company's own pages repeat most. It is the likeliest first impression
     the product makes on a company whose site does not server-render.
+
+    The Duolingo case is BOTH derivations empty: extraction returned titles
+    and meta descriptions, so no signal matched AND no body was long enough to
+    be analyst evidence. Patching only `derive_observations` would now describe
+    a different run -- one where the analyst has readable evidence and is
+    correctly consulted (see the test below).
     """
-    monkeypatch.setattr(
-        "intent_engine.strategic_intelligence.observations."
-        "derive_observations", lambda *a, **k: [])
+    for name in ("derive_observations", "derive_analyst_evidence"):
+        monkeypatch.setattr(
+            f"intent_engine.strategic_intelligence.observations.{name}",
+            lambda *a, **k: [])
     app, c, rid = _strategic_webapp_run(tmp_path)
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
@@ -1081,3 +1088,47 @@ def test_an_unfinished_run_does_not_masquerade_as_a_founder_brief(tmp_path):
     app, c, rid = _strategic_webapp_run(tmp_path)
     status, headers, body = c.request("GET", "/runs/NOT-A-REAL-RUN/progress")
     assert status.startswith("404"), status
+
+
+def test_no_signal_but_readable_evidence_still_reaches_the_analyst(tmp_path,
+                                                                   monkeypatch):
+    """MEASURED on five real companies: Toyota and Costco died before the
+    analyst with usable evidence in hand.
+
+    `derive_observations` requires a controlled-vocabulary SIGNAL match,
+    because a signal is the unit the pattern library matches against. The
+    analyst does not share that requirement -- observations.py says so itself,
+    and calls conflating the two harmful. Returning None when no keyword
+    matched meant the analyst was never consulted on evidence it could read.
+    """
+    monkeypatch.setattr(
+        "intent_engine.strategic_intelligence.observations."
+        "derive_observations", lambda *a, **k: [])
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    report = app.ci.compose(rid, fi_service=app.fi).get("strategic_report")
+    assert report is not None, (
+        "no pattern signal matched, so the analyst was never asked")
+    assert report.get("result_state")
+
+
+def test_reasoning_overview_reports_rich_acceptance_for_operators(tmp_path):
+    """"The reasoning backend is configured" and "a grounded analysis was
+    accepted" are different things, and nothing recorded the difference."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    app.ci.compose(rid, fi_service=app.fi)
+    overview = app.ci.reasoning_overview()
+    assert overview["attempts"] >= 1
+    assert 0.0 <= overview["acceptance_rate"] <= 100.0
+    assert set(overview["averages"]) == {
+        "documents", "analyst_evidence", "independent_sources", "filings"}
+    assert overview["accepted"] + overview["rejected"] == overview["attempts"]
+
+
+def test_operator_reasoning_metrics_never_reach_a_founder_screen(tmp_path):
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    app.ci.compose(rid, fi_service=app.fi)
+    for layer in ("", "/brief", "/dashboard", "/story", "/full"):
+        _, _, body = c.request("GET", f"/runs/{rid}{layer}")
+        for leaked in ("acceptance_rate", "rejection_causes",
+                       "reasoning_assessed", "analyst_evidence"):
+            assert leaked not in body, (layer, leaked)
