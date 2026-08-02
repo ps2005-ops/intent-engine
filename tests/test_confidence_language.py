@@ -8,6 +8,7 @@ move it.
 """
 import re
 
+from tests.test_strategic_intelligence import _live_transport
 from intent_engine.founder_brief.render import (
     confidence_sentence, is_bare_grade,
 )
@@ -110,3 +111,61 @@ def test_a_grounded_brief_never_renders_a_bare_grade(tmp_path):
     assert conf_para, "the grade vanished entirely"
     for para in conf_para:
         assert len(para.split()) > 4, f"grade stands alone: {para!r}"
+
+
+# --- operability: why is the backend off? -----------------------------------
+def test_readyz_distinguishes_a_missing_key_from_a_broken_client(tmp_path,
+                                                                 monkeypatch):
+    """A whole cycle was spent guessing between two causes that need
+    opposite fixes: add the variable, or fix the code."""
+    import json as _json
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+
+    def _ready(app):
+        out = []
+        body = app({"REQUEST_METHOD": "GET", "PATH_INFO": "/readyz",
+                    "SERVER_NAME": "t", "SERVER_PORT": "80",
+                    "wsgi.url_scheme": "http", "QUERY_STRING": "",
+                    "HTTP_HOST": "localhost"},
+                   lambda s, h: out.append(s))
+        return _json.loads(b"".join(body).decode())["capabilities"]
+
+    cfg = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                    web_store_path=tmp_path / "w.jsonl",
+                    fi_store_path=tmp_path / "fi.jsonl",
+                    ci_store_path=tmp_path / "ci.jsonl")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    caps = _ready(WebApp(cfg, transport=_live_transport, resolver=False))
+    assert caps["strategic_reasoning"] is False
+    assert caps["reasoning_key_present"] is False
+    assert "not set" in caps["reasoning_unavailable_because"]
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "x" * 8)
+    caps = _ready(WebApp(cfg, transport=_live_transport, resolver=False))
+    assert caps["reasoning_key_present"] is True
+    # env="test" refuses to build a client, so this is the "present but no
+    # client" branch -- and the two are now distinguishable.
+    assert caps["strategic_reasoning"] is False
+    assert "present" in caps["reasoning_unavailable_because"]
+
+
+def test_readyz_never_carries_the_key_itself(tmp_path, monkeypatch):
+    import json as _json
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    secret_value = "sk-ant-do-not-leak-me"
+    monkeypatch.setenv("ANTHROPIC_API_KEY", secret_value)
+    cfg = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                    web_store_path=tmp_path / "w.jsonl",
+                    fi_store_path=tmp_path / "fi.jsonl",
+                    ci_store_path=tmp_path / "ci.jsonl")
+    app = WebApp(cfg, transport=_live_transport, resolver=False)
+    out = []
+    body = app({"REQUEST_METHOD": "GET", "PATH_INFO": "/readyz",
+                "SERVER_NAME": "t", "SERVER_PORT": "80",
+                "wsgi.url_scheme": "http", "QUERY_STRING": "",
+                "HTTP_HOST": "localhost"}, lambda s, h: out.append(s))
+    raw = b"".join(body).decode()
+    assert secret_value not in raw
+    assert "sk-ant" not in raw

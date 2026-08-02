@@ -325,6 +325,22 @@ class WebApp:
                     _LOG.warning("analyst client unavailable; "
                                  "continuing without a reasoning backend")
                     ci_analyst = None
+                    self._analyst_error = "key present but no client was built"
+        # WHY the backend is off, not just THAT it is off.
+        #
+        # `/readyz` reports whether a client exists, which is the honest
+        # capability signal -- but it cannot tell a MISSING key apart from a
+        # key that is present and unusable, and those need opposite fixes:
+        # add the variable, or fix the code. A whole cycle was spent guessing
+        # between them. Both are booleans; the value is never read anywhere.
+        import os as _os
+        self._analyst_key_present = bool(_os.environ.get("ANTHROPIC_API_KEY"))
+        if not getattr(self, "_analyst_error", ""):
+            self._analyst_error = (
+                "" if ci_analyst is not None
+                else ("ANTHROPIC_API_KEY is not set in this environment"
+                      if not self._analyst_key_present
+                      else "key present but no client was built"))
         self._analyst_client = ci_analyst
         self.ci = CompanyIngestionService(
             getattr(config, "ci_store_path", "data/company_ingestion.jsonl"),
@@ -3681,7 +3697,12 @@ class WebApp:
         # direction is the only kind worth publishing.
         return {"pdf_extraction": pdf_available,
                 "browser_rendering": rendering_enabled(),
-                "strategic_reasoning": self._analyst_client is not None}
+                "strategic_reasoning": self._analyst_client is not None,
+                # Presence only -- the value is never read into a response.
+                "reasoning_key_present": getattr(
+                    self, "_analyst_key_present", False),
+                "reasoning_unavailable_because": getattr(
+                    self, "_analyst_error", "")}
 
     def _probe_runtime_root_writable(self) -> None:
         import os as _os
