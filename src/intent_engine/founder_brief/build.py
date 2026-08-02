@@ -371,10 +371,14 @@ def _confidence(observations: Sequence[dict], report: dict,
     A confidence label with no reason is decoration. The reason is the part a
     founder can actually act on -- it tells them what evidence would move it.
     """
+    from intent_engine.strategic_intelligence.source_semantics import (
+        independent_count,
+    )
     n = len(observations)
-    independent = sum(1 for o in observations
-                      if o.get("source_class") not in
-                      ("company_owned", "executive_statement", None, ""))
+    # A company filing is authoritative because of its venue and company-
+    # authored all the same. Counting it as independent told a founder their
+    # reading was externally corroborated when only the company had spoken.
+    independent = independent_count(o.get("source_class") for o in observations)
     dated = sum(1 for o in observations if (o.get("date") or "")[:4].isdigit())
 
     if not insight:

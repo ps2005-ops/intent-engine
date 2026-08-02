@@ -829,11 +829,15 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.observations import (
             derive_analyst_evidence,
         )
+        from intent_engine.strategic_intelligence.source_semantics import (
+            independent_count,
+        )
         evidence = derive_analyst_evidence(documents)
-        independent = sum(
-            1 for o in evidence
-            if getattr(o, "source_class", "") not in
-            ("company_owned", "executive_statement", "", None))
+        # `investor_material` is a COMPANY-authored filing; EDGAR is its venue,
+        # not its author. Counting it as independent is what produced the
+        # false "EDGAR supplied 10 independent sources" reading.
+        independent = independent_count(
+            getattr(o, "source_class", "") for o in evidence)
         filings = sum(1 for d in documents
                       if "sec.gov" in (d.get("final_url") or ""))
         self._append(
@@ -1005,6 +1009,32 @@ class CompanyIngestionService:
                     payload["strategic_analysis"], memory=memory)
                 payload["evidence_count"] = len(evidence)
         payload["result_state_detail"] = ResultState.EXPLANATION.get(state, "")
+        # WHY IT WAS WITHHELD, in the reader's terms. The generic
+        # STRATEGICALLY_INSUFFICIENT text says the pages were "descriptive
+        # rather than strategic", which was measurably not the reason on these
+        # runs -- they were refused for reaching after figures the sources did
+        # not contain. A founder told the wrong reason acts on the wrong thing.
+        if state != ResultState.COMPLETE:
+            from intent_engine.strategic_intelligence.numeric_ledger import (
+                build_ledger,
+            )
+            from intent_engine.strategic_intelligence.source_semantics import (
+                independent_count,
+            )
+            from intent_engine.strategic_intelligence import (
+                withheld_explanation as WX,
+            )
+            explanation = WX.explain(
+                findings=payload.get("critic_findings") or [],
+                families=sorted({getattr(o, "source_class", "")
+                                 for o in evidence
+                                 if getattr(o, "source_class", "")}),
+                independent_sources=independent_count(
+                    getattr(o, "source_class", "") for o in evidence),
+                document_count=len(documents),
+                numeric_facts=len(build_ledger(evidence)))
+            payload["withheld_explanation"] = explanation
+            payload["result_state_detail"] = WX.render_text(explanation)
         return payload
 
     @staticmethod
