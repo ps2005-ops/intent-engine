@@ -35,8 +35,6 @@ import urllib.parse
 import urllib.request
 
 FTS_ENDPOINT = "https://efts.sec.gov/LATEST/search-index"
-USER_AGENT = ("intent-engine/1.0 company-research "
-              "(contact: operator via deployment)")
 
 #: forms whose text is substantive prose about a business, in rough order of
 #: how much a third party says about a competitor inside them.
@@ -64,11 +62,27 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+def _sec_user_agent() -> str:
+    """The shared UA plus a contact, exactly as edgar._sec_transport builds it.
+
+    This module had invented its own User-Agent string with a placeholder
+    contact. SEC fair-access guidance asks for a real one, and the rest of the
+    codebase already threads SEC_CONTACT_EMAIL through for precisely that --
+    so a second, weaker convention here was a way to start getting 403s that
+    the other SEC caller would not.
+    """
+    import os
+    from intent_engine.company_ingestion.records import USER_AGENT
+    contact = os.environ.get("SEC_CONTACT_EMAIL", "").strip()
+    return USER_AGENT + (f" contact:{contact}" if contact else "")
+
+
 def _get_json(url, *, transport=None, timeout=20.0):
     if transport is not None:                     # injected in tests
         return transport(url)
     request = urllib.request.Request(
-        url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+        url, headers={"User-Agent": _sec_user_agent(),
+                      "Accept": "application/json"})
     opener = urllib.request.build_opener(_NoRedirect)
     with opener.open(request, timeout=timeout) as response:
         return json.loads(response.read())

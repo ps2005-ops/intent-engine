@@ -147,3 +147,83 @@ def test_an_injected_transport_keeps_discovery_offline(tmp_path):
     ci = CompanyIngestionService(tmp_path / "ci.jsonl",
                                  transport=_live_transport, resolver=False)
     assert ci._third_party_filing_candidates({"company_name": "Datadog"}) == []
+
+
+# --- claim relevance: the seventeen measured false positives ----------------
+def _relevance(text, company="Datadog"):
+    from intent_engine.strategic_intelligence import claim_relevance as CR
+    return CR.assess(text=text, company_name=company)
+
+
+def test_a_compensation_peer_group_is_not_corroboration():
+    """MEASURED on Cloudflare's and Confluent's filings: the only mention of
+    Datadog sat in an executive-compensation peer group."""
+    v = _relevance("Based on a review of the analysis prepared by Compensia, "
+                   "the compensation committee removed Cloudflare and Datadog "
+                   "from the peer group for 2025.")
+    assert v.relationship == "UNRELATED"
+    assert v.rejected_as == "compensation_peer_group"
+    assert not v.usable_as_support
+
+
+def test_an_xbrl_taxonomy_fragment_is_not_evidence():
+    """MEASURED on Figma, Lifetime Brands, Ichor and Australian Oilseeds."""
+    v = _relevance("2023-01-01 2023-12-31 0001579878 "
+                   "us-gaap:ForeignTaxJurisdictionMember Datadog")
+    assert v.rejected_as == "xbrl_fragment"
+
+
+def test_a_director_biography_is_not_evidence():
+    """MEASURED on Skillsoft, IPG Photonics and ProSomnus."""
+    v = _relevance("He has served on the board of directors of Datadog, Inc. "
+                   "and received a Bachelor of Science from the University of "
+                   "Denver.")
+    assert v.rejected_as == "director_biography"
+
+
+def test_forward_looking_boilerplate_is_not_evidence():
+    """MEASURED on SEMrush."""
+    v = _relevance("These forward-looking statements involve circumstances "
+                   "that are difficult to predict, including competition from "
+                   "Datadog.")
+    assert v.rejected_as == "forward_looking_boilerplate"
+
+
+def test_naming_the_company_and_saying_nothing_is_rejected():
+    v = _relevance("Our platform integrates with Datadog and other tools.")
+    assert v.relationship == "UNRELATED"
+    assert v.rejected_as == "weak_mention"
+
+
+def test_a_long_competitor_list_is_context_only_never_support():
+    """A company beside twenty others shows it competes here, nothing more."""
+    v = _relevance("We compete with Datadog, Splunk, Elastic, Dynatrace, "
+                   "New Relic, Sumo Logic, Grafana Labs and others.")
+    assert v.relationship == "CONTEXTUALIZES"
+    assert not v.usable_as_support, "context-only may never carry a conclusion"
+
+
+def test_a_material_displacement_statement_is_genuine_support():
+    """MEASURED: New Relic's filing is the one of eighteen that qualifies."""
+    v = _relevance("Customers have migrated from our platform to Datadog, and "
+                   "we lost a customer to them in the enterprise segment.")
+    assert v.usable_as_support
+    assert v.relationship in ("SUPPORTS", "WEAKENS")
+
+
+def test_a_material_statement_about_a_different_subject_is_context_only():
+    v = _relevance("We compete directly with Datadog in log management.",
+                   company="Datadog")
+    from intent_engine.strategic_intelligence import claim_relevance as CR
+    scoped = CR.assess(text="We compete directly with Datadog in log "
+                            "management.",
+                       company_name="Datadog",
+                       claim_terms=("electric vehicle", "battery"))
+    assert scoped.relationship == "CONTEXTUALIZES"
+    assert scoped.rejected_as == "different_subject"
+    assert v.usable_as_support        # unscoped, it is still material
+
+
+def test_a_document_that_never_names_the_company_is_wrong_entity():
+    v = _relevance("This filing discusses semiconductor lithography demand.")
+    assert v.rejected_as == "wrong_entity"

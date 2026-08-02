@@ -517,7 +517,7 @@ def _is_weak(excerpt: str, title: str, signals: list) -> bool:
 MIN_ANALYST_EXCERPT_CHARS = 120
 
 
-def derive_analyst_evidence(documents) -> list:
+def derive_analyst_evidence(documents, company: str = "") -> list:
     """Evidence for the grounded analyst -- every strategic page, signal or not.
 
     `derive_observations` below requires a controlled-vocabulary signal match,
@@ -553,6 +553,24 @@ def derive_analyst_evidence(documents) -> list:
             continue
 
         body = (doc.get("text_content") or "").strip()
+        # AN INDEPENDENT SOURCE STILL HAS TO SAY SOMETHING.
+        #
+        # Measured on the eighteen third-party filings this product accepts:
+        # seventeen were not statements about the subject at all -- executive
+        # compensation peer groups, XBRL taxonomy fragments, director
+        # biographies, forward-looking boilerplate. They raised the
+        # independence COUNT and taught the analyst nothing.
+        #
+        # Only third-party sources are screened. Company-owned pages are the
+        # company describing itself and are expected to; the question there is
+        # never "is this about the company".
+        if (doc.get("source_class") or "") == "competitor":
+            from intent_engine.strategic_intelligence.claim_relevance import (
+                assess,
+            )
+            verdict = assess(text=body, company_name=company or "")
+            if not verdict.usable_as_support:
+                continue
         excerpt = (body or doc.get("meta_description") or "").strip()
         if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
             continue

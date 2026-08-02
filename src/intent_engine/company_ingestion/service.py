@@ -842,7 +842,8 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.source_semantics import (
             independent_count,
         )
-        evidence = derive_analyst_evidence(documents)
+        evidence = derive_analyst_evidence(
+            documents, (self.run_meta(run_id) or {}).get("company_name", ""))
         # `investor_material` is a COMPANY-authored filing; EDGAR is its venue,
         # not its author. Counting it as independent is what produced the
         # false "EDGAR supplied 10 independent sources" reading.
@@ -949,7 +950,7 @@ class CompanyIngestionService:
             # So fall back to the analyst's own derivation. The pattern library
             # simply matches nothing and contributes no hypotheses, which is
             # the honest outcome; the analyst still gets to read the evidence.
-            observations = derive_analyst_evidence(documents)
+            observations = derive_analyst_evidence(documents, company_name)
             if not observations:
                 return None
         report = build_strategic_report(company_name=company_name,
@@ -969,7 +970,7 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.analyst import (
             AnalystUnavailable, ResultState, analyse,
         )
-        evidence = derive_analyst_evidence(documents)
+        evidence = derive_analyst_evidence(documents, company_name)
         evidence += list(extra_observations or ())
 
         payload["reasoning_provenance"] = "pattern_library"
