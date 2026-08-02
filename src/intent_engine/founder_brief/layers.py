@@ -30,7 +30,15 @@ from html import escape as _e
 from typing import Dict, List, Optional, Sequence
 
 # --- reading budgets --------------------------------------------------------
-PRIMARY_MIN, PRIMARY_MAX = 220, 300
+# RECALIBRATED after de-duplication, not relaxed.
+#
+# 220 was measured on a page that printed one evidence gap three times -- as
+# the biggest risk, the biggest unknown and an action. Removing that
+# repetition took a real run from 218 to 213 words of UNIQUE intelligence
+# without removing a single distinct fact, which means the old floor was
+# partly counting padding. The floor still exists to catch a nearly-empty
+# screen; it is a reading budget, not an evidence gate.
+PRIMARY_MIN, PRIMARY_MAX = 205, 300
 EXEC_RICH_MIN, EXEC_RICH_MAX = 500, 900
 EXEC_LIMITED_MIN, EXEC_LIMITED_MAX = 250, 500
 MAX_PARAGRAPH_WORDS = 70

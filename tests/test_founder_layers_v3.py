@@ -665,6 +665,7 @@ def _rich_pair():
     ledger.spend(k.fact, k.interpretation, k.so_what, k.decision)
     for change in (brief.what_changed or ())[:2]:
         ledger.spend(change.get("what", ""))
+    ledger.spend(brief.biggest_risk, brief.biggest_unknown)
     return brief, report, L.build_executive_brief(brief, report, ledger)
 
 

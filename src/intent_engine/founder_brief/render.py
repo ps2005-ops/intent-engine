@@ -238,13 +238,16 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
     if b.biggest_risk or b.biggest_unknown:
         out.append("<h2>Risk and unknown</h2><div class=\"grid2\">")
         if b.biggest_risk:
+            # The label and the sentence ran together in the rendered text
+            # ("Biggest riskevery source here is..."), because a bare <span>
+            # is inline. Seen live, not in any assertion.
             out.append('<div class="card"><span class="lbl small muted">'
                        f'Biggest risk</span>'
-                       f'{_e(_clip(b.biggest_risk, 26))}</div>')
+                       f'<p>{_e(_clip(b.biggest_risk, 26))}</p></div>')
         if b.biggest_unknown:
             out.append('<div class="card"><span class="lbl small muted">'
                        f'Biggest unknown</span>'
-                       f'{_e(_clip(b.biggest_unknown, 26))}</div>')
+                       f'<p>{_e(_clip(b.biggest_unknown, 26))}</p></div>')
         out.append("</div>")
 
     # Market context belongs on the dashboard, not the 60-second screen: it is

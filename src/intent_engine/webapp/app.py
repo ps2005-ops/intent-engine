@@ -1960,6 +1960,11 @@ class WebApp:
             ledger.spend(k.fact, k.interpretation, k.so_what, k.decision)
         for change in (brief.what_changed or ())[:2]:
             ledger.spend(change.get("what", ""))
+        # The primary screen also prints the risk and the unknown. Omitting
+        # them let the executive brief re-serve an evidence gap the reader had
+        # already met two sections earlier -- the same repetition the 60-second
+        # screen was just cleaned of, one layer up.
+        ledger.spend(brief.biggest_risk, brief.biggest_unknown)
         # When the reading was WITHHELD, reuse the conclusion the strategic
         # brief already reached rather than authoring a second version of it.
         # One source of truth for "what did this report conclude".

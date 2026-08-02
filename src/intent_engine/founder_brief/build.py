@@ -203,6 +203,33 @@ def build(*, company: str, mode: str, report: Optional[dict] = None,
     brief.biggest_unknown = _sentence(
         _first(report.get("questions")) or _first(report.get("evidence_gaps")))
     brief.next_actions = _next_actions(report, brief.key_insight, mode)
+
+    # ONE SCREEN, ONE SENTENCE, ONCE.
+    #
+    # Seen live on Palantir: `risks` and `questions` were both empty, so
+    # `biggest_risk`, `biggest_unknown` AND a "Find out:" action all fell back
+    # to the same first evidence gap. The founder's primary screen printed one
+    # sentence three times under three different headings, which is what a
+    # generic AI summary looks like. Later fields yield to earlier ones and
+    # are dropped rather than repeated -- an empty section is honest, a
+    # duplicated one is not.
+    spoken = {_said(brief.key_insight.fact) if brief.key_insight else "",
+              _said(brief.key_insight.so_what) if brief.key_insight else "",
+              _said(brief.key_insight.decision) if brief.key_insight else ""}
+    spoken |= {_said(c["what"]) for c in brief.what_changed}
+    for field in ("biggest_risk", "biggest_unknown"):
+        value = getattr(brief, field)
+        if _said(value) in spoken:
+            setattr(brief, field, "")
+        elif value:
+            spoken.add(_said(value))
+    kept = []
+    for action in brief.next_actions:
+        if _said(action) in spoken:
+            continue
+        spoken.add(_said(action))
+        kept.append(action)
+    brief.next_actions = tuple(kept)
     brief.confidence, brief.confidence_reason = _confidence(
         observations, report, brief.key_insight)
     brief.market_context = market
@@ -238,6 +265,19 @@ def _what_it_does(report: dict, observations: Sequence[dict]) -> str:
     return ""
 
 
+def _said(text: str) -> str:
+    """A sentence's identity, for "has this screen already said it?".
+
+    The leading action verb is stripped first: "Find out: Revenue mix is not
+    public" and "Revenue mix is not public" are the same sentence to a reader,
+    and comparing them with the prefix attached let the identical evidence gap
+    appear as both the biggest risk and an action.
+    """
+    body = re.sub(r"^\s*(find out|watch|ask|check|confirm|verify)\s*:\s*",
+                  "", str(text or ""), flags=re.I)
+    return " ".join(re.findall(r"[a-z0-9]+", body.lower()))[:120]
+
+
 def _what_changed(observations: Sequence[dict]) -> tuple:
     """Up to three DATED developments, newest first.
 
@@ -247,12 +287,20 @@ def _what_changed(observations: Sequence[dict]) -> tuple:
     """
     dated = [o for o in observations if (o.get("date") or "")[:4].isdigit()]
     dated.sort(key=lambda o: o.get("date", ""), reverse=True)
-    out = []
-    for obs in dated[:3]:
+    out, seen = [], set()
+    for obs in dated:
+        if len(out) >= 3:
+            break
         text = _sentence(obs.get("text") or obs.get("summary") or "", 160)
-        if text:
-            out.append({"when": obs.get("date", "")[:10], "what": text,
-                        "evidence_id": obs.get("observation_id", "")})
+        # Two observations retrieved from different pages routinely carry the
+        # SAME derived sentence. Printed twice under "What changed", with the
+        # same date, it reads as a broken product -- seen live on Palantir,
+        # where one company-description sentence filled both rows.
+        if not text or _said(text) in seen:
+            continue
+        seen.add(_said(text))
+        out.append({"when": obs.get("date", "")[:10], "what": text,
+                    "evidence_id": obs.get("observation_id", "")})
     return tuple(out)
 
 

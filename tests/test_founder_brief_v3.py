@@ -354,3 +354,61 @@ def test_the_gate_reports_every_failure_not_just_the_first():
     b.next_actions = ("a", "b", "c", "d")
     result = G.check(b, "<main><h1>x</h1>win rate 61% undervalued</main>")
     assert len(result.failures) >= 3
+
+
+# --- one screen, one sentence, once -----------------------------------------
+def test_the_primary_screen_never_prints_one_sentence_three_times():
+    """SEEN LIVE on Palantir, not in any assertion.
+
+    `risks` and `questions` were both empty, so `biggest_risk`,
+    `biggest_unknown` and a "Find out:" action all fell back to the same first
+    evidence gap. One sentence, three headings, one screen.
+    """
+    gap = "every source here is published by the company itself"
+    report = {"observations": [
+        {"text": "Acme sells three products.", "date": "2026-05-01",
+         "source_class": "company_owned", "observation_id": "ev-1"}],
+        "evidence_gaps": [gap], "risks": [], "questions": []}
+    b = B.build(company="Acme", mode=B.MARKETING_ONLY, report=report,
+                observations=report["observations"])
+    rendered = " ".join(filter(None, [
+        b.biggest_risk, b.biggest_unknown, *b.next_actions]))
+    assert rendered.lower().count(gap) <= 1, rendered
+
+
+def test_what_changed_does_not_list_the_same_development_twice():
+    """SEEN LIVE: two observations carried the same derived sentence and both
+    were printed under "What changed", with the same date."""
+    same = "Acme sells several distinct products rather than one."
+    report = {"observations": [
+        {"text": same, "date": "2026-08-02", "source_class": "company_owned",
+         "observation_id": "ev-1"},
+        {"text": same, "date": "2026-08-02", "source_class": "company_owned",
+         "observation_id": "ev-2"}]}
+    b = B.build(company="Acme", mode=B.MARKETING_ONLY, report=report,
+                observations=report["observations"])
+    assert len(b.what_changed) <= 1, b.what_changed
+
+
+def test_an_action_repeating_the_risk_is_dropped_despite_its_prefix():
+    """"Find out: X" and "X" are the same sentence to a reader."""
+    gap = "Whether customers moved their source of truth is not observable."
+    report = {"observations": [
+        {"text": "Acme sells software.", "date": "2026-05-01",
+         "source_class": "company_owned", "observation_id": "ev-1"}],
+        "evidence_gaps": [gap], "risks": [], "questions": []}
+    b = B.build(company="Acme", mode=B.MARKETING_ONLY, report=report,
+                observations=report["observations"])
+    joined = " ".join(b.next_actions).lower()
+    if b.biggest_risk:
+        assert gap.lower() not in joined, b.next_actions
+
+
+def test_the_risk_label_does_not_run_into_its_sentence():
+    """SEEN LIVE: "Biggest riskevery source here is..." -- a bare <span> is
+    inline, so the label and the sentence ran together in the rendered text."""
+    from intent_engine.founder_brief import render as R
+    b = _sparse()
+    b.biggest_risk = "Nothing independent confirms the claim."
+    html = R.render_brief(b, run_id="r1")
+    assert "Biggest risk</span><p>" in html
