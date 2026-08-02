@@ -15,6 +15,7 @@ import html as _html
 import json
 import pathlib
 import logging
+import time
 import traceback
 import uuid
 from urllib.parse import parse_qs
@@ -338,6 +339,30 @@ class WebApp:
         if Scheduler.enabled():
             self._scheduler = Scheduler(self._runtime_root).start()
         self._results: dict = {}   # run_id -> composed result cache
+        # ASYNCHRONOUS ANALYSIS.
+        #
+        # `POST /analyze` used to run discovery, retrieval, reasoning and
+        # rendering inside the request. A real browser on the deployed preview
+        # was blocked for the WHOLE analysis -- minutes for Costco -- and the
+        # progress page, which already records truthful stages, could not be
+        # reached during the one window it exists to explain.
+        #
+        # In-process and bounded, not a second job framework: the run, its
+        # ownership and every stage transition are already persisted by the
+        # ingestion service, so the request only has to stop waiting for them.
+        # One worker, because the preview is a free instance and two
+        # concurrent analyses would contend for its memory.
+        import threading as _threading
+        from concurrent.futures import ThreadPoolExecutor as _Pool
+        self._analysis_pool = _Pool(max_workers=1,
+                                    thread_name_prefix="analysis")
+        self._analysis_lock = _threading.Lock()
+        self._analysis_inflight: dict = {}   # run_id -> started monotonic
+        # env="test" keeps the OLD synchronous semantics so the existing
+        # suite still asserts on finished runs without every test learning to
+        # wait. The asynchronous path has its own dedicated tests which turn
+        # this on explicitly -- gating it the way the analyst client is gated.
+        self._analysis_async = config.env != "test"
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
         # run_id -> the last answered topics, so a bare "Why?" has a subject.
         self._conversation_context: dict = {}
@@ -1044,12 +1069,17 @@ class WebApp:
             elif existing != session["user_id"]:
                 return self._error_page(403, "this run belongs to another "
                                              "account")
-            self.ci.discover(run_id)
             if self.config.autorun_sources:
-                # Frictionless default: no separate source-review page. Approve
-                # the recommended sources (consent was given on this form) and
-                # run straight through to the result.
+                # Frictionless default: no separate source-review page. The
+                # work is SCHEDULED and the response returns at once;
+                # discovery is itself a network call and belongs off the
+                # request thread with everything after it.
+                if self._analysis_async:
+                    self._schedule_analysis(session["user_id"], run_id)
+                    return self._redirect(f"/runs/{run_id}/progress")
+                self.ci.discover(run_id)
                 return self._autorun(session, run_id)
+            self.ci.discover(run_id)
             return self._redirect(f"/runs/{run_id}/sources")
         result = self.fi.run(company_name=DEMO_COMPANY_NAME,
                              website=f"https://{DEMO_DOMAIN}",
@@ -1112,6 +1142,48 @@ class WebApp:
             f'</main></body></html>')
         return self._html(body)
 
+    #: Backend transitions the ingestion service ALREADY records, mapped to
+    #: words a founder reads. Only states that genuinely occur are listed --
+    #: claiming "checking outside context" for a stage that never runs is the
+    #: dishonesty this mapping exists to avoid.
+    STAGE_COPY = {
+        "VALIDATING_COMPANY": "Checking which company this is",
+        "DISCOVERING_SOURCES": "Finding the company's own, investor and "
+                               "regulatory sources",
+        "AWAITING_SOURCE_APPROVAL": "Choosing which sources to read",
+        "FETCHING_APPROVED_SOURCES": "Reading the most relevant material",
+        "PARSING_SOURCES": "Reading the most relevant material",
+        "BUILDING_SOURCE_ARTIFACTS": "Organising what the sources actually say",
+        "ASSEMBLING_COMPANY_UNDERSTANDING": "Testing whether the evidence "
+                                            "supports a useful conclusion",
+        "ASSEMBLING_REPORT": "Writing the founder briefing",
+    }
+
+    def _stage_line(self, state) -> str:
+        """One truthful sentence, or an honest general fallback."""
+        return self.STAGE_COPY.get(
+            state or "", "Still working through the available evidence")
+
+    def _elapsed_line(self, run_id: str) -> str:
+        """Real elapsed time. Never a percentage, never a countdown."""
+        import datetime as _dt
+        first = None
+        for row in self.ci.store.for_run(run_id):
+            first = getattr(row, "recorded_at", None)
+            if first:
+                break
+        if not first:
+            return "Just started."
+        try:
+            began = _dt.datetime.fromisoformat(str(first).replace("Z", "+00:00"))
+        except ValueError:
+            return "Just started."
+        seconds = int((_dt.datetime.now(_dt.timezone.utc) - began)
+                      .total_seconds())
+        if seconds < 60:
+            return f"Running for {max(seconds, 1)}s."
+        return f"Running for {seconds // 60}m {seconds % 60}s."
+
     def _progress(self, session, run_id):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
@@ -1143,6 +1215,10 @@ class WebApp:
         if status in ("COMPLETE", "PARTIAL"):
             return self._redirect(f"/runs/{run_id}")
 
+        # A worker that vanished must not leave this page polling forever.
+        if not terminal and self._interrupted_if_stale(run_id):
+            status = self.ci.store.run_state(run_id) or status
+            terminal = True
         refresh = ('' if terminal
                    else '<meta http-equiv="refresh" content="4">')
         # A run that failed must say so in the heading. Softening every state
@@ -1165,13 +1241,18 @@ class WebApp:
         else:
             # Still in flight. Say what is happening in words a person uses,
             # not lifecycle names, and never claim a result already exists.
-            tail = ('<p>Finding the company\'s own pages, its investor and '
-                    'financial material where it exists, and independent '
-                    'coverage — then reading them. This usually takes under a '
-                    'minute and the page moves on by itself.</p>'
-                    '<p class="coverage">If nothing has happened after a '
-                    'couple of minutes the run may have been interrupted. You '
-                    'can <a href="/">start again</a>.</p>')
+            # THE STAGE, THE ELAPSED TIME, AND WHERE TO FIND THIS LATER.
+            # No percentage and no countdown: there is no honest denominator
+            # for either, and a fake one is worse than none.
+            tail = (f'<p role="status" aria-live="polite">'
+                    f'<strong>{_e(self._stage_line(status))}.</strong></p>'
+                    f'<p>{_e(self._elapsed_line(run_id))}</p>'
+                    f'<p>You can safely leave this page — the analysis keeps '
+                    f'running, and it will be waiting under '
+                    f'<a href="/analyses">your analyses</a>.</p>'
+                    f'<p class="coverage">This preview stores runs in memory, '
+                    f'so a restart can interrupt one. If that happens the page '
+                    f'says so rather than waiting forever.</p>')
         return self._html(head + tail + '</main></body></html>')
 
     def _coverage_note(self, run_id, real):
@@ -2951,6 +3032,117 @@ class WebApp:
                     break
                 picked.append(candidate["candidate_id"])
         return picked
+
+    # --- asynchronous analysis ------------------------------------------
+    #: A run whose last transition is older than this and is not terminal is
+    #: treated as INTERRUPTED. The free instance restarts without warning, and
+    #: a run left permanently "reading evidence" is the worst of both worlds:
+    #: it never finishes and never admits it.
+    STALE_ATTEMPT_SECONDS = 15 * 60
+
+    TERMINAL_STATES = ("COMPLETE", "PARTIAL", "FAILED", "REJECTED",
+                       "INTERRUPTED")
+
+    def wait_for_analysis(self, run_id: str, timeout: float = 30.0) -> bool:
+        """Block until this run reaches a terminal state. TESTS ONLY.
+
+        Production never waits -- that is the entire point of the change. This
+        exists so a test can assert on the finished state without sleeping on
+        a guess.
+        """
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            with self._analysis_lock:
+                running = run_id in self._analysis_inflight
+            state = self.ci.store.run_state(run_id)
+            if not running and state in self.TERMINAL_STATES:
+                return True
+            time.sleep(0.05)
+        return False
+
+    def _schedule_analysis(self, user_id: str, run_id: str) -> bool:
+        """Queue the analysis for this OWNED run exactly once.
+
+        Returns True when this call scheduled work. A double-click, a browser
+        retry or a duplicate POST returns False and changes nothing: the run
+        id is deterministic per company+user+day, so the second submission
+        resolves to the same run and must not start a second execution.
+        """
+        with self._analysis_lock:
+            if run_id in self._analysis_inflight:
+                return False
+            state = self.ci.store.run_state(run_id)
+            if state in self.TERMINAL_STATES or run_id in self._results:
+                return False                    # already done; reuse it
+            self._analysis_inflight[run_id] = time.monotonic()
+        try:
+            self._analysis_pool.submit(self._run_analysis, user_id, run_id)
+        except RuntimeError:                    # pool shut down
+            with self._analysis_lock:
+                self._analysis_inflight.pop(run_id, None)
+            return False
+        return True
+
+    def _run_analysis(self, user_id: str, run_id: str) -> None:
+        """The whole pipeline, off the request thread.
+
+        Every exception becomes a TERMINAL state. A worker that dies silently
+        would leave the progress page claiming work forever, which is the
+        failure this whole change exists to remove.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        domain = meta.get("domain", "")
+        try:
+            self.ci.discover(run_id)
+            candidates = self.ci.store.candidates(run_id)
+            if self.ci.store.approval(run_id) is None:
+                approved = self._recommended_candidate_ids(
+                    candidates, refusing_hosts=self.ci.refusing_hosts(run_id))
+                rejected = [c["candidate_id"] for c in candidates
+                            if c["candidate_id"] not in approved]
+                self.ci.approve(run_id, user_id=user_id,
+                                approved_ids=approved, rejected_ids=rejected)
+                self.ci.fetch_approved(run_id)
+            self._results[run_id] = self._compose(run_id)
+        except Exception as exc:  # noqa: BLE001 - a worker may not escape
+            _LOG.warning("analysis failed run=%s %s", run_id,
+                         type(exc).__name__)
+            try:
+                self.ci._transition(run_id, domain, "FAILED")
+            except Exception:  # noqa: BLE001 - already failing
+                pass
+        finally:
+            with self._analysis_lock:
+                self._analysis_inflight.pop(run_id, None)
+
+    def _interrupted_if_stale(self, run_id: str) -> bool:
+        """Mark a run INTERRUPTED when its worker vanished.
+
+        Ephemeral free-tier instances restart mid-run. Without this the
+        progress page polls a state that will never advance.
+        """
+        state = self.ci.store.run_state(run_id)
+        if state in self.TERMINAL_STATES:
+            return False
+        with self._analysis_lock:
+            if run_id in self._analysis_inflight:
+                return False                    # genuinely running here
+        last = None
+        for row in self.ci.store.for_run(run_id):
+            last = getattr(row, "recorded_at", None) or last
+        if not last:
+            return False
+        import datetime as _dt
+        try:
+            when = _dt.datetime.fromisoformat(str(last).replace("Z", "+00:00"))
+        except ValueError:
+            return False
+        now = _dt.datetime.now(_dt.timezone.utc)
+        if (now - when).total_seconds() < self.STALE_ATTEMPT_SECONDS:
+            return False
+        meta = self.ci.run_meta(run_id) or {}
+        self.ci._transition(run_id, meta.get("domain", ""), "INTERRUPTED")
+        return True
 
     def _autorun(self, session, run_id):
         """Approve the recommended sources, retrieve, and compose in one shot,
