@@ -123,11 +123,38 @@ decisions. That is a correct answer and it is strongly preferred to a \
 confident-sounding invention. Three real decisions beat five padded ones."""
 
 
-def _evidence_pack(observations, company_name, *, entity_hint=None) -> str:
+_CLOSED_EVIDENCE_NOTICE = """\
+CLOSED-EVIDENCE TASK. Measured failure this guards against: on five real
+companies the critic rejected 16 figures and 15 of them appeared in NO
+retrieved document -- they were recalled, not read.
+
+  * Use ONLY the evidence in this request.
+  * You may already know this company. Do not use anything you remember.
+  * State a number ONLY if it appears in NUMERIC_FACTS below, and cite its
+    fact_id. There are no exceptions for figures you are confident about.
+  * Do not compute a new number from the facts. A derivation you perform
+    silently cannot be verified and will be refused.
+  * Where evidence and memory disagree, the evidence wins.
+  * Where a figure is missing, say so: "the retrieved evidence does not
+    provide a verified figure", or describe direction without magnitude.
+
+Withholding is a correct answer. An unsupported figure is not."""
+
+
+def _evidence_pack(observations, company_name, *, entity_hint=None,
+                   ledger=None) -> str:
     lines = [f"COMPANY UNDER ANALYSIS: {company_name}"]
     if entity_hint:
         lines.append(f"ENTITY NOTE: {entity_hint}")
     lines.append("")
+    lines.append(_CLOSED_EVIDENCE_NOTICE)
+    lines.append("")
+    if ledger is not None:
+        from intent_engine.strategic_intelligence.numeric_ledger import (
+            render_for_pack,
+        )
+        lines.append(render_for_pack(ledger))
+        lines.append("")
     lines.append(f"EVIDENCE ({len(observations)} retrieved observations). "
                  "Cite by observation_id.")
     lines.append("")
@@ -158,9 +185,10 @@ def evidence_digest(observations, company_name) -> str:
     return h.hexdigest()
 
 
-def cache_key(observations, company_name, model) -> str:
+def cache_key(observations, company_name, model, *, ledger_size=0) -> str:
     return hashlib.sha256("|".join([
         evidence_digest(observations, company_name), model, PROMPT_VERSION,
+        f"ledger={ledger_size}",
     ]).encode("utf-8")).hexdigest()
 
 
@@ -222,17 +250,24 @@ def analyse(company_name, observations, *, client=None, cache=None,
         raise AnalystUnavailable(
             "no reasoning backend configured (ANTHROPIC_API_KEY unset)")
 
-    key = cache_key(observations, company_name, model)
+    from intent_engine.strategic_intelligence.numeric_ledger import (
+        build_ledger,
+    )
+    # The ledger is part of WHAT THE ANALYST WAS SHOWN, so it belongs in the
+    # cache identity: a run that saw different figures is a different run.
+    ledger = build_ledger(observations)
+    key = cache_key(observations, company_name, model,
+                    ledger_size=len(ledger))
     if cache is not None:
         hit = cache.get(key)
         if hit is not None:
             log.info("analyst cache hit company=%s key=%s", company_name,
                      key[:12])
             return _verify_and_wrap(hit, observations, company_name, model,
-                                    usage={"cached": True})
+                                    usage={"cached": True}, ledger=ledger)
 
     user_message = _evidence_pack(observations, company_name,
-                                  entity_hint=entity_hint)
+                                  entity_hint=entity_hint, ledger=ledger)
 
     raw, usage, last_error = None, {}, None
     for attempt in range(1, MAX_ATTEMPTS + 1):
@@ -268,7 +303,8 @@ def analyse(company_name, observations, *, client=None, cache=None,
 
     if cache is not None:
         cache.put(key, raw)
-    return _verify_and_wrap(raw, observations, company_name, model, usage)
+    return _verify_and_wrap(raw, observations, company_name, model, usage,
+                            ledger=ledger)
 
 
 def _normalise(raw):
@@ -315,10 +351,18 @@ def _normalise(raw):
     return out
 
 
-def _verify_and_wrap(raw, observations, company_name, model, usage):
+def _verify_and_wrap(raw, observations, company_name, model, usage,
+                     ledger=None):
     raw = _normalise(raw)
-    findings = verify_analysis(raw, observations=observations,
-                               company_name=company_name)
+    # SCHEMA GATE, ahead of the critic and separate from it. A numeric claim
+    # with no fact_id behind it never reaches the critic; the critic stays an
+    # independent second line of defence rather than the only one.
+    from intent_engine.strategic_intelligence.contract_numeric import (
+        validate_numeric_claims,
+    )
+    schema_findings = validate_numeric_claims(raw, ledger or [])
+    findings = list(schema_findings) + list(verify_analysis(
+        raw, observations=observations, company_name=company_name))
     if rejects(findings):
         log.warning("analyst output rejected for %s: %s", company_name,
                     "; ".join(f.check for f in findings if f.rejects))
