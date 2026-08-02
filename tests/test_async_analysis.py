@@ -501,3 +501,35 @@ def test_interrupted_says_so_rather_than_implying_work_continues(tmp_path):
     app.ci._transition(run_id, meta.get("domain", ""), "INTERRUPTED")
     _, _, html = c.request("GET", f"/runs/{run_id}/progress")
     assert "interrupt" in html.lower() or "stopped" in html.lower()
+
+
+# --- rate-limit honesty -----------------------------------------------------
+def test_a_refused_demo_says_when_to_come_back():
+    """"Please try again later" is not an answer to "when?" -- and the
+    window is already known at the point of refusal."""
+    from intent_engine.webapp.app import _retry_phrase
+    assert _retry_phrase(30) == "You can try again in under a minute."
+    assert _retry_phrase(600) == "You can try again in about 11 minutes."
+    assert "hours" in _retry_phrase(7200)
+    # never promise a moment that has already passed
+    assert _retry_phrase(-5) == "You can try again in under a minute."
+
+
+def test_the_rate_limit_page_carries_a_time_and_reassures_about_live_runs(
+        tmp_path):
+    cfg = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                    web_store_path=tmp_path / "w.jsonl",
+                    fi_store_path=tmp_path / "fi.jsonl",
+                    ci_store_path=tmp_path / "ci.jsonl",
+                    demo_ip_analyses_per_hour=1)
+    app = WebApp(cfg, transport=_live_transport, resolver=False)
+    app._analysis_async = True
+    c = _WsgiClient(app)
+    c.request("POST", "/demo")
+    body = (f"consent=on&csrf={c.csrf()}&company_name=Acme"
+            f"&website=https://acme.example")
+    c.request("POST", "/analyze", body)
+    status, _, html = c.request("POST", "/analyze", body)
+    assert status.startswith("429")
+    assert "try again in" in html
+    assert "already running are unaffected" in html

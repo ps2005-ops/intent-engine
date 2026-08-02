@@ -255,6 +255,40 @@ def _analyst_cache_for(config):
         return None
 
 
+def _conf_para(grade, reason) -> str:
+    """Reason first, grade only if it adds something. See render.py."""
+    from intent_engine.founder_brief.render import confidence_sentence
+    return confidence_sentence(grade, reason)
+
+
+def _grade_note(grade) -> str:
+    """A grade shown alone says nothing; shown after its reasons it is a
+    summary. Returns '' for a value that would read as a bare label."""
+    from intent_engine.founder_brief.render import is_bare_grade
+    g = (grade or "").strip().strip(".")
+    if not g:
+        return ""
+    return f"Overall confidence: {g.lower()}." if is_bare_grade(g) else g
+
+
+def _retry_phrase(seconds: float) -> str:
+    """"Try again later" is not an answer to "when?".
+
+    A founder who has just been refused needs to know whether to wait or to
+    give up on the demo, and the window is already known here -- the oldest
+    recorded hit decides it. Rounded up, because promising a minute that has
+    not elapsed reads as a broken promise.
+    """
+    seconds = max(0.0, float(seconds))
+    if seconds < 60:
+        return "You can try again in under a minute."
+    minutes = int(seconds // 60) + 1
+    if minutes < 60:
+        return f"You can try again in about {minutes} minutes."
+    hours = int(seconds // 3600) + 1
+    return f"You can try again in about {hours} hours."
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
@@ -687,14 +721,19 @@ class WebApp:
         if len(ip_hits) >= self.config.demo_ip_analyses_per_hour:
             self._demo_ip_hits[remote] = ip_hits
             return self._error_page(
-                429, "Demo analysis limit reached for your network; please "
-                     "try again later.")
+                429, "Demo analysis limit reached for your network. "
+                     f"{_retry_phrase(min(ip_hits) + 3600 - now)} "
+                     "Analyses already running are unaffected, and finished "
+                     "ones stay under your analyses.")
         if len(session_hits) >= self.config.demo_session_analyses_per_day:
             session["analyses"] = session_hits
             self._demo_ip_hits[remote] = ip_hits
             return self._error_page(
                 429, "This demo session has reached its analysis limit for "
-                     "today; please try again later.")
+                     "today. "
+                     f"{_retry_phrase(min(session_hits) + 86400 - now)} "
+                     "Analyses already running are unaffected, and finished "
+                     "ones stay under your analyses.")
         ip_hits.append(now)
         session_hits.append(now)
         self._demo_ip_hits[remote] = ip_hits
@@ -2066,9 +2105,11 @@ class WebApp:
             parts.append('<h2>What could change this answer</h2>'
                          f'<div class="card"><p>{_e(a.what_could_change)}</p>'
                          "</div>")
-        if a.confidence:
-            parts.append(f'<p class="small muted">Confidence: '
-                         f'{_e(a.confidence)}.</p>')
+        # A trailing "Confidence: Low." qualifies nothing a reader can use.
+        # It survives only when it carries its reason.
+        _q_conf = _conf_para(a.confidence, getattr(a, "confidence_reason", ""))
+        if _q_conf:
+            parts.append(f'<p class="small muted">{_e(_q_conf)}</p>')
         # An answer that resolved nothing must still tell the reader what CAN
         # be asked. Dropping this turned "I could not find a subject for that"
         # into a dead end -- the same failure the sparse report page had.
@@ -2278,6 +2319,15 @@ class WebApp:
                     f'<p>{_e(value)}</p></section>') if is_meaningful(value) \
                 else ''
 
+        # "Low" at the top of the primary founder surface tells a reader to
+        # distrust the reading without telling them what would fix it. The
+        # reason is the actionable half, so it leads -- and when there is no
+        # reason, the grade is withheld rather than shown naked.
+        from intent_engine.founder_brief.render import confidence_sentence
+        _conf_line = confidence_sentence(brief.headline.confidence,
+                                         getattr(brief, "confidence_reason",
+                                                 ""))
+
         central = central_view_after_headline(
             brief.thesis,
             brief.headline.view if is_meaningful(brief.headline.does) else "")
@@ -2306,8 +2356,9 @@ class WebApp:
             + (f'<section class="b-headline">'
                f'<p class="hl-does">{_e(brief.headline.does)}</p>'
                f'<p class="hl-view">{_e(brief.headline.view)}</p>'
-               f'<p class="hl-conf">{_e(brief.headline.confidence)}</p>'
-               f'</section>' if is_meaningful(brief.headline.does) else '')
+               + (f'<p class="hl-conf">{_e(_conf_line)}</p>' if _conf_line
+                  else '')
+               + f'</section>' if is_meaningful(brief.headline.does) else '')
             + _p("The central view", central)
             + (f'<section class="b-part"><h2>What supports it</h2>'
                f'<ul class="signals">{signals}</ul></section>'
@@ -2627,8 +2678,8 @@ class WebApp:
                     f'<p>{_e(c["where_the_analogy_breaks"])}</p>'
                     f'<h2>Strategic implication</h2>'
                     f'<p>{_e(c["strategic_implication"])}</p>'
-                    f'<h2>Confidence &amp; missing evidence</h2>'
-                    f'<p>{_e(str(c["confidence"]))} — {_e(c["missing_evidence"])}</p>'
+                    f'<h2>What is missing</h2>'
+                    f'<p>{_e(_conf_para(c["confidence"], c["missing_evidence"]))}</p>'
                     f'<h2>Supporting evidence</h2><ul>{ev}</ul>{back}'
                     f'</main></body></html>')
             return self._html(body)
@@ -2656,8 +2707,10 @@ class WebApp:
                 f'<h2>Strongest supporting evidence</h2><ul>{ev}</ul>'
                 f'<h2>Counter-evidence</h2><ul>{counter}</ul>'
                 f'<h2>Alternative explanations</h2><ul>{alts}</ul>'
-                f'<h2>Confidence: {_e(str(a["confidence"]))}</h2><ul>{reasons}</ul>'
-                f'<h2>What would change my view</h2><ul>{falsify}</ul>'
+                f'<h2>What this rests on</h2><ul>{reasons}</ul>'
+                + (f'<p class="small muted">{_e(_grade_note(a["confidence"]))}'
+                   f'</p>' if _grade_note(a["confidence"]) else '')
+                + f'<h2>What would change my view</h2><ul>{falsify}</ul>'
                 f'<p><strong>Decision this affects:</strong> '
                 f'{_e(a["decision"])}</p>{back}</main></body></html>')
         return self._html(body)

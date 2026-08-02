@@ -21,7 +21,7 @@ from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
 from intent_engine.company_ingestion.fetch import safe_fetch
-from intent_engine.company_ingestion.parsing import parse_html
+from intent_engine.company_ingestion.parsing import parse_html, readable_title
 from intent_engine.company_ingestion.pasted import pasted_source
 from intent_engine.company_ingestion.readiness import (
     assess_readiness, explain as explain_readiness,
@@ -452,7 +452,8 @@ class CompanyIngestionService:
                         run_id, domain, candidate_id, "parse_error",
                         document["reason"], False))
                     continue
-                parsed = {"title": document["title"] or candidate.get("title"),
+                parsed = {"title": readable_title(document["title"],
+                                                  candidate.get("title")),
                           "meta_description": "",
                           "text": document["text"],
                           "content_hash": document["content_hash"],
@@ -525,7 +526,8 @@ class CompanyIngestionService:
                 content_hash=parsed["content_hash"],
                 byte_count=(len(body) if isinstance(body, bytes)
                             else len(body.encode())),
-                title=parsed["title"] or candidate.get("title"),
+                title=readable_title(parsed["title"],
+                                     candidate.get("title")),
                 text_content=parsed["text"][:120_000],
                 meta_description=parsed["meta_description"][:500],
                 freshness=freshness,

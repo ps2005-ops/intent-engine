@@ -494,3 +494,37 @@ def render_actions(actions) -> str:
         out.append(f'<p class="approve"><strong>Approval required.</strong> '
                    f'{_e(d["approval_required"])}</p></div>')
     return "".join(out)
+
+
+#: Grades that mean nothing on their own. "Low" is not a finding; the reason
+#: is. A founder cannot act on a word, only on what is missing.
+BARE_GRADES = {"low", "medium", "high", "moderate", "limited", "partial",
+               "strong", "weak", "uncertain", "unknown", "none"}
+
+
+def is_bare_grade(text) -> bool:
+    """True when a string is only a confidence word (with trimming)."""
+    t = (text or "").strip().strip(".,;:—-").lower()
+    if not t:
+        return False
+    t = t.replace(" confidence", "").replace("confidence ", "").strip()
+    return t in BARE_GRADES
+
+
+def confidence_sentence(grade, reason) -> str:
+    """Never show a grade without the reason that earns it.
+
+    A bare "Low" tells a founder to distrust the reading but not what would
+    fix it. The reason is the actionable half, so the reason leads and the
+    grade -- when it adds anything at all -- trails it.
+    """
+    grade = (grade or "").strip().strip(".")
+    reason = (reason or "").strip()
+    if not reason:
+        # Nothing to explain it with: a naked grade is worse than silence,
+        # because it looks like a finding.
+        return "" if is_bare_grade(grade) else grade
+    if not grade or is_bare_grade(grade):
+        return reason
+    return f"{reason} ({grade})" if grade.lower() not in reason.lower() \
+        else reason

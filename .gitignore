@@ -94,3 +94,6 @@ data/company_ingestion.jsonl.lock
 .venv
 uiproof/
 .claude/launch.json
+
+# Live-preview validation artifacts (screenshots, matrices). Never committed.
+validation/
