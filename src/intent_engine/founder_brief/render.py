@@ -275,9 +275,11 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
 def render_market(context) -> str:
     """Market modules, each with what changed / so what / what to watch.
 
-    An unavailable module says "Unavailable" and why. It never renders an empty
-    axis, because a chart with no line reads as "flat" — a claim the missing
-    data does not support.
+    A module with no data says what is NOT established and why, never the bare
+    word "Unavailable" — that is an engineering status, and six live dashboards
+    opened with a stack of them. It still never renders an empty axis, because
+    a chart with no line reads as "flat", a claim the missing data cannot
+    support.
     """
     if context is None:
         return ""
@@ -285,8 +287,10 @@ def render_market(context) -> str:
     out = ["<h2>Market context</h2>"]
     if not ctx.get("available"):
         return "".join(out + [
-            '<div class="card muted small">Unavailable — '
-            f'{_e(ctx.get("reason", "no market data"))}.</div>'])
+            '<div class="card muted small">Not established — '
+            f'{_e(ctx.get("reason", "no market data"))}. '
+            'For a private company there is no market to read, which is the '
+            'honest answer rather than a gap.</div>'])
 
     for name, module in (ctx.get("modules") or {}).items():
         out.append('<div class="card">')
@@ -372,9 +376,24 @@ def render_dashboard(modules) -> str:
     for m in modules:
         d = m if isinstance(m, dict) else m.as_dict()
         if not d.get("available"):
-            out.append(f'<div class="tile off"><h3>{_e(d["title"])}</h3>'
-                       f'<p class="small muted">Unavailable — '
-                       f'{_e(d.get("unavailable_reason", ""))}</p></div>')
+            # AN EMPTY STATE STILL HAS TO TEACH.
+            #
+            # On six live companies every dashboard opened with a stack of
+            # cards whose whole content was the word "Unavailable". That is an
+            # engineering status: it tells a founder the software failed,
+            # rather than what is and is not knowable about this company.
+            # The refusal to invent a number stays; the card now carries why
+            # the gap matters and what would close it.
+            tile = [f'<div class="tile off"><h3>{_e(d["title"])}</h3>',
+                    f'<p class="small muted">Not established — '
+                    f'{_e(d.get("unavailable_reason", ""))}</p>']
+            if d.get("so_what"):
+                tile.append('<div class="sowhat"><span class="lbl">Why this '
+                            f'matters</span>{_e(d["so_what"])}</div>')
+            if d.get("what_to_watch"):
+                tile.append(f'<p class="small muted">What would settle it: '
+                            f'{_e(d["what_to_watch"])}</p>')
+            out.append("".join(tile) + "</div>")
             continue
         out.append(f'<div class="tile"><h3>{_e(d["title"])}</h3>')
         if d.get("what_changed"):

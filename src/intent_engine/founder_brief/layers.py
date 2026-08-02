@@ -141,11 +141,53 @@ class Module:
                 "unavailable_reason": self.unavailable_reason}
 
 
-def _unavailable(key, title, reason) -> Module:
-    """A module with no data says so. It never draws an empty axis, because a
-    chart with no line is read as 'flat' -- a claim the absence cannot support."""
-    return Module(key=key, title=title, what_changed="", so_what="",
-                  what_to_watch="", available=False, unavailable_reason=reason)
+def _unavailable(key, title, reason, *, so_what="", to_watch="") -> Module:
+    """A module with no data TEACHES. It still never draws an empty axis.
+
+    Every dashboard, on every one of six live companies, opened with a stack
+    of cards whose entire content was the word "Unavailable". That is an
+    engineering status, not intelligence: it tells a founder the software
+    failed rather than telling them what is and is not knowable about this
+    company, and it was the single most common thing on the page.
+
+    The refusal to fabricate a number is right and stays. What changes is that
+    the absence now carries the two things a founder can act on -- why this
+    gap matters to the decision, and what evidence would close it.
+    """
+    return Module(key=key, title=title, what_changed="", so_what=so_what,
+                  what_to_watch=to_watch, available=False,
+                  unavailable_reason=reason)
+
+
+def _dedupe_dashboard(modules: List[Module]) -> List[Module]:
+    """One screen, one sentence, once -- across every card.
+
+    MEASURED on six live companies: after fixing the market module the
+    dashboards still repeated 16 sentences between them. Business momentum and
+    the strategic timeline print the same dated developments, and several
+    cards inherit the same `so_what` and `what_to_watch` from the one key
+    insight, so a founder met "how much to invest ahead of the transition"
+    twice on one screen.
+
+    First card to say a thing keeps it. A later card drops the line rather
+    than repeating it, and drops nothing else -- a card that loses its
+    interpretation still shows its rows.
+    """
+    ledger = Ledger()
+    for module in modules:
+        if module.what_changed and not ledger.fresh(module.what_changed):
+            module.what_changed = ""
+        if module.rows:
+            kept = [r for r in module.rows
+                    if ledger.fresh(str(r.get("value", "")))]
+            module.rows = tuple(kept)
+    # `so_what` and `what_to_watch` are deliberately NOT deduplicated. Every
+    # available module owes the reader an interpretation -- the release gate
+    # fails a module shown without one -- so suppressing a repeat here would
+    # trade a duplicated sentence for a card that explains nothing. Cards
+    # inheriting one insight's "why this matters" is a real remaining defect,
+    # and the fix is a card-specific interpretation, not a blank.
+    return modules
 
 
 def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
@@ -156,20 +198,36 @@ def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
     # A. BUSINESS TRAJECTORY — only from a verified financial series.
     modules.append(_unavailable(
         "business_trajectory", "Business trajectory",
-        "No verified revenue, EPS, margin or cash-flow series is available for "
-        "this company. Estimated figures are deliberately not substituted — a "
-        "fabricated financial series is the one error that would make this "
-        "actively misleading."))
+        "No verified revenue, EPS, margin or cash-flow series was retrieved "
+        "for this company. Estimated figures are deliberately not substituted "
+        "— a fabricated financial series is the one error that would make "
+        "this actively misleading.",
+        so_what="Without a financial series you cannot tell growth from "
+                "momentum, or a strong quarter from a strong year. Treat any "
+                "read on this company's trajectory as provisional.",
+        to_watch="A filed income statement, a published earnings release, or "
+                 "an investor deck with a multi-period series would settle "
+                 "it."))
 
     # B. MARKET TRAJECTORY — sanitised export only.
     market = brief.market_context or {}
     if market.get("available"):
+        # The headline is the first module's sentence, and the rows repeat
+        # every module including that one -- so Shopify's dashboard printed
+        # "the shares fell 3.3% over the past three months" THREE times on one
+        # screen. The ledger the layers already share is the fix: a row that
+        # would restate the headline is dropped, not reprinted.
+        market_ledger = Ledger()
+        first = next(iter((market.get("modules") or {}).values()), {})
+        market_ledger.spend(first.get("what_changed", ""))
         rows = []
         for name, module in (market.get("modules") or {}).items():
+            value = market_ledger.fresh(module.get("what_changed", ""))
+            if not value:
+                continue
             rows.append({"label": name.replace("_", " ").title(),
-                         "value": module.get("what_changed", ""),
+                         "value": value,
                          "so_what": module.get("so_what", "")})
-        first = next(iter((market.get("modules") or {}).values()), {})
         modules.append(Module(
             key="market_trajectory", title="Market trajectory",
             what_changed=first.get("what_changed", ""),
@@ -183,7 +241,13 @@ def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
         modules.append(_unavailable(
             "market_trajectory", "Market trajectory",
             market.get("reason")
-            or "No market snapshot is published for this company."))
+            or "No market snapshot has been published for this company.",
+            so_what="Without market context you are reading the company's own "
+                    "account with nothing outside it to argue back. For a "
+                    "private company there is no market to read, and that is "
+                    "the honest answer rather than a gap.",
+            to_watch="A listed ticker with published price history is what "
+                     "makes this section possible."))
 
     # C. BUSINESS MOMENTUM — dated, material developments only.
     momentum = [c for c in (brief.what_changed or ()) if c.get("what")]
@@ -204,7 +268,12 @@ def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
     else:
         modules.append(_unavailable(
             "business_momentum", "Business momentum",
-            "No dated developments could be verified from public sources."))
+            "No dated development could be verified from public sources.",
+            so_what="Undated material tells you what a company says it is, "
+                    "never whether anything moved. Direction is the one thing "
+                    "this evidence cannot establish.",
+            to_watch="A dated announcement, release note or filing — one "
+                     "timestamped item is enough to start a trajectory."))
 
     # D. STRATEGIC TIMELINE — deduplicated, material only.
     timeline = _timeline(report, brief)
@@ -235,7 +304,7 @@ def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
                 {"label": "Evidence needed next", "value": k.watch},
             ),
             text_alternative=f"Tension: {k.so_what} Decision: {k.decision}"))
-    return modules
+    return _dedupe_dashboard(modules)
 
 
 def _timeline(report: dict, brief) -> List[dict]:

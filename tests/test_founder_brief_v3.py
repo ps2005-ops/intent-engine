@@ -288,9 +288,12 @@ def test_depth_is_offered_but_never_required():
         assert href in html
 
 
-def test_unavailable_market_data_renders_unavailable_not_a_number():
+def test_absent_market_data_teaches_rather_than_saying_unavailable():
     html = R.render_market(M.unavailable("no snapshot").as_dict())
-    assert "Unavailable" in html
+    assert "Not established" in html
+    # "Unavailable" is an engineering status, not intelligence:
+    # six live dashboards opened with a stack of them.
+    assert "Unavailable" not in html
     assert "0%" not in html
 
 

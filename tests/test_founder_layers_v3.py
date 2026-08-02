@@ -153,7 +153,10 @@ def test_every_available_module_answers_the_three_questions():
 
 def test_an_unavailable_module_states_why_and_renders_no_number():
     html = R.render_dashboard(L.build_dashboard(_rich()))
-    assert "Unavailable" in html
+    assert "Not established" in html
+    # "Unavailable" is an engineering status, not intelligence:
+    # six live dashboards opened with a stack of them.
+    assert "Unavailable" not in html
     assert "0%" not in html
     assert "$0" not in html
 
@@ -525,7 +528,10 @@ def test_a_malformed_export_fails_closed_and_never_crashes(bad):
     modules = L.build_dashboard(_rich(market=ctx.as_dict()))
     assert len(modules) >= 4
     html = R.render_dashboard(modules)
-    assert "Unavailable" in html
+    assert "Not established" in html
+    # "Unavailable" is an engineering status, not intelligence:
+    # six live dashboards opened with a stack of them.
+    assert "Unavailable" not in html
     assert ">0%<" not in html and ">$0<" not in html
 
 
@@ -782,3 +788,45 @@ def test_a_clause_split_on_a_semicolon_stays_readable():
 def test_a_report_with_no_pattern_simply_omits_the_section():
     built = L.build_executive_brief(_rich(), {}, L.Ledger())
     assert not [s for s in built["sections"] if s["key"] == "pattern"]
+
+
+# --- empty states must teach, measured on six live companies ----------------
+def test_no_dashboard_card_is_only_the_word_unavailable():
+    """MEASURED: across six live companies the dashboards showed the bare word
+    "Unavailable" eleven times. That is an engineering status -- it tells a
+    founder the software failed, not what is knowable about the company."""
+    html = R.render_dashboard(L.build_dashboard(_sparse()))
+    assert "Unavailable" not in html
+    assert "Not established" in html
+
+
+def test_an_absent_card_still_says_why_it_matters_and_what_would_settle_it():
+    for module in L.build_dashboard(_sparse()):
+        if not module.available:
+            assert module.so_what, module.key
+            assert module.what_to_watch, module.key
+
+
+def test_the_dashboard_never_prints_the_same_row_twice():
+    """MEASURED: business momentum and the strategic timeline printed the same
+    dated developments, and the market card repeated its own headline in its
+    rows -- Shopify showed one price sentence three times on one screen."""
+    modules = L.build_dashboard(
+        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict()))
+    seen = set()
+    for module in modules:
+        for row in module.rows:
+            key = L.Ledger._key(str(row.get("value", "")))
+            if key:
+                assert key not in seen, row
+                seen.add(key)
+
+
+def test_an_available_card_keeps_its_interpretation_after_deduplication():
+    """Deduplication may not buy a clean screen by emptying a card: the
+    release gate fails a module shown without an interpretation."""
+    modules = L.build_dashboard(
+        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict()))
+    for module in modules:
+        if module.available:
+            assert module.so_what, module.key
