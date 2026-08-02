@@ -106,14 +106,53 @@ def test_progress_shows_a_truthful_stage_and_elapsed_time(tmp_path):
         assert run_id not in body.split("<main")[1]   # no raw id on screen
 
 
+def _in_flight_progress(app):
+    """The progress page for a run that has NOT finished.
+
+    A submitted run reaches a terminal state before the assertion runs (the
+    harness waits), and /progress then 303s -- so a gate written against the
+    submitted run inspects an empty redirect body and passes vacuously. That
+    is how the fake-percentage gate first "passed" while a percentage was on
+    the page. Build a genuinely non-terminal run instead.
+    """
+    c = _WsgiClient(app)
+    c.request("POST", "/demo")
+    session = app.auth.session(c.cookie.split("=", 1)[1])
+    run = app.ci.create_run(company_name="Acme",
+                            website="https://acme.example",
+                            user_id=session["user_id"],
+                            as_of="2026-08-02T00:00:00+00:00")
+    run_id = run["run_id"]
+    from intent_engine.webapp.store import WebEvent
+    app.web_store.append(WebEvent(
+        event_type="web.run_owned", actor_type="human",
+        actor_id=session["user_id"], subject_type="run", subject_id=run_id,
+        idempotency_key=f"own:{run_id}",
+        payload={"user_id": session["user_id"], "run_id": run_id}))
+    app.ci._transition(run_id, run["domain"], "FETCHING_APPROVED_SOURCES")
+    assert app.ci.store.run_state(run_id) not in app.TERMINAL_STATES
+    status, _, body = c.request("GET", f"/runs/{run_id}/progress")
+    assert status.startswith("200"), status
+    return c, run_id, body
+
+
 def test_no_fake_percentage_or_countdown_anywhere_on_progress(tmp_path):
-    app = _async_app(tmp_path)
-    c, _, headers, _ = _submit(app)
-    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
-    _, _, body = c.request("GET", f"/runs/{run_id}/progress")
+    """BREAK PROOF B. The pipeline has no honest completion denominator, so
+    any percentage on this page is invented."""
     import re
-    assert not re.search(r"\b\d{1,3}%\s*(complete|done)", body, re.I)
-    assert "remaining" not in body.lower()
+    app = _async_app(tmp_path)
+    _, _, body = _in_flight_progress(app)
+    assert "Running for" in body, "the page must show real elapsed time"
+    # VISIBLE text only: `max-width:100%` in the stylesheet is not a claim
+    # about completion, and a gate that trips on CSS gets deleted by the next
+    # person rather than believed.
+    visible = re.sub(r"<(style|script)[^>]*>.*?</\1>", " ", body,
+                     flags=re.S | re.I)
+    visible = re.sub(r"<[^>]+>", " ", visible)
+    assert not re.search(r"\d{1,3}\s*%", visible), \
+        f"a percentage is shown to the founder: {visible[:200]}"
+    assert "remaining" not in visible.lower()
+    assert "estimated" not in visible.lower()
 
 
 def test_stage_copy_never_invents_a_stage_that_did_not_run(tmp_path):
@@ -294,3 +333,140 @@ def test_a_terminal_run_is_never_reopened_as_interrupted(tmp_path):
     app.STALE_ATTEMPT_SECONDS = -1
     assert app._interrupted_if_stale(run_id) is False
     assert app.ci.store.run_state(run_id) == before
+
+
+# --- release-gate proofs: each of these must FAIL if the defect returns ------
+def test_gate_c_a_terminal_run_never_shows_an_active_stage(tmp_path):
+    """BREAK PROOF C. A run that finished while the page still showed
+    "reading evidence" would poll forever and never say it was done.
+
+    Driven from a run transitioned to COMPLETE directly. Written against a
+    submitted run this passed vacuously: the test transport has no network, so
+    those runs end FAILED and the completion branch was never reached.
+    """
+    app = _async_app(tmp_path)
+    c, run_id, body = _in_flight_progress(app)
+    assert "Reading the most relevant material" in body     # active, polling
+    assert 'http-equiv="refresh"' in body
+
+    meta = app.ci.run_meta(run_id)
+    app.ci._transition(run_id, meta["domain"], "COMPLETE")
+    status, headers, body = c.request("GET", f"/runs/{run_id}/progress")
+    assert status.startswith("303"), (
+        f"terminal run still rendered a progress page: {status}")
+    assert headers["Location"] == f"/runs/{run_id}"
+
+
+def test_gate_d_one_attempt_executes_exactly_once(tmp_path):
+    """BREAK PROOF D. Measured, not inferred: two workers on one attempt can
+    produce an identical-looking result while doing the work twice.
+
+    The duplicate is scheduled WHILE the first is in flight. Scheduling it
+    after completion passed vacuously -- the terminal check refused it for a
+    different reason than the one under test.
+    """
+    import threading
+    release = threading.Event()
+
+    def slow(*a, **k):
+        release.wait(timeout=10)
+        raise RuntimeError("done")
+
+    app = _async_app(tmp_path, transport=slow)
+    c = _WsgiClient(app)
+    c.request("POST", "/demo")
+    run = app.ci.create_run(company_name="Acme",
+                            website="https://acme.example", user_id="u",
+                            as_of="2026-08-02T00:00:00+00:00")
+    run_id = run["run_id"]
+    assert app._schedule_analysis("u", run_id) is True
+    for _ in range(200):                      # wait for the worker to enter
+        if app._worker_starts.get(run_id):
+            break
+        time.sleep(0.01)
+    # the duplicate arrives while the first attempt is genuinely running
+    assert app._schedule_analysis("u", run_id) is False, \
+        "a second worker was scheduled onto a live attempt"
+    release.set()
+    assert app.wait_for_analysis(run_id, timeout=30)
+    assert app._worker_starts.get(run_id, 0) == 1, app._worker_starts
+    assert app._terminal_writes.get(run_id, 0) == 1, app._terminal_writes
+
+
+def test_gate_e_refresh_keeps_the_same_run_and_attempt(tmp_path):
+    """BREAK PROOF E. Losing the run on refresh strands the founder with no
+    way back to work that is still running."""
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    starts = app._worker_starts.get(run_id, 0)
+    for _ in range(3):                            # refresh repeatedly
+        status, _, _ = c.request("GET", f"/runs/{run_id}/progress")
+        assert not status.startswith("404"), "owner lost their own run"
+    assert app._worker_starts.get(run_id, 0) == starts, \
+        "a refresh started another attempt"
+    assert app.wait_for_analysis(run_id, timeout=60)
+    _, _, listing = c.request("GET", "/analyses")
+    assert run_id[:10] in listing, "the run vanished from history"
+
+
+def test_gate_f_a_failed_run_is_never_dressed_as_a_limited_result(tmp_path):
+    """BREAK PROOF F. A failure rendered as "Limited analysis" claims the
+    evidence review completed when it did not."""
+    def exploding(*a, **k):
+        raise RuntimeError("network gone")
+    app = _async_app(tmp_path, transport=exploding)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+    assert app.ci.store.run_state(run_id) == "FAILED"
+    _, _, body = c.request("GET", f"/runs/{run_id}")
+    assert "could not be completed" in body
+    assert "Limited analysis" not in body, "a failure is posing as a result"
+
+
+# --- capacity ---------------------------------------------------------------
+def test_capacity_is_explicitly_bounded(tmp_path):
+    """The queue lives in this process. An unbounded one is a memory leak
+    with a friendly name."""
+    app = _async_app(tmp_path)
+    assert app.MAX_ACTIVE_ANALYSES == 1        # free instance
+    assert app.MAX_PENDING_ANALYSES >= 1
+    assert app.MAX_PENDING_ANALYSES < 100
+
+
+def test_work_beyond_capacity_is_refused_not_silently_dropped(tmp_path):
+    import threading
+    release = threading.Event()
+
+    def slow(*a, **k):
+        release.wait(timeout=10)
+        raise RuntimeError("done")
+
+    app = _async_app(tmp_path, transport=slow)
+    limit = app.MAX_ACTIVE_ANALYSES + app.MAX_PENDING_ANALYSES
+    accepted, runs = 0, []
+    for i in range(limit + 3):
+        run = app.ci.create_run(company_name=f"Acme{i}",
+                                website=f"https://acme{i}.example",
+                                user_id="u",
+                                as_of="2026-08-02T00:00:00+00:00")
+        runs.append(run["run_id"])
+        if app._schedule_analysis("u", run["run_id"]):
+            accepted += 1
+    assert accepted <= limit, f"accepted {accepted} beyond a bound of {limit}"
+    release.set()
+    for run_id in runs:
+        app.wait_for_analysis(run_id, timeout=30)
+
+
+def test_a_refused_submission_never_leaves_a_run_claiming_to_run(tmp_path):
+    """A run accepted but never executed would poll forever."""
+    app = _async_app(tmp_path)
+    app.MAX_ACTIVE_ANALYSES = 0
+    app.MAX_PENDING_ANALYSES = 0
+    run = app.ci.create_run(company_name="Acme",
+                            website="https://acme.example", user_id="u",
+                            as_of="2026-08-02T00:00:00+00:00")
+    assert app._schedule_analysis("u", run["run_id"]) is False
+    assert run["run_id"] not in app._analysis_inflight

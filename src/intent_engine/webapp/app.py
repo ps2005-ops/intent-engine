@@ -359,6 +359,11 @@ class WebApp:
         self._analysis_lock = _threading.Lock()
         self._analysis_inflight: dict = {}   # run_id -> started monotonic
         self._analysis_attempts: dict = {}   # run_id -> executions started
+        # Instrumented so duplicate execution is measurable rather than
+        # inferred from output: a second worker on one attempt can produce an
+        # identical-looking result while doing the work twice.
+        self._worker_starts: dict = {}      # run_id -> worker entries
+        self._terminal_writes: dict = {}    # run_id -> terminal transitions
         # ASYNC EVERYWHERE, INCLUDING TESTS.
         #
         # This was briefly gated on env != "test" so the existing suite could
@@ -3075,6 +3080,16 @@ class WebApp:
             time.sleep(0.05)
         return False
 
+    #: One analysis at a time on a free instance. Two concurrent runs contend
+    #: for the memory of a 512MB container while each holds retrieved
+    #: documents, and the second finishes slower than if it had waited.
+    MAX_ACTIVE_ANALYSES = 1
+
+    #: How many may WAIT. Bounded because the queue lives in this process:
+    #: an unbounded one is a memory leak with a friendly name, and work it
+    #: cannot promise to run should be refused rather than accepted quietly.
+    MAX_PENDING_ANALYSES = 3
+
     #: A run may be retried this many times. Bounded because a retry costs a
     #: full retrieval pass, and an unbounded button is how a free instance is
     #: taken down by one impatient visitor.
@@ -3140,6 +3155,12 @@ class WebApp:
             if retrying and self.attempt_count(run_id) >= \
                     self.MAX_ANALYSIS_ATTEMPTS:
                 return False                    # bounded, never a loop
+            active = len(self._analysis_inflight)
+            if active >= (self.MAX_ACTIVE_ANALYSES
+                          + self.MAX_PENDING_ANALYSES):
+                # Refused, not silently dropped: a run that can never execute
+                # is worse than an honest no.
+                return False
             self._analysis_inflight[run_id] = time.monotonic()
             self._analysis_attempts[run_id] = \
                 self._analysis_attempts.get(run_id, 0) + 1
@@ -3158,6 +3179,8 @@ class WebApp:
         would leave the progress page claiming work forever, which is the
         failure this whole change exists to remove.
         """
+        with self._analysis_lock:
+            self._worker_starts[run_id] = self._worker_starts.get(run_id, 0) + 1
         meta = self.ci.run_meta(run_id) or {}
         domain = meta.get("domain", "")
         try:
@@ -3172,11 +3195,17 @@ class WebApp:
                                 approved_ids=approved, rejected_ids=rejected)
                 self.ci.fetch_approved(run_id)
             self._results[run_id] = self._compose(run_id)
+            with self._analysis_lock:
+                self._terminal_writes[run_id] = \
+                    self._terminal_writes.get(run_id, 0) + 1
         except Exception as exc:  # noqa: BLE001 - a worker may not escape
             _LOG.warning("analysis failed run=%s %s", run_id,
                          type(exc).__name__)
             try:
                 self.ci._transition(run_id, domain, "FAILED")
+                with self._analysis_lock:
+                    self._terminal_writes[run_id] = \
+                        self._terminal_writes.get(run_id, 0) + 1
             except Exception:  # noqa: BLE001 - already failing
                 pass
         finally:
