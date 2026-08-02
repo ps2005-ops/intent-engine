@@ -358,11 +358,16 @@ class WebApp:
                                     thread_name_prefix="analysis")
         self._analysis_lock = _threading.Lock()
         self._analysis_inflight: dict = {}   # run_id -> started monotonic
-        # env="test" keeps the OLD synchronous semantics so the existing
-        # suite still asserts on finished runs without every test learning to
-        # wait. The asynchronous path has its own dedicated tests which turn
-        # this on explicitly -- gating it the way the analyst client is gated.
-        self._analysis_async = config.env != "test"
+        self._analysis_attempts: dict = {}   # run_id -> executions started
+        # ASYNC EVERYWHERE, INCLUDING TESTS.
+        #
+        # This was briefly gated on env != "test" so the existing suite could
+        # keep asserting on finished runs. That left 3000+ tests exercising a
+        # code path real users no longer receive -- the route returned
+        # immediately in production and blocked in every test. The divergence
+        # is the bug: the harness waits now (see tests/conftest.py), the
+        # product does not.
+        self._analysis_async = True
         self._demo_ip_hits: dict = {}   # client_ip -> [analysis timestamps]
         # run_id -> the last answered topics, so a bare "Why?" has a subject.
         self._conversation_context: dict = {}
@@ -1543,6 +1548,16 @@ class WebApp:
         """
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
             return self._error_page(404, "no such run for this account")
+        # A FAILED or INTERRUPTED run is retried as a NEW ATTEMPT on the
+        # worker -- retry must not reintroduce the blocking request the async
+        # change just removed. Bounded, and a no-op while an attempt is live,
+        # so a repeatedly clicked button cannot stack executions.
+        state = self.ci.store.run_state(run_id)
+        if state in self.RETRYABLE_STATES:
+            if self.retry_state(session, run_id)["allowed"]:
+                self._schedule_analysis(session["user_id"], run_id,
+                                        allow_retry=True)
+            return self._redirect(f"/runs/{run_id}/progress")
         try:
             self._results[run_id] = self._compose(run_id)
         except IngestionError as exc:
@@ -3060,7 +3075,53 @@ class WebApp:
             time.sleep(0.05)
         return False
 
-    def _schedule_analysis(self, user_id: str, run_id: str) -> bool:
+    #: A run may be retried this many times. Bounded because a retry costs a
+    #: full retrieval pass, and an unbounded button is how a free instance is
+    #: taken down by one impatient visitor.
+    MAX_ANALYSIS_ATTEMPTS = 3
+
+    #: Only these terminal states may be retried. A COMPLETE or LIMITED run is
+    #: a RESULT -- re-running it is "analyse again", a separate deliberate
+    #: action, not error recovery.
+    RETRYABLE_STATES = ("FAILED", "INTERRUPTED")
+
+    def attempt_count(self, run_id: str) -> int:
+        """How many executions this run has had, this process.
+
+        NOT derived from run transitions: `_transition` is idempotent per
+        (run, state), so a second attempt through DISCOVERING_SOURCES writes
+        nothing and a counter built on it always reads 1. Counting in memory
+        is honest about its scope -- the bound survives as long as the process
+        that would run the retry, which is exactly as long as it needs to.
+        """
+        return self._analysis_attempts.get(run_id, 0)
+
+    def retry_state(self, session, run_id: str) -> dict:
+        """Whether retry is offered, and the reason when it is not."""
+        if not self._owned(session, run_id):
+            return {"allowed": False, "reason": "not yours"}
+        with self._analysis_lock:
+            if run_id in self._analysis_inflight:
+                return {"allowed": False,
+                        "reason": "This analysis is still running."}
+        state = self.ci.store.run_state(run_id)
+        if state not in self.RETRYABLE_STATES:
+            return {"allowed": False,
+                    "reason": "This run finished; there is nothing to retry."}
+        attempts = self.attempt_count(run_id)
+        if attempts >= self.MAX_ANALYSIS_ATTEMPTS:
+            return {"allowed": False,
+                    "reason": (f"This analysis has been attempted "
+                               f"{attempts} times without completing. "
+                               f"Starting a fresh analysis is more likely to "
+                               f"help than trying again.")}
+        return {"allowed": True, "attempts": attempts,
+                "reason": ("Runs the evidence pass again from the sources "
+                           "already found. Nothing already verified is "
+                           "discarded.")}
+
+    def _schedule_analysis(self, user_id: str, run_id: str, *,
+                           allow_retry: bool = False) -> bool:
         """Queue the analysis for this OWNED run exactly once.
 
         Returns True when this call scheduled work. A double-click, a browser
@@ -3072,9 +3133,16 @@ class WebApp:
             if run_id in self._analysis_inflight:
                 return False
             state = self.ci.store.run_state(run_id)
-            if state in self.TERMINAL_STATES or run_id in self._results:
+            retrying = allow_retry and state in self.RETRYABLE_STATES
+            if not retrying and (state in self.TERMINAL_STATES
+                                 or run_id in self._results):
                 return False                    # already done; reuse it
+            if retrying and self.attempt_count(run_id) >= \
+                    self.MAX_ANALYSIS_ATTEMPTS:
+                return False                    # bounded, never a loop
             self._analysis_inflight[run_id] = time.monotonic()
+            self._analysis_attempts[run_id] = \
+                self._analysis_attempts.get(run_id, 0) + 1
         try:
             self._analysis_pool.submit(self._run_analysis, user_id, run_id)
         except RuntimeError:                    # pool shut down
