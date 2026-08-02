@@ -229,6 +229,16 @@ class CompanyIngestionService:
         candidates = candidates + propose_edgar_candidates(
             company_name=meta.get("company_name", ""),
             transport=self.transport, resolver=self.resolver)
+        # THE ONLY INDEPENDENT VANTAGE POINT WE CAN ACTUALLY REACH.
+        #
+        # Ten companies produced ZERO independent sources: every one was the
+        # company describing itself. The families that would fix that were
+        # probed and are not accessible without bypassing controls we will not
+        # bypass -- review sites answer 403, newswire feeds 401/404. What IS
+        # public is EDGAR full-text search, where a COMPETITOR'S OWN 10-K names
+        # this company. Different author, regulatory venue, exact date,
+        # permanent citation.
+        candidates = candidates + self._third_party_filing_candidates(meta)
         # Curated official sources for a KNOWN entity. This is what stops a
         # multinational whose primary domain refuses automated access from
         # collapsing into whatever single filing happened to be reachable:
@@ -1036,6 +1046,32 @@ class CompanyIngestionService:
             payload["withheld_explanation"] = explanation
             payload["result_state_detail"] = WX.render_text(explanation)
         return payload
+
+    def _third_party_filing_candidates(self, meta) -> list:
+        """Filings by OTHER registrants naming this company. Never raises."""
+        from intent_engine.company_ingestion.third_party_filings import (
+            propose_third_party_filings,
+        )
+        # An injected transport means a test double or a replay, and the
+        # full-text index is not part of it. Reaching the live endpoint from a
+        # test suite is both wrong and slow -- it tripled the suite's runtime
+        # the first time this shipped without the guard.
+        if self.transport is not None:
+            return []
+        company_name = meta.get("company_name", "")
+        subject_cik = ""
+        try:
+            from intent_engine.company_ingestion.edgar import resolve_cik
+            resolved = resolve_cik(company_name, transport=self.transport,
+                                   resolver=self.resolver)
+            subject_cik = str((resolved or {}).get("cik") or "")
+        except Exception:  # noqa: BLE001 - the subject filter is best-effort
+            subject_cik = ""
+        try:
+            return propose_third_party_filings(
+                company_name=company_name, subject_cik=subject_cik)
+        except Exception:  # noqa: BLE001 - discovery must never break
+            return []
 
     @staticmethod
     def _entity_hint(company_name, documents):
