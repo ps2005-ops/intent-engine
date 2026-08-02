@@ -1861,20 +1861,13 @@ class WebApp:
                                              "executive_statement", None, ""))
         thesis = report.get("thesis") or {}
         identity = self.ci.entity_identity(run_id) or {}
-        ticker = identity.get("ticker") or ""
+        ticker = self._ticker_of(identity)
         mode = fb.classify_mode(
             is_public=bool(ticker), evidence_count=len(observations),
             independent_sources=independent,
             has_thesis=bool(thesis.get("view"))
             and not thesis.get("view_withheld"))
-        market = None
-        if ticker:
-            try:
-                snap = (pathlib.Path(self.config.data_dir) / "reports"
-                        / "market" / "export" / f"{ticker}.json")
-                market = fm.load(snap, expected_ticker=ticker).as_dict()
-            except Exception:  # noqa: BLE001 - degrade, never fail the page
-                market = fm.unavailable("snapshot unreadable").as_dict()
+        market = self._market_snapshot(ticker) if ticker else None
         # `company_name` is what the presentation deck has always used, so a
         # run whose identity record is absent (every anonymous demo run) was
         # headed "Shopify — presentation" on one layer and "This company" on
@@ -1886,6 +1879,52 @@ class WebApp:
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
+
+    @staticmethod
+    def _ticker_of(identity: dict) -> str:
+        """The listed ticker for this entity, or "".
+
+        SECOND BREAK IN THE SAME CHAIN. Both call sites read
+        `identity["ticker"]`; the identity record has no such key. It carries
+        `listings: [{"exchange": "NASDAQ", "ticker": "PLTR"}]`. So the ticker
+        was always "", the market lookup was never even attempted, and the
+        dashboard printed "no market snapshot" for companies whose snapshot
+        was sitting on disk.
+        """
+        for listing in (identity or {}).get("listings") or ():
+            if isinstance(listing, dict) and listing.get("ticker"):
+                return str(listing["ticker"]).strip().upper()
+        return str((identity or {}).get("ticker") or "").strip().upper()
+
+    def _market_snapshot(self, ticker: str):
+        """The market engine's sanitized export for this ticker, or None.
+
+        THIS CHANNEL WAS DEAD CODE. Both call sites read
+        `self.config.data_dir`, and AppConfig has no such field -- it has
+        `web_store_path`, `fi_store_path` and `ci_store_path`. Every lookup
+        raised AttributeError, a bare `except Exception` caught it, and the
+        founder dashboard reported "market context unavailable" on every run
+        ever made. No export file could have been read even if one existed,
+        which is why the market module has never once appeared.
+
+        `market_intel_export.v1` is the ONLY sanctioned channel from the market
+        engine to this UI, and it is deliberately narrow: the producer's
+        FORBIDDEN_KEYS bans win rates, alpha, strategy names and predictions.
+        So this surfaces descriptive market context and nothing the release
+        gate would (correctly) refuse.
+        """
+        from intent_engine.founder_brief import market as fm
+        snapshot = (self._runtime_root / "reports" / "market" / "export"
+                    / f"{ticker.upper()}.json")
+        if not snapshot.exists():
+            return fm.unavailable(
+                "No market snapshot has been published for this ticker "
+                "yet.").as_dict()
+        try:
+            return fm.load(snapshot, expected_ticker=ticker).as_dict()
+        except Exception:  # noqa: BLE001 - a bad FILE degrades, a bug does not
+            _LOG.warning("market export unreadable for %s", ticker)
+            return fm.unavailable("market snapshot could not be read").as_dict()
 
     def _founder_answer_page(self, session, run_id, answer):
         """One answer, in the same shape as every other founder surface."""
@@ -2059,7 +2098,7 @@ class WebApp:
         thesis = report.get("thesis") or {}
         has_view = bool(thesis.get("view")) and not thesis.get("view_withheld")
         identity = self.ci.entity_identity(run_id) or {}
-        ticker = identity.get("ticker") or ""
+        ticker = self._ticker_of(identity)
 
         mode = fb.classify_mode(
             is_public=bool(ticker), evidence_count=len(observations),
@@ -2071,15 +2110,7 @@ class WebApp:
         # section renders "Unavailable" -- never a zero, and never a 500: a
         # founder-facing page must not die because an upstream research
         # artefact is missing.
-        market = None
-        if ticker:
-            try:
-                snapshot = (pathlib.Path(self.config.data_dir) / "reports"
-                            / "market" / "export" / f"{ticker}.json")
-                market = fm.load(snapshot, expected_ticker=ticker).as_dict()
-            except Exception:  # noqa: BLE001 - degrade, never fail the page
-                market = fm.unavailable(
-                    "market snapshot could not be read").as_dict()
+        market = self._market_snapshot(ticker) if ticker else None
 
         # `company_name` is what the presentation deck has always used, so a
         # run whose identity record is absent (every anonymous demo run) was
