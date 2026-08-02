@@ -753,3 +753,32 @@ def test_why_it_matters_is_not_provenance_metadata():
     text = " ".join(why[0]["paragraphs"]).lower()
     assert "keeps this timely" not in text
     assert "recent public signal" not in text
+
+
+def test_the_brief_surfaces_the_historical_analog_it_already_computed():
+    """UNSURFACED INTELLIGENCE. The reasoning engine computes a comparable
+    pattern -- mechanism, named analogs with sources, and the conditions under
+    which it does NOT apply -- and the executive brief never read it. It was
+    reachable only from the full analysis, the page a founder opens last.
+    """
+    _, _, built = _rich_pair()
+    section = [s for s in built["sections"] if s["key"] == "pattern"]
+    assert section, "the comparable pattern never reaches the brief"
+    text = " ".join(section[0]["paragraphs"])
+    assert "known move" in text
+    # the analogy must arrive with its falsifier, or it is only flattery
+    assert "stops being the right comparison" in text
+
+
+def test_a_clause_split_on_a_semicolon_stays_readable():
+    """SEEN LIVE: "...real infrastructure ownership language alone is not
+    proof..." -- two clauses fused because the separator was dropped."""
+    joined = L._sentences_of(
+        "Infrastructure framing can precede real ownership; language alone "
+        "is not proof.")
+    assert "ownership. Language" in joined
+
+
+def test_a_report_with_no_pattern_simply_omits_the_section():
+    built = L.build_executive_brief(_rich(), {}, L.Ledger())
+    assert not [s for s in built["sections"] if s["key"] == "pattern"]

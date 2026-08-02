@@ -366,6 +366,7 @@ BRIEF_SECTIONS = (
     ("business", "Business and economic context"),
     ("context", "Market and financial context"),
     ("who", "Who benefits and who loses"),
+    ("pattern", "How this has played out elsewhere"),
     ("wrong", "What could make this wrong"),
     ("next", "What to do or watch next"),
 )
@@ -381,10 +382,22 @@ _BUSINESS_COMPONENTS = ("value_proposition", "growth_engine",
 
 def _sentences_of(text: str, limit: int = 2) -> str:
     """At most `limit` sentences, so one long joined field cannot become a
-    paragraph nobody finishes."""
+    paragraph nobody finishes.
+
+    Clauses split on a semicolon are rejoined with a full stop, not a bare
+    space. Dropping the separator produced "...real infrastructure ownership
+    language alone is not proof..." on the live page -- two clauses fused into
+    one unreadable one.
+    """
     parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+|;\s+", text or "")
              if p.strip()]
-    return " ".join(parts[:limit])
+    kept = []
+    for part in parts[:limit]:
+        if kept and not kept[-1][-1:] in ".!?":
+            kept[-1] = kept[-1] + "."
+            part = part[:1].upper() + part[1:]   # it is a sentence now
+        kept.append(part)
+    return " ".join(kept)
 
 
 def _component_text(model: dict, name: str) -> str:
@@ -442,6 +455,45 @@ def _field_texts(items, *fields, limit: int = 2) -> List[str]:
         if parts:
             out.append(_sentences_of(" ".join(parts), limit=3))
     return out
+
+
+def _pattern_texts(report: dict) -> List[str]:
+    """The comparable pattern, its analogs, and when it stops being true.
+
+    UNSURFACED INTELLIGENCE. The reasoning engine computes a full comparable
+    pattern -- mechanism, named historical examples WITH sources, the
+    conditions under which it does not apply, and its own limitations -- and
+    the executive brief never read a word of it. It was reachable only from
+    the full analysis, which is the page a founder is least likely to open.
+
+    A founder asking "has anyone done this before, and what happened?" is
+    asking the single most useful question available here, and the answer was
+    already computed.
+    """
+    patterns = [p for p in (report.get("patterns") or ())
+                if isinstance(p, dict)]
+    if not patterns:
+        return []
+    pattern = patterns[0]
+    out: List[str] = []
+    names = [e.get("name", "") for e in
+             (pattern.get("historical_examples") or ()) if e.get("name")]
+    mechanism = _sentences_of(pattern.get("mechanism") or "", limit=2)
+    if names and mechanism:
+        out.append(f"This is a known move: {', '.join(names[:3])} went the "
+                   f"same way. {mechanism}")
+    elif mechanism:
+        out.append(mechanism)
+    # The falsifier belongs beside the analogy, or the analogy is just
+    # flattery -- a pattern that cannot fail explains nothing.
+    unless = _sentences_of(pattern.get("when_it_does_not_apply") or "")
+    if unless:
+        out.append(f"It stops being the right comparison when {unless[0].lower()}"
+                   f"{unless[1:]}")
+    caveat = _sentences_of(pattern.get("limitations") or "")
+    if caveat:
+        out.append(caveat)
+    return [t for t in out if t]
 
 
 def build_executive_brief(brief, report: Optional[dict] = None,
@@ -528,6 +580,7 @@ def build_executive_brief(brief, report: Optional[dict] = None,
         # Only where the evidence names a party. `vulnerabilities` states the
         # exposed layer and the mechanism; `surprises` states who a move
         # encroaches on. Neither is inferred here.
+        "pattern": _pattern_texts(report),
         "who": (_exposure_texts(report.get("vulnerabilities"))
                 + _field_texts(report.get("surprises"),
                                "finding", "why_surprising")),
@@ -546,7 +599,8 @@ def build_executive_brief(brief, report: Optional[dict] = None,
     # it does not. The ledger has already removed anything an earlier layer
     # said, so a third paragraph can only be new information -- padding is not
     # reachable through it.
-    wide = {"business", "who", "wrong", "why", "decision", "changed"}
+    wide = {"business", "who", "wrong", "why", "decision", "changed",
+            "pattern"}
     sections = []
     for key, title in BRIEF_SECTIONS:
         paragraphs = [t for t in (ledger.fresh(x) for x in raw.get(key, []))
