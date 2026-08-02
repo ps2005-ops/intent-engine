@@ -722,7 +722,7 @@ def test_the_default_route_never_reverts_to_a_deeper_layer(tmp_path):
     assert "Location" not in headers
     # the 60-second contract, asserted on the rendered default
     for marker in ("Why this matters", "What I would do next",
-                   "How confident is this"):
+                   "How far this evidence goes"):
         assert marker in body, marker
 
 

@@ -256,9 +256,16 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
 
     # --- confidence, last because it qualifies everything above --------------
     if b.confidence:
-        out.append("<h2>How confident is this</h2><div class=\"card\">")
-        out.append(f'<p><span class="conf">{_e(b.confidence)}.</span> '
-                   f'{_e(_clip(b.confidence_reason, 30))}</p>')
+        # LEAD WITH THE REASON, NOT THE GRADE.
+        #
+        # The page opened "Low." and a founder read it as a verdict on the
+        # company rather than a statement about the evidence behind it. The
+        # label survives as a compact marker after the explanation, because
+        # a grade cannot tell anyone what to do and the explanation can.
+        out.append("<h2>How far this evidence goes</h2><div class=\"card\">")
+        out.append(f'<p>{_e(_clip(b.confidence_reason, 40))}</p>')
+        out.append(f'<p class="small muted"><span class="conf">'
+                   f'{_e(b.confidence)}</span> confidence</p>')
         if b.limitations:
             out.append('<details><summary>What this analysis could not see'
                        '</summary><ul>')

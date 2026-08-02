@@ -77,7 +77,7 @@ def test_primary_order_puts_the_decision_before_the_history():
     order = [html.index(m) for m in
              ("The most important thing", "Why this matters",
               "Decision affected", "What I would do next", "What changed",
-              "How confident is this")]
+              "How far this evidence goes")]
     assert order == sorted(order), order
 
 

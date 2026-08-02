@@ -4,6 +4,7 @@ Most of these assert a REFUSAL: that an insight without a consequence cannot be
 displayed, that a sparse company cannot dead-end, that engine trading
 performance cannot appear as founder intelligence.
 """
+import re
 import pytest
 
 from intent_engine.founder_brief import build as B
@@ -415,3 +416,29 @@ def test_the_risk_label_does_not_run_into_its_sentence():
     b.biggest_risk = "Nothing independent confirms the claim."
     html = R.render_brief(b, run_id="r1")
     assert "Biggest risk</span><p>" in html
+
+
+def test_confidence_never_opens_with_a_bare_grade():
+    """MEASURED on six live companies: five briefs opened "Low." A founder
+    reads that as a verdict on the COMPANY, not a statement about the evidence
+    behind it. A grade cannot tell anyone what to do."""
+    html = R.render_brief(_rich(), run_id="r1")
+    assert "How far this evidence goes" in html
+    assert not re.search(r"How far this evidence goes</h2>.{0,40}"
+                         r"<span class=\"conf\">", html, re.S)
+
+
+def test_every_confidence_reason_says_what_would_move_it():
+    """The only actionable part of a confidence statement is what would change
+    it. Each reason is also written to survive the renderer's word clip --
+    a longer sentence was being truncated exactly at that clause."""
+    from intent_engine.founder_brief.build import _confidence
+    k = _rich().key_insight
+    for observations in ([{"source_class": "company_owned"}] * 10,
+                         [{"source_class": "independent_reporting",
+                           "date": "2026-01-01"}] * 4,
+                         [{"source_class": "independent_reporting"}]):
+        label, reason = _confidence(observations, {}, k)
+        assert len(reason.split()) <= 40, (label, len(reason.split()))
+        assert any(cue in reason.lower() for cue in
+                   ("would move", "would confirm", "would settle")), reason

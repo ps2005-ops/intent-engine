@@ -429,21 +429,36 @@ def _confidence(observations: Sequence[dict], report: dict,
     independent = independent_count(o.get("source_class") for o in observations)
     dated = sum(1 for o in observations if (o.get("date") or "")[:4].isdigit())
 
+    # EVERY REASON MUST SAY WHAT WOULD MOVE IT.
+    #
+    # The label was doing the talking: the page opened "Low." and a founder
+    # took that as the product's verdict on the company rather than a
+    # statement about the evidence behind it. A grade is not information --
+    # what is established, what is missing, and what would settle it is.
     if not insight:
-        return ("Low", "No conclusion cleared the evidence bar. What follows "
-                       "describes what could be verified, not what it means.")
+        return ("Low", "No conclusion cleared the evidence bar, so none is "
+                       "presented. What follows is what could be verified, "
+                       "not what it means. One dated, independently reported "
+                       "development would be enough to change that.")
     if independent == 0:
-        return ("Low", f"Everything here comes from the company's own "
-                       f"material ({n} source(s)). Nothing independent "
-                       f"confirms it, so treat it as what the company says "
-                       f"about itself.")
+        # Written to survive the renderer's 40-word clip. The clause that
+        # says what would MOVE the conclusion is the only actionable part,
+        # and a longer, better sentence was being truncated exactly there.
+        return ("Low", f"All {n} source(s) are the company's own. The facts "
+                       f"are checkable; the reading of them has not been "
+                       f"tested outside the company. A customer account or "
+                       f"independent report would move this.")
     if independent >= 2 and dated >= 3:
-        return ("Moderate", f"{independent} independent source(s) and {dated} "
-                            f"dated item(s) agree. Still a public-information "
-                            f"view — it cannot see inside the business.")
-    return ("Low to moderate", f"{independent} independent source(s) and "
-                               f"{dated} dated item(s). Thin enough that one "
-                               f"new disclosure could change it.")
+        return ("Moderate", f"{independent} source(s) outside the company "
+                            f"agree with {dated} dated item(s), so the "
+                            f"direction is corroborated, not asserted. It "
+                            f"still cannot see pricing, retention or unit "
+                            f"economics — those would confirm it.")
+    return ("Low to moderate", f"{independent} source(s) from outside the "
+                               f"company and {dated} dated item(s) — enough "
+                               f"to point a direction, not enough to rely on. "
+                               f"One further independent account either way "
+                               f"would settle it.")
 
 
 # ---------------------------------------------------------------------------
