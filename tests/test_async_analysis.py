@@ -470,3 +470,34 @@ def test_a_refused_submission_never_leaves_a_run_claiming_to_run(tmp_path):
                             as_of="2026-08-02T00:00:00+00:00")
     assert app._schedule_analysis("u", run["run_id"]) is False
     assert run["run_id"] not in app._analysis_inflight
+
+
+# --- terminal-state matrix --------------------------------------------------
+def test_every_terminal_state_stops_polling_and_drops_the_active_stage(
+        tmp_path):
+    """An INTERRUPTED run polled forever under 'Reading the public
+    evidence...': the progress page's terminal set omitted it, and the
+    stale-marker refuses to re-mark a run it already marked."""
+    for state in ("FAILED", "REJECTED", "INTERRUPTED"):
+        app = _async_app(tmp_path / state)
+        c, _, headers, _ = _submit(app)
+        run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+        app.wait_for_analysis(run_id, timeout=30)
+        meta = app.ci.run_meta(run_id) or {}
+        app.ci._transition(run_id, meta.get("domain", ""), state)
+        _, _, html = c.request("GET", f"/runs/{run_id}/progress")
+        assert 'http-equiv="refresh"' not in html, (
+            f"{state} keeps polling a run that will never advance")
+        assert "Reading the public evidence" not in html, (
+            f"{state} still shows an active stage")
+
+
+def test_interrupted_says_so_rather_than_implying_work_continues(tmp_path):
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    app.wait_for_analysis(run_id, timeout=30)
+    meta = app.ci.run_meta(run_id) or {}
+    app.ci._transition(run_id, meta.get("domain", ""), "INTERRUPTED")
+    _, _, html = c.request("GET", f"/runs/{run_id}/progress")
+    assert "interrupt" in html.lower() or "stopped" in html.lower()

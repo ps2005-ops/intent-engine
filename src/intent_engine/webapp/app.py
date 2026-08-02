@@ -1211,7 +1211,11 @@ class WebApp:
         # Auto-update without a manual refresh: while the run is still in a
         # non-terminal state, the page reloads itself; in any terminal state the
         # refresh is omitted so it stops (safe, JS-free, CSP-proof).
-        terminal = status in ("COMPLETE", "PARTIAL", "FAILED", "REJECTED")
+        # Read the one list. A local tuple here omitted INTERRUPTED, and
+        # because the stale-marker refuses to re-mark a run it has already
+        # marked, such a run polled itself every four seconds forever under
+        # "Reading the public evidence..." -- a dead run wearing a live stage.
+        terminal = status in self.TERMINAL_STATES
         # FOUNDER BRIEF FIRST.
         #
         # The original fix here was "do not stop on a status page" and it sent
@@ -1234,8 +1238,13 @@ class WebApp:
         # A run that failed must say so in the heading. Softening every state
         # into "Reading the public evidence…" would hide a failure behind a
         # progress message, which is worse than the jargon it replaced.
-        heading = ("This analysis could not be completed"
-                   if status == "FAILED" else "Reading the public evidence…")
+        heading = {
+            "FAILED": "This analysis could not be completed",
+            # Say what happened. "Reading the public evidence..." on a run
+            # whose worker died is a progress message covering for a stop.
+            "INTERRUPTED": "This analysis was interrupted",
+            "REJECTED": "This analysis was not accepted",
+        }.get(status, "Reading the public evidence…")
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'{refresh}<title>{_e(heading)}</title></head>'
                 f'<body>'
