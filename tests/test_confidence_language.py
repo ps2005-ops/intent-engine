@@ -53,3 +53,60 @@ def test_no_founder_template_renders_a_grade_as_its_own_element():
         r"<(p|h2|h3)[^>]*>\s*(?:Confidence:?\s*&?a?m?p?;?\s*)?"
         r"\{_e\(str\(\w+\[.confidence.\]\)\)\}\s*</\1>", src)
     assert not offenders, offenders
+
+
+# --- cross-layer regression on a genuinely grounded run ---------------------
+def test_a_grounded_brief_never_renders_a_bare_grade(tmp_path):
+    """The preview cannot produce this path without a key, so it is pinned
+    here: on a COMPLETE grounded run the rendered founder brief must not
+    show a confidence word standing on its own."""
+    from tests.test_strategic_result_states import (
+        RecordedClient, _decision_payload, _transport,
+    )
+    from intent_engine.company_ingestion.service import CompanyIngestionService
+    from intent_engine.founder_intelligence.service import (
+        FounderIntelligenceService,
+    )
+    from intent_engine.strategic_intelligence.observations import (
+        derive_analyst_evidence,
+    )
+    from intent_engine.strategic_intelligence.analyst import ResultState
+
+    fi = FounderIntelligenceService(tmp_path / "fi.jsonl")
+    ci = CompanyIngestionService(tmp_path / "ci.jsonl", transport=_transport,
+                                 resolver=False)
+    run = ci.create_run(company_name="Examplecorp",
+                        website="https://example.test", user_id="u",
+                        as_of="2026-08-02T00:00:00+00:00")
+    rid = run["run_id"]
+    cands = ci.discover(rid)
+    ci.approve(rid, user_id="u",
+               approved_ids=[c["candidate_id"] for c in cands][:14],
+               rejected_ids=[])
+    ci.fetch_approved(rid)
+    ev = derive_analyst_evidence(list(ci.store.retrieved(rid)))
+    ci._analyst_client = RecordedClient(_decision_payload(ev[0].observation_id))
+    report = ci.compose(rid, fi_service=fi)["strategic_report"]
+    assert report["result_state"] == ResultState.COMPLETE
+
+    from intent_engine.founder_brief import build as fb
+    from intent_engine.founder_brief import render as fr
+    brief = fb.build(company="Examplecorp", mode=fb.classify_mode(
+        is_public=False, evidence_count=len(ev)), report=report,
+        observations=[e.__dict__ if hasattr(e, "__dict__") else e
+                      for e in ev])
+    html = fr.render_brief(brief, run_id=rid)
+    # No paragraph on the rendered brief may be a confidence word alone.
+    for para in re.findall(r"<p[^>]*>(.*?)</p>", html, re.S):
+        assert not fr.is_bare_grade(re.sub(r"<[^>]+>", "", para)), para
+    # The grade is present -- this passes by explaining it, not by hiding
+    # it -- and it never stands as its own sentence.
+    assert brief.confidence and brief.confidence_reason
+    plain = re.sub(r"<[^>]+>", "", html)
+    assert "confidence" in plain.lower()
+    conf_para = [re.sub(r"<[^>]+>", "", p)
+                 for p in re.findall(r"<p[^>]*>(.*?)</p>", html, re.S)
+                 if "confidence" in p.lower()]
+    assert conf_para, "the grade vanished entirely"
+    for para in conf_para:
+        assert len(para.split()) > 4, f"grade stands alone: {para!r}"

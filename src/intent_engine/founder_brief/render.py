@@ -262,10 +262,14 @@ def render_brief(brief, *, run_id: str = "", links: bool = True) -> str:
         # company rather than a statement about the evidence behind it. The
         # label survives as a compact marker after the explanation, because
         # a grade cannot tell anyone what to do and the explanation can.
+        # The marker rides WITH the reason rather than in a paragraph of its
+        # own: alone in the DOM, "Low confidence" is a bare grade again --
+        # it is what a screen reader announces as one thought, and what the
+        # eye lands on when it skips the paragraph above.
         out.append("<h2>How far this evidence goes</h2><div class=\"card\">")
-        out.append(f'<p>{_e(_clip(b.confidence_reason, 40))}</p>')
-        out.append(f'<p class="small muted"><span class="conf">'
-                   f'{_e(b.confidence)}</span> confidence</p>')
+        out.append(f'<p>{_e(_clip(b.confidence_reason, 40))} '
+                   f'<span class="small muted">(<span class="conf">'
+                   f'{_e(b.confidence)}</span> confidence)</span></p>')
         if b.limitations:
             out.append('<details><summary>What this analysis could not see'
                        '</summary><ul>')
