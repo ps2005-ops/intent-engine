@@ -528,7 +528,7 @@ def _upper_first(text: str) -> str:
     return text[:1].upper() + text[1:] if text else ""
 
 
-def _identity(text: str) -> str:
+def _identity(text: str, limit: int = 120) -> str:
     """A sentence's identity, so a deck can tell whether it already said it.
 
     Compared on words alone: two bullets differing only by the heading glued
@@ -536,7 +536,8 @@ def _identity(text: str) -> str:
     evidence that would settle it: X") are one sentence to a reader.
     """
     body = re.sub(r"^[^:]{0,60}:\s*", "", " ".join(str(text or "").split()))
-    return " ".join(re.findall(r"[a-z0-9]+", body.lower()))[:120]
+    words = " ".join(re.findall(r"[a-z0-9]+", body.lower()))
+    return words[:limit] if limit else words
 
 
 def _decision_detail_slides(decision: dict, *, index: int = 0,
@@ -556,15 +557,24 @@ def _decision_detail_slides(decision: dict, *, index: int = 0,
     shown = {_identity(t) for t in (already_shown or ())}
 
     def _fresh(text):
-        """Drop a bullet this deck has already said.
+        """Drop a bullet this deck has already said, or already contains.
 
-        The next move and the missing evidence collapse to the same sentence
-        whenever no falsification question survived filtering, and the screen
-        printed it twice under two headings -- the same duplication the
-        founder brief was fixed for.
+        Two collapses, both measured on the deployed decks. The next move and
+        the missing evidence become the same sentence whenever no
+        falsification question survives filtering. And the mechanism is the
+        act option's key assumption, its upside, and -- on the
+        alternative-derived path -- part of the headline too, so it appeared
+        four times across two screens.
+
+        Containment, not equality: "value and lock-in migrate from the visible
+        product" and "If this reading holds, value and lock-in migrate from
+        the visible product" are one sentence to a reader, and the second is
+        not a prefix of the first.
         """
         key = _identity(text)
-        if not text or not key or key in shown:
+        if not text or not key:
+            return ""
+        if any(key in seen or seen in key for seen in shown):
             return ""
         shown.add(key)
         return text
@@ -579,15 +589,31 @@ def _decision_detail_slides(decision: dict, *, index: int = 0,
         # a comparison, and at 375px they would not be side by side anyway.
         for n, option in enumerate(options[:2]):
             label = (option.get("label") or "").rstrip(":")
+            # DEDUPED WITHIN THE SCREEN, not against the deck.
+            #
+            # The upside IS this screen -- it is what the option wins, and
+            # dropping it because the decision screen already named the
+            # mechanism left "Option 1" with nothing but its cost. What has to
+            # go is the assumption when it restates what is already on the
+            # same screen, which is the common case: the act option's key
+            # assumption is the mechanism, and so is its upside.
+            upside = option.get("upside", "")
+            downside = option.get("downside", "")
+            assumption = option.get("key_assumption", "")
+            # Compared in full, not on the 120-character prefix the
+            # cross-slide check uses: the assumption sits INSIDE the upside
+            # here ("If <assumption>, nothing has been committed against it"),
+            # and a truncated needle stops matching a truncated haystack.
+            here = f"{_identity(upside, 0)} {_identity(downside, 0)}"
+            if _identity(assumption, 0) and _identity(assumption, 0) in here:
+                assumption = ""
             slides.append(_slide(
                 f"option-{index + 1}-{n + 1}", f"Option {n + 1}: {label}", [
-                    _bullet(_fresh(option.get("upside", "")),
+                    _bullet(upside,
                             evidence=option.get("supporting_evidence_ids")
                             or []),
-                    _bullet(_lead("The cost: ",
-                                  _fresh(option.get("downside", "")))),
-                    _bullet(_lead("This assumes ",
-                                  _fresh(option.get("key_assumption", "")))),
+                    _bullet(_lead("The cost: ", downside)),
+                    _bullet(_lead("This assumes ", assumption)),
                 ], kind="options",
                 note="Cited against the evidence behind it."))
         slides.append(_slide(f"next-{index + 1}", "What to do next", [
@@ -896,10 +922,16 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     composed_decision = decision_of(r)
     shown_here = [b["text"] for s in slides if s for b in s["bullets"]]
     if composed_decision.is_ready:
+        # The headline names the mechanism when the option labels are generic,
+        # so the mechanism line below it would be the same sentence twice.
+        mechanism = ("" if _identity(composed_decision.mechanism) in
+                     _identity(composed_decision.headline)
+                     else composed_decision.mechanism)
         slides.append(_slide("decision", "The decision this bears on", [
             _bullet(composed_decision.headline, full=True),
-            _bullet(_lead("The mechanism: ", composed_decision.mechanism)),
+            _bullet(_lead("The mechanism: ", mechanism)),
         ], kind="decision"))
+        shown_here = [b["text"] for s in slides if s for b in s["bullets"]]
     if composed_decision.readiness != "WITHHELD":
         # No separate headline screen for the bounded state: the headline IS
         # "no option is safe to commit to yet, because...", and the screen

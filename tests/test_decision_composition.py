@@ -671,3 +671,38 @@ def test_the_rich_brief_shows_the_decision_not_the_topics():
         topic = (implication.get("decision") or "").lower().rstrip(".")
         if topic:
             assert topic not in line.lower(), topic
+
+
+def test_an_option_screen_says_the_mechanism_once():
+    """On the deployed decks the mechanism appeared four times across two
+    screens: in the headline, on the decision screen, as option one's upside,
+    and again as its key assumption. It is the act option's assumption AND its
+    upside by construction, so the repetition is structural rather than a
+    one-off.
+
+    What may not happen in fixing it is the upside going missing -- an option
+    screen without what the option WINS is the more expensive failure.
+    """
+    from intent_engine.strategic_intelligence.slides import build_slides
+    deck = build_slides(_report().as_dict())
+    options = [s for s in deck if s["kind"] == "options"]
+    assert len(options) == 2, [s["kind"] for s in deck]
+
+    for slide in options:
+        texts = [b["text"] for b in slide["bullets"]]
+        assert texts, slide["id"]
+        # the upside survives, and nothing on the screen restates it
+        seen = []
+        for text in texts:
+            words = " ".join(re.findall(r"[a-z0-9]+", text.lower()))
+            for other in seen:
+                assert words not in other and other not in words, texts
+            seen.append(words)
+
+    decision = [s for s in deck if s["kind"] == "decision"]
+    if decision:
+        bullets = [b["text"] for b in decision[0]["bullets"]]
+        head = " ".join(re.findall(r"[a-z0-9]+", bullets[0].lower()))
+        for text in bullets[1:]:
+            body = " ".join(re.findall(r"[a-z0-9]+", text.lower()))
+            assert body not in head, bullets
