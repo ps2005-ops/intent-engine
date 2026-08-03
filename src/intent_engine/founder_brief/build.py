@@ -591,10 +591,20 @@ def _next_actions(report: dict, insight: Optional[FounderInsight],
         text = question if isinstance(question, str) else question.get("text")
         if text:
             actions.append(_sentence(f"Answer internally: {text}", 180))
-    for gap in (report.get("evidence_gaps") or ())[:2]:
+    # Filtered where the visible item is SELECTED, the same boundary the deck
+    # and the brief use. The deployed Palantir brief told a founder to "Find
+    # out: Whether customers actually moved their source of truth is not
+    # observable from outside" -- an evidence gap phrased in the library's own
+    # vocabulary, on the primary screen, as the single thing to go and do.
+    from intent_engine.strategic_intelligence.concrete import (
+        reads_as_taxonomy,
+    )
+    for gap in (report.get("evidence_gaps") or ()):
         text = gap if isinstance(gap, str) else gap.get("text")
-        if text:
+        if text and not reads_as_taxonomy(text):
             actions.append(_sentence(f"Find out: {text}", 180))
+        if len(actions) >= 5:
+            break
     seen, unique = set(), []
     for action in actions:
         key = action.lower()[:60]

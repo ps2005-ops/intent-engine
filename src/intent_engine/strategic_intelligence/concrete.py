@@ -289,6 +289,20 @@ def select_founder_claim_anchor(observations, *, company="") -> dict:
     # subject beyond the company itself, has not earned the takeover.
     if len(fact.split()) < 3:
         return {}
+    # A TITLE STILL HAS TO BE A SENTENCE.
+    #
+    # "Palantir Partnership Vanguard" opened the deployed deck under the
+    # heading "The insight" -- three nouns, retrieved from a page, presented
+    # as the analysis's conclusion. `action_kind` had matched a word in it,
+    # and nothing after that asked whether the result asserted anything.
+    #
+    # The claim gate's word floor cannot be used here: "Sentry acquired
+    # Codecov." is three words and is exactly the fact this path exists to
+    # find. What separates them is the verb -- one reports an action, the
+    # other is a noun phrase -- so that is what is required.
+    from intent_engine.founder_brief.build import _has_finite_verb
+    if not _has_finite_verb(fact.lower()):
+        return {}
     return {
         "fact": fact,
         "kind": lead["kind"],

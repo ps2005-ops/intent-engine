@@ -1864,12 +1864,23 @@ class WebApp:
 
     def _suggested_questions(self, report):
         """Company-specific follow-ups derived from the report, not generic."""
+        from intent_engine.strategic_intelligence.concrete import (
+            reads_as_taxonomy,
+        )
         hyps = report.get("hypotheses", [])
         qs = []
         if hyps:
             top = hyps[0]
-            qs.append(f"What evidence most weakens the "
-                      f"{top['title'].split(' (')[0].lower()} thesis?")
+            # A hypothesis TITLE is the pattern library's label for a shape.
+            # Quoting it back inside a suggested question put "absorbing
+            # adjacent tools until the work lives inside it" on the deployed
+            # Palantir page, in a question the reader was invited to click.
+            title = top.get("title", "").split(" (")[0]
+            if title and not reads_as_taxonomy(title):
+                qs.append(f"What evidence most weakens the "
+                          f"{title.lower()} thesis?")
+            else:
+                qs.append("What evidence most weakens the reading here?")
             comps = top.get("comparables", [])
             if comps:
                 qs.append(f"How is this transition similar to {comps[0]}, and "

@@ -516,3 +516,85 @@ def test_break_a_bounded_result_becomes_rich_on_one_surface():
     slides = _decision_detail_slides(bounded.as_dict())
     assert {s["kind"] for s in slides} == {"investigation"}
     assert not any(s["kind"] == "options" for s in slides)
+
+
+# --- 5. read off the deployed preview ----------------------------------------
+#
+# Each of these was measured on the preview at bb8b3d1, running Palantir as a
+# guest. They are here because the test suite was fully green at the time: a
+# gate can be correct and still be wired to only some of the paths that need
+# it, and no unit test was going to notice which ones were missing.
+
+def test_a_retrieved_page_title_cannot_lead_the_deck():
+    """"Palantir Partnership Vanguard." opened the deck under "The insight".
+
+    Three nouns, lifted from a page title. The claim gate was written for
+    exactly this string, but it guards the fallback deck, and the takeover
+    path reached the same slide without passing it. The word floor cannot be
+    reused here -- "Sentry acquired Codecov." is also three words and is the
+    fact this path exists to find -- so the verb is what decides.
+    """
+    from intent_engine.strategic_intelligence.concrete import (
+        select_founder_claim_anchor,
+    )
+
+    def _observation(title, excerpt):
+        return {"source_title": title, "excerpt": excerpt,
+                "observation_id": "obs-1", "date": "2026-07-01",
+                "source_class": "company_owned"}
+
+    noun_phrase = select_founder_claim_anchor(
+        [_observation("Palantir Partnership Vanguard",
+                      "Partnership with Vanguard.")], company="Palantir")
+    assert noun_phrase == {}, noun_phrase
+
+    real = select_founder_claim_anchor(
+        [_observation("Sentry Acquires Codecov | Sentry",
+                      "Find current press releases.")], company="Sentry")
+    assert real.get("fact") == "Sentry acquired Codecov."
+
+
+def test_the_next_action_is_not_the_librarys_own_vocabulary():
+    """The deployed brief's single next action was "Find out: Whether
+    customers actually moved their source of truth is not observable from
+    outside" -- an evidence gap in the pattern library's words, on the primary
+    screen, as the one thing to go and do."""
+    import intent_engine.founder_brief.build as B
+    report = {
+        "evidence_gaps": [
+            "Whether customers actually moved their source of truth is not "
+            "observable from outside.",
+            "every source here is published by the company itself"],
+        "questions": [], "thesis": {}, "hypotheses": [], "observations": []}
+    actions = B._next_actions(report, None, B.PRIVATE_COMPANY)
+    joined = " ".join(actions).lower()
+    assert "source of truth" not in joined, actions
+    assert "published by the company itself" in joined, actions
+
+
+def test_a_suggested_follow_up_never_quotes_a_pattern_title():
+    """"What evidence most weakens the absorbing adjacent tools until the work
+    lives inside it thesis?" was offered to the reader as a click."""
+    from intent_engine.webapp.app import WebApp
+    app = object.__new__(WebApp)
+    report = {"hypotheses": [{
+        "title": "absorbing adjacent tools until the work lives inside it",
+        "comparables": ["Notion"]}], "agenda": []}
+    questions = " ".join(app._suggested_questions(report)).lower()
+    assert "adjacent tools" not in questions, questions
+    assert "weakens the reading" in questions, questions
+
+
+def test_source_classes_reach_the_reader_in_words():
+    """The deck printed "no investor_material / customer_voice / competitor /
+    independent_reporting source corroborates this yet"."""
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    from tests.test_sentry_deck_regression import SENTRY_OBS
+    report = build_strategic_report(company_name="Sentry",
+                                    observations=SENTRY_OBS).as_dict()
+    gaps = " ".join(report["evidence_gaps"])
+    for internal in ("investor_material", "customer_voice",
+                     "independent_reporting", "executive_statement"):
+        assert internal not in gaps, gaps

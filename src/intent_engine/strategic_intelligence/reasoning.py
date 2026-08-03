@@ -128,6 +128,16 @@ def _confidence(matched_qual, support_classes, counter_count) -> tuple:
     return level, reasons
 
 
+#: source classes as a reader would say them
+_CLASS_IN_WORDS = {
+    "executive_statement": "executive statement",
+    "investor_material": "investor material",
+    "customer_voice": "customer account",
+    "competitor": "competitor",
+    "independent_reporting": "independent report",
+}
+
+
 def _rank_evidence(observations):
     """Order evidence by strategic value: independent vantage first, then
     dated, then strong (not weak), then more specific (longer excerpt)."""
@@ -185,8 +195,13 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
     missing_external = [c for c in _EXTERNAL_CLASSES
                         if c not in support_classes]
     if missing_external:
-        gaps.append("no " + " / ".join(missing_external)
-                    + " source corroborates this yet")
+        # Named in a reader's words. The enum spellings are the pipeline's
+        # own, and the deployed deck printed "no investor_material /
+        # customer_voice / competitor / independent_reporting source
+        # corroborates this yet" to a founder.
+        gaps.append("no " + ", ".join(_CLASS_IN_WORDS.get(c, c)
+                                      for c in missing_external)
+                    + " has corroborated this yet")
 
     strong_ids = {o.observation_id for o in strongest_support}
     roles = ([(o.observation_id, "direct_support") for o in strongest_support]
