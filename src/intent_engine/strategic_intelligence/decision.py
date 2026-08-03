@@ -153,6 +153,28 @@ def _claim(text: str) -> str:
     return text if _is_consequence(text) else ""
 
 
+def as_clause(text: str, company: str = "") -> str:
+    """Public: a sentence made fit to sit inside another one.
+
+    Exposed because the narrative renderer builds sentences around the SAME
+    composed strings. A renderer that lowercases and de-punctuates its own way
+    is how one mechanism comes to read as two -- "If instead Breadth is
+    defensive bundling" on one surface and "if instead breadth is..." on the
+    next.
+    """
+    return _clause(text, company)
+
+
+def end_sentence(text: str) -> str:
+    """Public: end a composed sentence exactly once. See `_stop`."""
+    return _stop(text)
+
+
+def lower_first(text: str, company: str = "") -> str:
+    """Public: lowercase an opening word unless it is a name. See `_lower_first`."""
+    return _lower_first(text, company)
+
+
 def mechanism_sentence(hypothesis) -> str:
     """The founder-usable half of a hypothesis's reasoning. See `_mechanism_of`.
 
@@ -268,6 +290,13 @@ class DecisionOption:
     contradicting_evidence_ids: tuple = ()
     watch_item: str = ""
     business_consequence: str = ""
+    #: which side of the trade-off this is -- "act" on the reading, or "hold"
+    #: for the competing account. Internal: a renderer needs it to refer back
+    #: to the right one ("that the reading above holds" vs "that the competing
+    #: account above holds"), and string-matching the assumption against the
+    #: upside gets it wrong, because the holding option's upside restates the
+    #: alternative it assumes.
+    stance: str = ""
 
     @property
     def is_defensible(self) -> bool:
@@ -427,7 +456,13 @@ def decision_from_dict(data) -> FounderDecision:
             contradicting_evidence_ids=tuple(
                 o.get("contradicting_evidence_ids") or ()),
             watch_item=o.get("watch_item", ""),
-            business_consequence=o.get("business_consequence", ""))
+            business_consequence=o.get("business_consequence", ""),
+            # Carried through the round trip. Dropping it here left every
+            # option with an empty stance on the served page -- the decision
+            # reaches a surface as a stored dict, not as the composed object --
+            # so both cards pointed at "the competing account above" and one
+            # of them meant the opposite.
+            stance=o.get("stance", ""))
         for o in (data.get("options") or ()) if isinstance(o, dict))
     return FounderDecision(
         topic=data.get("topic", ""), mechanism=data.get("mechanism", ""),
@@ -450,17 +485,40 @@ def decision_from_dict(data) -> FounderDecision:
 # --- composition --------------------------------------------------------------
 
 def _readable_reason(reasons) -> str:
-    """The first confidence reason that is about the EVIDENCE.
+    """The first confidence reason that is about the EVIDENCE, in a reader's
+    words.
 
     The first entry is always a signal-matching trace ("3 qualifying signal(s)
     matched: ..."), which is the system describing its own machinery.
+
+    Two more shapes are refused, because confidence reasons are written for the
+    reasoning layer and were never translated for a reader the way evidence
+    gaps were. "all support comes from company-owned pages, which is one-sided;
+    independent corroboration is missing" carries a word this product's own
+    contract lists as internal vocabulary, and "corroborated across an
+    independent vantage point (customer_voice, independent_reporting)" prints
+    the source taxonomy verbatim. Both would have reached the founder on the
+    new decision screen; the gaps say the same things in English and are
+    already used where this returns "".
     """
+    from intent_engine.founder_brief.contract import INTERNAL_VOCABULARY
+    from intent_engine.strategic_intelligence.records import SOURCE_CLASSES
     for reason in (reasons or ()):
         low = str(reason).lower()
         if "signal" in low or "qualifying" in low or "capped" in low:
             continue
+        if any(token in low for token in INTERNAL_VOCABULARY):
+            continue
+        if any(cls in low for cls in SOURCE_CLASSES):
+            continue
+        # "supported from 1 vantage point(s): the company" is counting, not
+        # explaining, and the "(s)" is a template that never chose a plural.
+        # A founder-facing sentence clears the same claim contract as every
+        # other one on the page.
+        if "(s)" in low:
+            continue
         text = _flat(reason)
-        if text:
+        if text and _claim(text):
             return text[:1].upper() + text[1:]
     return ""
 
@@ -509,7 +567,7 @@ def _act_option(label, description, mechanism, alternative, support, counter,
         if alternative else "",
         key_assumption=mechanism,
         supporting_evidence_ids=support, contradicting_evidence_ids=counter,
-        watch_item=watch, business_consequence=consequence)
+        watch_item=watch, business_consequence=consequence, stance="act")
 
 
 def _hold_option(label, description, mechanism, alternative, support, counter,
@@ -524,7 +582,7 @@ def _hold_option(label, description, mechanism, alternative, support, counter,
             f"from it: {_clause(mechanism, company)}")) if mechanism else "",
         key_assumption=alternative,
         supporting_evidence_ids=support, contradicting_evidence_ids=counter,
-        watch_item=watch, business_consequence=consequence)
+        watch_item=watch, business_consequence=consequence, stance="hold")
 
 
 def _options_from_alternatives(hypothesis, mechanism, alternative,
@@ -544,10 +602,18 @@ def _options_from_alternatives(hypothesis, mechanism, alternative,
     watch_a = falsifiers[0] if falsifiers else ""
     watch_b = falsifiers[-1] if len(falsifiers) > 1 else watch_a
 
+    # DESCRIPTION IS THE ACTION, NOT THE READING.
+    #
+    # Both descriptions used to open "Plan as though ...: <mechanism>", which
+    # is the SAME sentence the option's upside states -- so option one's card
+    # carried the mechanism three times over (description, upside, key
+    # assumption) and the deck showed all three. The description now says what
+    # management would actually do; what the option wins stays on the upside,
+    # where a reader looking for the trade-off goes to find it.
     first = _act_option(
         "Commit to the reading now",
-        f"Plan as though this is already under way: "
-        f"{_clause(mechanism, company)}",
+        "Management plans, resources and prices as though this is already "
+        "true, without waiting for an outside source to confirm it.",
         mechanism, alternative, support, counter, watch_a, consequence, company)
     second = _hold_option(
         "Hold and verify first",

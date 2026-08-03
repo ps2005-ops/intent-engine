@@ -44,6 +44,23 @@ EXEC_LIMITED_MIN, EXEC_LIMITED_MAX = 250, 500
 MAX_PARAGRAPH_WORDS = 70
 MAX_ACTIONS = 3
 
+# THE SCROLLABLE NARRATIVE IS BUDGETED IN TWO PLACES, NOT ONE.
+#
+# The 205-300 budget above was written for a page that TEASED the decision and
+# sent the reader elsewhere for it. The narrative carries the whole thing --
+# the answer, the trigger, the consequence, two options with what each costs,
+# the next move, evidence on both sides, the falsifier and the prepared
+# artefact -- so holding it to 300 words would mean deleting the options,
+# which is the opposite of what this rebuild is for.
+#
+# What still has to be fast is the ANSWER. A founder gets the core in the
+# first section and scrolls only if they want the rest, so that section is
+# budgeted at 60 seconds of reading (~120 words at 250wpm) and the page as a
+# whole is budgeted for depth. The floor matters more than the ceiling here:
+# it is what catches a narrative that rendered headings over nothing.
+ANSWER_MAX = 120
+NARRATIVE_MIN, NARRATIVE_MAX = 250, 950
+
 MARKET_DISCLAIMER = ("Descriptive market context, not an investment "
                      "recommendation.")
 

@@ -181,6 +181,66 @@ def _normalised_text(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip()
 
 
+def sentence_identity(text: str, limit: int = 120) -> str:
+    """A sentence's identity, so a surface can tell whether it already said it.
+
+    Compared on words alone, with any leading label stripped: two lines
+    differing only by the heading glued to the front ("The evidence that would
+    settle it: X" and "X") are one sentence to a reader.
+
+    Lives here rather than in a renderer because the deck and the scrollable
+    narrative both need it, and two implementations of "have I said this" is
+    how one surface deduplicates what the other repeats.
+    """
+    body = re.sub(r"^[^:]{0,60}:\s*", "", " ".join(str(text or "").split()))
+    words = " ".join(re.findall(r"[a-z0-9]+", body.lower()))
+    return words[:limit] if limit else words
+
+
+class SaidOnce:
+    """One screen's memory of what it has already told the reader.
+
+    Containment, not equality: "value and lock-in migrate from the visible
+    product" and "If this reading holds, value and lock-in migrate from the
+    visible product" are one sentence to a reader, and neither is a prefix of
+    the other after the label is stripped.
+
+    A caller decides what to do with a repeat. `fresh` returns "" so a caller
+    can drop an optional line; `has` lets a caller substitute a back-reference
+    where the field is structurally required -- an option with no stated cost
+    is a worse page than a repetitive one.
+
+    Identities are compared UNTRUNCATED. The deck's 120-character cap is fine
+    for equality but silently breaks containment on long sentences: an option
+    whose upside is "If this reading holds, <mechanism>" is longer than the cap,
+    so the mechanism it obviously contains tested as new and printed again as
+    the key assumption on the same card.
+    """
+
+    def __init__(self, seed=()):
+        self._seen = set()
+        for text in (seed or ()):
+            self.remember(text)
+
+    def has(self, text: str) -> bool:
+        key = sentence_identity(text, limit=0)
+        if not key:
+            return True
+        return any(key in seen or seen in key for seen in self._seen)
+
+    def remember(self, text: str) -> None:
+        key = sentence_identity(text, limit=0)
+        if key:
+            self._seen.add(key)
+
+    def fresh(self, text: str) -> str:
+        """The text, or "" when this screen has already said it."""
+        if not text or self.has(text):
+            return ""
+        self.remember(text)
+        return text
+
+
 def find_duplicates(texts, threshold: float = NEAR_DUPLICATE_SIMILARITY) \
         -> list:
     """Indices of entries that repeat an earlier entry, with what they match.

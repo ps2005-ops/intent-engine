@@ -35,15 +35,37 @@ def test_a_real_run_lands_inside_the_full_reading_budget(tmp_path):
     A follow-up form and its suggested questions are how a founder asks for
     more. Counting them against the reading budget would force a choice
     between being answerable and being brief, which is a false trade.
+
+    The default is now the scrollable decision narrative, so the budget it is
+    held to is the narrative's. Holding the page that carries the options to
+    the old teaser's 300 words would mean deleting the options.
     """
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, c, rid = _strategic_webapp_run(tmp_path)
     _, _, body = c.request("GET", f"/runs/{rid}")
-    main = body.split('<main class="fb">')[1]
+    main = body.split('<main class="nar">')[1]
     intelligence = L.intelligence_words(main)
-    assert L.PRIMARY_MIN <= intelligence <= L.PRIMARY_MAX, intelligence
+    assert L.NARRATIVE_MIN <= intelligence <= L.NARRATIVE_MAX, intelligence
     # and the split is reported, so prose cannot be hidden inside a control
     assert L.visible_words(main) > intelligence
+
+
+def test_the_answer_alone_is_still_a_sixty_second_read(tmp_path):
+    """The whole page is budgeted for depth; the ANSWER is budgeted for speed.
+
+    This is the half of the old 300-word budget that still has to hold. A
+    founder gets the core in the first section and scrolls only if they want
+    the rest, so a narrative that pushed the answer past a minute of reading
+    would have moved the problem rather than fixed it.
+    """
+    from tests.test_strategic_intelligence import _strategic_webapp_run
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    _, _, body = c.request("GET", f"/runs/{rid}")
+    answer = re.search(r'<section id="executive_answer".*?</section>', body,
+                       re.S)
+    assert answer, "the default page has no executive answer section"
+    words = L.visible_words(answer.group(0))
+    assert 0 < words <= L.ANSWER_MAX, words
 
 
 def test_essential_intelligence_cannot_hide_inside_a_control():

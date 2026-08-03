@@ -31,7 +31,7 @@ import re
 
 from intent_engine.strategic_intelligence.editorial import (
     addresses_the_system, deduplicate, is_meaningful, lower_first,
-    meaningful_items,
+    meaningful_items, sentence_identity,
 )
 
 _e = _html.escape
@@ -531,13 +531,12 @@ def _upper_first(text: str) -> str:
 def _identity(text: str, limit: int = 120) -> str:
     """A sentence's identity, so a deck can tell whether it already said it.
 
-    Compared on words alone: two bullets differing only by the heading glued
-    to the front ("The gap that has to close first is this: X" and "The
-    evidence that would settle it: X") are one sentence to a reader.
+    The rule now lives in `editorial`, because the scrollable narrative needs
+    exactly the same one and two implementations of "have I said this" is how
+    one surface deduplicates what the other repeats. Kept as a name here so
+    the call sites below read the same as they did.
     """
-    body = re.sub(r"^[^:]{0,60}:\s*", "", " ".join(str(text or "").split()))
-    words = " ".join(re.findall(r"[a-z0-9]+", body.lower()))
-    return words[:limit] if limit else words
+    return sentence_identity(text, limit)
 
 
 def _decision_detail_slides(decision: dict, *, index: int = 0,

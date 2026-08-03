@@ -2443,14 +2443,38 @@ class WebApp:
                 or "This company")
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
+
+        # THE DECISION IS THE DEFAULT SCREEN.
+        #
+        # `render_brief` reads `brief.key_insight`, which is None whenever the
+        # thesis view is withheld -- and the composed decision can be
+        # DECISION_READY while that is true, because it decides across the
+        # portfolio rather than from the top-ranked reading alone. Measured on
+        # the preview: Palantir's default page said "No strategic conclusion
+        # is being asserted about this company" while the deck one click away
+        # carried two options, a cost on each side and the check that
+        # separates them. Same run, same decision object, three surfaces
+        # disagreeing about whether an answer existed.
+        #
+        # So the default now renders the one decision, vertically, and the
+        # brief object feeds it rather than gating it.
+        from intent_engine.founder_brief import narrative as fn
+        from intent_engine.founder_brief.layers import build_actions
+        from intent_engine.strategic_intelligence.decision import decision_of
+
+        story = fn.build_narrative(
+            company=name, brief=brief, report=report,
+            observations=observations, decision=decision_of(report),
+            actions=build_actions(brief))
         # The assistant belongs ON the default screen. Dropping it was a real
         # regression: a founder who has just read a 60-second answer is exactly
         # the person with a follow-up question, and making them navigate first
         # is how a conversation never starts.
-        body = (fr.render_brief(brief, run_id=run_id,
-                                citation_labels=self._citation_labels(run_id))
-                + self._ask_form(run_id, report, session))
-        return self._html(self._page(f"{name} — founder brief", body,
+        body = fr.BRIEF_CSS + fn.render_narrative(
+            story, run_id=run_id,
+            citation_labels=self._citation_labels(run_id),
+            trailing=self._ask_form(run_id, report, session))
+        return self._html(self._page(f"{name} — the decision", body,
                                      session, session.get("csrf", "")))
 
     def _ask_form(self, run_id, report, session):

@@ -731,10 +731,15 @@ def test_the_default_route_never_reverts_to_a_deeper_layer(tmp_path):
         "the default must be served directly; a redirect to a deeper layer is "
         "the reversion this guards")
     assert "Location" not in headers
-    # the 60-second contract, asserted on the rendered default
-    for marker in ("Why this matters", "What I would do next",
-                   "How far this evidence goes"):
+    # The default is the scrollable decision narrative. Asserted by SECTION
+    # ID rather than by heading text: the headings are copy and will be
+    # reworded, and a guard that fails on rewording is a guard people delete.
+    for marker in ('id="executive_answer"', 'id="the_decision"',
+                   'id="next_move"', 'id="prepared"'):
         assert marker in body, marker
+    # ...and it is a scroll, not a deck: no pager stands between the reader
+    # and any of it.
+    assert "Next →" not in body and "Slide 1 of" not in body
 
 
 def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,
