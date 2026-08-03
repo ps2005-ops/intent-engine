@@ -2253,6 +2253,15 @@ class WebApp:
             and o.get("observation_id")][:8]
 
     def _executive_brief_page(self, session, run_id):
+        # OWNERSHIP, like every other run route. Measured on the deployed
+        # preview 2026-08-03: `/runs/{id}` answered 404 "no such run for this
+        # account" to a session that did not own the run, while `/brief`,
+        # `/dashboard` and `/story` served the whole analysis to that same
+        # session with HTTP 200. The guard existed on the primary page and on
+        # /slides and /sources, and was simply missing on these three -- so
+        # the protection looked present and was not.
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
         """The executive brief — depth WITHOUT repetition.
 
         Built from the same `FounderBrief` as every other layer, with the
@@ -2317,6 +2326,8 @@ class WebApp:
         have kept whichever was defined last -- which is how a founder-facing
         route ends up serving an operator page.
         """
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
@@ -2331,6 +2342,8 @@ class WebApp:
                                      session.get("csrf", "")))
 
     def _story_page(self, session, run_id):
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
