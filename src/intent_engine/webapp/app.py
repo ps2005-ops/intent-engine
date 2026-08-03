@@ -342,6 +342,17 @@ class WebApp:
                       if not self._analyst_key_present
                       else "key present but no client was built"))
         self._analyst_client = ci_analyst
+        # Listing resolution needs the same outbound path as retrieval, and
+        # the same discipline as the analyst client above: env="test" never
+        # reaches the network, so the suite stays hermetic and a stray
+        # environment cannot turn a test run into live SEC traffic. Both
+        # caches are per-process; the SEC table changes daily at most, and
+        # re-fetching it per page render would put a network round trip in
+        # front of a dashboard.
+        self._transport = transport
+        self._resolver = resolver
+        self._sec_map = None
+        self._listing_cache: dict = {}
         self.ci = CompanyIngestionService(
             getattr(config, "ci_store_path", "data/company_ingestion.jsonl"),
             transport=transport, resolver=resolver,
@@ -2026,9 +2037,13 @@ class WebApp:
                                              "executive_statement", None, ""))
         thesis = report.get("thesis") or {}
         identity = self.ci.entity_identity(run_id) or {}
-        ticker = self._ticker_of(identity)
+        listing = self._listing_for(run_id)
+        ticker = listing.ticker
+        # A company can be listed and still have no ticker resolved for this
+        # run. `is_public` asks what the company IS, so it reads the status
+        # rather than whether one lookup happened to return a symbol.
         mode = fb.classify_mode(
-            is_public=bool(ticker), evidence_count=len(observations),
+            is_public=listing.is_public, evidence_count=len(observations),
             independent_sources=independent,
             has_thesis=bool(thesis.get("view"))
             and not thesis.get("view_withheld"))
@@ -2091,10 +2106,13 @@ class WebApp:
         # honest thing to quote and an invented date is the thing to avoid.
         documents = [t for t in
                      ((d.get("title") or "").strip() for d in used) if t]
+        listing = self._listing_for(run_id)
         return {"company": name, "pages_read": len(used),
                 "usable": note.get("source_count"), "kinds": kinds,
                 "blocked": blocked, "documents": documents,
-                "ticker": ticker or ""}
+                "ticker": ticker or "",
+                "listing_status": listing.status,
+                "listing_exchange": listing.exchange}
 
     @staticmethod
     def _ticker_of(identity: dict) -> str:
@@ -2111,6 +2129,45 @@ class WebApp:
             if isinstance(listing, dict) and listing.get("ticker"):
                 return str(listing["ticker"]).strip().upper()
         return str((identity or {}).get("ticker") or "").strip().upper()
+
+    def _sec_ticker_map(self):
+        """The SEC registrant table, fetched once per process."""
+        if self._sec_map is None:
+            from intent_engine.company_ingestion.listings import (
+                SecTickerMap, load_sec_ticker_map,
+            )
+            if self.config.env == "test" and self._transport is None:
+                self._sec_map = SecTickerMap(())
+            else:
+                self._sec_map = load_sec_ticker_map(
+                    transport=self._transport, resolver=self._resolver)
+        return self._sec_map
+
+    def _listing_for(self, run_id):
+        """This run's listing resolution, computed once per run.
+
+        THE THREE-COMPANY BOTTLENECK. `_ticker_of` reads `identity["listings"]`,
+        which is populated only from the hand-written registry in entities.py
+        -- and that registry lists exactly three companies. So Tesla, NVIDIA
+        and Costco resolved no ticker, `_market_snapshot()` was never called,
+        and the dashboard reported a missing market snapshot for companies
+        whose shares trade every day. The registry still wins when it has an
+        answer; the SEC registrant table now answers for everyone else.
+        """
+        cached = self._listing_cache.get(run_id)
+        if cached is not None:
+            return cached
+        from intent_engine.company_ingestion.listings import resolve_listing
+        identity = self.ci.entity_identity(run_id) or {}
+        meta = self.ci.run_meta(run_id) or {}
+        name = (identity.get("canonical_name") or identity.get("common_name")
+                or identity.get("name") or meta.get("company_name") or "")
+        resolution = resolve_listing(
+            company_name=name, website=meta.get("website", ""),
+            registry_listings=identity.get("listings") or (),
+            sec_map=self._sec_ticker_map())
+        self._listing_cache[run_id] = resolution
+        return resolution
 
     def _market_snapshot(self, ticker: str):
         """The market engine's sanitized export for this ticker, or None.
@@ -2241,7 +2298,7 @@ class WebApp:
             brief, report, ledger, withheld_line=withheld_line,
             footing=self._evidence_footing(
                 run_id, name,
-                self._ticker_of(self.ci.entity_identity(run_id) or {})))
+                self._listing_for(run_id).ticker))
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — executive '
                 f'brief</h1>'
                 + fr.render_executive_brief(
@@ -2263,7 +2320,7 @@ class WebApp:
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
         footing = self._evidence_footing(
-            run_id, name, self._ticker_of(self.ci.entity_identity(run_id) or {}))
+            run_id, name, self._listing_for(run_id).ticker)
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — '
                 f'intelligence</h1>'
                 + fr.render_dashboard(
@@ -2290,7 +2347,7 @@ class WebApp:
             brief, report, ledger,
             footing=self._evidence_footing(
                 run_id, name,
-                self._ticker_of(self.ci.entity_identity(run_id) or {})))
+                self._listing_for(run_id).ticker))
         actions = fl.build_actions(brief)
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — the '
                 f'decision story</h1>'
@@ -2326,10 +2383,11 @@ class WebApp:
         thesis = report.get("thesis") or {}
         has_view = bool(thesis.get("view")) and not thesis.get("view_withheld")
         identity = self.ci.entity_identity(run_id) or {}
-        ticker = self._ticker_of(identity)
+        listing = self._listing_for(run_id)
+        ticker = listing.ticker
 
         mode = fb.classify_mode(
-            is_public=bool(ticker), evidence_count=len(observations),
+            is_public=listing.is_public, evidence_count=len(observations),
             independent_sources=independent, has_thesis=has_view,
             has_financials=False)
 

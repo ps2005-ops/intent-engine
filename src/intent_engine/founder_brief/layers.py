@@ -280,34 +280,57 @@ def build_dashboard(brief, report: Optional[dict] = None, *,
                 f"{r['label']}: {r['value']}" for r in rows) or
             "no market series available"))
     else:
-        # The old copy asserted "for a private company there is no market to
-        # read" on EVERY company without a snapshot -- which the deployed
-        # preview printed under Tesla and NVIDIA, both listed. Saying a listed
-        # company is private is not an honest gap, it is a wrong fact. The
-        # ticker is known here whenever identity resolved it, so the two cases
-        # are now told apart instead of being collapsed into the wrong one.
+        # FOUR STATES, NOT TWO. The original copy asserted "for a private
+        # company there is no market to read" on EVERY company without a
+        # snapshot -- which the deployed preview printed under Tesla and
+        # NVIDIA, both listed. A failed lookup and a private company are
+        # different facts with different fixes, and only one of them is a
+        # statement about the company.
         ticker = (footing or {}).get("ticker")
+        status = (footing or {}).get("listing_status") or ""
+        exchange = (footing or {}).get("listing_exchange") or ""
         if ticker:
+            where = f" on {exchange}" if exchange else ""
             reason = (market.get("reason")
                       or f"No market snapshot has been published for "
-                         f"{ticker} in this run.")
+                         f"{ticker}{where} in this run.")
             so_what = ("This company is listed, so a market read is possible "
                        "in principle -- it is missing here, not absent in "
                        "principle. Without it you are reading the company's "
                        "own account with nothing outside it to argue back.")
             to_watch = (f"A published price history for {ticker} is what "
                         f"makes this section possible.")
+        elif status == "PUBLIC_LISTING_UNRESOLVED":
+            reason = (market.get("reason")
+                      or "The company appears to be publicly listed, but a "
+                         "verified market identifier was not available for "
+                         "this run.")
+            so_what = ("The gap is in identifying the security, not in the "
+                       "company. Until the right listing is confirmed, market "
+                       "context would risk describing a different company's "
+                       "shares.")
+            to_watch = ("Confirming which listed entity and share class this "
+                        "company trades as is what makes this section "
+                        "possible.")
+        elif status == "PRIVATE":
+            reason = (market.get("reason")
+                      or "This company has no public share-price series, so "
+                         "listed-market context does not apply.")
+            so_what = ("There is no market opinion to read for a private "
+                       "company. That is a property of the company, not a "
+                       "missing input, so nothing here is pending.")
+            to_watch = ""
         else:
             reason = (market.get("reason")
-                      or "No market snapshot has been published for this "
-                         "company, and no listing was identified for it.")
+                      or "No listing could be verified for this company, so "
+                         "no market series was looked up.")
             so_what = ("Without market context you are reading the company's "
                        "own account with nothing outside it to argue back. "
-                       "If this company is private there is no market to "
-                       "read, and that is the honest answer rather than a "
-                       "gap.")
-            to_watch = ("A listed ticker with published price history is "
-                        "what makes this section possible.")
+                       "Whether that is because the company is private or "
+                       "because the listing was not identified is itself "
+                       "unresolved here.")
+            to_watch = ("Confirming whether this company is listed, and under "
+                        "which symbol, is the first step.")
         modules.append(_unavailable(
             "market_trajectory", "Market trajectory", reason,
             so_what=so_what, to_watch=to_watch))
