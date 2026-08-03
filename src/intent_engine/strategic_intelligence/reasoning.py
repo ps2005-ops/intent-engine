@@ -349,7 +349,18 @@ def _build_questions(hypotheses, observations):
     return questions
 
 
-def _build_thesis(company_name, hypotheses, blind_spots):
+def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
+                  evidence_gaps=()):
+    from intent_engine.strategic_intelligence.decision import compose_decision
+
+    # WHAT WAS VERIFIED, in the company's own retrieved words. Carried on the
+    # decision because the honest investigation state is unreadable without
+    # it: "this cannot be concluded" means nothing to a reader who was never
+    # told what COULD be.
+    verified = tuple(
+        (o.excerpt or o.text) for o in (observations or ())
+        if not getattr(o, "weak", False) and (o.excerpt or o.text))[:3]
+
     if not hypotheses:
         # Flagged rather than left for a caller to recognise by its wording.
         # Downstream gates need to tell "the product declined to form a view
@@ -361,7 +372,11 @@ def _build_thesis(company_name, hypotheses, blind_spots):
         return {"view": f"What {company_name} has published is not enough to "
                         f"read a strategy from, so none is put forward here.",
                 "transition": "", "tension": "", "why_care": "",
-                "view_withheld": True}
+                "view_withheld": True,
+                "decision": compose_decision(
+                    company_name, None, blind_spots,
+                    evidence_gaps=evidence_gaps,
+                    verified=verified).as_dict()}
     top = hypotheses[0]
     # NO FABRICATED TENSION.
     #
@@ -388,7 +403,17 @@ def _build_thesis(company_name, hypotheses, blind_spots):
         "transition": top.statement,
         "tension": tension,
         "why_it_may_matter": why_it_may_matter,
+        # THE TOPIC, KEPT AS THE TOPIC.
+        #
+        # `why_care` is `implications[0]`, which is a decision TOPIC -- a
+        # question -- and every surface printed it as the finished decision.
+        # It stays here because the reasoning layer legitimately needs to know
+        # WHICH decision the evidence bears on; what changed is that the
+        # answer now lives in `decision` and the surfaces render that instead.
         "why_care": top.decision_implications[0],
+        "decision": compose_decision(
+            company_name, top, blind_spots, evidence_gaps=evidence_gaps,
+            verified=verified).as_dict(),
     }
 
 
@@ -704,7 +729,6 @@ def build_strategic_report(*, company_name, observations,
 
     blind_spots = _build_blind_spots(observations)
     questions = _build_questions(hypotheses, observations)
-    thesis = _build_thesis(company_name, hypotheses, blind_spots)
     shifts = _build_shifts(observations)
 
     evidence_gaps = []
@@ -724,6 +748,15 @@ def build_strategic_report(*, company_name, observations,
             0, "every source here is published by the company itself, so "
                "nothing in this reading has been checked against an outside "
                "account of it")
+
+    # Built AFTER the gaps, not before: the decision has to name what is
+    # missing, and the two coverage gaps inserted above are the most important
+    # things missing in a typical run. Composing the decision first meant the
+    # one field a founder needs to judge it by was the one field it could not
+    # see.
+    thesis = _build_thesis(company_name, hypotheses, blind_spots,
+                           observations=observations,
+                           evidence_gaps=evidence_gaps)
 
     graph = _build_evidence_graph(company_name, observations, hypotheses,
                                   used_patterns, blind_spots, questions)
