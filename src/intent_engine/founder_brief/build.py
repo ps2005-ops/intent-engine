@@ -256,8 +256,14 @@ def _first(items) -> str:
 # nothing: a bare topic ("how much to invest ahead of the transition"), a
 # question-shaped stub ("whether to keep investing in depth"), and a naked
 # noun phrase. They are all recognisable by having no finite verb.
-_FRAGMENT_STARTS = ("how much", "how many", "whether", "what to", "when to",
-                    "which ", "why ", "how to")
+# Interrogative openings, not a list of the ones seen so far. "How much to
+# invest ahead of the transition" was blocked and "How exposed a plan is to one
+# buyer's product cycle slipping" was not, because the list named two "how"
+# phrasings out of the six the library uses. A sentence that opens on "how" or
+# "whether" is asking; "what"/"when" stay narrow because both open legitimate
+# cleft sentences ("What customers actually buy is the outcome").
+_FRAGMENT_STARTS = ("how ", "whether ", "what to", "when to",
+                    "which ", "why ")
 # SENTENCES ABOUT THE ANALYSIS, NOT ABOUT THE BUSINESS.
 #
 # "The most recent evidence is About Palantir." has a finite verb and passed
@@ -275,6 +281,93 @@ _VERB_HINTS = (" is ", " are ", " was ", " were ", " can ", " could ",
                " reduces ", " increases ", " risks ", " threatens ",
                " depends ", " requires ", " shifts ", " turns ")
 
+# THE INVENTORY WAS THE BUG, NOT THE RULE.
+#
+# The rule -- a claim needs a finite verb -- is right. Thirty hand-listed verbs
+# to implement it is not: "Northstar pricing publishes its prices" is a
+# complete assertion about a company and was rejected because nobody had
+# written " publishes " into the tuple above. Every such rejection silently
+# blanks a real finding, which is the failure mode this gate exists to
+# prevent, so the inventory is widened to ordinary finite English.
+#
+# Widening the VERB list weakens nothing. A noun phrase ("Palantir Partnership
+# Vanguard"), a bare topic ("whether to keep investing in depth"), a pattern
+# label and a metadata sentence are each rejected by a DIFFERENT rule -- the
+# fragment-start list, the self-referential list, the taxonomy filter, the word
+# floor. None of them depends on a verb being absent from a lexicon.
+_FINITE_VERBS = frozenset("""
+is are was were be been am has have had do does did
+can could may might will would shall should must ought need needs
+acquires acquired adds added allows allowed announces announced appears
+appeared applies applied arrives arrived asks asked avoids avoided
+becomes became begins began breaks broke brings brought builds built
+buys bought carries carried causes caused charges charged chooses chose
+commits committed competes competed concentrates concentrated confirms
+confirmed costs covers covered creates created cuts decides decided
+delays delayed delivers delivered describes described determines
+determined develops developed drives drove drops dropped earns earned
+ends ended enters entered establishes established exceeds exceeded
+exposes exposed extends extended fails failed falls fell favours favors
+favoured favored finds found follows followed gains gained gives gave
+goes went grew handles handled happens happened helps helped holds held
+improves improved includes included invests invested joins joined
+knows knew lacks lacked lands landed lasts lasted launches launched
+leads led learns learned lets limits limited lives lived loses lost
+matches matched matters mattered migrates migrated misses missed moves
+moved names named needs needed offers offered opens opened operates
+operated owns owned pays paid picks picked places placed plans planned
+points pointed prevents prevented prices priced produces produced
+promises promised protects protected proves proved provides provided
+publishes published pulls pulled puts raised reaches reached reads read
+receives received reflects reflected remains remained removes removed
+replaces replaced reports reported rests rested returns returned rises
+rose runs ran says said sees saw sells sold sends sent serves served
+sets settles settled shows showed signals signalled signaled sits sat
+solves solved sounds sounded spends spent splits split stands stood
+starts started stays stayed stops stopped strains strained suggests
+suggested supports supported takes took teaches taught tells told tends
+tended tests tested tightens tightened trades traded treats treated
+tries tried uses used wants wanted watches watched weakens weakened
+wins won works worked
+""".split()) | frozenset("""
+add allow appear apply arrive ask avoid become begin break bring build buy
+carry cause charge choose commit compete concentrate confirm cost cover
+create cut decide delay deliver depend describe determine develop drive drop
+earn end enter erode establish exceed expose extend fail fall favour favor
+find follow force gain give grow handle happen help hold improve include
+increase invest join keep know lack land last lead learn leave let limit
+live lose make match matter mean migrate miss move name need offer open
+operate own pay pick place plan point prevent price produce promise protect
+prove provide publish pull put raise reach read receive reduce reflect
+remain remove replace report require rest return rise run say see sell send
+serve set settle shift show sit solve sound spend split stand start stay
+stop strain suggest support take teach tell tend test threaten tighten
+trade treat try turn use want watch weaken win work
+""".split())
+# A PLURAL SUBJECT TAKES THE BASE FORM, which the inflected list above cannot
+# see. "value and lock-in migrate from the visible product to the rails
+# underneath it" carries no inflected verb at all, and half the pattern
+# library's mechanism sentences are written that way -- so rejecting them left
+# the strongest thing the analysis had to say about a company in a field that
+# nothing rendered.
+
+
+def _has_finite_verb(low: str) -> bool:
+    """True when a lowercased sentence carries a finite verb.
+
+    Two inventories, deliberately: the hint tuple matches on surrounding
+    spaces and so catches multi-word shapes, while the lexicon matches whole
+    WORDS and so catches a verb opening an imperative or closing a clause --
+    "Sentry acquired Codecov." has no trailing space after the object.
+    """
+    if any(hint in f" {low} " for hint in _VERB_HINTS):
+        return True
+    # Hyphens are part of the WORD. Splitting on them made "a people-delivered
+    # service" contain the verb "delivered", so the pattern library's own
+    # titles -- noun phrases, every one -- started passing as claims.
+    return any(word in _FINITE_VERBS
+               for word in re.findall(r"[a-z'\-]+", low))
+
 
 def _is_consequence(text: str) -> bool:
     """True when this reads as a statement about what follows, not a topic.
@@ -290,9 +383,20 @@ def _is_consequence(text: str) -> bool:
     low = stripped.lower()
     if low.startswith(_FRAGMENT_STARTS):
         return False
+    # A PARTICIPIAL PHRASE IS NOT A SENTENCE.
+    #
+    # Every title in the pattern library opens on a gerund -- "leaning on a
+    # buyer type whose budget it does not control", "turning a people-
+    # delivered service into a repeatable product". They name a shape and
+    # assert nothing, but a relative clause inside one ("does not control")
+    # carries a finite verb, so a verb test alone lets them through. What
+    # decides it is the MAIN clause, and an opening gerund means there is not
+    # one.
+    if re.match(r"[a-z]+ing\b", low):
+        return False
     if any(marker in low for marker in _SELF_REFERENTIAL):
         return False
-    return any(hint in f" {low} " for hint in _VERB_HINTS)
+    return _has_finite_verb(low)
 
 
 def _consequence(*candidates) -> str:
@@ -360,6 +464,26 @@ def _what_changed(observations: Sequence[dict]) -> tuple:
     return tuple(out)
 
 
+def _decision_sentence(report: dict) -> str:
+    """What the founder should DO, from the one composed decision.
+
+    The recommended move leads because it is the actionable half; the headline
+    follows it only when there is no move, which happens when nothing survived
+    filtering to check. Both come from the same object every other surface
+    renders, so the brief cannot disagree with the deck about what the
+    decision is.
+    """
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(report)
+    if decision.readiness == "WITHHELD":
+        return ""
+    # The HEADLINE, not the next move. This field answers "what is being
+    # decided"; the check that would settle it is what `watch` already
+    # carries, and putting it here left the brief with a question in the one
+    # slot the contract requires to name a choice.
+    return decision.headline
+
+
 def _insight_candidates(report: dict,
                         observations: Sequence[dict]) -> List[FounderInsight]:
     """Turn whatever the strategic layer concluded into candidate insights.
@@ -416,10 +540,15 @@ def _insight_candidates(report: dict,
                 thesis.get("why_it_may_matter"),
                 thesis.get("tension"),
                 _first(report.get("decision_implications"))), 280),
-            # `why_care` is phrased as a real choice ("whether to X vs Y")
-            decision=_sentence(
-                thesis.get("why_care")
-                or _first(report.get("decision_implications")), 240),
+            # THE DECISION, NOT THE QUESTION IT IS ABOUT.
+            #
+            # This read `why_care`, which is `implications[0]` -- a decision
+            # TOPIC. "Whether to keep investing in depth or in adjacency" is
+            # the question a founder arrived with, and the brief handed it
+            # back under the heading "The decision". It reaches Q&A too, as
+            # `decision_affected`, so the same question was the answer in two
+            # places. The composed decision states the options and the move.
+            decision=_sentence(_decision_sentence(report), 240),
             watch=_sentence(
                 _first(lead.get("falsification_questions"))
                 or _first(report.get("underexamined_questions"))
@@ -437,9 +566,7 @@ def _insight_candidates(report: dict,
                 _first(hypothesis.get("decision_implications")),
                 thesis.get("why_it_may_matter"),
                 thesis.get("tension")), 280),
-            decision=_sentence(
-                _first(hypothesis.get("decision_implications"))
-                or thesis.get("why_care") or "", 240),
+            decision=_sentence(_decision_sentence(report), 240),
             watch=_sentence(_first(hypothesis.get("falsification_questions"))
                             or _first(hypothesis.get("evidence_gaps")), 220),
             evidence_ids=tuple(hypothesis.get("supporting_observation_ids")
