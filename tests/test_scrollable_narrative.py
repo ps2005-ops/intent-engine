@@ -443,6 +443,65 @@ def test_no_answer_is_parked_behind_a_disclosure_control():
         "part of the primary answer is collapsed behind a disclosure"
 
 
+# --- 6c. slides are optional meeting mode ------------------------------------
+
+def test_no_supporting_slide_repeats_what_the_deck_already_said():
+    """Slides stopped being the comprehension path, so what is left has to be
+    worth paging through. A bullet the deck has already shown costs a click
+    and returns nothing.
+
+    Load-bearing slides are exempt by design and so are exempt here: the
+    decision screens restate deliberately, and dropping a bullet from them to
+    satisfy this rule would leave an option with no stated cost.
+    """
+    from intent_engine.strategic_intelligence.slides import (
+        _LOAD_BEARING, build_slides,
+    )
+    from intent_engine.strategic_intelligence.editorial import sentence_identity
+    deck = build_slides(_report())
+    seen = {}
+    for slide in deck:
+        for bullet in slide["bullets"]:
+            key = sentence_identity(bullet["text"], limit=0)
+            if not key:
+                continue
+            if slide["kind"] not in _LOAD_BEARING:
+                assert key not in seen, (bullet["text"][:60], seen.get(key))
+            seen[key] = slide["id"]
+
+
+def test_a_load_bearing_slide_is_never_dropped_for_terseness():
+    """A deck missing the choice is not a shorter deck, it is a different
+    one."""
+    from intent_engine.strategic_intelligence.slides import meeting_quality
+    terse = [{"id": "decision", "kind": "decision", "note": "",
+              "title": "The decision", "bullets": [{"text": "Own it.",
+                                                    "evidence": [],
+                                                    "date": "", "full": True}]}]
+    assert meeting_quality(terse) == terse
+
+
+def test_a_dated_fact_is_not_treated_as_a_weak_slide():
+    """"Sentry acquired Codecov." is four words and is the strongest thing on
+    that deck. An earlier version of the gate dropped it."""
+    from intent_engine.strategic_intelligence.slides import meeting_quality
+    deck = [{"id": "changed", "kind": "content", "note": "",
+             "title": "What changed", "bullets": [
+                 {"text": "Sentry acquired Codecov.", "evidence": [],
+                  "date": "2026-05-02", "full": False}]}]
+    assert len(meeting_quality(deck)) == 1
+
+
+def test_presentation_cards_have_no_fixed_minimum_height():
+    """A floor is what made a two-bullet slide render as a mostly-empty card.
+    Height follows content."""
+    from intent_engine.strategic_intelligence.slides import (
+        build_slides, render_deck,
+    )
+    markup = render_deck(build_slides(_report()), company="Shopify")
+    assert "min-height" not in markup
+
+
 # --- 7. break every guard ----------------------------------------------------
 
 def test_break_a_section_with_nothing_behind_it_is_rendered():

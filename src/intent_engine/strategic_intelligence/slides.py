@@ -30,7 +30,7 @@ import html as _html
 import re
 
 from intent_engine.strategic_intelligence.editorial import (
-    addresses_the_system, deduplicate, is_meaningful, lower_first,
+    SaidOnce, addresses_the_system, deduplicate, is_meaningful, lower_first,
     meaningful_items, sentence_identity,
 )
 
@@ -828,10 +828,12 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # richly; a deterministic report fills less of it. Both render here.
     analysis = r.get("strategic_analysis")
     if analysis and (analysis.get("decisions") or []):
-        return build_founder_slides(analysis, company=company)
+        return meeting_quality(
+            build_founder_slides(analysis, company=company))
     adapted = founder_view_from_report(r)
     if adapted:
-        return build_founder_slides(adapted, company=company)
+        return meeting_quality(
+            build_founder_slides(adapted, company=company))
 
     # The deck below is the fallback for a company with real evidence but no
     # concrete development to lead with. It was the LAST founder-facing surface
@@ -1053,7 +1055,7 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
                           meaningful_items(r.get("shifts", []), key="title"))
             if _concrete(title)][:2]
     slides.append(_slide("questions", "Questions for leadership",
-                         question_bullets))
+                         question_bullets, kind="questions"))
 
     # 9. Evidence and limitations. Not a content slide — it never counts
     #    toward the minimum, or a deck could reach five on disclaimers alone.
@@ -1073,7 +1075,90 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     slides.append(_slide("evidence", "Evidence and limitations",
                          limitation_bullets, kind="evidence"))
 
-    return [s for s in slides if s]
+    return meeting_quality(slides)
+
+
+#: Slides that carry the decision. They are never dropped for thinness -- a
+#: deck missing the choice is not a shorter deck, it is a different one.
+# Two kinds of exemption, both learned from a gate failing.
+#
+# "questions" REFRAMES a finding as something to go and check ("Confirm with
+# an independent source: <finding>"), so an identity match against the finding
+# is a false positive -- the reader gains the instruction even though they
+# have seen the fact.
+#
+# "wrong" and "watch" restate the falsifier and the checks on purpose. They
+# are the only slides that answer "what weakens this", and dropping them for
+# restating is how the persona suite lost that answer for a private company.
+_LOAD_BEARING = frozenset({"decision", "options", "investigation",
+                           "next_move", "today", "evidence", "questions"})
+_LOAD_BEARING_IDS = frozenset({"wrong", "watch", "gaps"})
+
+
+def _load_bearing(slide) -> bool:
+    return (slide.get("kind") in _LOAD_BEARING
+            or slide.get("id") in _LOAD_BEARING_IDS)
+
+def meeting_quality(slides) -> list:
+    """Drop the slides a meeting cannot use. Slides are OPTIONAL now.
+
+    The scrollable narrative is the comprehension path, so this deck no longer
+    has to reach a slide count -- it has to be worth paging through. Measured
+    on the deployed Palantir deck, ten slides included:
+
+        "Palantir Technologies in one minute"   three lines of the company's
+                                                own marketing copy
+        "What the company has published"        a blog index blurb and
+                                                "Weighted-average shares of
+                                                common stock outstanding used
+                                                in computing earnings per
+                                                share..."
+        "Questions for leadership"              one bullet
+
+    None of those changes a decision, and a reader who paged to them paid four
+    clicks to learn nothing.
+
+    ONE RULE, AND IT IS REPETITION. Two stronger rules were tried against the
+    suite and both were wrong. Requiring a finite assertion on every slide
+    dropped "Sentry acquired Codecov." -- a dated fact is not a weak slide, it
+    is the shortest kind of strong one. A minimum word count dropped the
+    Sentry deck's opening insight for the same reason. Terseness is not the
+    defect; saying the same thing on a second screen is, and a bullet the deck
+    has already shown costs a click and returns nothing.
+
+    A slide left with no fresh bullets is dropped entirely. Load-bearing
+    slides keep theirs whatever else has been said, because a deck missing the
+    choice is not a shorter deck, it is a different one.
+    """
+    present = [s for s in slides if s]
+    # WHICH SLIDE YIELDS MATTERS AS MUCH AS THE RULE.
+    #
+    # "<Company> in one minute" is built from whatever company-owned text was
+    # retrieved first, so it claimed the product descriptions before the
+    # products-and-market slide could -- and deduplicating in document order
+    # then took Foundry, Gotham and AIP off the deck entirely, which a golden
+    # gate caught. The weakest slide is the one that gives way, so it is
+    # resolved LAST. Output order is unchanged; only claim order is.
+    order = sorted(range(len(present)),
+                   key=lambda i: present[i].get("id") == "company")
+    said, dropped, edited = SaidOnce(), set(), {}
+    for i in order:
+        slide = present[i]
+        texts = [b.get("text", "") for b in slide.get("bullets", ())]
+        if _load_bearing(slide):
+            for text in texts:
+                said.remember(text)
+            continue
+        fresh = [t for t in texts if t and not said.has(t)]
+        if not fresh:
+            dropped.add(i)
+            continue
+        edited[i] = [b for b in slide.get("bullets", ())
+                     if b.get("text") in fresh]
+        for text in fresh:
+            said.remember(text)
+    return [dict(s, bullets=edited[i]) if i in edited else s
+            for i, s in enumerate(present) if i not in dropped]
 
 
 def meaningful_slide_count(slides) -> int:
@@ -1117,7 +1202,7 @@ border:0}
    the first slide stays visible. */
 .deck.is-navigated .slide:first-of-type:not(:target){display:none}
 .deck .stage{border:1px solid var(--line);border-radius:14px;
-background:var(--panel);padding:24px 26px;min-height:340px}
+background:var(--panel);padding:24px 26px}
 .deck h2{font-size:1.5rem;line-height:1.25;margin:0 0 14px;color:var(--ink)}
 .deck ul{margin:0;padding-left:1.15rem}
 .deck li{margin:0 0 12px;font-size:1.05rem}
@@ -1148,13 +1233,13 @@ font-weight:600}
 .deck .meta{color:var(--muted);font-size:.8rem;margin-top:18px;
 border-top:1px solid var(--line);padding-top:10px}
 @media (max-width:600px){
-.deck{padding:4px 10px 24px}.deck .stage{padding:18px 16px;min-height:280px}
+.deck{padding:4px 10px 24px}.deck .stage{padding:18px 16px}
 .deck h2{font-size:1.25rem}.deck li{font-size:1rem}
 .deck .dots{margin-left:0;width:100%}}
 @media print{
 .deck .slide{display:block!important;page-break-after:always;margin-bottom:20px}
 .deck .bar,.deck .act,.deck .dots{display:none!important}
-.deck .stage{border:none;background:none;min-height:0}
+.deck .stage{border:none;background:none}
 .deck .cites[open],.deck .cites{display:block}}
 @media (prefers-color-scheme:dark){
 .deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--bg:#0f141c;

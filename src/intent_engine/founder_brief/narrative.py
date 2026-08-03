@@ -358,7 +358,8 @@ def _trim_option(option):
                "That the competing account stated above is the correct one.")
     return replace(option, key_assumption=pointer)
 
-def _executive_answer(company, decision, brief, consequence, said) -> Section:
+def _executive_answer(company, decision, brief, consequence, supporting,
+                      said) -> Section:
     """Two to four complete sentences: what appears to be happening, why it
     matters, and the most important uncertainty.
 
@@ -399,10 +400,19 @@ def _executive_answer(company, decision, brief, consequence, said) -> Section:
         said.remember(decision.mechanism)
 
     if decision.readiness == DECISION_READY:
-        if consequence and not said.has(consequence):
+        # A REAL CONSEQUENCE BEATS THE STRUCTURAL ONE.
+        #
+        # Live on the preview, Palantir's answer said "it matters because the
+        # two courses of action it implies do not cost the same" -- true of
+        # every decision ever made, and therefore about no company -- while
+        # the section directly below it carried two supported consequences.
+        # The fallback is for when there is genuinely nothing better.
+        why = next((c for c in (consequence, *supporting) if c
+                    and not said.has(c)), "")
+        if why:
             paras.append(end_sentence(
-                f"That matters because {as_clause(consequence, company)}"))
-            said.remember(consequence)
+                f"That matters because {as_clause(why, company)}"))
+            said.remember(why)
         elif len(decision.options) >= 2:
             paras.append(
                 f"It matters because the two courses of action it implies do "
@@ -764,9 +774,18 @@ def _could_be_wrong(company, decision, said) -> Section:
 
 
 def _what_to_watch(decision, brief, said) -> Section:
-    """Observable indicators, minus the one already named as the falsifier."""
+    """Observable indicators, minus the one already named as the falsifier.
+
+    `evidence_required` is included because it is the same kind of thing: a
+    named, specific piece of public record whose appearance would move the
+    reading. Without it this section emptied on the live Palantir run -- the
+    single falsification check was already the next move -- and a page that
+    tells a founder to act but not what to keep an eye on is the shorter,
+    worse page.
+    """
     watch = []
-    for text in _dedupe(list(decision.watch_items) + [
+    for text in _dedupe(list(decision.watch_items)
+                        + list(decision.evidence_required) + [
             getattr(getattr(brief, "key_insight", None), "watch", "")]):
         if said.has(text):
             continue
@@ -830,7 +849,12 @@ def _prepared(company, decision, actions, said) -> Section:
         cards.append({
             "kind": d.get("kind", ""), "title": d.get("title", ""),
             "found": _flat(d.get("intelligence", "")),
-            "decision": _flat(d.get("why", "")),
+            # `why` is why the ARTEFACT is worth having, not which decision it
+            # serves. Rendered under "Decision it affects", the risk register
+            # read "Decision it affects: it is the single most consequential
+            # thing this analysis found that could go wrong" -- which is not a
+            # decision, and was measured on the deployed page.
+            "why": _flat(d.get("why", "")),
             "prepared": _flat(d.get("recommended_action", "")),
             "next": _flat(d.get("expected_result", "")),
         })
@@ -845,7 +869,7 @@ def _prepared(company, decision, actions, said) -> Section:
     # the decision memo's "Write up the choice: ..." is the decision headline
     # by construction, so it emptied on every ready run.
     for card in cards:
-        for key in ("found", "decision"):
+        for key in ("found", "decision", "why"):
             value = card.get(key, "")
             if value and said.has(value):
                 card[key] = ("The choice set out above." if key == "decision"
@@ -902,7 +926,8 @@ def build_narrative(*, company: str, brief, report: Optional[dict] = None,
     # statement of an idea the one that survives.
     said = SaidOnce()
     built = [
-        _executive_answer(company, decision, brief, consequence, said),
+        _executive_answer(company, decision, brief, consequence,
+                          statements, said),
         _why_now(company, decision, brief, obs, said),
         _what_changed(company, brief, obs, said),
         _business_consequence(company, decision, brief, consequence,
@@ -1133,6 +1158,7 @@ def render_narrative(narrative, *, run_id: str = "", citation_labels=None,
                            f'{_e(card["title"])}</h3><dl class="dl">')
                 for label, key in (("What was found", "found"),
                                    ("Decision it affects", "decision"),
+                                   ("Why it is worth having", "why"),
                                    ("What it prepared", "prepared"),
                                    ("What you do next", "next")):
                     if _flat(card.get(key)):
