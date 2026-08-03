@@ -2303,7 +2303,8 @@ class WebApp:
                 f'brief</h1>'
                 + fr.render_executive_brief(
                     built, run_id=run_id,
-                    evidence_ids=self._observation_ids(report))
+                    evidence_ids=self._observation_ids(report),
+                    citation_labels=self._citation_labels(run_id))
                 + fr._deeper(run_id) + "</main>")
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))
@@ -2422,7 +2423,8 @@ class WebApp:
         # regression: a founder who has just read a 60-second answer is exactly
         # the person with a follow-up question, and making them navigate first
         # is how a conversation never starts.
-        body = (fr.render_brief(brief, run_id=run_id)
+        body = (fr.render_brief(brief, run_id=run_id,
+                                citation_labels=self._citation_labels(run_id))
                 + self._ask_form(run_id, report, session))
         return self._html(self._page(f"{name} — founder brief", body,
                                      session, session.get("csrf", "")))
