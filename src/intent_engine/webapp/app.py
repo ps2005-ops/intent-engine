@@ -3826,6 +3826,19 @@ class WebApp:
         # and this endpoint say "true" -- while every single run still took
         # the limited path. A capability probe that cannot be wrong in that
         # direction is the only kind worth publishing.
+        # MARKET AND MACRO WERE UNVERIFIABLE FROM OUTSIDE.
+        #
+        # Three cycles reported "TIINGO_API_KEY / FRED_API_KEY availability
+        # unknown" because this endpoint published neither, and nothing else
+        # on the service does. That turned a one-second check into a blocked
+        # objective. Presence only, exactly as with the reasoning key: these
+        # are booleans and the values are never read into a response.
+        #
+        # Unlike `strategic_reasoning`, these deliberately report the KEY and
+        # not a live client, because neither the price producer nor the macro
+        # adapter is constructed inside the web process -- claiming a
+        # capability here would repeat the mistake the reasoning probe fixed.
+        import os as _os
         return {"pdf_extraction": pdf_available,
                 "browser_rendering": rendering_enabled(),
                 "strategic_reasoning": self._analyst_client is not None,
@@ -3833,7 +3846,9 @@ class WebApp:
                 "reasoning_key_present": getattr(
                     self, "_analyst_key_present", False),
                 "reasoning_unavailable_because": getattr(
-                    self, "_analyst_error", "")}
+                    self, "_analyst_error", ""),
+                "market_key_present": bool(_os.environ.get("TIINGO_API_KEY")),
+                "macro_key_present": bool(_os.environ.get("FRED_API_KEY"))}
 
     def _probe_runtime_root_writable(self) -> None:
         import os as _os
