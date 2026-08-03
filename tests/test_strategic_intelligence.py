@@ -263,9 +263,20 @@ def test_new_shopify_report_rejects_low_value_structures(shopify_report):
     assert ">what to monitor<" in lowered
     assert ">sources<" in lowered
     assert "leadership is likely weighing" in lowered
-    # the decision the claim bears on is still stated -- as a sentence, not
-    # as a value beside a bold label in a six-row grid
-    assert "it bears on one decision in particular" in lowered
+    # THE DECISION IS STATED -- AND IT IS A DECISION, NOT THE QUESTION.
+    #
+    # This asserted the literal wrapper "it bears on one decision in
+    # particular: <thesis.why_care>", and `why_care` is `implications[0]` --
+    # a decision TOPIC. The old assertion could only ever pass by the page
+    # printing the founder's own question back at them, so it encoded the
+    # defect rather than guarding against it. What replaces it is stronger:
+    # the composed decision must be on the page, and the bare topic must not.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(shopify_report)
+    assert decision.readiness in ("DECISION_READY", "INVESTIGATION_REQUIRED")
+    assert decision.headline.lower()[:40] in lowered, decision.headline
+    topic = (shopify_report.thesis or {}).get("why_care", "")
+    assert topic and topic.lower().rstrip(".") not in lowered, topic
 
 
 # --- G: the acceptance evidence flows through the REAL compose pipeline ------
@@ -778,8 +789,10 @@ def test_webapp_strategic_run_carries_no_legacy_extraction_view(tmp_path):
     # the full analysis keeps every contract it had; it is no longer the default
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
-    # executive-first content is present
-    assert "It bears on one decision in particular" in body
+    # executive-first content is present. The decision is the COMPOSED one --
+    # the old assertion here matched the sentence that rendered the decision
+    # topic, which is the thing this replaces.
+    assert "The choice:" in body or "No option is safe to commit to yet" in body
     assert ">Why that evidence matters<" in body
     assert ">What happened<" in body and ">Sources<" in body
     # The legacy claim/evidence view is GONE, not collapsed. Quarantining it

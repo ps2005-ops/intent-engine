@@ -232,9 +232,29 @@ def test_slides_follow_the_narrative_order():
     against a fixture that earns the takeover.
     """
     ids = [s["id"] for s in build_slides(_rich_report())]
-    expected = ["company", "view", "changed", "market", "signals", "tension",
-                "opportunity", "questions", "evidence"]
+    # The decision screens sit directly after the central view, because "so
+    # what do I do about it" is the question a reader has the moment they have
+    # the view -- not after four screens of supporting material. Which screens
+    # appear depends on readiness: `decision` plus `option-*` and `next-*` when
+    # the evidence supports two courses of action, `investigate-*` when it does
+    # not, and none at all when no view was formed.
+    expected = ["company", "view", "decision", "option-1-1", "option-1-2",
+                "next-1", "investigate-1", "changed", "market", "signals",
+                "tension", "opportunity", "questions", "evidence"]
     assert ids == [i for i in expected if i in ids], ids
+
+
+def test_the_decision_screens_follow_the_view_not_the_evidence():
+    """The deck's answer to "what do I do" may not be buried behind context.
+
+    Asserted separately from the order above so that adding a context screen
+    later cannot quietly push the decision down the deck without a failure.
+    """
+    ids = [s["id"] for s in build_slides(_rich_report())]
+    decisions = [i for i in ids if i.startswith(("decision", "option-",
+                                                 "next-", "investigate-"))]
+    assert decisions, ids
+    assert ids.index(decisions[0]) <= ids.index("view") + 1, ids
 
 
 def test_evidence_is_not_repeated_across_slides():
