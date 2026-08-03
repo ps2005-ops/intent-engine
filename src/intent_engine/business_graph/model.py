@@ -298,6 +298,45 @@ class BusinessGraph:
         return out
 
 
+def detect_cycles_in_mappings(edges, edge_type: str,
+                              *, kind_key: str = "edge",
+                              src_key: str = "from",
+                              dst_key: str = "to") -> list:
+    """Cycle detection over dict-shaped edges, for the domain graphs.
+
+    `product/graph.py` and `executive/graph.py` each carried a byte-identical
+    copy of this algorithm -- the same concept implemented three times in one
+    repository, which is exactly what "one concept, exactly once" forbids. The
+    two domain graphs keep their own edge VOCABULARY, which is legitimately
+    theirs; they do not each need their own depth-first search.
+
+    Deliberately preserves the legacy contract exactly -- a sorted list of
+    tuples, each closing on the node it started from -- because the point is to
+    remove duplication without changing behaviour their callers depend on.
+    """
+    adjacency: dict = {}
+    for edge in edges:
+        if edge[kind_key] == edge_type:
+            adjacency.setdefault(edge[src_key], set()).add(edge[dst_key])
+    cycles, visiting, visited = [], set(), set()
+
+    def _walk(node, stack):
+        if node in visiting:
+            cycles.append(tuple(stack[stack.index(node):] + [node]))
+            return
+        if node in visited:
+            return
+        visiting.add(node)
+        for nxt in sorted(adjacency.get(node, ())):
+            _walk(nxt, stack + [nxt])
+        visiting.discard(node)
+        visited.add(node)
+
+    for node in sorted(adjacency):
+        _walk(node, [node])
+    return sorted(set(cycles))
+
+
 def detect_cycles(edges: Sequence[Edge], kind: str) -> List[List[str]]:
     """Cycles among edges of one kind. Same contract as the two graphs
     this generalises, so their callers can move over unchanged."""
