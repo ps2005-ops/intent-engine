@@ -632,3 +632,42 @@ def test_the_withheld_page_names_its_evidence_in_words():
                      "investor_material"):
         assert internal not in text, text
     assert "the company's own pages" in text, text
+
+
+def test_the_decision_uses_the_portfolio_not_only_its_top_entry():
+    """Both live companies ranked a hypothesis first whose mechanism is the
+    library describing itself, so both refused to decide -- while the same
+    page printed a mechanism for the reading ranked second.
+
+    Ranking still decides the central claim. It does not get to veto a
+    decision the evidence below it can support.
+    """
+    from intent_engine.strategic_intelligence.decision import decide_across
+    blocked = _hypothesis("tool_to_system_of_record",
+                          HYPOTHESIS_SCAFFOLDS["tool_to_system_of_record"])
+    usable = _hypothesis("product_to_platform",
+                         HYPOTHESIS_SCAFFOLDS["product_to_platform"])
+
+    alone = compose_decision("Acme", blocked)
+    assert alone.readiness == INVESTIGATION_REQUIRED
+
+    together = decide_across("Acme", [blocked, usable])
+    assert together.readiness == DECISION_READY, together.unsafe_because
+    assert len(together.options) == 2
+    assert together.mechanism
+
+    # and a portfolio where NONE can support one still refuses
+    assert decide_across("Acme", [blocked]).readiness == \
+        INVESTIGATION_REQUIRED
+
+
+def test_the_rich_brief_shows_the_decision_not_the_topics():
+    """The deployed brief listed two raw topics under "The decision"."""
+    from intent_engine.founder_brief.layers import _composed_decision_lines
+    report = _report().as_dict()
+    line = _composed_decision_lines(report)
+    assert line
+    for implication in (report.get("decision_implications") or ())[:3]:
+        topic = (implication.get("decision") or "").lower().rstrip(".")
+        if topic:
+            assert topic not in line.lower(), topic

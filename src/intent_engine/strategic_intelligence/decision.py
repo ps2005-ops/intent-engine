@@ -400,13 +400,14 @@ def decision_of(report) -> FounderDecision:
     hypotheses = [h.as_dict() if hasattr(h, "as_dict") else h
                   for h in (r.get("hypotheses") or ())]
     hypotheses = [h for h in hypotheses if isinstance(h, dict)]
+    # Same rule as the producer: the portfolio, not only its first entry.
     observations = [o.as_dict() if hasattr(o, "as_dict") else o
                     for o in (r.get("observations") or ())]
     verified = tuple(
         (o.get("excerpt") or o.get("text") or "")
         for o in observations if isinstance(o, dict) and not o.get("weak"))[:3]
-    return compose_decision(
-        r.get("company_name", ""), hypotheses[0] if hypotheses else None,
+    return decide_across(
+        r.get("company_name", ""), hypotheses,
         r.get("blind_spots") or (), evidence_gaps=r.get("evidence_gaps") or (),
         verified=verified)
 
@@ -554,6 +555,39 @@ def _options_from_alternatives(hypothesis, mechanism, alternative,
         f"{_clause(alternative, company)}",
         mechanism, alternative, counter, support, watch_b, consequence, company)
     return (first, second)
+
+
+def decide_across(company_name, hypotheses, blind_spots=(),
+                  evidence_gaps=(), verified=()) -> FounderDecision:
+    """The portfolio's decision, not just its top-ranked hypothesis's.
+
+    Measured on the deployed preview: Shopify and Palantir both ranked
+    `tool_to_system_of_record` first, whose mechanism is the library
+    describing itself and is correctly filtered -- so both said "the public
+    record carries what this company says about itself, not the mechanism
+    behind it" while the SAME page printed a mechanism for the hypothesis
+    ranked second. Refusing to decide because the top-ranked reading cannot
+    be explained, when a ranked reading below it can, is a refusal the
+    evidence does not call for.
+
+    Ranking still decides the central claim. This decides only which reading
+    the DECISION is about, and the composed object carries its own mechanism
+    and evidence, so what a reader sees stays self-consistent.
+    """
+    ordered = list(hypotheses or ())
+    if not ordered:
+        return compose_decision(company_name, None, blind_spots,
+                                evidence_gaps=evidence_gaps, verified=verified)
+    first = None
+    for hypothesis in ordered:
+        decision = compose_decision(company_name, hypothesis, blind_spots,
+                                    evidence_gaps=evidence_gaps,
+                                    verified=verified)
+        if decision.is_ready:
+            return decision
+        if first is None:
+            first = decision
+    return first
 
 
 def compose_decision(company_name, hypothesis, blind_spots=(),

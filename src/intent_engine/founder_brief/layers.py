@@ -641,6 +641,19 @@ def _exposure_texts(items, limit: int = 2) -> List[str]:
     return out
 
 
+def _composed_decision_lines(report) -> str:
+    """The options and the next move, in one line, from the one decision."""
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(report)
+    if decision.readiness == "WITHHELD":
+        return ""
+    parts = [decision.headline]
+    for option in decision.options[:2]:
+        parts.append(f"{option.label}: {option.upside} {option.downside}")
+    parts.append(decision.recommended_next_move)
+    return " ".join(p for p in parts if p)
+
+
 def _field_texts(items, *fields, limit: int = 2) -> List[str]:
     """The first `limit` non-empty values of `fields` across `items`.
 
@@ -775,9 +788,15 @@ def build_executive_brief(brief, report: Optional[dict] = None,
                 # already spent.
                 *_field_texts(report.get("opportunities"),
                               "why_now", limit=1)],
-        "decision": ([k.decision if k else ""]
-                     + _field_texts(report.get("decision_implications"),
-                                    "decision", "why_it_matters")
+        # `decision_implications[*].decision` is `implications[0]` for each
+        # hypothesis -- a decision TOPIC. The deployed brief printed two of
+        # them verbatim under the heading "The decision": "Whether to keep
+        # investing in depth or in adjacency." and "Whether to invest ahead of
+        # demand in owning checkout/identity/data rails vs. deepening the core
+        # product." The composed decision replaces them; the opportunities
+        # below it are real statements and stay.
+        "decision": ([k.decision if k else "",
+                      _composed_decision_lines(report)]
                      + _field_texts(report.get("opportunities"),
                                     "statement", "why_now", "asymmetry")),
         # How the business actually works. Every one of these is a field the

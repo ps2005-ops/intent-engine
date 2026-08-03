@@ -418,9 +418,13 @@ def render_strategic_report(report) -> str:
         # part of the interpretation, not a separate finding -- and said once.
         _p(f"On current evidence, leadership is likely weighing "
            f"{lower_first(a['inferred_discussion'])}"
-           + (f" The decision in front of them: "
-              f"{lower_first(a['likely_decision'])}"
-              if is_meaningful(a.get("likely_decision")) else ""))
+           # `likely_decision` is a decision TOPIC too -- the deployed page
+           # ended this sentence with "whether to invest now in agent-readable
+           # endpoints, identity, and checkout the agents will call", which is
+           # the same question the composed decision exists to answer. The
+           # agenda keeps what it can honestly say (what leadership is likely
+           # weighing) and stops short of restating the question as an answer.
+           )
         for a in (r.get("agenda") or ())
         if is_meaningful(a.get("inferred_discussion"))
         and not reads_as_taxonomy(a.get("inferred_discussion", ""))

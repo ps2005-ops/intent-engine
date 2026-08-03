@@ -366,7 +366,9 @@ def _build_questions(hypotheses, observations):
 
 def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
                   evidence_gaps=()):
-    from intent_engine.strategic_intelligence.decision import compose_decision
+    from intent_engine.strategic_intelligence.decision import (
+        compose_decision, decide_across,
+    )
 
     # WHAT WAS VERIFIED, in the company's own retrieved words. Carried on the
     # decision because the honest investigation state is unreadable without
@@ -426,9 +428,9 @@ def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
         # WHICH decision the evidence bears on; what changed is that the
         # answer now lives in `decision` and the surfaces render that instead.
         "why_care": top.decision_implications[0],
-        "decision": compose_decision(
-            company_name, top, blind_spots, evidence_gaps=evidence_gaps,
-            verified=verified).as_dict(),
+        "decision": decide_across(
+            company_name, hypotheses, blind_spots,
+            evidence_gaps=evidence_gaps, verified=verified).as_dict(),
     }
 
 
