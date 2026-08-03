@@ -675,6 +675,31 @@ class CompanyIngestionService:
         return result
 
     # --- quality-gated composition (retry + targeted rediscovery) ------------
+    def business_graph(self, run_id: str, result=None):
+        """This run, in the platform's shared vocabulary.
+
+        THE CALLER THE GRAPH DID NOT HAVE. The business graph shipped with a
+        projection function and nothing that invoked it, which is integration
+        in appearance only: `grep business_graph src/` returned nothing
+        outside the graph package itself. Ingestion is the right owner because
+        it already holds both inputs -- the retrieval log and the report the
+        run produced -- so no new state and no adapter is introduced.
+
+        Rebuilt on demand rather than stored. The graph is a projection of the
+        append-only log, so persisting it would create a second copy that can
+        disagree with the events it came from, and the events would still be
+        the truth.
+        """
+        from intent_engine.business_graph.projections import from_ingestion_run
+        if result is None:
+            result = {}
+        report = result.get("strategic_report")
+        return from_ingestion_run(
+            run_id=run_id,
+            retrieved=[d for d in self.store.retrieved(run_id)
+                       if d.get("retrieval_status") == "OK"],
+            report=report)
+
     def compose_with_quality(self, run_id: str, *, fi_service,
                              max_passes=None, **compose_kwargs) -> dict:
         """Compose, score the report, and — when the quality gate says more
