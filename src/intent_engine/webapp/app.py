@@ -2038,12 +2038,63 @@ class WebApp:
         # headed "Shopify — presentation" on one layer and "This company" on
         # the founder brief beside it. The name was in the report the whole
         # time; only this path declined to read it.
+        # ...and the run's own metadata is the source that is ALWAYS set,
+        # because it is what the founder typed. Leaving it out of the chain
+        # is why three unrelated companies rendered byte-identical bounded
+        # pages headed "This company": on a limited run the identity record
+        # and the report are both empty, so every company collapsed onto the
+        # same placeholder. Measured on the deployed preview -- Tesla, NVIDIA
+        # and Costco produced identical dashboard, story and executive-brief
+        # text down to the word count.
         name = (identity.get("canonical_name") or identity.get("name")
                 or report.get("company_name")
-                or result.get("company") or "This company")
+                or result.get("company")
+                or (self.ci.run_meta(run_id) or {}).get("company_name")
+                or "This company")
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
+
+    def _evidence_footing(self, run_id, name, ticker=""):
+        """What this run actually retrieved, for the bounded layers.
+
+        The limited landing page has always rendered these facts and is
+        company-specific because of it -- "3 page(s) read; 1 carried usable
+        evidence" under a heading naming Tesla. The dashboard, story and brief
+        beside it were built from constants, which is why they came out
+        byte-identical for Tesla and NVIDIA. Same facts, same run, so the
+        deeper layers now read from the same place rather than from copy.
+
+        Counts and identifiers only. Nothing here interprets evidence, and a
+        missing piece yields a missing key rather than a guess.
+        """
+        from intent_engine.company_ingestion.readiness import is_english
+        from urllib.parse import urlsplit
+        try:
+            fetched = [d for d in self.ci.store.retrieved(run_id)
+                       if d.get("retrieval_status") == "OK"]
+        except Exception:                       # a run with no store rows yet
+            return {}
+        used = [d for d in fetched if is_english(d)]
+        result = self._result(run_id) or {}
+        note = result.get("insufficient_evidence") or {}
+        kinds = sorted({str(d.get("source_class") or "").replace("_", " ")
+                        for d in used} - {""})
+        blocked = []
+        for readable, _label, _human, _detail in self._failure_rows(run_id):
+            host = urlsplit(str(readable)).netloc or str(readable)
+            if host and host not in blocked:
+                blocked.append(host)
+        # A retrieved record carries no publication date -- only the title the
+        # page declared. Where the pipeline could date a filing it says so in
+        # that title ("SEC 8-K exhibit (2026-07-22)"), so the title is the
+        # honest thing to quote and an invented date is the thing to avoid.
+        documents = [t for t in
+                     ((d.get("title") or "").strip() for d in used) if t]
+        return {"company": name, "pages_read": len(used),
+                "usable": note.get("source_count"), "kinds": kinds,
+                "blocked": blocked, "documents": documents,
+                "ticker": ticker or ""}
 
     @staticmethod
     def _ticker_of(identity: dict) -> str:
@@ -2186,8 +2237,11 @@ class WebApp:
                     (legacy.headline.view or "").split())
             except Exception:  # noqa: BLE001 - the brief still renders
                 withheld_line = ""
-        built = fl.build_executive_brief(brief, report, ledger,
-                                         withheld_line=withheld_line)
+        built = fl.build_executive_brief(
+            brief, report, ledger, withheld_line=withheld_line,
+            footing=self._evidence_footing(
+                run_id, name,
+                self._ticker_of(self.ci.entity_identity(run_id) or {})))
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — executive '
                 f'brief</h1>'
                 + fr.render_executive_brief(
@@ -2208,9 +2262,12 @@ class WebApp:
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
+        footing = self._evidence_footing(
+            run_id, name, self._ticker_of(self.ci.entity_identity(run_id) or {}))
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — '
                 f'intelligence</h1>'
-                + fr.render_dashboard(fl.build_dashboard(brief, report))
+                + fr.render_dashboard(
+                    fl.build_dashboard(brief, report, footing=footing))
                 + fr._deeper(run_id) + "</main>")
         return self._html(self._page(f"{name} — intelligence", body, session,
                                      session.get("csrf", "")))
@@ -2229,7 +2286,11 @@ class WebApp:
             # Orientation repetition is permitted; a missing mandated section
             # is not.
             ledger.spend(brief.key_insight.fact, brief.key_insight.so_what)
-        sections = fl.build_story(brief, report, ledger)
+        sections = fl.build_story(
+            brief, report, ledger,
+            footing=self._evidence_footing(
+                run_id, name,
+                self._ticker_of(self.ci.entity_identity(run_id) or {})))
         actions = fl.build_actions(brief)
         body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — the '
                 f'decision story</h1>'
@@ -2284,9 +2345,19 @@ class WebApp:
         # headed "Shopify — presentation" on one layer and "This company" on
         # the founder brief beside it. The name was in the report the whole
         # time; only this path declined to read it.
+        # ...and the run's own metadata is the source that is ALWAYS set,
+        # because it is what the founder typed. Leaving it out of the chain
+        # is why three unrelated companies rendered byte-identical bounded
+        # pages headed "This company": on a limited run the identity record
+        # and the report are both empty, so every company collapsed onto the
+        # same placeholder. Measured on the deployed preview -- Tesla, NVIDIA
+        # and Costco produced identical dashboard, story and executive-brief
+        # text down to the word count.
         name = (identity.get("canonical_name") or identity.get("name")
                 or report.get("company_name")
-                or result.get("company") or "This company")
+                or result.get("company")
+                or (self.ci.run_meta(run_id) or {}).get("company_name")
+                or "This company")
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         # The assistant belongs ON the default screen. Dropping it was a real

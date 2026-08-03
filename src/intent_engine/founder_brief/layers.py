@@ -190,14 +190,56 @@ def _dedupe_dashboard(modules: List[Module]) -> List[Module]:
     return modules
 
 
-def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
-    """Modules supported by verified data, and honest gaps for the rest."""
+def _footing_prefix(footing: Optional[dict]) -> str:
+    """What this run actually read, in one sentence, or "" if unknown.
+
+    MEASURED on the deployed preview: Tesla and NVIDIA rendered BYTE-IDENTICAL
+    dashboard, story and executive-brief pages -- 304, 371 and 387 words, the
+    same text twice -- because every empty state was a constant. Naming the
+    company fixes the heading and nothing else; two pages differing by one
+    word are still materially identical, which is what the release gate now
+    measures.
+
+    So an absence is reported against THIS run's retrieval: what was read,
+    how much of it was usable, and what refused. Counts only -- nothing here
+    interprets evidence that was never retrieved.
+    """
+    if not footing:
+        return ""
+    read, usable = footing.get("pages_read"), footing.get("usable")
+    if not read:
+        return ""
+    who = footing.get("company") or "this company"
+    line = f"{read} page(s) were read for {who}"
+    if usable is not None:
+        line += f" and {usable} carried usable evidence"
+    kinds = [k for k in (footing.get("kinds") or ()) if k]
+    if kinds:
+        line += f" ({', '.join(kinds)})"
+    blocked = [b for b in (footing.get("blocked") or ()) if b]
+    if blocked:
+        shown = ", ".join(blocked[:2])
+        more = f" and {len(blocked) - 2} more" if len(blocked) > 2 else ""
+        line += f"; {shown}{more} refused automated access"
+    return line + ". "
+
+
+def build_dashboard(brief, report: Optional[dict] = None, *,
+                    footing: Optional[dict] = None) -> List[Module]:
+    """Modules supported by verified data, and honest gaps for the rest.
+
+    `footing` carries what this particular run retrieved, so that a gap is
+    reported as a fact about this company's evidence rather than as a
+    constant that reads the same for every company.
+    """
     report = report or {}
     modules: List[Module] = []
+    seen = _footing_prefix(footing)
 
     # A. BUSINESS TRAJECTORY — only from a verified financial series.
     modules.append(_unavailable(
         "business_trajectory", "Business trajectory",
+        seen +
         "No verified revenue, EPS, margin or cash-flow series was retrieved "
         "for this company. Estimated figures are deliberately not substituted "
         "— a fabricated financial series is the one error that would make "
@@ -238,16 +280,37 @@ def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
                 f"{r['label']}: {r['value']}" for r in rows) or
             "no market series available"))
     else:
+        # The old copy asserted "for a private company there is no market to
+        # read" on EVERY company without a snapshot -- which the deployed
+        # preview printed under Tesla and NVIDIA, both listed. Saying a listed
+        # company is private is not an honest gap, it is a wrong fact. The
+        # ticker is known here whenever identity resolved it, so the two cases
+        # are now told apart instead of being collapsed into the wrong one.
+        ticker = (footing or {}).get("ticker")
+        if ticker:
+            reason = (market.get("reason")
+                      or f"No market snapshot has been published for "
+                         f"{ticker} in this run.")
+            so_what = ("This company is listed, so a market read is possible "
+                       "in principle -- it is missing here, not absent in "
+                       "principle. Without it you are reading the company's "
+                       "own account with nothing outside it to argue back.")
+            to_watch = (f"A published price history for {ticker} is what "
+                        f"makes this section possible.")
+        else:
+            reason = (market.get("reason")
+                      or "No market snapshot has been published for this "
+                         "company, and no listing was identified for it.")
+            so_what = ("Without market context you are reading the company's "
+                       "own account with nothing outside it to argue back. "
+                       "If this company is private there is no market to "
+                       "read, and that is the honest answer rather than a "
+                       "gap.")
+            to_watch = ("A listed ticker with published price history is "
+                        "what makes this section possible.")
         modules.append(_unavailable(
-            "market_trajectory", "Market trajectory",
-            market.get("reason")
-            or "No market snapshot has been published for this company.",
-            so_what="Without market context you are reading the company's own "
-                    "account with nothing outside it to argue back. For a "
-                    "private company there is no market to read, and that is "
-                    "the honest answer rather than a gap.",
-            to_watch="A listed ticker with published price history is what "
-                     "makes this section possible."))
+            "market_trajectory", "Market trajectory", reason,
+            so_what=so_what, to_watch=to_watch))
 
     # C. BUSINESS MOMENTUM — dated, material developments only.
     momentum = [c for c in (brief.what_changed or ()) if c.get("what")]
@@ -266,9 +329,21 @@ def build_dashboard(brief, report: Optional[dict] = None) -> List[Module]:
             text_alternative="; ".join(
                 f"{c['when']}: {c['what']}" for c in momentum)))
     else:
+        # A run can retrieve dated documents and still establish no dated
+        # DEVELOPMENT -- Tesla's two SEC exhibits are the case. Naming them
+        # tells the reader the difference between "nothing was found" and
+        # "what was found does not carry a change", which are different
+        # answers and lead to different next steps.
+        docs = [d for d in ((footing or {}).get("documents") or ()) if d]
+        if docs:
+            shown = "; ".join(str(d) for d in docs[:3])
+            reason = (f"No dated development could be verified. What was "
+                      f"retrieved ({shown}) does not establish a change in "
+                      f"direction.")
+        else:
+            reason = "No dated development could be verified from public sources."
         modules.append(_unavailable(
-            "business_momentum", "Business momentum",
-            "No dated development could be verified from public sources.",
+            "business_momentum", "Business momentum", reason,
             so_what="Undated material tells you what a company says it is, "
                     "never whether anything moved. Direction is the one thing "
                     "this evidence cannot establish.",
@@ -349,9 +424,16 @@ STORY_SECTIONS = (
 
 
 def build_story(brief, report: Optional[dict] = None,
-                ledger: Optional[Ledger] = None) -> List[dict]:
+                ledger: Optional[Ledger] = None, *,
+                footing: Optional[dict] = None) -> List[dict]:
     """Sections with real content. An empty section is omitted, never printed
-    as a heading over nothing."""
+    as a heading over nothing.
+
+    On a limited run every candidate below is empty, so the story collapsed to
+    the constant actions block -- identical for every company. `footing` gives
+    it the one thing that is genuinely specific: what this run could and could
+    not read.
+    """
     report = report or {}
     ledger = ledger or Ledger()
     k = brief.key_insight
@@ -385,6 +467,41 @@ def build_story(brief, report: Optional[dict] = None,
         if paragraphs:
             out.append({"key": key, "title": title,
                         "paragraphs": paragraphs[:3]})
+
+    # A story with no narrative section is the bounded case. It still opens
+    # with what was actually read, so the reader learns where the reading
+    # stopped for THEIR company rather than meeting a generic actions block.
+    if not any(s["key"] != "watch" for s in out):
+        opening = _footing_paragraphs(footing)
+        if opening:
+            out.insert(0, {"key": "verified",
+                           "title": "What we could and could not read",
+                           "paragraphs": opening})
+    return out
+
+
+def _footing_paragraphs(footing: Optional[dict]) -> List[str]:
+    """This run's retrieval, as prose. Facts only -- no interpretation."""
+    if not footing or not footing.get("pages_read"):
+        return []
+    who = footing.get("company") or "This company"
+    read, usable = footing.get("pages_read"), footing.get("usable")
+    first = f"{read} public page(s) could be read for {who}"
+    if usable is not None:
+        first += f", and {usable} carried evidence the analysis could use"
+    docs = [d for d in (footing.get("documents") or ()) if d]
+    if docs:
+        first += ": " + "; ".join(str(d) for d in docs[:3])
+    out = [first + "."]
+    blocked = [b for b in (footing.get("blocked") or ()) if b]
+    if blocked:
+        shown = ", ".join(str(b) for b in blocked[:2])
+        more = (f" and {len(blocked) - 2} other host(s)"
+                if len(blocked) > 2 else "")
+        out.append(f"{shown}{more} refused automated access. Anything "
+                   f"published there is outside what this reading can check, "
+                   f"which is a limit of the retrieval and not a finding "
+                   f"about the company.")
     return out
 
 
@@ -567,7 +684,8 @@ def _pattern_texts(report: dict) -> List[str]:
 
 def build_executive_brief(brief, report: Optional[dict] = None,
                           ledger: Optional[Ledger] = None,
-                          withheld_line: str = "") -> dict:
+                          withheld_line: str = "", *,
+                          footing: Optional[dict] = None) -> dict:
     """Deepens the first screen without repeating it.
 
     The ledger is passed in ALREADY LOADED with the 60-second brief's
@@ -595,7 +713,7 @@ def build_executive_brief(brief, report: Optional[dict] = None,
                             "strongly enough to put one forward.")
 
     if not k:
-        return _limited_brief(brief, report, ledger, withheld_line)
+        return _limited_brief(brief, report, ledger, withheld_line, footing)
 
     # WHERE THE DEPTH WAS.
     #
@@ -696,7 +814,8 @@ def build_executive_brief(brief, report: Optional[dict] = None,
 
 
 def _limited_brief(brief, report: dict, ledger: Ledger,
-                   withheld_line: str) -> dict:
+                   withheld_line: str,
+                   footing: Optional[dict] = None) -> dict:
     """The executive brief for a company whose reading was withheld.
 
     Every section is built from material the run actually established. Nothing
@@ -728,15 +847,31 @@ def _limited_brief(brief, report: dict, ledger: Ledger,
         if text:
             verified.append(f"{when + ' — ' if when else ''}{text}")
 
-    why_limited = (
-        f"Of {len(observations)} retrieved source(s), {len(independent)} come "
-        f"from someone other than the company and {len(dated)} carry a date. "
-        f"Without dated, independent material there is no way to tell a "
-        f"direction from a snapshot, so any conclusion about where this "
-        f"business is heading would be the analysis filling in the gap rather "
-        f"than reading it. Decisions that depend on trajectory — hiring "
-        f"ahead of demand, pricing changes, competitive positioning — cannot "
-        f"be made confidently on this basis.")
+    # "Of 0 retrieved source(s)" was printed for a run that had just read a
+    # filing. `observations` counts EVIDENCE the analysis accepted, which on a
+    # limited run is legitimately zero -- but the sentence calls it "retrieved",
+    # and a reader who has seen the source list on the previous screen is being
+    # told the software did not do what they watched it do. The retrieval
+    # counts come from the run itself; the evidence count keeps its own name.
+    read = (footing or {}).get("pages_read")
+    if read:
+        why_limited = (
+            f"{read} page(s) were read and {len(observations)} carried "
+            f"evidence the analysis could use, of which {len(independent)} "
+            f"come from someone other than the company and {len(dated)} carry "
+            f"a date. ")
+    else:
+        why_limited = (
+            f"Of {len(observations)} retrieved source(s), {len(independent)} "
+            f"come from someone other than the company and {len(dated)} carry "
+            f"a date. ")
+    why_limited += (
+        "Without dated, independent material there is no way to tell a "
+        "direction from a snapshot, so any conclusion about where this "
+        "business is heading would be the analysis filling in the gap rather "
+        "than reading it. Decisions that depend on trajectory — hiring "
+        "ahead of demand, pricing changes, competitive positioning — cannot "
+        "be made confidently on this basis.")
 
     customer_view = (
         "A prospective customer, partner or investor researching this company "
@@ -763,10 +898,31 @@ def _limited_brief(brief, report: dict, ledger: Ledger,
             "Independent reporting, a dated customer outcome, or published "
             "pricing would each move this assessment.")
 
+    # WHAT WE VERIFIED has to be concrete or it is not worth a heading. With
+    # no accepted evidence there is still something true and specific to say:
+    # which documents were actually read, and which hosts refused. That is the
+    # difference between "nothing could be established about your company" and
+    # the same sentence printed for every company in the product.
+    if not verified:
+        seen = []
+        docs = [d for d in ((footing or {}).get("documents") or ()) if d]
+        if docs:
+            seen.append("The public material that could be read was: "
+                        + "; ".join(str(d) for d in docs[:3]) + ".")
+        blocked = [b for b in ((footing or {}).get("blocked") or ()) if b]
+        if blocked:
+            shown = ", ".join(str(b) for b in blocked[:2])
+            more = (f" and {len(blocked) - 2} other host(s)"
+                    if len(blocked) > 2 else "")
+            seen.append(f"{shown}{more} refused automated access, so anything "
+                        f"published there could not be checked.")
+        seen.append("No dated, checkable claim could be established from the "
+                    "public material.")
+        verified = seen
+
     raw = {
         "bottom_line": [bottom],
-        "verified": verified or ["No dated, checkable claim could be "
-                                 "established from the public material."],
+        "verified": verified,
         "why_limited": [why_limited],
         "customer_view": [customer_view],
         "decision": [decision],
