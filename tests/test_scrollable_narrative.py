@@ -608,6 +608,87 @@ def test_the_withheld_state_renders_on_the_served_default_route(tmp_path):
     assert 'id="prepared"' in body
 
 
+# --- 6e. what the final live matrix measured ---------------------------------
+
+def test_the_competing_accounts_belong_to_the_reading_being_decided():
+    """Live on Hugging Face: the options were about a second buyer segment
+    while "What argues against it" rebutted "the source of truth still lives
+    elsewhere" — a different hypothesis's alternatives. Evidence overlap alone
+    picked the wrong one because hypotheses share observations."""
+    from intent_engine.strategic_intelligence.decision import (
+        mechanism_sentence,
+    )
+    report = _report()
+    decision = decision_of(report)
+    narrative = _narrative(report)
+    if decision.readiness != DECISION_READY:
+        pytest.skip("this fixture composes no options")
+    decided = [h for h in report["hypotheses"]
+               if mechanism_sentence(h) == decision.mechanism]
+    assert decided, "no hypothesis states the decided mechanism"
+    theirs = {" ".join(str(a).split())
+              for a in (decided[0].get("alternative_explanations") or ())}
+    shown = set(narrative.section(N.EVIDENCE_AGAINST).note.split(" | ")) - {""}
+    assert shown <= theirs, (shown - theirs)
+    # ...and the option built on the alternative uses one of the same ones.
+    # Compared case-insensitively: the composer lowercases it into a clause.
+    card = (decision.options[1].description + " "
+            + decision.options[1].upside).lower()
+    assert any(a[:30].lower() in card for a in theirs), (card, theirs)
+
+
+def test_citations_are_not_collapsed_by_a_shared_pattern_label():
+    """`strategic_signal` is a PATTERN-level label, so several observations
+    carry the identical one. Preferring it collapsed a thirteen-source
+    citation list to a single line on the deployed page."""
+    report = _report()
+    # every observation carrying the same signal, which is the live shape
+    report = dict(report, observations=[
+        dict(o, strategic_signal="exposes a surface others can build on")
+        for o in report["observations"]])
+    narrative = _narrative(report)
+    items = narrative.section(N.EVIDENCE_FOR).items
+    assert len(items) >= 2, [i.text for i in items]
+    assert len({i.text for i in items}) == len(items)
+
+
+def test_the_bounded_state_states_the_missing_evidence_once(tmp_path):
+    """Live on Basecamp, one gap sentence appeared under both "The options"
+    and "What to do next"."""
+    decision = FounderDecision(
+        readiness=INVESTIGATION_REQUIRED,
+        mechanism="the second buyer arrives with new requirements",
+        unsafe_because="the public record carries what this company says "
+                       "about itself, not the mechanism behind it",
+        evidence_required=("the analysis rests only on the company's own "
+                           "website; an independent report would be needed",),
+        recommended_next_move="The gap that has to close first is this: the "
+                              "analysis rests only on the company's own "
+                              "website; an independent report would be "
+                              "needed.")
+    body = _served(tmp_path, decision)
+    # Measured on the narrative PROSE. The prepared "evidence request" card
+    # legitimately enumerates what is missing -- that is the artefact's own
+    # content, not a restatement of the argument.
+    prose = body.split('<section id="prepared"')[0]
+    gap = "analysis rests only on the company&#x27;s own website"
+    assert prose.count(gap) == 1, prose.count(gap)
+
+
+def test_marketing_copy_is_never_presented_as_a_verified_finding(tmp_path):
+    """Live on Basecamp: "What was verified:" led with the homepage slogan."""
+    decision = FounderDecision(
+        readiness=INVESTIGATION_REQUIRED,
+        mechanism="the second buyer arrives with new requirements",
+        unsafe_because="only one course of action is supported",
+        verified=("Trusted by millions, Basecamp puts everything you need to "
+                  "get work done in one place.",
+                  "Pricing is published as a single flat monthly fee."))
+    body = _served(tmp_path, decision)
+    assert "Trusted by millions" not in body
+    assert "single flat monthly fee" in body
+
+
 # --- 7. break every guard ----------------------------------------------------
 
 def test_break_a_section_with_nothing_behind_it_is_rendered():

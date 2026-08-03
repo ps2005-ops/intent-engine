@@ -296,7 +296,12 @@ def _excerpt(obs: dict) -> str:
     only in the page name at the front. That is a scraped nav bar wearing
     quotation marks.
     """
-    text = _flat(obs.get("strategic_signal")) or _flat(obs.get("excerpt")) \
+    # THE EXCERPT FIRST. `strategic_signal` is a PATTERN-level label, not a
+    # per-source one, so several observations carry the identical signal --
+    # and preferring it collapsed a thirteen-source citation list to one line,
+    # and printed "exposes a surface others can build on" beside a source
+    # titled "Basecamp 5 is all new for 2026".
+    text = _flat(obs.get("excerpt")) or _flat(obs.get("strategic_signal")) \
         or _flat(obs.get("text"))
     words = text.split()
     if len(words) > _EXCERPT_WORDS:
@@ -543,6 +548,24 @@ def _business_consequence(company, decision, brief, consequence, statements,
     return Section(BUSINESS_CONSEQUENCE, "What this costs or wins")
 
 
+#: A homepage slogan is not a verified finding. Live on the deployed Basecamp
+#: page, "What was verified:" led with "trusted by millions, Basecamp puts
+#: everything you need to get work done in one place. It's the calm, organized
+#: way to manage projects..." -- the company's own marketing, presented by the
+#: product as something it had checked. Where nothing survives this, the line
+#: is omitted, which is the honest outcome for a run that verified nothing.
+_PROMOTIONAL = (
+    "trusted by millions", "everything you need", "the calm,", "loved by",
+    "get started free", "try it free", "join thousands", "world's best",
+    "#1 ", "award-winning", "all you need", "made simple", "sign up",
+)
+
+
+def _is_promotional(text: str) -> bool:
+    low = _flat(text).lower()
+    return any(marker in low for marker in _PROMOTIONAL)
+
+
 def _the_decision(company, decision, said) -> Section:
     """The composed decision in plain language. Never the raw internal topic.
 
@@ -562,9 +585,11 @@ def _the_decision(company, decision, said) -> Section:
     if decision.readiness != DECISION_READY and decision.undecided_question:
         paras.append(f"The open question is: {decision.undecided_question}")
         said.remember(decision.undecided_question)
-    if decision.readiness == INVESTIGATION_REQUIRED and decision.verified:
-        verified = _flat(decision.verified[0])
-        if verified and not said.has(verified):
+    if decision.readiness == INVESTIGATION_REQUIRED:
+        verified = next((v for v in (_flat(x) for x in decision.verified)
+                         if v and not said.has(v) and not _is_promotional(v)),
+                        "")
+        if verified:
             paras.append(end_sentence(
                 f"What was verified: {as_clause(verified, company)}"))
             said.remember(verified)
@@ -610,10 +635,17 @@ def _options(company, decision, said) -> Section:
         paras.append("No options are put forward, because a choice between "
                      "one supported course of action and a blank is not a "
                      "choice. What is missing is named below.")
-        if decision.evidence_required:
+        gap = _flat(decision.evidence_required[0]) \
+            if decision.evidence_required else ""
+        # "What to do next" states this gap when no falsification check exists,
+        # and it renders after this section -- so claiming it here printed the
+        # same sentence under two headings on the live bounded page. The more
+        # important place keeps it.
+        if gap and not SaidOnce([decision.recommended_next_move]).has(gap):
             paras.append(end_sentence(
                 f"The evidence that would produce a second option: "
-                f"{as_clause(decision.evidence_required[0], company)}"))
+                f"{as_clause(gap, company)}"))
+            said.remember(gap)
     elif decision.readiness == WITHHELD:
         paras.append("No options are put forward. Nothing was established "
                      "firmly enough for one course of action to be weighed "
@@ -623,6 +655,7 @@ def _options(company, decision, said) -> Section:
             paras.append(end_sentence(
                 f"The minimum needed before any of this becomes decidable: "
                 f"{as_clause(decision.evidence_required[0], company)}"))
+            said.remember(decision.evidence_required[0])
     return Section(OPTIONS, "The options, and what each costs",
                    paragraphs=tuple(paras))
 
@@ -683,6 +716,16 @@ def _decided_hypothesis(decision, hypotheses):
     """
     if not hypotheses:
         return {}
+    # The mechanism is derived from a hypothesis's own reasoning, so equality
+    # identifies it exactly. Evidence overlap alone did not: hypotheses share
+    # observations, so the first overlapping one won -- and the live Hugging
+    # Face page argued against "the source of truth still lives elsewhere"
+    # while its options were about a second buyer segment.
+    from intent_engine.strategic_intelligence.decision import mechanism_sentence
+    if decision.mechanism:
+        for h in hypotheses:
+            if mechanism_sentence(h) == decision.mechanism:
+                return h
     owned = set()
     for option in decision.options:
         owned |= set(option.supporting_evidence_ids)
