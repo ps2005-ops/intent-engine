@@ -161,8 +161,13 @@ def render_brief(brief, *, run_id: str = "", links: bool = True,
         out.append('<div class="card headline">')
         out.append(f"<h3>{_e(_clip(k.fact, 34))}</h3>")
         out.append(_p(_clip(k.interpretation, 38)))
-        out.append('<div class="sowhat"><span class="lbl">Why this '
-                   f'matters</span>{_e(_clip(k.so_what, 34))}</div>')
+        # A heading over a blank is worse than no heading: it reads as a
+        # section the product forgot to fill in. `so_what` is now empty
+        # whenever nothing stated a real consequence, so the block goes with
+        # it rather than framing the absence.
+        if k.so_what:
+            out.append('<div class="sowhat"><span class="lbl">Why this '
+                       f'matters</span>{_e(_clip(k.so_what, 34))}</div>')
         if k.decision:
             out.append('<div class="decision"><span class="lbl">Decision '
                        f'affected</span>{_e(_clip(k.decision, 30))}</div>')

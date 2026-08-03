@@ -363,8 +363,23 @@ def _build_thesis(company_name, hypotheses, blind_spots):
                 "transition": "", "tension": "", "why_care": "",
                 "view_withheld": True}
     top = hypotheses[0]
-    tension = (blind_spots[0].observed_tension if blind_spots
-               else "how much to invest ahead of the transition")
+    # NO FABRICATED TENSION.
+    #
+    # This fell back to the literal string "how much to invest ahead of the
+    # transition" whenever no tension was observed -- a noun phrase, not a
+    # consequence. The founder brief renders `tension` under the heading "Why
+    # this matters", so a company with no observed tension told its reader
+    # that what mattered was "how much to invest ahead of the transition",
+    # which asserts nothing and was measured on the deployed preview
+    # (Palantir, 2026-08-03). An absent tension is now absent, and the
+    # consumers below choose a real sentence instead.
+    tension = blind_spots[0].observed_tension if blind_spots else ""
+    # The blind spot already carries the CONSEQUENCE of its tension, and
+    # nothing downstream had ever read it. That is the sentence "why this
+    # matters" wants: "the complexity that wins enterprise deals can erode
+    # the ease that won the SMB base", rather than the tension restated.
+    why_it_may_matter = (blind_spots[0].why_it_may_matter if blind_spots
+                         else "")
     return {
         "view": (f"{company_name} appears to be {top.title[0].lower()}"
                  f"{top.title[1:]}. The evidence supports this as a "
@@ -372,6 +387,7 @@ def _build_thesis(company_name, hypotheses, blind_spots):
                  f"fact."),
         "transition": top.statement,
         "tension": tension,
+        "why_it_may_matter": why_it_may_matter,
         "why_care": top.decision_implications[0],
     }
 

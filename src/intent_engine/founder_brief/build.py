@@ -251,6 +251,50 @@ def _first(items) -> str:
     return ""
 
 
+# A consequence needs a subject doing something. These are the shapes that
+# reached the deployed preview under a "Why this matters" heading and said
+# nothing: a bare topic ("how much to invest ahead of the transition"), a
+# question-shaped stub ("whether to keep investing in depth"), and a naked
+# noun phrase. They are all recognisable by having no finite verb.
+_FRAGMENT_STARTS = ("how much", "how many", "whether", "what to", "when to",
+                    "which ", "why ", "how to")
+_VERB_HINTS = (" is ", " are ", " was ", " were ", " can ", " could ",
+               " may ", " might ", " will ", " would ", " has ", " have ",
+               " raises ", " lowers ", " erodes ", " makes ", " forces ",
+               " means ", " leaves ", " keeps ", " becomes ", " grows ",
+               " reduces ", " increases ", " risks ", " threatens ",
+               " depends ", " requires ", " shifts ", " turns ")
+
+
+def _is_consequence(text: str) -> bool:
+    """True when this reads as a statement about what follows, not a topic.
+
+    Deliberately conservative: it accepts anything with a finite verb, so it
+    lets through prose that is merely mediocre and only rejects the shapes
+    that carry no assertion at all. Over-rejecting would silently blank a
+    real interpretation, which is worse than an inelegant one.
+    """
+    stripped = " ".join((text or "").split())
+    if len(stripped.split()) < 5:
+        return False
+    low = stripped.lower()
+    if low.startswith(_FRAGMENT_STARTS):
+        return False
+    return any(hint in f" {low} " for hint in _VERB_HINTS)
+
+
+def _consequence(*candidates) -> str:
+    """The first candidate that actually states a consequence, else "".
+
+    Returning "" is a real outcome: the renderer omits the block rather than
+    printing a heading over a fragment.
+    """
+    for candidate in candidates:
+        if isinstance(candidate, str) and _is_consequence(candidate):
+            return candidate
+    return ""
+
+
 def _what_it_does(report: dict, observations: Sequence[dict]) -> str:
     """One plain sentence. Drawn from the company's own description, because
     that is the one thing a marketing site is a reliable source for."""
@@ -347,11 +391,19 @@ def _insight_candidates(report: dict,
             # the MECHANISM, which is what turns an observation into a reading
             interpretation=_sentence(
                 lead.get("reasoning") or thesis.get("transition") or "", 300),
-            # the TENSION is why a founder should care: two things that cannot
-            # both stay true
-            so_what=_sentence(
-                thesis.get("tension")
-                or _first(report.get("decision_implications")), 280),
+            # WHY THIS MATTERS IS A CONSEQUENCE, NOT A TOPIC.
+            #
+            # The blind spot's `why_it_may_matter` states the consequence of
+            # the tension and is preferred; the tension itself ("A is growing
+            # while B still promises...") is the runner-up because it at
+            # least states two things that cannot both stay true. Anything
+            # that is not a complete thought is dropped rather than shown --
+            # the preview rendered "Why this matters: how much to invest
+            # ahead of the transition", which tells a reader nothing.
+            so_what=_sentence(_consequence(
+                thesis.get("why_it_may_matter"),
+                thesis.get("tension"),
+                _first(report.get("decision_implications"))), 280),
             # `why_care` is phrased as a real choice ("whether to X vs Y")
             decision=_sentence(
                 thesis.get("why_care")
@@ -369,9 +421,10 @@ def _insight_candidates(report: dict,
             fact=_sentence(hypothesis.get("statement")
                            or hypothesis.get("title") or "", 260),
             interpretation=_sentence(hypothesis.get("reasoning") or "", 300),
-            so_what=_sentence(
-                _first(hypothesis.get("decision_implications"))
-                or thesis.get("tension") or "", 280),
+            so_what=_sentence(_consequence(
+                _first(hypothesis.get("decision_implications")),
+                thesis.get("why_it_may_matter"),
+                thesis.get("tension")), 280),
             decision=_sentence(
                 _first(hypothesis.get("decision_implications"))
                 or thesis.get("why_care") or "", 240),
