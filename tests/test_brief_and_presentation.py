@@ -238,10 +238,19 @@ def test_slides_follow_the_narrative_order():
     # appear depends on readiness: `decision` plus `option-*` and `next-*` when
     # the evidence supports two courses of action, `investigate-*` when it does
     # not, and none at all when no view was formed.
-    expected = ["company", "view", "decision", "option-1-1", "option-1-2",
-                "next-1", "investigate-1", "changed", "market", "signals",
-                "tension", "opportunity", "questions", "evidence"]
+    # "<Company> in one minute" now sits AFTER the decision rather than
+    # opening the deck. Measured live: it opened the Palantir presentation
+    # with "At Palantir, we believe that with good data and the right
+    # software, institutions can solve hard problems and change the world for
+    # the better." -- the company's values statement, on the first screen
+    # someone walks a room through. It is honest context and it is not the
+    # answer, so the deck opens on the reading and the choice, and it follows.
+    expected = ["view", "decision", "option-1-1", "option-1-2",
+                "next-1", "investigate-1", "company", "changed", "market",
+                "signals", "tension", "opportunity", "questions", "evidence"]
     assert ids == [i for i in expected if i in ids], ids
+    if "company" in ids and "decision" in ids:
+        assert ids.index("decision") < ids.index("company")
 
 
 def test_the_decision_screens_follow_the_view_not_the_evidence():

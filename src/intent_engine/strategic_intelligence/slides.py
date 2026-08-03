@@ -885,9 +885,19 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
                 observation.get("excerpt", ""),
                 evidence=[observation.get("observation_id")],
                 date=observation.get("date", "")))
-    slides.append(_slide("company", f"{company} in one minute",
-                         identity_bullets[:3],
-                         note="From the company's own public pages."))
+    # BUILT FIRST, SHOWN AFTER THE DECISION.
+    #
+    # This slide is the company's own copy, honestly labelled -- on the live
+    # Palantir deck it opened with "At Palantir, we believe that with good
+    # data and the right software, institutions can solve hard problems and
+    # change the world for the better." Someone walking a room through this
+    # deck should not spend their first slide on a values statement, so the
+    # deck opens on the reading and the decision, and this becomes context a
+    # reader reaches once they know why it matters. It is still built here
+    # because it must claim its bullets before the market slide does.
+    identity_slide = _slide("company", f"{company} in one minute",
+                            identity_bullets[:3],
+                            note="From the company's own public pages.")
 
     # 2. Central strategic view. `thesis["view"]` and `thesis["transition"]`
     #    are the pattern library's own sentences with the company name
@@ -945,6 +955,10 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         # one thing twice and called it two screens.
         slides.extend(_decision_detail_slides(
             composed_decision.as_dict(), already_shown=shown_here))
+
+    # Context, now that the reader knows what it is context FOR.
+    if identity_slide:
+        slides.append(identity_slide)
 
     # 3. What changed recently
     change_bullets = [
