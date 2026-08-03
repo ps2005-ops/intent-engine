@@ -598,3 +598,37 @@ def test_source_classes_reach_the_reader_in_words():
     for internal in ("investor_material", "customer_voice",
                      "independent_reporting", "executive_statement"):
         assert internal not in gaps, gaps
+
+
+def test_the_limitations_slide_is_filtered_like_every_other_list():
+    """It was the one founder-facing list nobody had thought of as carrying
+    claims, so "Whether customers actually moved their source of truth is not
+    observable from outside" reached the deployed deck through it."""
+    from intent_engine.strategic_intelligence.editorial import (
+        consolidate_limitations,
+    )
+    kept = consolidate_limitations([
+        "Whether customers actually moved their source of truth is not "
+        "observable from outside.",
+        "every source here is published by the company itself"])
+    joined = " ".join(kept).lower()
+    assert "source of truth" not in joined, kept
+    assert "published by the company itself" in joined, kept
+
+
+def test_the_withheld_page_names_its_evidence_in_words():
+    """It told a founder its evidence covered "company_owned,
+    executive_statement, investor_material" -- on the screen whose whole job
+    is explaining honestly what was and was not found."""
+    from intent_engine.strategic_intelligence.withheld_explanation import (
+        explain,
+    )
+    out = explain(findings=(), families={"company_owned",
+                                         "executive_statement",
+                                         "investor_material"},
+                  document_count=13)
+    text = " ".join(str(v) for v in out.values())
+    for internal in ("company_owned", "executive_statement",
+                     "investor_material"):
+        assert internal not in text, text
+    assert "the company's own pages" in text, text

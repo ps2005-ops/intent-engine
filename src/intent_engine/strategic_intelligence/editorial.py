@@ -328,12 +328,22 @@ def reader_limitations(findings) -> list:
 
 
 def consolidate_limitations(*groups) -> list:
-    """One limitations section, not the same caveat under six headings."""
+    """One limitations section, not the same caveat under six headings.
+
+    Filtered for ontology vocabulary like every other founder-facing list.
+    "Whether customers actually moved their source of truth is not observable
+    from outside" is an evidence gap in the pattern library's words, and it
+    reached the deployed Palantir deck under "Evidence and limitations" -- the
+    one slide nobody had thought of as carrying claims.
+    """
+    from intent_engine.strategic_intelligence.concrete import (
+        reads_as_taxonomy,
+    )
     seen, out = [], []
     for group in groups:
         for limitation in group or ():
             text = str(limitation).strip()
-            if not is_meaningful(text):
+            if not is_meaningful(text) or reads_as_taxonomy(text):
                 continue
             if any(similarity(text, s) >= NEAR_DUPLICATE_SIMILARITY
                    for s in seen):

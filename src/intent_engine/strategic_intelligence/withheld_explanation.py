@@ -74,6 +74,18 @@ _FIX = {
 }
 
 
+#: source classes and coverage families, as a reader would say them
+_IN_WORDS = {
+    "company_owned": "the company's own pages",
+    "executive_statement": "executive statements",
+    "investor_material": "investor material",
+    "customer_voice": "customer accounts",
+    "competitor": "competitors",
+    "independent_reporting": "independent reporting",
+    "historical_pattern": "historical comparisons",
+}
+
+
 def explain(*, findings: Sequence[dict] = (), families: Sequence[str] = (),
             independent_sources: int = 0, document_count: int = 0,
             numeric_facts: int = 0) -> Dict[str, object]:
@@ -83,7 +95,13 @@ def explain(*, findings: Sequence[dict] = (), families: Sequence[str] = (),
     if document_count:
         available.append(f"{document_count} source(s) retrieved and read")
     if families:
-        available.append("evidence covering " + ", ".join(sorted(families)))
+        # In a reader's words. The deployed Palantir page told a founder its
+        # evidence covered "company_owned, executive_statement,
+        # investor_material" -- three enum members, on the screen that exists
+        # to explain honestly what was and was not found.
+        available.append("evidence covering " + ", ".join(
+            _IN_WORDS.get(f, str(f).replace("_", " "))
+            for f in sorted(families)))
     if numeric_facts:
         available.append(f"{numeric_facts} figure(s) we could quote directly")
     if not available:
