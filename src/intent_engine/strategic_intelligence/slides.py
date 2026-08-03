@@ -924,8 +924,13 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     if composed_decision.is_ready:
         # The headline names the mechanism when the option labels are generic,
         # so the mechanism line below it would be the same sentence twice.
-        mechanism = ("" if _identity(composed_decision.mechanism) in
-                     _identity(composed_decision.headline)
+        # Compared in FULL. The headline appends the mechanism to labels that
+        # are already a sentence long, so its 120-character identity is
+        # truncated well before the part being looked for -- and the deployed
+        # decision screen printed the mechanism twice, the second time under
+        # the label "The mechanism:".
+        mechanism = ("" if _identity(composed_decision.mechanism, 0) in
+                     _identity(composed_decision.headline, 0)
                      else composed_decision.mechanism)
         slides.append(_slide("decision", "The decision this bears on", [
             _bullet(composed_decision.headline, full=True),
