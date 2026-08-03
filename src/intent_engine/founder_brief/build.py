@@ -258,6 +258,16 @@ def _first(items) -> str:
 # noun phrase. They are all recognisable by having no finite verb.
 _FRAGMENT_STARTS = ("how much", "how many", "whether", "what to", "when to",
                     "which ", "why ", "how to")
+# SENTENCES ABOUT THE ANALYSIS, NOT ABOUT THE BUSINESS.
+#
+# "The most recent evidence is About Palantir." has a finite verb and passed
+# the check below, then rendered to a real founder as a conclusion. It is
+# provenance in the grammar of an assertion: it describes what the system
+# read, and says nothing about the company. Metadata that parses as a sentence
+# is exactly the case a verb test cannot catch, so it is named directly.
+_SELF_REFERENTIAL = ("the most recent evidence", "the latest evidence",
+                     "recent public signal", "this analysis", "the evidence is",
+                     "sources include", "based on the sources")
 _VERB_HINTS = (" is ", " are ", " was ", " were ", " can ", " could ",
                " may ", " might ", " will ", " would ", " has ", " have ",
                " raises ", " lowers ", " erodes ", " makes ", " forces ",
@@ -279,6 +289,8 @@ def _is_consequence(text: str) -> bool:
         return False
     low = stripped.lower()
     if low.startswith(_FRAGMENT_STARTS):
+        return False
+    if any(marker in low for marker in _SELF_REFERENTIAL):
         return False
     return any(hint in f" {low} " for hint in _VERB_HINTS)
 

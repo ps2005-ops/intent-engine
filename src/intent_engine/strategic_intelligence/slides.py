@@ -464,15 +464,34 @@ def _readable_confidence_reason(reasons) -> str:
 
 
 def _why_now_in_plain_words(why_now: str) -> str:
-    """The reasoning layer says "Recent public signal (2026-07-20, Pricing)
-    keeps this timely", which is the system describing its own inputs. A
-    reader wants the date and the page, not the word "signal"."""
+    """"Why now" is a reason, and provenance is not one.
+
+    The reasoning layer says "Recent public signal (2026-07-20, Pricing) keeps
+    this timely", which is the system describing its own inputs. An earlier fix
+    rewrote that as "The most recent evidence is Pricing (2026-07-20)" -- which
+    reads better and still answers nothing. A founder shown that under "why
+    now" learns when a page was published, not why the situation is urgent, and
+    it was one of the three strings the deployed Palantir deck was criticised
+    for.
+
+    So a value whose entire content is a date and a page name is WITHHELD. A
+    slide with no reason omits the line instead of printing a citation stamp
+    where an argument belongs -- the same rule the founder brief applies to
+    "why this matters".
+    """
     import re
-    match = re.search(r"\(([^,]+),\s*(.+?)\)", why_now or "")
+    text = (why_now or "").strip()
+    if not text:
+        return ""
+    match = re.search(r"\(([^,]+),\s*(.+?)\)", text)
     if not match:
-        return "" if "signal" in (why_now or "").lower() else (why_now or "")
-    when, where = match.group(1).strip(), match.group(2).strip()
-    return f"The most recent evidence is {where} ({when})."
+        # Prose that never mentioned the pipeline's own vocabulary is a real
+        # reason and passes through untouched.
+        return "" if "signal" in text.lower() else text
+    # Everything outside the parenthetical is the pipeline's own phrasing
+    # ("Recent public signal ... keeps this timely"), so what remains is
+    # provenance only. That is a citation, and citations belong on evidence.
+    return ""
 
 
 def build_founder_slides(analysis, *, company="") -> list:
