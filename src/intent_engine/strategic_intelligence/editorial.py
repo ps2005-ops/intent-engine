@@ -336,9 +336,14 @@ _READER_LIMITATION = {
     "thesis_generic":
         "The public evidence describes what the company does, but not enough "
         "to support a reading of why it is doing it.",
+    # WHAT THIS CODE ACTUALLY MEANS is "fewer than three RANKED readings were
+    # built" -- not "no alternative exists". The old wording said the latter,
+    # and the deployed Palantir deck carried it on the evidence slide while
+    # slide four was an option built entirely on the competing account and the
+    # decision screen listed two more. One run, two surfaces, opposite claims.
     "too_few_hypotheses":
-        "No competing explanation could be built from this evidence, so this "
-        "reading has not been tested against an alternative.",
+        "Only one reading of the evidence could be ranked, so it was not "
+        "weighed against a second one built independently of it.",
     "evidence_titles_only":
         "Only page titles and marketing copy could be extracted — nothing "
         "detailed enough to rest a reading on.",

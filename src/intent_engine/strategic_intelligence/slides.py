@@ -1027,10 +1027,18 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # 8. Questions for leadership. The same filter the brief and the full
     #    analysis apply: "How far toward a system of record do we go?" is the
     #    library asking its own falsification question in a founder's voice.
+    # The decision's OWN next check does not belong here. Live on the deployed
+    # deck, "Questions for leadership" was one bullet -- "Published pricing
+    # that assumes no implementation engagement." -- which slide five had
+    # already given as what to do next. A reader paged twice for one sentence.
+    # This slide is for what the decision screens did NOT already ask.
+    _already_asked = SaidOnce([composed_decision.falsifier,
+                               composed_decision.recommended_next_move])
     question_bullets = [
         _bullet(q.get("question", ""))
         for q in meaningful_items(r.get("questions", []), key="question")
-        if _concrete(q.get("question", ""))]
+        if _concrete(q.get("question", ""))
+        and not _already_asked.has(q.get("question", ""))]
     if not question_bullets:
         # Linear's ONLY leadership question was "Customers describing it as a
         # companion to a system of record rather than the record itself" --
@@ -1066,12 +1074,13 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         _bullet(x) for x in consolidate_limitations(
             r.get("evidence_gaps", []),
             reader_limitations(r.get("quality_findings", [])))]
-    coverage = r.get("source_class_coverage", {}) or {}
-    if coverage:
-        limitation_bullets.insert(0, _bullet(
-            "Built from " + ", ".join(f"{n} {c.replace('_', ' ')}"
-                                      for c, n in sorted(coverage.items())
-                                      if n) + " source(s)."))
+    # NO SOURCE-COUNT NARRATION. "Built from 9 company owned, 1 executive
+    # statement source(s)." is the taxonomy with its underscores rubbed out
+    # and a plural the template never resolved, and counting sources tells a
+    # reader nothing about whether to trust the reading -- the limitation
+    # bullets below say what is actually missing, in English. The counts stay
+    # available on the evidence-and-sources page, where a reader who wants
+    # provenance goes to look.
     slides.append(_slide("evidence", "Evidence and limitations",
                          limitation_bullets, kind="evidence"))
 

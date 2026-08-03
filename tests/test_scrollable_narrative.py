@@ -502,6 +502,88 @@ def test_presentation_cards_have_no_fixed_minimum_height():
     assert "min-height" not in markup
 
 
+# --- 6d. the bounded states, served end to end -------------------------------
+
+def _served(tmp_path, decision):
+    """The DEFAULT ROUTE's real HTML for a run whose decision is `decision`.
+
+    A deterministic fixture, and deliberately end-to-end rather than a call to
+    the renderer: INVESTIGATION_REQUIRED could not be reproduced on the
+    deployed preview once composition began walking the whole portfolio -- all
+    three companies run found a decidable reading -- so the state has to be
+    pinned on the served page rather than only in the composer.
+    """
+    from tests.test_strategic_intelligence import _strategic_webapp_run
+    app, client, run_id = _strategic_webapp_run(tmp_path)
+    result = app._real_result(run_id)
+    report = result["strategic_report"]
+    report["thesis"] = dict(report.get("thesis") or {},
+                            decision=decision.as_dict())
+    app.ci.store.save_report(run_id, report) if hasattr(
+        app.ci.store, "save_report") else None
+    original = app._real_result
+
+    def patched(rid):
+        out = original(rid)
+        if out and rid == run_id:
+            out = dict(out)
+            out["strategic_report"] = report
+        return out
+    app._real_result = patched
+    _, _, body = client.request("GET", f"/runs/{run_id}")
+    return body
+
+
+def test_the_investigation_state_renders_on_the_served_default_route(tmp_path):
+    decision = FounderDecision(
+        topic="Whether to price the product independently of the engagement.",
+        mechanism="the engagement teaches the workflow and the product sells "
+                  "it without the engagement",
+        readiness=INVESTIGATION_REQUIRED,
+        unsafe_because="only one course of action is supported by what was "
+                       "retrieved, and one option is not a decision",
+        evidence_required=("Revenue split between services and product is "
+                           "not public.",),
+        recommended_next_move="One bounded check comes before any commitment: "
+                              "published pricing that assumes no "
+                              "implementation engagement.",
+        what_each_result_would_favour="Evidence that the product sells "
+                                      "without the engagement favours acting "
+                                      "on it; evidence that it does not "
+                                      "favours holding.",
+        reconsider_when="Reconsider once a source outside the company reports "
+                        "on it.",
+        verified=("The company publishes named enterprise deployments.",))
+    body = _served(tmp_path, decision)
+    assert "not yet safe to act on" in body
+    # what was verified, why committing is unsafe, what is missing, one check
+    assert "publishes named enterprise deployments" in body
+    assert "one option is not a decision" in body
+    assert "Revenue split between services and product" in body
+    assert "One bounded check" in body
+    assert "favours acting on it" in body
+    assert "Reconsider once a source outside" in body
+    # and no option comparison is fabricated to fill the space
+    assert 'class="opt"' not in body
+    assert "No options are put forward" in body
+
+
+def test_the_withheld_state_renders_on_the_served_default_route(tmp_path):
+    decision = FounderDecision(
+        readiness=WITHHELD,
+        unsafe_because="what this company has published is not enough to read "
+                       "a strategy from",
+        evidence_required=("No independent coverage was retrieved.",),
+        limitation="No independent coverage was retrieved.")
+    body = _served(tmp_path, decision)
+    assert "cleared the evidence bar" in body
+    assert "No options are put forward" in body
+    assert 'class="opt"' not in body
+    assert "No independent coverage was retrieved" in body
+    # a withheld page is not one long disclaimer: it still prepares something
+    assert 'id="prepared"' in body
+
+
 # --- 7. break every guard ----------------------------------------------------
 
 def test_break_a_section_with_nothing_behind_it_is_rendered():

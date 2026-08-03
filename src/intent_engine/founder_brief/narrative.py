@@ -480,9 +480,10 @@ def _what_changed(company, brief, observations, said) -> Section:
         # analysis rather than a finding about the company.
         return Section(
             WHAT_CHANGED, "What changed",
-            paragraphs=("Read that as a limit on this analysis and not as a "
-                        "finding about the company: a change may well have "
-                        "happened where nothing published records it.",))
+            paragraphs=("No dated change could be established — read that as "
+                        "a limit on this analysis and not as a finding about "
+                        "the company. A change may well have happened where "
+                        "nothing published records it.",))
     # The trigger above is drawn from this same list. Repeating it under a
     # second heading is the duplication the dashboard already shipped, where
     # one sentence appeared as "Business momentum", "Strategic timeline" and
@@ -672,11 +673,15 @@ def _next_move(company, decision, said) -> Section:
 # and the against list is then made disjoint from the for list.
 
 def _support_ids(decision, hypotheses) -> list:
+    # Curated ids FIRST, then the full set. Taking only the curated list left
+    # the live Palantir page citing one sentence fragment behind a reading
+    # built from thirteen sources -- `strongest_support_ids` is frequently a
+    # single entry, and it is a ranking, not a limit.
     ids = list(decision.options[0].supporting_evidence_ids) \
         if decision.options else []
     for h in hypotheses:
-        ids.extend(h.get("strongest_support_ids")
-                   or h.get("supporting_observation_ids") or ())
+        ids.extend(h.get("strongest_support_ids") or ())
+        ids.extend(h.get("supporting_observation_ids") or ())
         break
     return ids
 
@@ -685,8 +690,8 @@ def _counter_ids(decision, hypotheses) -> list:
     ids = list(decision.options[0].contradicting_evidence_ids) \
         if decision.options else []
     for h in hypotheses:
-        ids.extend(h.get("strongest_counter_ids")
-                   or h.get("counter_observation_ids") or ())
+        ids.extend(h.get("strongest_counter_ids") or ())
+        ids.extend(h.get("counter_observation_ids") or ())
         break
     return ids
 
@@ -773,6 +778,25 @@ def _could_be_wrong(company, decision, said) -> Section:
                    paragraphs=tuple(paras))
 
 
+#: Shapes that describe what the RETRIEVAL lacked, not what a founder could go
+#: and observe. Measured live: "What to watch" listed "no investor material,
+#: customer account, competitor, independent report has corroborated this yet"
+#: and "Whether customers actually moved their source of truth is not
+#: observable from outside" -- the second one says outright that it cannot be
+#: watched, under a heading promising things to watch.
+_NOT_OBSERVABLE = ("is not observable", "not observable from",
+                   "has corroborated this", "could not be retrieved",
+                   "could not be established", "is not public",
+                   "is not disclosed", "no source outside")
+
+
+def _is_observable(text: str) -> bool:
+    low = _flat(text).lower()
+    if not low or low.startswith("no "):
+        return False
+    return not any(marker in low for marker in _NOT_OBSERVABLE)
+
+
 def _what_to_watch(decision, brief, said) -> Section:
     """Observable indicators, minus the one already named as the falsifier.
 
@@ -787,10 +811,10 @@ def _what_to_watch(decision, brief, said) -> Section:
     for text in _dedupe(list(decision.watch_items)
                         + list(decision.evidence_required) + [
             getattr(getattr(brief, "key_insight", None), "watch", "")]):
-        if said.has(text):
+        if said.has(text) or not _is_observable(text):
             continue
         said.remember(text)
-        watch.append(text)
+        watch.append(text[:1].upper() + text[1:])
         if len(watch) >= 3:
             break
     return Section(WHAT_TO_WATCH, "What to watch", kind="bullets",
