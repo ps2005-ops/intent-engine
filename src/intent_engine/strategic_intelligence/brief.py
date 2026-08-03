@@ -617,7 +617,15 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
     tension = (_first(r.get("blind_spots", []), "observed_tension")
                or _first(r.get("vulnerabilities", []), "exposed_layer"))
 
-    decision = (thesis.get("why_care", "")
+    # `why_care` is the decision TOPIC and was printed here as the decision --
+    # the same defect the deck had, from the same field. One composed object
+    # now answers it for every surface; the old fallbacks stay for a report
+    # that predates it and therefore has neither.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    composed = decision_of(r)
+    decision = (composed.recommended_next_move
+                or (composed.headline if composed.readiness != "WITHHELD"
+                    else "")
                 or _first(r.get("decision_implications", []), "decision")
                 or _first(r.get("questions", []), "decision_affected"))
 

@@ -384,7 +384,18 @@ def founder_view_from_report(report) -> dict:
         interpretation,
     ] if x).strip()
 
-    decision = thesis.get("why_care") or ""
+    # THE DECISION, NOT THE TOPIC.
+    #
+    # This was `thesis["why_care"]`, which is `implications[0]` -- "Whether to
+    # keep investing in depth or in adjacency". The deck printed the question
+    # under the heading "The decision" and the founder was left exactly where
+    # they started. The composed object states which options exist, what each
+    # wins and costs, and what would settle it, and when the evidence cannot
+    # support two options it says so instead of choosing one.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    composed = decision_of(r)
+    decision = composed.headline if composed.readiness != "WITHHELD" else ""
+    best = composed.options[0] if composed.options else None
     # WATCH ITEMS ARE FOUNDER-FACING, so taxonomy is filtered HERE -- at the
     # point where the visible item is selected, not by sanitising every string
     # in the system.
@@ -426,21 +437,37 @@ def founder_view_from_report(report) -> dict:
         # ranking layer is told not to promote anything to "today".
         "decisions": ([{
             "decision": decision,
-            "why_it_matters": "",
+            "readiness": composed.readiness,
+            "options": [o.as_dict() for o in composed.options],
+            "recommended_next_move": composed.recommended_next_move,
+            "limitation": composed.limitation,
+            "unsafe_because": composed.unsafe_because,
+            "evidence_required": list(composed.evidence_required),
+            "what_each_result_would_favour":
+                composed.what_each_result_would_favour,
+            "undecided_question": composed.undecided_question,
+            "why_it_matters": best.business_consequence if best else "",
             "cost_of_waiting": "",
             "what_a_competitor_may_do_first": "",
-            "upside": "", "downside": "",
-            "what_would_invalidate_it": falsifier,
+            "upside": best.upside if best else "",
+            "downside": best.downside if best else "",
+            "what_would_invalidate_it": composed.falsifier or falsifier,
             "what_to_watch": falsifier,
             "confidence": top.get("confidence", ""),
             "confidence_rationale": _readable_confidence_reason(
                 top.get("confidence_reasons")),
             "citations": list(top.get("strongest_support_ids") or []),
         }] if decision else []),
-        "strongest_case_we_are_wrong": _first(
-            top.get("alternative_explanations")),
+        # Both of these reached a live slide carrying "source of truth": the
+        # case against is an alternative explanation and the gaps are the
+        # scaffold's own, so they are library prose like everything else here
+        # and get the same filter at the point of selection.
+        "strongest_case_we_are_wrong": next(
+            (a for a in (top.get("alternative_explanations") or ())
+             if a and not reads_as_taxonomy(a)), ""),
         "questions": questions[:3],
-        "evidence_gaps": list(r.get("evidence_gaps") or [])[:2],
+        "evidence_gaps": [g for g in (r.get("evidence_gaps") or ())
+                          if g and not reads_as_taxonomy(g)][:2],
         # Left empty on purpose -- see the docstring. The renderer drops the
         # screens these would have filled.
         "business_model": {}, "mental_model": {}, "competitive": {},
@@ -492,6 +519,100 @@ def _why_now_in_plain_words(why_now: str) -> str:
     # ("Recent public signal ... keeps this timely"), so what remains is
     # provenance only. That is a citation, and citations belong on evidence.
     return ""
+
+
+def _upper_first(text: str) -> str:
+    """`unsafe_because` is written as a clause because the headline embeds it.
+    Standing alone as a bullet it is a sentence and needs a capital."""
+    text = (text or "").strip()
+    return text[:1].upper() + text[1:] if text else ""
+
+
+def _identity(text: str) -> str:
+    """A sentence's identity, so a deck can tell whether it already said it.
+
+    Compared on words alone: two bullets differing only by the heading glued
+    to the front ("The gap that has to close first is this: X" and "The
+    evidence that would settle it: X") are one sentence to a reader.
+    """
+    body = re.sub(r"^[^:]{0,60}:\s*", "", " ".join(str(text or "").split()))
+    return " ".join(re.findall(r"[a-z0-9]+", body.lower()))[:120]
+
+
+def _decision_detail_slides(decision: dict, *, index: int = 0,
+                            already_shown=()) -> list:
+    """The options, or the honest reason there are none.
+
+    Two screens at most, and only the one the readiness earns. A decision
+    slide that names a choice and then shows nothing a reader can weigh is the
+    same failure as printing the topic: it looks like an answer and carries
+    none. Where the evidence supports two courses of action they appear side
+    by side with what each wins, costs and assumes; where it does not, the
+    screen says what cannot be concluded, which evidence is missing and the
+    one bounded thing worth going to find out.
+    """
+    slides, options = [], (decision.get("options") or [])
+    readiness = decision.get("readiness", "")
+    shown = {_identity(t) for t in (already_shown or ())}
+
+    def _fresh(text):
+        """Drop a bullet this deck has already said.
+
+        The next move and the missing evidence collapse to the same sentence
+        whenever no falsification question survived filtering, and the screen
+        printed it twice under two headings -- the same duplication the
+        founder brief was fixed for.
+        """
+        key = _identity(text)
+        if not text or not key or key in shown:
+            return ""
+        shown.add(key)
+        return text
+
+    if readiness == "DECISION_READY" and len(options) >= 2:
+        # ONE SCREEN PER OPTION, not both on one.
+        #
+        # Two options with an upside and a cost each is four bullets, and the
+        # slide budget drops the fourth -- which is option two's cost, the one
+        # thing a reader weighing them cannot do without. A deck compares
+        # across consecutive screens; it does not need them side by side to be
+        # a comparison, and at 375px they would not be side by side anyway.
+        for n, option in enumerate(options[:2]):
+            label = (option.get("label") or "").rstrip(":")
+            slides.append(_slide(
+                f"option-{index + 1}-{n + 1}", f"Option {n + 1}: {label}", [
+                    _bullet(_fresh(option.get("upside", "")),
+                            evidence=option.get("supporting_evidence_ids")
+                            or []),
+                    _bullet(_lead("The cost: ",
+                                  _fresh(option.get("downside", "")))),
+                    _bullet(_lead("This assumes ",
+                                  _fresh(option.get("key_assumption", "")))),
+                ], kind="options",
+                note="Cited against the evidence behind it."))
+        slides.append(_slide(f"next-{index + 1}", "What to do next", [
+            _bullet(_fresh(decision.get("recommended_next_move", ""))),
+            _bullet(_lead("What this cannot settle: ",
+                          _fresh(decision.get("limitation", "")))),
+        ], kind="next_move"))
+        return [s for s in slides if s]
+
+    if readiness == "INVESTIGATION_REQUIRED":
+        verified = [v for v in (decision.get("verified") or []) if v]
+        slides.append(_slide(f"investigate-{index + 1}",
+                             "What cannot be concluded yet", [
+            _bullet(_lead("What was verified: ",
+                          _fresh(verified[0] if verified else ""))),
+            _bullet(_upper_first(_fresh(decision.get("unsafe_because", "")))),
+            _bullet(_fresh(decision.get("recommended_next_move", ""))),
+            _bullet(_lead("The evidence that would settle it: ",
+                          _fresh((decision.get("evidence_required")
+                                  or [""])[0]))),
+            _bullet(_fresh(decision.get("what_each_result_would_favour", ""))),
+        ], kind="investigation",
+            note="Stated as an open question because the public record does "
+                 "not close it."))
+    return [s for s in slides if s]
 
 
 def build_founder_slides(analysis, *, company="") -> list:
@@ -589,15 +710,27 @@ def build_founder_slides(analysis, *, company="") -> list:
     # the decisions
     for i, d in enumerate(decisions[:2]):
         when = _URGENCY_WORDS.get(d.get("urgency", ""), "")
-        slides.append(_slide(f"decision-{i + 1}",
-                             f"The decision: {when}" if when
-                             else "The decision", [
-            _bullet(d.get("decision", ""),
-                    evidence=d.get("citations") or [], full=True),
-            _bullet(_lead("Waiting costs: ", d.get("cost_of_waiting", ""))),
-            _bullet(_lead("A rival may move first: ",
-                          d.get("what_a_competitor_may_do_first", ""))),
-        ], kind="decision"))
+        # A BOUNDED DECISION GETS ONE SCREEN, NOT TWO.
+        #
+        # Its headline is "no option is safe to commit to yet, because X", and
+        # the investigation screen below opens with that same X. Rendering
+        # both put the identical sentence on two consecutive screens under two
+        # headings, which reads as a broken deck and pads the count with a
+        # repeat.
+        if d.get("readiness") != "INVESTIGATION_REQUIRED":
+            slides.append(_slide(f"decision-{i + 1}",
+                                 f"The decision: {when}" if when
+                                 else "The decision", [
+                _bullet(d.get("decision", ""),
+                        evidence=d.get("citations") or [], full=True),
+                _bullet(_lead("Waiting costs: ", d.get("cost_of_waiting", ""))),
+                _bullet(_lead("A rival may move first: ",
+                              d.get("what_a_competitor_may_do_first", ""))),
+            ], kind="decision"))
+        slides.extend(_decision_detail_slides(
+            d, index=i,
+            already_shown=[b["text"] for s in slides if s
+                           for b in s["bullets"]]))
 
     # 4 - the assumption carrying the weight
     weakest = weakest_assumption(assumptions) or {}
@@ -693,8 +826,25 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
 
     def _concrete(text):
+        """A founder-facing claim, or "".
+
+        This was a non-emptiness check with a taxonomy filter, which is why
+        "Palantir Partnership Vanguard" -- a retrieved PAGE TITLE -- reached a
+        deployed slide as strategic intelligence. A title is not taxonomy, so
+        nothing stopped it; the same hole passed internal pattern names
+        ("product→platform") arriving via `hypothesis.title`.
+
+        The contract is shared with the founder brief rather than restated
+        here: a claim needs a finite assertion, not merely words. Grammar
+        alone is insufficient, so metadata openings are excluded explicitly --
+        `_is_consequence` already rejects those, which is precisely why it is
+        reused instead of a second rule being written beside it.
+        """
+        from intent_engine.founder_brief.build import _is_consequence
         text = (text or "").strip()
-        return text if text and not reads_as_taxonomy(text) else ""
+        if not text or reads_as_taxonomy(text):
+            return ""
+        return text if _is_consequence(text) else ""
 
     thesis = r.get("thesis") or {}
     slides = []
@@ -723,10 +873,40 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         view_bullets.append(_bullet(thesis["view"]))
     if _concrete(thesis.get("transition")):
         view_bullets.append(_bullet(thesis["transition"]))
-    if _concrete(thesis.get("why_care")):
-        view_bullets.append(_bullet(f"Why it matters: {thesis['why_care']}"))
+    # `why_care` is the decision TOPIC, and "Why it matters: whether to keep
+    # investing in depth or in adjacency" was the product restating the
+    # question as though it were the point. The composed decision goes on its
+    # own screens below, where it has room to say what the options are.
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
+
+    # THE DECISION, AND THE SPARSE CASE THIS DECK EXISTS FOR.
+    #
+    # Measured on the Sentry-shaped fallback: with the library's sentences
+    # filtered out, the whole deck came to "We are helping the community work
+    # together." and "Built from 5 company owned source(s)." -- a marketing
+    # quote and a source count. Neither is intelligence, and a reader given
+    # those two lines has been told nothing at all.
+    #
+    # What the run DOES have, even then, is the honest bounded state: what it
+    # verified, what it cannot conclude from that, and the one check that
+    # would move it. That is a smaller claim than a strategy and it is a real
+    # one, so it is what the screens below carry.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    composed_decision = decision_of(r)
+    shown_here = [b["text"] for s in slides if s for b in s["bullets"]]
+    if composed_decision.is_ready:
+        slides.append(_slide("decision", "The decision this bears on", [
+            _bullet(composed_decision.headline, full=True),
+            _bullet(_lead("The mechanism: ", composed_decision.mechanism)),
+        ], kind="decision"))
+    if composed_decision.readiness != "WITHHELD":
+        # No separate headline screen for the bounded state: the headline IS
+        # "no option is safe to commit to yet, because...", and the screen
+        # below opens with that same sentence. Printed on both, the deck said
+        # one thing twice and called it two screens.
+        slides.extend(_decision_detail_slides(
+            composed_decision.as_dict(), already_shown=shown_here))
 
     # 3. What changed recently
     change_bullets = [

@@ -387,6 +387,14 @@ def render_strategic_report(report) -> str:
     def _sentences(items) -> str:
         return "".join(_p(x) for x in items)
 
+    def _decision_paragraph(report) -> str:
+        from intent_engine.strategic_intelligence.decision import decision_of
+        decision = decision_of(report)
+        if decision.readiness == "WITHHELD":
+            return ""
+        parts = [decision.headline, decision.recommended_next_move]
+        return " ".join(x for x in parts if x)
+
     # 1 ── MAIN INTERPRETATION -----------------------------------------
     # The claim is already in the hero; this adds only what the hero could
     # not: how far to trust it, and the decision it bears on.
@@ -399,9 +407,11 @@ def render_strategic_report(report) -> str:
         _p(f"This is held as a {lead['confidence']}-confidence reading of the "
            f"public evidence, not a settled fact."
            if lead.get("confidence") else ""),
-        _p(f"It bears on one decision in particular: "
-           f"{lower_first(thesis['why_care'])}"
-           if is_meaningful(thesis.get("why_care")) else ""),
+        # Was `thesis['why_care']` -- the decision TOPIC, rendered as though
+        # the analysis had reached it. The composed decision says which
+        # options exist and what separates them, or says plainly that the
+        # evidence does not yet support choosing.
+        _p(_decision_paragraph(r)),
     ] + [
         # What leadership is likely weighing right now, inferred from public
         # signals only. Kept here rather than in its own section because it is
@@ -502,14 +512,34 @@ def render_strategic_report(report) -> str:
     # hypothesis reasoning is used only when it is about the company rather
     # than about the pattern library matching itself.
     why_items = []
+    # THE MECHANISM, NOT THE RULE THAT FIRED.
+    #
+    # Scaffold reasoning is "<signals> match the product→platform mechanism:
+    # value and lock-in migrate from the visible product to the rails
+    # underneath it". Taken whole it leaks the pattern id, and dropping it
+    # whole -- which is what the strengthened taxonomy rule would do -- takes
+    # the mechanism with it. The extraction is shared with the composed
+    # decision so both surfaces state the same mechanism.
+    from intent_engine.strategic_intelligence.decision import (
+        mechanism_sentence,
+    )
+    for h in hyps:
+        reasoning = mechanism_sentence(h)
+        if is_meaningful(reasoning):
+            why_items.append(reasoning)
+    # OBSERVATIONS LAST, not first.
+    #
+    # They led this list, and `_once` had already spent every one of them on
+    # "The evidence" three sections earlier -- so the ten-item window filled
+    # with sentences that render to nothing and the section disappeared
+    # entirely the moment the reasoning above it was filtered. The heading
+    # promises why the evidence MATTERS; the mechanism answers that and the
+    # evidence restated does not, so the mechanism goes first and the
+    # observations fill whatever room is left.
     for o in r.get("observations", []) or ():
         text = (o.get("text") or "").strip()
         if is_meaningful(text) and not reads_as_taxonomy(text):
             why_items.append(text)
-    for h in hyps:
-        reasoning = (h.get("reasoning") or "").strip()
-        if is_meaningful(reasoning) and not reads_as_taxonomy(reasoning):
-            why_items.append(reasoning)
     for v in meaningful_items(r.get("vulnerabilities", []),
                               key="exposed_layer"):
         mechanism = (v.get("mechanism") or "").strip()
@@ -546,13 +576,21 @@ def render_strategic_report(report) -> str:
     # about itself, which is the same gate `_pattern_block` applied.
     for h in hyps:
         pattern = pat_by_id.get(h.get("pattern_id", ""), {})
-        if not pattern or reads_as_taxonomy(pattern.get("name", "")) \
-                or reads_as_taxonomy(pattern.get("mechanism", "")):
+        # Gated on what is RENDERED. Every entry in the library is named with
+        # an arrow ("Product → platform / tool → infrastructure"), so testing
+        # the name suppressed the analogue for every pattern there is -- while
+        # the name itself no longer reaches the page at all.
+        if not pattern or reads_as_taxonomy(pattern.get("mechanism", "")):
             continue
         examples = [e.get("name", "") for e in
                     pattern.get("historical_examples", []) if e.get("name")]
+        # The pattern NAME is the library's internal label -- "Product →
+        # platform / tool → infrastructure" -- and naming it told a reader
+        # which rule fired rather than what it means. The mechanism and the
+        # companies it has played out at are the comparative analysis; they
+        # stay, and the label goes.
         why += _p(
-            f"This resembles a pattern seen before — {pattern['name']}: "
+            f"This resembles a pattern seen before: "
             f"{lower_first(pattern.get('mechanism', ''))}"
             + (f" It has played out at {', '.join(examples[:3])}."
                if examples else "")
