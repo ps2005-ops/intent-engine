@@ -672,27 +672,51 @@ def _next_move(company, decision, said) -> Section:
 # from the ACTING option and the hypothesis — one reading, one set of roles —
 # and the against list is then made disjoint from the for list.
 
+def _decided_hypothesis(decision, hypotheses):
+    """The hypothesis the DECISION is about -- not necessarily the top-ranked.
+
+    `decide_across` walks the portfolio: when the best-ranked reading cannot
+    state a usable mechanism, the decision is composed on the next one that
+    can. Reading evidence off `hypotheses[0]` regardless therefore attributed
+    one reading's sources to another reading's decision. Matched by evidence
+    lineage, which is the only thing the composed object carries back.
+    """
+    if not hypotheses:
+        return {}
+    owned = set()
+    for option in decision.options:
+        owned |= set(option.supporting_evidence_ids)
+        owned |= set(option.contradicting_evidence_ids)
+    if owned:
+        for h in hypotheses:
+            ids = set(h.get("strongest_support_ids") or ()) \
+                | set(h.get("supporting_observation_ids") or ()) \
+                | set(h.get("strongest_counter_ids") or ()) \
+                | set(h.get("counter_observation_ids") or ())
+            if ids & owned:
+                return h
+    return hypotheses[0]
+
+
 def _support_ids(decision, hypotheses) -> list:
-    # Curated ids FIRST, then the full set. Taking only the curated list left
-    # the live Palantir page citing one sentence fragment behind a reading
-    # built from thirteen sources -- `strongest_support_ids` is frequently a
-    # single entry, and it is a ranking, not a limit.
+    # Curated ids FIRST, then that hypothesis's full set. Taking only the
+    # curated list left the live Palantir page citing one sentence fragment
+    # behind a reading built from thirteen sources -- `strongest_support_ids`
+    # is a ranking, not a limit, and is frequently a single entry.
     ids = list(decision.options[0].supporting_evidence_ids) \
         if decision.options else []
-    for h in hypotheses:
-        ids.extend(h.get("strongest_support_ids") or ())
-        ids.extend(h.get("supporting_observation_ids") or ())
-        break
+    h = _decided_hypothesis(decision, hypotheses)
+    ids.extend(h.get("strongest_support_ids") or ())
+    ids.extend(h.get("supporting_observation_ids") or ())
     return ids
 
 
 def _counter_ids(decision, hypotheses) -> list:
     ids = list(decision.options[0].contradicting_evidence_ids) \
         if decision.options else []
-    for h in hypotheses:
-        ids.extend(h.get("strongest_counter_ids") or ())
-        ids.extend(h.get("counter_observation_ids") or ())
-        break
+    h = _decided_hypothesis(decision, hypotheses)
+    ids.extend(h.get("strongest_counter_ids") or ())
+    ids.extend(h.get("counter_observation_ids") or ())
     return ids
 
 
@@ -714,15 +738,10 @@ def _evidence_against(company, decision, hypotheses, index) -> Section:
     ids = [i for i in _counter_ids(decision, hypotheses) if i not in supporting]
     items = _evidence_items(ids, index)
 
-    alternatives = []
-    for h in hypotheses:
-        for alt in (h.get("alternative_explanations") or ()):
-            text = _flat(alt if isinstance(alt, str) else alt.get("text"))
-            if text:
-                alternatives.append(text)
-        if alternatives:
-            break
-    alternatives = _dedupe(alternatives)[:3]
+    alternatives = _dedupe([
+        _flat(alt if isinstance(alt, str) else alt.get("text"))
+        for alt in (_decided_hypothesis(decision, hypotheses)
+                    .get("alternative_explanations") or ())])[:3]
 
     paras = []
     if alternatives:

@@ -298,6 +298,30 @@ def test_no_internal_vocabulary_or_taxonomy_reaches_the_reader(pattern_id):
     assert pattern_id not in body, "the pattern id reached the reader"
 
 
+def test_the_evidence_shown_belongs_to_the_reading_that_was_decided():
+    """`decide_across` walks the portfolio: when the top-ranked reading cannot
+    state a usable mechanism, the decision is composed on the next one that
+    can. Reading evidence off `hypotheses[0]` regardless attributed one
+    reading's sources to another reading's decision — and on the deployed
+    Palantir page it left a thirteen-source run citing one fragment."""
+    report = _report()
+    hypotheses = report["hypotheses"]
+    assert len(hypotheses) >= 2, "fixture needs a portfolio to choose from"
+    # Put an unrelated reading first; the decision must keep its own lineage.
+    report = dict(report, hypotheses=[
+        dict(hypotheses[1], strongest_support_ids=["nonexistent-a"],
+             supporting_observation_ids=["nonexistent-a"]),
+        hypotheses[0]])
+    decision = decision_of(report)
+    narrative = _narrative(report, "Shopify", decision)
+    shown = set(narrative.section(N.EVIDENCE_FOR).evidence_ids)
+    owned = set(decision.options[0].supporting_evidence_ids) if \
+        decision.options else set()
+    assert "nonexistent-a" not in shown, shown
+    if owned:
+        assert shown & owned, (shown, owned)
+
+
 def test_a_source_is_described_by_what_it_is_not_by_its_enum():
     narrative = _narrative()
     section = narrative.section(N.EVIDENCE_FOR)
