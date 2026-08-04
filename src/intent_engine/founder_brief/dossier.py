@@ -51,6 +51,25 @@ from intent_engine.founder_brief.narrative import (
 )
 
 
+#: Cover-page furniture common to every SEC filing. Matching any of these
+#: means the extractor got the wrapper rather than the disclosure.
+_FILING_BOILERPLATE = (
+    "pursuant to section 13", "securities exchange act of 1934",
+    "transition report pursuant", "quarterly report pursuant",
+    "annual report pursuant", "commission file number",
+    "registrant as specified in its charter",
+    "incorporated by reference into the registration statement",
+    "indicate by check mark", "☒", "☐", "[x]", "[ ]",
+)
+
+
+def _is_filing_boilerplate(text: str) -> bool:
+    low = _flat(text).lower()
+    if not low:
+        return False
+    return sum(1 for m in _FILING_BOILERPLATE if m in low) >= 2
+
+
 def _readable_excerpt(obs) -> str:
     """What this source says, in the most readable form it has.
 
@@ -70,6 +89,14 @@ def _readable_excerpt(obs) -> str:
     # contract let "commerce infrastructure powering commerce. Shop Pay
     # checkout, payments, capital, fulfillment, point of sale..." through as
     # a quotation.
+    # A FILING'S COVER PAGE IS NOT ITS CONTENT. Live on the preview, the
+    # single most valuable source in the run -- Palantir's 10-Q -- was cited
+    # as "☒. QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE
+    # SECURITIES EXCHANGE ACT OF 1934. ☐. TRANSITION REPORT PURSUANT TO..."
+    # which is the checkbox furniture every filing opens with and says
+    # nothing about this company.
+    if _is_filing_boilerplate(text):
+        return _flat(obs.get("strategic_signal")) or ""
     scraped = bool(_re.match(r"^[^.]{0,60}\bpage\.\s", text))
     text = _re.sub(r"^[^.]{0,60}\bpage\.\s*", "", text).strip()
     if text and (scraped or not _is_consequence(text.rstrip("…"))):
@@ -626,6 +653,59 @@ def _what_was_read(company, documents, said) -> Passage:
                    kind="labelled", items=tuple(rows[:8]))
 
 
+def _artefacts(company, decision, report, said) -> Passage:
+    """Prepared work, each tied to the decision and to its evidence.
+
+    The customer's question was whether the product researches or does
+    something. Every artefact here names the decision it serves, what it is
+    built from, and what the reader does with it -- and nothing leaves the
+    page without explicit approval.
+    """
+    rows = []
+    if decision.readiness == DECISION_READY and len(decision.options) >= 2:
+        rows.append({
+            "label": "Options comparison",
+            "text": end_sentence(
+                f"A one-page side-by-side of {decision.options[0].label} and "
+                f"{lower_first(decision.options[1].label)}, each with its "
+                f"upside, its cost, the assumption it rests on and the "
+                f"sources behind it — for the meeting where this is argued")})
+        rows.append({
+            "label": "Decision memo",
+            "text": end_sentence(
+                f"The reading, the choice and the recommended next move, "
+                f"written so the trade-off has to be made explicitly rather "
+                f"than by default")})
+    else:
+        wanted = "; ".join(_flat(e).rstrip(".")
+                           for e in decision.evidence_required[:3])
+        if wanted:
+            rows.append({"label": "Evidence request",
+                         "text": end_sentence(
+                             f"A numbered request for exactly what is "
+                             f"missing: {wanted}")})
+        rows.append({"label": "Investigation plan",
+                     "text": end_sentence(
+                         f"The one bounded check that would settle this, with "
+                         f"what each result would favour")})
+    questions = [_flat(q.get("question")) for q in _records(report, "questions")]
+    questions = [q for q in questions if q][:3]
+    if questions:
+        rows.append({"label": "Board discussion questions",
+                     "text": end_sentence("; ".join(
+                         q.rstrip("?") for q in questions))})
+    gaps = [_flat(g) for g in (report.get("evidence_gaps") or ())][:2]
+    if gaps:
+        rows.append({"label": "Diligence checklist",
+                     "text": end_sentence("; ".join(
+                         g.rstrip(".") for g in gaps if g))})
+    return Passage("artefacts", "What this has prepared for you", depth=BOTH,
+                   kind="labelled", items=tuple(rows[:4]),
+                   note="Drafted here and nothing more. Nothing is sent, "
+                        "published, scheduled or shared without your explicit "
+                        "approval.")
+
+
 def _evidence_appendix(report, index) -> Passage:
     """Every source used, with what kind of thing it is."""
     # DEDUPED BY SOURCE, NOT BY SENTENCE. This is the provenance list -- "every
@@ -708,6 +788,7 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
         _scenarios(company, decision, said),
         _unknowns(company, report, decision, said),
         _monitoring(company, report, decision, said),
+        _artefacts(company, decision, report, said),
         _evidence_appendix(report, index),
     ]
     return Dossier(company=company, readiness=decision.readiness,
@@ -847,6 +928,7 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
     from html import escape
 
     from intent_engine.founder_brief.narrative import _render_options
+    said = SaidOnce()
     out = ['<section id="executive_answer" class="lead"><h2>The answer</h2>']
     if decision.readiness == WITHHELD:
         out.append(_p(f"No strategic reading of {company} cleared the "
@@ -860,7 +942,17 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
             out.append(_p(end_sentence(
                 f"Across the public record for {company}, "
                 f"{as_clause(decision.mechanism, company)}")))
-        out.append(_p(decision.headline))
+            said.remember(decision.mechanism)
+        # The headline names the reading when the option labels are generic
+        # ("... — on whether <mechanism>"), and the line above just said it.
+        # The narrative strips that tail for the same reason; this is the same
+        # rule, applied where the deep layers get their headline.
+        headline = _flat(decision.headline)
+        if " — on whether " in headline:
+            head, _, tail = headline.partition(" — on whether ")
+            if said.has(tail):
+                headline = end_sentence(head)
+        out.append(_p(headline))
         if decision.readiness == INVESTIGATION_REQUIRED \
                 and decision.unsafe_because:
             out.append(_p(end_sentence(
@@ -873,8 +965,13 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
     out.append("</section>")
 
     if decision.readiness == DECISION_READY and len(decision.options) >= 2:
+        from dataclasses import replace
         from intent_engine.founder_brief.narrative import _trim_option
         options = tuple(_trim_option(o) for o in decision.options[:2])
+        # A watch item identical on both cards is the decision's one
+        # falsification check, which "what to do next" states below.
+        if len({_flat(o.watch_item) for o in options}) == 1:
+            options = tuple(replace(o, watch_item="") for o in options)
         out.append('<section id="options"><h2>The options, and what each '
                    'costs</h2>')
         out.append(_render_options(options))
@@ -882,7 +979,6 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
 
     moves = [decision.recommended_next_move,
              decision.what_each_result_would_favour, decision.reconsider_when]
-    said = SaidOnce()
     moves = [m for m in moves if _flat(m) and said.fresh(m)]
     if moves:
         out.append('<section id="next_move"><h2>What to do next</h2>')

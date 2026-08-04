@@ -192,8 +192,16 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
                if dated else "Timeliness limited: no dated evidence retrieved.")
 
     gaps = list(scaffold["gaps"])
+    # SCOPED TO WHAT THE RUN RETRIEVED, not to what supports this one
+    # hypothesis. Live on the preview after SEC periodic reports started
+    # arriving: the executive brief listed "Filings and investor material · 1"
+    # and, four lines down, "no investor material ... has corroborated this
+    # yet". Both were computed correctly and the page contradicted itself,
+    # because this sentence reads to a founder as a statement about the run.
+    retrieved_classes = {o.source_class for o in observations}
     missing_external = [c for c in _EXTERNAL_CLASSES
-                        if c not in support_classes]
+                        if c not in support_classes
+                        and c not in retrieved_classes]
     if missing_external:
         # Named in a reader's words. The enum spellings are the pipeline's
         # own, and the deployed deck printed "no investor_material /

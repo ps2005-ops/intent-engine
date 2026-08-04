@@ -199,8 +199,11 @@ def test_the_brief_does_not_restate_the_narrative(tmp_path):
     # the answer -- that is what makes the memo readable on its own.
     below = dossier_body.split('id="operating_model"')[-1]
     below = below.split('<nav class="deeper"')[0]
+    # The approval notice is a CONSENT notice, not analysis. It belongs
+    # wherever artefacts are offered, on every surface that offers them.
     echoed = [ln for ln in _text(below).splitlines()
               if len(ln.split()) >= 10
+              and "without your explicit approval" not in ln
               and " ".join(re.findall(r"[a-z0-9]+", ln.lower()))
               in narrative_lines]
     assert not echoed, echoed[:3]
@@ -373,6 +376,47 @@ def test_break_a_scraped_nav_dump_is_cited_as_a_quotation():
            "strategic_signal": "Acme presents payments and identity as "
                                "first-party rails across every surface."}
     assert D._readable_excerpt(obs).startswith("Acme presents payments")
+
+
+def test_break_a_filing_cover_page_is_cited_as_its_content():
+    """Live on the preview: the single most valuable source in the run --
+    Palantir's 10-Q -- was cited as its checkbox furniture."""
+    obs = {"observation_id": "o1", "source_title": "SEC 10-Q (2026-08-04)",
+           "source_class": "investor_material",
+           "excerpt": "\u2612. QUARTERLY REPORT PURSUANT TO SECTION 13 OR "
+                      "15(d) OF THE SECURITIES EXCHANGE ACT OF 1934. "
+                      "\u2610. TRANSITION REPORT PURSUANT TO SECTION 13",
+           "strategic_signal": "Palantir discloses specific risks rather "
+                               "than generic caveats."}
+    assert D._readable_excerpt(obs).startswith("Palantir discloses")
+    # ...and with nothing better behind it, the citation is dropped, not
+    # rendered as furniture.
+    assert D._readable_excerpt({k: v for k, v in obs.items()
+                                if k != "strategic_signal"}) == ""
+
+
+def test_break_a_gap_names_a_family_the_run_actually_retrieved():
+    """Live on the preview once SEC filings started arriving: the brief listed
+    "Filings and investor material - 1" and, four lines down, "no investor
+    material ... has corroborated this yet"."""
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    from intent_engine.strategic_intelligence.shopify_fixture import (
+        shopify_observations,
+    )
+    report = build_strategic_report(company_name="Shopify",
+                                    observations=shopify_observations())
+    retrieved = {o.source_class for o in report.observations}
+    for gap in report.evidence_gaps:
+        if "has corroborated this yet" not in gap:
+            continue
+        for present, words in (("investor_material", "investor material"),
+                               ("customer_voice", "customer account"),
+                               ("competitor", "competitor"),
+                               ("independent_reporting", "independent report")):
+            if present in retrieved:
+                assert words not in gap, (present, gap)
 
 
 def test_break_two_unrelated_companies_receive_the_same_deep_report():
