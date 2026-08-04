@@ -445,6 +445,32 @@ def test_break_the_bounded_answer_states_its_reason_twice():
     assert text.count(reason) == 1, text.count(reason)
 
 
+def test_macro_is_named_only_when_the_evidence_names_it():
+    """No generic GDP or interest-rate commentary. A macro factor earns a line
+    when something the run RETRIEVED mentions it; otherwise the absence is
+    stated once, with what it leaves untested."""
+    book = _dossier()
+    text = _text(_rendered(book, D.FULL))
+    assert "Macro and regulatory exposure" in text
+    assert "Nothing retrieved ties this decision to a macro or regulatory" \
+        in text or "Named because the retrieved evidence mentions it" in text
+    # ...and it is never a zero
+    assert "0%" not in text
+
+    # when the evidence DOES name one, the mechanism comes with it
+    report = _report()
+    obs = list(report["observations"])
+    obs.append({"observation_id": "macro-1",
+                "source_title": "SEC 10-Q", "source_class": "investor_material",
+                "excerpt": "A material share of revenue depends on government "
+                           "appropriation cycles that can slip a quarter.",
+                "date": "2026-08-04"})
+    named = _dossier(report=dict(report, observations=obs))
+    macro = named.passage("macro")
+    assert macro.items, "a named macro factor produced no line"
+    assert macro.items[0]["label"] == "Public budget exposure"
+
+
 def test_break_two_unrelated_companies_receive_the_same_deep_report():
     a = _text(_rendered(_dossier(company="Shopify"), D.FULL))
     b_report = dict(_report(), company_name="Northwind",

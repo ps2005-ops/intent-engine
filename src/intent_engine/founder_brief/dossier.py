@@ -474,6 +474,67 @@ def _market(company, market, said) -> Passage:
                    note=_flat(ctx.get("disclaimer")))
 
 
+def _macro(company, report, decision, said) -> Passage:
+    """Macro and regulatory exposure — only where the EVIDENCE names one.
+
+    No generic GDP or interest-rate commentary. A macro factor earns a line
+    here when something the run actually retrieved mentions it AND the
+    decision runs through it; otherwise this states, once, that no macro
+    exposure was established and what that leaves untested. There is no macro
+    adapter wired into this path, so the honest output is usually the
+    limitation -- which is a different thing from silence, and a different
+    thing from a zero.
+    """
+    hits, seen = [], SaidOnce()
+    for obs in _observation_dicts(report):
+        text = _readable_excerpt(obs)
+        low = text.lower()
+        for factor, mechanism in _MACRO_FACTORS:
+            if factor not in low or seen.has(factor):
+                continue
+            seen.remember(factor)
+            hits.append({"label": mechanism,
+                         "text": _sentence(text)})
+            break
+    if hits:
+        return Passage("macro", "Macro and regulatory exposure", depth=FULL,
+                       kind="labelled", items=tuple(hits[:3]),
+                       note="Named because the retrieved evidence mentions "
+                            "it, not because it applies to companies "
+                            "generally.")
+    return Passage(
+        "macro", "Macro and regulatory exposure", depth=FULL,
+        paragraphs=("Nothing retrieved ties this decision to a macro or "
+                    "regulatory factor, so none is asserted. That is a limit "
+                    "on the evidence, not a finding that the business is "
+                    "unexposed — rates, public and defence budgets, "
+                    "procurement cycles and AI policy can all move a decision "
+                    "like this one, and none of them was observable in what "
+                    "this run could read.",))
+
+
+#: A macro factor is only worth a line when the evidence NAMES it. The
+#: mechanism beside each is how it would reach a decision -- without that, a
+#: macro section is commentary that fits any company in any year.
+_MACRO_FACTORS = (
+    ("interest rate", "Cost of capital"),
+    ("inflation", "Cost of capital"),
+    ("defense spending", "Public budget exposure"),
+    ("defence spending", "Public budget exposure"),
+    ("government budget", "Public budget exposure"),
+    ("appropriation", "Public budget exposure"),
+    ("procurement", "Procurement cycle"),
+    ("tariff", "Trade exposure"),
+    ("regulation", "Regulatory exposure"),
+    ("regulatory", "Regulatory exposure"),
+    ("gdpr", "Regulatory exposure"),
+    ("ai act", "AI policy exposure"),
+    ("export control", "Trade exposure"),
+    ("foreign exchange", "Currency exposure"),
+    ("currency", "Currency exposure"),
+)
+
+
 def _analogs(company, report, decision, hypotheses, said) -> Passage:
     """Where this has played out before, and where the comparison stops.
 
@@ -791,6 +852,7 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
         _customer_demand(company, report, index, said),
         _competitive(company, report, decision, hypotheses, families, said),
         _market(company, market, said),
+        _macro(company, report, decision, said),
         _analogs(company, report, decision, hypotheses, said),
         _opportunity(company, report, said),
         _risk(company, report, decision, said),
