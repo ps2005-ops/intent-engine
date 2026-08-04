@@ -1,30 +1,38 @@
-"""The 60-second founder brief, rendered.
+"""Shared founder-facing CSS and the secondary layer renderers.
 
-LAYOUT IS THE PRODUCT DECISION HERE
------------------------------------
-The order below is the answer to the customer's complaint. A founder reads
-top-down and stops when they have enough, so the sequence is:
-
-    what it does -> what changed -> the insight -> SO WHAT -> the decision
-    -> what I would do -> risk / unknown -> confidence
-
-"So what" and the decision appear ABOVE the fold on mobile, before evidence,
-before charts and before navigation. If a reader stops after two cards they
-still have the consequence.
-
-WHAT IS DELIBERATELY NOT HERE
------------------------------
-No run identifier, no pipeline state, no source enum, no hypothesis name, no
-analysis version, no repeated dates, no citation metadata wall. Those belong in
-the evidence layer, one click away, and every one of them on this screen costs
-a founder attention they were going to spend on the answer.
-
-ACCESSIBILITY IS NOT A PASS AT THE END
+WHAT LIVES HERE, AND WHAT ROUTES TO IT
 --------------------------------------
-One `<main>`, one `<h1>`, headings in order, every colour meeting AA in both
-schemes, focus visible, and each chart carrying a textual equivalent — because
-a chart that only exists as a shape is a chart a screen reader user cannot read
-and a print-out loses.
+    BRIEF_CSS, LAYER_CSS   the shared stylesheet every founder page loads
+    _deeper                the depth nav, used by every layer and by the
+                           scrollable narrative
+    render_dashboard       GET /runs/<id>/dashboard
+    render_story           GET /runs/<id>/story
+    render_actions         the prepared-artefact cards on the story layer
+    confidence_sentence,   the "never a bare grade" contract, applied
+    is_bare_grade          wherever a confidence word would otherwise stand
+                           alone
+
+`render_market`, `render_executive_brief` and `_citations` are NOT routed. They
+are kept because each carries its own direct contract tests (no trading-engine
+performance on the page; a citation shows a readable source name and never an
+invented one) and those contracts are cheap to keep proven. Do not build on
+them without wiring a route first.
+
+WHY THERE IS NO `render_brief` ANY MORE
+---------------------------------------
+It rendered the 60-second brief from `FounderBrief.key_insight`, and that field
+is None whenever the thesis view is withheld -- while the composed
+`FounderDecision` can be DECISION_READY at the same time, because it decides
+across the whole hypothesis portfolio. So the page said "No strategic
+conclusion is being asserted about this company" while the deck one click away
+carried two options and a recommendation. Measured on the deployed preview,
+commit a6866d6.
+
+`founder_brief/narrative.py` replaced it: the default result renders the ONE
+shared decision. Deleting this rather than leaving it unrouted is deliberate --
+a second founder renderer built on a different source of truth is how that
+contradiction happened, and leaving it here invites the next person to fix the
+brief in the file nothing serves.
 """
 from __future__ import annotations
 
@@ -124,185 +132,6 @@ def _citations(evidence_ids, run_id: str, label: str = "Evidence",
 
 def _p(text: str) -> str:
     return f"<p>{_e(text)}</p>" if text else ""
-
-
-def _clip(text: str, words: int) -> str:
-    """Trim for the PRIMARY view only.
-
-    The full sentence stays on the insight object, so the decision story and
-    executive brief still show it complete. This is a reading-budget decision
-    about one screen, not a truncation of the intelligence -- the 60-second
-    brief has ~250 words to spend and a 60-word interpretation spends a
-    quarter of them before the reader reaches the decision.
-    """
-    parts = (text or "").split()
-    if len(parts) <= words:
-        return text or ""
-    return " ".join(parts[:words]).rstrip(",;:") + "…"
-
-
-def render_brief(brief, *, run_id: str = "", links: bool = True,
-                 citation_labels=None) -> str:
-    """The whole 60-second screen. One `<main>`, one `<h1>`."""
-    b = brief
-    out = [BRIEF_CSS, '<main class="fb">']
-
-    out.append(f"<h1>{_e(b.company)}</h1>")
-    if b.what_it_does:
-        out.append(f'<p class="does">{_e(b.what_it_does)}</p>')
-    else:
-        out.append('<p class="does muted">The public material does not state '
-                   'plainly what this company sells.</p>')
-
-    # --- the answer, first ---------------------------------------------------
-    if b.key_insight:
-        k = b.key_insight
-        out.append("<h2>The most important thing</h2>")
-        out.append('<div class="card headline">')
-        out.append(f"<h3>{_e(_clip(k.fact, 34))}</h3>")
-        out.append(_p(_clip(k.interpretation, 38)))
-        # A heading over a blank is worse than no heading: it reads as a
-        # section the product forgot to fill in. `so_what` is now empty
-        # whenever nothing stated a real consequence, so the block goes with
-        # it rather than framing the absence.
-        if k.so_what:
-            out.append('<div class="sowhat"><span class="lbl">Why this '
-                       f'matters</span>{_e(_clip(k.so_what, 34))}</div>')
-        if k.decision:
-            out.append('<div class="decision"><span class="lbl">Decision '
-                       f'affected</span>{_e(_clip(k.decision, 30))}</div>')
-        out.append(_citations(k.evidence_ids, run_id, "What this rests on",
-                              citation_labels))
-        out.append("</div>")
-    elif b.withheld_reason and not (b.verified or b.unclear):
-        # A withheld reading in a non-sparse mode used to render NOTHING here.
-        # The reader was left with a page that looked like the analysis had
-        # simply failed. It did not: it declined, and the reason is the honest
-        # headline.
-        out.append("<h2>The most important thing</h2>")
-        out.append('<div class="card headline">')
-        out.append("<h3>No strategic conclusion is being asserted about this "
-                   "company.</h3>")
-        out.append(_p(_clip(b.withheld_reason, 40)))
-        out.append('<div class="sowhat"><span class="lbl">Why this matters'
-                   '</span>Treat what follows as verified activity, not as a '
-                   'reading of strategy. A confident-sounding conclusion here '
-                   'would be the product overstating what it found.</div>')
-        out.append("</div>")
-    elif b.verified or b.unclear:
-        out.append("<h2>What a customer can actually verify</h2>")
-        out.append('<div class="card headline">')
-        out.append("<h3>There is not enough public evidence to read this "
-                   "company&rsquo;s strategy — but that is itself the "
-                   "finding.</h3>")
-        out.append('<div class="sowhat"><span class="lbl">Why this matters'
-                   '</span>A prospective customer, partner or investor sees '
-                   'exactly what this analysis saw. What cannot be verified '
-                   'here cannot be verified by them either.</div>')
-        out.append("</div>")
-
-    # --- what I would do next, BEFORE the history -----------------------------
-    # Order is the product decision: a reader who stops after the decision must
-    # already have the action. "What changed" is context for a reader who has
-    # not stopped, so it comes after.
-    if b.next_actions:
-        out.append("<h2>What I would do next</h2>")
-        out.append('<div class="card"><ol class="actions">')
-        out.extend(f"<li>{_e(_clip(a, 26))}</li>"
-                   for a in b.next_actions[:3])
-        out.append("</ol></div>")
-
-    # --- what changed --------------------------------------------------------
-    if b.what_changed:
-        out.append("<h2>What changed</h2><ul class=\"changed\">")
-        for item in b.what_changed[:2]:
-            when = f'<span class="when">{_e(item["when"])}</span>' if item.get(
-                "when") else ""
-            out.append(f'<li class="card">{when}'
-                       f'{_e(_clip(item["what"], 22))}</li>')
-        out.append("</ul>")
-
-    # --- sparse-mode product -------------------------------------------------
-    if b.customer_can_see:
-        out.append("<h2>What a visitor can confirm</h2><ul class=\"chips\">")
-        for item in b.customer_can_see:
-            cls = "yes" if item["present"] else "no"
-            mark = "visible" if item["present"] else "not visible"
-            out.append(f'<li class="{cls}">{_e(item["item"])} — {mark}</li>')
-        out.append("</ul>")
-    if b.claimed:
-        out.append('<h2>Claimed, not shown</h2>')
-        out.append('<div class="card"><ul>')
-        out.extend(f"<li>{_e(_clip(c, 20))}</li>" for c in b.claimed[:2])
-        out.append("</ul></div>")
-    if b.unclear:
-        out.append("<h2>What is unclear</h2><div class=\"card\"><ul>")
-        out.extend(f"<li>{_e(_clip(u, 16))}</li>" for u in b.unclear[:2])
-        out.append("</ul></div>")
-
-    if b.internal_questions:
-        out.append("<h2>Three questions to answer internally</h2>")
-        out.append('<div class="card"><ol class="actions">')
-        out.extend(f"<li>{_e(_clip(q, 22))}</li>"
-                   for q in b.internal_questions)
-        out.append("</ol></div>")
-    if b.public_proofs:
-        # Secondary by design: these are what to publish LATER. The diagnosis
-        # of what is true NOW is the primary product, and putting six more
-        # bullets above the fold would push the reading budget past a
-        # 60-second read.
-        out.append('<details><summary>Three public proofs that would build '
-                   'trust</summary><ol class="actions">')
-        out.extend(f"<li>{_e(_clip(p, 20))}</li>" for p in b.public_proofs)
-        out.append("</ol></details>")
-
-    # --- risk / unknown ------------------------------------------------------
-    if b.biggest_risk or b.biggest_unknown:
-        out.append("<h2>Risk and unknown</h2><div class=\"grid2\">")
-        if b.biggest_risk:
-            # The label and the sentence ran together in the rendered text
-            # ("Biggest riskevery source here is..."), because a bare <span>
-            # is inline. Seen live, not in any assertion.
-            out.append('<div class="card"><span class="lbl small muted">'
-                       f'Biggest risk</span>'
-                       f'<p>{_e(_clip(b.biggest_risk, 26))}</p></div>')
-        if b.biggest_unknown:
-            out.append('<div class="card"><span class="lbl small muted">'
-                       f'Biggest unknown</span>'
-                       f'<p>{_e(_clip(b.biggest_unknown, 26))}</p></div>')
-        out.append("</div>")
-
-    # Market context belongs on the dashboard, not the 60-second screen: it is
-    # supporting detail, and it was costing ~60 words of the reading budget
-    # before the reader reached confidence.
-
-    # --- confidence, last because it qualifies everything above --------------
-    if b.confidence:
-        # LEAD WITH THE REASON, NOT THE GRADE.
-        #
-        # The page opened "Low." and a founder read it as a verdict on the
-        # company rather than a statement about the evidence behind it. The
-        # label survives as a compact marker after the explanation, because
-        # a grade cannot tell anyone what to do and the explanation can.
-        # The marker rides WITH the reason rather than in a paragraph of its
-        # own: alone in the DOM, "Low confidence" is a bare grade again --
-        # it is what a screen reader announces as one thought, and what the
-        # eye lands on when it skips the paragraph above.
-        out.append("<h2>How far this evidence goes</h2><div class=\"card\">")
-        out.append(f'<p>{_e(_clip(b.confidence_reason, 40))} '
-                   f'<span class="small muted">(<span class="conf">'
-                   f'{_e(b.confidence)}</span> confidence)</span></p>')
-        if b.limitations:
-            out.append('<details><summary>What this analysis could not see'
-                       '</summary><ul>')
-            out.extend(f"<li>{_e(l)}</li>" for l in b.limitations)
-            out.append("</ul></details>")
-        out.append("</div>")
-
-    if links and run_id:
-        out.append(_deeper(run_id))
-    out.append("</main>")
-    return "".join(out)
 
 
 def render_market(context) -> str:

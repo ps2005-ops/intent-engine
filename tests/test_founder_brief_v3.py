@@ -262,29 +262,82 @@ def test_no_paper_control_performance_can_reach_the_page():
 
 
 # --- rendering + accessibility ---------------------------------------------
-def test_the_rendered_brief_has_one_main_and_one_h1():
-    html = R.render_brief(_rich(), run_id="r1")
+# `render_brief` is gone: it built the primary screen from
+# `FounderBrief.key_insight`, which is None whenever the thesis view is
+# withheld, so it printed "No strategic conclusion is being asserted" while the
+# composed decision was DECISION_READY. These contracts are real and outlived
+# it, so they are asserted against the surface that actually serves them now.
+
+def rendered(brief, run_id="r1", report=None):
+    """A FounderBrief rendered through the LIVE primary surface.
+
+    `report` matters when a test asserts anything about EVIDENCE: the
+    narrative cites the report's observations, not the brief's, because the
+    citation has to resolve through the real evidence route.
+    """
+    from intent_engine.founder_brief import narrative as N
+    story = N.build_narrative(company=brief.company, brief=brief,
+                              report=report or {})
+    return N.render_narrative(story, run_id=run_id)
+
+
+def _cited_report():
+    """A minimal report whose observations are citable."""
+    return {"company_name": "Acme",
+            "hypotheses": [{"hypothesis_id": "h1",
+                            "statement": "Growth is shifting to enterprise.",
+                            "reasoning": "Enterprise buyers dominate the "
+                                         "dated announcements.",
+                            "supporting_observation_ids": ["ev-1"],
+                            "strongest_support_ids": ["ev-1"],
+                            "counter_observation_ids": ["ev-2"],
+                            "alternative_explanations": [
+                                "The pricing change is unrelated to segment."],
+                            "confidence": "moderate",
+                            "confidence_reasons": ["two dated sources agree"],
+                            "evidence_gaps": ["No disclosed revenue split."],
+                            "decision_implications": [
+                                "Whether to fund enterprise delivery or "
+                                "protect self-serve onboarding."],
+                            "falsification_questions": [
+                                "Whether the next two wins are self-serve."]}],
+            "observations": [
+                {"observation_id": "ev-1",
+                 "excerpt": "A multi-year agreement with a logistics operator "
+                            "was announced.",
+                 "source_title": "Trade press", "date": "2026-06-02",
+                 "source_class": "independent_reporting"},
+                {"observation_id": "ev-2",
+                 "excerpt": "The pricing page still lists a self-serve tier.",
+                 "source_title": "Acme pricing", "date": "2026-05-11",
+                 "source_class": "company_owned"}],
+            "evidence_gaps": ["No disclosed revenue split by segment."]}
+
+
+def test_the_rendered_primary_view_has_one_main_and_one_h1():
+    html = rendered(_rich())
     assert html.count("<main") == 1
     assert html.count("<h1") == 1
 
 
-def test_so_what_appears_before_evidence_links_in_the_markup():
+def test_the_answer_appears_before_the_evidence_links_in_the_markup():
     """Order is the product decision: a reader who stops early still has the
     consequence."""
-    html = R.render_brief(_rich(), run_id="r1")
-    assert html.index("Why this matters") < html.index("Evidence and sources")
+    html = rendered(_rich())
+    assert html.index('id="executive_answer"') < html.index(
+        "Evidence and sources")
 
 
 def test_no_internal_terms_in_rendered_output():
     for brief in (_rich(), _sparse()):
-        html = R.render_brief(brief, run_id="r1").lower()
+        html = rendered(brief).lower()
         for term in ("run_id", "strategic_report", "source_class",
                      "hypothesis_id", "observation_id", "blocked_by"):
             assert term not in html, term
 
 
 def test_depth_is_offered_but_never_required():
-    html = R.render_brief(_rich(), run_id="r1")
+    html = rendered(_rich())
     for href in ("/story", "/brief", "/sources", "/full"):
         assert href in html
 
@@ -301,19 +354,19 @@ def test_absent_market_data_teaches_rather_than_saying_unavailable():
 # --- the release gate -------------------------------------------------------
 def test_the_gate_passes_on_a_good_rich_brief():
     b = _rich()
-    assert G.check(b, R.render_brief(b, run_id="r1")).passed
+    assert G.check(b, rendered(b)).passed
 
 
 def test_the_gate_passes_on_a_good_sparse_brief():
     b = _sparse()
-    assert G.check(b, R.render_brief(b, run_id="r1")).passed
+    assert G.check(b, rendered(b)).passed
 
 
 def test_the_gate_fails_when_a_major_insight_loses_its_so_what():
     """THE GATE PROOF — a real rule deliberately broken."""
     b = _rich()
     object.__setattr__(b.key_insight, "so_what", "")
-    result = G.check(b, R.render_brief(b, run_id="r1"))
+    result = G.check(b, rendered(b))
     assert not result.passed
     assert any("so what" in f for f in result.failures)
 
@@ -408,24 +461,37 @@ def test_an_action_repeating_the_risk_is_dropped_despite_its_prefix():
         assert gap.lower() not in joined, b.next_actions
 
 
-def test_the_risk_label_does_not_run_into_its_sentence():
+def test_a_label_never_runs_into_the_sentence_it_labels():
     """SEEN LIVE: "Biggest riskevery source here is..." -- a bare <span> is
-    inline, so the label and the sentence ran together in the rendered text."""
-    from intent_engine.founder_brief import render as R
-    b = _sparse()
-    b.biggest_risk = "Nothing independent confirms the claim."
-    html = R.render_brief(b, run_id="r1")
-    assert "Biggest risk</span><p>" in html
+    inline, so the label and the sentence ran together in the rendered text.
+
+    The old primary screen that produced it is gone; the construct is not.
+    Every label the live surface renders is a block-level element or carries
+    its own boundary, so the two can never abut as raw text.
+    """
+    html = rendered(_rich())
+    # a chip or a term is always closed before its value begins
+    assert not re.search(r'<span class="prov">[^<]*</span>[A-Za-z]', html)
+    assert not re.search(r"</dt><dd[^>]*>\s*</dd>", html)
+    for label, value in re.findall(r"<dt[^>]*>(.*?)</dt><dd[^>]*>(.*?)</dd>",
+                                   html, re.S):
+        assert label.strip() and value.strip(), (label, value)
 
 
-def test_confidence_never_opens_with_a_bare_grade():
+def test_the_live_surface_never_shows_a_confidence_grade_alone():
     """MEASURED on six live companies: five briefs opened "Low." A founder
     reads that as a verdict on the COMPANY, not a statement about the evidence
-    behind it. A grade cannot tell anyone what to do."""
-    html = R.render_brief(_rich(), run_id="r1")
-    assert "How far this evidence goes" in html
-    assert not re.search(r"How far this evidence goes</h2>.{0,40}"
-                         r"<span class=\"conf\">", html, re.S)
+    behind it. A grade cannot tell anyone what to do.
+
+    The primary screen no longer prints a grade at all -- it states the
+    limitation instead, which is the actionable half. This asserts the grade
+    has not crept back in as a bare word; `confidence_sentence` itself is
+    unit-tested in test_confidence_language.py.
+    """
+    html = rendered(_rich())
+    text = re.sub(r"<[^>]+>", " ", html)
+    for para in re.split(r"(?<=[.!?])\s+", text):
+        assert not R.is_bare_grade(para), para
 
 
 def test_every_confidence_reason_says_what_would_move_it():

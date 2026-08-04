@@ -13,7 +13,9 @@ from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import layers as L
 from intent_engine.founder_brief import market as M
 from intent_engine.founder_brief import render as R
-from tests.test_founder_brief_v3 import _rich, _sparse, _export
+from tests.test_founder_brief_v3 import (
+    _cited_report, _export, _rich, _sparse, rendered,
+)
 
 
 # --- reading budget ---------------------------------------------------------
@@ -25,8 +27,8 @@ def test_the_primary_view_fits_the_reading_budget():
     is deliberately smaller than a live report and would fail a floor for the
     wrong reason.
     """
-    main = R.render_brief(_rich(), run_id="r1").split('<main class="fb">')[1]
-    assert L.visible_words(main) <= L.PRIMARY_MAX
+    main = rendered(_rich()).split('<main class="nar">')[1]
+    assert L.visible_words(main) <= L.NARRATIVE_MAX
 
 
 def test_a_real_run_lands_inside_the_full_reading_budget(tmp_path):
@@ -72,7 +74,7 @@ def test_essential_intelligence_cannot_hide_inside_a_control():
     """The anti-gaming check for the budget split: moving the decision into
     the control block would shrink the measured intelligence while making the
     product worse."""
-    html = R.render_brief(_rich(), run_id="r1")
+    html = rendered(_rich())
     assert "Why this matters" in html
     controls_only = re.search(
         r'<section[^>]*class="[^"]*ui-controls[^"]*".*?</section>', html, re.S)
@@ -82,31 +84,38 @@ def test_essential_intelligence_cannot_hide_inside_a_control():
 
 
 def test_the_sparse_primary_view_also_fits():
-    main = R.render_brief(_sparse(), run_id="r1").split('<main class="fb">')[1]
-    assert L.visible_words(main) <= L.PRIMARY_MAX
+    main = rendered(_sparse()).split('<main class="nar">')[1]
+    assert L.visible_words(main) <= L.NARRATIVE_MAX
 
 
 def test_no_paragraph_exceeds_the_length_limit():
-    html = R.render_brief(_rich(), run_id="r1")
+    html = rendered(_rich())
     for para in re.findall(r"<p[^>]*>(.*?)</p>", html, re.S):
         text = re.sub(r"<[^>]+>", " ", para)
         assert len(text.split()) <= L.MAX_PARAGRAPH_WORDS, text[:80]
 
 
 def test_primary_order_puts_the_decision_before_the_history():
-    """A reader who stops after the decision must already have the action."""
-    html = R.render_brief(_rich(), run_id="r1")
-    order = [html.index(m) for m in
-             ("The most important thing", "Why this matters",
-              "Decision affected", "What I would do next", "What changed",
-              "How far this evidence goes")]
+    """A reader who stops after the decision must already have the action.
+
+    Asserted by SECTION ID: the headings are copy and get reworded, and a
+    guard that fails on rewording is a guard people delete.
+    """
+    html = rendered(_rich())
+    order = [html.index(f'id="{k}"') for k in
+             ("executive_answer", "why_now", "what_changed")
+             if f'id="{k}"' in html]
     assert order == sorted(order), order
+    # the answer is first, whatever else rendered
+    assert html.index('id="executive_answer"') == min(
+        html.index(m) for m in re.findall(r'id="[a-z_]+"', html)
+        if m in html and html.index(m) >= 0)
 
 
 def test_at_most_three_actions_render():
     b = _rich()
     b.next_actions = ("a one", "b two", "c three", "d four", "e five")
-    html = R.render_brief(b, run_id="r1")
+    html = rendered(b)
     assert html.count("<li>") - html.count('class="chips"') <= 6
 
 
@@ -280,7 +289,7 @@ def test_the_gate_refuses_a_rich_brief_that_misses_its_depth():
     a depth failure could not reach the gate at all."""
     b = _rich()
     built = L.build_executive_brief(b, {}, L.Ledger())
-    html = R.render_brief(b, run_id="r1")
+    html = rendered(b)
     assert G.check(b, html).passed          # unchanged without the brief
     result = G.check(b, html, executive=built)
     assert not result.passed
@@ -292,7 +301,7 @@ def test_an_executive_brief_inside_its_budget_still_passes():
     built = {"sections": [], "words": L.EXEC_RICH_MIN + 10,
              "budget": {"min": L.EXEC_RICH_MIN, "max": L.EXEC_RICH_MAX},
              "within_budget": True}
-    assert G.check(_rich(), R.render_brief(_rich(), run_id="r1"),
+    assert G.check(_rich(), rendered(_rich()),
                    executive=built).passed
 
 
@@ -410,14 +419,16 @@ def test_a_withheld_run_still_answers_why_it_matters():
               "thesis": {"view": "v", "tension": "t", "why_care": "w"}}
     b = B.build(company="Acme", mode=B.PRIVATE_COMPANY, report=report,
                 observations=[{"text": "t", "date": "2026-01-01"}])
-    html = R.render_brief(b, run_id="r1")
-    assert "No strategic conclusion is being asserted" in html
+    html = rendered(b)
+    # The live surface declines in its own words -- it does not go blank, and
+    # it says why, which is the point this test has always made.
+    assert "cleared the evidence bar" in html
     assert "Why this matters" in html
 
 
 def test_the_presentation_layer_stays_reachable():
     """Dropping its only link orphaned a working layer."""
-    html = R.render_brief(_rich(), run_id="r1")
+    html = rendered(_rich())
     for href in ("/story", "/dashboard", "/brief", "/slides", "/sources",
                  "/full"):
         assert href in html, href
@@ -486,37 +497,42 @@ def test_the_limited_brief_states_what_would_change_it():
 
 
 # --- citations --------------------------------------------------------------
-def test_the_primary_brief_cites_what_the_insight_rests_on():
-    html = R.render_brief(_rich(), run_id="r1")
+def test_the_primary_view_cites_what_the_reading_rests_on():
+    html = rendered(_rich(), report=_cited_report())
     assert "/runs/r1/evidence/" in html
-    assert "What this rests on" in html
+    assert "What supports this" in html
 
 
-def test_citations_are_secondary_not_a_metadata_wall():
-    """Behind a disclosure: a founder reading a 60-second answer is not
-    reading source ids, and they must not cost reading budget."""
-    html = R.render_brief(_rich(), run_id="r1")
-    main = html.split('<main class="fb">')[1]
-    assert "<details class=\"cites\"" in html
-    assert L.intelligence_words(main) <= L.PRIMARY_MAX
+def test_citations_cost_nothing_a_reader_has_to_open():
+    """INVERTED DELIBERATELY. The old screen put citations behind a
+    <details> so they could not spend the reading budget. The scrollable
+    narrative shows evidence -- and counter-evidence -- in the open, because
+    contradiction a reader has to click for is contradiction they do not
+    weigh. What still must not happen is a wall of raw identifiers.
+    """
+    html = rendered(_rich())
+    main = html.split('<main class="nar">')[1]
+    assert "<details" not in main, "evidence was collapsed again"
+    assert not re.search(r">\s*obs-[0-9a-f]{6,}\s*<", main)
+    assert L.visible_words(main) <= L.NARRATIVE_MAX
 
 
 def test_no_citation_is_emitted_without_a_run_to_resolve_against():
-    assert "/evidence/" not in R.render_brief(_rich(), run_id="")
+    assert "/evidence/" not in rendered(_rich(), run_id="")
 
 
 # --- extended release gate --------------------------------------------------
 def test_the_gate_catches_a_revived_withheld_reading():
     b = _rich()
     b.withheld_reason = "No strategic conclusion is asserted."
-    result = G.check(b, R.render_brief(b, run_id="r1"))
+    result = G.check(b, rendered(b))
     assert not result.passed
     assert any("withheld" in f for f in result.failures)
 
 
 def test_the_gate_catches_a_failing_citation():
     b = _rich()
-    result = G.check(b, R.render_brief(b, run_id="r1"),
+    result = G.check(b, rendered(b),
                      citations={"/runs/r1/evidence/obs-9": 404})
     assert not result.passed
     assert any("404" in f for f in result.failures)
@@ -742,7 +758,7 @@ def test_the_rich_brief_does_not_restate_the_sixty_second_screen():
     brief, _, built = _rich_pair()
     primary = [re.sub(r"<[^>]+>", " ", p) for p in
                re.findall(r"<p[^>]*>(.*?)</p>",
-                          R.render_brief(brief, run_id="r1"), re.S)]
+                          rendered(brief), re.S)]
     for section in built["sections"]:
         for paragraph in section["paragraphs"]:
             for shown in primary:
@@ -754,7 +770,7 @@ def test_the_rich_brief_does_not_restate_the_sixty_second_screen():
 def test_the_gate_refuses_a_rich_brief_padded_by_duplication():
     import copy
     brief, _, built = _rich_pair()
-    html = R.render_brief(brief, run_id="r1")
+    html = rendered(brief)
     assert G.check(brief, html, executive=built).passed
     padded = copy.deepcopy(built)
     padded["sections"][-1]["paragraphs"] = [padded["sections"][0]["paragraphs"][0]]

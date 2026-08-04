@@ -96,21 +96,28 @@ def test_a_grounded_brief_never_renders_a_bare_grade(tmp_path):
         is_public=False, evidence_count=len(ev)), report=report,
         observations=[e.__dict__ if hasattr(e, "__dict__") else e
                       for e in ev])
-    html = fr.render_brief(brief, run_id=rid)
-    # No paragraph on the rendered brief may be a confidence word alone.
+    # RENDERED THROUGH THE LIVE PRIMARY SURFACE. `render_brief` is gone: it
+    # built the screen from `key_insight`, which is None whenever the thesis
+    # view is withheld, so it printed a refusal while the composed decision
+    # was DECISION_READY.
+    from intent_engine.founder_brief import narrative as fn
+    story = fn.build_narrative(company="Examplecorp", brief=brief,
+                               report=report)
+    html = fn.render_narrative(story, run_id=rid)
+
+    # THE REFUSAL, which is what this test is named for: no paragraph and no
+    # sentence on the page may be a confidence word standing alone.
+    plain = re.sub(r"<[^>]+>", " ", html)
     for para in re.findall(r"<p[^>]*>(.*?)</p>", html, re.S):
         assert not fr.is_bare_grade(re.sub(r"<[^>]+>", "", para)), para
-    # The grade is present -- this passes by explaining it, not by hiding
-    # it -- and it never stands as its own sentence.
+    for sentence in re.split(r"(?<=[.!?])\s+", plain):
+        assert not fr.is_bare_grade(sentence), sentence
+
+    # The grade and its reason are still CARRIED -- the primary screen states
+    # the limitation rather than the grade, which is the actionable half, but
+    # nothing upstream has quietly stopped computing it.
     assert brief.confidence and brief.confidence_reason
-    plain = re.sub(r"<[^>]+>", "", html)
-    assert "confidence" in plain.lower()
-    conf_para = [re.sub(r"<[^>]+>", "", p)
-                 for p in re.findall(r"<p[^>]*>(.*?)</p>", html, re.S)
-                 if "confidence" in p.lower()]
-    assert conf_para, "the grade vanished entirely"
-    for para in conf_para:
-        assert len(para.split()) > 4, f"grade stands alone: {para!r}"
+    assert not fr.is_bare_grade(brief.confidence_reason)
 
 
 # --- operability: why is the backend off? -----------------------------------

@@ -81,11 +81,34 @@ def test_the_thesis_no_longer_fabricates_a_tension():
         "the fabricated tension fallback is back as a literal")
 
 
-def test_the_brief_omits_the_heading_when_there_is_no_consequence():
-    """A heading over a blank reads as a section the product forgot."""
-    import inspect
+def test_a_heading_is_never_rendered_over_a_blank():
+    """A heading over a blank reads as a section the product forgot.
 
-    from intent_engine.founder_brief import render
-    source = inspect.getsource(render.render_brief)
-    assert "if k.so_what:" in source, (
-        "the 'Why this matters' block renders unconditionally again")
+    This used to assert the literal `if k.so_what:` inside `render_brief` --
+    a source-text check on a renderer that no longer exists. The guarantee is
+    now structural and behavioural: `Section.is_substantive` decides, and
+    `build_narrative` drops what fails it, so an empty section cannot reach
+    the page to carry a heading in the first place.
+    """
+    from intent_engine.founder_brief import narrative as N
+
+    empty = N.Section("why_now", "Why this matters now")
+    assert not empty.is_substantive
+    fragment = N.Section("why_now", "Why this matters now",
+                         paragraphs=("Four words only here.",))
+    assert not fragment.is_substantive
+
+    real = N.Section("why_now", "Why this matters now", paragraphs=(
+        "A dated development moved this, and it changes what to do next.",))
+    assert real.is_substantive
+
+    # ...and the builder is what enforces it, on every section it emits. The
+    # renderer deliberately trusts its input, so asserting there would prove
+    # nothing about the page a reader gets.
+    from tests.test_founder_brief_v3 import _cited_report, _sparse
+    for brief in (_sparse(), _sparse()):
+        story = N.build_narrative(company="Acme", brief=brief,
+                                  report=_cited_report())
+        assert story.sections, "the narrative emitted nothing at all"
+        for section in story.sections:
+            assert section.is_substantive, section.key
