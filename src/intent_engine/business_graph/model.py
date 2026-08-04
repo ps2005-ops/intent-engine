@@ -55,6 +55,16 @@ PERSON = "person"
 TEAM = "team"
 CUSTOMER = "customer"
 COMPETITOR = "competitor"
+#: The company an analysis is ABOUT. Added when external intelligence was
+#: projected and there was nothing to attach it to: a market observation, a
+#: macro exposure and a competitor all say something about the subject, and
+#: every one of those edges needs the subject to exist. `competitor` was
+#: already here, which made the omission easy to miss -- the graph could hold
+#: a rival and not the company it rivalled.
+#:
+#: Deliberately distinct from `customer` and `competitor`, which are companies
+#: in a RELATION to the subject. There is exactly one of these per analysis.
+COMPANY = "company"
 MARKET = "market"
 PRODUCT = "product"
 PROJECT = "project"
@@ -72,9 +82,9 @@ HYPOTHESIS = "hypothesis"
 SCENARIO = "scenario"
 
 NODE_KINDS = frozenset({
-    PERSON, TEAM, CUSTOMER, COMPETITOR, MARKET, PRODUCT, PROJECT, DOCUMENT,
-    MEETING, RISK, KPI, DECISION, EVIDENCE, ASSUMPTION, EVENT, ACTION,
-    OUTCOME, HYPOTHESIS, SCENARIO,
+    PERSON, TEAM, CUSTOMER, COMPETITOR, COMPANY, MARKET, PRODUCT, PROJECT,
+    DOCUMENT, MEETING, RISK, KPI, DECISION, EVIDENCE, ASSUMPTION, EVENT,
+    ACTION, OUTCOME, HYPOTHESIS, SCENARIO,
 })
 
 # --- edge kinds -------------------------------------------------------------

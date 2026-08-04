@@ -50,6 +50,27 @@ _e = _html.escape
 
 # The brief is the default landing surface, so its contrast is not a detail.
 # Every foreground/background pair here is at or above WCAG AA for its size.
+def _external_charts(external) -> dict:
+    """Rendered charts for one run's external context, keyed by module key.
+
+    Empty when the data is too thin to draw honestly -- `visuals.render`
+    returns "" below its observation floor, and the tile then carries its
+    sentence and its text alternative alone. A chart is an addition to a
+    module that already reads correctly without one, never the module's
+    content.
+    """
+    if external is None:
+        return {}
+    from intent_engine.external_intel import presenter as _pres
+    from intent_engine.external_intel import visuals as _charts
+    out = {}
+    for block in _pres.blocks(external):
+        svg = _charts.render(block, external)
+        if svg:
+            out[block.key] = svg
+    return out
+
+
 def central_view_after_headline(thesis: str, headline_view: str) -> str:
     """What "The central view" should say once the headline has spoken.
 
@@ -353,6 +374,10 @@ class WebApp:
         self._resolver = resolver
         self._sec_map = None
         self._listing_cache: dict = {}
+        # External context is assembled once per run and shared by every
+        # founder surface, so the dashboard, the narrative, the brief and the
+        # full analysis cannot disagree about what the market did.
+        self._external_cache: dict = {}
         self.ci = CompanyIngestionService(
             getattr(config, "ci_store_path", "data/company_ingestion.jsonl"),
             transport=transport, resolver=resolver,
@@ -1931,8 +1956,7 @@ class WebApp:
         _book = fd.build_dossier(company=_name, report=report,
                                  decision=_decision, narrative=_story,
                                  documents=self._retrieved_documents(run_id),
-                                 market=self._market_snapshot(
-                                     self._listing_for(run_id).ticker)
+                                 market=self._market_snapshot(run_id)
                                  if self._listing_for(run_id).ticker else None)
         strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
             _book, depth=fd.FULL, run_id=run_id, wrap=False,
@@ -2104,7 +2128,7 @@ class WebApp:
             independent_sources=independent,
             has_thesis=bool(thesis.get("view"))
             and not thesis.get("view_withheld"))
-        market = self._market_snapshot(ticker) if ticker else None
+        market = self._market_snapshot(run_id) if ticker else None
         # `company_name` is what the presentation deck has always used, so a
         # run whose identity record is absent (every anonymous demo run) was
         # headed "Shopify — presentation" on one layer and "This company" on
@@ -2238,35 +2262,96 @@ class WebApp:
         self._listing_cache[run_id] = resolution
         return resolution
 
-    def _market_snapshot(self, ticker: str):
-        """The market engine's sanitized export for this ticker, or None.
+    def _external_context(self, run_id, *, allow_fetch=False):
+        """Market, macro and competitive context for one run, assembled once.
 
-        THIS CHANNEL WAS DEAD CODE. Both call sites read
-        `self.config.data_dir`, and AppConfig has no such field -- it has
-        `web_store_path`, `fi_store_path` and `ci_store_path`. Every lookup
-        raised AttributeError, a bare `except Exception` caught it, and the
-        founder dashboard reported "market context unavailable" on every run
-        ever made. No export file could have been read even if one existed,
-        which is why the market module has never once appeared.
+        WHY ONE OBJECT RATHER THAN THREE LOOKUPS. The dashboard, the narrative,
+        the Executive Brief and the Full Analysis all need the same outside
+        facts. Three surfaces each computing their own version is how they
+        drifted apart before; they read this.
 
-        `market_intel_export.v1` is the ONLY sanctioned channel from the market
-        engine to this UI, and it is deliberately narrow: the producer's
-        FORBIDDEN_KEYS bans win rates, alpha, strategy names and predictions.
-        So this surfaces descriptive market context and nothing the release
-        gate would (correctly) refuse.
+        `allow_fetch` IS THE WHOLE REFRESH POLICY. A page render passes False
+        and can never start a network download, however stale the data is. The
+        analysis path passes True, so a run on a company nobody has looked at
+        before still gets real data. A recent export is reused either way, so
+        a founder never waits on a market download that already happened.
+
+        Fails soft, deliberately. External context is context: if every source
+        is down, the founder still gets their analysis and the sections say
+        what is missing. A market outage must not be able to take a run away.
         """
-        from intent_engine.founder_brief import market as fm
-        snapshot = (self._runtime_root / "reports" / "market" / "export"
-                    / f"{ticker.upper()}.json")
-        if not snapshot.exists():
-            return fm.unavailable(
-                "No market snapshot has been published for this ticker "
-                "yet.").as_dict()
+        cached = self._external_cache.get(run_id)
+        if cached is not None and not allow_fetch:
+            return cached
+        import datetime as _dt
+        from intent_engine.external_intel import (
+            competitor_finder as cf, macro_provider as mp, market_producer,
+            pack as ep,
+        )
+        today = _dt.date.today().isoformat()
+        listing = self._listing_for(run_id)
+        result = self._result(run_id) or {}
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        identity = self.ci.entity_identity(run_id) or {}
+        name = (identity.get("canonical_name") or identity.get("name")
+                or report.get("company_name")
+                or (self.ci.run_meta(run_id) or {}).get("company_name") or "")
+
+        market = macro = competitors = None
         try:
-            return fm.load(snapshot, expected_ticker=ticker).as_dict()
+            market = market_producer.ensure_export(
+                ticker=listing.ticker, root=self._runtime_root, today=today,
+                exchange=listing.exchange, company_id=run_id,
+                allow_fetch=allow_fetch)
+        except Exception:  # noqa: BLE001 - context must never break a run
+            _LOG.warning("market context unavailable for %s", run_id)
+        # Retrieved documents carry the Competition section a filing states in
+        # the company's own words; observations carry the exposure phrases.
+        documents = [dict(d, observation_id=d.get("source_id") or
+                          d.get("document_id") or "")
+                     for d in self._retrieved_documents(run_id)
+                     if isinstance(d, dict)]
+        try:
+            macro = mp.build_factors(observations + documents,
+                                     root=self._runtime_root, today=today)
+        except Exception:  # noqa: BLE001
+            _LOG.warning("macro context unavailable for %s", run_id)
+        try:
+            competitors = cf.find_competitors(
+                observations + documents, subject=name, today=today)
+        except Exception:  # noqa: BLE001
+            _LOG.warning("competitor context unavailable for %s", run_id)
+
+        context = ep.build_context(market=market, macro=macro or (),
+                                   competitors=competitors or (),
+                                   as_of=today)
+        self._external_cache[run_id] = context
+        return context
+
+    def _market_snapshot(self, run_id: str):
+        """The founder-facing market context, in the shape the layers read.
+
+        THIS CHANNEL WAS DEAD TWICE OVER. Both original call sites read
+        `self.config.data_dir`, and AppConfig has no such field, so every
+        lookup raised AttributeError into a bare `except` and the dashboard
+        reported "market context unavailable" on every run ever made. Fixing
+        that revealed the second half: nothing was WRITING an export, so there
+        was no file to read even once the path was right.
+
+        `market_intel_export.v2` is the only sanctioned channel, and it is
+        enforced by allowlist rather than by a list of banned names -- see
+        external_intel/market_contract.py for why a blacklist could not hold.
+        """
+        from intent_engine.external_intel import presenter
+        try:
+            return presenter.market_context_dict(
+                self._external_context(run_id))
         except Exception:  # noqa: BLE001 - a bad FILE degrades, a bug does not
-            _LOG.warning("market export unreadable for %s", ticker)
-            return fm.unavailable("market snapshot could not be read").as_dict()
+            _LOG.warning("market context unreadable for run %s", run_id)
+            return {"available": False, "modules": {}, "limitations": [],
+                    "reason": "The market snapshot could not be read."}
 
     def _founder_answer_page(self, session, run_id, answer):
         """One answer, in the same shape as every other founder surface."""
@@ -2364,8 +2449,7 @@ class WebApp:
         book = fd.build_dossier(company=name, report=report,
                                 decision=decision, narrative=story,
                                 documents=self._retrieved_documents(run_id),
-                                market=self._market_snapshot(
-                                    self._listing_for(run_id).ticker)
+                                market=self._market_snapshot(run_id)
                                 if self._listing_for(run_id).ticker else None)
         body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
             book, depth=fd.BRIEF, run_id=run_id,
@@ -2390,10 +2474,14 @@ class WebApp:
         brief, report, name = self._founder_layers(run_id)
         footing = self._evidence_footing(
             run_id, name, self._listing_for(run_id).ticker)
-        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — '
-                f'intelligence</h1>'
+        from intent_engine.external_intel import visuals as _charts
+        external = self._external_context(run_id)
+        body = (f'{fr.BRIEF_CSS}{_charts.CHART_CSS}<main class="fb">'
+                f'<h1>{_e(name)} — intelligence</h1>'
                 + fr.render_dashboard(
-                    fl.build_dashboard(brief, report, footing=footing))
+                    fl.build_dashboard(brief, report, footing=footing,
+                                       external=external),
+                    charts=_external_charts(external))
                 + fr._deeper(run_id) + "</main>")
         return self._html(self._page(f"{name} — intelligence", body, session,
                                      session.get("csrf", "")))
@@ -2467,7 +2555,7 @@ class WebApp:
         # section renders "Unavailable" -- never a zero, and never a 500: a
         # founder-facing page must not die because an upstream research
         # artefact is missing.
-        market = self._market_snapshot(ticker) if ticker else None
+        market = self._market_snapshot(run_id) if ticker else None
 
         # `company_name` is what the presentation deck has always used, so a
         # run whose identity record is absent (every anonymous demo run) was
@@ -3794,8 +3882,25 @@ class WebApp:
         # than assumed.
         from intent_engine._version import version_info
         from intent_engine.company_ingestion.run_compatibility import stamp
-        return stamp(result,
-                     app_version=version_info().get("app_version", ""))
+        stamped = stamp(result,
+                        app_version=version_info().get("app_version", ""))
+        # THE ONLY PLACE EXTERNAL CONTEXT MAY FETCH. Analysis has just
+        # finished, the reader is already waiting on this request, and a
+        # market series for a company nobody has looked at before has to be
+        # downloaded once by somebody. Every page render afterwards is
+        # read-only, so no founder loading a brief can trigger a download.
+        #
+        # `self._results` is written by the CALLER, so it is primed here
+        # first -- the context reads the report to find exposure phrases and
+        # competitor passages, and without this it would build against an
+        # empty run and cache the emptiness.
+        self._results[run_id] = stamped
+        self._external_cache.pop(run_id, None)
+        try:
+            self._external_context(run_id, allow_fetch=True)
+        except Exception:  # noqa: BLE001 - context must never lose a run
+            _LOG.warning("external context refresh failed for %s", run_id)
+        return stamped
 
     def _ready(self):
         try:

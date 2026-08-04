@@ -201,13 +201,21 @@ margin:.7rem 0 0;font-size:.9rem}
 """
 
 
-def render_dashboard(modules) -> str:
+def render_dashboard(modules, *, charts=None) -> str:
     """Tiles that each answer what changed / so what / what to watch.
 
     An unavailable module is rendered as a stated gap. It is not hidden,
     because a missing section a reader cannot see is a missing section they
     assume was checked.
+
+    `charts` maps a module key to rendered SVG. A chart sits INSIDE its tile,
+    under the sentence it illustrates and above the "why this matters" block,
+    so the conclusion is read before the picture rather than inferred from it.
+    Every tile keeps its text alternative whether or not a chart appears --
+    the tile has to survive being printed, screen-read, or rendered where the
+    data was too thin to draw.
     """
+    charts = charts or {}
     out = [LAYER_CSS, '<h2>Executive intelligence</h2>', '<div class="dash">']
     for m in modules:
         d = m if isinstance(m, dict) else m.as_dict()
@@ -234,6 +242,8 @@ def render_dashboard(modules) -> str:
         out.append(f'<div class="tile"><h3>{_e(d["title"])}</h3>')
         if d.get("what_changed"):
             out.append(f'<p>{_e(d["what_changed"])}</p>')
+        if charts.get(d.get("key")):
+            out.append(charts[d["key"]])
         if d.get("rows"):
             out.append('<ul class="rows">')
             for row in d["rows"]:

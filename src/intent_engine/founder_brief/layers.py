@@ -242,12 +242,19 @@ def _footing_prefix(footing: Optional[dict]) -> str:
 
 
 def build_dashboard(brief, report: Optional[dict] = None, *,
-                    footing: Optional[dict] = None) -> List[Module]:
+                    footing: Optional[dict] = None,
+                    external=None) -> List[Module]:
     """Modules supported by verified data, and honest gaps for the rest.
 
     `footing` carries what this particular run retrieved, so that a gap is
     reported as a fact about this company's evidence rather than as a
     constant that reads the same for every company.
+
+    `external` is the run's `ExternalContext`. It adds macro and competitive
+    modules ONLY where the contracts admitted something -- a company with no
+    established exposure gets no macro tile at all, rather than a tile saying
+    the macro picture is unavailable. An empty tile and an omitted tile say
+    different things, and only one of them is true here: nothing is pending.
     """
     report = report or {}
     modules: List[Module] = []
@@ -351,6 +358,28 @@ def build_dashboard(brief, report: Optional[dict] = None, *,
         modules.append(_unavailable(
             "market_trajectory", "Market trajectory", reason,
             so_what=so_what, to_watch=to_watch))
+
+    # B2. MACRO EXPOSURE and COMPETITIVE PRESSURE — present only when the
+    # contracts admitted something. Both are omitted rather than rendered
+    # empty: an unavailable macro tile invites a founder to wait for data
+    # that is not coming, when the truthful statement is that this company's
+    # evidence establishes no exposure mechanism at all.
+    if external is not None:
+        from intent_engine.external_intel import presenter as _pres
+        for block in _pres.macro_blocks(external) + \
+                _pres.competitor_blocks(external):
+            modules.append(Module(
+                key=block.key, title=block.title,
+                what_changed=block.fact, so_what=block.so_what,
+                what_to_watch=block.decision,
+                rows=((({"label": "What this cannot tell you",
+                         "value": block.limitation},) if block.limitation
+                       else ())
+                      + (({"label": "Source",
+                           "value": " · ".join(
+                               x for x in (block.source, block.freshness)
+                               if x)},) if block.source else ())),
+                text_alternative=block.text_alternative))
 
     # C. BUSINESS MOMENTUM — dated, material developments only.
     momentum = [c for c in (brief.what_changed or ()) if c.get("what")]
