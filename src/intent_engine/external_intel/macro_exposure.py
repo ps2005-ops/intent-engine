@@ -44,34 +44,61 @@ LABOUR_MARKET = "labour_market"
 class _Rule:
     """One exposure mechanism, and the vocabulary that establishes it.
 
-    `triggers` are matched on WORD BOUNDARIES against retrieved evidence text.
-    Substring matching would let "credit" fire on "accreditation" and
-    "rates" on "corporate rates of growth" -- both seen while calibrating this.
+    TWO TIERS, AND THE REASON IS A REAL FAILURE. The first version had one
+    flat trigger list and fired on any single hit. Shopify's B2B page says
+    "procurement workflows and purchase orders", `procurement` was a defence
+    trigger, and the deployed product told a commerce company its decision
+    turned on US Department of Defense outlays -- with a confident mechanism
+    about federal appropriations attached. That is precisely the fabricated,
+    unfalsifiable macro claim this whole contract exists to refuse, and a
+    keyword did it.
+
+        strong      unambiguous on its own. "department of defense",
+                    "government contracts", "fedramp" are not written by
+                    accident, and one is enough.
+        supporting  real signal, ambiguous alone. "procurement", "military",
+                    "credit" appear in ordinary commercial prose. They add
+                    evidence to an exposure a strong trigger already
+                    established, and can never establish one themselves.
+
+    Matched on WORD BOUNDARIES: substring matching let "credit" fire on
+    "accreditation" and "rates" on "corporate rates of growth".
     """
 
-    def __init__(self, factor_key, triggers, mechanism, consequence,
-                 decision, min_hits=1):
+    def __init__(self, factor_key, strong, mechanism, consequence,
+                 decision, supporting=()):
         self.factor_key = factor_key
-        self.triggers = triggers
+        self.strong = tuple(strong)
+        self.supporting = tuple(supporting)
+        self.triggers = self.strong + self.supporting
         self.mechanism = mechanism
         self.consequence = consequence
         self.decision = decision
-        self.min_hits = min_hits
-        self._patterns = [re.compile(rf"\b{re.escape(t)}\b", re.I)
-                          for t in triggers]
+        self._strong_p = [(t, re.compile(rf"\b{re.escape(t)}\b", re.I))
+                          for t in self.strong]
+        self._support_p = [(t, re.compile(rf"\b{re.escape(t)}\b", re.I))
+                           for t in self.supporting]
 
     def match(self, texts) -> tuple:
-        """(evidence_ids, matched phrase) for the observations that fire."""
-        ids, phrases = [], []
+        """(evidence_ids, phrases) — empty unless a STRONG trigger fired."""
+        strong_ids, support_ids, phrases = [], [], []
         for observation_id, text in texts:
-            for pattern, trigger in zip(self._patterns, self.triggers):
-                found = pattern.search(text or "")
-                if found:
-                    if observation_id:
-                        ids.append(observation_id)
-                    phrases.append(trigger)
-                    break
-        return list(dict.fromkeys(ids)), phrases
+            body = text or ""
+            hit = next((t for t, p in self._strong_p if p.search(body)), None)
+            if hit:
+                if observation_id:
+                    strong_ids.append(observation_id)
+                phrases.append(hit)
+                continue
+            weak = next((t for t, p in self._support_p if p.search(body)),
+                        None)
+            if weak and observation_id:
+                support_ids.append(observation_id)
+        if not strong_ids:
+            # Supporting evidence with nothing to support establishes nothing.
+            return [], []
+        ids = list(dict.fromkeys(strong_ids + support_ids))
+        return ids, phrases
 
 
 #: The rules. Every mechanism is a sentence about how money actually reaches
@@ -79,11 +106,14 @@ class _Rule:
 RULES = (
     _Rule(
         PUBLIC_DEFENCE_SPEND,
-        ("government contract", "government contracts", "federal agency",
-         "federal agencies", "public sector", "public-sector", "defense",
-         "defence", "military", "department of defense", "intelligence "
-         "community", "procurement", "gsa", "govcloud", "fedramp",
-         "classified"),
+        strong=("government contract", "government contracts",
+                "federal agency", "federal agencies",
+                "department of defense", "department of defence",
+                "public sector", "public-sector", "fedramp", "govcloud",
+                "intelligence community", "defense department",
+                "national security", "federal government"),
+        supporting=("procurement", "classified", "gsa", "defense", "defence",
+                    "military"),
         mechanism=(
             "The company sells into government and defence budgets, so the "
             "size of the federal appropriation is the size of the pool its "
@@ -100,10 +130,12 @@ RULES = (
     ),
     _Rule(
         INTEREST_RATES,
-        ("interest rate", "interest rates", "borrowing", "credit",
-         "lending", "loan", "loans", "financing", "capital markets",
-         "debt", "mortgage", "leasing", "working capital", "installment",
-         "instalment", "buy now pay later", "merchant cash advance"),
+        strong=("interest rate", "interest rates", "borrowing cost",
+                "borrowing costs", "cost of capital", "merchant cash advance",
+                "buy now pay later", "installment", "instalment", "lending",
+                "loan", "loans", "mortgage", "leasing", "capital markets",
+                "working capital"),
+        supporting=("credit", "financing", "debt", "borrowing"),
         mechanism=(
             "The company's customers or its own balance sheet depend on "
             "borrowing, so the cost of credit changes what those customers "
@@ -118,10 +150,12 @@ RULES = (
     ),
     _Rule(
         CONSUMER_PRICES,
-        ("consumer spending", "consumer demand", "retail", "merchants",
-         "merchant", "shoppers", "discretionary", "basket", "checkout",
-         "e-commerce", "ecommerce", "gross merchandise", "shipping costs",
-         "input costs", "cost of goods", "freight"),
+        strong=("consumer spending", "consumer demand", "merchants",
+                "merchant", "shoppers", "gross merchandise", "e-commerce",
+                "ecommerce", "retail", "checkout", "discretionary",
+                "direct-to-consumer", "storefront"),
+        supporting=("basket", "shipping costs", "input costs",
+                    "cost of goods", "freight"),
         mechanism=(
             "The company's revenue tracks what end consumers spend through "
             "its customers, so household purchasing power sets the volume "
@@ -137,9 +171,14 @@ RULES = (
     ),
     _Rule(
         LABOUR_MARKET,
-        ("hiring", "headcount", "recruiting", "recruitment", "talent",
-         "payroll", "workforce", "employees", "staffing", "labour market",
-         "labor market", "wage", "wages", "attrition"),
+        # "hiring" and "employees" are NOT strong: every company hires and
+        # every About page names employees, so firing on them would produce
+        # the same labour-market paragraph for every company in the product.
+        strong=("labour market", "labor market", "wage inflation", "wages",
+                "payroll", "attrition", "hiring plan", "staffing costs",
+                "headcount", "recruiting"),
+        supporting=("talent", "employees", "workforce", "hiring", "staffing",
+                    "wage", "recruitment"),
         mechanism=(
             "The company's cost base or its customers' buying behaviour is "
             "tied to employment, so the labour market moves either what it "
@@ -188,14 +227,18 @@ def find_exposures(observations, *, extra_texts=()) -> List[Exposure]:
     found = []
     for rule in RULES:
         ids, phrases = rule.match(texts)
-        if len(ids) < rule.min_hits or not phrases:
+        if not ids or not phrases:
             continue
         try:
-            found.append(Exposure(
+            found.append((len(ids), Exposure(
                 factor_key=rule.factor_key, mechanism=rule.mechanism,
                 business_consequence=rule.consequence,
                 decision_implication=rule.decision,
-                evidence_ids=tuple(ids[:4]), matched_on=phrases[0]))
-        except MacroRejected:  # pragma: no cover - guarded by min_hits above
+                evidence_ids=tuple(ids[:4]), matched_on=phrases[0])))
+        except MacroRejected:  # pragma: no cover - guarded above
             continue
-    return found
+    # BEST-EVIDENCED FIRST, not declaration order. Surfaces with room for one
+    # factor take the first, and taking whichever rule happens to be written
+    # first is how a commerce company led with defence spending.
+    found.sort(key=lambda pair: -pair[0])
+    return [exposure for _, exposure in found]

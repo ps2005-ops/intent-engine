@@ -248,3 +248,77 @@ def test_a_year_to_date_figure_compares_against_the_same_month(tmp_path):
     got = MP._treasury_defence(tmp_path,
                                fetcher=_fake_fetcher({"mts": treasury}))
     assert got.prior_value == round(550 / 1e9, 1)
+
+
+# --- the two-tier trigger rule ----------------------------------------------
+# Found on the DEPLOYED product: Shopify's B2B page says "procurement
+# workflows and purchase orders", `procurement` was a defence trigger, and a
+# commerce company was told its decision turned on US Department of Defense
+# outlays -- with a confident mechanism about federal appropriations attached.
+# A single ambiguous keyword fabricated a company-specific exposure, which is
+# exactly what this contract exists to refuse.
+
+
+def test_a_supporting_trigger_alone_cannot_establish_an_exposure():
+    obs = [{"observation_id": "ev-1",
+            "text": "Streamline commerce operations with B2B wholesale, "
+                    "procurement workflows and purchase orders."}]
+    keys = [e.factor_key for e in MX.find_exposures(obs)]
+    assert MX.PUBLIC_DEFENCE_SPEND not in keys
+
+
+def test_a_strong_trigger_alone_does_establish_one():
+    obs = [{"observation_id": "ev-1",
+            "text": "Delivers software to US federal agencies under "
+                    "government contracts."}]
+    keys = [e.factor_key for e in MX.find_exposures(obs)]
+    assert MX.PUBLIC_DEFENCE_SPEND in keys
+
+
+def test_supporting_evidence_joins_an_exposure_a_strong_trigger_opened():
+    """It adds corroboration; it never opens the door itself."""
+    obs = [{"observation_id": "ev-1",
+            "text": "Delivers software under government contracts."},
+           {"observation_id": "ev-2",
+            "text": "Revenue concentrates in a few large procurement awards."}]
+    found = MX.find_exposures(obs)
+    defence = next(e for e in found
+                   if e.factor_key == MX.PUBLIC_DEFENCE_SPEND)
+    assert set(defence.evidence_ids) == {"ev-1", "ev-2"}
+
+
+def test_hiring_and_employees_do_not_establish_a_labour_exposure():
+    """Every company hires and every About page names employees, so firing on
+    them would print the same labour paragraph for every company."""
+    obs = [{"observation_id": "ev-1",
+            "text": "We have 500 employees and are hiring across teams."}]
+    keys = [e.factor_key for e in MX.find_exposures(obs)]
+    assert MX.LABOUR_MARKET not in keys
+
+
+def test_a_commerce_company_gets_commerce_exposures_not_defence():
+    """The deployed defect, end to end."""
+    obs = [{"observation_id": "ev-1",
+            "text": "Streamline commerce operations with B2B wholesale and "
+                    "procurement workflows."},
+           {"observation_id": "ev-2",
+            "text": "Sell to retail and direct-to-consumer shoppers with "
+                    "checkout and payments."}]
+    keys = [e.factor_key for e in MX.find_exposures(obs)]
+    assert keys and MX.PUBLIC_DEFENCE_SPEND not in keys
+    assert MX.CONSUMER_PRICES in keys
+
+
+def test_exposures_are_ordered_by_evidence_not_by_declaration_order():
+    """A surface with room for one factor takes the first, and taking
+    whichever rule happens to be written first is how a commerce company led
+    with defence spending."""
+    obs = [{"observation_id": "ev-1", "text": "Sold under government "
+                                              "contracts."},
+           {"observation_id": "ev-2", "text": "Serving retail shoppers."},
+           {"observation_id": "ev-3", "text": "Merchants at checkout."},
+           {"observation_id": "ev-4", "text": "Consumer demand for "
+                                              "e-commerce."}]
+    found = MX.find_exposures(obs)
+    assert found[0].factor_key == MX.CONSUMER_PRICES
+    assert len(found[0].evidence_ids) > len(found[-1].evidence_ids)
