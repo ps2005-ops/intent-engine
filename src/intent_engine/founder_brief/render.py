@@ -240,10 +240,21 @@ def render_dashboard(modules, *, charts=None) -> str:
             out.append("".join(tile) + "</div>")
             continue
         out.append(f'<div class="tile"><h3>{_e(d["title"])}</h3>')
-        if d.get("what_changed"):
+        chart = charts.get(d.get("key"))
+        # THE SAME SENTENCE, THREE TIMES. Measured on the deployed dashboard:
+        # the tile printed `what_changed`, then a chart whose headline IS
+        # `what_changed`, then `text_alternative`, which restates it again. A
+        # reader met "the shares rose 5.4% over the past year" three times in
+        # one tile.
+        #
+        # The chart's headline is the conclusion, and its <desc> is the text
+        # alternative a screen reader gets -- so when a chart renders, the
+        # tile contributes the interpretation and lets the figure carry the
+        # fact.
+        if d.get("what_changed") and not chart:
             out.append(f'<p>{_e(d["what_changed"])}</p>')
-        if charts.get(d.get("key")):
-            out.append(charts[d["key"]])
+        if chart:
+            out.append(chart)
         if d.get("rows"):
             out.append('<ul class="rows">')
             for row in d["rows"]:
@@ -257,9 +268,11 @@ def render_dashboard(modules, *, charts=None) -> str:
         if d.get("what_to_watch"):
             out.append(f'<p class="small muted">What to watch: '
                        f'{_e(d["what_to_watch"])}</p>')
-        if d.get("text_alternative"):
+        if d.get("text_alternative") and not chart:
             # Textual equivalent for screen readers and print, where a visual
-            # tile conveys nothing on its own.
+            # tile conveys nothing on its own. A rendered chart carries its
+            # own <desc>, so repeating it here is duplication rather than
+            # accessibility.
             out.append(f'<p class="small muted visually-alt">'
                        f'{_e(d["text_alternative"])}</p>')
         out.append("</div>")

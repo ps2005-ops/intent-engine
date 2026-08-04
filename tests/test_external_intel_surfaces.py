@@ -385,3 +385,50 @@ def test_break_an_old_report_silently_adopting_new_market_context(tmp_path):
     old_market = next(p for p in old_book.passages if p.key == "market")
     assert early.as_of in old_market.note
     assert later.as_of not in old_market.note
+
+
+# --- what the second deployed reading showed --------------------------------
+def test_a_tile_with_a_chart_does_not_say_the_same_thing_three_times(tmp_path):
+    """Measured on the deployed dashboard.
+
+    The tile printed `what_changed`, then a chart whose headline IS
+    `what_changed`, then `text_alternative` restating it again -- so a reader
+    met "the shares rose 5.4% over the past year" three times in one tile.
+    """
+    from intent_engine.founder_brief import render as R
+    context = _context(tmp_path)
+    modules = L.build_dashboard(
+        _brief(PS.market_context_dict(context)), _report(),
+        footing={"ticker": "ACME"}, external=context)
+    charts = {b.key: V.render(b, context) for b in PS.blocks(context)}
+    charts = {k: v for k, v in charts.items() if v}
+    html = R.render_dashboard(modules, charts=charts)
+    trajectory = next(b for b in PS.market_blocks(context)
+                      if b.key == "market_trajectory")
+    headline = V._headline(trajectory)
+    assert charts.get("market_trajectory"), "the chart must render at all"
+    assert html.count(headline.replace("%", "%")) <= 1, \
+        "the fact appears once: as the chart's own conclusion"
+
+
+def test_a_chart_carries_the_text_alternative_so_the_tile_need_not(tmp_path):
+    """Dropping the tile's copy is only safe because the figure has <desc>."""
+    context = _context(tmp_path)
+    block = next(b for b in PS.market_blocks(context)
+                 if b.key == "market_trajectory")
+    svg = V.render(block, context)
+    assert "<desc" in svg and "</desc>" in svg
+    assert 'role="img"' in svg
+
+
+def test_the_executive_brief_carries_the_macro_exposure(tmp_path):
+    """A named exposure with a current figure and the choice it bears on is
+    exactly what a decision memo is for.
+
+    It was FULL-only while it was keyword-spotted, which was right then: a
+    generic mechanism with no value is not decision material.
+    """
+    book, _ = _dossier(tmp_path)
+    macro = next(p for p in book.passages if p.key == "macro")
+    assert macro.for_depth(D.BRIEF), "the brief needs the macro exposure"
+    assert macro.for_depth(D.FULL)

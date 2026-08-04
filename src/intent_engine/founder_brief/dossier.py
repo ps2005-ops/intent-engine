@@ -563,8 +563,13 @@ def _macro(company, report, decision, said, external=None) -> Passage:
             ids.extend(block.evidence_ids)
         if items:
             note = _pres.macro_blocks(external)[0]
+            # BOTH DEPTHS, now that it carries a real reading. The old
+            # keyword-spotted version was FULL-only for a good reason -- a
+            # generic mechanism with no value is not decision material for a
+            # memo. A named exposure with a current figure and the choice it
+            # bears on is exactly what an executive brief is for.
             return Passage(
-                "macro", "Macro and industry exposure", depth=FULL,
+                "macro", "Macro and industry exposure", depth=BOTH,
                 kind="labelled", items=tuple(items[:3]),
                 evidence_ids=tuple(dict.fromkeys(ids)),
                 note=(f"Each factor is here because this company's own "
