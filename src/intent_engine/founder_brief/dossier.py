@@ -383,7 +383,7 @@ def _customer_demand(company, report, index, said) -> Passage:
 
 
 def _competitive(company, report, decision, hypotheses, families,
-                 said) -> Passage:
+                 said, external=None) -> Passage:
     """Relative position, or a stated reason there is nothing to say.
 
     A generic competitor list is worse than none: it is the same paragraph for
@@ -393,6 +393,32 @@ def _competitive(company, report, decision, hypotheses, families,
     """
     paras, items = [], []
     index = _evidence_index(_observation_dicts(report))
+
+    # NAMED ALTERNATIVES FIRST, when the contract established any. This used
+    # to depend entirely on whether a page whose source_class happened to be
+    # `competitor` was retrieved -- Shopify had one and got a real section,
+    # Palantir did not and got a stated absence, and the difference was
+    # retrieval luck rather than anything about the two companies. The filing
+    # they both file names their rivals in their own words.
+    named_alternatives = False
+    if external is not None and external.has_competitors:
+        from intent_engine.external_intel import presenter as _pres
+        named_alternatives = True
+        for block in _pres.competitor_blocks(external):
+            if said.has(block.fact):
+                continue
+            said.remember(block.fact)
+            paras.append(end_sentence(f"{_sentence(block.fact)} "
+                                      f"{block.so_what}"))
+            if not said.has(block.decision):
+                said.remember(block.decision)
+                paras.append(end_sentence(
+                    f"The choice that turns on: "
+                    f"{lower_first(block.decision)}"))
+            if block.limitation and not said.has(block.limitation):
+                said.remember(block.limitation)
+                paras.append(end_sentence(block.limitation))
+
     for obs in _observation_dicts(report):
         if _flat(obs.get("source_class")) not in ("competitor",
                                                   "independent_reporting"):
@@ -419,7 +445,11 @@ def _competitive(company, report, decision, hypotheses, families,
             f"The part of this most exposed to someone else's move is "
             f"{lower_first(layer)}: {as_clause(mechanism, company)}"))
 
-    if not items:
+    # The absence notice fires on whether ALTERNATIVES were established, not
+    # on whether `paras` is empty -- the vulnerabilities loop below also fills
+    # `paras`, so keying off it suppressed the notice for a company that had a
+    # vulnerability and no competitor, which is exactly when it is needed.
+    if not items and not named_alternatives:
         absent = next((f for f in families
                        if f["key"] == "competitor" and not f["present"]), None)
         if absent:
@@ -435,7 +465,7 @@ def _competitive(company, report, decision, hypotheses, families,
                    evidence_ids=tuple(i.evidence_id for i in items[:4]))
 
 
-def _market(company, market, said) -> Passage:
+def _market(company, market, said, external=None) -> Passage:
     """Market expectations in business language, or a stated limitation.
 
     Never a strategy name, a win rate, a Sharpe ratio or a recommendation --
@@ -461,30 +491,86 @@ def _market(company, market, said) -> Passage:
                 "Nothing is inferred from the absence. A missing price series "
                 "is not a flat one."),
             note=_flat(ctx.get("disclaimer")))
-    paras = []
-    for name, module in (ctx.get("modules") or {}).items():
-        changed, so_what = _flat(module.get("what_changed")), _flat(
-            module.get("so_what"))
-        if changed and not said.has(changed):
-            said.remember(changed)
-            paras.append(end_sentence(
-                f"{_sentence(changed)} {so_what}".strip()))
+    # WHAT CHANGED HERE. The old version printed each module's fact and its
+    # "why this matters" and stopped, so a reader learned what the shares did
+    # and never which choice it bore on. Every block now carries its decision
+    # and what it cannot establish -- the second is what stops a price move
+    # being read as a verdict on the operating strategy.
+    paras, ids = [], []
+    if external is not None:
+        from intent_engine.external_intel import presenter as _pres
+        for block in _pres.market_blocks(external):
+            if said.has(block.fact):
+                continue
+            said.remember(block.fact)
+            paras.append(end_sentence(f"{_sentence(block.fact)} "
+                                      f"{block.so_what}".strip()))
+            if not said.has(block.decision):
+                said.remember(block.decision)
+                paras.append(end_sentence(
+                    f"That bears on one choice: {lower_first(block.decision)}"))
+            if block.limitation and not said.has(block.limitation):
+                said.remember(block.limitation)
+                paras.append(end_sentence(block.limitation))
+            ids.extend(block.evidence_ids)
+    else:
+        for name, module in (ctx.get("modules") or {}).items():
+            changed, so_what = _flat(module.get("what_changed")), _flat(
+                module.get("so_what"))
+            if changed and not said.has(changed):
+                said.remember(changed)
+                paras.append(end_sentence(
+                    f"{_sentence(changed)} {so_what}".strip()))
+    stamp = []
+    if ctx.get("as_of"):
+        stamp.append(f"Market data as at {ctx['as_of']}")
+    if ctx.get("stale"):
+        stamp.append("older than one trading week, so it may not reflect "
+                     "recent sessions")
     return Passage("market", "What the market appears to expect", depth=BOTH,
-                   paragraphs=tuple(paras[:3]),
-                   note=_flat(ctx.get("disclaimer")))
+                   paragraphs=tuple(paras[:6]),
+                   evidence_ids=tuple(dict.fromkeys(ids)),
+                   note="; ".join(stamp) if stamp
+                   else _flat(ctx.get("disclaimer")))
 
 
-def _macro(company, report, decision, said) -> Passage:
-    """Macro and regulatory exposure — only where the EVIDENCE names one.
+def _macro(company, report, decision, said, external=None) -> Passage:
+    """Macro exposure — a factor, a mechanism, and a real current reading.
 
-    No generic GDP or interest-rate commentary. A macro factor earns a line
-    here when something the run actually retrieved mentions it AND the
-    decision runs through it; otherwise this states, once, that no macro
-    exposure was established and what that leaves untested. There is no macro
-    adapter wired into this path, so the honest output is usually the
-    limitation -- which is a different thing from silence, and a different
-    thing from a zero.
+    THIS USED TO BE KEYWORD SPOTTING. A factor earned a line when a retrieved
+    document happened to contain the word "interest rate", and what a reader
+    got was the word back with a generic mechanism beside it -- no value, no
+    direction, no date. There was no macro adapter wired into this path at
+    all, so the honest output was almost always the limitation.
+
+    `macro_intel.v1` replaces it: exposure is still established from this
+    company's own evidence (never from its sector), and now a published
+    series supplies the current reading, its direction and its date. A factor
+    with an exposure but no readable series does not appear -- fail closed.
     """
+    if external is not None and external.has_macro:
+        from intent_engine.external_intel import presenter as _pres
+        items, ids = [], []
+        for block in _pres.macro_blocks(external):
+            if said.has(block.fact):
+                continue
+            said.remember(block.fact)
+            items.append({
+                "label": block.fact,
+                "text": end_sentence(
+                    f"{block.so_what} The choice it bears on: "
+                    f"{lower_first(block.decision)}")})
+            ids.extend(block.evidence_ids)
+        if items:
+            note = _pres.macro_blocks(external)[0]
+            return Passage(
+                "macro", "Macro and industry exposure", depth=FULL,
+                kind="labelled", items=tuple(items[:3]),
+                evidence_ids=tuple(dict.fromkeys(ids)),
+                note=(f"Each factor is here because this company's own "
+                      f"retrieved evidence establishes the exposure, not "
+                      f"because it applies to companies generally. "
+                      f"{note.source}. {note.limitation}"))
     hits, seen = [], SaidOnce()
     for obs in _observation_dicts(report):
         text = _readable_excerpt(obs)
@@ -807,7 +893,7 @@ def _evidence_appendix(report, index) -> Passage:
 
 def build_dossier(*, company: str, report: Optional[dict] = None,
                   decision=None, market=None, narrative=None,
-                  documents=()) -> Dossier:
+                  documents=(), external=None) -> Dossier:
     """The canonical deep material, assembled once for both deep surfaces.
 
     `narrative` is the already-built primary screen. It is passed in so the
@@ -850,9 +936,10 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
         _what_was_read(company, documents, _observation_dicts(report), said),
         _what_changed(company, report, said),
         _customer_demand(company, report, index, said),
-        _competitive(company, report, decision, hypotheses, families, said),
-        _market(company, market, said),
-        _macro(company, report, decision, said),
+        _competitive(company, report, decision, hypotheses, families, said,
+                     external),
+        _market(company, market, said, external),
+        _macro(company, report, decision, said, external),
         _analogs(company, report, decision, hypotheses, said),
         _opportunity(company, report, said),
         _risk(company, report, decision, said),
@@ -926,13 +1013,17 @@ def render_families(families) -> str:
 
 def render_dossier(dossier, *, depth: str, run_id: str = "",
                    citation_labels=None, lead: str = "",
-                   wrap: bool = True) -> str:
+                   wrap: bool = True, charts=None) -> str:
     """The deep document at one depth. One `<main>`, one `<h1>`.
 
     `wrap=False` emits a `<div>` instead, for a route that already opens its
     own `<main>`. The full-analysis page does, and rendering both put TWO main
     landmarks on the longest page in the product -- so a screen reader's "skip
     to main content" could land on either.
+
+    `charts` maps an external-context block key to rendered SVG. A chart is
+    placed after the passage's prose, so the conclusion is read first and the
+    picture confirms it rather than having to be decoded.
     """
     from html import escape
 
@@ -947,6 +1038,15 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
            f'<p class="kicker">{escape(kicker)}</p>']
     if lead:
         out.append(lead)
+
+    charts = charts or {}
+    #: Which chart belongs under which passage. Only these three passages
+    #: gain one -- a chart under a passage that does not discuss it is
+    #: decoration, and decoration is what makes a reader stop trusting the
+    #: ones that mean something.
+    _CHART_FOR = {"market": ("market_trajectory", "market_risk"),
+                  "macro": tuple(k for k in charts if k.startswith("macro_")),
+                  "competitive": ("competitive_pressure",)}
 
     for passage in dossier.at(depth):
         out.append(f'<section id="{escape(passage.key)}">')
@@ -984,6 +1084,9 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
                 out.append("</div>")
         else:
             out.extend(_p(x) for x in passage.paragraphs)
+        for key in _CHART_FOR.get(passage.key, ()):
+            if charts.get(key):
+                out.append(charts[key])
         if passage.note:
             out.append(f'<p class="gap">{escape(passage.note)}</p>')
         out.append("</section>")

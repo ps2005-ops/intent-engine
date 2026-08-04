@@ -69,13 +69,19 @@ NEXT_MOVE = "next_move"
 EVIDENCE_FOR = "evidence_for"
 EVIDENCE_AGAINST = "evidence_against"
 COULD_BE_WRONG = "could_be_wrong"
+#: Outside conditions. Placed AFTER the decision, its options and what could
+#: make it wrong, so a reader meets the company's own answer first and the
+#: market as context on it. Before them, the page reads as though the market
+#: drove the conclusion -- which is exactly the causal misreading that makes
+#: market context dangerous to show at all.
+OUTSIDE = "outside"
 WHAT_TO_WATCH = "what_to_watch"
 PREPARED = "prepared"
 
 SECTION_ORDER = (
     EXECUTIVE_ANSWER, WHY_NOW, WHAT_CHANGED, BUSINESS_CONSEQUENCE,
     THE_DECISION, OPTIONS, NEXT_MOVE, EVIDENCE_FOR, EVIDENCE_AGAINST,
-    COULD_BE_WRONG, WHAT_TO_WATCH, PREPARED,
+    COULD_BE_WRONG, OUTSIDE, WHAT_TO_WATCH, PREPARED,
 )
 
 #: How a source is described to a reader who is not holding the taxonomy.
@@ -971,14 +977,62 @@ def _prepared(company, decision, actions, said) -> Section:
 
 # --- assembly -----------------------------------------------------------------
 
+#: Where an outside block sits on the primary screen. AFTER the decision, its
+#: options and what could be wrong -- so a reader meets the company's own
+#: answer first and outside conditions as context on it. Before it, and the
+#: page reads as though the market drove the conclusion, which is exactly the
+#: causal misreading market context is dangerous for.
+def _outside_conditions(external, said) -> Section:
+    """Market, macro and competitive context, only where it changes something.
+
+    ONE BLOCK PER CONTEXT AT MOST, and only the contexts that earned a place.
+    A company whose evidence establishes no macro exposure gets no macro
+    paragraph -- not an "unavailable" one.
+    """
+    if external is None or not external.relevant_sections():
+        return Section(OUTSIDE, "What is happening outside the company")
+
+    from intent_engine.external_intel import presenter as _pres
+    items = []
+    for block in _pres.leading_blocks(external):
+        if said.has(block.fact):
+            continue
+        said.remember(block.fact)
+        # Fact, so-what and the decision it bears on, in one entry. The
+        # limitation rides with it rather than being collected at the bottom,
+        # because a caveat a reader meets after the claim has already landed
+        # is a caveat that changes nothing.
+        text = f"{block.fact} {block.so_what}"
+        if block.decision and not said.has(block.decision):
+            said.remember(block.decision)
+            text += f" It bears on one choice: {lower_first(block.decision)}"
+        if block.limitation:
+            text += f" What it cannot settle: {lower_first(block.limitation)}"
+        items.append({"label": block.title, "text": end_sentence(text)})
+    if not items:
+        return Section(OUTSIDE, "What is happening outside the company")
+    return Section(
+        OUTSIDE, "What is happening outside the company", kind="labelled",
+        items=tuple(items),
+        note=("Outside conditions bound this decision; they do not make it. "
+              "Nothing here is evidence that the strategy is or is not "
+              "working."))
+
+
 def build_narrative(*, company: str, brief, report: Optional[dict] = None,
                     observations: Optional[Sequence[dict]] = None,
-                    decision=None, actions=()) -> Narrative:
+                    decision=None, actions=(), external=None) -> Narrative:
     """The whole default screen, from the one decision and the one brief.
 
     `decision` is accepted so a caller that already resolved it does not
     resolve it twice; omitted, it is read from the report by the same
     `decision_of` every other surface uses.
+
+    `external` adds outside context ONLY where it bears on the decision, and
+    at most one block per context -- market, macro, competitive. This page has
+    a reading budget the deep documents do not: a founder reading a 60-second
+    answer will not read six more sections, and three sections where one is
+    relevant is the padding the whole rebuild exists to remove.
     """
     report = report or {}
     if decision is None:
@@ -1024,6 +1078,7 @@ def build_narrative(*, company: str, brief, report: Optional[dict] = None,
         _evidence_for(decision, hypotheses, index),
         _evidence_against(company, decision, hypotheses, index),
         _could_be_wrong(company, decision, said),
+        _outside_conditions(external, said),
         _what_to_watch(decision, brief, said),
         _prepared(company, decision, actions, said),
     ]

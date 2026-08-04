@@ -1945,25 +1945,29 @@ class WebApp:
         # assumptions, scenarios, unknowns, monitoring, evidence appendix).
         # The legacy report follows as supporting detail rather than being
         # the page.
+        from intent_engine.external_intel import visuals as _charts
         from intent_engine.founder_brief import dossier as fd
         from intent_engine.founder_brief import narrative as fn
         from intent_engine.founder_brief import render as fr
         from intent_engine.strategic_intelligence.decision import decision_of
         _brief, _report_obj, _name = self._founder_layers(run_id)
         _decision = decision_of(report)
+        _external = self._external_context(run_id)
         _story = fn.build_narrative(company=_name, brief=_brief, report=report,
-                                    decision=_decision)
+                                    decision=_decision, external=_external)
         _book = fd.build_dossier(company=_name, report=report,
                                  decision=_decision, narrative=_story,
                                  documents=self._retrieved_documents(run_id),
+                                 external=_external,
                                  market=self._market_snapshot(run_id)
                                  if self._listing_for(run_id).ticker else None)
-        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
-            _book, depth=fd.FULL, run_id=run_id, wrap=False,
-            citation_labels=self._citation_labels(run_id),
-            lead=fd.render_decision_lead(_decision, _name, depth=fd.FULL,
-                                         run_id=run_id))
-            )
+        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS
+                 + fd.render_dossier(
+                     _book, depth=fd.FULL, run_id=run_id, wrap=False,
+                     citation_labels=self._citation_labels(run_id),
+                     charts=_external_charts(_external),
+                     lead=fd.render_decision_lead(
+                         _decision, _name, depth=fd.FULL, run_id=run_id)))
         # The legacy report is NOT appended. It said the same things the
         # dossier above now says -- one decision, one evidence list, one set
         # of alternatives -- so keeping it made every sentence on the page
@@ -2438,24 +2442,29 @@ class WebApp:
         # says, competitive position, market expectations, the opportunity and
         # the risk. The dossier is seeded with what the 60-second screen
         # already said, so this adds to that page instead of restating it.
+        from intent_engine.external_intel import visuals as _charts
         from intent_engine.founder_brief import dossier as fd
         from intent_engine.founder_brief import narrative as fn
         from intent_engine.founder_brief import render as fr
         from intent_engine.strategic_intelligence.decision import decision_of
         brief, report, name = self._founder_layers(run_id)
         decision = decision_of(report)
+        external = self._external_context(run_id)
         story = fn.build_narrative(company=name, brief=brief, report=report,
-                                   decision=decision)
+                                   decision=decision, external=external)
         book = fd.build_dossier(company=name, report=report,
                                 decision=decision, narrative=story,
                                 documents=self._retrieved_documents(run_id),
+                                external=external,
                                 market=self._market_snapshot(run_id)
                                 if self._listing_for(run_id).ticker else None)
-        body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
-            book, depth=fd.BRIEF, run_id=run_id,
-            citation_labels=self._citation_labels(run_id),
-            lead=fd.render_decision_lead(decision, name, depth=fd.BRIEF,
-                                         run_id=run_id))
+        body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + \
+            fd.render_dossier(
+                book, depth=fd.BRIEF, run_id=run_id,
+                citation_labels=self._citation_labels(run_id),
+                charts=_external_charts(external),
+                lead=fd.render_decision_lead(decision, name, depth=fd.BRIEF,
+                                             run_id=run_id))
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))
 
@@ -2599,7 +2608,8 @@ class WebApp:
         story = fn.build_narrative(
             company=name, brief=brief, report=report,
             observations=observations, decision=decision_of(report),
-            actions=build_actions(brief))
+            actions=build_actions(brief),
+            external=self._external_context(run_id))
         # The assistant belongs ON the default screen. Dropping it was a real
         # regression: a founder who has just read a 60-second answer is exactly
         # the person with a follow-up question, and making them navigate first
