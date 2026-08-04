@@ -798,8 +798,15 @@ def test_webapp_strategic_run_carries_no_legacy_extraction_view(tmp_path):
     # the old assertion here matched the sentence that rendered the decision
     # topic, which is the thing this replaces.
     assert "The choice:" in body or "No option is safe to commit to yet" in body
-    assert ">Why that evidence matters<" in body
-    assert ">What happened<" in body and ">Sources<" in body
+    # The dossier replaced the legacy report on this route. Reasoning is now
+    # carried by the business-model, analog and assumption passages rather
+    # than by one heading.
+    # The dossier replaced the legacy report on this route. Reasoning is now
+    # carried by the business-model, analog and assumption passages rather
+    # than by the old headings.
+    assert 'id="operating_model"' in body or 'id="assumptions"' in body
+    assert 'id="evidence_appendix"' in body
+    assert 'id="what_changed"' in body or 'id="executive_answer"' in body
     # The legacy claim/evidence view is GONE, not collapsed. Quarantining it
     # behind <details> still put it one click from a report a founder is about
     # to rely on, under a summary naming the system's own build history.
@@ -815,7 +822,7 @@ def test_webapp_strategic_run_carries_no_legacy_extraction_view(tmp_path):
         assert banned not in lo
     # the sources a reader can audit are still on the page — that is what the
     # appendix was standing in for, and it is now a first-class section
-    assert ">Sources<" in body
+    assert "Every source this rests on" in body
     # company-specific suggested questions, not generic
     assert "How is this transition similar to" in body
 

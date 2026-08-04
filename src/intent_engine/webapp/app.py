@@ -1883,8 +1883,14 @@ class WebApp:
                 qs.append("What evidence most weakens the reading here?")
             comps = top.get("comparables", [])
             if comps:
-                qs.append(f"How is this transition similar to {comps[0]}, and "
-                          f"where does the comparison break down?")
+                # The library names a comparable "Amazon → AWS". An arrow is
+                # its own notation, and it reached a founder-facing suggested
+                # question verbatim on the deployed /full page.
+                comparable = str(comps[0]).replace("→", "to").replace(
+                    "->", "to")
+                comparable = " ".join(comparable.split())
+                qs.append(f"How is this transition similar to {comparable}, "
+                          f"and where does the comparison break down?")
         if report.get("agenda"):
             qs.append("What is likely being debated internally right now?")
         qs.append("Which recent event makes this timely?")
@@ -1898,7 +1904,47 @@ class WebApp:
         )
         csrf = session["csrf"]
         report = result["strategic_report"]
-        strat = render_strategic_report(report)
+        # THE DOSSIER LEADS; THE LEGACY REPORT BECOMES THE APPENDIX.
+        #
+        # Measured on the deployed preview 2026-08-04: `/full` was 789 words
+        # against the primary screen's 816, so the "complete intelligence
+        # dossier" was SHALLOWER than the 60-second summary. It also carried
+        # the library talking to itself -- "leadership is likely weighing how
+        # aggressively to act on: turning a people-delivered service into a
+        # repeatable product" is a pattern name, and "Accenture -> industry
+        # platforms" is the library's own notation.
+        #
+        # The dossier now leads with the shared decision and the full-depth
+        # material (business model, chronology, evidence by provenance,
+        # competitive position, analogs with their breaking points,
+        # assumptions, scenarios, unknowns, monitoring, evidence appendix).
+        # The legacy report follows as supporting detail rather than being
+        # the page.
+        from intent_engine.founder_brief import dossier as fd
+        from intent_engine.founder_brief import narrative as fn
+        from intent_engine.founder_brief import render as fr
+        from intent_engine.strategic_intelligence.decision import decision_of
+        _brief, _report_obj, _name = self._founder_layers(run_id)
+        _decision = decision_of(report)
+        _story = fn.build_narrative(company=_name, brief=_brief, report=report,
+                                    decision=_decision)
+        _book = fd.build_dossier(company=_name, report=report,
+                                 decision=_decision, narrative=_story,
+                                 documents=self._retrieved_documents(run_id),
+                                 market=self._market_snapshot(
+                                     self._listing_for(run_id).ticker)
+                                 if self._listing_for(run_id).ticker else None)
+        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
+            _book, depth=fd.FULL, run_id=run_id,
+            citation_labels=self._citation_labels(run_id),
+            lead=fd.render_decision_lead(_decision, _name, depth=fd.FULL,
+                                         run_id=run_id))
+            )
+        # The legacy report is NOT appended. It said the same things the
+        # dossier above now says -- one decision, one evidence list, one set
+        # of alternatives -- so keeping it made every sentence on the page
+        # appear twice. Its one unique element, the source table, is the
+        # dossier's evidence appendix.
         # company-specific suggested questions, each a one-click ask
         suggested = "".join(
             f'<form action="/runs/{_e(run_id)}/conversation" method="post" '
@@ -2080,6 +2126,18 @@ class WebApp:
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
+
+    def _retrieved_documents(self, run_id):
+        """The run's retrieved documents, or () when the store has no rows.
+
+        The deep layers name what was readable, which is the only
+        company-specific footing a bounded run has once source-count narration
+        is removed.
+        """
+        try:
+            return list(self.ci.store.retrieved(run_id))
+        except Exception:                       # noqa: BLE001 - a run with no
+            return ()                           # store rows yet still renders
 
     def _evidence_footing(self, run_id, name, ticker=""):
         """What this run actually retrieved, for the bounded layers.
@@ -2280,52 +2338,40 @@ class WebApp:
         That is what stops this becoming a longer copy of the summary above
         it, which is what the legacy renderer had become.
         """
-        from intent_engine.founder_brief import layers as fl
+        # ONE DECISION, RENDERED DEEPER -- NOT A SECOND CONCLUSION.
+        #
+        # Measured on the deployed preview 2026-08-04: this page said "none of
+        # it supports a strategic view strongly enough to put one forward" and
+        # then offered a DIFFERENT decision ("Whether to close the evidence gap
+        # publicly...") while the primary screen carried a DECISION_READY
+        # choice about services-to-product. It was 396 words against the
+        # primary screen's 816, so the summary was also the deepest surface in
+        # the product.
+        #
+        # It now renders the SHARED decision, then the dossier at brief depth:
+        # how the business works, what changed and when, what the evidence
+        # says, competitive position, market expectations, the opportunity and
+        # the risk. The dossier is seeded with what the 60-second screen
+        # already said, so this adds to that page instead of restating it.
+        from intent_engine.founder_brief import dossier as fd
+        from intent_engine.founder_brief import narrative as fn
         from intent_engine.founder_brief import render as fr
+        from intent_engine.strategic_intelligence.decision import decision_of
         brief, report, name = self._founder_layers(run_id)
-        ledger = fl.Ledger()
-        if brief.key_insight:
-            k = brief.key_insight
-            # `interpretation` was missing from this list while the 60-second
-            # screen renders it (render.py, right under the headline), so the
-            # executive brief opened with the paragraph the reader had just
-            # finished. The ledger can only suppress what it is told was
-            # shown; every field the primary view prints belongs here.
-            ledger.spend(k.fact, k.interpretation, k.so_what, k.decision)
-        for change in (brief.what_changed or ())[:2]:
-            ledger.spend(change.get("what", ""))
-        # The primary screen also prints the risk and the unknown. Omitting
-        # them let the executive brief re-serve an evidence gap the reader had
-        # already met two sections earlier -- the same repetition the 60-second
-        # screen was just cleaned of, one layer up.
-        ledger.spend(brief.biggest_risk, brief.biggest_unknown)
-        # When the reading was WITHHELD, reuse the conclusion the strategic
-        # brief already reached rather than authoring a second version of it.
-        # One source of truth for "what did this report conclude".
-        withheld_line = ""
-        if brief.key_insight is None:
-            try:
-                from intent_engine.strategic_intelligence.brief import (
-                    build_brief,
-                )
-                legacy = build_brief(self._strategic_report_for(run_id),
-                                     as_of="")
-                withheld_line = " ".join(
-                    (legacy.headline.view or "").split())
-            except Exception:  # noqa: BLE001 - the brief still renders
-                withheld_line = ""
-        built = fl.build_executive_brief(
-            brief, report, ledger, withheld_line=withheld_line,
-            footing=self._evidence_footing(
-                run_id, name,
-                self._listing_for(run_id).ticker))
-        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — executive '
-                f'brief</h1>'
-                + fr.render_executive_brief(
-                    built, run_id=run_id,
-                    evidence_ids=self._observation_ids(report),
-                    citation_labels=self._citation_labels(run_id))
-                + fr._deeper(run_id) + "</main>")
+        decision = decision_of(report)
+        story = fn.build_narrative(company=name, brief=brief, report=report,
+                                   decision=decision)
+        book = fd.build_dossier(company=name, report=report,
+                                decision=decision, narrative=story,
+                                documents=self._retrieved_documents(run_id),
+                                market=self._market_snapshot(
+                                    self._listing_for(run_id).ticker)
+                                if self._listing_for(run_id).ticker else None)
+        body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
+            book, depth=fd.BRIEF, run_id=run_id,
+            citation_labels=self._citation_labels(run_id),
+            lead=fd.render_decision_lead(decision, name, depth=fd.BRIEF,
+                                         run_id=run_id))
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))
 

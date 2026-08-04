@@ -475,7 +475,7 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
     # "Evidence Library" that used to prove this page had rendered was the
     # claim-id dump, and it is gone.
     status, body = c.get(f"/runs/{run_id}/full")
-    assert status == "200 OK" and ">Sources<" in body
+    assert status == "200 OK" and "Every source this rests on" in body
 
     # a different anonymous session (fresh cookie) cannot reach the run
     other = _start_demo(app2)

@@ -405,8 +405,16 @@ def test_the_brief_page_reads_as_a_brief(tmp_path):
     # v3 layout marker: the executive brief is now rendered by the founder
     # renderer (<main class="fb">). The safeguard below -- a brief must not
     # become the report -- is unchanged and still the point of this test.
-    prose = re.sub(r"<[^>]+>", " ", body.split('<main class="fb">')[1])
-    assert len(prose.split()) < 700, "the brief must not become the report"
+    # v4: the brief is the DECISION MEMO and renders <main class="dos">. It
+    # is deliberately longer than the old 396-word page -- that page was
+    # shallower than the 60-second summary above it -- but it must still stop
+    # well short of the dossier, which is the point this test has always made.
+    prose = re.sub(r"<[^>]+>", " ", body.split('<main class="dos">')[1])
+    _, _, full = c.request("GET", f"/runs/{rid}/full")
+    full_prose = re.sub(r"<[^>]+>", " ", full.split('<main class="dos">')[1])
+    assert len(prose.split()) < len(full_prose.split()), \
+        "the brief must not become the report"
+    assert len(prose.split()) < 1200
 
 
 def test_the_brief_states_its_claim_once(tmp_path):
@@ -421,10 +429,13 @@ def test_the_brief_states_its_claim_once(tmp_path):
     _, _, body = c.request("GET", f"/runs/{rid}/brief")
     prose = re.sub(r"\s+", " ",
                    re.sub(r"<[^>]+>", " ",
-                          body.split('<main class="fb">')[1]))
-    from intent_engine.strategic_intelligence.brief import build_brief
-    brief = build_brief(app._strategic_report_for(rid), as_of="2026-07-29")
-    claim = " ".join((brief.headline.view or "").split())
+                          body.split('<main class="dos">')[1]))
+    # v4: the brief renders the SHARED decision, so the claim it must state
+    # exactly once is that decision's headline -- not the legacy brief's own,
+    # which was a second conclusion this page is no longer allowed to reach.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(app._strategic_report_for(rid))
+    claim = " ".join(decision.headline.split())
     assert claim, "no central claim to check"
     assert prose.count(claim) == 1, \
         f"the brief states its central claim {prose.count(claim)} times"
@@ -475,6 +486,9 @@ def test_the_full_analysis_still_contains_everything(tmp_path):
     # "Everything" means the full argument and its provenance -- not the
     # legacy extraction view, which was a <details> of internal claim ids and
     # is gone. The Sources section is what a reader auditing the report needs.
+    # The legacy report is gone: it restated the dossier that now leads this
+    # page, so every sentence appeared twice. Its one unique element -- the
+    # provenance list -- is the dossier's evidence appendix.
     assert "Technical appendix" not in body
-    assert "Every source considered" in body
-    assert ">Sources<" in body
+    assert "Every source this rests on" in body
+    assert 'id="evidence_appendix"' in body
