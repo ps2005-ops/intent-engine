@@ -12,11 +12,23 @@ WHAT LIVES HERE, AND WHAT ROUTES TO IT
     is_bare_grade          wherever a confidence word would otherwise stand
                            alone
 
-`render_market`, `render_executive_brief` and `_citations` are NOT routed. They
-are kept because each carries its own direct contract tests (no trading-engine
-performance on the page; a citation shows a readable source name and never an
-invented one) and those contracts are cheap to keep proven. Do not build on
-them without wiring a route first.
+EVERY PUBLIC RENDERER HERE IS ROUTED, AND A TEST KEEPS IT THAT WAY
+------------------------------------------------------------------
+`tests/test_no_dead_founder_renderers.py` fails if a `render_*` function in
+this module, or a `_*_page` method on `WebApp`, has no caller in `src/`. The
+exemption list is empty and is meant to stay empty.
+
+`render_market` and `render_executive_brief` were deleted under that guard.
+Both were unrouted, and both were kept alive by tests that asserted contracts
+against HTML no founder could reach: the executive brief has been served from
+the shared dossier since the deep-documents cycle, and market context reaches
+the page through `layers.build_dashboard`, which reads `brief.market_context`.
+The contracts were real -- no trading-engine performance on the page, and an
+absent market series teaches instead of printing "Unavailable" -- so they moved
+onto `build_dashboard`, which is the surface that actually serves them.
+
+`_citations` is private and called from within this module, so it is not a
+route of its own.
 
 WHY THERE IS NO `render_brief` ANY MORE
 ---------------------------------------
@@ -132,44 +144,6 @@ def _citations(evidence_ids, run_id: str, label: str = "Evidence",
 
 def _p(text: str) -> str:
     return f"<p>{_e(text)}</p>" if text else ""
-
-
-def render_market(context) -> str:
-    """Market modules, each with what changed / so what / what to watch.
-
-    A module with no data says what is NOT established and why, never the bare
-    word "Unavailable" — that is an engineering status, and six live dashboards
-    opened with a stack of them. It still never renders an empty axis, because
-    a chart with no line reads as "flat", a claim the missing data cannot
-    support.
-    """
-    if context is None:
-        return ""
-    ctx = context if isinstance(context, dict) else context.as_dict()
-    out = ["<h2>Market context</h2>"]
-    if not ctx.get("available"):
-        return "".join(out + [
-            '<div class="card muted small">Not established — '
-            f'{_e(ctx.get("reason", "no market data"))}. '
-            'For a private company there is no market to read, which is the '
-            'honest answer rather than a gap.</div>'])
-
-    for name, module in (ctx.get("modules") or {}).items():
-        out.append('<div class="card">')
-        out.append(f'<h3>{_e(name.replace("_", " ").title())}</h3>')
-        out.append(_p(module.get("what_changed", "")))
-        out.append('<div class="sowhat"><span class="lbl">Why this matters'
-                   f'</span>{_e(module.get("so_what", ""))}</div>')
-        if module.get("what_to_watch"):
-            out.append(f'<p class="small muted">What to watch: '
-                       f'{_e(module["what_to_watch"])}</p>')
-        out.append("</div>")
-
-    for limitation in (ctx.get("limitations") or ()):
-        out.append(f'<p class="small muted">{_e(limitation)}</p>')
-    out.append(f'<p class="small muted">{_e(ctx.get("disclaimer", ""))} '
-               f'As of {_e(ctx.get("as_of", "unknown"))}.</p>')
-    return "".join(out)
 
 
 def _deeper(run_id: str) -> str:
@@ -311,22 +285,6 @@ def render_story(sections, *, run_id: str = "") -> str:
         'ls.forEach(function(a){a.setAttribute("aria-current",'
         'a.getAttribute("href")==="#"+best?"true":"false");});}'
         'addEventListener("scroll",u,{passive:true});u();})();</script>')
-    return "".join(out)
-
-
-def render_executive_brief(built, *, run_id: str = "",
-                           evidence_ids=(), citation_labels=None) -> str:
-    out = [LAYER_CSS, '<h2>Executive brief</h2>']
-    for s in built.get("sections", []):
-        out.append(f'<h3>{_e(s["title"])}</h3>')
-        for p in s["paragraphs"]:
-            out.append(f"<p>{_e(p)}</p>")
-    out.append(_citations(evidence_ids, run_id, "Sources behind this",
-                          citation_labels))
-    budget = built.get("budget", {})
-    out.append(f'<p class="small muted">{built.get("words", 0)} words '
-               f'(target {budget.get("min")}–{budget.get("max")}). '
-               f'{_e(built.get("note", ""))}</p>')
     return "".join(out)
 
 

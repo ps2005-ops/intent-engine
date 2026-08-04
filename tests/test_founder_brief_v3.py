@@ -253,12 +253,29 @@ def test_the_signal_module_describes_the_signal_not_the_company():
         ctx.modules["signal"]["so_what"]
 
 
+def _market_module(market=None, footing=None):
+    """The market module as a founder actually receives it.
+
+    `render_market` used to serve this and was deleted unrouted -- market
+    context reaches the page through `layers.build_dashboard`, which reads
+    `brief.market_context`. Asserting here is asserting on the served surface.
+    """
+    from intent_engine.founder_brief import layers as L
+    modules = L.build_dashboard(_rich(market=market), footing=footing or {})
+    return next(m for m in modules if m.key == "market_trajectory")
+
+
 def test_no_paper_control_performance_can_reach_the_page():
     ctx = M.consume(_export(), expected_ticker="ACME")
-    html = R.render_market(ctx.as_dict()).lower()
+    module = _market_module(ctx.as_dict())
+    text = " ".join([module.what_changed, module.so_what,
+                     module.what_to_watch, module.text_alternative]
+                    + [f"{r.get('label')} {r.get('value')} {r.get('so_what')}"
+                       for r in module.rows]).lower()
+    assert text.strip(), "the module rendered nothing to check"
     for banned in ("win rate", "sharpe", "expectancy", "alpha",
                    "paper_control", "profit factor"):
-        assert banned not in html
+        assert banned not in text
 
 
 # --- rendering + accessibility ---------------------------------------------
@@ -343,12 +360,17 @@ def test_depth_is_offered_but_never_required():
 
 
 def test_absent_market_data_teaches_rather_than_saying_unavailable():
-    html = R.render_market(M.unavailable("no snapshot").as_dict())
-    assert "Not established" in html
-    # "Unavailable" is an engineering status, not intelligence:
-    # six live dashboards opened with a stack of them.
-    assert "Unavailable" not in html
-    assert "0%" not in html
+    module = _market_module(M.unavailable("no snapshot").as_dict(),
+                            footing={"ticker": "ACME", "listing_exchange": ""})
+    text = " ".join([module.what_changed, module.so_what,
+                     module.what_to_watch])
+    # "Unavailable" is an engineering status, not intelligence: six live
+    # dashboards opened with a stack of them. The module has to say what is
+    # not established, why, and what would settle it.
+    assert "Unavailable" not in text
+    assert "0%" not in text
+    assert module.so_what and module.what_to_watch
+    assert "ACME" in text, "the gap is reported about THIS company"
 
 
 # --- the release gate -------------------------------------------------------
