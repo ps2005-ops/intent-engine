@@ -432,6 +432,19 @@ def test_break_a_gap_names_a_family_the_run_actually_retrieved():
                 assert words not in gap, (present, gap)
 
 
+def test_break_the_bounded_answer_states_its_reason_twice():
+    """Live on Basecamp: the bounded headline EMBEDS the reason, and the line
+    below restated the same clause in the next sentence."""
+    reason = ("the public record carries what this company says about "
+              "itself, not the mechanism behind it")
+    decision = FounderDecision(readiness=INVESTIGATION_REQUIRED,
+                               mechanism="the rails carry the value",
+                               unsafe_because=reason)
+    markup = D.render_decision_lead(decision, "Basecamp", depth=D.BRIEF)
+    text = _text(markup)
+    assert text.count(reason) == 1, text.count(reason)
+
+
 def test_break_two_unrelated_companies_receive_the_same_deep_report():
     a = _text(_rendered(_dossier(company="Shopify"), D.FULL))
     b_report = dict(_report(), company_name="Northwind",

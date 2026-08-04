@@ -971,8 +971,14 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
             if said.has(tail):
                 headline = end_sentence(head)
         out.append(_p(headline))
+        said.remember(headline)
+        # The bounded headline EMBEDS the reason ("No option is safe to commit
+        # to yet: <reason> — so this is held open rather than settled"), so
+        # restating it below printed the same clause twice in adjacent
+        # sentences. Measured live on Basecamp.
         if decision.readiness == INVESTIGATION_REQUIRED \
-                and decision.unsafe_because:
+                and decision.unsafe_because \
+                and not said.has(decision.unsafe_because):
             out.append(_p(end_sentence(
                 f"It is not yet safe to act on, because "
                 f"{as_clause(decision.unsafe_because, company)}")))
