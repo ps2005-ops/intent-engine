@@ -625,7 +625,7 @@ def _risk(company, report, decision, said) -> Passage:
                    paragraphs=tuple(paras[:2]))
 
 
-def _what_was_read(company, documents, said) -> Passage:
+def _what_was_read(company, documents, observations, said) -> Passage:
     """The documents this run actually retrieved, by name and date.
 
     THE BOUNDED PATH HAS NO REPORT, so every passage above it is empty and the
@@ -639,6 +639,12 @@ def _what_was_read(company, documents, said) -> Passage:
     Naming them is a fact, not an interpretation, and it is the footing a
     reader needs to judge how far the bounded conclusion goes.
     """
+    # ONLY WHEN THERE IS NOTHING BETTER. On a rich run this listed eight
+    # undated entries -- "Careers.", "Palantir IR." -- that the evidence
+    # sections and the appendix already cover properly. It exists for the
+    # bounded path, where it is the only company-specific footing there is.
+    if observations:
+        return Passage("what_was_read", "What could actually be read")
     rows = []
     for doc in (documents or ()):
         if doc.get("retrieval_status") != "OK":
@@ -718,7 +724,11 @@ def _evidence_appendix(report, index) -> Passage:
         text = _readable_excerpt(obs)
         key = _flat(obs.get("source_title")).lower() or _flat(
             obs.get("observation_id"))
-        if not text or not key or key in seen:
+        # A filing whose extractable text is all cover-page furniture yields
+        # no quotation -- but it WAS read, and dropping it hid the single most
+        # authoritative source in the run from the provenance list. Listed
+        # with no quotation rather than not listed.
+        if not key or key in seen:
             continue
         seen.add(key)
         items.append(EvidenceItem(
@@ -776,7 +786,7 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
 
     built = [
         _operating_model(company, report, said),
-        _what_was_read(company, documents, said),
+        _what_was_read(company, documents, _observation_dicts(report), said),
         _what_changed(company, report, said),
         _customer_demand(company, report, index, said),
         _competitive(company, report, decision, hypotheses, families, said),
@@ -853,8 +863,15 @@ def render_families(families) -> str:
 
 
 def render_dossier(dossier, *, depth: str, run_id: str = "",
-                   citation_labels=None, lead: str = "") -> str:
-    """The deep document at one depth. One `<main>`, one `<h1>`."""
+                   citation_labels=None, lead: str = "",
+                   wrap: bool = True) -> str:
+    """The deep document at one depth. One `<main>`, one `<h1>`.
+
+    `wrap=False` emits a `<div>` instead, for a route that already opens its
+    own `<main>`. The full-analysis page does, and rendering both put TWO main
+    landmarks on the longest page in the product -- so a screen reader's "skip
+    to main content" could land on either.
+    """
     from html import escape
 
     from intent_engine.founder_brief.narrative import (
@@ -862,7 +879,8 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
     )
     kicker = ("Executive brief — the decision memo" if depth == BRIEF
               else "Full analysis — the intelligence behind the decision")
-    out = [DOSSIER_CSS, '<main class="dos">',
+    tag = "main" if wrap else "div"
+    out = [DOSSIER_CSS, f'<{tag} class="dos">',
            f"<h1>{escape(dossier.company)}</h1>",
            f'<p class="kicker">{escape(kicker)}</p>']
     if lead:
@@ -912,7 +930,7 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
     if run_id:
         from intent_engine.founder_brief.render import _deeper
         out.append(_deeper(run_id))
-    out.append("</main>")
+    out.append(f"</{tag}>")
     return "".join(out)
 
 

@@ -1935,7 +1935,7 @@ class WebApp:
                                      self._listing_for(run_id).ticker)
                                  if self._listing_for(run_id).ticker else None)
         strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + fd.render_dossier(
-            _book, depth=fd.FULL, run_id=run_id,
+            _book, depth=fd.FULL, run_id=run_id, wrap=False,
             citation_labels=self._citation_labels(run_id),
             lead=fd.render_decision_lead(_decision, _name, depth=fd.FULL,
                                          run_id=run_id))

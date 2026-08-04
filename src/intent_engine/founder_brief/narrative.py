@@ -1193,7 +1193,9 @@ def _render_evidence(section, run_id, labels) -> str:
         for item in section.items:
             out.append("<li>")
             out.append(f'<span class="prov">{_e(item.provenance)}</span>'
-                       f"<q>{_e(item.text)}</q>")
+                       + (f"<q>{_e(item.text)}</q>" if item.text else
+                          '<span class="muted">read in full; no single '
+                          'passage is quoted here</span>'))
             out.append(f'<span class="src">'
                        f"{_evidence_link(item, run_id, labels)}</span>")
             out.append("</li>")

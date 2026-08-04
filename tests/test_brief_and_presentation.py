@@ -411,7 +411,9 @@ def test_the_brief_page_reads_as_a_brief(tmp_path):
     # well short of the dossier, which is the point this test has always made.
     prose = re.sub(r"<[^>]+>", " ", body.split('<main class="dos">')[1])
     _, _, full = c.request("GET", f"/runs/{rid}/full")
-    full_prose = re.sub(r"<[^>]+>", " ", full.split('<main class="dos">')[1])
+    # `/full` renders the dossier as a <div>: that route already opens its own
+    # <main>, and two main landmarks on one page is an accessibility defect.
+    full_prose = re.sub(r"<[^>]+>", " ", full.split('<div class="dos">')[1])
     assert len(prose.split()) < len(full_prose.split()), \
         "the brief must not become the report"
     assert len(prose.split()) < 1200

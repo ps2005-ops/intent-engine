@@ -60,6 +60,14 @@ def _rendered(dossier, depth, company="Shopify"):
         lead=D.render_decision_lead(dossier.decision, company, depth=depth))
 
 
+def _dossier_body(markup: str) -> str:
+    for tag in ("main", "div"):
+        parts = markup.split(f'<{tag} class="dos">')
+        if len(parts) > 1:
+            return parts[1]
+    raise AssertionError("no dossier on this page")
+
+
 def _served(tmp_path):
     """The three real routes for one run."""
     from tests.test_strategic_intelligence import _strategic_webapp_run
@@ -73,8 +81,13 @@ def _served(tmp_path):
 
 
 def _words(body: str, cls: str) -> int:
-    parts = body.split(f'<main class="{cls}">')
-    return len(_text(parts[1]).split()) if len(parts) > 1 else 0
+    # `/full` renders the dossier as a <div>, because that route already opens
+    # its own <main> and two main landmarks on one page is a real defect.
+    for tag in ("main", "div"):
+        parts = body.split(f'<{tag} class="{cls}">')
+        if len(parts) > 1:
+            return len(_text(parts[1]).split())
+    return 0
 
 
 # --- 1. each depth is deeper than the one above -------------------------------
@@ -173,7 +186,7 @@ def test_a_bounded_result_is_never_revived_by_a_deeper_layer(readiness):
 def test_no_sentence_is_printed_twice_in_either_document(tmp_path):
     pages = _served(tmp_path)
     for label in ("brief", "full"):
-        body = pages[label].split('<main class="dos">')[1]
+        body = _dossier_body(pages[label])
         seen, repeats = {}, []
         for line in _text(body).splitlines():
             line = line.strip()
@@ -194,7 +207,7 @@ def test_the_brief_does_not_restate_the_narrative(tmp_path):
         " ".join(re.findall(r"[a-z0-9]+", ln.lower()))
         for ln in _text(pages["narrative"].split('<main class="nar">')[1])
         .splitlines() if len(ln.split()) >= 10}
-    dossier_body = pages["brief"].split('<main class="dos">')[1]
+    dossier_body = _dossier_body(pages["brief"])
     # Everything below the shared decision lead, which is SUPPOSED to restate
     # the answer -- that is what makes the memo readable on its own.
     below = dossier_body.split('id="operating_model"')[-1]
@@ -282,7 +295,7 @@ def test_no_internal_vocabulary_or_taxonomy_in_either_document(tmp_path):
     from intent_engine.strategic_intelligence.records import SOURCE_CLASSES
     pages = _served(tmp_path)
     for label in ("brief", "full"):
-        body = pages[label].split('<main class="dos">')[1]
+        body = _dossier_body(pages[label])
         # The legacy report still follows the dossier on /full; this asserts
         # the DOSSIER is clean, which is the part this cycle owns.
         body = body.split('<div class="si"')[0]
@@ -307,7 +320,7 @@ def test_source_counts_are_provenance_not_narration(tmp_path):
     a sentence like "12 page(s) were read and 10 carried evidence"."""
     pages = _served(tmp_path)
     for label in ("brief", "full"):
-        text = _text(pages[label].split('<main class="dos">')[1])
+        text = _text(_dossier_body(pages[label]))
         assert "page(s) were read" not in text, label
         assert "source(s)." not in text, label
 
