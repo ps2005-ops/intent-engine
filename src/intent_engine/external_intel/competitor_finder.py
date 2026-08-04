@@ -109,6 +109,20 @@ _ABBREV = r"(?<!\bInc)(?<!\bCorp)(?<!\bLtd)(?<!\bCo)(?<!\bplc)(?<!\bLLC)" \
 _SPLIT = re.compile(rf"{_ABBREV}(?<=[.;])\s+(?=[A-Z])")
 
 
+def _document_text(document: dict) -> str:
+    """Every field a retrieved document or an observation may hold its body in.
+
+    `text_content` is the ingestion store's field name; `text` is an
+    observation's. Reading only the second made every filing body invisible --
+    live on the preview, Palantir's 10-Q Competition section was retrieved and
+    stored and never searched, so the competitive passage reported that no
+    competitor account had been read while the company's own list of rivals
+    sat in the run.
+    """
+    return " ".join(str(document.get(f) or "")
+                    for f in ("text", "text_content", "quote", "summary"))
+
+
 def _sentences(text: str) -> List[str]:
     return [s.strip() for s in _SPLIT.split(text or "") if s.strip()]
 
@@ -209,10 +223,9 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
     for document in documents or ():
         if not isinstance(document, dict):
             continue
-        text = " ".join(str(document.get(f) or "")
-                        for f in ("text", "quote", "summary"))
+        text = _document_text(document)
         evidence_id = document.get("observation_id") or document.get(
-            "document_id") or ""
+            "source_id") or document.get("document_id") or ""
         if not text or not evidence_id:
             continue
         for passage in competition_passages(text):
@@ -284,10 +297,9 @@ def _internal_build(documents, *, today: str) -> Optional[Competitor]:
     for document in documents or ():
         if not isinstance(document, dict):
             continue
-        text = " ".join(str(document.get(f) or "")
-                        for f in ("text", "quote", "summary"))
+        text = _document_text(document)
         evidence_id = document.get("observation_id") or document.get(
-            "document_id") or ""
+            "source_id") or document.get("document_id") or ""
         if not text or not evidence_id:
             continue
         for passage in competition_passages(text):

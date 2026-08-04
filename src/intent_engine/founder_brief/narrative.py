@@ -988,6 +988,18 @@ def _outside_conditions(external, said) -> Section:
     ONE BLOCK PER CONTEXT AT MOST, and only the contexts that earned a place.
     A company whose evidence establishes no macro exposure gets no macro
     paragraph -- not an "unavailable" one.
+
+    WRITTEN SHORT ON PURPOSE. The first version carried each block's fact, its
+    why-this-matters, its decision AND its limitation, and took a real run
+    from 900 words to 1020 -- past the narrative's ceiling. The page's budget
+    is the discipline that keeps it readable in one sitting, so the fix was to
+    say less here rather than to raise it.
+
+    What survives is the FACT and the DECISION it bears on, which is the pair
+    a founder can act on. The non-causal frame moves to the section note,
+    stated once for the whole section instead of repeated in every entry, and
+    each block's full limitation waits in the Executive Brief and the Full
+    Analysis, where there is room to state it properly.
     """
     if external is None or not external.relevant_sections():
         return Section(OUTSIDE, "What is happening outside the company")
@@ -998,16 +1010,10 @@ def _outside_conditions(external, said) -> Section:
         if said.has(block.fact):
             continue
         said.remember(block.fact)
-        # Fact, so-what and the decision it bears on, in one entry. The
-        # limitation rides with it rather than being collected at the bottom,
-        # because a caveat a reader meets after the claim has already landed
-        # is a caveat that changes nothing.
-        text = f"{block.fact} {block.so_what}"
+        text = block.fact
         if block.decision and not said.has(block.decision):
             said.remember(block.decision)
             text += f" It bears on one choice: {lower_first(block.decision)}"
-        if block.limitation:
-            text += f" What it cannot settle: {lower_first(block.limitation)}"
         items.append({"label": block.title, "text": end_sentence(text)})
     if not items:
         return Section(OUTSIDE, "What is happening outside the company")
@@ -1015,8 +1021,9 @@ def _outside_conditions(external, said) -> Section:
         OUTSIDE, "What is happening outside the company", kind="labelled",
         items=tuple(items),
         note=("Outside conditions bound this decision; they do not make it. "
-              "Nothing here is evidence that the strategy is or is not "
-              "working."))
+              "A share-price move records what the market expects, not "
+              "whether the strategy is working. Each of these is stated with "
+              "its full limitation in the executive brief."))
 
 
 def build_narrative(*, company: str, brief, report: Optional[dict] = None,

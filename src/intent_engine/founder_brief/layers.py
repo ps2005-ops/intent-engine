@@ -277,7 +277,28 @@ def build_dashboard(brief, report: Optional[dict] = None, *,
 
     # B. MARKET TRAJECTORY — sanitised export only.
     market = brief.market_context or {}
-    if market.get("available"):
+    if external is not None and external.has_market:
+        # ONE TILE PER MARKET BLOCK. The single combined tile could only carry
+        # one chart, so the risk figures -- drawdown, distance from the high,
+        # volatility -- rendered as a sentence under the trajectory chart and
+        # their own chart never appeared. They answer a different question
+        # from direction (how wide a range a plan must survive), so they get
+        # their own tile and their own picture.
+        from intent_engine.external_intel import presenter as _pres
+        for block in _pres.market_blocks(external):
+            modules.append(Module(
+                key=block.key, title=block.title,
+                what_changed=block.fact, so_what=block.so_what,
+                what_to_watch=block.decision,
+                rows=((({"label": "What this cannot tell you",
+                         "value": block.limitation},) if block.limitation
+                       else ())
+                      + (({"label": "Source",
+                           "value": " · ".join(
+                               x for x in (block.source, block.freshness)
+                               if x)},) if block.source else ())),
+                text_alternative=block.text_alternative))
+    elif market.get("available"):
         # The headline is the first module's sentence, and the rows repeat
         # every module including that one -- so Shopify's dashboard printed
         # "the shares fell 3.3% over the past three months" THREE times on one

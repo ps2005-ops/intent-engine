@@ -163,8 +163,16 @@ def evidence_texts(observations) -> List[tuple]:
     for observation in observations or ():
         if not isinstance(observation, dict):
             continue
+        # `text_content` is what the ingestion store writes on a retrieved
+        # document; `text` is what an observation carries. Reading only the
+        # second made every filing body invisible here -- live on the preview,
+        # Palantir's 10-Q was retrieved, stored, and never searched for an
+        # exposure phrase, so the macro section fell back to "nothing
+        # retrieved ties this decision to a macro factor" with the evidence
+        # sitting in the run.
         text = " ".join(str(observation.get(field) or "")
-                        for field in ("text", "quote", "summary", "title"))
+                        for field in ("text", "text_content", "quote",
+                                      "summary", "title"))
         out.append((observation.get("observation_id") or "", text))
     return out
 
