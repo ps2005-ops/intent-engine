@@ -14,9 +14,19 @@ It is deliberately conservative and safe:
     policy, and reads only material a normal permitted user could read;
   - it is fully defensive: ANY failure (network down, parse error, no match)
     yields an empty candidate list, so discovery is never broken by SEC;
-  - it prefers small filings (8-K/6-K) whose primary HTML document stays under
-    the per-response byte cap and parses into real text — 10-K/10-Q primary
-    documents are often multi-megabyte and are only a lower preference.
+  - it prefers filings whose primary HTML document stays under the
+    per-response byte cap and parses into real text; a 10-K is usually over it
+    and stays a low preference, while a 10-Q usually fits.
+
+WHY ONE OF EACH KIND. Ranking purely by form preference gave every slot to
+current reports (8-K), because a filer publishes many more of those than
+periodic ones. Measured on the deployed preview 2026-08-04: every Palantir run
+retrieved nine company-owned pages and one executive page, no filings at all —
+and the analysis then reported "Revenue split between services and product is
+not public" as a FINDING. It is in the quarterly report, which was never
+proposed. `_spread_by_family` now serves each family once before serving any
+family twice, and demotes filings older than three years so a 2015 prospectus
+cannot hold a slot a current report needs.
 
 Nothing is fetched *for analysis* here: the returned candidates are proposed
 and, like every candidate, retrieved only after explicit user approval.
@@ -44,11 +54,36 @@ FILING_INDEX_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
                     "{accession_nodash}/index.json")
 
 # Prefer small, text-bearing filings whose primary document parses cleanly and
-# stays well under the per-response byte cap. 10-K/10-Q primary documents are
-# frequently multi-megabyte, so they are a lower preference on purpose.
-_PREFERRED_FORMS = ("8-K", "6-K", "10-Q", "10-K", "20-F", "S-1", "424B4",
-                    "DEF 14A", "40-F")
+# stays well under the per-response byte cap. A 10-K primary document is
+# frequently multi-megabyte, so it stays a lower preference on purpose --
+# measured 2026-08-04, Palantir's is over the 2,000,000-byte cap and truncates,
+# while its 10-Q is 1.8MB and fits.
+_PREFERRED_FORMS = ("10-Q", "8-K", "6-K", "20-F", "40-F", "10-K", "S-1",
+                    "424B4", "DEF 14A")
 MAX_EDGAR_CANDIDATES = 3
+
+# ONE FILING OF EACH KIND, NOT THREE OF THE SAME KIND.
+#
+# Ranking purely by form preference spent all three slots on 8-Ks, because a
+# filer publishes far more current reports than periodic ones. Measured on the
+# deployed preview: every Palantir run retrieved 9 company-owned pages and 1
+# executive page, no filings at all in the report -- and the analysis then
+# stated "Revenue split between services and product is not public" as a
+# finding, which is false. It is in the periodic report; the periodic report
+# was simply never proposed.
+#
+# A periodic report carries revenue disaggregation, customer concentration and
+# risk factors. A current report carries the earnings release. They answer
+# different questions, so the budget takes one of each before it takes a
+# second of either.
+_FORM_FAMILY = {
+    "10-Q": "periodic", "10-K": "periodic", "20-F": "periodic",
+    "40-F": "periodic",
+    "8-K": "current", "6-K": "current",
+    "S-1": "registration", "424B4": "registration", "DEF 14A": "proxy",
+}
+#: The order families are first served in.
+_FAMILY_ORDER = ("periodic", "current", "registration", "proxy")
 _DROP_TOKENS = {"inc", "incorporated", "corp", "corporation", "co", "company",
                 "ltd", "limited", "plc", "llc", "lp", "holdings", "group",
                 "technologies", "technology", "the", "and", "of"}
@@ -165,6 +200,54 @@ def resolve_cik(company_name, *, ticker=None, transport=None, resolver=None):
             "ticker": row_ticker}
 
 
+#: A filing older than this describes a company that may no longer exist in
+#: the form described. Registration statements are the usual offenders -- a
+#: filer has exactly one S-1 and it never ages out of the index, so spreading
+#: by family alone handed slot three to Palantir's 2020 S-1 and Shopify's 2015
+#: prospectus. Stale filings are demoted, never dropped: for a company that has
+#: filed nothing since, its S-1 is still the best disclosure available.
+_STALE_AFTER_DAYS = 1095
+
+
+def _is_stale(date: str, today: str) -> bool:
+    """True when `date` is more than three years before `today` (ISO dates)."""
+    try:
+        from datetime import date as _date
+        filed = _date.fromisoformat(date[:10])
+        now = _date.fromisoformat(today[:10])
+    except Exception:                                       # noqa: BLE001
+        return False
+    return (now - filed).days > _STALE_AFTER_DAYS
+
+
+def _spread_by_family(order, forms, dates=(), today="") -> list:
+    """Round-robin an already-ranked index list across form families.
+
+    Order WITHIN a family is preserved, so the best periodic report is still
+    the best periodic report; only the interleaving changes. A form the family
+    table does not name keeps its rank and is served last, and anything stale
+    is served after everything current regardless of family.
+    """
+    if not today:
+        from datetime import date as _date
+        today = _date.today().isoformat()
+    buckets, stale = {}, []
+    for i in order:
+        filed = dates[i] if i < len(dates) else ""
+        if filed and _is_stale(filed, today):
+            stale.append(i)
+            continue
+        buckets.setdefault(_FORM_FAMILY.get(forms[i], "other"), []).append(i)
+    families = [f for f in _FAMILY_ORDER if f in buckets]
+    families += [f for f in buckets if f not in _FAMILY_ORDER]
+    out = []
+    while any(buckets[f] for f in families):
+        for family in families:
+            if buckets[family]:
+                out.append(buckets[family].pop(0))
+    return out + stale
+
+
 def filing_candidates(resolved, *, transport=None, resolver=None,
                       limit=MAX_EDGAR_CANDIDATES) -> list:
     """Propose recent filing primary-document candidates for a resolved CIK.
@@ -182,10 +265,14 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
         return []
     cik = resolved["cik"]
     out, seen = [], set()
-    # Rank by preferred form, then recency (submissions are newest-first).
+    # Rank by preferred form, then recency (submissions are newest-first)...
     order = sorted(range(len(forms)),
                    key=lambda i: (_PREFERRED_FORMS.index(forms[i])
                                   if forms[i] in _PREFERRED_FORMS else 99, i))
+    # ...then interleave so each FAMILY is served once before any family is
+    # served twice. See `_FORM_FAMILY`: the unspread order gave all three slots
+    # to current reports and the periodic report was never proposed.
+    order = _spread_by_family(order, forms, dates)
     for i in order:
         form, doc, acc = forms[i], docs[i], accessions[i]
         if not doc or not acc or not doc.lower().endswith((".htm", ".html")):
