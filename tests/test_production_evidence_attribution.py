@@ -284,3 +284,71 @@ def test_no_belief_can_be_opened_from_an_analyst_price_target():
     evidence, _ = translate(BHP_TARGET_CUT, "bhp", ["BHP", "BHP Group"])
     candidates, _refused = BF.propose(evidence, as_of="2026-08-05")
     assert candidates == []
+
+
+# --- defect 5: an analyst hypothetical is not a company action --------------
+#
+# Found in the output of a REAL production cycle run through the deployed
+# launchd entrypoint against live research, not in a fixture. One belief in
+# thirty-six rested on an analyst's argument that a result was reachable:
+#
+#   "Toyota: Struggling Through Macro Tensions, But There's A Path To EPS
+#    Growth (NYSE:TM) - Seeking Alpha."
+#     -> action "Growth" / object "EPS" -> EARNINGS_RESULT
+#     -> "toyota is seeing demand strengthen rather than plateau"
+#
+# Toyota reported nothing. This is the third costume of one failure -- event
+# vocabulary present, event absent -- after the Caterpillar price move and the
+# analyst price target, so it is refused by construction rather than by
+# company name.
+TOYOTA_PATH_TO = ("Toyota: Struggling Through Macro Tensions, But There's A "
+                  "Path To EPS Growth (NYSE:TM) - Seeking Alpha.")
+
+
+@pytest.mark.parametrize("text", [
+    TOYOTA_PATH_TO,
+    "New enterprise contracts could drive revenue growth next year.",
+    "There is potential for margin expansion in the second half.",
+    "We expect revenue to accelerate through fiscal 2027.",
+    "We estimate fair value at $95 per share.",
+    "Our bull case assumes 20% subscriber growth.",
+    "Our bear case sees margins compressing to 12%.",
+    "Upside exists if the restructuring completes on schedule.",
+    "There is room for further buybacks given the cash balance.",
+    "The company is likely to expand capacity in Asia.",
+    "Margins should improve as freight costs normalise.",
+    "The firm is poised to benefit from the data center cycle.",
+])
+def test_an_analyst_hypothetical_is_not_a_company_action(text):
+    """An argument that something COULD happen is not a record that it did."""
+    assert EP.classify_sentence(text) is None
+
+
+@pytest.mark.parametrize("text,expected", [
+    # Company guidance IS a company action and must survive. A company
+    # issuing guidance names itself in the third person and states a figure;
+    # an analyst forecasts in the first person.
+    ("GUIDANCE: (LIN) Linde Plc Expects Q3 Adjusted EPS Range $4.45 - $4.55 "
+     "- Moomoo.", ME.GUIDANCE_REVISION),
+    ("Canadian National Railway Raises 2026 Volume Outlook - WSJ.",
+     ME.GUIDANCE_REVISION),
+    ("Toyota Motor Corporation Revises Consolidated Earnings Forecast for "
+     "the Fiscal Year Ending March 31, 2027.", ME.GUIDANCE_REVISION),
+    ("Infosys Limited Provides Earnings Guidance for the Fiscal Year 2027.",
+     ME.GUIDANCE_REVISION),
+    ("Honda Motor Earnings, Revenue Rise; Raises Annual Guidance.",
+     ME.GUIDANCE_REVISION),
+])
+def test_real_company_guidance_still_classifies(text, expected):
+    """The control. Refusing the forecasting voice outright would delete the
+    GUIDANCE_REVISION family, which is a real company action -- every one of
+    these is verbatim from the production ledger."""
+    assert EP.classify_sentence(text) == expected
+
+
+def test_no_belief_can_be_opened_from_an_analyst_hypothetical():
+    from intent_engine.market import belief_formation as BF
+    evidence, _ = translate(TOYOTA_PATH_TO, "toyota",
+                            ["Toyota", "Toyota Motor Corporation"])
+    candidates, _refused = BF.propose(evidence, as_of="2026-08-05")
+    assert candidates == []

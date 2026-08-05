@@ -394,6 +394,48 @@ _NON_EVENT = tuple(re.compile(p, re.I) for p in (
     r"\bis the risk that\b", r"\bmarket risk is\b", r"\bwill fluctuate\b",
     r"\bability to (?:raise|continue|obtain|meet|attract|retain)\b",
     r"\bare exposed to\b", r"\bis exposed to\b",
+    # ANALYST HYPOTHETICALS. An argument that something COULD happen is not a
+    # record that it did. This is the third appearance of one failure -- event
+    # vocabulary present, event absent -- after the Caterpillar price move and
+    # the analyst price target, and it is refused the same way.
+    #
+    # Measured on a real production cycle through the deployed entrypoint:
+    #
+    #   "Toyota: Struggling Through Macro Tensions, But There's A Path To EPS
+    #    Growth (NYSE:TM)" -> action "Growth" / object "EPS" -> EARNINGS_RESULT
+    #    -> belief "toyota is seeing demand strengthen rather than plateau"
+    #
+    # Toyota reported nothing. An analyst argued a route to a result existed,
+    # and the engine recorded the result. The refusal is generalised to the
+    # construction rather than the company: what makes the sentence
+    # inadmissible is that its verb is owned by someone reasoning about the
+    # company, not by the company acting.
+    #
+    # CALIBRATED AGAINST THE POSITIVE CORPUS. Company guidance is a real
+    # company action and must survive: "Linde Plc Expects Q3 Adjusted EPS
+    # Range $4.45-$4.55", "Canadian National Railway Raises 2026 Volume
+    # Outlook" and "Toyota Motor Corporation Revises Consolidated Earnings
+    # Forecast" all still classify, because a company issuing guidance names
+    # itself in the third person and states a figure. Only the first-person
+    # forecasting voice ("we expect", "we estimate") is refused -- that is an
+    # analyst writing a note, and where a filing uses it the surrounding
+    # forward-looking-statement language is already refused above.
+    #
+    # `valuation` is deliberately NOT refused: it is a factual noun in real
+    # M&A reporting ("the deal implies a valuation of $2 billion"), and
+    # refusing it would delete events rather than clean them.
+    r"\bpath to\b", r"\bpotential for\b", r"\broom for\b",
+    r"\b(?:bull|bear|base) case\b",
+    r"\bupside (?:exists|remains|potential)\b",
+    r"\b(?:is|are) (?:poised|set|positioned) to\b",
+    r"\blikely to\b",
+    r"\bwe (?:expect|estimate|forecast|project|anticipate|model|foresee|"
+    r"see|view)\b",
+    r"\bcould (?:drive|boost|lift|push|help|support|reach|hit|deliver|see|"
+    r"add|expand|improve|benefit|climb|rally|surge|unlock|accelerate)\b",
+    r"\bmay (?:drive|boost|lift|help|support|benefit|improve)\b",
+    r"\bshould (?:improve|benefit|rise|grow|help|continue|remain|see|"
+    r"deliver|expand|outperform)\b",
 ))
 
 
