@@ -35,6 +35,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+from . import strategic_contract as SC
 from .competitor_contract import corroborating, framing_only
 from .pack import (
     COMPETITIVE, MACRO, MARKET, NON_CAUSAL_FRAME, STRATEGIC, ExternalContext,
@@ -290,30 +291,63 @@ def strategic_blocks(context: ExternalContext) -> List[Block]:
 
     lead = beliefs[0]
     subject = intel.subject or "this company"
-    confidence = float(lead.get("confidence") or 0)
     others = [str(b.get("proposition") or "") for b in beliefs[1:3]
               if b.get("proposition")]
 
+    # The figure is spoken in the grammar its update method can carry. A
+    # CALIBRATED_HEURISTIC opening step printed as "62% confidence" is the
+    # false-precision failure the producer's own contract exists to prevent.
     fact = (f"Reading strategic evidence about {subject}, the market-learning "
-            f"engine holds that {lead.get('proposition', '')} — at "
-            f"{confidence:.0%} confidence.")
+            f"engine holds that {lead.get('proposition', '')} — "
+            f"{SC.confidence_language(lead)}. It is "
+            f"{SC.maturity_sentence(lead)}.")
     if others:
         fact += " It also holds: " + "; ".join(others) + "."
 
-    untested = all(str(b.get("update_method") or "").upper() == "DECLARED"
-                   or not b.get("direction_of_last_change")
-                   for b in beliefs)
+    # PROVENANCE COMES FROM THE GRAPH, AND ONLY FROM THE GRAPH.
+    #
+    # The interpretation above is the dossier's -- that stays canonical. What
+    # the belief RESTS on is resolved through the projection, so the page and
+    # the graph cannot come to disagree about which evidence supports what.
+    # Fails closed: no belief node means no provenance sentence, never a
+    # second derivation off `intel.beliefs` that would look identical today
+    # and drift tomorrow.
+    from . import projection as PJ
+    provenance = PJ.belief_provenance(context, company=subject)
+    lead_provenance = provenance.get(str(lead.get("proposition") or "").strip())
+
     limitation = (
         "These are readings held at a stated confidence, not observations, "
         "and they describe strategic posture rather than this company's "
         "operating results.")
-    if untested:
+    maturities = {SC.belief_maturity(b) for b in beliefs}
+    if maturities == {SC.NEWLY_DECLARED}:
         limitation += (" Every one of them was opened by the evidence behind "
                        "it and has not since been revised, so the confidence "
                        "is an opening position rather than a tested one.")
-    stated = [x for b in beliefs for x in (b.get("limitations") or ()) if x]
+    if lead_provenance:
+        stated = lead_provenance["limitations"]
+    else:
+        stated = []
     if stated:
         limitation += " Stated by the engine: " + "; ".join(stated[:2]) + "."
+
+    # Supporting and contradicting evidence stay separate in the sentence, not
+    # only in the data: a belief that has been contradicted and one that has
+    # merely been asserted must not read the same.
+    if lead_provenance:
+        supports = lead_provenance["supports"]
+        contradicts = lead_provenance["contradicts"]
+        counted = sum(len(s["evidence_ids"]) for s in supports)
+        if counted:
+            basis = (f" It rests on {counted} piece(s) of public evidence")
+            if contradicts:
+                basis += (f", and {len(contradicts)} preregistered "
+                          f"expectation(s) have since gone against it")
+            fact += basis + "."
+        elif contradicts:
+            fact += (f" {len(contradicts)} preregistered expectation(s) have "
+                     f"gone against it.")
 
     return [Block(
         key="strategic_reading", context=STRATEGIC,
@@ -334,9 +368,13 @@ def strategic_blocks(context: ExternalContext) -> List[Block]:
         freshness=(f"published {intel.as_of}"
                    + (f", {intel.age_days} days ago"
                       if intel.age_days is not None else "")),
+        # The text alternative carries the same claim as the visual one. A
+        # percentage here and words there would mean the screen-reader path
+        # asserted a precision the page itself declined to.
         text_alternative=(f"{len(beliefs)} strategic reading(s) about "
-                          f"{subject}; strongest at {confidence:.0%} "
-                          f"confidence."),
+                          f"{subject}; the strongest is "
+                          f"{SC.maturity_sentence(lead)}, and "
+                          f"{SC.confidence_language(lead)}."),
         evidence_ids=tuple(x for b in beliefs
                            for x in (b.get("evidence_ids") or ())))]
 

@@ -224,6 +224,116 @@ def validate(payload: dict) -> None:
     _scan_text(payload)
 
 
+# --- belief maturity --------------------------------------------------------
+#
+# WHY A FOUNDER MAY NOT BE SHOWN "62% CONFIDENCE"
+# -----------------------------------------------
+# The producer is explicit that `update_method` is "never decorative": only
+# EMPIRICAL_BAYES derives likelihoods from measured base rates. A
+# CALIBRATED_HEURISTIC is "a bounded step scaled by evidence quality, honest
+# about being a heuristic", and DECLARED means the belief was OPENED by its
+# evidence and never revised since.
+#
+# 0.618 from an opening heuristic and 0.618 from a posterior that survived
+# three contradictions are different claims about the world, and printing both
+# as "62% confidence" makes the weaker one unfalsifiable-sounding. A reader who
+# sees two decimal places reasonably infers something was measured.
+#
+# So maturity is derived HERE, once, from the fields the producer actually
+# publishes, and every founder surface reads it from this function. A surface
+# computing its own would be the mechanism by which the narrative and the
+# dashboard come to disagree about the same belief.
+NEWLY_DECLARED = "NEWLY_DECLARED"
+REVISED = "REVISED"
+TESTED = "TESTED"
+REPEATEDLY_SUPPORTED = "REPEATEDLY_SUPPORTED"
+UNDER_REVIEW = "UNDER_REVIEW"
+WEAKENED = "WEAKENED"
+RETIRED = "RETIRED"
+
+MATURITIES = frozenset({NEWLY_DECLARED, REVISED, TESTED, REPEATEDLY_SUPPORTED,
+                        UNDER_REVIEW, WEAKENED, RETIRED})
+
+#: The only update method whose number is a measurement rather than a step
+#: size. Deliberately a whitelist: a method added upstream must be classified
+#: here before its figure can reach a founder as a percentage.
+NUMERIC_METHODS = frozenset({"EMPIRICAL_BAYES"})
+
+#: Words for a heuristic reading. The bands are wide on purpose -- narrow ones
+#: would reintroduce the precision the words exist to avoid.
+_PLAUSIBILITY = ((0.75, "well supported by the current evidence"),
+                 (0.60, "moderately plausible"),
+                 (0.45, "roughly balanced against the alternatives"),
+                 (0.0, "weakly supported"))
+
+
+def belief_maturity(belief: dict) -> str:
+    """How much this belief has been through, from what the producer states.
+
+    Conservative by construction: anything unrecognised reads as newly
+    declared, because treating an unknown method as tested is the failure that
+    matters. The reverse understates a belief and costs nothing.
+    """
+    method = str(belief.get("update_method") or "").upper()
+    direction = belief.get("direction_of_last_change")
+    if belief.get("retired"):
+        return RETIRED
+    if method == "DECAY":
+        # Absence moved it toward uncertainty; no new evidence arrived.
+        return UNDER_REVIEW
+    if not direction:
+        return TESTED if method in NUMERIC_METHODS else NEWLY_DECLARED
+    lowered = str(direction).lower()
+    if lowered in ("down", "weaker", "negative", "-"):
+        return WEAKENED
+    if method in NUMERIC_METHODS:
+        return REPEATEDLY_SUPPORTED
+    return REVISED
+
+
+def confidence_is_numeric(belief: dict) -> bool:
+    """Whether this belief's figure may be printed as a percentage."""
+    return str(belief.get("update_method") or "").upper() in NUMERIC_METHODS
+
+
+def confidence_language(belief: dict) -> str:
+    """A phrase a founder can act on, matched to what the number can bear.
+
+    Not a reflexive removal of every number: an EMPIRICAL_BAYES posterior IS a
+    measurement and says so. What is refused is a heuristic step presented in
+    the same grammar as a measured one.
+    """
+    try:
+        value = float(belief.get("confidence") or 0)
+    except (TypeError, ValueError):
+        value = 0.0
+    if confidence_is_numeric(belief):
+        return f"held at {value:.0%} confidence, from measured base rates"
+    for floor, words in _PLAUSIBILITY:
+        if value >= floor:
+            return f"the current evidence makes this {words}"
+    return "the current evidence is not strong enough to lean on"
+
+
+#: What each maturity means, in a founder's terms rather than the engine's.
+MATURITY_WORDS = {
+    NEWLY_DECLARED: ("a newly formed reading, not a tested conclusion"),
+    REVISED: ("revised since it was opened, as later evidence arrived"),
+    TESTED: ("tested against measured base rates rather than assumed"),
+    REPEATEDLY_SUPPORTED: ("supported again by evidence arriving after it "
+                           "was opened"),
+    UNDER_REVIEW: ("drifting toward uncertainty because no new evidence has "
+                   "arrived"),
+    WEAKENED: ("weaker than when it was opened, after contrary evidence"),
+    RETIRED: ("withdrawn, and kept only as a record"),
+}
+
+
+def maturity_sentence(belief: dict) -> str:
+    return MATURITY_WORDS.get(belief_maturity(belief),
+                              MATURITY_WORDS[NEWLY_DECLARED])
+
+
 @dataclass(frozen=True)
 class StrategicIntel:
     """The founder-facing view of one company's strategic dossier."""
