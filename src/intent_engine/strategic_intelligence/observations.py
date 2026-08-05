@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
+from intent_engine.strategic_intelligence import evidence_text as ET
 from intent_engine.strategic_intelligence.records import StrategicObservation
 
 
@@ -552,8 +553,11 @@ def derive_analyst_evidence(documents) -> list:
         if page_kind(doc.get("final_url", ""), title) != "strategic":
             continue
 
-        body = (doc.get("text_content") or "").strip()
-        excerpt = (body or doc.get("meta_description") or "").strip()
+        body = ET.body_text(doc)
+        # ONE excerpt rule, shared with `derive_observations` below. Two
+        # derivations reading the same document must not disagree about what
+        # it says; they differ in what they admit, not in what they read.
+        excerpt = ET.evidence_excerpt(doc)
         if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
             continue
 
@@ -580,7 +584,7 @@ def derive_analyst_evidence(documents) -> list:
             directly_observed=True,
             signals=tuple(signals),
             source_class=source_class,
-            excerpt=excerpt[:1200],
+            excerpt=excerpt[:ET.EXCERPT_CHARS],
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],
@@ -590,6 +594,7 @@ def derive_analyst_evidence(documents) -> list:
             weak=weak,
             evidence_quality="weak" if weak else "strong"))
     return evidence
+
 
 
 def observation_sentence(subject: str, signal: str, label: str) -> str:
@@ -656,8 +661,15 @@ def derive_observations(documents, *, company: str = "") -> list:
         if not signals:
             continue
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
-        excerpt = (doc.get("meta_description")
-                   or doc.get("text_content", "")[:280]).strip()
+        # THE MEASURED DEFECT. This line used to read
+        #     (meta_description or text_content[:280])
+        # and it was production for every observation the engine made. A
+        # marketing page's meta_description IS its blurb; a filing's first 280
+        # characters ARE its cover page; and Microsoft's Q4 earnings exhibit
+        # was cut one clause before its first number. Fifteen of seventeen
+        # live observations carried no commercial event in any phrasing, and
+        # the classifier downstream was blamed for rejecting them.
+        excerpt = ET.evidence_excerpt(doc)
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0]
         entity = (title or norm).split("—")[0].strip()[:80]
@@ -687,7 +699,7 @@ def derive_observations(documents, *, company: str = "") -> list:
             directly_observed=True,
             signals=tuple(signals),
             source_class=source_class,
-            excerpt=excerpt[:400],
+            excerpt=excerpt[:ET.EXCERPT_CHARS],
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],
