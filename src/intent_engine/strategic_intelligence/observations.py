@@ -411,6 +411,7 @@ _OUTSIDE_ONLY_PHRASES = {
     "merchant_outcome_positioning": ("helped us grow", "grew our sales",
                                      "increased our revenue"),
 }
+from intent_engine.strategic_intelligence import filing_sections as FS
 from intent_engine.strategic_intelligence.evidence_classes import (
     INDEPENDENT_CLASSES as _INDEPENDENT_CLASSES,
 )
@@ -677,8 +678,25 @@ def derive_observations(documents, *, company: str = "") -> list:
         if not signals:
             continue
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
-        excerpt = (doc.get("meta_description")
-                   or doc.get("text_content", "")[:280]).strip()
+        # A FILING IS NOT READ FROM ITS FIRST 280 CHARACTERS. For a web page
+        # that is the summary; for a 10-K it is the cover page -- form title,
+        # filing-status checkboxes, state of incorporation, IRS number. That
+        # is why a run which retrieved Datadog's annual report produced no
+        # filing-derived observation, and why "What was verified" fell back to
+        # blog marketing once the cover page was filtered out.
+        #
+        # Section-aware selection is tried FIRST and falls back silently, so a
+        # malformed or unrecognised filing keeps the old behaviour rather than
+        # losing its observation.
+        body_text = doc.get("text_content", "") or ""
+        excerpt, section = "", ""
+        if FS.looks_like_filing(body_text, doc.get("final_url", "")):
+            excerpt, section = FS.best_excerpt(body_text)
+        if not excerpt:
+            excerpt = (doc.get("meta_description")
+                       or body_text[:280]).strip()
+        else:
+            excerpt = excerpt.strip()
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0]
         entity = (title or norm).split("—")[0].strip()[:80]
