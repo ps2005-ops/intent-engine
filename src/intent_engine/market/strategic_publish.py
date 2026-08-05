@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import pathlib
 import re
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from . import strategic_export as SE
 
@@ -107,10 +107,13 @@ def bundles(result, *, market_structures: Sequence[Any] = (),
     for key in sorted(keys):
         out[key] = {
             "company_id": key,
-            "display_name": (_display_name(beliefs.get(key, ()))
-                             or _display_name(hidden.get(key, ()))
-                             or _display_name(mismatches.get(key, ()))
-                             or key),
+            # The engine's OWN subject string, verbatim — the market universe
+            # company id a belief was keyed on. It is not a display name and
+            # must not be shown to a founder; `publish` maps it to one.
+            "subject": (_display_name(beliefs.get(key, ()))
+                        or _display_name(hidden.get(key, ()))
+                        or _display_name(mismatches.get(key, ()))
+                        or key),
             "beliefs": beliefs.get(key, []),
             "hidden_states": hidden.get(key, []),
             "interactions": interactions.get(key, []),
@@ -127,8 +130,28 @@ def bundles(result, *, market_structures: Sequence[Any] = (),
 def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             pricing_actions: Sequence[Any] = (),
             causal_pathways: Sequence[Any] = (),
+            identities: Optional[Dict[str, Any]] = None,
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
+
+    `identities` maps this engine's internal subject (the market universe's
+    `company_id`, which is what a belief's `subject` actually holds) to the
+    names a founder would recognise: `{"microsoft": ("Microsoft Corporation",
+    ("Microsoft", "Microsoft Corp"))}`.
+
+    IT IS NOT COSMETIC, AND THAT WAS MEASURED
+    -----------------------------------------
+    Without it this module filed `microsoft.json`, and the founder side —
+    which knows the company as whatever its operator typed — looked for
+    `microsoft-corporation.json`. It found nothing, on every company, and
+    reported "no strategic reading has been published", which is a legitimate
+    sentence and so nothing anywhere raised. The bridge had a producer, a
+    consumer, an allowlist enforced at both ends and a full test suite, and it
+    carried zero dossiers.
+
+    So the file is keyed on the name the other side can actually derive, and
+    the payload states its subject as well, because a key both sides have to
+    compute the same way is the thing that just failed.
 
     Returns a report the cycle can print: what was published, what was
     skipped for having no material, and what was REFUSED because the
@@ -137,12 +160,25 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
     grouped = bundles(result, market_structures=market_structures,
                       pricing_actions=pricing_actions,
                       causal_pathways=causal_pathways)
+    identities = identities or {}
     published: List[str] = []
     refused: List[dict] = []
+    unnamed: List[str] = []
     for key, bundle in grouped.items():
+        subject_id = bundle["subject"]
+        display, aliases = _identity_for(subject_id, identities)
+        if not display:
+            # No display name was supplied, so the old key stands. The dossier
+            # is still correct and still published; it simply cannot be found
+            # by name, and that is reported rather than left to be discovered
+            # as another silent absence.
+            unnamed.append(key)
+        file_key = company_key(display) or key
         try:
             payload = SE.build_export(
-                company_id=key, as_of=result.as_of,
+                company_id=file_key, as_of=result.as_of,
+                subject_id=subject_id, display_name=display,
+                subject_names=aliases,
                 beliefs=bundle["beliefs"],
                 hidden_states=bundle["hidden_states"],
                 interactions=bundle["interactions"],
@@ -156,16 +192,40 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
         except SE.ExportLeak as exc:
             # Fail closed, loudly, and per company. Never counted as a
             # publish, never counted as "nothing to say".
-            refused.append({"company_id": key, "reason": str(exc)})
+            refused.append({"company_id": file_key, "reason": str(exc)})
             continue
-        published.append(key)
+        published.append(file_key)
     return {
         "contract": SE.EXPORT_VERSION,
         "as_of": result.as_of,
         "companies_with_material": len(grouped),
         "published": sorted(published),
         "refused": refused,
+        "unnamed": sorted(unnamed),
         "directory": str(pathlib.Path(root) / EXPORT_DIR),
         "note": ("a company with no belief, posture move, mismatch or "
                  "information priority is not given an empty dossier"),
+        "unnamed_note": ("a dossier published under an internal id only; the "
+                         "founder side cannot find it by company name"),
     }
+
+
+def _identity_for(subject_id: str, identities: Dict[str, Any]
+                  ) -> Tuple[str, Tuple[str, ...]]:
+    """The display name and aliases for one internal subject.
+
+    Accepts either `{id: "Display Name"}` or `{id: ("Display Name", aliases)}`
+    so a caller with only a name is not forced to invent an alias list.
+    """
+    entry = identities.get(subject_id) or identities.get(
+        company_key(subject_id))
+    if entry is None:
+        return "", ()
+    if isinstance(entry, str):
+        return entry.strip(), ()
+    display, aliases = "", ()
+    try:
+        display, aliases = entry[0], tuple(entry[1])
+    except (TypeError, IndexError, KeyError):
+        return (str(entry).strip(), ())
+    return str(display).strip(), tuple(str(a) for a in aliases if a)

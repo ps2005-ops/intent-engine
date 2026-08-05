@@ -283,6 +283,13 @@ class CycleContext:
         default_factory=lambda: __import__(
             "intent_engine.market.evidence_translation", fromlist=["x"]
         ).TranslationStats())
+    # company_id -> (canonical name, aliases). Only the research sweep knows
+    # what a company is CALLED; everything downstream keys on the universe id,
+    # which is stable and is why it is used. The strategic export is where
+    # that stops working, because the founder side has never seen this
+    # engine's ids and cannot derive one from a company name — so the names
+    # travel with the evidence rather than being re-derived at the boundary.
+    company_names: Dict[str, Any] = field(default_factory=dict)
 
 
 def run_step(name: str, fn: StepFn, ctx: CycleContext, *,

@@ -127,12 +127,19 @@ def _live_research(ctx: C.CycleContext) -> Tuple[List[dict], int]:
         # below keeps only a count, which is all the report needs and is
         # exactly what made the previous eleven cycles unable to learn: a
         # count cannot update a belief.
+        aliases = _aliases_for(company)
         translated, dropped, tstats = ET.translate_with_stats(
             out.get("evidence") or [], subject_company=company.company_id,
             as_of=ctx.as_of,
-            subject_aliases=_aliases_for(company))
+            subject_aliases=aliases)
         ctx.learning_inbox.extend(translated)
         ctx.translation_stats.merge(tstats)
+        # The names go with it. This is the only place in the cycle that holds
+        # both the id everything downstream keys on and the name a founder
+        # would use, and the strategic export needs both.
+        ctx.company_names[company.company_id] = (
+            getattr(company, "canonical_name", "") or company.company_id,
+            aliases)
         rows.append({
             "company": company.company_id,
             "instrument": getattr(company, "tradable_instrument", "") or "",
@@ -509,7 +516,8 @@ def learning_step(ctx: C.CycleContext) -> dict:
     # must not lose the learning that already happened, so it is reported in
     # the row rather than raised.
     try:
-        payload["strategic_export"] = SEP.publish(result, root=ctx.root)
+        payload["strategic_export"] = SEP.publish(
+            result, root=ctx.root, identities=ctx.company_names)
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}
     return payload

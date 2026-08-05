@@ -195,3 +195,100 @@ def test_hidden_states_reach_the_dossier_with_their_alternatives(store,
     posture = payload["hidden_states"][0]
     assert posture["certainty_note"], "a posture must never read as certain"
     assert posture["alternatives"], "rival postures must remain live"
+
+
+# ------------------------------------------------- the identity of the subject
+#
+# THE BRIDGE CARRIED NOTHING, AND NOTHING REPORTED IT.
+#
+# `company_key` is pinned identically on both sides (above), and the join
+# still never matched on a single real company. Both sides computed the key
+# correctly from DIFFERENT STRINGS: this engine keys on its internal universe
+# id ("microsoft"), and the founder side knows the company by the name its
+# operator typed ("Microsoft Corporation"). Pinning a shared function does not
+# pin a shared input, and the miss renders as "no strategic reading has been
+# published", which is a sentence the product is supposed to be able to say.
+def test_the_dossier_is_filed_under_the_name_the_other_side_can_derive(
+        store, tmp_path):
+    e = seed(store, subject="palantir")
+    result = run_session(store, e)
+    report = SEP.publish(
+        result, root=tmp_path,
+        identities={"palantir": ("Palantir Technologies Inc.",
+                                 ("Palantir", "Palantir Technologies"))})
+
+    assert report["published"] == ["palantir-technologies-inc"]
+    assert report["unnamed"] == []
+    assert (tmp_path / "reports/market/strategic"
+            / "palantir-technologies-inc.json").exists()
+
+
+def test_the_dossier_states_who_it_is_about(store, tmp_path):
+    """A key is not an identity unless both sides derive it from one string."""
+    e = seed(store, subject="palantir")
+    result = run_session(store, e)
+    SEP.publish(result, root=tmp_path,
+                identities={"palantir": ("Palantir Technologies Inc.",
+                                         ("Palantir",))})
+    payload = json.loads(
+        (tmp_path / "reports/market/strategic"
+         / "palantir-technologies-inc.json").read_text())
+
+    assert payload["company_display_name"] == "Palantir Technologies Inc."
+    # The internal id is kept among the names, so a consumer holding only the
+    # old key can still find the dossier it used to read.
+    assert "palantir" in payload["subject_names"]
+    assert "Palantir Technologies Inc." in payload["subject_names"]
+
+
+def test_a_founder_never_reads_the_internal_slug(store, tmp_path):
+    """The subject of the sentence must be the company, not its key.
+
+    Measured on the first real dossiers: "microsoft is seeing demand
+    strengthen rather than plateau" — a correct claim about a database key.
+    """
+    b = B.create(belief_id="h9",
+                 proposition="microsoft is seeing demand strengthen",
+                 subject="microsoft", prior=0.6, at="2026-07-01")
+    store.declare_belief(b)
+    result = LC.run(as_of="2026-08-05", store=store, trades_opened=0)
+    SEP.publish(result, root=tmp_path,
+                identities={"microsoft": ("Microsoft Corporation", ())})
+    payload = json.loads(
+        (tmp_path / "reports/market/strategic"
+         / "microsoft-corporation.json").read_text())
+
+    belief = payload["strategic_beliefs"][0]
+    assert belief["proposition"] == (
+        "Microsoft Corporation is seeing demand strengthen")
+    assert belief["subject"] == "Microsoft Corporation"
+
+
+def test_a_proposition_that_does_not_open_with_the_subject_is_left_alone():
+    """The substitution is positional and exact, never search-and-replace."""
+    show, sentence = SE._displayer("microsoft", "Microsoft Corporation")
+    assert sentence("microsoft is hiring") == "Microsoft Corporation is hiring"
+    # Not a template rendering, so it is not ours to rewrite.
+    assert sentence("Demand at microsoft is strengthening") == (
+        "Demand at microsoft is strengthening")
+    assert show("microsoft") == "Microsoft Corporation"
+    assert show("microsoft azure") == "microsoft azure"
+
+
+def test_a_dossier_with_no_identity_is_published_and_reported_as_unfindable(
+        store, tmp_path):
+    """Back-compatible, and honest about what the omission costs.
+
+    Publishing under the internal id still produces a correct dossier. It
+    simply cannot be found by company name, and that is said out loud rather
+    than left to surface as another silent absence.
+    """
+    e = seed(store, subject="palantir")
+    result = run_session(store, e)
+    report = SEP.publish(result, root=tmp_path)
+
+    assert report["published"] == ["palantir"]
+    assert report["unnamed"] == ["palantir"]
+    payload = json.loads((tmp_path / "reports/market/strategic"
+                          / "palantir.json").read_text())
+    assert payload["company_display_name"] == "palantir"

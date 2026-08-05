@@ -394,7 +394,12 @@ def propose(evidence: Sequence[ME.MicroEvidence], *, as_of: str,
             learning_speed=spec.learning_speed,
             confidence_basis=(
                 f"opened by {len(items)} translated evidence item(s) of type "
-                f"{items[0].evidence_type}, effective sample {ess}"),
+                # Rounded because this string is read by a founder, not by a
+                # calculation: "effective sample 1.4722" spends four digits of
+                # apparent precision on an estimate of how much four
+                # correlated items are really worth.
+                f"{items[0].evidence_type}, effective sample "
+                f"{ess:.2f}"),
             review_interval_days=spec.window_days,
             limitations=limitations,
             supporting_evidence_ids=tuple(i.evidence_id for i in items))

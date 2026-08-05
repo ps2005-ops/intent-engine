@@ -263,3 +263,73 @@ def test_break_subject_binding_with_another_registrants_filing():
     assert len(items) == 1
     assert stats.provenance_only == 1
     assert any("retrieval provenance" in lim for lim in items[0].limitations)
+
+
+# --- 17. the subject's name inside ANOTHER company's name ---------------
+#
+# The guard in 16 was a plain substring test, and this is the document that
+# walked through it. Discovery for the software company "Linear" resolved to
+# an SEC registrant called "Linear Minerals Corp.", whose filing contains the
+# token "Linear" twenty-six times — as its own short name: "the Linear
+# shareholders", "Linear transferred the assets". Every occurrence satisfied
+# `"linear" in body.lower()`, so a lithium miner's joint ventures and option
+# agreements became beliefs about a project-tracking company, correctly
+# classified and properly cited.
+LINEAR_MINERALS = (
+    "LINEAR MINERALS CORP. (formerly FE Battery Metals Corp.). Condensed "
+    "interim financial statements. These condensed interim financial "
+    "statements of Linear Minerals Corp. have been prepared by management. "
+    "Linear Minerals Corp. (\"Linear Minerals\" or the \"Company\") is a "
+    "junior exploration company. Common shares of Westlinear (the Spinco "
+    "shares) were distributed to the Linear shareholders on a pro rata "
+    "basis. Linear transferred the Pontax West lithium property to "
+    "Westlinear, and Linear retained its working capital.")
+
+
+def test_break_subject_binding_when_another_company_extends_the_name():
+    """A longer company name that starts with ours is a collision, not a hit."""
+    assert ET.subject_binding(LINEAR_MINERALS, ("Linear", "linear")) == \
+        ET.OTHER_NAMED
+
+    rows = [{"evidence_text": LINEAR_MINERALS, "kind": "filing",
+             "source": "https://www.sec.gov/Archives/edgar/data/1066130/x.htm",
+             "published_at": AS_OF}]
+    items, _, stats = ET.translate_with_stats(
+        rows, subject_company="linear", as_of=AS_OF,
+        subject_aliases=("Linear", "linear"))
+    assert items == []
+    assert stats.subject_mismatch == 1
+
+
+def test_the_subject_named_as_a_company_survives_the_collision_rule():
+    """The rule must not refuse a company for naming its own subsidiaries.
+
+    "Microsoft Ireland Operations Limited" extends "Microsoft" exactly the way
+    "Linear Minerals Corp." extends "Linear". The difference is that this
+    document also names Microsoft Corporation itself, and a document that
+    names the subject as a company has named it.
+    """
+    body = ("MICROSOFT CORPORATION. Form 10-K. Microsoft Ireland Operations "
+            "Limited and Microsoft Global Finance are consolidated "
+            "subsidiaries. Revenue increased 18% to $70.1 billion.")
+    assert ET.subject_binding(
+        body, ("Microsoft Corporation", "Microsoft", "microsoft")) == ET.NAMED
+
+
+def test_a_dateline_before_the_company_name_still_names_the_company():
+    """`_OTHER_ENTITY` captures leading capitals; the name is the TAIL.
+
+    A masking version of this guard read "Calif. — NVIDIA Corporation" as a
+    foreign entity and refused NVIDIA's own filing.
+    """
+    body = ("SANTA CLARA, Calif. — NVIDIA Corporation today reported record "
+            "revenue for the second quarter.")
+    assert ET.subject_binding(
+        body, ("NVIDIA Corporation", "NVIDIA", "nvidia")) == ET.NAMED
+
+
+def test_an_alias_inside_a_longer_word_is_not_a_naming():
+    """Word boundaries, not substrings: "linearity" does not name Linear."""
+    body = ("The study measured linearity and linearisation error across "
+            "the sample. No company is named in this passage.")
+    assert ET.subject_binding(body, ("Linear", "linear")) == ET.UNNAMED

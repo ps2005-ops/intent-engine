@@ -59,6 +59,14 @@ ALLOWED: Dict[str, Any] = {
     "export_version": None,
     "generated_at": None,
     "company_id": None,
+    # THE SUBJECT, NAMED OUT LOUD. `company_id` is derived from this engine's
+    # internal universe id, which the founder side has never seen and cannot
+    # guess; it asked for the dossier under the name a founder typed and got
+    # nothing, on every real company, without either side reporting a fault.
+    # A key is not an identity unless both sides derive it from the same
+    # string, so the export now states its subject instead of encoding it.
+    "company_display_name": None,
+    "subject_names": None,
     "as_of": None,
     "freshness": {"status": None, "as_of": None, "age_days": None,
                   "stale": None, "note": None},
@@ -225,7 +233,37 @@ def assert_sanitized(payload: dict) -> None:
     _scan_text(payload)
 
 
+def _displayer(subject_id: str, display_name: str):
+    """Render the engine's internal subject in the founder's vocabulary.
+
+    The learning store keys a belief on `subject_company`, which is the market
+    universe's company id — stable, which is exactly why it is used, and a
+    slug, which is why it must not be the word a founder reads. The first real
+    dossiers said "microsoft is seeing demand strengthen rather than plateau":
+    a correct claim about a key.
+
+    The substitution is EXACT and positional, never a search-and-replace. Every
+    family template is `"{subject} ..."`, so the subject is a known prefix and
+    nothing else in the sentence is touched. A proposition that does not begin
+    with the subject is left exactly as written rather than guessed at.
+    """
+    src = (subject_id or "").strip()
+    dst = (display_name or "").strip()
+
+    def show(value: str) -> str:
+        return dst if (dst and src and (value or "").strip() == src) else value
+
+    def sentence(text: str) -> str:
+        if dst and src and (text or "").startswith(src + " "):
+            return dst + text[len(src):]
+        return text
+
+    return show, sentence
+
+
 def build_export(*, company_id: str, as_of: str,
+                 subject_id: str = "", display_name: str = "",
+                 subject_names: Sequence[str] = (),
                  beliefs: Sequence[Any] = (),
                  hidden_states: Sequence[Any] = (),
                  interactions: Sequence[Any] = (),
@@ -244,23 +282,29 @@ def build_export(*, company_id: str, as_of: str,
     """
     from . import expectation as EXP
 
+    show, sentence = _displayer(subject_id, display_name)
     payload: Dict[str, Any] = {
         "export_version": EXPORT_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(
             timespec="seconds"),
         "company_id": company_id,
+        "company_display_name": display_name or subject_id or company_id,
+        "subject_names": sorted({n for n in
+                                 (list(subject_names) + [display_name,
+                                                         subject_id])
+                                 if (n or "").strip()}),
         "as_of": as_of[:10],
         "freshness": _freshness(as_of),
-        "strategic_beliefs": [_belief(b) for b in beliefs],
-        "hidden_states": [_hidden(h) for h in hidden_states],
+        "strategic_beliefs": [_belief(b, show, sentence) for b in beliefs],
+        "hidden_states": [_hidden(h, show) for h in hidden_states],
         "interactions": [_interaction(i) for i in interactions],
         "pricing_actions": [_gated(p) for p in pricing_actions],
         "causal_pathways": [_pathway(p) for p in causal_pathways],
         "expectation_mismatches": [
-            _mismatch(r) for r in reconciliations
+            _mismatch(r, show) for r in reconciliations
             if getattr(r, "outcome", "") in EXP.INFORMATIVE],
         "competitor_reactions": [_reaction(r) for r in competitor_reactions],
-        "information_priorities": [_priority(p)
+        "information_priorities": [_priority(p, show)
                                    for p in information_priorities],
         "limitations": list(limitations),
         "disclaimer": DISCLAIMER,
@@ -279,9 +323,9 @@ def build_export(*, company_id: str, as_of: str,
 
 
 # --- projectors: each one names exactly what crosses ----------------------
-def _belief(b) -> dict:
+def _belief(b, show=lambda s: s, sentence=lambda s: s) -> dict:
     last = b.history[-1] if b.history else None
-    return {"proposition": b.proposition, "subject": b.subject,
+    return {"proposition": sentence(b.proposition), "subject": show(b.subject),
             "confidence": b.posterior_probability,
             "direction_of_last_change": last.direction if last else None,
             "last_updated": b.last_updated,
@@ -296,11 +340,11 @@ def _belief(b) -> dict:
             "limitations": list(b.limitations)}
 
 
-def _hidden(h) -> dict:
+def _hidden(h, show=lambda s: s) -> dict:
     top = h.top(4)
     state, p = h.leading
     moved = h.history[-1].moved() if h.history else ()
-    return {"subject": h.subject, "leading_state": state,
+    return {"subject": show(h.subject), "leading_state": state,
             "leading_probability": p,
             "alternatives": [{"state": s, "probability": v}
                              for s, v in top[1:]],
@@ -360,8 +404,8 @@ def _pathway(p) -> dict:
                       for e in d["edges"]]}
 
 
-def _mismatch(r) -> dict:
-    return {"subject": r.subject, "expected_event": "",
+def _mismatch(r, show=lambda s: s) -> dict:
+    return {"subject": show(r.subject), "expected_event": "",
             "expected_direction": None,
             "observed_direction": r.observed_direction,
             "outcome": r.outcome, "rationale": r.rationale,
@@ -380,9 +424,9 @@ def _reaction(r) -> dict:
             "is_prediction": d["is_prediction"]}
 
 
-def _priority(p) -> dict:
+def _priority(p, show=lambda s: s) -> dict:
     d = p.as_dict()
-    return {"subject": d["subject"],
+    return {"subject": show(d["subject"]),
             "candidate_observation": d["candidate_observation"],
             "observation_kind": d["observation_kind"],
             "expected_date": d["expected_date"], "priority": d["priority"],

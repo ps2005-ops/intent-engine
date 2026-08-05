@@ -220,9 +220,20 @@ _OTHER_ENTITY = re.compile(
     r"\b([A-Z][A-Za-z&.\-]*(?:\s+[A-Z][A-Za-z&.\-]*){0,3})\s+"
     r"(?:Inc|Corp|Corporation|Ltd|Limited|LLC|PLC|N\.V\.|S\.A\.)\b")
 
+#: corporate suffixes, stripped before two names are compared as the same
+#: company. "Caterpillar" and "Caterpillar Inc." are one subject.
+_SUFFIX = re.compile(
+    r"\b(inc|corp|corporation|company|co|ltd|limited|llc|plc|sa|s\.a|nv|n\.v|"
+    r"ag|gmbh|holdings|group)\b\.?", re.I)
+
 NAMED = "named"                  # the document names the subject
 UNNAMED = "unnamed"              # the document names no company at all
 OTHER_NAMED = "other_named"      # it names other companies and not this one
+
+
+def _stem(name: str) -> str:
+    """A company name reduced to what makes it that company."""
+    return " ".join(_SUFFIX.sub(" ", name or "").split()).strip(" ,.").lower()
 
 
 def subject_binding(text: str, aliases: Sequence[str]) -> str:
@@ -241,12 +252,80 @@ def subject_binding(text: str, aliases: Sequence[str]) -> str:
     corporate entities while never naming the subject is refused, because
     that is the shape of a mis-resolved registrant rather than of a terse
     exhibit.
+
+    A SUBSTRING IS NOT A NAMING, AND THAT IS HOW THE GUARD WAS BEATEN
+    ----------------------------------------------------------------
+    This check was added because discovery for "Linear" resolved to a mining
+    registrant, and it did not work: the registrant is "Linear Minerals
+    Corp.", the alias "Linear" occurs in it twenty-six times, and every one of
+    those occurrences satisfied a plain substring test. So the filing was
+    accepted as being about the software company, and produced two beliefs —
+    partnerships and contract awards — that were correctly extracted, properly
+    cited, and about a different company entirely.
+
+    No rule about neighbouring words can fix that on its own, because the
+    filing is not being coy: it introduces "Linear Minerals Corp." and then
+    says "Linear" for the rest of forty thousand characters — "the Linear
+    shareholders", "Linear transferred the assets". Those are real, standalone
+    uses of the subject's exact name, referring to a different company.
+
+    What separates the two cases is whether the subject is present as a
+    COMPANY. A document that names "Microsoft Corporation" has named the
+    subject however many product names begin with the word Microsoft. A
+    document that names "Linear Minerals Corp." and never "Linear" as a
+    corporate entity has introduced a longer-named company that the bare word
+    now most plausibly refers to, and attributing its events to the subject is
+    the fabrication this guard exists to stop. So a name collision is refused
+    rather than resolved — the same choice the founder side makes when two
+    dossiers claim one company.
     """
     body = text or ""
-    low = body.lower()
-    if any(a for a in aliases if a and a.lower() in low):
-        return NAMED
-    return OTHER_NAMED if _OTHER_ENTITY.search(body) else UNNAMED
+    stems = {s for s in (_stem(a) for a in aliases if a) if s}
+    entities = [_stem(m.group(1)) for m in _OTHER_ENTITY.finditer(body)]
+
+    collision = False
+    for entity in entities:
+        if _is_subject(entity, stems):
+            return NAMED           # named as a company, in its own right
+        collision = collision or _extends(entity, stems)
+    if collision:
+        return OTHER_NAMED
+
+    # No collision, so a plain naming is a naming. The boundaries matter and
+    # a bare substring did not have them: "Linear" should not be found inside
+    # "linearity", and the short-alias floor in `_aliases_for` was carrying
+    # that on its own.
+    for alias in aliases:
+        if alias and re.search(r"\b" + re.escape(alias) + r"\b", body, re.I):
+            return NAMED
+    return OTHER_NAMED if entities else UNNAMED
+
+
+def _is_subject(entity: str, stems: set) -> bool:
+    """Whether a corporate name found in the body IS the subject.
+
+    Matched on the TAIL, because `_OTHER_ENTITY` may capture up to four
+    capitalised words before the name itself — a press release datelined
+    "SANTA CLARA, Calif. — NVIDIA Corporation" yields "Calif NVIDIA", which is
+    still NVIDIA. The tail is the company; what precedes it is context.
+    """
+    words = entity.split()
+    return any(entity == s or words[-len(s.split()):] == s.split()
+               for s in stems if s and len(s.split()) <= len(words))
+
+
+def _extends(entity: str, stems: set) -> bool:
+    """Whether a corporate name is the subject's name plus more of its own.
+
+    "Linear Minerals" extends "Linear". "Microsoft Corporation" does not
+    extend "Microsoft" — the suffix is already gone by the time we compare.
+    """
+    words = entity.split()
+    return any(len(s.split()) < len(words)
+               and words[:len(s.split())] == s.split()
+               for s in stems if s)
+
+
 
 
 def translate(observations: Sequence[Any], *, subject_company: str,
