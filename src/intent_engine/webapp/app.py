@@ -1807,9 +1807,22 @@ class WebApp:
             grouped.setdefault((label, human, detail), []).append(readable)
         items = []
         for (label, human, detail), sources in grouped.items():
-            shown = ", ".join(_e(s) for s in sources[:3])
-            if len(sources) > 3:
-                shown += f" and {len(sources) - 3} more"
+            # Deduplicate the READABLE names, not the attempts. Several
+            # candidates routinely resolve to the same readable string — a
+            # homepage proposed by two discovery paths, or pages whose titles
+            # are unknown so both fall back to the same host. Measured live on
+            # Caterpillar, the list opened "www.caterpillar.com,
+            # www.caterpillar.com, www.caterpillar.com/api", which reads as
+            # carelessness and spends two of the three visible slots saying
+            # one thing.
+            #
+            # The count follows the deduplicated list, so "and N more" counts
+            # pages the reader would recognise as distinct rather than
+            # internal retry attempts, which are not a fact about the company.
+            distinct = list(dict.fromkeys(sources))
+            shown = ", ".join(_e(s) for s in distinct[:3])
+            if len(distinct) > 3:
+                shown += f" and {len(distinct) - 3} more"
             items.append(f"<li><strong>{_e(label)}</strong>: {_e(human)}"
                          f"{detail}<br><span class='muted'>{shown}</span></li>")
         failed_html = (f"<h3>Sources that could not be read</h3>"
@@ -2151,7 +2164,6 @@ class WebApp:
         """
         from intent_engine.founder_brief import build as fb
         from intent_engine.founder_brief import layers as fl
-        from intent_engine.founder_brief import market as fm
 
         result = self._result(run_id) or {}
         report = result.get("strategic_report") or {}
@@ -2601,7 +2613,6 @@ class WebApp:
         point of the mode system -- equally USEFUL, not equally detailed.
         """
         from intent_engine.founder_brief import build as fb
-        from intent_engine.founder_brief import market as fm
         from intent_engine.founder_brief import render as fr
 
         report = result.get("strategic_report") or {}
