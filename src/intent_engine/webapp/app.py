@@ -908,7 +908,7 @@ class WebApp:
             result = DI.ingest(
                 raw, runtime_root=self._runtime_root,
                 provided_token=environ.get("HTTP_X_DOSSIER_TOKEN", ""),
-                app_env=self.config.env)
+                request_host=environ.get("HTTP_HOST", ""))
         except DI.IngestRefused as exc:
             _LOG.info("strategic dossier refused: %s", exc.reason)
             return (f"{exc.status} Refused",

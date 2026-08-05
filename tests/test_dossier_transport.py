@@ -27,7 +27,8 @@ from intent_engine.external_intel import strategic_contract as SC
 
 PRODUCED = pathlib.Path(__file__).parent / "fixtures" / "produced"
 TOKEN = "a-preview-token"
-ENV = {DI.TOKEN_ENV: TOKEN}
+HOST = "preview.example"
+ENV = {DI.TOKEN_ENV: TOKEN, DI.HOST_ENV: HOST}
 
 
 def payload(**over):
@@ -40,9 +41,9 @@ def body(**over) -> bytes:
     return json.dumps(payload(**over)).encode("utf-8")
 
 
-def ingest(raw=None, *, root, token=TOKEN, app_env="preview", env=ENV):
+def ingest(raw=None, *, root, token=TOKEN, host=HOST, env=ENV):
     return DI.ingest(raw if raw is not None else body(), runtime_root=root,
-                     provided_token=token, app_env=app_env, env=env)
+                     provided_token=token, request_host=host, env=env)
 
 
 # --- it does not exist unless configured ------------------------------------
@@ -54,19 +55,28 @@ def test_with_no_token_configured_there_is_no_endpoint(tmp_path):
     assert exc.value.status == 404
 
 
-def test_it_refuses_to_exist_in_production_even_if_configured(tmp_path):
-    """The second, independent condition. A misconfiguration cannot open
-    production, and a change of heart about production cannot open a service
-    with no token."""
+def test_the_token_does_not_work_on_a_host_it_was_not_issued_for(tmp_path):
+    """The second condition, and it exists because of the exact mistake that
+    produced it: this preview was created by COPYING another service's env
+    vars. A check that a copied variable satisfies is not a second condition.
+    """
     with pytest.raises(DI.IngestRefused) as exc:
-        ingest(root=tmp_path, app_env="production")
+        ingest(root=tmp_path, host="intent-engine-oatc.onrender.com")
     assert exc.value.status == 404
 
 
 def test_enabled_only_when_both_conditions_hold():
-    assert DI.enabled_for("preview", ENV)
-    assert not DI.enabled_for("production", ENV)
-    assert not DI.enabled_for("preview", {})
+    assert DI.enabled_for(HOST, ENV)
+    assert DI.enabled_for(HOST + ":443", ENV)
+    assert not DI.enabled_for("somewhere.else", ENV)
+    assert not DI.enabled_for(HOST, {DI.TOKEN_ENV: TOKEN})
+    assert not DI.enabled_for(HOST, {DI.HOST_ENV: HOST})
+
+
+def test_a_hardened_preview_is_not_mistaken_for_production():
+    """The bug this replaced: keying on WEBAPP_ENV refused the very service
+    it was meant to enable, because a preview should run hardened too."""
+    assert DI.enabled_for(HOST, ENV)
 
 
 # --- authorisation ----------------------------------------------------------

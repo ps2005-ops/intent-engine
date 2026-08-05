@@ -59,6 +59,19 @@ MAX_BYTES = 512 * 1024
 
 TOKEN_ENV = "DOSSIER_INGEST_TOKEN"
 
+#: The host this token is valid for. The second condition, and it exists
+#: because of the exact mistake that produced it: the bridge preview was
+#: created by COPYING the env vars of another service. Any check that a copied
+#: variable satisfies is not a second condition at all.
+#:
+#: An earlier version keyed on WEBAPP_ENV != "production" and was wrong. A
+#: preview SHOULD run in hardened mode, and this one does, so the check
+#: conflated "runs hardened" with "is the production deployment" and refused
+#: the very service it was meant to enable. Binding to a hostname tests
+#: identity rather than posture: copy both variables anywhere else and the
+#: request host no longer matches, so the route does not exist there.
+HOST_ENV = "DOSSIER_INGEST_HOST"
+
 ACCEPTED = "accepted"
 UNCHANGED = "unchanged"
 SUPERSEDED = "superseded"
@@ -77,15 +90,22 @@ def configured_token(env=None) -> str:
     return (env or os.environ).get(TOKEN_ENV, "").strip()
 
 
-def enabled_for(app_env: str, env=None) -> bool:
-    """Whether the route exists at all.
+def _host(value: str) -> str:
+    return (value or "").split(":")[0].strip().lower()
 
-    Two independent conditions, because either one alone is a single point of
-    failure: a token must be configured, AND the service must not be
-    production. A misconfiguration cannot open production, and a change of
-    heart about production cannot open a service with no token.
+
+def enabled_for(request_host: str, env=None) -> bool:
+    """Whether the route exists at all, for THIS request.
+
+    Two genuinely independent conditions: a token must be configured, and the
+    request must have arrived at the host the token was issued for. Production
+    has neither variable, so it has no endpoint to attack rather than a
+    disabled one — and copying both variables onto another service still does
+    not open it, because the host will not match.
     """
-    return bool(configured_token(env)) and app_env != "production"
+    expected = _host((env or os.environ).get(HOST_ENV, ""))
+    return bool(configured_token(env)) and bool(expected) and \
+        _host(request_host) == expected
 
 
 def _authorized(provided: str, env=None) -> bool:
@@ -104,14 +124,14 @@ def _digest(raw: bytes) -> str:
 
 
 def ingest(raw: bytes, *, runtime_root, provided_token: str,
-           app_env: str = "", env=None) -> dict:
+           request_host: str = "", env=None) -> dict:
     """Validate and store one published dossier. Raises `IngestRefused`.
 
     The order is deliberate: authorisation, then size, then JSON, then the
     contract. Nothing touches the filesystem until the payload has passed the
     same allowlist a locally-written file would have to pass.
     """
-    if not enabled_for(app_env, env):
+    if not enabled_for(request_host, env):
         # Indistinguishable from an unknown path, on purpose.
         raise IngestRefused(404, "no such endpoint")
     if not _authorized(provided_token, env):
