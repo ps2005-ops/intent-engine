@@ -285,8 +285,12 @@ def _belief(b) -> dict:
             "confidence": b.posterior_probability,
             "direction_of_last_change": last.direction if last else None,
             "last_updated": b.last_updated,
-            "basis": last.basis if last else "",
-            "update_method": last.method if last else "",
+            # A belief declared this session has no update history yet. Its
+            # basis is the reason it was opened, not an empty string — a
+            # founder reading "confidence 0.62, basis: (nothing)" is being
+            # shown a number with no argument behind it.
+            "basis": last.basis if last else b.confidence_basis,
+            "update_method": last.method if last else "DECLARED",
             "evidence_ids": list(b.supporting_evidence_ids)
             + list(b.contradicting_evidence_ids),
             "limitations": list(b.limitations)}

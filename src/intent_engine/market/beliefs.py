@@ -161,6 +161,7 @@ class StrategicBelief:
             "supporting_evidence_ids": list(self.supporting_evidence_ids),
             "contradicting_evidence_ids":
                 list(self.contradicting_evidence_ids),
+            "applied_evidence_ids": list(self.applied_evidence_ids),
             "last_updated": self.last_updated,
             "last_validated": self.last_validated,
             "decay_eligible": self.decay_eligible,
@@ -178,17 +179,33 @@ def create(*, belief_id: str, proposition: str, subject: str,
            prior: float, at: str, learning_speed: str = MEDIUM,
            confidence_basis: str = "", decay_eligible: bool = True,
            review_interval_days: int = 90,
-           limitations: Sequence[str] = ()) -> StrategicBelief:
+           limitations: Sequence[str] = (),
+           supporting_evidence_ids: Sequence[str] = ()) -> StrategicBelief:
+    """Open a belief, optionally naming the evidence that proposed it.
+
+    THE PROPOSING EVIDENCE IS ALSO MARKED APPLIED, and that is the point of
+    passing it here rather than letting the first update pick it up. Evidence
+    that opened a belief has already had its effect: it set the prior. If the
+    same item were then allowed through `update` it would strengthen the
+    belief it created, which is a belief confirming itself with one fact
+    counted twice.
+
+    Without the ids the belief also reaches the founder export with
+    `evidence_ids: []` — a proposition with no lineage, which is exactly what
+    the citation work exists to prevent.
+    """
     if learning_speed not in SPEEDS:
         raise ValueError(f"unknown learning_speed {learning_speed!r}")
     p = _clamp(prior)
+    ids = tuple(supporting_evidence_ids)
     return StrategicBelief(
         belief_id=belief_id, proposition=proposition, subject=subject,
         prior_probability=p, posterior_probability=p, last_updated=at[:10],
         learning_speed=learning_speed, confidence_basis=confidence_basis,
         decay_eligible=decay_eligible,
         review_interval_days=review_interval_days,
-        limitations=tuple(limitations))
+        limitations=tuple(limitations),
+        supporting_evidence_ids=ids, applied_evidence_ids=ids)
 
 
 def design_effect(items: Sequence[ME.MicroEvidence]) -> float:

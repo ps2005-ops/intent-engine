@@ -37,6 +37,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
+from . import belief_formation as BF
 from . import beliefs as B
 from . import causal as C
 from . import counterfactual as CF
@@ -53,6 +54,7 @@ CONTRACT_VERSION = "learning_cycle.v1"
 # session that skipped one cannot present itself as having run them all.
 STEPS = (
     "micro_evidence_ingestion",
+    "belief_formation",
     "expected_vs_observed_reconciliation",
     "belief_revision",
     "hidden_state_update",
@@ -93,6 +95,7 @@ class LearningResult:
     as_of: str
     steps: List[StepResult] = field(default_factory=list)
     belief_summary: dict = field(default_factory=dict)
+    formation_summary: dict = field(default_factory=dict)
     reconciliation_summary: dict = field(default_factory=dict)
     hidden_state_summary: dict = field(default_factory=dict)
     causal_summary: dict = field(default_factory=dict)
@@ -101,6 +104,8 @@ class LearningResult:
     near_miss_summary: dict = field(default_factory=dict)
     information_agenda: dict = field(default_factory=dict)
     trades_opened: int = 0
+    #: which of the five outcome classes this session was (see learning_store)
+    outcome_class: str = ""
 
     # --- the session's live objects, for the sanitized export only --------
     # Summaries are counts, and a founder cannot be told anything useful by a
@@ -117,6 +122,7 @@ class LearningResult:
     interactions_seen: Tuple[Any, ...] = ()
     reconciliations_seen: Tuple[Any, ...] = ()
     priorities_seen: Tuple[Any, ...] = ()
+    candidates_formed: Tuple[Any, ...] = ()
 
     @property
     def observations_ingested(self) -> int:
@@ -178,6 +184,7 @@ class LearningResult:
                                    if s.status == ATTEMPTED),
             "steps_total": len(STEPS),
             "belief_learning": self.belief_summary,
+            "belief_formation": self.formation_summary,
             "expected_vs_observed": self.reconciliation_summary,
             "hidden_states": self.hidden_state_summary,
             "causal_graph": self.causal_summary,
@@ -189,6 +196,7 @@ class LearningResult:
             "trades_opened": self.trades_opened,
             "learned_without_trading": self.learned_without_trading,
             "why_nothing_moved": self.why_nothing_moved(),
+            "outcome_class": self.outcome_class,
         }
 
 
@@ -204,6 +212,8 @@ def run(*, as_of: str, store: LS.LearningStore,
         information_candidates: Sequence[dict] = (),
         shadow_registry: Optional[Any] = None,
         trades_opened: int = 0,
+        cycle: str = "day",
+        candidates_seen: int = 0,
         decay_beliefs: bool = True) -> LearningResult:
     """Run one full learning session. Attempts all thirteen steps.
 
@@ -232,8 +242,44 @@ def run(*, as_of: str, store: LS.LearningStore,
     by_id = {b.belief_id: b for b in beliefs_before}
     working: Dict[str, B.StrategicBelief] = dict(by_id)
 
+    # 1b. belief FORMATION ------------------------------------------------
+    # Runs before reconciliation and revision so a belief opened this session
+    # is visible to everything after it — but its expectation is registered
+    # with a window that opens today, so the evidence that PROPOSED it can
+    # never be the evidence that CONFIRMS it. That is the whole reason
+    # preregistration is load-bearing rather than ceremonial.
+    #
+    # Without this step the engine could translate perfect evidence for
+    # twenty-eight companies and still report zero, because revision needs a
+    # belief to revise and nothing anywhere created the first one.
+    candidates, refused = BF.propose(fresh, as_of=as_of,
+                                     existing=tuple(working.values()))
+    for candidate in candidates:
+        store.declare_belief(candidate.belief)
+        working[candidate.belief.belief_id] = candidate.belief
+        if candidate.expectation is not None:
+            store.record_expectation(candidate.expectation)
+    result.formation_summary = BF.summarise(candidates, refused)
+    result.candidates_formed = tuple(candidates)
+    result.steps.append(StepResult(
+        "belief_formation", ATTEMPTED, examined=len(fresh),
+        changed=len(candidates),
+        note=("no evidence proposed a belief: "
+              + ", ".join(f"{k} {v}" for k, v in sorted(refused.items()))
+              if not candidates and refused else "")))
+
     # 2. expected vs observed ---------------------------------------------
-    open_expectations = store.open_expectations(as_of=as_of)
+    # AN EXPECTATION REGISTERED TODAY IS NOT TESTED TODAY.
+    #
+    # Measured on the first real production cycle: six beliefs were declared,
+    # six expectations preregistered, and the same session immediately
+    # "tested" all six and wrote six TOO_EARLY rows into an append-only
+    # ledger. Two things were wrong with that. The report said
+    # `evaluated: 6` when zero tests could have happened, and at one row per
+    # expectation per session the ledger would have accumulated thousands of
+    # records of nothing having happened yet.
+    open_expectations = [e for e in store.open_expectations(as_of=as_of)
+                         if e.preregistered_at[:10] < as_of[:10]]
     reconciliations: List[EXP.Reconciliation] = []
     for e in open_expectations:
         obs = observations.get(e.expectation_id, {})
@@ -243,7 +289,11 @@ def run(*, as_of: str, store: LS.LearningStore,
                           observed_direction=obs.get("observed_direction"),
                           evidence_ids=obs.get("evidence_ids", ()))
         reconciliations.append(r)
-        store.record_reconciliation(r)
+        # TOO_EARLY is the absence of a result, not a result. It stays in the
+        # session summary — an operator should see that a window is running —
+        # and out of the permanent record, which exists to say what happened.
+        if r.outcome != EXP.TOO_EARLY:
+            store.record_reconciliation(r)
     result.reconciliation_summary = EXP.summarise(reconciliations)
     result.steps.append(StepResult(
         "expected_vs_observed_reconciliation", ATTEMPTED,
@@ -409,9 +459,58 @@ def run(*, as_of: str, store: LS.LearningStore,
 
     result.belief_summary = B.summarise(beliefs_before,
                                         tuple(working.values()))
+    # THE LEDGER SAYS WHAT KIND OF SESSION THIS WAS.
+    #
+    # Not "how many things happened" — that number has been the source of
+    # every overstatement this project has had to retract. A session that
+    # ingested forty observations and moved nothing is a different outcome
+    # from one that declared a belief, and the ledger records which, once,
+    # idempotently, from a closed vocabulary.
+    result.outcome_class = _classify_outcome(
+        result, len(fresh), len(candidates), revised,
+        candidates_seen=candidates_seen)
+    store.record_cycle(
+        as_of=as_of, cycle=cycle, outcome=result.outcome_class,
+        detail=result.why_nothing_moved() or (
+            f"{len(candidates)} belief(s) declared, {revised} revision(s)"),
+        counts={"evidence_ingested": len(fresh),
+                "beliefs_declared": len(candidates),
+                "beliefs_revised": revised,
+                "expectations_registered": sum(
+                    1 for c in candidates if c.expectation),
+                "expectations_tested": len(open_expectations),
+                "trades_opened": trades_opened})
     result.beliefs_after = tuple(working.values())
     result.hidden_states_after = tuple(hs_after)
     result.interactions_seen = tuple(interactions)
     result.reconciliations_seen = tuple(reconciliations)
     result.priorities_seen = tuple(priorities)
     return result
+
+
+def _classify_outcome(result: LearningResult, ingested: int, declared: int,
+                      revised: int, *, candidates_seen: int = 0) -> str:
+    """Which of the five things happened. Deliberately not a score.
+
+    Order matters: declaring a belief is new knowledge even in a session that
+    also revised one, because the declaration is the thing that did not exist
+    before. `OBSERVED_NO_IMPACT` is a real and common result — evidence
+    arrived, no belief moved — and is recorded as such rather than as a
+    smaller version of learning.
+
+    The last two are the pair an operator most needs kept apart.
+    `UNCLASSIFIABLE_INPUT` means candidate sentences reached the translator
+    and none of them carried an event, which is a pipeline symptom.
+    `NO_NEW_EVIDENCE` means nothing arrived at all, which is a retrieval
+    symptom or simply a quiet day. Reporting both as zero is what made eleven
+    consecutive cycles indistinguishable from each other.
+    """
+    if declared:
+        return LS.NEW_KNOWLEDGE
+    if revised or result.hidden_state_summary.get("companies_moved"):
+        return LS.BELIEF_MOVEMENT
+    if ingested:
+        return LS.OBSERVED_NO_IMPACT
+    if candidates_seen:
+        return LS.UNCLASSIFIABLE_INPUT
+    return LS.NO_NEW_EVIDENCE

@@ -34,7 +34,8 @@ REPORT_VERSION = "translation_observability.v1"
 #: keys a per-company summary may carry. Counts and identifiers only.
 _COMPANY_KEYS = ("company", "documents", "candidate_sentences",
                  "evidence_translated", "evidence_unclassifiable",
-                 "furniture_rejected", "subject_mismatch")
+                 "furniture_rejected", "subject_mismatch",
+                 "provenance_only")
 
 #: the longest free-text value allowed anywhere in the payload. A company id
 #: and a rejection reason fit; a sentence does not.
@@ -87,6 +88,11 @@ def summarise(rows: Sequence[dict], stats: Any = None) -> dict:
         "subject_mismatch": totals.get(
             "subject_mismatch", sum(r["subject_mismatch"]
                                     for r in per_company)),
+        # Documents that never name the subject. Not an error — a tables-only
+        # earnings exhibit names nobody — but the attribution rests on
+        # retrieval rather than on the document, and an operator should be
+        # able to see how much of a cycle's evidence is held that way.
+        "provenance_only_documents": totals.get("provenance_only", 0),
         "classification_by_type": dict(totals.get("by_type", {})),
         "rejection_reasons": dict(totals.get("by_reason", {})),
         "per_company": per_company[:MAX_COMPANIES],
@@ -152,7 +158,9 @@ def render(payload: dict) -> List[str]:
              f"- furniture rejected: {payload['furniture_rejected']}",
              f"- unclassifiable: {payload['unclassifiable_candidates']}",
              f"- duplicates: {payload['duplicate_candidates']}",
-             f"- subject not named in source: {payload['subject_mismatch']}"]
+             f"- subject not named in source: {payload['subject_mismatch']}",
+             f"- attributed on provenance alone: "
+             f"{payload.get('provenance_only_documents', 0)}"]
     by_type = payload.get("classification_by_type") or {}
     if by_type:
         lines += ["", "By event type: " + ", ".join(

@@ -498,6 +498,8 @@ def learning_step(ctx: C.CycleContext) -> dict:
         as_of=ctx.as_of, store=store,
         evidence=list(ctx.learning_inbox),
         shadow_registry=SP.ShadowRegistry(),
+        cycle=ctx.cycle,
+        candidates_seen=getattr(ctx.translation_stats, "candidates", 0),
         trades_opened=int(positions.get("opened", 0) or 0))
     payload = result.as_dict()
     payload["ledger"] = store.health()

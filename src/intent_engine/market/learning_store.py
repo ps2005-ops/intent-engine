@@ -35,9 +35,23 @@ BELIEF_UPDATE = "belief_update"
 EXPECTATION = "expectation"
 RECONCILIATION = "reconciliation"
 EVIDENCE = "evidence"
+CYCLE = "cycle"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
-                          RECONCILIATION, EVIDENCE})
+                          RECONCILIATION, EVIDENCE, CYCLE})
+
+# What a session actually produced. Recorded as a class, not as a count,
+# because "3 things happened" is the sentence this project keeps having to
+# take back. A cycle that ingested forty observations and moved nothing is
+# NOT a cycle that gained knowledge, and the ledger has to be able to say so
+# without a reader doing arithmetic on five other fields.
+NEW_KNOWLEDGE = "NEW_KNOWLEDGE"              # a belief was declared
+BELIEF_MOVEMENT = "BELIEF_MOVEMENT"          # an existing posterior moved
+OBSERVED_NO_IMPACT = "OBSERVED_NO_IMPACT"    # evidence arrived, nothing moved
+UNCLASSIFIABLE_INPUT = "UNCLASSIFIABLE_INPUT"  # candidates, no events
+NO_NEW_EVIDENCE = "NO_NEW_EVIDENCE"          # nothing arrived at all
+OUTCOME_CLASSES = (NEW_KNOWLEDGE, BELIEF_MOVEMENT, OBSERVED_NO_IMPACT,
+                   UNCLASSIFIABLE_INPUT, NO_NEW_EVIDENCE)
 
 
 class LearningStore:
@@ -57,8 +71,23 @@ class LearningStore:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(row, sort_keys=True, default=str) + "\n")
 
-    def declare_belief(self, belief: B.StrategicBelief) -> None:
+    def declare_belief(self, belief: B.StrategicBelief) -> bool:
+        """Declare a belief once. Returns False if it was already declared.
+
+        Idempotent because the cycle is: a nightly run that re-reads the same
+        filings would otherwise append a fresh declaration every night. The
+        fold already keeps the first, so the duplicates were invisible in the
+        projection and unbounded on disk — the worst combination, because
+        nothing would ever have surfaced the growth.
+        """
+        if belief.belief_id in self.belief_ids():
+            return False
         self._append(BELIEF, belief.as_dict())
+        return True
+
+    def belief_ids(self) -> frozenset:
+        return frozenset(r.get("belief_id") for r in self._rows()
+                         if r.get("record") == BELIEF and r.get("belief_id"))
 
     def record_update(self, belief_id: str,
                       update: B.BeliefUpdate) -> None:
@@ -66,8 +95,45 @@ class LearningStore:
         payload["belief_id"] = belief_id
         self._append(BELIEF_UPDATE, payload)
 
-    def record_expectation(self, e: EXP.ExpectedObservation) -> None:
+    def record_expectation(self, e: EXP.ExpectedObservation) -> bool:
+        """Preregister once. A re-registered expectation is not a new test."""
+        if e.expectation_id in self.expectation_ids():
+            return False
         self._append(EXPECTATION, e.as_dict())
+        return True
+
+    def expectation_ids(self) -> frozenset:
+        return frozenset(r.get("expectation_id") for r in self._rows()
+                         if r.get("record") == EXPECTATION
+                         and r.get("expectation_id"))
+
+    def record_cycle(self, *, as_of: str, cycle: str, outcome: str,
+                     detail: str = "", counts: Optional[dict] = None) -> bool:
+        """One row per learning session, saying what class of thing happened.
+
+        Idempotent on (as_of, cycle): a job that fires twice records one
+        session, matching every other hosted job's contract. Replayable, and
+        the only place the ledger states an interpretation rather than a fact
+        — which is why the interpretation is a closed vocabulary.
+        """
+        if outcome not in OUTCOME_CLASSES:
+            raise ValueError(f"unknown outcome class {outcome!r}")
+        cycle_id = f"{as_of[:10]}|{cycle}"
+        if cycle_id in self.cycle_ids():
+            return False
+        self._append(CYCLE, {"cycle_id": cycle_id, "as_of": as_of[:10],
+                             "cycle": cycle, "outcome": outcome,
+                             "detail": detail[:400],
+                             "counts": dict(counts or {}),
+                             "schema": "learning_cycle_record.v1"})
+        return True
+
+    def cycle_ids(self) -> frozenset:
+        return frozenset(r.get("cycle_id") for r in self._rows()
+                         if r.get("record") == CYCLE and r.get("cycle_id"))
+
+    def cycles(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows() if r.get("record") == CYCLE)
 
     def record_reconciliation(self, r: EXP.Reconciliation) -> None:
         self._append(RECONCILIATION, r.as_dict())
@@ -128,7 +194,11 @@ class LearningStore:
                         u.get("effective_sample_size", 0.0)))
                 for u in sorted(updates.get(bid, []),
                                 key=lambda u: u.get("at", "")))
-            applied = tuple(e for u in history for e in u.evidence_ids)
+            # Declared ids first: evidence that PROPOSED a belief is applied
+            # from the moment it is declared, and a reload that forgot them
+            # would let the same fact strengthen the belief it created.
+            applied = tuple(row.get("applied_evidence_ids") or ()) + tuple(
+                e for u in history for e in u.evidence_ids)
             out.append(B.StrategicBelief(
                 belief_id=bid, proposition=row.get("proposition", ""),
                 subject=row.get("subject", ""),

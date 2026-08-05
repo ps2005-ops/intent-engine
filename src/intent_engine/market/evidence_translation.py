@@ -100,6 +100,7 @@ class TranslationStats:
     unclassifiable: int = 0
     build_rejected: int = 0
     subject_mismatch: int = 0
+    provenance_only: int = 0
     by_type: Dict[str, int] = field(default_factory=dict)
     by_reason: Dict[str, int] = field(default_factory=dict)
 
@@ -121,6 +122,7 @@ class TranslationStats:
         self.unclassifiable += other.unclassifiable
         self.build_rejected += other.build_rejected
         self.subject_mismatch += other.subject_mismatch
+        self.provenance_only += other.provenance_only
         for key, value in other.by_type.items():
             self.by_type[key] = self.by_type.get(key, 0) + value
         for key, value in other.by_reason.items():
@@ -135,6 +137,7 @@ class TranslationStats:
                 "unclassifiable": self.unclassifiable,
                 "build_rejected": self.build_rejected,
                 "subject_mismatch": self.subject_mismatch,
+                "provenance_only": self.provenance_only,
                 "translation_rate": self.translation_rate,
                 "by_type": dict(sorted(self.by_type.items())),
                 "by_reason": dict(sorted(self.by_reason.items()))}
@@ -211,9 +214,39 @@ def classify_type(text: str) -> Optional[str]:
     return None
 
 
-def _mentions_subject(text: str, aliases: Sequence[str]) -> bool:
-    low = (text or "").lower()
-    return any(a for a in aliases if a and a.lower() in low)
+#: a corporate entity named in the body, used to tell "this document is about
+#: somebody else" apart from "this document names nobody"
+_OTHER_ENTITY = re.compile(
+    r"\b([A-Z][A-Za-z&.\-]*(?:\s+[A-Z][A-Za-z&.\-]*){0,3})\s+"
+    r"(?:Inc|Corp|Corporation|Ltd|Limited|LLC|PLC|N\.V\.|S\.A\.)\b")
+
+NAMED = "named"                  # the document names the subject
+UNNAMED = "unnamed"              # the document names no company at all
+OTHER_NAMED = "other_named"      # it names other companies and not this one
+
+
+def subject_binding(text: str, aliases: Sequence[str]) -> str:
+    """How firmly this document is bound to the subject.
+
+    THREE ANSWERS, NOT TWO, and the middle one cost real evidence to learn.
+    A first pass rejected any document that did not name the subject, and the
+    first thing it threw away was Caterpillar's Q2 earnings exhibit — the
+    single most valuable document in the corpus — because a tables-only
+    exhibit names no company anywhere in 13,000 characters. It states
+    "Second-quarter 2026 sales and revenues increased 24% to $20.5 billion"
+    and never says whose.
+
+    So a document that names NOBODY is attributed on retrieval provenance and
+    carries that as a stated limitation. Only a document that names other
+    corporate entities while never naming the subject is refused, because
+    that is the shape of a mis-resolved registrant rather than of a terse
+    exhibit.
+    """
+    body = text or ""
+    low = body.lower()
+    if any(a for a in aliases if a and a.lower() in low):
+        return NAMED
+    return OTHER_NAMED if _OTHER_ENTITY.search(body) else UNNAMED
 
 
 def translate(observations: Sequence[Any], *, subject_company: str,
@@ -246,12 +279,16 @@ def translate(observations: Sequence[Any], *, subject_company: str,
 
     for obs in observations:
         stats.observations += 1
-        if aliases and not _mentions_subject(evidence_text_of(obs), aliases):
+        binding = (subject_binding(evidence_text_of(obs), aliases)
+                   if aliases else NAMED)
+        if binding == OTHER_NAMED:
             stats.subject_mismatch += 1
             stats.note_reason("subject_not_named_in_source")
             rejected.append(
                 f"subject not named in source: {_field(obs, 'source')[:70]!r}")
             continue
+        if binding == UNNAMED:
+            stats.provenance_only += 1
         source = _field(obs, "source", "url", "source_url", "citation")
         observed = _field(obs, "observed_at", "date", "published_at",
                           "as_of") or as_of
@@ -288,9 +325,7 @@ def translate(observations: Sequence[Any], *, subject_company: str,
                     fact=candidate.text, source_author=author,
                     source_role=role, reliability=_reliability(role),
                     relevance=0.6, contradiction_role=ME.NEUTRAL,
-                    limitations=(f"single sentence at offset "
-                                 f"{candidate.offset} of the source "
-                                 f"document",))
+                    limitations=_limitations(candidate, binding))
             except ME.EvidenceRejected as exc:
                 stats.build_rejected += 1
                 stats.note_reason("evidence_rejected")
@@ -324,6 +359,24 @@ def _source_class_of(obs: Any) -> str:
     kind = _field(obs, "kind").lower()
     return _KIND_TO_SOURCE_CLASS.get(kind, "company_owned" if kind
                                      else "independent_reporting")
+
+
+def _limitations(candidate, binding: str) -> Tuple[str, ...]:
+    """What a reader has to know about this fact to weigh it correctly.
+
+    The provenance note is the honest half of the three-way binding above.
+    When a document never names the company, the claim that it is ABOUT that
+    company rests on the retrieval that fetched it — which is a real basis and
+    a weaker one, and the reader is told so rather than left to assume the
+    document said it.
+    """
+    out = [f"single sentence at offset {candidate.offset} of the source "
+           f"document"]
+    if binding == UNNAMED:
+        out.append("the source document does not name the subject anywhere; "
+                   "attribution rests on retrieval provenance, not on the "
+                   "document's own words")
+    return tuple(out)
 
 
 def _field(obj: Any, *names: str) -> str:
