@@ -238,3 +238,49 @@ def test_the_speculation_guard_does_not_refuse_real_statements(text):
     sentences opening "when"/"what"/"why"/"how", which killed a real Microsoft
     earnings statement in the corpus."""
     assert EP.classify_sentence(text) is not None
+
+
+# --- defect 4: analyst commentary is not a company action -------------------
+#
+# Found in the output of a REAL production cycle run through the deployed
+# launchd entrypoint, not in a fixture. One session opened two contradictory
+# beliefs about one company, both from third-party price targets.
+BHP_TARGET_CUT = ("BHP Group Limited Stock 12-Month Price Target Cut to "
+                  "$58.5, Implies 34% Downside - TradingView.")
+BHP_TARGET_RAISE = ("Argus Raises its Price Target on BHP Group (BHP) to $95 "
+                    "- Yahoo Finance.")
+
+
+@pytest.mark.parametrize("text", [
+    BHP_TARGET_CUT,
+    BHP_TARGET_RAISE,
+    "Morgan Stanley upgrades Acme to Overweight from Equal-weight.",
+    "Analyst initiated coverage on Acme with a Buy rating.",
+    "Acme Earnings: Demand Jumps; Fair Value Estimate Increased - Morningstar.",
+])
+def test_analyst_commentary_is_not_a_company_action(text):
+    """The object token ("Price") matched while the SUBJECT was an analyst.
+
+    The two BHP headlines produced "is buying market share with price rather
+    than protecting margin" and "is exercising pricing power rather than
+    defending volume" in the same cycle. They contradict each other, which is
+    what makes it obvious neither described BHP's own conduct.
+    """
+    assert EP.classify_sentence(text) is None
+
+
+@pytest.mark.parametrize("text", [
+    "Acme raised list prices by 5% across its enterprise tier.",
+    "Acme cut prices on its entry-level plan to win share.",
+])
+def test_a_real_pricing_action_still_classifies(text):
+    """The control. Real pricing actions say "prices" or "list prices"; an
+    analyst note says "price target". Refusing both would delete the family."""
+    assert EP.classify_sentence(text) == ME.PRICING_SIGNAL
+
+
+def test_no_belief_can_be_opened_from_an_analyst_price_target():
+    from intent_engine.market import belief_formation as BF
+    evidence, _ = translate(BHP_TARGET_CUT, "bhp", ["BHP", "BHP Group"])
+    candidates, _refused = BF.propose(evidence, as_of="2026-08-05")
+    assert candidates == []

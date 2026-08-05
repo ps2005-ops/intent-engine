@@ -322,6 +322,32 @@ _NON_EVENT = tuple(re.compile(p, re.I) for p in (
     # availability of financing include..." fired PRODUCT_LAUNCH, and "If
     # the going concern assumption is not appropriate ... then adjustments
     # would be necessary" fired EARNINGS_RESULT.
+    # ANALYST COMMENTARY IS NOT A COMPANY ACTION. An analyst moving a price
+    # target, a rating, or a fair-value estimate is a statement about the
+    # SHARES by someone outside the company; the company did nothing.
+    #
+    # Measured on a real production cycle through the deployed entrypoint,
+    # which opened two CONTRADICTORY beliefs about one company in one session:
+    #
+    #   "BHP Stock 12-Month Price Target Cut to $58.5, Implies 34% Downside"
+    #     -> PRICING_SIGNAL -> "bhp is buying market share with price rather
+    #        than protecting margin"
+    #   "Argus Raises its Price Target on BHP Group (BHP) to $95"
+    #     -> PRICING_SIGNAL -> "bhp is exercising pricing power rather than
+    #        defending volume"
+    #
+    # Both from third-party price targets, and they contradict each other --
+    # which is what makes it obvious neither was about BHP's own conduct.
+    # This is the Caterpillar price-move failure once more: the object token
+    # ("Price") matched while the subject of the sentence was an analyst.
+    #
+    # A real pricing action still classifies: those say "prices" or "list
+    # prices", not "price target".
+    r"\bprice target\b", r"\btarget price\b", r"\bfair value estimate\b",
+    r"\bimplies \d+(?:\.\d+)?% (?:down|up)side\b",
+    r"\b(?:upgrade|downgrade)[sd]?\b.{0,30}\b(?:to|from)\s+(?:buy|sell|hold|"
+    r"neutral|overweight|underweight|outperform|underperform)\b",
+    r"\binitiated? coverage\b", r"\breiterate[sd]? (?:its )?(?:buy|sell|hold)\b",
     # INTERROGATIVE AND SPECULATIVE HEADLINES. A question about whether
     # something will happen is not a record that it did, and an invitation to
     # speculate is not an observation. Measured: "Will Duolingo (DUOL) Beat
