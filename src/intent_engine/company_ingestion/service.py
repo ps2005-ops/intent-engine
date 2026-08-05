@@ -433,7 +433,12 @@ class CompanyIngestionService:
                 candidate["url"], transport=self.transport,
                 resolver=self.resolver,
                 extra_mime_prefixes=PDF_MIME_PREFIXES if wants_pdf else (),
-                binary=wants_pdf)
+                binary=wants_pdf,
+                # Annual filings only, flagged by the EDGAR adapter. Keeping
+                # the first 2MB of a 10-K is what makes its Competition
+                # section reachable at all; discarding it is why competitive
+                # intelligence rendered as an absence on every company.
+                accept_truncated=bool(candidate.get("accept_truncated")))
             if not result["ok"]:
                 failed.append(self._fail(
                     run_id, domain, candidate_id, result["failure_type"],

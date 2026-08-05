@@ -14,9 +14,10 @@ It is deliberately conservative and safe:
     policy, and reads only material a normal permitted user could read;
   - it is fully defensive: ANY failure (network down, parse error, no match)
     yields an empty candidate list, so discovery is never broken by SEC;
-  - it prefers filings whose primary HTML document stays under the
-    per-response byte cap and parses into real text; a 10-K is usually over it
-    and stays a low preference, while a 10-Q usually fits.
+  - it prefers filings whose primary HTML document parses into real text. A
+    10-K usually exceeds the per-response byte cap; it is retrieved anyway,
+    TRUNCATED AND MARKED AS SUCH, because Item 1. Business is at the front of
+    an annual report and the truncation removes the end.
 
 WHY ONE OF EACH KIND. Ranking purely by form preference gave every slot to
 current reports (8-K), because a filer publishes many more of those than
@@ -53,12 +54,13 @@ ARCHIVE_DOC_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
 FILING_INDEX_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
                     "{accession_nodash}/index.json")
 
-# Prefer small, text-bearing filings whose primary document parses cleanly and
-# stays well under the per-response byte cap. A 10-K primary document is
-# frequently multi-megabyte, so it stays a lower preference on purpose --
-# measured 2026-08-04, Palantir's is over the 2,000,000-byte cap and truncates,
-# while its 10-Q is 1.8MB and fits.
-_PREFERRED_FORMS = ("10-Q", "8-K", "6-K", "20-F", "40-F", "10-K", "S-1",
+# Prefer text-bearing filings whose primary document parses cleanly.
+#
+# The 10-K used to sit behind the 10-Q here because its primary document is
+# frequently multi-megabyte and the retrieval discarded anything over the cap.
+# It is now retrieved truncated (see TRUNCATABLE_FORMS), and it is the ONLY
+# filing carrying a Competition section, so it leads.
+_PREFERRED_FORMS = ("10-K", "10-Q", "20-F", "40-F", "8-K", "6-K", "S-1",
                     "424B4", "DEF 14A")
 MAX_EDGAR_CANDIDATES = 3
 
@@ -76,14 +78,32 @@ MAX_EDGAR_CANDIDATES = 3
 # risk factors. A current report carries the earnings release. They answer
 # different questions, so the budget takes one of each before it takes a
 # second of either.
+#
+# The annual and the quarterly report are SEPARATE families, by the same
+# argument that separated periodic from current above: they answer different
+# questions, so the budget takes one of each before a second of either.
+#
+# Sharing a "periodic" family meant the 10-Q always won it — it ranks higher
+# in _PREFERRED_FORMS because it fits the byte cap — and with three candidate
+# slots the round-robin filled them with 10-Q, 8-K and DEF 14A. The annual
+# report was never proposed on any run.
+#
+# That is the whole reason competitive intelligence rendered as an absence on
+# every validation company: the Competition section exists only in Item 1 of
+# the annual report, and the annual report never arrived.
 _FORM_FAMILY = {
-    "10-Q": "periodic", "10-K": "periodic", "20-F": "periodic",
-    "40-F": "periodic",
+    "10-K": "annual", "20-F": "annual", "40-F": "annual",
+    "10-Q": "quarterly",
     "8-K": "current", "6-K": "current",
     "S-1": "registration", "424B4": "registration", "DEF 14A": "proxy",
 }
 #: The order families are first served in.
-_FAMILY_ORDER = ("periodic", "current", "registration", "proxy")
+_FAMILY_ORDER = ("annual", "quarterly", "current", "registration", "proxy")
+
+#: Forms whose primary document routinely exceeds the per-response byte cap
+#: and which are still worth retrieving truncated, because the sections that
+#: matter are at the front. See `external_intel.annual_filing`.
+TRUNCATABLE_FORMS = frozenset({"10-K", "20-F", "40-F"})
 _DROP_TOKENS = {"inc", "incorporated", "corp", "corporation", "co", "company",
                 "ltd", "limited", "plc", "llc", "lp", "holdings", "group",
                 "technologies", "technology", "the", "and", "of"}
@@ -305,6 +325,12 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
             "title": (f"SEC {form} exhibit{f' ({date})' if date else ''}"
                       if is_exhibit
                       else f"SEC {form}{f' ({date})' if date else ''}"),
+            # An annual report is worth retrieving even when it overruns the
+            # per-response cap: Item 1. Business is at the front and the
+            # truncation removes the end. The retrieval marks it truncated
+            # and nothing downstream may call it complete.
+            "form": form,
+            "accept_truncated": form in TRUNCATABLE_FORMS and not is_exhibit,
         })
         if len(out) >= limit:
             break

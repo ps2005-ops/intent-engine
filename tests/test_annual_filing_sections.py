@@ -182,3 +182,67 @@ def test_capitalised_names_do_not_leak_into_categories():
              "source_class": "investor_material", "date": "2026-02-17"}]
     cats = [c["category"] for c in CFD.category_alternatives(docs)]
     assert not any("Snowflake" in c or "Databricks" in c for c in cats)
+
+
+# ------------------------------------------------ the retrieval wiring
+def test_annual_and_quarterly_are_separate_candidate_families():
+    """Sharing one family meant the 10-Q always won and the 10-K never ran."""
+    from intent_engine.company_ingestion import edgar
+    assert edgar._FORM_FAMILY["10-K"] != edgar._FORM_FAMILY["10-Q"]
+    assert edgar._FAMILY_ORDER.index("annual") < \
+           edgar._FAMILY_ORDER.index("quarterly")
+
+
+def test_the_annual_report_wins_a_slot_against_a_filers_usual_mix():
+    """A filer publishes many 8-Ks; the annual report must still be proposed."""
+    from intent_engine.company_ingestion import edgar
+    forms = ["8-K", "8-K", "10-Q", "8-K", "10-K", "8-K", "DEF 14A"]
+    dates = ["2026-08-01"] * len(forms)
+    order = edgar._spread_by_family(list(range(len(forms))), forms, dates,
+                                    today="2026-08-05")
+    chosen = [forms[i] for i in order[:edgar.MAX_EDGAR_CANDIDATES]]
+    assert "10-K" in chosen, chosen
+    assert "10-Q" in chosen, chosen
+
+
+def test_only_annual_forms_are_retrieved_truncated():
+    from intent_engine.company_ingestion import edgar
+    assert "10-K" in edgar.TRUNCATABLE_FORMS
+    assert "20-F" in edgar.TRUNCATABLE_FORMS
+    assert "10-Q" not in edgar.TRUNCATABLE_FORMS
+    assert "8-K" not in edgar.TRUNCATABLE_FORMS
+
+
+def _transport(body: bytes, exceeded: bool):
+    def tx(url, timeout):
+        return 200, {"content-type": "text/html"}, body, exceeded
+    return tx
+
+
+def test_over_cap_response_is_still_discarded_by_default():
+    """The general retrieval path is unchanged: an over-cap page is refused."""
+    from intent_engine.company_ingestion.fetch import safe_fetch
+    result = safe_fetch("https://example.com/big",
+                        transport=_transport(b"<html>x</html>", True),
+                        resolver=False)
+    assert result["ok"] is False
+    assert result["failure_type"] == "too_large"
+
+
+def test_over_cap_annual_filing_is_kept_and_marked_truncated():
+    from intent_engine.company_ingestion.fetch import safe_fetch
+    result = safe_fetch("https://www.sec.gov/Archives/x.htm",
+                        transport=_transport(b"<html>Item 1. Business</html>",
+                                             True),
+                        resolver=False, accept_truncated=True)
+    assert result["ok"] is True
+    assert result["truncated"] is True
+    assert "Item 1. Business" in result["body"]
+
+
+def test_an_under_cap_response_is_never_marked_truncated():
+    from intent_engine.company_ingestion.fetch import safe_fetch
+    result = safe_fetch("https://www.sec.gov/Archives/x.htm",
+                        transport=_transport(b"<html>ok</html>", False),
+                        resolver=False, accept_truncated=True)
+    assert result["ok"] is True and result["truncated"] is False
