@@ -276,6 +276,13 @@ class CycleContext:
     # durable copy of this evidence is the learning ledger, which the
     # learning step writes.
     learning_inbox: List[Any] = field(default_factory=list)
+    # Bounded translation counts, accumulated across the sweep. Counts only —
+    # this one IS reported, because an operator cannot otherwise tell a sweep
+    # that found nothing from a sweep that dropped everything it found.
+    translation_stats: Any = field(
+        default_factory=lambda: __import__(
+            "intent_engine.market.evidence_translation", fromlist=["x"]
+        ).TranslationStats())
 
 
 def run_step(name: str, fn: StepFn, ctx: CycleContext, *,

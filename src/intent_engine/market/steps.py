@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 from typing import Callable, Dict, List, Optional, Tuple
 
 from intent_engine.market import assets as A
@@ -126,10 +127,12 @@ def _live_research(ctx: C.CycleContext) -> Tuple[List[dict], int]:
         # below keeps only a count, which is all the report needs and is
         # exactly what made the previous eleven cycles unable to learn: a
         # count cannot update a belief.
-        translated, dropped = ET.translate(
+        translated, dropped, tstats = ET.translate_with_stats(
             out.get("evidence") or [], subject_company=company.company_id,
-            as_of=ctx.as_of)
+            as_of=ctx.as_of,
+            subject_aliases=_aliases_for(company))
         ctx.learning_inbox.extend(translated)
+        ctx.translation_stats.merge(tstats)
         rows.append({
             "company": company.company_id,
             "instrument": getattr(company, "tradable_instrument", "") or "",
@@ -143,8 +146,33 @@ def _live_research(ctx: C.CycleContext) -> Tuple[List[dict], int]:
             "error": out.get("error", ""), "stub": False,
             "evidence_translated": len(translated),
             "evidence_unclassifiable": len(dropped),
+            "candidate_sentences": tstats.candidates,
+            "furniture_rejected": tstats.furniture_rejected,
+            "subject_mismatch": tstats.subject_mismatch,
         })
     return rows, errors
+
+
+def _aliases_for(company) -> Tuple[str, ...]:
+    """The names a document must use for its content to be about this company.
+
+    Short tokens are dropped: a two-letter alias matches inside half the words
+    in English, and a subject check that always passes is worse than none
+    because it looks like a guard.
+    """
+    names = [getattr(company, "canonical_name", "") or "",
+             getattr(company, "company_id", "") or ""]
+    for extra in (getattr(company, "aliases", ()) or ()):
+        names.append(str(extra))
+    # "Caterpillar Inc." also has to match a document that says "Caterpillar"
+    stems = []
+    for name in names:
+        stem = re.sub(r"\b(inc|corp|corporation|company|co|ltd|llc|plc|sa|nv|"
+                      r"ag|gmbh|technologies|holdings|group)\b\.?", "",
+                      name, flags=re.I).strip(" ,.")
+        if len(stem) >= 4:
+            stems.append(stem)
+    return tuple(dict.fromkeys(n for n in names + stems if len(n) >= 4))
 
 
 # ---------------------------------------------------------------------------

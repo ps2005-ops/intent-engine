@@ -17,11 +17,12 @@ reason it can still say honestly that it has never opened a position.
 """
 from __future__ import annotations
 
-from typing import Tuple
+from typing import List, Tuple
 
 from intent_engine.market import cycle as C
 from intent_engine.market import session as S
 from intent_engine.market import signal_opportunity as SO
+from intent_engine.market import translation_report as TR
 
 UNMEASURABLE = "UNMEASURABLE"
 
@@ -174,6 +175,12 @@ def render_report(ctx) -> Tuple[str, dict]:
         "timezone": S.TIMEZONE, "dry_run": ctx.dry_run,
         "session": session.as_dict(),
         "research": {k: v for k, v in research.items() if k != "rows"},
+        # `rows` is still stripped — it carries a document's worth of free
+        # text per company. What is NOT stripped any more is what the rows
+        # were the only record of: how much of what was retrieved actually
+        # became evidence. Bounded counts only; `assert_bounded` enforces it.
+        "translation": TR.summarise(research.get("rows") or [],
+                                    getattr(ctx, "translation_stats", None)),
         "opportunity": opportunity.get("summary"),
         "funnel": funnel.get("funnel"), "stability": funnel.get("stability"),
         "promotion": funnel.get("promotion"), "maturity": funnel.get("maturity"),
@@ -219,6 +226,10 @@ def render_report(ctx) -> Tuple[str, dict]:
         f"cycles |",
         f"| operating health | {health.get('overall', '—')} |",
         "",
+        "",
+    ]
+    lines += TR.render(payload["translation"])
+    lines += [
         "## DECISION FUNNEL",
         "",
         "```",
