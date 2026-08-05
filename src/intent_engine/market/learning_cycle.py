@@ -543,11 +543,25 @@ def _still_classifies(items: Sequence[Any]) -> Tuple[List[Any], List[Any]]:
     dropped too, rather than silently re-routed: re-typing old evidence would
     rewrite a judgement nobody recorded making.
     """
+    from intent_engine.strategic_intelligence import evidence_text as EText
+
     from . import event_patterns as EP
     from . import evidence_translation as ET
     keep: List[Any] = []
     stale: List[Any] = []
     for item in items:
+        # THE EXTRACTION GATE, WHICH THE TYPE CHECK ALONE SKIPS.
+        #
+        # `translate` never classifies a sentence it would not have extracted:
+        # candidate extraction runs first and drops furniture. Re-checking
+        # only the TYPE walks straight past that, and a stored row that today's
+        # pipeline could never ingest still formed a belief. Measured: "Will
+        # Duolingo (DUOL) Beat Estimates Again in Its Next Earnings Report? -
+        # Yahoo Finance" is `incomplete_sentence` to the extractor and was
+        # backfilled anyway, opening a belief about strengthening demand.
+        if EText.furniture_reason(item.fact):
+            stale.append(item)
+            continue
         etype, action, _obj = EP.explain(item.fact)
         if etype != item.evidence_type:
             stale.append(item)

@@ -403,3 +403,52 @@ def test_the_summary_has_one_shape_whether_or_not_it_found_anything(store):
                   backfill_evidence=True
                   ).as_dict()["belief_formation_backfill"]
     assert set(empty) == set(full)
+
+
+def test_a_row_the_extractor_would_reject_is_not_backfilled(store):
+    """The gate the type check alone skipped.
+
+    `translate` never classifies a sentence it would not have extracted:
+    candidate extraction runs first and drops furniture. Re-checking only the
+    TYPE walks past that, so a stored row today's pipeline could never ingest
+    still formed a belief -- measured on the real ledger, where an
+    `incomplete_sentence` headline opened a belief about strengthening demand.
+    """
+    from intent_engine.strategic_intelligence import evidence_text as EText
+    headline = ("Duolingo beat consensus estimates for the quarter - Yahoo "
+                "Finance")
+    assert EText.furniture_reason(headline)
+    stored_with_type(store, headline, ME.EARNINGS_SURPRISE,
+                     subject="duolingo")
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["declared"] == 0
+    assert summary["refused_stale_type"] == 1
+    assert store.beliefs() == ()
+
+
+def test_the_real_production_ledger_yields_no_defensible_belief(store):
+    """Measured, and reported rather than worked around.
+
+    Every one of the nine production rows is a title with a " - Publisher"
+    suffix. Under the extraction, typing and attribution rules that now hold,
+    all nine are refused and the corrected backfill declares zero. That is the
+    honest result: the upstream sweep stored headlines, not article prose.
+    """
+    for fact, etype, subject in [
+            ("Caterpillar Inc. stock underperforms Monday when compared to "
+             "competitors despite daily gains - MarketWatch",
+             ME.COMPETITOR_ACTION, "caterpillar"),
+            ("Will Duolingo (DUOL) Beat Estimates Again in Its Next Earnings "
+             "Report? - Yahoo Finance", ME.EARNINGS_SURPRISE, "duolingo"),
+            ("PayPal tops Q2 estimates and raises full-year forecast amid "
+             "Stripe takeover bid - SiliconANGLE",
+             ME.GUIDANCE_REVISION, "stripe")]:
+        stored_with_type(store, fact, etype, subject=subject)
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["on_ledger"] == 3
+    assert summary["refused_stale_type"] == 3
+    assert summary["declared"] == 0

@@ -196,3 +196,45 @@ def test_a_titled_headline_never_reaches_the_classifier(headline):
     """
     assert EText.furniture_reason(headline) == "incomplete_sentence"
     assert translate(headline, "any", ["Any"])[0] == []
+
+
+# --- defect 3: a question is not an observation -----------------------------
+#
+# Found by manually inspecting the beliefs a corrected real-ledger backfill
+# produced, which is the only place it could have been found: every gate the
+# row passed was working as written.
+DUOLINGO_QUESTION = ("Will Duolingo (DUOL) Beat Estimates Again in Its Next "
+                     "Earnings Report? - Yahoo Finance")
+
+
+def test_an_interrogative_headline_evidences_no_event():
+    """It fired EARNINGS_SURPRISE on the pair "Beat"/"Estimates" and opened
+    "Duolingo, Inc. is seeing demand strengthen rather than plateau" -- a
+    claim about trading conditions, from a sentence that asserts nothing.
+
+    The Caterpillar price-move failure in a different costume: event
+    vocabulary present, event absent.
+    """
+    assert EP.classify_sentence(DUOLINGO_QUESTION) is None
+
+
+@pytest.mark.parametrize("text", [
+    "Will Acme beat estimates again this quarter?",
+    "Is it time to buy Acme?",
+    "Here's why Acme raised guidance",
+    "What to expect from Acme's Q3 earnings",
+])
+def test_speculation_is_not_evidence(text):
+    assert EP.classify_sentence(text) is None
+
+
+@pytest.mark.parametrize("text", [
+    "When adjusting for these items, we exceeded expectations across revenue.",
+    "Acme beat consensus estimates for the quarter.",
+    "Acme raised its full-year guidance.",
+])
+def test_the_speculation_guard_does_not_refuse_real_statements(text):
+    """The narrowing that measurement forced. A first version also refused
+    sentences opening "when"/"what"/"why"/"how", which killed a real Microsoft
+    earnings statement in the corpus."""
+    assert EP.classify_sentence(text) is not None

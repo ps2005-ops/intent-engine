@@ -520,6 +520,17 @@ def learning_step(ctx: C.CycleContext) -> dict:
             result, root=ctx.root, identities=ctx.company_names)
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}
+    # Ship what was just published to a deployed founder service, when one is
+    # configured. Off by default, so an unconfigured cycle behaves exactly as
+    # it did. Same reasoning as the publish above: learning has already
+    # happened and is already recorded, so a transport failure is counted in
+    # the row rather than raised, and never folded into a success count.
+    from . import dossier_transport as DT
+    try:
+        payload["dossier_transport"] = DT.ship(root=ctx.root)
+    except Exception as exc:  # noqa: BLE001 - see above
+        payload["dossier_transport"] = {"error": str(exc), "sent": [],
+                                        "failed": [], "configured": True}
     return payload
 
 

@@ -322,6 +322,25 @@ _NON_EVENT = tuple(re.compile(p, re.I) for p in (
     # availability of financing include..." fired PRODUCT_LAUNCH, and "If
     # the going concern assumption is not appropriate ... then adjustments
     # would be necessary" fired EARNINGS_RESULT.
+    # INTERROGATIVE AND SPECULATIVE HEADLINES. A question about whether
+    # something will happen is not a record that it did, and an invitation to
+    # speculate is not an observation. Measured: "Will Duolingo (DUOL) Beat
+    # Estimates Again in Its Next Earnings Report?" fired EARNINGS_SURPRISE
+    # on the word pair "Beat"/"Estimates" and opened the belief "Duolingo,
+    # Inc. is seeing demand strengthen rather than plateau" -- a claim about
+    # trading conditions, from a sentence that asserts nothing whatsoever.
+    #
+    # This is the Caterpillar price-move failure in a different costume: event
+    # vocabulary present, event absent. Same treatment.
+    # Narrowed after measurement. A first version also refused sentences
+    # beginning "when", "what", "why" and "how", which reads like a headline
+    # rule and is not one: the corpus contains "When adjusting for these
+    # items, we exceeded expectations across revenue..." -- a real Microsoft
+    # earnings statement that happens to open with a subordinate clause. Only
+    # forms that cannot be assertions are refused.
+    r"\?",
+    r"^will\b", r"^is it\b",
+    r"\bhere'?s why\b", r"\bis it time to\b", r"\bwhat to (?:expect|know)\b",
     r"^if\b", r"^should\b", r"^were\b", r"^in the event\b",
     r"\bfactors that (?:could|may|might)\b",
     r"\b(?:could|would|might|may) (?:be|have|affect|include|result|differ|"
