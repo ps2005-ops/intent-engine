@@ -143,7 +143,7 @@ def test_a_backfill_does_not_report_itself_as_new_knowledge(store):
 def test_organic_formation_is_reported_apart_from_the_backfill(store):
     """A session that both ingests new evidence AND backfills must not blend
     them: one is this session's work, the other is a repair."""
-    old = [ev(subject="linde", kind=ME.CAPEX_SIGNAL, n=i) for i in range(2)]
+    old = [ev(subject="linde", n=i) for i in range(2)]
     ingested(store, old)
     new = [ev(subject="duolingo", n=i) for i in range(3)]
     result = LC.run(as_of="2026-08-05", store=store, evidence=new,
@@ -258,6 +258,85 @@ def test_the_backfill_summary_says_what_it_is(store):
     assert "not" in note and "learning" in note
 
 
+# --- a repair may not resurrect a retired judgement --------------------------
+#
+# The production ledger was written at 7e6b21f, where `classify_type` matched
+# keywords against the WHOLE observation. It typed
+#
+#   "Caterpillar Inc. stock underperforms Monday when compared to competitors
+#    despite daily gains"
+#
+# as COMPETITOR_ACTION -- a share-price story read as a rival making a move --
+# and opened "Caterpillar Inc. faces a rival competing on price or capability",
+# which reached a founder. The current branch extracts candidate SENTENCES and
+# refuses that text outright. Six of the nine production rows fail the same way.
+#
+# So the backfill reprocesses old JUDGEMENTS, not just old evidence, and has to
+# put each one to the classifier that is running now.
+CAT_PRICE_MOVE = ("Caterpillar Inc. stock underperforms Monday when compared "
+                  "to competitors despite daily gains - MarketWatch")
+
+
+def stored_with_type(store, fact, etype, subject="caterpillar"):
+    """Write a row whose stored type an OLDER classifier produced."""
+    item = ME.build(subject_company=subject, actor=subject, evidence_type=etype,
+                    observed_at="2026-07-20",
+                    source="https://marketwatch.com/x", fact=fact,
+                    source_role="independent_reporting",
+                    reliability=0.75, relevance=0.6)
+    store.record_evidence(item)
+    return item
+
+
+def test_the_current_classifier_refuses_the_headline_that_became_a_belief():
+    """The regression itself, pinned: a price-move story is not an event."""
+    from intent_engine.market import event_patterns as EP
+    assert EP.classify_sentence(CAT_PRICE_MOVE) is None
+
+
+def test_a_row_whose_type_no_longer_holds_opens_no_belief(store):
+    stored_with_type(store, CAT_PRICE_MOVE, ME.COMPETITOR_ACTION)
+    result = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                    backfill_evidence=True)
+    summary = result.as_dict()["belief_formation_backfill"]
+    assert summary["declared"] == 0
+    assert summary["refused_stale_type"] == 1
+    assert summary["examined"] == 0
+    assert store.beliefs() == ()
+
+
+def test_a_stale_type_is_reported_not_silently_dropped(store):
+    stored_with_type(store, CAT_PRICE_MOVE, ME.COMPETITOR_ACTION)
+    ingested(store, [ev(subject="duolingo", n=1)])
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["on_ledger"] == 2
+    assert summary["refused_stale_type"] == 1
+    assert summary["examined"] == 1
+
+
+def test_a_row_whose_type_merely_changed_is_dropped_not_re_routed(store):
+    """Re-typing old evidence would rewrite a judgement nobody recorded
+    making, and `routes_for` would send the belief to a different family."""
+    fact = "Duolingo beat consensus estimates for the quarter."
+    stored_with_type(store, fact, ME.CAPEX_SIGNAL, subject="duolingo")
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["refused_stale_type"] == 1
+    assert summary["declared"] == 0
+
+
+def test_a_row_the_current_classifier_still_agrees_with_is_kept(store):
+    ingested(store, [ev(subject="duolingo", n=i) for i in range(2)])
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["refused_stale_type"] == 0
+    assert summary["declared"] >= 1
+
+
 def test_a_backfill_with_an_empty_ledger_says_so_rather_than_failing(store):
     result = LC.run(as_of="2026-08-05", store=store, evidence=[],
                     backfill_evidence=True)
@@ -265,3 +344,16 @@ def test_a_backfill_with_an_empty_ledger_says_so_rather_than_failing(store):
     assert summary["requested"] is True
     assert summary["declared"] == 0
     assert summary["examined"] == 0
+
+
+def test_the_summary_has_one_shape_whether_or_not_it_found_anything(store):
+    """A summary whose keys depend on what it found makes every reader write
+    a `.get`, and the one that forgets reads "found nothing" as "never ran"."""
+    empty = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                   backfill_evidence=True
+                   ).as_dict()["belief_formation_backfill"]
+    ingested(store, [ev(subject="duolingo", n=i) for i in range(2)])
+    full = LC.run(as_of="2026-08-06", store=store, evidence=[],
+                  backfill_evidence=True
+                  ).as_dict()["belief_formation_backfill"]
+    assert set(empty) == set(full)

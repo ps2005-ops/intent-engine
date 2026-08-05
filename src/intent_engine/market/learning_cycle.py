@@ -514,6 +514,46 @@ def run(*, as_of: str, store: LS.LearningStore,
     return result
 
 
+def _still_classifies(items: Sequence[Any]) -> Tuple[List[Any], List[Any]]:
+    """Split stored evidence by whether TODAY's classifier still agrees.
+
+    A stored `evidence_type` is not a fact about the world, it is the output
+    of whichever classifier was running when the row was written — and
+    `belief_formation.routes_for` sends a belief to a family on the strength
+    of it. Backfilling therefore reprocesses old JUDGEMENTS, not old evidence,
+    and a repair that resurrects a conclusion the current pipeline would
+    refuse is worse than the gap it fills.
+
+    This is measured, not hypothetical. The production ledger was written at
+    `7e6b21f`, where `classify_type` matched keywords against the WHOLE
+    observation. That commit typed
+
+        "Caterpillar Inc. stock underperforms Monday when compared to
+         competitors despite daily gains"
+
+    as COMPETITOR_ACTION -- a share-price story read as a rival making a move
+    -- and it opened the belief "Caterpillar Inc. faces a rival competing on
+    price or capability rather than coexisting", which reached a founder.
+    The current branch extracts candidate SENTENCES first and refuses that
+    text outright: "no candidate sentence". Six of the nine production rows
+    fail the same way.
+
+    So each row is re-put to the current classifier and kept only if the
+    answer still matches what was stored. A row whose type merely CHANGED is
+    dropped too, rather than silently re-routed: re-typing old evidence would
+    rewrite a judgement nobody recorded making.
+    """
+    from . import event_patterns as EP
+    keep: List[Any] = []
+    stale: List[Any] = []
+    for item in items:
+        if EP.classify_sentence(item.fact) == item.evidence_type:
+            keep.append(item)
+        else:
+            stale.append(item)
+    return keep, stale
+
+
 def _backfill_formation(store: LS.LearningStore,
                         working: Dict[str, B.StrategicBelief], *, as_of: str,
                         skip_ids: Any, result: LearningResult
@@ -570,11 +610,22 @@ def _backfill_formation(store: LS.LearningStore,
     """
     # `skip_ids` are the rows this very session just ingested: formation has
     # already seen them, and reconsidering them here would double-count.
-    recorded = [e for e in store.evidence() if e.evidence_id not in skip_ids]
+    on_ledger = [e for e in store.evidence() if e.evidence_id not in skip_ids]
+    recorded, stale_typed = _still_classifies(on_ledger)
     if not recorded:
-        result.backfill_summary = {"requested": True, "examined": 0,
-                                   "declared": 0, "beliefs": [],
-                                   "note": "no evidence was on the ledger"}
+        # Same SHAPE as the populated case. A summary whose keys depend on
+        # whether it found anything makes every reader write a `.get`, and
+        # the one that forgets reads a repair that found nothing as a repair
+        # that never ran.
+        empty = BF.summarise((), {})
+        empty.update({
+            "requested": True, "examined": 0, "declared": 0, "beliefs": [],
+            "on_ledger": len(on_ledger),
+            "refused_stale_type": len(stale_typed),
+            "note": ("no evidence on the ledger still classifies the way it "
+                     "was stored" if stale_typed
+                     else "no evidence was on the ledger")})
+        result.backfill_summary = empty
         return ()
 
     candidates, refused = BF.propose(recorded, as_of=as_of,
@@ -592,6 +643,11 @@ def _backfill_formation(store: LS.LearningStore,
         "requested": True, "examined": len(recorded),
         "declared": len(opened),
         "beliefs": [b.belief_id for b in opened],
+        "on_ledger": len(on_ledger),
+        # Reported, never silent: a row refused here means the ledger holds a
+        # judgement the current pipeline would not make, which is a finding
+        # about the ledger and not a detail of this run.
+        "refused_stale_type": len(stale_typed),
         "note": ("opened from evidence already on the ledger; a repair of "
                  "evidence that predates belief formation, NOT learning "
                  "earned this session, and excluded from knowledge gain")})
