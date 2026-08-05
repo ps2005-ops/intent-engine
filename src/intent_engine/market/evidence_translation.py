@@ -301,6 +301,73 @@ def subject_binding(text: str, aliases: Sequence[str]) -> str:
     return OTHER_NAMED if entities else UNNAMED
 
 
+#: Families whose actor is, by definition, the company whose results these
+#: are. Everything else may legitimately have a third party as the actor of
+#: the sentence while still being evidence about the subject — a law firm
+#: represents a company in ITS bond issuance, a regulator schedules a hearing
+#: about ITS merger — so the check below is not applied to them. Widening it
+#: would refuse real evidence to fix a narrower problem.
+OWN_RESULTS_FAMILIES = frozenset({ME.EARNINGS_SURPRISE, ME.GUIDANCE_REVISION})
+
+
+def reports_own_results(text: str, action: str, aliases: Sequence[str]) -> bool:
+    """Whether the SUBJECT is the one whose results this sentence reports.
+
+    NAMING THE SUBJECT IS NOT THE SAME AS BEING ABOUT IT
+    -----------------------------------------------------
+    `subject_binding` answers "does this document name the company", and it
+    has to, because a document that names nobody cannot be attributed. It
+    cannot answer "is the company the one this event happened to", and the
+    difference produced a live belief:
+
+        "PayPal tops Q2 estimates and raises full-year forecast amid Stripe
+         takeover bid"
+
+    filed under `stripe`, typed GUIDANCE_REVISION. Stripe IS named, so binding
+    passed. But the estimates topped and the forecast raised are PayPal's;
+    Stripe is the object of a takeover bid mentioned afterwards. The engine
+    recorded a guidance revision for a company that had not issued one.
+
+    THE TEST IS POSITION, AND ONLY FOR RESULTS
+    -------------------------------------------
+    A company reporting its own numbers is named before the verb that reports
+    them. So for the results families the subject must appear BEFORE the
+    action span; if it appears only after, the numbers belong to whoever came
+    first and this sentence is about them.
+
+    Deliberately not applied to the action families. "A&O Shearman represents
+    Sasol Limited in its USD750 million bond issuance" puts the subject after
+    the verb and is still real evidence about Sasol's financing — refusing it
+    would be a worse error than the one being fixed. Nor is the rule "the
+    first company named wins", which would throw away "regulators set a
+    hearing for the Dominion Energy, NextEra merger", where NextEra is a
+    genuine party to the event.
+    """
+    if not action:
+        return True
+    body = text or ""
+    lowered = body.lower()
+    at = lowered.find(action.lower())
+    if at < 0:
+        return True
+    named = False
+    for alias in aliases:
+        if not alias:
+            continue
+        if re.search(r"\b" + re.escape(alias) + r"\b", body[:at], re.I):
+            return True
+        named = named or bool(
+            re.search(r"\b" + re.escape(alias) + r"\b", body, re.I))
+    # The subject appears nowhere in the sentence, so there is no position to
+    # test and this function has learned nothing. Fails OPEN, like a missing
+    # action span: on the live path `subject_binding` has already established
+    # that the document names the subject, so this only arises for a caller
+    # working from a name it could not match -- an accented or multi-word
+    # form reconstructed from a slug, say -- and refusing on that would drop
+    # evidence over a spelling.
+    return not named
+
+
 def _is_subject(entity: str, stems: set) -> bool:
     """Whether a corporate name found in the body IS the subject.
 
@@ -382,11 +449,23 @@ def translate(observations: Sequence[Any], *, subject_company: str,
         for candidate in candidates:
             if kept >= MAX_ITEMS_PER_OBSERVATION:
                 break
-            etype = EP.classify_sentence(candidate.text) or default_type
+            etype, action, _obj = EP.explain(candidate.text)
+            etype = etype or default_type
             if etype is None:
                 stats.unclassifiable += 1
                 stats.note_reason("no_commercial_event")
                 rejected.append(f"unclassifiable: {candidate.text[:60]!r}")
+                continue
+            # Naming the subject got this far; being the company the results
+            # belong to is a second question, and only the results families
+            # can answer it from word order. See `reports_own_results`.
+            if (aliases and etype in OWN_RESULTS_FAMILIES
+                    and not reports_own_results(candidate.text, action,
+                                                aliases)):
+                stats.subject_mismatch += 1
+                stats.note_reason("results_belong_to_another_company")
+                rejected.append(
+                    f"results are another company's: {candidate.text[:60]!r}")
                 continue
             key = (etype, EText._dedupe_key(candidate.text))
             if key in seen_facts:

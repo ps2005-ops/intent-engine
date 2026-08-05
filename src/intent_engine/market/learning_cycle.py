@@ -544,14 +544,39 @@ def _still_classifies(items: Sequence[Any]) -> Tuple[List[Any], List[Any]]:
     rewrite a judgement nobody recorded making.
     """
     from . import event_patterns as EP
+    from . import evidence_translation as ET
     keep: List[Any] = []
     stale: List[Any] = []
     for item in items:
-        if EP.classify_sentence(item.fact) == item.evidence_type:
-            keep.append(item)
-        else:
+        etype, action, _obj = EP.explain(item.fact)
+        if etype != item.evidence_type:
             stale.append(item)
+            continue
+        # The type surviving is not the whole question. A stored row can be
+        # correctly typed and still record another company's results -- the
+        # ledger holds a GUIDANCE_REVISION for `stripe` whose forecast is
+        # PayPal's. The live path refuses that now, and a backfill that did
+        # not would be a second door into the same belief.
+        #
+        # The subject name is reconstructed from the slug, which is all a
+        # stored row carries. `reports_own_results` fails open when it cannot
+        # find the subject at all, so a slug that does not reproduce the
+        # written form drops back to the type check rather than refusing.
+        if etype in ET.OWN_RESULTS_FAMILIES and not ET.reports_own_results(
+                item.fact, action, _slug_names(item.subject_company)):
+            stale.append(item)
+            continue
+        keep.append(item)
     return keep, stale
+
+
+def _slug_names(subject: str) -> Tuple[str, ...]:
+    """The names a slug plausibly stands for: `hdfc_bank` -> "HDFC Bank"."""
+    words = [w for w in (subject or "").replace("-", "_").split("_") if w]
+    if not words:
+        return ()
+    return (" ".join(words), " ".join(w.capitalize() for w in words),
+            " ".join(w.upper() for w in words))
 
 
 def _backfill_formation(store: LS.LearningStore,

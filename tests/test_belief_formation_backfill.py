@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import pytest
 
+from intent_engine.market import evidence_translation as ET
 from intent_engine.market import learning_cycle as LC
 from intent_engine.market import learning_store as LS
 from intent_engine.market import micro_evidence as ME
@@ -335,6 +336,51 @@ def test_a_row_the_current_classifier_still_agrees_with_is_kept(store):
                      ).as_dict()["belief_formation_backfill"]
     assert summary["refused_stale_type"] == 0
     assert summary["declared"] >= 1
+
+
+def test_a_backfill_will_not_open_a_belief_on_another_companys_results(store):
+    """The second door into the same defect.
+
+    The live path refuses "PayPal tops Q2 estimates and raises full-year
+    forecast" as evidence about Stripe. A backfill that only re-checked the
+    TYPE would walk the same belief in through the ledger, because the type
+    is genuinely GUIDANCE_REVISION -- it is the attribution that is wrong.
+    """
+    stored_with_type(
+        store,
+        "PayPal tops Q2 estimates and raises full-year forecast amid Stripe "
+        "takeover bid.",
+        ME.GUIDANCE_REVISION, subject="stripe")
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["declared"] == 0
+    assert summary["refused_stale_type"] == 1
+    assert store.beliefs() == ()
+
+
+def test_a_backfill_still_opens_a_belief_on_the_subjects_own_results(store):
+    """The control: the attribution check must not refuse everything."""
+    stored_with_type(
+        store,
+        "Duolingo beat consensus estimates for the quarter and raised its "
+        "full-year forecast.",
+        ME.EARNINGS_SURPRISE, subject="duolingo")
+    summary = LC.run(as_of="2026-08-05", store=store, evidence=[],
+                     backfill_evidence=True
+                     ).as_dict()["belief_formation_backfill"]
+    assert summary["declared"] == 1
+    assert summary["refused_stale_type"] == 0
+
+
+def test_a_slug_that_cannot_be_matched_falls_back_to_the_type_check(store):
+    """`america_movil` does not reproduce "América Móvil". A position test
+    that cannot find the subject has learned nothing, so it must not refuse
+    over a spelling."""
+    assert LC._slug_names("hdfc_bank")[1] == "Hdfc Bank"
+    assert ET.reports_own_results(
+        "América Móvil raised its full-year capex plan.", "raised",
+        LC._slug_names("america_movil"))
 
 
 def test_a_backfill_with_an_empty_ledger_says_so_rather_than_failing(store):
