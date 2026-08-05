@@ -554,6 +554,21 @@ class WebApp:
             return self._error_page(400, "untrusted host")
         method = environ["REQUEST_METHOD"]
         path = environ.get("PATH_INFO", "/")
+
+        # MACHINE ROUTE, HANDLED BEFORE ANYTHING READS THE BODY.
+        #
+        # Deliberately above the session lookup and above `self._form`, which
+        # consumes `wsgi.input` and would leave nothing to read. It carries no
+        # cookie and cannot: the caller is the market publisher on another
+        # machine, authenticated by a shared token rather than by a session,
+        # so the CSRF gate below has nothing to protect here and no session to
+        # protect it with.
+        #
+        # It does not exist unless configured, and never in production. See
+        # `external_intel/dossier_ingest`.
+        if path == "/internal/strategic-dossier" and method == "POST":
+            return self._ingest_strategic_dossier(environ)
+
         sid = self._cookie(environ, "sid")
         session = self.auth.session(sid) if sid else None
         if session is None and sid and self.config.demo_mode:
@@ -870,6 +885,42 @@ class WebApp:
 
     def _ok_json(self, obj):
         return "200 OK", [("Content-Type", "application/json")], json.dumps(obj)
+
+    def _ingest_strategic_dossier(self, environ):
+        """Accept one published dossier from the market publisher.
+
+        Thin on purpose: read the body, hand it to the contract, translate the
+        refusal into a status. Every decision about what is acceptable lives
+        in `dossier_ingest`, which shares the allowlist with the local file
+        path, so this route cannot become a second, weaker way in.
+        """
+        from intent_engine.external_intel import dossier_ingest as DI
+        try:
+            length = int(environ.get("CONTENT_LENGTH") or 0)
+        except (TypeError, ValueError):
+            length = 0
+        if length > DI.MAX_BYTES:
+            return ("413 Payload Too Large",
+                    [("Content-Type", "application/json")],
+                    json.dumps({"error": "dossier too large"}))
+        raw = environ["wsgi.input"].read(length) if length else b""
+        try:
+            result = DI.ingest(
+                raw, runtime_root=self._runtime_root,
+                provided_token=environ.get("HTTP_X_DOSSIER_TOKEN", ""),
+                app_env=self.config.env)
+        except DI.IngestRefused as exc:
+            _LOG.info("strategic dossier refused: %s", exc.reason)
+            return (f"{exc.status} Refused",
+                    [("Content-Type", "application/json")],
+                    json.dumps({"error": exc.reason}))
+        # The consumer caches external context per run; a newly-arrived
+        # dossier must be visible to the NEXT analysis rather than to the
+        # next process.
+        self._external_cache.clear()
+        _LOG.info("strategic dossier %s for %s (%s)", result["status"],
+                  result["company_id"], result["revision"])
+        return self._ok_json(result)
 
     def _redirect(self, where, *, set_sid=None, clear_cookie=False):
         headers = [("Location", where)]
