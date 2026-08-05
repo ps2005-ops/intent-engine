@@ -483,7 +483,9 @@ def decision_from_dict(data) -> FounderDecision:
         what_each_result_would_favour=data.get(
             "what_each_result_would_favour", ""),
         reconsider_when=data.get("reconsider_when", ""),
-        verified=tuple(data.get("verified") or ()),
+        # Rehydration filters too: a decision serialised before this rule
+        # existed still carries the cover page in its stored `verified`.
+        verified=tuple(FH.executive_safe(data.get("verified") or ())),
         basis=data.get("basis", ""))
 
 
@@ -670,7 +672,13 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
     """
     blind = list(blind_spots or ())
     gaps = [g for g in (evidence_gaps or ()) if _flat(g)]
-    verified = tuple(_flat(v) for v in (verified or ()) if _flat(v))
+    # THE chokepoint: this is the one decision object every surface renders,
+    # so filing furniture is refused here rather than at each caller. Filtering
+    # only `decision_of` left the live decision page and slide 1 still showing
+    # a 10-K cover page -- the unit tests passed and the product did not
+    # change, which is why this is filtered where every surface converges.
+    verified = tuple(FH.executive_safe(
+        _flat(v) for v in (verified or ()) if _flat(v)))
 
     if hypothesis is None:
         return FounderDecision(

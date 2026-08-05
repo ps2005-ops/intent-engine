@@ -120,3 +120,27 @@ def test_the_producer_filters_before_the_three_item_cap():
     assert d.verified
     assert "Revenue increased 26%" in d.verified[0]
     assert not any("PURSUANT TO SECTION" in v for v in d.verified)
+
+
+def test_the_chokepoint_every_surface_renders_is_filtered():
+    """Filtering only `decision_of` was not enough: the live decision page and
+    slide 1 still showed the cover page, because the surfaces render whatever
+    `compose_decision` built. Pinned at the convergence point."""
+    from intent_engine.strategic_intelligence import decision as D
+    d = D.compose_decision("Acme", None, verified=(
+        DATADOG_SLIDE_1,
+        "TABLE OF CONTENTS",
+        "Revenue increased 26% to $2.68 billion.",
+    ))
+    assert not any("PURSUANT TO SECTION" in v for v in d.verified)
+    for glyph in FH.CHECKBOX_GLYPHS:
+        assert not any(glyph in v for v in d.verified)
+    assert any("Revenue increased 26%" in v for v in d.verified)
+
+
+def test_a_decision_stored_before_this_rule_is_cleaned_on_rehydration():
+    from intent_engine.strategic_intelligence import decision as D
+    d = D.decision_from_dict({
+        "verified": [DATADOG_SLIDE_1, "Revenue increased 26%."]})
+    assert not any("PURSUANT TO SECTION" in v for v in d.verified)
+    assert d.verified
