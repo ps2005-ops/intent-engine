@@ -462,6 +462,7 @@ def learning_step(ctx: C.CycleContext) -> dict:
     from . import learning_cycle as LC
     from . import learning_store as LS
     from . import shadow_policies as SP
+    from . import strategic_publish as SEP
 
     store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
     positions = (ctx.results.get("positions") or {})
@@ -472,6 +473,15 @@ def learning_step(ctx: C.CycleContext) -> dict:
         trades_opened=int(positions.get("opened", 0) or 0))
     payload = result.as_dict()
     payload["ledger"] = store.health()
+    # Publish the sanitized dossiers. This is the ONLY channel to Founder
+    # Intelligence, and it runs on every session — a bridge that only opens
+    # when someone remembers to open it is not a bridge. A failure to publish
+    # must not lose the learning that already happened, so it is reported in
+    # the row rather than raised.
+    try:
+        payload["strategic_export"] = SEP.publish(result, root=ctx.root)
+    except Exception as exc:  # noqa: BLE001 - see above
+        payload["strategic_export"] = {"error": str(exc), "published": []}
     return payload
 
 

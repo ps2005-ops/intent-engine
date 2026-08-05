@@ -102,6 +102,22 @@ class LearningResult:
     information_agenda: dict = field(default_factory=dict)
     trades_opened: int = 0
 
+    # --- the session's live objects, for the sanitized export only --------
+    # Summaries are counts, and a founder cannot be told anything useful by a
+    # count. The projector in `strategic_publish` needs the objects
+    # themselves, so the session carries them here rather than rebuilding a
+    # second, drifting copy from the ledger.
+    #
+    # DELIBERATELY OUTSIDE `as_dict()`. These are not report fields: the day
+    # report is written to disk and read by operators, and putting live
+    # objects in it would put the whole belief store into every cycle JSON.
+    # `as_dict` names its keys explicitly, so nothing here can ride along.
+    beliefs_after: Tuple[Any, ...] = ()
+    hidden_states_after: Tuple[Any, ...] = ()
+    interactions_seen: Tuple[Any, ...] = ()
+    reconciliations_seen: Tuple[Any, ...] = ()
+    priorities_seen: Tuple[Any, ...] = ()
+
     @property
     def observations_ingested(self) -> int:
         for s in self.steps:
@@ -393,4 +409,9 @@ def run(*, as_of: str, store: LS.LearningStore,
 
     result.belief_summary = B.summarise(beliefs_before,
                                         tuple(working.values()))
+    result.beliefs_after = tuple(working.values())
+    result.hidden_states_after = tuple(hs_after)
+    result.interactions_seen = tuple(interactions)
+    result.reconciliations_seen = tuple(reconciliations)
+    result.priorities_seen = tuple(priorities)
     return result
