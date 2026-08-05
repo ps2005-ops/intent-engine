@@ -169,6 +169,12 @@ LAYER_CSS = """
 <style>
 .dash{display:grid;gap:.7rem;grid-template-columns:1fr 1fr;margin:.5rem 0}
 @media(max-width:760px){.dash{grid-template-columns:1fr}}
+/* A TILE WITH A CHART SPANS BOTH COLUMNS. Measured at 1440px: a chart in a
+   half-width tile rendered 317px wide against a 640-unit viewBox, scaling its
+   11px axis labels to under 5px -- present, and unreadable. A chart nobody
+   can read is decoration, and decoration is what stops a reader trusting the
+   charts that do mean something. */
+.dash .tile.haschart{grid-column:1/-1}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
 padding:1rem 1.1rem}
 .tile h3{margin:0 0 .4rem;font-size:1rem}
@@ -239,8 +245,9 @@ def render_dashboard(modules, *, charts=None) -> str:
                             f'{_e(d["what_to_watch"])}</p>')
             out.append("".join(tile) + "</div>")
             continue
-        out.append(f'<div class="tile"><h3>{_e(d["title"])}</h3>')
         chart = charts.get(d.get("key"))
+        out.append(f'<div class="tile{" haschart" if chart else ""}">'
+                   f'<h3>{_e(d["title"])}</h3>')
         # THE SAME SENTENCE, THREE TIMES. Measured on the deployed dashboard:
         # the tile printed `what_changed`, then a chart whose headline IS
         # `what_changed`, then `text_alternative`, which restates it again. A

@@ -432,3 +432,25 @@ def test_the_executive_brief_carries_the_macro_exposure(tmp_path):
     macro = next(p for p in book.passages if p.key == "macro")
     assert macro.for_depth(D.BRIEF), "the brief needs the macro exposure"
     assert macro.for_depth(D.FULL)
+
+
+def test_a_dashboard_chart_tile_spans_the_grid(tmp_path):
+    """Measured at 1440px on the deployed dashboard.
+
+    A chart in a half-width tile rendered 317px wide against a 640-unit
+    viewBox, scaling its 11px axis labels to under 5px -- present, and
+    unreadable. A chart nobody can read is decoration, and decoration is what
+    stops a reader trusting the charts that do mean something.
+    """
+    from intent_engine.founder_brief import render as R
+    context = _context(tmp_path)
+    modules = L.build_dashboard(
+        _brief(PS.market_context_dict(context)), _report(),
+        footing={"ticker": "ACME"}, external=context)
+    charts = {b.key: V.render(b, context) for b in PS.blocks(context)}
+    charts = {k: v for k, v in charts.items() if v}
+    html = R.render_dashboard(modules, charts=charts)
+    assert ".dash .tile.haschart{grid-column:1/-1}" in html
+    assert html.count('class="tile haschart"') == len(charts)
+    # A tile without a chart keeps its half-width slot.
+    assert 'class="tile"' in html
