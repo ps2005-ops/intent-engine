@@ -36,7 +36,9 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from .competitor_contract import corroborating, framing_only
-from .pack import COMPETITIVE, MACRO, MARKET, NON_CAUSAL_FRAME, ExternalContext
+from .pack import (
+    COMPETITIVE, MACRO, MARKET, NON_CAUSAL_FRAME, STRATEGIC, ExternalContext,
+)
 
 
 @dataclass(frozen=True)
@@ -250,10 +252,105 @@ def competitor_blocks(context: ExternalContext) -> List[Block]:
         chart="competitor_positioning")]
 
 
+def strategic_blocks(context: ExternalContext) -> List[Block]:
+    """What the market-learning engine currently believes about this company.
+
+    THE FAMILY THAT REACHED THE REASONING LAYER AND NOT THE PAGE
+    ------------------------------------------------------------
+    `pack.reasoning_pack` has carried strategic blocks for as long as the
+    contract has existed, so the model saw them. Every founder-visible surface
+    — the dossier, the layers, the narrative — builds its sections from
+    `presenter.blocks()`, and this family was not in it. `relevant_sections()`
+    would name STRATEGIC as relevant and no surface could render a word of it.
+
+    ONE BLOCK, NOT ONE PER BELIEF
+    -----------------------------
+    The other three families each contribute a single block and the surfaces
+    budget on that basis; a dossier that emitted six would take six of the
+    reading budget away from the company's own evidence. So the strongest
+    belief leads and the rest are named after it, which is also the honest
+    ordering — confidence here is a stated number, not a ranking the reader
+    has to infer.
+
+    A BELIEF IS NOT AN OBSERVATION, AND THE BLOCK SAYS SO TWICE
+    -----------------------------------------------------------
+    Once in the fact, which attributes the reading to the engine rather than
+    stating it about the world, and once in the limitation, which says a
+    freshly opened belief is an opening position rather than a tested one.
+    Confidence in the high fifties printed without that reads as a finding.
+    """
+    if not context.has_strategic:
+        return []
+    intel = context.strategic
+    beliefs = sorted(intel.beliefs,
+                     key=lambda b: float(b.get("confidence") or 0),
+                     reverse=True)
+    if not beliefs:
+        return []
+
+    lead = beliefs[0]
+    subject = intel.subject or "this company"
+    confidence = float(lead.get("confidence") or 0)
+    others = [str(b.get("proposition") or "") for b in beliefs[1:3]
+              if b.get("proposition")]
+
+    fact = (f"Reading strategic evidence about {subject}, the market-learning "
+            f"engine holds that {lead.get('proposition', '')} — at "
+            f"{confidence:.0%} confidence.")
+    if others:
+        fact += " It also holds: " + "; ".join(others) + "."
+
+    untested = all(str(b.get("update_method") or "").upper() == "DECLARED"
+                   or not b.get("direction_of_last_change")
+                   for b in beliefs)
+    limitation = (
+        "These are readings held at a stated confidence, not observations, "
+        "and they describe strategic posture rather than this company's "
+        "operating results.")
+    if untested:
+        limitation += (" Every one of them was opened by the evidence behind "
+                       "it and has not since been revised, so the confidence "
+                       "is an opening position rather than a tested one.")
+    stated = [x for b in beliefs for x in (b.get("limitations") or ()) if x]
+    if stated:
+        limitation += " Stated by the engine: " + "; ".join(stated[:2]) + "."
+
+    return [Block(
+        key="strategic_reading", context=STRATEGIC,
+        title="What the market engine believes",
+        fact=fact,
+        so_what=(
+            "This is an outside reading of the same company, built from "
+            "public evidence on its own schedule. Where it agrees with this "
+            "analysis it is corroboration from a separate path; where it "
+            "disagrees, one of the two is working from something the other "
+            "has not seen, and that gap is worth finding before acting."),
+        decision=(
+            "Whether to treat this quarter's evidence as a change in "
+            "direction or as a single period — and which of these readings "
+            "to go looking for evidence against first."),
+        limitation=limitation,
+        source="market-learning engine, from public evidence",
+        freshness=(f"published {intel.as_of}"
+                   + (f", {intel.age_days} days ago"
+                      if intel.age_days is not None else "")),
+        text_alternative=(f"{len(beliefs)} strategic reading(s) about "
+                          f"{subject}; strongest at {confidence:.0%} "
+                          f"confidence."),
+        evidence_ids=tuple(x for b in beliefs
+                           for x in (b.get("evidence_ids") or ())))]
+
+
 def blocks(context: ExternalContext) -> List[Block]:
-    """Every relevant block, in decision order: market, macro, competition."""
+    """Every relevant block, in decision order.
+
+    Strategic comes last deliberately: it is an outside reading of the
+    company, and it qualifies the company's own evidence rather than leading
+    it. `ExternalContext.changes_readiness` is the structural half of the
+    same rule.
+    """
     return (market_blocks(context) + macro_blocks(context)
-            + competitor_blocks(context))
+            + competitor_blocks(context) + strategic_blocks(context))
 
 
 def leading_blocks(context: ExternalContext) -> List[Block]:

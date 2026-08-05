@@ -47,7 +47,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 SCHEMA_VERSION = "strategic_market_intel.v1"
 
@@ -103,6 +103,15 @@ _INTERACTION = {
 
 ALLOWED: Dict[str, Any] = {
     "export_version": ..., "generated_at": ..., "company_id": ...,
+    # WHO THE DOSSIER IS ABOUT, STATED RATHER THAN INFERRED FROM ITS FILENAME.
+    # `company_id` is a key, and a key is only an identity if both sides
+    # derive it from the same string — which they did not. The producer keys
+    # on its own internal universe id and this side knows the company by
+    # whatever name the founder typed, so the two agreed only by coincidence.
+    # `subject_names` is the producer naming its subject out loud, and it is
+    # what `resolve` matches on. Optional: a dossier written before this field
+    # existed is still readable, it simply cannot be found by name.
+    "company_display_name": ..., "subject_names": ...,
     "as_of": ...,
     "freshness": {"status": ..., "as_of": ..., "age_days": ...,
                   "stale": ..., "note": ...},
@@ -221,6 +230,14 @@ class StrategicIntel:
     available: bool
     reason: str = ""
     company_id: str = ""
+    #: The producer's own display name for the subject, when it stated one.
+    #: Preferred over `company_id` wherever a founder can see it: `company_id`
+    #: is a slug, and "microsoft is seeing demand strengthen" is a sentence
+    #: about a key, not about a company.
+    display_name: str = ""
+    #: Every name the producer says this dossier is about. Used to find the
+    #: dossier, never rendered.
+    subject_names: Tuple[str, ...] = ()
     as_of: str = ""
     age_days: Optional[int] = None
     stale: bool = False
@@ -249,9 +266,17 @@ class StrategicIntel:
                     or self.mismatches or self.reactions or self.pathways
                     or self.priorities or self.market_structure)
 
+    @property
+    def subject(self) -> str:
+        """The name to put in front of a founder. Never the slug if avoidable."""
+        return self.display_name or self.company_id
+
     def as_dict(self) -> dict:
         return {"available": self.available, "reason": self.reason,
-                "company_id": self.company_id, "as_of": self.as_of,
+                "company_id": self.company_id,
+                "display_name": self.display_name,
+                "subject_names": list(self.subject_names),
+                "as_of": self.as_of,
                 "age_days": self.age_days, "stale": self.stale,
                 "beliefs": list(self.beliefs), "postures": list(self.postures),
                 "interactions": list(self.interactions),
@@ -322,7 +347,11 @@ def consume(payload: dict, *, expected_company: str = "",
                      if isinstance(r, dict))
 
     return StrategicIntel(
-        available=True, company_id=company, as_of=as_of, age_days=age,
+        available=True, company_id=company,
+        display_name=str(payload.get("company_display_name") or ""),
+        subject_names=tuple(str(x) for x in
+                            (payload.get("subject_names") or ())),
+        as_of=as_of, age_days=age,
         stale=False,
         beliefs=_rows("strategic_beliefs"),
         postures=_rows("hidden_states"),
@@ -338,6 +367,138 @@ def consume(payload: dict, *, expected_company: str = "",
         disclaimer=str(payload.get("disclaimer") or DISCLAIMER))
 
 
+#: A universe of a few dozen companies publishes a few dozen dossiers. The cap
+#: exists so a directory that has grown unexpectedly degrades into a miss
+#: rather than into a slow page.
+MAX_DOSSIERS_SCANNED = 512
+
+NO_DOSSIER = (
+    "No strategic reading has been published for this company. Strategic "
+    "posture, competitor reactions and preregistered expectations are not "
+    "part of this analysis.")
+
+
+def _read(path) -> Optional[dict]:
+    """One dossier as a plain object, or None if it cannot be read at all."""
+    import json
+
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _declared_keys(payload: dict) -> set:
+    """Every key this dossier claims to answer to, normalised.
+
+    `company_id` is included because a producer that has not yet learned to
+    state `subject_names` still answers to its own key, and this side must
+    keep reading the dossiers that already exist.
+    """
+    names = [payload.get("company_id") or "",
+             payload.get("company_display_name") or ""]
+    names += [str(n) for n in (payload.get("subject_names") or ())
+              if isinstance(n, (str, int, float))]
+    return {k for k in (company_key(str(n)) for n in names) if k}
+
+
+def resolve(directory, *, names: Sequence[str],
+            today: str = "") -> StrategicIntel:
+    """Find the dossier for a company known by any of `names`.
+
+    WHY THIS EXISTS AND `load` WAS NOT ENOUGH
+    -----------------------------------------
+    `load` takes a path, and the caller built that path from `company_key` of
+    the one name it happened to hold. Measured against the first real dossiers
+    the market engine ever wrote, that join NEVER MATCHED: the producer files
+    under its internal universe id (`microsoft.json`) and this side asks for
+    the name a founder typed (`microsoft-corporation.json`). Both sides ran
+    exactly as designed, both were tested, and the bridge carried nothing —
+    silently, because "no dossier published" is a legitimate answer and so
+    nothing raised.
+
+    Two names for the same company is the normal case, not the edge case, so
+    the fix is not a better convention. It is to stop inferring identity from
+    a filename: a dossier is accepted when it NAMES the company it is about,
+    and the filename is only a hint about where to look first.
+
+    AMBIGUITY IS REFUSED, NOT RESOLVED
+    ----------------------------------
+    If two dossiers claim the same company, one of them is wrong and picking
+    either would attribute half the evidence to the wrong subject — the same
+    failure the market side already paid for when a mis-resolved registrant
+    produced perfectly-classified events about the wrong company. Both are
+    refused, with the reason.
+
+    A FILE AT THE EXPECTED NAME WINS, AND WINS BEFORE THE SCAN
+    ----------------------------------------------------------
+    The scan exists to find a dossier filed under a name we did not guess; it
+    is not a second opinion about one we did. So a file sitting at exactly
+    `company_key(name).json` is taken, and a rival claim elsewhere in the
+    directory does not make it ambiguous — the filename is the strongest
+    identity assertion available, not the weakest. The consequence worth
+    knowing is that ambiguity is detected among CLAIMS, not against the
+    canonical file: `microsoft-corporation.json` is read even if some other
+    dossier also lists "Microsoft Corporation" among its subjects.
+    """
+    import pathlib
+
+    root = pathlib.Path(directory)
+    keys, seen = [], set()
+    for name in names:
+        key = company_key(str(name or ""))
+        if key and key not in seen:
+            seen.add(key)
+            keys.append(key)
+    if not keys:
+        return unavailable(
+            "This analysis has no company name to look a strategic dossier "
+            "up by, so none was read.")
+
+    # Fast path: the producer's filename already agrees with a name we hold.
+    for key in keys:
+        candidate = root / f"{key}.json"
+        if candidate.exists():
+            return load(candidate, expected_company=key, today=today)
+
+    if not root.is_dir():
+        return unavailable(NO_DOSSIER, company_id=keys[0])
+
+    wanted = set(keys)
+    matches: List[Tuple[Any, dict]] = []
+    renamed = 0
+    for path in sorted(root.glob("*.json"))[:MAX_DOSSIERS_SCANNED]:
+        payload = _read(path)
+        if payload is None:
+            continue
+        # The producer writes `<company_id>.json`. A file whose declared id
+        # disagrees with its own name has been moved or hand-edited, and a
+        # dossier that two lookups would answer differently is not one this
+        # side will render.
+        if company_key(str(payload.get("company_id") or "")) != path.stem:
+            renamed += 1
+            continue
+        if _declared_keys(payload) & wanted:
+            matches.append((path, payload))
+
+    if len(matches) > 1:
+        return unavailable(
+            f"{len(matches)} strategic dossiers claim to be about this "
+            f"company ({', '.join(sorted(p.stem for p, _ in matches))}). "
+            f"That is an upstream identity error, and choosing one of them "
+            f"would attach the wrong company's evidence to this analysis, so "
+            f"none was rendered.", company_id=keys[0])
+    if not matches:
+        extra = (f" {renamed} dossier(s) were skipped because their declared "
+                 f"company did not match their filename." if renamed else "")
+        return unavailable(NO_DOSSIER + extra, company_id=keys[0])
+
+    path, payload = matches[0]
+    return consume(payload, expected_company=str(payload.get("company_id")
+                                                 or ""), today=today)
+
+
 def load(path, *, expected_company: str = "",
          today: str = "") -> StrategicIntel:
     """Read a dossier from disk. A missing file is a reason, not an error."""
@@ -346,11 +507,7 @@ def load(path, *, expected_company: str = "",
 
     p = pathlib.Path(path)
     if not p.exists():
-        return unavailable(
-            "No strategic reading has been published for this company. "
-            "Strategic posture, competitor reactions and preregistered "
-            "expectations are not part of this analysis.",
-            company_id=expected_company)
+        return unavailable(NO_DOSSIER, company_id=expected_company)
     try:
         payload = json.loads(p.read_text())
     except (OSError, ValueError) as exc:

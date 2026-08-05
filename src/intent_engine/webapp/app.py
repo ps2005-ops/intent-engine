@@ -2394,16 +2394,27 @@ class WebApp:
         # no import path from here into the market package, and the package is
         # not even present on this branch. A missing dossier is the normal
         # case and stays silent; see `ExternalContext.has_strategic`.
+        # It is resolved by NAME rather than by one derived filename. The
+        # producer keys its files on an internal universe id it never shares,
+        # and this side knows the company by whatever the founder typed, so a
+        # single-key lookup missed every real dossier ever published without
+        # reporting anything — see `strategic_contract.resolve`. Every name
+        # this run holds for the company is offered, and the dossier has to
+        # name itself back.
         strategic = None
         try:
             from intent_engine.external_intel import (
                 strategic_contract as sc,
             )
-            key = sc.company_key(name)
-            strategic = sc.load(
+            strategic = sc.resolve(
                 pathlib.Path(self._runtime_root) / "reports" / "market"
-                / "strategic" / f"{key}.json",
-                expected_company=key, today=today)
+                / "strategic",
+                names=[name, identity.get("common_name") or "",
+                       identity.get("canonical_legal_name") or "",
+                       identity.get("fallback_subject") or "",
+                       (self.ci.run_meta(run_id) or {}).get(
+                           "company_name") or ""],
+                today=today)
         except Exception:  # noqa: BLE001 - context must never break a run
             _LOG.warning("strategic context unavailable for %s", run_id)
 
