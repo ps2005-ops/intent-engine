@@ -174,3 +174,36 @@ def test_the_section_title_is_not_the_excerpt():
 
 def test_a_curly_apostrophe_does_not_hide_a_section():
     assert "item_7" in FS.find_sections(CURLY_MDA)
+
+
+ITEM5_BLEED = (
+    "ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES "
+    "EXCHANGE ACT OF 1934. Commission File Number 001-38480. "
+    "TABLE OF CONTENTS Item 1. Business 3 Item 7. MD&A 40 "
+    "Item 1. Business We are a monitoring and security platform for cloud "
+    "applications sold to engineering teams worldwide. "
+    "Item 5. Market for Registrant's Common Equity, Related Stockholder "
+    "Matters and Issuer Purchases of Equity Securities. "
+    "Item 7. Management’s Discussion and Analysis of Financial Condition and "
+    "Results of Operations. "
+    "Revenue increased 26% to $2.68 billion in fiscal 2025, driven primarily "
+    "by expansion within our existing customer base."
+)
+
+
+def test_an_unextracted_item_still_ends_the_previous_section():
+    """Measured live: only five Items were recognised, so Item 5's heading sat
+    inside Item 1's body, was long enough to pass the prose check, and became
+    "What was verified". A section ends where the NEXT section starts, not
+    where the next interesting one does."""
+    excerpt, section = FS.best_excerpt(ITEM5_BLEED)
+    assert excerpt.startswith("Revenue increased 26%")
+    for fragment in ("Registrant", "Stockholder", "Issuer Purchases"):
+        assert fragment not in excerpt
+    assert fragment not in FS.find_sections(ITEM5_BLEED).get("item_1", "")
+
+
+def test_item_1_body_stops_at_item_5():
+    body = FS.find_sections(ITEM5_BLEED).get("item_1", "")
+    assert "monitoring and security platform" in body
+    assert "Common Equity" not in body

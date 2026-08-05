@@ -66,6 +66,15 @@ _HEADINGS = (
     ("item_1", re.compile(r"item\s*1\b[\s.:\-\u2014]*", re.I)),
 )
 
+# EVERY "Item N" is a BOUNDARY, even the ones nothing is extracted from.
+# Measured live: only five items were recognised, so Item 5's heading --
+# "Market for Registrant's Common Equity, Related Stockholder Matters and
+# Issuer Purchases of Equity Securities" -- sat inside the previous section's
+# body, was long enough to pass the prose check, and became the excerpt. A
+# section must end where the next section starts, not where the next
+# INTERESTING section starts.
+_ANY_ITEM = re.compile(r"item\s*\d{1,2}[a-z]?\b[\s.:\-\u2014]*", re.I)
+
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 _MIN_PROSE = 80        # a heading followed by less than this is navigation
 _MAX_SPAN = 600
@@ -126,11 +135,19 @@ def find_sections(text: str) -> dict:
     for key, pattern in _HEADINGS:
         for m in pattern.finditer(blob):
             marks.append((m.start(), m.end(), key))
+    # Boundary-only marks: they terminate the previous section but nothing is
+    # extracted from them. `None` keys are skipped when building the result.
+    known = {m[0] for m in marks}
+    for m in _ANY_ITEM.finditer(blob):
+        if m.start() not in known:
+            marks.append((m.start(), m.end(), None))
     marks.sort()
 
     out: dict = {}
     for i, (start, end, key) in enumerate(marks):
         stop = marks[i + 1][0] if i + 1 < len(marks) else len(blob)
+        if key is None:
+            continue                  # boundary only
         body = _TITLE_TAIL.sub("", blob[end:stop].strip(), count=1).strip()
         if len(body) < _MIN_PROSE:
             continue          # navigation entry, not the section itself
