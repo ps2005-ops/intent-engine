@@ -1,0 +1,396 @@
+"""Every session attempts to learn — and says why it did not, when it did not.
+
+WHAT THIS REPLACES
+------------------
+`steps.assets_step` reports the ledger and passes `()` for revisions, so
+NET KNOWLEDGE GAIN was structurally 0 on every cycle for eleven consecutive
+cycles. Its docstring is right about the risk it was avoiding: an unattended
+process that rewrites its own confidences nightly manufactures exactly the
+daily-progress signal this project refuses to manufacture.
+
+This module takes the opposite route to the same protection. Instead of
+refusing to update, it makes every update *earned* by something external:
+
+  - a preregistered expectation, committed before the observation existed;
+  - deduplicated evidence carrying a real source;
+  - a decay rule driven by the calendar, recorded as decay and never as
+    contradiction.
+
+A quiet session still reports zero. But it now reports zero WITH ITS WORKING:
+what was observed, what was tested, and why nothing moved. Those are different
+statements, and only the second one is evidence that the engine is alive.
+
+THE ORDER OF THE THIRTEEN STEPS MATTERS
+---------------------------------------
+Reconciliation runs before belief revision, so an expectation is scored against
+the observation that arrived — not against a posterior it just helped move.
+Decay runs last, so a belief validated by this session's evidence is not
+decayed in the same breath for being stale.
+
+NOTHING HERE OPENS A POSITION
+-----------------------------
+No import of `paper_engine`, no order path, no position identity. Learning is
+upstream of trading and does not depend on it — which is the whole point.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+
+from . import beliefs as B
+from . import causal as C
+from . import counterfactual as CF
+from . import expectation as EXP
+from . import hidden_state as HS
+from . import information_value as IV
+from . import learning_store as LS
+from . import micro_evidence as ME
+from . import strategic_interaction as SI
+
+CONTRACT_VERSION = "learning_cycle.v1"
+
+# The thirteen things every session attempts (§22). Reported individually so a
+# session that skipped one cannot present itself as having run them all.
+STEPS = (
+    "micro_evidence_ingestion",
+    "expected_vs_observed_reconciliation",
+    "belief_revision",
+    "hidden_state_update",
+    "causal_graph_update",
+    "interaction_memory_update",
+    "counterfactual_update",
+    "shadow_policy_update",
+    "regret_calculation",
+    "near_miss_analysis",
+    "information_value_prioritisation",
+    "knowledge_decay",
+    "long_horizon_outcome_resolution",
+)
+
+ATTEMPTED = "ATTEMPTED"
+SKIPPED = "SKIPPED"
+FAILED = "FAILED"
+
+
+@dataclass
+class StepResult:
+    """One step's outcome, including an honest zero."""
+    name: str
+    status: str
+    changed: int = 0
+    examined: int = 0
+    note: str = ""
+
+    def as_dict(self) -> dict:
+        return {"step": self.name, "status": self.status,
+                "examined": self.examined, "changed": self.changed,
+                "note": self.note}
+
+
+@dataclass
+class LearningResult:
+    """What a session actually learned, and what it merely looked at."""
+    as_of: str
+    steps: List[StepResult] = field(default_factory=list)
+    belief_summary: dict = field(default_factory=dict)
+    reconciliation_summary: dict = field(default_factory=dict)
+    hidden_state_summary: dict = field(default_factory=dict)
+    causal_summary: dict = field(default_factory=dict)
+    interaction_summary: dict = field(default_factory=dict)
+    counterfactual_summary: dict = field(default_factory=dict)
+    near_miss_summary: dict = field(default_factory=dict)
+    information_agenda: dict = field(default_factory=dict)
+    trades_opened: int = 0
+
+    @property
+    def observations_ingested(self) -> int:
+        for s in self.steps:
+            if s.name == "micro_evidence_ingestion":
+                return s.examined
+        return 0
+
+    @property
+    def knowledge_gain(self) -> int:
+        """Belief-layer learning ONLY. Never includes trade outcomes.
+
+        Kept separate from anything trading produces, because conflating them
+        is how eleven quiet markets got recorded as eleven quiet minds.
+        """
+        s = self.belief_summary
+        return int(s.get("belief_knowledge_gain", 0)) + \
+            int(self.hidden_state_summary.get("companies_moved", 0)) + \
+            int(self.causal_summary.get("added", 0)) + \
+            int(self.causal_summary.get("strengthened", 0)) + \
+            int(self.causal_summary.get("weakened", 0))
+
+    @property
+    def learned_without_trading(self) -> bool:
+        """The central claim this cycle has to be able to make."""
+        return self.trades_opened == 0 and self.knowledge_gain > 0
+
+    def why_nothing_moved(self) -> str:
+        """The explanation a zero must carry. §22 forbids a bare zero."""
+        if self.knowledge_gain:
+            return ""
+        ingested = self.observations_ingested
+        recon = self.reconciliation_summary or {}
+        by_outcome = recon.get("by_outcome", {})
+        parts = [f"{ingested} observation(s) ingested",
+                 f"{recon.get('evaluated', 0)} preregistered expectation(s) "
+                 f"tested"]
+        if by_outcome.get(EXP.TOO_EARLY):
+            parts.append(f"{by_outcome[EXP.TOO_EARLY]} still inside their "
+                         f"evaluation window")
+        if by_outcome.get(EXP.UNINFORMATIVE):
+            parts.append(f"{by_outcome[EXP.UNINFORMATIVE]} observed a move "
+                         f"too small to discriminate")
+        if by_outcome.get(EXP.UNMEASURABLE):
+            parts.append(f"{by_outcome[EXP.UNMEASURABLE]} had no qualifying "
+                         f"observation")
+        if not ingested:
+            parts.append("no new evidence carried a source, so nothing was "
+                         "eligible to update a belief")
+        return ("No belief moved this session. " + "; ".join(parts) +
+                ". A tested-and-unmoved belief is a result, not an absence "
+                "of work.")
+
+    def as_dict(self) -> dict:
+        return {
+            "contract": CONTRACT_VERSION, "as_of": self.as_of,
+            "steps": [s.as_dict() for s in self.steps],
+            "steps_attempted": sum(1 for s in self.steps
+                                   if s.status == ATTEMPTED),
+            "steps_total": len(STEPS),
+            "belief_learning": self.belief_summary,
+            "expected_vs_observed": self.reconciliation_summary,
+            "hidden_states": self.hidden_state_summary,
+            "causal_graph": self.causal_summary,
+            "strategic_interactions": self.interaction_summary,
+            "counterfactuals_and_regret": self.counterfactual_summary,
+            "near_misses": self.near_miss_summary,
+            "information_priorities": self.information_agenda,
+            "belief_knowledge_gain": self.knowledge_gain,
+            "trades_opened": self.trades_opened,
+            "learned_without_trading": self.learned_without_trading,
+            "why_nothing_moved": self.why_nothing_moved(),
+        }
+
+
+def run(*, as_of: str, store: LS.LearningStore,
+        evidence: Sequence[ME.MicroEvidence] = (),
+        observations: Optional[Dict[str, dict]] = None,
+        hidden_states: Sequence[HS.HiddenStateBelief] = (),
+        hidden_state_observations: Sequence[dict] = (),
+        graph: Optional[C.CausalGraph] = None,
+        interactions: Sequence[SI.StrategicInteraction] = (),
+        counterfactuals: Sequence[CF.Counterfactual] = (),
+        near_misses: Sequence[CF.NearMiss] = (),
+        information_candidates: Sequence[dict] = (),
+        shadow_registry: Optional[Any] = None,
+        trades_opened: int = 0,
+        decay_beliefs: bool = True) -> LearningResult:
+    """Run one full learning session. Attempts all thirteen steps.
+
+    `observations` maps expectation_id → {observed_value, observed_at,
+    observed_direction, evidence_ids}. An expectation with no entry is scored
+    TOO_EARLY or UNMEASURABLE by `reconcile`, never as a refutation.
+    """
+    result = LearningResult(as_of=as_of[:10], trades_opened=trades_opened)
+    observations = observations or {}
+    graph = graph if graph is not None else C.CausalGraph()
+    before_edges = graph.all()
+
+    # 1. micro-evidence ingestion -----------------------------------------
+    known = store.evidence_ids()
+    fresh = [e for e in ME.deduplicate(evidence)
+             if e.evidence_id not in known]
+    for item in fresh:
+        store.record_evidence(item)
+    result.steps.append(StepResult(
+        "micro_evidence_ingestion", ATTEMPTED, changed=len(fresh),
+        examined=len(evidence),
+        note=(f"{len(evidence) - len(fresh)} already ingested and skipped"
+              if len(evidence) != len(fresh) else "")))
+
+    beliefs_before = store.beliefs()
+    by_id = {b.belief_id: b for b in beliefs_before}
+    working: Dict[str, B.StrategicBelief] = dict(by_id)
+
+    # 2. expected vs observed ---------------------------------------------
+    open_expectations = store.open_expectations(as_of=as_of)
+    reconciliations: List[EXP.Reconciliation] = []
+    for e in open_expectations:
+        obs = observations.get(e.expectation_id, {})
+        r = EXP.reconcile(e, as_of=as_of,
+                          observed_value=obs.get("observed_value"),
+                          observed_at=obs.get("observed_at", ""),
+                          observed_direction=obs.get("observed_direction"),
+                          evidence_ids=obs.get("evidence_ids", ()))
+        reconciliations.append(r)
+        store.record_reconciliation(r)
+    result.reconciliation_summary = EXP.summarise(reconciliations)
+    result.steps.append(StepResult(
+        "expected_vs_observed_reconciliation", ATTEMPTED,
+        examined=len(open_expectations),
+        changed=result.reconciliation_summary["informative"],
+        note="" if open_expectations else
+             "no preregistered expectation was open this session"))
+
+    # 3. belief revision ---------------------------------------------------
+    # Reconciliations first: an expectation is scored against the observation
+    # that arrived, not against a posterior it just helped move.
+    revised = 0
+    for r in reconciliations:
+        belief = working.get(r.hypothesis_id)
+        if belief is None:
+            continue
+        updated, changed = B.update_from_reconciliation(
+            belief, r.outcome, at=as_of, rationale=r.rationale,
+            expectation_id=r.expectation_id)
+        if changed:
+            working[belief.belief_id] = updated
+            store.record_update(belief.belief_id, updated.history[-1])
+            revised += 1
+
+    by_subject: Dict[str, List[ME.MicroEvidence]] = {}
+    for item in fresh:
+        by_subject.setdefault(item.subject_company, []).append(item)
+    for belief in list(working.values()):
+        items = [e for e in by_subject.get(belief.subject, ())
+                 if not belief.has_applied(e.evidence_id)]
+        if not items:
+            continue
+        updated, changed = B.update(working[belief.belief_id], items,
+                                    at=as_of)
+        if changed:
+            working[belief.belief_id] = updated
+            store.record_update(belief.belief_id, updated.history[-1])
+            revised += 1
+    result.steps.append(StepResult(
+        "belief_revision", ATTEMPTED, examined=len(working),
+        changed=revised))
+
+    # 4. hidden states -----------------------------------------------------
+    hs_after: List[HS.HiddenStateBelief] = list(hidden_states)
+    hs_index = {b.subject: i for i, b in enumerate(hs_after)}
+    hs_changed = 0
+    for obs in hidden_state_observations:
+        subject = obs.get("subject")
+        if subject not in hs_index:
+            continue
+        try:
+            hs_after[hs_index[subject]] = HS.observe(
+                hs_after[hs_index[subject]], action=obs["action"],
+                likelihoods=obs["likelihoods"], at=as_of,
+                evidence_ids=obs.get("evidence_ids", ()),
+                invalidating_evidence=obs.get("invalidating_evidence", ""))
+            hs_changed += 1
+        except HS.HiddenStateError:
+            # A refused observation is a guard firing, not a cycle failure.
+            continue
+    result.hidden_state_summary = HS.summarise(hidden_states, hs_after)
+    result.steps.append(StepResult(
+        "hidden_state_update", ATTEMPTED, examined=len(hidden_states),
+        changed=hs_changed))
+
+    # 5. causal graph ------------------------------------------------------
+    result.causal_summary = graph.summarise(before=before_edges)
+    result.steps.append(StepResult(
+        "causal_graph_update", ATTEMPTED, examined=len(graph.all()),
+        changed=result.causal_summary["added"]
+        + result.causal_summary["strengthened"]
+        + result.causal_summary["weakened"]))
+
+    # 6. interaction memory ------------------------------------------------
+    result.interaction_summary = SI.summarise(interactions)
+    result.steps.append(StepResult(
+        "interaction_memory_update", ATTEMPTED, examined=len(interactions),
+        changed=result.interaction_summary["with_response"]))
+
+    # 7/9. counterfactuals and regret --------------------------------------
+    result.counterfactual_summary = CF.summarise(counterfactuals)
+    result.steps.append(StepResult(
+        "counterfactual_update", ATTEMPTED, examined=len(counterfactuals),
+        changed=result.counterfactual_summary["resolved"]))
+
+    # 8. shadow policies ---------------------------------------------------
+    if shadow_registry is not None:
+        shadow_registry.assert_isolated()
+        result.steps.append(StepResult(
+            "shadow_policy_update", ATTEMPTED,
+            examined=len(shadow_registry.all_books()),
+            note="isolation verified; no shadow policy touches the "
+                 "principal paper book"))
+    else:
+        result.steps.append(StepResult(
+            "shadow_policy_update", SKIPPED,
+            note="no shadow registry supplied to this session"))
+
+    result.steps.append(StepResult(
+        "regret_calculation", ATTEMPTED,
+        examined=result.counterfactual_summary["resolved"],
+        changed=result.counterfactual_summary["actionable_regret_records"],
+        note=f"no-trade regret "
+             f"{result.counterfactual_summary['no_trade_regret']} over "
+             f"{result.counterfactual_summary['no_trade_decisions_scored']} "
+             f"scored no-trade decisions"))
+
+    # 10. near misses ------------------------------------------------------
+    result.near_miss_summary = CF.analyse_near_misses(near_misses)
+    result.steps.append(StepResult(
+        "near_miss_analysis", ATTEMPTED, examined=len(near_misses),
+        changed=sum(1 for f in result.near_miss_summary["findings"]
+                    if f["recommendation"] == "REVIEW_THRESHOLD")))
+
+    # 11. information value ------------------------------------------------
+    priorities = []
+    for c in information_candidates:
+        belief = working.get(c.get("belief_id", ""))
+        if belief is None:
+            continue
+        try:
+            priorities.append(IV.prioritise(
+                belief, candidate_observation=c["candidate_observation"],
+                observation_kind=c["observation_kind"],
+                expected_date=c["expected_date"], as_of=as_of,
+                decision_value=c.get("decision_value", 0.5),
+                decision_deadline=c.get("decision_deadline", ""),
+                falsifies=c.get("falsifies", "")))
+        except ValueError:
+            continue
+    result.information_agenda = IV.agenda(priorities)
+    result.steps.append(StepResult(
+        "information_value_prioritisation", ATTEMPTED,
+        examined=len(information_candidates),
+        changed=result.information_agenda["actionable"]))
+
+    # 12. decay — LAST, so this session's validation is respected ----------
+    decayed = 0
+    if decay_beliefs:
+        for belief in list(working.values()):
+            updated, changed = B.decay(belief, at=as_of)
+            if changed:
+                working[belief.belief_id] = updated
+                store.record_update(belief.belief_id, updated.history[-1])
+                decayed += 1
+        result.steps.append(StepResult(
+            "knowledge_decay", ATTEMPTED, examined=len(working),
+            changed=decayed,
+            note="decay moves a belief toward uncertainty, never toward "
+                 "false"))
+    else:
+        result.steps.append(StepResult("knowledge_decay", SKIPPED,
+                                       note="decay disabled for this run"))
+
+    # 13. long-horizon outcome resolution ----------------------------------
+    resolved = sum(1 for c in counterfactuals
+                   if c.verdict != CF.UNRESOLVED)
+    result.steps.append(StepResult(
+        "long_horizon_outcome_resolution", ATTEMPTED,
+        examined=len(counterfactuals), changed=resolved,
+        note="trade outcomes are strong validation evidence, and are no "
+             "longer the only path to knowledge"))
+
+    result.belief_summary = B.summarise(beliefs_before,
+                                        tuple(working.values()))
+    return result

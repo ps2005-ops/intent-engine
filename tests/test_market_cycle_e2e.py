@@ -50,8 +50,23 @@ def test_a_complete_day_cycle_runs_every_step(tmp_path):
     assert result.status == C.COMPLETED, result.reason
     assert [s.name for s in result.steps] == [
         "research", "opportunity", "funnel", "positions", "paper_entries",
-        "assets", "health", "report"]
+        "assets", "learning", "health", "report"]
     assert all(s.ok for s in result.steps)
+
+
+def test_learning_runs_after_positions_so_it_knows_the_trade_count(tmp_path):
+    """The learning step must be able to state whether a trade was opened.
+
+    Its central claim — that knowledge moved WITHOUT a trade — is only
+    checkable if it runs after the step that would have opened one.
+    """
+    names = [n for n, _ in STEPS.day_steps()]
+    assert names.index("learning") > names.index("positions")
+    assert names.index("learning") < names.index("report")
+
+
+def test_learning_runs_in_the_night_cycle_too(tmp_path):
+    assert "learning" in [n for n, _ in STEPS.night_steps()]
 
 
 def test_a_complete_night_cycle_adds_reconciliation_and_resolution(tmp_path):

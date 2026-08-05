@@ -52,7 +52,7 @@ import pathlib
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from intent_engine.market import failures as F
 from intent_engine.market import session as S
@@ -269,6 +269,13 @@ class CycleContext:
     run_id: str
     dry_run: bool = False
     results: Dict[str, dict] = field(default_factory=dict)
+    # Evidence handed from the research sweep to the learning step, in its
+    # object form. Deliberately NOT part of `results`: only `results` is
+    # serialised into the cycle report, and a few hundred full evidence rows
+    # per company would bloat every report to no reader's benefit. The
+    # durable copy of this evidence is the learning ledger, which the
+    # learning step writes.
+    learning_inbox: List[Any] = field(default_factory=list)
 
 
 def run_step(name: str, fn: StepFn, ctx: CycleContext, *,

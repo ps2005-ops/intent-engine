@@ -56,6 +56,108 @@ def _fmt(value, pct: bool = False) -> str:
     return str(value)
 
 
+def _belief_learning(learning: dict) -> List[str]:
+    """BELIEF LEARNING, reported apart from anything trading produced.
+
+    The separation is the point of the section. Trading performance is not a
+    research-velocity measure, and using it as one is what made eleven
+    consecutive cycles report NET KNOWLEDGE GAIN: 0 while ingesting evidence
+    on 27 companies a night.
+    """
+    if not learning:
+        return ["## BELIEF LEARNING", "",
+                "Not run this cycle — no learning step result was recorded.",
+                ""]
+
+    belief = learning.get("belief_learning") or {}
+    evo = learning.get("expected_vs_observed") or {}
+    outcomes = evo.get("by_outcome") or {}
+    hidden = learning.get("hidden_states") or {}
+    graph = learning.get("causal_graph") or {}
+    regret = learning.get("counterfactuals_and_regret") or {}
+    agenda = learning.get("information_priorities") or {}
+    gain = learning.get("belief_knowledge_gain", 0)
+
+    lines = [
+        "## BELIEF LEARNING",
+        "",
+        "Learning that does **not** require a trade. Reported separately "
+        "from trade learning below; the two are never summed.",
+        "",
+        f"- belief knowledge gain: **{gain:+d}**",
+        f"- trades opened this cycle: {learning.get('trades_opened', 0)}",
+        f"- learned without trading: "
+        f"**{learning.get('learned_without_trading', False)}**",
+        f"- beliefs: {belief.get('beliefs_total', 0)} · "
+        f"strengthened {belief.get('strengthened', 0)} · "
+        f"weakened {belief.get('weakened', 0)} · "
+        f"unchanged after test {belief.get('unchanged_after_test', 0)} · "
+        f"new {belief.get('new', 0)} · "
+        f"decayed {belief.get('decayed', 0)} · "
+        f"retired {belief.get('retired', 0)}",
+        "",
+        "### EXPECTED VS OBSERVED",
+        "",
+        f"- preregistered expectations tested: {evo.get('evaluated', 0)} · "
+        f"informative: {evo.get('informative', 0)}",
+        f"- confirmed {outcomes.get('CONFIRMED', 0)} · "
+        f"partially confirmed {outcomes.get('PARTIALLY_CONFIRMED', 0)} · "
+        f"contradicted {outcomes.get('CONTRADICTED', 0)} · "
+        f"uninformative {outcomes.get('UNINFORMATIVE', 0)} · "
+        f"too early {outcomes.get('TOO_EARLY', 0)} · "
+        f"unmeasurable {outcomes.get('UNMEASURABLE', 0)}",
+        "",
+        "### HIDDEN STATES",
+        "",
+        f"- companies tracked: {hidden.get('companies_tracked', 0)} · "
+        f"posteriors moved: {hidden.get('companies_moved', 0)}",
+    ]
+    for change in (hidden.get("changes") or [])[:5]:
+        moved = ", ".join(f"P({m['state']}) {m['from']:.2f}→{m['to']:.2f}"
+                          for m in change.get("moved", [])[:3])
+        lines.append(f"  - {change.get('subject')}: {moved}")
+
+    lines += [
+        "",
+        "### CAUSAL GRAPH",
+        "",
+        f"- edges: {graph.get('edges_total', 0)} · added "
+        f"{graph.get('added', 0)} · strengthened "
+        f"{graph.get('strengthened', 0)} · weakened "
+        f"{graph.get('weakened', 0)} · asserted "
+        f"{graph.get('asserted', 0)}",
+        "",
+        "### COUNTERFACTUALS AND REGRET",
+        "",
+        f"- decisions scored: {regret.get('resolved', 0)} · "
+        f"false negatives {regret.get('false_negatives', 0)} · "
+        f"correct refusals {regret.get('correct_refusals', 0)}",
+        f"- no-trade decisions scored: "
+        f"{regret.get('no_trade_decisions_scored', 0)} · no-trade regret "
+        f"{regret.get('no_trade_regret', 0)}",
+        f"- actionable regret records: "
+        f"{regret.get('actionable_regret_records', 0)} (unavoidable "
+        f"uncertainty is excluded — it is the price of deciding, not a "
+        f"miscalibration)",
+        "",
+        "### INFORMATION PRIORITIES",
+        "",
+    ]
+    top = agenda.get("highest_value_next_observation")
+    if top:
+        lines.append(
+            f"- highest expected value: **{top.get('candidate_observation')}** "
+            f"({top.get('subject')}, expected {top.get('expected_date')})")
+    else:
+        lines.append("- no candidate observation currently scores above zero.")
+
+    why = learning.get("why_nothing_moved") or ""
+    if why:
+        lines += ["", "### WHY NOTHING MOVED", "", why]
+    lines.append("")
+    return lines
+
+
 def render_report(ctx) -> Tuple[str, dict]:
     """Build both forms. Returns (markdown, payload)."""
     research = ctx.results.get("research") or {}
@@ -64,6 +166,7 @@ def render_report(ctx) -> Tuple[str, dict]:
     positions = ctx.results.get("positions") or {}
     assets = ctx.results.get("assets") or {}
     health = ctx.results.get("health") or {}
+    learning = ctx.results.get("learning") or {}
     session = ctx.session
 
     payload = {
@@ -76,6 +179,10 @@ def render_report(ctx) -> Tuple[str, dict]:
         "promotion": funnel.get("promotion"), "maturity": funnel.get("maturity"),
         "positions": positions, "assets": assets.get("summary"),
         "velocity": assets.get("velocity"),
+        # Belief learning is a SEPARATE key from `velocity` and `positions`
+        # on purpose. Merging them is what let eleven quiet markets be
+        # reported as eleven quiet minds.
+        "learning": {k: v for k, v in learning.items() if k != "steps"},
         "health": {k: health.get(k) for k in ("overall", "cycles", "lock",
                                               "scheduler", "storage", "notes")},
         "unmeasurable": {name: reason for name, reason in _POSITION_METRICS},
@@ -216,6 +323,7 @@ def render_report(ctx) -> Tuple[str, dict]:
         assets.get("velocity_render", ""),
         "```",
         "",
+    ] + _belief_learning(learning) + [
         "## ENGINEERING PREDICTION ACCURACY",
         "",
         "Tracked in `docs/BOTTLENECK_LOG.md`. This measures engineering "

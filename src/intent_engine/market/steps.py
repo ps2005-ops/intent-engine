@@ -35,6 +35,7 @@ import pathlib
 from typing import Callable, Dict, List, Optional, Tuple
 
 from intent_engine.market import assets as A
+from intent_engine.market import evidence_translation as ET
 from intent_engine.market import cycle as C
 from intent_engine.market import funnel as FUN
 from intent_engine.market import signal_opportunity as SO
@@ -121,6 +122,14 @@ def _live_research(ctx: C.CycleContext) -> Tuple[List[dict], int]:
         opportunity = classify(company,
                                _report_for(out, out.get("evidence")),
                                as_of=ctx.as_of)
+        # Hand the observations themselves to the learning step. The row
+        # below keeps only a count, which is all the report needs and is
+        # exactly what made the previous eleven cycles unable to learn: a
+        # count cannot update a belief.
+        translated, dropped = ET.translate(
+            out.get("evidence") or [], subject_company=company.company_id,
+            as_of=ctx.as_of)
+        ctx.learning_inbox.extend(translated)
         rows.append({
             "company": company.company_id,
             "instrument": getattr(company, "tradable_instrument", "") or "",
@@ -132,6 +141,8 @@ def _live_research(ctx: C.CycleContext) -> Tuple[List[dict], int]:
             "classification": opportunity.classification,
             "quality": opportunity.quality,
             "error": out.get("error", ""), "stub": False,
+            "evidence_translated": len(translated),
+            "evidence_unclassifiable": len(dropped),
         })
     return rows, errors
 
@@ -413,13 +424,19 @@ def paper_resolve_step(series_fn: Optional[Callable] = None) -> Callable:
 # research assets
 # ---------------------------------------------------------------------------
 def assets_step(ctx: C.CycleContext) -> dict:
-    """Report the ledger. It does NOT auto-revise beliefs.
+    """Report the ledger. It does NOT auto-revise research assets.
 
-    Deliberate. An unattended process that rewrites its own confidences every
-    night would manufacture exactly the daily-progress signal this project has
-    spent sixteen days refusing to manufacture. Revisions are appended when
-    evidence justifies one; a quiet night appends nothing and reports
-    NET KNOWLEDGE GAIN: 0, which is a legitimate result.
+    Deliberate, and unchanged. An unattended process that rewrites its own
+    confidences every night would manufacture exactly the daily-progress
+    signal this project has spent sixteen days refusing to manufacture.
+    Revisions are appended when evidence justifies one; a quiet night appends
+    nothing and reports NET KNOWLEDGE GAIN: 0, which is a legitimate result.
+
+    What changed is that this is no longer the ONLY place knowledge could
+    move. `learning_step` runs a separate belief layer whose updates are
+    earned by preregistered expectations and sourced evidence rather than by
+    a nightly rewrite, so a quiet asset ledger no longer implies a quiet
+    engine. The two are reported separately and must stay that way.
     """
     ledger = A.AssetLedger(pathlib.Path(ctx.root) / A.DEFAULT_PATH)
     velocity = A.velocity_from_revisions((), ledger)
@@ -427,6 +444,35 @@ def assets_step(ctx: C.CycleContext) -> dict:
             "assets": [a.as_dict() for a in ledger.all()],
             "velocity": velocity.as_dict(),
             "velocity_render": velocity.render()}
+
+
+# ---------------------------------------------------------------------------
+# belief learning — runs EVERY session, with or without a trade
+# ---------------------------------------------------------------------------
+def learning_step(ctx: C.CycleContext) -> dict:
+    """Run the belief-learning session. Never opens a position.
+
+    Reads the evidence the research sweep handed over on `ctx.learning_inbox`
+    and the expectations already preregistered in the learning ledger, then
+    attempts all thirteen learning steps. A session that moves nothing
+    reports zero WITH its working — what was observed, what was tested, and
+    why nothing changed — which is the distinction §22 requires and the one
+    the previous eleven cycles could not make.
+    """
+    from . import learning_cycle as LC
+    from . import learning_store as LS
+    from . import shadow_policies as SP
+
+    store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
+    positions = (ctx.results.get("positions") or {})
+    result = LC.run(
+        as_of=ctx.as_of, store=store,
+        evidence=list(ctx.learning_inbox),
+        shadow_registry=SP.ShadowRegistry(),
+        trades_opened=int(positions.get("opened", 0) or 0))
+    payload = result.as_dict()
+    payload["ledger"] = store.health()
+    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -513,6 +559,7 @@ def day_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("positions", positions_step),
         ("paper_entries", paper_entries_step(series_fn)),
         ("assets", assets_step),
+        ("learning", learning_step),
         ("health", health_step),
         ("report", report_step),
     ]
@@ -528,6 +575,7 @@ def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("funnel", funnel_step),
         ("positions", positions_step),
         ("assets", assets_step),
+        ("learning", learning_step),
         ("replay", replay_step(series_fn=None)),
         ("health", health_step),
         ("report", report_step),
