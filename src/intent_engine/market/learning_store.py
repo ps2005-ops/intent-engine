@@ -266,6 +266,73 @@ class LearningStore:
                          if r.get("record") == EVIDENCE
                          and r.get("evidence_id"))
 
+    def evidence(self) -> Tuple[ME.MicroEvidence, ...]:
+        """Rehydrate ingested evidence as objects, in ingestion order.
+
+        WHY THIS DID NOT EXIST, AND WHY IT HAD TO
+        -----------------------------------------
+        Evidence was write-only: `record_evidence` put it in and
+        `evidence_ids` read back nothing but the dedup key. That was
+        sufficient while ingestion was the ONLY consumer, and became a trap
+        the moment belief formation existed, because formation runs on the
+        evidence a session brought in and nothing could reach the evidence
+        already on the log. Rows ingested before formation existed were
+        permanently unreachable by it.
+
+        NOT A ROUND TRIP, AND THE DIFFERENCE MATTERS
+        --------------------------------------------
+        `as_dict` writes `independence` and `self_authored`, and BOTH are
+        derived properties of `source_role`, not fields. Reconstructing them
+        from the row would let a stored value contradict the rule that
+        computes it -- an old row written under a different independence
+        table would silently keep its old weighting and get a design-effect
+        penalty nobody could explain. So they are dropped and recomputed, and
+        `source_role` is the only thing trusted.
+
+        A row missing the fields that make evidence evidence -- an id, a
+        subject, a source -- is skipped rather than defaulted. Evidence with
+        no source is exactly what rule 5 in `beliefs.py` refuses.
+        """
+        out: List[ME.MicroEvidence] = []
+        for row in self._rows():
+            if row.get("record") != EVIDENCE:
+                continue
+            if not (row.get("evidence_id") and row.get("subject_company")
+                    and row.get("source")):
+                continue
+            numeric = row.get("numeric_values") or {}
+            if isinstance(numeric, dict):
+                numeric = tuple(numeric.items())
+            else:
+                numeric = tuple(tuple(pair) for pair in numeric)
+            out.append(ME.MicroEvidence(
+                evidence_id=row["evidence_id"],
+                subject_company=row["subject_company"],
+                actor=row.get("actor", ""),
+                evidence_type=row.get("evidence_type", ""),
+                observed_at=row.get("observed_at", ""),
+                available_at=row.get("available_at", ""),
+                source=row["source"],
+                fact=row.get("fact", ""),
+                source_author=row.get("source_author", ""),
+                # The same literal the dataclass defaults to. A row written
+                # before `source_role` existed reads as independent
+                # reporting, which is what it was assumed to be then.
+                source_role=row.get("source_role") or "independent_reporting",
+                numeric_values=numeric,
+                affected_hypotheses=tuple(row.get("affected_hypotheses") or ()),
+                affected_hidden_states=tuple(
+                    row.get("affected_hidden_states") or ()),
+                affected_causal_nodes=tuple(
+                    row.get("affected_causal_nodes") or ()),
+                affected_interactions=tuple(
+                    row.get("affected_interactions") or ()),
+                reliability=float(row.get("reliability", 0.5)),
+                relevance=float(row.get("relevance", 0.5)),
+                contradiction_role=row.get("contradiction_role", ME.NEUTRAL),
+                limitations=tuple(row.get("limitations") or ())))
+        return tuple(out)
+
     def reconciliations(self) -> Tuple[dict, ...]:
         return tuple(r for r in self._rows()
                      if r.get("record") == RECONCILIATION)

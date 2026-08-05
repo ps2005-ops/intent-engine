@@ -96,6 +96,12 @@ class LearningResult:
     steps: List[StepResult] = field(default_factory=list)
     belief_summary: dict = field(default_factory=dict)
     formation_summary: dict = field(default_factory=dict)
+    #: Beliefs opened from evidence that was ALREADY on the ledger, never
+    #: folded into `formation_summary`. Kept apart because recovering a
+    #: belief the engine should have formed months ago is a repair, and a
+    #: repair reported as a session's learning is the overstatement this
+    #: project keeps having to retract. Empty on every ordinary cycle.
+    backfill_summary: dict = field(default_factory=dict)
     reconciliation_summary: dict = field(default_factory=dict)
     hidden_state_summary: dict = field(default_factory=dict)
     causal_summary: dict = field(default_factory=dict)
@@ -185,6 +191,7 @@ class LearningResult:
             "steps_total": len(STEPS),
             "belief_learning": self.belief_summary,
             "belief_formation": self.formation_summary,
+            "belief_formation_backfill": self.backfill_summary,
             "expected_vs_observed": self.reconciliation_summary,
             "hidden_states": self.hidden_state_summary,
             "causal_graph": self.causal_summary,
@@ -214,12 +221,17 @@ def run(*, as_of: str, store: LS.LearningStore,
         trades_opened: int = 0,
         cycle: str = "day",
         candidates_seen: int = 0,
-        decay_beliefs: bool = True) -> LearningResult:
+        decay_beliefs: bool = True,
+        backfill_evidence: bool = False) -> LearningResult:
     """Run one full learning session. Attempts all thirteen steps.
 
     `observations` maps expectation_id → {observed_value, observed_at,
     observed_direction, evidence_ids}. An expectation with no entry is scored
     TOO_EARLY or UNMEASURABLE by `reconcile`, never as a refutation.
+
+    `backfill_evidence` is OFF by default and must be asked for. It lets
+    formation see evidence already on the ledger — see `_backfill_formation`
+    for what that is repairing and why it is not ordinary learning.
     """
     result = LearningResult(as_of=as_of[:10], trades_opened=trades_opened)
     observations = observations or {}
@@ -267,6 +279,11 @@ def run(*, as_of: str, store: LS.LearningStore,
         note=("no evidence proposed a belief: "
               + ", ".join(f"{k} {v}" for k, v in sorted(refused.items()))
               if not candidates and refused else "")))
+
+    # 1c. belief formation BACKFILL, only when asked for -------------------
+    backfilled = _backfill_formation(
+        store, working, as_of=as_of, skip_ids={e.evidence_id for e in fresh},
+        result=result) if backfill_evidence else ()
 
     # 2. expected vs observed ---------------------------------------------
     # AN EXPECTATION REGISTERED TODAY IS NOT TESTED TODAY.
@@ -457,7 +474,16 @@ def run(*, as_of: str, store: LS.LearningStore,
         note="trade outcomes are strong validation evidence, and are no "
              "longer the only path to knowledge"))
 
-    result.belief_summary = B.summarise(beliefs_before,
+    # BACKFILLED BELIEFS COUNT AS ALREADY-HELD, NOT AS NEW.
+    #
+    # `summarise` calls anything absent from `before` "new", and `new` feeds
+    # `belief_knowledge_gain`, which feeds `learned_without_trading` — the
+    # one claim this cycle exists to make honestly. A repair that recovered
+    # eight beliefs the engine should have formed in July would otherwise
+    # report as a session that learned eight things today. Adding them to
+    # `before` says the true thing: they are held, and this session is not
+    # where they came from.
+    result.belief_summary = B.summarise(tuple(beliefs_before) + backfilled,
                                         tuple(working.values()))
     # THE LEDGER SAYS WHAT KIND OF SESSION THIS WAS.
     #
@@ -486,6 +512,95 @@ def run(*, as_of: str, store: LS.LearningStore,
     result.reconciliations_seen = tuple(reconciliations)
     result.priorities_seen = tuple(priorities)
     return result
+
+
+def _backfill_formation(store: LS.LearningStore,
+                        working: Dict[str, B.StrategicBelief], *, as_of: str,
+                        skip_ids: Any, result: LearningResult
+                        ) -> Tuple[B.StrategicBelief, ...]:
+    """Open beliefs from evidence ALREADY on the ledger. A repair, not a session.
+
+    WHAT IT REPAIRS
+    ---------------
+    `propose` runs on `fresh` — evidence whose id is not already recorded.
+    That is correct for a nightly cycle and it left a hole: evidence ingested
+    by a cycle that ran BEFORE belief formation existed can never reach
+    formation, because every later run dedupes those rows away first.
+    Measured on the production ledger: 9 evidence rows, 0 beliefs, and
+    `refused: {}` — not one reason, because there was nothing to refuse. The
+    same 9 rows against a store that had not seen them declared 8 beliefs.
+
+    An operator reading that zero could not tell it from "the evidence was
+    not good enough", which is the failure mode this whole module exists to
+    prevent.
+
+    WHY IT IS NOT SIMPLY THE NORMAL PATH WITH A WIDER INPUT
+    -------------------------------------------------------
+    Deduplication is rule 1 in `beliefs.py` and it is load-bearing:
+    re-reading an unchanged filing nightly must do nothing. This does not
+    touch it. Nothing is re-ingested, no evidence row is written, and the
+    normal cycle's `fresh` is unchanged. The only thing widened is what
+    FORMATION may look at, once, when a human asks for it.
+
+    PREREGISTRATION STILL HOLDS, AND THIS IS THE SUBTLE PART
+    --------------------------------------------------------
+    Expectations are registered at the SESSION date, never at the evidence's
+    original date. Reconciliation only scores expectations where
+    `preregistered_at < as_of`, so backfilling a July observation with a July
+    date would produce an expectation whose window had already closed and
+    which the very evidence that opened it could settle. Dating from today
+    keeps the rule that opened evidence can never be confirming evidence.
+
+    IT IS NOT ONE OF THE FOURTEEN STEPS
+    ------------------------------------
+    Deliberately absent from `STEPS` and from `result.steps`. `steps_total`
+    is `len(STEPS)` and operators read attempted-against-total to see whether
+    a session ran completely; adding a step that only sometimes exists would
+    make every ordinary cycle look like it skipped one. It reports through
+    `backfill_summary` alone, which surfaces as its own top-level
+    `belief_formation_backfill` key — separate, as it should be.
+
+    IT MAY NOT COUNT AS LEARNING
+    -----------------------------
+    The caller adds these to `beliefs_before` when summarising, so they are
+    not counted as `new`, do not reach `belief_knowledge_gain`, and cannot
+    make `learned_without_trading` true. They are still published to the
+    founder side, because the belief is real — only the claim that this
+    session discovered it would be false.
+    """
+    # `skip_ids` are the rows this very session just ingested: formation has
+    # already seen them, and reconsidering them here would double-count.
+    recorded = [e for e in store.evidence() if e.evidence_id not in skip_ids]
+    if not recorded:
+        result.backfill_summary = {"requested": True, "examined": 0,
+                                   "declared": 0, "beliefs": [],
+                                   "note": "no evidence was on the ledger"}
+        return ()
+
+    candidates, refused = BF.propose(recorded, as_of=as_of,
+                                     existing=tuple(working.values()))
+    opened: List[B.StrategicBelief] = []
+    for candidate in candidates:
+        store.declare_belief(candidate.belief)
+        working[candidate.belief.belief_id] = candidate.belief
+        if candidate.expectation is not None:
+            store.record_expectation(candidate.expectation)
+        opened.append(candidate.belief)
+
+    summary = BF.summarise(candidates, refused)
+    summary.update({
+        "requested": True, "examined": len(recorded),
+        "declared": len(opened),
+        "beliefs": [b.belief_id for b in opened],
+        "note": ("opened from evidence already on the ledger; a repair of "
+                 "evidence that predates belief formation, NOT learning "
+                 "earned this session, and excluded from knowledge gain")})
+    if not opened and refused:
+        summary["note"] = ("nothing on the ledger proposed a belief: "
+                           + ", ".join(f"{k} {v}"
+                                       for k, v in sorted(refused.items())))
+    result.backfill_summary = summary
+    return tuple(opened)
 
 
 def _classify_outcome(result: LearningResult, ingested: int, declared: int,
