@@ -10,7 +10,6 @@ import pytest
 from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
-from intent_engine.founder_brief import market as M
 from intent_engine.founder_brief import render as R
 
 
@@ -196,61 +195,72 @@ def test_confidence_always_states_what_limits_it():
     assert len(b.confidence_reason) > 40
 
 
-# --- market export consumer -------------------------------------------------
-def _export(**kw):
-    base = {"export_version": "market_intel_export.v1", "ticker": "ACME",
-            "latest_completed_market_date": "2026-07-31",
-            "freshness": {"age_days": 1},
-            "price_change": {"1m": {"value": -0.12, "status": "observed"}},
-            "benchmark_relative": {"1y": {"value": -0.16,
-                                          "status": "observed"}},
-            "volatility": {"value": 0.42, "status": "inferred"},
-            "fundamentals": {"status": "unmeasurable"},
-            "signal": {"state": "quiet"}}
-    base.update(kw)
-    return base
+# --- market context, as the product actually assembles it -------------------
+# `founder_brief/market.py` used to stand here: a consumer for
+# `market_intel_export.v1`, the market-learning engine's own export. It is
+# gone, and its unit tests with it, because the founder product no longer
+# reads that contract from either end:
+#
+#   * `market_intel_export.v2` is produced FOUNDER-SIDE, by
+#     `external_intel/market_producer.py`, from public price history. Its
+#     contract module records why -- v1 guarded with a blacklist, and the
+#     field that leaks is the one nobody thought of.
+#   * v2 dropped `signal.state` and `opportunity.state` ON PURPOSE, as
+#     INTERNAL. The v1 consumer rendered the first of them, so wiring it back
+#     up would reintroduce the exact leak v2 exists to prevent.
+#   * `_market_snapshot` refuses a v1 file outright, and
+#     `test_market_context_wiring` pins that refusal: v1 and v2 disagree about
+#     units, so reading one with the other's code turns a 2.1% move into 0.0%.
+#
+# What survives here is what was always the point: assertions on the SERVED
+# surface. The fixture is built through the real producer and the real
+# presenter, so these tests now assert against the shape production delivers
+# rather than one no code path can produce. The v1 consumer's own properties
+# -- version refusal, ticker mismatch, staleness, unmeasurable-is-never-zero,
+# fixed disclaimer text -- are covered against v2 in
+# `tests/test_market_intel_contract.py`.
+def _market_context(ticker="ACME"):
+    """A populated `brief.market_context`, assembled the production way.
+
+    Deterministic rather than random: a drift plus a repeating wobble, so
+    volatility and drawdown are real figures. A flat series would report 0%
+    for both, and a zero is a measurement -- it would make this fixture assert
+    the opposite of what the export is careful about.
+    """
+    import datetime
+    import math
+
+    from intent_engine.external_intel import market_contract as MC
+    from intent_engine.external_intel import market_producer as MP
+    from intent_engine.external_intel import pack, presenter
+
+    as_of = "2026-07-31"
+
+    def closes(start, drift, wobble, n=400):
+        out, day, i = {}, datetime.date.fromisoformat(as_of), 0
+        while len(out) < n:
+            if day.weekday() < 5:
+                out[day.isoformat()] = round(
+                    start + drift * i + wobble * math.sin(i / 6.0)
+                    + (wobble / 2) * math.sin(i / 2.3), 4)
+                i += 1
+            day -= datetime.timedelta(days=1)
+        return out
+
+    payload = MP.build_export(
+        ticker=ticker, closes=closes(100.0, -0.05, 1.6),
+        benchmark_closes=closes(400.0, -0.02, 2.0),
+        as_of=as_of, exchange="NASDAQ", currency="USD")
+    intel = MC.MarketIntel(available=True, ticker=ticker, payload=payload,
+                           stale=False, age_days=1)
+    return presenter.market_context_dict(
+        pack.build_context(market=intel, as_of=as_of))
 
 
-def test_an_unknown_schema_version_is_refused():
-    ctx = M.consume(_export(export_version="market_intel_export.v2"))
-    assert not ctx.available
-    assert "v1" in ctx.reason
-
-
-def test_a_ticker_mismatch_is_refused():
-    ctx = M.consume(_export(), expected_ticker="OTHER")
-    assert not ctx.available
-    assert "not OTHER" in ctx.reason
-
-
-def test_a_stale_snapshot_is_flagged_not_hidden():
-    ctx = M.consume(_export(), expected_ticker="ACME", today="2026-09-01")
-    assert ctx.stale
-    assert any("days old" in l for l in ctx.limitations)
-
-
-def test_missing_fundamentals_become_a_limitation_never_a_zero():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    assert "fundamentals" not in (ctx.modules or {})
-    assert any("verified revenue" in l for l in ctx.limitations)
-
-
-def test_every_market_module_carries_an_interpretation():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    for name, module in ctx.modules.items():
-        assert module.get("so_what"), name
-        assert module.get("what_changed"), name
-
-
-def test_the_market_disclaimer_is_always_present():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    assert "not an investment recommendation" in ctx.disclaimer
-
-
-def test_the_signal_module_describes_the_signal_not_the_company():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    assert "describes the signal, not the company" in \
-        ctx.modules["signal"]["so_what"]
+def _absent_market_context(reason="no market snapshot"):
+    """The absent shape `presenter.market_context_dict` emits, verbatim."""
+    return {"available": False, "reason": reason, "modules": {},
+            "limitations": []}
 
 
 def _market_module(market=None, footing=None):
@@ -265,9 +275,17 @@ def _market_module(market=None, footing=None):
     return next(m for m in modules if m.key == "market_trajectory")
 
 
+def test_the_assembled_market_context_carries_an_interpretation():
+    """Every module a founder is shown says what changed and why it matters."""
+    context = _market_context()
+    assert context["available"], context
+    for name, module in context["modules"].items():
+        assert module.get("what_changed"), name
+        assert module.get("so_what"), name
+
+
 def test_no_paper_control_performance_can_reach_the_page():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    module = _market_module(ctx.as_dict())
+    module = _market_module(_market_context())
     text = " ".join([module.what_changed, module.so_what,
                      module.what_to_watch, module.text_alternative]
                     + [f"{r.get('label')} {r.get('value')} {r.get('so_what')}"
@@ -360,7 +378,7 @@ def test_depth_is_offered_but_never_required():
 
 
 def test_absent_market_data_teaches_rather_than_saying_unavailable():
-    module = _market_module(M.unavailable("no snapshot").as_dict(),
+    module = _market_module(_absent_market_context("no snapshot"),
                             footing={"ticker": "ACME", "listing_exchange": ""})
     text = " ".join([module.what_changed, module.so_what,
                      module.what_to_watch])

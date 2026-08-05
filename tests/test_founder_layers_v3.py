@@ -11,10 +11,10 @@ from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import layers as L
-from intent_engine.founder_brief import market as M
 from intent_engine.founder_brief import render as R
 from tests.test_founder_brief_v3 import (
-    _cited_report, _export, _rich, _sparse, rendered,
+    _absent_market_context, _cited_report, _market_context, _rich, _sparse,
+    rendered,
 )
 
 
@@ -174,8 +174,7 @@ def test_the_dashboard_never_fabricates_a_financial_series():
 
 
 def test_every_available_module_answers_the_three_questions():
-    ctx = M.consume(_export(), expected_ticker="ACME").as_dict()
-    for m in L.build_dashboard(_rich(market=ctx)):
+    for m in L.build_dashboard(_rich(market=_market_context())):
         if m.available:
             assert m.so_what, m.key
             assert m.what_changed, m.key
@@ -214,7 +213,7 @@ def test_the_timeline_is_deduplicated():
 
 def test_no_control_performance_reaches_the_dashboard():
     html = R.render_dashboard(L.build_dashboard(
-        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict())))
+        _rich(market=_market_context())))
     for banned in ("win rate", "sharpe", "alpha", "expectancy",
                    "paper_control", "profit factor"):
         assert banned not in html.lower()
@@ -546,24 +545,29 @@ def test_the_gate_catches_controls_placed_before_the_answer():
 
 
 # --- market-export states: found by production-parity validation ------------
-@pytest.mark.parametrize("bad", [
-    "a string", 123, None, [],
-    {"export_version": "market_intel_export.v1", "ticker": "ACME",
-     "latest_completed_market_date": "2026-07-31", "price_change": "oops"},
-    {"export_version": "market_intel_export.v1", "ticker": "ACME",
-     "latest_completed_market_date": "2026-07-31", "volatility": "bad",
-     "freshness": "nope"},
+# These were written against the v1 consumer, which validated the export
+# itself. That job moved: `market_intel_export.v2` is validated on the way OUT
+# of the producer and refused on the way in by `market_producer.load_export`,
+# so a malformed artefact never reaches a shape the layers can see. The v2
+# suite pins that half -- see `test_an_export_violating_the_contract_is_not_
+# shown_degraded` and `test_a_wrong_schema_version_is_refused_rather_than_
+# best_efforted` in `tests/test_market_intel_contract.py`.
+#
+# What belongs HERE is the half those tests cannot reach: whatever made the
+# market context unavailable, the dashboard has to survive it. That is the
+# property the parity failure actually cost a founder -- the page went down,
+# not just the tile.
+@pytest.mark.parametrize("reason", [
+    "the snapshot could not be read",
+    "no market snapshot has been published for this company",
+    "",
 ])
-def test_a_malformed_export_fails_closed_and_never_crashes(bad):
-    """FOUND BY PARITY: `price_change` as a string raised AttributeError and
+def test_an_unavailable_market_never_takes_the_dashboard_down(reason):
+    """FOUND BY PARITY: a malformed `price_change` raised AttributeError and
     took the whole founder page down. "Fails closed" must mean the market
-    module goes unavailable -- not that a malformed upstream artefact can
-    break a founder's result."""
-    ctx = M.consume(bad, expected_ticker="ACME")
-    assert ctx.available is False
-    assert ctx.reason
-    # and the dashboard still renders every other tile
-    modules = L.build_dashboard(_rich(market=ctx.as_dict()))
+    module goes unavailable -- not that a bad upstream artefact can break a
+    founder's result."""
+    modules = L.build_dashboard(_rich(market=_absent_market_context(reason)))
     assert len(modules) >= 4
     html = R.render_dashboard(modules)
     assert "Not established" in html
@@ -573,23 +577,18 @@ def test_a_malformed_export_fails_closed_and_never_crashes(bad):
     assert ">0%<" not in html and ">$0<" not in html
 
 
-def test_a_partial_export_renders_only_what_exists():
-    partial = {"export_version": "market_intel_export.v1", "ticker": "ACME",
-               "latest_completed_market_date": "2026-07-31",
-               "freshness": {"age_days": 1},
-               "price_change": {"1m": {"value": -0.05, "status": "observed"}},
-               "fundamentals": {"status": "unmeasurable"}}
-    ctx = M.consume(partial, expected_ticker="ACME")
-    assert ctx.available
-    assert set(ctx.modules) == {"price"}
-    assert any("verified revenue" in l for l in ctx.limitations)
-
-
-def test_a_stale_export_is_flagged_and_still_usable():
-    from tests.test_founder_brief_v3 import _export
-    ctx = M.consume(_export(), expected_ticker="ACME", today="2026-10-01")
-    assert ctx.stale and ctx.available
-    assert any("days old" in l for l in ctx.limitations)
+def test_a_market_context_renders_only_the_modules_it_carries():
+    """A module the export did not measure is omitted, never drawn empty: a
+    chart axis with no line reads as "flat", which is a claim the data does
+    not support."""
+    context = _market_context()
+    context["modules"].pop("market_risk", None)
+    module = next(m for m in L.build_dashboard(_rich(market=context))
+                  if m.key == "market_trajectory")
+    assert module.available
+    text = " ".join([module.what_changed, module.text_alternative]
+                    + [str(r.get("value", "")) for r in module.rows]).lower()
+    assert "volatility" not in text
 
 
 # --- the withheld thesis must stay withheld in Q&A --------------------------
@@ -849,8 +848,7 @@ def test_the_dashboard_never_prints_the_same_row_twice():
     """MEASURED: business momentum and the strategic timeline printed the same
     dated developments, and the market card repeated its own headline in its
     rows -- Shopify showed one price sentence three times on one screen."""
-    modules = L.build_dashboard(
-        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict()))
+    modules = L.build_dashboard(_rich(market=_market_context()))
     seen = set()
     for module in modules:
         for row in module.rows:
@@ -863,8 +861,7 @@ def test_the_dashboard_never_prints_the_same_row_twice():
 def test_an_available_card_keeps_its_interpretation_after_deduplication():
     """Deduplication may not buy a clean screen by emptying a card: the
     release gate fails a module shown without an interpretation."""
-    modules = L.build_dashboard(
-        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict()))
+    modules = L.build_dashboard(_rich(market=_market_context()))
     for module in modules:
         if module.available:
             assert module.so_what, module.key
