@@ -86,8 +86,16 @@ class IndustryDocument:
     def as_evidence_row(self) -> dict:
         """The hosted-store shape, so this flows through the existing pipeline
         without a second evidence format."""
+        # `evidence_text` carries the headline AND the excerpt, because a news
+        # headline is frequently the only place the event is actually stated
+        # ("Caterpillar wins $1.2bn defence order") while the excerpt carries
+        # the detail. Sending only the title made the translator classify a
+        # publisher's SEO headline; sending only the excerpt lost the event.
         return {"kind": _KIND_FOR_CATEGORY.get(self.category, "news"),
                 "summary": self.title[:600], "source": self.url,
+                "evidence_text": " ".join(
+                    f"{self.title.strip().rstrip('.')}. {self.excerpt}"
+                    .split()),
                 "published_at": self.published_at,
                 "confidence": self.confidence,
                 "interpretation": f"{self.publisher} ({self.category})"}

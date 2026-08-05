@@ -69,13 +69,27 @@ CAPEX_SIGNAL = "CAPEX_SIGNAL"
 PRICING_SIGNAL = "PRICING_SIGNAL"
 PROCUREMENT_SIGNAL = "PROCUREMENT_SIGNAL"
 
+# Added when the sentence-level classifier was measured against a real corpus.
+# Every one of these existed as an event in the corpus and had no honest home
+# in the taxonomy, so it was being filed under a neighbouring type — and a
+# type is a claim. "Microsoft announced results for the quarter" was reaching
+# beliefs as EARNINGS_SURPRISE, which asserts a beat that the sentence does
+# not state; a dividend increase was reaching them as CAPEX_SIGNAL, which
+# asserts spending on capacity when the company was returning cash.
+EARNINGS_RESULT = "EARNINGS_RESULT"        # results reported, no beat claimed
+EXECUTIVE_CHANGE = "EXECUTIVE_CHANGE"      # appointment, departure, election
+CAPITAL_RETURN = "CAPITAL_RETURN"          # dividend, buyback
+PARTNERSHIP = "PARTNERSHIP"
+MA_ACTIVITY = "MA_ACTIVITY"
+
 EVIDENCE_TYPES = frozenset({
     EARNINGS_SURPRISE, GUIDANCE_REVISION, ESTIMATE_REVISION, PRICE_CHANGE,
     PRODUCT_LAUNCH, COMPETITOR_ACTION, CUSTOMER_COMMENT, SUPPLIER_COMMENT,
     HIRING, LAYOFF, INSIDER_ACTIVITY, OPTIONS_SKEW, INVENTORY_CHANGE,
     FREIGHT_CHANGE, PATENT_ACTIVITY, CONTRACT_AWARD, REGULATORY_ACTION,
     MACRO_RELEASE, MARKET_REACTION, CAPEX_SIGNAL, PRICING_SIGNAL,
-    PROCUREMENT_SIGNAL,
+    PROCUREMENT_SIGNAL, EARNINGS_RESULT, EXECUTIVE_CHANGE, CAPITAL_RETURN,
+    PARTNERSHIP, MA_ACTIVITY,
 })
 
 # --- contradiction role ---------------------------------------------------

@@ -99,16 +99,36 @@ def select_diverse(candidates: list, limit: int) -> list:
     return out
 
 
-def _observation_rows(report: dict, *, as_of: str) -> List[dict]:
+def _index_documents(documents) -> Dict[str, dict]:
+    """Retrieved documents by source_id and by URL, for evidence lookup."""
+    index: Dict[str, dict] = {}
+    for doc in documents or ():
+        if not isinstance(doc, dict):
+            continue
+        for key in (doc.get("source_id"), doc.get("final_url")):
+            if key:
+                index.setdefault(str(key), doc)
+    return index
+
+
+def _observation_rows(report: dict, *, as_of: str,
+                      documents=()) -> List[dict]:
     """Strategic observations as hosted evidence rows.
 
     Only observations carrying real text become evidence. An observation with
     no readable content is a retrieval artefact, and admitting it would inflate
     `evidence_count` — a number later used to judge whether a company was well
     covered — with rows that say nothing.
+
+    `documents` is the retrieved set the observations were derived from. It is
+    optional and the row still builds without it, but supplying it is what
+    lets learning read a whole document instead of a display excerpt — see
+    the note on `evidence_text` below.
     """
     from intent_engine.market.session import leakage_cutoff
+    from intent_engine.strategic_intelligence import evidence_text as EText
     _cutoff = leakage_cutoff(as_of)
+    by_source = _index_documents(documents)
 
     rows: List[dict] = []
     for obs in (report.get("observations") or ()):
@@ -156,10 +176,41 @@ def _observation_rows(report: dict, *, as_of: str) -> List[dict]:
         # renames "now, in UTC" to "now, in the operating timezone".
         if published > as_of[:10]:
             published = as_of[:10]
+        # THE FACT AND THE READING ARE DIFFERENT THINGS.
+        #
+        # `summary` is the strategic reading — "<Company> exposes a surface
+        # others can build on, so other people's work comes to depend on it".
+        # It is the right thing to show a reader and the wrong thing to
+        # classify, because it is a template: no phrasing of it will ever
+        # contain a commercial event, so every observation reaching the
+        # translator was structurally unclassifiable.
+        #
+        # `evidence_text` is what the document actually said. It is what the
+        # translator segments and classifies. Both travel, because the reading
+        # without the fact cannot be checked and the fact without the reading
+        # cannot be read.
+        #
+        # IT IS THE DOCUMENT, NOT THE EXCERPT. The excerpt is a display
+        # window, deliberately bounded at ~1,200 characters, and a bound
+        # chosen for reading is the wrong bound for learning: Microsoft's Q4
+        # exhibit runs to 16,000 characters and states its beat in one
+        # sentence, while Palantir's blog index states a US Army partnership
+        # past its twentieth sentence. Either can fall outside any single
+        # display window, so learning reads the whole document — bounded by
+        # `SCAN_CHARS`, filtered by the same furniture gate — and the reader
+        # keeps the excerpt.
+        origin = str(obs.get("origin") or "")
+        source_id = str((obs.get("source_refs") or [{}])[0]
+                        .get("artifact_id") or "")
+        doc = by_source.get(source_id) or by_source.get(origin)
+        evidence = (EText.body_text(doc)[:EText.SCAN_CHARS] if doc
+                    else str(obs.get("excerpt") or ""))
         rows.append({
             "kind": _SOURCE_CLASS_TO_KIND.get(source_class, "product"),
             "summary": summary[:600],
+            "evidence_text": " ".join(evidence.split()),
             "source": obs.get("url") or obs.get("source_id") or source_class,
+            "origin": origin,
             "published_at": published,
             "confidence": 0.4 if obs.get("weak") else 0.7,
             "interpretation": " ".join(str(obs.get("signal") or "").split()),
@@ -225,7 +276,11 @@ def founder_intelligence_research_fn(
                     "error": type(exc).__name__}
 
         report = (result or {}).get("strategic_report") or {}
-        rows = _observation_rows(report, as_of=as_of)
+        try:
+            documents = list(ci_service.store.retrieved(run_id))
+        except Exception:  # noqa: BLE001 - learning degrades, research does not
+            documents = []
+        rows = _observation_rows(report, as_of=as_of, documents=documents)
 
         # INDUSTRY EVIDENCE. Third-party coverage of this company, published on
         # or before `as_of`. The adapter enforces point-in-time itself
