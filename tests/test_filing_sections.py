@@ -144,3 +144,33 @@ def test_a_web_page_still_uses_its_meta_description():
     }]
     for o in O.derive_observations(docs, company="Datadog"):
         assert "Some other body text" not in o.excerpt
+
+
+# --- found live, not in a fixture -------------------------------------------
+CURLY_MDA = (
+    "ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES "
+    "EXCHANGE ACT OF 1934. Commission File Number 001-38480. "
+    "TABLE OF CONTENTS Item 1. Business 3 Item 7. Management’s Discussion 40 "
+    "Item 7. Management’s Discussion and Analysis of Financial Condition "
+    "and Results of Operations. "
+    "Revenue increased 26% to $2.68 billion in fiscal 2025, driven primarily "
+    "by expansion within our existing customer base. Customers with annual "
+    "recurring revenue of $100,000 or more grew to 3,610 from 3,390."
+)
+
+
+def test_the_section_title_is_not_the_excerpt():
+    """Measured live on the deployed preview: "What was verified" read
+    "management's Discussion and Analysis of Financial Condition and Results
+    of Operations." -- the heading, not the section. The filing writes a CURLY
+    apostrophe, so a straight-quote pattern never consumed the title."""
+    excerpt, section = FS.best_excerpt(CURLY_MDA)
+    assert "Item 7" in section
+    assert excerpt.startswith("Revenue increased 26%")
+    for fragment in ("Discussion and Analysis", "Financial Condition",
+                     "Results of Operations"):
+        assert fragment not in excerpt
+
+
+def test_a_curly_apostrophe_does_not_hide_a_section():
+    assert "item_7" in FS.find_sections(CURLY_MDA)

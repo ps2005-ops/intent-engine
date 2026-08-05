@@ -54,14 +54,16 @@ SECTION_NAMES = {
 
 # Tolerant of case, of "ITEM 1." / "Item 1 -" / "Item 1:" and of the &#160;
 # spacing these documents are full of.
+# The heading MATCH stops at the item number. Stripping the human title is
+# `_TITLE_TAIL`'s single job -- when both tried, the heading consumed
+# "Management's Discussion" and the title stripper (anchored at the start) then
+# saw "and Analysis of Financial Condition..." and left it in the excerpt.
 _HEADINGS = (
-    ("item_1a", re.compile(r"item\s*1a\b[\s.:\-—]*(?:risk\s+factors)?", re.I)),
-    ("item_7a", re.compile(r"item\s*7a\b[\s.:\-—]*", re.I)),
-    ("item_7", re.compile(r"item\s*7\b[\s.:\-—]*"
-                          r"(?:management'?s\s+discussion)?", re.I)),
-    ("item_3", re.compile(r"item\s*3\b[\s.:\-—]*(?:legal\s+proceedings)?",
-                          re.I)),
-    ("item_1", re.compile(r"item\s*1\b[\s.:\-—]*(?:business)?", re.I)),
+    ("item_1a", re.compile(r"item\s*1a\b[\s.:\-\u2014]*", re.I)),
+    ("item_7a", re.compile(r"item\s*7a\b[\s.:\-\u2014]*", re.I)),
+    ("item_7", re.compile(r"item\s*7\b[\s.:\-\u2014]*", re.I)),
+    ("item_3", re.compile(r"item\s*3\b[\s.:\-\u2014]*", re.I)),
+    ("item_1", re.compile(r"item\s*1\b[\s.:\-\u2014]*", re.I)),
 )
 
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
@@ -88,8 +90,29 @@ def looks_like_filing(text: str, url: str = "") -> bool:
     return hits >= 2
 
 
+#: The heading's own title, which follows "Item 7" and is not body prose.
+#: Measured live: the Item 7 heading matched, but the filing writes
+#: "Management’s" with a CURLY apostrophe, so an optional `management'?s`
+#: group never consumed it -- and "management's Discussion and Analysis of
+#: Financial Condition and Results of Operations." became the excerpt. The
+#: title is stripped after the match rather than guessed inside it.
+_TITLE_TAIL = re.compile(
+    r"^(?:"
+    r"management'?s\s+discussion\s+and\s+analysis"
+    r"(?:\s+of\s+financial\s+condition)?"
+    r"(?:\s+and\s+results\s+of\s+operations)?"
+    r"|quantitative\s+and\s+qualitative\s+disclosures"
+    r"(?:\s+about\s+market\s+risk)?"
+    r"|risk\s+factors|legal\s+proceedings|business|properties"
+    r"|financial\s+statements(?:\s+and\s+supplementary\s+data)?"
+    r")[\s.:;,\-\u2014]*", re.I)
+
+
 def _normalise(text: str) -> str:
-    return re.sub(r"[   ]", " ", text or "")
+    # Curly quotes normalised FIRST: filings use them and every pattern here
+    # is written with the straight forms.
+    text = (text or "").replace("\u2019", "'").replace("\u2018", "'")
+    return re.sub(r"[\xa0\u2007\u202f]", " ", text)
 
 
 def find_sections(text: str) -> dict:
@@ -108,7 +131,7 @@ def find_sections(text: str) -> dict:
     out: dict = {}
     for i, (start, end, key) in enumerate(marks):
         stop = marks[i + 1][0] if i + 1 < len(marks) else len(blob)
-        body = blob[end:stop].strip()
+        body = _TITLE_TAIL.sub("", blob[end:stop].strip(), count=1).strip()
         if len(body) < _MIN_PROSE:
             continue          # navigation entry, not the section itself
         # The LAST qualifying occurrence wins: the body always follows the
