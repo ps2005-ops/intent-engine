@@ -762,3 +762,56 @@ def test_break_the_answer_grows_past_a_sixty_second_read():
                        markup, re.S)
     assert answer
     assert L.visible_words(answer.group(0)) <= L.ANSWER_MAX
+
+
+# --------------------------------------------------- statutory cover pages
+def test_break_a_filing_cover_page_is_cited_as_supporting_evidence():
+    """Measured live on Palantir 2026-08-05.
+
+    The TOP item under "What supports this" was the 10-K cover page:
+    "☒. ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES
+    EXCHANGE ACT OF 1934. ☐. TRANSITION REPORT PURSUANT TO…"
+
+    Every word genuine, none of it supporting anything — the same defect
+    class as competitors mined out of risk-factor boilerplate.
+    """
+    obs = {"excerpt": "☒. ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF "
+                      "THE SECURITIES EXCHANGE ACT OF 1934. ☐. TRANSITION "
+                      "REPORT PURSUANT TO SECTION 13 OR 15(d)"}
+    assert N._excerpt(obs) == "", "cover-page furniture was cited"
+
+
+def test_a_real_passage_from_the_same_filing_still_cites():
+    """The rule must not cost the filing its place — only its cover page."""
+    obs = {"excerpt": "Revenue from government customers grew 47% year over "
+                      "year, and now represents a majority of total revenue."}
+    assert obs["excerpt"] in N._excerpt(obs)
+
+
+def test_the_next_readable_candidate_takes_the_slot():
+    """Furniture is stepped over, not merely blanked."""
+    obs = {"excerpt": "Indicate by check mark whether the registrant is a "
+                      "well-known seasoned issuer",
+           "text": "The engagement teaches the workflow, and the product "
+                   "sells it without the engagement."}
+    assert "engagement teaches" in N._excerpt(obs)
+
+
+@pytest.mark.parametrize("furniture", [
+    "Commission File Number 001-39540",
+    "Title of each class Trading Symbol Name of each exchange on which "
+    "registered",
+    "☐ Emerging growth company",
+])
+def test_every_cover_page_marker_is_refused(furniture):
+    assert N._excerpt({"excerpt": furniture}) == ""
+
+
+def test_the_rule_is_narrow_enough_not_to_eat_operating_prose():
+    """An over-broad rule silently drops real evidence — the worse mistake."""
+    for real in ("The company competes with in-house build efforts.",
+                 "Management raised full-year guidance after a strong "
+                 "second quarter in the defense segment.",
+                 "Switching costs rise as the platform becomes the system "
+                 "of record for a team's work."):
+        assert N._excerpt({"excerpt": real}), real

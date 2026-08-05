@@ -20,7 +20,8 @@ import html as _html
 import re
 
 from intent_engine.strategic_intelligence.editorial import (
-    consolidate_limitations, deduplicate, is_meaningful, lower_first,
+    consolidate_limitations, deduplicate, is_filing_furniture, is_meaningful,
+    lower_first,
     meaningful_items, reader_limitations, shared_evidence, strip_machinery,
 )
 
@@ -478,7 +479,7 @@ def render_strategic_report(report) -> str:
     evidence_rows, counter_rows = [], []
     for o in r.get("observations", []) or ():
         quote = (o.get("excerpt") or "").strip()
-        if not is_meaningful(quote):
+        if not is_meaningful(quote) or is_filing_furniture(quote):
             continue
         if " ".join(quote.lower().split()) in seen:
             continue

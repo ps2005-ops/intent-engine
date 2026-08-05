@@ -44,6 +44,7 @@ than rendering an empty comparison.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from html import escape as _e
 from typing import List, Optional, Sequence
@@ -52,7 +53,9 @@ from intent_engine.strategic_intelligence.decision import (
     DECISION_READY, INVESTIGATION_REQUIRED, WITHHELD, as_clause,
     decision_from_dict, decision_of, end_sentence, lower_first,
 )
-from intent_engine.strategic_intelligence.editorial import SaidOnce
+from intent_engine.strategic_intelligence.editorial import (
+    SaidOnce, is_filing_furniture,
+)
 
 NARRATIVE_VERSION = "founder_narrative.v1"
 
@@ -301,14 +304,24 @@ def _excerpt(obs: dict) -> str:
     identity, payments, capital, fulfillment, point of sale..." -- differing
     only in the page name at the front. That is a scraped nav bar wearing
     quotation marks.
+
+    Cover-page furniture is stepped over rather than shown. Returning "" when
+    every candidate is furniture is deliberate: `_evidence_items` skips an
+    observation with no text, so the slot goes to a source that can actually
+    say something instead of being spent on a ballot box.
     """
     # THE EXCERPT FIRST. `strategic_signal` is a PATTERN-level label, not a
     # per-source one, so several observations carry the identical signal --
     # and preferring it collapsed a thirteen-source citation list to one line,
     # and printed "exposes a surface others can build on" beside a source
     # titled "Basecamp 5 is all new for 2026".
-    text = _flat(obs.get("excerpt")) or _flat(obs.get("strategic_signal")) \
-        or _flat(obs.get("text"))
+    text = ""
+    for candidate in (obs.get("excerpt"), obs.get("strategic_signal"),
+                      obs.get("text")):
+        flat = _flat(candidate)
+        if flat and not is_filing_furniture(flat):
+            text = flat
+            break
     words = text.split()
     if len(words) > _EXCERPT_WORDS:
         text = " ".join(words[:_EXCERPT_WORDS]).rstrip(",;:.") + "…"

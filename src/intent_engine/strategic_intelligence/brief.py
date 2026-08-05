@@ -31,7 +31,8 @@ import re
 from dataclasses import dataclass, field
 
 from intent_engine.strategic_intelligence.editorial import (
-    addresses_the_system, consolidate_limitations, deduplicate, is_meaningful,
+    addresses_the_system, consolidate_limitations, deduplicate,
+    is_filing_furniture, is_meaningful,
     meaningful_items, reader_limitations,
 )
 
@@ -601,7 +602,7 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
     for observation in r.get("observations", []) or ():
         support = (observation.get("text")
                    or observation.get("excerpt") or "").strip()
-        if not is_meaningful(support):
+        if not is_meaningful(support) or is_filing_furniture(support):
             continue
         candidates.append({"text": support,
                            "date": observation.get("date", ""),

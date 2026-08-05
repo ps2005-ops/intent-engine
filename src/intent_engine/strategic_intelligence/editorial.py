@@ -85,6 +85,49 @@ def addresses_the_system(text) -> bool:
     return any(marker in low for marker in _ADDRESSES_THE_SYSTEM)
 
 
+#: STATUTORY COVER-PAGE FURNITURE — real source, real passage, no claim.
+#:
+#: A filing opens with a mandated cover page (ballot boxes, the Act it is
+#: filed under, the exchange the shares trade on), and an excerpt comes off
+#: the front of a document, so that is what a 10-K offers first. Measured on
+#: the deployed preview 2026-08-05, the TOP item under "What supports this"
+#: for Palantir was:
+#:
+#:     "☒. ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES
+#:      EXCHANGE ACT OF 1934. ☐. TRANSITION REPORT PURSUANT TO…"
+#:
+#: It lives HERE, not in one renderer, because six surfaces read `excerpt`
+#: independently — narrative, executive brief, evidence view, Q&A, the graph
+#: projection and the evidence node page. Fixing the one that was noticed
+#: would have left the same ballot box on the other five.
+#:
+#: Deliberately narrow: every pattern is language that appears ONLY on a
+#: statutory cover page and never in the operating prose that follows. An
+#: over-broad rule silently drops real evidence, which is the more expensive
+#: mistake.
+_FILING_FURNITURE = re.compile(
+    r"[☐☑☒]"
+    r"|pursuant\s+to\s+section\s+1[35]\b"
+    r"|securities\s+exchange\s+act\s+of\s+19\d\d"
+    r"|indicate\s+by\s+check\s+mark"
+    r"|commission\s+file\s+(number|no\b)"
+    r"|title\s+of\s+each\s+class"
+    r"|name\s+of\s+each\s+exchange\s+on\s+which"
+    r"|emerging\s+growth\s+company"
+    r"|well[- ]known\s+seasoned\s+issuer"
+    r"|transition\s+report\s+pursuant",
+    re.I)
+
+
+def is_filing_furniture(text) -> bool:
+    """Whether this passage is a filing's cover page rather than its content.
+
+    A citation a founder cannot read a fact out of spends the most valuable
+    line on the page and teaches them the citations are decorative.
+    """
+    return bool(text) and bool(_FILING_FURNITURE.search(str(text)))
+
+
 def is_meaningful(value) -> bool:
     """Whether a value says anything at all.
 
