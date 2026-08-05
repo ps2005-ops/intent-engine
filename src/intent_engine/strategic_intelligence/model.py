@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 
-_INDEPENDENT = ("independent_reporting", "customer_voice", "competitor")
+from intent_engine.strategic_intelligence.evidence_classes import (
+    INDEPENDENT_CLASSES as _INDEPENDENT,
+)
 
 # component -> (signals that inform it, contradicting signals, plain-language stem)
 _COMPONENTS = {

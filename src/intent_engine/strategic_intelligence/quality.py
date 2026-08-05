@@ -14,11 +14,12 @@ INSUFFICIENT = "INSUFFICIENT_STRATEGIC_EVIDENCE"
 FAILED = "FAILED"
 STRATEGIC_STATUSES = (COMPLETE, PARTIAL, INSUFFICIENT, FAILED)
 
-_EXTERNAL_CLASSES = ("executive_statement", "investor_material",
-                     "customer_voice", "competitor", "independent_reporting")
-# a genuinely outside vantage point (not the company's own publishing). A
-# COMPLETE report needs cross-source corroboration from at least one of these.
-_INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
+# One canonical model; these were five separate tuples across the package and
+# drifted. A COMPLETE report still needs a genuinely outside vantage point.
+from intent_engine.strategic_intelligence.evidence_classes import (
+    EXTERNAL_CLASSES as _EXTERNAL_CLASSES,
+    INDEPENDENT_CLASSES as _INDEPENDENT_CLASSES,
+)
 
 # transition/strategy cue words a real thesis must contain (not a description)
 _STRATEGIC_CUES = ("appears to", "moving", "shift", "transition", "toward",

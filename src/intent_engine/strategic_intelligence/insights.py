@@ -13,7 +13,9 @@ from dataclasses import asdict, dataclass, field
 
 from intent_engine.strategic_intelligence.patterns import TENSIONS
 
-_INDEPENDENT = ("independent_reporting", "customer_voice", "competitor")
+from intent_engine.strategic_intelligence.evidence_classes import (
+    INDEPENDENT_CLASSES as _INDEPENDENT,
+)
 
 # phrases that make an "insight" generic (fail the executive quality gate)
 _GENERIC_MARKERS = (

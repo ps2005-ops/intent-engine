@@ -411,8 +411,11 @@ _OUTSIDE_ONLY_PHRASES = {
     "merchant_outcome_positioning": ("helped us grow", "grew our sales",
                                      "increased our revenue"),
 }
-_OUTSIDE_VANTAGE_CLASSES = frozenset(
-    {"customer_voice", "independent_reporting", "competitor"})
+from intent_engine.strategic_intelligence.evidence_classes import (
+    INDEPENDENT_CLASSES as _INDEPENDENT_CLASSES,
+)
+
+_OUTSIDE_VANTAGE_CLASSES = frozenset(_INDEPENDENT_CLASSES)
 
 
 def _detect_neutral_signals(text: str) -> list:

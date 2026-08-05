@@ -22,10 +22,13 @@ from intent_engine.strategic_intelligence.records import (
 
 _CONF_RANK = {"speculative": 0, "low": 1, "moderate": 2, "high": 3}
 # source classes that make a report more than one-sided
-_EXTERNAL_CLASSES = ("executive_statement", "investor_material",
-                     "customer_voice", "competitor", "independent_reporting")
-# genuinely outside the company's own publishing (cross-source corroboration)
-_INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
+from intent_engine.strategic_intelligence import evidence_classes as EC
+
+# Kept as aliases so existing readers of these names keep working; the tiers
+# themselves now live in one place (`evidence_classes`) because they were
+# duplicated across five modules and drifted.
+_EXTERNAL_CLASSES = EC.EXTERNAL_CLASSES
+_INDEPENDENT_CLASSES = EC.INDEPENDENT_CLASSES
 
 
 def _signals_present(observations) -> set:
@@ -761,18 +764,14 @@ def build_strategic_report(*, company_name, observations,
         for g in h.evidence_gaps:
             if g not in evidence_gaps:
                 evidence_gaps.append(g)
-    external_present = [c for c in _EXTERNAL_CLASSES if c in coverage]
-    independent_present = [c for c in _INDEPENDENT_CLASSES if c in coverage]
-    if not external_present:
-        evidence_gaps.insert(
-            0, "the analysis rests only on the company's own website; a "
-               "filing, an investor statement, a customer or an independent "
-               "report would be needed to test any of it")
-    elif not independent_present:
-        evidence_gaps.insert(
-            0, "every source here is published by the company itself, so "
-               "nothing in this reading has been checked against an outside "
-               "account of it")
+    # Three tiers, not two. A regulatory filing is management-authored but is
+    # made under securities law, so it is not the same evidence as a marketing
+    # page -- and treating the two alike is what made a run that HAD retrieved
+    # the 10-K report "every source here is published by the company itself"
+    # and withhold every option. See `evidence_classes` for the measurement.
+    limitation = EC.standing_limitation(coverage)
+    if limitation:
+        evidence_gaps.insert(0, limitation)
 
     # Built AFTER the gaps, not before: the decision has to name what is
     # missing, and the two coverage gaps inserted above are the most important
