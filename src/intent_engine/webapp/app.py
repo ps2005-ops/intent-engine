@@ -2376,9 +2376,28 @@ class WebApp:
         except Exception:  # noqa: BLE001
             _LOG.warning("competitor context unavailable for %s", run_id)
 
+        # The sanitized strategic dossier, if the market-learning engine has
+        # published one for this company. It is READ ONLY, from one versioned
+        # file, and it is the only channel between the two systems — there is
+        # no import path from here into the market package, and the package is
+        # not even present on this branch. A missing dossier is the normal
+        # case and stays silent; see `ExternalContext.has_strategic`.
+        strategic = None
+        try:
+            from intent_engine.external_intel import (
+                strategic_contract as sc,
+            )
+            key = sc.company_key(name)
+            strategic = sc.load(
+                pathlib.Path(self._runtime_root) / "reports" / "market"
+                / "strategic" / f"{key}.json",
+                expected_company=key, today=today)
+        except Exception:  # noqa: BLE001 - context must never break a run
+            _LOG.warning("strategic context unavailable for %s", run_id)
+
         context = ep.build_context(market=market, macro=macro or (),
                                    competitors=competitors or (),
-                                   as_of=today)
+                                   strategic=strategic, as_of=today)
         self._external_cache[run_id] = context
         return context
 

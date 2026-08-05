@@ -37,10 +37,12 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from .competitor_contract import CLAIM_RELEVANT, Competitor, corroborating
 from .macro_contract import MacroFactor
 from .market_contract import MarketIntel, absent
+from .strategic_contract import StrategicIntel
 
 MARKET = "market"
 MACRO = "macro"
 COMPETITIVE = "competitive"
+STRATEGIC = "strategic"
 
 
 @dataclass(frozen=True)
@@ -50,6 +52,12 @@ class ExternalContext:
     macro: Tuple[MacroFactor, ...] = ()
     competitors: Tuple[Competitor, ...] = ()
     as_of: str = ""
+    #: The sanitized strategic dossier, when the market-learning engine has
+    #: published one for this company. Optional by design — it arrives from a
+    #: separate system, on its own schedule, and a founder analysis has never
+    #: promised one. See `has_strategic` for why absence is silent here and
+    #: loud for the other three families.
+    strategic: Optional["StrategicIntel"] = None
 
     # --- relevance ----------------------------------------------------------
     @property
@@ -63,6 +71,22 @@ class ExternalContext:
     @property
     def has_competitors(self) -> bool:
         return bool(corroborating(self.competitors))
+
+    @property
+    def has_strategic(self) -> bool:
+        """Available AND carrying material.
+
+        A dossier that validated cleanly and says nothing is not a section.
+        The distinction matters more here than for market or macro: those are
+        families a public company is EXPECTED to have, so their absence is
+        itself a finding worth printing. A strategic dossier is produced by an
+        upstream engine that may simply never have looked at this company, and
+        printing "no strategic reading was published" on every analysis would
+        report our own deployment topology as if it were intelligence about
+        the company.
+        """
+        return bool(self.strategic and self.strategic.available
+                    and self.strategic.has_material)
 
     def relevant_sections(self) -> List[str]:
         """Only the contexts that have something to say.
@@ -78,6 +102,8 @@ class ExternalContext:
             out.append(MACRO)
         if self.has_competitors:
             out.append(COMPETITIVE)
+        if self.has_strategic:
+            out.append(STRATEGIC)
         return out
 
     @property
@@ -242,12 +268,153 @@ NON_CAUSAL_FRAME = (
 def build_context(*, market: Optional[MarketIntel] = None,
                   macro: Sequence[MacroFactor] = (),
                   competitors: Sequence[Competitor] = (),
+                  strategic: Optional[StrategicIntel] = None,
                   as_of: str = "") -> ExternalContext:
     return ExternalContext(
         market=market or absent("No market context was assembled for this "
                                 "run."),
         macro=tuple(macro or ()), competitors=tuple(competitors or ()),
-        as_of=as_of)
+        strategic=strategic, as_of=as_of)
+
+
+def _strategic_blocks(intel: "StrategicIntel") -> List[dict]:
+    """The strategic dossier as reasoning blocks, one role per kind.
+
+    Each kind answers a different founder question, and they are kept apart
+    because merging them is how a posture INFERENCE gets read as an observed
+    ACTION:
+
+        interactions            who acted, and who responded
+        postures                what the actor's stance might be, with rivals
+        mismatches              what was expected and did not happen
+        reactions               what response is plausible next
+        priorities              what observation would settle it
+
+    Two invariants are enforced here rather than trusted upstream. A posture
+    always travels with its live alternatives, so it cannot be printed as a
+    settled fact. An interaction always travels with its alternative
+    explanations, so an inferred objective cannot be printed as a known
+    motive — that is the difference between "Company B matched the price" and
+    "Company B is buying share", and only the first one was observed.
+    """
+    out: List[dict] = []
+    for row in intel.interactions:
+        facts = [f"{row.get('focal_actor', '')} — "
+                 f"{row.get('initial_action', '')}."]
+        if row.get("response"):
+            facts.append(f"{row.get('responding_actor', '')} responded: "
+                         f"{row['response']}.")
+        if row.get("response_lag_days") is not None:
+            facts.append(f"Response came {row['response_lag_days']} day(s) "
+                         f"later.")
+        if row.get("payoff_note"):
+            facts.append(f"Effect on payoffs: {row['payoff_note']}")
+        limitations = list(row.get("alternative_explanations") or ())
+        if row.get("inferred_objective"):
+            facts.append(f"One reading of the objective: "
+                         f"{row['inferred_objective']}.")
+            limitations.append(
+                "The objective is inferred from the action, not stated by "
+                "the actor. The alternatives above remain open.")
+        out.append({
+            "context": STRATEGIC,
+            "role": ("A sequence of actions between named actors. It says "
+                     "what was DONE and by whom; it does not establish why."),
+            "facts": facts, "evidence_ids": list(row.get("evidence_ids")
+                                                 or ()),
+            "as_of": row.get("at", ""), "freshness": "", "stale": False,
+            "limitations": limitations, "source": "",
+        })
+    for row in intel.postures:
+        alts = row.get("alternatives") or []
+        facts = [f"{row.get('subject', '')} — leading reading: "
+                 f"{row.get('leading_state', '')} "
+                 f"({float(row.get('leading_probability') or 0):.0%})."]
+        if alts:
+            facts.append("Live alternatives: " + ", ".join(
+                f"{a.get('state')} ({float(a.get('probability') or 0):.0%})"
+                for a in alts) + ".")
+        for moved in (row.get("moved") or ()):
+            facts.append(f"{moved.get('state')} moved "
+                         f"{float(moved.get('from') or 0):.0%} → "
+                         f"{float(moved.get('to') or 0):.0%}.")
+        out.append({
+            "context": STRATEGIC,
+            "role": ("An inferred stance, held as a distribution. The "
+                     "leading reading is not a finding, and the "
+                     "alternatives are not rejected."),
+            "facts": facts,
+            "evidence_ids": list(row.get("evidence_ids") or ()),
+            "as_of": row.get("as_of", ""), "freshness": "", "stale": False,
+            "limitations": [row.get("certainty_note", "")],
+            "source": "",
+        })
+    for row in intel.mismatches:
+        facts = [f"{row.get('subject', '')} — expected "
+                 f"{row.get('expected_event') or 'the preregistered outcome'}"
+                 f"; observed {row.get('observed_direction') or 'otherwise'}."]
+        if row.get("rationale"):
+            facts.append(row["rationale"])
+        out.append({
+            "context": STRATEGIC,
+            "role": ("An expectation committed BEFORE the observation, and "
+                     "what actually happened. A mismatch is evidence; it is "
+                     "not a verdict on the company."),
+            "facts": facts,
+            "evidence_ids": list(row.get("evidence_ids") or ()),
+            "as_of": row.get("evaluated_at", ""), "freshness": "",
+            "stale": False,
+            "limitations": ([f"Falsifier stated in advance: "
+                             f"{row['falsifier']}"]
+                            if row.get("falsifier") else []),
+            "source": "",
+        })
+    for row in intel.reactions:
+        facts = [f"{row.get('responder', '')} — {row.get('response', '')}."]
+        if row.get("payoff_effect"):
+            facts.append(f"Effect if it happens: {row['payoff_effect']}.")
+        if row.get("second_order"):
+            facts.append(f"Then: {row['second_order']}.")
+        limitations = []
+        if row.get("is_prediction"):
+            limitations.append(
+                "This is a bounded expectation about a response that has NOT "
+                "happened. It is a scenario to monitor, not an event.")
+        if row.get("precedents"):
+            facts.append(f"Precedent: {row['precedents']}.")
+        else:
+            limitations.append(
+                "No precedent was matched, so the mechanism carries this "
+                "reading on its own.")
+        out.append({
+            "context": STRATEGIC,
+            "role": ("A plausible response by another actor, with its "
+                     "confidence. It is a scenario, never a forecast."),
+            "facts": facts,
+            "evidence_ids": list(row.get("evidence_ids") or ()),
+            "as_of": "", "freshness": "", "stale": False,
+            "limitations": limitations, "source": "",
+        })
+    for row in intel.priorities:
+        facts = [f"{row.get('candidate_observation', '')} would most reduce "
+                 f"the uncertainty on {row.get('subject', '')}."]
+        if row.get("expected_date"):
+            facts.append(f"Expected {row['expected_date']}.")
+        if row.get("falsifies"):
+            facts.append(f"It would settle: {row['falsifies']}.")
+        out.append({
+            "context": STRATEGIC,
+            "role": ("What to watch next, and why it is the observation "
+                     "worth waiting for."),
+            "facts": facts, "evidence_ids": [], "as_of": "",
+            "freshness": "", "stale": False,
+            "limitations": ([row["limitation"]] if row.get("limitation")
+                            else []),
+            "source": "",
+        })
+    for block in out:
+        block["limitations"] = [x for x in block["limitations"] if x]
+    return out
 
 
 def reasoning_pack(context: ExternalContext) -> dict:
@@ -349,6 +516,8 @@ def reasoning_pack(context: ExternalContext) -> dict:
                 "limitations": [d["limitation"]],
                 "source": ", ".join(t for t in d["source_titles"] if t),
             })
+    if context.has_strategic:
+        blocks.extend(_strategic_blocks(context.strategic))
     return {
         "as_of": context.as_of,
         "sections": context.relevant_sections(),
