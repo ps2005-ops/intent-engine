@@ -11,10 +11,10 @@ from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import layers as L
-from intent_engine.founder_brief import market as M
 from intent_engine.founder_brief import render as R
+from tests import canonical_market as CM
 from tests.test_founder_brief_v3 import (
-    _cited_report, _export, _rich, _sparse, rendered,
+    _cited_report, _rich, _sparse, rendered,
 )
 
 
@@ -173,8 +173,8 @@ def test_the_dashboard_never_fabricates_a_financial_series():
     assert "fabricated" in bt.unavailable_reason
 
 
-def test_every_available_module_answers_the_three_questions():
-    ctx = M.consume(_export(), expected_ticker="ACME").as_dict()
+def test_every_available_module_answers_the_three_questions(tmp_path):
+    ctx = CM.market_context(tmp_path)
     for m in L.build_dashboard(_rich(market=ctx)):
         if m.available:
             assert m.so_what, m.key
@@ -212,9 +212,9 @@ def test_the_timeline_is_deduplicated():
     assert len({r["value"] for r in rows}) == len(rows)
 
 
-def test_no_control_performance_reaches_the_dashboard():
+def test_no_control_performance_reaches_the_dashboard(tmp_path):
     html = R.render_dashboard(L.build_dashboard(
-        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict())))
+        _rich(market=CM.market_context(tmp_path))))
     for banned in ("win rate", "sharpe", "alpha", "expectancy",
                    "paper_control", "profit factor"):
         assert banned not in html.lower()
@@ -547,23 +547,27 @@ def test_the_gate_catches_controls_placed_before_the_answer():
 
 # --- market-export states: found by production-parity validation ------------
 @pytest.mark.parametrize("bad", [
-    "a string", 123, None, [],
-    {"export_version": "market_intel_export.v1", "ticker": "ACME",
-     "latest_completed_market_date": "2026-07-31", "price_change": "oops"},
-    {"export_version": "market_intel_export.v1", "ticker": "ACME",
-     "latest_completed_market_date": "2026-07-31", "volatility": "bad",
-     "freshness": "nope"},
+    '"a string"', "123", "null", "[]", "{not json at all",
+    '{"schema_version": "market_intel_export.v2", "ticker": "ACME",'
+    ' "price_periods": "oops"}',
+    '{"schema_version": "market_intel_export.v2", "ticker": "ACME",'
+    ' "annualized_volatility": "bad", "data_freshness": "nope"}',
 ])
-def test_a_malformed_export_fails_closed_and_never_crashes(bad):
+def test_a_malformed_export_fails_closed_and_never_crashes(tmp_path, bad):
     """FOUND BY PARITY: `price_change` as a string raised AttributeError and
     took the whole founder page down. "Fails closed" must mean the market
     module goes unavailable -- not that a malformed upstream artefact can
-    break a founder's result."""
-    ctx = M.consume(bad, expected_ticker="ACME")
-    assert ctx.available is False
-    assert ctx.reason
+    break a founder's result.
+
+    Rewritten against v2 and the real loader. The v1 dicts this used to hand a
+    deleted consumer could not reach a founder from any producer that exists,
+    so the case was being proved on a shape nothing emits.
+    """
+    intel, ctx = CM.malformed(tmp_path, bad)
+    assert intel.available is False
+    assert intel.reason
     # and the dashboard still renders every other tile
-    modules = L.build_dashboard(_rich(market=ctx.as_dict()))
+    modules = L.build_dashboard(_rich(market=ctx))
     assert len(modules) >= 4
     html = R.render_dashboard(modules)
     assert "Not established" in html
@@ -573,23 +577,32 @@ def test_a_malformed_export_fails_closed_and_never_crashes(bad):
     assert ">0%<" not in html and ">$0<" not in html
 
 
-def test_a_partial_export_renders_only_what_exists():
-    partial = {"export_version": "market_intel_export.v1", "ticker": "ACME",
-               "latest_completed_market_date": "2026-07-31",
-               "freshness": {"age_days": 1},
-               "price_change": {"1m": {"value": -0.05, "status": "observed"}},
-               "fundamentals": {"status": "unmeasurable"}}
-    ctx = M.consume(partial, expected_ticker="ACME")
-    assert ctx.available
-    assert set(ctx.modules) == {"price"}
-    assert any("verified revenue" in l for l in ctx.limitations)
+def test_a_partial_export_renders_only_what_exists(tmp_path):
+    """A history too short to measure a year NAMES the year it could not
+    measure, and still reports the month it could.
+
+    The unmeasured window becoming a zero is refused a layer lower, where
+    `measurement()` rejects a value on an unmeasurable status. What this
+    asserts is the founder-visible half: the shortfall is stated in words
+    rather than left as a silently missing row.
+    """
+    short = CM.market_context(
+        tmp_path, closes=CM.closes(n=40),
+        benchmark_closes=CM.closes(n=40, start=400.0, step=0.10))
+    assert short["available"]
+    assert short["modules"], "a short history is still a readable one"
+    stated = " ".join(short["limitations"]).lower()
+    assert "too short" in stated
+    assert "the past year" in stated
+
+    # and the same producer on a full history states no such shortfall
+    assert not CM.market_context(tmp_path / "full")["limitations"]
 
 
-def test_a_stale_export_is_flagged_and_still_usable():
-    from tests.test_founder_brief_v3 import _export
-    ctx = M.consume(_export(), expected_ticker="ACME", today="2026-10-01")
-    assert ctx.stale and ctx.available
-    assert any("days old" in l for l in ctx.limitations)
+def test_a_stale_export_is_flagged_and_still_usable(tmp_path):
+    ctx = CM.market_context(tmp_path, today="2026-10-01")
+    assert ctx["stale"] and ctx["available"]
+    assert ctx["age_days"] and ctx["age_days"] > 30
 
 
 # --- the withheld thesis must stay withheld in Q&A --------------------------
@@ -845,12 +858,11 @@ def test_an_absent_card_still_says_why_it_matters_and_what_would_settle_it():
             assert module.what_to_watch, module.key
 
 
-def test_the_dashboard_never_prints_the_same_row_twice():
+def test_the_dashboard_never_prints_the_same_row_twice(tmp_path):
     """MEASURED: business momentum and the strategic timeline printed the same
     dated developments, and the market card repeated its own headline in its
     rows -- Shopify showed one price sentence three times on one screen."""
-    modules = L.build_dashboard(
-        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict()))
+    modules = L.build_dashboard(_rich(market=CM.market_context(tmp_path)))
     seen = set()
     for module in modules:
         for row in module.rows:
@@ -860,11 +872,11 @@ def test_the_dashboard_never_prints_the_same_row_twice():
                 seen.add(key)
 
 
-def test_an_available_card_keeps_its_interpretation_after_deduplication():
+def test_an_available_card_keeps_its_interpretation_after_deduplication(
+        tmp_path):
     """Deduplication may not buy a clean screen by emptying a card: the
     release gate fails a module shown without an interpretation."""
-    modules = L.build_dashboard(
-        _rich(market=M.consume(_export(), expected_ticker="ACME").as_dict()))
+    modules = L.build_dashboard(_rich(market=CM.market_context(tmp_path)))
     for module in modules:
         if module.available:
             assert module.so_what, module.key

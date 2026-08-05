@@ -10,8 +10,8 @@ import pytest
 from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
-from intent_engine.founder_brief import market as M
 from intent_engine.founder_brief import render as R
+from tests import canonical_market as CM
 
 
 def _insight(**kw):
@@ -196,62 +196,31 @@ def test_confidence_always_states_what_limits_it():
     assert len(b.confidence_reason) > 40
 
 
-# --- market export consumer -------------------------------------------------
-def _export(**kw):
-    base = {"export_version": "market_intel_export.v1", "ticker": "ACME",
-            "latest_completed_market_date": "2026-07-31",
-            "freshness": {"age_days": 1},
-            "price_change": {"1m": {"value": -0.12, "status": "observed"}},
-            "benchmark_relative": {"1y": {"value": -0.16,
-                                          "status": "observed"}},
-            "volatility": {"value": 0.42, "status": "inferred"},
-            "fundamentals": {"status": "unmeasurable"},
-            "signal": {"state": "quiet"}}
-    base.update(kw)
-    return base
-
-
-def test_an_unknown_schema_version_is_refused():
-    ctx = M.consume(_export(export_version="market_intel_export.v2"))
-    assert not ctx.available
-    assert "v1" in ctx.reason
-
-
-def test_a_ticker_mismatch_is_refused():
-    ctx = M.consume(_export(), expected_ticker="OTHER")
-    assert not ctx.available
-    assert "not OTHER" in ctx.reason
-
-
-def test_a_stale_snapshot_is_flagged_not_hidden():
-    ctx = M.consume(_export(), expected_ticker="ACME", today="2026-09-01")
-    assert ctx.stale
-    assert any("days old" in l for l in ctx.limitations)
-
-
-def test_missing_fundamentals_become_a_limitation_never_a_zero():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    assert "fundamentals" not in (ctx.modules or {})
-    assert any("verified revenue" in l for l in ctx.limitations)
-
-
-def test_every_market_module_carries_an_interpretation():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    for name, module in ctx.modules.items():
-        assert module.get("so_what"), name
-        assert module.get("what_changed"), name
-
-
-def test_the_market_disclaimer_is_always_present():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    assert "not an investment recommendation" in ctx.disclaimer
-
-
-def test_the_signal_module_describes_the_signal_not_the_company():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    assert "describes the signal, not the company" in \
-        ctx.modules["signal"]["so_what"]
-
+# --- market context, on the canonical channel -------------------------------
+# Seven tests stood here driving `founder_brief.market`, a duplicate v1
+# consumer deleted in f2b7a18. Their SAFEGUARDS were not deleted with it. Each
+# already holds on the canonical channel and is asserted there:
+#
+#   unknown schema version   test_market_intel_contract
+#                            ::test_a_wrong_schema_version_is_refused_rather...
+#   ticker mismatch          test_market_intel_contract
+#                            ::test_a_ticker_mismatch_is_refused
+#   staleness is labelled    test_market_intel_contract
+#                            ::test_a_stale_export_is_labelled_stale
+#   a gap never becomes 0    test_external_intel_surfaces
+#                            ::test_break_a_missing_market_value_becoming_zero
+#   every module interprets  test_external_intel_surfaces::test_every_dashboard
+#                            _module_interprets_rather_than_only_reporting
+#   the disclaimer is shown  test_founder_layers_v3
+#                            ::test_the_dashboard_carries_the_market_disclaimer
+#
+# The seventh asserted that a "signal" module described the signal rather than
+# the company. v2 publishes no signal module -- the concept was removed, not
+# relocated -- so there is nothing left to assert and no gap left behind.
+#
+# The two below stay, because they never asserted on the consumer's internals:
+# both read the DASHBOARD a founder is served, so they outlived the module they
+# happened to be written against and needed only their input rerouted.
 
 def _market_module(market=None, footing=None):
     """The market module as a founder actually receives it.
@@ -265,9 +234,8 @@ def _market_module(market=None, footing=None):
     return next(m for m in modules if m.key == "market_trajectory")
 
 
-def test_no_paper_control_performance_can_reach_the_page():
-    ctx = M.consume(_export(), expected_ticker="ACME")
-    module = _market_module(ctx.as_dict())
+def test_no_paper_control_performance_can_reach_the_page(tmp_path):
+    module = _market_module(CM.market_context(tmp_path))
     text = " ".join([module.what_changed, module.so_what,
                      module.what_to_watch, module.text_alternative]
                     + [f"{r.get('label')} {r.get('value')} {r.get('so_what')}"
@@ -360,7 +328,7 @@ def test_depth_is_offered_but_never_required():
 
 
 def test_absent_market_data_teaches_rather_than_saying_unavailable():
-    module = _market_module(M.unavailable("no snapshot").as_dict(),
+    module = _market_module(CM.absent_market_context("no snapshot"),
                             footing={"ticker": "ACME", "listing_exchange": ""})
     text = " ".join([module.what_changed, module.so_what,
                      module.what_to_watch])
