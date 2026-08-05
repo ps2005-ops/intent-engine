@@ -277,6 +277,84 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
     return out[:limit]
 
 
+def category_alternatives(documents, *, limit: int = 8) -> List[dict]:
+    """Classes of substitute a filing names WITHOUT naming any company.
+
+    A name-based finder is blind to these and reports the honest-looking but
+    misleading "no competitor was named". Measured on Shopify's 2026 10-K:
+    its Competition section names no company at all, and instead lists what a
+    merchant might choose instead — "ecommerce software vendors; content
+    management systems; payment processors; point of sale providers;
+    marketplaces". That is a real competitive statement, and to a founder it
+    is arguably more useful than a name, because it describes the SHAPE of
+    the alternative rather than one instance of it.
+
+    Returned separately from `find_competitors` rather than folded in: these
+    are categories, not companies, and presenting them in the same list would
+    let "payment processors" read as a named rival.
+    """
+    out: List[dict] = []
+    seen = set()
+    for document in documents or ():
+        if not isinstance(document, dict):
+            continue
+        text = _document_text(document)
+        evidence_id = document.get("observation_id") or document.get(
+            "source_id") or document.get("document_id") or ""
+        if not text or not evidence_id:
+            continue
+        for passage in competition_passages(text):
+            trigger = re.search(
+                r"(?:select|choose|use|turn to|opt for)\s+(?:one or more\s+)?"
+                r"(?:integrated or standalone\s+)?(?:offerings?|solutions?|"
+                r"products?|providers?)?\s*from\s+other\s+providers?"
+                r"|alternatives?\s+(?:to\s+\w+\s+)?includ\w*"
+                r"|competitors?\s+includ\w*", passage, re.I)
+            if not trigger:
+                continue
+            # Bound the enumeration to the sentence that introduces it.
+            # Running past it captured "platform capabilities and product
+            # functionality" from Palantir's filing — a competitive FACTOR
+            # from the next sentence, offered to a founder as though it were
+            # something a buyer could purchase instead.
+            tail = passage[trigger.end():]
+            stop = re.search(r"\.\s", tail)
+            if stop:
+                tail = tail[:stop.start()]
+            for raw in re.split(r"[;•,]|&#8226;", tail):
+                item = raw.strip(" .,:&#0123456789").strip()
+                item = re.sub(r"^(?:and|or|such as|including)\s+", "", item,
+                              flags=re.I).strip()
+                if not (3 < len(item) < 60):
+                    continue
+                # A category is a lowercase noun phrase. A capitalised span is
+                # a company name and belongs to find_competitors, not here.
+                if item[:1].isupper() or _NAME.search(item):
+                    continue
+                if not re.search(r"\b(vendors?|systems?|processors?|"
+                                 r"providers?|services?|marketplaces?|"
+                                 r"registrars?|lenders?|companies|"
+                                 r"integrators?|contractors?|consultants?|"
+                                 r"platforms?|software)\b", item, re.I):
+                    continue
+                key = item.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append({
+                    "category": item,
+                    "evidence_id": str(evidence_id),
+                    "source_title": str(document.get("source_title") or ""),
+                    "date": str(document.get("date") or ""),
+                    "limitation": ("A class of alternative named in the "
+                                   "company's own filing, not a specific "
+                                   "competitor; no company is identified."),
+                })
+                if len(out) >= limit:
+                    return out
+    return out
+
+
 #: The alternative with no company name. A buyer's own engineering team is the
 #: most common thing an enterprise product loses to, and a name-based finder
 #: cannot see it -- there is no capitalised span to match. It was missing from
@@ -290,6 +368,17 @@ _INTERNAL_PATTERNS = (
     r"capabilit(?:y|ies))",
     r"internally\s+develop(?:ed|ing)?",
     r"(?:their|its)\s+own\s+engineering\s+teams?",
+    # Added from the live Palantir 10-K, whose Competition section opens
+    # "We are fundamentally competing with the internal software development
+    # efforts of our potential customers" and continues "Organizations
+    # frequently attempt to build their own data platforms before turning to
+    # buy ours". Neither phrasing uses "in-house" or "internally develop", so
+    # the strongest statement of the in-house alternative any filing in the
+    # validation set contains was invisible to all four patterns above.
+    r"internal\s+(?:software\s+)?(?:development|engineering)\s+"
+    r"(?:efforts?|resources?|teams?)",
+    r"build\s+their\s+own\s+\w+(?:\s+\w+)?",
+    r"software\s+developed\s+by\s+customers\s+internally",
 )
 
 
