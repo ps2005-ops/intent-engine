@@ -310,6 +310,47 @@ def _retry_phrase(seconds: float) -> str:
     return f"You can try again in about {hours} hours."
 
 
+def _with_annual_filing_sections(documents: list) -> list:
+    """Replace an annual report's body with its Competition section.
+
+    Everything else passes through untouched. Fully defensive: a filing the
+    extractor cannot parse keeps its original text, so this can only ever
+    add competitive evidence, never remove a document from the run.
+
+    The truncation note travels with it, so a downstream surface can say the
+    filing was read only as far as the retrieval cap reached.
+    """
+    from intent_engine.external_intel import annual_filing as af
+
+    out = []
+    for document in documents:
+        title = str(document.get("source_title")
+                    or document.get("title") or "")
+        if not any(form in title for form in ("10-K", "20-F", "40-F")):
+            out.append(document)
+            continue
+        body = str(document.get("text_content") or document.get("text") or "")
+        if not body:
+            out.append(document)
+            continue
+        try:
+            sections = af.extract(
+                body, form="10-K",
+                truncated=bool(document.get("truncated")),
+                source_url=str(document.get("url") or ""))
+        except Exception:  # noqa: BLE001 - never break a run over a filing
+            out.append(document)
+            continue
+        competition = sections.competition
+        if competition is None or not competition.usable:
+            out.append(document)
+            continue
+        out.append(dict(document, text_content=competition.text,
+                        text=competition.text,
+                        filing_completeness=sections.completeness_note))
+    return out
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
@@ -2317,6 +2358,13 @@ class WebApp:
                           d.get("document_id") or "")
                      for d in self._retrieved_documents(run_id)
                      if isinstance(d, dict)]
+        # An annual report is handed over as its EXTRACTED Competition
+        # section, not as 550,000 characters of raw filing. Passing the whole
+        # document means the finder mines Item 1A as well, where competition
+        # is discussed at length and no rival is named in the same passage —
+        # so the real Competition section is outvoted by risk-factor prose
+        # and the run reports that no competitor account was retrieved.
+        documents = _with_annual_filing_sections(documents)
         try:
             macro = mp.build_factors(observations + documents,
                                      root=self._runtime_root, today=today)

@@ -246,3 +246,57 @@ def test_an_under_cap_response_is_never_marked_truncated():
                         transport=_transport(b"<html>ok</html>", False),
                         resolver=False, accept_truncated=True)
     assert result["ok"] is True and result["truncated"] is False
+
+
+# ------------------------------- the raw-filing fabrication this prevents
+def test_break_raw_filing_fabricates_competitors_from_its_own_boilerplate():
+    """Mining a whole 10-K names the company's own CEO as a competitor.
+
+    Measured against the real Palantir 10-K: passing the raw 550,000-character
+    document to the finder returned five "competitors" — Alexander Karp
+    (Palantir's own CEO), Palantir Foundry (its own product), "Founder Voting
+    Agreement", "Intellectual Property", and the HTML entity fragment "O&amp".
+    Every one of them was captured from risk-factor and exhibit boilerplate
+    that mentions competition without naming a rival.
+
+    Narrowing to the extracted Competition section is what stops it.
+    """
+    from intent_engine.webapp.app import _with_annual_filing_sections
+
+    raw = (FILING +
+           " Our founder Alexander Karp controls a majority of voting power "
+           "under the Founder Voting Agreement. We face competition from "
+           "emerging companies. Intellectual Property We have registered "
+           "trademarks for Palantir Foundry and our corporate logo.")
+    docs = [{"source_title": "SEC 10-K (2026-02-17)", "text_content": raw,
+             "observation_id": "obs_1", "source_class": "investor_material",
+             "date": "2026-02-17", "truncated": True}]
+
+    narrowed = _with_annual_filing_sections(docs)
+    assert len(narrowed[0]["text_content"]) < len(raw) / 2
+    assert narrowed[0]["filing_completeness"]
+
+    names = {c.name for c in CFD.find_competitors(
+        narrowed, subject="Palantir", today="2026-08-05")}
+    for fabrication in ("Alexander Karp", "Founder Voting Agreement",
+                        "Intellectual Property", "Palantir Foundry"):
+        assert fabrication not in names, fabrication
+    assert "The buyer's own engineering team" in names
+
+
+def test_non_annual_documents_pass_through_untouched():
+    from intent_engine.webapp.app import _with_annual_filing_sections
+    docs = [{"source_title": "SEC 10-Q (2026-08-04)",
+             "text_content": "quarterly body", "observation_id": "o1"}]
+    assert _with_annual_filing_sections(docs)[0]["text_content"] == \
+           "quarterly body"
+
+
+def test_an_unparseable_filing_keeps_its_original_text():
+    """This may only ever add evidence, never drop a document from a run."""
+    from intent_engine.webapp.app import _with_annual_filing_sections
+    docs = [{"source_title": "SEC 10-K (2026-02-17)",
+             "text_content": "no statutory headings here at all",
+             "observation_id": "o1"}]
+    assert _with_annual_filing_sections(docs)[0]["text_content"] == \
+           "no statutory headings here at all"
