@@ -72,8 +72,22 @@ MAX_KNOWN_PATHS = 28
 # highest-value families (product, customers, investor) take their quota
 # without starving the rest, and stays far inside MAX_TOTAL_BYTES_PER_RUN.
 MAX_APPROVED_SOURCES = 14
+#: The budget for ONE untrusted web response. SEC filings are fetched against
+#: `edgar.MAX_FILING_BYTES` instead — see the reasoning there.
 MAX_RESPONSE_BYTES = 2_000_000
-MAX_TOTAL_BYTES_PER_RUN = 15_000_000
+#: The budget for a whole run.
+#:
+#: This had to move with the filing budget, not after it. At 15MB a single
+#: JPMorgan 10-K (12.9MB measured 2026-08-05) would consume 86% of the run and
+#: every remaining source would fail with "run byte budget exhausted" — the
+#: analysis would trade nine ordinary pages for one filing and come out worse
+#: than before. 48MB carries the realistic worst case: three statutory filings
+#: (annual, quarterly, current — the families are served round-robin, so at
+#: most a few land) plus the ordinary pages, none of which can exceed 2MB.
+#:
+#: The cost is bounded and was measured before raising it: JPMorgan's 12.9MB
+#: 10-K downloads in ~1s and parses in ~2s.
+MAX_TOTAL_BYTES_PER_RUN = 48_000_000
 MAX_REDIRECTS = 5
 CONNECT_TIMEOUT_S = 8
 READ_TIMEOUT_S = 12

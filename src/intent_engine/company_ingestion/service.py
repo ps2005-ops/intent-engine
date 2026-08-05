@@ -28,7 +28,8 @@ from intent_engine.company_ingestion.readiness import (
 )
 from intent_engine.company_ingestion.records import (
     IngestionError, IngestionEvent, MAX_APPROVED_SOURCES,
-    MAX_TOTAL_BYTES_PER_RUN, failure_record, retrieved_record,
+    MAX_RESPONSE_BYTES, MAX_TOTAL_BYTES_PER_RUN, failure_record,
+    retrieved_record,
 )
 from intent_engine.company_ingestion.store import DEFAULT_CI_PATH, IngestionStore
 from intent_engine.company_ingestion.validation import (
@@ -434,11 +435,17 @@ class CompanyIngestionService:
                 resolver=self.resolver,
                 extra_mime_prefixes=PDF_MIME_PREFIXES if wants_pdf else (),
                 binary=wants_pdf,
-                # Annual filings only, flagged by the EDGAR adapter. Keeping
-                # the first 2MB of a 10-K is what makes its Competition
-                # section reachable at all; discarding it is why competitive
-                # intelligence rendered as an absence on every company.
-                accept_truncated=bool(candidate.get("accept_truncated")))
+                # Filings only, flagged by the EDGAR adapter. `max_bytes`
+                # raises the budget for a statutory document, because most
+                # large-cap filings exceed the general 2MB cap and were being
+                # discarded whole — measured live on Caterpillar, whose 10-Q
+                # came back "too large" and left the run bounded.
+                # `accept_truncated` is the fallback for anything past even
+                # that budget; nothing downstream may call such a read
+                # complete.
+                accept_truncated=bool(candidate.get("accept_truncated")),
+                max_bytes=int(candidate.get("max_bytes")
+                              or MAX_RESPONSE_BYTES))
             if not result["ok"]:
                 failed.append(self._fail(
                     run_id, domain, candidate_id, result["failure_type"],

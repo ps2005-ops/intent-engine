@@ -206,11 +206,66 @@ def test_the_annual_report_wins_a_slot_against_a_filers_usual_mix():
 
 
 def test_only_annual_forms_are_retrieved_truncated():
+    """A quarterly report must never arrive half-read.
+
+    Measured 2026-08-05: MD&A sits at char 2,418,251 of 3,459,434 in
+    Caterpillar's 10-Q. Truncating one keeps the tagged financial tables and
+    drops the management narrative, so the form is fixed by the filing budget
+    instead — a visible `too_large` beats an invisible half-document.
+    """
     from intent_engine.company_ingestion import edgar
     assert "10-K" in edgar.TRUNCATABLE_FORMS
     assert "20-F" in edgar.TRUNCATABLE_FORMS
     assert "10-Q" not in edgar.TRUNCATABLE_FORMS
     assert "8-K" not in edgar.TRUNCATABLE_FORMS
+
+
+def test_filings_get_a_larger_budget_than_ordinary_web_pages():
+    """The live defect: Caterpillar's 3.5MB 10-Q was discarded whole.
+
+    The 2MB cap is a rule about untrusted responses. Applied to EDGAR it
+    measured the wrong thing — seven of twelve measured large-cap primary
+    documents exceed it, including every filing of JPMorgan and Berkshire.
+    """
+    from intent_engine.company_ingestion import edgar
+    from intent_engine.company_ingestion.records import MAX_RESPONSE_BYTES
+    assert edgar.MAX_FILING_BYTES > MAX_RESPONSE_BYTES
+    # The largest primary document measured 2026-08-05 was JPMorgan's 10-K at
+    # 12,927,325 bytes. The budget must clear it, or the biggest filers stay
+    # unreadable — which is the defect this fixes.
+    assert edgar.MAX_FILING_BYTES >= 12_927_325
+
+
+def test_one_filing_cannot_exhaust_the_whole_run_budget():
+    """Raising the per-document budget without this starves every other source.
+
+    A 12.9MB filing against the old 15MB run budget left 2MB for the other
+    thirteen sources, so the analysis would trade nine ordinary pages for one
+    filing and come out worse.
+    """
+    from intent_engine.company_ingestion import edgar
+    from intent_engine.company_ingestion.records import (
+        MAX_TOTAL_BYTES_PER_RUN,
+    )
+    assert MAX_TOTAL_BYTES_PER_RUN >= 3 * edgar.MAX_FILING_BYTES
+
+
+def test_a_filing_candidate_carries_the_filing_budget():
+    """The budget travels on the candidate, so only EDGAR ever spends it.
+
+    An ordinary page never sees `max_bytes`, which is what keeps the raised
+    budget from becoming a general loosening of the retrieval cap.
+    """
+    from intent_engine.company_ingestion import edgar
+    from tests.test_palantir_resilience import palantir_transport
+    resolved = edgar.resolve_cik("Palantir Technologies",
+                                 transport=palantir_transport, resolver=False)
+    cands = edgar.filing_candidates(resolved, transport=palantir_transport,
+                                    resolver=False)
+    assert cands, "expected SEC filing candidates"
+    statutory = [c for c in cands if "exhibit" not in c["title"].lower()]
+    assert statutory, "expected at least one statutory filing"
+    assert all(c["max_bytes"] == edgar.MAX_FILING_BYTES for c in statutory)
 
 
 def _transport(body: bytes, exceeded: bool):

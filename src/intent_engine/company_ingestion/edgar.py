@@ -103,7 +103,38 @@ _FAMILY_ORDER = ("annual", "quarterly", "current", "registration", "proxy")
 #: Forms whose primary document routinely exceeds the per-response byte cap
 #: and which are still worth retrieving truncated, because the sections that
 #: matter are at the front. See `external_intel.annual_filing`.
+#:
+#: THE 10-Q IS DELIBERATELY NOT HERE, and the reason is measured rather than
+#: inherited. An annual report survives truncation because Item 1. Business
+#: sits at the front. A quarterly report does not: measured 2026-08-05, the
+#: MD&A heading sits at character 2,418,251 of 3,459,434 in Caterpillar's
+#: latest 10-Q — 70% of the way in, and past any cut worth making. Truncating
+#: a 10-Q keeps the tagged financial tables and discards the management
+#: narrative, which is the part a reader is there for.
+#:
+#: So a large quarterly report is fixed by the BUDGET below, not by tolerating
+#: a half-read of it. Adding the form here would have converted a visible
+#: "too large" failure into an invisible half-document — the more dangerous of
+#: the two, because nothing downstream would have known to say so.
 TRUNCATABLE_FORMS = frozenset({"10-K", "20-F", "40-F"})
+
+#: SEC filings get their own size budget, separate from the 2MB cap that
+#: governs ordinary web retrieval.
+#:
+#: WHY THEY ARE NOT THE SAME NUMBER. The general cap bounds an UNTRUSTED
+#: response from an arbitrary host — it is a safety limit, and it should stay
+#: where it is. EDGAR is a known publisher serving structured statutory
+#: documents over one validated domain, and real ones are simply larger than
+#: 2MB. Measured 2026-08-05 on latest primary documents: JPMorgan 10-K
+#: 12,927,325 bytes, Berkshire 10-K 10,396,820, Caterpillar 10-K 6,100,469
+#: and 10-Q 3,459,434, Walmart 10-K 2,323,981, Palantir 10-K 2,192,014.
+#:
+#: At 2MB, seven of those twelve documents were discarded whole. That is what
+#: "too large: the page exceeded the size budget" meant on Caterpillar's live
+#: run, and it is why a company with a complete public record produced a
+#: bounded analysis. 16MB clears the largest observed filing with headroom
+#: without pretending there is no limit at all.
+MAX_FILING_BYTES = 16_000_000
 _DROP_TOKENS = {"inc", "incorporated", "corp", "corporation", "co", "company",
                 "ltd", "limited", "plc", "llc", "lp", "holdings", "group",
                 "technologies", "technology", "the", "and", "of"}
@@ -114,21 +145,26 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None                          # surface 3xx as HTTPError
 
 
-def _sec_transport(url: str, timeout: float):
+def _sec_transport(url: str, timeout: float,
+                   max_bytes: int = MAX_RESPONSE_BYTES):
     """Production transport for SEC endpoints. Mirrors the ordinary retrieval
     transport but sends a UA that identifies the requester per SEC fair-access
     guidance (adds a contact if SEC_CONTACT_EMAIL is set). Returns
-    (status, headers_dict, body_bytes_capped, exceeded)."""
+    (status, headers_dict, body_bytes_capped, exceeded).
+
+    `max_bytes` defaults to the ordinary cap so the metadata calls in this
+    module are unaffected; only a filing DOCUMENT is fetched with
+    MAX_FILING_BYTES."""
     contact = os.environ.get("SEC_CONTACT_EMAIL", "").strip()
     ua = USER_AGENT + (f" contact:{contact}" if contact else "")
     opener = urllib.request.build_opener(_NoRedirect())
     request = urllib.request.Request(url, headers={
         "User-Agent": ua, "Accept": "application/json,text/html"})
     response = opener.open(request, timeout=timeout)
-    body = response.read(MAX_RESPONSE_BYTES + 1)
+    body = response.read(max_bytes + 1)
     headers = {k.lower(): v for k, v in response.headers.items()}
-    return (response.status, headers, body[:MAX_RESPONSE_BYTES],
-            len(body) > MAX_RESPONSE_BYTES)
+    return (response.status, headers, body[:max_bytes],
+            len(body) > max_bytes)
 
 
 def _fetch_bytes(url, *, transport, resolver, timeout=8.0) -> bytes:
@@ -331,6 +367,10 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
             # and nothing downstream may call it complete.
             "form": form,
             "accept_truncated": form in TRUNCATABLE_FORMS and not is_exhibit,
+            # A statutory filing is fetched against the EDGAR budget. An
+            # exhibit is an ordinary attachment and stays on the general cap.
+            "max_bytes": (MAX_RESPONSE_BYTES if is_exhibit
+                          else MAX_FILING_BYTES),
         })
         if len(out) >= limit:
             break
