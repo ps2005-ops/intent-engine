@@ -45,6 +45,7 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass, field
 
+from intent_engine.strategic_intelligence import filing_hygiene as FH
 from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
 
 #: A choice can be made on what is known.
@@ -432,9 +433,13 @@ def decision_of(report) -> FounderDecision:
     # Same rule as the producer: the portfolio, not only its first entry.
     observations = [o.as_dict() if hasattr(o, "as_dict") else o
                     for o in (r.get("observations") or ())]
-    verified = tuple(
+    # Filing furniture is filtered BEFORE the cap, not after: a 10-K's cover
+    # page sorts first in the document, so taking [:3] and cleaning afterwards
+    # left the slide with nothing. See `filing_hygiene` for the measurement.
+    verified = tuple(FH.executive_safe(
         (o.get("excerpt") or o.get("text") or "")
-        for o in observations if isinstance(o, dict) and not o.get("weak"))[:3]
+        for o in observations if isinstance(o, dict) and not o.get("weak")
+    ))[:3]
     return decide_across(
         r.get("company_name", ""), hypotheses,
         r.get("blind_spots") or (), evidence_gaps=r.get("evidence_gaps") or (),
