@@ -456,12 +456,29 @@ def test_gate_g_a_failed_transition_does_not_erase_evidence_that_exists(
         status, _, body = c.request("GET", path)
         assert "no approved source could be retrieved" not in body, (
             f"{path} denies evidence the same store still holds")
-        # A raw 500 is worse than the wrong page: the first attempt at this
-        # fix fell through to the report renderer, which was handed a run with
-        # no report and answered 500 on /full and /slides.
+        # It must say what WAS read, and point at where to read it.
+        assert "source(s) were read" in body, f"{path} never says what it read"
+        assert f"/runs/{run_id}/brief" in body, f"{path} offers no way in"
+        # A 500 is worse than the wrong page, and re-routing this run to the
+        # deeper surfaces produced exactly that, twice, on the live preview.
         assert not str(status).startswith("5"), f"{path} answered {status}"
         for leak in ("Traceback", "Internal Server Error", "NoneType"):
             assert leak not in body, f"{path} leaked {leak!r}"
+
+
+def test_gate_g2_a_run_that_really_retrieved_nothing_still_says_so(tmp_path):
+    """The other half: the honest sentence must survive for the run it was
+    written for, or this fix has simply moved the lie."""
+    def exploding(*a, **k):
+        raise RuntimeError("network gone")
+    app = _async_app(tmp_path, transport=exploding)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+    assert not app._retrieved_documents(run_id)
+    _, _, body = c.request("GET", f"/runs/{run_id}")
+    assert "no approved source could be retrieved" in body
+    assert "source(s) were read" not in body
 
 
 # --- capacity ---------------------------------------------------------------

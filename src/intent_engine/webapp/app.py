@@ -1639,14 +1639,45 @@ class WebApp:
             for cid, label, human, detail in rows)
         detail_block = (f'<h2>What happened to each source</h2><ul>{items}</ul>'
                         if items else '')
+        # WHAT WAS READ, WHEN ANYTHING WAS. "no approved source could be
+        # retrieved" is the reason a run has no report, and it was printed
+        # unconditionally — including for runs where the store DID hold
+        # documents. Measured live on preview-v3, twice (Alphabet,
+        # https://abc.xyz): every guessed path 404'd, the run went FAILED, and
+        # EDGAR then returned the 10-K and the 10-Q. This page told the reader
+        # nothing had been retrieved while `/brief`, reading the same store,
+        # listed both filings under "What could actually be read".
+        #
+        # The reader is owed the true sentence and the place the evidence is,
+        # so say what was read and link to it. Re-routing the page was tried
+        # twice and answered 500 both times: the deeper surfaces are built for
+        # a run that composed something, and this one did not.
+        read = self._retrieved_documents(run_id)
+        if read:
+            titles = [str(d.get("title") or d.get("final_url") or "").strip()
+                      for d in read]
+            titles = [t for t in titles if t][:5]
+            listed = "".join(f'<li>{_e(t)}</li>' for t in titles)
+            opening = (
+                f'<p>Run <code>{_e(run_id)}</code> did not produce a report: '
+                f'not enough of what it needed could be retrieved, so no '
+                f'reading is asserted here — we do not invent one.</p>'
+                f'<p><strong>{len(read)} source(s) were read</strong> before '
+                f'it stopped, and the executive brief covers what they '
+                f'support: <a href="/runs/{_e(run_id)}/brief">read the '
+                f'brief</a>.</p>'
+                + (f'<h2>What was read</h2><ul>{listed}</ul>' if listed else ''))
+        else:
+            opening = (
+                f'<p>Run <code>{_e(run_id)}</code> did not produce a report '
+                f'because no approved source could be retrieved. There is no '
+                f'result to show — we do not invent one.</p>')
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<meta name="viewport" content="width=device-width,'
                 f'initial-scale=1"><title>Analysis could not be completed'
                 f'</title></head><body>{self._nav(session, session["csrf"])}'
                 f'<main><h1>This analysis could not be completed</h1>'
-                f'<p>Run <code>{_e(run_id)}</code> did not produce a report '
-                f'because no approved source could be retrieved. There is no '
-                f'result to show — we do not invent one.</p>'
+                f'{opening}'
                 f'<p>Public websites can refuse automated access, rate-limit '
                 f'requests, or require JavaScript to render. A failed '
                 f'retrieval is not evidence that anything is missing in the '
@@ -1850,20 +1881,23 @@ class WebApp:
             # composed result the readiness gate below still decides, and a
             # run that cannot support a view lands on the insufficient-evidence
             # page, which says so.
-            # AND IT ROUTES TO THE BOUNDED PAGE, NOT THE REPORT RENDERER.
-            # Falling through to the general renderer instead returned HTTP
-            # 500 on `/full` and `/slides` for exactly this run: the state is
-            # FAILED because no report was composed, so the renderer was
-            # handed a result with no report to render. A raw 500 is worse
-            # than the wrong page. `_insufficient_evidence_page` is built for
-            # precisely this reader — evidence exists, a view does not — and
-            # it names what was read, what is missing, and what to do next.
+            # AND THE FIX IS TO THE PAGE'S WORDS, NOT ITS ROUTING. Two
+            # attempts at re-routing this run both made it worse, measured
+            # live on preview-v3 (Alphabet, https://abc.xyz): falling through
+            # to the report renderer answered 500 on `/full` and `/slides`
+            # (run 01KZB03PMHJV49G826M9NPACSV), and routing to
+            # `_insufficient_evidence_page` answered 500 on the PRIMARY screen
+            # (run 01KZB1MXQ5VPCZDSGFT92ZE144). Both pages are built for a run
+            # that composed something; this one did not, which is why its
+            # state is FAILED.
+            #
+            # A FAILED run therefore keeps the page written for it. What was
+            # wrong was never the routing — it was the sentence, which claimed
+            # nothing had been retrieved while the same store held the
+            # filings. `_failed_run_page` now reads the store and says what is
+            # true, so the reader is told what WAS read and where to read it.
             if self.ci.store.run_state(run_id) == "FAILED":
-                failed_result = self._real_result(run_id)
-                if not (self._retrieved_documents(run_id) and failed_result):
-                    return self._failed_run_page(session, run_id)
-                return self._insufficient_evidence_page(
-                    session, run_id, failed_result)
+                return self._failed_run_page(session, run_id)
             result = self._real_result(run_id)
             if result is None:
                 # Auto-run mode never routes guests through manual source
