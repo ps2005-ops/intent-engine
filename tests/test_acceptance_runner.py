@@ -236,6 +236,52 @@ def test_an_honest_bounded_result_scores_useful_bounded():
         A.USEFUL_BOUNDED
 
 
+# THE FIXTURE ABOVE WAS WRITTEN TO SATISFY THE MARKERS, which is why it could
+# not catch the markers being wrong. Below is the wording the product actually
+# renders -- `narrative.py` writes "No strategic reading of {company} cleared
+# the evidence bar" and labels its next step "What you do next" -- taken from
+# the deployed page for Constellation Software on preview-v3 at c57af3b.
+#
+# That page is a CORRECT refusal: it names what it read, names what is missing,
+# declines to invent options, and prepares an evidence request. The runner
+# scored it FAILED on two markers that were guesses at the phrasing ("no
+# strategic reading" in lowercase, and "What you can do"), so an honest
+# withheld result counted against the useful rate.
+_LIVE_WITHHELD = (
+    "<main>Constellation Software serves more than one clearly different "
+    "buyer, so one roadmap has to serve buyers who want different things. "
+    "The answer. No strategic reading of Constellation Software cleared the "
+    "evidence bar, so none is asserted here. That absence is itself the "
+    "finding: what Constellation Software has published is not enough to read "
+    "a strategy from. The options, and what each costs. No options are put "
+    "forward. Nothing was established firmly enough for one course of action "
+    "to be weighed against another. The minimum needed before any of this "
+    "becomes decidable: every source here is published by the company itself. "
+    "What was found. The reading could not be settled on what is public. "
+    "What it prepared. A numbered request for exactly what is missing. "
+    "What you do next. " + "filler words to pass the floor " * 30 + "</main>")
+
+
+def test_the_live_withheld_page_is_scored_useful_bounded():
+    verdict = A.score(_LIVE_WITHHELD, company="Constellation Software")
+    assert verdict["state"] == A.USEFUL_BOUNDED, verdict["reasons"]
+
+
+@pytest.mark.parametrize("marker,rendered", [
+    # left: what the runner looks for. right: what the product writes.
+    ("No strategic reading", "No strategic reading of Acme cleared the "
+                             "evidence bar, so none is asserted here."),
+    ("What you do next", "<dt class=\"k\">What you do next</dt>"),
+])
+def test_every_bounded_marker_is_wording_the_product_really_emits(marker,
+                                                                  rendered):
+    assert marker in rendered
+    assert any(marker in markers
+               for markers in A._BOUNDED_MARKERS.values()), (
+        f"{marker!r} is rendered by the product but no bounded marker "
+        "matches it")
+
+
 def test_a_raw_framework_error_is_never_useful():
     verdict = A.score("<main>Bad Request approve at least one source</main>",
                       company="Datadog")

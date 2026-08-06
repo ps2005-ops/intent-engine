@@ -269,16 +269,31 @@ _FULL_MARKERS = {
     "limitation": ("What most limits this", "What argues against it"),
     "evidence": ("What supports this",),
 }
+# THESE ARE THE STRINGS THE PRODUCT ACTUALLY RENDERS, and they are matched
+# case-sensitively on purpose: these are section headings, and lowercasing the
+# comparison would let ordinary prose ("...that is the answer...") satisfy a
+# check that exists to find a HEADING.
+#
+# Two of them were guesses at the wording rather than the wording, and both
+# missed on the deployed page. Measured live on preview-v3 at c57af3b:
+# Constellation Software returned an honest withheld result -- it named what it
+# read, named what was missing, refused to invent options, and prepared an
+# evidence request -- and the runner scored it FAILED, because the product
+# writes "No strategic reading" (`narrative.py`) and the marker said "no
+# strategic reading", and because the product's next-step heading is "What you
+# do next" and the marker offered three other phrasings. An instrument that
+# cannot see a correct refusal reports the denominator wrong in the direction
+# that flatters nobody.
 _BOUNDED_MARKERS = {
     "explains_insufficiency": ("not enough public evidence",
                                "did not produce a report",
-                               "no strategic reading",
+                               "No strategic reading",
                                "Limited analysis"),
     "names_what_was_read": ("What was found", "Pages read",
                             "What was verified"),
     "names_what_is_missing": ("What was missing", "minimum needed",
                               "Sources that could not be read"),
-    "next_step": ("What you can do", "What to do next",
+    "next_step": ("What you do next", "What you can do", "What to do next",
                   "Look again for the missing evidence"),
 }
 
