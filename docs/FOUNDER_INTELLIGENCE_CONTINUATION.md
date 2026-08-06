@@ -400,3 +400,104 @@ by another agent session sharing that path — `.git` removed and most of `src`
 deleted. All committed work was safe on `origin`; uncommitted edits were
 rescued file-by-file and rebuilt in a worktree owned by this session. Do not
 share a scratchpad worktree path between sessions.
+
+---
+
+# CYCLE 2026-08-06 — the twenty-company matrix, measured
+
+Branch `feat/founder-decision-experience-v3`, deployed and verified on
+`intent-engine-preview-v3`. Everything below was measured on the deployed
+service, not reasoned about.
+
+## The matrix was run WITHOUT the acceptance runner
+
+The runner is built and its refusal path is proven live (no auth, wrong token
+and empty token all return byte-identical 404s and never echo the token), but
+it stayed switched off: enabling it needs a secret set on the hosted service,
+and that is the owner's action, not the agent's.
+
+**It was not needed.** The public guest path is the same `_analyze`, and its
+quota is 10 analyses per IP per rolling hour — so twenty companies is two
+windows of ordinary use, not a bypass. Verdicts came from the product's own
+`webapp.acceptance.score`, so a row means what a runner row would have meant.
+
+**Rule: the runner is a convenience, not a precondition.** A matrix that
+cannot be run without new infrastructure has usually mis-stated its blocker.
+
+## Useful rate: 19/20
+
+One failure: Alphabet (`https://abc.xyz`). Every other company returned a
+useful full or honestly-bounded result.
+
+## Six defects, and the shape they share
+
+Five of the six were a CORRECT rule that could not reach the thing it governed:
+
+| defect | the rule was right | it could not reach |
+|---|---|---|
+| filing read, "marketing only" limitation | `evidence_classes` grants an ACCOUNTABLE tier | `has_filing` searched `source_refs` for a URL that production never puts there — it is on `origin` |
+| identical answer on 5 of 7 companies | pattern says it needs an embedded delivery model | a 2-of-3 threshold let an API page + a products page assert it |
+| landing page unreadable in dark | `_A11Y_CSS` has a dark block | `form.analyze label` and `.sample-quote` outrank its selectors |
+| focus ring 2.76:1 in dark | `.brief`/`.deck` re-point var(--accent) | the global floor hard-coded `#1d4ed8` |
+| progress page white-on-white | the floor covers `.card`/`details` | it has no rule for `[role=status]`, `.coverage` |
+| "no approved source could be retrieved" | `compose` decides on the documents | the page decided on the last state transition |
+
+**Rule: when a fix lands and the defect survives, suspect the seam, not the
+rule.** Every one of these had a passing test for the rule in isolation.
+
+**Rule: a page may not name a colour.** A colour a page names is a colour the
+dark block cannot re-point. Tested structurally now, not by eyeballing.
+
+## The instrument drifts too, and in both directions
+
+Three measurement defects were found, and correcting them is not weakening a
+gate:
+
+* the runner scored an honest withheld result FAILED, because two markers were
+  guesses at the wording ("no strategic reading" for "No strategic reading",
+  "What you can do" for "What you do next"). The old bounded fixture had been
+  written to satisfy the markers, which is why it could not catch them;
+* the persona harness matched slides by `id`, and ids are suffixed per
+  instance, so a deck that answered "what to investigate next" was scored as
+  not answering it;
+* the slide floor treated "composition lost slides" and "the run supported
+  fewer findings" as one failure — so removing an unsupported reading made the
+  gate demand it back.
+
+**Rule: build fixtures from what the product renders, never from what the
+checker looks for.** **Rule: a gate must never be satisfiable only by a
+fabrication.**
+
+## Do not re-route a failed run; fix what its page says
+
+Two attempts to route Alphabet's FAILED-but-has-documents run to a richer
+surface both answered HTTP 500 live (`/full` and `/slides` first, then the
+primary screen). Those pages are built for a run that composed something.
+
+The defect was the sentence, not the routing: the page claimed nothing had
+been retrieved while the same store held the 10-K and the 10-Q. It now reads
+the store and says what was read, with a link to the brief.
+
+**Rule: prefer correcting what a page SAYS over sending the reader somewhere
+else.** **Rule: a 500 is worse than the wrong page.**
+
+## Still open
+
+* **Alphabet remains the one not-useful row.** Its page is now truthful and
+  points at a 1060-word brief that IS decision-useful, but the primary screen
+  carries no analysis. It was NOT reclassified — tuning the scorer in the
+  measurer's own favour is how a denominator gets edited.
+* **`services_to_product` still dominates.** Requiring the services signal
+  fixed Visa live and is proven offline, but most large vendors do publish
+  professional-services pages, so the signal fires legitimately and the same
+  answer still recurs. The next lever is the disconfirming signal:
+  `pricing_published` is already declared and currently only lowers
+  confidence.
+* **Executive brief composition.** Measured on 19 briefs: median 1426 words
+  (7.1 min). For public companies "What the market appears to expect" is
+  24–37% of the brief, and 62% on NVIDIA — a bounded result whose brief is
+  mostly share-price commentary.
+* **Progress page transient states.** During an Alphabet-shaped run the
+  primary screen answers 400 then 500 before settling at 200. Both are the
+  product's own four-section pages with a safe reference, not raw framework
+  errors, but neither should be reachable.
