@@ -453,9 +453,15 @@ def test_gate_g_a_failed_transition_does_not_erase_evidence_that_exists(
     assert app.ci.store.run_state(run_id) == "FAILED"
 
     for path in (f"/runs/{run_id}", f"/runs/{run_id}/full"):
-        _, _, body = c.request("GET", path)
+        status, _, body = c.request("GET", path)
         assert "no approved source could be retrieved" not in body, (
             f"{path} denies evidence the same store still holds")
+        # A raw 500 is worse than the wrong page: the first attempt at this
+        # fix fell through to the report renderer, which was handed a run with
+        # no report and answered 500 on /full and /slides.
+        assert not str(status).startswith("5"), f"{path} answered {status}"
+        for leak in ("Traceback", "Internal Server Error", "NoneType"):
+            assert leak not in body, f"{path} leaked {leak!r}"
 
 
 # --- capacity ---------------------------------------------------------------

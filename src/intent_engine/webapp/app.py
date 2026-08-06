@@ -1850,10 +1850,20 @@ class WebApp:
             # composed result the readiness gate below still decides, and a
             # run that cannot support a view lands on the insufficient-evidence
             # page, which says so.
+            # AND IT ROUTES TO THE BOUNDED PAGE, NOT THE REPORT RENDERER.
+            # Falling through to the general renderer instead returned HTTP
+            # 500 on `/full` and `/slides` for exactly this run: the state is
+            # FAILED because no report was composed, so the renderer was
+            # handed a result with no report to render. A raw 500 is worse
+            # than the wrong page. `_insufficient_evidence_page` is built for
+            # precisely this reader — evidence exists, a view does not — and
+            # it names what was read, what is missing, and what to do next.
             if self.ci.store.run_state(run_id) == "FAILED":
-                if not (self._retrieved_documents(run_id)
-                        and self._real_result(run_id)):
+                failed_result = self._real_result(run_id)
+                if not (self._retrieved_documents(run_id) and failed_result):
                     return self._failed_run_page(session, run_id)
+                return self._insufficient_evidence_page(
+                    session, run_id, failed_result)
             result = self._real_result(run_id)
             if result is None:
                 # Auto-run mode never routes guests through manual source
