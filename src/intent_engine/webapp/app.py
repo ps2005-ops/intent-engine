@@ -3937,6 +3937,17 @@ class WebApp:
         with self._analysis_lock:
             return run_id in self._analysis_inflight
 
+    def _failure_stage(self, run_id) -> str:
+        """How far the run got, named in pipeline terms. Durable facts only."""
+        try:
+            if self.ci.store.approval(run_id) is None:
+                return "discovery"
+            if not self._retrieved_documents(run_id):
+                return "retrieval"
+            return "composition"
+        except Exception:                                     # noqa: BLE001
+            return "unknown"
+
     def _availability(self, run_id) -> dict:
         """What this run currently has. READ-ONLY, and the single source every
         run route consults before deciding what it may render."""
@@ -4108,8 +4119,19 @@ class WebApp:
                 self._terminal_writes[run_id] = \
                     self._terminal_writes.get(run_id, 0) + 1
         except Exception as exc:  # noqa: BLE001 - a worker may not escape
-            _LOG.warning("analysis failed run=%s %s", run_id,
-                         type(exc).__name__)
+            # THE CLASS ALONE COULD NOT BE ACTED ON. Every composition failure
+            # on this service logged "ValueError" and nothing else, and
+            # `StrategicError` subclasses ValueError — so the one line that
+            # exists to explain the failure named the base class of the thing
+            # that actually failed and no stage. A bounded message and the
+            # stage make it a diagnosis instead of a category.
+            #
+            # These are structural messages ("unknown source_class 'x'"),
+            # never source text, and they stay in the log: the reader gets the
+            # safe diagnostic id, never this.
+            _LOG.warning("analysis failed run=%s stage=%s %s: %s", run_id,
+                         self._failure_stage(run_id), type(exc).__name__,
+                         str(exc)[:200])
             try:
                 self.ci._transition(run_id, domain, "FAILED")
                 with self._analysis_lock:
