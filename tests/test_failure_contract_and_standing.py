@@ -205,6 +205,9 @@ from intent_engine.strategic_intelligence import filing_sections as FS  # noqa: 
 from intent_engine.strategic_intelligence.observations import (  # noqa: E402
     derive_observations,
 )
+from intent_engine.strategic_intelligence.reasoning import (  # noqa: E402
+    build_strategic_report,
+)
 
 _FILER_SELF = (
     "Headquartered in Pittsford, New York, Infinite Group is a developer of "
@@ -286,3 +289,80 @@ def test_subject_span_requires_the_whole_distinctive_name(subject, text,
 
 def test_a_leading_token_is_never_an_alias_on_its_own():
     assert "Constellation" not in FS.subject_aliases("Constellation Software")
+
+
+# --- the filing tier has to be reachable from a REAL observation --------------
+#
+# Measured live on preview-v3 at c57af3b: Datadog's executive brief cited
+# "SEC 10-K (2026-02-18)" among its sources and, in the same document, said
+# "every source here is published by the company itself, so nothing in this
+# reading has been checked against an outside account of it".
+#
+# `evidence_classes` was correct and `reasoning` asked it the right question.
+# The break was between them: `has_filing` searched `source_refs` for a URL,
+# and no production `source_refs` entry has ever carried one. So the whole
+# ACCOUNTABLE tier was unreachable in production -- the fix landed, the tests
+# for the pure module passed, and every filing-backed company kept being told
+# its filing was marketing.
+
+_DDOG_10K = {
+    "content_hash": "h-ddog-10k",
+    "final_url": ("https://www.sec.gov/Archives/edgar/data/1561550/"
+                  "000156155026000012/ddog-20251231.htm"),
+    "title": "SEC 10-K (2026-02-18)",
+    "source_class": "investor_material",
+    "source_id": "src-edgar-1",
+    "meta_description": "",
+    "text_content": (
+        "Item 1. Business. We offer a unified platform, and we expand within "
+        "existing customers by selling additional products to them, which "
+        "increases the cost of switching away from our platform. Our "
+        "customers integrate our APIs into their own systems, so other "
+        "products come to depend on the platform we operate."),
+    "freshness": "CURRENT",
+    "retrieved_at": "2026-08-06",
+}
+
+
+def test_a_production_observation_carries_its_url_on_origin_not_in_refs():
+    """Pins the shape that made the seam wrong.
+
+    If a future change starts putting the URL into `source_refs`, this test
+    should be updated, not deleted -- but while the shape is this, anything
+    reading refs alone for a URL is reading a field that is never populated.
+    """
+    observation, = derive_observations([_DDOG_10K], company="Datadog")
+    assert observation.origin == _DDOG_10K["final_url"]
+    for ref in observation.source_refs:
+        assert not (ref.get("url") or ref.get("source_url")
+                    or ref.get("final_url")), (
+            "source_refs now carries a URL; the has_filing derivation in "
+            "reasoning.build_strategic_report should be revisited")
+
+
+def test_a_run_that_read_a_filing_is_not_told_the_filing_was_marketing():
+    """The live Datadog defect, at the seam that produced it."""
+    observations = derive_observations([_DDOG_10K], company="Datadog")
+    report = build_strategic_report(company_name="Datadog",
+                                    observations=observations)
+    gaps = " ".join(report.evidence_gaps or ())
+    assert "published by the company itself" not in gaps
+    assert "the company's filings carry this" in gaps
+
+
+def test_a_run_without_a_filing_still_says_the_sources_are_the_companys_own():
+    """The opposite error is the one this module was written to prevent.
+
+    Constellation Software: an investor-relations PAGE, no filing. It must not
+    inherit the accountability of a filing just because the class matches.
+    """
+    page = dict(_DDOG_10K,
+                final_url="https://www.csisoftware.com/investor-relations",
+                title="Investor Relations",
+                content_hash="h-csu-ir")
+    observations = derive_observations([page], company="Constellation Software")
+    report = build_strategic_report(company_name="Constellation Software",
+                                    observations=observations)
+    gaps = " ".join(report.evidence_gaps or ())
+    assert "the company's filings carry this" not in gaps
+    assert "published by the company itself" in gaps

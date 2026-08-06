@@ -727,11 +727,27 @@ def build_strategic_report(*, company_name, observations,
     # "/ir", so an ordinary investor-relations page claimed the accountability
     # of a 10-K. Measured live: Constellation Software, a TSX-only issuer with
     # no SEC filing in the run, was told its filings carried the reading.
-    has_filing = any(
-        EC.is_regulatory_filing(str(ref.get("url") or ref.get("source_url")
-                                    or ref.get("final_url") or ""))
-        for o in observations for ref in (o.source_refs or ())
-        if isinstance(ref, dict))
+    #
+    # THE URL IS ON THE OBSERVATION, NOT IN ITS REFS. `observations.py` builds
+    # every production `source_refs` entry as
+    # `{subsystem, artifact_type, artifact_id, source_class}` -- there is no
+    # url/source_url/final_url key in it, and there never was. Reading refs
+    # alone therefore answered "no filing" for EVERY run, so the tier this
+    # module exists to grant could not be reached in production: measured live
+    # on Datadog (preview c57af3b), whose brief cited "SEC 10-K (2026-02-18)"
+    # and whose limitation still read "every source here is published by the
+    # company itself". `origin` carries the retrieved `final_url`, which is
+    # what `service.py` already tests for sec.gov elsewhere. Refs are still
+    # consulted so callers that DO carry a URL there keep working.
+    def _filing_urls(o):
+        yield str(getattr(o, "origin", "") or "")
+        for ref in (o.source_refs or ()):
+            if isinstance(ref, dict):
+                yield str(ref.get("url") or ref.get("source_url")
+                          or ref.get("final_url") or "")
+
+    has_filing = any(EC.is_regulatory_filing(url)
+                     for o in observations for url in _filing_urls(o))
 
     patterns_by_id = {p.pattern_id: p for p in patterns}
     hypotheses = []
