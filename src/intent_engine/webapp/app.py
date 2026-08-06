@@ -214,8 +214,15 @@ border-color:#3a4454;color:#c3cad6}
 :root code,:root pre{background:#1b2230;color:#e5e7eb}
 /* Buttons keep a white background from the base sheet; inheriting the dark
    scheme's near-white text on it renders them at 1.1:1 — unreadable. */
+/* A CONTROL'S EDGE IS NOT DECORATION. WCAG 1.4.11 asks 3:1 for the boundary
+   that tells a reader where a field IS, and #3a4454 renders at 1.88:1 on
+   #0f141c and 1.74:1 on a panel — measured live on the deployed landing form
+   at a5e1322, where the text and placeholders passed and the boxes around
+   them did not. #606e88 is 3.59:1 on the page, 3.32:1 on a panel and 3.10:1
+   inside the field. Panel and separator borders stay #3a4454: those are
+   decorative, and this rule is only for things you click into. */
 :root button,:root input,:root select,:root textarea{background:#1b2230;
-color:#f3f4f6;border-color:#3a4454}
+color:#f3f4f6;border-color:#606e88}
 :root .why,:root .alt,:root .q,:root .unavailable,:root .state,
 :root .limitation,:root .muted,:root .when{color:#c3cad6}
 /* Deck surfaces that hard-code a light literal rather than var(--panel), and

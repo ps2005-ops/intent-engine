@@ -161,7 +161,7 @@ form.analyze button[type=submit]{background:var(--l-accent);
 @media (prefers-color-scheme:dark){
 :root{--l-ink:#f3f4f6;--l-muted:#c3cad6;--l-lede:#c3cad6;--l-label:#c3cad6;
   --l-faint:#c3cad6;--l-head:#c3cad6;--l-line:#3a4454;--l-field-bg:#1b2230;
-  --l-field-line:#3a4454;--l-place:#9aa4b5;--l-link:#7aa2ff;
+  --l-field-line:#606e88;--l-place:#9aa4b5;--l-link:#7aa2ff;
   --l-accent:#7aa2ff;--l-accent-ink:#0f141c}}
 """
 

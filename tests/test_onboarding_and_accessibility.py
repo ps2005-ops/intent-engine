@@ -334,6 +334,41 @@ def test_every_panel_that_sets_a_light_background_has_a_dark_counterpart():
                 "its text inherits near-white and disappears")
 
 
+def test_a_control_border_is_visible_in_dark_mode():
+    """WCAG 1.4.11: the boundary that tells a reader where a field IS needs
+    3:1, the same as any other non-text UI component.
+
+    Measured live on the deployed landing form at a5e1322, in dark mode: the
+    label, the placeholder and the typed text all passed, and the box around
+    them rendered #3a4454 on #0f141c — 1.88:1, and 1.74:1 inside a panel. The
+    text was readable and you could not see where to type it.
+    """
+    from intent_engine.founder_intelligence.presentation import _LANDING_CSS
+    from intent_engine.webapp.app import _A11Y_CSS
+
+    def contrast(a, b):
+        def lin(v):
+            v /= 255
+            return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+
+        def lum(h):
+            r, g, b_ = (int(h[i:i + 2], 16) for i in (1, 3, 5))
+            return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b_)
+
+        x, y = lum(a), lum(b)
+        hi, lo = max(x, y), min(x, y)
+        return (hi + 0.05) / (lo + 0.05)
+
+    page, panel = "#0f141c", "#161c26"
+    for sheet, name in ((_LANDING_CSS, "landing"), (_A11Y_CSS, "floor")):
+        compact = sheet.replace(" ", "").replace("\n", "")
+        dark = compact.split("@media(prefers-color-scheme:dark)", 1)[1]
+        assert "#606e88" in dark, f"{name} sheet has no visible control border"
+    assert contrast("#606e88", page) >= 3.0
+    assert contrast("#606e88", panel) >= 3.0
+    assert contrast("#3a4454", page) < 3.0          # the value it replaced
+
+
 def test_the_landing_sheet_repoints_its_palette_for_dark():
     from intent_engine.founder_intelligence.presentation import _LANDING_CSS
     compact = _LANDING_CSS.replace(" ", "").replace("\n", "")
