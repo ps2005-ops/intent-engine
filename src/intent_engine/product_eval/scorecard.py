@@ -49,6 +49,15 @@ THRESHOLDS = {
     "long_sentence_share_max": 0.30,
 }
 
+#: The floor BELOW which a deck is not a presentation at all, whatever the
+#: evidence supported. Taken from the renderer's own `deck_is_presentable` so
+#: the eval and the product cannot drift apart on what "presentable" means —
+#: they already had, by one slide, and the gap was only visible when a run
+#: legitimately produced four.
+from intent_engine.strategic_intelligence.slides import (  # noqa: E402
+    MIN_MEANINGFUL_SLIDES as _PRESENTABLE_FLOOR,
+)
+
 # Words that mean nothing to a reader who did not write them.
 JARGON = (
     "leverage", "synergy", "paradigm", "holistic", "utilise", "utilize",
@@ -273,11 +282,35 @@ def score_report(*, brief=None, slides=(), report=None, documents=(),
     # slides is a paragraph with arrows, and the release standard names five as
     # the floor — so it has to be a failure here, not a band in a dimension
     # nobody gates on.
+    #
+    # BUT A DECK MAY NOT REACH THE FLOOR BY ASSERTING SOMETHING THE EVIDENCE
+    # DOES NOT SUPPORT, and for a while it did. `services_to_product` qualified
+    # on any two of three signals, so an API page and a products page were
+    # enough to tell Brightledger — self-serve reconciliation software that
+    # PUBLISHES ITS PRICING, which is that pattern's own disconfirming signal —
+    # that it "converts what it learned delivering work alongside customers
+    # into products". Requiring the services signal removed that slide and this
+    # gate then failed the run for being one short, which is the floor asking
+    # for the fabrication back.
+    #
+    # So the shortfall is a failure when COMPOSITION lost the slides, and a
+    # warning when the run simply did not support that many findings — the same
+    # treatment, and for the same reason, as "no strategic view could be
+    # supported" below: it stays visible so the pressure to find more does not
+    # quietly disappear, but it never demands an invented finding.
     if brief_text and metrics["slide_count"] < THRESHOLDS[
             "min_meaningful_slides"]:
-        failures.append(f"only {metrics['slide_count']} meaningful slide(s); "
-                        f"{THRESHOLDS['min_meaningful_slides']} is the floor "
-                        f"for a presentation")
+        thin = len(hypotheses or ()) <= 1
+        short = f"only {metrics['slide_count']} meaningful slide(s); " \
+                f"{THRESHOLDS['min_meaningful_slides']} is the floor " \
+                f"for a presentation"
+        if thin and metrics["slide_count"] >= _PRESENTABLE_FLOOR:
+            warnings.append(
+                short + " — the evidence supported "
+                f"{len(hypotheses or ())} finding(s), so the deck is short "
+                "rather than padded")
+        else:
+            failures.append(short)
 
     # A brief with no hypothesis behind it is a summary wearing an analysis's
     # clothes. Sony reached six sources, four evidence families and a rendered
