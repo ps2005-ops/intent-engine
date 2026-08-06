@@ -37,6 +37,29 @@ def _obs(oid, title, excerpt, signals=("consolidation",)):
 
 
 # these titles are what the live run actually retrieved
+#
+# THE SIGNAL SET WAS MIGRATED, THE RENDERING CONTRACT WAS NOT.
+# ------------------------------------------------------------------
+# Everything in this file is a contract on the RENDERER: that the pattern
+# library's taxonomy never reaches a reader, and that filtering it out does
+# not take the honesty — the confidence sentence, the case against, the gaps —
+# with it. To test any of that there has to be a reading to filter, and the
+# reading this fixture produced was `tool_to_system_of_record` qualifying on
+# `consolidation + multi_product`.
+#
+# That qualification was itself the defect, removed in
+# `test_system_of_record_needs_a_mechanism`: several products and
+# consolidation copy are things most B2B software companies have, and neither
+# says the customer's source of truth moved. Left alone, this fixture would
+# have gone quiet — three renderer contracts passing vacuously because no
+# hypothesis existed to leak, and a deck dropping from four slides to two.
+#
+# So `obs-5` observes the mechanism the reading asserts. Note what this
+# fixture is and is not: the signals here were always hand-attached rather
+# than detected from the excerpts, so this is a Sentry-shaped run that clears
+# the new bar, not a claim about what Sentry's own pages say today. Whether
+# the real company still qualifies is a question for the live rerun, and the
+# answer there is allowed to be no.
 SENTRY_OBS = [
     _obs("obs-1", "About Sentry | Sentry", "Bugs aren't great."),
     _obs("obs-2", "Sentry Acquires Codecov | Sentry",
@@ -46,6 +69,10 @@ SENTRY_OBS = [
          "Application performance monitoring for developers.",
          ("multi_product", "consolidation")),
     _obs("obs-4", "Media Resources | Sentry", "Press releases and logos."),
+    _obs("obs-5", "One platform, one data model | Sentry",
+         "Errors, traces and replays are written to a shared data model, so "
+         "every product reads the same underlying data.",
+         ("shared_data_model",)),
 ]
 
 

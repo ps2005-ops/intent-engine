@@ -364,16 +364,42 @@ PATTERN_LIBRARY = [
                      "and reviewed",
              "source": "https://www.figma.com/blog/"},
         ],
-        when_it_applies="The company positions itself as replacing several "
-                        "separate tools AND ships multiple product surfaces.",
-        when_it_does_not_apply="The product stays deliberately narrow and "
-                               "integrates rather than absorbs.",
+        when_it_applies="The company shows a CAUSAL mechanism moving the "
+                        "customer's record into it — an authoritative-record "
+                        "claim, one data model beneath several products, or "
+                        "customers retiring a system they already had.",
+        when_it_does_not_apply="The breadth is a product list. Several "
+                               "products, an API and consolidation copy are "
+                               "things almost every B2B software company has, "
+                               "and none of them says the source of truth "
+                               "moved. Also: the product integrates rather "
+                               "than absorbs, or its economics are self-serve "
+                               "point-tool economics.",
         source_refs=[{"title": "curated pattern: tool→system of record",
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("consolidation", "multi_product",
-                            "developer_surface"),
-        disconfirming_signals=(),
+                            "developer_surface", "system_of_record_claim",
+                            "shared_data_model",
+                            "replaces_incumbent_systems"),
+        # THE MECHANISM, NOT THE ATTRIBUTES. This reading was gated only by
+        # "any 2 of consolidation / multi_product / developer_surface", and the
+        # last two are true of nearly every B2B software company — so it fired
+        # on being a platform at all. Measured live at dad7d28: Palantir,
+        # HubSpot and Snowflake each qualified that way and were handed the
+        # same sentence with only the name changed.
+        #
+        # The pattern's own `mechanism` field says the customer's source of
+        # truth moves and switching cost rises once other systems read from
+        # it. These are the three ways that can be evidenced, and a run
+        # showing none of them no longer gets to assert it.
+        required_any_signals=("system_of_record_claim", "shared_data_model",
+                              "replaces_incumbent_systems"),
+        # Published self-serve pricing argues against the switching cost this
+        # reading depends on: a record you can leave on a monthly plan is not
+        # the record the mechanism describes. Secondary, not blocking — a
+        # company can publish prices and still hold the record.
+        disconfirming_signals=("pricing_published",),
         limitations="Consolidation claims are marketing language; whether the "
                     "source of truth actually moved is not visible publicly.",
     ),

@@ -310,6 +310,24 @@ def _confidence_in_plain_words(level: str, rationale: str) -> str:
 _lower_first = lower_first
 
 
+def _confirm_question(title: str) -> str:
+    """Turn one of the run's dated findings back into something to go and check.
+
+    ONE PHRASING, TWO DECKS. Both founder-facing decks reach the same dead end
+    — a reader with nothing to investigate because every question the run
+    produced came from the pattern library and was filtered — and both answer
+    it the same way, from the run's own findings. Written twice, the two
+    copies would drift and only one of them would be the sentence anyone
+    reviewed.
+
+    Not `_lower_first`: these titles OPEN with the company name, and
+    lowercasing turned "Linear pricing publishes its prices" into "linear
+    pricing publishes its prices" in the reader's own deck.
+    """
+    return (f"Confirm with an independent or customer source: "
+            f"{title.rstrip('.')}.")
+
+
 def founder_view_from_report(report) -> dict:
     """Adapt a deterministic report into the founder presentation contract.
 
@@ -394,7 +412,23 @@ def founder_view_from_report(report) -> dict:
     # support two options it says so instead of choosing one.
     from intent_engine.strategic_intelligence.decision import decision_of
     composed = decision_of(r)
+    # WITHHELD IS A POSITION, NOT AN ABSENCE.
+    #
+    # `composed` already states it: "No decision is put forward: the public
+    # record did not carry enough to read one from", with `unsafe_because`
+    # naming what is missing. That was computed and then dropped here, so a
+    # run with real findings but no hypothesis answered "so what do I do
+    # about it" with silence — and silence reads as the analysis having
+    # forgotten to finish rather than having declined on purpose.
+    #
+    # It is carried only when the run found something. A company with no
+    # findings AND no decision has nothing to present, and
+    # `test_a_deck_with_nothing_concrete_is_not_presentable` is the contract
+    # that says so — this must not become the slide that pads that deck to
+    # the floor.
     decision = composed.headline if composed.readiness != "WITHHELD" else ""
+    if not decision and (r.get("shifts") or ()):
+        decision = composed.headline
     best = composed.options[0] if composed.options else None
     # WATCH ITEMS ARE FOUNDER-FACING, so taxonomy is filtered HERE -- at the
     # point where the visible item is selected, not by sanitising every string
@@ -417,6 +451,14 @@ def founder_view_from_report(report) -> dict:
                  (_watchable(q.get("question", "") if isinstance(q, dict)
                              else str(q))
                   for q in (r.get("questions") or [])) if q]
+    # Every question this layer produces is built FROM a hypothesis, so a run
+    # that reached no hypothesis leaves the reader nothing to investigate —
+    # the same dead end the fallback deck already answers, and the same
+    # answer. See `_confirm_question`.
+    if not questions:
+        questions = [_confirm_question(t) for t in
+                     (s.get("title", "") for s in (r.get("shifts") or ()))
+                     if t and not reads_as_taxonomy(t)][:2]
 
     view = {
         # The one claim, stated first. Not a company description.
@@ -466,6 +508,16 @@ def founder_view_from_report(report) -> dict:
             (a for a in (top.get("alternative_explanations") or ())
              if a and not reads_as_taxonomy(a)), ""),
         "questions": questions[:3],
+        # The run's dated findings, carried rather than dropped. Only this
+        # adapter sets the key: a grounded analysis writes its own screens and
+        # must not have one appended from a different layer. Same taxonomy
+        # filter as everything else chosen for display, and the same rule —
+        # a rejected finding is dropped, never reworded.
+        "dated_findings": [
+            {"title": s.get("title", ""), "date": s.get("date", ""),
+             "observation_id": s.get("observation_id", "")}
+            for s in (r.get("shifts") or ())
+            if s.get("title") and not reads_as_taxonomy(s.get("title", ""))],
         "evidence_gaps": [g for g in (r.get("evidence_gaps") or ())
                           if g and not reads_as_taxonomy(g)][:2],
         # Left empty on purpose -- see the docstring. The renderer drops the
@@ -622,7 +674,13 @@ def _decision_detail_slides(decision: dict, *, index: int = 0,
         ], kind="next_move"))
         return [s for s in slides if s]
 
-    if readiness == "INVESTIGATION_REQUIRED":
+    # WITHHELD belongs on this screen too. It is the same state one degree
+    # further along — INVESTIGATION_REQUIRED says no option can be committed
+    # to yet, WITHHELD says the record did not carry enough to name options at
+    # all — and "What cannot be concluded yet" is the heading for both. Routed
+    # anywhere else it becomes a one-line decision screen asserting that there
+    # is no decision, with the reason left off.
+    if readiness in ("INVESTIGATION_REQUIRED", "WITHHELD"):
         verified = [v for v in (decision.get("verified") or []) if v]
         slides.append(_slide(f"investigate-{index + 1}",
                              "What cannot be concluded yet", [
@@ -721,6 +779,28 @@ def build_founder_slides(analysis, *, company="") -> list:
         _bullet((ins.get("economics") or {}).get("mechanism", "")),
     ], kind="tension"))
 
+    # What the run actually found, dated.
+    #
+    # THE DEFECT THIS FIXES: having MORE evidence produced a WORSE deck.
+    # A concrete development is what hands a company to this deck rather than
+    # the fallback one — and the fallback builds a "What changed recently"
+    # screen from the run's dated findings while this one had nowhere to put
+    # them, so they were computed and then dropped. Invisible while a pattern
+    # was firing (its slides filled the deck), visible the moment one stopped:
+    # Brightledger, which publishes four dated findings, fell to two screens
+    # when `tool_to_system_of_record` was correctly gated off it.
+    #
+    # These are not filler. Each is an observation this run retrieved, with a
+    # date and a citation, phrased as the consequence the reader should draw.
+    # `_slide` returns None when nothing survives, so a company with no dated
+    # findings gets no screen rather than an empty heading.
+    slides.append(_slide("found", "What the analysis found", [
+        _bullet(f.get("title", ""), date=f.get("date", ""),
+                evidence=[f["observation_id"]] if f.get("observation_id")
+                else [])
+        for f in (a.get("dated_findings") or [])[:4]
+    ], kind="findings"))
+
     # 3 - what leadership is protecting and giving up
     slides.append(_slide("mental_model", "What leadership is protecting", [
         _bullet(_lead("They believe ", mm.get("they_believe", ""))),
@@ -741,8 +821,10 @@ def build_founder_slides(analysis, *, company="") -> list:
         # the investigation screen below opens with that same X. Rendering
         # both put the identical sentence on two consecutive screens under two
         # headings, which reads as a broken deck and pads the count with a
-        # repeat.
-        if d.get("readiness") != "INVESTIGATION_REQUIRED":
+        # repeat. WITHHELD is the same shape — "no decision is put forward"
+        # followed by a screen whose first line is why — so it is skipped here
+        # for the same reason.
+        if d.get("readiness") not in ("INVESTIGATION_REQUIRED", "WITHHELD"):
             slides.append(_slide(f"decision-{i + 1}",
                                  f"The decision: {when}" if when
                                  else "The decision", [
@@ -1071,8 +1153,7 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         # lowercasing turned "Linear pricing publishes its prices" into
         # "linear pricing publishes its prices" in the reader's own deck.
         question_bullets = [
-            _bullet(f"Confirm with an independent or customer source: "
-                    f"{title.rstrip('.')}.")
+            _bullet(_confirm_question(title))
             for title in (s.get("title", "") for s in
                           meaningful_items(r.get("shifts", []), key="title"))
             if _concrete(title)][:2]

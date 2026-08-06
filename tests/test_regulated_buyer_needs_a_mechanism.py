@@ -230,7 +230,20 @@ def test_bare_defence_and_defense_are_not_regulated_buyer_markers():
 
 def test_a_stronger_hypothesis_is_not_displaced_by_a_weak_regulated_reading():
     """A company whose real shape is consolidation keeps that reading, and
-    does not additionally receive an unearned buyer-concentration one."""
+    does not additionally receive an unearned buyer-concentration one.
+
+    MIGRATED. The point of this test is the buyer-concentration gate: a
+    passing mention of regulated industries must not manufacture a reading,
+    and the company's genuine reading must survive that. It needed a genuine
+    reading to survive, and used the system-of-record one — which at the time
+    fired on the products page alone, so the "stronger hypothesis" was itself
+    ungated. That made half of this test a false control.
+
+    The fixture now carries the mechanism instead of implying it. Note what
+    was NOT enough on its own: "a single source of truth for the whole team"
+    stays in the copy and is exactly the marketing language the pattern's own
+    `limitations` field says it cannot read as proof.
+    """
     docs = [
         _doc("c1", "https://acme.example/", "Acme",
              "Acme is one workspace that replaces several separate tools, a "
@@ -238,7 +251,9 @@ def test_a_stronger_hypothesis_is_not_displaced_by_a_weak_regulated_reading():
              "industries too."),
         _doc("c2", "https://acme.example/p", "Products",
              "Marketing, Sales and Service are separate products on one "
-             "connected workspace, with a developer API to build on."),
+             "connected workspace, with a developer API to build on. All "
+             "three run on a shared data model, so the same underlying data "
+             "is what each of them reads and writes."),
     ]
     obs = derive_observations(docs, company="Acme")
     assert _hypothesis_for(BUYER, BUYER_SCAFFOLD, obs, "Acme") is None

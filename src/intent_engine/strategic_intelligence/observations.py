@@ -219,6 +219,13 @@ _SIGNAL_RELEVANCE = {
                                         "the revenue line directly",
     "consolidation": "so a customer who leaves later has to rebuild more than "
                      "one workflow to do it",
+    "system_of_record_claim": "so the data other systems trust now lives here, "
+                              "and leaving means moving the record itself",
+    "shared_data_model": "so the products stop being separable: the second one "
+                         "is worth more because the first already holds the "
+                         "data",
+    "replaces_incumbent_systems": "so the customer has already retired the "
+                                  "thing they would otherwise fall back to",
     "capacity_investment": "so the cost lands now while the payoff depends on "
                            "demand that has not arrived yet",
     "customer_concentration": "so a small number of buyers can move the whole "
@@ -428,6 +435,40 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                       "all in one", "connected workspace", "one place",
                       "unified platform", "unified suite",
                       "single source of truth"),
+    # --- tool-to-system-of-record CAUSAL MECHANISMS ---------------------------
+    # `consolidation` is what a company SAYS; `multi_product` and
+    # `developer_surface` are things almost every B2B software company HAS.
+    # The pattern's own mechanism is that the customer's source of truth moves
+    # and switching cost rises once other systems read from it — and none of
+    # those three establishes that. Measured live at dad7d28: Palantir,
+    # HubSpot and Snowflake each qualified on multi_product + developer_surface
+    # and were handed the same secondary sentence, name-substituted.
+    #
+    # Each of the three below is something a company only has if the record
+    # really is moving into it.
+    # DIRECTIONAL PHRASES ONLY. Bare "system of record" and "system of truth"
+    # were tried and removed the same day: they match the sentence that says
+    # the record lives SOMEWHERE ELSE. "We integrate with your existing tools;
+    # two-way sync keeps your system of truth wherever it already lives" is
+    # the exact opposite of this mechanism and matched it. A keyword cannot
+    # read negation, so the phrase itself has to carry the direction — the
+    # same reason bare "defence" is banned from `regulated_buyer` above.
+    "system_of_record_claim": ("system of record for", "the system of record",
+                               "becomes your system of record",
+                               "source of truth for your",
+                               "authoritative record", "golden record"),
+    # the thing that actually creates the lock-in: not several products, but
+    # several products over ONE model of the customer's data.
+    "shared_data_model": ("shared data model", "common data model",
+                          "unified data model", "single data model",
+                          "one data layer", "shared schema",
+                          "same underlying data"),
+    # the customer had a system and stopped using it. "Integrates with" is
+    # deliberately absent — integration is the opposite of replacement.
+    "replaces_incumbent_systems": ("replace your existing", "migrate off",
+                                   "rip and replace", "retire legacy",
+                                   "consolidate your stack", "sunset your",
+                                   "move off spreadsheets"),
     # --- shapes that only a company with physical or disclosed operations
     # exhibits. Added because the neutral set above is a SOFTWARE-shaped
     # neutral set: it reads pricing pages, developer surfaces and workspace
@@ -489,6 +530,12 @@ _NEUTRAL_LABEL = {
     "disclosed_public_sector_exposure": "has written down what public-sector "
                                         "buyers contribute",
     "consolidation": "positions itself as replacing several separate tools",
+    "system_of_record_claim": "claims to hold the authoritative record, not a "
+                              "copy of it",
+    "shared_data_model": "runs its products over one model of the customer's "
+                         "data",
+    "replaces_incumbent_systems": "describes customers retiring a system they "
+                                  "already had",
     "capacity_investment": "is committing capital to capacity ahead of the "
                            "demand for it",
     "customer_concentration": "has written down a dependence on a few buyers",
@@ -892,6 +939,9 @@ _SIGNAL_RELEVANCE.update({k: v["relevance"] for k, v in FD.PROPOSITIONS.items()}
 _TYPE_FOR_SIGNAL.update({
     "multi_product": "product_surface",
     "consolidation": "product_surface",
+    "system_of_record_claim": "product_surface",
+    "shared_data_model": "infrastructure_platform",
+    "replaces_incumbent_systems": "product_surface",
     "developer_surface": "infrastructure_platform",
     "segment_split": "buyer_segment",
     "regulated_buyer": "buyer_segment",

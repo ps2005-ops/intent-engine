@@ -191,10 +191,28 @@ def answer_strategic(question: str, report) -> dict:
                "selected_comparable": comparable.title() if comparable else None}
 
     if hyp is None:
+        # A DEAD END IS NOT AN ANSWER.
+        #
+        # "I don't yet hold a hypothesis that matches that question." was the
+        # whole reply, and a reader who typed "hm" or "tell me more" was left
+        # with nowhere to go — they cannot know what this run does hold, so
+        # they cannot ask a better question. Reachable for any run that
+        # produced no hypothesis, which stopped being rare the moment readings
+        # had to earn their evidence rather than clear a signal count.
+        #
+        # What follows names what the run DID find, from the run's own dated
+        # findings, so the next question is one the reader can actually form.
+        # Nothing is invented: if there is nothing to offer, the sentence stays
+        # as it was rather than promising material that does not exist.
+        found = [s.get("title", "") for s in (r.get("shifts") or ())
+                 if s.get("title")][:3]
+        answer = "I don't yet hold a hypothesis that matches that question."
+        if found:
+            answer += (" What this run did find, and can be asked about: "
+                       + "; ".join(t.rstrip(".") for t in found) + ".")
         return {"conversation_version": CONVERSATION_VERSION,
                 "intent": "UNMATCHED", "routing": routing,
-                "answer": {"direct_answer": "I don't yet hold a hypothesis that "
-                           "matches that question.", "evidence": [],
+                "answer": {"direct_answer": answer, "evidence": [],
                            "counter_evidence": [], "confidence": None,
                            "confidence_reasons": [], "falsification": [],
                            "decision": ""}, "citations": []}

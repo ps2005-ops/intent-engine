@@ -313,6 +313,19 @@ _CONSOLIDATION = ("o6", "consolidation",
                   "Acme positions itself as replacing several tools.",
                   "One unified platform, a single source of truth replacing "
                   "several separate tools.")
+# The MECHANISM, which is a different claim from being a platform at all.
+#
+# `_API` and `_PRODUCTS` used to be enough on their own to produce a
+# system-of-record reading, and that was the same class of defect this file
+# documents one pattern over: an API page and a products page are things
+# almost every B2B software company has, so the reading fired on being a
+# platform rather than on the record having moved. Two tests below leaned on
+# that reading as their "other hypothesis", so they are the ones that had to
+# carry evidence of the mechanism instead.
+_RECORD = ("o7", "shared_data_model",
+           "Acme runs its products over one model of the customer's data.",
+           "Every product reads and writes the same underlying data: one "
+           "shared data model across the suite.")
 
 
 def _fired(*specs):
@@ -342,9 +355,33 @@ def test_the_services_reading_still_fires_when_the_transition_is_observed():
 
 
 def test_removing_it_does_not_silence_the_reading_that_did_fit():
-    """An API and a product suite still support a system-of-record reading —
-    the fix removes one unsupported claim, not the analysis."""
-    assert _fired(_API, _PRODUCTS), "the run must still reach a reading"
+    """The services gate removes one unsupported claim, not the analysis.
+
+    MIGRATED. This asserted that `_API, _PRODUCTS` alone still reached a
+    reading, and it did — the system-of-record one, which was itself firing on
+    nothing more than an API and a product suite. So the test was proving the
+    services gate was not a mute button by pointing at a second reading that
+    should never have fired either.
+
+    The property it exists to protect is real and is unchanged: gating one
+    pattern must not silence a run whose evidence fits a different pattern.
+    What changes is that the other reading now has to be earned. With the
+    mechanism observed, it is exactly as available as it ever was.
+    """
+    fired = _fired(_API, _PRODUCTS, _RECORD)
+    assert fired, "the run must still reach a reading"
+    assert "services_to_product" not in fired, \
+        "and it must not be the one this file just gated"
+
+
+def test_a_platform_shape_on_its_own_now_reaches_no_reading_at_all():
+    """The other half of the migration above, stated rather than implied.
+
+    An API and a product suite describe most of the industry. A run that has
+    retrieved only those two things has not found a strategy, and the honest
+    output is no reading — not the cheapest one that clears a signal count.
+    """
+    assert not _fired(_API, _PRODUCTS)
 
 
 def test_a_required_signal_must_be_one_the_pattern_qualifies_on():
@@ -411,12 +448,33 @@ def test_published_pricing_costs_the_reading_its_rank_not_only_its_wording():
     already sold without the engagement. The reading is not deleted — it stays
     available as a secondary hypothesis — but a reading the evidence argues
     with must not be the first line on the page when a cleaner one exists.
+
+    MIGRATED. "A cleaner one exists" was doing real work in that sentence, and
+    the cleaner one used to be the system-of-record reading firing on `_API`
+    and `_PRODUCTS`. Demotion has nothing to hand the lead to unless some
+    OTHER reading genuinely qualifies, so the fixture now observes the
+    mechanism that earns one. The assertion is untouched: pricing costs this
+    reading its rank, not merely its wording.
     """
-    contested = _fired(_API, _PRODUCTS, _SERVICES, _TRANSFER, _CONSOLIDATION,
-                       _PRICING)
+    case = (_API, _PRODUCTS, _SERVICES, _TRANSFER, _CONSOLIDATION, _RECORD,
+            _PRICING)
+    contested = _fired(*case)
     assert "services_to_product" in contested, "it must remain available"
-    assert _answer(_API, _PRODUCTS, _SERVICES, _TRANSFER, _CONSOLIDATION,
-                   _PRICING) != "services_to_product"
+    assert _answer(*case) != "services_to_product"
+
+
+def test_demotion_needs_somewhere_to_demote_to():
+    """The companion case, so the test above cannot pass for the wrong reason.
+
+    When the contested reading is the ONLY one that qualified, there is no
+    cleaner line to promote and the honest behaviour is to keep it — demoting
+    it to nothing would leave the page blank rather than accurate. This is why
+    `_demote_contested` returns the list unchanged rather than dropping the
+    head of it.
+    """
+    lonely = (_PRODUCTS, _SERVICES, _TRANSFER, _PRICING)
+    assert _fired(*lonely) == {"services_to_product"}
+    assert _answer(*lonely) == "services_to_product"
 
 
 def test_blocking_is_declared_per_pattern_never_applied_globally():
