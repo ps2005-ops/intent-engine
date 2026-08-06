@@ -1935,10 +1935,28 @@ class WebApp:
                 # `_founder_layers` both tolerate a missing report and compose
                 # from identity, listing and the documents; the primary screen
                 # was the only surface that would not.
+                stored = self._results.get(run_id)
                 if avail["documents"] and avail["has_result"] \
                         and layer == "default":
-                    return self._founder_brief_page(
-                        session, run_id, self._results.get(run_id))
+                    # WHICH BOUNDED SURFACE. A run that composed a reading gets
+                    # the founder brief. A run whose composition FAILED has
+                    # evidence and no view, which is what
+                    # `_insufficient_evidence_page` is written for — it names
+                    # what was read, what is missing and what to do next.
+                    #
+                    # Measured on the deployed preview at 1446db6: the founder
+                    # brief for that state told the reader "the public record
+                    # did not carry enough" and never mentioned the SEC 10-K
+                    # and 10-Q the run had just read. Naming five sources and
+                    # then saying nothing could be read is the same untruth
+                    # the failure page had.
+                    if stored.get("composition_failure"):
+                        return self._insufficient_evidence_page(
+                            session, run_id, stored,
+                            reason="The sources below were read, but the full "
+                                   "synthesis did not complete, so no "
+                                   "strategic reading is asserted here.")
+                    return self._founder_brief_page(session, run_id, stored)
                 return self._failed_run_page(session, run_id)
             result = self._real_result(run_id)
             if result is None:

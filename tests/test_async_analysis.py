@@ -611,6 +611,14 @@ def test_gate_g4_composition_failure_still_leaves_a_useful_bounded_result(
     # nothing invented, and no exception text ever reaches a reader
     for leaked in ("overclaims", "ValueError", "Traceback"):
         assert leaked not in body, f"exception detail leaked: {leaked}"
+    # AND IT SCORES AS THE PRODUCT'S OWN INSTRUMENT SEES IT, unchanged.
+    # Naming five sources and then saying nothing could be read is the same
+    # untruth the failure page had, so the bounded surface must say what it
+    # read, what is missing, and what to do next.
+    from intent_engine.webapp import acceptance as _acc
+    verdict = _acc.score(body, company="Acme")
+    assert verdict["state"] in (_acc.USEFUL_FULL, _acc.USEFUL_BOUNDED), \
+        f"scored {verdict['state']}: {verdict['reasons']}"
 
 
 def test_gate_g5_the_fallback_needs_evidence_and_invents_nothing(tmp_path):
