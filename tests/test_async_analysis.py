@@ -530,6 +530,43 @@ def test_the_availability_projection_never_composes(tmp_path):
         app.AVAIL_FULL, app.AVAIL_FAILURE)
 
 
+def test_gate_g3_a_failed_run_with_evidence_leads_with_what_it_could_read(
+        tmp_path):
+    """Alphabet's EXACT shape, which gate G did not model.
+
+    Measured live on preview-v3 at c9afbc7, run 01KZB7BBJ43ZKYXE5CG4VEHMCQ:
+    FAILED, five sources read including the 10-K and 10-Q, and NO composed
+    strategic report — so the `has_report` branch never fired and the primary
+    screen served a 278-word failure page while `/brief`, off the same run,
+    served 1060 words. `_founder_layers` and `_founder_brief_page` both
+    tolerate a missing report; the primary screen was the only surface that
+    would not.
+    """
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+    assert app._retrieved_documents(run_id), "fixture must retrieve something"
+
+    # documents, a result, but no composed reading — and FAILED
+    app._results[run_id] = dict(app._results[run_id] or {},
+                                strategic_report=None)
+    meta = app.ci.run_meta(run_id)
+    app.ci._transition(run_id, meta["domain"], "FAILED")
+    assert not app._availability(run_id)["has_report"]
+
+    status, _, body = c.request("GET", f"/runs/{run_id}")
+    assert not str(status).startswith("5"), f"primary answered {status}"
+    assert "no approved source could be retrieved" not in body
+    text = _main_text(body)
+    assert len(text.split()) > 150, \
+        f"primary carries no analysis ({len(text.split())} words)"
+    # and the deeper layers still agree with it
+    for suffix in ("/brief", "/full", "/slides"):
+        deep, _h, _b = c.request("GET", f"/runs/{run_id}{suffix}")
+        assert not str(deep).startswith("5"), f"{suffix} answered {deep}"
+
+
 def test_gate_g2_a_run_that_really_retrieved_nothing_still_says_so(tmp_path):
     """The other half: the honest sentence must survive for the run it was
     written for, or this fix has simply moved the lie."""

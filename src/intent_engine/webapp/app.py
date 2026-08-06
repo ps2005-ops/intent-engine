@@ -1917,7 +1917,18 @@ class WebApp:
                 # the state stays FAILED, the failure detail stays one click
                 # away, and nothing is invented — if no reading was composed
                 # this still falls through to the failure page below.
-                if avail["has_report"] and layer == "default":
+                # THE TEST IS "COULD ANYTHING BE READ", NOT "IS THERE A
+                # REPORT". Measured live at c9afbc7 (run
+                # 01KZB7BBJ43ZKYXE5CG4VEHMCQ): FAILED, five sources read
+                # including the 10-K and 10-Q, and no composed strategic
+                # report — so a `has_report` test still sent the reader to a
+                # 278-word failure page while `/brief`, off the same run,
+                # served 1060 words. `_founder_brief_page` and
+                # `_founder_layers` both tolerate a missing report and compose
+                # from identity, listing and the documents; the primary screen
+                # was the only surface that would not.
+                if avail["documents"] and avail["has_result"] \
+                        and layer == "default":
                     return self._founder_brief_page(
                         session, run_id, self._results.get(run_id))
                 return self._failed_run_page(session, run_id)
