@@ -49,7 +49,8 @@ def result_view_model(run_result: dict) -> dict:
 def _render_card(card: dict) -> str:
     avail = card.get("availability", "UNAVAILABLE")
     parts = [f'<article class="card avail-{_e(avail).lower()}">']
-    parts.append(f'<h4>{_e(card.get("headline"))}</h4>')
+    # h3, under the section's h2 — see `_render_section`.
+    parts.append(f'<h3>{_e(card.get("headline"))}</h3>')
     # availability + confidence + freshness in TEXT (not colour alone)
     parts.append(f'<p class="state"><strong>State:</strong> '
                  f'{_e(_AVAIL_LABEL.get(avail, avail))}')
@@ -90,7 +91,12 @@ def _render_section(section: dict) -> str:
     avail = section.get("availability", "SUPPORTED")
     parts = [f'<section aria-labelledby="s-{_e(section["kind"])}" '
              f'class="section avail-{_e(avail).lower()}">']
-    parts.append(f'<h3 id="s-{_e(section["kind"])}">{_e(section["title"])}</h3>')
+    # h2, NOT h3. These sections sit directly under the page's h1 with nothing
+    # between them, so starting at h3 skipped a level: a reader navigating by
+    # heading went h1 -> h3 and was given no way to tell whether they had
+    # missed a section. Cards below are h3 accordingly. Measured on the
+    # deployed result page, whose sequence was h1,h3,h4,h4,...
+    parts.append(f'<h2 id="s-{_e(section["kind"])}">{_e(section["title"])}</h2>')
     if avail in (AVAIL_UNAVAILABLE, AVAIL_OUT_OF_SCOPE) and not section.get("cards"):
         parts.append(f'<p class="unavailable">{_e(_AVAIL_LABEL.get(avail, avail))}'
                      f' — {_e(section.get("note", ""))}</p>')

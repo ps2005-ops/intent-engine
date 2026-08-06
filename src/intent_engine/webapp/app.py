@@ -244,6 +244,28 @@ body{background:#fff;color:#000}}
 </style>
 """
 
+#: The shared link is the one page a reader reaches with no session, no nav and
+#: no way to ask for anything else, so it carries its own reading layout. It
+#: names no colour: every value comes from the shared palette variables, so the
+#: dark block in `_A11Y_CSS` can re-point them (see the rule about pages naming
+#: colours — a colour a page names is a colour dark mode cannot correct).
+_SHARED_CSS = """
+<style>
+main{max-width:46rem;margin:0 auto;padding:20px 18px 48px;line-height:1.55}
+main h1{font-size:1.6rem;margin:0 0 .4rem}
+main h2{font-size:1.1rem;margin:1.8rem 0 .6rem}
+main section{margin-bottom:.6rem}
+ul.cards,ul.limits{list-style:none;padding:0;margin:0}
+ul.cards>li{border:1px solid var(--line,#e5e7eb);border-radius:10px;
+padding:12px 14px;margin-bottom:10px;background:var(--panel,#f8fafc)}
+ul.limits>li{margin:0 0 .35rem 1.1rem;list-style:disc}
+p.headline{margin:0 0 .35rem;font-weight:600}
+p.muted{margin:.2rem 0;font-size:.9rem;color:var(--muted,#4b5563)}
+@media (max-width:600px){main{padding:14px 14px 36px}
+main h1{font-size:1.35rem}}
+</style>
+"""
+
 _ONBOARDING_CSS = """
 <style>
 .onboarding{border:1px solid var(--line);border-radius:14px;
@@ -3730,15 +3752,63 @@ class WebApp:
             return self._error_page(404, "this share link is not available "
                                          "(missing, revoked, or expired)")
         preview = render_report_preview(self._result(run_id) or {})
-        sections = "".join(f'<li>{_e(s["kind"])}</li>'
-                           for s in preview.get("sections", []))
+        # RENDER THE REPORT, NOT ITS TABLE OF INTERNAL NAMES.
+        #
+        # This page used to emit `<li>{s["kind"]}</li>` — so someone opening a
+        # shared link was shown five snake_case enum values
+        # ("company_understanding", "what_stood_out", …) and no analysis at
+        # all. Every section already carries a reader-facing `title` and cards
+        # with headlines; the renderer was reading the one field on the object
+        # that is internal and discarding the rest.
+        #
+        # The subset contract is unchanged — `render_report_preview` still
+        # decides what may leave — and nothing internal is printed here:
+        # `kind`, `insight_id` and claim ids stay out of the markup.
+        company = (preview.get("company") or {}).get("normalized_name") or ""
+        blocks = []
+        for section in preview.get("sections", []):
+            cards = []
+            for card in section.get("cards", []):
+                headline = (card.get("headline") or "").strip()
+                if not headline:
+                    continue
+                bits = [f'<p class="headline">{_e(headline)}</p>']
+                confidence = (card.get("confidence") or "").strip()
+                if confidence:
+                    bits.append(f'<p class="muted">Confidence: '
+                                f'{_e(confidence)}</p>')
+                for field, label in (("why_it_matters", "Why it matters"),
+                                     ("alternative_explanation",
+                                      "Another reading"),
+                                     ("what_would_change_the_view",
+                                      "What would change this")):
+                    value = (card.get(field) or "").strip()
+                    if value:
+                        bits.append(f'<p class="muted">{label}: '
+                                    f'{_e(value)}</p>')
+                cards.append(f'<li>{"".join(bits)}</li>')
+            if not cards:
+                continue
+            title = (section.get("title") or "").strip()
+            blocks.append(f'<section><h2>{_e(title)}</h2>'
+                          f'<ul class="cards">{"".join(cards)}</ul></section>')
+        limitations = "".join(f'<li>{_e(l)}</li>'
+                              for l in preview.get("limitations", []) if l)
+        if limitations:
+            blocks.append(f'<section><h2>What this does not cover</h2>'
+                          f'<ul class="limits">{limitations}</ul></section>')
+        if not blocks:
+            blocks.append('<p>This analysis produced no shareable sections.</p>')
+        heading = (f'Shared analysis: {_e(company)}' if company
+                   else 'Shared executive report')
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'<meta name="robots" content="noindex,nofollow">'
-                f'<title>Shared executive report</title></head><body><main>'
-                f'<h1>Shared executive report</h1>'
-                f'<p>A read-only, evidence-backed executive report subset. '
-                f'No private notes; no internal metadata.</p>'
-                f'<ul>{sections}</ul></main></body></html>')
+                f'<title>{heading}</title>{_SHARED_CSS}</head><body><main>'
+                f'<h1>{heading}</h1>'
+                f'<p class="muted">A read-only, evidence-backed extract of an '
+                f'executive report. No private notes; no internal metadata; '
+                f'nothing here can be edited.</p>'
+                f'{"".join(blocks)}</main></body></html>')
         return self._html(body, extra_headers=(
             ("X-Robots-Tag", "noindex, nofollow"),))
 
