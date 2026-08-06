@@ -425,46 +425,109 @@ def test_gate_f_a_failed_run_is_never_dressed_as_a_limited_result(tmp_path):
     assert "Limited analysis" not in body, "a failure is posing as a result"
 
 
-def test_gate_g_a_failed_transition_does_not_erase_evidence_that_exists(
+def test_gate_g_a_failed_transition_does_not_erase_a_reading_that_exists(
         tmp_path):
     """BREAK PROOF G, the converse of F, and just as damaging.
 
-    "FAILED" is the LAST transition, not the whole story: the evidence loop
-    can fail a pass, transition FAILED, and retrieve on a later one. `compose`
-    decides on the documents themselves, so the page must ask the same
-    question or it contradicts the run it reports.
+    "FAILED" is the LAST transition, not the whole story: the evidence loop can
+    fail a pass, transition FAILED, and retrieve on a later one. Measured live
+    on preview-v3 (Alphabet, https://abc.xyz): `/brief` served 820 words off
+    the composed dossier while the PRIMARY screen served a failure page saying
+    the run produced nothing.
 
-    Measured live on preview-v3 (Alphabet, https://abc.xyz, both passes):
-    every guessed path 404'd and the run went FAILED, then EDGAR returned the
-    10-K and 10-Q. `/runs/{id}` and `/full` said "no approved source could be
-    retrieved. There is no result to show" while `/brief` — reading the SAME
-    store — listed both filings under "What could actually be read".
+    A run that composed a reading is a bounded result, not a failure, and the
+    primary screen renders the same founder brief it renders for every other
+    run. The state stays FAILED and the failure detail stays reachable.
     """
     app = _async_app(tmp_path)
     c, _, headers, _ = _submit(app)
     run_id = headers["Location"].split("/runs/")[1].split("/")[0]
     assert app.wait_for_analysis(run_id, timeout=60)
-    documents = app._retrieved_documents(run_id)
-    assert documents, "fixture must retrieve something for this test to bite"
+    assert app._retrieved_documents(run_id), "fixture must retrieve something"
+    assert app._availability(run_id)["has_report"], \
+        "fixture must compose a reading for this test to bite"
 
-    # exactly the state Alphabet was in: FAILED, with documents in the store
+    # exactly the state Alphabet was in: FAILED, with a composed dossier
     meta = app.ci.run_meta(run_id)
     app.ci._transition(run_id, meta["domain"], "FAILED")
     assert app.ci.store.run_state(run_id) == "FAILED"
 
-    for path in (f"/runs/{run_id}", f"/runs/{run_id}/full",
-                 f"/runs/{run_id}/slides"):
-        status, _, body = c.request("GET", path)
-        assert "no approved source could be retrieved" not in body, (
-            f"{path} denies evidence the same store still holds")
-        # It must say what WAS read, and point at where to read it.
-        assert "source(s) were read" in body, f"{path} never says what it read"
-        assert f"/runs/{run_id}/brief" in body, f"{path} offers no way in"
-        # A 500 is worse than the wrong page, and re-routing this run to the
-        # deeper surfaces produced exactly that, twice, on the live preview.
-        assert not str(status).startswith("5"), f"{path} answered {status}"
-        for leak in ("Traceback", "Internal Server Error", "NoneType"):
-            assert leak not in body, f"{path} leaked {leak!r}"
+    status, _, body = c.request("GET", f"/runs/{run_id}")
+    assert not str(status).startswith("5"), f"primary answered {status}"
+    assert "no approved source could be retrieved" not in body
+    assert "could not be completed" not in body, \
+        "a composed reading is being shown as a failure"
+    assert len(_main_text(body).split()) > 150, "primary carries no analysis"
+
+
+def _main_text(html):
+    import re as _re
+    m = _re.search(r"<main\b[^>]*>(.*?)</main>", html, _re.S | _re.I)
+    inner = _re.sub(r"<(script|style)[^>]*>.*?</\1>", " ",
+                    m.group(1) if m else html, flags=_re.S | _re.I)
+    return " ".join(_re.sub(r"<[^>]+>", " ", inner).split())
+
+
+def test_no_run_route_mutates_the_run_while_the_worker_is_working(tmp_path):
+    """The reads were writes.
+
+    `_autorun` approves and fetches and `_real_result` composes — both from a
+    GET. A reader refreshing during the analysis raced the worker doing the
+    same thing: that is the live 400 at t=0 (a lost approval race) and the live
+    500 that followed (a compose racing a compose). Measured on preview-v3 at
+    a183f51, all six routes sampled together at t=0: `/`=400 while
+    `/progress`, `/brief`, `/full`, `/slides` and `/sources` all answered 200.
+
+    Held in flight explicitly rather than by timing, so this cannot pass by
+    finishing first.
+    """
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+
+    def explode(*a, **k):
+        raise AssertionError("a GET mutated a run that is still in flight")
+
+    # Drop the cached result, so a handler that reaches for `_real_result`
+    # has to COMPOSE — which is exactly the write this must not perform.
+    app._results.pop(run_id, None)
+    with app._analysis_lock:
+        app._analysis_inflight[run_id] = time.monotonic()
+    approve, fetch, compose = app.ci.approve, app.ci.fetch_approved, app._compose
+    app.ci.approve = app.ci.fetch_approved = app._compose = explode
+    try:
+        for suffix in ("", "/brief", "/full", "/slides"):
+            status, _h, _b = c.request("GET", f"/runs/{run_id}{suffix}")
+            code = str(status).split()[0]
+            assert not code.startswith(("4", "5")), \
+                f"{suffix or '/'} answered {status} while in flight"
+    finally:
+        app.ci.approve, app.ci.fetch_approved = approve, fetch
+        app._compose = compose
+        with app._analysis_lock:
+            app._analysis_inflight.pop(run_id, None)
+
+
+def test_the_availability_projection_never_composes(tmp_path):
+    """It is consulted on every request, so it must not be able to do work."""
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+    app._results.pop(run_id, None)
+
+    def explode(*a, **k):
+        raise AssertionError("_availability composed a result")
+
+    original, app._compose = app._compose, explode
+    try:
+        avail = app._availability(run_id)
+    finally:
+        app._compose = original
+    assert avail["level"] in (
+        app.AVAIL_NO_CONTENT, app.AVAIL_IN_PROGRESS, app.AVAIL_BOUNDED,
+        app.AVAIL_FULL, app.AVAIL_FAILURE)
 
 
 def test_gate_g2_a_run_that_really_retrieved_nothing_still_says_so(tmp_path):

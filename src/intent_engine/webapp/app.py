@@ -1896,7 +1896,30 @@ class WebApp:
             # nothing had been retrieved while the same store held the
             # filings. `_failed_run_page` now reads the store and says what is
             # true, so the reader is told what WAS read and where to read it.
+            # WHILE THE WORKER IS WORKING, THIS PAGE ONLY WATCHES. Below, both
+            # `_autorun` and `_real_result` mutate the run, and a reader who
+            # refreshes during the analysis raced the worker doing the same
+            # thing — that is the live 400 at t=0 and the live 500 that
+            # followed it. The progress page is the honest transitional answer
+            # and it already exists.
+            avail = self._availability(run_id)
+            if avail["in_flight"]:
+                return self._redirect(f"/runs/{run_id}/progress")
+
             if self.ci.store.run_state(run_id) == "FAILED":
+                # A FAILED run that nonetheless COMPOSED a reading is not a
+                # failure to the reader — it is a bounded result, and the
+                # canonical bounded surface is the founder brief the primary
+                # screen already renders for every other run. Measured live
+                # (Alphabet, https://abc.xyz): `/brief` served 820 words off
+                # this same dossier while the primary screen served a failure
+                # page. Rendering the dossier here is not relabelling the run:
+                # the state stays FAILED, the failure detail stays one click
+                # away, and nothing is invented — if no reading was composed
+                # this still falls through to the failure page below.
+                if avail["has_report"] and layer == "default":
+                    return self._founder_brief_page(
+                        session, run_id, self._results.get(run_id))
                 return self._failed_run_page(session, run_id)
             result = self._real_result(run_id)
             if result is None:
@@ -2840,6 +2863,11 @@ class WebApp:
         # the protection looked present and was not.
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
+        # The same availability question the other run routes ask. This one
+        # answered 200 with a full dossier while the primary screen answered
+        # 400, which is how the two surfaces came to contradict each other.
+        if self._is_real_run(run_id) and self._availability(run_id)["in_flight"]:
+            return self._redirect(f"/runs/{run_id}/progress")
         """The executive brief — depth WITHOUT repetition.
 
         Built from the same `FounderBrief` as every other layer, with the
@@ -3069,9 +3097,17 @@ class WebApp:
         # 01KZB2PCVR1A5SFVQTA2B9FYE5): `/runs/{id}` and `/full` answered 200
         # and `/slides` answered 500 for the same run, on a link the layer nav
         # offers the reader.
-        if self._is_real_run(run_id) \
-                and self.ci.store.run_state(run_id) == "FAILED":
-            return self._failed_run_page(session, run_id)
+        if self._is_real_run(run_id):
+            avail = self._availability(run_id)
+            # Asking for the deck before the deck exists is the reader
+            # following the layer nav, not an error. Send them to the page
+            # that says what IS ready.
+            if avail["in_flight"]:
+                return self._redirect(f"/runs/{run_id}/progress")
+            if not avail["slides_ready"]:
+                if avail["state"] == "FAILED" and not avail["has_report"]:
+                    return self._failed_run_page(session, run_id)
+                return self._redirect(f"/runs/{run_id}")
         report = self._strategic_report_for(run_id)
         if report is None:
             return self._redirect(f"/runs/{run_id}/full")
@@ -3854,6 +3890,70 @@ class WebApp:
     TERMINAL_STATES = ("COMPLETE", "PARTIAL", "FAILED", "REJECTED",
                        "INTERRUPTED")
 
+    # --- what exists for a run, asked once -------------------------------
+    #
+    # WHY THIS EXISTS. Five handlers each decided independently what a run had,
+    # and they disagreed. Measured live on preview-v3 at a183f51, one Alphabet
+    # run (01KZB5F4F58V176TSGPXHXWB7H), all six routes sampled together:
+    #
+    #   t=0.0s   /=400  /progress=200  /brief=200  /full=200  /slides=200
+    #   t=11.2s  /=200  /progress=200  /brief=200  /full=200  /slides=303
+    #
+    # The primary screen answered 400 while every other surface answered 200.
+    #
+    # AND THE READS WERE WRITES. `_real_result` composes on demand and
+    # `_autorun` approves and fetches — both from a GET, both while the async
+    # worker was doing the same thing. The 400 is `_autorun` losing the race to
+    # approve; the 500 seen in earlier cycles is a compose racing a compose.
+    # A page a reader refreshes must never be the thing that mutates the run.
+    #
+    # So availability is DERIVED, never inferred per handler, and this function
+    # touches nothing: no approve, no fetch, no compose.
+    AVAIL_NO_CONTENT = "NO_CONTENT_YET"
+    AVAIL_IN_PROGRESS = "PARTIAL_PROGRESS"
+    AVAIL_BOUNDED = "BOUNDED_DOSSIER_AVAILABLE"
+    AVAIL_FULL = "FULL_REPORT_AVAILABLE"
+    AVAIL_FAILURE = "TERMINAL_FAILURE"
+
+    def _analysis_in_flight(self, run_id) -> bool:
+        with self._analysis_lock:
+            return run_id in self._analysis_inflight
+
+    def _availability(self, run_id) -> dict:
+        """What this run currently has. READ-ONLY, and the single source every
+        run route consults before deciding what it may render."""
+        in_flight = self._analysis_in_flight(run_id)
+        state = self.ci.store.run_state(run_id)
+        documents = self._retrieved_documents(run_id)
+        # `self._results.get` deliberately, NOT `_real_result`: composing here
+        # would make a read a write again, which is the defect this exists for.
+        result = self._results.get(run_id) or {}
+        report = bool(result.get("strategic_report"))
+        settled = (not in_flight) and state in self.TERMINAL_STATES
+
+        if in_flight or (state not in self.TERMINAL_STATES and state):
+            level = self.AVAIL_IN_PROGRESS
+        elif report:
+            level = self.AVAIL_FULL
+        elif documents:
+            level = self.AVAIL_BOUNDED
+        elif state == "FAILED":
+            level = self.AVAIL_FAILURE
+        else:
+            level = self.AVAIL_NO_CONTENT
+        return {
+            "level": level,
+            "in_flight": in_flight,
+            "settled": settled,
+            "state": state,
+            "documents": len(documents),
+            "has_result": bool(result),
+            "has_report": report,
+            # Slides need a composed report. Asking for them earlier is the
+            # reader following the layer nav, not an error.
+            "slides_ready": report and settled,
+        }
+
     def wait_for_analysis(self, run_id: str, timeout: float = 30.0) -> bool:
         """Block until this run reaches a terminal state. TESTS ONLY.
 
@@ -4051,6 +4151,15 @@ class WebApp:
                 self.ci.fetch_approved(run_id)
                 self._results[run_id] = self._compose(run_id)
             except IngestionError as exc:
+                # LOSING A RACE IS NOT A BAD REQUEST. The async worker approves,
+                # fetches and composes the same run; a reader who opened the
+                # page at the same moment arrived here and was shown a 400
+                # built from the ingestion exception. Measured live at a183f51:
+                # `/runs/{id}` answered 400 at t=0 while every other route
+                # answered 200. If the work is already in hand, say so.
+                if self._analysis_in_flight(run_id) \
+                        or self.ci.store.approval(run_id) is not None:
+                    return self._redirect(f"/runs/{run_id}/progress")
                 return self._error_page(400, str(exc))
         elif run_id not in self._results:
             # Approval already exists (e.g. a duplicate submit after a restart):
