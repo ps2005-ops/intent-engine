@@ -65,9 +65,21 @@ def test_an_essential_refused_claim_still_aborts_and_names_itself():
 
 
 def test_a_report_survives_one_refused_optional_claim():
+    """The whole point: the run keeps everything else it established.
+
+    The refusal driven here is a heading that carries its OWN quotation marks.
+    Quote-stripping pairs the source's inner quotes with the builder's outer
+    ones, so part of the source lands back in workspace voice and the wall
+    refuses the sentence. That is a real page shape, and the wall is right to
+    refuse it — but it may only cost that one line.
+
+    This used to be driven by the audience claim. It no longer can be: the
+    audience phrase is now quoted and attributed, so a company writing
+    "always-on" costs the reader nothing. See
+    `test_audience_claim_is_quoted_not_dropped.py`.
+    """
     C._REFUSED.clear()
-    """The whole point: the run keeps everything else it established."""
-    text = ("Acme builds workflow software.\n"
+    text = ('Reviewers called it "the best workflow tool" last year.\n'
             "A platform built for always-on operations teams.\n"
             "We serve customers worldwide.\n")
     built = C.build_claims(documents=[_doc(text=text)],
@@ -77,12 +89,12 @@ def test_a_report_survives_one_refused_optional_claim():
     assert all(c is not None for group in built.values()
                if isinstance(group, list) for c in group), \
         "a refused claim leaked through as None"
-    # the refused one is the audience claim; identity and scope survive it
     ids = {c.claim_id for c in understanding}
     assert "u.identity" in ids, f"identity lost; got {sorted(ids)}"
-    assert any(r["claim_id"] in ("u.customer", "p.homepage_audience")
-               for r in C._REFUSED), \
-        f"the overclaiming audience claim was not refused: {C._REFUSED}"
+    assert any(r["claim_id"] == "u.value_prop" for r in C._REFUSED), \
+        f"the overclaiming claim was not refused: {C._REFUSED}"
+    # and the claim that used to be the casualty now survives alongside it
+    assert "u.customer" in ids, f"audience still lost; got {sorted(ids)}"
 
 
 def test_every_surviving_claim_is_still_inside_the_wall():

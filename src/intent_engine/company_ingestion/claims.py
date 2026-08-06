@@ -48,6 +48,36 @@ _AUDIENCE_PATTERNS = (
 )
 
 
+#: A quoted span shorter than this is not checked by `assert_quotes_exist`
+#: (its regex floor is 4 characters). Requiring the same floor here keeps the
+#: verbatim-quote guarantee TOTAL: every audience phrase we quote is a phrase
+#: the quote checker actually verifies against the cited source.
+_MIN_QUOTABLE = 4
+
+
+def _audience_phrase(doc: dict) -> str | None:
+    """The company's own audience wording, verbatim, or None.
+
+    Matched case-insensitively but sliced out of the ORIGINAL text, because
+    this phrase is presented to the reader as something the source says. A
+    lower-cased rewrite of the source is not the source, and quoting one would
+    make the visible attribution subtly false.
+    """
+    text = doc.get("text_content") or ""
+    lowered = text.lower()
+    for pattern in _AUDIENCE_PATTERNS:
+        m = re.search(pattern, lowered)
+        if not m:
+            continue
+        start, end = m.span(1)
+        # `str.lower()` can change length on a few Unicode code points, which
+        # would misalign the span; fall back to the matched text when it does.
+        span = text[start:end]
+        phrase = (span if span.lower() == m.group(1) else m.group(1)).strip()
+        return phrase if len(phrase) >= _MIN_QUOTABLE else None
+    return None
+
+
 def real_ref(doc: dict) -> SourceRef:
     return SourceRef(
         subsystem=REAL_SUBSYSTEM, artifact_type=doc["source_type"],
@@ -314,25 +344,37 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 f'"{first_heading[:200]}"',
                 AVAIL_SUPPORTED, [home], confidence="Moderate",
                 docs_by_id=docs))
-        audience = None
-        for pattern in _AUDIENCE_PATTERNS:
-            m = re.search(pattern, home["text_content"].lower())
-            if m:
-                audience = m.group(1).strip()
-                break
+        audience = _audience_phrase(home)
         if audience:
+            # SOURCE VOICE, QUOTED. The phrase is the company's own wording,
+            # lifted verbatim, so it goes through `_q()` like every other
+            # source-derived span in this module. Before this, it was the one
+            # builder that interpolated retrieved text RAW into a workspace
+            # sentence — so an absolute the *company* wrote ("always-on",
+            # "built for teams that must scale") read as the workspace's own
+            # certainty, tripped the language wall, and cost the claim.
+            #
+            # Quoting is not an escape hatch: `docs_by_id` makes
+            # `assert_quotes_exist` prove the phrase is really in a cited
+            # source, so an invented quotation is still refused. The wall is
+            # unchanged, and everything OUTSIDE the quote is still walled.
             understanding.append(_claim(
                 "u.customer",
-                f"Visible audience language: the homepage speaks to "
-                f"{audience} (supported inference from page language).",
+                f"Visible audience language: the homepage addresses "
+                f"{_q(audience)}. That is who the company says it is "
+                f"speaking to, which is not the same as who its customers "
+                f"are; named accounts, case studies or a disclosed revenue "
+                f"mix would be needed to establish composition.",
                 AVAIL_PARTIAL, [home], confidence="Moderate",
-                transformation="summarized"))
+                transformation="summarized", docs_by_id=docs))
             persona.append(_claim(
                 "p.homepage_audience",
-                f"The homepage appears primarily oriented toward "
-                f"{audience}. We do not yet know whether this is "
-                f"intentional.", AVAIL_PARTIAL, [home],
-                confidence="Moderate", transformation="summarized"))
+                f"The homepage is oriented toward {_q(audience)}. This "
+                f"wording signals the audience being targeted; whether the "
+                f"customer base is composed that way, and whether the "
+                f"emphasis is deliberate, is not settled by the page itself.",
+                AVAIL_PARTIAL, [home], confidence="Moderate",
+                transformation="summarized", docs_by_id=docs))
     # --- products / platform: what the company actually offers ---------------
     # Without this, a retrieved product or documentation page contributed
     # nothing to the report and the offering stayed "Not available" even though
