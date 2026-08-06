@@ -17,6 +17,7 @@ import json
 import pathlib
 import logging
 import re
+from dataclasses import asdict
 import time
 import traceback
 import uuid
@@ -43,6 +44,7 @@ from intent_engine.company_ingestion.records import (
 )
 from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
+from intent_engine.webapp import acceptance as _acc
 from intent_engine.webapp import failures as _failures
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
 from intent_engine.webapp.records import WebAppError, WebEvent
@@ -577,7 +579,7 @@ class WebApp:
         # session-minting route ONLY while DEMO_MODE is on; when it is off,
         # `/demo` is just an unknown path and the ordinary gate applies, so
         # the authentication flow is byte-for-byte unchanged.
-        post_exempt = ("/login", "/signup")
+        post_exempt = ("/login", "/signup", "/internal/acceptance")
         if self.config.demo_mode:
             post_exempt = post_exempt + ("/demo",)
 
@@ -621,6 +623,8 @@ class WebApp:
         if path == "/version":
             from intent_engine._version import version_info
             return self._ok_json(version_info())
+        if path == "/internal/acceptance" and method == "POST":
+            return self._acceptance(environ)
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
         if path == "/onboarding/dismiss" and method == "POST":
@@ -1641,6 +1645,170 @@ class WebApp:
                 f'<p><a href="/">Start a new analysis</a></p>'
                 f'</main></body></html>')
         return self._html(body)
+
+    # =====================================================================
+    # PREVIEW-ONLY ACCEPTANCE RUNS
+    # =====================================================================
+    #
+    # The public demo allows ten analyses per IP per rolling hour. That is an
+    # abuse guardrail on a public URL and it does not move -- which is exactly
+    # why a twenty-company matrix could not be driven through the guest flow,
+    # and why every previous cycle generalised from one or five companies.
+    #
+    # This is NOT a second analysis path. It calls the same `_analyze` the
+    # guest form calls, with `smoke=True`, and that flag buys exactly one
+    # thing: the quota. If the runner could produce a result the product
+    # cannot, the matrix would be measuring the runner.
+
+    #: How long one company may take before the entry is recorded timed out.
+    ACCEPTANCE_TIMEOUT_S = 420
+    ACCEPTANCE_POLL_S = 5
+    #: Bounded request body. An acceptance request is a short JSON list.
+    ACCEPTANCE_MAX_BODY = 16_384
+
+    def _acceptance(self, environ):
+        """Run a bounded acceptance matrix. Preview-only, authenticated.
+
+        Every refusal returns the SAME 404 with no body detail: an endpoint
+        that answers "wrong token" differently from "not enabled here" tells
+        an unauthenticated caller which of the two it is.
+        """
+        try:
+            expected = (_acc.token_from_env() or "").strip()
+            _acc.authorise(env=self.config.env, expected=expected,
+                           presented=(environ.get(_acc.ACCEPTANCE_HEADER)
+                                      or "").strip())
+        except _acc.AcceptanceRefused:
+            return self._error_page(404, "page not found")
+        try:
+            length = int(environ.get("CONTENT_LENGTH") or 0)
+        except ValueError:
+            length = 0
+        if length <= 0 or length > self.ACCEPTANCE_MAX_BODY:
+            return self._ok_json({"error": "invalid request size"})
+        try:
+            payload = json.loads(
+                environ["wsgi.input"].read(length).decode("utf-8"))
+            requested = _acc.plan(
+                payload.get("companies"),
+                max_companies=payload.get("max_companies"),
+                concurrency=payload.get("concurrency"),
+                budget=payload.get("budget"))
+        except (ValueError, KeyError, TypeError, _acc.AcceptanceRefused) as exc:
+            # The refusal reason is safe here: the caller is authenticated.
+            return self._ok_json({"error": str(exc)[:200]})
+
+        run_id = str(payload.get("acceptance_run_id") or "")[:64] or \
+            f"acc-{uuid.uuid4().hex[:12]}"
+        ledger = _acc.Ledger(
+            pathlib.Path(self.config.web_store_path).parent
+            / "acceptance.jsonl", run_id=run_id)
+        if payload.get("cancel"):
+            ledger.cancel()
+            return self._ok_json({"acceptance_run_id": run_id,
+                                  "cancelled": True,
+                                  "summary": ledger.summary()})
+        if ledger.cancelled:
+            return self._ok_json({"acceptance_run_id": run_id,
+                                  "cancelled": True,
+                                  "summary": ledger.summary()})
+
+        pending = ledger.pending(requested["companies"],
+                                 force_fresh=bool(payload.get("force_fresh")))
+        spent = sum(1 for e in ledger.entries.values()
+                    if e.state in _acc.TERMINAL and e.state !=
+                    _acc.BUDGET_EXHAUSTED)
+        for company in pending:
+            if spent >= requested["budget"]:
+                ledger.record(_acc.Entry(
+                    requested_company=company["name"],
+                    website=company["website"],
+                    state=_acc.BUDGET_EXHAUSTED,
+                    reasons=["analysis budget exhausted before this entry"]))
+                continue
+            spent += 1
+            ledger.record(self._acceptance_one(company, run_id=run_id))
+        return self._ok_json({
+            "acceptance_run_id": run_id,
+            "deployed_commit": self._deployed_commit(),
+            "summary": ledger.summary(),
+            "entries": [asdict(e) for e in ledger.entries.values()],
+        })
+
+    def _deployed_commit(self) -> str:
+        try:
+            from intent_engine._version import version_info
+            return str(version_info().get("commit", ""))[:12]
+        except Exception:                                     # noqa: BLE001
+            return ""
+
+    def _acceptance_one(self, company, *, run_id):
+        """One company, through the real pipeline, scored deterministically."""
+        entry = _acc.Entry(requested_company=company["name"],
+                           website=company["website"],
+                           state=_acc.RUNNING, started_at=time.time())
+        sid = self.auth.create_anonymous_session()
+        session = self.auth.session(sid)
+        try:
+            response = self._analyze(
+                session, {"consent": "1", "company_name": company["name"],
+                          "website": company["website"]},
+                remote="acceptance", smoke=True)
+        except Exception as exc:                              # noqa: BLE001
+            entry.state = _acc.FAILED
+            entry.internal_failure_category = _failures.classify(str(exc))
+            entry.reasons = ["the analysis raised before producing a page"]
+            entry.completed_at = time.time()
+            return entry
+        location = dict(response[1]).get("Location", "")
+        match = re.search(r"/runs/([A-Za-z0-9_-]+)", location)
+        if not match:
+            entry.state = _acc.FAILED
+            entry.internal_failure_category = _failures.COMPANY_RESOLUTION_FAILED
+            entry.reasons = ["no analysis was created for this company"]
+            entry.completed_at = time.time()
+            return entry
+        analysis_id = match.group(1)
+        entry.analysis_id = analysis_id
+        entry.fresh_or_reused = ("reused" if analysis_id in self._results
+                                 else "fresh")
+
+        deadline = time.time() + self.ACCEPTANCE_TIMEOUT_S
+        html = ""
+        while time.time() < deadline:
+            page = self._run_page(session, analysis_id)
+            html = page[2] if isinstance(page, tuple) else ""
+            if "Reading the public evidence" not in html and len(html) > 4000:
+                break
+            time.sleep(self.ACCEPTANCE_POLL_S)
+        else:
+            entry.state = _acc.TIMED_OUT
+            entry.internal_failure_category = _failures.ANALYSIS_TIMEOUT
+            entry.reasons = ["the analysis did not finish inside the budget"]
+            entry.completed_at = time.time()
+            entry.duration_seconds = round(entry.completed_at
+                                           - entry.started_at, 1)
+            return entry
+
+        verdict = _acc.score(html, company=company["name"])
+        entry.state = verdict["state"]
+        entry.checks = verdict["checks"]
+        entry.reasons = verdict["reasons"]
+        entry.completed_at = time.time()
+        entry.duration_seconds = round(entry.completed_at
+                                       - entry.started_at, 1)
+        try:
+            records = self.ci.store.retrieved(analysis_id)
+            entry.evidence_count = len(records)
+            entry.source_classes = sorted(
+                {r.get("source_class", "") for r in records})
+            entry.filing_quality_states = sorted(
+                {(r.get("filing") or {}).get("extraction_quality", "")
+                 for r in records if r.get("filing")})
+        except Exception:                                     # noqa: BLE001
+            pass                    # diagnostics must never fail the entry
+        entry.safe_diagnostic_id = analysis_id[:12]
+        return entry
 
     def _run_page(self, session, run_id, *, layer="default"):
         if not self._owned(session, run_id):
