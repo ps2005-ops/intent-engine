@@ -377,6 +377,18 @@ def _with_annual_filing_sections(documents: list) -> list:
     return out
 
 
+#: Source classes as a reader would name them, for the bounded fallback's
+#: "What was found" list. Same vocabulary the readiness note already uses.
+_SOURCE_FAMILY = {
+    "company_owned": "the company's own pages",
+    "investor_material": "investor or earnings material",
+    "executive_statement": "an executive statement",
+    "customer_voice": "customer accounts",
+    "competitor": "a competitor's account",
+    "independent_reporting": "independent reporting",
+}
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
@@ -4010,6 +4022,15 @@ class WebApp:
             # with evidence and no synthesis.
             "readiness": {"may_synthesize": False,
                           "research_mode": "composition_incomplete"},
+            # WITHOUT THIS THE PAGE CONTRADICTED ITSELF. `found` drives the
+            # "What was found" list, and its empty-state reads "No usable
+            # public source could be read" — printed directly under
+            # "5 page(s) read", measured live at 19a9c5d. Name the families
+            # actually retrieved so the two sentences agree.
+            "readiness_explanation": {
+                "found": [_SOURCE_FAMILY.get(family, family)
+                          for family in coverage],
+            },
             "limitations": [_EC.standing_limitation(
                 {c: 1 for c in coverage},
                 has_filing=any(_EC.is_regulatory_filing(

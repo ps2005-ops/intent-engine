@@ -619,6 +619,11 @@ def test_gate_g4_composition_failure_still_leaves_a_useful_bounded_result(
     verdict = _acc.score(body, company="Acme")
     assert verdict["state"] in (_acc.USEFUL_FULL, _acc.USEFUL_BOUNDED), \
         f"scored {verdict['state']}: {verdict['reasons']}"
+    # and the page may not contradict itself: "N page(s) read" printed above
+    # "No usable public source could be read" was live at 19a9c5d.
+    assert not ("page(s) read" in text
+                and "No usable public source could be read" in text), \
+        "the page says both that it read sources and that it read none"
 
 
 def test_gate_g5_the_fallback_needs_evidence_and_invents_nothing(tmp_path):
