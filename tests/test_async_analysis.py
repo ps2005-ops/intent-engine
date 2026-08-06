@@ -567,6 +567,78 @@ def test_gate_g3_a_failed_run_with_evidence_leads_with_what_it_could_read(
         assert not str(deep).startswith("5"), f"{suffix} answered {deep}"
 
 
+def test_gate_g4_composition_failure_still_leaves_a_useful_bounded_result(
+        tmp_path):
+    """BREAK PROOF G4 — the measured Alphabet cause, not a hypothetical one.
+
+    Five fresh Alphabet runs on 568f7ec ended identically: five sources read
+    including the 10-K and the 10-Q, and composition raising
+    `PersonalError: claim text overclaims: ['always']` — the editorial
+    language wall refusing one sentence. The wall is right to refuse it. It
+    was wrong that refusing one sentence threw the whole run away and served a
+    failure page for a company whose filings had been read.
+
+    The run stays FAILED. The reader does not lose it.
+    """
+    app = _async_app(tmp_path)
+
+    real_compose = app._compose
+    calls = {"n": 0}
+
+    def exploding_compose(run_id):
+        calls["n"] += 1
+        real_compose(run_id)                     # retrieval really happened
+        raise ValueError("claim text overclaims: ['always']")
+
+    app._compose = exploding_compose
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=90)
+    assert calls["n"], "compose was never reached"
+
+    assert app.ci.store.run_state(run_id) == "FAILED", \
+        "the run's own state must stay honest"
+    assert app._retrieved_documents(run_id), "fixture must retrieve something"
+
+    status, _h, body = c.request("GET", f"/runs/{run_id}")
+    assert not str(status).startswith(("4", "5")), f"primary answered {status}"
+    text = _main_text(body)
+    assert "no approved source could be retrieved" not in text
+    assert "could not be completed" not in text, \
+        "a run with usable evidence is still shown as a failure"
+    assert len(text.split()) > 150, \
+        f"the reader lost the run ({len(text.split())} words)"
+    # nothing invented, and no exception text ever reaches a reader
+    for leaked in ("overclaims", "ValueError", "Traceback"):
+        assert leaked not in body, f"exception detail leaked: {leaked}"
+
+
+def test_gate_g5_the_fallback_needs_evidence_and_invents_nothing(tmp_path):
+    """It may not manufacture a result out of nothing, and it may not carry a
+    recommendation the composer never produced."""
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+
+    bounded = app._bounded_result(run_id, ValueError("x"))
+    assert bounded is not None
+    assert bounded["strategic_report"] is None, "the fallback invented a report"
+    assert not bounded["sections"], "the fallback invented sections"
+    assert bounded["readiness"]["may_synthesize"] is False
+    assert bounded["observations"], "the fallback dropped the evidence"
+    assert bounded["composition_failure"]["error_class"] == "ValueError"
+    assert "x" not in str(bounded["composition_failure"]), \
+        "the exception message reached the result"
+
+    # deterministic: same run, same facts, same object
+    assert app._bounded_result(run_id, ValueError("x")) == bounded
+
+    # and with nothing retrieved there is nothing to offer
+    app._retrieved_documents = lambda _rid: ()
+    assert app._bounded_result(run_id, ValueError("x")) is None
+
+
 def test_gate_g2_a_run_that_really_retrieved_nothing_still_says_so(tmp_path):
     """The other half: the honest sentence must survive for the run it was
     written for, or this fix has simply moved the lie."""

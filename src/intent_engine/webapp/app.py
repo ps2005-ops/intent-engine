@@ -44,6 +44,7 @@ from intent_engine.company_ingestion.records import (
 )
 from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
+from intent_engine.strategic_intelligence import evidence_classes as _EC
 from intent_engine.webapp import acceptance as _acc
 from intent_engine.webapp import failures as _failures
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
@@ -3937,6 +3938,75 @@ class WebApp:
         with self._analysis_lock:
             return run_id in self._analysis_inflight
 
+    def _bounded_result(self, run_id, exc):
+        """What the product can still say when full synthesis failed.
+
+        MEASURED, NOT HYPOTHETICAL. Five fresh Alphabet runs on 568f7ec all
+        ended identically: five sources read including the 10-K and the 10-Q,
+        and composition raising
+        `PersonalError: claim text overclaims: ['always']` — the editorial
+        language wall refusing a sentence. The wall is right to refuse it. It
+        was wrong that refusing one sentence threw away the whole run, and the
+        reader got a failure page for a company whose filings had been read.
+
+        This invents nothing. It carries the identity the run resolved, the
+        documents it actually retrieved and the honest limitation of that
+        mixture, and it says plainly that the synthesis did not complete. No
+        thesis, no options, no recommendation — `_founder_brief_page` composes
+        the bounded view from these facts exactly as it does for any run whose
+        evidence supports no reading.
+
+        Returns None when nothing usable survived, so a run that genuinely
+        retrieved nothing still gets the terminal failure page.
+        """
+        documents = self._retrieved_documents(run_id)
+        if not documents:
+            return None
+        meta = self.ci.run_meta(run_id) or {}
+        observations = []
+        for doc in documents:
+            title = str(doc.get("title") or doc.get("final_url") or "").strip()
+            if not title:
+                continue
+            observations.append({
+                "observation_id": f"obs-{doc.get('source_id', '')}",
+                "source_class": doc.get("source_class") or "company_owned",
+                "source_title": title,
+                "origin": doc.get("final_url", ""),
+                "excerpt": "",
+            })
+        if not observations:
+            return None
+        coverage = sorted({o["source_class"] for o in observations})
+        return {
+            "run_id": run_id,
+            "status": "BOUNDED_AFTER_COMPOSITION_FAILURE",
+            "company_domain": meta.get("domain", ""),
+            "observations": observations,
+            "sections": [],
+            "strategic_report": None,
+            "coverage": {"document_count": len(documents),
+                         "families": coverage},
+            # The gate did not decide this; the composer never got that far.
+            # Saying `may_synthesize` false is the honest reading of a run
+            # with evidence and no synthesis.
+            "readiness": {"may_synthesize": False,
+                          "research_mode": "composition_incomplete"},
+            "limitations": [_EC.standing_limitation(
+                {c: 1 for c in coverage},
+                has_filing=any(_EC.is_regulatory_filing(
+                    str(d.get("final_url") or "")) for d in documents))],
+            "composition_failure": {
+                # Safe by construction: a class name and a short id. The
+                # message stays in the log; a reader never sees exception text.
+                "stage": "composition",
+                "error_class": type(exc).__name__,
+                "diagnostic_id": hashlib.sha256(
+                    f"{run_id}:{type(exc).__name__}".encode()
+                ).hexdigest()[:12],
+            },
+        }
+
     def _failure_stage(self, run_id) -> str:
         """How far the run got, named in pipeline terms. Durable facts only."""
         try:
@@ -4138,6 +4208,16 @@ class WebApp:
                     self._terminal_writes[run_id] = \
                         self._terminal_writes.get(run_id, 0) + 1
             except Exception:  # noqa: BLE001 - already failing
+                pass
+            # A COMPANY WITH USABLE EVIDENCE MAY NOT BECOME NON-USEFUL JUST
+            # BECAUSE SYNTHESIS FAILED. The run stays FAILED — that is the
+            # truth about the composer — but the reader gets what the run did
+            # establish rather than a page saying it produced nothing.
+            try:
+                bounded = self._bounded_result(run_id, exc)
+                if bounded is not None:
+                    self._results.setdefault(run_id, bounded)
+            except Exception:  # noqa: BLE001 - the fallback may not fail too
                 pass
         finally:
             with self._analysis_lock:
