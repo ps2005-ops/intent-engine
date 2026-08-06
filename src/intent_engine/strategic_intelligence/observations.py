@@ -207,6 +207,16 @@ _SIGNAL_RELEVANCE = {
                      "slows the sales cycle",
     "regulated_buyer": "so compliance becomes a moat and a constraint at the "
                        "same time",
+    "gov_dedicated_delivery": "so part of the engineering budget is spent "
+                              "serving one buyer type that the commercial "
+                              "product does not benefit from",
+    "accreditation_gate": "so the authorization, not the product, decides "
+                          "when a deal may close",
+    "public_procurement_vehicle": "so the buying cycle is set by a budget "
+                                  "calendar rather than by the customer's "
+                                  "need",
+    "disclosed_public_sector_exposure": "so a shift in public budgets reaches "
+                                        "the revenue line directly",
     "consolidation": "so a customer who leaves later has to rebuild more than "
                      "one workflow to do it",
     "capacity_investment": "so the cost lands now while the payoff depends on "
@@ -339,13 +349,77 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                           "monthly price", "pricing page", "per month"),
     "pricing_gated": ("contact sales", "request a quote", "talk to sales",
                       "custom pricing", "quoted"),
-    # buyers in regulated or accredited environments
-    # Bare "compliance" and "regulated" were removed — every B2B page has a
-    # compliance footer; that is not a regulated BUYER.
-    "regulated_buyer": ("defence", "defense", "intelligence community",
-                        "accredited", "regulated industries",
-                        "regulated environments", "government systems",
-                        "public procurement", "fedramp"),
+    # buyers in regulated or accredited environments — the company SAYING it
+    # serves them. This is a marketing surface, and it is kept as one: it is
+    # context and it may colour a segment reading, but on its own it is not
+    # evidence that regulated buyers drive the business. For that see the
+    # mechanism signals below.
+    #
+    # Bare "compliance" and "regulated" were removed earlier — every B2B page
+    # has a compliance footer; that is not a regulated BUYER.
+    #
+    # Bare "defence"/"defense" were removed 2026-08-06 and MUST NOT COME BACK.
+    # Measured on HubSpot's live security page: "HubSpot uses a
+    # defense-in-depth approach to implement layers of security" — a security
+    # ARCHITECTURE phrase — matched `regulated_buyer` and was, with a
+    # case-studies page, most of the reason HubSpot and Snowflake were handed
+    # the same "dependence on regulated or public-sector buyers" conclusion.
+    # The buyer has to be named as a buyer.
+    "regulated_buyer": ("defence sector", "defense sector",
+                        "defence customers", "defense customers",
+                        "department of defense", "ministry of defence",
+                        "intelligence community", "accredited",
+                        "regulated industries", "regulated environments",
+                        "government systems", "public procurement",
+                        "government agencies", "public sector customers"),
+    # --- regulated-buyer CAUSAL MECHANISMS ------------------------------------
+    # Each of the four below is something a company only has if regulated or
+    # public-sector buyers actually shaped it: a place it had to build, an
+    # authorization it had to win, a way it had to be bought, or an exposure it
+    # had to disclose. A compliance badge, a security page or one case study
+    # produces none of them.
+    #
+    # They are separate signals rather than one, so the reading can say WHICH
+    # mechanism it read off — two companies that genuinely qualify then get two
+    # different sentences because they have two different mechanisms, not
+    # because the prose was varied.
+    #
+    # somewhere it had to build: a separate region/estate for these buyers
+    "gov_dedicated_delivery": ("govcloud", "government cloud", "gov cloud",
+                               "sovereign cloud", "sovereign region",
+                               "sovereign deployment", "dedicated government "
+                               "region", "public sector edition",
+                               "government community cloud", "air gapped",
+                               "in-country data residency"),
+    # something it had to win before it could sell: an authorization that
+    # gates the purchase. NOT a general assurance badge — SOC 2, ISO 27001,
+    # GDPR and HIPAA are deliberately absent, because every B2B vendor has
+    # them and they gate nothing.
+    "accreditation_gate": ("fedramp", "stateramp", "impact level", "il4",
+                           "il5", "il6", "cjis", "itar", "dod provisional",
+                           "provisional authorization",
+                           "authority to operate", "criminal justice "
+                           "information services"),
+    # a way it had to be bought: public procurement machinery
+    "public_procurement_vehicle": ("gsa schedule", "contract vehicle",
+                                   "procurement vehicle", "g-cloud",
+                                   "sewp", "idiq",
+                                   "blanket purchase agreement",
+                                   "framework agreement", "ccs framework"),
+    # an exposure it had to write down: materiality, in its own words.
+    # "government revenue" and "federal revenue" are here because reporting
+    # one as its own line IS the disclosure — a company does not separate a
+    # revenue line for a buyer type that does not matter to it. This is what
+    # Palantir's investor page says ("quarterly results separate United States
+    # government revenue from United States commercial revenue"), and it is a
+    # far better reason to reach a buyer-concentration reading than the word
+    # "defence" appearing on a product page.
+    "disclosed_public_sector_exposure": (
+        "government customers accounted", "public sector revenue",
+        "revenue from government", "government contracts represented",
+        "sales to government", "public sector segment revenue",
+        "depend on government contracts", "government appropriations",
+        "government revenue", "federal revenue", "government segment"),
     # explicit consolidation of previously separate tools. Bare "unified" was
     # removed: it is one of the most common words in corporate English, and on
     # its own it produced "absorbing adjacent tools until the work lives inside
@@ -406,6 +480,14 @@ _NEUTRAL_LABEL = {
     "pricing_published": "publishes its prices",
     "pricing_gated": "keeps pricing behind a sales conversation",
     "regulated_buyer": "sells into regulated or accredited environments",
+    "gov_dedicated_delivery": "runs a separate estate built for government or "
+                              "sovereign deployment",
+    "accreditation_gate": "holds an authorization that public buyers require "
+                          "before they may purchase",
+    "public_procurement_vehicle": "is bought through public procurement "
+                                  "machinery rather than ordinary sales",
+    "disclosed_public_sector_exposure": "has written down what public-sector "
+                                        "buyers contribute",
     "consolidation": "positions itself as replacing several separate tools",
     "capacity_investment": "is committing capital to capacity ahead of the "
                            "demand for it",
@@ -813,6 +895,10 @@ _TYPE_FOR_SIGNAL.update({
     "developer_surface": "infrastructure_platform",
     "segment_split": "buyer_segment",
     "regulated_buyer": "buyer_segment",
+    "gov_dedicated_delivery": "buyer_segment",
+    "accreditation_gate": "buyer_segment",
+    "public_procurement_vehicle": "buyer_segment",
+    "disclosed_public_sector_exposure": "buyer_segment",
     "named_customers": "monetization_ecosystem",
     "services_motion": "messaging",
     "productization": "messaging",

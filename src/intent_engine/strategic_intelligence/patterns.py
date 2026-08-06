@@ -42,6 +42,11 @@ SIGNAL_VOCABULARY = (
     "multi_product", "segment_split", "named_customers", "developer_surface",
     "services_motion", "pricing_published", "pricing_gated",
     "regulated_buyer", "consolidation",
+    # regulated-buyer CAUSAL mechanisms. `regulated_buyer` is what a company
+    # SAYS; these are what it had to build, win, be bought through, or
+    # disclose. Only these may carry a buyer-concentration reading.
+    "gov_dedicated_delivery", "accreditation_gate",
+    "public_procurement_vehicle", "disclosed_public_sector_exposure",
     # shapes a company with physical operations or formal disclosure exhibits.
     # The neutral set above is software-shaped; without these a manufacturer's
     # evidence matched one signal and produced no hypothesis.
@@ -389,15 +394,27 @@ PATTERN_LIBRARY = [
              "note": "growth tracked appropriation cycles rather than product",
              "source": "https://www.gao.gov/"},
         ],
-        when_it_applies="Regulated or government buyers are named prominently "
-                        "AND the company describes distinct segments.",
-        when_it_does_not_apply="Buyers are diversified across many unrelated "
-                               "industries with no regulated concentration.",
+        when_it_applies="The company shows a CAUSAL mechanism tying it to "
+                        "regulated or public-sector buyers — a dedicated "
+                        "government estate, an accreditation that gates the "
+                        "purchase, a procurement vehicle, or a disclosed "
+                        "exposure.",
+        when_it_does_not_apply="The only evidence is compliance badges, a "
+                               "security page, one case study or 'serves "
+                               "regulated industries' copy; or buyers are "
+                               "diversified with no regulated concentration.",
         source_refs=[{"title": "curated pattern: buyer concentration",
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("regulated_buyer", "segment_split",
-                            "named_customers"),
+                            "named_customers", "gov_dedicated_delivery",
+                            "accreditation_gate", "public_procurement_vehicle",
+                            "disclosed_public_sector_exposure"),
+        # Vocabulary is not a mechanism. Without one of these, this reading
+        # fired on a compliance footer — see `required_any_signals`.
+        required_any_signals=("gov_dedicated_delivery", "accreditation_gate",
+                              "public_procurement_vehicle",
+                              "disclosed_public_sector_exposure"),
         disconfirming_signals=("pricing_published",),
         limitations="Without disclosed revenue by segment, concentration is "
                     "inferred from emphasis, which can mislead.",
@@ -476,6 +493,16 @@ PATTERN_LIBRARY = [
                     "structure rather than observed.",
     ),
 ]
+
+#: A statement placeholder no caller has filled renders as a hole in the page,
+#: and a caller that does not know a placeholder exists raises KeyError at
+#: composition time. Both were live risks the moment `{mechanism}` was added:
+#: production filled it and a second caller did not. So the substitution lives
+#: HERE, once, beside the scaffolds that declare the placeholders.
+def statement_for(scaffold: dict, *, company: str, mechanism: str = "") -> str:
+    """Fill a scaffold's statement. The only place a statement is formatted."""
+    return scaffold["statement"].format(company=company, mechanism=mechanism)
+
 
 # Hypothesis scaffolds — the reasoning the engine instantiates when a pattern
 # fires. Kept beside the library (auditable) but separate from the pattern
@@ -739,13 +766,21 @@ HYPOTHESIS_SCAFFOLDS = {
     },
     "buyer_concentration_exposure": {
         "title": "leaning on a buyer type whose budget it does not control",
-        "statement": "{company}'s public emphasis suggests meaningful "
-                     "dependence on regulated or public-sector buyers, whose "
-                     "purchasing moves on cycles the company cannot "
-                     "influence.",
-        "reasoning": "Prominent regulated-buyer language, named deployments "
-                     "in those environments and an explicit segment split "
-                     "match the buyer-concentration mechanism.",
+        # NAMES THE MECHANISM IT READ OFF. The old sentence was "public
+        # emphasis suggests meaningful dependence on regulated or
+        # public-sector buyers" — true of any company with a compliance
+        # footer, and therefore identical for HubSpot and Snowflake. What
+        # differs between two companies that genuinely qualify is WHY, so the
+        # reading now says why. `{mechanism}` is filled from the causal
+        # signals actually observed; a run with none of them never gets here.
+        "statement": "{company} appears to depend on regulated or "
+                     "public-sector buyers in a way that shapes the business: "
+                     "{mechanism}. Purchasing of that kind moves on budget "
+                     "and accreditation cycles the company cannot influence.",
+        "reasoning": "A causal public-sector mechanism — not compliance "
+                     "language alone — matches the buyer-concentration "
+                     "pattern: the company has built, certified, or disclosed "
+                     "something it would only have if these buyers mattered.",
         "alternatives": [
             "Regulated buyers are prominent in marketing but small in "
             "revenue.",

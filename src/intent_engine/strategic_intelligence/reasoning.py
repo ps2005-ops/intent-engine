@@ -13,7 +13,7 @@ from intent_engine.strategic_intelligence.observations import (
     qualifying_signals_of,
 )
 from intent_engine.strategic_intelligence.patterns import (
-    HYPOTHESIS_SCAFFOLDS, PATTERN_LIBRARY, TENSIONS,
+    HYPOTHESIS_SCAFFOLDS, PATTERN_LIBRARY, TENSIONS, statement_for,
 )
 from intent_engine.strategic_intelligence.records import (
     BlindSpot, StrategicHypothesis, StrategicObservation, StrategicQuestion,
@@ -141,6 +141,36 @@ _CLASS_IN_WORDS = {
 }
 
 
+#: How each causal mechanism reads in a sentence. A reading that fires on a
+#: mechanism SAYS WHICH ONE, so two companies that genuinely qualify differ
+#: because their evidence differs — not because the wording was varied. Every
+#: phrase here describes only what the signal itself observed.
+_MECHANISM_PHRASE = {
+    "gov_dedicated_delivery":
+        "it runs a separate government or sovereign estate alongside the "
+        "commercial one",
+    "accreditation_gate":
+        "it holds accreditations those buyers require before they may "
+        "purchase at all",
+    "public_procurement_vehicle":
+        "it is bought through public procurement machinery rather than "
+        "ordinary sales",
+    "disclosed_public_sector_exposure":
+        "it has written down what public-sector buyers contribute",
+}
+
+
+def _mechanism_phrase(pattern, present):
+    """The mechanisms this reading actually read off, in a reader's words."""
+    matched = [s for s in pattern.required_any_signals if s in present]
+    phrases = [_MECHANISM_PHRASE[s] for s in matched if s in _MECHANISM_PHRASE]
+    if not phrases:
+        return ""
+    if len(phrases) == 1:
+        return phrases[0]
+    return ", and ".join([", ".join(phrases[:-1]), phrases[-1]])
+
+
 def _rank_evidence(observations):
     """Order evidence by strategic value: independent vantage first, then
     dated, then strong (not weak), then more specific (longer excerpt)."""
@@ -166,6 +196,16 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
     # HubSpot, Visa) reached the SAME conclusion, none of which had retrieved
     # a services signal. See `ComparablePattern.required_signals`.
     if any(s not in present for s in pattern.required_signals):
+        return None
+    # A READING NEEDS A REASON TO BE TRUE, NOT JUST VOCABULARY FOR IT.
+    # `buyer_concentration_exposure` qualified on "regulated industries" copy
+    # plus a case-studies page, so HubSpot — whose only regulated-buyer
+    # evidence was the phrase "defense-in-depth" on its security page —
+    # received the same dominant conclusion as Snowflake, which runs GovCloud
+    # regions at DoD IL5. One of those companies has a public-sector
+    # mechanism. See `ComparablePattern.required_any_signals`.
+    if pattern.required_any_signals and not any(
+            s in present for s in pattern.required_any_signals):
         return None
     matched_disc = tuple(s for s in pattern.disconfirming_signals
                          if s in present)
@@ -232,7 +272,9 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
     h = StrategicHypothesis(
         hypothesis_id=f"hyp-{pattern.pattern_id}",
         title=scaffold["title"],
-        statement=scaffold["statement"].format(company=company_name),
+        statement=statement_for(
+            scaffold, company=company_name,
+            mechanism=_mechanism_phrase(pattern, present)),
         reasoning=reasoning,
         supporting_observation_ids=[o.observation_id for o in support],
         counter_observation_ids=[o.observation_id for o in counter],

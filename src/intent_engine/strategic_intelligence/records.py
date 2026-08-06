@@ -144,6 +144,19 @@ class ComparablePattern:
     #: run had said. Empty for every pattern whose qualifying signals are
     #: genuinely interchangeable.
     required_signals: tuple = ()
+    #: AT LEAST ONE of these must be present. Where `required_signals` names a
+    #: single subject the reading is about, this names a set of alternative
+    #: CAUSAL MECHANISMS, any one of which would make the reading true — the
+    #: reading may not fire on vocabulary alone when none of them is observed.
+    #:
+    #: `buyer_concentration_exposure` needs one in the way "depends on
+    #: regulated buyers" needs a reason to be true: a separate estate built for
+    #: those buyers, an authorization that gates the purchase, a procurement
+    #: vehicle, or a disclosed exposure. Without this, "regulated industries"
+    #: copy plus a case-studies page was enough, and HubSpot and Snowflake —
+    #: one of which has no public-sector mechanism at all — were handed the
+    #: same conclusion.
+    required_any_signals: tuple = ()
     disconfirming_signals: tuple = ()
     #: Disconfirming signals strong enough that this reading may not be
     #: the PRIMARY one while they are present. It stays in the portfolio
@@ -164,6 +177,11 @@ class ComparablePattern:
             _require(signal in self.qualifying_signals,
                      f"pattern {self.pattern_id} requires {signal!r}, which is "
                      "not one of its qualifying signals")
+        for signal in self.required_any_signals:
+            _require(signal in self.qualifying_signals,
+                     f"pattern {self.pattern_id} requires one of "
+                     f"{signal!r}, which is not one of its qualifying "
+                     "signals")
         for signal in self.blocking_signals:
             _require(signal in self.disconfirming_signals,
                      f"pattern {self.pattern_id} is blocked by {signal!r}, "
@@ -173,6 +191,7 @@ class ComparablePattern:
         d = asdict(self)
         d["qualifying_signals"] = list(self.qualifying_signals)
         d["required_signals"] = list(self.required_signals)
+        d["required_any_signals"] = list(self.required_any_signals)
         d["disconfirming_signals"] = list(self.disconfirming_signals)
         d["blocking_signals"] = list(self.blocking_signals)
         return d

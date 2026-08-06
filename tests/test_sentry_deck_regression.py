@@ -232,10 +232,10 @@ def _scaffold_report(company="Huggingface"):
     the thesis, the hypothesis, the blind spot, the vulnerability, the
     opportunity and the leadership question all come from one scaffold."""
     from intent_engine.strategic_intelligence.patterns import (
-        HYPOTHESIS_SCAFFOLDS,
+        HYPOTHESIS_SCAFFOLDS, statement_for,
     )
     scaffold = HYPOTHESIS_SCAFFOLDS["tool_to_system_of_record"]
-    statement = scaffold["statement"].format(company=company)
+    statement = statement_for(scaffold, company=company, mechanism="it runs a separate government estate")
     return {
         "company_name": company,
         "thesis": {"view": f"{company} appears to be {scaffold['title']}.",
@@ -356,7 +356,7 @@ def test_the_topic_never_renders_as_the_finished_decision():
     """
     from intent_engine.strategic_intelligence.decision import compose_decision
     from intent_engine.strategic_intelligence.patterns import (
-        HYPOTHESIS_SCAFFOLDS,
+        HYPOTHESIS_SCAFFOLDS, statement_for,
     )
     from intent_engine.strategic_intelligence.records import (
         StrategicHypothesis,
@@ -364,7 +364,7 @@ def test_the_topic_never_renders_as_the_finished_decision():
     for pattern_id, scaffold in HYPOTHESIS_SCAFFOLDS.items():
         hypothesis = StrategicHypothesis(
             hypothesis_id=f"hyp-{pattern_id}", title=scaffold["title"],
-            statement=scaffold["statement"].format(company="Acme"),
+            statement=statement_for(scaffold, company="Acme", mechanism="it runs a separate government estate"),
             reasoning=scaffold["reasoning"],
             supporting_observation_ids=["obs-1"], counter_observation_ids=[],
             alternative_explanations=list(scaffold["alternatives"]),

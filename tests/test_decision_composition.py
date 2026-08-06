@@ -22,14 +22,20 @@ from intent_engine.strategic_intelligence.decision import (
     DECISION_READY, INVESTIGATION_REQUIRED, WITHHELD, DecisionOption,
     FounderDecision, compose_decision, decision_of, mechanism_sentence,
 )
-from intent_engine.strategic_intelligence.patterns import HYPOTHESIS_SCAFFOLDS
+from intent_engine.strategic_intelligence.patterns import (
+    HYPOTHESIS_SCAFFOLDS, statement_for,
+)
 from intent_engine.strategic_intelligence.records import StrategicHypothesis
 
 
 def _hypothesis(pattern_id, scaffold, *, confidence="moderate"):
     return StrategicHypothesis(
         hypothesis_id=f"hyp-{pattern_id}", title=scaffold["title"],
-        statement=scaffold["statement"].format(company="Acme"),
+        statement=statement_for(
+            scaffold, company="Acme",
+            # a representative causal mechanism, for the scaffolds that name
+            # one; ignored by the scaffolds that do not
+            mechanism="it runs a separate government estate"),
         reasoning=scaffold["reasoning"],
         supporting_observation_ids=["obs-1", "obs-2"],
         counter_observation_ids=["obs-9"],
