@@ -288,6 +288,10 @@ PATTERN_LIBRARY = [
         confidence="moderate",
         qualifying_signals=("services_motion", "multi_product",
                             "developer_surface"),
+        # Without evidence of the engagement there is no "services" half of
+        # "services → product", and the reading becomes a claim about how the
+        # company delivers that nothing in the run observed.
+        required_signals=("services_motion",),
         disconfirming_signals=("pricing_published",),
         limitations="Public pages rarely disclose the revenue mix, so the "
                     "balance between services and product is not observable "

@@ -135,6 +135,15 @@ class ComparablePattern:
     source_refs: list = field(default_factory=list)
     confidence: str = "moderate"
     qualifying_signals: tuple = ()
+    #: Signals WITHOUT WHICH THIS PATTERN MAY NOT FIRE, whatever the threshold.
+    #: A qualifying signal is evidence that a reading is plausible; a required
+    #: one is the reading's subject. `services_to_product` needs
+    #: `services_motion` in the same way "services → product" needs services:
+    #: matching two of three let an API page and a product page assert that a
+    #: company "delivers work alongside customers", which no evidence in the
+    #: run had said. Empty for every pattern whose qualifying signals are
+    #: genuinely interchangeable.
+    required_signals: tuple = ()
     disconfirming_signals: tuple = ()
     limitations: str = ""
 
@@ -145,10 +154,15 @@ class ComparablePattern:
                  f"pattern {self.pattern_id} needs >=1 cited example")
         _require(bool(self.qualifying_signals),
                  f"pattern {self.pattern_id} needs qualifying signals")
+        for signal in self.required_signals:
+            _require(signal in self.qualifying_signals,
+                     f"pattern {self.pattern_id} requires {signal!r}, which is "
+                     "not one of its qualifying signals")
 
     def as_dict(self) -> dict:
         d = asdict(self)
         d["qualifying_signals"] = list(self.qualifying_signals)
+        d["required_signals"] = list(self.required_signals)
         d["disconfirming_signals"] = list(self.disconfirming_signals)
         return d
 

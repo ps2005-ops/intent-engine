@@ -157,6 +157,16 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
     matched_qual = tuple(s for s in pattern.qualifying_signals if s in present)
     if len(matched_qual) < scaffold.get("threshold", 2):
         return None
+    # A threshold counts evidence; it cannot tell which evidence the reading is
+    # ABOUT. Without this, two of `services_to_product`'s three qualifying
+    # signals were enough, and "multi_product + developer_surface" — an API
+    # page and a product page, on any software company — asserted that the
+    # company "delivers work alongside customers". Measured on the deployed
+    # preview: five of seven full results (Datadog, MongoDB, Cloudflare,
+    # HubSpot, Visa) reached the SAME conclusion, none of which had retrieved
+    # a services signal. See `ComparablePattern.required_signals`.
+    if any(s not in present for s in pattern.required_signals):
+        return None
     matched_disc = tuple(s for s in pattern.disconfirming_signals
                          if s in present)
     # support: prefer STRONG observations carrying a qualifying signal

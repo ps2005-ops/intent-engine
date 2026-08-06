@@ -264,3 +264,79 @@ def test_agenda_items_carry_the_field_the_renderer_reads():
     for item in agenda:
         assert item.get("inferred_discussion"), \
             f"agenda item the renderer cannot title: {item!r}"
+
+
+# --- a threshold counts evidence; it cannot say what the reading is about ----
+#
+# The defect above was fixed in DETECTION, and this is the same claim arriving
+# through the other door. `services_to_product` qualifies on any two of
+# ("services_motion", "multi_product", "developer_surface"), so a company with
+# an API page and a products page — every software company — met the threshold
+# without a single observation about delivering work alongside customers, and
+# was told it "converts what it learned delivering work alongside customers
+# into products those customers can run themselves".
+#
+# Measured on the deployed preview at acf4357 across a twenty-company matrix:
+# five of the seven full results (Datadog, MongoDB, Cloudflare, HubSpot, Visa)
+# returned that IDENTICAL sentence as "The answer" — the one line a founder
+# reads first. None had retrieved a services signal.
+
+def _sig_obs(oid, signal, text, excerpt):
+    from intent_engine.strategic_intelligence.records import (
+        StrategicObservation,
+    )
+    return StrategicObservation(
+        observation_id=oid, text=text, observation_type="messaging",
+        source_refs=[{"artifact_id": f"src-{oid}"}], signals=(signal,),
+        source_class="company_owned", excerpt=excerpt,
+        source_title=f"src {oid}", origin=f"https://acme.example/{oid}",
+        date="2026-08-06")
+
+
+_API = ("o1", "developer_surface", "Acme exposes a surface others can build on.",
+        "Build on our API: REST and GraphQL documentation for developers.")
+_PRODUCTS = ("o2", "multi_product",
+             "Acme sells several distinct products rather than one.",
+             "Explore the suite: Compute, Storage, Analytics and Security.")
+_SERVICES = ("o3", "services_motion",
+             "Acme embeds engineers alongside its customers.",
+             "Our implementation team works on-site alongside yours.")
+
+
+def _fired(*specs):
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    report = build_strategic_report(
+        company_name="Acme", observations=[_sig_obs(*s) for s in specs])
+    return {h.pattern_id for h in report.hypotheses}
+
+
+def test_a_services_reading_needs_evidence_of_a_service():
+    assert "services_to_product" not in _fired(_API, _PRODUCTS)
+
+
+def test_the_services_reading_still_fires_when_the_service_is_observed():
+    """The gate must not be a mute button: with the engagement evidence the
+    pattern is exactly as available as it was before."""
+    assert "services_to_product" in _fired(_API, _PRODUCTS, _SERVICES)
+    assert "services_to_product" in _fired(_PRODUCTS, _SERVICES)
+
+
+def test_removing_it_does_not_silence_the_reading_that_did_fit():
+    """An API and a product suite still support a system-of-record reading —
+    the fix removes one unsupported claim, not the analysis."""
+    assert _fired(_API, _PRODUCTS), "the run must still reach a reading"
+
+
+def test_a_required_signal_must_be_one_the_pattern_qualifies_on():
+    import pytest
+    from intent_engine.strategic_intelligence.records import ComparablePattern
+    bad = ComparablePattern(
+        pattern_id="p", name="n", description="d", mechanism="m",
+        historical_examples=[{"name": "x", "note": "y", "source": "z"}],
+        when_it_applies="a", when_it_does_not_apply="b",
+        qualifying_signals=("multi_product",),
+        required_signals=("services_motion",))
+    with pytest.raises(Exception):
+        bad.validate()
