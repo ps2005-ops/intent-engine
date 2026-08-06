@@ -10,11 +10,13 @@ Honesty boundaries carried into the web layer:
 """
 from __future__ import annotations
 
+import hashlib
 import hmac
 import html as _html
 import json
 import pathlib
 import logging
+import re
 import time
 import traceback
 import uuid
@@ -41,6 +43,7 @@ from intent_engine.company_ingestion.records import (
 )
 from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
+from intent_engine.webapp import failures as _failures
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
 from intent_engine.webapp.records import WebAppError, WebEvent
 from intent_engine.webapp.sharing import SharingService
@@ -148,6 +151,10 @@ font-size:.95rem;cursor:pointer}
 .brief{max-width:none}}
 </style>
 """
+
+#: A page's own stylesheet, wherever in the body it was emitted. Used by
+#: `_stylize` to lift it into the head — see the reasoning there.
+_STYLE_BLOCK = re.compile(r"<style\b[^>]*>.*?</style>", re.S | re.I)
 
 # The floor every page meets, whatever else it brings. Deliberately small and
 # additive — it grants visible focus, a readable dark scheme, a responsive
@@ -862,7 +869,32 @@ class WebApp:
         # these element selectors on specificity regardless of order.
         head_extra += f"<style>{_APP_CSS}</style>"
         head_extra += _A11Y_CSS
-        return body.replace("</head>", head_extra + "</head>", 1)
+        # A <style> BLOCK IS NOT CONTENT, AND IT WAS SITTING IN <main>.
+        #
+        # `LAYER_CSS` is prepended to the fragment each layer renderer returns,
+        # so the dashboard, the story and the actions list each carried a copy
+        # INSIDE the element that holds the reading. Invisible to a reader, and
+        # it is stylesheet text inside `main.innerText` -- so every text-based
+        # gate, every accessibility tree and every extractor read CSS as part
+        # of the analysis.
+        #
+        # Hoisted here rather than at the twenty call sites that build a body,
+        # because this is the one function every HTML response passes through,
+        # and a rule that has to be remembered at each call site is a rule that
+        # will be missed at the twenty-first.
+        #
+        # Order is preserved deliberately: the shared sheet, then the
+        # accessibility baseline, then the page's own rules -- exactly the
+        # cascade that held when the page's rules lived below in the body.
+        head, sep, rest = body.partition("</head>")
+        hoisted: list = []
+
+        def _take(match):
+            hoisted.append(match.group(0))
+            return ""
+
+        rest = _STYLE_BLOCK.sub(_take, rest)
+        return head + head_extra + "".join(hoisted) + sep + rest
 
     def _html(self, body, *, status="200 OK", extra_headers=()):
         return status, [("Content-Type", "text/html; charset=utf-8"),
@@ -884,13 +916,75 @@ class WebApp:
         return "303 See Other", headers, ""
 
     def _error_page(self, code, message):
-        titles = {400: "Bad request", 403: "Forbidden", 404: "Not found",
-                  429: "Too many requests", 500: "Something went wrong"}
-        body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'<title>{titles.get(code, "Error")}</title></head><body>'
-                f'<main><h1>{titles.get(code, "Error")}</h1>'
-                f'<p>{_e(message)}</p><p><a href="/">Back to start</a></p>'
-                f'</main></body></html>')
+        """A reader-facing failure. Never a status line and an exception.
+
+        Measured live: `GET /runs/{id}` on a run that had not yet been
+        approved answered "Bad request / approve at least one source" — a
+        framework status and an internal message, which tells a reader they
+        did something wrong when the run had simply not reached its next step.
+
+        The category decides what is said; `message` never reaches the page.
+        It is hashed into a short reference an operator can correlate.
+        """
+        category = _failures.classify(message)
+        # Decided from the message's OWN classification, before any
+        # code-specific substitution below replaces it: substituting first and
+        # then reading `explained["category"]` made every unrecognised 404
+        # look understood, and silently dropped the one sentence it had.
+        understood = category != _failures.INTERNAL_FAILURE
+        if code in (403, 429) and category == _failures.INTERNAL_FAILURE:
+            titles = {403: "That is not available to this session",
+                      429: "Too many analyses for now"}
+            explained = {
+                "category": category, "title": titles[code],
+                "what_worked": "Your session is active.",
+                "what_failed": "This request was not carried out.",
+                "why": ("This preview limits how much one visitor can run, so "
+                        "it stays available to everyone."
+                        if code == 429 else
+                        "This session does not have access to that."),
+                "next_step": ("Wait a little and try again."
+                              if code == 429 else "Start a new analysis."),
+                "retryable": code == 429,
+            }
+        elif code == 404 and category == _failures.INTERNAL_FAILURE:
+            explained = _failures.explain(_failures.NOT_FOUND)
+        else:
+            explained = _failures.explain(category)
+        # THE MESSAGE IS SUPPRESSED ONLY WHERE IT WAS UNDERSTOOD.
+        #
+        # When `classify` recognised the cause, this module has better words
+        # for it than the exception did, and showing both would be showing the
+        # internal one. When it did NOT recognise the cause, the message is the
+        # only information there is — and it is carrying things a reader needs:
+        # the 500 handler puts the log-correlation reference in it, debug mode
+        # puts the traceback in it, and a revoked share link explains itself
+        # there. Dropping it unrecognised would trade one silence for another.
+        detail = "" if understood else (message or "")
+        return self._failure_response(code, explained, detail)
+
+    def _failure_response(self, code, explained, detail=""):
+        retry = ('<p><a class="cta" href="/">Run a new analysis</a></p>'
+                 if explained["retryable"] else
+                 '<p><a href="/">Back to start</a></p>')
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1">'
+            f'<title>{_e(explained["title"])}</title></head><body>'
+            f'<main class="brief"><h1>{_e(explained["title"])}</h1>'
+            f'<p><strong>What did work.</strong> '
+            f'{_e(explained["what_worked"])}</p>'
+            f'<p><strong>What did not.</strong> '
+            f'{_e(explained["what_failed"])}</p>'
+            f'<p><strong>Why.</strong> {_e(explained["why"])}</p>'
+            f'<p><strong>What to do next.</strong> '
+            f'{_e(explained["next_step"])}</p>'
+            f'{retry}'
+            + (f'<p class="small muted">{_e(detail)}</p>' if detail else "")
+            + '</main></body></html>')
+        titles = {400: "Bad Request", 403: "Forbidden", 404: "Not Found",
+                  429: "Too Many Requests", 500: "Internal Server Error"}
         return f"{code} {titles.get(code, 'Error')}", \
             [("Content-Type", "text/html; charset=utf-8")], self._stylize(body)
 

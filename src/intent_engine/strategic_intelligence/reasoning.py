@@ -722,6 +722,16 @@ def build_strategic_report(*, company_name, observations,
     coverage = {}
     for o in observations:
         coverage[o.source_class] = coverage.get(o.source_class, 0) + 1
+    # WAS A FILING ACTUALLY READ. Not "is there an investor-material source" --
+    # `discovery.py` gives that class to any URL containing "investor" or
+    # "/ir", so an ordinary investor-relations page claimed the accountability
+    # of a 10-K. Measured live: Constellation Software, a TSX-only issuer with
+    # no SEC filing in the run, was told its filings carried the reading.
+    has_filing = any(
+        EC.is_regulatory_filing(str(ref.get("url") or ref.get("source_url")
+                                    or ref.get("final_url") or ""))
+        for o in observations for ref in (o.source_refs or ())
+        if isinstance(ref, dict))
 
     patterns_by_id = {p.pattern_id: p for p in patterns}
     hypotheses = []
@@ -769,7 +779,7 @@ def build_strategic_report(*, company_name, observations,
     # page -- and treating the two alike is what made a run that HAD retrieved
     # the 10-K report "every source here is published by the company itself"
     # and withhold every option. See `evidence_classes` for the measurement.
-    limitation = EC.standing_limitation(coverage)
+    limitation = EC.standing_limitation(coverage, has_filing=has_filing)
     if limitation:
         evidence_gaps.insert(0, limitation)
 
