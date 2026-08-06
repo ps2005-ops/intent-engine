@@ -290,3 +290,113 @@ with no SEC filings in the run. The template is unconditional.
 **Not attempted this cycle:** the authenticated acceptance runner, the
 20-company matrix, and the ≥90% useful-rate measurement. §5.1 (brief under
 word target) and §5.2 (`<style>` inside `<main>`) are unchanged.
+
+---
+
+# 2026-08-06 — the residual defects, and what the product may claim
+
+Branch `feat/founder-decision-experience-v3`. Suite 3928+, guard EXIT=0.
+Production and PR #14 untouched.
+
+## 14. WHAT WAS CLOSED
+
+**§5.2 `<style>` inside `<main>` — FIXED, live-verified.** `LAYER_CSS` is
+prepended to the fragment each layer renderer returns, so `/story` and
+`/dashboard` each carried a stylesheet inside the element holding the reading.
+Hoisted in `_stylize`, the single function every HTML response passes through.
+A rule enforced at twenty call sites is a rule that will be missed at the
+twenty-first. Cascade order preserved: shared sheet → accessibility floor →
+the page's own rules.
+
+**Raw Bad Request — FIXED, live-verified.** `GET /runs/{id}` on an unapproved
+run answered `Bad request / approve at least one source`: a framework status
+and an exception. Now every customer-visible failure resolves to a named
+category in `webapp/failures.py` carrying what worked, what did not, why, and
+one next step. Verified live: unknown run and revoked share link both explain
+themselves.
+
+The rule that made it work: **internal text is suppressed only where it was
+understood.** Where classification fails, the message is still shown — the 500
+handler puts the log-correlation reference there, debug puts the traceback
+there, a revoked share link explains itself there. The first attempt dropped
+it unconditionally and three existing tests correctly failed.
+
+**§2B limitation language — FIXED, live-verified.** Constellation Software, a
+TSX-only issuer with no SEC filing, was told "the company's filings carry
+this". `discovery.py` assigns `investor_material` by URL keyword ("investor",
+"/ir", "earnings"); `edgar.py` assigns the same class to a 10-K. Accountability
+was being inferred from a URL family. It is a property of the document: a
+regulator's archive served it, or nobody did. Live after: "every source here is
+published by the company itself." The same cause ran the other way too — an IR
+page that is not a filing fell through to "none", understating evidence the run
+did obtain.
+
+**§2A third-party filing span — FIXED, live-verified.** Stripe's run showed
+"Infinite Group is a developer of cybersecurity software" as evidence about
+Stripe: accurate, accountable, correctly cited, wrong company. `subject_span`
+now selects the sentences that name the subject and returns nothing when none
+do, and the caller drops the document. Live after: "payments became due on
+August 15, 2022, and consisted of 25% of the Company's receivables processed
+through Stripe."
+
+Aliases are deliberately conservative — a suffix is removable, a leading token
+is not. "Linear Minerals Corp." once satisfied the alias "Linear".
+
+## 15. RULES ADDED TO THE DOCTRINE
+
+15. A limitation that overstates the evidence is worse than no limitation.
+    Every limitation is derived from the source mixture actually obtained.
+16. Accountability is a property of the document, never of a URL family.
+17. A filing written by someone else is read for what it says about the
+    subject. If it never names the subject, it is not evidence about it.
+18. No customer-visible failure may be a status line and an exception. Every
+    one names what worked, what did not, why, and one next step.
+19. Internal text is hidden only where it was understood well enough to say
+    something better. Unrecognised, it is still the only information there is.
+20. A `<style>` block is not content and never belongs inside `<main>`.
+21. A statement on a failure page must be true of THAT failure. "The company
+    you entered was recorded" is false on a 404 for an unknown run.
+
+## 16. WEEKLY QUALITY CYCLE
+
+Each cycle, in this order, and each reports live baseline → matrix → useful
+rate → failure clusters → deployed repairs → before/after → regression tests →
+remaining blockers.
+
+| week | cycle | gate |
+|---|---|---|
+| 1 | Reliability | no raw framework error on any tested path |
+| 2 | Company-universe coverage | 20-company matrix, ≥90% useful |
+| 3 | Evidence and filing integrity | no span attributed to the wrong company |
+| 4 | Founder reasoning | first two minutes answer the eight questions |
+| 5 | Presentation | slide 1 conclusion-first, no source prose |
+| 6 | Dark mode and accessibility | every surface, both themes, 375–1440 |
+
+## 17. NOT DONE THIS CYCLE — precise handoff
+
+**§5.1 executive brief word count: NOT MEASURED.** The one run that reached
+`/brief` this cycle was a withheld result (310 words, correctly), which is not
+a valid measurement. Measure on a RICH result before touching
+`build_executive_brief` — the causal fields it was said to be missing were
+wired in an earlier cycle and the defect may already be closed.
+
+**Authenticated acceptance runner: NOT BUILT.** This is the blocker for
+everything below it. The public demo quota is 10 analyses per IP per rolling
+hour, which is why the 20-company matrix cannot be driven from the guest flow.
+Build it per §4 of the 2026-08-06 brief: preview-only, authenticated, bounded
+cost and concurrency, resumable, structured per-company result contract.
+
+**20-company matrix: NOT RUN.** Denominator is fixed and every company stays in
+it: Microsoft, Amazon, Alphabet, NVIDIA, Caterpillar, Visa, Datadog,
+Cloudflare, HubSpot, MongoDB, Snowflake, Shopify, Constellation Software, CGI,
+Brookfield, RBC, Stripe, Ramp, Anduril, Notion.
+
+**Full dark-mode surface sweep: PARTIAL.** One result page measured at 390px in
+both themes (42 elements, 0 below WCAG AA, no overflow). The remaining
+surfaces, widths (375/768/1280/1440) and states are unmeasured.
+
+**Worktree note.** The `d4928192-.../fiv3` worktree was destroyed mid-session
+by another agent session sharing that path — `.git` removed and most of `src`
+deleted. All committed work was safe on `origin`; uncommitted edits were
+rescued file-by-file and rebuilt in a worktree owned by this session. Do not
+share a scratchpad worktree path between sessions.

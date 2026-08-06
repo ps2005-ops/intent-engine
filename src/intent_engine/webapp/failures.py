@@ -220,6 +220,28 @@ def classify(message: str) -> str:
     return INTERNAL_FAILURE
 
 
+#: Where the generic line would say something untrue. A 404 on an unknown run
+#: had no company entered, so "the company you entered was recorded" is exactly
+#: the kind of statement-not-in-evidence this module exists to stop.
+_WHAT_WORKED = {
+    NOT_FOUND: "Your session is active, and nothing you have already run was "
+               "affected.",
+    SHARE_LINK_UNAVAILABLE: "The link was received and checked.",
+    PROVIDER_CREDIT_EXHAUSTED: "The company was identified and its public "
+                               "evidence was retrieved.",
+    PROVIDER_RATE_LIMITED: "The company was identified and retrieval had "
+                           "already started.",
+    ANALYSIS_TIMEOUT: "The company was identified and some sources were "
+                      "read before the budget ran out.",
+    EVIDENCE_INSUFFICIENT: "The company was identified and its public "
+                           "sources were read.",
+    REASONING_WITHHELD: "The company was identified and its public sources "
+                        "were read.",
+    RETRIEVAL_BLOCKED: "The company was identified.",
+    RETRIEVAL_INSUFFICIENT: "The company was identified and retrieval ran.",
+}
+
+
 def explain(category: str, *, what_worked: str = "") -> dict:
     """The four things a reader is owed, for one failure category."""
     if category not in _COPY:
@@ -230,8 +252,9 @@ def explain(category: str, *, what_worked: str = "") -> dict:
         "title": title,
         # NEVER EMPTY. A page that says only what went wrong reads as a dead
         # end; a reader who is told what WAS established can still act on it.
-        "what_worked": what_worked or "Your request was received and the "
-                                      "company you entered was recorded.",
+        "what_worked": (what_worked or _WHAT_WORKED.get(category)
+                        or "Your request was received and the company you "
+                           "entered was recorded."),
         "what_failed": what_failed,
         "why": why,
         "next_step": next_step,
