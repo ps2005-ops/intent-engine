@@ -275,3 +275,51 @@ def test_legal_proceedings_boilerplate_is_not_an_excerpt():
     ])
     excerpt, _label = FS.best_excerpt(text)
     assert "From time to time" not in excerpt
+
+
+# =============================================================================
+# A quarterly report numbers its Items differently
+# =============================================================================
+
+_QUARTERLY = "\n".join([
+    "Item 1. Financial Statements",
+    "Defending such proceedings is costly and can impose a significant burden "
+    "on management and employees. The results of any current or future "
+    "litigation cannot be predicted with certainty, and regardless of the "
+    "outcome, litigation can have an adverse impact. ",
+    "Item 2. Management's Discussion and Analysis of Financial Condition and "
+    "Results of Operations",
+    "Overview",
+    "We sell an observability platform on a subscription basis, and revenue "
+    "grew 26% year over year as existing customers adopted more products. ",
+    "Item 2. Unregistered Sales of Equity Securities and Use of Proceeds",
+    "During the three months ended March 31, 2026, we issued 134,236 shares "
+    "of Class A common stock as consideration in acquisitions, exempt from "
+    "registration under the Securities Act. ",
+])
+
+
+def test_quarterly_mdna_is_preferred_over_the_notes():
+    """Read with the annual order, a 10-Q reaches Item 1 -- which is the notes
+    to the accounts, and produced litigation boilerplate as the excerpt."""
+    excerpt, label = FS.best_excerpt(_QUARTERLY, form="10-Q")
+    assert "Management's Discussion" in label
+    assert excerpt.startswith("We sell an observability platform")
+
+
+def test_the_second_item_2_does_not_displace_the_first():
+    """A 10-Q prints Item 2 twice; only one of them is MD&A."""
+    spans = {s["key"]: s for s in FS.section_spans(_QUARTERLY)}
+    assert "134,236 shares" not in spans["item_2"]["body"]
+    assert "observability platform" in spans["item_2"]["body"]
+
+
+def test_annual_priority_is_unchanged_without_a_form():
+    annual = "\n".join([
+        "Item 7. Management's Discussion and Analysis",
+        "Overview",
+        "Total sales for the year were $67.6 billion, an increase of four "
+        "percent driven by higher volume across the machinery segments. ",
+    ])
+    _excerpt, label = FS.best_excerpt(annual)
+    assert label == FS.SECTION_NAMES["item_7"]

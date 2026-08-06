@@ -704,7 +704,11 @@ def derive_observations(documents, *, company: str = "") -> list:
         body_text = doc.get("text_content", "") or ""
         excerpt, section = "", ""
         if FS.looks_like_filing(body_text, doc.get("final_url", "")):
-            excerpt, section = FS.best_excerpt(body_text)
+            # The form decides which Item carries MD&A: 7 in an annual report,
+            # 2 in a quarterly one. The parser already established it, so this
+            # never has to be guessed from the text.
+            excerpt, section = FS.best_excerpt(
+                body_text, form=(doc.get("filing") or {}).get("form", ""))
         if not excerpt:
             excerpt = (doc.get("meta_description")
                        or body_text[:280]).strip()

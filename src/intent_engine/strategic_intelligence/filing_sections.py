@@ -194,10 +194,21 @@ def section_spans(text: str) -> list:
         offset = blob.index(body[:64], body_start) if body else body_start
         # The LAST qualifying occurrence wins: the body always follows the
         # contents page, so a later match is the real section.
+        #
+        # EXCEPT when the later one is a different section with the same
+        # number. A 10-Q prints "Item 2" twice -- Part I is Management's
+        # Discussion and Analysis, Part II is Unregistered Sales of Equity
+        # Securities -- and last-wins took the second. A heading whose title
+        # this module recognises is one of the sections it models; an
+        # unrecognised title reusing the same number is not, and must not
+        # displace it.
+        titled = title is not None
+        if key in by_key and by_key[key]["titled"] and not titled:
+            continue
         by_key[key] = {
             "key": key, "name": SECTION_NAMES.get(key, key), "kind": "item",
             "heading_start": start, "body_start": offset,
-            "body_end": offset + len(body), "body": body,
+            "body_end": offset + len(body), "body": body, "titled": titled,
         }
     return sorted(by_key.values(), key=lambda s: s["heading_start"])
 
@@ -244,7 +255,31 @@ def _first_substantive_sentences(body: str, *, limit: int = _MAX_SPAN) -> str:
     return joined[:limit].rstrip()
 
 
-def best_excerpt(text: str) -> tuple:
+#: A quarterly report numbers its Items differently, and reading it with the
+#: annual order picks the wrong one. In a 10-Q, Item 1 is Financial Statements
+#: and MD&A is Item 2 -- so the annual priority reached the notes to the
+#: accounts first. Measured live on Datadog's 10-Q, that produced "Defending
+#: such proceedings is costly... The results of any current or future
+#: litigation cannot be predicted with certainty" as the quarter's excerpt:
+#: litigation boilerplate, true of every public company, shown to a reader
+#: under the label "Regulatory or investor filing".
+QUARTERLY_SECTION_PRIORITY = (
+    "item_2",    # Management's Discussion and Analysis (quarterly)
+    "item_1a",   # Risk Factors
+    "item_3",    # Legal Proceedings
+    "item_1",    # Financial Statements -- notes, tables, boilerplate
+)
+
+#: The citation a reader sees. "Item 2" alone says nothing; which Item 2 it is
+#: depends on the form, so the label does too.
+QUARTERLY_SECTION_NAMES = dict(
+    SECTION_NAMES,
+    item_2="Item 2 (Management's Discussion and Analysis)",
+    item_1="Item 1 (Financial Statements)",
+)
+
+
+def best_excerpt(text: str, *, form: str = "") -> tuple:
     """Return `(excerpt, section_label)` for a filing, or `("", "")`.
 
     Fails closed: a malformed or section-free document returns empty strings
@@ -253,7 +288,10 @@ def best_excerpt(text: str) -> tuple:
     sections = find_sections(text)
     if not sections:
         return "", ""
-    for key in SECTION_PRIORITY:
+    quarterly = (form or "").upper().strip().startswith("10-Q")
+    priority = QUARTERLY_SECTION_PRIORITY if quarterly else SECTION_PRIORITY
+    names = QUARTERLY_SECTION_NAMES if quarterly else SECTION_NAMES
+    for key in priority:
         body = sections.get(key)
         if not body:
             continue
@@ -262,5 +300,5 @@ def best_excerpt(text: str) -> tuple:
         for candidate in (_skip_preamble(body), body):
             excerpt = _first_substantive_sentences(candidate)
             if len(excerpt) >= _MIN_PROSE:
-                return excerpt, SECTION_NAMES[key]
+                return excerpt, names[key]
     return "", ""
