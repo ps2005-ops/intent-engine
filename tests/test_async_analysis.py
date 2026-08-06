@@ -425,6 +425,39 @@ def test_gate_f_a_failed_run_is_never_dressed_as_a_limited_result(tmp_path):
     assert "Limited analysis" not in body, "a failure is posing as a result"
 
 
+def test_gate_g_a_failed_transition_does_not_erase_evidence_that_exists(
+        tmp_path):
+    """BREAK PROOF G, the converse of F, and just as damaging.
+
+    "FAILED" is the LAST transition, not the whole story: the evidence loop
+    can fail a pass, transition FAILED, and retrieve on a later one. `compose`
+    decides on the documents themselves, so the page must ask the same
+    question or it contradicts the run it reports.
+
+    Measured live on preview-v3 (Alphabet, https://abc.xyz, both passes):
+    every guessed path 404'd and the run went FAILED, then EDGAR returned the
+    10-K and 10-Q. `/runs/{id}` and `/full` said "no approved source could be
+    retrieved. There is no result to show" while `/brief` — reading the SAME
+    store — listed both filings under "What could actually be read".
+    """
+    app = _async_app(tmp_path)
+    c, _, headers, _ = _submit(app)
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    assert app.wait_for_analysis(run_id, timeout=60)
+    documents = app._retrieved_documents(run_id)
+    assert documents, "fixture must retrieve something for this test to bite"
+
+    # exactly the state Alphabet was in: FAILED, with documents in the store
+    meta = app.ci.run_meta(run_id)
+    app.ci._transition(run_id, meta["domain"], "FAILED")
+    assert app.ci.store.run_state(run_id) == "FAILED"
+
+    for path in (f"/runs/{run_id}", f"/runs/{run_id}/full"):
+        _, _, body = c.request("GET", path)
+        assert "no approved source could be retrieved" not in body, (
+            f"{path} denies evidence the same store still holds")
+
+
 # --- capacity ---------------------------------------------------------------
 def test_capacity_is_explicitly_bounded(tmp_path):
     """The queue lives in this process. An unbounded one is a memory leak

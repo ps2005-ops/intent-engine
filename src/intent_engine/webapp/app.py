@@ -1826,8 +1826,34 @@ class WebApp:
             # A FAILED real-company run has no report. Render an honest
             # failed-run page — never redirect back to source approval and
             # never present a nonexistent result.
+            #
+            # "FAILED" IS THE LAST TRANSITION, NOT THE WHOLE STORY. The state
+            # is whatever `ci.run_transitioned` said last, and the evidence
+            # loop can fail a pass, transition FAILED, and then retrieve on a
+            # later one. `compose` decides on the documents themselves
+            # (`if not documents`), and this page has to ask the same question
+            # or it contradicts the run it is reporting.
+            #
+            # Measured live on preview-v3 (Alphabet, https://abc.xyz, runs
+            # 01KZATHG9PX98WCVS5M0PG2XHD and 01KZAXYRE9CAX8MBX9EVV4QZDA, both
+            # passes): every guessed abc.xyz path 404'd, the run went FAILED,
+            # and EDGAR then returned the 10-K and 10-Q. `/runs/{id}` and
+            # `/full` told the reader "did not produce a report because no
+            # approved source could be retrieved. There is no result to show"
+            # while `/brief` — reading the SAME store, through
+            # `_retrieved_documents` — listed "SEC 10-K (2026-02-05)" and
+            # "SEC 10-Q (2026-07-23)" under "What could actually be read".
+            # The primary screen stated something the same store disproved,
+            # and threw away a correct bounded result to do it.
+            #
+            # Falling through does not invent anything: with documents and a
+            # composed result the readiness gate below still decides, and a
+            # run that cannot support a view lands on the insufficient-evidence
+            # page, which says so.
             if self.ci.store.run_state(run_id) == "FAILED":
-                return self._failed_run_page(session, run_id)
+                if not (self._retrieved_documents(run_id)
+                        and self._real_result(run_id)):
+                    return self._failed_run_page(session, run_id)
             result = self._real_result(run_id)
             if result is None:
                 # Auto-run mode never routes guests through manual source
