@@ -234,6 +234,30 @@ border-radius:999px;padding:.05rem .5rem;margin-left:.35rem;vertical-align:middl
 .step-badge{display:inline-block;background:#eeeefc;border-radius:999px;
 padding:.15rem .75rem;font-size:.85rem;font-weight:600;color:#2d2d70}
 .count-note{font-size:.85rem;color:#555}
+/* PANELS THAT SET A LIGHT BACKGROUND AND NO COLOUR. Under a dark scheme the
+   background stayed light while the text inherited the dark scheme's
+   near-white, so each of these rendered white-on-white. Measured live on
+   preview-v3 at 20ffb9c, on the PROGRESS page — the screen every visitor
+   watches for the whole analysis: the stage line "Writing the founder
+   briefing." inside [role=status] at 1.01:1, and the .coverage note "This
+   preview stores runs in memory..." at 1.06:1. Both invisible.
+
+   The generic floor in `webapp.app._A11Y_CSS` covers .card/.chip/details and
+   could not reach these: it has no rule for [role=status], [role=alert],
+   .coverage or a source-list label. Give each a dark counterpart here, beside
+   the light one it corrects, so the two cannot drift apart. */
+@media (prefers-color-scheme:dark){
+[role=alert]{background:#2a1717;border-color:#5b2b2b;color:#ffb4b4}
+[role=status]{background:#161c26;border-color:#3a4454;color:#f3f4f6}
+.coverage{background:#1f1b12;border-color:#4a3f28;color:#f3f4f6}
+details{background:#161c26;border-color:#3a4454}
+ul.source-list li label{background:#1b2230;border-color:#3a4454;color:#f3f4f6}
+ul.source-list li label:hover{background:#222b3b;border-color:#4a5568}
+.tag-authoritative{background:#14351f;color:#8fe0ac}
+.tag-external{background:#241a3a;color:#c4a9f5}
+.tag-unverified{background:#22262e;color:#c3cad6}
+.step-badge{background:#1e2440;color:#c9cdff}
+.count-note{color:#c3cad6}}
 """
 
 

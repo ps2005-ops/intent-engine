@@ -312,6 +312,28 @@ def test_the_focus_ring_is_repointed_for_dark_not_left_on_the_light_accent():
     assert contrast("#1d4ed8", "#0f141c") < 3.0      # the value it replaced
 
 
+def test_every_panel_that_sets_a_light_background_has_a_dark_counterpart():
+    """A background without a colour inherits the dark scheme's near-white.
+
+    Measured live on preview-v3 at 20ffb9c, on the progress page: the stage
+    line inside [role=status] rendered at 1.01:1 and the .coverage note at
+    1.06:1 — both invisible, on the screen a visitor watches for the whole
+    analysis. The generic floor has no rule for these selectors, so the dark
+    counterpart has to live beside the light one.
+    """
+    from intent_engine.founder_intelligence.presentation import _BASE_CSS
+    compact = _BASE_CSS.replace(" ", "").replace("\n", "")
+    assert "@media(prefers-color-scheme:dark)" in compact, \
+        "the base sheet has no dark block"
+    light, dark = compact.split("@media(prefers-color-scheme:dark)", 1)
+    for selector in ("[role=status]", "[role=alert]", ".coverage",
+                     "ul.source-listlilabel"):
+        if selector + "{" in light:
+            assert selector in dark, (
+                f"{selector} sets a light background with no dark counterpart; "
+                "its text inherits near-white and disappears")
+
+
 def test_the_landing_sheet_repoints_its_palette_for_dark():
     from intent_engine.founder_intelligence.presentation import _LANDING_CSS
     compact = _LANDING_CSS.replace(" ", "").replace("\n", "")
