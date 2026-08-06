@@ -501,3 +501,78 @@ else.** **Rule: a 500 is worse than the wrong page.**
   primary screen answers 400 then 500 before settling at 200. Both are the
   product's own four-section pages with a safe reference, not raw framework
   errors, but neither should be reachable.
+
+---
+
+# CYCLE 2026-08-06b — closure: four items
+
+Branch `feat/founder-decision-experience-v3`. Measured on the deployed
+preview, not reasoned about.
+
+## The reads were writes — one projection, and no route mutates
+
+The transient 400→500 was never a rendering bug. `_autorun` approves and
+fetches and `_real_result` composes, both from a GET, both racing the async
+worker doing the same thing. All six routes sampled together at a183f51 on one
+Alphabet run:
+
+    t= 0.0s  /=400  /progress=200  /brief=200  /full=200  /slides=200
+    t=11.2s  /=200  /progress=200  /brief=200  /full=200  /slides=303
+
+`_availability(run_id)` now derives what exists and touches nothing; every run
+route asks it first and answers the progress page while the worker works.
+After the fix, the same trace reads:
+
+    t= 0.0s  /=303  /progress=200  /brief=303  /full=303  /slides=303
+    t=23.3s  /=303  /progress=200  /brief=200  /full=200  /slides=200
+    t=37.0s  /=200(541w)
+
+**Rule: a page a reader refreshes may never be the thing that mutates the run.**
+**Rule: the transitional answer is a redirect to progress, never an error.**
+
+## Having services is not the transition
+
+Requiring `services_motion` was right and insufficient — nearly every large
+vendor publishes an implementation page. The reading still dominated MongoDB,
+Cloudflare, HubSpot, Snowflake and Amazon. `productization` is now its own
+signal and the pattern requires BOTH halves, and a pattern may declare
+BLOCKING signals (a subset of its disconfirming ones) that cost it first place
+while keeping it as a secondary hypothesis.
+
+Live, before → after: MongoDB and Cloudflare and HubSpot and Snowflake all
+carried the identical "the engagement teaches the workflow" sentence; they now
+read "the second buyer arrives with requirements the first never had", an
+honest withhold, and two regulated-buyer readings. Amazon reads "when agents
+transact, the rails they call matter more than the human-facing storefront".
+
+**Rule: a threshold counts evidence and cannot say what the reading is ABOUT.**
+**Rule: blocking is declared per pattern.** A blanket penalty on
+counter-evidence was tried and broke nine tests, correctly — the flagship
+reading is SUPPOSED to have been argued with.
+
+## Two attempts at Alphabet made it worse before one made it better
+
+Re-routing the FAILED-with-evidence run to the report renderer answered 500 on
+`/full` and `/slides`; routing it to `_insufficient_evidence_page` answered 500
+on the primary screen. Both pages are built for a run that composed something.
+
+What worked was two separate things: the failure page now reads the store and
+says what WAS read, and the primary screen renders the founder brief whenever
+the run has documents and a result — the test is "could anything be read", not
+"is there a report", because `/brief` was composing 1060 words off a run with
+no `strategic_report` while the primary served 278.
+
+**Rule: prefer correcting what a page SAYS over sending the reader elsewhere.**
+
+## Still open
+
+* **Alphabet is not deterministic.** One live run settles the primary at 541
+  words off the dossier; another ends with no cached result and serves the
+  truthful 278-word failure page. The remaining gap is the case where compose
+  itself raises, leaving documents but nothing composed.
+* **A new repetition, smaller than the old one.** HubSpot and Snowflake now
+  share a regulated-buyer answer. Two companies, not five, and a different
+  pattern — but the same shape of problem.
+* **The visual matrix is broad, not exhaustive.** Nine surfaces measured across
+  375/768/1280/1440 in dark and light; share links, Q&A, dashboard and the
+  retry state are not covered.
