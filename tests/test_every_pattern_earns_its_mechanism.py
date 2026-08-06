@@ -46,6 +46,33 @@ _UNGATED_DEBT = frozenset({
     "ecosystem_control_vs_openness",
     "human_to_agent_workflow",
     "portfolio_run_as_one",
+    # NEXT: measured as the highest remaining risk. It is the only entry here
+    # that fires on ordinary COMMERCE copy — `product_breadth + platform_control`
+    # — and unlike the three already repaired it has disconfirmers, which is
+    # why it ranked behind `single_to_multi_segment`.
+    "product_to_platform",
+    "single_product_to_ecosystem",
+    "smb_wedge_to_enterprise",
+})
+
+#: The debt as it stood when the rule was written, and a closed historical
+#: fact rather than a setting.
+#:
+#: WHY A SECOND LIST. "This list may only shrink" was enforced by a cap on its
+#: length, and a break proof showed the cap does not hold: widening `<= 8` to
+#: `<= 99` is one character, leaves every other assertion green, and re-opens
+#: the exemption for anything. Size was never the property worth pinning —
+#: MEMBERSHIP is. Nothing may join the debt list that was not already on it,
+#: so a newly added pattern cannot be exempted at all, whatever the cap says.
+#:
+#: Editing this set is rewriting what was true on 2026-08-06, which is a
+#: visible act in review rather than a number nudged upward.
+_DEBT_WHEN_THE_RULE_WAS_WRITTEN = frozenset({
+    "capacity_ahead_of_demand",
+    "differentiator_commoditization",
+    "ecosystem_control_vs_openness",
+    "human_to_agent_workflow",
+    "portfolio_run_as_one",
     "product_to_platform",
     "single_product_to_ecosystem",
     "single_to_multi_segment",
@@ -84,15 +111,67 @@ def test_the_debt_list_does_not_grow():
     ungated = {pid for pid, p in PATTERNS.items() if not _gated(p)}
     assert _UNGATED_DEBT >= ungated, \
         "an ungated pattern is missing from the debt list"
-    assert len(_UNGATED_DEBT) <= 9, \
-        "the ungated-pattern debt grew; gate the pattern instead"
+    # Membership, not size. See `_DEBT_WHEN_THE_RULE_WAS_WRITTEN` for why the
+    # length cap this replaced could be widened without failing anything.
+    joined = _UNGATED_DEBT - _DEBT_WHEN_THE_RULE_WAS_WRITTEN
+    assert not joined, (
+        f"{sorted(joined)} was added to the ungated-pattern debt list. The "
+        "list records what predates the rule; a pattern that did not predate "
+        "it cannot be exempted from it — gate the pattern instead")
 
 
-def test_the_two_repaired_patterns_stay_repaired():
-    """Both were found live, at real cost. Neither regresses silently."""
-    for pid in ("buyer_concentration_exposure", "tool_to_system_of_record"):
-        assert pid not in _UNGATED_DEBT
-        assert PATTERNS[pid].required_any_signals, f"{pid} lost its gate"
+def test_every_listed_debt_is_still_genuinely_ungated():
+    """A repaired pattern must LEAVE the list, not sit on it as a spare
+    exemption. Together with the subset check above this pins the list to
+    exactly the ungated set — it cannot grow, and it cannot keep a pattern it
+    no longer describes."""
+    stale = {pid for pid in _UNGATED_DEBT if _gated(PATTERNS[pid])}
+    assert not stale, (
+        f"{sorted(stale)} now has an applicability gate and must be removed "
+        "from the debt list")
+
+
+#: A repaired pattern leaves the debt list permanently. The gate each one
+#: needs differs, because what makes a reading true differs: two are true when
+#: any ONE of several mechanisms is evidenced, and one is true only when its
+#: SUBJECT is named. Both are recorded so neither can quietly become a
+#: threshold again.
+_REPAIRED = {
+    # found live: fired on the word "defense" inside "defense-in-depth"
+    "buyer_concentration_exposure": "required_any_signals",
+    # found live: fired on multi_product + developer_surface, and handed
+    # Palantir, HubSpot and Snowflake the same name-substituted sentence
+    "tool_to_system_of_record": "required_any_signals",
+    # found by measurement rather than by a live run: `regulated_buyer +
+    # pricing_gated` qualified it without naming a second buyer at all, which
+    # its own `when_it_does_not_apply` forbids
+    "single_to_multi_segment": "required_signals",
+}
+
+
+@pytest.mark.parametrize("pid,field", sorted(_REPAIRED.items()))
+def test_a_repaired_pattern_stays_repaired(pid, field):
+    """Each was paid for once. None regresses silently."""
+    assert pid not in _UNGATED_DEBT
+    assert getattr(PATTERNS[pid], field), f"{pid} lost its {field} gate"
+
+
+def test_a_repaired_pattern_may_not_be_returned_to_the_debt_list():
+    """The exemption list is the tempting fix for a failing gate, and it is
+    never the right one."""
+    assert not (_UNGATED_DEBT & set(_REPAIRED)), \
+        "a repaired pattern was added back to the ungated debt list"
+
+
+@pytest.mark.parametrize("pid", sorted(PATTERNS))
+def test_a_disconfirmer_is_never_also_required(pid):
+    """A pattern cannot both require a signal and be argued with by it —
+    declared that way the gate and the counter-evidence describe opposite
+    readings, and one of the two is wrong."""
+    p = PATTERNS[pid]
+    required = set(p.required_signals) | set(p.required_any_signals)
+    assert not (required & set(p.disconfirming_signals)), \
+        f"{pid} both requires and is disconfirmed by the same signal"
 
 
 @pytest.mark.parametrize("pid", sorted(PATTERNS))

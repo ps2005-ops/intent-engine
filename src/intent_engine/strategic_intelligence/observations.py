@@ -311,10 +311,30 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
     # the company names more than one kind of buyer. Bare "segments" was
     # removed: it matched any sentence containing the word, including
     # "customer segments" in a marketing page.
-    "segment_split": ("government and commercial", "public and private sector",
-                      "enterprise and small", "consumer and business",
-                      "business units", "public sector",
-                      "commercial customers", "government customers"),
+    #
+    # TWO GROUPS, OR IT IS NOT A SPLIT. Half of this list used to name only
+    # ONE buyer — "public sector", "commercial customers", "government
+    # customers" — and one named none at all: "business units" is the
+    # company's own org chart, not who it sells to. The signal's own label is
+    # "serves more than one clearly different buyer", and the pattern that
+    # depends on it says it does not apply when "only one buyer group is ever
+    # described". Both were contradicted by the detector.
+    #
+    # Every phrase here is a PAIR. A company that only ever mentions the
+    # public sector is a company with one buyer, and the reading built on this
+    # signal — that the organisation is pulling apart to serve a second one —
+    # is not true of it.
+    "segment_split": ("government and commercial",
+                      "commercial and government",
+                      "public and private sector",
+                      "private and public sector",
+                      "enterprise and small", "small and enterprise",
+                      "enterprise and smb", "smb and enterprise",
+                      "consumer and business", "consumers and businesses",
+                      "startups and enterprises",
+                      "individuals and teams",
+                      "self-serve and enterprise",
+                      "developers and enterprises"),
     # specific named customers or deployments, not "trusted by thousands"
     "named_customers": ("case study", "case studies", "customer story",
                         "customer stories", "deployments include",

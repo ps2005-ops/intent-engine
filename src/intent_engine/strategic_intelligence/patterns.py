@@ -340,8 +340,28 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("segment_split", "regulated_buyer",
-                            "pricing_gated"),
-        disconfirming_signals=(),
+                            "pricing_gated", "smb_simplicity"),
+        # THE SUBJECT WAS OPTIONAL. This qualified on any two of
+        # `segment_split`, `regulated_buyer` and `pricing_gated`, so
+        # `regulated_buyer + pricing_gated` was sufficient — "we serve
+        # regulated industries" plus "contact sales for pricing", which
+        # describes a very large share of enterprise software and names no
+        # second buyer at all. Measured on ordinary enterprise-vendor copy
+        # after the system-of-record repair, it was the ONLY ungated pattern
+        # that still asserted itself on generic text.
+        #
+        # `when_it_applies` already said what is required — "the company names
+        # two clearly different buyer groups" — and `segment_split` is exactly
+        # that signal. It is now required rather than one of three ways to
+        # reach a threshold, which makes the gate a restatement of the
+        # pattern's own declared applicability rather than a new rule.
+        required_signals=("segment_split",),
+        # Outside evidence that the product is still chosen by one kind of
+        # buyer, for the reason that buyer chooses it. Independent-vantage
+        # only (see `_OUTSIDE_ONLY_PHRASES`): the company saying it is simple
+        # is marketing, reviewers saying customers stay for the simplicity is
+        # evidence about who the buyer actually is.
+        disconfirming_signals=("smb_simplicity",),
         limitations="Segment language on marketing pages often runs ahead of "
                     "actual revenue mix.",
     ),
