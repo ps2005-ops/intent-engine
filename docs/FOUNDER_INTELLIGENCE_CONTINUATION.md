@@ -576,3 +576,50 @@ no `strategic_report` while the primary served 278.
 * **The visual matrix is broad, not exhaustive.** Nine surfaces measured across
   375/768/1280/1440 in dark and light; share links, Q&A, dashboard and the
   retry state are not covered.
+
+---
+
+# CYCLE 2026-08-06c — the guard was right, the blast radius was not
+
+## One sentence took the whole run
+
+Measured live, after adding the stage and message to the failure log (the old
+line said only "ValueError", and `PersonalError` subclasses it, so it named
+the base class of the thing that failed and no stage):
+
+    stage=composition PersonalError: claim text overclaims: ['always']
+
+Alphabet's SEC 10-K and 10-Q had been read successfully. One claim tripped the
+editorial language wall and the entire run was abandoned.
+
+Claims are validated downstream, when a SECTION is validated — so an
+overclaiming sentence was only caught after it had been folded into a card,
+and taking the card down took the run with it. `_claim` now asks the wall at
+the claim boundary: an optional claim that fails is refused ALONE and logged
+with its id; `u.identity`, `u.offering` and `u.scope` still abort, because a
+page missing what the company sells is worse than no page.
+
+Live result: Alphabet went from five identical failure pages, to five
+identical bounded pages, to **five identical `useful_full` results at 1030
+words** — "businesses that subsidise each other are managed together and
+disclosed apart", read from its own filing.
+
+**Rule: an editorial guard stays strict and fails at the smallest safe scope.**
+**Rule: the wall is never relaxed to make a company synthesise** — no banned
+term was removed, and a test re-validates every surviving claim.
+
+## Two measurement lessons
+
+* **Five runs, not two.** The previous cycle called Alphabet nondeterministic
+  from two samples, one of which was an interim page. Five identical runs
+  showed it was a deterministic abort all along.
+* **Sort captures by mtime, not by name.** The previous cycle reported the
+  bounded-page contradiction as unfixed; it had been fixed, and the file
+  inspected was a stale capture from an earlier build whose run id happened to
+  sort last.
+
+## Still open
+
+* HubSpot and Snowflake still share a regulated/public-sector answer.
+* Dashboard, Q&A, valid share, revoked share, retry state and the system-mode
+  branches remain unmeasured.
