@@ -124,10 +124,31 @@ def _render_section(section: dict) -> str:
 # floor's, so the floor lost the cascade to literals it had no rule for. The
 # fix is the one that file already documents for `.brief` and `.deck` —
 # re-point the variables, do not restyle each rule from outside.
+#
+# That dark audit fixed the DARK values and never re-measured the LIGHT ones
+# these variables were extracted from, so three literals shipped below the
+# floor. Measured live on preview-v3 at 81ac65d, in light mode, against the
+# white canvas the page actually resolves to (`body` sets no background of its
+# own — the earlier "light is fine" reading came from an instrument that parsed
+# that transparency as black and inverted every ratio):
+#
+#   --l-head        #77778f  4.36:1  the "What comes back" / "Where it comes
+#                                    from" section labels, 12.8px at weight
+#                                    600 — normal text, so the floor is 4.5.
+#   --l-place       #9a9ab0  2.75:1  the input placeholders.
+#   --l-field-line  #d5d5e2  1.45:1  the border that says where a field IS.
+#                                    WCAG 1.4.11 asks 3:1, and this is the same
+#                                    defect `webapp.app` already documents
+#                                    fixing in dark (#3a4454 -> #606e88).
+#
+# Darkened along their own hue so the page keeps its cool grey cast rather
+# than turning neutral, and with margin rather than landing exactly on the
+# threshold: 5.14, 4.85 and 3.42. Their dark counterparts below already pass
+# (11.2, 6.34, 3.10) and are deliberately left alone.
 _LANDING_CSS = """
 :root{--l-ink:#1a1a2e;--l-muted:#4a4a63;--l-lede:#3a3a52;--l-label:#444;
-  --l-faint:#555;--l-head:#77778f;--l-line:#e9e9f2;--l-field-bg:#fff;
-  --l-field-line:#d5d5e2;--l-place:#9a9ab0;--l-link:#3a3a8c;--l-accent:#2f2f7a;
+  --l-faint:#555;--l-head:#6b6b88;--l-line:#e9e9f2;--l-field-bg:#fff;
+  --l-field-line:#8888a8;--l-place:#6f6f8c;--l-link:#3a3a8c;--l-accent:#2f2f7a;
   --l-accent-ink:#fff}
 main{max-width:44rem}
 h1{font-size:2.3rem;line-height:1.15;letter-spacing:-.02em;margin:.2em 0 .5rem}

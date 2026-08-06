@@ -224,6 +224,33 @@ border-color:#3a4454;color:#c3cad6}
    decorative, and this rule is only for things you click into. */
 :root button,:root input,:root select,:root textarea{background:#1b2230;
 color:#f3f4f6;border-color:#606e88}
+/* A BORDER-COLOUR WITH NO WIDTH DRAWS NOTHING. The rule above names #606e88
+   and stops there, but the base sheet ships a global `button{border:0}`
+   (presentation._BASE_CSS) that zeroes the WIDTH, so on every <button> that
+   colour had nothing to paint. Measured live on preview-v3 at 81ac65d, in
+   dark mode: the landing page's anonymous-entry CTA rendered #1b2230 on
+   #0f141c — 1.16:1 — a control a reader can read the label of and cannot see
+   the edges of. The inputs passed only because the landing sheet happens to
+   set its own 1px width.
+
+   (Phrased without quoting that button's copy on purpose: this stylesheet is
+   inlined into every page, comments included, so a label quoted here would
+   appear on pages the control itself is switched off for.)
+
+   Checkboxes and radios are excluded on purpose: `:root{color-scheme:dark}`
+   above already hands them a native dark boundary, and giving them an author
+   border makes the engine drop that native rendering — trading a boundary
+   that works for one that also loses the tick. */
+:root button,:root input:not([type=checkbox]):not([type=radio]),
+:root select,:root textarea{border-style:solid;border-width:1px}
+/* ...but a text-styled control is not a box. `nav button` (Log out, Leave
+   demo) and `button.linkish` (the example runs) set a transparent background
+   deliberately so they read as links beside their real <a> siblings. The
+   blanket fill above outranks them, so in dark each one became a flat
+   #1b2230 rectangle at 1.16:1 — no longer a link, not yet a visible button.
+   Give the transparency back and keep the edge off. Both selectors outrank
+   the two rules above, so this holds wherever it lands in the cascade. */
+:root nav button,:root button.linkish{background:transparent;border-width:0}
 :root .why,:root .alt,:root .q,:root .unavailable,:root .state,
 :root .limitation,:root .muted,:root .when{color:#c3cad6}
 /* Deck surfaces that hard-code a light literal rather than var(--panel), and
