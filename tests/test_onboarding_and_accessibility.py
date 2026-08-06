@@ -259,6 +259,42 @@ def test_both_themes_are_styled_never_only_one(guest):
             f"{name} has no dark theme"
 
 
+# WHY THE TEST ABOVE PASSED WHILE THE LANDING PAGE WAS UNREADABLE. Every page
+# ships `_A11Y_CSS`, and that sheet contains the string
+# "prefers-color-scheme:dark" — so asking whether the string is present asks
+# nothing about the page's OWN stylesheet. Measured live on preview-v3 at
+# c57af3b, in dark mode: `.sample-quote` rendered #1a1a2e on #0f141c (1.08:1),
+# `.lede` 1.68:1, and the consent label 1.9:1 — the sentence describing what
+# the visitor was consenting to. The floor could not correct them because
+# `form.analyze label` and `.sample-quote` outrank its selectors.
+#
+# So test the property that actually prevents it: a page's own sheet may not
+# name a colour, because a colour it names is a colour the dark block cannot
+# re-point.
+
+def test_the_landing_sheet_names_no_colour_a_theme_cannot_repoint():
+    from intent_engine.founder_intelligence.presentation import _LANDING_CSS
+    # `:root{...}` is where a literal belongs: once as the light default, once
+    # re-pointed inside the dark block.
+    rules = re.sub(r":root\s*\{[^}]*\}", "", _LANDING_CSS)
+    leaked = re.findall(r"#[0-9a-fA-F]{3,8}\b", rules)
+    assert not leaked, (
+        f"landing rules hard-code {sorted(set(leaked))}; dark mode cannot "
+        "re-point a literal, so these render at light-mode values on a dark "
+        "background")
+
+
+def test_the_landing_sheet_repoints_its_palette_for_dark():
+    from intent_engine.founder_intelligence.presentation import _LANDING_CSS
+    compact = _LANDING_CSS.replace(" ", "").replace("\n", "")
+    assert "@media(prefers-color-scheme:dark)" in compact, \
+        "the landing sheet has no dark block of its own"
+    dark = compact.split("@media(prefers-color-scheme:dark)", 1)[1]
+    # the text a visitor reads first, and the one they must read to consent
+    for token in ("--l-lede:", "--l-label:", "--l-ink:", "--l-field-bg:"):
+        assert token in dark, f"dark mode never re-points {token}"
+
+
 def test_no_page_leaks_an_internal_state_name(guest):
     for name, body in _all_styled_pages(guest).items():
         for internal in ("READY_FOR_FULL_REPORT", "RETRYABLE_EVIDENCE_GAP",
