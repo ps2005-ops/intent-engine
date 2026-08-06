@@ -284,6 +284,34 @@ def test_the_landing_sheet_names_no_colour_a_theme_cannot_repoint():
         "background")
 
 
+def test_the_focus_ring_is_repointed_for_dark_not_left_on_the_light_accent():
+    """Measured on the deployed /login at b66dbe3: the ring rendered #1d4ed8
+    on #0f141c — 2.76:1, under the 3:1 WCAG floor for a non-text indicator, so
+    a keyboard user in dark mode could not reliably see where they were."""
+    from intent_engine.webapp.app import _A11Y_CSS
+
+    def contrast(hex_a, hex_b):
+        def lin(component):
+            component /= 255
+            return (component / 12.92 if component <= 0.03928
+                    else ((component + 0.055) / 1.055) ** 2.4)
+
+        def lum(value):
+            r, g, b = (int(value[i:i + 2], 16) for i in (1, 3, 5))
+            return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+
+        first, second = lum(hex_a), lum(hex_b)
+        hi, lo = max(first, second), min(first, second)
+        return (hi + 0.05) / (lo + 0.05)
+
+    compact = _A11Y_CSS.replace(" ", "").replace("\n", "")
+    dark = compact.split("@media(prefers-color-scheme:dark)", 1)[1]
+    assert "focus-visible{outline-color:#7aa2ff}" in dark, \
+        "dark mode does not re-point the focus ring"
+    assert contrast("#7aa2ff", "#0f141c") >= 3.0
+    assert contrast("#1d4ed8", "#0f141c") < 3.0      # the value it replaced
+
+
 def test_the_landing_sheet_repoints_its_palette_for_dark():
     from intent_engine.founder_intelligence.presentation import _LANDING_CSS
     compact = _LANDING_CSS.replace(" ", "").replace("\n", "")

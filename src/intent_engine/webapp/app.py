@@ -176,6 +176,15 @@ table{display:block;overflow-x:auto}}
 :root{color-scheme:dark}
 body{background:#0f141c;color:#f3f4f6}
 a{color:#7aa2ff}
+/* The focus ring is set once above in the light accent (#1d4ed8), and that
+   colour carried into dark mode unchanged: measured on the deployed /login at
+   b66dbe3, 2.76:1 against #0f141c, under the 3:1 WCAG floor for a non-text UI
+   indicator. A keyboard user in dark mode could not reliably see where they
+   were. `.brief` and `.deck` were already correct because their ring reads
+   var(--accent), which IS re-pointed below; only the global floor hard-coded
+   the literal. Same specificity as the base rule, so it wins on order. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+outline-color:#7aa2ff}
 :where(h1,h2,h3,h4,h5,h6){color:#f3f4f6}
 /* NOT :where() — that zeroes specificity, so these lost to the very class
    rules they correct and the panels stayed light under a dark scheme. */
