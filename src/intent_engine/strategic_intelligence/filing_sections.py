@@ -35,21 +35,29 @@ import re
 from intent_engine.strategic_intelligence import filing_hygiene as FH
 
 #: Ordered by how much a reader gets from them.
+#:
+#: `item_2` is LAST and is there for quarterly reports, where MD&A is Item 2
+#: rather than Item 7. In an annual report Item 2 is Properties, which is why
+#: it must never be reached before Item 7, Item 1 and Item 1A have been tried
+#: -- and in a 10-K at least one of those is always present.
 SECTION_PRIORITY = (
-    "item_7",    # Management's Discussion and Analysis
+    "item_7",    # Management's Discussion and Analysis (annual)
     "item_1",    # Business
     "item_1a",   # Risk Factors
     "item_3",    # Legal Proceedings
     "item_7a",   # Market Risk
+    "item_2",    # MD&A in a 10-Q; Properties in a 10-K
 )
 
 SECTION_NAMES = {
     "item_1": "Item 1 (Business)",
     "item_1a": "Item 1A (Risk Factors)",
+    "item_2": "Item 2",
     "item_3": "Item 3 (Legal Proceedings)",
     "item_7": "Item 7 (Management's Discussion and Analysis)",
     "item_7a": "Item 7A (Quantitative and Qualitative Disclosures About "
                "Market Risk)",
+    "item_8": "Item 8 (Financial Statements and Supplementary Data)",
 }
 
 # Tolerant of case, of "ITEM 1." / "Item 1 -" / "Item 1:" and of the &#160;
@@ -62,7 +70,9 @@ _HEADINGS = (
     ("item_1a", re.compile(r"item\s*1a\b[\s.:\-\u2014]*", re.I)),
     ("item_7a", re.compile(r"item\s*7a\b[\s.:\-\u2014]*", re.I)),
     ("item_7", re.compile(r"item\s*7\b[\s.:\-\u2014]*", re.I)),
+    ("item_8", re.compile(r"item\s*8\b[\s.:\-\u2014]*", re.I)),
     ("item_3", re.compile(r"item\s*3\b[\s.:\-\u2014]*", re.I)),
+    ("item_2", re.compile(r"item\s*2\b[\s.:\-\u2014]*", re.I)),
     ("item_1", re.compile(r"item\s*1\b[\s.:\-\u2014]*", re.I)),
 )
 
@@ -78,6 +88,23 @@ _ANY_ITEM = re.compile(r"item\s*\d{1,2}[a-z]?\b[\s.:\-\u2014]*", re.I)
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 _MIN_PROSE = 80        # a heading followed by less than this is navigation
 _MAX_SPAN = 600
+
+# A CROSS-REFERENCE IS NOT A HEADING. Filings refer to each other constantly:
+# MD&A says "see Part I, Item 1A. Risk Factors", Item 1 says "included in
+# Item 8". Measured on a full Datadog 10-K, those references ended MD&A after
+# 4,263 characters and then labelled 23,410 characters of MD&A prose as Item
+# 1A -- so an excerpt cited to Risk Factors was actually management's
+# discussion.
+#
+# A real heading is the whole start of its line; a reference sits inside a
+# sentence. The rule only applies when the document HAS line-start headings,
+# so a fixture stored as one unbroken blob keeps its previous behaviour rather
+# than losing every section.
+_LINE_START = re.compile(r"(?:\A|\n)[ \t]{0,4}$")
+
+
+def _at_line_start(blob: str, position: int) -> bool:
+    return bool(_LINE_START.search(blob[max(0, position - 8):position]))
 
 
 def looks_like_filing(text: str, url: str = "") -> bool:
@@ -124,11 +151,17 @@ def _normalise(text: str) -> str:
     return re.sub(r"[\xa0\u2007\u202f]", " ", text)
 
 
-def find_sections(text: str) -> dict:
-    """Map section key -> body text, for body headings only.
+def section_spans(text: str) -> list:
+    """Ordered body sections with their offsets INTO `text`.
 
+    Each entry is `{key, name, heading_start, body_start, body_end, body}`.
     A heading whose following text is shorter than `_MIN_PROSE` before the next
     heading is a table-of-contents entry and is skipped.
+
+    Offsets are usable against the caller's own string: `_normalise` only
+    substitutes single characters for single characters, so it never shifts a
+    position. That is what lets retention record where a kept excerpt came
+    from instead of storing a second copy of the filing.
     """
     blob = _normalise(text)
     marks = []
@@ -141,20 +174,37 @@ def find_sections(text: str) -> dict:
     for m in _ANY_ITEM.finditer(blob):
         if m.start() not in known:
             marks.append((m.start(), m.end(), None))
+    anchored = [m for m in marks if _at_line_start(blob, m[0])]
+    if anchored:
+        marks = anchored
     marks.sort()
 
-    out: dict = {}
+    by_key: dict = {}
     for i, (start, end, key) in enumerate(marks):
         stop = marks[i + 1][0] if i + 1 < len(marks) else len(blob)
         if key is None:
             continue                  # boundary only
-        body = _TITLE_TAIL.sub("", blob[end:stop].strip(), count=1).strip()
+        raw = blob[end:stop]
+        lead = len(raw) - len(raw.lstrip())
+        title = _TITLE_TAIL.match(raw[lead:])
+        body_start = end + lead + (title.end() if title else 0)
+        body = blob[body_start:stop].strip()
         if len(body) < _MIN_PROSE:
             continue          # navigation entry, not the section itself
+        offset = blob.index(body[:64], body_start) if body else body_start
         # The LAST qualifying occurrence wins: the body always follows the
         # contents page, so a later match is the real section.
-        out[key] = body
-    return out
+        by_key[key] = {
+            "key": key, "name": SECTION_NAMES.get(key, key), "kind": "item",
+            "heading_start": start, "body_start": offset,
+            "body_end": offset + len(body), "body": body,
+        }
+    return sorted(by_key.values(), key=lambda s: s["heading_start"])
+
+
+def find_sections(text: str) -> dict:
+    """Map section key -> body text, for body headings only."""
+    return {span["key"]: span["body"] for span in section_spans(text)}
 
 
 def _first_substantive_sentences(body: str, *, limit: int = _MAX_SPAN) -> str:
