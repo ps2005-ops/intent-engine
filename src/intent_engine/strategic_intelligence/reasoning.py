@@ -342,6 +342,12 @@ def select_portfolio(hypotheses, *, limit=MAX_DISPLAYED_HYPOTHESES) -> list:
     never handed the same claim twice under different pattern names.
     Deterministic: same inputs, same portfolio.
     """
+    # NOTE ON COUNTER-EVIDENCE AND RANK. Do not add a blanket penalty for
+    # `counter_observation_ids` here: it was tried, and it broke the property
+    # the product deliberately has — the flagship reading is supposed to carry
+    # real counter-evidence, because a lead hypothesis nobody has argued with
+    # is one nobody has tested. Disconfirmation that should cost a reading its
+    # PLACE is declared per pattern instead; see `_demote_contested`.
     ranked = sorted(
         hypotheses,
         key=lambda h: (_CONF_RANK[h.confidence],
@@ -357,6 +363,40 @@ def select_portfolio(hypotheses, *, limit=MAX_DISPLAYED_HYPOTHESES) -> list:
             continue
         chosen.append(candidate)
     return chosen
+
+
+def _demote_contested(hypotheses, patterns_by_id, present):
+    """A reading its own pattern calls contradicted may not LEAD.
+
+    Disconfirming signals only ever softened the confidence wording, so a
+    reading the evidence argues with could still be the first line on the page
+    — and the first line is the one most readers take away. `services_to_product`
+    declares `pricing_published` as blocking: published self-serve pricing is
+    the plainest evidence that the product is already sold without the
+    engagement, so that reading must not lead when another one is available.
+
+    Blocking is declared per pattern, never global: a blanket penalty on
+    counter-evidence removes the property that the flagship reading has been
+    argued with, which is the point of showing counter-evidence at all.
+
+    The reading is not deleted. It keeps its place in the portfolio as a
+    secondary hypothesis, which is where a contested reading belongs.
+    """
+    if len(hypotheses) < 2:
+        return hypotheses
+
+    def blocked(hypothesis):
+        pattern = patterns_by_id.get(hypothesis.pattern_id)
+        return bool(pattern and any(
+            s in present for s in getattr(pattern, "blocking_signals", ())))
+
+    if not blocked(hypotheses[0]):
+        return hypotheses
+    for index, candidate in enumerate(hypotheses[1:], 1):
+        if not blocked(candidate):
+            return ([candidate] + hypotheses[:index]
+                    + hypotheses[index + 1:])
+    return hypotheses                    # every reading is contested; keep order
 
 
 def _build_questions(hypotheses, observations):
@@ -787,6 +827,7 @@ def build_strategic_report(*, company_name, observations,
     hypotheses = kept
 
     hypotheses = select_portfolio(hypotheses)
+    hypotheses = _demote_contested(hypotheses, patterns_by_id, present)
 
     fired_pattern_ids = {h.pattern_id for h in hypotheses}
     used_patterns = [p for p in patterns if p.pattern_id in fired_pattern_ids]

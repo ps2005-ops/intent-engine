@@ -301,6 +301,18 @@ _PRODUCTS = ("o2", "multi_product",
 _SERVICES = ("o3", "services_motion",
              "Acme embeds engineers alongside its customers.",
              "Our implementation team works on-site alongside yours.")
+# The TRANSFER, which is a different claim from having services at all.
+_TRANSFER = ("o4", "productization",
+             "Acme turns delivered work into something sold on its own.",
+             "We productized what we learned delivering those engagements "
+             "into a repeatable product.")
+_PRICING = ("o5", "pricing_published", "Acme publishes its prices.",
+            "Pricing starts at a low monthly price per seat, free plan "
+            "available.")
+_CONSOLIDATION = ("o6", "consolidation",
+                  "Acme positions itself as replacing several tools.",
+                  "One unified platform, a single source of truth replacing "
+                  "several separate tools.")
 
 
 def _fired(*specs):
@@ -316,11 +328,17 @@ def test_a_services_reading_needs_evidence_of_a_service():
     assert "services_to_product" not in _fired(_API, _PRODUCTS)
 
 
-def test_the_services_reading_still_fires_when_the_service_is_observed():
-    """The gate must not be a mute button: with the engagement evidence the
-    pattern is exactly as available as it was before."""
-    assert "services_to_product" in _fired(_API, _PRODUCTS, _SERVICES)
-    assert "services_to_product" in _fired(_PRODUCTS, _SERVICES)
+def test_the_services_reading_still_fires_when_the_transition_is_observed():
+    """The gate must not be a mute button.
+
+    Updated when the contract tightened: the engagement alone no longer
+    qualifies, because almost every large vendor has one. With the engagement
+    AND the transfer it describes, the pattern is exactly as available as it
+    ever was — which is what stops this being a mute button rather than a gate.
+    """
+    assert "services_to_product" in _fired(_API, _PRODUCTS, _SERVICES,
+                                           _TRANSFER)
+    assert "services_to_product" in _fired(_PRODUCTS, _SERVICES, _TRANSFER)
 
 
 def test_removing_it_does_not_silence_the_reading_that_did_fit():
@@ -340,3 +358,117 @@ def test_a_required_signal_must_be_one_the_pattern_qualifies_on():
         required_signals=("services_motion",))
     with pytest.raises(Exception):
         bad.validate()
+
+
+# --- having services is not the same claim as the transition -----------------
+#
+# Requiring `services_motion` was right and was not enough: almost every large
+# vendor publishes a professional-services or implementation page. Measured on
+# the deployed preview, the reading still dominated MongoDB, Cloudflare,
+# HubSpot and Amazon — none of which claim that engagements taught them
+# something they now sell WITHOUT the engagement. That claim is the mechanism
+# the pattern is named for, and it is its own signal.
+
+def _answer(*specs):
+    """The pattern that would be "The answer" — first in the portfolio."""
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    report = build_strategic_report(
+        company_name="Acme", observations=[_sig_obs(*s) for s in specs])
+    return report.hypotheses[0].pattern_id if report.hypotheses else None
+
+
+def test_a_professional_services_page_alone_is_not_the_transition():
+    """The live case: enterprise vendor with implementation services."""
+    assert "services_to_product" not in _fired(_API, _PRODUCTS, _SERVICES)
+
+
+def test_self_serve_saas_with_a_services_page_is_not_the_transition():
+    assert "services_to_product" not in _fired(_PRODUCTS, _SERVICES, _PRICING)
+
+
+def test_an_api_company_with_no_transfer_evidence_is_not_the_transition():
+    assert "services_to_product" not in _fired(_API, _PRODUCTS)
+
+
+def test_a_company_that_describes_the_transfer_still_gets_the_reading():
+    """A genuine services-to-product company must keep it."""
+    assert "services_to_product" in _fired(_API, _PRODUCTS, _SERVICES,
+                                           _TRANSFER)
+    assert "services_to_product" in _fired(_SERVICES, _TRANSFER)
+
+
+def test_the_transfer_reading_is_the_answer_when_nothing_argues_with_it():
+    assert _answer(_API, _PRODUCTS, _SERVICES, _TRANSFER,
+                   _CONSOLIDATION) == "services_to_product"
+
+
+def test_published_pricing_costs_the_reading_its_rank_not_only_its_wording():
+    """Disconfirming evidence has to cost something a reader can see.
+
+    Published self-serve pricing is the plainest evidence that the product is
+    already sold without the engagement. The reading is not deleted — it stays
+    available as a secondary hypothesis — but a reading the evidence argues
+    with must not be the first line on the page when a cleaner one exists.
+    """
+    contested = _fired(_API, _PRODUCTS, _SERVICES, _TRANSFER, _CONSOLIDATION,
+                       _PRICING)
+    assert "services_to_product" in contested, "it must remain available"
+    assert _answer(_API, _PRODUCTS, _SERVICES, _TRANSFER, _CONSOLIDATION,
+                   _PRICING) != "services_to_product"
+
+
+def test_blocking_is_declared_per_pattern_never_applied_globally():
+    """A blanket penalty on counter-evidence was tried first, and was wrong.
+
+    Sorting contested readings down globally broke the property the product
+    deliberately has — `test_flagship_hypothesis_has_real_counter_evidence`:
+    the lead reading is SUPPOSED to carry counter-evidence, because one nobody
+    has argued with is one nobody has tested. Nine tests failed, and they were
+    right to.
+
+    So blocking is a per-pattern declaration, and a pattern may only be blocked
+    by a signal it already declares as arguing against it.
+    """
+    import pytest
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+    from intent_engine.strategic_intelligence.records import ComparablePattern
+
+    declared = [p for p in PATTERN_LIBRARY if p.blocking_signals]
+    assert declared, "no pattern declares blocking signals"
+    for pattern in declared:
+        for signal in pattern.blocking_signals:
+            assert signal in pattern.disconfirming_signals
+
+    bad = ComparablePattern(
+        pattern_id="p", name="n", description="d", mechanism="m",
+        historical_examples=[{"name": "x", "note": "y", "source": "z"}],
+        when_it_applies="a", when_it_does_not_apply="b",
+        qualifying_signals=("multi_product",),
+        disconfirming_signals=(),
+        blocking_signals=("pricing_published",))
+    with pytest.raises(Exception):
+        bad.validate()
+
+
+def test_a_blocked_reading_stays_available_as_a_secondary_hypothesis():
+    """Blocking costs it first place, not its place."""
+    from intent_engine.strategic_intelligence.reasoning import _demote_contested
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+
+    by_id = {p.pattern_id: p for p in PATTERN_LIBRARY}
+
+    class _H:
+        def __init__(self, pid):
+            self.pattern_id = pid
+
+    blocked = _H("services_to_product")
+    clean = _H("tool_to_system_of_record")
+    order = _demote_contested([blocked, clean], by_id, {"pricing_published"})
+    assert order[0] is clean, "a blocked reading is still leading"
+    assert blocked in order, "a blocked reading was dropped, not demoted"
+
+    # with nothing arguing against it, it leads again
+    unblocked = _demote_contested([blocked, clean], by_id, set())
+    assert unblocked[0] is blocked

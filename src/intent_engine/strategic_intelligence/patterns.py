@@ -287,12 +287,23 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("services_motion", "multi_product",
-                            "developer_surface"),
-        # Without evidence of the engagement there is no "services" half of
-        # "services → product", and the reading becomes a claim about how the
-        # company delivers that nothing in the run observed.
-        required_signals=("services_motion",),
+                            "developer_surface", "productization"),
+        # BOTH HALVES, OR IT IS NOT THIS READING.
+        #
+        # `services_motion` alone was not enough. Almost every large vendor
+        # publishes a professional-services or implementation page, so
+        # requiring it removed the reading from Visa and left it dominating
+        # MongoDB, Cloudflare, HubSpot and Amazon — none of which claim that
+        # engagements taught them something they now sell without the
+        # engagement. That claim is `productization`, and it is the mechanism
+        # the pattern is named for. Having services is a fact about delivery;
+        # the transition is a fact about where the margin is going.
+        required_signals=("services_motion", "productization"),
+        # Published self-serve pricing is the plainest evidence that the
+        # product is already sold without the engagement. It now costs the
+        # reading its PLACE as well as its confidence — see `_demote_contested`.
         disconfirming_signals=("pricing_published",),
+        blocking_signals=("pricing_published",),
         limitations="Public pages rarely disclose the revenue mix, so the "
                     "balance between services and product is not observable "
                     "from outside.",

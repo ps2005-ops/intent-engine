@@ -145,6 +145,12 @@ class ComparablePattern:
     #: genuinely interchangeable.
     required_signals: tuple = ()
     disconfirming_signals: tuple = ()
+    #: Disconfirming signals strong enough that this reading may not be
+    #: the PRIMARY one while they are present. It stays in the portfolio
+    #: as a secondary hypothesis. Must be a subset of
+    #: `disconfirming_signals`, so a pattern cannot be blocked by
+    #: something it never declared as arguing against it.
+    blocking_signals: tuple = ()
     limitations: str = ""
 
     def validate(self) -> None:
@@ -158,12 +164,17 @@ class ComparablePattern:
             _require(signal in self.qualifying_signals,
                      f"pattern {self.pattern_id} requires {signal!r}, which is "
                      "not one of its qualifying signals")
+        for signal in self.blocking_signals:
+            _require(signal in self.disconfirming_signals,
+                     f"pattern {self.pattern_id} is blocked by {signal!r}, "
+                     "which is not one of its disconfirming signals")
 
     def as_dict(self) -> dict:
         d = asdict(self)
         d["qualifying_signals"] = list(self.qualifying_signals)
         d["required_signals"] = list(self.required_signals)
         d["disconfirming_signals"] = list(self.disconfirming_signals)
+        d["blocking_signals"] = list(self.blocking_signals)
         return d
 
 

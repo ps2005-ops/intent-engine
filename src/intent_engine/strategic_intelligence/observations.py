@@ -199,6 +199,8 @@ _SIGNAL_RELEVANCE = {
                          "that dependence is hard to unwind",
     "services_motion": "so growth needs people as well as software, and "
                        "margin follows headcount",
+    "productization": "so what the engagements taught is being sold without "
+                      "them, which is the margin the transition is for",
     "pricing_published": "so competitors can price against it directly and "
                          "customers can compare without a conversation",
     "pricing_gated": "so price is set deal by deal, which protects margin and "
@@ -312,6 +314,26 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                         "professional services", "implementation team",
                         "on site with", "bespoke deployment",
                         "solutions engineering"),
+    # THE TRANSFER ITSELF, which is a different claim from having services.
+    # "services → product" is not "this company has a services page"; it is
+    # "what the engagements taught became something sold without them". Almost
+    # every large vendor has the first. Only some describe the second, and the
+    # phrases below are the ones that describe it rather than imply it.
+    #
+    # Measured: with `services_motion` alone required, the reading still
+    # dominated MongoDB, Cloudflare, HubSpot and Amazon, all of which publish
+    # professional-services pages and none of which claimed the transfer.
+    "productization": ("productize", "productized", "productise",
+                       "productised", "productizing",
+                       "what we learned delivering", "learned from delivering",
+                       "learned delivering", "codified into",
+                       "codify what", "packaged into a product",
+                       "packaged as a product", "now available as a product",
+                       "from bespoke to", "turned into a repeatable",
+                       "into a repeatable product", "repeatable offering",
+                       "reusable accelerators", "delivery accelerators",
+                       "reference implementations",
+                       "self-serve version of", "productized service"),
     # price is published vs gated
     "pricing_published": ("per seat", "per user", "starts at", "free plan",
                           "monthly price", "pricing page", "per month"),
@@ -380,6 +402,7 @@ _NEUTRAL_LABEL = {
     "named_customers": "publishes named customers rather than logos alone",
     "developer_surface": "exposes a surface others can build on",
     "services_motion": "delivers through people, not only through software",
+    "productization": "describes turning delivered work into something sold on its own",
     "pricing_published": "publishes its prices",
     "pricing_gated": "keeps pricing behind a sales conversation",
     "regulated_buyer": "sells into regulated or accredited environments",
@@ -792,6 +815,7 @@ _TYPE_FOR_SIGNAL.update({
     "regulated_buyer": "buyer_segment",
     "named_customers": "monetization_ecosystem",
     "services_motion": "messaging",
+    "productization": "messaging",
     "pricing_published": "messaging",
     "pricing_gated": "buyer_segment",
 })
