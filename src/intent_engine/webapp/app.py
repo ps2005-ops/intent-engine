@@ -103,7 +103,7 @@ def central_view_after_headline(thesis: str, headline_view: str) -> str:
 
 _BRIEF_CSS = """
 <style>
-.brief{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--bg:#ffffff;
+.brief{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--ctl:#888aa4;--bg:#ffffff;
 --panel:#f8fafc;--accent:#1d4ed8;--accent-ink:#ffffff;
 font:17px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 color:var(--ink);background:var(--bg);
@@ -130,7 +130,7 @@ padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:8px}
 .brief .layers strong{color:var(--ink)}
 .brief .b-act{display:flex;gap:10px;flex-wrap:wrap;margin:1.8rem 0 1rem}
 .brief .b-act a{display:inline-block;padding:10px 18px;border-radius:9px;
-border:1px solid var(--line);text-decoration:none;color:var(--ink);
+border:1px solid var(--ctl);text-decoration:none;color:var(--ink);
 font-weight:600;font-size:.95rem}
 .brief .b-act a.primary{background:var(--accent);color:var(--accent-ink);
 border-color:var(--accent)}
@@ -139,7 +139,7 @@ border-color:var(--accent)}
 .brief .b-ask{border-top:1px solid var(--line);padding-top:1rem}
 .brief .b-ask label{display:block;font-size:.86rem;color:var(--muted);
 margin-bottom:.35rem}
-.brief .b-ask input{padding:9px 11px;border:1px solid var(--line);
+.brief .b-ask input{padding:9px 11px;border:1px solid var(--ctl);
 border-radius:8px;font-size:1rem;min-width:60%;background:var(--bg);
 color:var(--ink)}
 .brief .b-ask button{padding:9px 16px;border-radius:8px;border:0;
@@ -148,7 +148,7 @@ font-size:.95rem;cursor:pointer}
 @media (max-width:600px){.brief{font-size:16px;padding:6px 14px 30px}
 .brief h1{font-size:1.45rem}.brief .b-ask input{min-width:100%}}
 @media (prefers-color-scheme:dark){
-.brief{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--bg:#0f141c;
+.brief{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--ctl:#606e88;--bg:#0f141c;
 --panel:#161c26;--accent:#7aa2ff;--accent-ink:#0b1220}}
 @media print{.brief .layers,.brief .b-act,.brief .b-ask{display:none}
 .brief{max-width:none}}
@@ -207,7 +207,7 @@ outline-color:#7aa2ff}
    2. The absence of :where(). :where() zeroes specificity, so those rules
       would lose to any plain class selector — including all of these. */
 :root .brief,:root .deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;
---bg:#0f141c;--panel:#161c26;--accent:#7aa2ff;--accent-ink:#0f141c}
+--ctl:#606e88;--bg:#0f141c;--panel:#161c26;--accent:#7aa2ff;--accent-ink:#0f141c}
 :root nav,:root .trust-note,:root .panel{background:#161c26;
 border-color:#3a4454;color:#c3cad6}
 :root nav a,:root nav a:visited,:root nav button,

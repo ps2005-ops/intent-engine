@@ -198,6 +198,99 @@ def test_the_shared_shell_focus_ring_is_visible():
     assert ratio >= 3.0, f"focus ring is {ratio:.2f}:1"
 
 
+# --- decorative borders and interactive boundaries are different things -----
+#
+# `--line` drew the slide frame, the section rules AND the edge of every
+# control, so one value had to be both a hairline divider (no WCAG floor) and
+# an interactive boundary (1.4.11 asks 3:1). It was tuned as a divider. The
+# split gives the clickable edge its own token and leaves separators alone —
+# darkening every rule in the product to fix a button is a different design,
+# silently applied.
+_DECK = None
+_BRIEF = None
+
+
+def _sheets():
+    global _DECK, _BRIEF
+    if _DECK is None:
+        from intent_engine.strategic_intelligence.slides import _CSS
+        from intent_engine.webapp.app import _BRIEF_CSS
+        _DECK = _CSS.replace(" ", "").replace("\n", "")
+        _BRIEF = _BRIEF_CSS.replace(" ", "").replace("\n", "")
+    return _DECK, _BRIEF
+
+
+def _token(compact, selector, name, *, dark):
+    """Read a custom property out of the sheet production ships."""
+    head, _, tail = compact.partition(_DARK_AT)
+    region = tail if dark else head
+    block = region.split(selector, 1)[1].split("}", 1)[0]
+    m = re.search(rf"{re.escape(name)}:(#[0-9a-fA-F]{{3,6}})", block)
+    assert m, f"{name} missing from {selector} ({'dark' if dark else 'light'})"
+    return m.group(1)
+
+
+@pytest.mark.parametrize("which", ["deck", "brief"])
+def test_the_interactive_border_token_meets_the_control_floor(which):
+    """#d1d5db was 1.47:1 — the slide nav, the numbered dots, the brief's
+    action buttons and its follow-up input all wore it."""
+    deck, brief = _sheets()
+    sheet, sel = (deck, ".deck{") if which == "deck" else (brief, ".brief{")
+    light = _token(sheet, sel, "--ctl", dark=False)
+    assert contrast(light, _LIGHT_CANVAS) >= 3.0, \
+        f"{which} --ctl is {contrast(light, _LIGHT_CANVAS):.2f}:1 in light"
+    dark = _token(sheet, sel, "--ctl", dark=True)
+    assert contrast(dark, _DARK_CANVAS) >= 3.0, \
+        f"{which} --ctl is {contrast(dark, _DARK_CANVAS):.2f}:1 in dark"
+
+
+@pytest.mark.parametrize("which", ["deck", "brief"])
+def test_decorative_separators_were_not_dragged_up_with_the_controls(which):
+    """The point of the split. If `--line` had simply been darkened to clear
+    the control floor, every hairline in the product would have thickened —
+    a redesign disguised as an accessibility fix. A divider is allowed to
+    stay quiet."""
+    deck, brief = _sheets()
+    sheet, sel = (deck, ".deck{") if which == "deck" else (brief, ".brief{")
+    line = _token(sheet, sel, "--line", dark=False)
+    ctl = _token(sheet, sel, "--ctl", dark=False)
+    assert line != ctl, "the two roles collapsed back into one value"
+    assert contrast(line, _LIGHT_CANVAS) < 3.0, \
+        "the decorative separator was darkened to control strength"
+
+
+@pytest.mark.parametrize("which", ["deck", "brief"])
+def test_every_clickable_edge_uses_the_control_token(which):
+    """A rule that draws a border on something you click must read --ctl.
+    This is the assertion that catches a NEW control added later with
+    `border:1px solid var(--line)` copied from the rule above it."""
+    deck, brief = _sheets()
+    sheet = deck if which == "deck" else brief
+    interactive = ([".deck.nava,.deck.acta,.deck.actbutton{", ".deck.dotsa{"]
+                   if which == "deck" else
+                   [".brief.b-acta{", ".brief.b-askinput{"])
+    for sel in interactive:
+        assert sel in sheet, f"{sel} vanished — update this test with the rule"
+        block = sheet.split(sel, 1)[1].split("}", 1)[0]
+        assert "var(--ctl)" in block, f"{sel} still draws its edge from --line"
+
+
+def test_the_accent_filled_control_is_not_boxed_by_the_split():
+    """The primary slide action is a filled accent control; giving it a grey
+    control edge would be worse, not better."""
+    deck, _ = _sheets()
+    block = deck.split(".deck.nava.primary{", 1)[1].split("}", 1)[0]
+    assert "border-color:var(--accent)" in block
+
+
+def test_the_shipped_stylesheets_have_balanced_comments():
+    """A stray `*/` turns the rest of the sheet into text on the page."""
+    from intent_engine.strategic_intelligence.slides import _CSS
+    from intent_engine.webapp.app import _A11Y_CSS as floor
+    for name, sheet in (("deck", _CSS), ("floor", floor)):
+        assert sheet.count("/*") == sheet.count("*/"), f"{name} comments"
+
+
 def test_a_flat_dark_button_fill_would_not_pass_on_its_own():
     """Why the border is load-bearing rather than decorative: the fill the
     dark floor gives a button is nearly the page colour."""

@@ -1196,7 +1196,19 @@ def deck_is_presentable(slides) -> bool:
 
 _CSS = """
 <style>
-.deck{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--bg:#ffffff;
+/* TWO KINDS OF BORDER, TWO TOKENS. `--line` drew the slide frame, the meta
+   rule AND the edge of every control — so the one value had to satisfy both a
+   decorative divider (no WCAG floor) and an interactive boundary (1.4.11 asks
+   3:1). It was tuned as a divider, and the controls inherited that: measured
+   on the deployed Palantir deck at 485ec4b, in light mode, the slide nav, the
+   follow-up question button and the numbered dots all rendered #d1d5db at
+   1.47:1. (Labels are described rather than quoted here: this stylesheet is
+   inlined into the page, comments and all.)
+   Darkening `--line` would have fixed the controls by making every hairline
+   divider heavy, which is a different design applied silently. So the
+   interactive edge gets its own token; separators keep theirs. Dark mode
+   already had two values for this and only needed the name. */
+.deck{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--ctl:#888aa4;--bg:#ffffff;
 --panel:#f8fafc;--accent:#1d4ed8;--accent-ink:#ffffff;
 font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 color:var(--ink);background:var(--bg);max-width:900px;margin:0 auto;
@@ -1237,7 +1249,7 @@ margin:16px 0 8px}
 .deck .nav{display:inline-flex;gap:8px}
 .deck .nav a,.deck .act a,.deck .act button{display:inline-block;
 font-size:.9rem;font-weight:600;text-decoration:none;padding:9px 16px;
-border-radius:9px;border:1px solid var(--line);background:#fff;
+border-radius:9px;border:1px solid var(--ctl);background:#fff;
 color:var(--ink);cursor:pointer}
 .deck .nav a.primary{background:var(--accent);color:var(--accent-ink);
 border-color:var(--accent)}
@@ -1246,7 +1258,7 @@ border-color:var(--accent)}
 .deck .count{color:var(--muted);font-size:.86rem;font-variant-numeric:tabular-nums}
 .deck .dots{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 .deck .dots a{width:26px;height:26px;display:grid;place-items:center;
-border-radius:50%;border:1px solid var(--line);font-size:.72rem;
+border-radius:50%;border:1px solid var(--ctl);font-size:.72rem;
 text-decoration:none;color:var(--muted);background:#fff}
 .deck .act{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .deck .cites{margin-top:14px}
@@ -1265,7 +1277,7 @@ border-top:1px solid var(--line);padding-top:10px}
 .deck .stage{border:none;background:none}
 .deck .cites[open],.deck .cites{display:block}}
 @media (prefers-color-scheme:dark){
-.deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--bg:#0f141c;
+.deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--ctl:#606e88;--bg:#0f141c;
 --panel:#161c26;--accent:#7aa2ff;--accent-ink:#0b1220}
 .deck .nav a,.deck .act a,.deck .dots a{background:#1b222e;color:var(--ink)}}
 </style>
