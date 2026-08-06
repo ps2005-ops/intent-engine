@@ -21,6 +21,9 @@ from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
 from intent_engine.company_ingestion.fetch import safe_fetch
+from intent_engine.company_ingestion.filing_text import (
+    is_filing_document, parse_filing_html,
+)
 from intent_engine.company_ingestion.parsing import parse_html, readable_title
 from intent_engine.company_ingestion.pasted import pasted_source
 from intent_engine.company_ingestion.readiness import (
@@ -472,6 +475,20 @@ class CompanyIngestionService:
                           "modified_date": "", "links": [],
                           "extraction_mode": "pdf",
                           "blocks_found": 0}
+            elif is_filing_document(url=candidate["url"],
+                                    form=candidate.get("form", "")):
+                # A regulatory filing is not a web page and is not parsed like
+                # one. `parse_html` buffers text only inside `<p>`/`<li>`/`<td>`
+                # and a modern inline-XBRL filing contains NONE of the first
+                # two — Datadog's 10-K has zero `<p>` and 4,857 `<span>`, so
+                # 93% of the document was silently discarded and Item 7 never
+                # reached a detector. Ordinary pages keep the ordinary parser.
+                parsed = parse_filing_html(
+                    body, url=candidate["url"],
+                    form=candidate.get("form", ""),
+                    truncated=bool(result.get("truncated")),
+                    status_code=result.get("status_code", 200),
+                    mime_type=result.get("mime_type", "text/html"))
             else:
                 parsed = parse_html(body)
             if not parsed["text"].strip():
@@ -540,11 +557,19 @@ class CompanyIngestionService:
                             else len(body.encode())),
                 title=readable_title(parsed["title"],
                                      candidate.get("title")),
-                text_content=parsed["text"][:120_000],
+                # A FILING arrives already retained section by section, under
+                # the same total bound. Slicing it again from the front would
+                # reintroduce exactly the failure that retention exists to
+                # remove — Item 1 alone runs to 98,000 characters in a Datadog
+                # 10-K, so a front cut at 120,000 stores Business and stops
+                # before MD&A. Everything else keeps the flat cap it had.
+                text_content=(parsed["text"] if parsed.get("filing")
+                              else parsed["text"][:120_000]),
                 meta_description=parsed["meta_description"][:500],
                 freshness=freshness,
                 extraction_mode=parsed.get("extraction_mode", "body"),
-                blocks_found=parsed.get("blocks_found") or 0)
+                blocks_found=parsed.get("blocks_found") or 0,
+                filing=parsed.get("filing"))
 
     def _fail(self, run_id, domain, candidate_id, failure_type, message,
               retryable):

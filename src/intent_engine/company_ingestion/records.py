@@ -204,7 +204,8 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
                      meta_description="", freshness="CURRENT",
                      retrieval_status="OK", privacy="public",
                      origin_note="", source_class="company_owned",
-                     extraction_mode="body", blocks_found=0) -> dict:
+                     extraction_mode="body", blocks_found=0,
+                     filing=None) -> dict:
     assert_no_secret(text_content[:20000], where="retrieved source text")
     if privacy not in PRIVACY_CLASSES:
         raise IngestionError(f"unknown privacy class {privacy!r}")
@@ -225,7 +226,18 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
             # WHERE the text came from. A document recovered only from
             # og:description is not the same evidence as a document whose body
             # was read, and every gate downstream was blind to the difference.
-            "extraction_mode": extraction_mode, "blocks_found": blocks_found}
+            "extraction_mode": extraction_mode, "blocks_found": blocks_found,
+            # WHAT WAS READ, for a regulatory filing: the quality verdict, the
+            # sections located, and the span each retained excerpt was cut
+            # from. Absent (None) for every other kind of document, so no
+            # existing consumer changes shape.
+            #
+            # This exists so nothing downstream has to re-derive from one
+            # front-truncated blob what the parser already established. "We
+            # retrieved the 10-K" and "we can read the 10-K" were the same
+            # fact to every gate, which is how a cover page travelled as an
+            # annual report.
+            **({"filing": filing} if filing else {})}
 
 
 def failure_record(*, failure_id, run_id, candidate_id, failure_type,
