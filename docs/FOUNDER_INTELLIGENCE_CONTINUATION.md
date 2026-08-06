@@ -166,3 +166,127 @@ Demo limit is 10 analyses/IP/rolling hour (`demo_ip_analyses_per_hour`). It is
 an abuse guardrail on a public URL — do not raise it to speed up testing.
 
 PR #14 stays **draft**. Production stays on `119d345`. Do not merge.
+
+---
+
+# 2026-08-05 — filings became readable
+
+Branch `feat/founder-decision-experience-v3`, deployed and verified on
+`b6db86d`. Suite 3885 passed, guard EXIT=0. Production and PR #14 untouched.
+
+## 10. THE DEFECT, AND WHY IT LOOKED LIKE SOMETHING ELSE
+
+`parse_html` buffers character data only while a `_BLOCK` tag is open, and its
+block set is the vocabulary of a hand-written page: `p`, `h1`-`h6`, `li`, `td`.
+Datadog's 2025 10-K contains **zero** `<p>`, **zero** headings, **zero** `<li>`
+— 1,878 `<div>` and 4,857 `<span>`. Every narrative paragraph was discarded and
+only the 7,147 table cells survived: 25,787 characters of a 2,086,014-byte
+document.
+
+It was not truncation. The parser walked the whole document — the last text it
+produced was the signature page — and threw away 93% of it. Three cycles read
+that 25,787 as "the fetch stopped early" and went looking at byte caps and
+document selection. **A short extract is not evidence of a short read.** Check
+whether the tags carrying the text are in the block set before touching the
+network layer.
+
+| | before | after |
+|---|---|---|
+| Datadog 10-K extracted | 25,787 | 382,003 |
+| sections located | 0 body | 1, 1A, 2, 3, 7, 7A, 8 |
+| filing propositions | 0 | 9 (7 survive retention) |
+| what a reader saw | company blog | Item 7 MD&A, cited to the 10-K |
+
+## 11. RULES THAT NOW HOLD
+
+**Filings are parsed by `company_ingestion/filing_text.py`, not `parse_html`.**
+Gated on the document being served from EDGAR or already identified as a
+filing. Ordinary pages are untouched — that separation is deliberate, and
+`test_non_filing_extraction_is_unchanged` fails if it erodes.
+
+**Extraction quality is explicit.** Nine states. "We retrieved the 10-K" and
+"we can read the 10-K" were the same fact to every gate, which is how a cover
+page travelled as an annual report for three cycles. `COVER_ONLY` is a claim
+about volume, never about Item numbering — a 10-K/A carries only the items it
+amends and is a complete read of itself.
+
+**Retention is section-aware and every section gets an equal reserve first.**
+Front truncation at 120,000 carries 4 of the 9 propositions the Datadog 10-K
+supports; the equal-reserve allocation carries 7 under the same bound. Item 1
+runs to 39,000 characters and Item 1A to 149,000 — either could eat the budget,
+and neither may.
+
+**Topical spans are funded from their own reserve.** Item 1A's reserve buys its
+first 24,000 characters, so customer concentration and supplier dependency —
+tens of thousands of characters in — are only reachable by looking for them.
+Sharing one pool with the Items cost six of nine propositions when measured.
+
+**A cross-reference is not a heading, and a heading is not a section.** "See
+Part I, Item 1A" inside MD&A ended MD&A at 4,263 characters and labelled 23,410
+characters of it as Risk Factors. A real heading starts its line. A 10-Q prints
+"Item 2" twice and only one of them is MD&A.
+
+**Which Item carries MD&A depends on the form.** 7 in an annual report, 2 in a
+quarterly one. Read with the annual order a 10-Q reaches Financial Statements
+and serves litigation boilerplate.
+
+**Prose about the document is not prose about the company.** This is the one to
+remember. Filtering a section's opening framing phrase by phrase does not
+converge — removing one promotes the next, measured across five filers and
+three deploys. Substance begins at the first real subheading; go there.
+
+**Public identifiers are not credentials.** A cover page prints the commission
+file number beside the IRS employer number and the naive card pattern matched
+the pair, dropping a whole 8-K. Luhn separates the shape from the thing without
+weakening detection.
+
+**Say only what was established.** A registrant whose filing names the subject
+is not thereby a competitor; it is "Another registrant's filing".
+
+## 12. MEASURED THIS CYCLE
+
+Extraction, seven filers, all `FULL_BODY_CONFIRMED` with all seven sections
+except where noted:
+
+| filer | raw | old | new |
+|---|---|---|---|
+| Datadog 10-K | 2,086,014 | 25,787 | 382,003 |
+| Microsoft 10-K | 8,585,501 | 268,258 | 319,417 |
+| Caterpillar 10-K | 6,100,469 | 71,013 | 428,519 |
+| NVIDIA 10-K | 1,967,816 | 24,899 | 334,003 |
+| Amazon 10-K | 1,968,342 | 33,724 | 279,996 |
+| Caterpillar 2007 (pre-XBRL) | 619,098 | 30,304 | 97,845 |
+| Shopify 10-K/A | 741,610 | 49,032 | 145,228 (partial, correctly) |
+
+Edge cases classified correctly: EDGAR index → `INDEX_ONLY`; XBRL schema →
+`XBRL_METADATA_ONLY`; 8-K → `FULL_BODY_CONFIRMED` (no Items, by design).
+
+Deployed gate on `b6db86d`, sequential, fresh guest session each:
+
+| company | outcome | first evidence |
+|---|---|---|
+| Datadog | FULL, 973 w | 10-K Item 7 — "Datadog is the AI-powered observability…" |
+| Microsoft | FULL, 1,004 w | 10-K Item 7 — "Microsoft is a technology company…" |
+| Shopify | FULL, 1,123 w | 10-K — "We believe we can help merchants of all verticals…" |
+| Stripe | FULL, 831 w | another registrant's filing (see §13) |
+| Constellation Software | WITHHELD, correctly | no SEC filings exist — TSX-only issuer |
+| Caterpillar | BOUNDED, legitimately | caterpillar.com timed out; both filings read |
+
+No raw `Bad Request` in any run. Dark and light both pass at 390 px: 42 text
+elements, 0 below WCAG AA 4.5:1, `scrollWidth == 390` in both themes.
+
+## 13. STILL OPEN
+
+**Third-party filings surface the filer, not the mention.** Stripe's run cites
+Infinite Group's 10-K and shows Infinite Group describing *itself*. The label
+is now honest and the excerpt is no longer boilerplate, but the adapter should
+return the span that names the subject. Start at `classify_mention`.
+
+**A filings-shaped limitation is used where there are no filings.**
+Constellation Software's withheld page says "the company's filings carry this,
+so it is stated under legal obligation" as the minimum needed — for a company
+with no SEC filings in the run. The template is unconditional.
+
+**Not attempted this cycle:** the authenticated acceptance runner, the
+20-company matrix, and the ≥90% useful-rate measurement. §5.1 (brief under
+word target) and §5.2 (`<style>` inside `<main>`) are unchanged.
