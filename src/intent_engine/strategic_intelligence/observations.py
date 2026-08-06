@@ -411,7 +411,12 @@ _OUTSIDE_ONLY_PHRASES = {
     "merchant_outcome_positioning": ("helped us grow", "grew our sales",
                                      "increased our revenue"),
 }
+from intent_engine.strategic_intelligence import filing_detectors as FD
 from intent_engine.strategic_intelligence import filing_sections as FS
+
+
+def FD_looks_like_filing(text: str) -> bool:
+    return FS.looks_like_filing(text)
 from intent_engine.strategic_intelligence.evidence_classes import (
     INDEPENDENT_CLASSES as _INDEPENDENT_CLASSES,
 )
@@ -429,6 +434,14 @@ def _detect_signals(text: str, source_class: str = "company_owned") -> list:
     set always. A company outside every domain library still has a strategy."""
     text = text or ""
     signals = list(_detect_neutral_signals(text))
+    # FILINGS ARE THEIR OWN DOMAIN. The commerce library never matches a
+    # 10-K from a company that does not sell commerce software, so a filing
+    # contributed nothing even after section extraction found its prose.
+    # Source-specific detection, same canonical observation -- NOT a wider
+    # global vocabulary, and NOT an admission bypass: every filing rule needs
+    # a stated mechanism, so descriptive prose still fails closed.
+    if FD_looks_like_filing(text):
+        signals += [s_ for s_ in FD.detect(text) if s_ not in signals]
     if in_commerce_domain(text):
         signals += [sig for sig, phrases in _SIGNAL_KEYWORDS.items()
                     if _any_phrase(text, phrases)]
@@ -742,6 +755,13 @@ def derive_observations(documents, *, company: str = "") -> list:
 # so nothing downstream needs to know there are two libraries.
 _SIGNAL_KEYWORDS.update(_NEUTRAL_SIGNAL_KEYWORDS)
 _SIGNAL_LABEL.update(_NEUTRAL_LABEL)
+# Filing propositions carry their own label and observation type, so the
+# taxonomy stays the single source of truth for both.
+_SIGNAL_LABEL.update({k: v["label"] for k, v in FD.PROPOSITIONS.items()})
+_TYPE_FOR_SIGNAL.update({k: v["type"] for k, v in FD.PROPOSITIONS.items()})
+# A signal with no stated consequence produces a bullet that restates itself
+# and stops, so the taxonomy carries the consequence too.
+_SIGNAL_RELEVANCE.update({k: v["relevance"] for k, v in FD.PROPOSITIONS.items()})
 _TYPE_FOR_SIGNAL.update({
     "multi_product": "product_surface",
     "consolidation": "product_surface",
