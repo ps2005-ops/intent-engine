@@ -72,7 +72,6 @@ _FURNITURE = tuple(re.compile(p, re.I) for p in (
     r"\bsignatures?\s*$", r"\bpursuant to the requirements of the securities\b",
     r"\bhas duly caused this report to be signed\b",
     # safe-harbour boilerplate
-    r"\bforward-looking statements\b.{0,40}\bwithin the meaning\b",
     r"\bprivate securities litigation reform act\b",
     r"\bactual results (?:could|may) differ materially\b",
     # SECTION-OPENING FRAMING. Every Item begins by telling the reader how to
@@ -96,8 +95,14 @@ _FURNITURE = tuple(re.compile(p, re.I) for p in (
     r"\b(?:this|the following)\s+(?:discussion|md&a|section)\b",
     r"\bis intended to (?:help|assist|provide)\b.{0,40}\breader\b",
     r"\bstatements? (?:other than|of historical facts?)\b",
-    r"\bforward-looking statements?\b.{0,60}"
-    r"\b(?:subject to|risks and uncertainties)\b",
+    # SAFE HARBOUR IS ALWAYS ABOUT THE DOCUMENT. Three narrower rules were
+    # tried and each was defeated by the next filing's phrasing: "within
+    # the meaning", then "subject to risks and uncertainties", then
+    # "Examples of forward-looking statements include, but are not limited
+    # to (i) projections of sales, income or loss". A sentence that names
+    # forward-looking statements at all is telling the reader how to weigh
+    # the filing, never what the company does.
+    r"\bforward.looking statements?\b",
     r"\bcautionary statements?\b",
     r"\bnotes thereto\b",
     r"\b(?:described|discussed|included) elsewhere in this\b",
