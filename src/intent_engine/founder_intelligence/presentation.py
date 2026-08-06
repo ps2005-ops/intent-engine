@@ -227,7 +227,14 @@ padding:.1rem .15rem}}
 label{display:block;margin:.4rem 0 .3rem;font-weight:500}
 input[type=text],input[type=email],input[type=password],input[type=url],
 input:not([type]),textarea,select{width:100%;max-width:34rem;box-sizing:border-box;
-padding:.55rem .7rem;border:1px solid #cfd0dc;border-radius:8px;font:inherit;
+/* #cfd0dc was 1.53:1 on the white field — the same WCAG 1.4.11 defect the
+   landing sheet had at #d5d5e2, but in the SHARED shell, so it reached every
+   form outside the landing page: login, the follow-up question box on a
+   result, the add-a-source form. Found on the deployed Palantir result at
+   485ec4b, in light mode, after the landing fix had already shipped —
+   fixing one sheet says nothing about the other. #888aa4 is 3.38:1,
+   alongside the landing's 3.42:1. */
+padding:.55rem .7rem;border:1px solid #888aa4;border-radius:8px;font:inherit;
 background:#fff;color:inherit}
 textarea{min-height:6rem;resize:vertical}
 input:focus,textarea:focus,select:focus{outline:2px solid #6b6be0;

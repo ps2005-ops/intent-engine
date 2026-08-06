@@ -166,6 +166,38 @@ def test_text_styled_buttons_do_not_become_flat_boxes_in_dark():
     assert "background:transparent" in dark
 
 
+def test_the_shared_shell_field_border_is_visible_too():
+    """Fixing one stylesheet says nothing about the other.
+
+    The landing sheet's border was corrected first. `_BASE_CSS` — the shell
+    every OTHER surface uses, so login, the follow-up question box on a
+    result, and the add-a-source form — still carried #cfd0dc at 1.53:1, and
+    it took a live sweep of a deployed result page to find it. Parsed out of
+    the sheet for the same reason as everything else here.
+    """
+    from intent_engine.founder_intelligence.presentation import _BASE_CSS
+    compact = _BASE_CSS.replace(" ", "").replace("\n", "")
+    # the shared field rule, up to the end of its declaration block
+    block = compact.split("input:not([type]),textarea,select{", 1)[1]
+    block = block.split("}", 1)[0]
+    found = re.search(r"border:1pxsolid(#[0-9a-fA-F]{3,6})", block)
+    assert found, f"shared field rule declares no border colour: {block[:120]}"
+    colour = found.group(1)
+    ratio = contrast(colour, _LIGHT_CANVAS)
+    assert ratio >= 3.0, \
+        f"shared field border {colour} is {ratio:.2f}:1 on the white field"
+
+
+def test_the_shared_shell_focus_ring_is_visible():
+    """The ring is the only thing telling a keyboard user where they are."""
+    from intent_engine.founder_intelligence.presentation import _BASE_CSS
+    compact = _BASE_CSS.replace(" ", "").replace("\n", "")
+    found = re.search(r"outline:2pxsolid(#[0-9a-fA-F]{3,6})", compact)
+    assert found, "shared shell declares no focus outline colour"
+    ratio = contrast(found.group(1), _LIGHT_CANVAS)
+    assert ratio >= 3.0, f"focus ring is {ratio:.2f}:1"
+
+
 def test_a_flat_dark_button_fill_would_not_pass_on_its_own():
     """Why the border is load-bearing rather than decorative: the fill the
     dark floor gives a button is nearly the page colour."""
