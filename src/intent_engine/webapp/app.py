@@ -1751,9 +1751,47 @@ class WebApp:
                 f'requests, or require JavaScript to render. A failed '
                 f'retrieval is not evidence that anything is missing in the '
                 f'real world.</p>{detail_block}'
+                f'{self._targeted_retry_action(session, run_id)}'
                 f'<p><a href="/">Start a new analysis</a></p>'
                 f'</main></body></html>')
         return self._html(body)
+
+    def _targeted_retry_action(self, session, run_id) -> str:
+        """The second look, offered here only when it has somewhere to go.
+
+        `_insufficient_evidence_page` has offered this since it was written.
+        This page — the one a reader gets when the run produced no report at
+        all — never did, so the only exit was "Start a new analysis", which
+        re-runs everything from scratch and pays for the whole analysis again.
+        Measured on a run whose sources were all unreachable: `retry_state`
+        returned allowed (FAILED is retryable by design) and
+        `_has_untried_sources` returned True — the machinery for a cheap,
+        targeted second look was ready and nothing on the page reached it.
+
+        The condition is deliberately the same one the other page uses rather
+        than a new one. A retry with nowhere new to look is a button that can
+        only repeat itself, and `_insufficient_evidence_page` is right that
+        this is worse than no button: it looks like progress. So both gates
+        apply — somewhere new to go, AND a retry the run is actually owed
+        (ownership, not already running, budget not spent).
+        """
+        try:
+            if not self._has_untried_sources(run_id):
+                return ""
+            if not self.retry_state(session, run_id).get("allowed"):
+                return ""
+        except Exception:                       # never break the failure page
+            return ""
+        csrf = _e(session.get("csrf", "")) if session else ""
+        return (f'<form action="/runs/{_e(run_id)}/retry" method="post" '
+                f'class="action">'
+                f'<input type="hidden" name="csrf" value="{csrf}">'
+                f'<button type="submit">Look again for the missing evidence'
+                f'</button>'
+                f'<p class="why">Runs one more targeted search for the kinds '
+                f'of source that are missing, skipping everything that '
+                f'already failed. Nothing already verified is discarded.</p>'
+                f'</form>')
 
     # =====================================================================
     # PREVIEW-ONLY ACCEPTANCE RUNS
