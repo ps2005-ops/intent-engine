@@ -3063,6 +3063,15 @@ class WebApp:
     def _slides_page(self, session, run_id):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
+        # THE SAME GUARD `_run_page` HAS, WHICH THIS ROUTE NEVER GOT. A FAILED
+        # run composed no report, and building a deck from one raised —
+        # measured live on preview-v3 (Alphabet, https://abc.xyz, run
+        # 01KZB2PCVR1A5SFVQTA2B9FYE5): `/runs/{id}` and `/full` answered 200
+        # and `/slides` answered 500 for the same run, on a link the layer nav
+        # offers the reader.
+        if self._is_real_run(run_id) \
+                and self.ci.store.run_state(run_id) == "FAILED":
+            return self._failed_run_page(session, run_id)
         report = self._strategic_report_for(run_id)
         if report is None:
             return self._redirect(f"/runs/{run_id}/full")

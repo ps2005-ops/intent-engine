@@ -452,7 +452,8 @@ def test_gate_g_a_failed_transition_does_not_erase_evidence_that_exists(
     app.ci._transition(run_id, meta["domain"], "FAILED")
     assert app.ci.store.run_state(run_id) == "FAILED"
 
-    for path in (f"/runs/{run_id}", f"/runs/{run_id}/full"):
+    for path in (f"/runs/{run_id}", f"/runs/{run_id}/full",
+                 f"/runs/{run_id}/slides"):
         status, _, body = c.request("GET", path)
         assert "no approved source could be retrieved" not in body, (
             f"{path} denies evidence the same store still holds")
