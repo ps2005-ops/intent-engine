@@ -95,7 +95,9 @@ _FURNITURE = tuple(re.compile(p, re.I) for p in (
     r"\bthe following discussion and analysis\b",
     r"\b(?:this|the following)\s+(?:discussion|md&a|section)\b",
     r"\bis intended to (?:help|assist|provide)\b.{0,40}\breader\b",
-    r"\bstatements? (?:other than|of historical fact)\b",
+    r"\bstatements? (?:other than|of historical facts?)\b",
+    r"\bforward-looking statements?\b.{0,60}"
+    r"\b(?:subject to|risks and uncertainties)\b",
     r"\bcautionary statements?\b",
     r"\bnotes thereto\b",
     r"\b(?:described|discussed|included) elsewhere in this\b",

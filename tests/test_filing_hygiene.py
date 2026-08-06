@@ -144,3 +144,39 @@ def test_a_decision_stored_before_this_rule_is_cleaned_on_rehydration():
         "verified": [DATADOG_SLIDE_1, "Revenue increased 26%."]})
     assert not any("PURSUANT TO SECTION" in v for v in d.verified)
     assert d.verified
+
+
+# =============================================================================
+# Safe-harbour boilerplate, measured on the deployed preview
+#
+# A Stripe run cited another registrant's 10-K and showed, as the evidence:
+# "Readers of this report are advised that this document contains both
+# statements of historical facts and forward-looking statements." The existing
+# rule required "statements ... within the meaning", and the plural in
+# "historical facts" defeated the singular pattern that was meant to catch it.
+# =============================================================================
+
+@pytest.mark.parametrize("boilerplate", [
+    "Readers of this report are advised that this document contains both "
+    "statements of historical facts and forward-looking statements.",
+    "All statements other than statements of historical fact are "
+    "forward-looking statements.",
+    "Forward-looking statements are subject to certain risks and "
+    "uncertainties, which could cause actual results to differ.",
+    "This discussion contains forward-looking statements that involve risks "
+    "and uncertainties.",
+])
+def test_safe_harbour_boilerplate_is_furniture(boilerplate):
+    assert FH.is_filing_furniture(boilerplate)
+
+
+@pytest.mark.parametrize("real", [
+    "Stripe is a financial services platform that helps businesses accept "
+    "payments and manage money movement.",
+    "Total sales and revenues for 2025 were $67.589 billion, an increase of "
+    "$2.780 billion, or 4 percent, compared with 2024.",
+    "We derive substantially all of our revenue from subscriptions to our "
+    "platform, which we sell on an annual basis.",
+])
+def test_real_disclosure_is_not_furniture(real):
+    assert not FH.is_filing_furniture(real)

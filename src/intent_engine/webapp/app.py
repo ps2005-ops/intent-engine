@@ -3758,7 +3758,7 @@ class WebApp:
             "company_owned": "Company-owned pages",
             "executive_statement": "Executive statements (company-published)",
             "customer_voice": "Customer evidence (independent)",
-            "competitor": "Competitor evidence (independent)",
+            "competitor": "Another registrant's filing (independent)",
             "independent_reporting": "Independent reporting",
         }
         rows = ""

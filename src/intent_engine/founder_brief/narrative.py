@@ -94,7 +94,7 @@ PROVENANCE_LABEL = {
     "executive_statement": "Company claim",
     "investor_material": "Regulatory or investor filing",
     "customer_voice": "Customer evidence",
-    "competitor": "Competitor evidence",
+    "competitor": "Another registrant's filing",
     "independent_reporting": "Independent evidence",
     "historical_pattern": "Inference from a comparable case",
     "unavailable_or_failed": "Unknown — could not be retrieved",

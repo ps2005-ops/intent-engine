@@ -134,7 +134,7 @@ _FAMILIES = (
     ("customer_voice", "Customer evidence",
      "Nothing here reports what buying and using this actually costs a "
      "customer, so adoption and retention claims cannot be tested."),
-    ("competitor", "Competitor evidence",
+    ("competitor", "Another registrant's filing",
      "No competitor's own account was read, so relative position rests on "
      "this company's framing of its market."),
     ("independent_reporting", "Independent reporting",
@@ -367,7 +367,7 @@ def _customer_demand(company, report, index, said) -> Passage:
     # Independent voices first: they are the ones a reader cannot get from the
     # company, and burying them under eight company pages is how a page that
     # HAS customer evidence still reads as marketing.
-    order = ["Customer evidence", "Independent evidence", "Competitor evidence",
+    order = ["Customer evidence", "Independent evidence", "Another registrant's filing",
              "Regulatory or investor filing", "Company claim"]
     items = []
     for label in order:
