@@ -207,3 +207,71 @@ def test_item_1_body_stops_at_item_5():
     body = FS.find_sections(ITEM5_BLEED).get("item_1", "")
     assert "monitoring and security platform" in body
     assert "Common Equity" not in body
+
+
+# =============================================================================
+# The preamble is not the section
+#
+# Once the body of a filing actually reached the excerpt selector, every Item 7
+# offered its opening framing instead of its content -- and filtering that one
+# phrase at a time only promoted the next one. Measured across five filers, the
+# first sentence of MD&A was five different sentences, all describing the
+# document rather than the company.
+# =============================================================================
+
+_PREAMBLES = {
+    "datadog": "This discussion, particularly information with respect to our "
+               "future results of operations or financial condition, business "
+               "strategy and plans, contains forward-looking statements. ",
+    "microsoft": "The following Management's Discussion and Analysis of "
+                 "Financial Condition and Results of Operations (“MD&A”) is "
+                 "intended to help the reader understand the results of "
+                 "operations and financial condition of the company. ",
+    "amazon": "All statements other than statements of historical fact, "
+              "including statements regarding guidance, industry prospects, "
+              "or future results of operations, are forward-looking. ",
+    "nvidia": "You should read this in conjunction with our Consolidated "
+              "Financial Statements and related Notes thereto, as well as "
+              "other cautionary statements described elsewhere in this "
+              "Annual Report on Form 10-K. ",
+}
+_SUBSTANCE = ("We sell an observability platform to engineering teams on a "
+              "subscription basis, and revenue grows when existing customers "
+              "adopt additional products inside the same account. ")
+
+
+@pytest.mark.parametrize("filer", sorted(_PREAMBLES))
+def test_mdna_preamble_is_not_the_excerpt(filer):
+    text = "\n".join([
+        "Item 7. Management's Discussion and Analysis of Financial Condition "
+        "and Results of Operations",
+        _PREAMBLES[filer],
+        "Overview",
+        _SUBSTANCE,
+    ])
+    excerpt, label = FS.best_excerpt(text)
+    assert "Item 7" in label
+    assert excerpt.startswith("We sell an observability platform")
+
+
+def test_a_section_without_a_subheading_still_yields_its_content():
+    """The preamble skip must not cost a section that simply has no heading."""
+    text = "\n".join([
+        "Item 7. Management's Discussion and Analysis",
+        _SUBSTANCE,
+    ])
+    excerpt, label = FS.best_excerpt(text)
+    assert "Item 7" in label
+    assert excerpt.startswith("We sell an observability platform")
+
+
+def test_legal_proceedings_boilerplate_is_not_an_excerpt():
+    text = "\n".join([
+        "Item 3. Legal Proceedings",
+        "From time to time we may become involved in legal proceedings or be "
+        "subject to claims arising in the ordinary course of our business. We "
+        "are not presently a party to any legal proceedings that we believe "
+        "would have a material adverse effect. ",
+    ])
+    excerpt, _label = FS.best_excerpt(text)
+    assert "From time to time" not in excerpt

@@ -168,9 +168,47 @@ _SECRET_PATTERNS = (
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     re.compile(r"\bBearer\s+[A-Za-z0-9._-]{20,}\b"),
     re.compile(r"\bpassword\s*[:=]\s*\S+", re.IGNORECASE),
-    re.compile(r"\b(?:\d[ -]*?){13,16}\b"),                # naive card number
     re.compile(r"\bAuthorization:\s*\S+", re.IGNORECASE),
 )
+
+#: Candidate card numbers: 13-16 digits, optionally spaced or hyphenated the
+#: way they are printed. Checked against Luhn before it counts — see below.
+_CARD_CANDIDATE = re.compile(r"\b(?:\d[ -]*?){13,16}\b")
+
+
+def _luhn_ok(digits: str) -> bool:
+    """The checksum every real payment card number satisfies."""
+    total, double = 0, False
+    for char in reversed(digits):
+        value = int(char)
+        if double:
+            value *= 2
+            if value > 9:
+                value -= 9
+        total += value
+        double = not double
+    return total % 10 == 0
+
+
+def _looks_like_card_number(text: str) -> bool:
+    """A digit run that is actually shaped like a payment card number.
+
+    The pattern alone is 13-16 digits with optional spaces or hyphens, and
+    public documents are full of that shape. Measured live: a Datadog 8-K
+    prints its commission file number beside its IRS employer number on the
+    cover page — "001-39051 27-2825503" — and the whole filing was refused as
+    a credential, so a real disclosure was dropped from a real analysis.
+
+    Luhn is the difference between the shape and the thing. Every issued card
+    number satisfies it; an arbitrary digit run satisfies it about one time in
+    ten, and the concatenation above does not. This narrows FALSE positives
+    only: nothing that was detected before stops being detected.
+    """
+    for match in _CARD_CANDIDATE.finditer(text or ""):
+        digits = re.sub(r"\D", "", match.group(0))
+        if 13 <= len(digits) <= 16 and _luhn_ok(digits):
+            return True
+    return False
 
 
 class FounderIntelligenceError(ValueError):
@@ -212,11 +250,11 @@ def assert_no_certainty(text: str, availability: str, *,
 
 
 def assert_no_secret(text: str, *, where: str = "text") -> None:
-    for pattern in _SECRET_PATTERNS:
-        if pattern.search(text or ""):
-            raise SecretRejected(
-                f"{where} contains what looks like a credential or sensitive "
-                "identifier — the public experience refuses to store it")
+    if any(pattern.search(text or "") for pattern in _SECRET_PATTERNS) or \
+            _looks_like_card_number(text):
+        raise SecretRejected(
+            f"{where} contains what looks like a credential or sensitive "
+            "identifier — the public experience refuses to store it")
 
 
 def validate_public_url(url: str) -> str:

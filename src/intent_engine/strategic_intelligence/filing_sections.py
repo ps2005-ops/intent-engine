@@ -207,6 +207,29 @@ def find_sections(text: str) -> dict:
     return {span["key"]: span["body"] for span in section_spans(text)}
 
 
+#: Where a section stops explaining itself and starts saying something.
+#:
+#: Filtering the preamble sentence by sentence does not work: removing one
+#: promotes the next. Measured across five filers, the opening of Item 7 was
+#: five different sentences that all describe the document -- how to read the
+#: MD&A, which statements are forward-looking, what is incorporated by
+#: reference -- before any of them described the company. What they share is
+#: not wording, it is position: the substance begins at the first real
+#: subheading. Datadog, NVIDIA and Amazon call it "Overview"; others use
+#: "Executive Summary" or go straight to "Results of Operations".
+_SUBSTANCE_HEADING = re.compile(
+    r"^\s*(?:overview|executive\s+summary|business\s+overview|our\s+business"
+    r"|company\s+overview|introduction|general|results\s+of\s+operations)"
+    r"\s*[.:]?\s*$", re.I | re.M)
+_PREAMBLE_WINDOW = 15_000
+
+
+def _skip_preamble(body: str) -> str:
+    """`body` from its first substantive subheading, if it has one nearby."""
+    match = _SUBSTANCE_HEADING.search(body[:_PREAMBLE_WINDOW])
+    return body[match.end():] if match else body
+
+
 def _first_substantive_sentences(body: str, *, limit: int = _MAX_SPAN) -> str:
     """The first prose that is not furniture, up to `limit` characters."""
     parts = []
@@ -234,7 +257,10 @@ def best_excerpt(text: str) -> tuple:
         body = sections.get(key)
         if not body:
             continue
-        excerpt = _first_substantive_sentences(body)
-        if len(excerpt) >= _MIN_PROSE:
-            return excerpt, SECTION_NAMES[key]
+        # Past the preamble first; the whole section only if that finds
+        # nothing, because a section with no subheading still has content.
+        for candidate in (_skip_preamble(body), body):
+            excerpt = _first_substantive_sentences(candidate)
+            if len(excerpt) >= _MIN_PROSE:
+                return excerpt, SECTION_NAMES[key]
     return "", ""

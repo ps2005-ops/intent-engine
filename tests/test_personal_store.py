@@ -222,3 +222,4 @@ def test_tampered_history_raises_on_fold(tmp_path):
     with pytest.raises(PersonalError, match="stored workspace history is "
                                            "invalid"):
         fold_personal(PersonalStore(path).read_all(), validate=True)
+

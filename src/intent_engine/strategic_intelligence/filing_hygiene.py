@@ -75,6 +75,45 @@ _FURNITURE = tuple(re.compile(p, re.I) for p in (
     r"\bforward-looking statements\b.{0,40}\bwithin the meaning\b",
     r"\bprivate securities litigation reform act\b",
     r"\bactual results (?:could|may) differ materially\b",
+    # SECTION-OPENING FRAMING. Every Item begins by telling the reader how to
+    # read it, and once the body of a filing actually reached the excerpt
+    # selector these became the FIRST substantive-looking sentence in their
+    # section. Measured live: the Datadog 10-K led with "The following
+    # discussion and analysis of our financial condition and results of
+    # operations should be read in conjunction with our audited consolidated
+    # financial statements", and the 10-Q led with "From time to time we may
+    # become involved in legal proceedings". Both are long, both parse as
+    # prose, and neither says anything about the company.
+    # THE GENERAL RULE THIS IS AN INSTANCE OF: prose about the DOCUMENT is not
+    # prose about the company. Filtering the opening sentence one phrase at a
+    # time just promoted the next one -- Datadog led with "This discussion,
+    # particularly information with respect to our future results", Microsoft
+    # and Caterpillar with "is intended to help the reader understand", NVIDIA
+    # with "our Consolidated Financial Statements and related Notes thereto",
+    # Amazon with "All statements other than statements of historical fact".
+    # Five filers, five different sentences, all saying how to read the filing.
+    r"\bthe following discussion and analysis\b",
+    r"\b(?:this|the following)\s+(?:discussion|md&a|section)\b",
+    r"\bis intended to (?:help|assist|provide)\b.{0,40}\breader\b",
+    r"\bstatements? (?:other than|of historical fact)\b",
+    r"\bcautionary statements?\b",
+    r"\bnotes thereto\b",
+    r"\b(?:described|discussed|included) elsewhere in this\b",
+    r"\bshould be read (?:in conjunction|together) with\b",
+    # A cross-reference to the filing itself, and the fragment left when one
+    # is split at a sentence boundary. Measured on a 2007 Caterpillar 10-K,
+    # which offered "(Risk Factors and Cautionary Factors That May Affect
+    # Future Results) of this Form 10-K." as its Item 7 excerpt.
+    r"\bof this (?:form 10-[kq]|annual report|quarterly report)\b",
+    r"^\s*\(",
+    r"\bfrom time to time,? we may become (?:involved|subject)\b",
+    r"\bwe are not (?:presently|currently) a party to any\b",
+    r"\bis incorporated (?:herein )?by reference\b",
+    r"\bunless the context otherwise requires\b",
+    r"\bthe information (?:set forth|contained) (?:in|under)\b"
+    r".{0,60}\bis incorporated\b",
+    r"\bthis (?:annual|quarterly|current) report on form\b"
+    r".{0,40}\bcontains forward-looking\b",
     # XBRL / tagging labels
     r"\bxbrl\b", r"\binline xbrl\b", r"\bus-gaap:\b",
 ))
