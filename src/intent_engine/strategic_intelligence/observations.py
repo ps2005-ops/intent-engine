@@ -703,7 +703,25 @@ def derive_observations(documents, *, company: str = "") -> list:
         # losing its observation.
         body_text = doc.get("text_content", "") or ""
         excerpt, section = "", ""
-        if FS.looks_like_filing(body_text, doc.get("final_url", "")):
+        is_filing = FS.looks_like_filing(body_text, doc.get("final_url", ""))
+        # A FILING BY SOMEONE ELSE IS READ FOR WHAT IT SAYS ABOUT US.
+        #
+        # `third_party_filings` retrieves filings by other registrants that
+        # name the subject, which is the only independent vantage most runs
+        # get. Selecting the excerpt the same way as for the subject's own
+        # filing gives the FILER's description of ITSELF: measured live on
+        # Stripe, "Infinite Group is a developer of cybersecurity software"
+        # was presented as evidence about Stripe.
+        #
+        # Fails closed. A third-party filing whose usable prose never names
+        # the subject is not evidence about the subject, and the document is
+        # dropped rather than shown with someone else's business description.
+        if is_filing and doc.get("source_class") == "competitor":
+            excerpt = FS.subject_span(body_text, company)
+            if not excerpt:
+                continue
+            section = "the passage naming this company"
+        elif is_filing:
             # The form decides which Item carries MD&A: 7 in an annual report,
             # 2 in a quarterly one. The parser already established it, so this
             # never has to be guessed from the text.

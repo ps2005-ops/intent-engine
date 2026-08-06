@@ -302,3 +302,82 @@ def best_excerpt(text: str, *, form: str = "") -> tuple:
             if len(excerpt) >= _MIN_PROSE:
                 return excerpt, names[key]
     return "", ""
+
+
+# ===========================================================================
+# A FILING WRITTEN BY SOMEONE ELSE
+# ===========================================================================
+#
+# `third_party_filings` retrieves filings by OTHER registrants that name the
+# subject, and that is a genuinely independent vantage point -- the only one
+# most runs get. But the excerpt was chosen the same way as for the subject's
+# own filing: highest-priority Item, first substantive prose. In a filing
+# written by someone else, that is the FILER describing ITSELF.
+#
+# Measured live on the deployed preview, analysing Stripe:
+#
+#   "Headquartered in Pittsford, New York, Infinite Group is a developer of
+#    cybersecurity software and related cybersecurity consulting..."
+#
+# Accurate, accountable, correctly cited, and about the wrong company. The
+# reader is told this supports a proposition about Stripe.
+#
+# WHAT IS SELECTED INSTEAD. The sentences that actually name the subject. If
+# none do, this returns "" and the caller drops the document -- a third-party
+# filing whose usable content cannot be tied to the subject is not evidence
+# about the subject, and showing it anyway is what created the problem.
+
+#: Corporate-form suffixes, stripped so "Datadog, Inc." matches "Datadog".
+_SUFFIXES = re.compile(
+    r"[,\s]+(?:inc|inc\.|incorporated|corp|corp\.|corporation|co|co\.|"
+    r"company|ltd|ltd\.|limited|llc|l\.l\.c\.|plc|n\.v\.|nv|s\.a\.|sa|ag|"
+    r"gmbh|holdings?|group|technologies|technology|labs?)\.?$", re.I)
+
+#: How much context around a naming sentence is worth keeping.
+_SUBJECT_SPAN_LIMIT = 700
+_MIN_SUBJECT_SENTENCE = 50
+
+
+def subject_aliases(subject: str) -> tuple:
+    """Names that mean THIS company, and no shorter ones.
+
+    Deliberately does NOT include a leading token of a multi-word name. A
+    previous cycle matched "Linear Minerals Corp." on the alias "Linear" and
+    attributed a mining company's disclosures to a software company; two of
+    the three fixes attempted then were worse than the bug. A suffix is
+    removable because it is not distinguishing. A first word is not.
+    """
+    name = " ".join((subject or "").split())
+    if not name:
+        return ()
+    out = [name]
+    stripped = _SUFFIXES.sub("", name).strip(" ,.")
+    if stripped and stripped.lower() != name.lower() and len(stripped) >= 3:
+        out.append(stripped)
+    return tuple(out)
+
+
+def subject_span(text: str, subject: str, *,
+                 limit: int = _SUBJECT_SPAN_LIMIT) -> str:
+    """The sentences in someone else's filing that name `subject`.
+
+    Returns "" when the subject is never named in substantive prose — the
+    caller must then drop the document rather than fall back to the filer's
+    own description of itself.
+    """
+    aliases = subject_aliases(subject)
+    if not aliases:
+        return ""
+    patterns = [re.compile(rf"\b{re.escape(a)}\b", re.I) for a in aliases]
+    blob = _normalise(text)
+    kept: list = []
+    for sentence in _SENTENCE.split(blob):
+        line = " ".join(sentence.split())
+        if len(line) < _MIN_SUBJECT_SENTENCE or FH.is_filing_furniture(line):
+            continue
+        if not any(p.search(line) for p in patterns):
+            continue
+        kept.append(line)
+        if sum(len(k) for k in kept) >= limit:
+            break
+    return " ".join(kept)[:limit].rstrip()

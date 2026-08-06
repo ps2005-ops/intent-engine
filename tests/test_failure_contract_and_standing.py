@@ -197,3 +197,92 @@ def test_standing_falls_back_to_class_when_the_caller_cannot_tell():
     assert EC.evidence_standing({"investor_material": 1}) == "accountable"
     assert EC.evidence_standing({"investor_material": 1},
                                 has_filing=False) == "asserted"
+
+
+# --- a filing by someone else is read for what it says about US ---------------
+
+from intent_engine.strategic_intelligence import filing_sections as FS  # noqa: E402
+from intent_engine.strategic_intelligence.observations import (  # noqa: E402
+    derive_observations,
+)
+
+_FILER_SELF = (
+    "Headquartered in Pittsford, New York, Infinite Group is a developer of "
+    "cybersecurity software and related cybersecurity consulting and advisory "
+    "services for commercial and government clients. ")
+# Carries a real filing proposition (supplier dependency) AND names the
+# subject: an observation needs a signal, so a fixture without one would test
+# the admission rule rather than the span selection.
+_ABOUT_SUBJECT = (
+    "We depend on third-party providers including Stripe to collect "
+    "subscription revenue, and an interruption there would delay collections "
+    "materially. ")
+# `_detect_signals` re-checks `looks_like_filing` on the TEXT alone, with no
+# URL, so a fixture has to carry the structure a real filing carries or the
+# filing detectors never run and the document yields no observation.
+_FILING_HEAD = (
+    "ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES "
+    "EXCHANGE ACT OF 1934\nCommission File Number 001-39051\n"
+    "Item 1. Business\nOverview\n")
+
+
+def _third_party_doc(body, *, company="Stripe"):
+    return {
+        "content_hash": "h1",
+        "final_url": ("https://www.sec.gov/Archives/edgar/data/9/"
+                      "imci-20251231.htm"),
+        "title": "INFINITE GROUP INC — 10-K",
+        "source_class": "competitor",
+        "text_content": body,
+        "meta_description": "",
+        "filing": {"form": "10-K"},
+    }
+
+
+def test_a_third_party_filing_surfaces_the_span_naming_the_subject():
+    body = _FILING_HEAD + _FILER_SELF + _ABOUT_SUBJECT
+    observations = derive_observations([_third_party_doc(body)],
+                                       company="Stripe")
+    assert observations, "the filing names the subject and should be usable"
+    excerpt = " ".join(o.excerpt for o in observations)
+    assert "third-party providers including Stripe" in excerpt
+    assert "Infinite Group is a developer" not in excerpt
+
+
+def test_a_third_party_filing_that_never_names_the_subject_is_dropped():
+    """Failing closed. Someone else's business description is not evidence."""
+    body = _FILING_HEAD + _FILER_SELF + (
+        "Our backlog at year end was $12.4 million across all segments. ")
+    assert derive_observations([_third_party_doc(body)],
+                               company="Stripe") == []
+
+
+def test_the_subjects_own_filing_is_unaffected():
+    body = _FILING_HEAD + (
+        "Datadog is the observability platform for cloud applications. "
+        "Revenue increased 26% to $3.1 billion for the year, driven by "
+        "expansion within existing customers who adopted more products. ")
+    doc = _third_party_doc(body, company="Datadog")
+    doc["source_class"] = "investor_material"
+    doc["title"] = "SEC 10-K"
+    observations = derive_observations([doc], company="Datadog")
+    assert observations
+    assert "observability platform" in " ".join(
+        o.excerpt for o in observations)
+
+
+@pytest.mark.parametrize("subject,text,expected", [
+    ("Stripe", "The Company uses Stripe for payment processing across all of "
+               "its subscription products worldwide.", True),
+    ("Linear", "Linear Minerals Corp. reported drilling results at its "
+               "northern site during the period under review.", False),
+    ("Datadog, Inc.", "We license Datadog for infrastructure monitoring "
+                      "across our production estate and pay annually.", True),
+])
+def test_subject_span_requires_the_whole_distinctive_name(subject, text,
+                                                          expected):
+    assert bool(FS.subject_span(text, subject)) is expected
+
+
+def test_a_leading_token_is_never_an_alias_on_its_own():
+    assert "Constellation" not in FS.subject_aliases("Constellation Software")
