@@ -47,6 +47,7 @@ from typing import List, Optional, Sequence
 
 from intent_engine.founder_brief.narrative import (
     PROVENANCE_LABEL, EvidenceItem, _dedupe, _evidence_index, _excerpt,
+    provenance_label,
     _flat, _is_promotional, _observation_dicts,
 )
 
@@ -429,8 +430,12 @@ def _competitive(company, report, decision, hypotheses, families,
         said.remember(text)
         items.append(EvidenceItem(
             text=text, source_title=_flat(obs.get("source_title")),
-            provenance=PROVENANCE_LABEL.get(_flat(obs.get("source_class")),
-                                            "Unknown"),
+            provenance=provenance_label(
+                _flat(obs.get("source_class")),
+                title=_flat(obs.get("source_title")),
+                focal=_flat(report.get("company_name")),
+                excerpt=_flat(obs.get("excerpt")),
+                origin=_flat(obs.get("origin"))),
             date=_flat(obs.get("date")),
             evidence_id=_flat(obs.get("observation_id"))))
 
@@ -906,8 +911,12 @@ def _evidence_appendix(report, index) -> Passage:
         seen.add(key)
         items.append(EvidenceItem(
             text=text, source_title=_flat(obs.get("source_title")),
-            provenance=PROVENANCE_LABEL.get(_flat(obs.get("source_class")),
-                                            "Unknown"),
+            provenance=provenance_label(
+                _flat(obs.get("source_class")),
+                title=_flat(obs.get("source_title")),
+                focal=_flat(report.get("company_name")),
+                excerpt=_flat(obs.get("excerpt")),
+                origin=_flat(obs.get("origin"))),
             date=_flat(obs.get("date")),
             evidence_id=_flat(obs.get("observation_id"))))
     return Passage("evidence_appendix", "Every source this rests on",
