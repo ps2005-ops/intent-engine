@@ -1141,22 +1141,17 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
     strategic_dir = root / "reports" / "market" / "strategic"
     published = sorted(p.stem for p in strategic_dir.glob("*.json")) \
         if strategic_dir.exists() else []
-    receipt = root / "reports" / "market" / "dossier_consumption.json"
-    consumed: object = UNMEASURABLE
-    if receipt.exists():
-        try:
-            consumed = len(json.loads(
-                receipt.read_text(encoding="utf-8")).get("consumed") or ())
-        except (json.JSONDecodeError, OSError):
-            consumed = UNMEASURABLE
+    # Consumption comes from the founder side's own acknowledgements, read
+    # from the ledger it writes beside the dossiers it reads. An absent ledger
+    # stays UNMEASURABLE rather than becoming zero: "nobody told us" and
+    # "nobody used it" are opposite findings and only one of them is bad.
+    from . import dossier_consumption as DC
+    consumption = DC.summarise(root, published=len(published))
     health.founder_utility = {
         "strategic_dossiers_written": len(published),
-        "strategic_dossiers_consumed": consumed,
-        "consumption_note": (
-            "the consumer lives on the founder branch and writes no receipt "
-            "into this root; consumption is not observable from the market "
-            "runtime and is reported as unmeasured rather than as zero"
-        ) if consumed is UNMEASURABLE else "",
+        "strategic_dossiers_consumed": consumption.get("dossiers_used"),
+        "consumption": consumption,
+        "founder_utility_status": consumption.get("founder_utility_status"),
         "beliefs_relevant_to_founder_decisions": sum(
             1 for b in belief_rows
             if str(b.get("subject", "")).replace("_", "-").lower()
@@ -1413,10 +1408,20 @@ def render(health: LearningHealth) -> str:
         "",
         f"- Strategic dossiers written: "
         f"{utility['strategic_dossiers_written']}",
-        f"- Consumed: {_fmt(utility['strategic_dossiers_consumed'])}",
+        f"- Used in founder reasoning: "
+        f"{_fmt(utility['strategic_dossiers_consumed'])}",
+        f"- Status: **{utility.get('founder_utility_status')}**",
     ]
-    if utility.get("consumption_note"):
-        lines.append(f"  _{utility['consumption_note']}_")
+    consumption = utility.get("consumption") or {}
+    if consumption.get("because"):
+        lines.append(f"  _{consumption['because']}_")
+    elif consumption:
+        lines.append(
+            f"  received {consumption.get('dossiers_received')} · "
+            f"eligible {consumption.get('dossiers_eligible')} · "
+            f"used {consumption.get('dossiers_used')} · "
+            f"rendered {consumption.get('dossiers_rendered')} "
+            f"(rate {_fmt(consumption.get('consumption_rate'))})")
 
     lines += [
         "",
