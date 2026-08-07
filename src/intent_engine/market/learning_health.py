@@ -761,6 +761,7 @@ class LearningHealth:
     founder_utility: Dict[str, object] = field(default_factory=dict)
     velocity: Dict[str, object] = field(default_factory=dict)
     acceleration: Dict[str, object] = field(default_factory=dict)
+    mechanisms: Dict[str, object] = field(default_factory=dict)
     cohorts: List[dict] = field(default_factory=list)
     funnel: Dict[str, object] = field(default_factory=dict)
     status: Dict[str, object] = field(default_factory=dict)
@@ -782,6 +783,7 @@ class LearningHealth:
             "calibration": self.calibration,
             "knowledge_health": self.knowledge,
             "founder_utility": self.founder_utility,
+            "mechanism_calibration": self.mechanisms,
             "velocity": self.velocity, "acceleration": self.acceleration,
             "cohorts": self.cohorts, "funnel": self.funnel,
             "status": self.status, "alerts": self.alerts,
@@ -1170,6 +1172,14 @@ def assess(*, root: pathlib.Path, as_of: str, store=None,
         for d in WINDOWS}
     health.cohorts = [c.as_dict() for c in cohorts(
         belief_rows, reconciliations, dossier_subjects=published)]
+    # --- mechanism calibration -------------------------------------------
+    # An outcome does not only revise the belief it tested; it revises the
+    # standing of the MECHANISM that generated the expectation. Without this,
+    # a transmission hypothesis that has been wrong every time it was checked
+    # keeps proposing beliefs at full strength forever.
+    from . import mechanism_calibration as MC
+    health.mechanisms = MC.summarise(MC.calibrate(rows))
+
     health.funnel = funnel(observations, ledger_totals={
         "expectations_resolved": resolved,
         "expectations_due": due + resolved,
@@ -1371,6 +1381,31 @@ def render(health: LearningHealth) -> str:
         for name, row in sorted(seven.get("series", {}).items()):
             lines.append(f"- {name}: {row['current']:.2f}/day "
                          f"vs {row['prior']:.2f}/day ({row['direction']})")
+        lines.append("")
+
+    mech = d.get("mechanism_calibration") or {}
+    if mech:
+        lines += [
+            "## Which mechanisms were tested rather than assumed",
+            "",
+            f"- Tested: {mech.get('mechanisms_tested')} of "
+            f"{mech.get('mechanisms_total')} "
+            f"({mech.get('tests_total')} tests, "
+            f"{mech.get('confirmations')} confirmed, "
+            f"{mech.get('contradictions')} contradicted)",
+        ]
+        for row in mech.get("mechanisms", []):
+            if not row.get("tested"):
+                continue
+            lines.append(
+                f"  - `{row['mechanism']}` — {row['tested']} tests across "
+                f"{row['independent_subjects']} companies, "
+                f"{row['contradicted']} contradicted → "
+                f"{row['maturity']} (reliability {_fmt(row['reliability'])})")
+        untested = mech.get("assumed_but_never_tested") or []
+        if untested:
+            lines.append(f"- Still assumed, never tested: "
+                         f"{', '.join(untested)}")
         lines.append("")
 
     lines += [
