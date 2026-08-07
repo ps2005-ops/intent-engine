@@ -777,3 +777,96 @@ undetectable, and one that reaches them next to its own quotation is obvious.
 subject is competitors, customers-of-customers, or a risk factor is not
 evidence about this company's buyers. `filing_detectors` already matches
 sentence-scoped; this needs the same discipline plus a subject test.
+
+---
+
+# CYCLE 2026-08-06d — subject-scoped causal reasoning, measured live
+
+Branch `feat/founder-decision-experience-v3`, deployed and verified on
+`intent-engine-preview-v3` at **`3db364b`**. Full suite 4376 passed / 16
+skipped, EXIT=0.
+
+## The defect
+
+Signal detection was `_any_phrase(text, phrases)` — does the phrase appear
+anywhere in the document. Ownership was inferred from proximity and nothing
+else. Measured live at `037f805`, Microsoft's two-buyers reading was evidenced
+by its own 10-K:
+
+> "Our competitors are developing new software and devices, while also
+> deploying competing cloud-based services for consumers and businesses."
+
+The pair phrase is present. The buyers are the competitors'.
+
+## Why the obvious fix is wrong
+
+Amazon's evidence for the same reading came from the same kind of paragraph:
+
+> "Our competitors include … producers of the products **we offer and sell to
+> consumers and businesses**."
+
+Outer subject also "Our competitors", but the phrase sits in a relative clause
+whose subject is "we" — Amazon really does sell to both. A filter rejecting
+any sentence mentioning competitors deletes a true signal and looks like a
+fix. **This corrects the previous cycle's report, which called both wrong
+matches. Only Microsoft is.**
+
+So ownership is decided by the NEAREST GOVERNING SUBJECT to the left of the
+match (`strategic_intelligence/subject.py`). Detection, span capture and
+mechanism evidence all consult it.
+
+## Reject foreign, do not require own
+
+Marketing copy is largely subjectless ("Explore the suite"), so requiring an
+explicit owner would silence most of what a company publishes about itself. On
+a page the company owns, an unattributed sentence is the company talking —
+that is provenance, which the run already establishes, not proximity.
+
+**The foreign list overshot first.** It also listed customers, suppliers,
+partners and resellers: ten tests and two real capabilities.
+
+- "Our CUSTOMER platform includes a system of record…" — a compound noun, not
+  a subject, nearer the phrase than "Our". HubSpot's real mechanism sentence
+  was rejected as somebody else's.
+- "CUSTOMERS migrate off their old suite and retire legacy systems." — the
+  customer is the actor and their behaviour IS the evidence for
+  `replaces_incumbent_systems`.
+
+A counterparty acting on the company's product is evidence about the company.
+Only rivals and outside commentators are foreign.
+
+## Live before/after, same eight companies
+
+| company | evidence quoted before | after | reading |
+|---|---|---|---|
+| **Microsoft** | competitor sentence | **none** | **two-buyers reading removed** |
+| Amazon | own relative clause | unchanged | preserved |
+| Linear | "startups and enterprises that choose Linear" | unchanged | preserved |
+| Palantir, HubSpot, Datadog, MongoDB, Snowflake | — | unchanged | unchanged |
+
+One change, zero collateral. Microsoft's remaining reading is
+`portfolio_run_as_one`, which is UNGATED and claims no mechanism, so showing
+none is correct rather than a new gap.
+
+## Performance
+
+Detection measured before/after on the same 1.2MB input: **4.83s vs 5.33s —
+9.5% faster**, because `owned_match` exits on the first owned occurrence. An
+earlier "+32%" reading was an unequal baseline that omitted
+`in_commerce_domain`; always compare the same entry point.
+
+## A harness hazard worth knowing
+
+BP-7 swaps `{2,}` for `{0,}` — the same byte length. Restoring it left the
+file at its original size and mtime, so CPython reused the `.pyc` compiled
+from the MUTATED source, and the pre-commit guard failed a test whose source
+was demonstrably correct. `grep` and `inspect.getsource` both agreed with the
+disk; only `func.__code__.co_consts` showed the truth. Break-proof restores
+now bump mtime and clear `__pycache__`. The dangerous version of this is not
+the false red — it is a proof "holding" against stale bytecode.
+
+## Remaining debt
+
+Eight of twelve patterns are still ungated and may assert structural claims
+(MongoDB: "breadth plus partners raise switching costs") with no mechanism.
+`product_to_platform` remains the measured next target.
