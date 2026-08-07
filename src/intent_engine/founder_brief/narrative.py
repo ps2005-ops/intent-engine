@@ -868,7 +868,21 @@ def _could_be_wrong(company, decision, said) -> Section:
 _NOT_OBSERVABLE = ("is not observable", "not observable from",
                    "has corroborated this", "could not be retrieved",
                    "could not be established", "is not public",
-                   "is not disclosed", "no source outside")
+                   "is not disclosed", "no source outside",
+                   # The sufficiency sentences are the same class one cycle
+                   # later. Seen live on Cloudflare, under "What to watch":
+                   # "The public record argues against the reading that it
+                   # holds the authoritative record rather than a copy of it,
+                   # its products run on one model of the customer's data or
+                   # customers retire a system they already had: what was
+                   # retrieved points the other way." That is a statement
+                   # about this run's evidence, and there is nothing in it a
+                   # founder can go and observe. It belongs in the unknowns,
+                   # which is where it is also rendered.
+                   "did not verify", "we found signs of this shape",
+                   "argues against the reading", "do not establish that",
+                   "could not establish whether",
+                   "not the same as finding it untrue")
 
 
 def _is_observable(text: str) -> bool:

@@ -418,6 +418,69 @@ def _what_it_does(report: dict, observations: Sequence[dict]) -> str:
         value = report.get(key)
         if isinstance(value, str) and len(value.split()) >= 4:
             return _sentence(value, 180)
+
+    # THE COMPANY'S WORDS, NOT OURS. This is the first sentence under the
+    # company name — the first thing any founder reads — and it was taking
+    # `obs["text"]`, which is not the company's description at all. That field
+    # is the sentence THIS SYSTEM generates from a signal label:
+    #
+    #   "Palantir Technologies sells several distinct products rather than
+    #    one, so attention and engineering are split across products that
+    #    compete with each other for both."
+    #
+    # Measured on the deployed preview across twenty companies: Palantir and
+    # Microsoft opened with that identical sentence, name-substituted, because
+    # they carry the same signal. It is a label about our taxonomy where a
+    # description of the business belongs — and the description was sitting in
+    # `excerpt` the whole time:
+    #
+    #   "Palantir Technologies builds three platforms: Foundry for the
+    #    commercial enterprise, Gotham for defence and intelligence..."
+    #
+    # Only the company's own account is used. A customer review and an
+    # analyst note are real evidence and are the wrong voice for "what this
+    # company does" — Shopify's highest-ranked excerpt is a merchant review
+    # praising fast setup, which describes an experience rather than a
+    # business. Weak observations are skipped for the same reason they are
+    # weak: title-only and generic-marketing text says nothing.
+    # ...and the RIGHT excerpt, which is not simply the first one. Ranking
+    # order put Brightledger's API changelog and Sony's segment-reporting
+    # cadence at the top: both are the company's own words and neither says
+    # what the business is.
+    #
+    # `product_surface` FIRST, then `messaging`, and the order is measured
+    # rather than guessed. Trying `messaging` first opened Notion, Linear
+    # and Brightledger with their PRICE LISTS — pricing pages carry that
+    # type — while their product pages say what the thing actually is:
+    # "Connectors read payout files from payment processors, match them to
+    # ledger entries, and raise an exception when a difference persists."
+    own_account = ("company_owned", "executive_statement", "investor_material")
+
+    def _pick(types):
+        for obs in observations:
+            if obs.get("weak") or obs.get("source_class") not in own_account:
+                continue
+            if types and obs.get("observation_type") not in types:
+                continue
+            excerpt = (obs.get("excerpt") or "").strip()
+            if len(excerpt.split()) >= 8:
+                return _sentence(excerpt, 180)
+        return ""
+
+    return (_pick(("product_surface",)) or _pick(("messaging",))
+            or _pick(()) or _fallback_label(observations))
+
+
+def _fallback_label(observations) -> str:
+    """Last resort: the generated signal sentence.
+
+    Kept because the comprehension gate treats a missing opening line as a
+    failure, and a company-specific label beats an empty page. It is last
+    because it is the one option that can read identically for two different
+    companies.
+    """
+    # Last resort. A generated label is still better than an empty opening,
+    # and the gate treats a missing `what_it_does` as a comprehension failure.
     for obs in observations:
         text = obs.get("text") or obs.get("summary") or ""
         if len(text.split()) >= 8:

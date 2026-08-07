@@ -68,8 +68,21 @@ def test_a_deep_run_that_still_shows_nothing_is_informative():
     assert "informative rather than incidental" in S.explain("Acme", P2P, d)
 
 
-def test_evidence_pointing_the_other_way_is_a_contradiction():
+def test_one_weak_disconfirmer_is_not_a_contradiction():
+    """MEASURED LIVE ON CLOUDFLARE. Publishing a price list made the page
+    say "the public record argues against" the reading. Pricing is
+    `tool_to_system_of_record`'s disconfirmer and that pattern's own note
+    says why it is weak: a company can publish prices and still hold the
+    record. One weak signal is noise."""
     d = S.classify(P2P, [_obs("o1", ("storefront_creation",))])
+    assert d["state"] != S.MECHANISM_CONTRADICTED
+    assert "argues against" not in S.explain("Acme", P2P, d)
+
+
+def test_evidence_pointing_the_other_way_is_a_contradiction():
+    """A second disconfirmer is a direction rather than noise."""
+    d = S.classify(P2P, [_obs("o1", ("storefront_creation",
+                                     "smb_simplicity"))])
     assert d["state"] == S.MECHANISM_CONTRADICTED
     assert "argues against" in S.explain("Acme", P2P, d)
 
@@ -91,7 +104,8 @@ def test_the_four_unsupported_states_read_differently_to_a_reader():
             P2P, [_obs("o1", ("infrastructure_positioning",), "x" * 500),
                   _obs("o2", ("product_breadth",), source_class="investor_material")])),
         S.explain("Acme", P2P, S.classify(
-            P2P, [_obs("o1", ("storefront_creation",))])),
+            P2P, [_obs("o1", ("storefront_creation",
+                              "smb_simplicity"))])),
         S.explain("Acme", P2P, S.classify(
             P2P, [_obs("o1", ("infrastructure_positioning",))],
             blocked_families=("x",))),

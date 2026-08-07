@@ -89,9 +89,31 @@ def classify(pattern, observations, *, blocked_families=()) -> dict:
 
     carriers = tuple(_CARRIED_BY[m] for m in missing if m in _CARRIED_BY)
 
+    # A WEAK DISCONFIRMER IS NOT A CONTRADICTION.
+    #
+    # This treated any disconfirming signal as "the public record argues
+    # against it", and measured live on Cloudflare that produced exactly that
+    # sentence because the company publishes a price list. `pricing_published`
+    # is `tool_to_system_of_record`'s disconfirmer, and that pattern's own note
+    # says why it is a weak one: "a company can publish prices and still hold
+    # the record."
+    #
+    # The library already separates the two. `blocking_signals` are the
+    # disconfirmers strong enough to displace a reading; the rest argue with it
+    # and are shown as counter-evidence. Only the strong ones may be reported
+    # to a founder as the record pointing the other way.
+    # Requiring a BLOCKING signal alone was tried and is too strict: only
+    # `services_to_product` declares one, so the contradiction state became
+    # unreachable for the rest of the library and a real "the record points
+    # the other way" case would have gone unreported. Either a blocking
+    # signal, or more than one ordinary disconfirmer — one weak signal is
+    # noise, a second is a direction.
+    strong = tuple(s for s in getattr(pattern, "blocking_signals", ())
+                   if s in present) or (
+        disconfirmed if len(disconfirmed) >= 2 else ())
     if blocked_families:
         state = RETRIEVAL_BLOCKED
-    elif disconfirmed:
+    elif strong:
         # The run read something that argues the other way. That IS a finding.
         state = MECHANISM_CONTRADICTED
     elif _looked_in_the_right_place(pattern, observations):
