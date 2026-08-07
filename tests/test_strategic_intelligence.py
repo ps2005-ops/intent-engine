@@ -307,9 +307,17 @@ def test_shopify_acceptance_runs_through_real_compose(tmp_path):
 
 # --- unification: the LIVE pipeline (no fixture) reaches multi-class quality --
 
+# "App Store partners and developers" was a list of things this company HAS.
+# `product_to_platform` now requires the third condition its own
+# `when_it_applies` always named — third parties building on it — so the page
+# says what those partners and developers actually do. Faithful to the
+# Shopify-shaped subject this fixture stands in for, and the smallest change
+# that restores what the tests below exist to check: comparison routing and
+# multi-class reasoning, neither of which is about ecosystem evidence.
 _HOME = ("commerce infrastructure powering commerce. Shop Pay checkout and "
          "buyer identity, payments, capital, fulfillment, point of sale, "
-         "Markets and Audiences. App Store partners and developers. Online "
+         "Markets and Audiences. App Store partners and developers build on "
+         "the platform, and merchants run their business on it. Online "
          "store storefront. End-to-end first-party rails. Enterprise ready.")
 _PRESS = ("Leadership: we are building the essential infrastructure for "
           "commerce, owning checkout and identity so merchants can focus on "

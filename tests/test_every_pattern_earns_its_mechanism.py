@@ -46,11 +46,6 @@ _UNGATED_DEBT = frozenset({
     "ecosystem_control_vs_openness",
     "human_to_agent_workflow",
     "portfolio_run_as_one",
-    # NEXT: measured as the highest remaining risk. It is the only entry here
-    # that fires on ordinary COMMERCE copy — `product_breadth + platform_control`
-    # — and unlike the three already repaired it has disconfirmers, which is
-    # why it ranked behind `single_to_multi_segment`.
-    "product_to_platform",
     "single_product_to_ecosystem",
     "smb_wedge_to_enterprise",
 })
@@ -146,6 +141,11 @@ _REPAIRED = {
     # pricing_gated` qualified it without naming a second buyer at all, which
     # its own `when_it_does_not_apply` forbids
     "single_to_multi_segment": "required_signals",
+    # found live on Shopify: `when_it_applies` required "third parties
+    # increasingly build on it" and no signal measured that, so the gate was
+    # two of four attributes — one of which, `product_breadth`, the pattern
+    # itself lists under `when_it_does_not_apply`
+    "product_to_platform": "required_any_signals",
 }
 
 

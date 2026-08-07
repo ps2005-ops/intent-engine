@@ -193,7 +193,15 @@ _SIGNAL_KEYWORDS = {
                                    "powering commerce", "infrastructure for "
                                    "commerce", "payments infrastructure",
                                    "commerce backbone", "commerce platform"),
-    "checkout_identity_rails": ("checkout", "shop pay", "shoppay",
+    # BARE "checkout" WAS REMOVED. Every commerce site has a checkout; the
+    # word says nothing about owning the rails underneath one, and it was one
+    # of the three signals that fired on Shopify from a single ordinary
+    # sentence. Same defect as bare "defence" in `regulated_buyer` and bare
+    # "system of record" in the mechanism set: the phrase has to carry the
+    # claim, not merely co-occur with the topic.
+    "checkout_identity_rails": ("one-click checkout", "checkout api",
+                                "hosted checkout", "checkout rails",
+                                "shop pay", "shoppay",
                                 "buyer identity", "payment rails",
                                 "one-click checkout", "digital wallet"),
     "agentic_commerce": ("ai agent", "agentic", "ai-mediated", "ai shopping",
@@ -344,6 +352,11 @@ _SIGNAL_RELEVANCE = {
                                   "need",
     "disclosed_public_sector_exposure": "so a shift in public budgets reaches "
                                         "the revenue line directly",
+    "third_party_builds_on": "so leaving means other people's work stops "
+                             "working, not just yours",
+    "external_operations_depend": "so the switching cost is an operational "
+                                  "migration for somebody else's business, "
+                                  "not a procurement decision",
     "consolidation": "so a customer who leaves later has to rebuild more than "
                      "one workflow to do it",
     "system_of_record_claim": "so the data other systems trust now lives here, "
@@ -582,6 +595,51 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                       "all in one", "connected workspace", "one place",
                       "unified platform", "unified suite",
                       "single source of truth"),
+    # --- product-to-platform CAUSAL MECHANISMS --------------------------------
+    #
+    # THE PATTERN NAMED ITS OWN MECHANISM AND HAD NO SIGNAL FOR IT.
+    # `product_to_platform.when_it_applies` requires three things: the company
+    # frames itself as infrastructure, it owns payment/identity rails, AND
+    # "third parties increasingly build on it". `when_it_does_not_apply` says
+    # it does not hold when "there is no third-party build-on ecosystem".
+    # There was no signal for third-party dependence anywhere in the
+    # qualifying set, so the reading could fire with none of it.
+    #
+    # Measured live at 037f805 on Shopify, and reproducible from one ordinary
+    # sentence: "commerce platform" + "checkout" + "one platform for" lights
+    # three of the four qualifying signals against a threshold of two. Every
+    # commerce company with a checkout and a platform claim was told it is
+    # "repositioning toward operating the payment, identity, data and
+    # distribution rails its market runs on".
+    #
+    # An app store is a thing a company HAS. Outsiders whose own operations
+    # stop working without you is the mechanism. These two signals are the
+    # difference, and both are DIRECTIONAL: "build on our" cannot match "we
+    # build on AWS", which is the same relationship pointing the other way.
+    # Third-person forms are safe HERE and would not have been a cycle ago:
+    # `subject.py` now rejects an occurrence whose nearest governing subject
+    # is a rival, so "extend the platform" cannot be harvested from a sentence
+    # about a competitor's ecosystem. The possessive-only list missed the
+    # commonest phrasing — Shopify's own fixture says "merchants extend the
+    # platform", which is precisely the mechanism.
+    "third_party_builds_on": ("build on our", "built on our", "builds on our",
+                              "building on our", "developers build on",
+                              "partners build on", "apps built on",
+                              "integrations built on", "extend our platform",
+                              "extend the platform", "extends the platform",
+                              "build on the platform",
+                              "built on the platform"),
+    # Not "they integrate with us" — an integration is switchable by
+    # reconnecting it. This is the customer's own operation running on top.
+    "external_operations_depend": ("run their business on",
+                                   "run their businesses on",
+                                   "power their business",
+                                   "powers their business",
+                                   "businesses run on", "merchants run on",
+                                   "depend on our platform",
+                                   "rely on our platform",
+                                   "rely on our infrastructure",
+                                   "depend on our infrastructure"),
     # --- tool-to-system-of-record CAUSAL MECHANISMS ---------------------------
     # `consolidation` is what a company SAYS; `multi_product` and
     # `developer_surface` are things almost every B2B software company HAS.
@@ -677,6 +735,8 @@ _NEUTRAL_LABEL = {
     "disclosed_public_sector_exposure": "has written down what public-sector "
                                         "buyers contribute",
     "consolidation": "positions itself as replacing several separate tools",
+    "third_party_builds_on": "has outside organisations building on it",
+    "external_operations_depend": "has customers running their own operations on it",
     "system_of_record_claim": "claims to hold the authoritative record, not a "
                               "copy of it",
     "shared_data_model": "runs its products over one model of the customer's "
@@ -1107,6 +1167,8 @@ _SIGNAL_RELEVANCE.update({k: v["relevance"] for k, v in FD.PROPOSITIONS.items()}
 _TYPE_FOR_SIGNAL.update({
     "multi_product": "product_surface",
     "consolidation": "product_surface",
+    "third_party_builds_on": "infrastructure_platform",
+    "external_operations_depend": "infrastructure_platform",
     "system_of_record_claim": "product_surface",
     "shared_data_model": "infrastructure_platform",
     "replaces_incumbent_systems": "product_surface",

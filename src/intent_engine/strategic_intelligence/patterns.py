@@ -96,8 +96,46 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="high",
         qualifying_signals=("infrastructure_positioning", "checkout_identity_rails",
-                            "product_breadth", "platform_control"),
+                            "product_breadth", "platform_control",
+                            "third_party_builds_on",
+                            "external_operations_depend"),
+        # THE PATTERN ALREADY REQUIRED THIS IN PROSE AND HAD NO SIGNAL FOR IT.
+        #
+        # `when_it_applies` names three conditions and the third is "third
+        # parties increasingly build on it"; `when_it_does_not_apply` rules the
+        # reading out when "there is no third-party build-on ecosystem".
+        # Nothing in the qualifying set measured that, so the gate was two of
+        # four attributes — and `product_breadth` is itself listed under
+        # when_it_does_not_apply as the thing this pattern is NOT.
+        #
+        # Measured live at 037f805 on Shopify, reproducible from a single
+        # ordinary sentence: "commerce platform" + "checkout" + "one platform
+        # for" lights three of four against a threshold of two. Every commerce
+        # company with a checkout was told it operates the rails its market
+        # runs on.
+        #
+        # Owning rails is a capability. Outsiders whose own operations stop
+        # working without you is the transition, and it is what raises the
+        # switching cost this reading trades on.
+        required_any_signals=("third_party_builds_on",
+                              "external_operations_depend"),
         disconfirming_signals=("storefront_creation", "smb_simplicity"),
+        # NO BLOCKER, DELIBERATELY, AND IT WAS TRIED.
+        #
+        # `blocking_signals=("smb_simplicity",)` looked right — a company
+        # independently reported as a simple tool for small merchants should
+        # not lead with "operating the rails its market runs on". Measured, it
+        # demoted Shopify's most accurate reading and broke two tests: the
+        # brief and the executive document opened on different theses, and a
+        # counter-observation was printed twice.
+        #
+        # It is the same mistake `test_blocking_is_declared_per_pattern_never_
+        # applied_globally` already records at global scope: the lead reading
+        # is SUPPOSED to carry counter-evidence, because one nobody has argued
+        # with is one nobody has tested. Simplicity for small merchants and
+        # infrastructure for large ones are not mutually exclusive — Shopify
+        # is both — so this argues with the reading rather than displacing it,
+        # which is what `disconfirming_signals` is for.
         limitations="Infrastructure framing in marketing can precede real "
                     "infrastructure ownership; language alone is not proof of "
                     "the transition.",
