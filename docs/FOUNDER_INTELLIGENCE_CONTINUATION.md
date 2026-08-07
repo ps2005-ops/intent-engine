@@ -623,3 +623,76 @@ term was removed, and a test re-validates every surviving claim.
 * HubSpot and Snowflake still share a regulated/public-sector answer.
 * Dashboard, Q&A, valid share, revoked share, retry state and the system-mode
   branches remain unmeasured.
+
+---
+
+# CYCLE 2026-08-06b — causal gating, measured live
+
+Branch `feat/founder-decision-experience-v3`, deployed and verified on
+`intent-engine-preview-v3` at **`7595334`** (`/version` confirms). Everything
+below was measured on the deployed service.
+
+## What changed
+
+`tool_to_system_of_record` and `single_to_multi_segment` now require a causal
+mechanism. Gated patterns 2 → 4 of 12; ungated debt 9 → 8. Full suite 4313
+passed / 6 skipped, EXIT=0.
+
+## The matrix, run after the final deploy
+
+Seven companies, each on a fresh guest identity (a new cookie jar posting
+straight to `/analyze` mints its own session — do NOT `POST /demo` first, that
+creates a session and the next POST then needs a CSRF token from a rendered
+form). Sequential, 20s apart.
+
+| company | dominant reading | system-of-record sentence |
+|---|---|---|
+| Palantir | services→product (from filings) | **gone** (present at `dad7d28`) |
+| Snowflake | bounded — nothing cleared the bar | **gone** (present at `dad7d28`) |
+| MongoDB | ecosystem control vs openness | absent |
+| Salesforce | human→agent workflow | absent |
+| Linear | one buyer → two buyers | absent |
+| HubSpot | portfolio run as one | **still present, as the secondary** |
+| Datadog | bounded — not safe to act on | **still present, under "switching costs"** |
+
+Linear's reading is transparently earned: the surfaces render the
+`segment_split` label and the evidence is HubSpot-style plain — "the startups
+and enterprises that choose Linear". That is the gate working in public.
+
+## THE RESIDUAL, PRECISELY
+
+HubSpot and Datadog still receive the system-of-record reading, and **no
+mechanism evidence appears on any surface for either**. Checked three ways on
+the deployed pages: the neutral labels ("runs its products over one model of
+the customer's data"), the relevance strings ("so the data other systems trust
+now lives here"), and the raw mechanism phrases. All absent — while Linear's
+`segment_split` label renders, so these surfaces do show signal labels when
+they exist.
+
+It is not a hole in the gate. `thesis["transition"]` is `top.statement` and
+`top` is a gated hypothesis, so there is no second unguarded path, and the
+same build dropped the reading for Palantir and Snowflake. The likely cause is
+benign: HubSpot's run retrieves 59 sources and one of them carries a mechanism
+phrase, while the surfaces render a selected subset of observations.
+
+**But that is its own defect, and the next piece of work.** The gate fixed
+WHICH companies get the reading. It did not change WHAT the sentence says —
+still the generic scaffold, name-substituted — or make the run show the
+evidence that earned it. A reader looking at HubSpot sees an unfalsifiable
+claim with nothing behind it. The fix is mechanism-specific rendering: the
+statement should name the authoritative object and cite the observation that
+established it, and a reading whose mechanism observation is not renderable
+should not assert itself.
+
+## Next highest risk, measured not guessed
+
+Feeding four corpora of ordinary B2B copy through `_hypothesis_for` for every
+pattern, then a commerce corpus: after these two repairs, **`product_to_platform`
+is the only ungated pattern that still asserts itself on generic copy**
+(commerce, via `product_breadth + platform_control`). It is named as the next
+target in `_UNGATED_DEBT`.
+
+## Not measured this cycle
+
+Multi-identity stability harness, share verification, and the retry lifecycle
+on this HEAD. Unchanged from the previous cycle's status.
