@@ -957,3 +957,82 @@ now carries that signal (signals there are hand-attached, not detected), and
 the Acme transport page says what its partners and developers actually do.
 Both suites exist to check comparison routing and multi-class reasoning,
 neither of which is about ecosystem evidence.
+
+---
+
+# CYCLE 2026-08-07b — measured re-ranking, portfolio gating, sufficiency layer
+
+Deployed and verified on `intent-engine-preview-v3` at **`f60a9b2`**.
+Full suite 4439 passed / 16 skipped, EXIT=0.
+
+## Measurement re-ranked the plan
+
+Twelve shaped corpora plus live frequency across every recorded run:
+
+| pattern | generic firing | live freq | disconfirmers |
+|---|---|---|---|
+| **portfolio_run_as_one** | multi_product_suite | **3** (HubSpot, Microsoft, Stripe) | **0** |
+| human_to_agent_workflow | none | **4** (Amazon, HubSpot, Shopify, Stripe) | 1 |
+| differentiator_commoditization | commerce | 0 | 1 |
+| ecosystem_control_vs_openness | none | 1 (MongoDB) | 0 |
+| single_product_to_ecosystem | none | 0 | 0 |
+
+The two patterns named first in the plan fire on **no** shaped corpus.
+`portfolio_run_as_one` does, and reached three real companies — so it was
+repaired first. `human_to_agent_workflow` has the highest live frequency of
+all and was not on the list at all.
+
+## portfolio_run_as_one
+
+`when_it_applies` is a CONJUNCTION: several segments AND "owning both the
+content or product and the channel that distributes it". Gate was any two of
+`segment_reporting`, `content_and_channel`, `multi_product` — so "operating
+segments" plus "our product portfolio", i.e. every multi-product filer.
+
+**The live loop caught what the shaped corpus could not.** Gating only the
+coupling withdrew the reading from HubSpot and Stripe as intended — and gave
+it to Datadog, which had never had it. Datadog genuinely runs "a common data
+model", so the coupling was present; it reports ONE segment, so "reports
+distinct segments … hard to read any single business from outside" is false of
+it in every clause. Both halves are now required.
+
+| company | before cycle | coupling-only gate | final |
+|---|---|---|---|
+| HubSpot | yes | no | no |
+| Stripe | yes | no | no |
+| **Datadog** | no | **yes** (regression) | **no** |
+| **Microsoft** | yes | yes | **yes, earned** |
+| Shopify | no | no | no |
+
+Microsoft's evidence: *"XBOX content and services revenue … benefited from
+strong first-party content performance"* — the content+channel coupling the
+mechanism was written from, against reported segment results. Three unearned
+readings became one earned one.
+
+Mechanism evidence now leads with the MECHANISM rather than the subject:
+surfaces quote the first item, and readers were being shown "Segment results
+are reported" while the coupling that explains the consequence went unread.
+
+## Sufficiency: not proven is not disproven
+
+`sufficiency.py` separates five states, each with a different founder-facing
+sentence: SUPPORTED, MECHANISM_CONTRADICTED, REASONING_NOT_SUPPORTED (the
+right sources were read and are silent), RETRIEVAL_MISSING, RETRIEVAL_BLOCKED.
+
+**The confirmation-bias boundary.** `mechanism_request()` returns "evidence of
+third party builds on, usually found in developer documentation, a marketplace
+or app directory" and may never return "evidence for product_to_platform". A
+retrieval layer told which CONCLUSION to support will find support for it;
+coming back empty has to stay possible or the gate is theatre. Guarded across
+every module.
+
+## Status
+
+Gated **6/12 (50%)**, up from 5/12. Patterns with no disconfirmers 3 → 2.
+Latency +1.1% on an equal baseline (`derive_observations`, same input).
+
+Remaining debt, re-measured after the repair:
+`differentiator_commoditization` (only one still firing on shaped copy),
+`human_to_agent_workflow` (highest live frequency),
+`ecosystem_control_vs_openness`, `single_product_to_ecosystem`,
+`smb_wedge_to_enterprise`, `capacity_ahead_of_demand`.
