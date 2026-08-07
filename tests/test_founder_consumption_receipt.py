@@ -170,3 +170,31 @@ def test_no_market_internals_leak_into_the_receipt(tmp_path):
     for banned in ("password", "token", "secret", "api_key", "position",
                    "trade", "order", "pnl"):
         assert banned not in blob
+
+
+# ===========================================================================
+# RENDERED — the stage that must not be reachable with an empty section
+# ===========================================================================
+def test_rendered_requires_actual_blocks_not_an_open_section(tmp_path):
+    """An empty strategic section was reachable until this cycle.
+
+    Validated, eligible, "used", and nothing under the heading. Counting the
+    heading as RENDERED would re-create exactly the overstatement this
+    telemetry exists to prevent.
+    """
+    CR.acknowledge_context(tmp_path, company_id="acme", analysis_id="run1",
+                           strategic=FakeIntel(), has_strategic=True,
+                           rendered_blocks=0)
+    assert CR.RENDERED_TO_FOUNDER not in _stages(tmp_path)
+    assert CR.USED_IN_REASONING in _stages(tmp_path)
+
+
+def test_rendered_fires_when_a_block_actually_exists(tmp_path):
+    CR.acknowledge_context(tmp_path, company_id="acme", analysis_id="run1",
+                           strategic=FakeIntel(), has_strategic=True,
+                           rendered_blocks=2, surface="analysis")
+    rows = [r for r in _rows(tmp_path)
+            if r["stage"] == CR.RENDERED_TO_FOUNDER]
+    assert len(rows) == 1
+    assert rows[0]["strategic_content_used"] == 2
+    assert rows[0]["founder_surface_rendered"] == "analysis"

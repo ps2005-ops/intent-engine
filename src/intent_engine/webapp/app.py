@@ -2929,10 +2929,18 @@ class WebApp:
             # the try above, so an import failure there would leave it unbound
             # and this would raise NameError on a path that is meant to be
             # incapable of affecting the run.
+            # RENDERED counts actual strategic BLOCKS, not the fact that the
+            # section opened. An empty strategic section was reachable until
+            # this cycle -- validated, eligible, "used", and nothing under the
+            # heading -- so counting the heading would have re-created exactly
+            # the overstatement this telemetry exists to prevent.
+            rendered = len([b for b in ep.reasoning_pack(context)["blocks"]
+                            if b.get("context") == ep.STRATEGIC])
             cr.acknowledge_context(
                 self._runtime_root, company_id=_sc.company_key(name),
                 analysis_id=run_id, strategic=strategic,
-                has_strategic=context.has_strategic, analysis_as_of=today)
+                has_strategic=context.has_strategic, analysis_as_of=today,
+                rendered_blocks=rendered, surface="analysis")
         except Exception:  # noqa: BLE001 - see above
             _LOG.warning("consumption receipt not written for %s", run_id)
 

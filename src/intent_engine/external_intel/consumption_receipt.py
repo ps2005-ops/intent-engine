@@ -51,6 +51,10 @@ SELECTED = "SELECTED"
 PROJECTED = "PROJECTED"
 USED_IN_REASONING = "USED_IN_REASONING"
 RENDERED_TO_FOUNDER = "RENDERED_TO_FOUNDER"
+#: The dossier did not merely appear — it constrained something a founder
+#: acts on. Deliberately the hardest stage to reach and the only one that
+#: answers "was this learning worth having".
+DECISION_RELEVANT = "DECISION_RELEVANT"
 
 # --- refusal codes ----------------------------------------------------------
 STALE_DOSSIER = "STALE_DOSSIER"
@@ -129,7 +133,9 @@ def emit(root, *, company_id: str, stage: str, analysis_id: str,
 def acknowledge_context(root, *, company_id: str, analysis_id: str,
                         strategic, has_strategic: bool,
                         analysis_started_at: str = "",
-                        analysis_as_of: str = "") -> None:
+                        analysis_as_of: str = "",
+                        rendered_blocks: int = 0,
+                        surface: str = "") -> None:
     """Record how far one dossier got in one analysis.
 
     Called once per analysis, after the external context is built, because
@@ -191,3 +197,11 @@ def acknowledge_context(root, *, company_id: str, analysis_id: str,
     # optimistic proxy for it.
     emit(root, stage=USED_IN_REASONING, strategic_content_used=beliefs,
          **common)
+    if rendered_blocks:
+        # RENDERED means a strategic block actually exists to show. An
+        # empty strategic section used to be reachable -- validated,
+        # eligible, "used", and nothing under the heading -- so this stage
+        # counts blocks rather than trusting that the section opened.
+        emit(root, stage=RENDERED_TO_FOUNDER,
+             strategic_content_used=rendered_blocks,
+             surface=surface or "analysis", **common)

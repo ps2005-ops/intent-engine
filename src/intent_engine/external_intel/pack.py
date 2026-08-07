@@ -277,6 +277,90 @@ def build_context(*, market: Optional[MarketIntel] = None,
         strategic=strategic, as_of=as_of)
 
 
+def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
+    """What the market engine currently thinks the evidence implies.
+
+    THE DEFECT THIS CLOSES. `has_material` counted beliefs; this renderer read
+    interactions, postures, mismatches, reactions and priorities and did not
+    read beliefs. The market engine publishes beliefs. So a real dossier
+    validated cleanly, was counted as carrying material, opened a strategic
+    section, and put nothing under it — the third layer of a disconnection
+    whose first two layers were a schema the consumer rejected and a refusal
+    indistinguishable from absence.
+
+    ROUTED THROUGH THE GRAPH, NOT THE DOSSIER JSON. The blocks are built from
+    the `business_graph` projection, so a founder-visible sentence can be
+    walked back to a hypothesis node, to the evidence nodes that support it,
+    to an evidence id in the market ledger. Rendering the JSON directly would
+    be one fewer hop and would break that chain on the first hop.
+
+    A PROBABILITY IS NOT CONFIDENCE. The producer states 0.586 on every belief
+    in the current corpus, because that is the prior a single evidence item
+    opens one at. Printing "59% confident" would turn a prior into a
+    measurement — the same error the market's own mechanism calibration
+    refuses by declining to grade below five informative tests. The standing
+    is a phrase chosen by testing status, and an untested belief cannot be
+    dressed up by a high prior.
+
+    The four layers stay separate: what the evidence WAS, what the engine
+    currently READS from it, and what that would MEAN are three different
+    claims, and only the first is observed.
+    """
+    from intent_engine.business_graph import projections as bgp
+    from intent_engine.business_graph.model import HYPOTHESIS, SUPPORTS
+
+    beliefs = list(intel.beliefs or ())
+    if not beliefs:
+        return []
+
+    graph = bgp.from_strategic_dossier(
+        company_id=intel.company_id, company_label=intel.company_id,
+        beliefs=beliefs, as_of=intel.as_of, dossier_revision=intel.as_of)
+
+    out: List[dict] = []
+    for node in graph.of_kind(HYPOTHESIS):
+        if node.attrs.get("origin") != "market_learning_engine":
+            continue
+        # Walked along the SUPPORTS edges pointing INTO the belief. Evidence
+        # supports a hypothesis, so from the hypothesis it is an in-edge —
+        # and `neighbours(node, kind)` filters by EDGE kind, not node kind, so
+        # asking it for EVIDENCE silently returned nothing and the rendered
+        # block carried no provenance at all. This hop is the whole chain:
+        # sentence → hypothesis node → supporting evidence → ledger id.
+        evidence_ids = []
+        for edge in graph.in_edges(node.node_id, SUPPORTS):
+            source_node = graph.node(edge.src)
+            if source_node and source_node.attrs.get("evidence_id"):
+                evidence_ids.append(source_node.attrs["evidence_id"])
+
+        # "Reads" and "is", kept apart deliberately. The proposition is the
+        # engine's reading; the basis is what it read it from.
+        facts = [f"Market evidence currently supports this reading: "
+                 f"{node.label}"]
+        if node.attrs.get("basis"):
+            facts.append(f"Basis: {node.attrs['basis']}")
+        facts.append(f"Standing: {node.confidence}.")
+
+        limitations = list(node.attrs.get("limitations") or ())
+        limitations.append(
+            "This is a reading the market-learning engine holds, not an "
+            "established fact about the company, and it does not by itself "
+            "recommend an action.")
+        out.append({
+            "context": STRATEGIC,
+            "role": ("What an outside learning engine currently reads from "
+                     "this company's public evidence. It is a hypothesis "
+                     "under test, not a finding, and it carries no "
+                     "recommendation."),
+            "facts": facts,
+            "evidence_ids": evidence_ids,
+            "as_of": node.as_of, "freshness": "", "stale": bool(intel.stale),
+            "limitations": limitations,
+            "source": "market-learning engine strategic dossier",
+        })
+    return out
+
+
 def _strategic_blocks(intel: "StrategicIntel") -> List[dict]:
     """The strategic dossier as reasoning blocks, one role per kind.
 
@@ -297,7 +381,7 @@ def _strategic_blocks(intel: "StrategicIntel") -> List[dict]:
     motive — that is the difference between "Company B matched the price" and
     "Company B is buying share", and only the first one was observed.
     """
-    out: List[dict] = []
+    out: List[dict] = _belief_blocks(intel)
     for row in intel.interactions:
         facts = [f"{row.get('focal_actor', '')} — "
                  f"{row.get('initial_action', '')}."]

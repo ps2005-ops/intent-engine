@@ -36,6 +36,7 @@ from typing import Optional, Sequence
 from intent_engine.business_graph.model import (
     ASSUMES,
     ASSUMPTION,
+    COMPANY,
     CONTRADICTS,
     DOCUMENT,
     EVIDENCE,
@@ -161,4 +162,115 @@ def link_decision(graph: BusinessGraph, *, decision_id: str,
     for hyp_id in hypothesis_ids:
         graph.add_edge(Edge(hyp_id, decision_id, INFORMS, derived=False,
                             source=author))
+    return graph
+
+
+# ---------------------------------------------------------------------------
+# the market-learning engine's strategic dossier
+# ---------------------------------------------------------------------------
+#: How a market belief's numeric confidence becomes a founder-facing word.
+#:
+#: The producer states a probability -- 0.586 on every belief in the current
+#: corpus, because that is the prior a single evidence item opens a belief at.
+#: Printing "59% confident" would be the defect this whole layer exists to
+#: prevent: a prior rendered as a measurement. The engine's own mechanism
+#: calibration refuses to grade below five informative tests for the same
+#: reason.
+#:
+#: So the word is chosen by TESTING STATUS first and probability second, and
+#: an untested belief cannot reach the top band however high its prior.
+_DECLARED = "opened by evidence, not yet tested"
+_SUPPORTED = "supported by later evidence"
+_CONTESTED = "contested by later evidence"
+
+
+def belief_standing(belief: dict) -> str:
+    """The honest one-line standing of a market belief.
+
+    `update_method` is the producer's own record of how the belief reached its
+    current state: DECLARED means one evidence item opened it and nothing has
+    argued with it since. That is a hypothesis, and it is rendered as one.
+    """
+    method = str(belief.get("update_method") or "").upper()
+    direction = str(belief.get("direction_of_last_change") or "").upper()
+    if method == "DECLARED" or not direction:
+        return _DECLARED
+    if direction in ("DOWN", "WEAKENED", "CONTRADICTED"):
+        return _CONTESTED
+    return _SUPPORTED
+
+
+def from_strategic_dossier(*, company_id: str, company_label: str = "",
+                           beliefs: Sequence[dict] = (),
+                           as_of: str = "", dossier_revision: str = "",
+                           graph: Optional[BusinessGraph] = None
+                           ) -> BusinessGraph:
+    """A market dossier's beliefs, in the shared vocabulary.
+
+    WHY THIS EXISTS
+    ---------------
+    The market engine publishes beliefs. The founder's strategic renderer read
+    interactions, postures, mismatches, reactions and priorities -- everything
+    EXCEPT beliefs. So a dossier whose only content was a belief passed
+    validation, was counted as carrying material, opened a strategic section,
+    and put nothing under it. Three layers of the same disconnection: a schema
+    the consumer rejected, a refusal indistinguishable from absence, and a
+    renderer that did not read the one kind of content the producer makes.
+
+    A market belief is a HYPOTHESIS about a COMPANY, SUPPORTED by EVIDENCE.
+    That is already the graph's vocabulary, so nothing new is invented here --
+    which is the point. Routing through the graph rather than rendering the
+    dossier JSON directly is what makes a founder-visible sentence traceable
+    back to an evidence id.
+
+    Pure, like every other projection: it stores nothing and owns nothing, so
+    it cannot disagree with the dossier it was built from.
+    """
+    graph = graph or BusinessGraph()
+    company_node = f"company:{company_id}"
+    graph.add_node(Node(
+        node_id=company_node, kind=COMPANY,
+        label=company_label or company_id,
+        source=f"market dossier {dossier_revision or as_of}".strip(),
+        as_of=as_of))
+
+    for index, belief in enumerate(beliefs):
+        proposition = _clip(belief.get("proposition") or "", 240)
+        if not proposition:
+            continue
+        # Keyed on the dossier revision so a later revision is a NEW node
+        # rather than a silent overwrite of what a founder was previously
+        # shown. The graph is append-only about what was believed when.
+        belief_node = f"market-belief:{company_id}:{dossier_revision or as_of}:{index}"
+        graph.add_node(Node(
+            node_id=belief_node, kind=HYPOTHESIS, label=proposition,
+            source=f"market dossier {dossier_revision or as_of}".strip(),
+            confidence=belief_standing(belief),
+            as_of=str(belief.get("last_updated") or as_of),
+            attrs={
+                "origin": "market_learning_engine",
+                "company_id": company_id,
+                "subject": belief.get("subject") or company_label,
+                "basis": _clip(belief.get("basis") or "", 240),
+                "update_method": belief.get("update_method") or "",
+                "limitations": list(belief.get("limitations") or ()),
+                "dossier_revision": dossier_revision or as_of,
+            }))
+        # Derived: the dossier says this belief is about this company, so
+        # nobody asserted the link and nobody can be wrong about it.
+        graph.add_edge(Edge(src=belief_node, dst=company_node,
+                            kind=INFORMS, derived=True,
+                            source="market dossier"))
+
+        for evidence_id in (belief.get("evidence_ids") or ()):
+            evidence_node = f"market-evidence:{evidence_id}"
+            graph.add_node(Node(
+                node_id=evidence_node, kind=EVIDENCE,
+                label=f"market evidence {evidence_id}",
+                source="market learning ledger", as_of=as_of,
+                attrs={"evidence_id": evidence_id,
+                       "origin": "market_learning_engine"}))
+            graph.add_edge(Edge(src=evidence_node, dst=belief_node,
+                                kind=SUPPORTS, derived=True,
+                                source="market dossier"))
     return graph
