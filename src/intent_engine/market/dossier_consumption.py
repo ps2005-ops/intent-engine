@@ -63,10 +63,14 @@ SELECTED = "SELECTED"
 PROJECTED = "PROJECTED"
 USED_IN_REASONING = "USED_IN_REASONING"
 RENDERED_TO_FOUNDER = "RENDERED_TO_FOUNDER"
+#: The dossier constrained something a founder acts on. The hardest stage
+#: to reach, and the only one that answers "was this learning worth
+#: having". Nothing emits it yet; it is defined so the ladder has a top.
+DECISION_RELEVANT = "DECISION_RELEVANT"
 
 STAGES: Tuple[str, ...] = (
     PUBLISHED, RECEIVED, VALIDATED, ELIGIBLE, SELECTED, PROJECTED,
-    USED_IN_REASONING, RENDERED_TO_FOUNDER,
+    USED_IN_REASONING, RENDERED_TO_FOUNDER, DECISION_RELEVANT,
 )
 _ORDER = {name: i for i, name in enumerate(STAGES)}
 
@@ -305,6 +309,7 @@ def summarise(root, *, published: int = 0,
         "dossiers_projected": counts[PROJECTED],
         "dossiers_used": used,
         "dossiers_rendered": rendered,
+        "dossiers_decision_relevant": counts[DECISION_RELEVANT],
         "consumption_rate": rate,
         "time_to_consumption_seconds": (
             sorted(lag)[len(lag) // 2] if lag else UNMEASURABLE),
