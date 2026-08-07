@@ -1036,3 +1036,83 @@ Remaining debt, re-measured after the repair:
 `human_to_agent_workflow` (highest live frequency),
 `ecosystem_control_vs_openness`, `single_product_to_ecosystem`,
 `smb_wedge_to_enterprise`, `capacity_ahead_of_demand`.
+
+---
+
+# CYCLE 2026-08-07c — agent gating, and a refusal that speaks
+
+Deployed and verified on `intent-engine-preview-v3` at **`2cd524a`**.
+Full suite 4479 passed / 16 skipped, EXIT=0. Gated **7/12 (58%)**.
+
+## human_to_agent_workflow
+
+Highest-frequency ungated reading in the library — live it fired for Amazon,
+HubSpot, Shopify and Stripe with the identical sentence, and reproduces from
+one line: the bare word "agentic" plus "marketplace".
+
+`when_it_applies` names three clauses and the first is "ships agent/AI-commerce
+ENDPOINTS". Nothing measured it. An AI feature is a capability; a workflow a
+human used to run being executed by software that ACTS is the transition.
+
+Three mechanisms, all directional — "assistant", "copilot" and "agentic" are
+absent by design: `agent_executes_actions`, `agent_callable_endpoint`,
+`human_intervention_reduced`. Counter-case declared: `human_in_the_loop`.
+
+Shaped **precision 1.00, recall 1.00** across fourteen cases (chatbot, copilot,
+AI search, recommendations, deterministic rules, approval-every-step,
+analytics, a competitor's agents — all rejected; five delegated-execution
+shapes kept).
+
+**The third mechanism was added by measurement.** With two, recall was 0.60:
+"agents execute the workflow with no human intervention" tripped ONE signal
+and then needed a generic commerce attribute to clear the threshold — mechanism
+was not sufficient on its own, which is backwards. Splitting out the half where
+the HUMAN STOPS fixed it.
+
+## Founder-facing sufficiency
+
+`near_misses` is the canonical object — verified evidence, missing mechanism,
+contradicting evidence, source family needed, why it matters, falsifier, safe
+explanation — built once in `reasoning`, serialised, carried into
+`evidence_gaps`, which the deck, brief and dossier already render.
+
+**It failed to reach a page on its first deploy.** Measured live at `c472e1f`
+across eight companies: not one showed the sentence. It was appended after the
+scaffold's generic unknowns, and every surface truncates that list (founder
+view 2, deck gaps screen 3). Position is part of being visible; near misses now
+sit at index 1, behind only the standing source-mix limitation.
+
+**And it leaked taxonomy on its first run** — "…that Acme fits product →
+platform / tool → infrastructure", `pattern.name`, which every other surface
+filters. It now names the missing FACT.
+
+Live at `2cd524a`, HubSpot:
+
+> "We found signs of this shape for HubSpot, but did not verify that software
+> acts on the customer's behalf rather than suggesting, it ships a surface an
+> agent can transact through or the workflow runs without a person. That
+> distinction matters: this run did not read a source that would show it,
+> which is not the same as finding it untrue."
+
+Visible on 3 of 5 companies; absent where a pattern fired or supporting
+evidence was thin, which is the intended selectivity.
+
+## Live before/after
+
+| company | agent reading before | after |
+|---|---|---|
+| **HubSpot** | yes | **withdrawn, and explained** |
+| Stripe | yes | retained |
+| Amazon, Shopify, Datadog, Microsoft, MongoDB, Palantir | — | unchanged |
+
+## Remaining debt, re-ranked
+
+| pattern | shaped firing | disconfirmers |
+|---|---|---|
+| **differentiator_commoditization** | commerce (only one still firing) | 1 |
+| ecosystem_control_vs_openness | none | **0** |
+| single_product_to_ecosystem | none | **0** |
+| smb_wedge_to_enterprise | none | 1 |
+| capacity_ahead_of_demand | none | 1 |
+
+`differentiator_commoditization` is next: measured, ranked, not repaired.
