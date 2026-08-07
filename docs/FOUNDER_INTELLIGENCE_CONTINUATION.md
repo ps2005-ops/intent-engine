@@ -870,3 +870,90 @@ the false red — it is a proof "holding" against stale bytecode.
 Eight of twelve patterns are still ungated and may assert structural claims
 (MongoDB: "breadth plus partners raise switching costs") with no mechanism.
 `product_to_platform` remains the measured next target.
+
+---
+
+# CYCLE 2026-08-07 — mechanism-gated product_to_platform, measured live
+
+Branch `feat/founder-decision-experience-v3`, deployed and verified on
+`intent-engine-preview-v3` at **`92e1132`**. Full suite 4402 passed / 16
+skipped, EXIT=0.
+
+## Measured pattern inventory (Phase 1)
+
+Before: **4/12 gated (33%)** — 1 fully gated (`services_to_product`), 3
+partially. After: **5/12 (42%)**.
+
+Still ungated, and the three with no disconfirmers at all are the next
+targets: `ecosystem_control_vs_openness`, `portfolio_run_as_one`,
+`single_product_to_ecosystem`; then `capacity_ahead_of_demand`,
+`differentiator_commoditization`, `human_to_agent_workflow`,
+`smb_wedge_to_enterprise`.
+
+## The defect
+
+`product_to_platform.when_it_applies` names three conditions and the third is
+"third parties increasingly build on it"; `when_it_does_not_apply` rules the
+reading out where "there is no third-party build-on ecosystem". **No signal
+measured that.** The gate was two of four attributes — and one of the four,
+`product_breadth`, is listed in the pattern's own text as the thing it is NOT.
+
+Reproducible from one ordinary sentence: "commerce platform … checkout
+securely. One platform for payments, shipping and analytics" lights three of
+four against a threshold of two.
+
+**The audit that finds these fast:** read `when_it_applies` as a checklist and
+ask which clause has a signal behind it.
+
+## The repair
+
+Two mechanisms, both about outsiders rather than capability:
+`third_party_builds_on`, `external_operations_depend`. An app store, an API,
+product breadth and owning your own stack are capabilities. Outsiders whose
+own operations stop working without you is the transition — and it is what
+raises the switching cost the reading trades on.
+
+Bare "checkout" removed from `checkout_identity_rails` (every commerce site
+has one; same defect as bare "defence").
+
+**Measured on twelve shaped companies: precision 0.50 → 1.00, recall 0.25 →
+1.00.** Recall was the surprise: the old gate matched commerce marketing
+vocabulary, so it also MISSED genuine platform companies that do not write
+like Shopify. An attribute gate is wrong in both directions, not merely
+permissive.
+
+## A blocker was added and measured out again
+
+`blocking_signals=("smb_simplicity",)` looked right and demoted Shopify's most
+accurate reading, breaking two tests (brief and executive document opened on
+different theses; a counter-observation printed twice). Same mistake
+`test_blocking_is_declared_per_pattern_never_applied_globally` records at
+global scope: **the lead reading is supposed to carry counter-evidence.**
+Simplicity for small merchants and infrastructure for large ones are not
+exclusive. Kept as a disconfirmer; the decision is pinned in a test.
+
+This is Phase 8's "blocking_signals must exist" requirement declined with
+measurement, which is the debt-with-justification the brief permits.
+
+## Live before/after
+
+| company | before (`037f805`) | after (`92e1132`) |
+|---|---|---|
+| **Shopify** | p2p reading, **no mechanism shown** | p2p reading, **earned**: "…their businesses on our platform and adopt more features; offer more sales channels…" |
+| **Stripe** | p2p asserted, no mechanism | **p2p withdrawn** — lead reading unchanged |
+| Palantir, HubSpot, Datadog, Linear, Microsoft, Amazon | no p2p | unchanged |
+
+One reading earned, one withdrawn, six untouched.
+
+Stripe is infrastructure in reality; the run's retrieved evidence did not
+demonstrate third-party dependence, so the engine withholds rather than
+asserts. That is the intended fail-closed behaviour, and it is also a
+retrieval limit rather than a reasoning one.
+
+## Fixtures migrated by intent
+
+The Shopify observation whose own text says "merchants extend the platform"
+now carries that signal (signals there are hand-attached, not detected), and
+the Acme transport page says what its partners and developers actually do.
+Both suites exist to check comparison routing and multi-class reasoning,
+neither of which is about ecosystem evidence.
