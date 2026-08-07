@@ -352,7 +352,16 @@ def _customer_demand(company, report, index, said) -> Passage:
     groups, seen = {}, SaidOnce()
     for obs in _observation_dicts(report):
         source_class = _flat(obs.get("source_class"))
-        label = PROVENANCE_LABEL.get(source_class, "Unknown")
+        # The fifth and last call site, and the one that renders the evidence
+        # list on /brief and /full — where the Figma leak was actually
+        # visible. It assigns to a variable instead of inlining the lookup,
+        # so a replace over `PROVENANCE_LABEL.get(...)` call shapes missed it
+        # twice. Grep for the FIELD (`provenance=`), not for the call.
+        label = provenance_label(
+            source_class, title=_flat(obs.get("source_title")),
+            focal=_flat(report.get("company_name")),
+            excerpt=_flat(obs.get("excerpt")),
+            origin=_flat(obs.get("origin")))
         text = _readable_excerpt(obs)
         # `seen` filters WITHIN this pass; `said` is only spent on what
         # survives selection, so a candidate dropped here does not silently
