@@ -73,7 +73,19 @@ def _sentence_around(text: str, start: int, end: int) -> str:
         # keep the match itself in view rather than truncating from the left
         rel = start - left
         head = max(0, rel - _MAX_SPAN // 2)
-        span = ("…" if head else "") + span[head:head + _MAX_SPAN].strip() + "…"
+        # ...and cut at word boundaries. Measured on the deployed Palantir
+        # result: the quote opened "…ong with ongoing O&M services", a
+        # half-word the reader has to decode before they can judge the
+        # evidence. A quotation is only checkable if it reads as language.
+        if head:
+            space = span.find(" ", head)
+            head = space + 1 if 0 <= space < head + 40 else head
+        tail = head + _MAX_SPAN
+        if tail < len(span):
+            space = span.rfind(" ", head, tail)
+            tail = space if space > head else tail
+        span = (("…" if head else "") + span[head:tail].strip()
+                + ("…" if tail < len(span) else ""))
     return span
 
 

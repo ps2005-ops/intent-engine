@@ -94,6 +94,27 @@ def test_each_signal_gets_its_own_span_not_the_documents():
         "one document, many signals — each needs its own evidence"
 
 
+def test_a_long_span_is_trimmed_at_word_boundaries():
+    """A quotation is only checkable if it reads as language.
+
+    Measured on the deployed Palantir result: the evidence opened "…ong with
+    ongoing O&M services", a half-word the reader has to decode before they
+    can judge it. Long sentences are common in filings, which is exactly
+    where this evidence comes from.
+    """
+    filler = "The company describes its commercial arrangements at length. "
+    text = (filler * 6
+            + "Revenue is generated along with ongoing O&M services and the "
+              "platform acts as the system of record for the customer estate "
+              "under multi-year agreements. " + filler * 4)
+    span = phrase_span(text, _NEUTRAL_SIGNAL_KEYWORDS["system_of_record_claim"])
+    assert "the system of record for" in span
+    core = span.strip("…").strip()
+    assert not core.startswith(" ") and not core.endswith(" ")
+    for edge in (core.split()[0], core.split()[-1]):
+        assert edge in text, f"{edge!r} is a fragment, not a word from the source"
+
+
 def test_a_span_is_absent_rather_than_empty_when_unresolvable():
     """A caller must be able to tell "nothing to show" from "the empty
     string", or it will render a quotation mark around nothing."""
