@@ -2910,6 +2910,32 @@ class WebApp:
         context = ep.build_context(market=market, macro=macro or (),
                                    competitors=competitors or (),
                                    strategic=strategic, as_of=today)
+
+        # Tell the market engine what became of the dossier it published.
+        # Only this side knows: the file is read, validated, accepted or
+        # refused, and turned into reasoning blocks here. Without this the
+        # producer's founder-utility metric is permanently UNMEASURABLE, which
+        # is honest and leaves it optimising in the dark.
+        #
+        # This records CONSUMPTION, never truth — nothing written here flows
+        # back into a belief, a mechanism or an expectation. It is also
+        # deliberately unable to break a run: every failure inside is
+        # swallowed, because a telemetry write that can fail an analysis is a
+        # worse defect than the missing measurement it was added to fix.
+        try:
+            from intent_engine.external_intel import consumption_receipt as cr
+            from intent_engine.external_intel import strategic_contract as _sc
+            # Re-imported rather than reusing `sc`: that name is bound inside
+            # the try above, so an import failure there would leave it unbound
+            # and this would raise NameError on a path that is meant to be
+            # incapable of affecting the run.
+            cr.acknowledge_context(
+                self._runtime_root, company_id=_sc.company_key(name),
+                analysis_id=run_id, strategic=strategic,
+                has_strategic=context.has_strategic, analysis_as_of=today)
+        except Exception:  # noqa: BLE001 - see above
+            _LOG.warning("consumption receipt not written for %s", run_id)
+
         self._external_cache[run_id] = context
         return context
 

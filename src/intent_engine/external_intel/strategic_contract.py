@@ -103,6 +103,30 @@ _INTERACTION = {
 
 ALLOWED: Dict[str, Any] = {
     "export_version": ..., "generated_at": ..., "company_id": ...,
+    # The producer's human-readable name for the same company. Same class as
+    # `company_id` and equally safe: it is the subject of the analysis, not a
+    # market internal.
+    #
+    # ITS ABSENCE HAD BROKEN THE ENTIRE BRIDGE. This side fails closed on any
+    # unknown field, which is the correct posture and is why nothing leaked --
+    # but the producer has been emitting `company_display_name` on every
+    # dossier, so every one of the 22 published dossiers was refused, silently,
+    # for as long as both sides have existed. The market engine reported
+    # "22 dossiers published" and the founder rendered none of them.
+    #
+    # Nobody could see it: the refusal is caught, logged at warning level and
+    # degrades to no strategic section, which is also the normal appearance of
+    # a company the market has simply never looked at. It took consumption
+    # telemetry to tell those two apart, and it found this on its first run
+    # against real dossiers.
+    "company_display_name": ...,
+    # The producer's alias set for the same company, e.g.
+    # ["Caterpillar", "Caterpillar Inc.", "caterpillar"]. Same class again,
+    # and useful on this side for the identity check rather than despite it.
+    # Surfaced only after `company_display_name` was allowed, because
+    # validation fails on the FIRST unknown field -- so the mismatch had to be
+    # measured, fixed and re-measured rather than diagnosed once.
+    "subject_names": ...,
     "as_of": ...,
     "freshness": {"status": ..., "as_of": ..., "age_days": ...,
                   "stale": ..., "note": ...},
