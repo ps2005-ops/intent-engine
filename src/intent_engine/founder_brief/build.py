@@ -412,8 +412,20 @@ def _consequence(*candidates) -> str:
 
 
 def _is_about(excerpt: str, company: str, origin: str = "",
-              title: str = "") -> bool:
+              title: str = "", vocabulary=frozenset(),
+              source_class: str = "", observation_type: str = "") -> bool:
     """Whether this passage is the SUBJECT describing itself.
+
+    Now a thin adapter over `identity.classify`, which returns four states
+    instead of two. CONFIRMED and PROBABLE are both usable here.
+
+    WHY CALLERS THAT PASS NO VOCABULARY ARE UNCHANGED. PROBABLE is only
+    reachable when the passage's subject is found in the company's own site
+    vocabulary, so a caller that supplies none can only ever get CONFIRMED,
+    NOT or UNKNOWN — exactly the strict behaviour that closed the Stripe/Figma
+    leak. The provenance labels in `narrative.py` call it that way on purpose:
+    relaxing an attribution label is a different decision from relaxing which
+    sentence opens a page, and only the second one is being made here.
 
     THE WORST DEFECT THIS CYCLE FOUND, and the generic label had been hiding
     it. On the deployed preview Stripe's page opened:
@@ -430,6 +442,19 @@ def _is_about(excerpt: str, company: str, origin: str = "",
     (`FS.subject_span`). This is the same rule applied where the sentence is
     chosen: a description of the business either names the business or is
     written in its own voice. A passage that does neither may be about anyone.
+    """
+    from intent_engine.founder_brief import identity as ID
+    return ID.classify(
+        excerpt, company=company, origin=origin, title=title,
+        source_class=source_class, observation_type=observation_type,
+        vocabulary=vocabulary).usable
+
+
+def _is_about_legacy(excerpt: str, company: str) -> bool:
+    """The original two-signal rule, kept as the CONFIRMED half's reference.
+
+    Retained so the strict behaviour has a name and a test of its own rather
+    than only existing inside a branch of the four-state classifier.
     """
     low = " ".join((excerpt or "").split()).lower()
     if re.search(r"\b(we|our|us)\b", low):
@@ -505,6 +530,15 @@ def _what_it_does(report: dict, observations: Sequence[dict],
     # ledger entries, and raise an exception when a difference persists."
     own_account = ("company_owned", "executive_statement", "investor_material")
 
+    # The company's own section and product names, read off its own site.
+    # This is what lets a passage qualify without literally naming the
+    # company: "Connectors read payout files..." is Brightledger describing
+    # Brightledger because /connectors is a Brightledger page. Built once per
+    # company, and built only from pages that are not customer stories — see
+    # `identity.owned_vocabulary`.
+    from intent_engine.founder_brief import identity as ID
+    vocabulary = ID.owned_vocabulary(observations, company=company)
+
     def _pick(types):
         for obs in observations:
             if obs.get("weak") or obs.get("source_class") not in own_account:
@@ -514,7 +548,9 @@ def _what_it_does(report: dict, observations: Sequence[dict],
             excerpt = (obs.get("excerpt") or "").strip()
             if len(excerpt.split()) >= 8 and _is_about(
                     excerpt, company, obs.get("origin", ""),
-                    obs.get("source_title", "")):
+                    obs.get("source_title", ""), vocabulary=vocabulary,
+                    source_class=obs.get("source_class", ""),
+                    observation_type=obs.get("observation_type", "")):
                 return _sentence(excerpt, 180)
         return ""
 
