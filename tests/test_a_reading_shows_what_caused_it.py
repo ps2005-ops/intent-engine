@@ -372,6 +372,16 @@ def test_the_evidenced_state_quotes_instead_of_disclaiming(sor):
 def test_an_ungated_pattern_is_not_silenced_by_this_rule():
     """The recorded debt keeps the analysis it always had. Suppressing it here
     would delete working readings to punish a gap tracked in
-    `test_every_pattern_earns_its_mechanism`."""
-    ungated = {"pattern_id": "portfolio_run_as_one", "mechanism_evidence": []}
-    assert not MECH.needs_mechanism(ungated)
+    `test_every_pattern_earns_its_mechanism`.
+
+    The example is READ from the library rather than named: this test spelled
+    `portfolio_run_as_one` and went red the day that pattern was gated, which
+    is a stale reference reporting itself as a defect. The debt set shrinks
+    every cycle by design, so the fixture has to shrink with it.
+    """
+    still_ungated = [p.pattern_id for p in PATTERN_LIBRARY
+                     if not (p.required_signals or p.required_any_signals)]
+    if not still_ungated:
+        pytest.skip("no ungated patterns remain — the debt is fully repaid")
+    assert not MECH.needs_mechanism(
+        {"pattern_id": still_ungated[0], "mechanism_evidence": []})

@@ -352,6 +352,11 @@ _SIGNAL_RELEVANCE = {
                                   "need",
     "disclosed_public_sector_exposure": "so a shift in public budgets reaches "
                                         "the revenue line directly",
+    "cross_product_coupling": "so the products stop being separable to a "
+                              "customer, and to anyone reading their "
+                              "performance apart",
+    "independently_operated": "so a weak business can be sold or closed "
+                              "without disturbing the others",
     "third_party_builds_on": "so leaving means other people's work stops "
                              "working, not just yours",
     "external_operations_depend": "so the switching cost is an operational "
@@ -595,6 +600,38 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                       "all in one", "connected workspace", "one place",
                       "unified platform", "unified suite",
                       "single source of truth"),
+    # --- portfolio-run-as-one CAUSAL MECHANISM --------------------------------
+    #
+    # `portfolio_run_as_one.when_it_applies` requires the company to report
+    # several segments AND to describe "owning both the content or product and
+    # the channel that distributes it" — a COUPLING. The gate was any two of
+    # `segment_reporting`, `content_and_channel` and `multi_product`, so
+    # "operating segments" plus "our product portfolio" was enough, and that
+    # is every multi-product filer. Measured live: HubSpot, Microsoft and
+    # Stripe all received it, the highest live frequency of any ungated
+    # pattern with no disconfirmers.
+    #
+    # `content_and_channel` already carries the coupling for a media-shaped
+    # company (owned titles plus the box they play on). This is the same
+    # coupling for a software-shaped one: the businesses are run as one
+    # because they share the machinery a customer actually touches.
+    "cross_product_coupling": ("cross-product", "across our products",
+                               "one account across", "single sign-on across",
+                               "unified billing", "common billing",
+                               "one contract across", "shared services across",
+                               "bundled across", "adopt more than one of our"),
+    # THE DISCONFIRMER THE PATTERN ALREADY DESCRIBED AND NEVER DECLARED.
+    # `when_it_does_not_apply` says "segments are unrelated holdings with no
+    # described operational connection" — the Constellation Software shape.
+    # A company that says its businesses are run separately is telling you the
+    # coupling is absent.
+    "independently_operated": ("operates independently",
+                               "operate independently",
+                               "standalone businesses", "separately managed",
+                               "autonomous business units",
+                               "decentralised operating model",
+                               "decentralized operating model",
+                               "run as separate businesses"),
     # --- product-to-platform CAUSAL MECHANISMS --------------------------------
     #
     # THE PATTERN NAMED ITS OWN MECHANISM AND HAD NO SIGNAL FOR IT.
@@ -735,6 +772,8 @@ _NEUTRAL_LABEL = {
     "disclosed_public_sector_exposure": "has written down what public-sector "
                                         "buyers contribute",
     "consolidation": "positions itself as replacing several separate tools",
+    "cross_product_coupling": "runs its products over shared identity, billing or contracts",
+    "independently_operated": "says its businesses are run separately from one another",
     "third_party_builds_on": "has outside organisations building on it",
     "external_operations_depend": "has customers running their own operations on it",
     "system_of_record_claim": "claims to hold the authoritative record, not a "
@@ -1167,6 +1206,8 @@ _SIGNAL_RELEVANCE.update({k: v["relevance"] for k, v in FD.PROPOSITIONS.items()}
 _TYPE_FOR_SIGNAL.update({
     "multi_product": "product_surface",
     "consolidation": "product_surface",
+    "cross_product_coupling": "product_surface",
+    "independently_operated": "product_surface",
     "third_party_builds_on": "infrastructure_platform",
     "external_operations_depend": "infrastructure_platform",
     "system_of_record_claim": "product_surface",

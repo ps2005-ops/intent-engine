@@ -45,7 +45,6 @@ _UNGATED_DEBT = frozenset({
     "differentiator_commoditization",
     "ecosystem_control_vs_openness",
     "human_to_agent_workflow",
-    "portfolio_run_as_one",
     "single_product_to_ecosystem",
     "smb_wedge_to_enterprise",
 })
@@ -141,6 +140,10 @@ _REPAIRED = {
     # pricing_gated` qualified it without naming a second buyer at all, which
     # its own `when_it_does_not_apply` forbids
     "single_to_multi_segment": "required_signals",
+    # measured worst of the seven remaining: fired on ordinary
+    # multi-product-suite copy, reached HubSpot, Microsoft and Stripe
+    # live, and declared no disconfirmers at all
+    "portfolio_run_as_one": "required_any_signals",
     # found live on Shopify: `when_it_applies` required "third parties
     # increasingly build on it" and no signal measured that, so the gate was
     # two of four attributes — one of which, `product_breadth`, the pattern
@@ -154,6 +157,21 @@ def test_a_repaired_pattern_stays_repaired(pid, field):
     """Each was paid for once. None regresses silently."""
     assert pid not in _UNGATED_DEBT
     assert getattr(PATTERNS[pid], field), f"{pid} lost its {field} gate"
+
+
+@pytest.mark.parametrize("pid", sorted(_REPAIRED))
+def test_a_repaired_pattern_keeps_its_counter_evidence(pid):
+    """FOUND BY A BREAK PROOF THAT DID NOT HOLD.
+
+    Deleting `portfolio_run_as_one`'s only disconfirmer left the whole guard
+    green: the gate was pinned and the counter-evidence was not. Every pattern
+    here was repaired precisely because it asserted more than it measured, and
+    a reading nobody can argue with is one nobody has tested — so the
+    disconfirmers are part of the repair, not decoration on it.
+    """
+    assert PATTERNS[pid].disconfirming_signals, (
+        f"{pid} was repaired and has lost its counter-evidence; the gate "
+        "alone does not make a reading arguable")
 
 
 def test_a_repaired_pattern_may_not_be_returned_to_the_debt_list():

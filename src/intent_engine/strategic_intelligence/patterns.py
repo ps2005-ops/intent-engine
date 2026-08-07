@@ -570,8 +570,37 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("segment_reporting", "content_and_channel",
-                            "multi_product"),
-        disconfirming_signals=(),
+                            "multi_product", "cross_product_coupling",
+                            "shared_data_model", "independently_operated"),
+        # THE COUPLING IS THE PATTERN, AND ANY TWO OF THREE DID NOT NEED IT.
+        #
+        # `when_it_applies` requires several segments AND "owning both the
+        # content or product and the channel that distributes it". The gate
+        # was any two of `segment_reporting`, `content_and_channel` and
+        # `multi_product`, so "operating segments" plus "our product
+        # portfolio" qualified — which is every multi-product filer.
+        #
+        # Measured live: HubSpot, Microsoft and Stripe all received this
+        # reading, the highest live frequency of any ungated pattern that
+        # declared no disconfirmers. On shaped corpora it fires on ordinary
+        # multi-product-suite copy.
+        #
+        # Three ways the coupling can be evidenced. `content_and_channel` is
+        # the media shape the mechanism was written from (owned titles plus
+        # the box they play on); the other two are the same coupling in a
+        # software company — shared identity/billing/contracts, or one data
+        # model beneath the products. Reporting segments and listing products
+        # are what a company DISCLOSES; the coupling is what makes them one
+        # business.
+        required_any_signals=("content_and_channel", "cross_product_coupling",
+                              "shared_data_model"),
+        # The disconfirmer the pattern already described in prose and never
+        # declared: "segments are unrelated holdings with no described
+        # operational connection". A company that says its businesses are run
+        # separately is telling you the coupling is absent. Not a blocker —
+        # a decentralised operator can still cross-subsidise, and this argues
+        # with the reading rather than excluding it.
+        disconfirming_signals=("independently_operated",),
         limitations="Transfers between segments are not disclosed publicly, "
                     "so which business subsidises which is inferred from "
                     "structure rather than observed.",
