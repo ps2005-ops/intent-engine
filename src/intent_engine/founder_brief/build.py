@@ -185,7 +185,7 @@ def build(*, company: str, mode: str, report: Optional[dict] = None,
     observations = list(observations or ())
 
     brief = FounderBrief(company=company, mode=mode)
-    brief.what_it_does = _what_it_does(report, observations)
+    brief.what_it_does = _what_it_does(report, observations, company)
 
     if mode == MARKETING_ONLY:
         return _sparse_brief(brief, observations)
@@ -411,7 +411,47 @@ def _consequence(*candidates) -> str:
     return ""
 
 
-def _what_it_does(report: dict, observations: Sequence[dict]) -> str:
+def _is_about(excerpt: str, company: str, origin: str = "",
+              title: str = "") -> bool:
+    """Whether this passage is the SUBJECT describing itself.
+
+    THE WORST DEFECT THIS CYCLE FOUND, and the generic label had been hiding
+    it. On the deployed preview Stripe's page opened:
+
+        "Figma democratizes design through its collaborative design products."
+
+    A document about another company was in Stripe's observation set,
+    classified as own-account, so preferring excerpts surfaced it. The old
+    behaviour masked it only because `observation_sentence` pastes the SUBJECT
+    name onto every generated label — the wrong content was there all along
+    with the right name in front of it.
+
+    `company_ingestion` already guards this for filings by other registrants
+    (`FS.subject_span`). This is the same rule applied where the sentence is
+    chosen: a description of the business either names the business or is
+    written in its own voice. A passage that does neither may be about anyone.
+    """
+    low = " ".join((excerpt or "").split()).lower()
+    if re.search(r"\b(we|our|us)\b", low):
+        return True
+    from intent_engine.strategic_intelligence.subject import _company_tokens
+    tokens = [t.lower() for t in _company_tokens(company or "")]
+    if any(t in low for t in tokens):
+        return True
+    # PROVENANCE, NOT PHRASING. Requiring the excerpt itself to name the
+    # company was tried and rejected Brightledger's real description —
+    # "Connectors read payout files from payment processors, match them to
+    # ledger entries" — which names nobody because a product page does not
+    # need to. Structurally that is indistinguishable from "Figma
+    # democratizes design", so the text cannot settle it and the DOCUMENT
+    # can: a page titled for this company, or served from its domain, is
+    # this company describing itself.
+    where = f"{title or ''} {origin or ''}".lower()
+    return bool(tokens) and any(t in where for t in tokens)
+
+
+def _what_it_does(report: dict, observations: Sequence[dict],
+                  company: str = "") -> str:
     """One plain sentence. Drawn from the company's own description, because
     that is the one thing a marketing site is a reliable source for."""
     for key in ("what_it_does", "offering", "summary", "description"):
@@ -463,7 +503,9 @@ def _what_it_does(report: dict, observations: Sequence[dict]) -> str:
             if types and obs.get("observation_type") not in types:
                 continue
             excerpt = (obs.get("excerpt") or "").strip()
-            if len(excerpt.split()) >= 8:
+            if len(excerpt.split()) >= 8 and _is_about(
+                    excerpt, company, obs.get("origin", ""),
+                    obs.get("source_title", "")):
                 return _sentence(excerpt, 180)
         return ""
 
