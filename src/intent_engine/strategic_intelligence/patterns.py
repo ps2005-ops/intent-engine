@@ -594,6 +594,21 @@ PATTERN_LIBRARY = [
         # business.
         required_any_signals=("content_and_channel", "cross_product_coupling",
                               "shared_data_model"),
+        # THE SUBJECT HALF, ADDED AFTER THE FIRST DEPLOY OF THIS GATE.
+        #
+        # `when_it_applies` is a conjunction: several segments AND the
+        # coupling. Requiring only the coupling qualified Datadog live — it
+        # genuinely runs "a common data model" across its products, but it
+        # reports ONE segment, so "reports distinct segments while describing
+        # them as one connected portfolio" is not true of it and neither is
+        # the consequence the statement draws ("hard to read any single
+        # business from outside"). Microsoft, which does both, is unaffected:
+        # its evidence is "first-party content performance" against reported
+        # segment results.
+        #
+        # A coupling without separate disclosure is a well-built product, not
+        # a portfolio being run as one.
+        required_signals=("segment_reporting",),
         # The disconfirmer the pattern already described in prose and never
         # declared: "segments are unrelated holdings with no described
         # operational connection". A company that says its businesses are run

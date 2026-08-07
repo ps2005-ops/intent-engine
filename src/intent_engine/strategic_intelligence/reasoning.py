@@ -189,8 +189,15 @@ def _mechanism_evidence(pattern, observations):
         _NEUTRAL_LABEL, _NEUTRAL_SIGNAL_KEYWORDS, _SIGNAL_KEYWORDS,
         phrase_span,
     )
-    wanted = tuple(pattern.required_signals) + tuple(
-        pattern.required_any_signals)
+    # MECHANISM BEFORE SUBJECT. Surfaces quote the first item, and the first
+    # item should be the half that explains the consequence. Measured on
+    # `portfolio_run_as_one`, which requires both: the reader was shown
+    # "Segment results are reported" — true, and the least surprising thing
+    # about the company — while the coupling that actually makes the
+    # businesses one ("customers use one account across our products, with
+    # unified billing") sat second and went unread.
+    wanted = tuple(pattern.required_any_signals) + tuple(
+        pattern.required_signals)
     out, seen = [], set()
     for signal in wanted:
         if signal in seen:
