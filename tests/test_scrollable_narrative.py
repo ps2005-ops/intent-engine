@@ -329,8 +329,16 @@ def test_a_source_is_described_by_what_it_is_not_by_its_enum():
     section = narrative.section(N.EVIDENCE_FOR)
     assert section and section.items, "nothing supports the reading"
     for item in section.items:
-        assert item.provenance in N.PROVENANCE_LABEL.values() or \
-            item.provenance == "Unknown", item.provenance
+        # MIGRATED. This asserted membership of the fixed author-only
+        # table, which stopped being the whole vocabulary when provenance
+        # gained a SUBJECT dimension: a page the company wrote ABOUT
+        # SOMEBODY ELSE is no longer reported as its own claim, and reads
+        # "From Shopify's own site". The property this test is named for —
+        # a reader sees what a source IS, never an enum — is unchanged, so
+        # it is asserted directly instead of against a closed list.
+        said = item.provenance
+        assert said and said[0].isupper(), said
+        assert "_" not in said, f"raw enum reached the page: {said}"
 
 
 def test_the_internal_topic_is_never_rendered_as_the_answer():

@@ -101,6 +101,41 @@ PROVENANCE_LABEL = {
 }
 _DEFAULT_PROVENANCE = "Unknown"
 
+def provenance_label(source_class: str, *, title: str = "",
+                     focal: str = "", excerpt: str = "",
+                     origin: str = "") -> str:
+    """How a source is described to a reader — author AND subject.
+
+    THE DEFECT THIS EXISTS FOR. Provenance was `source_class` alone, which
+    records WHO WROTE a page and says nothing about WHO IT IS ABOUT. Measured
+    live: Stripe's evidence list carried
+
+        Company claim — "Figma democratizes design through its collaborative
+        design products."
+
+    from a page titled "Figma Completes Rollout of New Billing Model |
+    Stripe". Stripe wrote it and Stripe hosts it, so `company_owned` is
+    correct — and "Company claim" then reads as *Stripe* claiming it.
+
+    IDENTIFYING THE OTHER COMPANY WAS TRIED AND ABANDONED. Taking the title's
+    leading capitalised word turned "Connectors and matches | Brightledger
+    docs" into "Brightledger writing about Connectors": a common noun at a
+    title's start is indistinguishable from a company name without a lexicon,
+    and a wrong guess here relabels good evidence.
+    So this does not guess the subject. It only refuses to assert one.
+    "Company claim" is reserved for a passage demonstrably about the focal
+    company — its own voice, or its own name. Everything else on the
+    company's site gets a label that is true either way: the venue, which is
+    what was actually established.
+    """
+    base = PROVENANCE_LABEL.get(source_class, _DEFAULT_PROVENANCE)
+    if base != "Company claim":
+        return base
+    from intent_engine.founder_brief.build import _is_about
+    if _is_about(excerpt, focal, origin, title):
+        return base
+    return f"From {focal}'s own site" if focal else "From the company's site"
+
 # WHICH PART OF THE BUSINESS A SUPPORTED SENTENCE SPEAKS TO.
 #
 # This labels sentences the analysis already produced; it never generates a
@@ -328,7 +363,8 @@ def _excerpt(obs: dict) -> str:
     return text
 
 
-def _evidence_items(ids, index: dict, limit: int = 3) -> List[EvidenceItem]:
+def _evidence_items(ids, index: dict, limit: int = 3,
+                    company: str = "") -> List[EvidenceItem]:
     out = []
     seen = SaidOnce()
     for oid in dict.fromkeys(str(i) for i in (ids or ()) if i):
@@ -343,7 +379,11 @@ def _evidence_items(ids, index: dict, limit: int = 3) -> List[EvidenceItem]:
         seen.remember(text)
         out.append(EvidenceItem(
             text=text, source_title=_flat(obs.get("source_title")),
-            provenance=PROVENANCE_LABEL.get(_flat(obs.get("source_class")),
+            provenance=provenance_label(
+                _flat(obs.get("source_class")),
+                title=_flat(obs.get("source_title")),
+                focal=company, excerpt=_flat(obs.get("excerpt")),
+                origin=_flat(obs.get("origin"))) or (
                                             _DEFAULT_PROVENANCE),
             date=_flat(obs.get("date")), evidence_id=oid))
         if len(out) >= limit:
@@ -782,8 +822,9 @@ def _counter_ids(decision, hypotheses) -> list:
     return ids
 
 
-def _evidence_for(decision, hypotheses, index) -> Section:
-    items = _evidence_items(_support_ids(decision, hypotheses), index)
+def _evidence_for(decision, hypotheses, index, company="") -> Section:
+    items = _evidence_items(_support_ids(decision, hypotheses), index,
+                            company=company)
     return Section(EVIDENCE_FOR, "What supports this", kind="evidence",
                    items=tuple(items),
                    evidence_ids=tuple(i.evidence_id for i in items))
@@ -798,7 +839,7 @@ def _evidence_against(company, decision, hypotheses, index) -> Section:
     """
     supporting = {i for i in _support_ids(decision, hypotheses)}
     ids = [i for i in _counter_ids(decision, hypotheses) if i not in supporting]
-    items = _evidence_items(ids, index)
+    items = _evidence_items(ids, index, company=company)
 
     alternatives = _dedupe([
         _flat(alt if isinstance(alt, str) else alt.get("text"))
@@ -1156,7 +1197,7 @@ def build_narrative(*, company: str, brief, report: Optional[dict] = None,
         _the_decision(company, decision, said),
         _options(company, decision, said),
         _next_move(company, decision, said),
-        _evidence_for(decision, hypotheses, index),
+        _evidence_for(decision, hypotheses, index, company),
         _evidence_against(company, decision, hypotheses, index),
         _could_be_wrong(company, decision, said),
         _outside_conditions(external, said),
