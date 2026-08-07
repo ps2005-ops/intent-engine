@@ -44,7 +44,6 @@ _UNGATED_DEBT = frozenset({
     "capacity_ahead_of_demand",
     "differentiator_commoditization",
     "ecosystem_control_vs_openness",
-    "human_to_agent_workflow",
     "single_product_to_ecosystem",
     "smb_wedge_to_enterprise",
 })
@@ -140,6 +139,10 @@ _REPAIRED = {
     # pricing_gated` qualified it without naming a second buyer at all, which
     # its own `when_it_does_not_apply` forbids
     "single_to_multi_segment": "required_signals",
+    # the highest-frequency ungated reading in the library: Amazon,
+    # HubSpot, Shopify and Stripe all received the identical sentence,
+    # and the bare marketing word "agentic" plus "marketplace" was enough
+    "human_to_agent_workflow": "required_any_signals",
     # measured worst of the seven remaining: fired on ordinary
     # multi-product-suite copy, reached HubSpot, Microsoft and Stripe
     # live, and declared no disconfirmers at all

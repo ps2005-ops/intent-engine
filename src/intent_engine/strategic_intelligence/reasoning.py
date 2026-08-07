@@ -964,6 +964,21 @@ def build_strategic_report(*, company_name, observations,
     if limitation:
         evidence_gaps.insert(0, limitation)
 
+    # WHAT THIS RUN NEARLY CONCLUDED, AND WHY IT DID NOT.
+    #
+    # A gated reading that fails is invisible: the founder cannot tell whether
+    # the analysis looked and found nothing, or never looked. Where the run
+    # holds real supporting evidence and exactly the mechanism is unverified,
+    # that is a decision-relevant gap and it is named. One canonical object,
+    # built here; the surfaces render it and none of them re-decides what a
+    # refusal meant. See `sufficiency.near_misses`.
+    from intent_engine.strategic_intelligence import sufficiency as SUF
+    misses = SUF.near_misses(company_name, patterns, observations,
+                             fired_ids=fired_pattern_ids)
+    for miss in misses:
+        if miss["safe_explanation"]:
+            evidence_gaps.append(miss["safe_explanation"])
+
     # Built AFTER the gaps, not before: the decision has to name what is
     # missing, and the two coverage gaps inserted above are the most important
     # things missing in a typical run. Composing the decision first meant the
@@ -1009,7 +1024,7 @@ def build_strategic_report(*, company_name, observations,
         company_name=company_name, status="",
         thesis=thesis, shifts=shifts, hypotheses=hypotheses,
         patterns=used_patterns, blind_spots=blind_spots, questions=questions,
-        evidence_gaps=evidence_gaps,
+        evidence_gaps=evidence_gaps, near_misses=misses,
         decision_implications=_decision_implications(hypotheses, blind_spots),
         observations=list(observations), source_class_coverage=coverage,
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,

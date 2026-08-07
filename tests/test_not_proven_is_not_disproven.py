@@ -53,8 +53,8 @@ def test_a_thin_run_is_a_retrieval_gap_not_a_finding():
                               excerpt="short")])
     assert d["state"] == S.RETRIEVAL_MISSING
     text = S.explain("Stripe", P2P, d)
-    assert "did not find" in text
-    assert "does not mean it is untrue" in text
+    assert "did not verify" in text
+    assert "not the same as finding it untrue" in text
     assert "usually appear in" in text, "tell the reader where to look"
 
 

@@ -140,25 +140,131 @@ def mechanism_request(pattern) -> tuple:
     return tuple(out)
 
 
+#: How much supporting evidence a refused reading needs before it is worth
+#: naming. Below this the company simply is not that kind of company and
+#: saying so is noise; the point of a near miss is that the run got close.
+_NEAR_MISS_SUPPORT = 2
+
+
+def near_misses(company, patterns, observations, *, fired_ids=(),
+                limit: int = 2) -> list:
+    """Readings this run ALMOST reached, as founder-facing objects.
+
+    THE GAP THIS CLOSES. `classify` could already tell a retrieval hole from a
+    contradiction, and nothing showed it to anyone. A founder saw a reading
+    silently absent and could not tell whether the analysis had looked and
+    found nothing, or never looked.
+
+    Deliberately not every refusal. A reading is worth naming only when the
+    run has real supporting evidence for the pattern AND exactly the
+    mechanism is unverified — that is a decision-relevant gap. Everything
+    else is the ordinary condition of not being that kind of company, and
+    listing it would bury the one that matters.
+    """
+    present = set()
+    for observation in observations or ():
+        present.update(observation.signals or ())
+
+    out = []
+    for pattern in patterns:
+        if pattern.pattern_id in set(fired_ids):
+            continue
+        if not _mechanisms(pattern):
+            continue
+        supporting = [s for s in pattern.qualifying_signals
+                      if s in present and s not in _mechanisms(pattern)]
+        if len(supporting) < _NEAR_MISS_SUPPORT:
+            continue
+        diagnosis = classify(pattern, observations)
+        if diagnosis["state"] in (None, SUPPORTED):
+            continue
+        out.append({
+            "pattern_id": pattern.pattern_id,
+            "status": diagnosis["state"],
+            "verified_evidence": supporting,
+            "missing_mechanism": list(diagnosis.get("missing") or ()),
+            "contradicting_evidence": list(diagnosis.get("disconfirmed_by")
+                                           or ()),
+            "source_family_needed": list(
+                diagnosis.get("would_be_carried_by") or ()),
+            "why_it_matters": pattern.mechanism,
+            "falsifier": pattern.when_it_does_not_apply,
+            "safe_explanation": explain(company, pattern, diagnosis),
+        })
+    return out[:limit]
+
+
+#: What each mechanism would ESTABLISH, in a reader's words. The sentence
+#: names the missing fact, never the pattern.
+#:
+#: The first version said "…establishing that Acme fits product → platform /
+#: tool → infrastructure", which is `pattern.name` — the library's own
+#: taxonomy, on the page, to a reader who has never met it. Every other
+#: surface in this system filters exactly that (`reads_as_taxonomy`), and a
+#: new surface reintroduced it. A founder cannot go and check whether a
+#: company "fits product → platform"; they can check whether outside
+#: businesses depend on it.
+_WOULD_ESTABLISH = {
+    "third_party_builds_on": "outside organisations build on this company",
+    "external_operations_depend":
+        "other businesses run their own operations on it",
+    "system_of_record_claim": "it holds the authoritative record rather than "
+                              "a copy of it",
+    "shared_data_model": "its products run on one model of the customer's data",
+    "replaces_incumbent_systems": "customers retire a system they already had",
+    "cross_product_coupling": "its products share identity, billing or "
+                              "contracts",
+    "content_and_channel": "it owns both what is sold and the channel that "
+                           "distributes it",
+    "agent_executes_actions": "software acts on the customer's behalf rather "
+                              "than suggesting",
+    "agent_callable_endpoint": "it ships a surface an agent can transact "
+                               "through",
+    "human_intervention_reduced": "the workflow runs without a person",
+    "services_motion": "it delivers work alongside customers",
+    "productization": "it sells what those engagements taught it",
+    "segment_split": "it names two clearly different buyer groups",
+    "gov_dedicated_delivery": "it runs a separate estate for public-sector "
+                              "buyers",
+    "accreditation_gate": "it holds accreditations those buyers require",
+    "public_procurement_vehicle": "it is bought through public procurement",
+    "disclosed_public_sector_exposure": "it has disclosed what those buyers "
+                                        "contribute",
+}
+
+
+def _in_readers_words(diagnosis) -> str:
+    claims = [_WOULD_ESTABLISH[m] for m in (diagnosis.get("missing") or ())
+              if m in _WOULD_ESTABLISH]
+    if not claims:
+        return ""
+    if len(claims) == 1:
+        return claims[0]
+    return " or ".join([", ".join(claims[:-1]), claims[-1]])
+
+
 def explain(company: str, pattern, diagnosis: dict) -> str:
-    """What a founder is told. Never the raw label."""
+    """What a founder is told. Never the raw label, and never the pattern."""
     state = diagnosis.get("state")
     if state in (None, SUPPORTED):
         return ""
-    subject = pattern.name.lower()
+    claim = _in_readers_words(diagnosis)
+    if not claim:
+        return ""
+    subject = claim
     if state == MECHANISM_CONTRADICTED:
-        return (f"The public record argues against reading {company} as "
+        return (f"The public record argues against the reading that "
                 f"{subject}: what was retrieved points the other way.")
     if state == RETRIEVAL_BLOCKED:
-        return (f"We could not establish whether {company} fits "
-                f"{subject}: the sources that would show it were unavailable "
-                f"to this run.")
+        return (f"We could not establish whether {subject}: the sources that "
+                f"would show it were unavailable to this run.")
     if state == RETRIEVAL_MISSING:
         carriers = diagnosis.get("would_be_carried_by") or ()
         where = f" It would usually appear in {carriers[0]}." if carriers else ""
-        return (f"We did not find public evidence establishing that {company} "
-                f"fits {subject}. That does not mean it is untrue — this run "
-                f"did not read a source that would show it.{where}")
-    return (f"The sources this run read do not establish that {company} fits "
-            f"{subject}. They are the kind of sources that would show it, so "
-            f"treat the absence as informative rather than incidental.")
+        return (f"We found signs of this shape for {company}, but did not "
+                f"verify that {subject}. That distinction matters: this run "
+                f"did not read a source that would show it, which is not "
+                f"the same as finding it untrue.{where}")
+    return (f"The sources this run read do not establish that {subject}. "
+            f"They are the kind of sources that would show it, so treat the "
+            f"absence as informative rather than incidental.")

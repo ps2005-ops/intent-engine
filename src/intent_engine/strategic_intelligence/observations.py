@@ -352,6 +352,15 @@ _SIGNAL_RELEVANCE = {
                                   "need",
     "disclosed_public_sector_exposure": "so a shift in public budgets reaches "
                                         "the revenue line directly",
+    "human_intervention_reduced": "so the labour it replaces is the thing "
+                                  "being sold, not the software",
+    "agent_executes_actions": "so the work leaves the person who used to "
+                              "do it, and the labour it replaces is the "
+                              "thing being sold",
+    "agent_callable_endpoint": "so demand can arrive without a human ever "
+                               "seeing the interface it used to arrive "
+                               "through",
+    "human_in_the_loop": "so the workflow has not actually changed hands",
     "cross_product_coupling": "so the products stop being separable to a "
                               "customer, and to anyone reading their "
                               "performance apart",
@@ -600,6 +609,57 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                       "all in one", "connected workspace", "one place",
                       "unified platform", "unified suite",
                       "single source of truth"),
+    # --- human-to-agent-workflow CAUSAL MECHANISMS ----------------------------
+    #
+    # THE HIGHEST-FREQUENCY UNGATED READING IN THE LIBRARY. Live it fired for
+    # Amazon, HubSpot, Shopify and Stripe, all with the identical sentence.
+    # Reproduced from one line: the bare word "agentic" plus "marketplace"
+    # qualifies it. "Agentic" is a 2025-26 marketing word every commerce and
+    # SaaS company now prints; "marketplace" is a distribution noun.
+    #
+    # `when_it_applies` names three clauses and the first is "ships agent/
+    # AI-commerce ENDPOINTS". Nothing measured that. `when_it_does_not_apply`
+    # says the reading fails where "buying remains human-driven … with no
+    # agent endpoints".
+    #
+    # An AI feature is a capability. A workflow a human used to run being
+    # executed by software that acts is the transition — which is what moves
+    # where demand is captured.
+    #
+    # DIRECTIONAL. "assistant", "copilot" and "agentic" are absent by design:
+    # drafting and suggesting leave the human doing the work.
+    "agent_executes_actions": ("acts on your behalf", "act on your behalf",
+                               "agents complete", "agent completes",
+                               "agents place orders", "agent places orders",
+                               "agents purchase", "completes the purchase",
+                               "executes the workflow", "agents execute"),
+    # THE OTHER HALF OF THE SAME TRANSITION: the human stops doing it.
+    #
+    # Split out after measuring recall at 0.60. Folded into
+    # `agent_executes_actions` these phrases produced ONE signal, so a genuine
+    # description ("agents execute the workflow with no human intervention")
+    # still needed a generic commerce attribute to clear the threshold — the
+    # mechanism was not sufficient on its own, which is backwards. Two
+    # mechanism signals mean a real description qualifies on mechanism alone
+    # and marketing vocabulary still cannot.
+    "human_intervention_reduced": ("without human intervention",
+                                   "no human intervention", "unattended",
+                                   "hands-off", "zero touch",
+                                   "end-to-end autonomously",
+                                   "runs autonomously", "fully autonomous"),
+    # A surface built for a machine caller rather than a person. This is the
+    # clause `when_it_applies` already required and nothing measured.
+    "agent_callable_endpoint": ("agentic checkout", "agent api",
+                                "agent-ready", "agent ready",
+                                "for ai agents to", "machine-readable checkout",
+                                "mcp server", "agent toolkit",
+                                "agent protocol"),
+    # The stated counter-case: the human is still doing it.
+    "human_in_the_loop": ("requires your approval", "requires human approval",
+                          "you review and approve", "human review is required",
+                          "review before it is sent",
+                          "recommends rather than", "suggests rather than",
+                          "always keeps a human in the loop"),
     # --- portfolio-run-as-one CAUSAL MECHANISM --------------------------------
     #
     # `portfolio_run_as_one.when_it_applies` requires the company to report
@@ -772,6 +832,10 @@ _NEUTRAL_LABEL = {
     "disclosed_public_sector_exposure": "has written down what public-sector "
                                         "buyers contribute",
     "consolidation": "positions itself as replacing several separate tools",
+    "agent_executes_actions": "describes software acting rather than suggesting",
+    "human_intervention_reduced": "describes the workflow running without a person",
+    "agent_callable_endpoint": "ships a surface built for a machine caller",
+    "human_in_the_loop": "keeps a person in every step of the workflow",
     "cross_product_coupling": "runs its products over shared identity, billing or contracts",
     "independently_operated": "says its businesses are run separately from one another",
     "third_party_builds_on": "has outside organisations building on it",
@@ -1206,6 +1270,10 @@ _SIGNAL_RELEVANCE.update({k: v["relevance"] for k, v in FD.PROPOSITIONS.items()}
 _TYPE_FOR_SIGNAL.update({
     "multi_product": "product_surface",
     "consolidation": "product_surface",
+    "agent_executes_actions": "product_surface",
+    "human_intervention_reduced": "product_surface",
+    "agent_callable_endpoint": "infrastructure_platform",
+    "human_in_the_loop": "product_surface",
     "cross_product_coupling": "product_surface",
     "independently_operated": "product_surface",
     "third_party_builds_on": "infrastructure_platform",

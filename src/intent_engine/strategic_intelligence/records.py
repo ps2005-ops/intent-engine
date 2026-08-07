@@ -367,6 +367,11 @@ class StrategicReport:
     source_library: dict = field(default_factory=dict)  # all sources, grouped
     analytics_events: list = field(default_factory=list)
     mental_model: dict = field(default_factory=dict)    # persistent company model
+    #: Gated readings this run ALMOST reached: enough supporting evidence
+    #: to be worth naming, one mechanism unverified. See
+    #: `sufficiency.near_misses` — the canonical object every surface
+    #: reads rather than each deciding for itself what a refusal meant.
+    near_misses: list = field(default_factory=list)
     surprises: list = field(default_factory=list)       # strategic surprises
     opportunities: list = field(default_factory=list)
     vulnerabilities: list = field(default_factory=list)
@@ -395,6 +400,10 @@ class StrategicReport:
             "blind_spots": [b.as_dict() for b in self.blind_spots],
             "questions": [q.as_dict() for q in self.questions],
             "evidence_gaps": list(self.evidence_gaps),
+            # Every founder-facing surface reads the dict, so a field that
+            # stops here is a field no reader ever sees. That is precisely how
+            # `mechanism_evidence` went missing before it was serialised.
+            "near_misses": list(self.near_misses),
             "decision_implications": list(self.decision_implications),
             "observations": [o.as_dict() for o in self.observations],
             "source_class_coverage": self.source_class_coverage,

@@ -197,8 +197,32 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("agentic_commerce", "distribution_shift",
-                            "checkout_identity_rails"),
-        disconfirming_signals=("storefront_creation",),
+                            "checkout_identity_rails",
+                            "agent_executes_actions",
+                            "agent_callable_endpoint",
+                            "human_intervention_reduced"),
+        # THE HIGHEST-FREQUENCY UNGATED READING IN THE LIBRARY, and the one
+        # with the least behind it. Live it fired for Amazon, HubSpot, Shopify
+        # and Stripe with the identical sentence; reproduced from one line,
+        # the bare word "agentic" plus "marketplace" was enough.
+        #
+        # `when_it_applies` names three clauses and the first is "ships
+        # agent/AI-commerce ENDPOINTS". Nothing measured it.
+        # `when_it_does_not_apply` says the reading fails where "buying
+        # remains human-driven ... with no agent endpoints".
+        #
+        # An AI feature is a capability. A workflow a human used to run being
+        # executed by software that ACTS is the transition — and it is what
+        # moves where demand is captured, which is the consequence this
+        # reading draws.
+        required_any_signals=("agent_executes_actions",
+                              "agent_callable_endpoint",
+                              "human_intervention_reduced"),
+        # The stated counter-case, which the pattern described and never
+        # declared: if a person approves every step, the workflow has not
+        # changed hands. Not a blocker — a company can ship both a supervised
+        # assistant and an autonomous endpoint.
+        disconfirming_signals=("storefront_creation", "human_in_the_loop"),
         limitations="Agentic-commerce timing is uncertain; announcements can "
                     "outrun real buyer behaviour by years.",
     ),
