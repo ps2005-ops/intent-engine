@@ -54,6 +54,24 @@ Earlier cycles closed these and they stayed closed across 9 scored runs:
 | NVIDIA returns a limited-evidence page | medium | retrieval; unchanged before and after |
 | Adobe opens with a fiscal-year results sentence | low | own words, own page, just not a description |
 
+### Measured live on the shipped build (`40920cd`)
+
+| company | before | after |
+|---|---|---|
+| Palantir | "sells several distinct products rather than one, so attention and engineering are split…" | "At Palantir, we believe that with good data and the right software, institutions can solve hard problems…" |
+| Microsoft | *the identical sentence* | "Microsoft is a technology company committed to making digital technology and artificial intelligence available…" |
+| HubSpot | *the identical sentence* | "We provide an agentic customer platform that helps marketing, sales, and customer service teams drive business growth." |
+| Stripe | "exposes a surface others can build on…" → then, mid-cycle, "Figma democratizes design…" | "Stripe is a financial services platform that helps all types of businesses accept payments, build flexible billing…" |
+
+Signal-label openings: **4 of 4 → 0 of 4**. "The public record argues against"
+gone. Near-miss explanation still visible.
+
+### Still open, found while verifying
+
+| defect | severity | note |
+|---|---|---|
+| Figma's self-description still appears in Stripe's EVIDENCE list, labelled "Company claim" | medium | attributed to "INFINITE GROUP INC — 10-K", so it is sourced rather than asserted, but "Company" reads as Stripe. Same class the `FS.subject_span` guard exists for on competitor filings; these are reaching the evidence list by another route. **Next cycle's first target.** |
+
 ### Learning velocity
 
 Four producers fixed, none patched at a surface. Two of the four were defects
