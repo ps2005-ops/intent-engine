@@ -50,8 +50,21 @@ def test_a_complete_day_cycle_runs_every_step(tmp_path):
     assert result.status == C.COMPLETED, result.reason
     assert [s.name for s in result.steps] == [
         "research", "opportunity", "funnel", "positions", "paper_entries",
-        "assets", "learning", "health", "report"]
+        "assets", "learning", "learning_health", "health", "report"]
     assert all(s.ok for s in result.steps)
+
+
+def test_learning_health_runs_after_learning_so_it_sees_this_session(tmp_path):
+    """Measuring the session before it happens measures the previous one.
+
+    `learning_health` reads the ledger. Run before `learning`, it would
+    report on reconciliations written yesterday and call them today's, which
+    is precisely the stale-surface error it exists to detect.
+    """
+    names = [n for n, _ in STEPS.day_steps()]
+    assert names.index("learning_health") > names.index("learning")
+    for build in (STEPS.day_steps, STEPS.night_steps):
+        assert "learning_health" in [n for n, _ in build()]
 
 
 def test_learning_runs_after_positions_so_it_knows_the_trade_count(tmp_path):

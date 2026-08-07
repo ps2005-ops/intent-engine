@@ -496,20 +496,34 @@ def learning_step(ctx: C.CycleContext) -> dict:
     """
     from . import learning_cycle as LC
     from . import learning_store as LS
+    from . import observation_binding as OB
     from . import shadow_policies as SP
     from . import strategic_publish as SEP
 
     store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
     positions = (ctx.results.get("positions") or {})
+    # Match arriving evidence to the expectations waiting for it. Without
+    # this, `LC.run` is called with no observations at all, `reconcile` has
+    # nothing to score against, and every expectation returns TOO_EARLY
+    # forever -- which is exactly what the ledger recorded for its first
+    # forty-six. The evidence is read from the STORE, not from this session's
+    # inbox: an expectation preregistered last week is answered by whatever
+    # has arrived since, not only by what arrived in the last ten minutes.
+    open_expectations = store.open_expectations(as_of=ctx.as_of)
+    observations, binding_refused = OB.bind(
+        open_expectations, store.evidence(), as_of=ctx.as_of)
     result = LC.run(
         as_of=ctx.as_of, store=store,
         evidence=list(ctx.learning_inbox),
+        observations=observations,
         shadow_registry=SP.ShadowRegistry(),
         cycle=ctx.cycle,
         candidates_seen=getattr(ctx.translation_stats, "candidates", 0),
         trades_opened=int(positions.get("opened", 0) or 0))
     payload = result.as_dict()
     payload["ledger"] = store.health()
+    payload["observation_binding"] = OB.summarise(
+        observations, binding_refused, examined=len(open_expectations))
     # Publish the sanitized dossiers. This is the ONLY channel to Founder
     # Intelligence, and it runs on every session — a bridge that only opens
     # when someone remembers to open it is not a bridge. A failure to publish
@@ -531,6 +545,37 @@ def learning_step(ctx: C.CycleContext) -> dict:
     except Exception as exc:  # noqa: BLE001 - see above
         payload["dossier_transport"] = {"error": str(exc), "sent": [],
                                         "failed": [], "configured": True}
+    return payload
+
+
+def learning_health_step(ctx: C.CycleContext) -> dict:
+    """Measure whether the engine is learning, and persist that measurement.
+
+    Runs AFTER `learning`, so it sees this session's reconciliations rather
+    than the previous session's. Reads the append-only ledger and the cycle
+    reports; writes one bounded snapshot per operating day.
+
+    Never raises. A health measurement that can break the operating cycle
+    would mean the act of asking "is this working" could stop it working.
+    """
+    from . import learning_health as LH
+
+    root = pathlib.Path(ctx.root)
+    try:
+        health = LH.assess(root=root, as_of=ctx.as_of,
+                           runtime_sha=getattr(ctx, "runtime_sha", ""))
+    except Exception as exc:  # noqa: BLE001 - see docstring
+        return {"contract": LH.CONTRACT, "error": str(exc)}
+
+    payload = health.as_dict()
+    if not ctx.dry_run:
+        try:
+            payload["snapshot_appended"] = LH.append_snapshot(
+                health, root=root)
+            (root / "reports" / "market" / "learning_health.md").write_text(
+                LH.render(health), encoding="utf-8")
+        except OSError as exc:
+            payload["persist_error"] = str(exc)
     return payload
 
 
@@ -619,6 +664,7 @@ def day_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("paper_entries", paper_entries_step(series_fn)),
         ("assets", assets_step),
         ("learning", learning_step),
+        ("learning_health", learning_health_step),
         ("health", health_step),
         ("report", report_step),
     ]
@@ -635,6 +681,7 @@ def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("positions", positions_step),
         ("assets", assets_step),
         ("learning", learning_step),
+        ("learning_health", learning_health_step),
         ("replay", replay_step(series_fn=None)),
         ("health", health_step),
         ("report", report_step),
