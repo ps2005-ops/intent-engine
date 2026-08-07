@@ -60,6 +60,9 @@ def _any_phrase(text: str, phrases) -> bool:
 # So a signal now carries the sentence that produced it. Evidence for a claim
 # is the text that caused the claim, or it is not evidence for that claim.
 _MAX_SPAN = 320
+#: How many occurrences of a phrase to test for ownership before giving up.
+#: See `owned_match`.
+_MAX_OCCURRENCES = 20
 
 
 def _sentence_around(text: str, start: int, end: int) -> str:
@@ -89,16 +92,59 @@ def _sentence_around(text: str, start: int, end: int) -> str:
     return span
 
 
-def phrase_span(text: str, phrases) -> str:
-    """The first sentence in `text` that evidences one of `phrases`."""
+def _foreign_match(text, match, company) -> bool:
+    """Whether this occurrence belongs to somebody other than the company."""
+    from intent_engine.strategic_intelligence import subject as SUBJ
+    # Scoped to the sentence, so a subject three sentences back cannot govern
+    # this clause. `filing_detectors` has matched sentence-scoped from the
+    # start for the same reason.
+    left = text.rfind(". ", 0, match.start())
+    left = 0 if left < 0 else left + 2
+    return SUBJ.subject_of(text[left:match.end()],
+                           match.start() - left, company) == SUBJ.FOREIGN
+
+
+def owned_match(text: str, phrases, company: str = ""):
+    """The first occurrence of any phrase that is NOT somebody else's.
+
+    REJECT FOREIGN RATHER THAN REQUIRE OWN, deliberately, and this is the one
+    place this cycle does not fail closed on `unknown`.
+
+    Marketing copy is largely subjectless — "Explore the suite", "One platform
+    for everything" — so requiring an explicit owner would silence most of
+    what a company publishes about itself and call it rigour. On a page the
+    company owns, an unattributed sentence is the company talking; that is
+    provenance, which the run already establishes, not proximity, which is
+    what this module exists to stop trusting.
+
+    A demonstrably foreign subject is different, and is always rejected.
+    """
     for phrase in phrases:
-        match = _phrase_pattern(phrase).search(text or "")
-        if match:
-            return _sentence_around(text, match.start(), match.end())
-    return ""
+        # BOUNDED. When every occurrence is somebody else's, the loop would
+        # otherwise walk all of them — and a 10-K can repeat a phrase across
+        # hundreds of risk-factor sentences, which is precisely the document
+        # where the subject is most often foreign. A company that owns the
+        # claim states it early; twenty occurrences is a generous place to
+        # stop looking, and stopping there fails closed rather than open.
+        for n, match in enumerate(_phrase_pattern(phrase).finditer(text or "")):
+            if n >= _MAX_OCCURRENCES:
+                break
+            if not _foreign_match(text, match, company):
+                return match
+    return None
 
 
-def signal_spans(text: str, signals=()) -> dict:
+def phrase_span(text: str, phrases, company: str = "") -> str:
+    """The first sentence in `text` that evidences one of `phrases`.
+
+    Skips occurrences owned by someone else: quoting a competitor's sentence
+    as this company's evidence is the defect this cycle removes.
+    """
+    match = owned_match(text, phrases, company)
+    return _sentence_around(text, match.start(), match.end()) if match else ""
+
+
+def signal_spans(text: str, signals=(), company: str = "") -> dict:
     """signal -> the sentence in this document that evidenced it.
 
     Only the keyword-driven vocabularies are resolvable this way; filing
@@ -115,7 +161,7 @@ def signal_spans(text: str, signals=()) -> dict:
         for signal, phrases in table.items():
             if signal in spans or (wanted is not None and signal not in wanted):
                 continue
-            span = phrase_span(text, phrases)
+            span = phrase_span(text, phrases, company)
             if span:
                 spans[signal] = span
     return spans
@@ -677,16 +723,30 @@ from intent_engine.strategic_intelligence.evidence_classes import (
 _OUTSIDE_VANTAGE_CLASSES = frozenset(_INDEPENDENT_CLASSES)
 
 
-def _detect_neutral_signals(text: str) -> list:
+def _detect_neutral_signals(text: str, company: str = "") -> list:
+    """Signals this document evidences ABOUT THIS COMPANY.
+
+    Was `_any_phrase(text, phrases)` — does the phrase appear anywhere in the
+    document — which infers ownership from proximity and nothing else.
+    Measured live at `037f805`: Microsoft was told it "serves two clearly
+    different buyer groups" on the strength of "Our competitors are ...
+    deploying competing cloud-based services for consumers and businesses".
+    The phrase is there; the buyers are the competitors'.
+
+    A signal now needs at least one occurrence that is not demonstrably
+    somebody else's. See `owned_match` for why the test rejects foreign
+    subjects rather than requiring explicit ownership.
+    """
     return [sig for sig, phrases in _NEUTRAL_SIGNAL_KEYWORDS.items()
-            if _any_phrase(text or "", phrases)]
+            if owned_match(text or "", phrases, company) is not None]
 
 
-def _detect_signals(text: str, source_class: str = "company_owned") -> list:
+def _detect_signals(text: str, source_class: str = "company_owned",
+                    company: str = "") -> list:
     """Domain signals when the document is in that domain, plus the neutral
     set always. A company outside every domain library still has a strategy."""
     text = text or ""
-    signals = list(_detect_neutral_signals(text))
+    signals = list(_detect_neutral_signals(text, company))
     # FILINGS ARE THEIR OWN DOMAIN. The commerce library never matches a
     # 10-K from a company that does not sell commerce software, so a filing
     # contributed nothing even after section extraction found its prose.
@@ -697,10 +757,11 @@ def _detect_signals(text: str, source_class: str = "company_owned") -> list:
         signals += [s_ for s_ in FD.detect(text) if s_ not in signals]
     if in_commerce_domain(text):
         signals += [sig for sig, phrases in _SIGNAL_KEYWORDS.items()
-                    if _any_phrase(text, phrases)]
+                    if owned_match(text, phrases, company) is not None]
         if source_class in _OUTSIDE_VANTAGE_CLASSES:
             signals += [sig for sig, phrases in _OUTSIDE_ONLY_PHRASES.items()
-                        if sig not in signals and _any_phrase(text, phrases)]
+                        if sig not in signals
+                        and owned_match(text, phrases, company) is not None]
     return signals
 
 
@@ -849,7 +910,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             doc.get("source_type"), "company_owned")
         text = " ".join(filter(None, [
             title, doc.get("meta_description", ""), body]))
-        signals = _detect_signals(text, source_class)
+        signals = _detect_signals(text, source_class, company)
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0] if signals else ""
         entity = (title or norm).split("—")[0].strip()[:80]
@@ -940,7 +1001,7 @@ def derive_observations(documents, *, company: str = "") -> list:
             doc.get("text_content", "")]))
         source_class = doc.get("source_class") or _SOURCE_CLASS.get(
             doc.get("source_type"), "company_owned")
-        signals = _detect_signals(text, source_class)
+        signals = _detect_signals(text, source_class, company)
         if not signals:
             continue
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
@@ -1020,7 +1081,7 @@ def derive_observations(documents, *, company: str = "") -> list:
             # second, looser search. `text` is the detection input; for a
             # filing that is the extracted body, which is where the phrase
             # was found.
-            signal_spans=signal_spans(text, signals),
+            signal_spans=signal_spans(text, signals, company),
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],
