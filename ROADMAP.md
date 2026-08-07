@@ -1423,6 +1423,67 @@ The through-line is unchanged from T001: propose/recommend-first, the
 human disposes, nothing acts without approval. The version scheme records
 that V1.0 is a **launch boundary**, not just the next task.
 
+### V3 / V4 / V5 — restated 2026-08-07 against measured results
+
+Restated after the first cycle that measured the learning loop rather than
+the product surface. The restatement is not a re-plan: it adds the component
+that had been assumed rather than built, and it moves one item because
+measurement showed it was blocking everything downstream of it.
+
+**V3 — EXTERNAL COMMERCIAL INTELLIGENCE, LEARNING INDEPENDENTLY OF TRADING**
+
+| component | status 2026-08-07 |
+|---|---|
+| External commercial intelligence | BUILT — 247 evidence rows, 25 companies |
+| Independent zero-trade learning | BUILT — `learned_without_trading: true`, 51 beliefs with no position opened |
+| Global commercial world model | PARTIAL — 25 companies, 14 event families; no supply-chain or competitor graph |
+| Priority intelligence watchlist | PARTIAL — 27 tracked, 19% carrying evidence |
+| **Learning health / acceleration system** | **BUILT this cycle** — `MarketLearningHealth.v1`, persisted history, 9 alert classes |
+| Industrial economics | PARTIAL |
+| Game theory / strategic interaction | DECLARED, NOT POPULATED — 0 interactions observed |
+| Causal learning | DECLARED, NOT POPULATED — 0 edges |
+| Founder intelligence | BUILT and deployed |
+| Repeated live product perfection loop | RUNNING — see `docs/FOUNDER_PRODUCT_LEARNING_LEDGER.md` |
+
+The measured finding that changed this list: **belief testing had never
+happened.** 46 beliefs, 46 expectations, zero informative reconciliations,
+because production called the learning cycle without ever passing an
+observation. Every quality measure downstream — calibration, survival,
+reversal rate — was structurally unmeasurable and had been reported as zero.
+It is now wired, and the first real cycle after the fix produced 8 confirmed
+and 2 contradicted.
+
+That is why learning health is promoted from a reporting nicety to a V3
+component. Without it, a subsystem can be *declared* and sit at zero
+indefinitely, and nothing in the system will say so. Two still are, and are
+listed above as declared-not-populated rather than as built.
+
+**V3 exit criteria, added because "built" was doing too much work**
+
+1. Learning status can be classified honestly, including refusing to classify.
+2. A named bottleneck is measured, not asserted, and ranked across cycles.
+3. Belief survival and reversal are measurable on a real sample.
+4. Market→Founder usefulness is measured at both ends, not just the sending end.
+5. Global coverage cannot fall while watchlist depth rises without an alert.
+
+Items 1, 2, 3 and 5 hold as of this cycle. Item 4 does not: dossier
+*consumption* is unobservable from the market runtime, and is reported
+`UNMEASURABLE` rather than zero. That is the honest state and the next gap.
+
+**V4 — INTERNAL COMPANY INTELLIGENCE** (not started, deliberately)
+
+Internal documents, company memory, decision memory, synthetic enterprise,
+personal founder AI, and the internal↔external learning loop. Unchanged in
+scope. The V3 exit criteria above are its entry criteria — an internal loop
+built on an external loop that cannot say whether it is learning would
+inherit that blindness and double it.
+
+**V5 — BOUNDED AUTONOMOUS ENTERPRISE OPERATING SYSTEM**
+
+Permissioned actions, outcome learning, continuous organizational
+intelligence. Unchanged, and still last. Every autonomy step remains gated on
+the same through-line: propose first, human disposes.
+
 ## NEEDS-SPEC (real backlog items, no verifiable done-condition — never guessed at)
 
 - **Overnight Task 4 — mechanism rendering in the premortem** — UNBLOCKED
