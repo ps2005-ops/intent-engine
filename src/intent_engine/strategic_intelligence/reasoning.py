@@ -975,9 +975,19 @@ def build_strategic_report(*, company_name, observations,
     from intent_engine.strategic_intelligence import sufficiency as SUF
     misses = SUF.near_misses(company_name, patterns, observations,
                              fired_ids=fired_pattern_ids)
-    for miss in misses:
+    # INSERTED NEAR THE FRONT, NOT APPENDED. Every surface truncates this list
+    # — the founder view takes two, the deck's gaps screen three — and a near
+    # miss appended after the scaffold's generic unknowns was measured live at
+    # c472e1f as reaching no page at all. It outranks them: a scaffold gap
+    # says something is unknowable from outside, while this names one specific
+    # missing fact, why it matters, and which source would settle it.
+    #
+    # Index 1 keeps the standing source-mix limitation first, which is the one
+    # thing a reader needs before anything else.
+    for miss in reversed(misses):
         if miss["safe_explanation"]:
-            evidence_gaps.append(miss["safe_explanation"])
+            evidence_gaps.insert(1 if evidence_gaps else 0,
+                                 miss["safe_explanation"])
 
     # Built AFTER the gaps, not before: the decision has to name what is
     # missing, and the two coverage gaps inserted above are the most important

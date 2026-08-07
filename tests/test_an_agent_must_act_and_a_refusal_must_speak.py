@@ -217,3 +217,27 @@ def test_not_every_refusal_is_reported():
     assert len(report.near_misses) <= 2
     for miss in report.near_misses:
         assert len(miss["verified_evidence"]) >= 2
+
+
+def test_the_near_miss_survives_every_surface_truncation(near_miss_report):
+    """MEASURED LIVE AT c472e1f: the text existed, was serialised, and reached
+    no page.
+
+    Every surface truncates `evidence_gaps` — the founder view takes two, the
+    deck's gaps screen three — and the near miss was appended after the
+    scaffold's generic unknowns, so on a real company with several gaps it
+    fell off the end. Position is part of being founder-visible.
+    """
+    gaps = near_miss_report.evidence_gaps
+    where = [i for i, g in enumerate(gaps) if "did not verify" in g]
+    assert where, "no near miss in the gaps at all"
+    assert min(where) <= 2, (
+        f"near miss sits at index {min(where)}; surfaces truncate before "
+        f"that: {[g[:60] for g in gaps]}")
+
+
+def test_the_near_miss_reaches_the_rendered_deck(near_miss_report):
+    from intent_engine.strategic_intelligence.slides import build_slides
+    text = " ".join(b["text"] for s in build_slides(near_miss_report)
+                    for b in s["bullets"])
+    assert "did not verify" in text
