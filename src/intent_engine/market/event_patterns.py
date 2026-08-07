@@ -257,6 +257,31 @@ _FAMILIES: Tuple[Tuple[str, str, str], ...] = (
      _any(r"\binventor\w+\b", r"\bstock levels?\b", r"\bdestocking\b",
           r"\brestocking\b", r"\bchannel inventory\b", r"\bbacklog\b",
           r"\border book\b")),
+    # --- committed demand -------------------------------------------------
+    # The GAAP phrasings, because they are the ones filings actually use. The
+    # action list carries `was`/`were`/`is`/`totaled` deliberately: a filing
+    # states a balance ("contract liabilities were $7,280 million") rather
+    # than narrating a change, and requiring a change verb is what discarded
+    # every one of these.
+    (ME.COMMITTED_DEMAND,
+     _any(r"ros\w*e?", r"fell", r"increas\w+", r"decreas\w+", r"declin\w+",
+          r"grew", r"grow\w*", r"was", r"were", r"is", r"are", r"total\w+",
+          r"reach\w+", r"stood", r"remain\w+", _SAY),
+     _any(r"\bunsatisfied performance obligations?\b",
+          r"\bremaining performance obligations?\b",
+          r"\bperformance obligations?\b",
+          r"\bcontract liabilit(?:y|ies)\b",
+          r"\bcustomer advances?\b",
+          r"\bdeferred revenue\b", r"\bunearned revenue\b",
+          r"\border backlog\b")),
+    # --- externally imposed cost -------------------------------------------
+    (ME.COST_SHOCK,
+     _any(r"impos\w+", r"paid", r"pay\w*", r"incur\w+", r"cost\w*",
+          r"recover\w+", r"collect\w+", r"ceas\w+", r"rais\w+", r"cut",
+          r"was", r"were", r"total\w+", _SAY),
+     _any(r"\btariffs?\b", r"\bduties\b", r"\bcustoms dut\w+\b",
+          r"\bcountervailing dut\w+\b", r"\banti-?dumping\b",
+          r"\bexport controls?\b", r"\bsanctions?\b")),
     # --- patents ----------------------------------------------------------
     (ME.PATENT_ACTIVITY,
      _any(r"grant\w+", r"issu\w+", r"fil\w+", r"award\w+", r"appl\w+",
@@ -316,6 +341,36 @@ _NON_EVENT = tuple(re.compile(p, re.I) for p in (
     # forward-looking-statement legalese
     r"\bthese forward-looking statements\b",
     r"\bactual results (?:may|could) differ\b",
+    # ACCOUNTING-STANDARDS PROSE IS NOT A COMMERCIAL EVENT.
+    #
+    # Measured over five real 10-Q/10-K filings, 2112 candidate sentences:
+    # 3.9% of everything the classifier ACCEPTED was accounting-mechanics
+    # text, and it was not accepted harmlessly. "The December 31, 2025
+    # financial position data included herein is derived from the audited
+    # consolidated financial statements" classified as LAYOFF. A FASB
+    # announcement about ASU 2024-03 classified as GUIDANCE_REVISION -- the
+    # company issued no guidance; a standards board published a rule that
+    # applies to everyone.
+    #
+    # A LAYOFF that never happened routes to `margin_protection` and proposes
+    # a belief about cost discipline out of an audit cross-reference. That is
+    # a fabricated economic signal with a real citation attached, which is the
+    # kind nobody catches.
+    #
+    # This is a PRECISION repair, and it was the larger of the two findings:
+    # of what the classifier rejects, only 2.6% carried a quantified economic
+    # fact, so the funnel's ~92% loss is mostly correct rejection. The event
+    # problem was never mainly that too much is discarded.
+    r"\b(?:ASU|ASC)\s*\d{4}",
+    r"\b(?:FASB|IASB|GAAP|IFRS)\b",
+    r"\baccounting (?:standard|guidance|policies|pronouncement)",
+    r"\bin the process of evaluating\b",
+    r"\bearly adoption (?:is )?permitted\b",
+    r"\bnot necessarily indicative of\b",
+    r"\bprepared in conformity with\b",
+    r"\bread in conjunction with\b",
+    r"\breclassified to conform\b",
+    r"\bderived from the audited\b",
     # CONDITIONALS AND HYPOTHETICALS. Something that would happen if
     # something else happened has not happened. Both of these are real
     # corpus sentences that classified: "Factors that could affect the

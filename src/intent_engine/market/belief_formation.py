@@ -278,6 +278,18 @@ _ROUTES: Tuple[Tuple[str, str, Optional[str]], ...] = (
     (ME.EXECUTIVE_CHANGE, "leadership_transition", None),
     (ME.INVENTORY_CHANGE, "demand_weakening", EXP.UP),
     (ME.INVENTORY_CHANGE, "demand_strengthening", EXP.DOWN),
+    # Committed demand reads the same way round as revenue and the OPPOSITE
+    # way from inventory: a rising order book is demand customers have signed
+    # for, whereas rising inventory is goods nobody has bought yet. Routed in
+    # BOTH directions so it lands in a falsifiable family and can be tested by
+    # `observation_binding` rather than only ever proposing beliefs.
+    (ME.COMMITTED_DEMAND, "demand_strengthening", EXP.UP),
+    (ME.COMMITTED_DEMAND, "demand_weakening", EXP.DOWN),
+    # A tariff is a margin event before it is anything else. Occurrence-only:
+    # the absence of a tariff disclosure refutes nothing, so this family stays
+    # outside the falsifiable set on purpose -- binding it would build a
+    # channel that can only confirm.
+    (ME.COST_SHOCK, "margin_protection", None),
 )
 
 #: a structural family needs this much independent-equivalent evidence, or a

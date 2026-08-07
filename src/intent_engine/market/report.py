@@ -168,6 +168,13 @@ def render_report(ctx) -> Tuple[str, dict]:
     assets = ctx.results.get("assets") or {}
     health = ctx.results.get("health") or {}
     learning = ctx.results.get("learning") or {}
+    # The learning-health verdict has to reach the persisted report, not only
+    # the operator markdown. This module NAMES every step result it carries,
+    # so a step added later runs, produces a value, and is silently dropped
+    # here -- the same seam that hid the missing `observations` argument for
+    # weeks. Found by reading a real cycle report and noticing the step said
+    # `ok` while its measurement was nowhere in the JSON.
+    learning_health = ctx.results.get("learning_health") or {}
     session = ctx.session
 
     payload = {
@@ -190,6 +197,7 @@ def render_report(ctx) -> Tuple[str, dict]:
         # on purpose. Merging them is what let eleven quiet markets be
         # reported as eleven quiet minds.
         "learning": {k: v for k, v in learning.items() if k != "steps"},
+        "learning_health": learning_health,
         "health": {k: health.get(k) for k in ("overall", "cycles", "lock",
                                               "scheduler", "storage", "notes")},
         "unmeasurable": {name: reason for name, reason in _POSITION_METRICS},

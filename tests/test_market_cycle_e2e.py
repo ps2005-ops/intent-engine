@@ -312,3 +312,28 @@ def test_a_rehearsal_does_not_cancel_the_real_run(tmp_path):
 def test_a_rehearsals_bar_is_not_remembered_as_ingested(tmp_path):
     _run(tmp_path, dry_run=True, latest_bar="2026-07-30")
     assert C.RunStore(tmp_path).last_ingested_bar() is None
+
+
+def test_the_learning_health_verdict_reaches_the_persisted_report(tmp_path):
+    """A step that runs and is dropped from the report has not been wired.
+
+    `report.render_report` names every step result it carries into the
+    payload, so a step added later reports `ok`, produces a value, and is
+    silently discarded. Found exactly that way: a real cycle showed
+    `ok learning_health` while the report JSON had no such key.
+
+    This is the same seam that hid the missing `observations` argument for
+    weeks, so it gets a guard rather than a note.
+    """
+    import json
+
+    result = _run(tmp_path)
+    assert result.status == C.COMPLETED, result.reason
+    # The DATED report, not `latest_day.json` -- that one is the pointer file
+    # and holds only paths. Sorting a `*_day.json` glob puts the pointer last,
+    # which is how the first draft of this test read the wrong file.
+    reports = sorted((tmp_path / "reports" / "market").glob("20*_day.json"))
+    assert reports, "the cycle wrote no report"
+    payload = json.loads(reports[-1].read_text(encoding="utf-8"))
+    assert "learning_health" in payload
+    assert payload["learning_health"], "learning_health reached the report empty"

@@ -82,6 +82,31 @@ CAPITAL_RETURN = "CAPITAL_RETURN"          # dividend, buyback
 PARTNERSHIP = "PARTNERSHIP"
 MA_ACTIVITY = "MA_ACTIVITY"
 
+# --- added 2026-08-07 from a measured corpus gap ---------------------------
+#
+# Five real 10-Q/10-K filings were run through the classifier and every
+# rejected sentence carrying a quantity AND an economic concept was read. Two
+# concepts appeared repeatedly that the vocabulary could not represent at all,
+# and both are among the most economically load-bearing numbers a filing has.
+#
+#: Demand that is already contracted but not yet delivered. GAAP calls this
+#: "unsatisfied/remaining performance obligations" and "contract liabilities";
+#: neither phrase existed anywhere in the pattern library, so Caterpillar's
+#: $44.1bn of unsatisfied performance obligations and its contract liabilities
+#: going 2,745 -> 4,678 -> 7,280 ($M) were both discarded. `INVENTORY_CHANGE`
+#: matches the word "backlog", which no filing uses. Deliberately separate
+#: from inventory: inventory is goods the company holds and nobody has bought,
+#: committed demand is revenue customers have already signed for -- opposite
+#: economics, so they must not route to the same family in the same direction.
+COMMITTED_DEMAND = "COMMITTED_DEMAND"
+#: An externally imposed cost the company does not control -- tariffs, duties,
+#: customs, sanctions. Caterpillar disclosed ~$1.0bn of IEEPA tariff costs and
+#: $392m of expected recoveries; nothing in the vocabulary could hold either.
+#: Distinct from PRICING_SIGNAL (a company choice) because the economics
+#: differ: a company can pass a tariff through, absorb it, or relocate, and
+#: which one it does is exactly the strategic question worth asking.
+COST_SHOCK = "COST_SHOCK"
+
 EVIDENCE_TYPES = frozenset({
     EARNINGS_SURPRISE, GUIDANCE_REVISION, ESTIMATE_REVISION, PRICE_CHANGE,
     PRODUCT_LAUNCH, COMPETITOR_ACTION, CUSTOMER_COMMENT, SUPPLIER_COMMENT,
