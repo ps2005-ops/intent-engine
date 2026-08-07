@@ -558,12 +558,20 @@ def learning_health_step(ctx: C.CycleContext) -> dict:
     Never raises. A health measurement that can break the operating cycle
     would mean the act of asking "is this working" could stop it working.
     """
+    from . import health as H
     from . import learning_health as LH
 
     root = pathlib.Path(ctx.root)
+    # Which code produced this measurement. A health history whose rows cannot
+    # be attributed to a commit cannot answer "did that change help", which is
+    # most of what the history is for.
+    try:
+        runtime_sha = (H.git_state(root).get("commit") or "")[:12]
+    except Exception:  # noqa: BLE001 - an unknown sha must not stop the cycle
+        runtime_sha = ""
     try:
         health = LH.assess(root=root, as_of=ctx.as_of,
-                           runtime_sha=getattr(ctx, "runtime_sha", ""))
+                           runtime_sha=runtime_sha)
     except Exception as exc:  # noqa: BLE001 - see docstring
         return {"contract": LH.CONTRACT, "error": str(exc)}
 
