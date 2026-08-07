@@ -16,7 +16,8 @@ from intent_engine.strategic_intelligence.patterns import (
     HYPOTHESIS_SCAFFOLDS, PATTERN_LIBRARY, TENSIONS, statement_for,
 )
 from intent_engine.strategic_intelligence.records import (
-    BlindSpot, StrategicHypothesis, StrategicObservation, StrategicQuestion,
+    BlindSpot, MechanismEvidence, StrategicHypothesis, StrategicObservation,
+    StrategicQuestion,
     StrategicReport,
 )
 
@@ -171,6 +172,69 @@ def _mechanism_phrase(pattern, present):
     return ", and ".join([", ".join(phrases[:-1]), phrases[-1]])
 
 
+def _mechanism_evidence(pattern, observations):
+    """The sentences that actually established this reading's mechanism.
+
+    Built HERE because this is the last place that knows which signal
+    qualified the pattern. Downstream, a surface has only the hypothesis and a
+    list of observations, and cannot tell which of a document's eighteen
+    signals the reading was about — so it showed the document's opening
+    instead. See `records.MechanismEvidence`.
+
+    An observation whose span could not be resolved is skipped rather than
+    quoted from its excerpt: the excerpt is chosen for the document, and
+    passing it off as the evidence for this signal is the defect, not the fix.
+    """
+    from intent_engine.strategic_intelligence.observations import (
+        _NEUTRAL_LABEL, _NEUTRAL_SIGNAL_KEYWORDS, _SIGNAL_KEYWORDS,
+        phrase_span,
+    )
+    wanted = tuple(pattern.required_signals) + tuple(
+        pattern.required_any_signals)
+    out, seen = [], set()
+    for signal in wanted:
+        if signal in seen:
+            continue
+        phrases = (_NEUTRAL_SIGNAL_KEYWORDS.get(signal)
+                   or _SIGNAL_KEYWORDS.get(signal) or ())
+        for observation in observations:
+            if signal not in (observation.signals or ()):
+                continue
+            quote = (getattr(observation, "signal_spans", None)
+                     or {}).get(signal, "")
+            if not quote:
+                # NOT A FALLBACK TO THE EXCERPT — that is the defect this
+                # whole module exists to remove, and a break proof asserts it
+                # stays removed. This searches the excerpt for the PHRASE and
+                # quotes only the sentence containing it, which is the same
+                # rule as `signal_spans`, applied late.
+                #
+                # Needed because spans are captured during detection, and not
+                # every observation is built that way: fixtures, cached
+                # records and the stored path all construct
+                # `StrategicObservation` directly. Without this, a reading
+                # backed by real evidence went silent purely because of where
+                # its observation was assembled — measured as narrative
+                # overlap RISING between two unrelated companies, since what
+                # was dropped was the company-specific half of the page.
+                quote = phrase_span(
+                    f"{observation.excerpt or ''} {observation.text or ''}",
+                    phrases)
+            if not quote:
+                continue
+            seen.add(signal)
+            out.append(MechanismEvidence(
+                signal=signal,
+                label=_NEUTRAL_LABEL.get(signal, ""),
+                quote=quote,
+                observation_id=observation.observation_id,
+                source_title=observation.source_title,
+                origin=observation.origin,
+                source_class=observation.source_class))
+            break
+    return tuple(out)
+
+
 def _rank_evidence(observations):
     """Order evidence by strategic value: independent vantage first, then
     dated, then strong (not weak), then more specific (longer excerpt)."""
@@ -294,6 +358,7 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
                           for e in pattern.historical_examples),
         evidence_roles=tuple(roles),
         provenance=_provenance(support_classes),
+        mechanism_evidence=_mechanism_evidence(pattern, support),
     )
     h.validate()
     return h

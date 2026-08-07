@@ -99,6 +99,14 @@ class StrategicObservation:
     entity: str = ""                # linked product/project/entity
     weak: bool = False              # title-only / generic marketing → weak
     evidence_quality: str = "strong"  # strong | weak
+    #: signal -> the sentence IN THIS DOCUMENT that evidenced it.
+    #:
+    #: `excerpt` is one passage chosen for the whole document, so on a source
+    #: carrying many signals it is the right evidence for at most one of them.
+    #: A reading that qualified on signal X must be able to quote the words
+    #: that produced X, not the document's opening. See
+    #: `observations.signal_spans` for the measured case this comes from.
+    signal_spans: dict = field(default_factory=dict)
 
     def validate(self) -> None:
         _require(self.observation_type in OBSERVATION_TYPES,
@@ -198,6 +206,32 @@ class ComparablePattern:
 
 
 @dataclass
+class MechanismEvidence:
+    """The words that caused a reading, and where they came from.
+
+    ONE OBJECT, EVERY SURFACE. A reading asserts a structural force —
+    "switching cost rises", "the record moved" — and until now no surface
+    could show what established it. Each surface had the hypothesis and the
+    observation list and had to guess which excerpt was relevant; measured
+    live, all of them guessed the document's opening paragraph.
+
+    This is built once, where the pattern qualifies and the matched signal is
+    still known, and read everywhere. A surface that renders a mechanism claim
+    without rendering this is asserting something the reader cannot check.
+    """
+    signal: str            #: the mechanism signal that qualified the pattern
+    label: str             #: what having it means, in a reader's words
+    quote: str             #: the sentence in the source that evidenced it
+    observation_id: str
+    source_title: str = ""
+    origin: str = ""
+    source_class: str = "company_owned"
+
+    def as_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
 class StrategicHypothesis:
     """An outside-in strategic bet. Carries the full reasoning apparatus a
     reader needs to accept, weaken, or reject it."""
@@ -227,6 +261,10 @@ class StrategicHypothesis:
     # cannot judge either one, and the two were previously indistinguishable on
     # the page.
     provenance: str = "company-stated"
+    #: The mechanism(s) this reading qualified on, each with the sentence that
+    #: evidenced it. Empty only for a pattern that declares no mechanism gate
+    #: — those are the recorded debt, not a licence to hide reasoning.
+    mechanism_evidence: tuple = ()
 
     def validate(self) -> None:
         _require(self.confidence in CONFIDENCE_LEVELS,
@@ -259,6 +297,12 @@ class StrategicHypothesis:
         for k in ("source_classes", "strongest_support_ids",
                   "strongest_counter_ids", "comparables", "evidence_roles"):
             d[k] = list(getattr(self, k))
+        # `asdict` already recursed into these; restate as a list so every
+        # surface reads the same shape whether it was handed the object or
+        # its dict.
+        d["mechanism_evidence"] = [
+            m.as_dict() if hasattr(m, "as_dict") else dict(m)
+            for m in self.mechanism_evidence]
         return d
 
 

@@ -39,6 +39,75 @@ def _has_phrase(text: str, phrase: str) -> bool:
 def _any_phrase(text: str, phrases) -> bool:
     return any(_has_phrase(text, p) for p in phrases)
 
+
+# --- WHERE a signal was found, not merely THAT it was ------------------------
+#
+# THE DEFECT THIS EXISTS TO FIX. An observation is one document, and carries
+# every signal detected anywhere in it — HubSpot's 10-K carried eighteen. Its
+# `excerpt` is chosen ONCE for the whole document (the filing's best section,
+# or its opening), so it can be the right evidence for at most one of those
+# eighteen signals, and in practice for none of them.
+#
+# Measured live at bdbc0d0: `tool_to_system_of_record` qualified for HubSpot on
+# `system_of_record_claim`, which is genuinely there — the 10-K says "Our
+# customer platform includes a system of record for maintaining a unified view
+# of the customer experience". The reader was shown "We provide an agentic
+# customer platform that helps marketing, sales, and customer service teams
+# drive business growth", the document's first 400 characters, which says
+# nothing of the kind. The gate fired correctly and the explanation layer
+# showed the wrong four hundred characters.
+#
+# So a signal now carries the sentence that produced it. Evidence for a claim
+# is the text that caused the claim, or it is not evidence for that claim.
+_MAX_SPAN = 320
+
+
+def _sentence_around(text: str, start: int, end: int) -> str:
+    """The sentence containing a match, trimmed to something quotable."""
+    left = text.rfind(". ", 0, start)
+    left = 0 if left < 0 else left + 2
+    right = text.find(". ", end)
+    right = len(text) if right < 0 else right + 1
+    span = " ".join(text[left:right].split())
+    if len(span) > _MAX_SPAN:
+        # keep the match itself in view rather than truncating from the left
+        rel = start - left
+        head = max(0, rel - _MAX_SPAN // 2)
+        span = ("…" if head else "") + span[head:head + _MAX_SPAN].strip() + "…"
+    return span
+
+
+def phrase_span(text: str, phrases) -> str:
+    """The first sentence in `text` that evidences one of `phrases`."""
+    for phrase in phrases:
+        match = _phrase_pattern(phrase).search(text or "")
+        if match:
+            return _sentence_around(text, match.start(), match.end())
+    return ""
+
+
+def signal_spans(text: str, signals=()) -> dict:
+    """signal -> the sentence in this document that evidenced it.
+
+    Only the keyword-driven vocabularies are resolvable this way; filing
+    propositions are matched by their own sentence-scoped rules and carry
+    their span through `filing_detectors`. A signal with no resolvable span is
+    ABSENT from this mapping rather than present-and-empty, so a caller can
+    tell "no evidence to show" from "evidence is the empty string".
+    """
+    text = text or ""
+    wanted = set(signals) if signals else None
+    spans = {}
+    for table in (_NEUTRAL_SIGNAL_KEYWORDS, _SIGNAL_KEYWORDS,
+                  _OUTSIDE_ONLY_PHRASES):
+        for signal, phrases in table.items():
+            if signal in spans or (wanted is not None and signal not in wanted):
+                continue
+            span = phrase_span(text, phrases)
+            if span:
+                spans[signal] = span
+    return spans
+
 # document source_type -> strategic source_class
 _SOURCE_CLASS = {
     "external_approved": "independent_reporting",
@@ -934,6 +1003,12 @@ def derive_observations(documents, *, company: str = "") -> list:
             signals=tuple(signals),
             source_class=source_class,
             excerpt=excerpt[:400],
+            # Resolved against the SAME text detection ran on, so a span is
+            # the actual sentence that produced the signal rather than a
+            # second, looser search. `text` is the detection input; for a
+            # filing that is the extracted body, which is where the phrase
+            # was found.
+            signal_spans=signal_spans(text, signals),
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],

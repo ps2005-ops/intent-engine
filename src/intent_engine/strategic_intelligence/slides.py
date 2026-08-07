@@ -392,9 +392,35 @@ def founder_view_from_report(report) -> dict:
     # world and cannot check "becoming the place a team's work is stored".
     fact = anchor["fact"]
     supporting = [t for t in anchor.get("supporting") or [] if t]
+    # THE READING MAY NOT ARRIVE WITHOUT WHAT CAUSED IT.
+    #
+    # "A plausible reading is that {company} appears to be broadening from a
+    # focused tool toward being the place a team's work is stored, which
+    # raises switching cost" was shown to HubSpot and Datadog with nothing
+    # behind it a reader could check. The claim was correct and the evidence
+    # existed — it just never reached this screen. The mechanism sentence now
+    # travels WITH the interpretation, from `mechanism.because_line`, and a
+    # reading that cannot produce one does not get to assert itself here.
+    # Same three states as the narrative, in the same order, from the same
+    # module — see `narrative.py`. The deck and the brief must not disagree
+    # about why a company got a reading, and the only way to guarantee that is
+    # for both to ask `mechanism` rather than each deciding for itself.
+    from intent_engine.strategic_intelligence import mechanism as MECH
     interpretation = ""
     if claim and not reads_as_taxonomy(claim):
-        interpretation = f"A plausible reading is that {_lower_first(claim)}"
+        because = MECH.because_line(top)
+        if because:
+            interpretation = (f"A plausible reading is that "
+                              f"{_lower_first(claim)} The company's own words: "
+                              f"{because}")
+        elif MECH.needs_mechanism(top):
+            interpretation = (f"A plausible reading is that "
+                              f"{_lower_first(claim)} No retrieved source "
+                              f"states this in its own words.")
+        else:
+            # A pattern that declares no mechanism gate is recorded debt, not
+            # a hidden claim; it keeps the reading it always had.
+            interpretation = f"A plausible reading is that {_lower_first(claim)}"
     elif top.get("reasoning") and not reads_as_taxonomy(top["reasoning"]):
         interpretation = top["reasoning"]
     paragraph = " ".join(x for x in [

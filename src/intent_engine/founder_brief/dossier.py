@@ -732,13 +732,32 @@ def _unknowns(company, report, decision, said) -> Passage:
                    depth=FULL, kind="labelled", items=tuple(rows[:5]))
 
 
+def _checkable(text: str) -> bool:
+    """Whether a reader could actually go and observe this.
+
+    THE SAME FILTER THE DECK ALREADY APPLIES, arriving here late. Measured
+    live at `bdbc0d0`: HubSpot's and Datadog's full analyses both told the
+    reader to watch for "customers describing it as a companion to a system of
+    record rather than the record itself" — `tool_to_system_of_record`'s own
+    falsification question, in vocabulary the reader has never met and cannot
+    check. The deck filters exactly this through `_watchable`; the dossier
+    read the same field and did not.
+
+    Dropped, never reworded: a watch item a reader cannot observe is worse
+    than a shorter list, and generic filler is worse than both.
+    """
+    from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
+    text = (text or "").strip()
+    return bool(text) and not reads_as_taxonomy(text)
+
+
 def _monitoring(company, report, decision, said) -> Passage:
     """A prioritised watch list: the question, and what it would settle."""
     rows = []
     for row in _records(report, "questions"):
         question = _flat(row.get("question"))
         why = _readable_reason(row.get("why_it_matters"))
-        if not question or said.has(question):
+        if not question or said.has(question) or not _checkable(question):
             continue
         said.remember(question)
         rows.append({"label": question, "text": _sentence(why) if why else ""})
@@ -847,7 +866,9 @@ def _artefacts(company, decision, report, said) -> Passage:
                          f"The one bounded check that would settle this, with "
                          f"what each result would favour")})
     questions = [_flat(q.get("question")) for q in _records(report, "questions")]
-    questions = [q for q in questions if q][:3]
+    # Same rule as the watch list above: a question a board cannot investigate
+    # is worse than one fewer question. See `_checkable`.
+    questions = [q for q in questions if _checkable(q)][:3]
     if questions:
         rows.append({"label": "Board discussion questions",
                      "text": end_sentence("; ".join(

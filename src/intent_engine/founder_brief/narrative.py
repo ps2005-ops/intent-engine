@@ -1069,7 +1069,54 @@ def build_narrative(*, company: str, brief, report: Optional[dict] = None,
     # Without it that section had one candidate, which the answer above had
     # usually already spent, and a page that names no consequence fails the
     # thing this rebuild exists for.
-    statements = _dedupe([_flat(h.get("statement")) for h in hypotheses])[:3]
+    #
+    # A CLAIM AND THE WORDS THAT CAUSED IT TRAVEL TOGETHER OR NOT AT ALL.
+    #
+    # This list is where "HubSpot appears to be broadening from a focused tool
+    # toward being the place a team's work is stored, which raises switching
+    # cost" reached the deployed page — as a bare statement, with the sentence
+    # that established it left behind in an observation nobody rendered.
+    # Measured live at `bdbc0d0` on HubSpot and Datadog.
+    #
+    # Concatenated deliberately rather than passed alongside: two fields can
+    # be rendered separately and one of them dropped, which is how the
+    # evidence went missing in the first place. A gated reading that cannot
+    # produce its sentence is not used here at all — the page loses a
+    # consequence rather than asserting an unfalsifiable one.
+    # SILENCE IS NOT TRANSPARENCY.
+    #
+    # The first attempt DROPPED a gated claim that could not quote itself, on
+    # the reasoning that an unevidenced structural assertion should not be
+    # made. Measured, that was worse: `services_to_product` lost an entire
+    # company-specific section and its page moved CLOSER to an unrelated
+    # company's — narrative overlap rose through the 0.75 break threshold,
+    # because what was removed was the specific half and what remained was
+    # the shared scaffolding. A founder was left with less analysis and no
+    # indication anything was missing.
+    #
+    # So the claim stays and carries its status. Three states, and the reader
+    # can tell them apart:
+    #   - evidenced      -> the sentence from the source, quoted
+    #   - not evidenced  -> said so, in the open, so it can be gone and found
+    #   - no mechanism claimed (ungated, the recorded debt) -> unchanged
+    from intent_engine.strategic_intelligence import mechanism as MECH
+    statements = []
+    for h in hypotheses:
+        claim = _flat(h.get("statement"))
+        if not claim:
+            continue
+        because = MECH.because_line(h)
+        if because:
+            statements.append(f"{claim.rstrip('.')}. The company's own words: "
+                              f"{because}")
+        elif MECH.needs_mechanism(h):
+            statements.append(
+                f"{claim.rstrip('.')}. No retrieved source states this in its "
+                f"own words, so treat it as a reading of the evidence rather "
+                f"than something the company has said.")
+        else:
+            statements.append(claim)
+    statements = _dedupe(statements)[:3]
 
     consequence = ""
     for spot in (report.get("blind_spots") or ()):
