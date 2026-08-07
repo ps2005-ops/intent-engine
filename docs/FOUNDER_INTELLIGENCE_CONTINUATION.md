@@ -696,3 +696,84 @@ target in `_UNGATED_DEBT`.
 
 Multi-identity stability harness, share verification, and the retry lifecycle
 on this HEAD. Unchanged from the previous cycle's status.
+
+---
+
+# CYCLE 2026-08-06c — mechanism transparency, measured live
+
+Branch `feat/founder-decision-experience-v3`, deployed and verified on
+`intent-engine-preview-v3` at **`bdd007a`**. Full suite 4346 passed / 16
+skipped, EXIT=0.
+
+## The defect, and why it was not a gating defect
+
+HubSpot's 10-K says "Our customer platform includes a system of record for
+maintaining a unified view of the customer experience". The reading was right
+and the gate was right. What the page showed as its evidence was "We provide
+an agentic customer platform that helps marketing, sales, and customer service
+teams drive business growth" — the document's first four hundred characters.
+
+Structural: an observation is one DOCUMENT carrying every signal found
+anywhere in it (HubSpot's filing carried eighteen), while `excerpt` is chosen
+once for the whole document. It is therefore the right evidence for at most
+one signal, and for a long filing usually for none.
+
+Fixed by capturing the sentence per signal (`observations.signal_spans`),
+attaching the qualifying ones to the hypothesis (`records.MechanismEvidence`,
+built in `reasoning._mechanism_evidence` — the last place that knows WHICH
+signal qualified), and rendering through one module (`mechanism.py`) that the
+deck and the brief both call and no one else may.
+
+**Silence is not transparency.** Dropping an unevidenced gated claim was tried
+first and measured worse: `services_to_product` lost a company-specific
+section and its page moved CLOSER to an unrelated company's. Three states now,
+distinguishable to a reader: quoted / stated-as-unevidenced / unchanged
+(ungated, claims no mechanism).
+
+## Live matrix, ten companies on the deployed build
+
+| company | reading | mechanism shown | quoted evidence |
+|---|---|---|---|
+| HubSpot | tool→system of record | yes | "…includes a system of record for maintaining a unified view of the customer experience" |
+| Datadog | tool→system of record | yes | "…powered by a common data model that is extensible…" |
+| Palantir | services→product | yes | the O&M / professional-services passage |
+| Linear | one buyer → two buyers | yes | "the startups and enterprises that choose Linear" |
+| Microsoft | one buyer → two buyers | yes | see defect below |
+| Amazon | one buyer → two buyers | yes | see defect below |
+| Snowflake | bounded, none asserted | n/a | — |
+| MongoDB | ecosystem control (UNGATED) | no | — |
+| Stripe | portfolio run as one (UNGATED) | no | — |
+| Shopify | product→platform (UNGATED) | no | — |
+
+Counter-evidence and falsifier present on all ten. Taxonomy leak ("customers
+describing it as a companion to a system of record") gone — the dossier now
+applies the same `reads_as_taxonomy` filter the deck always had.
+
+Every reading WITHOUT a shown mechanism is one of the eight ungated patterns
+recorded in `_UNGATED_DEBT`. Those declare no mechanism at all, so there is
+none to show; the fix for them is gating, not rendering. MongoDB's "breadth
+plus partners raise switching costs" is exactly the unevidenced structural
+claim that debt still permits.
+
+## WHAT TRANSPARENCY IMMEDIATELY EXPOSED
+
+Microsoft and Amazon qualified `single_to_multi_segment` on `segment_split`,
+and the quoted sentence shows why that is wrong:
+
+> "Our competitors are developing new software and devices, while also
+> deploying competing cloud-based services for consumers and businesses."
+
+The pair phrase "consumers and businesses" is in the document, but the
+sentence is about COMPETITORS' offerings, not about who Microsoft sells to.
+Amazon's is the same shape — a competitor list in a 10-K risk factor.
+
+The phrase-level gate cannot read the subject of the sentence it matched. This
+was always happening; it was invisible until the evidence was shown, and it
+became visible the same day. **That is the argument for this cycle**: a
+detection defect that reaches a founder as an unsupported sentence is
+undetectable, and one that reaches them next to its own quotation is obvious.
+
+**Next cycle: subject-scope the span.** A pair phrase inside a sentence whose
+subject is competitors, customers-of-customers, or a risk factor is not
+evidence about this company's buyers. `filing_detectors` already matches
+sentence-scoped; this needs the same discipline plus a subject test.
