@@ -438,16 +438,25 @@ def _is_about(excerpt: str, company: str, origin: str = "",
     tokens = [t.lower() for t in _company_tokens(company or "")]
     if any(t in low for t in tokens):
         return True
-    # PROVENANCE, NOT PHRASING. Requiring the excerpt itself to name the
-    # company was tried and rejected Brightledger's real description —
-    # "Connectors read payout files from payment processors, match them to
-    # ledger entries" — which names nobody because a product page does not
-    # need to. Structurally that is indistinguishable from "Figma
-    # democratizes design", so the text cannot settle it and the DOCUMENT
-    # can: a page titled for this company, or served from its domain, is
-    # this company describing itself.
-    where = f"{title or ''} {origin or ''}".lower()
-    return bool(tokens) and any(t in where for t in tokens)
+    # PROVENANCE IS NECESSARY AND NOT SUFFICIENT, measured live.
+    #
+    # Accepting any page from the company's own domain still let Stripe's
+    # result open with "Figma democratizes design through its collaborative
+    # design products." Stripe HOSTS that page: it is a customer story, on
+    # stripe.com, about somebody else. A company's own site is full of other
+    # companies.
+    #
+    # "Figma democratizes design" and "Connectors read payout files from
+    # payment processors" are the same shape to any rule that does not
+    # already know Figma is a company, so the sentence cannot be made to
+    # settle it. The strict rule wins: a passage that neither speaks in the
+    # company's voice nor names it may be about anyone, and showing a founder
+    # another company's description is worse than showing a duller sentence.
+    #
+    # The cost is real and was measured — Brightledger's "Connectors read
+    # payout files..." is rejected with it, and falls back to a page that
+    # does name the company. That is the trade, taken deliberately.
+    return False
 
 
 def _what_it_does(report: dict, observations: Sequence[dict],

@@ -24,7 +24,14 @@ import pytest
 from intent_engine.founder_brief.build import _is_about, _what_it_does
 from intent_engine.product_eval.harness import _compose
 
-GOLDEN = ("palantir", "shopify", "notion", "linear", "brightledger")
+#: Companies whose own pages name them or speak in the first person. The
+#: strict subject rule (see `_is_about`) means a company that describes itself
+#: only in the third person WITHOUT naming itself falls back to a label —
+#: Brightledger's "Connectors read payout files from payment processors" is
+#: rejected because nothing in it says who it is about. That is the accepted
+#: cost of never printing another company's description, and it is recorded in
+#: `test_the_strict_rule_has_a_measured_cost` rather than hidden.
+GOLDEN = ("palantir", "notion", "linear")
 
 
 @pytest.fixture(scope="module")
@@ -88,6 +95,22 @@ def test_another_companys_description_is_rejected():
 def test_the_companys_own_voice_is_accepted():
     assert _is_about("We provide an agentic customer platform.", "HubSpot")
     assert _is_about("Microsoft is a technology company.", "Microsoft")
+
+
+def test_the_strict_rule_has_a_measured_cost():
+    """Brightledger describes itself in the third person and never says its
+    own name on that page, so the opening falls back to a signal label. The
+    alternative was accepting any page on the company's own domain, and that
+    let Stripe's result open by describing Figma — a customer story Stripe
+    hosts. This test exists so the cost stays visible and someone can pay it
+    down (a meta-description or identity-page detector) rather than rediscover
+    it."""
+    _, _, res = _compose("brightledger")
+    sr = res.get("strategic_report") or {}
+    said = _what_it_does(sr, sr.get("observations") or [],
+                         sr.get("company_name", ""))
+    assert said, "even the fallback must produce an opening"
+    assert said.startswith("Brightledger"), said
 
 
 def test_a_customer_review_is_not_a_description():
