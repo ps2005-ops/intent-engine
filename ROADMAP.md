@@ -1423,6 +1423,46 @@ The through-line is unchanged from T001: propose/recommend-first, the
 human disposes, nothing acts without approval. The version scheme records
 that V1.0 is a **launch boundary**, not just the next task.
 
+### The permanent doctrine
+
+The system is not complete when it generates good analysis. Analysis quality
+is a snapshot, and a snapshot can be reached by writing better prompts.
+
+It is complete when it continuously improves **what it observes, what it
+believes, why it believes it, which mechanisms it trusts, which causal
+relationships it considers plausible, which actors it connects, which hidden
+states it considers, what it expects next, what evidence would change its
+mind, what founders should care about, and whether its previous reasoning was
+actually useful.**
+
+Every one of those is a loop, not a feature, and each has to be measurable
+before it can be improved. The order this project keeps rediscovering is that
+the measurement comes first: three separate defects this month — the missing
+`observations` argument, the classifier's precision inversion, and the bridge
+that had never opened — were all invisible until something counted them, and
+all three had been silently wrong for weeks while every test passed.
+
+### The market→founder loop — closed 2026-08-07, and what it cost
+
+Recorded because the failure mode is worth more than the fix. The bridge was
+disconnected in **three consecutive layers**, each of which hid the next:
+
+1. **Schema.** The producer emitted `company_display_name` and
+   `subject_names`; the consumer fails closed on unknown fields. All 22
+   dossiers refused, always.
+2. **Silence.** A refusal is caught, logged at warning, and degrades to no
+   strategic section — which is also exactly how a company the market never
+   looked at appears. The two were indistinguishable.
+3. **Render.** `has_material` counted beliefs; the renderer read every kind
+   of strategic content *except* beliefs, which is the only kind the producer
+   makes. A dossier could validate, count as material, open a section, and put
+   nothing under it.
+
+No test caught any of them, because each side was individually correct. The
+loop is now measured end to end — published 22, used 22, rendered 22, rate
+1.0 — and the standing lesson is that **an integration nobody counts is an
+integration nobody has.**
+
 ### V3 / V4 / V5 — restated 2026-08-07 against measured results
 
 Restated after the first cycle that measured the learning loop rather than
@@ -1438,7 +1478,17 @@ measurement showed it was blocking everything downstream of it.
 | Independent zero-trade learning | BUILT — `learned_without_trading: true`, 51 beliefs with no position opened |
 | Global commercial world model | PARTIAL — 25 companies, 14 event families; no supply-chain or competitor graph |
 | Priority intelligence watchlist | PARTIAL — 27 tracked, 19% carrying evidence |
-| **Learning health / acceleration system** | **BUILT this cycle** — `MarketLearningHealth.v1`, persisted history, 9 alert classes |
+| **Learning health / acceleration system** | BUILT — `MarketLearningHealth.v1`, persisted history, 9 alert classes |
+| **Market→Founder closed loop** | **BUILT 2026-08-07** — `dossier_consumption.v1`, 8-stage ladder, `CONSUMED_VISIBLE_EFFECT` on 22/22 |
+| **Belief→graph→reasoning path** | **BUILT 2026-08-07** — beliefs project as HYPOTHESIS nodes; founder sentence traces to a market evidence id |
+| Mechanism calibration | BUILT — graded from real reconciliations, `UNMEASURABLE` below 5 tests |
+| Causal learning | DECLARED, NOT POPULATED — 0 edges |
+| Strategic interactions | DECLARED, NOT POPULATED — 0 observed |
+| Hidden-state inference | NOT BUILT |
+| Belief maturity / decay | NOT BUILT |
+| Value of Information | NOT BUILT |
+| Research prioritisation | NOT BUILT — research is still pulled by availability, not by information value |
+| Founder Product Learning health | NOT BUILT |
 | Industrial economics | PARTIAL |
 | Game theory / strategic interaction | DECLARED, NOT POPULATED — 0 interactions observed |
 | Causal learning | DECLARED, NOT POPULATED — 0 edges |
@@ -1466,9 +1516,25 @@ listed above as declared-not-populated rather than as built.
 4. Market→Founder usefulness is measured at both ends, not just the sending end.
 5. Global coverage cannot fall while watchlist depth rises without an alert.
 
-Items 1, 2, 3 and 5 hold as of this cycle. Item 4 does not: dossier
-*consumption* is unobservable from the market runtime, and is reported
-`UNMEASURABLE` rather than zero. That is the honest state and the next gap.
+Items 1, 2, 3 and 5 held from the first restatement. **Item 4 now holds too**
+— consumption is measured at both ends, and measuring it is what exposed that
+it had never once occurred.
+
+**V3 exit criteria, extended 2026-08-07 after the loop closed**
+
+6. A founder-visible strategic sentence traces to a market evidence id.
+   *Holds* — hypothesis node → supports edge → evidence node → ledger row.
+7. A market belief renders with its epistemic standing intact: a prior is
+   never printed as a measurement, and a reading never becomes advice.
+   *Holds*, pinned by tests that forbid the specific strings.
+8. `DECISION_RELEVANT` is emitted by something. **Does not hold.** The stage
+   exists and nothing fills it, deliberately: it is the only measure of
+   whether the learning was worth having, and an emitter written before there
+   is a defensible test for it would put a number on the one question this
+   loop exists to ask honestly.
+9. Causal edges, strategic interactions and hidden states are populated from
+   real episodes. **Does not hold** — all three remain declared and empty,
+   and they are the next cycle's work.
 
 **V4 — INTERNAL COMPANY INTELLIGENCE** (not started, deliberately)
 
