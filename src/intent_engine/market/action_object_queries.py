@@ -221,6 +221,12 @@ def plan(*, actor: str, action_id: str, missing_dimensions: Sequence[str],
     for family in FAMILIES:
         supplies = _SUPPLIES.get(family, ())
         covered = sum(1 for dim in missing if dim in supplies)
+        # THIS is what keeps a homepage out of the plan, and a wave-8 break
+        # proof is what established it: a generic family supplies no
+        # dimension, so it never survives here and the score it would have
+        # received is never computed. A separate penalty on GENERIC_FAMILIES
+        # sat below this line for one commit and could not fire — the same
+        # "guard that cannot fail" this project has now found twice.
         if not covered:
             continue
         established, attempts = measured.get(family, (0, 0))
@@ -232,10 +238,6 @@ def plan(*, actor: str, action_id: str, missing_dimensions: Sequence[str],
             score = covered * (rate if rate else -0.5)
         else:
             score = covered * 0.5          # untried: the editorial prior only
-        # A generic family can only ever be a last resort, and never while a
-        # family whose editorial purpose covers the gap is untried.
-        if family in GENERIC_FAMILIES:
-            score -= 10.0
         scored.append((score, family))
 
     scored.sort(key=lambda pair: (-pair[0], FAMILIES.index(pair[1])))

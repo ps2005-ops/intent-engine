@@ -226,6 +226,32 @@ def test_a_product_with_no_buyer_is_partial_not_unknown():
     assert CO.WHAT in got.dimensions_present
 
 
+def test_a_price_change_with_a_tier_and_no_buyer_is_not_established():
+    """A priced tier names WHAT changed and never WHO was meant to feel it.
+
+    The dimension table said PRICE_CHANGE needs a what AND a who, and nothing
+    asserted it: emptying that requirement left every test green. This is the
+    live BigCommerce shape — a real dated change whose tier is in the sentence
+    and whose buyer is in a table further down the page.
+    """
+    got, _ = CO.extract(
+        "Starting June 1, 2026, the Plus plan price increases to $2,500 "
+        "per month.",
+        action_id="a1", actor="BigCommerce", source="s",
+        created_at="2026-08-08", action_type="PRICE_CHANGE")
+    assert got.standing == CO.PARTIAL
+    assert CO.WHO.lower() in got.missing
+    assert not got.is_usable
+    # And the same sentence WITH a buyer clears the bar, so the refusal above
+    # is the missing dimension and not the extractor failing to read a price.
+    with_buyer, _ = CO.extract(
+        "Starting June 1, 2026, the Plus plan price increases to $2,500 "
+        "per month for enterprise merchants.",
+        action_id="a2", actor="BigCommerce", source="s",
+        created_at="2026-08-08", action_type="PRICE_CHANGE")
+    assert with_buyer.standing == CO.ESTABLISHED
+
+
 def test_a_vacuous_word_is_not_a_product():
     got, _ = pull("Salesforce today announced Commerce for everyone.")
     assert got is None or got.use_case.lower() not in CO._VACUOUS

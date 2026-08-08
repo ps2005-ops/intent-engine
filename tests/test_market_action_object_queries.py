@@ -119,16 +119,26 @@ def test_a_high_voi_question_never_routes_to_a_generic_page():
         assert all(p.candidate_source_family != generic for p in plans[:4])
 
 
-def test_a_generic_family_cannot_outrank_a_purposeful_one():
-    """Even with a flattering measured yield, the homepage stays last:
-    a homepage that once mentioned a buyer is still not a page about one."""
-    performance = {Q.HOMEPAGE: (5, 5), Q.PRICING_PAGE: (0, 0)}
-    plans = Q.plan(actor="Shopify", action_id="a1",
-                   missing_dimensions=["WHO"], performance=performance,
-                   limit=len(Q.FAMILIES))
-    families = [p.candidate_source_family for p in plans]
-    if Q.HOMEPAGE in families:
-        assert families.index(Q.PRICING_PAGE) < families.index(Q.HOMEPAGE)
+def test_a_generic_family_is_never_planned_however_well_it_scored():
+    """Even with a perfect measured yield, the homepage is not planned.
+
+    The earlier version of this test asked "if the homepage is in the list,
+    is it below pricing?" — and the homepage is never in the list, so it
+    asserted nothing. It is excluded because it supplies no dimension, not
+    because it is ranked badly, and that is a stronger guarantee: no
+    measured yield can buy a generic page a place in the plan.
+    """
+    performance = {Q.HOMEPAGE: (5, 5), Q.NEWSROOM: (9, 9),
+                   Q.PRICING_PAGE: (0, 0)}
+    for missing in (["WHO"], ["WHAT"], ["SUBSTITUTE"], ["BUDGET"],
+                    ["WHAT", "WHO", "SUBSTITUTE", "BUDGET"]):
+        plans = Q.plan(actor="Shopify", action_id="a1",
+                       missing_dimensions=missing, performance=performance,
+                       limit=len(Q.FAMILIES))
+        families = [p.candidate_source_family for p in plans]
+        assert families, f"no plan at all for {missing}"
+        assert not (set(families) & Q.GENERIC_FAMILIES), \
+            f"a generic family was planned for {missing}: {families}"
 
 
 # --- the plan must name a real gap ----------------------------------------
