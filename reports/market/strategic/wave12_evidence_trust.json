@@ -1,0 +1,22 @@
+{
+ "contract": "evidence_trust.v1",
+ "as_of": "2026-08-08",
+ "summary": {
+  "contract": "evidence_trust.v1",
+  "events": 167,
+  "by_standing": {
+   "SINGLE_SOURCE": 118,
+   "DEPENDENT_REREPORTING": 43,
+   "PARTIALLY_INDEPENDENT": 1,
+   "INDEPENDENTLY_CORROBORATED": 1,
+   "CONFLICTED": 4
+  },
+  "independent_support": 163,
+  "total_weight": 166.3,
+  "sentence": "Public sources disagree on this point, so we are keeping the conclusion bounded.",
+  "note": "weight is computed first and the sentence is derived from it, so the prose cannot say 'one observation' while a belief matures on three copies of it"
+ },
+ "naive_source_count": 295,
+ "inflation_avoided": 132,
+ "note": "a founder page counting rows would have claimed 295 sources for 163 observations"
+}

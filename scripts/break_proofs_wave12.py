@@ -32,6 +32,7 @@ SE = f"{T}/test_market_strategic_episodes.py"
 LC = f"{T}/test_market_learning_channels.py"
 RPQ = f"{T}/test_market_relationship_persistence.py"
 KRT = f"{T}/test_market_knowledge_retention.py"
+ETR = f"{T}/test_market_evidence_trust.py"
 CRL = f"{T}/test_market_competitive_relationships.py"
 OTM = f"{T}/test_market_occurrence_time.py"
 NM = f"{T}/test_market_near_miss.py"
@@ -476,6 +477,36 @@ PROOFS = [
      "        if predicate == \"COMPETES_WITH\" and not scope_value:",
      "        if False:",
      f"{RPQ}::test_a_rivalry_with_no_contested_object_is_refused"),
+
+("w12-5. three copies of one announcement weigh more than one",
+     S / "evidence_trust.py",
+     "    DEPENDENT_REREPORTING: 1.0,",
+     "    DEPENDENT_REREPORTING: 3.0,",
+     f"{ETR}::test_three_same_origin_reports_weigh_the_same_as_one"),
+
+    ("w12-6. dependent re-reporting inflates independent support",
+     S / "evidence_trust.py",
+     "    if conflicting:\n        standing = CONFLICTED\n"
+     "    elif accounts <= 1:\n        standing = SINGLE_SOURCE\n"
+     "    elif market_standing == \"CORROBORATED\" and independent >= 2:",
+     "    if conflicting:\n        standing = CONFLICTED\n"
+     "    elif accounts <= 1:\n        standing = SINGLE_SOURCE\n"
+     "    elif accounts >= 2 or (market_standing == \"CORROBORATED\" and independent >= 2):",
+     f"{ETR}::test_dependent_reporting_does_not_inflate_independent_support"),
+
+    ("w12-7. the founder page is shown an internal dependency label",
+     S / "evidence_trust.py",
+     "        \"Several reports trace back to the same underlying announcement, so \"\n"
+     "        \"we treat them as one observation rather than independent \"\n"
+     "        \"confirmation.\",",
+     "        \"SAME_ORIGIN: dependency_class same_origin across accounts.\",",
+     f"{ETR}::test_no_internal_vocabulary_reaches_the_reader"),
+
+    ("w12-8. the rendered line reports the strongest evidence, not the weakest",
+     S / "evidence_trust.py",
+     "    worst = min(trusts, key=lambda t: order.get(t.standing, 9))",
+     "    worst = max(trusts, key=lambda t: order.get(t.standing, 9))",
+     f"{ETR}::test_the_rendered_line_names_the_weakest_thing_worth_naming"),
 
     # --- 18 & 19: production target and PAPER --------------------------
     # Both are runtime guards asserted by the existing deployment tests
