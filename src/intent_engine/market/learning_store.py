@@ -73,12 +73,36 @@ RELATIONSHIP_RETIRED = "relationship_retired"
 CROSS_ACTOR_EXPECTATION = "cross_actor_expectation"
 #: How a preregistered cross-actor expectation turned out.
 CROSS_ACTOR_OUTCOME = "cross_actor_outcome"
+#: The ADJUDICATION over a counterfactual episode: which explanation the
+#: later evidence favoured, and the lesson drawn.
+#:
+#: The episodes themselves are a fold over the ledger and recompute every
+#: run. The adjudication is not — it is a judgement made once, and the
+#: retention audit read it as LOST for two waves because nothing wrote it.
+COUNTERFACTUAL_ADJUDICATION = "counterfactual_adjudication"
+#: A durable falsifier: what would change the engine's mind. Learning
+#: indefinitely is impossible if this is forgotten every restart.
+FALSIFIER = "falsifier"
+#: A standing instruction to watch a counterparty for a preregistered
+#: response.
+RESPONSE_WATCH = "response_watch"
+#: A competing objective attributed to an actor's move, kept with its
+#: alternatives.
+STRATEGIC_OBJECTIVE = "strategic_objective"
+#: A grounded rivalry episode: whose action, whose counterparty, what object.
+STRATEGIC_INTERACTION = "strategic_interaction"
+#: One observed instance of an actor answering another. Observational
+#: history, never a preregistration.
+ACTOR_RESPONSE_EPISODE = "actor_response_episode"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
                           RELATIONSHIP_RETIRED, CROSS_ACTOR_EXPECTATION,
-                          CROSS_ACTOR_OUTCOME})
+                          CROSS_ACTOR_OUTCOME,
+                          COUNTERFACTUAL_ADJUDICATION, FALSIFIER,
+                          RESPONSE_WATCH, STRATEGIC_OBJECTIVE,
+                          STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -387,6 +411,106 @@ class LearningStore:
             "observed_at": observed_at[:10],
             "evidence_ids": list(evidence_ids)})
         return True
+
+    # --- memory that must survive a restart -------------------------------
+
+    def _record_keyed(self, kind: str, payload: dict, key: str,
+                      conflict_fields: Sequence[str] = ()) -> str:
+        """Append once per key. Returns "written", "held" or "conflict".
+
+        A SECOND adjudication that disagrees with the first is never a silent
+        overwrite: the ledger is history, and "we changed our mind" is a
+        different fact from "we always thought this".
+        """
+        held = {str(r.get(key) or ""): r for r in self._rows()
+                if r.get("record") == kind}
+        identity = str(payload.get(key) or "")
+        if not identity:
+            raise ValueError(f"a {kind} with no {key} cannot be stored")
+        previous = held.get(identity)
+        if previous is None:
+            self._append(kind, payload)
+            return "written"
+        for field_name in conflict_fields:
+            if str(previous.get(field_name) or "") != \
+                    str(payload.get(field_name) or ""):
+                self._append(kind, {**payload, "supersedes": identity,
+                                    "conflict_on": field_name})
+                return "conflict"
+        return "held"
+
+    def record_counterfactual_adjudication(self, episode) -> str:
+        """Persist which explanation the evidence favoured, and the lesson."""
+        payload = (episode.as_dict() if hasattr(episode, "as_dict")
+                   else dict(episode))
+        return self._record_keyed(
+            COUNTERFACTUAL_ADJUDICATION, payload, "episode_id",
+            conflict_fields=("resolution", "lesson"))
+
+    def counterfactual_adjudications(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == COUNTERFACTUAL_ADJUDICATION)
+
+    def record_falsifier(self, falsifier) -> str:
+        payload = (falsifier.as_dict() if hasattr(falsifier, "as_dict")
+                   else dict(falsifier))
+        return self._record_keyed(FALSIFIER, payload, "falsifier_id",
+                                  conflict_fields=("standing", "resolution"))
+
+    def falsifiers(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows() if r.get("record") == FALSIFIER)
+
+    def record_response_watch(self, watch) -> str:
+        payload = (watch.as_dict() if hasattr(watch, "as_dict")
+                   else dict(watch))
+        return self._record_keyed(RESPONSE_WATCH, payload, "watch_id",
+                                  conflict_fields=("status",))
+
+    def response_watches(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == RESPONSE_WATCH)
+
+    def record_strategic_objective(self, hypothesis) -> str:
+        payload = (hypothesis.as_dict() if hasattr(hypothesis, "as_dict")
+                   else dict(hypothesis))
+        return self._record_keyed(STRATEGIC_OBJECTIVE, payload,
+                                  "hypothesis_id",
+                                  conflict_fields=("standing",))
+
+    def strategic_objectives(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == STRATEGIC_OBJECTIVE)
+
+    def record_strategic_interaction(self, interaction) -> str:
+        payload = (interaction.as_dict() if hasattr(interaction, "as_dict")
+                   else dict(interaction))
+        return self._record_keyed(STRATEGIC_INTERACTION, payload,
+                                  "interaction_id",
+                                  conflict_fields=("standing",))
+
+    def strategic_interactions(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == STRATEGIC_INTERACTION)
+
+    def record_actor_response_episode(self, episode) -> str:
+        """Observational history. Never a preregistration.
+
+        Refused outright if the payload claims otherwise: a historical
+        sequence relabelled as a prediction is the one move that would make
+        every strategic result untrustworthy at once.
+        """
+        payload = (episode.as_dict() if hasattr(episode, "as_dict")
+                   else dict(episode))
+        if payload.get("preregistered"):
+            raise ValueError(
+                "an observed episode cannot be marked preregistered: it was "
+                "read after both actions had happened")
+        return self._record_keyed(ACTOR_RESPONSE_EPISODE, payload,
+                                  "episode_id", conflict_fields=("standing",))
+
+    def actor_response_episodes(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == ACTOR_RESPONSE_EPISODE)
 
     def record_lifecycle(self, event) -> bool:
         """Append one belief-lifecycle event. Idempotent on `event_id`.
