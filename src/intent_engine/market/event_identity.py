@@ -37,7 +37,7 @@ import datetime as _dt
 import hashlib
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 CONTRACT = "event_identity.v1"
 
@@ -128,25 +128,43 @@ class Event:
         }
 
 
+def _field(item, name: str) -> str:
+    """Read one field off a row that may be an object OR a mapping.
+
+    The ledger on disk is JSONL and the store hands back `MicroEvidence`, so
+    both shapes reach this module. Reading only attributes made a list of
+    dicts fold into ONE event with an empty subject — 249 rows in, 1 event
+    out, no error — which is the shape of answer this project treats as
+    worse than a crash.
+    """
+    if isinstance(item, Mapping):
+        return str(item.get(name, "") or "")
+    return str(getattr(item, name, "") or "")
+
+
 def group(evidence: Sequence) -> Tuple[Event, ...]:
     """Fold evidence rows into events. No row is merged away."""
     buckets: Dict[str, List] = collections.defaultdict(list)
     for item in evidence:
-        core = event_core(getattr(item, "subject_company", ""),
-                          getattr(item, "evidence_type", ""),
-                          getattr(item, "fact", ""))
-        buckets[core].append(item)
+        subject = _field(item, "subject_company")
+        evidence_type = _field(item, "evidence_type")
+        fact = _field(item, "fact")
+        if not (subject or evidence_type or fact):
+            raise ValueError(
+                "an evidence row supplied no subject, no evidence type and "
+                "no fact, so it cannot identify an occurrence: rows of this "
+                "shape would all fold into a single empty event")
+        buckets[event_core(subject, evidence_type, fact)].append(item)
 
     out: List[Event] = []
     for core, rows in buckets.items():
-        rows = sorted(rows, key=lambda r: str(
-            getattr(r, "observed_at", ""))[:10])
+        rows = sorted(rows, key=lambda r: _field(r, "observed_at")[:10])
         # Split a bucket whose members are far apart in time: same wording,
         # different quarter, is two events.
         window: List = []
-        anchor = _date(getattr(rows[0], "observed_at", ""))
+        anchor = _date(_field(rows[0], "observed_at"))
         for row in rows:
-            when = _date(getattr(row, "observed_at", ""))
+            when = _date(_field(row, "observed_at"))
             if window and anchor and when and \
                     (when - anchor).days > SAME_EVENT_WINDOW_DAYS:
                 out.append(_event(core, window))
@@ -160,14 +178,14 @@ def group(evidence: Sequence) -> Tuple[Event, ...]:
 def _event(core: str, rows: Sequence) -> Event:
     return Event(
         event_id="evt_" + hashlib.sha256(
-            (core + str(getattr(rows[0], "observed_at", ""))[:10]
+            (core + _field(rows[0], "observed_at")[:10]
              ).encode()).hexdigest()[:14],
-        subject=getattr(rows[0], "subject_company", ""),
-        evidence_type=getattr(rows[0], "evidence_type", ""),
-        first_seen=str(getattr(rows[0], "observed_at", ""))[:10],
-        evidence_ids=tuple(getattr(r, "evidence_id", "") for r in rows),
-        sources=tuple(dict.fromkeys(getattr(r, "source", "") for r in rows)),
-        source_roles=tuple(getattr(r, "source_role", "") for r in rows),
+        subject=_field(rows[0], "subject_company"),
+        evidence_type=_field(rows[0], "evidence_type"),
+        first_seen=_field(rows[0], "observed_at")[:10],
+        evidence_ids=tuple(_field(r, "evidence_id") for r in rows),
+        sources=tuple(dict.fromkeys(_field(r, "source") for r in rows)),
+        source_roles=tuple(_field(r, "source_role") for r in rows),
         core=core)
 
 

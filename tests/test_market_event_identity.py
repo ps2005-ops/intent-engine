@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import pathlib
 
+import pytest
+
 from intent_engine.market import event_identity as EI
 from intent_engine.market import learning_store as LS
 from intent_engine.market import micro_evidence as ME
@@ -159,3 +161,47 @@ def test_a_period_marker_is_not_a_figure():
         item("Revenue rises 36% at Cloudflare on demand.",
              source="https://other.example/b")])
     assert len(events) == 1
+
+
+# --- the row shape must not change the answer -----------------------------
+
+def test_a_mapping_row_groups_the_same_as_an_object_row():
+    """The ledger on disk is JSONL and the store hands back objects.
+
+    Reading only attributes made a list of dicts fold into ONE event with an
+    empty subject: 249 rows in, 1 event out, no error. The two shapes must
+    reach the same events or every measurement taken from the file disagrees
+    with the same measurement taken from the store.
+    """
+    class Row:
+        def __init__(self, **kw):
+            self.__dict__.update(kw)
+
+    fields = [
+        dict(evidence_id="ev_1", subject_company="cloudflare",
+             evidence_type="EARNINGS_RESULT", fact="revenue rises 36%",
+             observed_at="2026-08-01", source="reuters.com",
+             source_role="news_report"),
+        dict(evidence_id="ev_2", subject_company="cloudflare",
+             evidence_type="EARNINGS_RESULT",
+             fact="Revenue rises 36% at Cloudflare, filing shows",
+             observed_at="2026-08-02", source="bloomberg.com",
+             source_role="regulatory_filing"),
+        dict(evidence_id="ev_3", subject_company="honda",
+             evidence_type="GUIDANCE_REVISION", fact="operating profit up 12%",
+             observed_at="2026-08-02", source="honda.com",
+             source_role="regulatory_filing"),
+    ]
+    as_dicts = EI.group(fields)
+    as_objects = EI.group([Row(**f) for f in fields])
+    assert len(as_dicts) == len(as_objects) == 2
+    assert {e.event_id for e in as_dicts} == {e.event_id for e in as_objects}
+    assert {e.subject for e in as_dicts} == {"cloudflare", "honda"}
+
+
+def test_a_row_that_identifies_no_occurrence_is_refused():
+    """The failure that hid the bug: rows with none of the identity fields
+    all hash to the same empty core and look like one well-corroborated
+    event. Refusing is the only reading that is not a lie."""
+    with pytest.raises(ValueError, match="cannot identify an occurrence"):
+        EI.group([{"record": "cycle", "cycle_id": "c1"}])

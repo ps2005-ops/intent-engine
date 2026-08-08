@@ -97,6 +97,14 @@ PROOFS = [
      "        return \"|\".join(head + [\" \".join(sorted(text.split()))])",
      f"{EI}::test_two_outlets_writing_one_event_differently_are_one_event"),
 
+    ("9b. a dict row reads as empty and every row folds into one event",
+     S / "event_identity.py",
+     "    if isinstance(item, Mapping):\n"
+     "        return str(item.get(name, \"\") or \"\")",
+     "    if False:\n"
+     "        return str(item.get(name, \"\") or \"\")",
+     f"{EI}::test_a_mapping_row_groups_the_same_as_an_object_row"),
+
     # --- 10. corroboration is never a later test -----------------------
     ("10. corroboration resolves the expectation its event opened",
      S / "event_corroboration.py",
