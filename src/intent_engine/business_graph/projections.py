@@ -191,8 +191,14 @@ _UNCORROBORATED = "reported again, not independently confirmed"
 _DISPUTED = "sources disagree"
 
 
-def belief_standing(belief: dict) -> str:
+def belief_standing(belief: dict, trust=None) -> str:
     """The honest one-line standing of a market belief.
+
+    `trust` may be supplied by a caller that has already read it. Reading it
+    is not free — it rebuilds the whole event grouping, every `Event` and its
+    evidence ids — and the projection below needs the same standing for the
+    node's attributes, so without this every belief was normalized twice on
+    the one path that runs for every dossier.
 
     `update_method` is the producer's own record of how the belief reached its
     current state: DECLARED means one evidence item opened it and nothing has
@@ -207,7 +213,7 @@ def belief_standing(belief: dict) -> str:
     """
     from intent_engine.external_intel import evidence_trust as ET
 
-    trust = ET.of_belief(belief)
+    trust = ET.of_belief(belief) if trust is None else trust
     method = str(belief.get("update_method") or "").upper()
     direction = str(belief.get("direction_of_last_change") or "").upper()
 
@@ -271,7 +277,7 @@ def from_strategic_dossier(*, company_id: str, company_label: str = "",
         graph.add_node(Node(
             node_id=belief_node, kind=HYPOTHESIS, label=proposition,
             source=f"market dossier {dossier_revision or as_of}".strip(),
-            confidence=belief_standing(belief),
+            confidence=belief_standing(belief, trust),
             as_of=str(belief.get("last_updated") or as_of),
             attrs={
                 "origin": "market_learning_engine",

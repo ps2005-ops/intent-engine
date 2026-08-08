@@ -196,6 +196,32 @@ def of_belief(belief: Any) -> Trust:
     return read(getattr(belief, "evidence_trust", None))
 
 
+def as_read_by(intel: Any, analysis_as_of: str) -> Trust:
+    """The standing an ALREADY-GENERATED analysis is entitled to show.
+
+    The dossier on disk is live — the market side republishes it as evidence
+    arrives. Every surface that answers questions about a stored analysis
+    reads that live file, so without this a week-old analysis would be
+    discussed using a standing it never saw: the page says the evidence is
+    thin, the assistant beneath it says separate sources now agree, and the
+    founder has no way to tell which is the product.
+
+    A dossier that POSTDATES the analysis is therefore treated as absent
+    rather than as an upgrade. Not because the newer standing is wrong — it is
+    probably better — but because applying it retroactively rewrites what a
+    founder was shown, and "we learned more since" is a different statement
+    from "this is what we concluded".
+
+    An analysis with no recorded date gets the standing: it is the live path,
+    where there is no history to protect.
+    """
+    ran = str(analysis_as_of or "")[:10]
+    revision = str(getattr(intel, "as_of", "") or "")[:10]
+    if ran and revision and revision > ran:
+        return UNRATED
+    return read(getattr(intel, "evidence_trust", None))
+
+
 def sentence(trust: Trust) -> str:
     """What to put on the page, or nothing.
 

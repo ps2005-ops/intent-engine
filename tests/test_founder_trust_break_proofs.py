@@ -25,7 +25,10 @@ CONTRACT = ROOT / "src/intent_engine/external_intel/strategic_contract.py"
 IMPACT = ROOT / "src/intent_engine/external_intel/decision_impact.py"
 RECEIPT = ROOT / "src/intent_engine/external_intel/consumption_receipt.py"
 
+QA = ROOT / "src/intent_engine/founder_brief/qa.py"
+
 T = "tests/test_founder_evidence_trust.py"
+S = "tests/test_founder_trust_surfaces.py"
 
 PROOFS = [
     # 1. three SAME_ORIGIN articles act like three independent supports
@@ -154,6 +157,62 @@ PROOFS = [
           find='    if trust["normalized_events_available"]:',
           replace="    if True:",
           target="tests/test_founder_trust_contract.py::test_an_unnormalized_dossier_emits_no_trust_stage",
+          expect_failure_contains="assert"),
+
+    # 16. the raw source count comes back to Q&A
+    #
+    # Restores the rule as it actually shipped: a verdict computed from how
+    # many rows survived a publisher-class filter, reported to a founder as
+    # independent support.
+    Proof(label="row count decides the Q&A verdict again",
+          path=QA,
+          find="    if trust.known:\n        if trust.standing == _ET.CONFLICTED:",
+          replace="    if n >= 2:\n        return ('Probably — ' + str(n) + "
+                  "' independent source(s) support this.')\n"
+                  "    if trust.known:\n        if trust.standing == _ET.CONFLICTED:",
+          target=f"{S}::test_a_dependent_cluster_is_not_reported_as_independent_support",
+          expect_failure_contains="assert"),
+
+    # 17. Q&A stops discriminating: every standing gives one answer
+    Proof(label="Q&A ignores the standing",
+          path=QA,
+          find="    if trust.known:\n        if trust.standing == _ET.CONFLICTED:",
+          replace="    if False:\n        if trust.standing == _ET.CONFLICTED:",
+          target=f"{S}::test_dependent_and_independent_differ_on_identical_rows",
+          expect_failure_contains="assert"),
+
+    # 18. an old analysis is re-rated by a dossier published after it
+    Proof(label="newer dossier rewrites the old analysis",
+          path=TRUST,
+          find="    if ran and revision and revision > ran:\n        return UNRATED",
+          replace="    if False:\n        return UNRATED",
+          target=f"{S}::test_a_dossier_from_after_the_analysis_is_not_applied_to_it",
+          expect_failure_contains="assert"),
+
+    # 19. the pin over-fires and withholds every standing, which would look
+    #     like historical stability while silently deleting the feature
+    Proof(label="the pin withholds everything",
+          path=TRUST,
+          find="    ran = str(analysis_as_of or \"\")[:10]",
+          replace="    return UNRATED\n    ran = str(analysis_as_of or \"\")[:10]",
+          target=f"{S}::test_the_dossier_the_analysis_actually_read_still_applies",
+          expect_failure_contains="assert"),
+
+    # 21. the projection goes back to normalizing every belief twice
+    Proof(label="belief normalized twice per dossier",
+          path=GRAPH,
+          find="            confidence=belief_standing(belief, trust),",
+          replace="            confidence=belief_standing(belief),",
+          target=f"{S}::test_the_projection_normalizes_each_belief_once",
+          expect_failure_contains="normalizations for"),
+
+    # 20. the Q&A limitation stops being carried, so a bounded standing is
+    #     acted on but never disclosed
+    Proof(label="standing bounds silently",
+          path=QA,
+          find="        _caveat = _ET.limitation(trust)",
+          replace="        _caveat = \"\"",
+          target=f"{S}::test_the_standing_earns_its_limitation_on_the_evidence_surface",
           expect_failure_contains="assert"),
 ]
 

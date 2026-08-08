@@ -32,6 +32,7 @@ import re
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence
 
+from intent_engine.external_intel import evidence_trust as _ET
 from intent_engine.founder_brief.consistency import _looks_strategic
 from intent_engine.founder_brief.contract import INTERNAL_VOCABULARY
 
@@ -83,9 +84,16 @@ def _intent(question: str, markers) -> bool:
 
 
 def answer(question: str, brief, *, engine_answer: str = "",
-           observations: Optional[Sequence[dict]] = None) -> FounderAnswer:
-    """Frame an answer using the shared object. Never invents a conclusion."""
+           observations: Optional[Sequence[dict]] = None,
+           trust=None) -> FounderAnswer:
+    """Frame an answer using the shared object. Never invents a conclusion.
+
+    `trust` is the CANONICAL standing produced by the market side, not a
+    judgement made here. Absent it, this surface may still describe which
+    accounts exist — it may not say they confirm each other.
+    """
     observations = list(observations or ())
+    trust = trust if trust is not None else _ET.UNRATED
     k = brief.key_insight
     withheld = k is None
 
@@ -151,19 +159,14 @@ def answer(question: str, brief, *, engine_answer: str = "",
             "No company-stated material is being relied on.")
         # Source-ablation: would the reading survive without the best source?
         if "without" in (question or "").lower():
-            # Precomputed: Python 3.9 cannot carry a multi-line expression
-            # inside an f-string, and a conditional this long is unreadable
-            # inline regardless.
-            survives = len(independent) >= 2
-            verdict = "Probably — " if survives else "No — "
-            consequence = (
-                "Removing the strongest one still leaves independent "
-                "corroboration." if survives else
-                "Removing the strongest one leaves it resting on the company "
-                "describing itself.")
-            out.direct_answer = (
-                f"{verdict}{len(independent)} independent source(s) support "
-                f"this. {consequence}")
+            out.direct_answer = _ablation(trust, independent)
+        # The standing earns a limitation on the surface that asked about
+        # evidence, whatever the question's exact wording. A reader who asks
+        # how strong the evidence is has asked the one question the standing
+        # answers, and answering it without the caveat is the omission.
+        _caveat = _ET.limitation(trust)
+        if _caveat and _caveat not in out.limitations:
+            out.limitations = tuple(out.limitations) + (_caveat,)
         out.fact_or_interpretation = (
             "Interpretation. The dated events are verified facts; the reading "
             "of what they add up to is an inference, and it is labelled as "
@@ -171,6 +174,56 @@ def answer(question: str, brief, *, engine_answer: str = "",
                              "offered because the evidence does not support "
                              "one.")
     return out
+
+
+def _ablation(trust, accounts: Sequence[dict]) -> str:
+    """Would the reading survive without its strongest source?
+
+    THE DEFECT THIS CLOSES
+    ----------------------
+    This answered `len(independent) >= 2`, where `independent` was every row
+    whose publisher was not the company, and reported the figure to a founder
+    as "N independent source(s) support this". Publisher class is not source
+    dependence: three outlets rewriting one press release are three non-company
+    rows and one observation. So the surface that exists to say how strong the
+    evidence is was the surface inflating it — and the answer it gave for a
+    dependent cluster ("still leaves independent corroboration") also leaked a
+    banned internal term straight onto the page, because it was written after
+    `_plain` had already run.
+
+    Trust is READ, never computed here. Where the market side established a
+    standing, that standing answers. Where it did not, the honest answer names
+    the accounts and refuses the independence claim rather than guessing it.
+    """
+    n = len(accounts)
+    if not n:
+        return ("No — removing the strongest one leaves it resting on the "
+                "company describing itself.")
+
+    if trust.known:
+        if trust.standing == _ET.CONFLICTED:
+            return ("No — public sources disagree on this point, so it "
+                    "cannot carry a confident conclusion on its own.")
+        if trust.standing == _ET.DEPENDENT_REREPORTING:
+            return ("No — several reports repeat the same underlying "
+                    "announcement, so removing the strongest one does not "
+                    "leave a separate account behind it.")
+        if trust.may_claim_independence and trust.independent_support >= 2:
+            return ("Probably — separate sources support this on their own, "
+                    "so removing the strongest one still leaves a second "
+                    "account standing.")
+        # SINGLE_SOURCE, PARTIALLY_INDEPENDENT, or independence that was
+        # established but thin: one account carries it either way.
+        return ("No — this rests on a single underlying account, so removing "
+                "it removes the basis for the reading.")
+
+    # UNRATED. The count is reportable; independence is not, because nobody
+    # established it. Saying "N independent sources" here is the inflation.
+    other = n - 1
+    tail = (f"that leaves {other} other account(s), though whether they "
+            "confirm each other on their own was not established."
+            if other else "there is no second account behind it.")
+    return f"Not established — {tail}"
 
 
 def _describe(observation, fallback: str) -> str:

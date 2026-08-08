@@ -3534,9 +3534,36 @@ class WebApp:
                     ) or str(engine or "")
         observations = [o for o in ((_report or {}).get("observations") or ())
                         if isinstance(o, dict)]
+        # The SAME canonical standing the analysis reasoned from, read from the
+        # same dossier by the same contract. Q&A must not re-derive how
+        # independent the sources are — that is the market side's judgement,
+        # and a second derivation here is a second product. Absent a dossier
+        # this stays UNRATED and the answer says so rather than counting rows.
+        #
+        # PINNED TO THE REVISION THE ANALYSIS READ. The dossier on disk is
+        # live: the market side republishes it as evidence arrives. Reading it
+        # unconditionally would answer a question about a WEEK-OLD analysis
+        # using a standing that analysis never saw — the page would say the
+        # evidence was thin while the assistant beneath it said sources now
+        # agree, which is the two-interpreters split this module exists to
+        # close, re-opened along the time axis. A dossier newer than the run
+        # is treated as absent rather than as an upgrade.
+        _trust = None
+        try:
+            from intent_engine.external_intel import evidence_trust as _et
+            from intent_engine.external_intel import strategic_contract as _sc
+            _intel = _sc.load(
+                pathlib.Path(self._runtime_root) / "reports" / "market"
+                / "strategic" / f"{_sc.company_key(_name)}.json",
+                expected_company=_sc.company_key(_name))
+            _ran = ((self.ci.run_meta(run_id) or {}).get("as_of") or "")[:10]
+            _trust = _et.as_read_by(_intel, _ran)
+        except Exception:  # noqa: BLE001 - a question must still be answerable
+            _LOG.warning("trust standing unavailable for %s", run_id)
         founder_answer = fqa.answer(question, brief,
                                     engine_answer=engine_text,
-                                    observations=observations)
+                                    observations=observations,
+                                    trust=_trust)
         return self._founder_answer_page(session, run_id, founder_answer)
         flat_claims = self._run_claims(run_id)
         # The previous turn's subject, so "Why?" and "Explain that" resolve
