@@ -260,3 +260,27 @@ def test_a_finished_run_reports_nothing_to_retry(failed_run):
     app = failed_run["app"]
     assert "COMPLETE" not in app.RETRYABLE_STATES
     assert "FAILED" in app.RETRYABLE_STATES
+
+
+def test_the_failure_page_never_says_the_company_does_not_exist(failed_run):
+    """The other half of the distinction, and the one that can defame.
+
+    "We could not read it" is a statement about a retrieval. "There is
+    nothing there" is a statement about a company, and the product is never
+    entitled to make it from a failed fetch. Verified live against
+    brightledger.io, whose every path returned an HTTP error: the page named
+    each failure and claimed nothing about the business.
+    """
+    text = _text(failed_run["body"]).lower()
+    for forbidden in ("does not exist", "no such company", "is not a real",
+                      "could not be found as a company",
+                      "we found nothing about"):
+        assert forbidden not in text, forbidden
+    # And it must still say what DID happen, per source.
+    assert "what happened to each source" in text
+
+
+def test_the_failure_page_attributes_the_failure_to_the_retrieval(failed_run):
+    text = _text(failed_run["body"]).lower()
+    assert "no approved source could be retrieved" in text
+    assert "we do not invent one" in text
