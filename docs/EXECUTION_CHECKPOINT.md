@@ -4,18 +4,18 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-07, wave 2 of continuous execution (slice 11).
+Updated 2026-08-07, wave 3 (slice 17).
 
 ## Pinned state
 
 | what | where |
 |---|---|
-| market runtime | `bbd9d44` (repin to `ba2e811`+ next) (branch `feat/consumption-telemetry`) |
-| founder preview | `a6c8601` (branch `feat/consumption-emitter` → `feat/founder-decision-experience-v3`) |
+| market runtime | `a6f14ec`+ (repin to head of `feat/consumption-telemetry`) (branch `feat/consumption-telemetry`) |
+| founder preview | `f0a0294` LIVE (branch `feat/consumption-emitter` → `feat/founder-decision-experience-v3`) |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in both launchd plists |
-| market suite | 3865 passed / 4 skipped / EXIT=0 |
-| founder suite | 4563 passed / 6 skipped / EXIT=0 |
+| market suite | 3916 passed / 4 skipped / EXIT=0 |
+| founder suite | 4573 passed / 6 skipped / EXIT=0 |
 
 ## Completed this mission
 
@@ -30,7 +30,12 @@ Updated 2026-08-07, wave 2 of continuous execution (slice 11).
 | 7 | Interaction binding that refuses | `bbd9d44` | 3 fabricated records → 0, with the prerequisite named |
 | 8 | **Natural scheduled cycle inspected** | — | `2026-08-07:night` COMPLETED; see below |
 | 9 | Actor relationships + measured source finding | `ba2e811` | 3959 filing sentences → 0 admissible, all categories |
-| 10 | Belief maturity (derived view) | pending | 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING on the real ledger |
+| 10 | Belief maturity (derived view) | `7fbb56d` | 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING |
+| 11 | Value of information + confirmation wall | `137d660` | 12 real items, 2 VOI_HIGH |
+| 12 | Shopify excerpt producer | `f0a0294` | ranked by substance; LIVE on preview |
+| 13 | Adversarial economics (12 cases) | `a6f14ec` | 29 assertions, all structural |
+| 14 | Whole-loop bottleneck | pushed | SOURCE_COVERAGE, funnel says EVENT_CLASSIFICATION |
+| 15 | Wave-3 break proofs | pushed | **14/14**, three pairings and one weak test repaired |
 
 ## The pattern this mission keeps finding
 
@@ -72,11 +77,25 @@ The old 10/8 figure was inflated by self-tests and must not be restored.
 
 ## Remaining queue, highest value first
 
-1. **SOURCE COVERAGE for relationships** — the new #1. The extractor is
-   built and correct; the corpus cannot feed it. Needs 8-K material
-   agreements, S-1s, or partnership releases, which name counterparties.
-   Everything downstream (interactions, cross-actor expectations,
-   game-theoretic learning) is blocked on this and only this.
+1. **SOURCE COVERAGE — still #1, now measured across three families.**
+   | family | sentences | named counterparties |
+   |---|---|---|
+   | news headlines | 219 items | ~1 |
+   | 10-K / 10-Q | 3,959 | 0 |
+   | 8-K + exhibits | 7,247 | 0 |
+
+   Large-cap disclosure systematically says "our competitors", "third
+   parties", "our top ten customers". NOT an extraction problem. The
+   untried families are S-1/F-1, partnership press releases and
+   government contract awards — the one real hit in the whole corpus was
+   a partnership release (Infosys/Metsä).
+
+2. **Knowledge decay events** — maturity computes STALE; append-only
+   lifecycle events are not yet written.
+3. **Economic chain**, **counterfactual memory**, **causal calibration**,
+   **learning-acceleration windows**, **LLM migration**, **performance
+   baseline**, **Brightledger live proof** — all still open and all
+   independent of item 1.
 2. **Actor-to-actor relationships** — now a hard PREREQUISITE, not a
    parallel task. Interaction binding is built and correctly returns zero
    because no competitor edges exist to read. Populate them from evidence

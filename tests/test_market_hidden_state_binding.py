@@ -45,13 +45,32 @@ def test_every_row_names_at_least_two_postures_pulling_apart():
 
 
 def test_no_posture_is_ever_eliminated_only_argued_down():
+    """A posture the action explains badly is argued down, never to zero.
+
+    The first version of this test used the real LAYOFF likelihoods, whose
+    lowest value is 0.35 — nothing could reach zero, so `all(p > 0)` held
+    whatever the arithmetic did and a break proof against the probability
+    floor went uncaught. A test that cannot fail is not a test.
+
+    So this drives a posture with a likelihood near zero and asserts it
+    still holds mass at the floor, which is what actually keeps a rival
+    alive.
+    """
     belief = HS.uniform("acme", at="2026-08-01",
                         states=HSB.TRACKED_STATES)
+    crushing = {HS.COST_CUTTING: 50.0, HS.EXPANDING: 1e-9,
+                HS.WAITING: 1.0}
     moved = HS.observe(belief, action="LAYOFF: cut 1200 roles",
-                       likelihoods=HSB.likelihoods_for(_ev(ME.LAYOFF)),
-                       at="2026-08-02")
-    assert all(p > 0 for _s, p in moved.distribution)
+                       likelihoods=crushing, at="2026-08-02")
+    by_state = dict(moved.distribution)
+    assert by_state[HS.EXPANDING] > 0, "a rival was eliminated outright"
     assert len(moved.distribution) == len(HSB.TRACKED_STATES)
+
+    # and the real likelihoods keep every posture alive too
+    ordinary = HS.observe(belief, action="LAYOFF: cut 1200 roles",
+                          likelihoods=HSB.likelihoods_for(_ev(ME.LAYOFF)),
+                          at="2026-08-02")
+    assert all(p > 0 for _s, p in ordinary.distribution)
 
 
 def test_a_price_cut_and_a_price_rise_say_opposite_things():
