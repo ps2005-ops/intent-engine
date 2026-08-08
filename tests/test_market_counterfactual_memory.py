@@ -1,0 +1,154 @@
+"""An alternative that predicts nothing is decoration, and is refused.
+
+The real episodes are the point. Both lessons stored below were read out of
+production's ledger rather than written into these tests: Cloudflare held
+`demand_strengthening` and `demand_weakening` at once, and Duolingo's
+weakening belief was opened by a share-price headline.
+"""
+from __future__ import annotations
+
+import json
+import pathlib
+
+import pytest
+
+from intent_engine.market import counterfactual_memory as CM
+
+REAL_LEDGER = pathlib.Path(
+    "/Users/prathamsharma/intent-engine-market/reports/market/"
+    "learning_ledger.jsonl")
+
+
+def rows():
+    return [json.loads(line) for line in
+            REAL_LEDGER.read_text().splitlines() if line.strip()]
+
+
+def valid(**overrides):
+    kwargs = dict(
+        subject="acme", observed_outcome="revenue rose",
+        leading="demand is strengthening",
+        alternative="the figure rose on price with volume flat",
+        expected_under_leading="revenue rises again on volume",
+        expected_under_alternative="revenue is flat once price is stripped",
+        discriminating_evidence="the next quarter's volume disclosure",
+        resolution=CM.STRENGTHENED, lesson="a lesson",
+        scope=CM.THIS_MECHANISM)
+    kwargs.update(overrides)
+    return kwargs
+
+
+# --- the two refusals that are the whole contract ------------------------
+
+def test_an_alternative_that_expects_the_same_thing_is_refused():
+    with pytest.raises(CM.EpisodeRejected, match="decoration"):
+        CM.episode(**valid(
+            expected_under_alternative="revenue rises again on volume"))
+
+
+def test_the_comparison_ignores_case_and_spacing():
+    with pytest.raises(CM.EpisodeRejected):
+        CM.episode(**valid(
+            expected_under_alternative="  Revenue RISES again on volume  "))
+
+
+def test_an_explanation_that_predicts_nothing_is_refused():
+    with pytest.raises(CM.EpisodeRejected, match="cannot be wrong"):
+        CM.episode(**valid(expected_under_alternative=""))
+
+
+def test_an_episode_with_no_alternative_is_refused():
+    with pytest.raises(CM.EpisodeRejected, match="story, not a test"):
+        CM.episode(**valid(alternative="   "))
+
+
+def test_an_episode_with_no_lesson_is_not_memory():
+    with pytest.raises(CM.EpisodeRejected, match="not memory"):
+        CM.episode(**valid(lesson=""))
+
+
+def test_an_unknown_scope_is_refused():
+    with pytest.raises(CM.EpisodeRejected):
+        CM.episode(**valid(scope="EVERYWHERE_ALWAYS"))
+
+
+# --- memory is only memory if it can be retrieved ------------------------
+
+def test_scope_decides_what_a_later_episode_consults():
+    company = CM.episode(**valid(scope=CM.THIS_COMPANY))
+    assert company.applies_to(subject="acme", family="anything")
+    assert not company.applies_to(subject="other", family="anything")
+
+    mechanism = CM.episode(**valid(
+        scope=CM.THIS_MECHANISM,
+        provenance={"family": "demand_strengthening"}))
+    assert mechanism.applies_to(subject="other",
+                                family="demand_strengthening")
+    assert not mechanism.applies_to(subject="acme", family="pricing_power")
+
+
+def test_a_classifier_lesson_applies_to_every_subject():
+    """The classifier runs on everything, so its failures follow it."""
+    got = CM.episode(**valid(scope=CM.THIS_CLASSIFIER))
+    assert got.applies_to(subject="anyone", family="anything")
+
+
+def test_recall_returns_only_the_applicable_memories():
+    episodes = CM.build(rows())
+    got = CM.recall(episodes, subject="nobody", family="pricing_power")
+    # The two classifier lessons follow every subject; the mechanism-scoped
+    # ones do not.
+    assert {e.future_use_scope for e in got} == {CM.THIS_CLASSIFIER}
+    assert len(got) == 2
+
+
+# --- built from real resolved episodes -----------------------------------
+
+def test_five_real_episodes_three_strengthened_two_weakened():
+    got = CM.summarise(CM.build(rows()))
+    assert got["episodes"] == 5
+    assert got["strengthened"] == 3 and got["weakened"] == 2
+    assert set(got["subjects"]) == {"cloudflare", "duolingo", "honda",
+                                    "shopify"}
+
+
+def test_the_cloudflare_lesson_is_about_the_classifier_not_the_company():
+    episodes = CM.build(rows())
+    got = next(e for e in episodes
+               if e.subject == "cloudflare" and e.resolution == CM.WEAKENED)
+    assert got.future_use_scope == CM.THIS_CLASSIFIER
+    assert "shared a sentence" in got.strongest_alternative
+    assert "must not open a demand belief" in got.lesson
+    # The belief was opened by a revenue-up / loss-widening headline.
+    assert "Revenue Rises" in got.provenance["opened_by"]
+
+
+def test_the_duolingo_alternative_matches_its_own_episode():
+    """A price-opened belief gets the price alternative, not the cost one."""
+    episodes = CM.build(rows())
+    got = next(e for e in episodes
+               if e.subject == "duolingo" and e.resolution == CM.WEAKENED)
+    assert "SHARE-PRICE movement" in got.strongest_alternative
+    assert "COST or MARGIN" not in got.strongest_alternative
+    assert got.future_use_scope == CM.THIS_CLASSIFIER
+
+
+def test_every_real_episode_has_two_different_expectations():
+    for got in CM.build(rows()):
+        assert got.expected_outcome_under_leading
+        assert got.expected_outcome_under_alternative
+        assert (got.expected_outcome_under_leading.lower() !=
+                got.expected_outcome_under_alternative.lower())
+
+
+def test_a_family_with_no_stated_alternative_produces_no_episode():
+    """Silence beats a fabricated alternative."""
+    made_up = [
+        {"record": "reconciliation", "expectation_id": "e1",
+         "hypothesis_id": "b1", "subject": "acme", "outcome": "CONFIRMED",
+         "evaluated_at": "2026-08-01", "evidence_ids": []},
+        {"record": "expectation", "expectation_id": "e1",
+         "hypothesis_id": "b1", "metric": "leadership_transition"},
+        {"record": "belief", "belief_id": "b1", "proposition": "p"},
+    ]
+    assert CM.build(made_up) == ()

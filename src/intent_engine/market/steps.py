@@ -584,7 +584,10 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     import json as _json
 
     from . import belief_maturity as BM
+    from . import causal_calibration as CCAL
     from . import causal_episodes as CE
+    from . import counterfactual_memory as CFM
+    from . import economic_chain as ECH
     from . import hidden_state_binding as HSB
     from . import knowledge_decay as KD
     from . import learning_store as LS
@@ -645,7 +648,50 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         payload["causal_episodes"] = CE.summarise(CE.build(rows))
     except Exception as exc:  # noqa: BLE001
         payload["causal_episodes"] = {"error": str(exc)}
+
+    try:
+        payload["causal_calibration"] = CCAL.summarise(
+            CCAL.calibrate(rows, industry_of=_industries()))
+    except Exception as exc:  # noqa: BLE001
+        payload["causal_calibration"] = {"error": str(exc)}
+
+    try:
+        payload["counterfactual_memory"] = CFM.summarise(CFM.build(rows))
+    except Exception as exc:  # noqa: BLE001
+        payload["counterfactual_memory"] = {"error": str(exc)}
+
+    try:
+        # One chain, for the subject whose evidence can actually carry one.
+        # Building a chain per company would produce twenty-seven that say
+        # UNKNOWN everywhere, which is true and useless; the scored winner is
+        # the one where the gaps mean something.
+        candidates = ECH.score_candidates(rows)
+        if candidates:
+            built = ECH.build(rows, subject=candidates[0]["subject"])
+            payload["economic_chain"] = {
+                **ECH.summarise([built]),
+                "chain": built.as_dict(),
+                "founder_translation": built.founder_translation(),
+                "candidates": list(candidates[:5]),
+            }
+        else:
+            payload["economic_chain"] = {"contract": ECH.CONTRACT,
+                                         "chains": 0,
+                                         "reason": "no subject has evidence"}
+    except Exception as exc:  # noqa: BLE001
+        payload["economic_chain"] = {"error": str(exc)}
     return payload
+
+
+def _industries() -> Dict[str, str]:
+    """company_id -> industry, for scope counting. Never raises."""
+    try:
+        from intent_engine.universe.companies import default_universe
+        return {c.company_id: (getattr(c, "industry", "")
+                               or getattr(c, "sector", ""))
+                for c in default_universe().prediction_companies()}
+    except Exception:                                       # noqa: BLE001
+        return {}
 
 
 def learning_health_step(ctx: C.CycleContext) -> dict:
