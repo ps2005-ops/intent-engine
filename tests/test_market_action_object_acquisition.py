@@ -163,3 +163,89 @@ def test_the_performance_table_is_what_the_planner_consumes():
                    limit=len(Q.FAMILIES))
     families = [p.candidate_source_family for p in plans]
     assert families.index(Q.RELEASE_NOTES) < families.index(Q.PRICING_PAGE)
+
+
+# --- one page is one document, one announcement is one action -------------
+
+def test_a_fragment_is_the_same_document():
+    """The wave-8 grid's denominator inflator.
+
+    Following a page's own in-page links produced /updates, /updates#main and
+    /updates#one-page-checkout as three retrievals of one page. A fragment
+    identifies a position INSIDE a document and never a different document.
+    """
+    assert AQ._canonical("https://x.com/updates#one-page-checkout") == \
+        AQ._canonical("https://x.com/updates") == "https://x.com/updates"
+    assert AQ._canonical("https://x.com/updates/") == "https://x.com/updates"
+
+
+def test_an_anchor_link_is_not_followed_as_a_new_page():
+    """The live shape: a changelog whose own table of contents links to
+    positions inside itself.
+
+    Two things this test learned the hard way. The body must be in BLOCK
+    tags and each block distinct, or the parser drops it, the document is
+    refused as too short, and every assertion below passes over an empty
+    list. And the duplicate check must not use `_canonical` — verifying a
+    function with itself is satisfied by any function at all.
+    """
+    blocks = "".join(
+        f"<p>Release note number {i}: unrelated filler carrying this page "
+        f"past the minimum parsed length.</p>" for i in range(8))
+    page = ('<html><head><title>Updates</title></head><body>'
+            '<a href="#main">skip to content</a>'
+            '<a href="#one-page-checkout">one-page checkout</a>'
+            '<p>Shopify Shipping expands to Italy and Spain.</p>'
+            + blocks + '</body></html>')
+    calls = []
+
+    def fetcher(url, **kw):
+        calls.append(url)
+        return {"ok": True, "body": page}
+
+    docs, report = AQ.retrieve("Shopify", "https://www.shopify.com",
+                               "release_notes", as_of="2026-08-08",
+                               fetcher=fetcher)
+    assert docs, "fixture was refused before the behaviour could be tested"
+    assert report.retrieved == len(docs)
+    # Stripped with a literal, not with the function under test.
+    stripped = [u.split("#", 1)[0].rstrip("/") for u in calls]
+    assert len(set(stripped)) == len(calls), \
+        f"the same page was fetched under several anchors: {calls}"
+    assert not [u for u in calls if "#" in u]
+    assert all("#" not in d.url for d in docs)
+
+
+def test_one_announcement_on_five_pages_is_one_action():
+    """`action_id` was already stable across duplicate retrievals and nothing
+    counted on it, so five readings of one sentence were reported as five
+    established objects while `all_objects` deduped them to one."""
+    # Each filler block must be DISTINCT: the parser collapses identical
+    # blocks, so repeating one sentence leaves the document under the
+    # minimum length and it is refused before any action is read.
+    filler = "".join(
+        f"<p>Filler block number {i} carrying this document past the "
+        f"minimum parsed length so it is read rather than refused.</p>"
+        for i in range(8))
+    body = ("<html><head><title>Updates</title></head><body>"
+            "<p>Shopify Shipping expands to Italy and Spain.</p>"
+            + filler + "</body></html>")
+
+    def fetcher(url, **kw):
+        # Every page of the family carries the SAME announcement, which is
+        # exactly the live shape: a changelog and its index page.
+        return {"ok": True, "body": body}
+
+    yields, actions, objects = AQ.measure(
+        [("Shopify", "https://www.shopify.com")], ["release_notes"],
+        as_of="2026-08-08", fetcher=fetcher)
+    report = yields["Shopify|release_notes"]
+    assert len({a.action_id for a in actions}) == len(actions), \
+        "the same announcement was returned as several actions"
+    assert report.actions_found == len({a.action_id for a in actions})
+    # The counters and the stored objects must agree — they did not before.
+    assert report.objects_established + report.objects_partial + \
+        report.objects_unknown == report.actions_found
+    assert report.objects_established <= len(objects)
+    assert report.duplicate_action_sightings > 0, \
+        "this fixture repeats one announcement across pages; that must show"

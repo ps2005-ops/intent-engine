@@ -1,0 +1,1671 @@
+{
+ "contract": "action_object_acquisition.v2",
+ "summary": {
+  "cells": 24,
+  "documents_retrieved": 65,
+  "actions_distinct": 38,
+  "duplicate_action_sightings": 15,
+  "objects_established": 1,
+  "by_family": {
+   "release_notes": {
+    "att": 17,
+    "ret": 3,
+    "act": 20,
+    "est": 1,
+    "part": 2,
+    "unk": 17,
+    "dup": 11
+   },
+   "pricing_page": {
+    "att": 28,
+    "ret": 16,
+    "act": 6,
+    "est": 0,
+    "part": 3,
+    "unk": 3,
+    "dup": 4
+   },
+   "product_launch_page": {
+    "att": 31,
+    "ret": 18,
+    "act": 5,
+    "est": 0,
+    "part": 1,
+    "unk": 4,
+    "dup": 0
+   },
+   "migration_page": {
+    "att": 25,
+    "ret": 9,
+    "act": 1,
+    "est": 0,
+    "part": 0,
+    "unk": 1,
+    "dup": 0
+   },
+   "comparison_page": {
+    "att": 26,
+    "ret": 13,
+    "act": 2,
+    "est": 0,
+    "part": 0,
+    "unk": 2,
+    "dup": 0
+   },
+   "solution_page": {
+    "att": 17,
+    "ret": 6,
+    "act": 4,
+    "est": 0,
+    "part": 1,
+    "unk": 3,
+    "dup": 0
+   }
+  }
+ },
+ "yields": {
+  "Shopify|release_notes": {
+   "contract": "action_object_acquisition.v1",
+   "family": "release_notes",
+   "actor": "Shopify",
+   "attempted": 4,
+   "retrieved": 1,
+   "actions_found": 9,
+   "objects_established": 1,
+   "objects_partial": 2,
+   "objects_unknown": 6,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 1.0,
+   "actions_per_document": 9.0,
+   "latency_seconds": 1.74,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 9,
+    "fetch_not_ok": 3
+   }
+  },
+  "Shopify|pricing_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "pricing_page",
+   "actor": "Shopify",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 1,
+   "objects_established": 0,
+   "objects_partial": 1,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 1,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.1667,
+   "latency_seconds": 6.75,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 2,
+    "fetch_not_ok": 3
+   }
+  },
+  "Shopify|product_launch_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "product_launch_page",
+   "actor": "Shopify",
+   "attempted": 8,
+   "retrieved": 6,
+   "actions_found": 1,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 1,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.1667,
+   "latency_seconds": 2.66,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 1,
+    "fetch_not_ok": 2
+   }
+  },
+  "Shopify|migration_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "migration_page",
+   "actor": "Shopify",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 1,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 1,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.1667,
+   "latency_seconds": 5.31,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 9,
+    "fetch_not_ok": 3
+   }
+  },
+  "Shopify|comparison_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "comparison_page",
+   "actor": "Shopify",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 1,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 1,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.1667,
+   "latency_seconds": 4.7,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 6,
+    "fetch_not_ok": 3
+   }
+  },
+  "Shopify|solution_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "solution_page",
+   "actor": "Shopify",
+   "attempted": 3,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 1.33,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 3
+   }
+  },
+  "Salesforce|release_notes": {
+   "contract": "action_object_acquisition.v1",
+   "family": "release_notes",
+   "actor": "Salesforce",
+   "attempted": 5,
+   "retrieved": 2,
+   "actions_found": 11,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 11,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 11,
+   "established_per_document": 0.0,
+   "actions_per_document": 5.5,
+   "latency_seconds": 9.95,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 22,
+    "duplicate_in_document": 2,
+    "fetch_not_ok": 3
+   }
+  },
+  "Salesforce|pricing_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "pricing_page",
+   "actor": "Salesforce",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 2,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 2,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 3,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.3333,
+   "latency_seconds": 16.94,
+   "errors": [],
+   "refusal_reasons": {
+    "action_belongs_to_another_actor": 1,
+    "describes_the_product_rather_than_a_change": 22,
+    "fetch_not_ok": 3
+   }
+  },
+  "Salesforce|product_launch_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "product_launch_page",
+   "actor": "Salesforce",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 4,
+   "objects_established": 0,
+   "objects_partial": 1,
+   "objects_unknown": 3,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.6667,
+   "latency_seconds": 14.25,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 16,
+    "fetch_not_ok": 3
+   }
+  },
+  "Salesforce|migration_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "migration_page",
+   "actor": "Salesforce",
+   "attempted": 5,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 10.48,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 5
+   }
+  },
+  "Salesforce|comparison_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "comparison_page",
+   "actor": "Salesforce",
+   "attempted": 4,
+   "retrieved": 1,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 8.4,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 7,
+    "fetch_not_ok": 3
+   }
+  },
+  "Salesforce|solution_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "solution_page",
+   "actor": "Salesforce",
+   "attempted": 3,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 5.26,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 2,
+    "too_short_to_be_a_document": 1
+   }
+  },
+  "BigCommerce|release_notes": {
+   "contract": "action_object_acquisition.v1",
+   "family": "release_notes",
+   "actor": "BigCommerce",
+   "attempted": 4,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 1.85,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 4
+   }
+  },
+  "BigCommerce|pricing_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "pricing_page",
+   "actor": "BigCommerce",
+   "attempted": 6,
+   "retrieved": 4,
+   "actions_found": 3,
+   "objects_established": 0,
+   "objects_partial": 2,
+   "objects_unknown": 1,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.75,
+   "latency_seconds": 3.45,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 21,
+    "fetch_not_ok": 2
+   }
+  },
+  "BigCommerce|product_launch_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "product_launch_page",
+   "actor": "BigCommerce",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 4.33,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 14,
+    "fetch_not_ok": 3
+   }
+  },
+  "BigCommerce|migration_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "migration_page",
+   "actor": "BigCommerce",
+   "attempted": 6,
+   "retrieved": 3,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 3.71,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 5,
+    "fetch_not_ok": 3
+   }
+  },
+  "BigCommerce|comparison_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "comparison_page",
+   "actor": "BigCommerce",
+   "attempted": 9,
+   "retrieved": 6,
+   "actions_found": 1,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 1,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.1667,
+   "latency_seconds": 5.78,
+   "errors": [],
+   "refusal_reasons": {
+    "action_belongs_to_another_actor": 3,
+    "describes_the_product_rather_than_a_change": 14,
+    "fetch_not_ok": 3
+   }
+  },
+  "BigCommerce|solution_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "solution_page",
+   "actor": "BigCommerce",
+   "attempted": 8,
+   "retrieved": 6,
+   "actions_found": 4,
+   "objects_established": 0,
+   "objects_partial": 1,
+   "objects_unknown": 3,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.6667,
+   "latency_seconds": 6.89,
+   "errors": [],
+   "refusal_reasons": {
+    "describes_the_product_rather_than_a_change": 14,
+    "fetch_not_ok": 2
+   }
+  },
+  "Magento|release_notes": {
+   "contract": "action_object_acquisition.v1",
+   "family": "release_notes",
+   "actor": "Magento",
+   "attempted": 4,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 32.79,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 4
+   }
+  },
+  "Magento|pricing_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "pricing_page",
+   "actor": "Magento",
+   "attempted": 4,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 32.57,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 4
+   }
+  },
+  "Magento|product_launch_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "product_launch_page",
+   "actor": "Magento",
+   "attempted": 5,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 40.84,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 5
+   }
+  },
+  "Magento|migration_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "migration_page",
+   "actor": "Magento",
+   "attempted": 5,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 40.69,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 5
+   }
+  },
+  "Magento|comparison_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "comparison_page",
+   "actor": "Magento",
+   "attempted": 4,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 32.74,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 4
+   }
+  },
+  "Magento|solution_page": {
+   "contract": "action_object_acquisition.v1",
+   "family": "solution_page",
+   "actor": "Magento",
+   "attempted": 3,
+   "retrieved": 0,
+   "actions_found": 0,
+   "objects_established": 0,
+   "objects_partial": 0,
+   "objects_unknown": 0,
+   "substitutes_named": 0,
+   "duplicate_action_sightings": 0,
+   "established_per_document": 0.0,
+   "actions_per_document": 0.0,
+   "latency_seconds": 24.42,
+   "errors": [],
+   "refusal_reasons": {
+    "fetch_not_ok": 3
+   }
+  }
+ },
+ "actions": [
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_f64ed4e3521c",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "BUNDLE_CHANGE",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Coming soon, you can set up bundles with the new Shopify Bundles app or any of the upcoming bundles apps built on Shopify Functions in the Shopify App Store.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_178c7443a73b",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Since launching 6 months ago, we\u2019ve already improved B2B on Shopify with dozens of enhancements.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_9d2dd76937ed",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "MARKET_ENTRY",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Shopify Shipping expands to Italy and Spain.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_462c8f01765b",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Introducing 10 new granular permissions, including view-only permissions, so store owners have better control over staff access to products and can delegate more confidently.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_d17401534408",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Our latest releases help speed up your build and give you more ways to customize commerce.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_85181720b010",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "BUNDLE_CHANGE",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Build the product bundles, order routing logic, checkout and cart validation rules, or delivery and payment options you need.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_60ef81645ffc",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Introducing JavaScript for Shopify Functions.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_924cabc192b9",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "We\u2019re providing unthrottled API calls for our newly launched Commerce Components by Shopify and increasing standard Admin API rate limits by 10x for Shopify Plus.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_afc27362696d",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Introducing Commerce Components.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_eee106cab5ef",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PARTNERSHIP",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/pricing"
+   ],
+   "source_family": "pricing_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "We partner with Stripe Payments Company for money transmission services and account services with funds held at Fifth Third Bank N.A., Member FDIC.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_3ba924c81f46",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/news/category/product-news"
+   ],
+   "source_family": "product_launch_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Introducing Tinker: Play with AI, bring your ideas to life.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_3fa499e7ab08",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/enterprise/blog/replatforming-seo-strategies"
+   ],
+   "source_family": "migration_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Google Analytics 4 to create an annotation on the day the new live site launches and validate key events (purchase, begin_checkout) in real time.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_0e1a80a0d0fb",
+   "actor": "Shopify",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/compare/shopify-vs-woocommerce"
+   ],
+   "source_family": "comparison_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Shopify launches more new features than WooCommerce.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_63a0d2b6701b",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Join our Year-End Innovation Review to explore the top features from 2025 alongside an exclusive look at the Winter '26 and upcoming 2026 releases for Agentforce Field Service.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_2d6bc8b81f1a",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Winter \u201926 Release: New Agentforce Sales Features Unveiled at Dreamforce.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_b146b465ce7f",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Salesforce releases are major platform updates delivered three times a year\u2014Winter, Spring, and Summer\u2014that introduce new features, enhancements, and security updates.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_6c28d1a66b1a",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "To see what\u2019s coming soon, visit Release Notes for Features Released Monthly.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_04cc4ed6756b",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Salesforce delivers three seasonal releases every year.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_578df96d9256",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Regular releases keep your org secure, scalable, and innovative\u2014without manual upgrades or downtime.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_74ead42912d2",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Each release introduces features that help admins, developers, and users work smarter and deliver more value.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_fc5d0960662c",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Patch or maintenance updates are smaller, targeted fixes released between major updates.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_10da21d4650a",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Salesforce announces sign-up opportunities through the Release Readiness Trailblazer Community.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_6529d277d471",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Use multiple channels: Slack, the Release in a Box deck, short training sessions for teams impacted by new releases and executive walkthroughs.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_c4ea14ca4602",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/releases"
+   ],
+   "source_family": "release_notes",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "You can access the latest version on Salesforce Releases and the Release Readiness Trailblazer Community.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_284f0c3bc295",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "BUNDLE_CHANGE",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/sales/pricing"
+   ],
+   "source_family": "pricing_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Bundled with Unlimited Edition.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_bbe87c340918",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/marketing/pricing"
+   ],
+   "source_family": "pricing_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Whether you\u2019re launching new campaigns, improving personalization, or optimizing performance, Marketing Cloud gives you the tools to do it faster, smarter, and more effectively than ever before.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_d880ebac0343",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PARTNERSHIP",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/news"
+   ],
+   "source_family": "product_launch_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "VCARB Partners with Salesforce to Supercharge Fan Engagement with AI, Deploying Agentforce 360.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_bca67f9b4c74",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/news"
+   ],
+   "source_family": "product_launch_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Missionforce National Security Unveils IL5-Authorized AI Agents and Apps to Drive Decision Advantage, Readiness, and Enhanced Warfighter Support.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_18e901d91ca2",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/news/stories/agentic-enterprise-index-insights-2026"
+   ],
+   "source_family": "product_launch_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Salesforce has released its 2026 Agentic Enterprise Index, which analyzes aggregated AI usage data from the Agentforce platform to uncover how businesses are deploying, using, and getting value out of AI agents.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_8d851cbb0234",
+   "actor": "Salesforce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/news/stories/customer-zero-pilots"
+   ],
+   "source_family": "product_launch_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "The Help Agent, Salesforce\u2019s implementation of Agentforce on help.salesforce.com, launched in October 2024 and is the most prominent example.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_7548c42fdcf7",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRICE_CHANGE",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/dm/plan-pricing-updates-2026"
+   ],
+   "source_family": "pricing_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Starting June 1, 2026, BigCommerce is updating its plan structure and pricing.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_597830e2ab92",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRICE_CHANGE",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/dm/plan-pricing-updates-2026"
+   ],
+   "source_family": "pricing_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "If you're on a monthly plan, switching to annual billing locks in your pricing for 12 months and reduces your monthly rate.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_9d0f5ad647b4",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRICE_CHANGE",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/dm/plan-pricing-updates-2026"
+   ],
+   "source_family": "pricing_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Upgrading to a higher plan reduces your fee rate; moving to a contracted Performance plan eliminates it.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_c880cb80f3b3",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/compare/bigcommerce-vs-shopify"
+   ],
+   "source_family": "comparison_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Shopify is widely known for its ease of use, especially for businesses launching their first online store.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_467535cca899",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/solutions/b2b-ecommerce-platform"
+   ],
+   "source_family": "solution_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Localize with ease: craft buyer-specific experiences across segments, locations, verticals, languages, currencies, and more by easily launching and managing new storefronts from a single back-end.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_ab3d8bdb7d8d",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PARTNERSHIP",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/solutions/b2b-ecommerce-platform"
+   ],
+   "source_family": "solution_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "Our curated set of third-party party applications boasts multiple partners with strong B2B applications that provide additional advanced capabilities without building out a custom experience through our APIs, like quoting.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_a0c2cbd96e47",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/solutions/headless-commerce"
+   ],
+   "source_family": "solution_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "\u201cLaunching on BigCommerce allowed us to personalize the customer journey and deliver frictionless experience across channels.\u201d.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  },
+  {
+   "contract": "competitive_action.v1",
+   "action_id": "act_324d1ac6b288",
+   "actor": "BigCommerce",
+   "counterparties": [],
+   "relationship_ids": [],
+   "action_type": "PRODUCT_LAUNCH",
+   "competitive_object": "",
+   "object_established": false,
+   "buyer_or_market": "",
+   "event_time": "2026-08-08",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/solutions/headless-commerce"
+   ],
+   "source_family": "solution_page",
+   "standing": "OBSERVED",
+   "materiality": "UNMEASURED",
+   "possible_effects": [],
+   "span": "\u201cBigCommerce and Contentful have opened up opportunities for us to create the kind of website that positions us to publish content like our recent new brand and product launches in a way that really makes our site unique.\u201d.",
+   "created_at": "2026-08-08",
+   "caution": "an action is what was done; it carries no motive and no claim that anybody responded"
+  }
+ ],
+ "objects": {
+  "act_9d2dd76937ed": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_b092e68496b4",
+   "category": "PRODUCT",
+   "workflow": "",
+   "buyer": "",
+   "budget": "",
+   "use_case": "Shopify Shipping",
+   "market_scope": "",
+   "geography": "Italy",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_spans": [
+    "Shopify Shipping expands",
+    "expands to Italy"
+   ],
+   "standing": "ESTABLISHED",
+   "created_at": "2026-08-08",
+   "missing": [],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHAT",
+    "WHERE"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHERE"
+   ],
+   "action_type": "MARKET_ENTRY"
+  },
+  "act_85181720b010": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_8126cc1fbab2",
+   "category": "WORKFLOW",
+   "workflow": "checkout",
+   "buyer": "",
+   "budget": "",
+   "use_case": "checkout",
+   "market_scope": "",
+   "geography": "",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_spans": [
+    "checkout"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "who"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "BUNDLE_CHANGE"
+  },
+  "act_924cabc192b9": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_337cf530ee0f",
+   "category": "PRODUCT",
+   "workflow": "",
+   "buyer": "",
+   "budget": "",
+   "use_case": "Commerce Components",
+   "market_scope": "",
+   "geography": "",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/updates"
+   ],
+   "source_spans": [
+    "launched Commerce Components"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "who"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "PRODUCT_LAUNCH"
+  },
+  "act_eee106cab5ef": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_08a57f6039ab",
+   "category": "WORKFLOW",
+   "workflow": "Payments",
+   "buyer": "",
+   "budget": "",
+   "use_case": "Payments",
+   "market_scope": "",
+   "geography": "",
+   "evidence_ids": [
+    "doc:https://www.shopify.com/au/pricing?country=au&lang=en"
+   ],
+   "source_spans": [
+    "Payments"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "who"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "PARTNERSHIP"
+  },
+  "act_8d851cbb0234": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_5953fd6cfee3",
+   "category": "GEOGRAPHIC_MARKET",
+   "workflow": "",
+   "buyer": "",
+   "budget": "",
+   "use_case": "",
+   "market_scope": "",
+   "geography": "October",
+   "evidence_ids": [
+    "doc:https://www.salesforce.com/news/stories/customer-zero-pilots"
+   ],
+   "source_spans": [
+    "launched in October"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "what",
+    "who"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHERE"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "PRODUCT_LAUNCH"
+  },
+  "act_597830e2ab92": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_e2bb049ba95a",
+   "category": "WORKFLOW",
+   "workflow": "billing",
+   "buyer": "",
+   "budget": "",
+   "use_case": "billing",
+   "market_scope": "",
+   "geography": "",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/dm/plan-pricing-updates-2026"
+   ],
+   "source_spans": [
+    "billing"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "who"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "PRICE_CHANGE"
+  },
+  "act_9d0f5ad647b4": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_8563cee8e91f",
+   "category": "PRODUCT",
+   "workflow": "",
+   "buyer": "",
+   "budget": "",
+   "use_case": "Performance tier",
+   "market_scope": "",
+   "geography": "",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/dm/plan-pricing-updates-2026"
+   ],
+   "source_spans": [
+    "Performance plan"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "who"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHAT"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "PRICE_CHANGE"
+  },
+  "act_324d1ac6b288": {
+   "contract": "competitive_object.v1",
+   "object_id": "obj_6f76786c9865",
+   "category": "CUSTOMER_SEGMENT",
+   "workflow": "",
+   "buyer": "new brand",
+   "budget": "",
+   "use_case": "",
+   "market_scope": "",
+   "geography": "",
+   "evidence_ids": [
+    "doc:https://www.bigcommerce.com/solutions/headless-commerce"
+   ],
+   "source_spans": [
+    "new brand"
+   ],
+   "standing": "PARTIAL",
+   "created_at": "2026-08-08",
+   "missing": [
+    "what"
+   ],
+   "substitute": "",
+   "substitutes": [],
+   "effective_date": "",
+   "dimensions_present": [
+    "WHO"
+   ],
+   "dimensions_required": [
+    "WHAT",
+    "WHO"
+   ],
+   "action_type": "PRODUCT_LAUNCH"
+  }
+ }
+}

@@ -4,7 +4,50 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 8.
+Updated 2026-08-08, wave 9.
+
+## Wave 9 — the near-miss corpus was mostly an accounting error
+
+The 89 UNKNOWN action objects wave 8 handed forward as a "training set" were
+**26 distinct sentences**. The 112 actions were **32**. The 5 established
+objects were **1**.
+
+Three defects, each inflating in the same direction:
+
+| defect | effect |
+|---|---|
+| in-page anchors fetched as separate documents | denominator ×4.5 on release_notes |
+| actions counted per sighting, not per `action_id` | numerator ×5 |
+| the page's owner used as the actor of every sentence on it | a fabricated action |
+
+`action_id` was **already stable** across the duplicate retrievals, and
+`all_objects` — a dict keyed by it — had been silently deduping to 1 the
+whole time while the counters reported 5. Two numbers derived from the same
+run disagreed by 5× and nothing compared them.
+
+The third defect surfaced only after fixing the first two. The re-run
+produced a SECOND established object: *"In 2020 Salesforce released B2B
+Commerce Lightning Experience ... for B2B merchants"* — read off
+**BigCommerce's** comparison page and attributed to BigCommerce. It
+establishes both a what and a who, so it was simultaneously the best-formed
+object in the corpus and the first invented one. Actions are now refused
+when the sentence attributes them to a different KNOWN actor; the check is
+gated on known names rather than capitalisation, because every sentence
+begins with a capital and an ungated rule refused "Regular releases keep
+your org secure" on the grounds that "Regular" is a company.
+
+### Honest live state after the fixes
+
+| | wave 8 claimed | actually |
+|---|---|---|
+| actions | 112 | **38** |
+| established objects | 5 | **1** |
+| release_notes est/doc | 0.556 | **0.333** (1 of 3) |
+
+`release_notes` is still the only family that has ever established an
+object, so the wave-8 ORDERING survives. What does not survive is the size
+of the claim: one object from three documents is a single observation, not
+a rate.
 
 ## Pinned state
 
@@ -67,6 +110,13 @@ asserted, and `event_corroboration` borrows the same reader so the two cannot
 drift apart.
 
 ### ACTION_OBJECT source performance, measured
+
+> **CORRECTED IN WAVE 9 — the numbers below count OCCURRENCES, not actions.**
+> One page reached through in-page anchors was retrieved as up to five
+> documents, and one announcement found on each was counted as up to five
+> actions. The honest figures are in the wave-9 section: **1** established
+> object from **3** release-note documents, not 5 from 9. The ORDERING was
+> right; the size of the claim was not.
 
 | family | retrieved | actions | established | est/doc |
 |---|---|---|---|---|

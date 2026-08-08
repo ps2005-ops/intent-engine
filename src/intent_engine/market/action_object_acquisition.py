@@ -32,7 +32,7 @@ import collections
 import time
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urldefrag, urljoin, urlparse
 
 from . import action_object_queries as Q
 from . import competitive_actions as CA
@@ -70,6 +70,10 @@ class FamilyYield:
     objects_partial: int = 0
     objects_unknown: int = 0
     substitutes_named: int = 0
+    #: The same announcement met again on another page of the same family.
+    #: Kept because "we saw it five times" and "there were five of them"
+    #: are opposite findings about the same number.
+    duplicate_action_sightings: int = 0
     latency_seconds: float = 0.0
     errors: List[str] = field(default_factory=list)
     refusal_reasons: Dict[str, int] = field(default_factory=dict)
@@ -95,6 +99,7 @@ class FamilyYield:
             "objects_partial": self.objects_partial,
             "objects_unknown": self.objects_unknown,
             "substitutes_named": self.substitutes_named,
+            "duplicate_action_sightings": self.duplicate_action_sightings,
             "established_per_document": round(
                 self.established_per_document, 4),
             "actions_per_document": round(self.actions_per_document, 4),
@@ -104,9 +109,21 @@ class FamilyYield:
         }
 
 
+def _canonical(url: str) -> str:
+    """One page is one document, whatever anchor you arrived through.
+
+    A fragment identifies a POSITION INSIDE a document and never a different
+    document. Following in-page links produced
+    `/updates`, `/updates#main`, `/updates#one-page-checkout` ... as five
+    separate retrievals of one page, which multiplied the denominator of
+    every yield in the wave-8 grid by up to 4.5.
+    """
+    return urldefrag(url)[0].rstrip("/")
+
+
 def _seeds(home_url: str, family: str) -> Tuple[str, ...]:
     base = home_url.rstrip("/")
-    return tuple(base + fragment for fragment in Q.paths_for(family))
+    return tuple(_canonical(base + fragment) for fragment in Q.paths_for(family))
 
 
 def retrieve(actor: str, home_url: str, family: str, *,
@@ -132,7 +149,7 @@ def retrieve(actor: str, home_url: str, family: str, *,
     out: List[RetrievedDocument] = []
 
     while frontier and len(out) < max_pages:
-        url = frontier.pop(0)
+        url = _canonical(frontier.pop(0))
         if url in seen:
             continue
         seen.add(url)
@@ -167,7 +184,7 @@ def retrieve(actor: str, home_url: str, family: str, *,
                     link or {}).get("href", "")
                 if not href:
                     continue
-                target = urljoin(url, href)
+                target = _canonical(urljoin(url, href))
                 if urlparse(target).hostname != host:
                     continue
                 if Q.family_of(target) == family and target not in seen:
@@ -178,7 +195,8 @@ def retrieve(actor: str, home_url: str, family: str, *,
 
 
 def actions_and_objects(document: RetrievedDocument, *,
-                        competitive_object_label: str = ""
+                        competitive_object_label: str = "",
+                        other_actors: Sequence[str] = ()
                         ) -> Tuple[Tuple[CA.CompetitiveAction, ...],
                                    Dict[str, CO.CompetitiveObject],
                                    Dict[str, int]]:
@@ -194,7 +212,7 @@ def actions_and_objects(document: RetrievedDocument, *,
         document.text, actor=document.actor,
         competitive_object=competitive_object_label,
         event_time=document.retrieved_at, source=document.url,
-        source_family=document.family)
+        source_family=document.family, other_actors=other_actors)
     objects: Dict[str, CO.CompetitiveObject] = {}
     for act in found:
         obj, _evidence = CO.extract(
@@ -227,13 +245,28 @@ def measure(subjects: Sequence[Tuple[str, str]], families: Sequence[str], *,
             documents, report = retrieve(
                 actor, home_url, family, as_of=as_of, fetcher=fetcher,
                 max_pages=max_pages)
+            # An announcement is one action however many pages carry it.
+            # `action_id` was ALREADY stable across duplicate retrievals and
+            # nothing counted on it: the wave-8 grid reported 5 established
+            # objects that were five readings of one sentence, and
+            # `all_objects` — a dict keyed by action_id — had been silently
+            # deduping to 1 the whole time while the counters said 5.
+            counted: set = set()
+            # Every OTHER subject in the run is a name this measurement
+            # already knows. It may only remove a misattribution.
+            others = [name for name, _ in subjects if name != actor]
             for document in documents:
-                actions, objects, refused = actions_and_objects(document)
-                report.actions_found += len(actions)
+                actions, objects, refused = actions_and_objects(
+                    document, other_actors=others)
                 for key, count in refused.items():
                     report.refusal_reasons[key] = \
                         report.refusal_reasons.get(key, 0) + count
                 for act in actions:
+                    if act.action_id in counted:
+                        report.duplicate_action_sightings += 1
+                        continue
+                    counted.add(act.action_id)
+                    report.actions_found += 1
                     obj = objects.get(act.action_id)
                     if obj is None:
                         report.objects_unknown += 1
@@ -245,7 +278,7 @@ def measure(subjects: Sequence[Tuple[str, str]], families: Sequence[str], *,
                         report.objects_unknown += 1
                     if obj is not None and obj.substitute:
                         report.substitutes_named += 1
-                all_actions.extend(actions)
+                    all_actions.append(act)
                 all_objects.update(objects)
             yields[f"{actor}|{family}"] = report
     return yields, all_actions, all_objects

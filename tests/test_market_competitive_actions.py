@@ -283,3 +283,85 @@ def test_undated_pricing_prose_is_not_a_price_change(text):
                           event_time="2026-08-08", source="s",
                           source_family="pricing_page")
     assert not found
+
+
+# --- whose action is it? --------------------------------------------------
+
+COMPARISON_PAGE = (
+    "In 2020 Salesforce released B2B Commerce Lightning Experience, and "
+    "added B2B2C Commerce for B2B merchants that want to add a "
+    "direct-to-consumer (DTC) channel.")
+
+
+def test_a_rivals_launch_on_our_page_is_not_our_launch():
+    """The live false positive this rule was written for.
+
+    BigCommerce's comparison page carries a complete, object-bearing
+    Salesforce announcement. Read as BigCommerce's, it manufactures a launch
+    that never happened — and because it establishes both a what and a who,
+    it would have been the corpus's SECOND established object and its first
+    fabricated one.
+    """
+    found, refused = CA.extract(
+        COMPARISON_PAGE, actor="BigCommerce", competitive_object="",
+        event_time="2026-08-08", source="s", source_family="comparison_page",
+        other_actors=["Shopify", "Salesforce", "Magento"])
+    assert not found
+    assert refused.get("action_belongs_to_another_actor") == 1
+
+
+def test_the_same_sentence_on_salesforces_own_page_is_kept():
+    """The rule must not simply delete the sentence: on the actor's OWN page
+    it is their announcement and belongs to them."""
+    found, _ = CA.extract(
+        COMPARISON_PAGE, actor="Salesforce", competitive_object="",
+        event_time="2026-08-08", source="s", source_family="release_notes",
+        other_actors=["Shopify", "BigCommerce", "Magento"])
+    assert found and found[0].actor == "Salesforce"
+
+
+def test_a_capitalised_sentence_opener_is_not_a_company():
+    """Every sentence begins with a capital. An ungated proper-noun rule
+    refused this one on the grounds that "Regular" is a company."""
+    text = ("Regular releases keep your org secure, scalable, and innovative "
+            "without manual upgrades or downtime.")
+    assert CA.acting_subject(text) == "Regular"
+    found, refused = CA.extract(
+        text, actor="Salesforce", competitive_object="",
+        event_time="2026-08-08", source="s", source_family="release_notes",
+        other_actors=["Shopify", "BigCommerce"])
+    assert not refused.get("action_belongs_to_another_actor")
+
+
+def test_a_sub_brand_still_belongs_to_its_parent():
+    """"Shopify Shipping expands to Italy and Spain" is Shopify's action."""
+    assert CA._same_actor("Shopify Shipping", "Shopify")
+    found, _ = CA.extract(
+        "Shopify Shipping expands to Italy and Spain.", actor="Shopify",
+        competitive_object="", event_time="2026-08-08", source="s",
+        source_family="release_notes", other_actors=["Salesforce"])
+    assert found and found[0].actor == "Shopify"
+
+
+def test_a_sentence_with_no_stated_subject_belongs_to_the_page():
+    """"Introducing Commerce Components." names nobody, and it is their
+    page and their announcement."""
+    assert CA.acting_subject("Introducing Commerce Components.") == ""
+    found, _ = CA.extract(
+        "Introducing Commerce Components for enterprise retailers.",
+        actor="Shopify", competitive_object="", event_time="2026-08-08",
+        source="s", source_family="release_notes",
+        other_actors=["Salesforce", "BigCommerce"])
+    assert found and found[0].actor == "Shopify"
+
+
+def test_the_known_names_can_only_remove_an_action_never_add_one():
+    """`other_actors` is attribution, not evidence: passing more names can
+    only ever shrink the result."""
+    kwargs = dict(actor="BigCommerce", competitive_object="",
+                  event_time="2026-08-08", source="s",
+                  source_family="comparison_page")
+    with_names, _ = CA.extract(COMPARISON_PAGE, other_actors=["Salesforce"],
+                               **kwargs)
+    without, _ = CA.extract(COMPARISON_PAGE, other_actors=(), **kwargs)
+    assert len(with_names) <= len(without)

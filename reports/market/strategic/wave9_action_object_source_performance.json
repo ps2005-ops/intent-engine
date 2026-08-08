@@ -1,0 +1,141 @@
+{
+ "contract": "action_object_source_performance.v2",
+ "supersedes": "wave8_action_object_source_performance.json",
+ "correction": "The wave-8 table counted OCCURRENCES, not actions. One page reached through in-page anchors (/updates, /updates#main, /updates#one-page-checkout ...) was retrieved as up to 5 documents, and one announcement found on each of them was counted as up to 5 actions. `action_id` was already stable across all of them and nothing counted on it. Wave 8 reported 5 established objects from 9 release-note documents (0.556); there was ONE established object, and there were 3 documents (0.333).",
+ "second_correction": "Re-running with the fix produced a SECOND established object that was a fabrication: Salesforce's 2020 B2B Commerce launch, described on BigCommerce's comparison page, attributed to BigCommerce because the page's owner was passed as the actor of every sentence on it. It established both a what and a who, so it would have been the corpus's best-formed object and its first invented one.",
+ "measured_over": {
+  "cells": 24,
+  "documents_retrieved": 65,
+  "actions_distinct": 38,
+  "duplicate_action_sightings": 15,
+  "objects_established": 1,
+  "by_family": {
+   "release_notes": {
+    "att": 17,
+    "ret": 3,
+    "act": 20,
+    "est": 1,
+    "part": 2,
+    "unk": 17,
+    "dup": 11
+   },
+   "pricing_page": {
+    "att": 28,
+    "ret": 16,
+    "act": 6,
+    "est": 0,
+    "part": 3,
+    "unk": 3,
+    "dup": 4
+   },
+   "product_launch_page": {
+    "att": 31,
+    "ret": 18,
+    "act": 5,
+    "est": 0,
+    "part": 1,
+    "unk": 4,
+    "dup": 0
+   },
+   "migration_page": {
+    "att": 25,
+    "ret": 9,
+    "act": 1,
+    "est": 0,
+    "part": 0,
+    "unk": 1,
+    "dup": 0
+   },
+   "comparison_page": {
+    "att": 26,
+    "ret": 13,
+    "act": 2,
+    "est": 0,
+    "part": 0,
+    "unk": 2,
+    "dup": 0
+   },
+   "solution_page": {
+    "att": 17,
+    "ret": 6,
+    "act": 4,
+    "est": 0,
+    "part": 1,
+    "unk": 3,
+    "dup": 0
+   }
+  }
+ },
+ "by_family": [
+  {
+   "source_family": "release_notes",
+   "attempts": 17,
+   "retrieved": 3,
+   "established_objects": 1,
+   "established_per_document": 0.3333,
+   "latency_per_document": 15.44,
+   "maturity": "PROVISIONAL"
+  },
+  {
+   "source_family": "pricing_page",
+   "attempts": 28,
+   "retrieved": 16,
+   "established_objects": 0,
+   "established_per_document": 0.0,
+   "latency_per_document": 3.73,
+   "maturity": "PROVISIONAL"
+  },
+  {
+   "source_family": "product_launch_page",
+   "attempts": 31,
+   "retrieved": 18,
+   "established_objects": 0,
+   "established_per_document": 0.0,
+   "latency_per_document": 3.45,
+   "maturity": "PROVISIONAL"
+  },
+  {
+   "source_family": "migration_page",
+   "attempts": 25,
+   "retrieved": 9,
+   "established_objects": 0,
+   "established_per_document": 0.0,
+   "latency_per_document": 6.69,
+   "maturity": "PROVISIONAL"
+  },
+  {
+   "source_family": "comparison_page",
+   "attempts": 26,
+   "retrieved": 13,
+   "established_objects": 0,
+   "established_per_document": 0.0,
+   "latency_per_document": 3.97,
+   "maturity": "PROVISIONAL"
+  },
+  {
+   "source_family": "solution_page",
+   "attempts": 17,
+   "retrieved": 6,
+   "established_objects": 0,
+   "established_per_document": 0.0,
+   "latency_per_document": 6.32,
+   "maturity": "PROVISIONAL"
+  }
+ ],
+ "plan_before_measurement": [
+  "pricing_page",
+  "product_launch_page",
+  "migration_page",
+  "release_notes"
+ ],
+ "plan_after_measurement": [
+  "release_notes",
+  "product_launch_page",
+  "pricing_page",
+  "migration_page"
+ ],
+ "families_that_established_anything": [
+  "release_notes"
+ ],
+ "note": "release_notes remains the only family that has ever established an object, and the ordering it produces is unchanged. What changed is the size of the claim: one object from three documents is a single observation, not a rate."
+}

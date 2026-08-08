@@ -172,6 +172,64 @@ _NOT_AN_ACTION = re.compile(
 
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 
+#: The action verbs, alone, used to find what governs them in a sentence.
+_ACTION_VERB = re.compile(
+    r"\b(?:announc|launch|introduc|unveil|releas|expand|cut|rais|updat|chang|"
+    r"bundl|packag|partner|acquir|add|move|switch|migrat)"
+    r"(?:s|es|ed|ing|d)?\b", re.I)
+
+#: A capitalised name sitting immediately before the verb it governs. Stops
+#: at a lowercase word so "In 2020 Salesforce released" yields "Salesforce"
+#: and not "In 2020 Salesforce".
+_SUBJECT = re.compile(
+    r"([A-Z][A-Za-z0-9&.'\-]*(?:\s+[A-Z][A-Za-z0-9&.'\-]*){0,3})\s*$")
+
+#: Words that begin a capitalised span without being anybody's name.
+_NOT_A_NAME = frozenset({
+    "the", "a", "an", "in", "on", "at", "to", "for", "and", "or", "but",
+    "today", "this", "that", "these", "those", "we", "our", "us", "it",
+    "its", "new", "now", "since", "when", "while", "after", "before",
+    "introducing", "announcing", "launching", "coming", "starting",
+    "effective", "beginning", "january", "february", "march", "april",
+    "may", "june", "july", "august", "september", "october", "november",
+    "december", "recently", "last", "next", "each", "every", "with",
+})
+
+
+def acting_subject(sentence: str) -> str:
+    """Who the sentence says is DOING the thing, or "" if it does not say.
+
+    A page's owner is not the subject of every sentence on it. BigCommerce's
+    comparison page carries "In 2020 Salesforce released B2B Commerce
+    Lightning Experience ... for B2B merchants" — a complete, well-formed,
+    object-bearing action belonging to SALESFORCE. Attributing it to the
+    page's owner invents an action BigCommerce never took, which is worse
+    than missing one.
+
+    An empty result means the sentence names no subject ("Introducing
+    Commerce Components."), and the document's owner is then the right
+    default: it is their page and their announcement.
+    """
+    verb = _ACTION_VERB.search(sentence or "")
+    if not verb:
+        return ""
+    before = (sentence or "")[:verb.start()].rstrip()
+    hit = _SUBJECT.search(before)
+    if not hit:
+        return ""
+    words = hit.group(1).split()
+    while words and words[0].lower() in _NOT_A_NAME:
+        words.pop(0)
+    return " ".join(words).strip(" ,;:")
+
+
+def _same_actor(subject: str, actor: str) -> bool:
+    """Loose containment, because "Shopify Shipping" is still Shopify."""
+    a, b = subject.lower().strip(), (actor or "").lower().strip()
+    if not a or not b:
+        return True
+    return a in b or b in a or bool(set(a.split()) & set(b.split()))
+
 
 @dataclass(frozen=True)
 class CompetitiveAction:
@@ -253,9 +311,25 @@ def action(*, actor: str, action_type: str, competitive_object: str,
 
 
 def extract(text: str, *, actor: str, competitive_object: str,
-            event_time: str, source: str, source_family: str
+            event_time: str, source: str, source_family: str,
+            other_actors: Sequence[str] = ()
             ) -> Tuple[Tuple[CompetitiveAction, ...], Dict[str, int]]:
-    """Pull stated actions out of one document."""
+    """Pull stated actions out of one document.
+
+    `other_actors` are companies the engine already knows by name. It is used
+    ONLY to REFUSE an action whose sentence attributes it to one of them, and
+    it can never supply an action, an actor or an object. Naming the parties
+    is how the engine avoids inventing one: BigCommerce's comparison page
+    carries "In 2020 Salesforce released B2B Commerce Lightning Experience
+    ... for B2B merchants", a complete object-bearing action that belongs to
+    Salesforce, and reading it off that page produced a BigCommerce launch
+    that never happened.
+
+    The check is deliberately gated on KNOWN names rather than on English
+    capitalisation. Every sentence begins with a capital, so a bare
+    proper-noun heuristic refuses "Regular releases keep your org secure"
+    on the grounds that "Regular" is a company.
+    """
     refused: Dict[str, int] = collections.Counter()
     found: List[CompetitiveAction] = []
     seen: set = set()
@@ -265,6 +339,15 @@ def extract(text: str, *, actor: str, competitive_object: str,
             continue
         if _NOT_AN_ACTION.search(sentence):
             refused["describes_the_product_rather_than_a_change"] += 1
+            continue
+        # Whose action is this? A page's owner is not the subject of every
+        # sentence on it, and a comparison page is mostly ABOUT somebody
+        # else. Attributing a rival's launch to the page's owner would
+        # manufacture an action that never happened.
+        subject = acting_subject(sentence)
+        if subject and not _same_actor(subject, actor) and any(
+                _same_actor(subject, other) for other in other_actors):
+            refused["action_belongs_to_another_actor"] += 1
             continue
         for pattern, kind in _COMPILED:
             if not pattern.search(sentence):
