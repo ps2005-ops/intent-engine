@@ -4,7 +4,98 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 9.
+Updated 2026-08-08, wave 10.
+
+## Wave 10 — two structural blockers, both located
+
+### `release_notes` was luck, and the sample says so
+
+Twelve official release-note surfaces across four rivals returned **11
+distinct documents**. The yield went DOWN.
+
+| | wave 9 | wave 10 |
+|---|---|---|
+| documents | 3 | **11** |
+| established objects | 1 | **1** |
+| est/document | 0.333 | **0.091** |
+
+Same single object — "Shopify Shipping expands to Italy and Spain". Eight of
+twelve surfaces returned nothing; **BigCommerce and Magento returned nothing
+from any of their six.** Maturity now requires ACTOR DIVERSITY as well as
+document count, because only two of four actors published anything reachable
+and only one produced an object: the family's apparent yield was one
+company's changelog.
+
+### Context recovery works and has nothing to work on
+
+`ActionContext` takes the heading and immediate neighbours and stops at a
+section boundary. Live recovery: **zero**.
+
+Before the index rule it "recovered" three, and all three were leaks —
+`checkout` borrowed from the entry above, and a buyer built from two
+navigation labels run together ("Sidekick app extensionsApp store"). An
+index page's sentences are not context for one another, and a window widened
+until a buyer appears will always find one belonging to something else.
+
+14 of 15 live actions come from two index pages. The seven changelog ENTRY
+pages, where context WOULD work, produce **zero actions** — the announcement
+is in the page TITLE and the detector reads only body text.
+
+### BLOCKER 1 — the rivalry edges do not persist
+
+`competitor_map_entries` is **0**, and COMPETES_WITH has **zero edges** in
+the actor-relationship graph, which holds 25 edges across only two of eleven
+predicates (SELLS_TO, PARTNERS_WITH). The three rivalry claims were produced
+during a wave-5 run and written nowhere. **This is a storage gap, not an
+evidence gap**, and it is why the episode ranker cannot read its own input.
+
+### BLOCKER 2 — every action is dated the day we fetched it
+
+23 live actions carry **one distinct `event_time`**: 2026-08-08.
+`action_object_acquisition` passes `event_time=document.retrieved_at`.
+
+§7 asks what happened when and §8 asks for "A followed by B within a
+plausible window". Neither has meaning when every delta is zero, and a
+timeline built on retrieval dates would order actions by the order we
+happened to fetch them **and would look exactly like a real one**. Same
+class as the wave-5 evidence id hashing `observed_at`; it survived because
+nothing downstream had ever ordered actions.
+
+### Episode ranking, on the pairs that exist
+
+| pair | actions | standing |
+|---|---|---|
+| Salesforce vs Shopify | 6 / 16 | **MEDIUM** |
+| Magento vs Shopify | 0 / 16 | NOT_OBSERVABLE |
+| Magento vs Shopify Plus | 0 / 0 | NOT_OBSERVABLE |
+
+Observability is first-class and separate from validity: a rivalry can be
+real and unlearnable. Salesforce/Shopify is held at MEDIUM because the
+source family behind it is PROVISIONAL.
+
+### Learning split, formalised and enforced
+
+| channel | wave 10 |
+|---|---|
+| ECONOMIC_KNOWLEDGE | **0** |
+| SYSTEM_CAPABILITY | 6 movements |
+| CALIBRATION | 0 — all six tracks UNMEASURABLE |
+| FOUNDER_UTILITY | 0 |
+
+`learning_channels.movement` REFUSES to file a pipeline repair as economic
+knowledge. Three waves running, the engine has improved its instrument and
+learned nothing new about the market — the correct reading, and the reason
+the split exists.
+
+### Not reached in wave 10
+
+§9-§15 (response memory, live interaction, preregistration, response watch,
+objective hypotheses) are blocked by the two blockers above, not by effort.
+§18/§19 (Founder evidence trust), §23/§24 (near-miss research priorities),
+§25 (economic chain re-run), §26 (product regression), §27 (falsifier
+migration) were not run. Product regression was judged least urgent because
+no Founder surface changed this wave — §26's stated reason for requiring it
+was the Founder provenance work, which is itself not done.
 
 ## Wave 9 — the near-miss corpus was mostly an accounting error
 
@@ -108,13 +199,13 @@ exists so that improvement can never again be reported as knowledge.
 | what | where |
 |---|---|
 | market head | `HEAD of feat/strategic-response-learning` (see git log) |
-| wave-9 break proofs | **32/32** through the hardened harness |
+| wave-10 break proofs | **41/41** through the hardened harness |
 | market runtime | **`079128b` — NOT repinned; owner action below** |
 | founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
 | founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4375 passed / 4 skipped / EXIT=0 |
+| market suite | 4413 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
 ## Wave 8
@@ -427,6 +518,23 @@ in customer stories usually names companies outside it.
   extraction over 249 rows is 3.73 ms. No regression above 10%
 - **BREAK PROOFS** 30/30. Two failed first-pass: one mutation was a no-op
   (`{} or {...}` evaluates to the second dict) and one guard was unreachable
+
+## Remaining queue after wave 10, highest value first
+
+1. **Persist the rivalry edges.** `competitor_map_entries` is 0. Until a
+   COMPETES_WITH claim survives the run that made it, the episode ranker,
+   the interaction record and every response test have no input.
+2. **Give an action its own date.** Every action is stamped with the
+   retrieval date, so no timeline can be ordered and no response window has
+   meaning. Changelog entries carry "06.17" and "July 30, 2026"; this needs
+   a dated-announcement extractor with a negative corpus.
+3. **Read the entry-page title as an announcement.** Seven single-topic
+   changelog pages yield zero actions because the announcement is the title.
+   Needs a title-grammar pattern family AND a negative set — nav labels and
+   section headers share the shape.
+4. **BigCommerce and Magento are unobservable.** Zero documents from six
+   official surfaces each. Either find a reachable surface or accept that
+   two of three tracked rivalries can never produce an episode.
 
 ## Remaining queue after wave 9, highest value first
 

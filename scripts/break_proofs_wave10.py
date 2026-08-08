@@ -28,6 +28,8 @@ EC = f"{T}/test_market_event_corroboration.py"
 RP = f"{T}/test_market_research_planning.py"
 AX = f"{T}/test_market_action_context.py"
 ECH = f"{T}/test_market_economic_chain.py"
+SE = f"{T}/test_market_strategic_episodes.py"
+LC = f"{T}/test_market_learning_channels.py"
 NM = f"{T}/test_market_near_miss.py"
 EI = f"{T}/test_market_event_identity.py"
 GT = f"{T}/test_market_game_theoretic_state.py"
@@ -316,6 +318,30 @@ PROOFS = [
      "              ECONOMIC_FACTOR, CREDIT_STATE, CAPITAL_STATE, INDUSTRY_STATE)",
      "              )",
      f"{ECH}::test_the_graph_can_carry_macro_and_capital_states"),
+
+("w10-6. a valid rivalry with a silent rival is ranked as learnable",
+     S / "strategic_episodes.py",
+     "    if obs != \"BOTH_SIDES_PUBLISH\":",
+     "    if False:",
+     f"{SE}::test_a_real_rivalry_with_a_silent_rival_is_not_observable"),
+
+    ("w10-7. a high-value question promotes an unobservable pair",
+     S / "strategic_episodes.py",
+     "        candidates, key=lambda c: (_ORDER.get(c.standing, 9), -c.voi,",
+     "        candidates, key=lambda c: (-c.voi, _ORDER.get(c.standing, 9),",
+     f"{SE}::test_value_never_promotes_an_unobservable_pair"),
+
+    ("w10-8. a pipeline repair is filed as economic knowledge",
+     S / "learning_channels.py",
+     "    if kind not in _ALLOWED[channel]:",
+     "    if False:",
+     f"{LC}::test_a_pipeline_repair_cannot_be_filed_as_economic_knowledge"),
+
+    ("w10-9. an untested calibration track reports zero accuracy",
+     S / "learning_channels.py",
+     "        return (self.correct / self.tested) if self.tested else None",
+     "        return (self.correct / self.tested) if self.tested else 0.0",
+     f"{LC}::test_an_untested_track_is_unmeasurable_and_not_zero"),
 
     # --- 18 & 19: production target and PAPER --------------------------
     # Both are runtime guards asserted by the existing deployment tests
