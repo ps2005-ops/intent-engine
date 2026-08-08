@@ -186,9 +186,21 @@ class ResearchPlan:
                 "health_adjustment": self.health_adjustment}
 
 
+#: Families whose documents are mostly relayed rather than originated. When
+#: the corpus is already dominated by syndication, asking these again buys
+#: another copy of what is held, not another witness.
+_RELAYED_FAMILIES = frozenset({"rival_newsroom", "comparison_page"})
+
+#: Above this share of SAME_ORIGIN pairs, the corpus's apparent corroboration
+#: is mostly one story wearing several bylines. Measured at 133/148 = 0.899
+#: on the live ledger, so the threshold is not hypothetical.
+SAME_ORIGIN_DOMINANT = 0.6
+
+
 def plan(question_type: str, *,
          performance: Sequence[SourceFamilyPerformance] = (),
-         learning_status: str = "", dominant_self_test_class: str = ""
+         learning_status: str = "", dominant_self_test_class: str = "",
+         dependency_classes: Optional[Dict[str, int]] = None
          ) -> ResearchPlan:
     """Rank the families that could answer this question. Never all of them.
 
@@ -259,6 +271,32 @@ def plan(question_type: str, *,
             "learning is DEGRADING and the dominant self-test class is "
             "SAME_SOURCE_REPACKAGING, so slow-changing pages were "
             "deprioritised in favour of sources that produce new documents")
+
+    # --- source dependence becomes an action too -------------------------
+    # A corpus whose accounts are 90% SAME_ORIGIN does not need more
+    # accounts; it needs a different KIND of witness. This does not suppress
+    # baseline coverage — every family keeps its place in the ranking — it
+    # reorders which is asked first.
+    classes = dependency_classes or {}
+    total_pairs = sum(classes.values())
+    if total_pairs:
+        same_origin_share = (classes.get("SAME_ORIGIN", 0)
+                             + classes.get("DERIVED", 0)) / total_pairs
+        if same_origin_share >= SAME_ORIGIN_DOMINANT:
+            ranked = [((3 if name in _RELAYED_FAMILIES else -2,) + key[1:],
+                       name,
+                       reason + (
+                           "; deprioritised because the corpus's accounts "
+                           "are already mostly one origin, and this family "
+                           "relays rather than originates"
+                           if name in _RELAYED_FAMILIES else
+                           "; prioritised because it originates a fact "
+                           "rather than relaying one"))
+                      for key, name, reason in ranked]
+            adjustment = ((adjustment + "; " if adjustment else "") +
+                          f"{same_origin_share:.0%} of paired accounts are "
+                          f"SAME_ORIGIN or DERIVED, so originating sources "
+                          f"were asked before relaying ones")
 
     ranked.sort(key=lambda row: row[0])
     return ResearchPlan(
