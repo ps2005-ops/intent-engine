@@ -186,12 +186,34 @@ def test_uses_and_works_with_state_no_holdable_relation():
 
 
 def test_supply_chain_does_not_produce_a_partner_called_chain():
-    """Four live edges pointed at an actor named "Chain" before this."""
+    """Four live edges pointed at an actor named "Chain" before this.
+
+    Two independent guards stop it — the pattern matches only the finite
+    verb `supplies`, and the plausibility filter rejects the common noun.
+    Both are proved, separately, because a test that passes under either one
+    cannot say which is load-bearing.
+    """
     found, refused, _ = PR.extract(
         release("Canadian National is investing in supply Chain "
-                "Collaboration across its network of terminals this year."),
+                "Collaboration across its network. Chain Collaboration "
+                "is a programme run with its terminal operators."),
         "canadian_national", ["Canadian National Railway"])
     assert all(r.object_actor != "Chain" for r in found)
+    # The pattern is the first guard: a compound noun is not a verb.
+    assert not any(p.search("investing in supply Chain Collaboration")
+                   for p, pred, _l, _b, _m in PR._COMPILED
+                   if pred == AR.SUPPLIES)
+
+
+def test_a_place_is_refused_at_the_call_site_not_only_in_the_helper():
+    """Testing the helper directly leaves the call site unguarded."""
+    found, refused, _ = PR.extract(
+        release("Grifols partners with Europe to expand plasma collection "
+                "across the region. Europe remains a core market for the "
+                "group and for its donors."),
+        "grifols", ["Grifols", "Grifols S.A."])
+    assert found == ()
+    assert refused["counterparty_is_a_common_noun_or_place"] == 1
 
 
 def test_a_place_name_is_not_a_counterparty():

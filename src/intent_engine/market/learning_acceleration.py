@@ -241,8 +241,15 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
 
     contradictions = weakened
     reconciliations = strengthened + weakened
-    subjects = {str(r.get("subject") or "") for r in ledger
-                if r.get("record") == "reconciliation"} - {""}
+    # Both halves of this ratio must come from the SAME population. Counting
+    # the ledger's distinct subjects over the WINDOW's reconciliations was a
+    # share of 9 out of 1 the moment the two diverged — caught by `rate`,
+    # which raises rather than clamping, and found by a break proof rather
+    # than by a test.
+    ledger_reconciliations = [r for r in ledger
+                              if r.get("record") == "reconciliation"]
+    subjects = {str(r.get("subject") or "")
+                for r in ledger_reconciliations} - {""}
     sources = {str(r.get("source_role") or "") for r in ledger
                if r.get("record") == "evidence"} - {""}
 
@@ -278,8 +285,8 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
         "contradiction_reachability": rate(contradictions, reconciliations),
         "source_diversity": float(len(sources)) if sources else None,
         "independent_confirmation": (
-            rate(len(subjects), max(reconciliations, 1))
-            if reconciliations else None),
+            rate(len(subjects), len(ledger_reconciliations))
+            if ledger_reconciliations else None),
         # Of the expectations EXAMINED, how many belong to a family no
         # observation could refute. The denominator is examinations, not
         # beliefs declared this cycle: binding examines every open

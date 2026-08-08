@@ -145,16 +145,36 @@ def test_absolute_limits_are_skipped_where_they_would_be_meaningless():
 
 
 def test_no_quality_dimension_can_exceed_one():
-    """A share above 1.0 means two populations were divided; it must raise."""
-    mismatched = [Obs(expectations_evaluated=2,
-                      binding_refused={
-                          "family_not_falsifiable_by_observation": 0})
-                  for _ in range(4)]
-    LA.quality(mismatched)          # consistent: no raise
-    for name, value in LA.quality(real_observations()).items():
+    for name, value in LA.quality(real_observations(),
+                                  ledger=real_ledger()).items():
         if value is None or name == "source_diversity":
             continue
         assert 0.0 <= float(value) <= 1.0, name
+
+
+def test_a_share_above_one_raises_rather_than_being_clamped():
+    """Found by a break proof, not by a test.
+
+    `independent_confirmation` divided the LEDGER's distinct subjects by the
+    WINDOW's reconciliations. On the real ledger the two happened to be
+    equal, so nothing showed; nine subjects over one reconciliation is a
+    share of 9.0. Both halves now come from the same population, which makes
+    THAT dimension structurally safe — so what is proved here is the
+    remaining reachable mismatch, and that the helper raises rather than
+    clamping. Clamping would have turned a population error into a plausible
+    number.
+    """
+    # More expectations refused as unfalsifiable than were ever examined.
+    mismatched = [Obs(expectations_evaluated=1,
+                      binding_refused={
+                          "family_not_falsifiable_by_observation": 9})
+                  for _ in range(2)]
+    # The denominator widens to cover the numerator, so this is consistent...
+    got = LA.quality(mismatched)
+    assert 0.0 <= got["false_positive_rate"] <= 1.0
+    # ...and the helper itself still refuses an inconsistent pair.
+    with pytest.raises(ValueError, match="two different populations"):
+        LA.quality([Obs(expectations_evaluated=1, expectations_resolved=9)])
 
 
 # --- windows are computed only where the history defends them ------------

@@ -54,11 +54,18 @@ def test_a_proposal_is_never_born_validated():
 
 
 def test_an_unvalidated_llm_proposal_is_never_offered():
-    store = AE.AlternativeStore()
+    """Held by the store and still invisible: the gate is `is_offerable`.
+
+    An earlier version of this test built an EMPTY store, so `offerable()`
+    iterated nothing and the assertion held however the gate behaved. It
+    could not fail. The proposal is now inside the store.
+    """
     raw = proposal(source=AE.LLM_PROPOSED)
     assert raw.validation_status == AE.PROPOSED
-    assert store.offerable() == ()          # never stored, never offered
-    assert len(store) == 0
+    store = AE.AlternativeStore([raw])
+    assert len(store) == 1
+    assert store.offerable() == ()
+    assert store.summarise()["llm_proposed_not_yet_validated"] == 1
 
 
 def test_validation_is_the_only_route_to_being_offerable():

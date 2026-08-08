@@ -130,6 +130,17 @@ def test_the_strongest_status_needs_scope_and_volume_together():
     assert got.status == CC.REPEATEDLY_SUPPORTED
 
 
+def test_an_uninformative_reconciliation_is_not_a_test():
+    """A row that discriminated nothing is not evidence about the edge."""
+    ledger = synthetic("demand_strengthening",
+                       [("a", "CONFIRMED"), ("b", "UNINFORMATIVE"),
+                        ("c", "TOO_EARLY"), ("d", "UNMEASURABLE")])
+    got = only(CC.calibrate(ledger), "demand_strengthening")
+    assert got.tests == 1
+    assert got.company_scope == ("a",)
+    assert got.unresolved == 3
+
+
 # --- what the vocabulary refuses to say ----------------------------------
 
 def test_established_is_not_in_the_vocabulary():
