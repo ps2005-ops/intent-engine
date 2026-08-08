@@ -63,11 +63,22 @@ RELATIONSHIP_SUPPORT = "relationship_support"
 #: A relationship the engine no longer holds. Never a deletion — the row
 #: that asserted it stays, and this says when we stopped believing it.
 RELATIONSHIP_RETIRED = "relationship_retired"
+#: A preregistered CROSS-ACTOR expectation: what we think rival B will do
+#: about rival A's move, written down BEFORE the answer is looked for.
+#:
+#: Distinct from EXPECTATION, which is a company-level expected
+#: observation. This one had no write path either, and preregistration
+#: whose record does not survive the process is not preregistration — the
+#: whole claim is that it existed before the evidence.
+CROSS_ACTOR_EXPECTATION = "cross_actor_expectation"
+#: How a preregistered cross-actor expectation turned out.
+CROSS_ACTOR_OUTCOME = "cross_actor_outcome"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
-                          RELATIONSHIP_RETIRED})
+                          RELATIONSHIP_RETIRED, CROSS_ACTOR_EXPECTATION,
+                          CROSS_ACTOR_OUTCOME})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -327,6 +338,47 @@ class LearningStore:
     def retired_relationship_ids(self) -> frozenset:
         return frozenset(str(r.get("relationship_id") or "") for r in self._rows()
                          if r.get("record") == RELATIONSHIP_RETIRED)
+
+    def record_cross_actor_expectation(self, expectation) -> bool:
+        """Write a preregistration down. Idempotent on `expectation_id`.
+
+        Nothing else in this class matters as much for honesty: the claim a
+        preregistration makes is that it EXISTED BEFORE the evidence, and an
+        in-memory object cannot make that claim to anyone.
+        """
+        payload = (expectation.as_dict() if hasattr(expectation, "as_dict")
+                   else dict(expectation))
+        if payload.get("expectation_id") in self.cross_actor_expectation_ids():
+            return False
+        self._append(CROSS_ACTOR_EXPECTATION, payload)
+        return True
+
+    def cross_actor_expectations(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == CROSS_ACTOR_EXPECTATION)
+
+    def cross_actor_expectation_ids(self) -> frozenset:
+        return frozenset(str(r.get("expectation_id") or "")
+                         for r in self.cross_actor_expectations())
+
+    def record_cross_actor_outcome(self, *, expectation_id: str, outcome: str,
+                                   observed_at: str,
+                                   evidence_ids: Sequence[str] = ()) -> bool:
+        """Record how a preregistration resolved, as a SEPARATE row.
+
+        The expectation row is history. Editing it to carry its own outcome
+        would destroy the evidence that it was written before the answer.
+        """
+        if expectation_id not in self.cross_actor_expectation_ids():
+            raise ValueError(
+                f"no preregistered expectation {expectation_id!r}: an outcome "
+                f"for an expectation that was never written down is exactly "
+                f"the retroactive story preregistration exists to prevent")
+        self._append(CROSS_ACTOR_OUTCOME, {
+            "expectation_id": expectation_id, "outcome": outcome,
+            "observed_at": observed_at[:10],
+            "evidence_ids": list(evidence_ids)})
+        return True
 
     def record_lifecycle(self, event) -> bool:
         """Append one belief-lifecycle event. Idempotent on `event_id`.

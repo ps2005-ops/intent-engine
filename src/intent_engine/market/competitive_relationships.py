@@ -312,6 +312,16 @@ _NEGATED = re.compile(
     re.I)
 
 
+#: Sentence openers that are never a customer's name. A migration story
+#: begins with the merchant; a comparison HEADLINE begins with a question.
+_NOT_A_BUYER_HEAD = frozenset({
+    "is", "are", "was", "were", "do", "does", "did", "can", "could",
+    "should", "would", "will", "how", "what", "why", "when", "where",
+    "which", "who", "the", "this", "that", "these", "those", "a", "an",
+    "if", "when", "before", "after", "moving", "migrating", "switching",
+})
+
+
 def _clause_around(sentence: str, start: int, end: int) -> str:
     """The clause containing the match, by deterministic boundaries."""
     left = 0
@@ -384,7 +394,16 @@ def extract(text: str, *, subject: str, aliases: Sequence[str],
                 # can go and verify.
                 head = AR._ACTOR.match(sentence)
                 if head:
-                    migration_buyer = head.group(1).strip(" .,;:")
+                    candidate = head.group(1).strip(" .,;:")
+                    # The capitalised head of a sentence is not automatically
+                    # a company. "Is migrating from Shopify to BigCommerce
+                    # difficult?" is a headline whose head is "Is", and it
+                    # was persisted as a BUYER — the same shape as wave 9's
+                    # "Regular releases keep your org secure". Interrogative
+                    # and determiner openers name nobody.
+                    if AR.is_named_actor(candidate) and \
+                            candidate.split()[0].lower() not in _NOT_A_BUYER_HEAD:
+                        migration_buyer = candidate
         for pattern, kind in ((_DIRECT, DIRECT_COMPETITOR_STATEMENT),
                               (_ALTERNATIVE,
                                CUSTOMER_ALTERNATIVE_EVALUATION)):

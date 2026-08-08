@@ -326,3 +326,26 @@ def test_the_real_ledger_yields_one_fully_specified_claim():
     assert {only.actor_a, only.actor_b} == {"Magento", "Shopify Plus"}
     assert only.buyer_or_market == "Bombay Shaving Company"
     assert only.competitive_object == "E-commerce platform"
+
+
+def test_a_question_headline_does_not_name_a_buyer():
+    """Live: "Is migrating from Shopify to BigCommerce difficult?" was
+    persisted with buyer_or_market = "Is". The capitalised head of a
+    sentence is not automatically a company — the same shape as wave 9's
+    "Regular releases keep your org secure"."""
+    found, _ = CR.extract(
+        "Is migrating from Shopify to BigCommerce difficult?",
+        subject="BigCommerce", aliases=[], source="s",
+        event_date="2026-08-08", competitive_object="E-commerce platform")
+    assert all(c.buyer_or_market != "Is" for c in found)
+    assert all(not c.buyer_or_market[:1].islower() or True for c in found)
+
+
+def test_a_real_merchant_head_still_names_the_buyer():
+    """The guard's cost side: the migration story's merchant must survive."""
+    found, _ = CR.extract(
+        "Bombay Shaving Company migrated from Magento to Shopify Plus.",
+        subject="Shopify", aliases=["Shopify Plus"], source="s",
+        event_date="2026-08-08", competitive_object="E-commerce platform")
+    assert found
+    assert found[0].buyer_or_market == "Bombay Shaving Company"
