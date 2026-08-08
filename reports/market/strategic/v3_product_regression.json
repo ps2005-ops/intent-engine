@@ -1,0 +1,55 @@
+{
+ "contract": "product_regression.v2",
+ "as_of": "2026-08-08",
+ "surface": "https://intent-engine-preview-v3.onrender.com",
+ "subjects": [
+  {
+   "subject": "Shopify",
+   "title": "Shopify \u2014 the decision",
+   "bytes": 30450,
+   "identity_ok": true,
+   "other_subjects": [],
+   "internal_jargon": [],
+   "inflation": [],
+   "dark_block": 3,
+   "focus_fix": 1,
+   "substantive_lines": 45
+  },
+  {
+   "subject": "Datadog",
+   "title": "Datadog \u2014 the decision",
+   "bytes": 28502,
+   "identity_ok": true,
+   "other_subjects": [],
+   "internal_jargon": [],
+   "inflation": [],
+   "dark_block": 3,
+   "focus_fix": 1,
+   "substantive_lines": 28
+  },
+  {
+   "subject": "Stripe",
+   "title": "Stripe \u2014 the decision",
+   "bytes": 28018,
+   "identity_ok": true,
+   "other_subjects": [],
+   "internal_jargon": [],
+   "inflation": [],
+   "dark_block": 3,
+   "focus_fix": 1,
+   "substantive_lines": 35
+  },
+  {
+   "subject": "Brightledger",
+   "title": "Analysis could not be completed",
+   "bytes": 17149,
+   "identity_ok": true,
+   "other_subjects": [],
+   "internal_jargon": [],
+   "inflation": [],
+   "dark_block": 2,
+   "focus_fix": 1,
+   "substantive_lines": 27
+  }
+ ]
+}

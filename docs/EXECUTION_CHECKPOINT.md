@@ -75,6 +75,20 @@ counted, never averaged.
     REASON:  no counterparty publishes a dated action stream
     OWNER-CONTROLLED: no
 
+### Product regression — clean on four live subjects
+
+| subject | outcome | identity | leakage | jargon | inflation |
+|---|---|---|---|---|---|
+| Shopify | full reading | ok | none | none | none |
+| Datadog | full reading | ok | none | none | none |
+| Stripe | full reading | ok | none | none | none |
+| Brightledger | bounded failure | ok | none | none | none |
+
+Zero source-count inflation phrases on any page, and none of 18 internal
+tokens appears. Economic chain re-scored: **toyota** leads at 42, tied with
+honda; weakest link MARGIN->GUIDANCE. Zero-trade learning verified — no
+cycle row carries a trade, order, position or broker field at all.
+
 ### Still executable, not done this run
 
 Founder trust is computed market-side and **not yet consumed by a rendered
