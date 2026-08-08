@@ -4,20 +4,109 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 7.
+Updated 2026-08-08, wave 8.
 
 ## Pinned state
 
 | what | where |
 |---|---|
-| market head | `HEAD of feat/consumption-telemetry` (see git log) |
+| market head | `HEAD of feat/strategic-response-learning` (see git log) |
 | market runtime | **`079128b` — NOT repinned; owner action below** |
 | founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
-| founder preview | `f0a0294` LIVE |
+| founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4145+ passed / 4 skipped / EXIT=0 |
+| market suite | 4333 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
+
+## Wave 8
+
+| slice | evidence it is real |
+|---|---|
+| Object dimensions + query planner | dimension model, planner that may choose where to look |
+| Object-bearing acquisition | 66 live documents, **1 ESTABLISHED object** — the first |
+| Source dependence | 5 "independent-account" events were really **2** |
+| Break proofs 18/18 → **21/21** | four came back NOT_CAUGHT and each named a real defect |
+| ACTION_OBJECT source performance | release_notes moves **last → first** on measurement |
+| Economic chain reassessed | honda KEPT; **stripe falls out of the top five** |
+| Product regression | 4 live subjects; identity, leakage, scaffolding all clean |
+
+### The bottleneck did not move, and that IS the finding
+
+An action's object must come from its own document. Over 66 live documents
+from six families, exactly ONE object reached ESTABLISHED — a named product
+entering named markets. Everything else is PARTIAL or UNKNOWN because the
+document names the thing and not the buyer.
+
+The relevance rerun then found that the one established object is
+**IRRELEVANT** to all three rivalries, for a stated, non-circular reason. So:
+
+    STRATEGIC INTERACTION       0
+    CROSS-ACTOR EXPECTATION     0
+    RESPONSE                    not searched — correctly
+
+Nothing is preregistered because nothing qualified. §9's ordering held: no
+expectation was written, so no response could be searched for one.
+
+### Four break proofs failed first, and that is where the wave paid
+
+- `PRICE_CHANGE`'s row in the dimension table was **asserted by nothing**.
+  Emptying it to `()` left the whole suite green.
+- The `GENERIC_FAMILIES` score penalty sat BELOW the coverage filter and
+  **could never execute**. Its test asked "if the homepage is in the list, is
+  it below pricing?" — and the homepage is never in the list.
+- Two proofs were paired with tests that could not observe them.
+
+### `event_identity.group` read dicts as empty
+
+Every field was read with `getattr`, so the JSONL ledger's dict rows produced
+empty strings, hashed to one core, and folded **249 rows into ONE event** with
+an empty subject. No error — just an answer that looks like a spectacularly
+well-corroborated occurrence. Both shapes now reach the same 155 events,
+asserted, and `event_corroboration` borrows the same reader so the two cannot
+drift apart.
+
+### ACTION_OBJECT source performance, measured
+
+| family | retrieved | actions | established | est/doc |
+|---|---|---|---|---|
+| release_notes | 9 | 89 | **5** | **0.556** |
+| pricing_page | 15 | 12 | 0 | 0.000 |
+| product_launch_page | 15 | 7 | 0 | 0.000 |
+| comparison_page | 12 | 2 | 0 | 0.000 |
+| migration_page | 10 | 0 | 0 | 0.000 |
+| solution_page | 5 | 2 | 0 | 0.000 |
+
+The editorial prior said launch pages name their buyer. They do not. Ranking
+this question by ACTION count would have sent the next budget to pricing
+pages, which returned 12 actions and established nothing. Every family is
+PROVISIONAL against a 20-document floor: this orders the next budget and
+settles nothing.
+
+### Economic chain
+
+Honda remains strongest raw (35) and normalized (22) and is KEPT unmodified.
+Its weakest UNKNOWN link is `ORDERS -> COMPANY_DEMAND`.
+
+What normalization changed is who is behind it: **stripe falls out of the top
+five**, 68% of its rows being further accounts of events already on the
+ledger, against honda's 48% and cloudflare's 9%. What it did not change is
+structure — every link status and weakest link is identical. Dropping a
+duplicate account of a covered stage drops no stage.
+
+### Product regression, live
+
+| subject | outcome |
+|---|---|
+| Shopify | full reading; filing prose, decision, options, falsifier |
+| Cloudflare | reading **withheld**, and says the absence is the finding |
+| Brightledger | no report; 23 sources each named with their own reason |
+| Olo | awaiting source confirmation, four-part failure shape intact |
+
+Identity, cross-company leakage, and multi-actor scaffolding: all clean.
+**One wart:** the awaiting-confirmation page is served with HTTP **400**.
+The page is right; the status says the client erred, and anything polling by
+status code reads a legitimate intermediate state as a bad request.
 
 ### OWNER_ACTION_REQUIRED
 
@@ -234,7 +323,22 @@ in customer stories usually names companies outside it.
 - **BREAK PROOFS** 30/30. Two failed first-pass: one mutation was a no-op
   (`{} or {...}` evaluates to the second dict) and one guard was unreachable
 
-## Remaining queue, highest value first
+## Remaining queue after wave 8, highest value first
+
+1. **A rival document that names its buyer — still.** Six families, 66
+   documents, one established object. The measurement now says WHERE to
+   spend: `release_notes` is the only family that produced one, and it is
+   PROVISIONAL at 9 documents. The next wave should take it past the
+   20-document INDICATIVE floor before concluding anything from 0.556.
+2. **The 74 UNKNOWN objects from release notes.** That family found 89
+   actions and established 5. The other 84 are the largest single pool of
+   near-misses in the corpus and nobody has read why they fail.
+3. **HTTP 400 on the founder awaiting-confirmation page.** Founder branch,
+   not reached across from this wave.
+4. Announcement-grade retrieval for Magento and BigCommerce, both of which
+   still yield no documents to the newsroom fetch.
+
+## Queue carried from wave 7
 
 1. **A rival document that names its buyer.** The object contract is built
    and measured; what is missing is the SOURCE. Pricing pages, launch pages

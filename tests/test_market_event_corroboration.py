@@ -226,3 +226,38 @@ def test_a_balanced_corpus_leaves_the_plan_alone():
     after = RP.plan(RP.NEEDS_FRESH_OBSERVATION, dependency_classes=balanced)
     assert before.families == after.families
     assert after.health_adjustment == ""
+
+
+def test_corroboration_reads_a_mapping_row_the_same_as_an_object():
+    """The sibling of the event_identity fix, and the reason it matters here.
+
+    These two modules consume the SAME rows. If grouping reads mappings and
+    corroboration does not, a dict-fed ledger groups correctly and then
+    reports every event as a single account with no publisher — a
+    corroboration pass that finds nothing wrong because it read nothing.
+    """
+    class Row:
+        def __init__(self, **kw):
+            self.__dict__.update(kw)
+
+    fields = [
+        dict(evidence_id="ev_1", subject_company="cloudflare",
+             evidence_type="EARNINGS_RESULT", fact="revenue rises 36%",
+             observed_at="2026-08-01", source="https://reuters.com/a",
+             source_role="news_report"),
+        dict(evidence_id="ev_2", subject_company="cloudflare",
+             evidence_type="EARNINGS_RESULT",
+             fact="revenue rises 36%, filing shows",
+             observed_at="2026-08-02", source="https://sec.gov/b",
+             source_role="regulatory_filing"),
+    ]
+    event = EI.group(fields)[0]
+    as_dicts = EC.assess(event, fields)
+    as_objects = EC.assess(EI.group([Row(**f) for f in fields])[0],
+                            [Row(**f) for f in fields])
+    assert as_dicts.standing == as_objects.standing
+    assert as_dicts.accounts == as_objects.accounts == 2
+    assert as_dicts.effective_accounts == as_objects.effective_accounts
+    assert as_dicts.publishers == as_objects.publishers
+    # And it actually READ them: an empty read would report no publishers.
+    assert as_dicts.publishers and all(as_dicts.publishers)

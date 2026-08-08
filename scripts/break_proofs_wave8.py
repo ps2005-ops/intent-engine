@@ -99,11 +99,20 @@ PROOFS = [
 
     ("9b. a dict row reads as empty and every row folds into one event",
      S / "event_identity.py",
+     "    get = (item.get if isinstance(item, Mapping)",
+     "    get = (item.get if False",
+     f"{EI}::test_a_mapping_row_groups_the_same_as_an_object_row"),
+
+    # `_field` is the reader event_corroboration borrows, and `group` no
+    # longer uses it — so it needs its own proof or the two modules could
+    # drift apart again with nothing red.
+    ("9c. corroboration's borrowed reader goes blind to mappings",
+     S / "event_identity.py",
      "    if isinstance(item, Mapping):\n"
      "        return str(item.get(name, \"\") or \"\")",
      "    if False:\n"
      "        return str(item.get(name, \"\") or \"\")",
-     f"{EI}::test_a_mapping_row_groups_the_same_as_an_object_row"),
+     f"{EC}::test_corroboration_reads_a_mapping_row_the_same_as_an_object"),
 
     # --- 10. corroboration is never a later test -----------------------
     ("10. corroboration resolves the expectation its event opened",

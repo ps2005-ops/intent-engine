@@ -43,7 +43,10 @@ import collections
 import re
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Mapping
 from urllib.parse import urlparse
+
+from . import event_identity as EI
 
 CONTRACT = "event_corroboration.v1"
 
@@ -83,13 +86,29 @@ _AGGREGATORS = frozenset({
 })
 
 
+def _field(row, name: str, default: str = "") -> str:
+    """Shape-agnostic read, shared with `event_identity`.
+
+    These two modules consume the SAME rows, so if one reads mappings and
+    the other does not, a dict-fed ledger silently becomes 155 single-account
+    events with no publisher — corroboration that reports nothing wrong.
+    """
+    return EI._field(row, name) or default
+
+
+def _flag(row, name: str) -> bool:
+    if isinstance(row, Mapping):
+        return bool(row.get(name, False))
+    return bool(getattr(row, name, False))
+
+
 def publisher_of(row) -> str:
     """Who actually published this, not who redirected to it.
 
     The host is the aggregator for over half the corpus, so the headline's
     own trailing attribution is preferred where it exists.
     """
-    fact = str(getattr(row, "fact", "") or "")
+    fact = _field(row, "fact")
     hit = _ATTRIBUTION.search(fact.strip())
     if hit:
         candidate = hit.group(1).strip().strip(".").lower()
@@ -97,7 +116,7 @@ def publisher_of(row) -> str:
         # is not, and the corpus contains several of those.
         if len(candidate.split()) <= 4 and not candidate.endswith(" of"):
             return candidate
-    host = urlparse(str(getattr(row, "source", "") or "")).hostname or ""
+    host = urlparse(_field(row, "source")).hostname or ""
     return host.lower().replace("www.", "")
 
 
@@ -109,23 +128,23 @@ def _tokens(text: str) -> set:
 def classify(row_a, row_b) -> Tuple[str, str]:
     """How dependent two accounts of one event are, and why."""
     pub_a, pub_b = publisher_of(row_a), publisher_of(row_b)
-    role_a = str(getattr(row_a, "source_role", "") or "")
-    role_b = str(getattr(row_b, "source_role", "") or "")
-    src_a = str(getattr(row_a, "source", "") or "")
-    src_b = str(getattr(row_b, "source", "") or "")
+    role_a = _field(row_a, "source_role")
+    role_b = _field(row_b, "source_role")
+    src_a = _field(row_a, "source")
+    src_b = _field(row_b, "source")
 
     if src_a and src_a == src_b:
         return SAME_ORIGIN, "the same URL, read twice"
     if pub_a and pub_a == pub_b:
         return SAME_ORIGIN, f"both published by {pub_a}"
 
-    fact_a = _tokens(str(getattr(row_a, "fact", "") or ""))
-    fact_b = _tokens(str(getattr(row_b, "fact", "") or ""))
+    fact_a = _tokens(_field(row_a, "fact"))
+    fact_b = _tokens(_field(row_b, "fact"))
     overlap = (len(fact_a & fact_b) / len(fact_a | fact_b)) if (
         fact_a | fact_b) else 0.0
 
-    self_a = bool(getattr(row_a, "self_authored", False))
-    self_b = bool(getattr(row_b, "self_authored", False))
+    self_a = _flag(row_a, "self_authored")
+    self_b = _flag(row_b, "self_authored")
     if (self_a != self_b) and overlap >= 0.6:
         return DERIVED, (
             "one account is the company's own and the other repeats its "
@@ -200,8 +219,7 @@ def assess(event, rows: Sequence) -> EventCorroboration:
     rows = list(rows)
     publishers = tuple(dict.fromkeys(publisher_of(r) for r in rows if
                                      publisher_of(r)))
-    roles = tuple(dict.fromkeys(str(getattr(r, "source_role", "") or "")
-                                for r in rows))
+    roles = tuple(dict.fromkeys(_field(r, "source_role") for r in rows))
     classes: Dict[str, int] = collections.Counter()
     contribution = 1.0 if rows else 0.0
     for index in range(len(rows)):
@@ -216,8 +234,7 @@ def assess(event, rows: Sequence) -> EventCorroboration:
                     for other in range(index)), default=0.0)
         contribution += best
 
-    numbers = [set(_NUMBER.findall(str(getattr(r, "fact", "") or "")))
-               for r in rows]
+    numbers = [set(_NUMBER.findall(_field(r, "fact"))) for r in rows]
     shared = set.intersection(*numbers) if numbers and all(numbers) else set()
     union = set().union(*numbers) if numbers else set()
     conflicting = tuple(sorted(union - shared)) if len(rows) > 1 else ()
@@ -233,8 +250,8 @@ def assess(event, rows: Sequence) -> EventCorroboration:
         standing, diversity = DEPENDENT_ACCOUNTS, "SAME_ORIGIN_OR_DERIVED"
 
     return EventCorroboration(
-        event_id=getattr(event, "event_id", ""),
-        subject=getattr(event, "subject", ""),
+        event_id=_field(event, "event_id"),
+        subject=_field(event, "subject"),
         accounts=len(rows), independent_accounts=independent,
         effective_accounts=contribution, source_roles=roles,
         publishers=publishers, source_diversity=diversity,

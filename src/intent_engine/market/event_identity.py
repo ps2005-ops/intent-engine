@@ -142,29 +142,43 @@ def _field(item, name: str) -> str:
     return str(getattr(item, name, "") or "")
 
 
+#: A row's fields, read ONCE. Dispatching on the row's shape per field made
+#: this module 20% slower over the ledger for no information gain — the shape
+#: cannot change between two reads of the same row.
+_Read = collections.namedtuple(
+    "_Read", "subject evidence_type fact observed_at evidence_id source "
+             "source_role")
+
+
+def _read(item) -> "_Read":
+    get = (item.get if isinstance(item, Mapping)
+           else lambda name, _d="": getattr(item, name, ""))
+    return _Read(*(str(get(name, "") or "") for name in (
+        "subject_company", "evidence_type", "fact", "observed_at",
+        "evidence_id", "source", "source_role")))
+
+
 def group(evidence: Sequence) -> Tuple[Event, ...]:
     """Fold evidence rows into events. No row is merged away."""
-    buckets: Dict[str, List] = collections.defaultdict(list)
+    buckets: Dict[str, List[_Read]] = collections.defaultdict(list)
     for item in evidence:
-        subject = _field(item, "subject_company")
-        evidence_type = _field(item, "evidence_type")
-        fact = _field(item, "fact")
-        if not (subject or evidence_type or fact):
+        row = _read(item)
+        if not (row.subject or row.evidence_type or row.fact):
             raise ValueError(
                 "an evidence row supplied no subject, no evidence type and "
                 "no fact, so it cannot identify an occurrence: rows of this "
                 "shape would all fold into a single empty event")
-        buckets[event_core(subject, evidence_type, fact)].append(item)
+        buckets[event_core(row.subject, row.evidence_type, row.fact)].append(row)
 
     out: List[Event] = []
     for core, rows in buckets.items():
-        rows = sorted(rows, key=lambda r: _field(r, "observed_at")[:10])
+        rows = sorted(rows, key=lambda r: r.observed_at[:10])
         # Split a bucket whose members are far apart in time: same wording,
         # different quarter, is two events.
-        window: List = []
-        anchor = _date(_field(rows[0], "observed_at"))
+        window: List[_Read] = []
+        anchor = _date(rows[0].observed_at)
         for row in rows:
-            when = _date(_field(row, "observed_at"))
+            when = _date(row.observed_at)
             if window and anchor and when and \
                     (when - anchor).days > SAME_EVENT_WINDOW_DAYS:
                 out.append(_event(core, window))
@@ -178,14 +192,13 @@ def group(evidence: Sequence) -> Tuple[Event, ...]:
 def _event(core: str, rows: Sequence) -> Event:
     return Event(
         event_id="evt_" + hashlib.sha256(
-            (core + _field(rows[0], "observed_at")[:10]
-             ).encode()).hexdigest()[:14],
-        subject=_field(rows[0], "subject_company"),
-        evidence_type=_field(rows[0], "evidence_type"),
-        first_seen=_field(rows[0], "observed_at")[:10],
-        evidence_ids=tuple(_field(r, "evidence_id") for r in rows),
-        sources=tuple(dict.fromkeys(_field(r, "source") for r in rows)),
-        source_roles=tuple(_field(r, "source_role") for r in rows),
+            (core + rows[0].observed_at[:10]).encode()).hexdigest()[:14],
+        subject=rows[0].subject,
+        evidence_type=rows[0].evidence_type,
+        first_seen=rows[0].observed_at[:10],
+        evidence_ids=tuple(r.evidence_id for r in rows),
+        sources=tuple(dict.fromkeys(r.source for r in rows)),
+        source_roles=tuple(r.source_role for r in rows),
         core=core)
 
 
