@@ -4,7 +4,81 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 11.
+Updated 2026-08-08, wave 12.
+
+## Wave 12 — production writes, and the reader stops being misled
+
+### PRIORITY 1 DONE — the nightly cycle persists what it accepts
+
+Wave 11 built `record_relationship`; **nothing called it**. The missing line
+was in `source_acquisition_step`: `accepted` went into
+`payload["relationships"]` — a run report — and nowhere else. Six waves of
+discovery landed in a JSON file the next process never read.
+
+It writes AFTER the measured verdict, so a family that did not reach
+INTEGRATE contributes nothing. Proven the only way that counts:
+
+    cycle runs → process exits → FRESH process loads the edge
+    second identical cycle → no second edge
+
+The summary carries `persistence_gap` = accepted − persisted − already-held,
+which must be zero on a real run.
+
+`knowledge_retention` gains **DISCOVERED_NOT_PERSISTED** — the state wave 11
+could not express. Its audit had said "a write path exists" and been
+satisfied while production forgot four rivalries a night. A quiet night
+(nothing accepted) is explicitly not a gap.
+
+### FOUNDER EVIDENCE TRUST — done, and it moves weight not just words
+
+The market layer has known since wave 8 that 133 of 155 events are
+same-origin. **None of it had ever reached a reader.**
+
+| | |
+|---|---|
+| rows a page could have called "sources" | **295** |
+| actual observations | **163** |
+| inflation avoided | **132 (45%)** |
+
+Weight is computed FIRST and the sentence derived from it, so the two cannot
+disagree — changing only wording would leave the belief maturing on three
+copies while the prose said otherwise. Dependent re-reporting weighs exactly
+what a single source weighs, **not slightly more**.
+
+A reader gets ordinary words: *"Several reports trace back to the same
+underlying announcement, so we treat them as one observation rather than
+independent confirmation."* A reader never gets SAME_ORIGIN, effective-account
+counts or a dependency class — asserted across every standing.
+
+### The operator report finally shows the split
+
+`learning_health_step` now persists ECONOMIC_KNOWLEDGE_GAIN,
+SYSTEM_CAPABILITY_GAIN, CALIBRATION_GAIN and FOUNDER_UTILITY_GAIN, with
+KNOWLEDGE_RETENTION beside them and never inside. A cycle that accepts four
+relationships and persists none reads DEGRADED, gap 4, economic gain **0**.
+
+### BLOCKER 3 HOLDS — measured per actor now, not asserted
+
+| actor | retrieved | actions | orderable | standing |
+|---|---|---|---|---|
+| Shopify | 1 | 7 | **7** | OBSERVABLE |
+| Salesforce | 2 | 2 | 1 | THIN |
+| Adobe Commerce | 1 | 0 | 0 | NOT_OBSERVABLE |
+| BigCommerce | 2 | 0 | 0 | NOT_OBSERVABLE |
+
+Salesforce's single orderable action belongs to a **third party**
+(Missionforce) and concerns national security, not commerce — so it is not
+relevant to the rivalry. Adobe Commerce's release-note page is a table of
+contents. No two-sided timeline, therefore no sequence, no interaction, no
+preregistration.
+
+### Not reached in wave 12
+
+§10-§17 (sequences, interaction, preregistration, response watch) blocked on
+blocker 3. §23 (counterfactual adjudication retention), §25 (near-miss
+priorities), §26 (source routing), §27 (SUPPLIES/DEPENDS_ON), §28 (chain
+re-run), §29 (macro guard), §30 (product regression) and §31 (falsifier)
+were not run.
 
 ## Wave 11 — both blockers broken, and a third one located
 
@@ -291,13 +365,13 @@ exists so that improvement can never again be reported as knowledge.
 | what | where |
 |---|---|
 | market head | `HEAD of feat/strategic-response-learning` (see git log) |
-| wave-11 break proofs | **55/55** through the hardened harness |
+| wave-12 break proofs | **65/65** through the hardened harness |
 | market runtime | **`079128b` — NOT repinned; owner action below** |
 | founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
 | founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4458 passed / 4 skipped / EXIT=0 |
+| market suite | 4480 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
 ## Wave 8
@@ -610,6 +684,20 @@ in customer stories usually names companies outside it.
   extraction over 249 rows is 3.73 ms. No regression above 10%
 - **BREAK PROOFS** 30/30. Two failed first-pass: one mutation was a no-op
   (`{} or {...}` evaluates to the second dict) and one guard was unreachable
+
+## Remaining queue after wave 12, highest value first
+
+1. **A dated action stream for ANY counterparty.** Measured per actor now:
+   Shopify 7 orderable, Salesforce 1 (a third party's, irrelevant), Adobe
+   and BigCommerce 0. Everything from sequences to preregistration waits on
+   this one number moving for a second company. Try investor-relations feeds
+   and dated press wires rather than more product surfaces.
+2. **Counterfactual adjudication retention** — still LOST in the audit.
+3. **Wire evidence_trust into the Founder surface.** The market-side
+   translation exists and is measured; no rendered page consumes it yet, so
+   the 45% inflation is still avoidable rather than avoided in product.
+4. **SUPPLIES / DEPENDS_ON coverage** — the chain's UNKNOWN links are all
+   upstream of the company.
 
 ## Remaining queue after wave 11, highest value first
 
