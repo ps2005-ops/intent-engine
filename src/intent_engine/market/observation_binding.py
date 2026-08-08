@@ -124,7 +124,8 @@ def _evidence_direction(item: ME.MicroEvidence) -> str:
 
 
 def bind(expectations: Sequence[EXP.ExpectedObservation],
-         evidence: Sequence[ME.MicroEvidence], *, as_of: str
+         evidence: Sequence[ME.MicroEvidence], *, as_of: str,
+         event_index: Optional[Dict[str, str]] = None
          ) -> Tuple[Dict[str, dict], Dict[str, int]]:
     """Build the `observations` mapping `learning_cycle.run` already accepts.
 
@@ -140,8 +141,11 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
     # One occurrence, many accounts. An expectation opened by one report of
     # an event must not be tested by another report of the SAME event, and
     # the fact fingerprint cannot see that: two outlets write it differently.
-    events = EI.group(evidence)
-    event_of = EI.index(events)
+    # Grouping 249 rows costs ~5ms and does not change between calls in a
+    # cycle, so a caller that binds more than once computes it once. The
+    # fallback keeps every existing call site working unchanged.
+    event_of = (event_index if event_index is not None
+                else EI.index(EI.group(evidence)))
     corroboration: Dict[str, int] = collections.Counter()
     by_subject: Dict[str, List[ME.MicroEvidence]] = collections.defaultdict(list)
     for item in evidence:

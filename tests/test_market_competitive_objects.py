@@ -138,9 +138,12 @@ def test_an_adjacent_workflow_never_reaches_strong():
 
 
 def test_shared_vacuous_words_do_not_create_overlap():
+    """Sharing "enterprise" and "platform" is sharing nothing. Asserting
+    only "not STRONG" would pass with the vacuous filter removed, since
+    those words produce ADJACENT rather than STRONG either way."""
     got, _ = pull("Salesforce launched checkout for enterprise retailers.")
     kind, _ = CO.overlap(got, "enterprise platform technology")
-    assert kind != CO.STRONG
+    assert kind == CO.NONE
 
 
 def test_no_object_means_no_overlap():

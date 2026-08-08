@@ -4,7 +4,7 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 6.
+Updated 2026-08-08, wave 7.
 
 ## Pinned state
 
@@ -28,6 +28,62 @@ cd /Users/prathamsharma/intent-engine-market && git checkout <latest market SHA>
 Refused by the permission classifier in waves 4 and 5. Not retried further,
 per instruction. The runtime therefore still runs `079128b` and does not run
 the wave-4 or wave-5 work.
+
+## Wave 7
+
+| slice | evidence it is real |
+|---|---|
+| CompetitiveObject from the document | precision 1.0 on a shaped corpus; 5 live actions, **0 ESTABLISHED** |
+| The three items wave 6 owed | routing by question type, competitor VOI, founder multi-actor view |
+| Event identity | 249 rows → 155 events; **5 with independent accounts** |
+| Wave-7 break proofs | **22/22** through the hardened harness |
+
+### The object must come from the document
+
+`competitive_objects.extract` has NO parameter through which an object can
+be supplied — asserted on the signature — and reads neither the universe nor
+the curated list. ESTABLISHED needs TWO axes: a what and a who. A product
+with no buyer could be sold to anybody.
+
+Live: 5 real actions survive the tightened announcement patterns (16 → 5).
+Of those, **0 ESTABLISHED, 1 PARTIAL, 4 UNKNOWN.** Interactions stay at zero
+for the most precise reason yet — not "we don't watch the rival", not "no
+actions exist", but "no action names both what it contests and who is
+choosing".
+
+Relevance now runs on `overlap`, and the string comparison against the
+action's own label is DELETED: keeping it would have reintroduced exactly
+what the module refuses to trust. ADJACENT never reaches RELEVANT.
+
+### Event identity — corroboration is not a later outcome
+
+249 evidence rows describe **155 occurrences**. 49 have several accounts; 5
+are corroborated across different source ROLES.
+
+Figures are the key and period markers are not figures. Keying on "Q2" as
+though it were a number split accounts of one print; excluding period
+markers took the ledger from 170 events to 155 and surfaced the 5
+independent-account events, up from zero.
+
+No row is merged away. The ledger can now say "three independent sources
+corroborated the opening event and none counted as a later outcome".
+
+One contract detail: the observation payload IS `reconcile`'s argument
+list, so a corroboration count added there becomes a keyword argument. It
+lives in the refusal telemetry instead.
+
+### Performance
+
+| stage | ms |
+|---|---|
+| action-object extraction | 0.015 |
+| event identity (249 rows) | 4.93 |
+| observation binding, index supplied | 1.24 |
+| observation binding, recomputing | 6.25 |
+
+Binding regressed 1.2 → 6.3 ms because event grouping ran inside it. `bind`
+now accepts a precomputed `event_index`; the fallback keeps every existing
+call site working.
 
 ## Wave 6
 
@@ -180,13 +236,17 @@ in customer stories usually names companies outside it.
 
 ## Remaining queue, highest value first
 
-1. **An action whose competitive object its own document establishes.**
-   Rivals are now observable and their actions are retrievable; what is
-   missing is a document that says what a given action is CONTESTING.
-   Everything from strategic interactions onward waits on that one field.
-2. **Announcement-grade sources for rivals.** Salesforce's blog is
-   narrative; a newsroom or IR feed would carry announcements. Magento and
-   BigCommerce yielded no documents at all to the two-hop fetch.
+1. **A rival document that names its buyer.** The object contract is built
+   and measured; what is missing is the SOURCE. Pricing pages, launch pages
+   and migration pages say who a thing is for. A rival's blog does not, and
+   that is where all 5 live actions came from. `ACTION_OBJECT` already
+   routes to the right families — nothing fetches them yet.
+2. **Announcement-grade retrieval for Magento and BigCommerce**, both of
+   which yielded zero documents to the two-hop newsroom fetch.
+3. **The historical ledger still carries pre-fix duplicate rows**, so its
+   measured self-test rate stays 0.857. The fix is prospective and
+   append-only doctrine forbids rewriting; a ledger written under occurrence
+   identity measures 0.400.
 3. **self_test_rate is 0.400**, down from 0.857 and still high. The remaining
    classes are wire duplicates and aggregator headlines, which are correlated
    evidence rather than duplicates and need the design-effect penalty, not

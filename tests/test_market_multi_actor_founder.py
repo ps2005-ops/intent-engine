@@ -42,9 +42,16 @@ def test_one_family_scores_differently_per_question():
 
 
 def test_a_familys_score_for_another_question_cannot_rank_it_here():
-    got = RP.plan(RP.NEEDS_GOVERNMENT_BUYER, performance=REAL)
-    assert got.families == ("government_award",)
-    assert "customer_case_study" in got.excluded
+    """Case studies hold three records. Without narrowing, whichever landed
+    last in the dict ranks the family — and the last one is ACTION_OBJECT at
+    0.000, which would push the best source for a named customer down."""
+    got = RP.plan(RP.NEEDS_CUSTOMER, performance=REAL)
+    assert "0.500" in got.reasons["customer_case_study"]
+    assert "0.000" not in got.reasons["customer_case_study"]
+
+    other = RP.plan(RP.NEEDS_GOVERNMENT_BUYER, performance=REAL)
+    assert other.families == ("government_award",)
+    assert "customer_case_study" in other.excluded
 
 
 def test_the_action_object_question_routes_to_document_classes_that_name_buyers():
@@ -237,6 +244,9 @@ def test_an_unestablished_object_moves_monitoring_and_nothing_else():
 def test_an_established_object_moves_risk_but_never_pricing():
     got = MAV.decision_impact(view(), object_standing="ESTABLISHED")
     assert "competitive_risk" in got["changed"]
+    # Asserting only that it appears in `unchanged` would pass while it ALSO
+    # appeared in `changed`; the field must be absent from `changed`.
+    assert "pricing_watch" not in got["changed"]
     assert "pricing_watch" in got["unchanged"]
     assert "until a pricing action is observed" in got["reason"]
 
