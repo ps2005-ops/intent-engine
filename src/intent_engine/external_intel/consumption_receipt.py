@@ -135,7 +135,8 @@ def acknowledge_context(root, *, company_id: str, analysis_id: str,
                         analysis_started_at: str = "",
                         analysis_as_of: str = "",
                         rendered_blocks: int = 0,
-                        surface: str = "") -> None:
+                        surface: str = "",
+                        decision_impact: Optional[dict] = None) -> None:
     """Record how far one dossier got in one analysis.
 
     Called once per analysis, after the external context is built, because
@@ -205,3 +206,14 @@ def acknowledge_context(root, *, company_id: str, analysis_id: str,
         emit(root, stage=RENDERED_TO_FOUNDER,
              strategic_content_used=rendered_blocks,
              surface=surface or "analysis", **common)
+        # DECISION_RELEVANT only when a semantic decision field actually
+        # moved AND the move is attributable to market evidence. Passing
+        # a falsey impact is the normal case and must stay normal: a
+        # dossier that was read and changed nothing is a real, common
+        # and honest outcome, not a failure to be papered over.
+        if decision_impact and decision_impact.get("changed"):
+            emit(root, stage=DECISION_RELEVANT,
+                 strategic_content_used=len(
+                     decision_impact.get("impact_types") or ()),
+                 surface=str(decision_impact.get("materiality") or ""),
+                 **common)

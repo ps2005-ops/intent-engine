@@ -2936,11 +2936,27 @@ class WebApp:
             # the overstatement this telemetry exists to prevent.
             rendered = len([b for b in ep.reasoning_pack(context)["blocks"]
                             if b.get("context") == ep.STRATEGIC])
+            # DECISION_RELEVANT is decided by a deterministic comparison of
+            # the SAME analysis with and without the dossier, over semantic
+            # fields rather than prose. Comparing two generations would
+            # measure sampling noise: run the same analysis twice with no
+            # dossier at all and the wording differs.
+            from intent_engine.external_intel import decision_impact as _di
+            without = ep.build_context(
+                market=market, macro=macro or (),
+                competitors=competitors or (), strategic=None, as_of=today)
+            impact = _di.assess(
+                analysis_id=run_id, company_id=_sc.company_key(name),
+                dossier_revision=str(getattr(strategic, "as_of", "") or ""),
+                before=_di.semantic_state(without),
+                after=_di.semantic_state(context),
+                provenance=_di.evidence_of(context))
             cr.acknowledge_context(
                 self._runtime_root, company_id=_sc.company_key(name),
                 analysis_id=run_id, strategic=strategic,
                 has_strategic=context.has_strategic, analysis_as_of=today,
-                rendered_blocks=rendered, surface="analysis")
+                rendered_blocks=rendered, surface="analysis",
+                decision_impact=impact.as_dict() if impact.changed else None)
         except Exception:  # noqa: BLE001 - see above
             _LOG.warning("consumption receipt not written for %s", run_id)
 
