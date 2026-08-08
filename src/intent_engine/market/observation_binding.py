@@ -134,7 +134,15 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
     who cannot tell "no evidence arrived" from "the family is not falsifiable"
     cannot tell patience from a bug.
     """
+    from . import event_identity as EI
+
     refused: Dict[str, int] = collections.Counter()
+    # One occurrence, many accounts. An expectation opened by one report of
+    # an event must not be tested by another report of the SAME event, and
+    # the fact fingerprint cannot see that: two outlets write it differently.
+    events = EI.group(evidence)
+    event_of = EI.index(events)
+    corroboration: Dict[str, int] = collections.Counter()
     by_subject: Dict[str, List[ME.MicroEvidence]] = collections.defaultdict(list)
     for item in evidence:
         subject = (item.subject_company or "").strip().lower()
@@ -174,6 +182,16 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
             if _fingerprint(item.fact) in basis_text:
                 refused["restates_the_evidence_that_opened_it"] += 1
                 continue
+            # Different wording, different outlet, SAME occurrence. This is
+            # corroboration of the opener and is counted as such rather than
+            # discarded — throwing it away would cost the source diversity
+            # that makes the opener worth anything.
+            opener_events = [event_of.get(i) for i in basis]
+            if EI.role_of(event_of.get(item.evidence_id),
+                          [e for e in opener_events if e]) == EI.CORROBORATES:
+                refused["corroborates_the_opening_event"] += 1
+                corroboration[exp.expectation_id] += 1
+                continue
             if item.observed_at[:10] < exp.preregistered_at[:10]:
                 continue
             if item.evidence_type not in relevant_types:
@@ -190,13 +208,20 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
             continue
 
         item, direction = found
+        # NOTE: this dict is `expectation.reconcile`'s argument list. A key
+        # added here becomes a keyword argument there, so corroboration
+        # counts live in the refusal telemetry instead — where the health
+        # layer reads them and where they cannot break a contract.
         observations[exp.expectation_id] = {
             "observed_direction": direction,
             "observed_at": item.observed_at[:10],
             "evidence_ids": (item.evidence_id,),
             "binding": BINDING_VERSION,
         }
-    return observations, dict(refused)
+    out = dict(refused)
+    if corroboration:
+        out["corroborating_accounts"] = sum(corroboration.values())
+    return observations, out
 
 
 def summarise(observations: Dict[str, dict], refused: Dict[str, int],
