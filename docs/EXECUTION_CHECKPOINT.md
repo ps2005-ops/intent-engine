@@ -1,195 +1,154 @@
-# Execution checkpoint — V3 continuous economic intelligence
+# Execution checkpoint — V3 multi-actor economic intelligence
 
 Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-07, wave 4.
+Updated 2026-08-07, wave 5.
 
 ## Pinned state
 
 | what | where |
 |---|---|
-| market head | `f85e490` (branch `feat/consumption-telemetry`) |
-| market runtime | **`079128b` — NOT repinned; see "Owner action" below** |
-| founder preview | `f0a0294` LIVE (branch `feat/consumption-emitter`) |
+| market head | `HEAD of feat/consumption-telemetry` (see git log) |
+| market runtime | **`079128b` — NOT repinned; owner action below** |
+| founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
+| founder preview | `f0a0294` LIVE |
 | production `main` | `119d345` — **untouched, do not target** |
-| PAPER | structurally enforced in all three launchd plists (`MARKET_TRADING_MODE=PAPER`) |
-| market suite | 4052 passed / 4 skipped / 10 deselected / EXIT=0 |
-| founder suite | 4573 passed / 16 skipped / EXIT=0 |
+| PAPER | structurally enforced in all three launchd plists |
+| market suite | 4145+ passed / 4 skipped / EXIT=0 |
+| founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
-### Owner action required
+### OWNER_ACTION_REQUIRED
 
-`git checkout f85e490` in `/Users/prathamsharma/intent-engine-market` was
-refused by the permission classifier twice. The runtime therefore still runs
-`079128b` and does NOT yet run the wave-4 work. The commit is already fetched
-and the worktree is otherwise clean; one command completes it.
+```bash
+cd /Users/prathamsharma/intent-engine-market && git checkout <latest market SHA>
+```
 
-## Completed, waves 1–4
+Refused by the permission classifier in waves 4 and 5. Not retried further,
+per instruction. The runtime therefore still runs `079128b` and does not run
+the wave-4 or wave-5 work.
 
-| # | slice | commit | evidence it is real |
-|---|---|---|---|
-| 1–15 | see git history through `079128b` | — | waves 1–3 |
-| 16 | Knowledge decay + the four unwired views | `f1ea2a1` | 51 beliefs, 0 stale, every zero refused for a named reason |
-| 17 | Economic chain, counterfactual memory, causal calibration | `0feb274` | honda chain 4 KNOWN / 3 UNKNOWN; 5 real episodes |
-| 18 | Learning acceleration, quality-gated | `f567bdd` | DEGRADING on self_test_rate 0.8 |
-| 19 | Counterparty source acquisition | `6af6f5c` | **25 relationships, 34 actors, 3 families, live** |
-| 20 | Wave-4 break proofs | `f85e490` | **35/35**, each demonstrating RED |
+## Wave 5
 
-## The pattern this mission keeps finding
-
-**A correct module, a call site that never supplies its inputs, and a metric
-honestly reporting zero that everyone reads as "nothing has happened yet."**
-
-Six confirmed instances. Wave 4 found the sixth and it was four modules at
-once: `belief_maturity`, `knowledge_decay`, `value_of_information` and
-`causal_episodes` had all been built, tested and reported as shipped, and NO
-operating cycle called any of them. `knowledge_step` now runs all seven
-derived views, in both day and night lists.
-
-**Before building a subsystem, check whether it already exists and is simply
-not wired.** Six for six.
-
-## SOURCE COVERAGE — closed as a diagnosis, open as an engineering target
-
-### Settled, and `counterparty_sources.measure` REFUSES to re-run them
-
-| family | volume | named counterparties |
+| slice | commit | evidence it is real |
 |---|---|---|
-| news headlines | 219 items | ~1 |
-| 10-K / 10-Q | 3,959 sentences | 0 |
-| 8-K + exhibits | 7,247 sentences | 0 |
+| Self-test contamination repaired at its producer | `dbbe41b` | 0.857 → 0.400, zero bindings lost |
+| Strict COMPETES_WITH contract | `8bb55d9` | precision 1.0 on a 10-case negative corpus |
+| Health→action, analogy transfer, cross-layer consistency | `6b0c80b` | the same question plans differently when degraded |
+| Real rivalry + game-theoretic state | `cef4e08` | 3 competitive edges, all with object and buyer |
+| Wave-5 break proofs | this wave | **30/30**, each demonstrating RED |
+| Founder failure-language pin | `c1c1cb8` | live against a site that errors on every path |
 
-### Measured live this wave, against the real 28-company universe
+## THE SELF-TEST RATE HAD A PRODUCER
 
-| family | docs | accepted | /doc | verdict | precision |
-|---|---|---|---|---|---|
-| `government_award` (USASpending) | 64 | 11 | 0.172 | INTEGRATE | ~100% |
-| `customer_case_study` | 22 | 11 | 0.500 | INTEGRATE | ~91% |
-| `partnership_release` | 59 | 3 | 0.051 | INTEGRATE | ~100% |
+`evidence_id_for` hashed `observed_at` — the date the SWEEP RAN — into a
+fact's identity. An unchanged page re-read on three nights became three
+facts. The function's own docstring stated the requirement it was breaking.
 
-**25 accepted relationships, 34 distinct actors, 2 predicate types
-(SELLS_TO 22, PARTNERS_WITH 3).**
+| | before | after |
+|---|---|---|
+| evidence rows | 249 | 173 |
+| self-tests refused | 18 | 2 |
+| self_test_rate | 0.857 | **0.400** |
+| no_readable_direction | 29 | 12 |
+| bindings lost | — | **0** |
 
-Cost: government 16s; case studies 311s; releases 521s. Night-only,
-cadence-gated 1 / 7 / 3 days. Scheduling, not removal.
+Decomposition: 28 `SAME_SOURCE_REPACKAGING`, 3
+`SAME_EVENT_DIFFERENT_HEADLINE`. `observation_binding.diagnose` keeps the
+class breakdown, and every class names a producer upstream of itself.
 
-### The two measurement traps, recorded so they are not re-entered
+A re-read is recorded as an `evidence_seen` sighting — it cannot test a
+belief — and sightings are idempotent on (evidence, date), so a replayed
+session still leaves the ledger byte-identical.
 
-1. **Partnership releases first measured 0.048/doc and the honest conclusion
-   would have been "family rejected".** It was wrong: the adapter was
-   fetching newsroom INDEX pages averaging 700 characters. With the article
-   hop it fetches real releases averaging 8,000. *Measure the retrieval
-   before believing the yield.*
-2. **Both prose families then measured INTEGRATE while their accepted rows
-   contained fabrications** — "P&G SUPPLIES Chain" (from "supply chain"),
-   customers called "How Cocunat" and "Shopify Case Studies". *A yield number
-   that counts fabrications is worse than no number.* Precision ~40% → ~90%.
+## COMPETES_WITH — populated, strictly
 
-## What acquisition did NOT unblock, and why
+A claim with no COMPETITIVE OBJECT is refused. Three real edges:
 
-Interactions are still **0**, now for a precise reason rather than an empty
-graph. Every integrated family is COMPANY-PUBLISHED, and a company names its
-customers and its partners and never its rivals. All 25 edges are `SELLS_TO`
-or `PARTNERS_WITH`; `interaction_binding` needs `COMPETES_WITH`, and
-`knowledge_step.world_model` reports that missing predicate by name.
+| a | b | object | buyer |
+|---|---|---|---|
+| Salesforce | Shopify | E-commerce platform | Alice |
+| Magento | Shopify | E-commerce platform | VIA VAI |
+| Magento | Shopify Plus | E-commerce platform | Bombay Shaving Company |
 
-**The next source must be one where a THIRD PARTY names both sides.** Untried
-and promising: analyst and industry reports naming competitive sets,
-antitrust and merger-review filings (which enumerate rivals by obligation),
-and head-to-head comparison pages.
+| family | docs | claims | /doc |
+|---|---|---|---|
+| customer_case_study | 22 | 3 | 0.136 |
+| comparison_page | 10 | 0 | 0.000 |
 
-## Canonical measured facts
+The vendor's own `/compare` and `/alternatives` pages — the family whose
+editorial purpose is naming the alternative — produced **zero**. Migration
+stories inside customer case studies produced all three.
 
-**NATURAL LEARNING** — canonical informative baseline **5 informative / 3
-confirmed / 2 contradicted**. The old 10/8 number is invalid and must never
-return.
+**The curated list and the corpus disagree completely.** The universe carries
+`shopify.competitors = [amazon, bigcommerce, square]`; none appears in any
+document, and neither discovered rival is on the list. Model knowledge is
+used only as a scoreboard, asserted by test.
 
-**KNOWLEDGE DECAY** — 51 beliefs, 0 stale, 0 retired, and every zero is
-refused for a named reason: 46 `WINDOW_OPEN`, 5 `TESTED`. Three cadences in
-genuine use (120 × 23, 180 × 17, 365 × 11), read off each belief's own
-`review_interval_days`; there is no module-level day count that governs any
-belief. Next decay window **2026-12-03**. Aged 130 / 200 / 400 / 800 days the
-same ledger yields 18 / 35 / 46 / 46 eligible, and the 5 tested beliefs never
-decay at any age.
+Built evidence types: DIRECT_COMPETITOR_STATEMENT,
+CUSTOMER_ALTERNATIVE_EVALUATION, REPLACEMENT_MIGRATION, PRODUCT_SUBSTITUTE.
+Four more are specified and NOT built, each listed with what it would need.
 
-**BELIEF MATURITY** — 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING / 0 STALE.
+## WHY INTERACTIONS ARE STILL ZERO — and it is a new reason
 
-**HIDDEN STATES** — 16 companies tracked, 54 observations, competing postures
-preserved.
+    wave 4   no_competitor_relationships_available
+    wave 5   action_does_not_provoke_a_response   (207 actions examined)
 
-**ECONOMIC CHAIN** — `honda`, scored not chosen (27 observations, 18 from
-filings, 1 resolved expectation). 4 of 7 stages KNOWN; MACRO_STATE,
-CUSTOMER_STATE and ORDERS have nothing in the ledger at all. Weakest link
-`ORDERS → COMPANY_DEMAND`. No link is ever OBSERVED and no constructor can
-emit one. Honda's own filing supplies the competing explanation for its
-margin move ("due mainly to the impact of EV-related losses…"), which raises
-the alternative without promoting the link.
+The rivals the corpus names — Magento, Salesforce — are companies this
+engine does not track. An interaction needs an action from one side and a
+response from the other, so a rivalry with ONE observed party cannot produce
+one. `world_model.rivals_outside_the_observed_universe` names them.
 
-**COUNTERFACTUAL MEMORY** — 5 episodes, 3 strengthened, 2 weakened. Both
-lessons are about the CLASSIFIER rather than the companies: a cost signal
-sharing a sentence with a revenue signal must not open a demand belief
-(cloudflare); price language must not reach a demand family (duolingo).
+**The bottleneck is now OBSERVATION OF THE NAMED RIVAL.** Two routes:
+add discovered rivals to the tracked universe, or accept that rivalry found
+in customer stories usually names companies outside it.
 
-**CAUSAL CALIBRATION** — 2 UNMEASURABLE / 2 EMERGING / 0 above.
-`ESTABLISHED` is absent from the vocabulary. The ladder is monotone in sample
-size, after a first draft promoted `demand_strengthening` to
-REPEATEDLY_SUPPORTED on three real tests.
+## Standing state
 
-**LEARNING ACCELERATION** — **DEGRADING**. 6 cycles ran the pipeline, 1 was
-the backlog drain and is excluded from every rate, leaving 5. Only `recent`
-(4 cycles) is computable; 7 / 14 / 30 report INSUFFICIENT_HISTORY with the
-real count attached. Driven by `self_test_rate` 0.8 — four of five would-be
-resolutions were the evidence that opened the belief.
-
-**LLM MIGRATION** — `alternative_explanation.v1`. An LLM may PROPOSE; the
-engine owns identity, storage, comparison, testing and retirement. A
-PROPOSED row is never offered downstream, and `record_test` has no argument
-that sets a standing directly.
-
-**PERFORMANCE** — every derived view is sub-millisecond. The seven new ones
-add ~1.1 ms to a cycle: decay 0.26, chain 0.31, acceleration 0.29,
-counterfactual 0.12, causal calibration 0.05. The whole derived block is
-5.71 ms, dominated by pre-existing `learning_health` at 3.76 ms. No
-regression above 10% anywhere. The only expensive addition is source
-acquisition, and it is scheduled rather than removed.
-
-**LIVE (founder preview, `f0a0294`)**
-
-| company | result |
-|---|---|
-| Shopify | full briefing; opening evidence is filing prose; the site's own meta description appears **0** times |
-| Grifols | bounded/limited correctly — 4 usable sources vs 5 needed, 2 evidence kinds vs 3; names exactly what is missing |
-| Brightledger | attempted live; brightledger.io returns HTTP errors on every path. The failure page names each source's specific failure, invents nothing, exposes the targeted retry, and contains no Connectors entity and no cross-company evidence |
+- **BELIEFS** 51 · 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING / 0 STALE
+- **DECAY** cadence-aware, next window 2026-12-03; zero stale is legitimate
+- **CAUSAL CALIBRATION** 2 UNMEASURABLE / 2 EMERGING; ESTABLISHED absent
+- **COUNTERFACTUAL MEMORY** 5 episodes, and one now transfers: the
+  Cloudflare lesson fires on an Etsy headline of the same shape, as an
+  ANALOGY carrying no evidence ids and `is_evidence=False`
+- **CALIBRATION CONSISTENCY** causal caps mechanism caps maturity; the real
+  ledger reads zero incoherent pairs and the guard exists for when it does not
+- **RESEARCH PLANNING** selection by predicate first; DEGRADING on re-reads
+  measurably reorders the same question; ingestion never disabled wholesale
+- **SOURCE PERFORMANCE** three families, all INDICATIVE, none ESTABLISHED
+- **GAME-THEORETIC STATE** `StrategicObjectiveHypothesis` (born WEAK, ≥2
+  alternatives, required expected_next_action) and `ActorResponsePattern`
+  (one episode is a CANDIDATE; a different response CONTRADICTS) both exist
+  and are unpopulated, correctly
+- **PERFORMANCE** wave-5 additions total 9.69 ms/cycle; competitive
+  extraction over 249 rows is 3.73 ms. No regression above 10%
+- **BREAK PROOFS** 30/30. Two failed first-pass: one mutation was a no-op
+  (`{} or {...}` evaluates to the second dict) and one guard was unreachable
 
 ## Remaining queue, highest value first
 
-1. **A source where a THIRD PARTY names both sides** — the only route to
-   `COMPETES_WITH`, and therefore to interactions and cross-actor
-   expectations. Everything downstream of relationships is blocked on this
-   one predicate.
-2. **The self-test rate, 0.8** — the acceleration report's own verdict on the
-   engine. Beliefs are opened and tested by evidence that arrives too close
-   together.
-3. **The two classifier lessons in counterfactual memory** are actionable
-   fixes to `event_patterns` / `belief_formation`, not merely records.
-4. **`CustomerNet`** — one residual case-study false positive (an ASML portal
-   read as a customer). One of eleven.
-5. Cross-actor expectations; the 30-cycle window; Founder consumption of the
-   seven derived views.
+1. **Observation of the named rival.** Everything from strategic interactions
+   onward is blocked on it, and nothing else is.
+2. **`_NOT_RIVALRY` is a whole-sentence filter** and refused 31 sentences.
+   Whole-sentence filters over-reject; it should apply to the matched clause.
+3. **self_test_rate is 0.400**, down from 0.857 and still high. The remaining
+   classes are wire duplicates and aggregator headlines, which are correlated
+   evidence rather than duplicates and need the design-effect penalty, not
+   the dedupe.
+4. Economic chain reassessment against the new relationships; VOI recompute
+   with decision relevance; the 30-cycle acceleration window.
 
 ## Standing rules
 
 - Commit and push every completed slice. Own your worktree path.
-- A break proof only counts if it demonstrates RED before restore. Two waves
-  running, the most valuable finding came from a break proof FAILING while
-  the suite was fully green.
-- Never print a producer's probability as founder confidence. Every market
-  belief carries the 0.586 prior a single evidence item opens one at.
-- No causal edge is ever `OBSERVED`, and none is promoted by a single test.
-- `UNMEASURABLE` is not zero. `INSUFFICIENT_HISTORY` is not zero. Absent
-  telemetry and a measured zero are opposite findings.
+- A break proof only counts if it demonstrates RED before restore. Three
+  waves running, the most valuable finding came from a proof FAILING.
+- No causal edge is ever `OBSERVED`; none is promoted by a single test.
+- `UNMEASURABLE`, `INSUFFICIENT_HISTORY` and `PROVISIONAL` are not zero.
 - Before building a subsystem, check whether it already exists and is simply
-  not wired. Six for six.
-- Integrate a source family on measured yield, never on how promising it
-  sounds — and check the retrieval before believing the yield.
+  not wired. Seven for seven — `market_structure` is the latest.
+- Integrate a source family on measured yield, and check the retrieval before
+  believing the yield.
+- A rivalry with no competitive object is refused. A motive with no
+  alternatives is refused. One response is not a habit.

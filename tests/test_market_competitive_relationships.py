@@ -140,6 +140,12 @@ NEGATIVE = [
      "The agency works with Shopify and works with BigCommerce."),
     ("outperformance",
      "Shopify outperformed BigCommerce shares over the trailing year."),
+    # This one matches a rivalry PATTERN and is still not rivalry: a fund
+    # choosing between two SECURITIES is not a buyer choosing between two
+    # products. It is the only negative case `_NOT_RIVALRY` alone guards,
+    # and without it a competitive claim is emitted.
+    ("securities shortlist",
+     "The fund shortlisted Amazon shares before choosing Shopify stock."),
 ]
 
 
