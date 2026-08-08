@@ -198,6 +198,20 @@ def render_report(ctx) -> Tuple[str, dict]:
         # reported as eleven quiet minds.
         "learning": {k: v for k, v in learning.items() if k != "steps"},
         "learning_health": learning_health,
+        # THE CAUSAL LAYER, WHICH WAS COMPUTED EVERY CYCLE AND THROWN AWAY.
+        # `knowledge_step` derives the economic chain, causal calibration,
+        # counterfactual memory, world model, VOI and belief maturity — and
+        # not one of them appeared in the persisted report, so none of it had
+        # a history and a regime change was structurally unobservable. The
+        # step's own docstring names this defect one level down ("a call site
+        # that never runs it"); this is the same defect one level up, where
+        # the step runs and the record is silent.
+        #
+        # A BOUNDED PROJECTION, not the payload: the chain carries statements
+        # lifted from filings and the candidate list is long, and a report
+        # that grows without limit is how free text gets into a dated
+        # artifact. Counts and standings only.
+        "knowledge": _knowledge_summary(ctx.results.get("knowledge") or {}),
         "health": {k: health.get(k) for k in ("overall", "cycles", "lock",
                                               "scheduler", "storage", "notes")},
         "unmeasurable": {name: reason for name, reason in _POSITION_METRICS},
@@ -553,3 +567,69 @@ def _recommendation(funnel: dict, health: dict) -> str:
         return ("PAUSE FOR ONE ENGINEERING CYCLE — operational health is DOWN; "
                 "the engine cannot run unattended in this state")
     return "CONTINUE OPERATING"
+
+
+def _knowledge_summary(knowledge: dict) -> dict:
+    """The causal layer, reduced to what a dated record should carry.
+
+    Bounded on purpose. The economic chain quotes statements lifted from
+    filings and the candidate list runs to every subject with evidence, so
+    persisting the payload whole would put a document's worth of free text
+    into every daily report — the failure `translation_report.assert_bounded`
+    exists to prevent, arriving through a different door.
+
+    Counts, standings and ids only. Anything a reader needs in full is
+    recomputable from the append-only ledger, which is the actual record.
+    """
+    if not knowledge:
+        return {"present": False,
+                "reason": "the knowledge step produced nothing this cycle"}
+
+    chain = knowledge.get("economic_chain") or {}
+    built = chain.get("chain") or {}
+    macro = knowledge.get("macro_state") or {}
+    voi = knowledge.get("value_of_information") or {}
+    world = knowledge.get("world_model") or {}
+    causal = knowledge.get("causal_calibration") or {}
+    decay = knowledge.get("knowledge_decay") or {}
+
+    return {
+        "present": True,
+        "macro_state": {k: macro.get(k) for k in
+                        ("by_standing", "anchoring", "anchoring_kinds",
+                         "unknown_kinds", "moved", "fetched_this_cycle",
+                         "newly_persisted", "history_rows", "series_failed",
+                         "error")
+                        if macro.get(k) is not None},
+        "economic_chain": {
+            "subject": built.get("subject"),
+            "overall_status": built.get("overall_status"),
+            "known_nodes": built.get("known_nodes"),
+            "unknown_nodes": built.get("unknown_nodes"),
+            "by_link_status": built.get("by_link_status"),
+            "weakest_link": built.get("weakest_link"),
+            "candidates_scored": len(chain.get("candidates") or ()),
+            "error": chain.get("error"),
+        },
+        "causal_calibration": {k: causal.get(k) for k in
+                               ("mechanisms", "tested", "confirmed",
+                                "contradicted", "standing", "error")
+                               if causal.get(k) is not None},
+        "world_model": {k: world.get(k) for k in
+                        ("relationships", "by_predicate", "interactions",
+                         "error")
+                        if world.get(k) is not None},
+        "value_of_information": {
+            "priorities": len(voi.get("priorities") or ()),
+            "by_priority": voi.get("by_priority"),
+            "error": voi.get("error"),
+        },
+        "knowledge_decay": {k: decay.get(k) for k in
+                            ("beliefs", "stale", "retired", "error")
+                            if decay.get(k) is not None},
+        "belief_maturity": {
+            "beliefs": (knowledge.get("belief_maturity") or {}).get("beliefs"),
+        },
+        "note": ("bounded projection; the append-only ledger is the record "
+                 "and every figure here is recomputable from it"),
+    }

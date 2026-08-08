@@ -95,6 +95,13 @@ STRATEGIC_INTERACTION = "strategic_interaction"
 #: history, never a preregistration.
 ACTOR_RESPONSE_EPISODE = "actor_response_episode"
 
+#: One dated figure about one economic condition. DURABLE rather than
+#: re-fetched, because an engine that reads the current value of a series
+#: every cycle and keeps none of them can never see that a regime changed —
+#: it only ever knows what the economy is doing today, which is exactly the
+#: knowledge a world model is supposed to accumulate.
+MACRO_OBSERVATION = "macro_observation"
+
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
@@ -102,7 +109,8 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           CROSS_ACTOR_OUTCOME,
                           COUNTERFACTUAL_ADJUDICATION, FALSIFIER,
                           RESPONSE_WATCH, STRATEGIC_OBJECTIVE,
-                          STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE})
+                          STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
+                          MACRO_OBSERVATION})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -296,6 +304,41 @@ class LearningStore:
                      if r.get("record") == EVIDENCE_SEEN)
 
     # --- relationships ----------------------------------------------------
+
+    def record_macro_observation(self, obs) -> bool:
+        """Persist one dated economic figure. False if already held.
+
+        Idempotent on `observation_id`, which is keyed on the series, the
+        period, the publication date and the value — so re-reading the same
+        figure next cycle appends nothing, while a REVISION of the same period
+        is a different id and is kept alongside the original. That is what
+        makes "what did we believe about Q2 in July" answerable later.
+        """
+        payload = obs.as_dict() if hasattr(obs, "as_dict") else dict(obs)
+        oid = str(payload.get("observation_id") or "")
+        if not oid:
+            raise ValueError(
+                "a macro observation needs its content-keyed id; without one "
+                "every cycle would append the same figure again")
+        if oid in self.macro_observation_ids():
+            return False
+        self._append(MACRO_OBSERVATION, payload)
+        return True
+
+    def macro_observation_ids(self) -> frozenset:
+        return frozenset(str(r.get("observation_id") or "")
+                         for r in self._rows()
+                         if r.get("record") == MACRO_OBSERVATION)
+
+    def macro_observations(self) -> Tuple[dict, ...]:
+        """Every economic figure ever seen, revisions included.
+
+        Revisions are NOT folded away here. A caller that wants the vintage
+        available on a date asks `macro_state.as_known_at`; a caller that
+        wants the history of what the engine believed needs both rows.
+        """
+        return tuple(r for r in self._rows()
+                     if r.get("record") == MACRO_OBSERVATION)
 
     def record_relationship(self, rel) -> bool:
         """Persist one actor relationship. Returns False if already held.

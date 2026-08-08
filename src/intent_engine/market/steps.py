@@ -88,12 +88,47 @@ def research_step(research_fn: Optional[Callable] = None) -> Callable:
         if ctx.dry_run and research_fn is None:
             rows = _offline_rows(ctx.as_of)
             return {"rows": rows, "companies": len(rows), "stub": True,
-                    "errors": 0}
+                    "errors": 0, "macro": {"skipped": "dry run"}}
         fn = research_fn or _live_research
         rows, errors = fn(ctx)
         return {"rows": rows, "companies": len(rows), "stub": False,
-                "errors": errors}
+                "errors": errors, "macro": _macro_sweep(ctx)}
     return step
+
+
+def _macro_sweep(ctx: C.CycleContext) -> dict:
+    """Acquire the economy, and keep it.
+
+    HERE RATHER THAN IN THE KNOWLEDGE STEP. That step is a fold over the
+    append-only ledger and promises the same answer twice on the same input;
+    putting an HTTP call inside it broke that invariant and, less abstractly,
+    put live network traffic into every unit test that touched it.
+
+    PERSISTED, not merely read. An engine that fetches the current value of a
+    series each cycle and keeps none of them only ever knows what the economy
+    is doing today. It could never notice that a regime changed, because it
+    has nothing to compare against — which is the whole point of a world model
+    rather than a dashboard.
+
+    Never raises: a publisher being down is not a reason to fail a cycle, and
+    a failed feed is reported by name rather than appearing as an economy that
+    stopped moving.
+    """
+    from intent_engine.market import learning_store as LS
+    from intent_engine.market import macro_ingest as MI
+
+    try:
+        store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
+        got = MI.collect(retrieved_at=ctx.as_of)
+        stored = sum(1 for o in got["observations"]
+                     if store.record_macro_observation(o))
+        return {"fetched": got["observation_count"],
+                "newly_persisted": stored,
+                "series_attempted": got["series_attempted"],
+                "series_failed": got["series_failed"],
+                "failures": got["failures"]}
+    except Exception as exc:  # noqa: BLE001 - a feed must not fail a cycle
+        return {"error": f"{type(exc).__name__}: {exc}"}
 
 
 def _live_research(ctx: C.CycleContext) -> Tuple[List[dict], int]:
@@ -791,6 +826,30 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     except Exception as exc:  # noqa: BLE001
         payload["counterfactual_memory"] = {"error": str(exc)}
 
+    # THE ECONOMY. Every chain below this was decapitated without it: the
+    # ledger holds only company-scoped evidence, so MACRO_STATE was not merely
+    # unobserved, it was unreachable, and the top link of every subject's
+    # chain sat at UNKNOWN forever.
+    #
+    # READ, never fetched. This step is a FOLD over the append-only ledger and
+    # must give the same answer twice on the same input; a network call here
+    # would break that invariant and put live HTTP inside every unit test that
+    # touches the step. Acquisition is the research step's job, and what it
+    # persisted is what this reads.
+    macro_state = None
+    try:
+        from . import macro_state as MS
+
+        history = [MS.from_dict(r) for r in store.macro_observations()]
+        states = [MS.state_of(kind, history, as_of=ctx.as_of)
+                  for kind in MS.STATE_KINDS]
+        anchoring = [s for s in states if s.anchors]
+        macro_state = anchoring[0] if anchoring else None
+        payload["macro_state"] = {**MS.summarise(states),
+                                  "history_rows": len(history)}
+    except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
+        payload["macro_state"] = {"error": f"{type(exc).__name__}: {exc}"}
+
     try:
         # One chain, for the subject whose evidence can actually carry one.
         # Building a chain per company would produce twenty-seven that say
@@ -798,7 +857,8 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         # the one where the gaps mean something.
         candidates = ECH.score_candidates(rows)
         if candidates:
-            built = ECH.build(rows, subject=candidates[0]["subject"])
+            built = ECH.build(rows, subject=candidates[0]["subject"],
+                              macro=macro_state)
             payload["economic_chain"] = {
                 **ECH.summarise([built]),
                 "chain": built.as_dict(),

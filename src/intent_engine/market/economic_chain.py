@@ -401,8 +401,25 @@ def _stated_cause(text: str) -> str:
 
 
 def build(rows: Sequence[dict], *, subject: str,
-          attributions: Sequence[Tuple[str, str]] = ()) -> EconomicChain:
+          attributions: Sequence[Tuple[str, str]] = (),
+          macro=None) -> EconomicChain:
     """Build one subject's chain from its real evidence, gaps included.
+
+    `macro` is a `macro_state.EconomicState` — the condition this chain hangs
+    from. WITHOUT IT EVERY CHAIN IS DECAPITATED: the ledger only holds
+    company-scoped evidence, so MACRO_STATE had no possible source and stood
+    UNKNOWN on every subject, which pinned the first link at UNKNOWN and the
+    whole chain with it. Measured on the live ledger before this existed:
+    4 known nodes, 3 unknown, and not one SUPPORTED link.
+
+    It is passed in rather than read from `rows` because a macro observation
+    is deliberately not company-scoped. A national figure filed under a
+    company would be read as a fact about that company, which is the exact
+    confusion the macro contract refuses to allow.
+
+    A macro state that does not ANCHOR (hypothesised, or unknown) leaves the
+    node UNKNOWN. Somebody's opinion about the economy is not a measurement of
+    it, and a chain resting on an opinion must not read as a measured one.
 
     `attributions` are (node_type, statement) pairs where the SOURCE DOCUMENT
     ITSELF attributes one node's movement to something. Honda's filing says
@@ -453,6 +470,18 @@ def build(rows: Sequence[dict], *, subject: str,
                                for e in items[:3]),
             observed_at=str(items[0].get("observed_at") or "")[:10]
             if items else "")
+
+    # The economy, if the engine measured it. This REPLACES the placeholder
+    # built above, which can only ever be UNKNOWN: no company-scoped evidence
+    # row describes a national condition, so the top of every chain was
+    # structurally unreachable rather than merely unobserved.
+    if macro is not None and getattr(macro, "anchors", False):
+        seen = macro.observation
+        nodes[MACRO_STATE] = node(
+            node_type=MACRO_STATE,
+            statement=macro.reason or f"{macro.state_kind} was measured",
+            evidence_ids=(seen.observation_id,) if seen else (),
+            observed_at=(seen.reference_period[:10] if seen else ""))
 
     links: List[Link] = []
     for source, target, mechanism, alternative, falsifier in _ROUTE:
