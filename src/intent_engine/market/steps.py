@@ -809,30 +809,95 @@ def _world_model(ctx: C.CycleContext) -> dict:
     from . import interaction_binding as IB
     from . import learning_store as LS
 
+    from . import competitive_relationships as CR
+    from . import learning_store as _LS
+
     acquired = (ctx.results.get("source_acquisition") or {}).get(
         "relationships") or []
     rows = tuple(_rehydrate(r) for r in acquired)
+
+    # Rivalry is extracted separately and under a stricter contract: a
+    # COMPETES_WITH claim needs a competitive object, which no other
+    # predicate does.
+    claims = _competitive_claims(ctx)
+    rows = rows + tuple(c.as_relationship() for c in claims)
     competitors = AR.competitor_map(rows)
     store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
     interactions, refused = IB.bind(
         store.evidence(), industry_of=_industries(),
         competitors_of=competitors)
     by_predicate = dict(collections.Counter(r.predicate for r in rows))
+    # Both ends of a rivalry must be OBSERVED for an interaction to be
+    # possible. The corpus names rivals the engine does not track — Magento,
+    # Salesforce — so a real competitive edge can still leave interactions
+    # at zero, for a reason that is about coverage rather than about the
+    # relationship.
+    tracked = {str(e.subject_company or "").strip().lower()
+               for e in _LS.LearningStore(
+                   pathlib.Path(ctx.root) / _LS.DEFAULT_PATH).evidence()}
+    unobserved = sorted({
+        end for claim_ in claims
+        for end in (claim_.actor_a, claim_.actor_b)
+        if not any(t and t in end.lower() for t in tracked)})
     return {
         "relationships": len(rows),
+        "competitive_claims": len(claims),
+        "competitive_objects": sorted({c.competitive_object for c in claims}),
+        "rivals_outside_the_observed_universe": unobserved,
         "by_predicate": by_predicate,
         "distinct_actors": len({r.subject_actor for r in rows}
                                | {r.object_actor for r in rows}),
         "competitor_edges": len(competitors),
         "interactions": len(interactions),
         "interactions_refused": dict(refused),
-        "missing_for_interactions": (
-            "" if competitors else
-            "COMPETES_WITH. Every integrated family is company-published, "
-            "and a company names its customers and its partners but not its "
-            "rivals. Interactions stay blocked on a relationship type these "
-            "sources structurally cannot supply"),
+        "missing_for_interactions": _missing_for_interactions(
+            competitors, unobserved),
     }
+
+
+def _missing_for_interactions(competitors: dict, unobserved: list) -> str:
+    if not competitors:
+        return ("COMPETES_WITH. Every integrated family is company-"
+                "published, and a company names its customers and its "
+                "partners but not its rivals")
+    if unobserved:
+        return (f"OBSERVATION OF THE RIVAL. Competitive edges exist, and "
+                f"{len(unobserved)} of their ends are companies this engine "
+                f"does not track: {', '.join(unobserved[:4])}. An "
+                f"interaction needs an action from one side and a response "
+                f"from the other, so a rivalry with one observed party "
+                f"cannot produce one")
+    return ""
+
+
+def _competitive_claims(ctx: C.CycleContext) -> tuple:
+    """Rivalry from the ledger's own evidence, under the strict contract."""
+    from . import competitive_relationships as CR
+    from . import learning_store as _LS
+
+    try:
+        from intent_engine.universe.companies import default_universe
+        companies = {c.company_id: c
+                     for c in default_universe().prediction_companies()}
+    except Exception:                                       # noqa: BLE001
+        return ()
+    store = _LS.LearningStore(pathlib.Path(ctx.root) / _LS.DEFAULT_PATH)
+    found = {}
+    for row in store.evidence():
+        company = companies.get((row.subject_company or "").strip().lower())
+        if not company:
+            continue
+        got, _ = CR.extract(
+            row.fact, subject=company.company_id,
+            aliases=_aliases_for(company), source=row.source,
+            event_date=row.observed_at[:10],
+            # The competitive object comes from what the company SELLS, a
+            # fact about it, never from who it competes with, which is the
+            # claim under test.
+            competitive_object=str(getattr(company, "industry", "") or ""))
+        for claim_ in got:
+            found.setdefault(claim_.claim_id, claim_)
+    return tuple(found.values())
 
 
 def _rehydrate(row: dict):

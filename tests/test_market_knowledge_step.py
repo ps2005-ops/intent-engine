@@ -136,6 +136,16 @@ def test_against_the_real_ledger(tmp_path):
     assert got["counterfactual_memory"]["episodes"] == 5
     assert got["economic_chain"]["subjects"] == ["honda"]
     assert got["economic_chain"]["observed_links"] == 0
+    # Rivalry from the ledger, under the strict contract, and the precise
+    # reason interactions are still zero.
+    world = got["world_model"]
+    assert world["competitive_claims"] == 1
+    assert world["by_predicate"]["COMPETES_WITH"] == 1
+    assert world["competitive_objects"] == ["E-commerce platform"]
+    assert world["rivals_outside_the_observed_universe"] == ["Magento"]
+    assert world["interactions"] == 0
+    assert world["missing_for_interactions"].startswith(
+        "OBSERVATION OF THE RIVAL")
     # The acceleration report reads production's own cycle history from the
     # copied root, so it sees no cycle reports here and says so rather than
     # inventing a trend.
