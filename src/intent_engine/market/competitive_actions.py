@@ -127,7 +127,18 @@ _PATTERNS: Tuple[Tuple[str, str], ...] = (
     (r"\b(?:cut|cuts|lowered?|lowers|reduc(?:ed|es)|rais(?:ed|es)|"
      r"increas(?:ed|es))\s+(?:its\s+)?(?:\w+\s+){0,2}"
      r"(?:price|prices|pricing|fees?|rates?)"
-     r"\b|\bnew\s+pricing\b|\bprice\s+(?:cut|reduction|increase)\b",
+     r"\b|\bnew\s+pricing\b|\bprice\s+(?:cut|reduction|increase)\b"
+     # A restructuring is a price change and says none of those verbs.
+     # BigCommerce's real announcement reads "Starting June 1, 2026,
+     # BigCommerce is updating its plan structure and pricing" — no cut, no
+     # raise, no "new pricing". The DATED frame is what keeps this from
+     # matching every footer that mentions updated pricing: a change nobody
+     # dated is a description of the current price.
+     r"|\b(?:starting|effective|beginning)\s+"
+     r"(?:January|February|March|April|May|June|July|August|September|"
+     r"October|November|December)\s+\d{1,2},?\s+\d{4}[^.]{0,120}?"
+     r"\b(?:updat(?:ed|es|ing)|chang(?:ed|es|ing)|introduc(?:ed|es|ing))"
+     r"[^.]{0,80}?\b(?:pricing|prices|plan\s+structure|fees?|rates?)\b",
      PRICE_CHANGE),
     (r"\b(?:bundl(?:ed|es|ing)|packag(?:ed|es|ing)\s+together|"
      r"included\s+at\s+no\s+(?:extra\s+)?(?:cost|charge))\b", BUNDLE_CHANGE),

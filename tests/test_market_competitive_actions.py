@@ -245,3 +245,41 @@ def test_silence_past_the_window_contradicts():
 
 def test_an_unresolved_expectation_is_reported_as_a_success():
     assert "is a success" in CAX.summarise([expectation()])["note"]
+
+
+# --- a restructuring is a price change, and a footer is not ---------------
+#
+# The live BigCommerce announcement reads "Starting June 1, 2026,
+# BigCommerce is updating its plan structure and pricing" and matched no
+# pattern: no cut, no raise, no "new pricing". The dated frame is what lets
+# it in without letting in every page that mentions updated pricing.
+
+DATED_PRICE_CHANGES = [
+    "Starting June 1, 2026, BigCommerce is updating its plan structure "
+    "and pricing.",
+    "Effective March 1, 2026, we are changing our rates for all plans.",
+]
+
+UNDATED_PRICE_PROSE = [
+    "Our pricing page was updated recently with clearer plan structure.",
+    "See our updated pricing for more information about fees.",
+    "Pricing and plan structure are explained below in detail for you.",
+    "Starting a new store is easy and our pricing is simple to understand.",
+]
+
+
+@pytest.mark.parametrize("text", DATED_PRICE_CHANGES)
+def test_a_dated_restructuring_is_a_price_change(text):
+    found, _ = CA.extract(text, actor="BigCommerce", competitive_object="",
+                          event_time="2026-08-08", source="s",
+                          source_family="pricing_page")
+    assert found and found[0].action_type == CA.PRICE_CHANGE
+
+
+@pytest.mark.parametrize("text", UNDATED_PRICE_PROSE)
+def test_undated_pricing_prose_is_not_a_price_change(text):
+    """A change nobody dated is a description of the current price."""
+    found, _ = CA.extract(text, actor="BigCommerce", competitive_object="",
+                          event_time="2026-08-08", source="s",
+                          source_family="pricing_page")
+    assert not found

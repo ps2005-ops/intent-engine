@@ -146,6 +146,15 @@ _PRODUCT_NAME = re.compile(
     r"(?:the\s+|its\s+|a\s+|new\s+)?"
     r"([A-Z][A-Za-z0-9]*(?:\s+[A-Z][A-Za-z0-9]*){0,3})")
 
+#: The named product as the SUBJECT of the sentence rather than its object:
+#: "Shopify Shipping expands to Italy", "Commerce Cloud is now available in
+#: Japan". Market-entry and availability sentences put the product first, and
+#: reading only the post-verb position missed every one of them.
+_PRODUCT_SUBJECT = re.compile(
+    r"\b([A-Z][A-Za-z0-9]*(?:\s+[A-Z][A-Za-z0-9]*){0,3})\s+"
+    r"(?:expand(?:ed|s|ing)|arriv(?:ed|es|ing)|is\s+now\s+available|"
+    r"are\s+now\s+available|com(?:es|ing)\s+to|now\s+supports?)\b")
+
 #: A budget the action targets. "CRM seat budget", "commerce spend".
 _BUDGET = re.compile(
     r"\b((?:\w+\s+){0,2}(?:seat|licence|license|subscription|platform|"
@@ -215,13 +224,19 @@ DIMENSIONS = (WHAT, WHO, WHERE, BUDGET_DIM, SUBSTITUTE)
 
 #: What each action type must establish before it counts as ESTABLISHED.
 #: The default — a what and a who — is what wave 7 required of everything.
+#: EVERY action type requires a WHAT. This is not a schema preference: an
+#: action with no "what" cannot be located economically no matter how much
+#: else it names. The first live run established "Shopify Shipping expands
+#: to Italy and Spain" on its geography ALONE, because MARKET_ENTRY had been
+#: allowed to pass on WHERE — and "somebody entered Italy" contests nothing
+#: until you know what they brought.
 _REQUIRED: Dict[str, Tuple[str, ...]] = {
     "PRICE_CHANGE": (WHAT, WHO),
     "PRODUCT_LAUNCH": (WHAT, WHO),
     "MIGRATION_PROGRAMME": (WHAT, WHO, SUBSTITUTE),
     "BUNDLE_CHANGE": (WHAT, WHO),
-    "SEGMENT_EXPANSION": (WHO,),
-    "MARKET_ENTRY": (WHERE,),
+    "SEGMENT_EXPANSION": (WHAT, WHO),
+    "MARKET_ENTRY": (WHAT, WHERE),
     # A partnership between two companies says nothing about who either of
     # them is competing with. It needs the use case or it establishes
     # nothing — the announcement alone is not rivalry.
@@ -372,7 +387,7 @@ def extract(span: str, *, action_id: str, actor: str, source: str,
     if workflow:
         spans.append(workflow_hit.group(0))
 
-    product_hit = _PRODUCT_NAME.search(text)
+    product_hit = _PRODUCT_NAME.search(text) or _PRODUCT_SUBJECT.search(text)
     product = product_hit.group(1).strip() if product_hit else ""
     if product and (_vacuous(product)
                     or product.lower() == (actor or "").lower()):
