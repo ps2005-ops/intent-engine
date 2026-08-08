@@ -84,13 +84,30 @@ CAN_ANSWER: Dict[str, Tuple[str, ...]] = {
     NEEDS_COMPETITIVE_ACTION: ("release_notes", "product_launch_page",
                                "investor_release", "rival_newsroom"),
     # An object needs a document that names the BUYER as well as the thing.
-    # A launch page says who it is for; a blog post rarely does.
+    # The editorial prior said a launch page says who it is for. Measured
+    # over 66 live documents it does not: launch pages established 0 from
+    # 15, pricing pages 0 from 15, migration pages 0 from 10, and RELEASE
+    # NOTES established 5 from 9. Membership is unchanged — a zero from ten
+    # documents is too small to bar a family — but the order now comes from
+    # `from_object_yield` rather than from this tuple's sequence.
     NEEDS_ACTION_OBJECT: ("pricing_page", "product_launch_page",
                           "migration_page", "release_notes"),
     NEEDS_OUTCOME_EVIDENCE: ("customer_case_study", "investor_release"),
     NEEDS_FRESH_OBSERVATION: ("government_award", "partnership_release",
                               "comparison_page", "customer_case_study",
                               "rival_newsroom"),
+}
+
+
+#: What one unit of `relationship_yield` COUNTS for each question. The field
+#: is one number reused across questions; the unit is not, and a plan that
+#: reports "relationships/document" for the object question is unreadable.
+YIELD_UNIT: Dict[str, str] = {
+    NEEDS_ACTION_OBJECT: "established objects",
+    NEEDS_COMPETITIVE_ACTION: "actions",
+    NEEDS_COMPETITOR: "competitor claims",
+    NEEDS_CUSTOMER: "named customers",
+    NEEDS_OUTCOME_EVIDENCE: "outcomes",
 }
 
 
@@ -170,6 +187,66 @@ def from_yield(report, *, question_type: str = "",
         last_updated=as_of[:10])
 
 
+def from_object_yield(report, *, as_of: str = "") -> SourceFamilyPerformance:
+    """Read an `action_object_acquisition.FamilyYield` into planning state.
+
+    The ACTION_OBJECT question is scored on ESTABLISHED OBJECTS PER DOCUMENT,
+    never on actions per document. A pricing page returned 12 actions and
+    established nothing; release notes returned fewer and established five.
+    Ranking this question by action count would recommend the family that
+    produced the most text about the fewest decidable things.
+
+    `false_positive_rate` is left None on purpose. An object that came back
+    UNKNOWN is not a false positive — it is a document that did not say who
+    the thing was for, which is the finding rather than an error. Calling it
+    one would let a family look precise by extracting nothing.
+    """
+    data = report.as_dict() if hasattr(report, "as_dict") else dict(report)
+    retrieved = int(data.get("retrieved", 0) or 0)
+    established = int(data.get("objects_established", 0) or 0)
+    latency = float(data.get("latency_seconds", 0.0) or 0.0)
+    return SourceFamilyPerformance(
+        source_family=str(data.get("family") or ""),
+        question_type=NEEDS_ACTION_OBJECT,
+        attempts=int(data.get("attempted", 0) or 0),
+        retrieved=retrieved,
+        useful=established,
+        relationship_yield=(established / retrieved) if retrieved else 0.0,
+        false_positive_rate=None,
+        latency_seconds=latency,
+        cost=("cheap" if retrieved and (latency / retrieved) < 1.0
+              else "expensive"),
+        last_updated=as_of[:10])
+
+
+def merge_object_yields(reports: Sequence[object], *, as_of: str = ""
+                        ) -> List[SourceFamilyPerformance]:
+    """One record per FAMILY, summed across actors.
+
+    The live measurement is a grid of actor x family cells, and a family's
+    standing is the question "does this KIND of page name a buyer", not
+    "did Shopify's pricing page". Summing before dividing also keeps the
+    denominator honest: averaging six per-actor rates would let one cell
+    that retrieved a single document count as much as one that retrieved
+    fifteen.
+    """
+    totals: Dict[str, Dict[str, float]] = collections.OrderedDict()
+    for report in reports:
+        data = (report.as_dict() if hasattr(report, "as_dict")
+                else dict(report))
+        family = str(data.get("family") or "")
+        if not family:
+            continue
+        row = totals.setdefault(family, {"attempted": 0.0, "retrieved": 0.0,
+                                         "objects_established": 0.0,
+                                         "latency_seconds": 0.0})
+        for field_name in row:
+            row[field_name] += float(data.get(field_name, 0) or 0)
+    return [from_object_yield({"family": name, **{k: v for k, v in row.items()}},
+                              as_of=as_of)
+            for name, row in totals.items()]
+
+
 @dataclass
 class ResearchPlan:
     """What to ask next, in what order, and why."""
@@ -243,8 +320,10 @@ def plan(question_type: str, *,
                            "can be"))
             continue
         immature = got.maturity == PROVISIONAL
-        reason = (f"{got.relationship_yield:.3f} relationships/document over "
-                  f"{got.retrieved} documents ({got.maturity})")
+        # The score means a different thing per question, and a reason that
+        # names the wrong unit is a reason nobody can check.
+        reason = (f"{got.relationship_yield:.3f} {YIELD_UNIT.get(question_type, 'relationships')}"
+                  f"/document over {got.retrieved} documents ({got.maturity})")
         if immature:
             reason += "; kept ahead of its rank because the sample is small"
         ranked.append(((0 if immature else 1,

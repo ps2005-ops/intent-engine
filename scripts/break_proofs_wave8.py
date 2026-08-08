@@ -25,6 +25,7 @@ CA = f"{T}/test_market_competitive_actions.py"
 AQ = f"{T}/test_market_action_object_queries.py"
 AC = f"{T}/test_market_action_object_acquisition.py"
 EC = f"{T}/test_market_event_corroboration.py"
+RP = f"{T}/test_market_research_planning.py"
 EI = f"{T}/test_market_event_identity.py"
 GT = f"{T}/test_market_game_theoretic_state.py"
 MF = f"{T}/test_market_multi_actor_founder.py"
@@ -131,6 +132,13 @@ PROOFS = [
      "            score = covered * (rate if rate else -0.5)",
      "            score = covered * (rate if rate else 0.9)",
      f"{AQ}::test_a_measured_zero_sinks_below_an_untried_family"),
+
+    ("13b. the object question is ranked by how much TEXT a family produced",
+     S / "research_planning.py",
+     "        relationship_yield=(established / retrieved) if retrieved else 0.0,",
+     "        relationship_yield=(float(data.get('actions_found', 0) or 0)\n"
+     "                            / retrieved) if retrieved else 0.0,",
+     f"{RP}::test_the_object_question_is_scored_on_objects_not_on_actions"),
 
     # --- 14. high value never buys a generic page ----------------------
     # The first version of this proof mutated a GENERIC_FAMILIES score

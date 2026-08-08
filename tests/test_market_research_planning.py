@@ -17,9 +17,14 @@ from intent_engine.market import learning_acceleration as LA
 from intent_engine.market import observation_binding as OB
 from intent_engine.market import research_planning as RP
 
-MEASURED = pathlib.Path(
-    "/private/tmp/claude-501/-Users-prathamsharma/"
-    "88a4600b-3357-43cf-9a33-f6b392f47edf/scratchpad/world_model.json")
+# Vendored into the repo in wave 8. It previously pointed at another
+# session's scratchpad behind an `if not exists: return`, so the day that
+# directory was cleaned the assertions below would have stopped running
+# without anything going red.
+MEASURED = pathlib.Path(__file__).resolve().parents[1] / \
+    "reports/market/strategic/source_family_measurement.json"
+ACQUIRED = pathlib.Path(__file__).resolve().parents[1] / \
+    "reports/market/strategic/wave8_acquisition.json"
 
 
 def perf(family, *, retrieved=50, yield_=0.2, latency=10.0):
@@ -126,8 +131,6 @@ def test_ingestion_is_never_disabled_wholesale():
 # --- against the real measured yields ------------------------------------
 
 def test_the_real_measurements_load_into_performance_records():
-    if not MEASURED.exists():                          # pragma: no cover
-        return
     families = json.loads(MEASURED.read_text())["families"]
     got = [RP.from_yield(y, as_of="2026-08-07") for y in families.values()]
     assert {p.source_family for p in got} == {
@@ -137,3 +140,78 @@ def test_the_real_measurements_load_into_performance_records():
     studies = next(p for p in got if p.source_family == "customer_case_study")
     assert studies.cost == "expensive"     # 311s over 22
     assert all(p.maturity != RP.ESTABLISHED for p in got)
+
+
+# --- ACTION_OBJECT is scored on objects, never on actions -----------------
+
+def test_the_object_question_is_scored_on_objects_not_on_actions():
+    """The live grid's exact trap.
+
+    Pricing pages returned 12 actions and established nothing. Release notes
+    returned fewer documents and established five objects. A planner ranking
+    this question by action count would send the next budget to the family
+    that produced the most text about the fewest decidable things.
+    """
+    pricing = RP.from_object_yield(
+        {"family": "pricing_page", "attempted": 27, "retrieved": 15,
+         "actions_found": 12, "objects_established": 0,
+         "latency_seconds": 52.6}, as_of="2026-08-08")
+    notes = RP.from_object_yield(
+        {"family": "release_notes", "attempted": 23, "retrieved": 9,
+         "actions_found": 89, "objects_established": 5,
+         "latency_seconds": 47.7}, as_of="2026-08-08")
+    assert pricing.relationship_yield == 0.0
+    assert notes.relationship_yield > 0.5
+    assert notes.question_type == RP.NEEDS_ACTION_OBJECT
+    got = RP.plan(RP.NEEDS_ACTION_OBJECT, performance=[pricing, notes])
+    assert got.families[0] == "release_notes"
+
+
+def test_an_unknown_object_is_not_counted_as_a_false_positive():
+    """A document that did not say who the thing was for is the finding.
+
+    Scoring it as an error would let a family look precise by extracting
+    nothing at all.
+    """
+    got = RP.from_object_yield(
+        {"family": "pricing_page", "attempted": 8, "retrieved": 5,
+         "objects_established": 0, "objects_partial": 4,
+         "objects_unknown": 1, "latency_seconds": 2.9}, as_of="2026-08-08")
+    assert got.false_positive_rate is None
+
+
+def test_a_family_is_summed_across_actors_before_it_is_divided():
+    """Two cells, one family. Averaging the rates would let the cell that
+    retrieved one document count as much as the cell that retrieved nine."""
+    got = RP.merge_object_yields([
+        {"family": "release_notes", "actor": "Shopify", "attempted": 12,
+         "retrieved": 1, "objects_established": 1, "latency_seconds": 5.0},
+        {"family": "release_notes", "actor": "BigCommerce", "attempted": 11,
+         "retrieved": 9, "objects_established": 0, "latency_seconds": 42.0},
+    ], as_of="2026-08-08")
+    assert len(got) == 1
+    assert got[0].retrieved == 10 and got[0].useful == 1
+    assert got[0].relationship_yield == 0.1        # 1/10, not (1.0 + 0.0)/2
+
+
+def test_the_plan_reports_the_unit_the_question_is_scored_in():
+    got = RP.plan(RP.NEEDS_ACTION_OBJECT, performance=[
+        RP.from_object_yield({"family": "release_notes", "attempted": 23,
+                              "retrieved": 9, "objects_established": 5,
+                              "latency_seconds": 47.7}, as_of="2026-08-08")])
+    assert "established objects/document" in got.reasons["release_notes"]
+    assert "relationships/document" not in got.reasons["release_notes"]
+
+
+def test_the_live_grid_moves_release_notes_from_last_to_first():
+    """§17 -> §18: the measurement has to change where the budget goes, or
+    it is a table nobody acts on."""
+    rows = list(json.loads(ACQUIRED.read_text())["yields"].values())
+    perf = RP.merge_object_yields(rows, as_of="2026-08-08")
+    before = RP.plan(RP.NEEDS_ACTION_OBJECT).families
+    after = RP.plan(RP.NEEDS_ACTION_OBJECT, performance=perf).families
+    assert before[-1] == "release_notes"        # the editorial prior
+    assert after[0] == "release_notes"          # what 66 documents measured
+    # Only release_notes established anything; nothing else may claim it.
+    producing = [p.source_family for p in perf if p.useful]
+    assert producing == ["release_notes"]
