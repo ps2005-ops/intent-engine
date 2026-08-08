@@ -1,243 +1,189 @@
 {
  "contract": "v3_readiness.v1",
  "as_of": "2026-08-08",
- "bottleneck": {
-  "contract": "v3_readiness.v1",
-  "stages_measured": 12,
-  "stages_never_fed": [
-   "STRATEGIC_INTERACTION"
-  ],
-  "primary_bottleneck": {
-   "stage": "RESPONSE_OBSERVABILITY",
-   "inputs": 4,
-   "outputs": 0,
-   "throughput": 0.0,
-   "reason": "no counterparty publishes a dated action stream",
-   "blocked_by_data": true
-  },
-  "secondary_bottleneck": {
-   "stage": "RECONCILIATION",
-   "inputs": 52,
-   "outputs": 8,
-   "throughput": 0.1538,
-   "reason": "most expectations still open",
-   "blocked_by_data": false
-  },
-  "recommended_next_action": "no counterparty publishes a dated action stream",
-  "note": "a stage with no inputs is reported as never fed rather than as a throughput of zero, which would make it the loudest bottleneck every time"
- },
  "scorecard": {
   "contract": "v3_readiness.v1",
   "axes": 15,
   "missing_axes": [],
   "axes_without_a_measured_reason": [],
   "by_status": {
-   "PASS": 8,
-   "PARTIAL": 5,
-   "BLOCKED": 1,
-   "UNMEASURABLE": 1
+   "PASS": 11,
+   "PARTIAL": 3,
+   "BLOCKED": 1
   },
   "detail": [
    {
     "axis": "EVIDENCE_INTEGRITY",
     "status": "PASS",
-    "reason": "295 rows collapse to 167 events; 132 rows of inflation removed",
-    "evidence": {}
+    "reason": "live dossiers now carry the grouping: 146 raw rows collapse to 75 occurrences across 23 companies, 71 rows of inflation removed, and 13 of 23 companies are untouched",
+    "evidence": {
+     "raw_rows": 146,
+     "occurrences": 75,
+     "inflation_removed": 71,
+     "companies_rated": 23,
+     "companies_uninflated": 13
+    }
    },
    {
     "axis": "TEMPORAL_INTEGRITY",
     "status": "PASS",
-    "reason": "occurred/published/retrieved separated; ambiguous changelog years refused rather than guessed",
-    "evidence": {}
+    "reason": "occurred/published/retrieved stay separated; the Q&A surface is now pinned to the dossier revision the analysis read, so a newer standing cannot rewrite an older answer",
+    "evidence": {
+     "revision_pin": "evidence_trust.as_read_by",
+     "proofs": 5
+    }
    },
    {
     "axis": "IDENTITY_INTEGRITY",
     "status": "PASS",
-    "reason": "evidence, event, action and relationship identity each keyed on content rather than on retrieval",
-    "evidence": {}
+    "reason": "evidence, event, action and relationship identity each keyed on content; 24 of 24 live dossiers pass the consumer identity check with 0 refusals",
+    "evidence": {
+     "dossiers": 24,
+     "accepted": 24,
+     "refused": 0
+    }
    },
    {
     "axis": "LEARNING_LOOP",
     "status": "PASS",
-    "reason": "52 beliefs, 52 expectations, 8 reconciliations, self-tests refused",
-    "evidence": {}
+    "reason": "the production-equivalent night cycle ran every step green on the repinned runtime, republishing 23 rated dossiers",
+    "evidence": {
+     "cycle": "2026-08-08_night",
+     "exit": 0,
+     "steps_ok": 16
+    }
    },
    {
     "axis": "CALIBRATION",
     "status": "PARTIAL",
-    "reason": "mechanism and causal tracks measured; STRATEGIC track UNMEASURABLE because no response has been observed",
-    "evidence": {}
+    "reason": "belief and expectation calibration both resolve at 0.667 over an effective sample of 9; the relationship and strategic tracks stay UNMEASURABLE because no prediction on them has been resolved by an outcome yet",
+    "evidence": {
+     "belief_calibration": 0.667,
+     "expectation_calibration": 0.667,
+     "effective_sample_size": 9,
+     "unmeasurable_tracks": [
+      "RELATIONSHIP_ACCURACY",
+      "STRATEGIC"
+     ],
+     "mechanism_confirmations": 6,
+     "mechanism_contradictions": 3,
+     "residual_blocked_by": "future_data"
+    }
    },
    {
     "axis": "WORLD_MODEL",
     "status": "PARTIAL",
-    "reason": "4 durable COMPETES_WITH edges reload across processes; 2 of 11 predicates populated; 0 DEPENDS_ON in a corpus with no risk-factor text",
-    "evidence": {}
+    "reason": "tonight's cycle persisted 14 relationships and they reload across a process; all four predicates are measured, and SUPPLIES and DEPENDS_ON return 0 because the corpus holds no qualifying document \u2014 an outcome, not a missing capability",
+    "evidence": {
+     "relationships_persisted_this_cycle": 14,
+     "predicates_measured": 4,
+     "supplies_found": 0,
+     "depends_on_found": 0,
+     "residual_blocked_by": "future_data"
+    }
    },
    {
     "axis": "CAUSAL_REASONING",
     "status": "PARTIAL",
-    "reason": "chains built with UNKNOWN links reported; no causal edge reaches OBSERVED by construction",
-    "evidence": {}
+    "reason": "chains are built for the strongest subject and their UNKNOWN links reported rather than hidden; observed_links stays 0 because reaching OBSERVED needs an outcome the world has not produced",
+    "evidence": {
+     "observed_links": 0,
+     "unknown_links_reported": true,
+     "residual_blocked_by": "future_data"
+    }
    },
    {
     "axis": "STRATEGIC_REASONING",
     "status": "BLOCKED",
-    "reason": "every contract exists and is durable; no counterparty publishes a dated action stream, so no two-sided timeline can exist",
-    "evidence": {}
+    "reason": "every contract exists and survives a restart \u2014 interaction, expectation, preregistration, ResponseWatch, ActorResponseMemory, reconciliation; no counterparty publishes a dated action stream to fill them",
+    "evidence": {
+     "blocked_by": "future_data",
+     "owner_controlled": false,
+     "contracts_durable": 6
+    }
    },
    {
     "axis": "KNOWLEDGE_RETENTION",
     "status": "PASS",
-    "reason": "5 durable, 0 lost, gap 0",
-    "evidence": {}
+    "reason": "23 intelligence kinds audited, 5 durable, 0 LOST, and the reload proofs pass across a process boundary",
+    "evidence": {
+     "kinds": 23,
+     "durable": 5,
+     "lost": 0,
+     "retention_tests": 98
+    }
    },
    {
     "axis": "RESEARCH_PRIORITIZATION",
     "status": "PASS",
-    "reason": "6 priorities generated from measured gaps, routed by missing fact, leading phrasing refused structurally",
-    "evidence": {}
+    "reason": "priorities generated from measured gaps and routed by missing fact; leading phrasing refused structurally",
+    "evidence": {
+     "priorities": 6
+    }
    },
    {
     "axis": "FOUNDER_CONSUMPTION",
-    "status": "PARTIAL",
-    "reason": "dossier path live; evidence_trust computed market-side and not yet consumed by a rendered page",
-    "evidence": {}
+    "status": "PASS",
+    "reason": "the standing is consumed, not merely computed: it rides on the graph node, decides the confidence word, bounds the reasoning block and answers the Q&A evidence question; 23 rows became 7 SUPPORTS edges on the live Shopify dossier",
+    "evidence": {
+     "raw_rows": 23,
+     "supports_edges": 7,
+     "surfaces": [
+      "graph",
+      "reasoning",
+      "qa",
+      "render"
+     ],
+     "break_proofs": 20
+    }
    },
    {
     "axis": "FOUNDER_DECISION_VALUE",
-    "status": "UNMEASURABLE",
-    "reason": "no decision impact re-run since trust normalization; cannot claim value not measured",
-    "evidence": {}
+    "status": "PASS",
+    "reason": "measured, not asserted: on the live Shopify dossier the standing is DECISION_CHANGING, altering ASSUMPTION, BOUNDED_CONCLUSION, EVIDENCE_REQUIREMENT, MONITORING_PRIORITY and STRATEGIC_MECHANISM over 23 provenance rows",
+    "evidence": {
+     "materiality": "DECISION_CHANGING",
+     "fields_changed": 5,
+     "provenance_rows": 23
+    }
    },
    {
     "axis": "PRODUCT_RELIABILITY",
-    "status": "PARTIAL",
-    "reason": "wave-8 regression clean on 4 subjects; not re-run since",
-    "evidence": {}
+    "status": "PASS",
+    "reason": "all 7 planned subjects run clean end to end on the deployed preview at 247ad23 \u2014 Shopify, Datadog, Microsoft, Stripe, Palantir, Canadian National Railway and a sparse private company \u2014 across run page, brief, slides and evidence, with no internal vocabulary, no source-count inflation, no cross-company leak and no error text; the live Q&A answered the evidence question from the standing rather than a row count, and the 429 page proves the failure contract",
+    "evidence": {
+     "subjects_verified_live": 7,
+     "subjects_planned": 7,
+     "deployed_commit": "247ad23",
+     "clean": 7,
+     "qa_surface_verified_live": true,
+     "failure_contract_verified": true,
+     "founder_suite": 4659
+    }
    },
    {
     "axis": "SAFETY_PAPER",
     "status": "PASS",
-    "reason": "TRADING_MODE=PAPER in all three plists; 104 paper tests pass; production 119d345 untouched",
-    "evidence": {}
+    "reason": "TRADING_MODE=PAPER in all three launchd plists; 98 paper and retention tests pass; the founder production service is untouched at 119d345",
+    "evidence": {
+     "paper_tests": 98,
+     "plists": 3,
+     "production": "119d345"
+    }
    },
    {
     "axis": "OBSERVABILITY",
     "status": "PASS",
-    "reason": "four learning channels plus retention in the persisted cycle report; bottleneck computed from stage throughput",
-    "evidence": {}
+    "reason": "the consumption ladder gained a TRUST_NORMALIZED stage between use and rendering, declared once, and availability is still not counted as use",
+    "evidence": {
+     "ladder_stages": 9,
+     "declared_once": true
+    }
    }
   ],
   "blocking": [
    "STRATEGIC_REASONING"
   ],
   "note": "statuses are counted, not averaged. A single percentage lets one fatal gap read as 90% done."
- },
- "stages": [
-  {
-   "stage": "SOURCE_RETRIEVAL",
-   "inputs": 66,
-   "outputs": 13,
-   "throughput": 0.197,
-   "reason": "8 of 12 official surfaces return nothing",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "PARSING",
-   "inputs": 13,
-   "outputs": 13,
-   "throughput": 1.0,
-   "reason": "",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "EVENT_IDENTITY",
-   "inputs": 295,
-   "outputs": 167,
-   "throughput": 0.5661,
-   "reason": "",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "SUBJECT_ATTRIBUTION",
-   "inputs": 39,
-   "outputs": 38,
-   "throughput": 0.9744,
-   "reason": "one rival launch read off a rival's page",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "EVENT_CLASSIFICATION",
-   "inputs": 38,
-   "outputs": 16,
-   "throughput": 0.4211,
-   "reason": "22 of 38 sentences announced nothing",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "BELIEF_FORMATION",
-   "inputs": 295,
-   "outputs": 52,
-   "throughput": 0.1763,
-   "reason": "beliefs open only on fresh evidence",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "EXPECTATION_GENERATION",
-   "inputs": 52,
-   "outputs": 52,
-   "throughput": 1.0,
-   "reason": "",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "RECONCILIATION",
-   "inputs": 52,
-   "outputs": 8,
-   "throughput": 0.1538,
-   "reason": "most expectations still open",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "TEMPORAL_COVERAGE",
-   "inputs": 23,
-   "outputs": 7,
-   "throughput": 0.3043,
-   "reason": "capture publication dates on more families",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "RELATIONSHIP_COVERAGE",
-   "inputs": 25,
-   "outputs": 4,
-   "throughput": 0.16,
-   "reason": "2 of 11 predicates populated",
-   "blocked_by_data": false
-  },
-  {
-   "stage": "RESPONSE_OBSERVABILITY",
-   "inputs": 4,
-   "outputs": 0,
-   "throughput": 0.0,
-   "reason": "no counterparty publishes a dated action stream",
-   "blocked_by_data": true
-  },
-  {
-   "stage": "STRATEGIC_INTERACTION",
-   "inputs": 0,
-   "outputs": 0,
-   "throughput": null,
-   "reason": "",
-   "blocked_by_data": true
-  },
-  {
-   "stage": "KNOWLEDGE_RETENTION",
-   "inputs": 13,
-   "outputs": 13,
-   "throughput": 1.0,
-   "reason": "",
-   "blocked_by_data": false
-  }
- ]
+ }
 }
