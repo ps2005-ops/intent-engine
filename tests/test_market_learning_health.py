@@ -601,3 +601,49 @@ def test_expectation_backlog_alert_fires_when_nothing_ever_resolves():
                           "expectations_contradicted": 0}
     fired = {a["alert"] for a in LH.alerts(series(4), health)}
     assert LH.EXPECTATION_BACKLOG_GROWING in fired
+
+
+# ===========================================================================
+# THE WHOLE-LOOP BOTTLENECK — a funnel cannot see a stage nothing entered
+# ===========================================================================
+def test_source_coverage_outranks_the_funnels_own_answer():
+    """The funnel ranks EVENT_CLASSIFICATION; the loop is limited earlier.
+
+    Relationship extraction is built and its conversion rate is UNDEFINED
+    rather than poor, so a funnel that only measures what arrived ranks it
+    nowhere. Measured this wave: three source families, ~11,000 sentences,
+    essentially no named counterparties.
+    """
+    result = LH.whole_loop_bottleneck(
+        funnel_result={"bottleneck": {"owner": "EVENT_CLASSIFICATION"}},
+        relationships=0, interactions=0, voi_items=12)
+    assert result["stage"] == "SOURCE_COVERAGE"
+    assert "STRATEGIC_INTERACTION" in result["unblocks"]
+
+
+def test_the_bottleneck_moves_on_once_relationships_exist():
+    result = LH.whole_loop_bottleneck(
+        funnel_result={}, relationships=5, interactions=0, voi_items=5)
+    assert result["stage"] == "STRATEGIC_INTERACTION"
+
+
+def test_consumed_but_never_decisive_is_a_decision_impact_bottleneck():
+    result = LH.whole_loop_bottleneck(
+        funnel_result={}, relationships=5, interactions=2, voi_items=5,
+        consumption={"dossiers_used": 22, "dossiers_decision_relevant": 0})
+    assert result["stage"] == "FOUNDER_DECISION_IMPACT"
+
+
+def test_no_voi_means_research_is_still_pulled_by_availability():
+    result = LH.whole_loop_bottleneck(
+        funnel_result={}, relationships=5, interactions=2, voi_items=0,
+        consumption={"dossiers_used": 22, "dossiers_decision_relevant": 22})
+    assert result["stage"] == "VOI"
+
+
+def test_every_whole_loop_stage_is_in_the_closed_vocabulary():
+    for kwargs in (dict(relationships=0, interactions=0, voi_items=0),
+                   dict(relationships=1, interactions=0, voi_items=0),
+                   dict(relationships=1, interactions=1, voi_items=0)):
+        result = LH.whole_loop_bottleneck(funnel_result={}, **kwargs)
+        assert result["stage"] in LH.BOTTLENECK_CLASSES

@@ -116,7 +116,14 @@ STAGE_OWNER: Dict[str, str] = {
 BOTTLENECK_CLASSES = frozenset(set(STAGE_OWNER.values()) | {
     "RETRIEVAL", "EVENT_EXTRACTION", "SUBJECT_BINDING", "CORROBORATION",
     "HIDDEN_STATE_INFERENCE", "INTERACTION_OBSERVATION", "CAUSAL_INFERENCE",
-    "INFORMATION_ACQUISITION", "FOUNDER_RELEVANCE"})
+    "INFORMATION_ACQUISITION", "FOUNDER_RELEVANCE",
+    # Added once the world-model layer was measured. SOURCE_COVERAGE is
+    # not a pipeline stage that leaks -- it is a stage the inputs never
+    # reach, and it is invisible to a funnel that only counts what
+    # arrived.
+    "SOURCE_COVERAGE", "ENTITY_RESOLUTION", "RELATIONSHIP_EXTRACTION",
+    "WORLD_MODEL", "STRATEGIC_INTERACTION", "VOI", "RESEARCH_PRIORITY",
+    "FOUNDER_CONSUMPTION", "FOUNDER_DECISION_IMPACT"})
 
 # --- alerts -----------------------------------------------------------------
 LEARNING_STALLED = "LEARNING_STALLED"
@@ -1449,3 +1456,66 @@ def render(health: LearningHealth) -> str:
         lines += ["## Alerts", "", "None.", ""]
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# the whole-loop bottleneck, not just the funnel's
+# ---------------------------------------------------------------------------
+def whole_loop_bottleneck(*, funnel_result: Dict[str, object],
+                          relationships: int = 0,
+                          interactions: int = 0,
+                          voi_items: int = 0,
+                          consumption: Optional[Dict[str, object]] = None
+                          ) -> Dict[str, object]:
+    """Where the LEARNING LOOP is limited, which is not always in the funnel.
+
+    The decision funnel can only see stages that something entered. A stage
+    the inputs never reach at all is invisible to it, and that is exactly the
+    state the world-model layer is in: relationship extraction is built, its
+    conversion rate is undefined rather than poor, and a funnel would rank it
+    nowhere.
+
+    Measured this wave: three source families -- news headlines, 10-K/10-Q and
+    8-K, together around 11,000 sentences -- yielded essentially no named
+    counterparties. Large-cap SEC disclosure systematically says "our
+    competitors", "third parties", "our top ten customers". So the loop is
+    limited before extraction, by what the sources contain.
+
+    Ordered by which failure starves the most downstream of it.
+    """
+    consumption = consumption or {}
+    if not relationships:
+        return {
+            "stage": "SOURCE_COVERAGE",
+            "because": (
+                "no actor-to-actor relationship exists, and the extractor is "
+                "not the reason: three source families were measured and the "
+                "documents name categories rather than counterparties. "
+                "Strategic interaction, cross-actor expectation and every "
+                "game-theoretic test downstream are starved by this alone"),
+            "unblocks": ["RELATIONSHIP_EXTRACTION", "WORLD_MODEL",
+                         "STRATEGIC_INTERACTION", "CROSS_ACTOR_EXPECTATION"],
+        }
+    if not interactions:
+        return {"stage": "STRATEGIC_INTERACTION",
+                "because": "relationships exist but no action by one actor "
+                           "has been paired with a response by a related one",
+                "unblocks": ["CROSS_ACTOR_EXPECTATION"]}
+    used = consumption.get("dossiers_used")
+    if _is_number(used) and not used:
+        return {"stage": "FOUNDER_CONSUMPTION",
+                "because": "learning is published and nothing consumes it",
+                "unblocks": ["FOUNDER_DECISION_IMPACT"]}
+    decisive = consumption.get("dossiers_decision_relevant")
+    if _is_number(decisive) and not decisive:
+        return {"stage": "FOUNDER_DECISION_IMPACT",
+                "because": "learning is consumed and changes no decision "
+                           "field", "unblocks": []}
+    if not voi_items:
+        return {"stage": "VOI",
+                "because": "nothing directs the next observation, so "
+                           "research remains pulled by availability",
+                "unblocks": ["RESEARCH_PRIORITY"]}
+    inner = (funnel_result.get("bottleneck") or {})
+    return {"stage": inner.get("owner") or "EVENT_CLASSIFICATION",
+            "because": inner.get("because", ""), "unblocks": []}
