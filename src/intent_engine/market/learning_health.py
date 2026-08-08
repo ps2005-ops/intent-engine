@@ -234,6 +234,15 @@ class CycleObservation:
     information_priorities: int = 0
     dossiers_written: int = 0
     refused: Dict[str, int] = field(default_factory=dict)
+    #: Expectations refused because the only qualifying observation was the
+    #: evidence that opened the belief. Held separately from `refused`, which
+    #: is belief FORMATION's refusals: the self-test guard lives in
+    #: observation binding, and any rate metric that cannot see it will
+    #: reward the engine for marking its own homework. It fired 20 times in
+    #: the cycle that established the canonical 5-informative baseline, and
+    #: was invisible to every downstream report until this field existed.
+    self_tests_refused: int = 0
+    binding_refused: Dict[str, int] = field(default_factory=dict)
     backlog_drain: bool = False
 
     @property
@@ -297,6 +306,8 @@ def observation_from_report(report: dict, *, backlog_drain: bool = False
     interactions = learning.get("strategic_interactions") or {}
     translation = report.get("translation") or {}
     refused = dict(formation.get("refused") or {})
+    binding = dict((learning.get("observation_binding") or {}).get("refused")
+                   or {})
 
     evaluated = int(observed.get("evaluated", 0) or 0)
     too_early = int(by_outcome.get("TOO_EARLY", 0) or 0)
@@ -340,6 +351,9 @@ def observation_from_report(report: dict, *, backlog_drain: bool = False
         information_priorities=int(priorities.get("candidates", 0) or 0),
         dossiers_written=len(export.get("published") or ()),
         refused=refused,
+        self_tests_refused=int(
+            binding.get("restates_the_evidence_that_opened_it", 0) or 0),
+        binding_refused=binding,
         backlog_drain=backlog_drain,
     )
 

@@ -590,6 +590,8 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     from . import economic_chain as ECH
     from . import hidden_state_binding as HSB
     from . import knowledge_decay as KD
+    from . import learning_acceleration as LA
+    from . import learning_health as LH
     from . import learning_store as LS
     from . import mechanism_calibration as MC
     from . import value_of_information as VOI
@@ -680,6 +682,15 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
                                          "reason": "no subject has evidence"}
     except Exception as exc:  # noqa: BLE001
         payload["economic_chain"] = {"error": str(exc)}
+
+    try:
+        impacts = len((ctx.results.get("learning") or {}).get(
+            "strategic_export", {}).get("published") or ())
+        payload["learning_acceleration"] = LA.report(
+            LH.load_cycle_observations(pathlib.Path(ctx.root)),
+            ledger=rows, decision_impacts=impacts)
+    except Exception as exc:  # noqa: BLE001
+        payload["learning_acceleration"] = {"error": str(exc)}
     return payload
 
 

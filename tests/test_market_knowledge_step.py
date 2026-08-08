@@ -22,7 +22,7 @@ REAL_LEDGER = pathlib.Path(
 
 VIEWS = ("belief_maturity", "knowledge_decay", "value_of_information",
          "causal_episodes", "causal_calibration", "counterfactual_memory",
-         "economic_chain")
+         "economic_chain", "learning_acceleration")
 
 
 def context(root, *, dry_run=True, as_of="2026-08-07"):
@@ -136,3 +136,7 @@ def test_against_the_real_ledger(tmp_path):
     assert got["counterfactual_memory"]["episodes"] == 5
     assert got["economic_chain"]["subjects"] == ["honda"]
     assert got["economic_chain"]["observed_links"] == 0
+    # The acceleration report reads production's own cycle history from the
+    # copied root, so it sees no cycle reports here and says so rather than
+    # inventing a trend.
+    assert got["learning_acceleration"]["cycles_total"] == 0

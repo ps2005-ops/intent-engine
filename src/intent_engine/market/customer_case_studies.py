@@ -203,6 +203,35 @@ _TITLE_OPENER = re.compile(
     r"discover|introducing|the\s+story\s+of|case\s+study:?|customer\s+story:?"
     r")\s+", re.I)
 
+#: A title that opens with the VENDOR's own name is the vendor talking about
+#: itself: "Shopify Case Studies", "Olo Case Study", "Stripe Supports Rivian".
+#: The whole-token resolver does not catch these — a one-token alias may not
+#: claim a three-token name, which is the rule that stops "Linear" claiming
+#: "Linear Minerals" — so the vendor prefix is stripped separately.
+#:
+#: A title that opens with a VERB is the headline's predicate, not a name:
+#: "Jobber Expands With New..." carries a customer and four words of copy.
+_TITLE_VERB = re.compile(
+    r"^(?:expands?|supports?|grows?|builds?|scales?|uses?|powers?|drives?|"
+    r"boosts?|cuts?|increases?|achieves?|delivers?|launches?|migrates?|"
+    r"chooses?|partners?|helps?|brings?|takes?|turns?|moves?|goes?|adds?|"
+    r"with|and|for|in|on|to|at|by|from|case|stor(?:y|ies)|stud(?:y|ies))$",
+    re.I)
+
+
+def _trim_to_the_name(candidate: str, vendor_tokens: frozenset) -> str:
+    """Drop a leading vendor name and stop at the headline's first verb."""
+    tokens = candidate.split()
+    while tokens and tokens[0].lower().strip(".,") in vendor_tokens:
+        tokens.pop(0)
+    kept = []
+    for token in tokens:
+        if _TITLE_VERB.match(token.strip(".,")):
+            break
+        kept.append(token)
+    return " ".join(kept).strip(" .,;:")
+
+
 #: A landing page, not a study. These titles name the SECTION, and a customer
 #: called "Case Studies" is the section heading wearing a company's schema.
 _SECTION_TITLE = re.compile(
@@ -221,8 +250,13 @@ def _customer_from_title(title: str, aliases: Sequence[str],
         match = AR._ACTOR.match(piece)
         if not match:
             continue
-        candidate = match.group(1).strip(" .,;:")
-        if not AR.is_named_actor(candidate):
+        vendor_tokens = frozenset(
+            t.lower().strip(".,")
+            for alias in list(aliases) + [subject]
+            for t in CS.normalise_actor(alias).split())
+        candidate = _trim_to_the_name(match.group(1).strip(" .,;:"),
+                                      vendor_tokens)
+        if not candidate or not AR.is_named_actor(candidate):
             continue
         if CS.resolves_to(candidate, list(aliases) + [subject]):
             continue
