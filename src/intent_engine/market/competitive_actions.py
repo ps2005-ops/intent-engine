@@ -311,7 +311,8 @@ _CONTESTS = {
 
 def assess(act: CompetitiveAction, *, relationship_id: str,
            relationship_object: str,
-           relationship_actors: Sequence[str]) -> ActionRelevance:
+           relationship_actors: Sequence[str],
+           established_object=None) -> ActionRelevance:
     """Does this action touch what THIS relationship says is contested?
 
     UNKNOWN is the default and is not a soft no: an interaction may never be
@@ -324,7 +325,7 @@ def assess(act: CompetitiveAction, *, relationship_id: str,
         return ActionRelevance(
             act.action_id, relationship_id, IRRELEVANT,
             f"{act.actor} is not a party to this relationship", act.span[:120])
-    if not act.object_established:
+    if not act.object_established or established_object is None:
         return ActionRelevance(
             act.action_id, relationship_id, UNKNOWN,
             f"the action's competitive object was asserted by the caller, "
@@ -332,21 +333,26 @@ def assess(act: CompetitiveAction, *, relationship_id: str,
             f"circular: every action then contests whatever it was labelled "
             f"with, and an interaction is not built on UNKNOWN",
             act.span[:120])
+    # The overlap is computed from the object the DOCUMENT established, not
+    # from a string comparison of two labels. ADJACENT never reaches
+    # RELEVANT: an adjacent workflow is not the same buying decision.
+    from . import competitive_objects as CO
+
+    kind, why = CO.overlap(established_object, relationship_object)
+    if kind != CO.STRONG:
+        return ActionRelevance(
+            act.action_id, relationship_id,
+            IRRELEVANT if kind == CO.NONE else UNKNOWN, why, act.span[:120])
     contests = _CONTESTS.get(act.action_type)
     if not contests:
         return ActionRelevance(
             act.action_id, relationship_id, UNKNOWN,
             f"{act.action_type} contests nothing this model can name; an "
             f"interaction is not built on UNKNOWN", act.span[:120])
-    same_object = (act.competitive_object.strip().lower()
-                   == (relationship_object or "").strip().lower())
-    if not same_object:
-        return ActionRelevance(
-            act.action_id, relationship_id, IRRELEVANT,
-            f"the action is about {act.competitive_object!r} and the "
-            f"rivalry is about {relationship_object!r}; two companies both "
-            f"doing something is not a strategic exchange",
-            act.span[:120])
+    # The label comparison that used to live here is gone: `overlap` above
+    # decides, from the object the DOCUMENT established, and a second check
+    # against `act.competitive_object` would reintroduce the very label the
+    # module refuses to trust.
     return ActionRelevance(
         act.action_id, relationship_id, RELEVANT,
         f"a {act.action_type} contests {contests}, which is what this "

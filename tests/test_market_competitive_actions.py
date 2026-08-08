@@ -113,23 +113,48 @@ def test_an_asserted_competitive_object_yields_unknown_not_relevant():
     assert "circular" in got.reason
 
 
+def _established(span, actor="Shopify"):
+    from intent_engine.market import competitive_objects as CO
+    obj, _ = CO.extract(span, action_id="a1", actor=actor, source="s",
+                        created_at="2026-08-08")
+    assert obj is not None and obj.is_usable, span
+    return obj
+
+
 def test_an_established_object_can_be_relevant():
-    got = CA.assess(act(object_established=True),
+    """Relevance now runs on the object the DOCUMENT established, and a
+    second comparison against the action's label would reintroduce the
+    label the module refuses to trust."""
+    span = "Shopify launched Checkout Blocks for enterprise merchants."
+    got = CA.assess(act(object_established=True, span=span),
                     relationship_id="cmp_1",
-                    relationship_object="E-commerce platform",
-                    relationship_actors=["Shopify", "Magento"])
+                    relationship_object="checkout infrastructure",
+                    relationship_actors=["Shopify", "Magento"],
+                    established_object=_established(span))
     assert got.relevant == CA.RELEVANT
     assert "contests" in got.reason
 
 
 def test_a_different_object_is_irrelevant():
-    got = CA.assess(act(object_established=True,
-                        competitive_object="Customer relationship management"),
+    span = "Shopify launched Checkout Blocks for enterprise merchants."
+    got = CA.assess(act(object_established=True, span=span),
                     relationship_id="cmp_1",
-                    relationship_object="E-commerce platform",
-                    relationship_actors=["Shopify", "Magento"])
+                    relationship_object="CRM seat budget",
+                    relationship_actors=["Shopify", "Magento"],
+                    established_object=_established(span))
     assert got.relevant == CA.IRRELEVANT
-    assert "not a strategic exchange" in got.reason
+
+
+def test_an_adjacent_object_is_unknown_not_relevant():
+    """ADJACENT never builds an interaction."""
+    span = "Shopify launched Checkout Blocks for enterprise merchants."
+    got = CA.assess(act(object_established=True, span=span),
+                    relationship_id="cmp_1",
+                    relationship_object="enterprise commerce platform",
+                    relationship_actors=["Shopify", "Magento"],
+                    established_object=_established(span))
+    assert got.relevant in (CA.UNKNOWN, CA.IRRELEVANT)
+    assert got.relevant != CA.RELEVANT
 
 
 def test_an_actor_outside_the_relationship_is_irrelevant():
