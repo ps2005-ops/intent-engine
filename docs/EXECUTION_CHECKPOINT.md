@@ -4,119 +4,192 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-07, wave 3 (slice 17).
+Updated 2026-08-07, wave 4.
 
 ## Pinned state
 
 | what | where |
 |---|---|
-| market runtime | `a6f14ec`+ (repin to head of `feat/consumption-telemetry`) (branch `feat/consumption-telemetry`) |
-| founder preview | `f0a0294` LIVE (branch `feat/consumption-emitter` → `feat/founder-decision-experience-v3`) |
+| market head | `f85e490` (branch `feat/consumption-telemetry`) |
+| market runtime | **`079128b` — NOT repinned; see "Owner action" below** |
+| founder preview | `f0a0294` LIVE (branch `feat/consumption-emitter`) |
 | production `main` | `119d345` — **untouched, do not target** |
-| PAPER | structurally enforced in both launchd plists |
-| market suite | 3916 passed / 4 skipped / EXIT=0 |
-| founder suite | 4573 passed / 6 skipped / EXIT=0 |
+| PAPER | structurally enforced in all three launchd plists (`MARKET_TRADING_MODE=PAPER`) |
+| market suite | 4052 passed / 4 skipped / 10 deselected / EXIT=0 |
+| founder suite | 4573 passed / 16 skipped / EXIT=0 |
 
-## Completed this mission
+### Owner action required
+
+`git checkout f85e490` in `/Users/prathamsharma/intent-engine-market` was
+refused by the permission classifier twice. The runtime therefore still runs
+`079128b` and does NOT yet run the wave-4 work. The commit is already fetched
+and the worktree is otherwise clean; one command completes it.
+
+## Completed, waves 1–4
 
 | # | slice | commit | evidence it is real |
 |---|---|---|---|
-| 1 | Belief → graph → founder reasoning | `74f70d0` | founder sentence traces to `ev_6242785c24ff2621` in the ledger |
-| 2 | DecisionImpact + before/after harness | `0fde6bc` | 22/22 MEANINGFUL; same-dossier control returns NONE |
-| 3 | FounderLearningHealth.v1 | `a6c8601` | reads NOT_LIMITED on the real ledger |
-| 4 | Causal episodes + self-test guard | `61e486f` | 10 episodes / 8 subjects; informative 10 → 5 after the guard |
-| 5 | Hidden-state binding | `75681e0` | companies_tracked 0 → 16, 54 observations |
-| 6 | Execution checkpoint | `bd0a9f2` | this file |
-| 7 | Interaction binding that refuses | `bbd9d44` | 3 fabricated records → 0, with the prerequisite named |
-| 8 | **Natural scheduled cycle inspected** | — | `2026-08-07:night` COMPLETED; see below |
-| 9 | Actor relationships + measured source finding | `ba2e811` | 3959 filing sentences → 0 admissible, all categories |
-| 10 | Belief maturity (derived view) | `7fbb56d` | 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING |
-| 11 | Value of information + confirmation wall | `137d660` | 12 real items, 2 VOI_HIGH |
-| 12 | Shopify excerpt producer | `f0a0294` | ranked by substance; LIVE on preview |
-| 13 | Adversarial economics (12 cases) | `a6f14ec` | 29 assertions, all structural |
-| 14 | Whole-loop bottleneck | pushed | SOURCE_COVERAGE, funnel says EVENT_CLASSIFICATION |
-| 15 | Wave-3 break proofs | pushed | **14/14**, three pairings and one weak test repaired |
+| 1–15 | see git history through `079128b` | — | waves 1–3 |
+| 16 | Knowledge decay + the four unwired views | `f1ea2a1` | 51 beliefs, 0 stale, every zero refused for a named reason |
+| 17 | Economic chain, counterfactual memory, causal calibration | `0feb274` | honda chain 4 KNOWN / 3 UNKNOWN; 5 real episodes |
+| 18 | Learning acceleration, quality-gated | `f567bdd` | DEGRADING on self_test_rate 0.8 |
+| 19 | Counterparty source acquisition | `6af6f5c` | **25 relationships, 34 actors, 3 families, live** |
+| 20 | Wave-4 break proofs | `f85e490` | **35/35**, each demonstrating RED |
 
 ## The pattern this mission keeps finding
 
 **A correct module, a call site that never supplies its inputs, and a metric
 honestly reporting zero that everyone reads as "nothing has happened yet."**
 
-Three confirmed instances, all shipped and all invisible to a green suite:
-
-1. `learning_cycle.run(observations=)` — never passed. No belief was ever tested.
-2. `report.render_report` — dropped `learning_health` from the persisted report.
-3. `learning_cycle.run(hidden_states=)` — never passed. `companies_tracked` 0.
-4. `learning_cycle.run(interactions=)` — never passed. `interactions` 0.
-
-Plus two contract breaks of the same family: the founder rejected every dossier
-over two unknown fields, and the renderer read every kind of strategic content
-except beliefs.
+Six confirmed instances. Wave 4 found the sixth and it was four modules at
+once: `belief_maturity`, `knowledge_decay`, `value_of_information` and
+`causal_episodes` had all been built, tested and reported as shipped, and NO
+operating cycle called any of them. `knowledge_step` now runs all seven
+derived views, in both day and night lists.
 
 **Before building a subsystem, check whether it already exists and is simply
-not wired.** In this codebase that has been true five times out of five.
+not wired.** Six for six.
 
-## Natural scheduled cycle — CLOSED, and it proved the wave
+## SOURCE COVERAGE — closed as a diagnosis, open as an engineering target
 
-`2026-08-07:night:America/Toronto` COMPLETED on runtime `bbd9d44941cf`.
-Everything built this session ran unattended in production:
+### Settled, and `counterparty_sources.measure` REFUSES to re-run them
 
-| check | result |
+| family | volume | named counterparties |
+|---|---|---|
+| news headlines | 219 items | ~1 |
+| 10-K / 10-Q | 3,959 sentences | 0 |
+| 8-K + exhibits | 7,247 sentences | 0 |
+
+### Measured live this wave, against the real 28-company universe
+
+| family | docs | accepted | /doc | verdict | precision |
+|---|---|---|---|---|---|
+| `government_award` (USASpending) | 64 | 11 | 0.172 | INTEGRATE | ~100% |
+| `customer_case_study` | 22 | 11 | 0.500 | INTEGRATE | ~91% |
+| `partnership_release` | 59 | 3 | 0.051 | INTEGRATE | ~100% |
+
+**25 accepted relationships, 34 distinct actors, 2 predicate types
+(SELLS_TO 22, PARTNERS_WITH 3).**
+
+Cost: government 16s; case studies 311s; releases 521s. Night-only,
+cadence-gated 1 / 7 / 3 days. Scheduling, not removal.
+
+### The two measurement traps, recorded so they are not re-entered
+
+1. **Partnership releases first measured 0.048/doc and the honest conclusion
+   would have been "family rejected".** It was wrong: the adapter was
+   fetching newsroom INDEX pages averaging 700 characters. With the article
+   hop it fetches real releases averaging 8,000. *Measure the retrieval
+   before believing the yield.*
+2. **Both prose families then measured INTEGRATE while their accepted rows
+   contained fabrications** — "P&G SUPPLIES Chain" (from "supply chain"),
+   customers called "How Cocunat" and "Shopify Case Studies". *A yield number
+   that counts fabrications is worse than no number.* Precision ~40% → ~90%.
+
+## What acquisition did NOT unblock, and why
+
+Interactions are still **0**, now for a precise reason rather than an empty
+graph. Every integrated family is COMPANY-PUBLISHED, and a company names its
+customers and its partners and never its rivals. All 25 edges are `SELLS_TO`
+or `PARTNERS_WITH`; `interaction_binding` needs `COMPETES_WITH`, and
+`knowledge_step.world_model` reports that missing predicate by name.
+
+**The next source must be one where a THIRD PARTY names both sides.** Untried
+and promising: analyst and industry reports naming competitive sets,
+antitrust and merger-review filings (which enumerate rivals by obligation),
+and head-to-head comparison pages.
+
+## Canonical measured facts
+
+**NATURAL LEARNING** — canonical informative baseline **5 informative / 3
+confirmed / 2 contradicted**. The old 10/8 number is invalid and must never
+return.
+
+**KNOWLEDGE DECAY** — 51 beliefs, 0 stale, 0 retired, and every zero is
+refused for a named reason: 46 `WINDOW_OPEN`, 5 `TESTED`. Three cadences in
+genuine use (120 × 23, 180 × 17, 365 × 11), read off each belief's own
+`review_interval_days`; there is no module-level day count that governs any
+belief. Next decay window **2026-12-03**. Aged 130 / 200 / 400 / 800 days the
+same ledger yields 18 / 35 / 46 / 46 eligible, and the 5 tested beliefs never
+decay at any age.
+
+**BELIEF MATURITY** — 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING / 0 STALE.
+
+**HIDDEN STATES** — 16 companies tracked, 54 observations, competing postures
+preserved.
+
+**ECONOMIC CHAIN** — `honda`, scored not chosen (27 observations, 18 from
+filings, 1 resolved expectation). 4 of 7 stages KNOWN; MACRO_STATE,
+CUSTOMER_STATE and ORDERS have nothing in the ledger at all. Weakest link
+`ORDERS → COMPANY_DEMAND`. No link is ever OBSERVED and no constructor can
+emit one. Honda's own filing supplies the competing explanation for its
+margin move ("due mainly to the impact of EV-related losses…"), which raises
+the alternative without promoting the link.
+
+**COUNTERFACTUAL MEMORY** — 5 episodes, 3 strengthened, 2 weakened. Both
+lessons are about the CLASSIFIER rather than the companies: a cost signal
+sharing a sentence with a revenue signal must not open a demand belief
+(cloudflare); price language must not reach a demand family (duolingo).
+
+**CAUSAL CALIBRATION** — 2 UNMEASURABLE / 2 EMERGING / 0 above.
+`ESTABLISHED` is absent from the vocabulary. The ladder is monotone in sample
+size, after a first draft promoted `demand_strengthening` to
+REPEATEDLY_SUPPORTED on three real tests.
+
+**LEARNING ACCELERATION** — **DEGRADING**. 6 cycles ran the pipeline, 1 was
+the backlog drain and is excluded from every rate, leaving 5. Only `recent`
+(4 cycles) is computable; 7 / 14 / 30 report INSUFFICIENT_HISTORY with the
+real count attached. Driven by `self_test_rate` 0.8 — four of five would-be
+resolutions were the evidence that opened the belief.
+
+**LLM MIGRATION** — `alternative_explanation.v1`. An LLM may PROPOSE; the
+engine owns identity, storage, comparison, testing and retirement. A
+PROPOSED row is never offered downstream, and `record_test` has no argument
+that sets a standing directly.
+
+**PERFORMANCE** — every derived view is sub-millisecond. The seven new ones
+add ~1.1 ms to a cycle: decay 0.26, chain 0.31, acceleration 0.29,
+counterfactual 0.12, causal calibration 0.05. The whole derived block is
+5.71 ms, dominated by pre-existing `learning_health` at 3.76 ms. No
+regression above 10% anywhere. The only expensive addition is source
+acquisition, and it is scheduled rather than removed.
+
+**LIVE (founder preview, `f0a0294`)**
+
+| company | result |
 |---|---|
-| `learning_health` in the DATED report | **yes** — `market_learning_health.v1` |
-| `observation_binding` | present, 5 bound |
-| self-test guard fired live | **`restates_the_evidence_that_opened_it: 20`** |
-| `hidden_state_binding` | 16 companies tracked, 16 moved |
-| informative reconciliations | **3 CONFIRMED / 2 CONTRADICTED = 5** |
-| belief revision | 3 strengthened, 2 weakened |
-| ledger | 5 reconciliations, 5 belief_updates, 249 evidence |
-| `learned_without_trading` | true |
-
-**The canonical baseline is 5 informative / 3 confirmed / 2 contradicted.**
-The old 10/8 figure was inflated by self-tests and must not be restored.
+| Shopify | full briefing; opening evidence is filing prose; the site's own meta description appears **0** times |
+| Grifols | bounded/limited correctly — 4 usable sources vs 5 needed, 2 evidence kinds vs 3; names exactly what is missing |
+| Brightledger | attempted live; brightledger.io returns HTTP errors on every path. The failure page names each source's specific failure, invents nothing, exposes the targeted retry, and contains no Connectors entity and no cross-company evidence |
 
 ## Remaining queue, highest value first
 
-1. **SOURCE COVERAGE — still #1, now measured across three families.**
-   | family | sentences | named counterparties |
-   |---|---|---|
-   | news headlines | 219 items | ~1 |
-   | 10-K / 10-Q | 3,959 | 0 |
-   | 8-K + exhibits | 7,247 | 0 |
-
-   Large-cap disclosure systematically says "our competitors", "third
-   parties", "our top ten customers". NOT an extraction problem. The
-   untried families are S-1/F-1, partnership press releases and
-   government contract awards — the one real hit in the whole corpus was
-   a partnership release (Infosys/Metsä).
-
-2. **Knowledge decay events** — maturity computes STALE; append-only
-   lifecycle events are not yet written.
-3. **Economic chain**, **counterfactual memory**, **causal calibration**,
-   **learning-acceleration windows**, **LLM migration**, **performance
-   baseline**, **Brightledger live proof** — all still open and all
-   independent of item 1.
-2. **Actor-to-actor relationships** — now a hard PREREQUISITE, not a
-   parallel task. Interaction binding is built and correctly returns zero
-   because no competitor edges exist to read. Populate them from evidence
-   and interactions follow immediately.
-3. **Belief maturity + knowledge decay** — distinguish contradicted from stale.
-4. **Value of Information + research priority** — ≥5 real watchlist entries.
-5. **Actor-to-actor relationships** — world model has zero; needs evidence, not
-   model world knowledge.
-6. **Shopify excerpt producer** — SEO meta description outranks body prose.
-7. **Adversarial economic suite** — 12 cases.
-8. **Break proofs** — 29 listed.
-9. **Performance measurement** — no baseline captured this mission.
-10. **Brightledger live proof** — preview quota bound.
+1. **A source where a THIRD PARTY names both sides** — the only route to
+   `COMPETES_WITH`, and therefore to interactions and cross-actor
+   expectations. Everything downstream of relationships is blocked on this
+   one predicate.
+2. **The self-test rate, 0.8** — the acceleration report's own verdict on the
+   engine. Beliefs are opened and tested by evidence that arrives too close
+   together.
+3. **The two classifier lessons in counterfactual memory** are actionable
+   fixes to `event_patterns` / `belief_formation`, not merely records.
+4. **`CustomerNet`** — one residual case-study false positive (an ASML portal
+   read as a customer). One of eleven.
+5. Cross-actor expectations; the 30-cycle window; Founder consumption of the
+   seven derived views.
 
 ## Standing rules
 
-- Commit and push every completed slice. A worktree was destroyed mid-session
-  once and uncommitted work was lost; it was rebuilt from context, but the
-  correct behaviour is to push first.
+- Commit and push every completed slice. Own your worktree path.
+- A break proof only counts if it demonstrates RED before restore. Two waves
+  running, the most valuable finding came from a break proof FAILING while
+  the suite was fully green.
 - Never print a producer's probability as founder confidence. Every market
   belief carries the 0.586 prior a single evidence item opens one at.
 - No causal edge is ever `OBSERVED`, and none is promoted by a single test.
-- `UNMEASURABLE` is not zero. Absent telemetry and zero utility are opposite
-  findings.
+- `UNMEASURABLE` is not zero. `INSUFFICIENT_HISTORY` is not zero. Absent
+  telemetry and a measured zero are opposite findings.
+- Before building a subsystem, check whether it already exists and is simply
+  not wired. Six for six.
+- Integrate a source family on measured yield, never on how promising it
+  sounds — and check the retrieval before believing the yield.
