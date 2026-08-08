@@ -146,6 +146,7 @@ def retrieve(actor: str, home_url: str, family: str, *,
 
     frontier: List[str] = list(_seeds(home_url, family))
     seen: set = set()
+    bodies: set = set()
     out: List[RetrievedDocument] = []
 
     while frontier and len(out) < max_pages:
@@ -170,6 +171,18 @@ def retrieve(actor: str, home_url: str, family: str, *,
                 report.refusal_reasons.get(
                     "too_short_to_be_a_document", 0) + 1
             continue
+        # Two URLs, one document. `/releases` and
+        # `/products/innovation/releases` returned byte-identical text, which
+        # the fragment rule cannot see: the paths genuinely differ. Content
+        # identity is the only thing that settles it, and counting both would
+        # inflate the denominator exactly as the anchors did.
+        fingerprint = str(parsed.get("content_hash") or "") or text[:2000]
+        if fingerprint in bodies:
+            report.refusal_reasons["same_document_at_another_url"] = \
+                report.refusal_reasons.get("same_document_at_another_url", 0) + 1
+            continue
+        bodies.add(fingerprint)
+
         report.retrieved += 1
         out.append(RetrievedDocument(
             document_id=f"{family}:{url}", family=family, actor=actor,

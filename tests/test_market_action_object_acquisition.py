@@ -223,18 +223,25 @@ def test_one_announcement_on_five_pages_is_one_action():
     # Each filler block must be DISTINCT: the parser collapses identical
     # blocks, so repeating one sentence leaves the document under the
     # minimum length and it is refused before any action is read.
-    filler = "".join(
-        f"<p>Filler block number {i} carrying this document past the "
-        f"minimum parsed length so it is read rather than refused.</p>"
-        for i in range(8))
-    body = ("<html><head><title>Updates</title></head><body>"
-            "<p>Shopify Shipping expands to Italy and Spain.</p>"
-            + filler + "</body></html>")
+    #
+    # The pages must also DIFFER from each other, or the content-hash rule
+    # drops them as one document and this guard never fires. The live shape
+    # is an index page and an entry page: different documents, same
+    # announcement carried by both.
+    def page(n):
+        filler = "".join(
+            f"<p>Page {n} block {i}: distinct filler carrying this document "
+            f"past the minimum parsed length so it is read.</p>"
+            for i in range(8))
+        return ("<html><head><title>Updates</title></head><body>"
+                "<p>Shopify Shipping expands to Italy and Spain.</p>"
+                + filler + "</body></html>")
+
+    counter = {"n": 0}
 
     def fetcher(url, **kw):
-        # Every page of the family carries the SAME announcement, which is
-        # exactly the live shape: a changelog and its index page.
-        return {"ok": True, "body": body}
+        counter["n"] += 1
+        return {"ok": True, "body": page(counter["n"])}
 
     yields, actions, objects = AQ.measure(
         [("Shopify", "https://www.shopify.com")], ["release_notes"],
@@ -249,3 +256,26 @@ def test_one_announcement_on_five_pages_is_one_action():
     assert report.objects_established <= len(objects)
     assert report.duplicate_action_sightings > 0, \
         "this fixture repeats one announcement across pages; that must show"
+
+
+def test_the_same_document_at_two_urls_is_retrieved_once():
+    """`/releases` and `/products/innovation/releases` returned byte-identical
+    text on the live Salesforce site. The paths genuinely differ, so the
+    fragment rule cannot see it; content identity is the only thing that can.
+    """
+    blocks = "".join(
+        f"<p>Release note {i}: distinct filler carrying this page past the "
+        f"minimum parsed length.</p>" for i in range(8))
+    body = ("<html><head><title>Releases</title></head><body>"
+            "<p>Shopify Shipping expands to Italy and Spain.</p>"
+            + blocks + "</body></html>")
+
+    def fetcher(url, **kw):
+        return {"ok": True, "body": body}
+
+    docs, report = AQ.retrieve("Salesforce", "https://www.salesforce.com",
+                               "release_notes", as_of="2026-08-08",
+                               fetcher=fetcher)
+    assert len(docs) == 1, [d.url for d in docs]
+    assert report.retrieved == 1
+    assert report.refusal_reasons.get("same_document_at_another_url", 0) >= 1
