@@ -89,6 +89,10 @@ class EvidenceTrust:
     effective_accounts: float
     weight: float
     sentence: str
+    #: The rows this occurrence was assembled from. Carried so normalization
+    #: never costs provenance: the grouping is reversible, and a consumer can
+    #: still walk from the occurrence back to every account of it.
+    evidence_ids: Tuple[str, ...] = ()
 
     def as_dict(self) -> dict:
         return {
@@ -96,10 +100,11 @@ class EvidenceTrust:
             "standing": self.standing, "accounts": self.accounts,
             "effective_accounts": round(self.effective_accounts, 2),
             "weight": self.weight, "sentence": self.sentence,
+            "evidence_ids": list(self.evidence_ids),
         }
 
 
-def assess(corroboration) -> EvidenceTrust:
+def assess(corroboration, *, evidence_ids: Sequence[str] = ()) -> EvidenceTrust:
     """Translate a market-layer corroboration into founder-facing trust.
 
     Reads `event_corroboration.EventCorroboration`, which already knows the
@@ -131,7 +136,8 @@ def assess(corroboration) -> EvidenceTrust:
     return EvidenceTrust(
         event_id=str(_get("event_id", "") or ""), standing=standing,
         accounts=accounts, effective_accounts=effective,
-        weight=WEIGHT[standing], sentence=_SENTENCES[standing])
+        weight=WEIGHT[standing], sentence=_SENTENCES[standing],
+        evidence_ids=tuple(str(e) for e in (evidence_ids or ())))
 
 
 def independent_support_count(trusts: Sequence[EvidenceTrust]) -> int:
@@ -156,10 +162,64 @@ def render(trusts: Sequence[EvidenceTrust]) -> str:
     """One sentence for a reader, naming the weakest thing worth naming."""
     if not trusts:
         return ""
-    order = {CONFLICTED: 0, DEPENDENT_REREPORTING: 1, SINGLE_SOURCE: 2,
-             PARTIALLY_INDEPENDENT: 3, INDEPENDENTLY_CORROBORATED: 4}
-    worst = min(trusts, key=lambda t: order.get(t.standing, 9))
+    # Same ordering as `weakest`, read from one table: two copies of this
+    # ranking is two things that can disagree about which fact is the weak one.
+    worst = min(trusts, key=lambda t: _WEAKEST_FIRST.get(t.standing, 9))
     return worst.sentence
+
+
+#: The order that decides which of several standings a claim inherits.
+#: Weakest first: a claim resting on one dependent cluster and one solid
+#: independent event is only as sound as the weakest thing it needs.
+_WEAKEST_FIRST = {CONFLICTED: 0, DEPENDENT_REREPORTING: 1, SINGLE_SOURCE: 2,
+                  PARTIALLY_INDEPENDENT: 3, INDEPENDENTLY_CORROBORATED: 4}
+
+
+def weakest(trusts: Sequence[EvidenceTrust]) -> str:
+    """The standing a claim inherits from the events beneath it."""
+    if not trusts:
+        return ""
+    return min(trusts, key=lambda t: _WEAKEST_FIRST.get(t.standing, 9)).standing
+
+
+def for_claim(trusts: Sequence[EvidenceTrust]) -> dict:
+    """What ONE claim's supporting evidence is actually worth.
+
+    THIS IS THE OBJECT THAT CROSSES TO THE FOUNDER SIDE, and it is shaped for
+    a consumer that must not do this arithmetic itself. It carries the raw
+    count and the normalized one side by side, because the whole failure this
+    module exists to prevent is a reader — human or machine — seeing only the
+    first number.
+
+    `raw_accounts` is what a naive count would have said. `distinct_events` is
+    how many things actually happened. When those two disagree, the gap is the
+    inflation, and `sentence` is what to say about it.
+
+    The standing is the WEAKEST of the events, not the average and not the
+    best: averaging lets one well-sourced filing launder a rumour that the
+    same claim also depends on.
+    """
+    trusts = list(trusts)
+    return {
+        "contract": CONTRACT,
+        "standing": weakest(trusts),
+        "raw_accounts": sum(t.accounts for t in trusts),
+        "distinct_events": len(trusts),
+        "independent_support": independent_support_count(trusts),
+        "weight": total_weight(trusts),
+        "sentence": render(trusts),
+        # THE GROUPING ITSELF, not only its size. Counts alone would let the
+        # consumer know that three rows are one occurrence without knowing
+        # WHICH three, so it could not build a graph that walks from a
+        # rendered sentence back to the rows underneath it. Provenance is the
+        # reason normalization is safe: nothing is deleted, it is grouped.
+        "events": [
+            {"event_id": t.event_id, "standing": t.standing,
+             "accounts": t.accounts, "weight": t.weight,
+             "evidence_ids": list(t.evidence_ids)}
+            for t in trusts
+        ],
+    }
 
 
 def summarise(trusts: Sequence[EvidenceTrust]) -> dict:

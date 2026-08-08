@@ -549,7 +549,12 @@ def learning_step(ctx: C.CycleContext) -> dict:
     # the row rather than raised.
     try:
         payload["strategic_export"] = SEP.publish(
-            result, root=ctx.root, identities=ctx.company_names)
+            result, root=ctx.root, identities=ctx.company_names,
+            # Without this the dossiers ship raw evidence-id lists and the
+            # founder side can only COUNT them. The module that normalizes
+            # them has existed since wave 8 with no production caller, which
+            # is the same shape as every other silent zero in this cycle.
+            evidence_rows=store.evidence())
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}
     # Ship what was just published to a deployed founder service, when one is

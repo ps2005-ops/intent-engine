@@ -131,6 +131,7 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             pricing_actions: Sequence[Any] = (),
             causal_pathways: Sequence[Any] = (),
             identities: Optional[Dict[str, Any]] = None,
+            evidence_rows: Sequence[Any] = (),
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
 
@@ -187,6 +188,10 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
                 causal_pathways=bundle["causal_pathways"],
                 reconciliations=bundle["reconciliations"],
                 information_priorities=bundle["information_priorities"],
+                # The WHOLE ledger, not this company's slice. Event identity
+                # clusters by wording and date, so it is safe across subjects
+                # and the export only reads back the ids its own beliefs cite.
+                evidence_rows=evidence_rows,
                 limitations=list(limitations))
             SE.write_export(payload, root=root)
         except SE.ExportLeak as exc:

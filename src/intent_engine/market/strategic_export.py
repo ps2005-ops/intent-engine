@@ -75,6 +75,29 @@ ALLOWED: Dict[str, Any] = {
         "direction_of_last_change": None, "last_updated": None,
         "basis": None, "update_method": None, "evidence_ids": None,
         "limitations": None,
+        # WHAT THOSE evidence_ids ARE ACTUALLY WORTH.
+        #
+        # `evidence_ids` is a list of ROWS. Three sites carrying one press
+        # release put three ids in it, and a consumer with nothing else to go
+        # on can only count them — which is how "three sources confirm" gets
+        # said about one announcement. This block is the same evidence,
+        # normalized: how many things actually happened, how much independent
+        # support may honestly be claimed, and the sentence to say about it.
+        #
+        # It crosses because the market layer OWNS this judgement. The founder
+        # side must not re-derive it from source counts; that is the arithmetic
+        # that is wrong in the first place.
+        "evidence_trust": {
+            "contract": None, "standing": None, "raw_accounts": None,
+            "distinct_events": None, "independent_support": None,
+            "weight": None, "sentence": None,
+            # The grouping, so the consumer can walk an occurrence back to
+            # every row that reported it. Normalization groups; it never
+            # deletes, and this is what makes that checkable rather than
+            # promised.
+            "events": [{"event_id": None, "standing": None, "accounts": None,
+                        "weight": None, "evidence_ids": None}],
+        },
     }],
     "hidden_states": [{
         "subject": None, "leading_state": None, "leading_probability": None,
@@ -129,6 +152,16 @@ ALLOWED: Dict[str, Any] = {
     }],
     "limitations": None,
     "evidence_ids": None,
+    # The whole dossier's evidence, normalized once. A consumer that renders a
+    # confidence line about the company as a whole reads this rather than
+    # counting `evidence_ids`.
+    "evidence_trust": {
+        "contract": None, "standing": None, "raw_accounts": None,
+        "distinct_events": None, "independent_support": None,
+        "weight": None, "sentence": None,
+        "events": [{"event_id": None, "standing": None, "accounts": None,
+                    "weight": None, "evidence_ids": None}],
+    },
     "disclaimer": None,
     "interpretation_allowed": None,
     "interpretation_forbidden": None,
@@ -273,6 +306,7 @@ def build_export(*, company_id: str, as_of: str,
                  reconciliations: Sequence[Any] = (),
                  competitor_reactions: Sequence[Any] = (),
                  information_priorities: Sequence[Any] = (),
+                 evidence_rows: Sequence[Any] = (),
                  limitations: Sequence[str] = ()) -> dict:
     """Assemble one company's sanitized strategic intelligence.
 
@@ -283,6 +317,8 @@ def build_export(*, company_id: str, as_of: str,
     from . import expectation as EXP
 
     show, sentence = _displayer(subject_id, display_name)
+    # Clustered once for the whole dossier, then read per belief.
+    trust = _trust_index(evidence_rows)
     payload: Dict[str, Any] = {
         "export_version": EXPORT_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(
@@ -295,7 +331,8 @@ def build_export(*, company_id: str, as_of: str,
                                  if (n or "").strip()}),
         "as_of": as_of[:10],
         "freshness": _freshness(as_of),
-        "strategic_beliefs": [_belief(b, show, sentence) for b in beliefs],
+        "strategic_beliefs": [_belief(b, show, sentence, trust)
+                              for b in beliefs],
         "hidden_states": [_hidden(h, show) for h in hidden_states],
         "interactions": [_interaction(i) for i in interactions],
         "pricing_actions": [_gated(p) for p in pricing_actions],
@@ -317,15 +354,82 @@ def build_export(*, company_id: str, as_of: str,
     ids: Set[str] = set()
     _collect_ids(payload, ids)
     payload["evidence_ids"] = sorted(ids)
+    # The dossier's own standing, over every row anything in it cites. Built
+    # from the same index, so it cannot disagree with the per-belief blocks.
+    whole = _trust_for(sorted(ids), trust)
+    if whole:
+        payload["evidence_trust"] = whole
 
     assert_sanitized(payload)
     return payload
 
 
+# --- normalized trust: rows in, occurrences out ---------------------------
+def _trust_index(evidence_rows: Sequence[Any]) -> Dict[str, Any]:
+    """evidence_id -> the trust standing of the EVENT that row belongs to.
+
+    Built once per export rather than per belief: event identity is a global
+    clustering over the ledger, and clustering only the rows one belief cites
+    would split an event whose other accounts were cited by a different
+    belief — inventing independence out of the order the beliefs happen to be
+    listed in.
+
+    Rows the caller did not supply simply have no entry. That is why the
+    absence of a trust block is a distinct state downstream from a block that
+    says "one observation": the first means nobody looked.
+    """
+    from . import event_corroboration as EC
+    from . import event_identity as EI
+    from . import evidence_trust as ET
+
+    rows = [r for r in (evidence_rows or ())]
+    if not rows:
+        return {}
+    by_id = {_evidence_id(r): r for r in rows}
+    index: Dict[str, Any] = {}
+    for event in EI.group(rows):
+        members = [by_id[eid] for eid in event.evidence_ids if eid in by_id]
+        trust = ET.assess(EC.assess(event, members),
+                          evidence_ids=event.evidence_ids)
+        for eid in event.evidence_ids:
+            index[eid] = trust
+    return index
+
+
+def _evidence_id(row) -> str:
+    if isinstance(row, dict):
+        return str(row.get("evidence_id") or "")
+    return str(getattr(row, "evidence_id", "") or "")
+
+
+def _trust_for(evidence_ids: Sequence[str], index: Dict[str, Any]
+               ) -> Optional[dict]:
+    """The claim-level standing for one object's cited rows.
+
+    Deduplicated by EVENT, not by row: that is the entire point. Two rows of
+    one occurrence contribute one event, and the claim is told so.
+    """
+    if not index:
+        return None
+    from . import evidence_trust as ET
+
+    seen: Dict[str, Any] = {}
+    for eid in evidence_ids or ():
+        trust = index.get(str(eid))
+        if trust is not None:
+            seen.setdefault(trust.event_id, trust)
+    if not seen:
+        return None
+    return ET.for_claim(list(seen.values()))
+
+
 # --- projectors: each one names exactly what crosses ----------------------
-def _belief(b, show=lambda s: s, sentence=lambda s: s) -> dict:
+def _belief(b, show=lambda s: s, sentence=lambda s: s, trust=None) -> dict:
     last = b.history[-1] if b.history else None
-    return {"proposition": sentence(b.proposition), "subject": show(b.subject),
+    evidence_ids = (list(b.supporting_evidence_ids)
+                    + list(b.contradicting_evidence_ids))
+    block = _trust_for(evidence_ids, trust or {})
+    out = {"proposition": sentence(b.proposition), "subject": show(b.subject),
             "confidence": b.posterior_probability,
             "direction_of_last_change": last.direction if last else None,
             "last_updated": b.last_updated,
@@ -335,9 +439,14 @@ def _belief(b, show=lambda s: s, sentence=lambda s: s) -> dict:
             # shown a number with no argument behind it.
             "basis": last.basis if last else b.confidence_basis,
             "update_method": last.method if last else "DECLARED",
-            "evidence_ids": list(b.supporting_evidence_ids)
-            + list(b.contradicting_evidence_ids),
+            "evidence_ids": evidence_ids,
             "limitations": list(b.limitations)}
+    # Omitted rather than nulled when no rows were supplied: a consumer must
+    # be able to tell "we normalized this and it is one observation" from
+    # "nobody normalized this", and a key that is always present cannot.
+    if block:
+        out["evidence_trust"] = block
+    return out
 
 
 def _hidden(h, show=lambda s: s) -> dict:
