@@ -49,17 +49,72 @@ object, so the wave-8 ORDERING survives. What does not survive is the size
 of the claim: one object from three documents is a single observation, not
 a rate.
 
+### The near-miss corpus, fully adjudicated
+
+All 37 refusals were read by hand against their documents — the pool is
+small enough to read completely, so it was not sampled.
+
+| | count | share |
+|---|---|---|
+| **not an action at all** | **22** | **59.5%** |
+| real actions | 15 | |
+| — recoverable by extraction | 6 | 40.0% of real |
+| — genuinely absent from source | 9 | |
+
+So the ordering is **action-detector precision first, extraction recall
+second, source content third** — and only the third needs more documents.
+Wave 8 had assumed the opposite.
+
+Twelve non-announcement shapes now refuse 22 of 22 non-actions while losing
+0 of 16 real actions. That is IN-SAMPLE: the shapes were written against
+this corpus, and the next unseen corpus is the only real test. Live effect
+38 actions → 16, all adjudicated real, **established objects unchanged at 1**.
+
+Two of the six recoverables have clean structural fixes — a buyer named in
+the consequence clause ("so store owners have better control") and a named
+edition with no price beside it ("Bundled with Unlimited Edition"). Both
+move UNKNOWN → PARTIAL and neither reaches ESTABLISHED, which is correct:
+one names a buyer and no what, the other a what and no buyer.
+
+### What wave 9 did NOT reach
+
+The episode branch was not started. No `StrategicEpisodeCandidate`, no
+historical timelines, no candidate action→response sequences, no live
+interaction and therefore no preregistered response. §5's release-note
+expansion, §19's predicate coverage, §28's macro/capital check, §29's
+learning-split module and §30's product regression were not run.
+
+The reason is that §1 and §2 turned into a correction of wave 8 rather than
+the training exercise they were scoped as, and the corrections were load
+bearing: every count the episode ranker would have consumed was inflated
+between 2.4× and 5×, and one of the two "established" objects was invented.
+Ranking episode candidates on those numbers would have chosen a pair for
+reasons that were not real.
+
+### Learning split for this wave
+
+| kind | this wave |
+|---|---|
+| ECONOMIC_KNOWLEDGE_GAIN | **none** — established objects still 1 |
+| SYSTEM_LEARNING_GAIN | action corpus 38 → 16 all-real; 3 counting defects fixed; near-miss corpus exists and is fully adjudicated |
+| MODEL_CALIBRATION_GAIN | none — no prediction was tested |
+| FOUNDER_UTILITY_GAIN | none — no surface changed |
+
+A cleaner denominator is not a new fact about the world, and this table
+exists so that improvement can never again be reported as knowledge.
+
 ## Pinned state
 
 | what | where |
 |---|---|
 | market head | `HEAD of feat/strategic-response-learning` (see git log) |
+| wave-9 break proofs | **32/32** through the hardened harness |
 | market runtime | **`079128b` — NOT repinned; owner action below** |
 | founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
 | founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4333 passed / 4 skipped / EXIT=0 |
+| market suite | 4375 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
 ## Wave 8
@@ -372,6 +427,26 @@ in customer stories usually names companies outside it.
   extraction over 249 rows is 3.73 ms. No regression above 10%
 - **BREAK PROOFS** 30/30. Two failed first-pass: one mutation was a no-op
   (`{} or {...}` evaluates to the second dict) and one guard was unreachable
+
+## Remaining queue after wave 9, highest value first
+
+1. **The episode branch, on numbers that are now trustworthy.**
+   `StrategicEpisodeCandidate`, timelines, candidate sequences, and the
+   first live interaction. This was wave 9's stated mission and it was not
+   started; the counts it depends on were being corrected instead.
+2. **Release-note expansion (§5).** One established object from three
+   documents is a single observation. Take the family past the
+   20-document INDICATIVE floor before concluding anything from 0.333.
+3. **The 9 genuinely-absent actions.** "Introducing Commerce Components."
+   is a real launch that names no buyer anywhere in its sentence. Either
+   the surrounding document says who it is for — §3's context expansion,
+   not attempted — or this family cannot establish objects and the
+   ordering is wrong.
+4. **The precision shapes on an unseen corpus.** 22/22 and 0/16 are fit.
+   A second rival set is the only honest test.
+5. **The attribution gate knows only tracked names.** "VCARB Partners with
+   Salesforce" and "Missionforce ... Unveils" are third-party actions kept
+   because the gate has never heard of those actors.
 
 ## Remaining queue after wave 8, highest value first
 
