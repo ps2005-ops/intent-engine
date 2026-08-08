@@ -649,8 +649,35 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
             accepted.extend(found)
 
     payload["relationships"] = [r.as_dict() for r in accepted]
+
+    # PERSIST what was ACCEPTED. This line is the one that was missing for
+    # six waves: wave 5 discovered three valid COMPETES_WITH rivalries, the
+    # run report carried them, and the next process saw none of it, because
+    # `accepted` went into a payload and nowhere else.
+    #
+    # It writes AFTER the measured verdict, so a family that did not reach
+    # INTEGRATE contributes nothing, and never before validation.
+    from . import learning_store as _LS
+    persisted = duplicates = 0
+    if not ctx.dry_run:
+        store = _LS.LearningStore(pathlib.Path(ctx.root) / _LS.DEFAULT_PATH)
+        for relationship in accepted:
+            row = (relationship.as_dict() if hasattr(relationship, "as_dict")
+                   else dict(relationship))
+            if store.record_relationship(row):
+                persisted += 1
+            else:
+                duplicates += 1
+
     payload["summary"] = {
         "relationships_accepted": len(accepted),
+        "relationships_persisted": persisted,
+        "relationships_already_held": duplicates,
+        # accepted - persisted - already_held must be zero on a real run.
+        # Anything else means discovery outran storage, which is the defect
+        # this project spent five waves not noticing.
+        "persistence_gap": (0 if ctx.dry_run else
+                            len(accepted) - persisted - duplicates),
         "by_predicate": CS.counts_by_predicate(accepted),
         "distinct_actors": len({r.subject_actor for r in accepted}
                                | {r.object_actor for r in accepted}),

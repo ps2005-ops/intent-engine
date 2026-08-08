@@ -47,8 +47,13 @@ DERIVED = "DERIVED"
 LOST = "LOST"
 #: A write path exists and nothing has used it yet.
 UNUSED = "UNUSED"
+#: A write path exists, production ACCEPTED objects, and fewer reached disk.
+#: The state wave 11 could not express: `record_relationship` existed and the
+#: nightly cycle did not call it, so every check said "a write path exists"
+#: and production forgot anyway.
+DISCOVERED_NOT_PERSISTED = "DISCOVERED_NOT_PERSISTED"
 
-STANDINGS = (DURABLE, DERIVED, LOST, UNUSED)
+STANDINGS = (DURABLE, DERIVED, LOST, UNUSED, DISCOVERED_NOT_PERSISTED)
 
 # --- overall ---------------------------------------------------------------
 HEALTHY = "HEALTHY"
@@ -68,6 +73,10 @@ class KnowledgeKind:
     produced: int = 0
     #: How many a fresh reader can load.
     reloadable: int = 0
+    #: How many production ACCEPTED this cycle. Distinct from `produced`,
+    #: which counts objects that exist in memory: a subsystem gets no credit
+    #: for owning a write path that the cycle never calls.
+    accepted: int = 0
     note: str = ""
 
     @property
@@ -76,6 +85,8 @@ class KnowledgeKind:
             return DERIVED
         if not self.write_path:
             return LOST if self.produced else UNUSED
+        if self.accepted and self.accepted > self.reloadable:
+            return DISCOVERED_NOT_PERSISTED
         if self.produced and not self.reloadable:
             return LOST
         if not self.produced:
@@ -84,21 +95,32 @@ class KnowledgeKind:
 
     @property
     def lost_count(self) -> int:
-        return (self.produced - self.reloadable) if self.standing == LOST else 0
+        if self.standing == LOST:
+            return self.produced - self.reloadable
+        if self.standing == DISCOVERED_NOT_PERSISTED:
+            return self.accepted - self.reloadable
+        return 0
+
+    @property
+    def persistence_gap(self) -> int:
+        """Accepted by production minus what a fresh reader can load."""
+        return max(0, self.accepted - self.reloadable)
 
     def as_dict(self) -> dict:
         return {
             "name": self.name, "is_original": self.is_original,
             "write_path": self.write_path, "produced": self.produced,
-            "reloadable": self.reloadable, "standing": self.standing,
-            "lost": self.lost_count, "note": self.note,
+            "accepted": self.accepted, "reloadable": self.reloadable,
+            "standing": self.standing, "lost": self.lost_count,
+            "persistence_gap": self.persistence_gap, "note": self.note,
         }
 
 
 def audit(kinds: Sequence[KnowledgeKind]) -> dict:
     """Which knowledge would survive a restart, and which would not."""
     by_standing = collections.Counter(k.standing for k in kinds)
-    lost = [k for k in kinds if k.standing == LOST]
+    lost = [k for k in kinds
+            if k.standing in (LOST, DISCOVERED_NOT_PERSISTED)]
     original = [k for k in kinds if k.is_original]
     durable = [k for k in original if k.standing == DURABLE]
     status = (DEGRADED if lost else
@@ -112,6 +134,8 @@ def audit(kinds: Sequence[KnowledgeKind]) -> dict:
                         if by_standing.get(s, 0)},
         "lost": [k.as_dict() for k in lost],
         "objects_lost": sum(k.lost_count for k in lost),
+        "persistence_gap": sum(k.persistence_gap for k in kinds),
+        "accepted_by_production": sum(k.accepted for k in kinds),
         "status": status,
         "reason": (
             f"{len(lost)} kind(s) produced knowledge this session that no "

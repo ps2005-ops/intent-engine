@@ -282,6 +282,14 @@ class LearningStore:
         appends support rather than a second edge.
         """
         payload = rel.as_dict() if hasattr(rel, "as_dict") else dict(rel)
+        predicate = str(payload.get("predicate") or "").upper()
+        scope_value = str(payload.get("competitive_object")
+                          or payload.get("relationship_object") or "").strip()
+        if predicate == "COMPETES_WITH" and not scope_value:
+            raise ValueError(
+                "a rivalry with no competitive object cannot be stored: its "
+                "scope key would be empty, so every future claim about these "
+                "two companies would collapse into this one edge")
         key = relationship_scope(payload)
         held = self.relationship_scopes()
         if key not in held:

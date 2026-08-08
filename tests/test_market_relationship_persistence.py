@@ -176,3 +176,61 @@ def test_the_outcome_is_a_separate_row_from_the_expectation(store):
     outcomes = [r for r in store._rows()
                 if r.get("record") == LS.CROSS_ACTOR_OUTCOME]
     assert outcomes[0]["outcome"] == "CONFIRMED"
+
+
+# --- the NIGHTLY CYCLE, not just the API ----------------------------------
+
+def test_the_acquisition_step_persists_what_it_accepts(tmp_path, monkeypatch):
+    """The line that was missing for six waves.
+
+    Wave 5 discovered three valid rivalries, the run report carried them, and
+    the next process saw none of it — `accepted` went into a payload and
+    nowhere else. This asserts the step itself writes.
+    """
+    from intent_engine.market import steps as ST
+    from intent_engine.market import counterparty_sources as CS
+    from intent_engine.market import cycle as C
+
+    made = AR.relationship(
+        subject_actor="Cloudflare, Inc.", predicate=AR.SELLS_TO,
+        object_actor="Federal Acquisition Service",
+        subject_kind=AR.LEGAL_ENTITY, object_kind=AR.GOVERNMENT,
+        evidence_ids=("usaspending:1",), source_document="https://x/1",
+        subject_span="Cloudflare, Inc.",
+        object_span="Federal Acquisition Service",
+        relationship_span="Cloudflare received award 1",
+        created_at="2026-08-08")
+
+    class _Report:
+        def as_dict(self):
+            return {"family": "government_award"}
+
+        def verdict(self):
+            return (CS.INTEGRATE, "measured")
+
+    monkeypatch.setattr(CS, "measure",
+                        lambda *a, **k: ((made,), _Report()))
+    (tmp_path / "reports" / "market").mkdir(parents=True)
+    ctx = C.CycleContext(cycle="market", as_of="2026-08-08", root=tmp_path,
+                         session=None, run_id="r1")
+    payload = ST.source_acquisition_step(ctx)
+
+    assert payload["summary"]["relationships_accepted"] >= 1
+    assert payload["summary"]["relationships_persisted"] >= 1
+    assert payload["summary"]["persistence_gap"] == 0
+    # And a FRESH store over the same file sees it.
+    assert LS.LearningStore(tmp_path / LS.DEFAULT_PATH).relationships()
+
+
+def test_a_second_identical_cycle_adds_no_second_edge(store):
+    """Re-running the same night must not double the graph."""
+    assert store.record_relationship(edge()) is True
+    assert store.record_relationship(edge()) is False
+    assert len(store.relationships()) == 1
+
+
+def test_a_rivalry_with_no_contested_object_is_refused(store):
+    """Its scope key would be empty, so every future claim about these two
+    companies would collapse into this one edge."""
+    with pytest.raises(ValueError, match="no competitive object"):
+        store.record_relationship(edge(competitive_object=""))

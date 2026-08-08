@@ -63,3 +63,41 @@ def test_the_lost_entries_name_themselves():
                          produced=2, reloadable=0)])
     assert got["lost"][0]["name"] == "strategic_objective"
     assert got["lost"][0]["lost"] == 2
+
+
+# --- a write path is not a write -------------------------------------------
+
+def test_an_unused_write_path_gets_no_credit_when_production_accepted_work():
+    """The exact wave-11 gap: `record_relationship` existed, the nightly
+    cycle never called it, and every check said "a write path exists" while
+    production forgot four rivalries a night."""
+    got = kind(produced=0, accepted=4, reloadable=0)
+    assert got.standing == KR.DISCOVERED_NOT_PERSISTED
+    assert got.persistence_gap == 4
+    assert got.lost_count == 4
+
+
+def test_accepting_and_persisting_everything_is_durable():
+    got = kind(produced=4, accepted=4, reloadable=4)
+    assert got.standing == KR.DURABLE
+    assert got.persistence_gap == 0
+
+
+def test_a_partial_write_is_still_a_gap():
+    got = kind(produced=4, accepted=4, reloadable=3)
+    assert got.standing == KR.DISCOVERED_NOT_PERSISTED
+    assert got.persistence_gap == 1
+
+
+def test_the_audit_degrades_on_a_persistence_gap():
+    got = KR.audit([kind(produced=0, accepted=4, reloadable=0)])
+    assert got["status"] == KR.DEGRADED
+    assert got["persistence_gap"] == 4
+    assert got["accepted_by_production"] == 4
+
+
+def test_accepting_nothing_is_not_a_gap():
+    """A quiet night is not a defect. Only accepted-but-unwritten is."""
+    got = KR.audit([kind(produced=4, accepted=0, reloadable=4)])
+    assert got["persistence_gap"] == 0
+    assert got["status"] == KR.HEALTHY
