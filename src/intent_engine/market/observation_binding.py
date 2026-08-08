@@ -104,6 +104,21 @@ def types_testing(family: str) -> frozenset:
     return frozenset(etype for etype, fam, _ in BF._ROUTES if fam == family)
 
 
+def _fingerprint(text: str) -> str:
+    """A fact's identity, independent of which outlet carried it.
+
+    Punctuation, case and the trailing "- Publisher Name" attribution are
+    stripped, because the same wire story reaching the ledger twice with
+    two ids is the exact case this exists to catch. Deliberately blunt: a
+    fuzzy similarity threshold would need tuning against a corpus nobody
+    has labelled, and the failure it prevents -- a belief scoring itself
+    -- is worth over-rejecting a little to avoid.
+    """
+    import re
+    body = re.split(r"\s+[-–—]\s+[A-Z]", " ".join((text or "").split()))[0]
+    return re.sub(r"[^a-z0-9 ]", "", body.lower()).strip()[:120]
+
+
 def _evidence_direction(item: ME.MicroEvidence) -> str:
     return BF.direction_of(item.fact)
 
@@ -138,11 +153,26 @@ def bind(expectations: Sequence[EXP.ExpectedObservation],
 
         subject = (exp.subject or "").strip().lower()
         basis = set(exp.evidence_basis or ())
+        basis_text = {_fingerprint(e.fact) for e in evidence
+                      if e.evidence_id in basis}
         relevant_types = types_testing(family)
         found = None
         for item in by_subject.get(subject, ()):
             if item.evidence_id in basis:
                 refused["evidence_proposed_this_expectation"] += 1
+                continue
+            # SAME FACT, DIFFERENT ID. Holding out the basis by id is not
+            # enough: the same story arrives twice, from two outlets or on two
+            # sweeps, with two ids and near-identical text. Measured on the
+            # real ledger before this guard -- 3 of 10 informative results
+            # scored a belief against the very sentence that opened it,
+            # including one where opener and test were byte-identical.
+            #
+            # Those are self-tests, and every one of them came back CONFIRMED,
+            # which is exactly how a channel that cannot fail looks from the
+            # outside.
+            if _fingerprint(item.fact) in basis_text:
+                refused["restates_the_evidence_that_opened_it"] += 1
                 continue
             if item.observed_at[:10] < exp.preregistered_at[:10]:
                 continue
