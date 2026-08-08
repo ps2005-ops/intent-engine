@@ -512,10 +512,21 @@ def learning_step(ctx: C.CycleContext) -> dict:
     open_expectations = store.open_expectations(as_of=ctx.as_of)
     observations, binding_refused = OB.bind(
         open_expectations, store.evidence(), as_of=ctx.as_of)
+    # Posture distributions, from the same evidence. `LC.run` has always
+    # accepted `hidden_states=` and `hidden_state_observations=` and
+    # production has never passed either, so `companies_tracked` has read 0
+    # since the subsystem was built -- the third instance of one pattern: a
+    # correct module, a call site that never supplies its inputs, and a metric
+    # honestly reporting zero that everyone read as "nothing happened yet".
+    from . import hidden_state_binding as HSB
+    hidden_states, hidden_observations, hs_refused = HSB.bind(
+        store.evidence(), as_of=ctx.as_of)
     result = LC.run(
         as_of=ctx.as_of, store=store,
         evidence=list(ctx.learning_inbox),
         observations=observations,
+        hidden_states=hidden_states,
+        hidden_state_observations=hidden_observations,
         shadow_registry=SP.ShadowRegistry(),
         cycle=ctx.cycle,
         candidates_seen=getattr(ctx.translation_stats, "candidates", 0),
@@ -524,6 +535,8 @@ def learning_step(ctx: C.CycleContext) -> dict:
     payload["ledger"] = store.health()
     payload["observation_binding"] = OB.summarise(
         observations, binding_refused, examined=len(open_expectations))
+    payload["hidden_state_binding"] = HSB.summarise(
+        hidden_states, hidden_observations, hs_refused)
     # Publish the sanitized dossiers. This is the ONLY channel to Founder
     # Intelligence, and it runs on every session — a bridge that only opens
     # when someone remembers to open it is not a bridge. A failure to publish
