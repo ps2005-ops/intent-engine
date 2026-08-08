@@ -371,3 +371,89 @@ def summarise(episodes: Sequence[CounterfactualEpisode]) -> dict:
                  "explanation is refused: no observation could separate "
                  "them, so the pair would teach nothing"),
     }
+
+
+# ---------------------------------------------------------------------------
+# using a past episode on a new one — as an analogy, never as evidence
+# ---------------------------------------------------------------------------
+#
+# THE LINE THIS DRAWS
+# -------------------
+# A stored episode says: last time a demand belief was opened by a headline
+# whose demand content and cost content shared a sentence, the later evidence
+# contradicted it. That is worth surfacing when the same shape appears again.
+#
+# It is NOT worth counting. The new company is not the old company, and an
+# analogy that becomes evidence is how a system talks itself into a
+# conclusion it has already reached elsewhere — the exact failure that makes
+# "we have seen this before" dangerous rather than useful.
+#
+# So `apply` returns CANDIDATE alternatives and CANDIDATE falsifiers, tagged,
+# with `is_evidence` false and no evidence ids. Nothing downstream can
+# mistake one for an observation, because it carries none.
+ANALOGY = "ANALOGY"
+
+
+@dataclass(frozen=True)
+class AppliedAnalogy:
+    """A past episode, offered against a present one. Never counted."""
+    episode_id: str
+    from_subject: str
+    to_subject: str
+    shared_shape: str
+    candidate_alternative: str
+    candidate_falsifier: str
+    what_it_is_not: str = (
+        "an analogy, not an observation: it carries no evidence ids, cannot "
+        "update a posterior, and cannot resolve an expectation")
+    is_evidence: bool = False
+    kind: str = ANALOGY
+
+    def as_dict(self) -> dict:
+        return {
+            "contract": CONTRACT, "kind": self.kind,
+            "episode_id": self.episode_id,
+            "from_subject": self.from_subject, "to_subject": self.to_subject,
+            "shared_shape": self.shared_shape,
+            "candidate_alternative": self.candidate_alternative,
+            "candidate_falsifier": self.candidate_falsifier,
+            "is_evidence": self.is_evidence,
+            "evidence_ids": [],
+            "what_it_is_not": self.what_it_is_not,
+        }
+
+
+def apply(episodes: Sequence[CounterfactualEpisode], *, subject: str,
+          family: str, opening_evidence: Sequence[str] = ()
+          ) -> Tuple[AppliedAnalogy, ...]:
+    """Offer past episodes of the same SHAPE against a new one.
+
+    The shape is what makes an analogy admissible, and it is matched on the
+    OPENING EVIDENCE rather than on the company: a cost signal opening a
+    demand belief is the same shape whoever it happens to.
+    """
+    opening = " ".join(opening_evidence).lower()
+    shapes = []
+    if any(word in opening for word in _COST_WORDS):
+        shapes.append(("a cost or margin figure sharing a sentence with a "
+                       "revenue figure", _COST_WORDS))
+    if any(word in opening for word in _PRICE_WORDS):
+        shapes.append(("a share-price movement standing in for a company "
+                       "observation", _PRICE_WORDS))
+
+    out: List[AppliedAnalogy] = []
+    for episode_ in recall(episodes, subject=subject, family=family):
+        if episode_.subject == subject:
+            continue          # not an analogy; the same case
+        past_opening = episode_.provenance.get("opened_by", "").lower()
+        for description, words in shapes:
+            if not any(word in past_opening for word in words):
+                continue
+            out.append(AppliedAnalogy(
+                episode_id=episode_.episode_id,
+                from_subject=episode_.subject, to_subject=subject,
+                shared_shape=description,
+                candidate_alternative=episode_.strongest_alternative,
+                candidate_falsifier=episode_.discriminating_evidence))
+            break
+    return tuple(out)

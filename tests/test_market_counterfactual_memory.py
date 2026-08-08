@@ -152,3 +152,57 @@ def test_a_family_with_no_stated_alternative_produces_no_episode():
         {"record": "belief", "belief_id": "b1", "proposition": "p"},
     ]
     assert CM.build(made_up) == ()
+
+
+# --- experience transfer: an analogy that can never become evidence -------
+
+def test_a_past_episode_is_offered_against_a_new_case_of_the_same_shape():
+    """The Cloudflare lesson, applied to a company it never saw.
+
+    The shape is matched on the OPENING EVIDENCE, not on the company: a cost
+    figure sharing a sentence with a revenue figure is the same shape
+    whoever it happens to.
+    """
+    episodes = CM.build(rows())
+    got = CM.apply(episodes, subject="etsy", family="demand_weakening",
+                   opening_evidence=[
+                       "Etsy Q3 2026: Revenue Rises 12% as Restructuring "
+                       "Widens Operating Loss"])
+    assert len(got) == 1
+    assert got[0].from_subject == "cloudflare"
+    assert got[0].to_subject == "etsy"
+    assert "sharing a sentence" in got[0].shared_shape
+
+
+def test_an_analogy_carries_no_evidence_and_says_so():
+    episodes = CM.build(rows())
+    (got,) = CM.apply(episodes, subject="etsy", family="demand_weakening",
+                      opening_evidence=["Revenue Rises as Loss Widens"])
+    assert got.is_evidence is False
+    assert got.as_dict()["evidence_ids"] == []
+    assert got.kind == CM.ANALOGY
+    assert "cannot update a posterior" in got.what_it_is_not
+    assert "cannot resolve an expectation" in got.what_it_is_not
+
+
+def test_a_different_shape_retrieves_nothing():
+    episodes = CM.build(rows())
+    assert CM.apply(episodes, subject="etsy", family="demand_weakening",
+                    opening_evidence=[
+                        "Etsy announced a new seller fee structure"]) == ()
+
+
+def test_an_episode_is_never_an_analogy_for_its_own_subject():
+    """That is the same case, not a comparable one."""
+    episodes = CM.build(rows())
+    assert CM.apply(episodes, subject="cloudflare",
+                    family="demand_weakening",
+                    opening_evidence=["Revenue Rises as Loss Widens"]) == ()
+
+
+def test_the_price_shape_retrieves_the_duolingo_episode():
+    episodes = CM.build(rows())
+    (got,) = CM.apply(episodes, subject="etsy", family="demand_weakening",
+                      opening_evidence=["Etsy Stock Falls on Q3 Earnings"])
+    assert got.from_subject == "duolingo"
+    assert "share-price" in got.shared_shape
