@@ -56,6 +56,11 @@ class RetrievedDocument:
     title: str
     text: str
     retrieved_at: str
+    #: When the PAGE says it was published or last changed. Distinct from
+    #: `retrieved_at`, which is when we looked. Empty when the page does
+    #: not say — an index page usually does not, an entry page usually
+    #: does, and that difference is why entry pages can be ordered.
+    published_at: str = ""
 
 
 @dataclass
@@ -187,7 +192,8 @@ def retrieve(actor: str, home_url: str, family: str, *,
         out.append(RetrievedDocument(
             document_id=f"{family}:{url}", family=family, actor=actor,
             url=url, title=str(parsed.get("title") or ""), text=text,
-            retrieved_at=as_of[:10]))
+            retrieved_at=as_of[:10],
+            published_at=str(parsed.get("modified_date") or "")[:10]))
 
         # One hop, and only to members of the SAME family, so a pricing page
         # can reach the pricing-update page without wandering onto the blog.

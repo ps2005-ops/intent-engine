@@ -33,6 +33,7 @@ LC = f"{T}/test_market_learning_channels.py"
 RPQ = f"{T}/test_market_relationship_persistence.py"
 KRT = f"{T}/test_market_knowledge_retention.py"
 CRL = f"{T}/test_market_competitive_relationships.py"
+OTM = f"{T}/test_market_occurrence_time.py"
 NM = f"{T}/test_market_near_miss.py"
 EI = f"{T}/test_market_event_identity.py"
 GT = f"{T}/test_market_game_theoretic_state.py"
@@ -407,6 +408,42 @@ PROOFS = [
      "        if expectation_id not in self.cross_actor_expectation_ids():",
      "        if False:",
      f"{RPQ}::test_an_outcome_needs_a_preregistered_expectation"),
+
+("w11-10. retrieval time is promoted to an occurrence",
+     S / "occurrence_time.py",
+     "    return ActionTime(occurred_at=\"\", published_at=\"\",\n"
+     "                      retrieved_at=retrieved_at[:10], standing=UNKNOWN,\n"
+     "                      evidence=\"neither the text nor the page states a date\")",
+     "    return ActionTime(occurred_at=retrieved_at[:10], published_at=\"\",\n"
+     "                      retrieved_at=retrieved_at[:10], standing=EXACT,\n"
+     "                      evidence=\"neither the text nor the page states a date\")",
+     f"{OTM}::test_retrieval_time_never_becomes_an_occurrence"),
+
+    ("w11-11. a dated future commitment is recorded as something that happened",
+     S / "occurrence_time.py",
+     "        return self.standing in ORDERABLE and not self.is_future",
+     "        return self.standing in ORDERABLE",
+     f"{OTM}::test_a_dated_future_commitment_is_not_an_occurrence"),
+
+    ("w11-12. an ambiguous changelog marker is guessed into last year",
+     S / "occurrence_time.py",
+     "    if got > published_at[:10]:\n        return \"\", \"\"",
+     "    if got > published_at[:10]:\n"
+     "        got = _iso(str(int(year) - 1), hit.group(\"month\"), hit.group(\"day\"))",
+     f"{OTM}::test_a_marker_later_than_the_publication_is_refused_not_guessed"),
+
+    ("w11-13. a dateless marker borrows the current year",
+     S / "occurrence_time.py",
+     "    if not hit or not published_at:\n        return \"\", \"\"",
+     "    if not hit:\n        return \"\", \"\"\n"
+     "    published_at = published_at or \"2026-12-31\"",
+     f"{OTM}::test_a_marker_with_no_publication_year_is_no_date"),
+
+    ("w11-14. vague recency is resolved to the publication date",
+     S / "occurrence_time.py",
+     "    if _VAGUE.search(text):",
+     "    if False:",
+     f"{OTM}::test_vague_recency_beats_a_publication_guess_by_refusing"),
 
     # --- 18 & 19: production target and PAPER --------------------------
     # Both are runtime guards asserted by the existing deployment tests
