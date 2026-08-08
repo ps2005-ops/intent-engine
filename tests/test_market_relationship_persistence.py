@@ -234,3 +234,42 @@ def test_a_rivalry_with_no_contested_object_is_refused(store):
     companies would collapse into this one edge."""
     with pytest.raises(ValueError, match="no competitive object"):
         store.record_relationship(edge(competitive_object=""))
+
+
+# --- the operator report carries the split and the retention --------------
+
+def test_the_persisted_report_separates_the_four_channels(tmp_path):
+    """The module existed and the cycle did not expose it, so an operator
+    inspecting a past cycle could not tell a refactor from insight."""
+    from intent_engine.market import steps as ST
+    from intent_engine.market import cycle as C
+    (tmp_path / "reports" / "market").mkdir(parents=True)
+    ctx = C.CycleContext(cycle="market", as_of="2026-08-08", root=tmp_path,
+                         session=None, run_id="r1", dry_run=True)
+    ctx.results["source_acquisition"] = {"summary": {
+        "relationships_accepted": 2, "relationships_persisted": 2,
+        "persistence_gap": 0}}
+    payload = ST.learning_health_step(ctx)
+    channels = payload["learning_channels"]["by_channel"]
+    assert set(channels) == {"ECONOMIC_KNOWLEDGE_GAIN", "SYSTEM_CAPABILITY_GAIN",
+                             "CALIBRATION_GAIN", "FOUNDER_UTILITY_GAIN"}
+    assert channels["ECONOMIC_KNOWLEDGE_GAIN"]["total"] == 2
+
+
+def test_retention_is_reported_beside_the_gains_not_inside_them(tmp_path):
+    """Keeping knowledge is not new knowledge."""
+    from intent_engine.market import steps as ST
+    from intent_engine.market import cycle as C
+    (tmp_path / "reports" / "market").mkdir(parents=True)
+    ctx = C.CycleContext(cycle="market", as_of="2026-08-08", root=tmp_path,
+                         session=None, run_id="r1", dry_run=True)
+    ctx.results["source_acquisition"] = {"summary": {
+        "relationships_accepted": 4, "relationships_persisted": 0,
+        "persistence_gap": 4}}
+    payload = ST.learning_health_step(ctx)
+    assert "knowledge_retention" in payload
+    assert payload["knowledge_retention"]["status"] == "DEGRADED"
+    assert payload["knowledge_retention"]["persistence_gap"] == 4
+    # And a persistence failure is NOT counted as economic knowledge.
+    assert payload["learning_channels"]["by_channel"][
+        "ECONOMIC_KNOWLEDGE_GAIN"]["total"] == 0

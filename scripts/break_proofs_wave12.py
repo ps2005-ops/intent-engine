@@ -508,6 +508,27 @@ PROOFS = [
      "    worst = max(trusts, key=lambda t: order.get(t.standing, 9))",
      f"{ETR}::test_the_rendered_line_names_the_weakest_thing_worth_naming"),
 
+("w12-9. the persisted cycle report omits the learning split",
+     S / "steps.py",
+     "        payload[\"learning_channels\"] = _LC.report(movements)",
+     "        payload[\"learning_channels_omitted\"] = _LC.report(movements)",
+     f"{RPQ}::test_the_persisted_report_separates_the_four_channels"),
+
+    # The guard and the count are ONE decision: mutating only `count` is
+    # unreachable behind `if persisted:`, which is how this came back
+    # NOT_CAUGHT the first time.
+    ("w12-10. a persistence failure is reported as economic knowledge",
+     S / "steps.py",
+     "        if persisted:\n"
+     "            movements.append(_LC.movement(\n"
+     "                channel=_LC.ECONOMIC_KNOWLEDGE, kind=\"relationship_discovered\",\n"
+     "                count=persisted,",
+     "        if accepted:\n"
+     "            movements.append(_LC.movement(\n"
+     "                channel=_LC.ECONOMIC_KNOWLEDGE, kind=\"relationship_discovered\",\n"
+     "                count=accepted,",
+     f"{RPQ}::test_retention_is_reported_beside_the_gains_not_inside_them"),
+
     # --- 18 & 19: production target and PAPER --------------------------
     # Both are runtime guards asserted by the existing deployment tests
     # rather than by a mutation of market code; they are verified in the

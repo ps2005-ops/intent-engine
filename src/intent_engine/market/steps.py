@@ -983,6 +983,38 @@ def learning_health_step(ctx: C.CycleContext) -> dict:
         return {"contract": LH.CONTRACT, "error": str(exc)}
 
     payload = health.as_dict()
+
+    # The four channels, in the PERSISTED report rather than in a helper.
+    # An operator inspecting a past cycle has to be able to read "we learned
+    # no new economic facts, and we improved the pipeline" — otherwise a
+    # refactor reads as insight for as long as the refactors last.
+    #
+    # RETENTION is reported BESIDE them and never inside them: keeping
+    # knowledge is not new knowledge.
+    try:
+        from . import learning_channels as _LC
+        from . import knowledge_retention as _KR
+        acquisition = (ctx.results.get("source_acquisition") or {})
+        summary = acquisition.get("summary") or {}
+        accepted = int(summary.get("relationships_accepted", 0) or 0)
+        persisted = int(summary.get("relationships_persisted", 0) or 0)
+        gap = int(summary.get("persistence_gap", 0) or 0)
+
+        movements = []
+        if persisted:
+            movements.append(_LC.movement(
+                channel=_LC.ECONOMIC_KNOWLEDGE, kind="relationship_discovered",
+                count=persisted,
+                detail=f"{persisted} relationship(s) persisted this cycle"))
+        payload["learning_channels"] = _LC.report(movements)
+        payload["knowledge_retention"] = _KR.audit([_KR.KnowledgeKind(
+            name="actor_relationship", is_original=True,
+            write_path="record_relationship", produced=accepted,
+            accepted=accepted, reloadable=accepted - gap,
+            note="written by source_acquisition_step")])
+    except Exception as exc:  # noqa: BLE001 - see docstring
+        payload["learning_channels_error"] = str(exc)
+
     if not ctx.dry_run:
         try:
             payload["snapshot_appended"] = LH.append_snapshot(
