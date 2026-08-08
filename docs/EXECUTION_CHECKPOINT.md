@@ -10,11 +10,11 @@ Updated 2026-08-07, wave 6.
 
 | what | where |
 |---|---|
-| market runtime | `75681e0` (branch `feat/consumption-telemetry`) |
+| market runtime | `bbd9d44` (branch `feat/consumption-telemetry`) |
 | founder preview | `a6c8601` (branch `feat/consumption-emitter` → `feat/founder-decision-experience-v3`) |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in both launchd plists |
-| market suite | 3827 passed / 4 skipped / EXIT=0 |
+| market suite | 3837 passed / 4 skipped / EXIT=0 |
 | founder suite | 4563 passed / 6 skipped / EXIT=0 |
 
 ## Completed this mission
@@ -26,6 +26,8 @@ Updated 2026-08-07, wave 6.
 | 3 | FounderLearningHealth.v1 | `a6c8601` | reads NOT_LIMITED on the real ledger |
 | 4 | Causal episodes + self-test guard | `61e486f` | 10 episodes / 8 subjects; informative 10 → 5 after the guard |
 | 5 | Hidden-state binding | `75681e0` | companies_tracked 0 → 16, 54 observations |
+| 6 | Execution checkpoint | `bd0a9f2` | this file |
+| 7 | Interaction binding that refuses | `bbd9d44` | 3 fabricated records → 0, with the prerequisite named |
 
 ## The pattern this mission keeps finding
 
@@ -37,6 +39,7 @@ Three confirmed instances, all shipped and all invisible to a green suite:
 1. `learning_cycle.run(observations=)` — never passed. No belief was ever tested.
 2. `report.render_report` — dropped `learning_health` from the persisted report.
 3. `learning_cycle.run(hidden_states=)` — never passed. `companies_tracked` 0.
+4. `learning_cycle.run(interactions=)` — never passed. `interactions` 0.
 
 Plus two contract breaks of the same family: the founder rejected every dossier
 over two unknown fields, and the renderer read every kind of strategic content
@@ -51,8 +54,10 @@ not wired.** In this codebase that has been true five times out of five.
    `learning_health` in the DATED report, `observation_binding`,
    `hidden_state_binding`, and that the self-test guard reduced informative
    results on the live ledger.
-2. **Strategic interactions** — `strategic_interaction.py` exists; check
-   whether it too is unwired before writing anything.
+2. **Actor-to-actor relationships** — now a hard PREREQUISITE, not a
+   parallel task. Interaction binding is built and correctly returns zero
+   because no competitor edges exist to read. Populate them from evidence
+   and interactions follow immediately.
 3. **Belief maturity + knowledge decay** — distinguish contradicted from stale.
 4. **Value of Information + research priority** — ≥5 real watchlist entries.
 5. **Actor-to-actor relationships** — world model has zero; needs evidence, not
