@@ -58,13 +58,18 @@ EXPLORATION_FLOOR = 0.15
 # --- what a question needs --------------------------------------------------
 #
 # The predicate is the question. Everything else is ranking.
-NEEDS_CUSTOMER = "NEEDS_CUSTOMER"
-NEEDS_GOVERNMENT_BUYER = "NEEDS_GOVERNMENT_BUYER"
-NEEDS_PARTNER = "NEEDS_PARTNER"
-NEEDS_COMPETITOR = "NEEDS_COMPETITOR"
-NEEDS_FRESH_OBSERVATION = "NEEDS_FRESH_OBSERVATION"
+NEEDS_CUSTOMER = "NAMED_CUSTOMER"
+NEEDS_GOVERNMENT_BUYER = "GOVERNMENT_BUYER"
+NEEDS_PARTNER = "PARTNERSHIP"
+NEEDS_COMPETITOR = "COMPETITOR_RELATIONSHIP"
+NEEDS_COMPETITIVE_ACTION = "COMPETITIVE_ACTION"
+NEEDS_ACTION_OBJECT = "ACTION_OBJECT"
+NEEDS_OUTCOME_EVIDENCE = "OUTCOME_EVIDENCE"
+NEEDS_FRESH_OBSERVATION = "FRESH_OBSERVATION"
 QUESTION_TYPES = (NEEDS_CUSTOMER, NEEDS_GOVERNMENT_BUYER, NEEDS_PARTNER,
-                  NEEDS_COMPETITOR, NEEDS_FRESH_OBSERVATION)
+                  NEEDS_COMPETITOR, NEEDS_COMPETITIVE_ACTION,
+                  NEEDS_ACTION_OBJECT, NEEDS_OUTCOME_EVIDENCE,
+                  NEEDS_FRESH_OBSERVATION)
 
 #: Which families CAN answer each question at all. A family absent from a
 #: row cannot answer that question however well it scores elsewhere.
@@ -73,8 +78,19 @@ CAN_ANSWER: Dict[str, Tuple[str, ...]] = {
     NEEDS_GOVERNMENT_BUYER: ("government_award",),
     NEEDS_PARTNER: ("partnership_release",),
     NEEDS_COMPETITOR: ("comparison_page", "customer_case_study"),
+    # An action needs an ANNOUNCEMENT. A rival's blog is narrative and
+    # measured 5 real actions from 8 documents at poor precision; release
+    # notes and launch pages are where a company states what it did.
+    NEEDS_COMPETITIVE_ACTION: ("release_notes", "product_launch_page",
+                               "investor_release", "rival_newsroom"),
+    # An object needs a document that names the BUYER as well as the thing.
+    # A launch page says who it is for; a blog post rarely does.
+    NEEDS_ACTION_OBJECT: ("pricing_page", "product_launch_page",
+                          "migration_page", "release_notes"),
+    NEEDS_OUTCOME_EVIDENCE: ("customer_case_study", "investor_release"),
     NEEDS_FRESH_OBSERVATION: ("government_award", "partnership_release",
-                              "comparison_page", "customer_case_study"),
+                              "comparison_page", "customer_case_study",
+                              "rival_newsroom"),
 }
 
 
@@ -93,6 +109,16 @@ class SourceFamilyPerformance:
     latency_seconds: float = 0.0
     cost: str = ""
     last_updated: str = ""
+
+    @property
+    def key(self) -> Tuple[str, str]:
+        """A family's record is per QUESTION TYPE, not overall.
+
+        `customer_case_study` yields 0.500 relationships/document for a named
+        customer and 0.136 for a competitor and 0.000 for an action object.
+        One number for the family would recommend it for all three.
+        """
+        return (self.source_family, self.question_type)
 
     @property
     def maturity(self) -> str:
@@ -180,13 +206,21 @@ def plan(question_type: str, *,
     from . import observation_binding as OB
 
     eligible = CAN_ANSWER.get(question_type, ())
-    by_family = {p.source_family: p for p in performance}
+    # Keyed by (family, question) and narrowed to THIS question, so a
+    # family's score for a different job cannot rank it here.
+    by_family = {p.source_family: p for p in performance
+                 if not p.question_type or p.question_type == question_type}
 
+    # Exclusions are computed from EVERY family the engine has measured, not
+    # from the ones narrowed to this question — a family scored only for a
+    # different job still needs a stated reason for not appearing here, or
+    # the plan silently omits it.
     excluded = {
-        name: (f"cannot answer {question_type}: this family names "
-               f"{'buyers' if 'award' in name else 'the other party'} of a "
-               f"different kind")
-        for name in by_family if name not in eligible}
+        p.source_family: (
+            f"cannot answer {question_type}: this family names "
+            f"{'buyers' if 'award' in p.source_family else 'the other party'}"
+            f" of a different kind")
+        for p in performance if p.source_family not in eligible}
 
     ranked: List[Tuple[tuple, str, str]] = []
     for name in eligible:
