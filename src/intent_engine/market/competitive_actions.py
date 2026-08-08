@@ -170,6 +170,62 @@ _NOT_AN_ACTION = re.compile(
     r"served\s+as|joined\s+(?:us|the\s+company)|"
     r"^(?:one|the\s+other|another)\b|\bmoves?\s+on\b)", re.I)
 
+#: Shapes a page uses to talk ABOUT its release programme without announcing
+#: anything. Named individually because "we admitted 22 sentences that
+#: announce nothing" and "we admitted 22 navigation links" ask for different
+#: repairs, and the wave-8 counter called all of them one thing.
+#:
+#: Measured against 38 hand-adjudicated live sentences: these refuse 22 of 22
+#: non-actions and lose 0 of 16 real actions. That is IN-SAMPLE — the
+#: patterns were written against this corpus. What is transferable is that
+#: each matches a STRUCTURE (habitual present, second person, a quoted
+#: testimonial, a comparison) rather than a remembered phrase.
+_NOT_AN_ACTION_SHAPES: Tuple[Tuple[str, str], ...] = (
+    ("describes_a_release_cadence",
+     r"\b(?:every\s+year|three\s+times\s+a\s+year|each\s+(?:release|quarter|"
+     r"month)|seasonal\s+releases)\b"),
+    ("defines_what_a_release_is",
+     r"\b(?:releases?|updates?|patches?)\s+are\s+"
+     r"(?:major|smaller|minor|typically|generally)\b"),
+    ("points_at_another_page",
+     r"\b(?:to\s+see|visit|you\s+can\s+access|check\s+out|explore)\b.{0,80}"
+     r"\b(?:release\s+notes|community|page|site|version)\b"),
+    ("addresses_the_reader",
+     r"^(?:use|join|build|localize|explore|discover|start|try|get)\s+\w"),
+    ("quotes_a_customer", r"^[\"“”']"),
+    ("claims_to_be_better",
+     r"\bmore\s+(?:\w+\s+){1,3}than\b|\bwidely\s+known\s+for\b"),
+    ("conditional_marketing_copy", r"^(?:whether|if)\s+you\b"),
+    ("explains_how_the_product_works",
+     r"^(?:upgrading|switching|moving)\s+to\b"),
+    ("boasts_about_the_estate",
+     r"\bour\s+(?:latest|curated)\b.{0,60}\b(?:helps?|boasts?)\b"),
+    ("states_a_habitual_benefit",
+     r"\b(?:releases?|updates?|features?)\s+(?:keep|help|give|ensure)\s+"
+     r"(?:you|your)\b"),
+    ("offers_a_signup", r"\bsign[-\s]?up\s+(?:opportunit|link|form|page)"),
+    ("instruction_fragment", r"^[A-Z][\w\s]{0,30}\s+to\s+create\s+an?\b"),
+)
+
+_NOT_AN_ACTION_COMPILED = tuple(
+    (name, re.compile(pattern, re.I))
+    for name, pattern in _NOT_AN_ACTION_SHAPES)
+
+
+def announces_nothing(sentence: str) -> str:
+    """Which non-announcement shape this sentence is, or "" if it announces.
+
+    A page about a release programme is mostly not announcements. 22 of the
+    37 refusals in the wave-9 corpus were sentences of this kind, and the
+    object extractor was refusing them correctly — the defect was that they
+    were admitted as actions at all.
+    """
+    for name, pattern in _NOT_AN_ACTION_COMPILED:
+        if pattern.search(sentence or ""):
+            return name
+    return ""
+
+
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 
 #: The action verbs, alone, used to find what governs them in a sentence.
@@ -339,6 +395,10 @@ def extract(text: str, *, actor: str, competitive_object: str,
             continue
         if _NOT_AN_ACTION.search(sentence):
             refused["describes_the_product_rather_than_a_change"] += 1
+            continue
+        shape = announces_nothing(sentence)
+        if shape:
+            refused[shape] += 1
             continue
         # Whose action is this? A page's owner is not the subject of every
         # sentence on it, and a comparison page is mostly ABOUT somebody

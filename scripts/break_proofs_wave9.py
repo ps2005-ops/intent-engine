@@ -26,6 +26,7 @@ AQ = f"{T}/test_market_action_object_queries.py"
 AC = f"{T}/test_market_action_object_acquisition.py"
 EC = f"{T}/test_market_event_corroboration.py"
 RP = f"{T}/test_market_research_planning.py"
+NM = f"{T}/test_market_near_miss.py"
 EI = f"{T}/test_market_event_identity.py"
 GT = f"{T}/test_market_game_theoretic_state.py"
 MF = f"{T}/test_market_multi_actor_founder.py"
@@ -233,6 +234,31 @@ PROOFS = [
      "                _same_actor(subject, other) for other in other_actors):",
      "                True for other in [1]):",
      f"{CA}::test_a_capitalised_sentence_opener_is_not_a_company"),
+
+("w9-6. a page describing its release cadence is admitted as an action",
+     S / "competitive_actions.py",
+     "        shape = announces_nothing(sentence)\n        if shape:",
+     "        shape = announces_nothing(sentence)\n        if False:",
+     f"{CA}::test_the_refusal_names_which_shape_it_was"),
+
+    ("w9-7. a non-action is counted as a missing buyer",
+     S / "near_miss.py",
+     "    real_actions = [m for m in adjudicated\n"
+     "                    if m.adjudication != WRONG_DOCUMENT]",
+     "    real_actions = list(adjudicated)",
+     f"{NM}::test_a_non_action_is_not_counted_as_a_missing_buyer"),
+
+    ("w9-8. an unadjudicated refusal is scored as a source failure",
+     S / "near_miss.py",
+     "    adjudicated = [m for m in misses if m.is_adjudicated]",
+     "    adjudicated = list(misses)",
+     f"{NM}::test_an_unadjudicated_refusal_is_not_a_source_failure"),
+
+    ("w9-9. a curly quote silently loses a hand label",
+     S / "near_miss.py",
+     "    text = \" \".join((span or \"\").translate(_QUOTES).split()).lower()",
+     "    text = \" \".join((span or \"\").split()).lower()",
+     f"{NM}::test_a_curly_quote_does_not_lose_a_label"),
 
     ("w9-5. a sub-brand is treated as a different company",
      S / "competitive_actions.py",

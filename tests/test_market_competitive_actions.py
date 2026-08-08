@@ -321,15 +321,22 @@ def test_the_same_sentence_on_salesforces_own_page_is_kept():
 
 
 def test_a_capitalised_sentence_opener_is_not_a_company():
-    """Every sentence begins with a capital. An ungated proper-noun rule
-    refused this one on the grounds that "Regular" is a company."""
-    text = ("Regular releases keep your org secure, scalable, and innovative "
-            "without manual upgrades or downtime.")
-    assert CA.acting_subject(text) == "Regular"
+    """Every sentence begins with a capital, and product names are
+    capitalised too. An ungated proper-noun rule reads "Commerce Components"
+    as a rival company and deletes Shopify's own launch.
+
+    The sentence has to be a REAL announcement or the precision gate refuses
+    it first and this test observes nothing — which is how it was first
+    written, and the break proof caught it.
+    """
+    text = "Commerce Components launched today for enterprise retailers."
+    assert CA.acting_subject(text) == "Commerce Components"
+    assert not CA.announces_nothing(text), "fixture must reach the actor check"
     found, refused = CA.extract(
-        text, actor="Salesforce", competitive_object="",
+        text, actor="Shopify", competitive_object="",
         event_time="2026-08-08", source="s", source_family="release_notes",
-        other_actors=["Shopify", "BigCommerce"])
+        other_actors=["Salesforce", "BigCommerce"])
+    assert found, "a real launch was deleted by the attribution rule"
     assert not refused.get("action_belongs_to_another_actor")
 
 
@@ -365,3 +372,70 @@ def test_the_known_names_can_only_remove_an_action_never_add_one():
                                **kwargs)
     without, _ = CA.extract(COMPARISON_PAGE, other_actors=(), **kwargs)
     assert len(with_names) <= len(without)
+
+
+# --- a page about releases is mostly not announcements --------------------
+
+NOT_ANNOUNCEMENTS = [
+    ("cadence", "Salesforce delivers three seasonal releases every year."),
+    ("definition", "Patch or maintenance updates are smaller, targeted "
+                   "fixes released between major updates."),
+    ("navigation", "You can access the latest version on Salesforce "
+                   "Releases and the Release Readiness Trailblazer Community."),
+    ("imperative", "Use multiple channels: Slack, the Release in a Box deck, "
+                   "short training sessions for teams impacted by releases."),
+    ("testimonial", "“Launching on BigCommerce allowed us to personalize the "
+                    "customer journey and deliver frictionless experience.”"),
+    ("comparison", "Shopify launches more new features than WooCommerce."),
+    ("conditional", "Whether you’re launching new campaigns, improving "
+                    "personalization, or optimizing performance, Marketing "
+                    "Cloud gives you the tools to move faster."),
+    ("how_it_works", "Upgrading to a higher plan reduces your fee rate; "
+                     "moving to a contracted Performance plan eliminates it."),
+    ("benefit", "Regular releases keep your org secure, scalable, and "
+                "innovative without manual upgrades or downtime."),
+    ("signup", "Salesforce announces sign-up opportunities through the "
+               "Release Readiness Trailblazer Community."),
+]
+
+REAL_ANNOUNCEMENTS = [
+    "Shopify Shipping expands to Italy and Spain.",
+    "Introducing JavaScript for Shopify Functions.",
+    "Introducing Commerce Components.",
+    "Introducing 10 new granular permissions, including view-only "
+    "permissions, so store owners have better control over staff access.",
+    "Starting June 1, 2026, BigCommerce is updating its plan structure "
+    "and pricing.",
+    "Winter ’26 Release: New Agentforce Sales Features Unveiled at Dreamforce.",
+    "Bundled with Unlimited Edition.",
+    "We’re providing unthrottled API calls for our newly launched Commerce "
+    "Components by Shopify and increasing standard API limits.",
+]
+
+
+@pytest.mark.parametrize("label,text", NOT_ANNOUNCEMENTS)
+def test_a_page_talking_about_its_releases_announces_nothing(label, text):
+    """22 of the 37 wave-9 refusals were sentences of this kind. The object
+    extractor was right to refuse them; the defect was admitting them as
+    actions at all."""
+    assert CA.announces_nothing(text), label
+
+
+@pytest.mark.parametrize("text", REAL_ANNOUNCEMENTS)
+def test_a_real_announcement_survives_the_precision_gate(text):
+    """The gate's cost side. Every one of these is a real action from the
+    live corpus and must pass — a precision filter that also removes the
+    signal is not an improvement."""
+    assert not CA.announces_nothing(text), CA.announces_nothing(text)
+
+
+def test_the_refusal_names_which_shape_it_was():
+    """"We admitted 22 sentences that announce nothing" and "we admitted 22
+    navigation links" ask for different repairs."""
+    _found, refused = CA.extract(
+        "Salesforce delivers three seasonal releases every year. "
+        "You can access the latest version on the Release Notes page.",
+        actor="Salesforce", competitive_object="", event_time="2026-08-08",
+        source="s", source_family="release_notes")
+    assert refused.get("describes_a_release_cadence") == 1
+    assert refused.get("points_at_another_page") == 1

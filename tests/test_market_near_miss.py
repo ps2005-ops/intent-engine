@@ -15,6 +15,8 @@ ACQUIRED = pathlib.Path(__file__).resolve().parents[1] / \
     "reports/market/strategic/wave9_acquisition.json"
 LABELS = pathlib.Path(__file__).resolve().parents[1] / \
     "reports/market/strategic/wave9_near_miss_labels.json"
+CORPUS = pathlib.Path(__file__).resolve().parents[1] / \
+    "reports/market/strategic/wave9_near_miss_corpus.json"
 
 
 def miss(**kw):
@@ -104,15 +106,30 @@ def test_the_live_corpus_is_fully_adjudicated():
     assert got["near_misses"] == len(misses)
 
 
-def test_most_of_the_live_pool_is_not_an_action_at_all():
-    """The wave-9 finding, pinned. The pool wave 8 handed forward as
-    "near misses" is majority sentences that announce nothing, so the
-    dominant defect is the ACTION detector's precision and not the object
-    extractor's recall."""
+def test_the_finding_that_most_of_the_pool_was_not_an_action_is_recorded():
+    """The wave-9 finding belongs to the corpus it was measured on.
+
+    This test first asserted it against the LIVE file, and then the
+    precision gate fixed the defect and the assertion started failing —
+    it was pinning the bug. The finding is pinned where it happened, on the
+    frozen corpus report; the live pool is checked below for the opposite
+    property.
+    """
+    corpus = json.loads(CORPUS.read_text())
+    assert corpus["summary"]["not_an_action_rate"] > 0.5
+    assert corpus["summary"]["not_an_action"] == 22
+    assert "action-detector precision" in corpus["ordering"][0]
+
+
+def test_the_live_pool_no_longer_admits_a_non_action():
+    """What the precision gate is for. Every sentence still reaching the
+    object extractor is one somebody adjudicated as a real action."""
     d = json.loads(ACQUIRED.read_text())
     labels = json.loads(LABELS.read_text())["labels"]
-    got = NM.summarise(NM.collect(d["actions"], d["objects"], labels))
-    assert got["not_an_action_rate"] > 0.5
-    # And of the real actions, a substantial minority ARE recoverable, so
+    misses = NM.collect(d["actions"], d["objects"], labels)
+    got = NM.summarise(misses)
+    assert got["not_an_action"] == 0, \
+        [m.span[:70] for m in misses if m.adjudication == NM.WRONG_DOCUMENT]
+    # And of the real actions a substantial minority ARE recoverable, so
     # extraction work is worth doing second — not instead, and not first.
     assert 0.2 < got["recoverable_object_rate"] < 0.8
