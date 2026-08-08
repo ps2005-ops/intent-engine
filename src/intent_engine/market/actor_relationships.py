@@ -192,6 +192,12 @@ def is_named_actor(text: str) -> bool:
     return bool(re.match(r"^[A-Z]", candidate))
 
 
+def normalise_self(name: str) -> str:
+    """A comparable form, for the one check every predicate needs: that the
+    two ends are not the same actor under two spellings."""
+    return " ".join(re.sub(r"[^a-z0-9 ]", " ", (name or "").lower()).split())
+
+
 def relationship(*, subject_actor: str, predicate: str, object_actor: str,
                  evidence_ids: Sequence[str], source_document: str,
                  subject_span: str, object_span: str,
