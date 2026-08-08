@@ -536,6 +536,10 @@ def learning_step(ctx: C.CycleContext) -> dict:
     payload["ledger"] = store.health()
     payload["observation_binding"] = OB.summarise(
         observations, binding_refused, examined=len(open_expectations))
+    # The rate alone names no producer. The class breakdown does, and every
+    # producer it can name is upstream of observation binding.
+    payload["self_test_decomposition"] = OB.diagnose(
+        open_expectations, store.evidence())
     payload["hidden_state_binding"] = HSB.summarise(
         hidden_states, hidden_observations, hs_refused)
     # Publish the sanitized dossiers. This is the ONLY channel to Founder

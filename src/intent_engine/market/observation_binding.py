@@ -209,3 +209,131 @@ def summarise(observations: Dict[str, dict], refused: Dict[str, int],
         "falsifiable_families": sorted(FALSIFIABLE),
         "refused": dict(sorted(refused.items())),
     }
+
+
+# ---------------------------------------------------------------------------
+# why a candidate was a self-test — the decomposition
+# ---------------------------------------------------------------------------
+#
+# WHY THIS EXISTS AS A CAPABILITY RATHER THAN A ONE-OFF PROBE
+# -----------------------------------------------------------
+# "self_test_rate is 0.8" is a number nobody can act on. "28 of 31 are the
+# same page re-read on a later sweep" names a producer, and the producer was
+# `evidence_id_for` hashing the date the sweep ran into the identity of the
+# fact it read. One measurement found it; the class breakdown is what made
+# the measurement possible, so it stays.
+#
+# The classes are ordered from most mechanical to least, and the first match
+# wins. AMBIGUOUS is real and is reported rather than absorbed.
+EXACT_FACT_RESTATEMENT = "EXACT_FACT_RESTATEMENT"
+SEMANTIC_RESTATEMENT = "SEMANTIC_RESTATEMENT"
+SAME_SOURCE_REPACKAGING = "SAME_SOURCE_REPACKAGING"
+WIRE_DUPLICATE = "WIRE_DUPLICATE"
+SAME_EVENT_DIFFERENT_HEADLINE = "SAME_EVENT_DIFFERENT_HEADLINE"
+SAME_DOCUMENT_DIFFERENT_EXCERPT = "SAME_DOCUMENT_DIFFERENT_EXCERPT"
+LEGITIMATE_LATER_OBSERVATION = "LEGITIMATE_LATER_OBSERVATION"
+AMBIGUOUS = "AMBIGUOUS"
+
+SELF_TEST_CLASSES = (
+    EXACT_FACT_RESTATEMENT, SEMANTIC_RESTATEMENT, SAME_SOURCE_REPACKAGING,
+    WIRE_DUPLICATE, SAME_EVENT_DIFFERENT_HEADLINE,
+    SAME_DOCUMENT_DIFFERENT_EXCERPT, LEGITIMATE_LATER_OBSERVATION, AMBIGUOUS)
+
+#: Which producer each class blames. A class with no named producer is a
+#: class nobody can fix, and that is worth saying out loud.
+PRODUCER_OF = {
+    SAME_SOURCE_REPACKAGING: (
+        "ingestion: the same source re-read on a later sweep. Fixed at "
+        "`micro_evidence.occurrence_key`, which no longer hashes the sweep "
+        "date into a fact's identity"),
+    EXACT_FACT_RESTATEMENT: (
+        "ingestion: byte-identical text from a different source. Two "
+        "outlets genuinely are two items, so this is correlated evidence "
+        "rather than a duplicate row"),
+    WIRE_DUPLICATE: (
+        "the wire: one story, several outlets. Correlated, handled by the "
+        "design-effect penalty in `beliefs`, never by pretending it is one "
+        "observation"),
+    SAME_EVENT_DIFFERENT_HEADLINE: (
+        "the aggregator: one event, two headlines. Caught by the fact "
+        "fingerprint rather than by identity"),
+    SAME_DOCUMENT_DIFFERENT_EXCERPT: (
+        "extraction: one document, two spans of it, both routed to the "
+        "same belief"),
+    SEMANTIC_RESTATEMENT: (
+        "no mechanical producer — the two sentences say the same thing in "
+        "different words, which no fingerprint catches"),
+    LEGITIMATE_LATER_OBSERVATION: "not a self-test; admitted",
+    AMBIGUOUS: "unclassified; inspect before acting on the count",
+}
+
+
+def classify_self_test(opener, candidate) -> str:
+    """Which kind of self-test this pair is. First match wins."""
+    same_text = (opener.fact or "").strip() == (candidate.fact or "").strip()
+    same_source = (opener.source == candidate.source
+                   and opener.source_role == candidate.source_role)
+    if same_text and same_source:
+        if opener.observed_at[:10] == candidate.observed_at[:10]:
+            return SAME_DOCUMENT_DIFFERENT_EXCERPT
+        return SAME_SOURCE_REPACKAGING
+    if same_text and opener.source_role != candidate.source_role:
+        return WIRE_DUPLICATE
+    if same_text:
+        return EXACT_FACT_RESTATEMENT
+    if _fingerprint(opener.fact) == _fingerprint(candidate.fact):
+        return SAME_EVENT_DIFFERENT_HEADLINE
+    return SEMANTIC_RESTATEMENT
+
+
+def diagnose(expectations: Sequence[EXP.ExpectedObservation],
+             evidence: Sequence[ME.MicroEvidence]) -> dict:
+    """Decompose the self-test population, and name a producer for each class.
+
+    Reports the classes as counts and the producers as sentences, because a
+    rate without a producer is a dashboard and a producer without a count is
+    an opinion.
+    """
+    by_id = {e.evidence_id: e for e in evidence}
+    by_subject: Dict[str, List[ME.MicroEvidence]] = collections.defaultdict(list)
+    for item in evidence:
+        subject = (item.subject_company or "").strip().lower()
+        if subject:
+            by_subject[subject].append(item)
+
+    counts: Dict[str, int] = collections.Counter()
+    samples: Dict[str, dict] = {}
+    for exp in expectations:
+        basis = set(exp.evidence_basis or ())
+        openers = {_fingerprint(by_id[i].fact): by_id[i]
+                   for i in basis if i in by_id}
+        for candidate in by_subject.get((exp.subject or "").strip().lower(),
+                                        ()):
+            if candidate.evidence_id in basis:
+                continue
+            opener = openers.get(_fingerprint(candidate.fact))
+            if opener is None:
+                continue
+            kind = classify_self_test(opener, candidate)
+            counts[kind] += 1
+            samples.setdefault(kind, {
+                "subject": exp.subject,
+                "opener": opener.evidence_id,
+                "candidate": candidate.evidence_id,
+                "opener_seen": opener.observed_at[:10],
+                "candidate_seen": candidate.observed_at[:10],
+                "identical_text": (opener.fact or "").strip()
+                == (candidate.fact or "").strip()})
+    total = sum(counts.values())
+    return {
+        "contract": BINDING_VERSION,
+        "self_tests": total,
+        "by_class": {k: counts.get(k, 0) for k in SELF_TEST_CLASSES
+                     if counts.get(k)},
+        "producers": {k: PRODUCER_OF.get(k, "") for k in counts},
+        "samples": samples,
+        "dominant_class": (counts.most_common(1)[0][0] if counts else ""),
+        "note": ("a self-test rate without a class breakdown names no "
+                 "producer, and every producer named here is upstream of "
+                 "this module"),
+    }

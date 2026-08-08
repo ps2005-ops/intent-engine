@@ -142,7 +142,32 @@ def test_evidence_ingested_once_across_sessions(store):
     second = LC.run(as_of="2026-08-05", store=store, evidence=[item])
     assert first.observations_ingested == 1
     assert second.steps[0].changed == 0
-    assert "already ingested" in second.steps[0].note
+    assert "already held" in second.steps[0].note
+    assert len(store.evidence()) == 1
+    # Same fact, same date: the sighting did not advance, so there is
+    # nothing new to record. A replay must leave the ledger byte-identical.
+    assert store.re_observations() == ()
+
+
+def test_the_same_fact_read_on_a_later_sweep_is_not_a_new_observation(store):
+    """The defect that drove the self-test rate to 0.8.
+
+    `observed_at` is the date the SWEEP ran. Hashing it into the evidence id
+    minted a fresh id for an unchanged page every night, so 84 of 249 real
+    ledger rows were re-reads that `observation_binding` then had to catch
+    one at a time as self-tests.
+    """
+    seed(store, window_end="2026-12-01")
+    monday = ev(observed="2026-08-04")
+    friday = ev(observed="2026-08-08")
+    assert monday.fact == friday.fact
+    assert monday.evidence_id == friday.evidence_id
+    LC.run(as_of="2026-08-04", store=store, evidence=[monday])
+    LC.run(as_of="2026-08-08", store=store, evidence=[friday])
+    assert len(store.evidence()) == 1
+    # The later sighting IS recorded — "the page still said this on Friday"
+    # is information — as a sighting, never as a second observation.
+    assert [r["seen_at"] for r in store.re_observations()] == ["2026-08-08"]
 
 
 def test_hidden_state_guard_failure_does_not_fail_the_cycle(store):

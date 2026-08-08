@@ -231,22 +231,58 @@ class MicroEvidence:
         }
 
 
-def evidence_id_for(*, subject_company: str, evidence_type: str,
-                    observed_at: str, fact: str, source: str) -> str:
-    """A content hash, so the SAME fact seen twice carries the same id.
+def occurrence_key(*, subject_company: str, evidence_type: str, fact: str,
+                   source: str) -> str:
+    """What makes two rows the SAME OBSERVATION rather than two of them.
 
-    Deduplication has to survive re-ingestion: the daily cycle re-reads the
-    same filings, and an incrementing counter would mint a fresh id each pass
-    and let one fact update a belief every day forever. The id is derived from
-    what the fact IS, so a repeat is recognisable as a repeat.
+    THE DATE IS NOT PART OF IT, AND INCLUDING IT WAS THE BUG
+    -------------------------------------------------------
+    This function's predecessor hashed `observed_at` into the key, and
+    `observed_at` is the date the SWEEP RAN, not the date anything happened.
+    So re-reading an unchanged page on three consecutive nights minted three
+    different ids for one fact, `learning_cycle`'s id-based dedupe passed
+    them all, and the ledger acquired 84 duplicate rows out of 249.
+
+    Downstream, `observation_binding` then caught them one at a time as
+    "restates the evidence that opened it" — 28 of 31 self-test refusals,
+    driving the engine's own learning-quality verdict to DEGRADING at a
+    self-test rate of 0.8. The guard was doing ingestion's job.
+
+    The docstring it replaces stated the requirement exactly — "the SAME
+    fact seen twice carries the same id... deduplication has to survive
+    re-ingestion" — and its own key defeated it.
 
     `source` participates because two outlets reporting the same event really
-    are two items — they are correlated, which the design-effect penalty in
+    are two items: they are correlated, which the design-effect penalty in
     `beliefs` handles, but they are not literally the same row.
+
+    WHAT THIS COLLAPSES THAT IT SHOULD NOT
+    --------------------------------------
+    A genuinely recurring identical sentence from the same source about the
+    same company — a monthly boilerplate line, say — becomes one occurrence.
+    That is a real loss of recall and it is the right trade: such a sentence
+    carries no direction, so it could not have tested anything, while a
+    belief scoring itself corrupts every downstream measurement.
     """
-    norm = _normalise(fact)
-    raw = "|".join((subject_company.strip().lower(), evidence_type,
-                    (observed_at or "")[:10], norm, source.strip().lower()))
+    return "|".join((subject_company.strip().lower(), evidence_type,
+                     _normalise(fact), source.strip().lower()))
+
+
+def evidence_id_for(*, subject_company: str, evidence_type: str,
+                    observed_at: str = "", fact: str = "",
+                    source: str = "") -> str:
+    """A content hash of the OCCURRENCE, stable across re-reads.
+
+    `observed_at` is accepted and ignored. It is kept in the signature
+    because callers pass it positionally by keyword and because deleting it
+    would silently change nothing at the call sites while changing
+    everything here; the parameter's presence and its absence from the key
+    are both deliberate.
+    """
+    del observed_at                       # see `occurrence_key`
+    raw = occurrence_key(subject_company=subject_company,
+                         evidence_type=evidence_type, fact=fact,
+                         source=source)
     return "ev_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 

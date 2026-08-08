@@ -239,16 +239,20 @@ def run(*, as_of: str, store: LS.LearningStore,
     before_edges = graph.all()
 
     # 1. micro-evidence ingestion -----------------------------------------
-    known = store.evidence_ids()
-    fresh = [e for e in ME.deduplicate(evidence)
-             if e.evidence_id not in known]
-    for item in fresh:
-        store.record_evidence(item)
+    # The store decides what is new, on OCCURRENCE identity. Asking it by id
+    # was the defect: the id carried the sweep date, so an unchanged page
+    # re-read tonight was a new fact every night.
+    fresh, reread = [], 0
+    for item in ME.deduplicate(evidence):
+        if store.record_evidence(item):
+            fresh.append(item)
+        else:
+            reread += 1
     result.steps.append(StepResult(
         "micro_evidence_ingestion", ATTEMPTED, changed=len(fresh),
         examined=len(evidence),
-        note=(f"{len(evidence) - len(fresh)} already ingested and skipped"
-              if len(evidence) != len(fresh) else "")))
+        note=(f"{reread} re-read of an occurrence already held"
+              if reread else "")))
 
     beliefs_before = store.beliefs()
     by_id = {b.belief_id: b for b in beliefs_before}

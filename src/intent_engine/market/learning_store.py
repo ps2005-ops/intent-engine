@@ -41,9 +41,14 @@ CYCLE = "cycle"
 #: belief row is history: editing it to say "this is stale now" would
 #: destroy the record of when it was not.
 LIFECYCLE = "belief_lifecycle"
+#: A fact the sweep read AGAIN. Not a second observation — the same one,
+#: still there. Recorded so "this page still said X a week later" survives
+#: without becoming a row that could test a belief.
+EVIDENCE_SEEN = "evidence_seen"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
-                          RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE})
+                          RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
+                          EVIDENCE_SEEN})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -143,8 +148,69 @@ class LearningStore:
     def record_reconciliation(self, r: EXP.Reconciliation) -> None:
         self._append(RECONCILIATION, r.as_dict())
 
-    def record_evidence(self, e: ME.MicroEvidence) -> None:
-        self._append(EVIDENCE, e.as_dict())
+    def record_evidence(self, e: ME.MicroEvidence) -> bool:
+        """Ingest one observation once. Returns False if it is a re-read.
+
+        Idempotent on OCCURRENCE, not on id, so rows written before the id
+        included the sweep date are still recognised. A re-read appends an
+        `evidence_seen` row instead: the fact that a page still says the same
+        thing a week later is real information, and it is not a second
+        observation that could score a belief against itself.
+        """
+        key = ME.occurrence_key(
+            subject_company=e.subject_company,
+            evidence_type=e.evidence_type, fact=e.fact, source=e.source)
+        held = self._occurrence_first_seen()
+        if key not in held:
+            self._append(EVIDENCE, e.as_dict())
+            return True
+        # A re-read is only worth a row when it is a LATER day. Re-running
+        # today's sweep is a replay, and a replay must leave the ledger
+        # byte-identical — the property `test_break_append_only_by_replaying
+        # _a_session` exists to hold. Same-day re-reads and repeats of a
+        # sighting already recorded are both silent.
+        seen_at = e.observed_at[:10]
+        if seen_at <= held[key]:
+            return False
+        sighting = f"{e.evidence_id}|{seen_at}"
+        if sighting not in self._sightings():
+            self._append(EVIDENCE_SEEN, {
+                "sighting_id": sighting, "evidence_id": e.evidence_id,
+                "seen_at": seen_at, "subject_company": e.subject_company,
+                "source": e.source, "occurrence_first_seen": held[key]})
+        return False
+
+    def _sightings(self) -> frozenset:
+        return frozenset(r.get("sighting_id") for r in self._rows()
+                         if r.get("record") == EVIDENCE_SEEN)
+
+    def _occurrence_first_seen(self) -> Dict[str, str]:
+        """occurrence key -> the date it was FIRST written."""
+        out: Dict[str, str] = {}
+        for r in self._rows():
+            if r.get("record") != EVIDENCE:
+                continue
+            key = ME.occurrence_key(
+                subject_company=str(r.get("subject_company") or ""),
+                evidence_type=str(r.get("evidence_type") or ""),
+                fact=str(r.get("fact") or ""),
+                source=str(r.get("source") or ""))
+            date = str(r.get("observed_at") or "")[:10]
+            if key not in out or date < out[key]:
+                out[key] = date
+        return out
+
+    def occurrence_keys(self) -> frozenset:
+        """Every evidence row's occurrence identity, recomputed from the row.
+
+        Recomputed rather than stored so the 249 rows written under the old
+        date-bearing id are covered without rewriting history.
+        """
+        return frozenset(self._occurrence_first_seen())
+
+    def re_observations(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == EVIDENCE_SEEN)
 
     def record_lifecycle(self, event) -> bool:
         """Append one belief-lifecycle event. Idempotent on `event_id`.
