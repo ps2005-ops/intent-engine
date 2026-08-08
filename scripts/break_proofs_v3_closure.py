@@ -508,8 +508,13 @@ PROOFS = [
 
     ("w12-8. the rendered line reports the strongest evidence, not the weakest",
      S / "evidence_trust.py",
-     "    worst = min(trusts, key=lambda t: order.get(t.standing, 9))",
-     "    worst = max(trusts, key=lambda t: order.get(t.standing, 9))",
+     # Re-anchored: the claim-level roll-up renamed `order` to
+     # `_WEAKEST_FIRST`, which left this proof pointing at a line that no
+     # longer existed. The harness reported ANCHOR_MISSING rather than a pass,
+     # which is the only reason it was noticed — a proof whose anchor has
+     # rotted is a proof that has silently stopped testing anything.
+     "    worst = min(trusts, key=lambda t: _WEAKEST_FIRST.get(t.standing, 9))",
+     "    worst = max(trusts, key=lambda t: _WEAKEST_FIRST.get(t.standing, 9))",
      f"{ETR}::test_the_rendered_line_names_the_weakest_thing_worth_naming"),
 
 ("w12-9. the persisted cycle report omits the learning split",

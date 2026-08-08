@@ -151,7 +151,11 @@ def test_the_real_ledger_has_genuinely_corroborated_events():
     assert got["evidence_rows"] >= 249
     assert got["events"] < got["evidence_rows"], "grouping must reduce rows"
     assert got["events"] >= 155
-    assert got["events_with_several_accounts"] == 49
+    # `== 49` survived directly beneath the note above warning against exactly
+    # this, and expired on the next cycle. The floor is the durable half; the
+    # ceiling is that grouping cannot invent an event.
+    assert got["events_with_several_accounts"] >= 49
+    assert got["events_with_several_accounts"] <= got["events"]
     assert got["events_with_independent_accounts"] >= 5
 
 

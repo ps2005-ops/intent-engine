@@ -129,8 +129,17 @@ def test_against_the_real_ledger(tmp_path):
     assert decay["not_eligible_because"]["TESTED"] >= 5
 
     assert got["causal_episodes"]["episodes"] >= 5
-    assert got["causal_episodes"]["by_outcome"]["CONTRADICTED"] == 2
-    assert got["value_of_information"]["by_priority"]["VOI_HIGH"] == 2
+    # A CONTRADICTED episode is the loop working, so this count only ever
+    # grows — pinning it equal meant the next contradiction the engine found
+    # would be reported as a test failure. The invariant is that contradiction
+    # is REACHED and stays a minority of a larger population.
+    outcomes = got["causal_episodes"]["by_outcome"]
+    assert outcomes["CONTRADICTED"] >= 2
+    assert outcomes["CONTRADICTED"] <= got["causal_episodes"]["episodes"]
+    # Same shape as CONTRADICTED above: a live count, pinned equal.
+    voi = got["value_of_information"]["by_priority"]
+    assert voi["VOI_HIGH"] >= 2
+    assert voi["VOI_HIGH"] <= sum(voi.values())
     assert got["belief_maturity"]["beliefs"] >= 51
     assert got["causal_calibration"]["total_tests"] >= 5
     assert got["counterfactual_memory"]["episodes"] >= 5

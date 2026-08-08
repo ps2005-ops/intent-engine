@@ -198,12 +198,28 @@ def test_a_share_above_one_raises_rather_than_being_clamped():
 # --- windows are computed only where the history defends them ------------
 
 def test_windows_beyond_the_history_report_insufficient_with_the_real_count():
+    """A window the history cannot defend says so, and names the shortfall.
+
+    THE LIST USED TO BE HARD-CODED — ("7_cycle", "14_cycle", "30_cycle") —
+    which asserted a fact about how much history existed on the day it was
+    written. Production appends nightly, so the history grew past seven cycles
+    and `7_cycle` became computable: the suite went red because the engine had
+    LEARNED MORE, with no code change. The durable claim is the relationship
+    between what a window requires and what exists, so it is now read off the
+    report rather than remembered.
+    """
     got = LA.report(real_observations(), ledger=real_ledger())
-    for name in ("7_cycle", "14_cycle", "30_cycle"):
+    beyond = [n for n, w in got["windows"].items()
+              if w["cycles_required"] > w["cycles_available"]]
+    assert beyond, "no window exceeds the history; the case is unexercised"
+    for name in beyond:
         window = got["windows"][name]
         assert window["status"] == LA.INSUFFICIENT_HISTORY
-        assert window["cycles_available"] < window["cycles_required"]
         assert str(window["cycles_available"]) in window["reason"]
+    # ...and the converse, so this cannot pass by calling everything short.
+    for name, window in got["windows"].items():
+        if window["cycles_required"] <= window["cycles_available"]:
+            assert window["status"] != LA.INSUFFICIENT_HISTORY
 
 
 def test_the_recent_window_is_the_shortest_that_can_carry_a_direction():
@@ -220,7 +236,13 @@ def test_the_real_history_reads_degrading_on_the_self_test_rate():
     got = LA.report(real_observations(), ledger=real_ledger())
     assert got["cycles_total"] >= 6
     assert got["backlog_cycles_excluded"] == 1
-    assert got["windows_computed"] == [LA.RECENT]
+    # Exactly the windows the history can defend — derived, not remembered.
+    # Pinning `[RECENT]` asserted that only four cycles existed, which stopped
+    # being true the moment production ran again.
+    expected = [n for n, size in LA.WINDOWS
+                if size <= got["windows"][n]["cycles_available"]]
+    assert got["windows_computed"] == expected
+    assert LA.RECENT in got["windows_computed"]
     assert got["status"] == LA.DEGRADING
     assert any("self_test_rate" in d for d in got["degradations"])
     assert got["quality"]["self_test_rate"] >= 0.8
