@@ -53,8 +53,9 @@ STABLE = "STABLE"
 PLATEAUING = "PLATEAUING"
 DEGRADING = "DEGRADING"
 INSUFFICIENT_HISTORY = "INSUFFICIENT_HISTORY"
+EARLY_WARNING_STATUS = "EARLY_WARNING"
 STATUSES = (ACCELERATING, STABLE, PLATEAUING, DEGRADING,
-            INSUFFICIENT_HISTORY)
+            EARLY_WARNING_STATUS, INSUFFICIENT_HISTORY)
 
 # --- windows ----------------------------------------------------------------
 #: A window needs at least two comparable halves to have a direction at all.
@@ -127,6 +128,42 @@ ABSOLUTE_LIMITS: Tuple[Tuple[str, str, float, str], ...] = (
 #: `contradiction_reachability == 0` only means something once there are
 #: enough reconciliations for a zero to be surprising.
 MIN_RECONCILIATIONS_FOR_REACHABILITY = 5
+
+# --- how much a rate is worth ------------------------------------------------
+#
+# WHY A RATE WITHOUT ITS DENOMINATOR IS NOT A MEASUREMENT
+# -------------------------------------------------------
+# `self_test_rate = 0.400` was reported as a headline and drove the whole
+# engine's verdict to DEGRADING. Its denominator was FIVE — two self-tests
+# and three bindings. The same 0.400 over five hundred would be a finding;
+# over five it is two events.
+#
+# So every rate now carries its numerator, its denominator and a maturity,
+# and DEGRADING may not be declared on an immature one. This is not a
+# cosmetic improvement to the score: the levels are unchanged and what
+# changes is what the engine is entitled to conclude from them.
+INSUFFICIENT_SAMPLE = "INSUFFICIENT_SAMPLE"   # < 10 observations
+EARLY = "EARLY"                               # 10-29
+USABLE = "USABLE"                             # 30-99
+MATURE = "MATURE"                             # 100+
+SAMPLE_MATURITIES = (INSUFFICIENT_SAMPLE, EARLY, USABLE, MATURE)
+
+#: Below this a rate may be REPORTED and may not drive a verdict.
+MIN_DENOMINATOR_FOR_VERDICT = 10
+
+#: A softer verdict for a real signal on too little evidence. Not "healthy" —
+#: the number is what it is — and not DEGRADING either.
+EARLY_WARNING = "EARLY_WARNING"
+
+
+def sample_maturity(denominator: float) -> str:
+    if denominator >= 100:
+        return MATURE
+    if denominator >= 30:
+        return USABLE
+    if denominator >= MIN_DENOMINATOR_FOR_VERDICT:
+        return EARLY
+    return INSUFFICIENT_SAMPLE
 
 
 @dataclass(frozen=True)
@@ -253,7 +290,9 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
     sources = {str(r.get("source_role") or "") for r in ledger
                if r.get("record") == "evidence"} - {""}
 
-    def rate(num: float, den: float) -> Optional[float]:
+    denominators: Dict[str, Tuple[float, float]] = {}
+
+    def rate(num: float, den: float, name: str = "") -> Optional[float]:
         """A proportion, or None. Never a number greater than one.
 
         Every dimension here except `source_diversity` is a share of a
@@ -267,6 +306,8 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
             raise ValueError(
                 f"a share of {num} out of {den} counts two different "
                 f"populations; fix the denominator rather than the number")
+        if name:
+            denominators[name] = (num, den)
         return round(num / den, 4)
 
     classes = collections.Counter(
@@ -278,29 +319,36 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
         # Of the expectations that were EVALUATED, how many actually
         # discriminated. A pipeline whose evaluations mostly return
         # TOO_EARLY is not calibrating anything.
-        "calibration_quality": rate(resolved, evaluated),
+        "calibration_quality": rate(resolved, evaluated, "calibration_quality"),
         # Could the engine have been wrong? A reconciliation set with no
         # contradictions in it is not a strong engine; it is a filter that
         # cannot reach disagreement.
-        "contradiction_reachability": rate(contradictions, reconciliations),
+        "contradiction_reachability": rate(contradictions, reconciliations, "contradiction_reachability"),
         "source_diversity": float(len(sources)) if sources else None,
         "independent_confirmation": (
-            rate(len(subjects), len(ledger_reconciliations))
+            rate(len(subjects), len(ledger_reconciliations),
+                 "independent_confirmation")
             if ledger_reconciliations else None),
         # Of the expectations EXAMINED, how many belong to a family no
         # observation could refute. The denominator is examinations, not
         # beliefs declared this cycle: binding examines every open
         # expectation, including ones from earlier cycles, so dividing by
         # this cycle's declarations produced a "rate" of 1.44.
-        "false_positive_rate": rate(unfalsifiable, evaluated),
+        "false_positive_rate": rate(unfalsifiable, evaluated, "false_positive_rate"),
         "self_test_rate": rate(totals["self_tests_refused"],
-                               totals["self_tests_refused"] + resolved),
+                               totals["self_tests_refused"] + resolved,
+                               "self_test_rate"),
         "no_op_rate": rate(classes[NO_OP] + classes[DUPLICATE],
-                           len(observations)),
-        "belief_revision_rate": rate(reconciliations, declared),
+                           len(observations), "no_op_rate"),
+        "belief_revision_rate": rate(reconciliations, declared, "belief_revision_rate"),
         "decision_impact_rate": rate(decision_impacts,
-                                     totals["Founder_consumption"]),
-        "knowledge_freshness": rate(unique, ingested),
+                                     totals["Founder_consumption"],
+                                     "decision_impact_rate"),
+        "knowledge_freshness": rate(unique, ingested, "knowledge_freshness"),
+        # Every rate carries the pair it came from. 0.400 over five is two
+        # events; the same number over five hundred is a finding, and a
+        # report that shows only the ratio cannot tell them apart.
+        "_denominators": dict(denominators),
     }
 
 
@@ -380,7 +428,12 @@ def window(observations: Sequence, *, name: str, size: int,
 
 def absolute_failures(now: Dict[str, Optional[float]], *,
                       reconciliations: int = 0) -> List[str]:
-    """Levels that are unacceptable whatever direction they came from."""
+    """Levels that are unacceptable whatever direction they came from.
+
+    Each entry carries the pair it was computed from and that pair's
+    maturity, so a caller can tell a finding from two events.
+    """
+    denominators = now.get("_denominators") or {}
     out: List[str] = []
     for name, comparison, threshold, why in ABSOLUTE_LIMITS:
         value = now.get(name)
@@ -394,8 +447,29 @@ def absolute_failures(now: Dict[str, Optional[float]], *,
                     or (comparison == "<" and value < threshold)
                     or (comparison == "==" and value == threshold))
         if breached:
-            out.append(f"{name}={value} ({comparison}{threshold}): {why}")
+            pair = denominators.get(name)
+            suffix = ""
+            if pair:
+                num, den = pair
+                suffix = (f" [{num:.0f}/{den:.0f}, "
+                          f"{sample_maturity(den)}]")
+            out.append(f"{name}={value} ({comparison}{threshold})"
+                       f"{suffix}: {why}")
     return out
+
+
+def _all_immature(failures: Sequence[str]) -> bool:
+    """Whether EVERY triggering failure rests on too small a sample.
+
+    One mature failure is enough to justify DEGRADING. All-immature is the
+    only case that softens it, and softening means EARLY_WARNING rather
+    than silence — the numbers are unchanged and what changes is what the
+    engine claims to know from them.
+    """
+    if not failures:
+        return False
+    return all(f"{INSUFFICIENT_SAMPLE}]" in f or f"{EARLY}]" in f
+               for f in failures)
 
 
 def degradations(before: Dict[str, Optional[float]],
@@ -416,7 +490,13 @@ def degradations(before: Dict[str, Optional[float]],
             continue
         worse = (moved == "DOWN") if higher_is_better else (moved == "UP")
         if worse:
-            out.append(f"{name} {was} -> {now}")
+            # Tagged with maturity for the same reason the level checks are:
+            # `_all_immature` must judge every failure by its sample, and an
+            # untagged trend would be read as mature by default.
+            pair = (after.get("_denominators") or {}).get(name)
+            suffix = (f" [{pair[0]:.0f}/{pair[1]:.0f}, "
+                      f"{sample_maturity(pair[1])}]") if pair else ""
+            out.append(f"{name} {was} -> {now}{suffix}")
     return out
 
 
@@ -450,6 +530,12 @@ def _status(volume: str, quality_direction: str, degraded: Sequence[str],
             "no cycle in this window declared a belief or resolved an "
             "expectation; evidence arrived and nothing moved. That is a "
             "stall, not a decline")
+    if degraded and _all_immature(degraded):
+        return EARLY_WARNING_STATUS, (
+            f"{len(degraded)} quality dimension(s) look wrong and every one "
+            f"of them rests on a sample too small to carry a verdict "
+            f"({'; '.join(degraded[:2])}). The levels are not softened; the "
+            f"conclusion drawn from them is")
     if degraded:
         return DEGRADING, (
             f"{len(degraded)} quality dimension(s) got materially worse "

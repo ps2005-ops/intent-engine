@@ -134,7 +134,22 @@ def test_a_rate_that_was_undefined_and_is_now_bad_still_degrades():
     now = LA.quality(after)
     assert LA.degradations(LA.quality(before), now) == []   # no trend
     assert LA.absolute_failures(now)                        # but a level
-    assert LA.window(before + after, name="w", size=4).status == LA.DEGRADING
+    # The level fires. On this fixture's tiny denominator the verdict is
+    # EARLY_WARNING rather than DEGRADING — which is the sample-size rule
+    # working, not the signal being suppressed.
+    got = LA.window(before + after, name="w", size=4)
+    assert got.status == LA.EARLY_WARNING_STATUS
+    assert got.status not in (LA.STABLE, LA.ACCELERATING)
+
+
+def test_the_same_level_on_a_mature_sample_reaches_degrading():
+    before = [Obs(self_tests_refused=0, expectations_resolved=0,
+                  beliefs_accepted=1, expectations_evaluated=200)
+              for _ in range(2)]
+    after = [Obs(self_tests_refused=400, expectations_resolved=100,
+                 expectations_evaluated=200) for _ in range(2)]
+    got = LA.window(before + after, name="w", size=4)
+    assert got.status == LA.DEGRADING
 
 
 def test_absolute_limits_are_skipped_where_they_would_be_meaningless():
@@ -147,7 +162,8 @@ def test_absolute_limits_are_skipped_where_they_would_be_meaningless():
 def test_no_quality_dimension_can_exceed_one():
     for name, value in LA.quality(real_observations(),
                                   ledger=real_ledger()).items():
-        if value is None or name == "source_diversity":
+        if value is None or name == "source_diversity" \
+                or name.startswith("_"):
             continue
         assert 0.0 <= float(value) <= 1.0, name
 
@@ -206,3 +222,65 @@ def test_the_real_history_reads_degrading_on_the_self_test_rate():
     assert got["status"] == LA.DEGRADING
     assert any("self_test_rate" in d for d in got["degradations"])
     assert got["quality"]["self_test_rate"] == 0.8
+
+
+# --- a rate without its denominator is not a measurement -----------------
+
+def test_every_rate_carries_the_pair_it_came_from():
+    got = LA.quality(real_observations(), ledger=real_ledger())
+    pairs = got["_denominators"]
+    for name in LA.QUALITY_NAMES:
+        if got.get(name) is None or name == "source_diversity":
+            continue
+        assert name in pairs, name
+        numerator, denominator = pairs[name]
+        assert numerator <= denominator
+
+
+def test_sample_maturity_separates_two_events_from_a_finding():
+    assert LA.sample_maturity(5) == LA.INSUFFICIENT_SAMPLE
+    assert LA.sample_maturity(25) == LA.EARLY
+    assert LA.sample_maturity(50) == LA.USABLE
+    assert LA.sample_maturity(500) == LA.MATURE
+
+
+def test_a_verdict_resting_only_on_immature_samples_is_softened():
+    """0.400 over five is two events. The LEVELS are unchanged; what the
+    engine claims to know from them is what changes."""
+    immature = ["self_test_rate=0.8 (>0.5) [4/5, INSUFFICIENT_SAMPLE]: x",
+                "no_op_rate=0.9 (>0.5) [9/10, EARLY]: y"]
+    assert LA._all_immature(immature)
+    got, reason = LA._status("FLAT", "DOWN", immature,
+                             __import__("collections").Counter(
+                                 {LA.NEW_KNOWLEDGE: 1}))
+    assert got == LA.EARLY_WARNING_STATUS
+    assert "not softened" in reason
+
+
+def test_one_mature_failure_still_justifies_degrading():
+    mixed = ["self_test_rate=0.8 (>0.5) [4/5, INSUFFICIENT_SAMPLE]: x",
+             "false_positive_rate 0.0 -> 0.3 [23/90, USABLE]"]
+    assert not LA._all_immature(mixed)
+    got, _ = LA._status("FLAT", "DOWN", mixed,
+                        __import__("collections").Counter(
+                            {LA.NEW_KNOWLEDGE: 1}))
+    assert got == LA.DEGRADING
+
+
+def test_a_trend_degradation_is_tagged_with_its_maturity_too():
+    """An untagged trend would be read as mature by default."""
+    got = LA.report(real_observations(), ledger=real_ledger())
+    assert any("USABLE]" in d or "MATURE]" in d or "EARLY]" in d
+               for d in got["degradations"])
+
+
+def test_the_real_verdict_still_degrades_and_says_on_which_dimension():
+    """DEGRADING is retained, and now for a stated reason: it rests on
+    false_positive_rate at 23/90 (USABLE), not on the EARLY self-test rate."""
+    got = LA.report(real_observations(), ledger=real_ledger())
+    assert got["status"] == LA.DEGRADING
+    mature = [d for d in got["degradations"]
+              if "USABLE]" in d or "MATURE]" in d]
+    assert mature, got["degradations"]
+    assert any("self_test_rate" in d and "EARLY]" in d
+               for d in got["degradations"])
