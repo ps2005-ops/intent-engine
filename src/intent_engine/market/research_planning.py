@@ -50,6 +50,15 @@ MATURITIES = (PROVISIONAL, INDICATIVE, ESTABLISHED)
 MIN_DOCUMENTS_INDICATIVE = 20
 MIN_DOCUMENTS_ESTABLISHED = 100
 
+#: A family's editorial purpose is a claim about a KIND of page, so a rate
+#: measured on one vendor is a claim about that vendor. Wave 10 expanded
+#: release_notes from 3 documents to 11 and found that only TWO of four
+#: tracked actors published anything reachable at all, and only ONE produced
+#: an object — so the family's apparent yield was one company's changelog.
+#: Document count alone was also the number waves 8 and 9 proved inflatable.
+MIN_ACTORS_INDICATIVE = 2
+MIN_ACTORS_ESTABLISHED = 3
+
 #: Even an ESTABLISHED family keeps a share of the budget. A planner that
 #: stops sampling cannot discover that a source has decayed, and a source
 #: that used to work is exactly the kind of thing that changes silently.
@@ -123,6 +132,8 @@ class SourceFamilyPerformance:
     belief_yield: float = 0.0
     resolution_yield: float = 0.0
     false_positive_rate: Optional[float] = None
+    #: How many different ACTORS the documents came from.
+    distinct_actors: int = 0
     latency_seconds: float = 0.0
     cost: str = ""
     last_updated: str = ""
@@ -139,11 +150,30 @@ class SourceFamilyPerformance:
 
     @property
     def maturity(self) -> str:
-        if self.retrieved >= MIN_DOCUMENTS_ESTABLISHED:
+        """Documents AND actor diversity. Either one alone is promotable by
+        re-reading the same vendor, which is how a family gets promoted on
+        one company's changelog."""
+        actors = max(self.distinct_actors, 1)
+        if (self.retrieved >= MIN_DOCUMENTS_ESTABLISHED
+                and actors >= MIN_ACTORS_ESTABLISHED):
             return ESTABLISHED
-        if self.retrieved >= MIN_DOCUMENTS_INDICATIVE:
+        if (self.retrieved >= MIN_DOCUMENTS_INDICATIVE
+                and actors >= MIN_ACTORS_INDICATIVE):
             return INDICATIVE
         return PROVISIONAL
+
+    @property
+    def maturity_reason(self) -> str:
+        actors = max(self.distinct_actors, 1)
+        gaps = []
+        if self.retrieved < MIN_DOCUMENTS_INDICATIVE:
+            gaps.append(f"{self.retrieved} documents against "
+                        f"{MIN_DOCUMENTS_INDICATIVE}")
+        if actors < MIN_ACTORS_INDICATIVE:
+            gaps.append(f"{actors} actor against {MIN_ACTORS_INDICATIVE}")
+        if not gaps:
+            return (f"{self.retrieved} documents across {actors} actors")
+        return "short on " + " and ".join(gaps)
 
     @property
     def latency_per_document(self) -> float:
@@ -161,7 +191,9 @@ class SourceFamilyPerformance:
             "latency_seconds": round(self.latency_seconds, 2),
             "latency_per_document": round(self.latency_per_document, 2),
             "cost": self.cost, "last_updated": self.last_updated,
+            "distinct_actors": self.distinct_actors,
             "maturity": self.maturity,
+            "maturity_reason": self.maturity_reason,
         }
 
 

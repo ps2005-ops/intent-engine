@@ -170,3 +170,46 @@ def test_the_founder_translation_separates_established_from_missing():
     assert got["weakest_link"] == "ORDERS → COMPANY_DEMAND"
     assert got["what_would_resolve_it"]
     assert "relying on the unmeasured ones" in got["why_it_matters"]
+
+
+# --- macro and capital live on THIS graph ---------------------------------
+
+def test_the_graph_can_carry_macro_and_capital_states():
+    """§21's compatibility check, pinned. If these had to live elsewhere,
+    every link between a macro condition and a company would cross two
+    models and become untyped."""
+    for node_type in ("ECONOMIC_FACTOR", "MACRO_STATE", "CREDIT_STATE",
+                      "CAPITAL_STATE", "INDUSTRY_STATE"):
+        assert node_type in EC.NODE_TYPES
+
+
+def test_a_macro_node_links_to_a_company_node_with_the_same_rules():
+    """One graph means one set of link rules — including the one that makes
+    OBSERVED unreachable for a LINK."""
+    factor = EC.node(node_type=EC.ECONOMIC_FACTOR,
+                     statement="Average interest rate on Treasury notes rose "
+                               "to 3.3 percent",
+                     evidence_ids=("ev_macro_1",), observed_at="2026-08-08")
+    demand = EC.node(node_type=EC.COMPANY_DEMAND,
+                     statement="Honda unit demand softened",
+                     evidence_ids=("ev_honda_1",), observed_at="2026-08-08")
+    edge = EC.link(source=factor, target=demand,
+                   mechanism="financing cost raises the monthly payment on a "
+                             "financed vehicle",
+                   alternative_explanation="demand moved on model cycle",
+                   falsifier="demand holds while rates rise further")
+    assert edge.status in EC.LINK_STATUSES
+    assert edge.status != EC.OBSERVED
+
+
+def test_the_new_node_types_are_declared_and_unpopulated():
+    """A node type with no instances is not a claim that the data exists.
+    This is the position COMPETES_WITH held before wave 5."""
+    import json
+    import pathlib
+    report = pathlib.Path(__file__).resolve().parents[1] / \
+        "reports/market/strategic/wave10_coverage.json"
+    got = json.loads(report.read_text())["macro_capital_compatibility"]
+    assert got["required_by_roadmap"]
+    # After the extension nothing is missing from the vocabulary.
+    assert set(got["required_by_roadmap"]) <= set(EC.NODE_TYPES)

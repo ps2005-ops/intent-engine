@@ -27,10 +27,11 @@ ACQUIRED = pathlib.Path(__file__).resolve().parents[1] / \
     "reports/market/strategic/wave8_acquisition.json"
 
 
-def perf(family, *, retrieved=50, yield_=0.2, latency=10.0):
+def perf(family, *, retrieved=50, yield_=0.2, latency=10.0, actors=3):
     return RP.SourceFamilyPerformance(
         source_family=family, retrieved=retrieved, attempts=28,
         useful=int(retrieved * yield_), relationship_yield=yield_,
+        distinct_actors=actors,
         latency_seconds=latency, last_updated="2026-08-07")
 
 
@@ -81,6 +82,28 @@ def test_maturity_needs_a_real_sample():
     assert perf("x", retrieved=4).maturity == RP.PROVISIONAL
     assert perf("x", retrieved=50).maturity == RP.INDICATIVE
     assert perf("x", retrieved=500).maturity == RP.ESTABLISHED
+
+
+def test_documents_alone_never_promote_a_family():
+    """Wave 10 expanded release_notes from 3 documents to 11 and found only
+    TWO of four tracked actors published anything reachable, and only ONE
+    produced an object. The family's apparent yield was one company's
+    changelog, and a document count is promotable by re-reading it."""
+    one_vendor = perf("release_notes", retrieved=500, actors=1)
+    assert one_vendor.maturity == RP.PROVISIONAL
+    assert "1 actor against 2" in one_vendor.maturity_reason
+
+    two_vendors = perf("release_notes", retrieved=500, actors=2)
+    assert two_vendors.maturity == RP.INDICATIVE
+
+    three_vendors = perf("release_notes", retrieved=500, actors=3)
+    assert three_vendors.maturity == RP.ESTABLISHED
+
+
+def test_the_maturity_reason_names_which_floor_is_short():
+    thin = perf("release_notes", retrieved=11, actors=2)
+    assert thin.maturity == RP.PROVISIONAL
+    assert "11 documents against 20" in thin.maturity_reason
 
 
 def test_an_unmeasured_family_is_sampled_rather_than_assumed_useless():

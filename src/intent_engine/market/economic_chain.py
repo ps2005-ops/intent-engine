@@ -57,9 +57,26 @@ HIRING = "HIRING"
 GUIDANCE = "GUIDANCE"
 OUTCOME = "OUTCOME"
 
+# --- states above the company ----------------------------------------------
+# The roadmap needs macro, credit and capital conditions to sit on the SAME
+# graph as the company chain, or transmission has to cross two models and
+# every link between them becomes untyped. `MACRO_STATE` already existed and
+# already carries the shape: a dated condition, evidenced, that a link can
+# run from. These four extend that vocabulary and nothing else — no new
+# graph, no parallel store, no second set of link rules.
+#
+# They are DECLARED and currently UNPOPULATED, which is the same position
+# `COMPETES_WITH` held before wave 5. A node type with no instances is not a
+# claim that the data exists.
+ECONOMIC_FACTOR = "ECONOMIC_FACTOR"   # an input price, a rate, a tariff
+CREDIT_STATE = "CREDIT_STATE"         # spreads, issuance, covenant pressure
+CAPITAL_STATE = "CAPITAL_STATE"       # funding availability and its cost
+INDUSTRY_STATE = "INDUSTRY_STATE"     # a condition shared by a whole sector
+
 NODE_TYPES = (MACRO_STATE, CUSTOMER_STATE, SUPPLIER_STATE, COMPANY_DEMAND,
               ORDERS, BACKLOG, PRICING, MARGIN, CAPEX, HIRING, GUIDANCE,
-              OUTCOME)
+              OUTCOME,
+              ECONOMIC_FACTOR, CREDIT_STATE, CAPITAL_STATE, INDUSTRY_STATE)
 
 # --- statuses ---------------------------------------------------------------
 KNOWN = "KNOWN"                # a node: the engine has dated evidence for it
