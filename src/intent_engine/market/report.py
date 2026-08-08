@@ -611,6 +611,11 @@ def _knowledge_summary(knowledge: dict) -> dict:
             "candidates_scored": len(chain.get("candidates") or ()),
             "error": chain.get("error"),
         },
+        "company_exposure": {
+            k: (knowledge.get("company_exposure") or {}).get(k)
+            for k in ("companies", "rated_exposures", "by_standing",
+                      "rated_by_dimension", "companies_with_any", "error")
+            if (knowledge.get("company_exposure") or {}).get(k) is not None},
         "causal_calibration": {k: causal.get(k) for k in
                                ("mechanisms", "tested", "confirmed",
                                 "contradicted", "standing", "error")

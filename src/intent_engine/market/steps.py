@@ -850,6 +850,26 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
         payload["macro_state"] = {"error": f"{type(exc).__name__}: {exc}"}
 
+    # WHAT MAKES A MACRO STATE MEAN SOMETHING DIFFERENT PER COMPANY.
+    # Without it the transmission is a template: the same story fits a
+    # capital-intensive manufacturer refinancing debt and a software company
+    # with none. Expect UNKNOWN to dominate — a corpus of press releases does
+    # not establish exposures, and a fully populated profile is a guessed one.
+    try:
+        from . import company_exposure as CX
+
+        subjects = sorted({str(r.get("subject_company") or "") for r in rows
+                           if r.get("record") == "evidence"
+                           and r.get("subject_company")})
+        profiles = {c: CX.profile(rows, company_id=c) for c in subjects}
+        payload["company_exposure"] = {
+            **CX.summarise(profiles),
+            "rated": [e.as_dict() for p in profiles.values()
+                      for e in p.values() if e.conditions],
+        }
+    except Exception as exc:  # noqa: BLE001
+        payload["company_exposure"] = {"error": f"{type(exc).__name__}: {exc}"}
+
     try:
         # One chain, for the subject whose evidence can actually carry one.
         # Building a chain per company would produce twenty-seven that say
