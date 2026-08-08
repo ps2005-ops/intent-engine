@@ -4,7 +4,7 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-07, wave 5.
+Updated 2026-08-08, wave 6.
 
 ## Pinned state
 
@@ -28,6 +28,58 @@ cd /Users/prathamsharma/intent-engine-market && git checkout <latest market SHA>
 Refused by the permission classifier in waves 4 and 5. Not retried further,
 per instruction. The runtime therefore still runs `079128b` and does not run
 the wave-4 or wave-5 work.
+
+## Wave 6
+
+| slice | evidence it is real |
+|---|---|
+| Clause-scoped rivalry | 8 mixed-clause shapes hold; measured 0 false refusals before the change |
+| Hardened break-proof harness | rejects the exact wave-5 no-op; wave 4 35/35, wave 5 32/32 through it |
+| Rival actions + relevance | 16 actions live; **0 RELEVANT** and the reason is non-circular |
+| Cross-actor expectations | menu, backwards-dating and closed windows all refused structurally |
+| Sample-size maturity | every rate carries numerator/denominator/maturity |
+
+### The circularity wave 6 found
+
+Relevance first scored **18 RELEVANT pairs** — every Salesforce AI-agent post
+counted as contesting an e-commerce platform, because the harness that
+fetched them had LABELLED them "E-commerce platform" and `assess` trusted the
+label. An action's competitive object must be established by its own
+document or relevance means nothing. `object_established` is now required.
+
+Honest count: **0 RELEVANT**, 24 IRRELEVANT (wrong party), 24 UNKNOWN
+(object not established). That is what `action_does_not_provoke_a_response`
+actually meant.
+
+### Rival action source coverage, measured
+
+| rival | documents | actions | note |
+|---|---|---|---|
+| Salesforce | 6 | 12 | mostly narrative, not announcements |
+| Shopify | 2 | 4 | same |
+| Magento | 0 | 0 | business.adobe.com yielded nothing |
+| BigCommerce | 0 | 0 | same |
+
+### Learning health, with its denominator
+
+| rate | pair | maturity |
+|---|---|---|
+| self_test_rate | 20/25 | EARLY |
+| false_positive_rate | 23/90 | USABLE |
+| knowledge_freshness | 491/598 | MATURE |
+| contradiction_reachability | 2/5 | INSUFFICIENT_SAMPLE |
+
+**DEGRADING is retained**, resting on false_positive_rate (USABLE), not on
+the EARLY self-test rate. The levels are unchanged; what the engine claims
+to know from them is what changed.
+
+### The break-proof harness is now permanent
+
+Five conditions, and a proof failing any of them is INVALID rather than
+merely uncaught: source hash must change, the test must have been green,
+must go red, must go red for the STATED reason, and must restore to
+identical bytes with `__pycache__` cleared. Six tests drive it against its
+own failure modes.
 
 ## Wave 5
 
@@ -128,10 +180,13 @@ in customer stories usually names companies outside it.
 
 ## Remaining queue, highest value first
 
-1. **Observation of the named rival.** Everything from strategic interactions
-   onward is blocked on it, and nothing else is.
-2. **`_NOT_RIVALRY` is a whole-sentence filter** and refused 31 sentences.
-   Whole-sentence filters over-reject; it should apply to the matched clause.
+1. **An action whose competitive object its own document establishes.**
+   Rivals are now observable and their actions are retrievable; what is
+   missing is a document that says what a given action is CONTESTING.
+   Everything from strategic interactions onward waits on that one field.
+2. **Announcement-grade sources for rivals.** Salesforce's blog is
+   narrative; a newsroom or IR feed would carry announcements. Magento and
+   BigCommerce yielded no documents at all to the two-hop fetch.
 3. **self_test_rate is 0.400**, down from 0.857 and still high. The remaining
    classes are wire duplicates and aggregator headlines, which are correlated
    evidence rather than duplicates and need the design-effect penalty, not
