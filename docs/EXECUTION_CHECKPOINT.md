@@ -4,7 +4,83 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 12.
+Updated 2026-08-08, V3 CLOSURE RUN.
+
+## V3 closure run — memory closed, strategic reasoning blocked on data
+
+### Every memory-critical object now survives a restart
+
+Six record kinds added and proven across a process boundary: counterfactual
+adjudication (the known LOST one), falsifier, response watch, strategic
+objective, strategic interaction, observed response episode.
+
+Durability audit over **23** V3 object kinds:
+
+| standing | count |
+|---|---|
+| DURABLE | 5 |
+| DERIVED (recomputable) | 10 |
+| UNUSED contract | 8 |
+| **LOST** | **0** |
+
+A conflicting adjudication APPENDS with `supersedes` — "we changed our mind"
+is a different fact from "we always thought this". An observed episode that
+claims `preregistered` is refused outright.
+
+### Falsifiers are validated, not accepted
+
+"The narrative shifts against them" is refused as unobservable: no source can
+report it, so the engine could never notice it arriving. "The number moves"
+is refused as non-discriminating. **EXPIRED is not RESOLVED_SURVIVED** — a
+window that closed with nobody reporting is an absence of evidence, and
+counting it as survival lets a belief harden on silence. The generated
+research question is neutral by construction.
+
+### Research priorities ask for observations
+
+Six generated from measured gaps, routed by MISSING FACT: a release note
+cannot say who a product is for, a pricing page cannot say when something
+shipped. Leading phrasing is refused structurally.
+
+### Dependency is not usage
+
+`DEPENDS_ON` requires a materiality marker the DOCUMENT supplies. Measured
+over the live ledger: **4 USES, 0 dependencies** — the ledger is built from
+earnings and award evidence, not risk-factor sections. An ACQUISITION gap,
+now a ranked priority. Found on the way: "Fast-growing" offered as a
+supplier, the third module to meet that shape.
+
+### Measured bottleneck, not asserted
+
+| | stage | throughput |
+|---|---|---|
+| primary | RESPONSE_OBSERVABILITY | **0.00** |
+| secondary | RECONCILIATION | 0.15 |
+
+`STRATEGIC_INTERACTION` is reported as never fed rather than as zero — a
+stage nobody fed has not failed.
+
+### V3 readiness
+
+    PASS 8 · PARTIAL 5 · BLOCKED 1 · UNMEASURABLE 1
+
+Blocking axis: **STRATEGIC_REASONING** — every contract exists and is
+durable; no counterparty publishes a dated action stream. Statuses are
+counted, never averaged.
+
+### Blocked by real-world data, not by effort
+
+    BLOCKED: two-sided timeline, historical sequence, live interaction,
+             live preregistration, response reconciliation
+    REASON:  no counterparty publishes a dated action stream
+    OWNER-CONTROLLED: no
+
+### Still executable, not done this run
+
+Founder trust is computed market-side and **not yet consumed by a rendered
+page**; product regression not re-run since wave 8; DecisionImpact not
+re-measured under normalized trust; economic chain not re-scored.
+
 
 ## Wave 12 — production writes, and the reader stops being misled
 
@@ -365,13 +441,13 @@ exists so that improvement can never again be reported as knowledge.
 | what | where |
 |---|---|
 | market head | `HEAD of feat/strategic-response-learning` (see git log) |
-| wave-12 break proofs | **65/65** through the hardened harness |
+| V3 closure break proofs | **76/76** through the hardened harness |
 | market runtime | **`079128b` — NOT repinned; owner action below** |
 | founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
 | founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4480 passed / 4 skipped / EXIT=0 |
+| market suite | 4544 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
 ## Wave 8
