@@ -213,6 +213,38 @@ def sentence(trust: Trust) -> str:
     return trust.sentence or _FALLBACK.get(trust.standing, "")
 
 
+#: The caution a standing earns, when it earns one. Keyed by standing rather
+#: than derived from `must_bound`, because those are different questions.
+#:
+#: UNKNOWN MUST NOT BORROW THE DEPENDENT SENTENCE. "The reports behind this do
+#: not independently confirm each other" is a claim ABOUT THE SOURCES, and an
+#: unrated dossier is one where nobody looked at the sources. Saying it anyway
+#: would assert a fact not in evidence — and would collapse "we checked and it
+#: is thin" into "we did not check", which is the exact distinction this
+#: module exists to keep.
+_LIMITATION: Dict[str, str] = {
+    DEPENDENT_REREPORTING:
+        "The reports behind this do not independently confirm each other, so "
+        "it is weaker than the number of articles suggests.",
+    CONFLICTED:
+        "Public sources disagree on this point, so it cannot carry a "
+        "confident conclusion on its own.",
+    UNKNOWN:
+        "How independent the sources behind this are was not established, so "
+        "it is not treated as confirmed.",
+}
+
+
+def limitation(trust: Trust) -> str:
+    """What to add to a block's limitations, or nothing.
+
+    Each standing gets its own sentence or none. A single shared caution would
+    say the same thing about evidence that was examined and found thin as
+    about evidence nobody examined.
+    """
+    return _LIMITATION.get(trust.standing, "")
+
+
 def contains_internal_vocabulary(text: str) -> Sequence[str]:
     """Which internal terms a rendered string leaks. Empty is the pass."""
     low = str(text or "").lower()

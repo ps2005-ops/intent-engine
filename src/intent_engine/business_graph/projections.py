@@ -287,6 +287,7 @@ def from_strategic_dossier(*, company_id: str, company_label: str = "",
                 # sound a sentence was is a surface that will forget to.
                 "trust_standing": trust.standing,
                 "trust_sentence": ET.sentence(trust),
+                "trust_limitation": ET.limitation(trust),
                 "trust_must_bound": trust.must_bound,
                 "trust_raw_accounts": trust.raw_accounts,
                 "trust_distinct_events": trust.distinct_events,

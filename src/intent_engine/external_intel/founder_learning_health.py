@@ -77,9 +77,7 @@ def _pairs(events: Sequence[dict]) -> Dict[str, dict]:
     stage. The unit is the pairing and its value is how far it got.
     """
     best: Dict[str, dict] = {}
-    order = {name: i for i, name in enumerate(
-        (CR.RECEIVED, CR.VALIDATED, CR.ELIGIBLE, CR.SELECTED, CR.PROJECTED,
-         CR.USED_IN_REASONING, CR.RENDERED_TO_FOUNDER, CR.DECISION_RELEVANT))}
+    order = _ORDER
     for row in events:
         key = f"{row.get('founder_analysis_id')}|{row.get('dossier_id')}"
         current = best.get(key)
@@ -89,10 +87,15 @@ def _pairs(events: Sequence[dict]) -> Dict[str, dict]:
     return best
 
 
+#: Read from the producer's own declaration rather than restated here. Two
+#: copies of a ladder is two things that can disagree about how far a dossier
+#: got, and the disagreement is silent: a stage this module has not heard of
+#: ranks below every other and vanishes from the health view.
+_ORDER = {name: i for i, name in enumerate(CR.LADDER)}
+
+
 def _reached(row: dict, stage: str) -> bool:
-    order = {name: i for i, name in enumerate(
-        (CR.RECEIVED, CR.VALIDATED, CR.ELIGIBLE, CR.SELECTED, CR.PROJECTED,
-         CR.USED_IN_REASONING, CR.RENDERED_TO_FOUNDER, CR.DECISION_RELEVANT))}
+    order = _ORDER
     got, want = order.get(str(row.get("stage"))), order.get(stage)
     return got is not None and want is not None and got >= want
 
@@ -134,6 +137,10 @@ def assess(root, *, window: Optional[int] = None) -> Dict[str, object]:
     used = sum(1 for r in ordered if _reached(r, CR.USED_IN_REASONING))
     rendered = sum(1 for r in ordered if _reached(r, CR.RENDERED_TO_FOUNDER))
     decisive = sum(1 for r in ordered if _reached(r, CR.DECISION_RELEVANT))
+    # Reasoned from occurrences rather than from a row count. Counted over
+    # pairings that reached at least this rung, so a dossier consumed by an
+    # older path — or by a producer that never normalized — is not credited.
+    normalized = sum(1 for r in ordered if _reached(r, CR.TRUST_NORMALIZED))
 
     materialities = collections.Counter(
         r.get("founder_surface_rendered") for r in events
@@ -155,6 +162,13 @@ def assess(root, *, window: Optional[int] = None) -> Dict[str, object]:
         "decision_impact_rate": _rate(decisive, len(ordered)),
         "materiality_distribution": dict(materialities),
         "graph_provenance_reads": rendered,
+
+        # --- was the evidence normalized, or merely counted? ----------------
+        # The question §14 asks. `normalized_rate` below 1.0 with a healthy
+        # consumption rate means dossiers are being read by a path that still
+        # counts rows — which is the failure that looks most like success.
+        "trust_normalized_consumptions": normalized,
+        "normalized_rate": _rate(normalized, used),
 
         # --- refusals, by cause ---------------------------------------------
         "identity_failures": refusals.get(CR.IDENTITY_MISMATCH, 0),

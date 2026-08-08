@@ -365,10 +365,10 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
             facts.append(note)
 
         limitations = list(node.attrs.get("limitations") or ())
-        if node.attrs.get("trust_must_bound"):
-            limitations.append(
-                "The reports behind this do not independently confirm each "
-                "other, so it is weaker than the number of articles suggests.")
+        # Standing-specific, so evidence that was examined and found thin does
+        # not get the same sentence as evidence nobody examined.
+        if node.attrs.get("trust_limitation"):
+            limitations.append(str(node.attrs["trust_limitation"]))
         limitations.append(
             "This is a reading the market-learning engine holds, not an "
             "established fact about the company, and it does not by itself "
@@ -381,6 +381,15 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
                      "recommendation."),
             "facts": facts,
             "evidence_ids": evidence_ids,
+            # The same sentence that is already in `facts`, named so a reader
+            # of the STRUCTURE can find it. `semantic_state` classifies facts
+            # by prefix, and a trust note starts with none of them — so
+            # without this key the one line that bounds the conclusion would
+            # fall through the classifier and register as no change at all.
+            "evidence_standing": note,
+            # How many things happened, beside how many times they were
+            # written up. Kept apart so nothing downstream has to divide.
+            "occurrences": occurrences,
             "as_of": node.as_of, "freshness": "", "stale": bool(intel.stale),
             "limitations": limitations,
             "source": "market-learning engine strategic dossier",

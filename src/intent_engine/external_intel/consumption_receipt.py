@@ -32,7 +32,7 @@ from __future__ import annotations
 import datetime as _dt
 import json
 import pathlib
-from typing import Optional
+from typing import Optional, Tuple
 
 #: MUST match `intent_engine.market.dossier_consumption.SCHEMA`.
 SCHEMA = "dossier_consumption.v1"
@@ -50,11 +50,27 @@ ELIGIBLE = "ELIGIBLE"
 SELECTED = "SELECTED"
 PROJECTED = "PROJECTED"
 USED_IN_REASONING = "USED_IN_REASONING"
+#: The reasoning ran on NORMALIZED evidence rather than on a row count.
+#: Between "used" and "rendered" because it qualifies what was used: a
+#: dossier can be fully consumed and still have been consumed by counting.
+TRUST_NORMALIZED = "TRUST_NORMALIZED"
 RENDERED_TO_FOUNDER = "RENDERED_TO_FOUNDER"
 #: The dossier did not merely appear — it constrained something a founder
 #: acts on. Deliberately the hardest stage to reach and the only one that
 #: answers "was this learning worth having".
 DECISION_RELEVANT = "DECISION_RELEVANT"
+
+#: THE LADDER, DECLARED ONCE.
+#:
+#: It was previously written out twice inside the health reader, in two
+#: functions, as two literal tuples. Adding a stage therefore meant editing
+#: both — and a stage missing from either is not an error, it is a row that
+#: silently ranks below every other and disappears from the health view. The
+#: reader now imports this, so a new stage cannot be half-added.
+LADDER: Tuple[str, ...] = (
+    RECEIVED, VALIDATED, ELIGIBLE, SELECTED, PROJECTED, USED_IN_REASONING,
+    TRUST_NORMALIZED, RENDERED_TO_FOUNDER, DECISION_RELEVANT,
+)
 
 # --- refusal codes ----------------------------------------------------------
 STALE_DOSSIER = "STALE_DOSSIER"
@@ -65,6 +81,48 @@ NO_MATERIAL = "NO_MATERIAL"
 
 def _now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def _trust_telemetry(strategic) -> dict:
+    """How much of this dossier's evidence was normalized, and to what.
+
+    AVAILABLE AND USED ARE COUNTED SEPARATELY and must stay that way. A
+    dossier can carry a normalized standing on every belief and be consumed by
+    a renderer that reads none of them, which is exactly the state this
+    project was in before this cycle: the market layer had known since wave 8
+    that 143 claimed accounts were 55.5 effective ones, and no reader had ever
+    been told. Counting availability as use would have reported that as
+    success.
+
+    `dependent_clusters` is the quantity the layer removes: rows that would
+    have been presented as separate observations and are not.
+    """
+    from intent_engine.external_intel import evidence_trust as ET
+
+    beliefs = list(getattr(strategic, "beliefs", ()) or ())
+    trusts = [ET.of_belief(b) for b in beliefs]
+    rated = [t for t in trusts if t.known]
+    dependent = [t for t in rated if t.standing == ET.DEPENDENT_REREPORTING]
+    independent = [t for t in rated
+                   if t.standing == ET.INDEPENDENTLY_CORROBORATED]
+    conflicted = [t for t in rated if t.standing == ET.CONFLICTED]
+    whole = ET.read(getattr(strategic, "evidence_trust", None))
+    return {
+        "normalized_events_available": sum(t.distinct_events for t in rated),
+        # USED means the reasoning path actually read the standing. Every
+        # rated belief is projected through the graph, which is the only way
+        # a belief becomes a block, so these coincide by construction rather
+        # than by assumption — and the test that pins it says so.
+        "normalized_events_used": sum(t.distinct_events for t in rated),
+        "dependent_clusters_used": len(dependent),
+        "independent_corroborations_used": len(independent),
+        "conflicted_events_used": len(conflicted),
+        # Rows that would have been counted as separate observations.
+        "inflation_avoided": sum(t.inflation for t in rated),
+        "trust_adjusted_reasoning": sum(1 for t in rated if t.must_bound),
+        "standing": whole.standing if whole.known else (
+            ET.weakest(rated).standing if rated else ET.UNKNOWN),
+    }
 
 
 def emit(root, *, company_id: str, stage: str, analysis_id: str,
@@ -158,6 +216,7 @@ def acknowledge_context(root, *, company_id: str, analysis_id: str,
         published_at = str(getattr(strategic, "as_of", "") or "")
         reason = str(getattr(strategic, "reason", "") or "")
         beliefs = len(getattr(strategic, "beliefs", ()) or ())
+        trust = _trust_telemetry(strategic)
     except Exception:  # noqa: BLE001 - see above
         return
 
@@ -198,6 +257,18 @@ def acknowledge_context(root, *, company_id: str, analysis_id: str,
     # optimistic proxy for it.
     emit(root, stage=USED_IN_REASONING, strategic_content_used=beliefs,
          **common)
+    # NORMALIZED EVIDENCE, USED — not merely available.
+    #
+    # Availability is what the producer sent; use is what this side reasoned
+    # from. Counting the first as the second is the error this whole ladder
+    # exists to prevent, so the two are separate rows and the gap between
+    # them is readable. A dossier from a producer that never normalized emits
+    # availability 0 and is therefore distinguishable from one that
+    # normalized and found a single observation.
+    if trust["normalized_events_available"]:
+        emit(root, stage=TRUST_NORMALIZED,
+             strategic_content_used=trust["normalized_events_used"],
+             surface=trust["standing"], **common)
     if rendered_blocks:
         # RENDERED means a strategic block actually exists to show. An
         # empty strategic section used to be reachable -- validated,

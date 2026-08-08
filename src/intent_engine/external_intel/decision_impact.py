@@ -300,6 +300,7 @@ def semantic_state(context) -> Dict[str, List[str]]:
     mechanisms: List[str] = []
     requirements: List[str] = []
     monitoring: List[str] = []
+    bounded: List[str] = []
 
     for block in strategic:
         for fact in block.get("facts") or ():
@@ -312,12 +313,20 @@ def semantic_state(context) -> Dict[str, List[str]]:
                 monitoring.append(text)
         for limitation in block.get("limitations") or ():
             requirements.append(str(limitation))
+        # HOW SOUND THE EVIDENCE IS, read from the named key rather than
+        # sniffed out of the prose. A trust note starts with none of the
+        # prefixes above, so classifying it by text would drop the one line
+        # that constrains the conclusion and report NO impact — the metric
+        # would then be measuring its own blind spot.
+        if block.get("evidence_standing"):
+            bounded.append(str(block["evidence_standing"]))
 
     return {
         ASSUMPTION: assumptions,
         STRATEGIC_MECHANISM: mechanisms,
         EVIDENCE_REQUIREMENT: requirements,
         MONITORING_PRIORITY: monitoring,
+        BOUNDED_CONCLUSION: bounded,
     }
 
 
