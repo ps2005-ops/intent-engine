@@ -4,7 +4,99 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, wave 10.
+Updated 2026-08-08, wave 11.
+
+## Wave 11 — both blockers broken, and a third one located
+
+### BLOCKER 1 CLEARED — rivalry survives the process
+
+The store had `record_evidence`, `record_expectation`, `record_cycle`,
+`record_reconciliation` and `record_lifecycle`, and **no way to record a
+relationship at all**. The seam was not broken; it did not exist.
+
+The three wave-5 rivalries are back, and **not from memory**: the extractor
+was re-run over 35 freshly retrieved pages and the same three came out of
+the same evidence, plus a fourth.
+
+| | |
+|---|---|
+| claims extracted | 11 |
+| durable edges | **4** |
+| loaded by a FRESH process | **4** |
+
+Identity is the SCOPE, not the id — ids are content hashes that move when an
+extractor changes. Symmetric predicates sort the pair; asymmetric ones keep
+direction; the same pair contesting a different object stays two claims;
+retirement is an append, never a delete.
+
+One claim would have become permanent junk: *"Is migrating from Shopify to
+BigCommerce difficult?"* was persisted with buyer **"Is"**. Same shape as
+wave 9's "Regular releases keep your org secure", in a different module.
+
+### The same defect was on the critical path
+
+`CrossActorExpectation` had no write path either. A preregistration whose
+record does not survive the process **cannot claim it preceded the
+evidence**, which is its entire content. It persists now; its outcome is a
+SEPARATE row, so the expectation cannot be edited to carry its own answer;
+and an outcome for an expectation nobody registered is refused.
+
+`knowledge_retention` makes the class mechanical instead of lucky — both
+instances were found by hand, one wave apart, because somebody counted. The
+audit reads **DEGRADED** and names a third: 8 counterfactual episodes whose
+adjudication is re-derived every run and stored nowhere.
+
+### BLOCKER 2 CLEARED — three dates, not one
+
+| | before | after |
+|---|---|---|
+| actions | 23 | 7 |
+| distinct event times | **1** (the fetch date) | — |
+| orderable dates | **0** | **4** |
+
+`RetrievedDocument` never captured publication metadata although the parser
+extracts it. Entry pages carry it, index pages mostly do not, and that is
+exactly why entry pages can be ordered.
+
+**The year inference fabricated a date on its first run, and that is why the
+rule is now a refusal.** shopify.dev/changelog reports `modified_date`
+2026-07-21 while its newest entry is marked 08.03 — metadata older than the
+page's own content — so "an entry cannot predate its publication" rolled an
+August 2026 entry back into **2025**. A wrong date on the axis a timeline is
+ordered by is worse than no date.
+
+### BLOCKER 3 — no rival publishes a dated stream
+
+All 7 orderable actions are **Shopify's**. A candidate sequence needs
+orderable actions from BOTH sides of a durable rivalry, and no counterparty
+has any: Salesforce's releases page yields one undated action, BigCommerce
+and Magento yield nothing.
+
+    persistence   ✓
+    temporal truth ✓
+    counterparty observability ✗   <- the wall now
+
+### The suite was asserting a snapshot of a live artifact
+
+Production ran a cycle mid-session — ledger 366 → 421 rows — and **fourteen
+assertions across eight files went red with no code change**. They pinned
+constants against an append-only production file, so they were written green
+with a built-in expiry. All are migrated to the invariant they were about.
+
+Two were not brittleness. `learning_acceleration.report` **crashed** on the
+live ledger: a share of 8.0 out of 6.0. The guard was right that the numbers
+count different populations and wrong that it is a defect — a window revises
+beliefs declared in EARLIER windows, so `belief_revision_rate` is a ratio,
+not a share. And the economic chain's strongest candidate **changed from
+honda to toyota on new evidence**, which is §24's reassessment arriving by
+itself.
+
+### Not reached in wave 11
+
+§10-§16 (timelines, sequences, live interaction, preregistration, response
+watch) are blocked on blocker 3, not on effort. §17-§19 (Founder evidence
+trust), §22-§23 (near-miss priorities, routing), §25 (product regression) and
+§26 (falsifier migration) were not run.
 
 ## Wave 10 — two structural blockers, both located
 
@@ -199,13 +291,13 @@ exists so that improvement can never again be reported as knowledge.
 | what | where |
 |---|---|
 | market head | `HEAD of feat/strategic-response-learning` (see git log) |
-| wave-10 break proofs | **41/41** through the hardened harness |
+| wave-11 break proofs | **55/55** through the hardened harness |
 | market runtime | **`079128b` — NOT repinned; owner action below** |
 | founder head | `c1c1cb8` (branch `feat/consumption-emitter`) |
 | founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4413 passed / 4 skipped / EXIT=0 |
+| market suite | 4458 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
 ## Wave 8
@@ -518,6 +610,22 @@ in customer stories usually names companies outside it.
   extraction over 249 rows is 3.73 ms. No regression above 10%
 - **BREAK PROOFS** 30/30. Two failed first-pass: one mutation was a no-op
   (`{} or {...}` evaluates to the second dict) and one guard was unreachable
+
+## Remaining queue after wave 11, highest value first
+
+1. **A dated action stream for any counterparty.** Shopify has one; nobody
+   else does. Until a second actor has orderable actions, no candidate
+   action->response sequence can exist, and everything downstream of it is
+   blocked. Look for investor releases, press feeds and dated newsrooms
+   rather than more changelogs.
+2. **Wire persistence into the live cycle.** The write path exists and this
+   wave used it from a script. Until `steps` calls it, production still
+   forgets rivalries every night — `relationships_added` has been 0 in every
+   cycle observation ever recorded.
+3. **The counterfactual adjudication has nowhere to go.** The retention
+   audit reads DEGRADED on it.
+4. **Entry-page titles still yield no actions** (carried from wave 10), and
+   entry pages are where the dates live.
 
 ## Remaining queue after wave 10, highest value first
 
