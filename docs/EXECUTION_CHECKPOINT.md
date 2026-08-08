@@ -4,7 +4,69 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, V3 CLOSURE RUN.
+Updated 2026-08-08, V3 FINAL CLOSURE RUN.
+
+## V3 final closure — the bridge carries trust, end to end, in production
+
+### The producer was never live
+
+The runtime was pinned at `94fa091`, the PARENT of the trust producer. Every
+one of the 23 published dossiers was accepted by the founder contract and
+none carried a standing, so the layer existed on both sides and crossed
+between them nowhere. Repinned to `ed4b7f4` and ran the production-equivalent
+night cycle; 23 of 24 dossiers now carry one.
+
+| measured live | |
+|---|---|
+| raw evidence rows | 146 |
+| distinct occurrences | 75 |
+| rows of inflation removed | 71 |
+| companies rated | 23 |
+| companies with NO inflation | 13 |
+
+The last row is the control: normalization discriminates rather than
+discounting. Canadian National's five rows are five separate occurrences and
+credit the full 5.0; Shopify's twenty-three credit 8.0 where a row count
+would have credited 23; Stripe's twelve credit 2.0.
+
+### Q&A was the surface that inflated the evidence
+
+The one screen a founder uses to ask how strong the evidence is answered
+"Probably — 3 independent source(s) support this", where `independent` meant
+"the publisher is not the company". Three outlets rewriting one release
+satisfied it three times, and the sentence leaked `corroboration` — banned
+founder-facing vocabulary — because it was assembled after `_plain` ran.
+
+It now reads the canonical standing and derives none. It is also PINNED to
+the dossier revision the analysis read: the file on disk is live, so
+answering a week-old analysis from today's dossier would reopen the
+two-interpreters split along the time axis.
+
+### Decision impact is measured, not asserted
+
+On the live Shopify dossier: DECISION_CHANGING over 23 provenance rows,
+changing ASSUMPTION, BOUNDED_CONCLUSION, EVIDENCE_REQUIREMENT,
+MONITORING_PRIORITY and STRATEGIC_MECHANISM.
+
+### Two guards had quietly stopped working
+
+`w12-8` pointed at a line the claim-level roll-up had renamed, so the harness
+reported ANCHOR_MISSING rather than a pass — it had been testing nothing. And
+five assertions pinned counts against the ledger production writes to
+nightly; running one cycle turned them red with no code change, each one
+reporting the engine LEARNING as a failure.
+
+### Test gate
+
+| | |
+|---|---|
+| market suite | 4552 passed / 4 skipped / EXIT=0 |
+| founder suite | 4659 passed / 16 skipped / EXIT=0 |
+| market break proofs | 76/76 HELD |
+| founder break proofs | 20/20 HELD |
+| paper + retention | 98 passed |
+
+Production `119d345` untouched. PAPER enforced in all three plists.
 
 ## V3 closure run — memory closed, strategic reasoning blocked on data
 
