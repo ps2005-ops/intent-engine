@@ -447,7 +447,7 @@ exists so that improvement can never again be reported as knowledge.
 | founder preview | LIVE, verified this wave against four subjects |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in all three launchd plists |
-| market suite | 4544 passed / 4 skipped / EXIT=0 |
+| market suite | 4540 passed / 4 skipped / EXIT=0 |
 | founder suite | 4575 passed / 6 skipped / EXIT=0 |
 
 ## Wave 8
