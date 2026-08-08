@@ -50,7 +50,8 @@ def test_a_complete_day_cycle_runs_every_step(tmp_path):
     assert result.status == C.COMPLETED, result.reason
     assert [s.name for s in result.steps] == [
         "research", "opportunity", "funnel", "positions", "paper_entries",
-        "assets", "learning", "learning_health", "health", "report"]
+        "assets", "learning", "knowledge", "learning_health", "health",
+        "report"]
     assert all(s.ok for s in result.steps)
 
 

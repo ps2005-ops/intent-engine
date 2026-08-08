@@ -561,6 +561,93 @@ def learning_step(ctx: C.CycleContext) -> dict:
     return payload
 
 
+def knowledge_step(ctx: C.CycleContext) -> dict:
+    """Derive standing, currency and research value from the ledger.
+
+    WHY THIS STEP EXISTS AT ALL
+    ---------------------------
+    `belief_maturity`, `knowledge_decay`, `value_of_information` and
+    `causal_episodes` were each built, tested and reported as shipped, and
+    NONE of them was ever called by an operating cycle. That is the sixth
+    instance of this codebase's dominant defect — a correct module, a call
+    site that never runs it, and a report that is silent rather than wrong.
+    A subsystem no cycle invokes has not shipped; it has compiled.
+
+    Everything here is a FOLD over the append-only ledger, so it is safe to
+    run every session and produces the same answer twice on the same input.
+    The one write is `knowledge_decay`'s lifecycle events, and those are
+    appended, idempotent on `event_id`, and never edit a belief row.
+
+    Never raises: deriving a view must not be able to stop the cycle that
+    produces the thing being viewed.
+    """
+    import json as _json
+
+    from . import belief_maturity as BM
+    from . import causal_episodes as CE
+    from . import hidden_state_binding as HSB
+    from . import knowledge_decay as KD
+    from . import learning_store as LS
+    from . import mechanism_calibration as MC
+    from . import value_of_information as VOI
+
+    path = pathlib.Path(ctx.root) / LS.DEFAULT_PATH
+    store = LS.LearningStore(path)
+    payload: dict = {}
+    rows: List[dict] = []
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(_json.loads(line))
+            except ValueError:
+                continue      # a corrupt line is skipped, never repaired
+
+    maturities: tuple = ()
+    try:
+        maturities = BM.classify(rows, as_of=ctx.as_of)
+        payload["belief_maturity"] = BM.summarise(maturities)
+    except Exception as exc:  # noqa: BLE001
+        payload["belief_maturity"] = {"error": str(exc)}
+
+    try:
+        assessments = KD.assess(rows, as_of=ctx.as_of)
+        emitted = KD.events(assessments, as_of=ctx.as_of,
+                            prior_events=store.lifecycle_events())
+        written = 0
+        if not ctx.dry_run:
+            for event in emitted:
+                written += int(store.record_lifecycle(event))
+        payload["knowledge_decay"] = {
+            **KD.summarise(assessments, emitted),
+            "events_written": written,
+            "events": [e.as_dict() for e in emitted[:10]],
+        }
+    except Exception as exc:  # noqa: BLE001
+        payload["knowledge_decay"] = {"error": str(exc)}
+
+    try:
+        hidden_states, _, _ = HSB.bind(store.evidence(), as_of=ctx.as_of)
+        # `company_names` holds (canonical_name, aliases); VOI wants the name
+        # a founder would recognise, not the pair.
+        names = {cid: (value[0] if isinstance(value, tuple) else str(value))
+                 for cid, value in (ctx.company_names or {}).items()}
+        items = VOI.from_state(
+            maturities=maturities, mechanisms=MC.calibrate(rows),
+            hidden_states=hidden_states, subject_names=names)
+        payload["value_of_information"] = VOI.summarise(items)
+    except Exception as exc:  # noqa: BLE001
+        payload["value_of_information"] = {"error": str(exc)}
+
+    try:
+        payload["causal_episodes"] = CE.summarise(CE.build(rows))
+    except Exception as exc:  # noqa: BLE001
+        payload["causal_episodes"] = {"error": str(exc)}
+    return payload
+
+
 def learning_health_step(ctx: C.CycleContext) -> dict:
     """Measure whether the engine is learning, and persist that measurement.
 
@@ -685,6 +772,7 @@ def day_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("paper_entries", paper_entries_step(series_fn)),
         ("assets", assets_step),
         ("learning", learning_step),
+        ("knowledge", knowledge_step),
         ("learning_health", learning_health_step),
         ("health", health_step),
         ("report", report_step),
@@ -702,6 +790,7 @@ def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("positions", positions_step),
         ("assets", assets_step),
         ("learning", learning_step),
+        ("knowledge", knowledge_step),
         ("learning_health", learning_health_step),
         ("replay", replay_step(series_fn=None)),
         ("health", health_step),

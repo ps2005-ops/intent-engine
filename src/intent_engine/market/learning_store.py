@@ -36,9 +36,14 @@ EXPECTATION = "expectation"
 RECONCILIATION = "reconciliation"
 EVIDENCE = "evidence"
 CYCLE = "cycle"
+#: A belief's currency changing over time — stale, revalidated, retired.
+#: A separate record kind rather than a field on the belief, because the
+#: belief row is history: editing it to say "this is stale now" would
+#: destroy the record of when it was not.
+LIFECYCLE = "belief_lifecycle"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
-                          RECONCILIATION, EVIDENCE, CYCLE})
+                          RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -140,6 +145,28 @@ class LearningStore:
 
     def record_evidence(self, e: ME.MicroEvidence) -> None:
         self._append(EVIDENCE, e.as_dict())
+
+    def record_lifecycle(self, event) -> bool:
+        """Append one belief-lifecycle event. Idempotent on `event_id`.
+
+        Idempotent because a decay pass is a fold over the ledger and may
+        run more than once a day; a second pass finding the same belief
+        still stale is not a second transition.
+        """
+        payload = event.as_dict() if hasattr(event, "as_dict") else dict(event)
+        if payload.get("event_id") in self.lifecycle_ids():
+            return False
+        self._append(LIFECYCLE, payload)
+        return True
+
+    def lifecycle_ids(self) -> frozenset:
+        return frozenset(r.get("event_id") for r in self._rows()
+                         if r.get("record") == LIFECYCLE
+                         and r.get("event_id"))
+
+    def lifecycle_events(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == LIFECYCLE)
 
     # --- reading ----------------------------------------------------------
     def _rows(self) -> List[dict]:
