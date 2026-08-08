@@ -65,43 +65,49 @@ NEWSROOM_NEEDLES = ("/news", "/newsroom", "/press", "/media",
 
 MAX_PAGES_PER_SUBJECT = 6
 
-#: (pattern, predicate, subject_is_left, what the phrase actually licenses)
+#: (pattern, predicate, subject_is_left, counterparty_before, meaning)
 #:
-#: Every entry is a claim about MEANING, not about matching. The fourth field
+#: Every entry is a claim about MEANING, not about matching. The last field
 #: is carried into the relationship record so a disputed edge is argued about
 #: in terms of what the verb was taken to mean.
-_PATTERNS: Tuple[Tuple[str, str, bool, str], ...] = (
-    (r"\bpartner(?:ed|ship|s|ing)?\s+with\b", AR.PARTNERS_WITH, True,
+#:
+#: `counterparty_before` is the field an earlier draft did not have, and its
+#: absence was a real bug. "Acme Bank has selected Stripe" names the OTHER
+#: party BEFORE the verb and the subject after it; taking the token after the
+#: match found "Stripe" — the subject's own name — and the edge was thrown
+#: away as a self-relation. Every procurement verb reads this way round.
+_PATTERNS: Tuple[Tuple[str, str, bool, bool, str], ...] = (
+    (r"\bpartner(?:ed|ship|s|ing)?\s+with\b", AR.PARTNERS_WITH, True, False,
      "a stated partnership, of unstated commercial content"),
-    (r"\b(?:strategic\s+)?alliance\s+with\b", AR.PARTNERS_WITH, True,
+    (r"\b(?:strategic\s+)?alliance\s+with\b", AR.PARTNERS_WITH, True, False,
      "a stated alliance"),
-    (r"\bcollaborat(?:es?|ed|ion|ing)\s+with\b", AR.PARTNERS_WITH, True,
+    (r"\bcollaborat(?:es?|ed|ion|ing)\s+with\b", AR.PARTNERS_WITH, True, False,
      "a stated collaboration, which is weaker than a supply relationship"),
     # Interoperability. NOT dependence: two products can interoperate with no
     # money and no obligation between their makers.
-    (r"\bintegrat(?:es?|ed|ion|ing)\s+with\b", AR.COMPLEMENTS, True,
+    (r"\bintegrat(?:es?|ed|ion|ing)\s+with\b", AR.COMPLEMENTS, True, False,
      "products interoperate; this states no commercial relationship"),
-    (r"\bavailable\s+(?:on|in|through)\s+the\b", AR.COMPLEMENTS, True,
+    (r"\bavailable\s+(?:on|in|through)\s+the\b", AR.COMPLEMENTS, True, False,
      "a listing on another company's marketplace"),
     # Selection: the selector is buying, so the direction inverts.
-    (r"\b(?:has\s+)?select(?:ed|s)\b", AR.SELLS_TO, False,
+    (r"\b(?:has\s+)?select(?:ed|s)\b", AR.SELLS_TO, True, True,
      "the selector is procuring, so the selected party is the seller"),
-    (r"\b(?:has\s+)?chos(?:en|e)\b", AR.SELLS_TO, False,
+    (r"\b(?:has\s+)?chos(?:en|e)\b", AR.SELLS_TO, True, True,
      "the chooser is procuring, so the chosen party is the seller"),
     (r"\bdistribut(?:es?|ed|ion|ing)\s+(?:through|via)\b", AR.DISTRIBUTES,
-     False, "the named party carries the subject's product to market"),
-    (r"\bresell(?:er|s|ing)?\s+(?:of|for)\b", AR.DISTRIBUTES, False,
+     False, False, "the named party carries the subject's product to market"),
+    (r"\bresell(?:er|s|ing)?\s+(?:of|for)\b", AR.DISTRIBUTES, False, True,
      "the named party resells the subject's product"),
     # `supplies`, the finite verb, only. `supply` and `supplying` collide
     # with "supply chain", and the first live measurement of this family
     # produced four edges to an actor called "Chain" because of it.
-    (r"\bsupplies\s+(?:to\s+)?\b", AR.SUPPLIES, True,
+    (r"\bsupplies\s+(?:to\s+)?\b", AR.SUPPLIES, True, False,
      "the subject ships something the named party consumes"),
-    (r"\bsupplier\s+(?:to|for)\b", AR.SUPPLIES, True,
+    (r"\bsupplier\s+(?:to|for)\b", AR.SUPPLIES, True, False,
      "a stated supply relationship"),
 )
-_COMPILED = tuple((re.compile(p, re.I), pred, left, meaning)
-                  for p, pred, left, meaning in _PATTERNS)
+_COMPILED = tuple((re.compile(p, re.I), pred, left, before, meaning)
+                  for p, pred, left, before, meaning in _PATTERNS)
 
 #: Phrases that name a counterparty and state no relationship worth holding.
 #: Counted, so "this family produced nothing" can be told apart from "this
@@ -307,15 +313,23 @@ def extract(document: CS.Document, subject: str, aliases: Sequence[str]
     subject_name = _display_name(aliases, subject)
     for sentence in _sentences(document.text):
         matched = False
-        for pattern, predicate, subject_is_left, meaning in _COMPILED:
+        for pattern, predicate, subject_is_left, before, meaning in _COMPILED:
             hit = pattern.search(sentence)
             if not hit:
                 continue
             matched = True
             counts["relationship_candidates"] += 1
-            tail = re.sub(r"^(?:the|a|an)\s+", "",
-                          sentence[hit.end():].lstrip(" ,:"), flags=re.I)
-            other = AR._ACTOR.match(tail)
+            if before:
+                # A procurement verb names the buyer first: "Acme Bank has
+                # selected Stripe". The counterparty is the sentence's
+                # leading actor, not the token after the verb.
+                head = re.sub(r"^(?:the|a|an)\s+", "",
+                              sentence[:hit.start()].strip(), flags=re.I)
+                other = AR._ACTOR.match(head)
+            else:
+                tail = re.sub(r"^(?:the|a|an)\s+", "",
+                              sentence[hit.end():].lstrip(" ,:"), flags=re.I)
+                other = AR._ACTOR.match(tail)
             if not other:
                 refused["no_named_counterparty"] = refused.get(
                     "no_named_counterparty", 0) + 1

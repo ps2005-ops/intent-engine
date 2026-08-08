@@ -51,7 +51,7 @@ def test_a_complete_day_cycle_runs_every_step(tmp_path):
     assert [s.name for s in result.steps] == [
         "research", "opportunity", "funnel", "positions", "paper_entries",
         "assets", "learning", "knowledge", "learning_health", "health",
-        "report"]
+        "report"]  # day does NOT acquire sources: it is night-only
     assert all(s.ok for s in result.steps)
 
 

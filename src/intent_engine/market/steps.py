@@ -30,6 +30,7 @@ indistinguishable from data afterwards.
 """
 from __future__ import annotations
 
+import collections
 import json
 import pathlib
 import re
@@ -561,6 +562,98 @@ def learning_step(ctx: C.CycleContext) -> dict:
     return payload
 
 
+#: The prose families cost ~8 minutes of wall clock across 28 companies; the
+#: structured one costs ~16 seconds. Running all three every night would add
+#: more time than the rest of the cycle uses, so acquisition runs NIGHT ONLY
+#: and each family carries its own cadence in days. Removing the expensive
+#: ones instead would have been the wrong fix: they are where the
+#: counterparties are.
+SOURCE_CADENCE_DAYS = {
+    "government_award": 1,        # structured, cheap, changes daily
+    "customer_case_study": 7,     # marketing pages change slowly
+    "partnership_release": 3,     # announcements are episodic
+}
+
+
+def source_acquisition_step(ctx: C.CycleContext) -> dict:
+    """Acquire documents that NAME a counterparty, and measure each family.
+
+    Night only, and per-family cadence-gated, because this is the only step
+    in the cycle whose cost is dominated by other people's web servers. A
+    family that is not due today reports `skipped_by_cadence` with the day it
+    next runs, so a reader can tell a family that produced nothing from one
+    that was not asked.
+
+    Never raises: an unreachable newsroom must not cost the cycle its
+    learning.
+    """
+    from . import counterparty_sources as CS
+    from . import customer_case_studies as CC
+    from . import gov_awards as GA
+    from . import partnership_releases as PR
+
+    if ctx.dry_run:
+        return {"skipped": "a dry run does not fetch other people's sites",
+                "families": {}}
+
+    try:
+        from intent_engine.universe.companies import default_universe
+        companies = list(default_universe().prediction_companies())
+    except Exception as exc:  # noqa: BLE001
+        return {"error": str(exc), "families": {}}
+
+    subjects = [(c.company_id, _aliases_for(c)) for c in companies]
+    home = {c.company_id: getattr(c, "website", "") for c in companies}
+    import datetime as _dt
+    try:
+        day = _dt.date.fromisoformat(ctx.as_of[:10]).toordinal()
+    except ValueError:
+        day = 0
+
+    def with_home(module):
+        def fetch(subject, aliases, as_of):
+            return module.fetch(subject, aliases, as_of,
+                                home_url=home.get(subject, ""))
+        return fetch
+
+    families = {
+        CS.GOVERNMENT_AWARD: (GA.fetch, GA.extract),
+        CS.PARTNERSHIP_RELEASE: (with_home(PR), PR.extract),
+        CS.CUSTOMER_CASE_STUDY: (with_home(CC), CC.extract),
+    }
+
+    payload: dict = {"families": {}, "relationships": []}
+    accepted: List = []
+    for family, (fetch, extract) in families.items():
+        cadence = SOURCE_CADENCE_DAYS.get(family, 1)
+        if cadence > 1 and day % cadence:
+            payload["families"][family] = {
+                "skipped_by_cadence": True, "cadence_days": cadence,
+                "note": "not due today; a family not asked is not a family "
+                        "that found nothing"}
+            continue
+        try:
+            found, report = CS.measure(
+                family, subjects=subjects, fetch=fetch, extract=extract,
+                as_of=ctx.as_of)
+        except Exception as exc:  # noqa: BLE001 - see docstring
+            payload["families"][family] = {"error": str(exc)}
+            continue
+        payload["families"][family] = report.as_dict()
+        # Integrate on the MEASURED verdict, never on the family's name.
+        if report.verdict()[0] == CS.INTEGRATE:
+            accepted.extend(found)
+
+    payload["relationships"] = [r.as_dict() for r in accepted]
+    payload["summary"] = {
+        "relationships_accepted": len(accepted),
+        "by_predicate": CS.counts_by_predicate(accepted),
+        "distinct_actors": len({r.subject_actor for r in accepted}
+                               | {r.object_actor for r in accepted}),
+    }
+    return payload
+
+
 def knowledge_step(ctx: C.CycleContext) -> dict:
     """Derive standing, currency and research value from the ledger.
 
@@ -684,6 +777,11 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         payload["economic_chain"] = {"error": str(exc)}
 
     try:
+        payload["world_model"] = _world_model(ctx)
+    except Exception as exc:  # noqa: BLE001
+        payload["world_model"] = {"error": str(exc)}
+
+    try:
         impacts = len((ctx.results.get("learning") or {}).get(
             "strategic_export", {}).get("published") or ())
         payload["learning_acceleration"] = LA.report(
@@ -692,6 +790,62 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     except Exception as exc:  # noqa: BLE001
         payload["learning_acceleration"] = {"error": str(exc)}
     return payload
+
+
+def _world_model(ctx: C.CycleContext) -> dict:
+    """Rerun relationship-derived views on whatever acquisition produced.
+
+    The interaction binder needs COMPETES_WITH edges specifically. The three
+    integrated source families produce SELLS_TO and PARTNERS_WITH — a company
+    publishes who buys from it and who it works with, and never who it is
+    losing to. So this reports the exact missing relationship type rather
+    than a bare zero, and `interaction_binding` keeps refusing.
+    """
+    from . import actor_relationships as AR
+    from . import interaction_binding as IB
+    from . import learning_store as LS
+
+    acquired = (ctx.results.get("source_acquisition") or {}).get(
+        "relationships") or []
+    rows = tuple(_rehydrate(r) for r in acquired)
+    competitors = AR.competitor_map(rows)
+    store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
+    interactions, refused = IB.bind(
+        store.evidence(), industry_of=_industries(),
+        competitors_of=competitors)
+    by_predicate = dict(collections.Counter(r.predicate for r in rows))
+    return {
+        "relationships": len(rows),
+        "by_predicate": by_predicate,
+        "distinct_actors": len({r.subject_actor for r in rows}
+                               | {r.object_actor for r in rows}),
+        "competitor_edges": len(competitors),
+        "interactions": len(interactions),
+        "interactions_refused": dict(refused),
+        "missing_for_interactions": (
+            "" if competitors else
+            "COMPETES_WITH. Every integrated family is company-published, "
+            "and a company names its customers and its partners but not its "
+            "rivals. Interactions stay blocked on a relationship type these "
+            "sources structurally cannot supply"),
+    }
+
+
+def _rehydrate(row: dict):
+    from . import actor_relationships as AR
+    return AR.ActorRelationship(
+        relationship_id=row.get("relationship_id", ""),
+        subject_actor=row.get("subject_actor_id", ""),
+        predicate=row.get("predicate", ""),
+        object_actor=row.get("object_actor_id", ""),
+        subject_kind=row.get("subject_kind", AR.LEGAL_ENTITY),
+        object_kind=row.get("object_kind", AR.LEGAL_ENTITY),
+        epistemic_status=row.get("epistemic_status", AR.OBSERVED),
+        evidence_ids=tuple(row.get("evidence_ids") or ()),
+        source_document=(row.get("source_document_ids") or [""])[0],
+        subject_span=row.get("subject_span", ""),
+        object_span=row.get("object_span", ""),
+        relationship_span=row.get("relationship_span", ""))
 
 
 def _industries() -> Dict[str, str]:
@@ -839,6 +993,7 @@ def day_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
 def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
     return [
         ("research", research_step(research_fn)),
+        ("source_acquisition", source_acquisition_step),
         ("reconcile", reconcile_step),
         ("paper_resolve", paper_resolve_step(series_fn)),
         ("opportunity", opportunity_step(series_fn)),

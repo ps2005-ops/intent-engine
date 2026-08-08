@@ -220,9 +220,16 @@ _TITLE_VERB = re.compile(
 
 
 def _trim_to_the_name(candidate: str, vendor_tokens: frozenset) -> str:
-    """Drop a leading vendor name and stop at the headline's first verb."""
+    """Drop a leading vendor name and any leading verb, then stop at the next.
+
+    "Stripe Supports Rivian" is the vendor, its verb, and the customer, in
+    that order. Stopping at the FIRST verb would return nothing; skipping
+    leading verbs and stopping at the next returns "Rivian".
+    """
     tokens = candidate.split()
     while tokens and tokens[0].lower().strip(".,") in vendor_tokens:
+        tokens.pop(0)
+    while tokens and _TITLE_VERB.match(tokens[0].strip(".,")):
         tokens.pop(0)
     kept = []
     for token in tokens:
