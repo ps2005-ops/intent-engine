@@ -235,7 +235,9 @@ def test_anonymous_runs_demo_end_to_end(tmp_path):
     status, headers, body = c.request("GET", run_url + "/progress")
     # finished runs go straight to the presentation now
     assert status.startswith("303"), status
-    assert headers["Location"].endswith("/slides"), headers["Location"]
+    # Founder-first: completion lands on the 60-second brief, not the deck.
+    assert not headers["Location"].endswith("/slides"), headers["Location"]
+    assert "/runs/" in headers["Location"], headers["Location"]
     status, _, body = c.request("GET", run_url)
     assert status == "200 OK"
     claim_id = body.split("/evidence/")[1].split('"')[0]
@@ -458,7 +460,8 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
     # test is that it is NOT sent to /login.
     status, hdrs2, body = c.request("GET", f"/runs/{run_id}/progress")
     assert hdrs2.get("Location", "") != "/login"
-    assert status.startswith("303") and hdrs2["Location"].endswith("/slides")
+    assert status.startswith("303")
+    assert not hdrs2["Location"].endswith("/slides"), hdrs2["Location"]
     status, _, body = c.request("GET", hdrs2["Location"])
     assert status == "200 OK"
     # the restored session is the same anonymous identity, still anonymous
@@ -472,7 +475,7 @@ def test_anonymous_real_company_run_survives_restart(tmp_path):
     # "Evidence Library" that used to prove this page had rendered was the
     # claim-id dump, and it is gone.
     status, body = c.get(f"/runs/{run_id}/full")
-    assert status == "200 OK" and ">Sources<" in body
+    assert status == "200 OK" and "Every source this rests on" in body
 
     # a different anonymous session (fresh cookie) cannot reach the run
     other = _start_demo(app2)

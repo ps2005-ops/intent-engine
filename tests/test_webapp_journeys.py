@@ -97,7 +97,9 @@ def test_full_required_journey(app):
     # presentation. Presentation-first is the product decision; this is the
     # journey asserting it rather than the old "Open the result" click.
     assert status.startswith("303"), status
-    assert headers["Location"].endswith("/slides"), headers["Location"]
+    # Founder-first: the completed run opens on the founder brief.
+    assert not headers["Location"].endswith("/slides"), headers["Location"]
+    assert "/runs/" in headers["Location"], headers["Location"]
     # result — Company Understanding present, no company score
     status, _, body = c.request("GET", run_url)
     assert status == "200 OK"

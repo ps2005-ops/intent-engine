@@ -46,6 +46,60 @@ TAXONOMY_WORDS = (
     "strategic optionality", "adjacent capability",
 )
 
+# THE LIBRARY DESCRIBING ITS OWN MACHINERY.
+#
+# TAXONOMY_WORDS is a list of NOUNS, so it could only ever catch a spelling
+# somebody had already read off a slide -- one entry per incident. The pattern
+# library names itself in a regular way, and that regularity is the thing worth
+# matching: "match the product→platform mechanism", "tool-to-system-of-record",
+# "hyp-services_to_product". Each is an internal identifier whatever nouns it
+# happens to contain, and a pattern added to the library tomorrow will be
+# spelled the same way. Naming the SHAPE is the only version of this rule that
+# holds without an incident first.
+_PATTERN_SELF_DESCRIPTION = (
+    # "...together match the product→platform mechanism", "matches the
+    # segment-split mechanism" -- the analysis reporting on its own rule firing
+    re.compile(r"\bmatch(?:es|ed|ing)?\s+the\b[^.:]{0,80}?\bmechanism\b", re.I),
+    # internal record ids: hyp-…, obs-…, pat:…, blind-…
+    re.compile(r"\b(?:hyp|obs|pat|blind)[-:][A-Za-z0-9_]+\b", re.I),
+    re.compile(r"\bpattern[_\s-](?:id|library|name|label)\b", re.I),
+)
+
+# A COMPOUND IS AN IDENTIFIER ONLY WHEN IT IS ONE.
+#
+# Matching the SHAPE "x-to-y" was too broad by a mile: it read "harder-to-copy
+# layers" and "a go-to-market choice" as internal vocabulary and deleted two
+# genuine sentences from the library. An allowlist of English compounds is
+# whack-a-mole -- there is no end to them.
+#
+# The library, though, knows its own ids. A compound is an identifier when its
+# words are a pattern id's words, in any of the three spellings the codebase
+# uses for the same thing: `tool_to_system_of_record`,
+# "tool-to-system-of-record" and "product→platform". Exact, so no English
+# compound can trip it, and systemic, because a pattern added tomorrow is
+# covered the moment it is added.
+_COMPOUND = re.compile(r"[A-Za-z]+(?:\s*(?:→|->|[-_])\s*[A-Za-z]+)+")
+
+
+def _id_words(text: str) -> tuple:
+    """A compound's words, with the joining "to" dropped."""
+    words = [w for w in re.split(r"[^A-Za-z]+", text.lower()) if w]
+    return tuple(w for w in words if w != "to")
+
+
+def _pattern_id_words() -> frozenset:
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+    return frozenset(_id_words(p.pattern_id) for p in PATTERN_LIBRARY)
+
+
+def _names_a_pattern_id(text: str) -> bool:
+    known = _pattern_id_words()
+    for match in _COMPOUND.finditer(text or ""):
+        words = _id_words(match.group(0))
+        if len(words) >= 2 and words in known:
+            return True
+    return False
+
 
 def action_kind(text: str):
     """Which kind of concrete company action this text reports, if any."""
@@ -123,9 +177,16 @@ def reads_as_taxonomy(text: str) -> bool:
     only the second one reached a slide because the first spelling was the
     only one being matched.
     """
-    low = re.sub(r"[-_]+", " ", (text or "").lower())
+    raw = (text or "")
+    low = re.sub(r"[-_]+", " ", raw.lower())
     low = re.sub(r"\s+", " ", low)
-    return any(word in low for word in TAXONOMY_WORDS)
+    if any(word in low for word in TAXONOMY_WORDS):
+        return True
+    # Checked against the ORIGINAL, because the normalisation above is what
+    # makes "tool-to-system-of-record" invisible to a hyphen-aware rule.
+    if any(rule.search(raw) for rule in _PATTERN_SELF_DESCRIPTION):
+        return True
+    return _names_a_pattern_id(raw)
 
 
 # --- title cleaning -----------------------------------------------------------
@@ -227,6 +288,20 @@ def select_founder_claim_anchor(observations, *, company="") -> dict:
     # A title that cleans down to nothing, or that names no company-specific
     # subject beyond the company itself, has not earned the takeover.
     if len(fact.split()) < 3:
+        return {}
+    # A TITLE STILL HAS TO BE A SENTENCE.
+    #
+    # "Palantir Partnership Vanguard" opened the deployed deck under the
+    # heading "The insight" -- three nouns, retrieved from a page, presented
+    # as the analysis's conclusion. `action_kind` had matched a word in it,
+    # and nothing after that asked whether the result asserted anything.
+    #
+    # The claim gate's word floor cannot be used here: "Sentry acquired
+    # Codecov." is three words and is exactly the fact this path exists to
+    # find. What separates them is the verb -- one reports an action, the
+    # other is a noun phrase -- so that is what is required.
+    from intent_engine.founder_brief.build import _has_finite_verb
+    if not _has_finite_verb(fact.lower()):
         return {}
     return {
         "fact": fact,

@@ -105,16 +105,35 @@ def test_a_run_with_no_concrete_development_keeps_the_existing_path():
     assert founder_view_from_report(plain) == {}
 
 
-def test_why_now_is_stated_in_plain_words():
-    """The reasoning layer says "Recent public signal (2026-07-20, Pricing)
-    keeps this timely" -- the system describing its own inputs."""
+def test_why_now_withholds_provenance_instead_of_rephrasing_it():
+    """CONTRACT CORRECTED after live customer feedback.
+
+    This test previously required the date and page name to SURVIVE into
+    "why now" -- it asserted `"2026-07-20" in out and "Pricing page" in out`.
+    That contract is what produced "The most recent evidence is About
+    Palantir." on the deployed Palantir result, which a real user reported as
+    meaningless.
+
+    Both readings agree the pipeline's own vocabulary ("signal") must go. They
+    disagree on what remains: the old one said rephrase the provenance, this
+    one says a publication date is not a reason the situation is urgent, so
+    there is no "why now" to state and the line is omitted.
+
+    The test was not weakened to let the code pass -- the expectation was
+    wrong, and keeping it would have preserved the defect the customer saw.
+    """
     from intent_engine.strategic_intelligence.slides import (
         _why_now_in_plain_words,
     )
     out = _why_now_in_plain_words(
         "Recent public signal (2026-07-20, Pricing page) keeps this timely.")
     assert "signal" not in out.lower()
-    assert "2026-07-20" in out and "Pricing page" in out
+    assert out == "", f"provenance was rendered as a reason: {out!r}"
+
+    # A genuine reason is still passed through untouched.
+    real = ("Two of the three largest customers renewed on shorter terms this "
+            "quarter, which changes the revenue base.")
+    assert _why_now_in_plain_words(real) == real
 
 
 def test_a_report_with_nothing_to_say_produces_no_founder_deck():

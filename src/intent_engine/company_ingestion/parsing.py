@@ -8,6 +8,7 @@ repeated short lines (nav/footer repetition).
 from __future__ import annotations
 
 import hashlib
+import re as _re
 from html.parser import HTMLParser
 
 from intent_engine.company_ingestion.records import PARSER_VERSION
@@ -404,3 +405,40 @@ def parse_html(html: str) -> dict:
         "extraction_mode": extraction_mode,
         "blocks_found": blocks_found,
     }
+
+
+def readable_title(document_title, candidate_title):
+    """Choose the title a human can actually use.
+
+    An SEC exhibit's own <title> is its accession filename -- "duol-20260603",
+    "exhibit991". Discovery already knows the readable label ("SEC 8-K exhibit
+    (2026-04-30)"), and taking the document's title whenever it was non-empty
+    threw that away, so a source list read as a column of storage keys.
+
+    The document title still wins when it is genuinely readable: a press
+    release headline says more than "SEC 8-K exhibit". Only a machine-shaped
+    title defers, and only to a candidate label that actually exists -- with
+    nothing to fall back to the original stands, because inventing a document
+    title is worse than showing an ugly one.
+    """
+    doc = (document_title or "").strip()
+    cand = (candidate_title or "").strip()
+    if not doc:
+        return cand
+    if not cand:
+        return doc
+    return cand if _looks_machine_generated(doc) else doc
+
+
+def _looks_machine_generated(title):
+    """A filename, an accession key or a bare exhibit tag -- not a sentence."""
+    t = title.strip().lower()
+    if " " in t:                     # any whitespace reads as prose
+        return False
+    if t.endswith((".htm", ".html", ".pdf", ".txt")):
+        return True
+    if _re.match(r"^[a-z0-9][a-z0-9._-]*\d{6,}[a-z0-9._-]*$", t):
+        return True                  # accession/date-stamped filename
+    if _re.match(r"^(a?\d?-?k?)?exhibit[\d._-]*$", t):
+        return True                  # exhibit991, a8-kexhibit991
+    return False

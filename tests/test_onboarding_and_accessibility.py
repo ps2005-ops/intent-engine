@@ -259,6 +259,127 @@ def test_both_themes_are_styled_never_only_one(guest):
             f"{name} has no dark theme"
 
 
+# WHY THE TEST ABOVE PASSED WHILE THE LANDING PAGE WAS UNREADABLE. Every page
+# ships `_A11Y_CSS`, and that sheet contains the string
+# "prefers-color-scheme:dark" — so asking whether the string is present asks
+# nothing about the page's OWN stylesheet. Measured live on preview-v3 at
+# c57af3b, in dark mode: `.sample-quote` rendered #1a1a2e on #0f141c (1.08:1),
+# `.lede` 1.68:1, and the consent label 1.9:1 — the sentence describing what
+# the visitor was consenting to. The floor could not correct them because
+# `form.analyze label` and `.sample-quote` outrank its selectors.
+#
+# So test the property that actually prevents it: a page's own sheet may not
+# name a colour, because a colour it names is a colour the dark block cannot
+# re-point.
+
+def test_the_landing_sheet_names_no_colour_a_theme_cannot_repoint():
+    from intent_engine.founder_intelligence.presentation import _LANDING_CSS
+    # `:root{...}` is where a literal belongs: once as the light default, once
+    # re-pointed inside the dark block.
+    rules = re.sub(r":root\s*\{[^}]*\}", "", _LANDING_CSS)
+    leaked = re.findall(r"#[0-9a-fA-F]{3,8}\b", rules)
+    assert not leaked, (
+        f"landing rules hard-code {sorted(set(leaked))}; dark mode cannot "
+        "re-point a literal, so these render at light-mode values on a dark "
+        "background")
+
+
+def test_the_focus_ring_is_repointed_for_dark_not_left_on_the_light_accent():
+    """Measured on the deployed /login at b66dbe3: the ring rendered #1d4ed8
+    on #0f141c — 2.76:1, under the 3:1 WCAG floor for a non-text indicator, so
+    a keyboard user in dark mode could not reliably see where they were."""
+    from intent_engine.webapp.app import _A11Y_CSS
+
+    def contrast(hex_a, hex_b):
+        def lin(component):
+            component /= 255
+            return (component / 12.92 if component <= 0.03928
+                    else ((component + 0.055) / 1.055) ** 2.4)
+
+        def lum(value):
+            r, g, b = (int(value[i:i + 2], 16) for i in (1, 3, 5))
+            return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+
+        first, second = lum(hex_a), lum(hex_b)
+        hi, lo = max(first, second), min(first, second)
+        return (hi + 0.05) / (lo + 0.05)
+
+    compact = _A11Y_CSS.replace(" ", "").replace("\n", "")
+    dark = compact.split("@media(prefers-color-scheme:dark)", 1)[1]
+    assert "focus-visible{outline-color:#7aa2ff}" in dark, \
+        "dark mode does not re-point the focus ring"
+    assert contrast("#7aa2ff", "#0f141c") >= 3.0
+    assert contrast("#1d4ed8", "#0f141c") < 3.0      # the value it replaced
+
+
+def test_every_panel_that_sets_a_light_background_has_a_dark_counterpart():
+    """A background without a colour inherits the dark scheme's near-white.
+
+    Measured live on preview-v3 at 20ffb9c, on the progress page: the stage
+    line inside [role=status] rendered at 1.01:1 and the .coverage note at
+    1.06:1 — both invisible, on the screen a visitor watches for the whole
+    analysis. The generic floor has no rule for these selectors, so the dark
+    counterpart has to live beside the light one.
+    """
+    from intent_engine.founder_intelligence.presentation import _BASE_CSS
+    compact = _BASE_CSS.replace(" ", "").replace("\n", "")
+    assert "@media(prefers-color-scheme:dark)" in compact, \
+        "the base sheet has no dark block"
+    light, dark = compact.split("@media(prefers-color-scheme:dark)", 1)
+    for selector in ("[role=status]", "[role=alert]", ".coverage",
+                     "ul.source-listlilabel"):
+        if selector + "{" in light:
+            assert selector in dark, (
+                f"{selector} sets a light background with no dark counterpart; "
+                "its text inherits near-white and disappears")
+
+
+def test_a_control_border_is_visible_in_dark_mode():
+    """WCAG 1.4.11: the boundary that tells a reader where a field IS needs
+    3:1, the same as any other non-text UI component.
+
+    Measured live on the deployed landing form at a5e1322, in dark mode: the
+    label, the placeholder and the typed text all passed, and the box around
+    them rendered #3a4454 on #0f141c — 1.88:1, and 1.74:1 inside a panel. The
+    text was readable and you could not see where to type it.
+    """
+    from intent_engine.founder_intelligence.presentation import _LANDING_CSS
+    from intent_engine.webapp.app import _A11Y_CSS
+
+    def contrast(a, b):
+        def lin(v):
+            v /= 255
+            return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+
+        def lum(h):
+            r, g, b_ = (int(h[i:i + 2], 16) for i in (1, 3, 5))
+            return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b_)
+
+        x, y = lum(a), lum(b)
+        hi, lo = max(x, y), min(x, y)
+        return (hi + 0.05) / (lo + 0.05)
+
+    page, panel = "#0f141c", "#161c26"
+    for sheet, name in ((_LANDING_CSS, "landing"), (_A11Y_CSS, "floor")):
+        compact = sheet.replace(" ", "").replace("\n", "")
+        dark = compact.split("@media(prefers-color-scheme:dark)", 1)[1]
+        assert "#606e88" in dark, f"{name} sheet has no visible control border"
+    assert contrast("#606e88", page) >= 3.0
+    assert contrast("#606e88", panel) >= 3.0
+    assert contrast("#3a4454", page) < 3.0          # the value it replaced
+
+
+def test_the_landing_sheet_repoints_its_palette_for_dark():
+    from intent_engine.founder_intelligence.presentation import _LANDING_CSS
+    compact = _LANDING_CSS.replace(" ", "").replace("\n", "")
+    assert "@media(prefers-color-scheme:dark)" in compact, \
+        "the landing sheet has no dark block of its own"
+    dark = compact.split("@media(prefers-color-scheme:dark)", 1)[1]
+    # the text a visitor reads first, and the one they must read to consent
+    for token in ("--l-lede:", "--l-label:", "--l-ink:", "--l-field-bg:"):
+        assert token in dark, f"dark mode never re-points {token}"
+
+
 def test_no_page_leaks_an_internal_state_name(guest):
     for name, body in _all_styled_pages(guest).items():
         for internal in ("READY_FOR_FULL_REPORT", "RETRYABLE_EVIDENCE_GAP",

@@ -277,18 +277,41 @@ _ANSWERED_BY = {
                                  ("wrong", "why_now", "tension", "evidence")),
     "what decision it could affect": (("decision",),
                                       ("decision-1", "today", "view")),
+    # "investigation" is the kind of the "What cannot be concluded yet" slide,
+    # which names the gap that has to close first — that IS what to look at
+    # next, and for a company whose only falsification question reads as
+    # taxonomy (so the brief rightly drops it) it is the only place that says
+    # so.
     "what to investigate next": (("questions",),
-                                 ("watch", "questions", "opportunity")),
+                                 ("watch", "questions", "opportunity",
+                                  "investigate", "investigation")),
     "how confident to be": ((), ("gaps", "view", "evidence")),
     "what could not be determined": (("limitation",), ("gaps", "evidence")),
 }
 
 
 def _unanswered(persona, brief, slides) -> list:
-    """The questions this reader needs that the analysis does not answer."""
+    """The questions this reader needs that the analysis does not answer.
+
+    MATCHED ON KIND AS WELL AS ID. Slide ids are suffixed per instance
+    ("investigate-1"), so an id set can only ever match the slides that happen
+    to be singletons — and a deck answering a question on its second
+    investigation slide was scored as not answering it at all. The `kind` is
+    the stable name for what a slide IS.
+
+    Measured on the Brightledger persona run: the deck carried "What cannot be
+    concluded yet", naming the gap that has to close first, and the reader was
+    still reported as unable to answer "what to investigate next".
+    """
     from intent_engine.strategic_intelligence.editorial import is_meaningful
-    filled = {s.get("id") for s in slides or ()
-              if s.get("bullets") or s.get("body")}
+    filled = set()
+    for slide in slides or ():
+        if not (slide.get("bullets") or slide.get("body")):
+            continue
+        sid = slide.get("id") or ""
+        filled.update({sid, sid.rsplit("-", 1)[0] if "-" in sid else sid,
+                       slide.get("kind") or ""})
+    filled.discard("")
     missing = []
     for question in persona.must_answer:
         fields, slide_ids = _ANSWERED_BY.get(question, ((), ()))

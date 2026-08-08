@@ -72,8 +72,22 @@ MAX_KNOWN_PATHS = 28
 # highest-value families (product, customers, investor) take their quota
 # without starving the rest, and stays far inside MAX_TOTAL_BYTES_PER_RUN.
 MAX_APPROVED_SOURCES = 14
+#: The budget for ONE untrusted web response. SEC filings are fetched against
+#: `edgar.MAX_FILING_BYTES` instead — see the reasoning there.
 MAX_RESPONSE_BYTES = 2_000_000
-MAX_TOTAL_BYTES_PER_RUN = 15_000_000
+#: The budget for a whole run.
+#:
+#: This had to move with the filing budget, not after it. At 15MB a single
+#: JPMorgan 10-K (12.9MB measured 2026-08-05) would consume 86% of the run and
+#: every remaining source would fail with "run byte budget exhausted" — the
+#: analysis would trade nine ordinary pages for one filing and come out worse
+#: than before. 48MB carries the realistic worst case: three statutory filings
+#: (annual, quarterly, current — the families are served round-robin, so at
+#: most a few land) plus the ordinary pages, none of which can exceed 2MB.
+#:
+#: The cost is bounded and was measured before raising it: JPMorgan's 12.9MB
+#: 10-K downloads in ~1s and parses in ~2s.
+MAX_TOTAL_BYTES_PER_RUN = 48_000_000
 MAX_REDIRECTS = 5
 CONNECT_TIMEOUT_S = 8
 READ_TIMEOUT_S = 12
@@ -89,6 +103,10 @@ INGESTION_EVENTS = frozenset({
     "ci.pasted_evidence_added", "ci.claims_built",
     # report-quality diagnostics (operator observability)
     "ci.quality_assessed",
+    # Operator-only: did the RICH path actually land? "The reasoning backend
+    # is configured" and "a grounded analysis was accepted" proved to be very
+    # different things, and nothing recorded the difference.
+    "ci.reasoning_assessed",
     # WHO the run is about, asserted before synthesis and independently of
     # whatever the run manages to retrieve.
     "ci.entity_identified",
@@ -186,7 +204,8 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
                      meta_description="", freshness="CURRENT",
                      retrieval_status="OK", privacy="public",
                      origin_note="", source_class="company_owned",
-                     extraction_mode="body", blocks_found=0) -> dict:
+                     extraction_mode="body", blocks_found=0,
+                     filing=None) -> dict:
     assert_no_secret(text_content[:20000], where="retrieved source text")
     if privacy not in PRIVACY_CLASSES:
         raise IngestionError(f"unknown privacy class {privacy!r}")
@@ -207,7 +226,18 @@ def retrieved_record(*, source_id, run_id, company_id, original_url,
             # WHERE the text came from. A document recovered only from
             # og:description is not the same evidence as a document whose body
             # was read, and every gate downstream was blind to the difference.
-            "extraction_mode": extraction_mode, "blocks_found": blocks_found}
+            "extraction_mode": extraction_mode, "blocks_found": blocks_found,
+            # WHAT WAS READ, for a regulatory filing: the quality verdict, the
+            # sections located, and the span each retained excerpt was cut
+            # from. Absent (None) for every other kind of document, so no
+            # existing consumer changes shape.
+            #
+            # This exists so nothing downstream has to re-derive from one
+            # front-truncated blob what the parser already established. "We
+            # retrieved the 10-K" and "we can read the 10-K" were the same
+            # fact to every gate, which is how a cover page travelled as an
+            # annual report.
+            **({"filing": filing} if filing else {})}
 
 
 def failure_record(*, failure_id, run_id, candidate_id, failure_type,

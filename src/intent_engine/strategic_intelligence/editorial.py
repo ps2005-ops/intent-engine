@@ -85,6 +85,49 @@ def addresses_the_system(text) -> bool:
     return any(marker in low for marker in _ADDRESSES_THE_SYSTEM)
 
 
+#: STATUTORY COVER-PAGE FURNITURE — real source, real passage, no claim.
+#:
+#: A filing opens with a mandated cover page (ballot boxes, the Act it is
+#: filed under, the exchange the shares trade on), and an excerpt comes off
+#: the front of a document, so that is what a 10-K offers first. Measured on
+#: the deployed preview 2026-08-05, the TOP item under "What supports this"
+#: for Palantir was:
+#:
+#:     "☒. ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES
+#:      EXCHANGE ACT OF 1934. ☐. TRANSITION REPORT PURSUANT TO…"
+#:
+#: It lives HERE, not in one renderer, because six surfaces read `excerpt`
+#: independently — narrative, executive brief, evidence view, Q&A, the graph
+#: projection and the evidence node page. Fixing the one that was noticed
+#: would have left the same ballot box on the other five.
+#:
+#: Deliberately narrow: every pattern is language that appears ONLY on a
+#: statutory cover page and never in the operating prose that follows. An
+#: over-broad rule silently drops real evidence, which is the more expensive
+#: mistake.
+_FILING_FURNITURE = re.compile(
+    r"[☐☑☒]"
+    r"|pursuant\s+to\s+section\s+1[35]\b"
+    r"|securities\s+exchange\s+act\s+of\s+19\d\d"
+    r"|indicate\s+by\s+check\s+mark"
+    r"|commission\s+file\s+(number|no\b)"
+    r"|title\s+of\s+each\s+class"
+    r"|name\s+of\s+each\s+exchange\s+on\s+which"
+    r"|emerging\s+growth\s+company"
+    r"|well[- ]known\s+seasoned\s+issuer"
+    r"|transition\s+report\s+pursuant",
+    re.I)
+
+
+def is_filing_furniture(text) -> bool:
+    """Whether this passage is a filing's cover page rather than its content.
+
+    A citation a founder cannot read a fact out of spends the most valuable
+    line on the page and teaches them the citations are decorative.
+    """
+    return bool(text) and bool(_FILING_FURNITURE.search(str(text)))
+
+
 def is_meaningful(value) -> bool:
     """Whether a value says anything at all.
 
@@ -179,6 +222,66 @@ def similarity(a: str, b: str) -> float:
 
 def _normalised_text(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip()
+
+
+def sentence_identity(text: str, limit: int = 120) -> str:
+    """A sentence's identity, so a surface can tell whether it already said it.
+
+    Compared on words alone, with any leading label stripped: two lines
+    differing only by the heading glued to the front ("The evidence that would
+    settle it: X" and "X") are one sentence to a reader.
+
+    Lives here rather than in a renderer because the deck and the scrollable
+    narrative both need it, and two implementations of "have I said this" is
+    how one surface deduplicates what the other repeats.
+    """
+    body = re.sub(r"^[^:]{0,60}:\s*", "", " ".join(str(text or "").split()))
+    words = " ".join(re.findall(r"[a-z0-9]+", body.lower()))
+    return words[:limit] if limit else words
+
+
+class SaidOnce:
+    """One screen's memory of what it has already told the reader.
+
+    Containment, not equality: "value and lock-in migrate from the visible
+    product" and "If this reading holds, value and lock-in migrate from the
+    visible product" are one sentence to a reader, and neither is a prefix of
+    the other after the label is stripped.
+
+    A caller decides what to do with a repeat. `fresh` returns "" so a caller
+    can drop an optional line; `has` lets a caller substitute a back-reference
+    where the field is structurally required -- an option with no stated cost
+    is a worse page than a repetitive one.
+
+    Identities are compared UNTRUNCATED. The deck's 120-character cap is fine
+    for equality but silently breaks containment on long sentences: an option
+    whose upside is "If this reading holds, <mechanism>" is longer than the cap,
+    so the mechanism it obviously contains tested as new and printed again as
+    the key assumption on the same card.
+    """
+
+    def __init__(self, seed=()):
+        self._seen = set()
+        for text in (seed or ()):
+            self.remember(text)
+
+    def has(self, text: str) -> bool:
+        key = sentence_identity(text, limit=0)
+        if not key:
+            return True
+        return any(key in seen or seen in key for seen in self._seen)
+
+    def remember(self, text: str) -> None:
+        key = sentence_identity(text, limit=0)
+        if key:
+            self._seen.add(key)
+
+    def fresh(self, text: str) -> str:
+        """The text, or "" when this screen has already said it."""
+        if not text or self.has(text):
+            return ""
+        self.remember(text)
+        return text
 
 
 def find_duplicates(texts, threshold: float = NEAR_DUPLICATE_SIMILARITY) \
@@ -276,9 +379,14 @@ _READER_LIMITATION = {
     "thesis_generic":
         "The public evidence describes what the company does, but not enough "
         "to support a reading of why it is doing it.",
+    # WHAT THIS CODE ACTUALLY MEANS is "fewer than three RANKED readings were
+    # built" -- not "no alternative exists". The old wording said the latter,
+    # and the deployed Palantir deck carried it on the evidence slide while
+    # slide four was an option built entirely on the competing account and the
+    # decision screen listed two more. One run, two surfaces, opposite claims.
     "too_few_hypotheses":
-        "No competing explanation could be built from this evidence, so this "
-        "reading has not been tested against an alternative.",
+        "Only one reading of the evidence could be ranked, so it was not "
+        "weighed against a second one built independently of it.",
     "evidence_titles_only":
         "Only page titles and marketing copy could be extracted — nothing "
         "detailed enough to rest a reading on.",
@@ -328,12 +436,22 @@ def reader_limitations(findings) -> list:
 
 
 def consolidate_limitations(*groups) -> list:
-    """One limitations section, not the same caveat under six headings."""
+    """One limitations section, not the same caveat under six headings.
+
+    Filtered for ontology vocabulary like every other founder-facing list.
+    "Whether customers actually moved their source of truth is not observable
+    from outside" is an evidence gap in the pattern library's words, and it
+    reached the deployed Palantir deck under "Evidence and limitations" -- the
+    one slide nobody had thought of as carrying claims.
+    """
+    from intent_engine.strategic_intelligence.concrete import (
+        reads_as_taxonomy,
+    )
     seen, out = [], []
     for group in groups:
         for limitation in group or ():
             text = str(limitation).strip()
-            if not is_meaningful(text):
+            if not is_meaningful(text) or reads_as_taxonomy(text):
                 continue
             if any(similarity(text, s) >= NEAR_DUPLICATE_SIMILARITY
                    for s in seen):

@@ -10,11 +10,13 @@ Rules enforced here:
 """
 from __future__ import annotations
 
+import logging
 import re
 from collections import Counter
 
 from intent_engine.company_ingestion.records import IngestionError
-from intent_engine.personal.records import (
+from intent_engine.personal.records import (  # noqa: F401
+    PersonalError, assert_workspace_language,
     AVAIL_PARTIAL, AVAIL_SUPPORTED, AVAIL_UNAVAILABLE, SourceClaim, SourceRef,
 )
 
@@ -46,6 +48,36 @@ _AUDIENCE_PATTERNS = (
 )
 
 
+#: A quoted span shorter than this is not checked by `assert_quotes_exist`
+#: (its regex floor is 4 characters). Requiring the same floor here keeps the
+#: verbatim-quote guarantee TOTAL: every audience phrase we quote is a phrase
+#: the quote checker actually verifies against the cited source.
+_MIN_QUOTABLE = 4
+
+
+def _audience_phrase(doc: dict) -> str | None:
+    """The company's own audience wording, verbatim, or None.
+
+    Matched case-insensitively but sliced out of the ORIGINAL text, because
+    this phrase is presented to the reader as something the source says. A
+    lower-cased rewrite of the source is not the source, and quoting one would
+    make the visible attribution subtly false.
+    """
+    text = doc.get("text_content") or ""
+    lowered = text.lower()
+    for pattern in _AUDIENCE_PATTERNS:
+        m = re.search(pattern, lowered)
+        if not m:
+            continue
+        start, end = m.span(1)
+        # `str.lower()` can change length on a few Unicode code points, which
+        # would misalign the span; fall back to the matched text when it does.
+        span = text[start:end]
+        phrase = (span if span.lower() == m.group(1) else m.group(1)).strip()
+        return phrase if len(phrase) >= _MIN_QUOTABLE else None
+    return None
+
+
 def real_ref(doc: dict) -> SourceRef:
     return SourceRef(
         subsystem=REAL_SUBSYSTEM, artifact_type=doc["source_type"],
@@ -54,6 +86,11 @@ def real_ref(doc: dict) -> SourceRef:
         as_of=doc["retrieved_at"], snapshot_version=doc["parser_version"],
         observed_at=doc["retrieved_at"],
         freshness_status=doc.get("freshness", "CURRENT"))
+
+
+_LOG = logging.getLogger(__name__)
+#: Claims refused during THIS build, for diagnostics only.
+_REFUSED: list = []
 
 
 def assert_real_claims(claims_by_section: dict) -> None:
@@ -83,20 +120,78 @@ def assert_quotes_exist(text: str, docs_by_id: dict, source_ids: list) -> None:
                 "cited source — rejected")
 
 
+#: Claims without which the report would MISLEAD rather than merely say less.
+#: A reader who is told what a company sells, by whom, and on what evidence
+#: can judge the rest; drop one of these and the remaining page reads as a
+#: complete analysis of something it never established.
+ESSENTIAL_CLAIM_IDS = frozenset({"u.identity", "u.offering", "u.scope"})
+
+
+class ClaimRefused(Exception):
+    """One claim did not pass its editorial contract. Carries which one."""
+
+    def __init__(self, claim_id, reason):
+        super().__init__(f"{claim_id}: {reason}")
+        self.claim_id = claim_id
+        self.reason = reason
+
+
 def _claim(claim_id, text, availability, docs, *, confidence=None,
-           transformation="direct", docs_by_id=None) -> SourceClaim:
+           transformation="direct", docs_by_id=None):
+    """Build one claim, or return None when an OPTIONAL one is refused.
+
+    ONE REFUSED SENTENCE MAY NOT COST THE WHOLE REPORT. `SourceClaim.validate`
+    runs the editorial language wall, and a single claim tripping it raised
+    straight out of composition — so the run was abandoned and the reader was
+    told nothing had been produced. Measured live on preview-v3:
+
+        stage=composition
+        PersonalError: claim text overclaims: ['always']
+
+    for Alphabet, whose 10-K and 10-Q had been read successfully. The wall is
+    right to refuse the sentence; it was the blast radius that was wrong.
+
+    The wall is NOT relaxed here and no banned term is removed: a refused
+    claim is still refused. It is now refused ALONE, unless it is one the
+    report would mislead without — see `ESSENTIAL_CLAIM_IDS`, which still
+    aborts, because a page missing what the company sells is worse than no
+    page.
+    """
     refs = tuple(real_ref(d) for d in docs) \
         if availability != AVAIL_UNAVAILABLE else ()
-    if docs_by_id is not None and docs:
-        assert_quotes_exist(text, docs_by_id, [d["source_id"] for d in docs])
-    claim = SourceClaim(claim_id=claim_id, text=text,
-                        availability=availability, source_refs=refs,
-                        confidence=confidence, transformation=transformation,
-                        freshness_status=min(
-                            (d.get("freshness", "CURRENT") for d in docs),
-                            default="CURRENT",
-                            key=lambda f: 0 if f == "STALE" else 1))
-    return claim
+    try:
+        if docs_by_id is not None and docs:
+            assert_quotes_exist(text, docs_by_id,
+                                [d["source_id"] for d in docs])
+        # THE LANGUAGE WALL, ASKED HERE AND ONLY HERE. Claims are validated
+        # downstream when a SECTION is validated, so an overclaiming sentence
+        # was caught only after it had been folded into a card — and taking
+        # the card down took the run with it. Asking at the claim boundary
+        # refuses the sentence at the smallest scope that is still safe.
+        #
+        # Deliberately NOT `claim.validate()`: that also enforces the
+        # source-ref invariant, and several builders legitimately construct a
+        # claim with no docs. Widening the catch here would silently drop
+        # them. This is the wall that fired, and only it.
+        assert_workspace_language(text, where=f"claim {claim_id}")
+        return SourceClaim(
+            claim_id=claim_id, text=text,
+            availability=availability, source_refs=refs,
+            confidence=confidence, transformation=transformation,
+            freshness_status=min(
+                (d.get("freshness", "CURRENT") for d in docs),
+                default="CURRENT",
+                key=lambda f: 0 if f == "STALE" else 1))
+    except (PersonalError, IngestionError) as exc:
+        if claim_id in ESSENTIAL_CLAIM_IDS:
+            raise ClaimRefused(claim_id, str(exc)[:200]) from exc
+        # Recorded, not silently dropped: the reader loses one line, and the
+        # log says which and why.
+        _LOG.warning("claim refused claim_id=%s %s: %s", claim_id,
+                     type(exc).__name__, str(exc)[:160])
+        _REFUSED.append({"claim_id": claim_id,
+                         "error_class": type(exc).__name__})
+        return None
 
 
 def _q(term: str) -> str:
@@ -249,25 +344,37 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 f'"{first_heading[:200]}"',
                 AVAIL_SUPPORTED, [home], confidence="Moderate",
                 docs_by_id=docs))
-        audience = None
-        for pattern in _AUDIENCE_PATTERNS:
-            m = re.search(pattern, home["text_content"].lower())
-            if m:
-                audience = m.group(1).strip()
-                break
+        audience = _audience_phrase(home)
         if audience:
+            # SOURCE VOICE, QUOTED. The phrase is the company's own wording,
+            # lifted verbatim, so it goes through `_q()` like every other
+            # source-derived span in this module. Before this, it was the one
+            # builder that interpolated retrieved text RAW into a workspace
+            # sentence — so an absolute the *company* wrote ("always-on",
+            # "built for teams that must scale") read as the workspace's own
+            # certainty, tripped the language wall, and cost the claim.
+            #
+            # Quoting is not an escape hatch: `docs_by_id` makes
+            # `assert_quotes_exist` prove the phrase is really in a cited
+            # source, so an invented quotation is still refused. The wall is
+            # unchanged, and everything OUTSIDE the quote is still walled.
             understanding.append(_claim(
                 "u.customer",
-                f"Visible audience language: the homepage speaks to "
-                f"{audience} (supported inference from page language).",
+                f"Visible audience language: the homepage addresses "
+                f"{_q(audience)}. That is who the company says it is "
+                f"speaking to, which is not the same as who its customers "
+                f"are; named accounts, case studies or a disclosed revenue "
+                f"mix would be needed to establish composition.",
                 AVAIL_PARTIAL, [home], confidence="Moderate",
-                transformation="summarized"))
+                transformation="summarized", docs_by_id=docs))
             persona.append(_claim(
                 "p.homepage_audience",
-                f"The homepage appears primarily oriented toward "
-                f"{audience}. We do not yet know whether this is "
-                f"intentional.", AVAIL_PARTIAL, [home],
-                confidence="Moderate", transformation="summarized"))
+                f"The homepage is oriented toward {_q(audience)}. This "
+                f"wording signals the audience being targeted; whether the "
+                f"customer base is composed that way, and whether the "
+                f"emphasis is deliberate, is not settled by the page itself.",
+                AVAIL_PARTIAL, [home], confidence="Moderate",
+                transformation="summarized", docs_by_id=docs))
     # --- products / platform: what the company actually offers ---------------
     # Without this, a retrieved product or documentation page contributed
     # nothing to the report and the offering stayed "Not available" even though
@@ -631,6 +738,11 @@ def build_claims(*, documents: list, company_name: str, domain: str,
                 AVAIL_PARTIAL, [d], confidence="High",
                 docs_by_id=docs))
 
+    # A refused OPTIONAL claim arrives here as None. Filtering in one place
+    # keeps every builder above unchanged and cannot miss a section.
+    for _group in (understanding, analytics, market, persona, blind,
+                   assumption, attention, opportunity, stale, competitor):
+        _group[:] = [c for c in _group if c is not None]
     claims_by_section = {
         "understanding": understanding, "analytics": analytics,
         "market_view": market, "persona": persona, "blind_spot": blind,

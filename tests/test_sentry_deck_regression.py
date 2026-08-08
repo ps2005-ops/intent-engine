@@ -7,6 +7,8 @@ retrieved a page titled "Sentry Acquires Codecov".
 
 Everything here asserts RENDERED CONTENT, not source strings.
 """
+import re
+
 import pytest
 
 from intent_engine.strategic_intelligence.reasoning import (
@@ -35,6 +37,29 @@ def _obs(oid, title, excerpt, signals=("consolidation",)):
 
 
 # these titles are what the live run actually retrieved
+#
+# THE SIGNAL SET WAS MIGRATED, THE RENDERING CONTRACT WAS NOT.
+# ------------------------------------------------------------------
+# Everything in this file is a contract on the RENDERER: that the pattern
+# library's taxonomy never reaches a reader, and that filtering it out does
+# not take the honesty — the confidence sentence, the case against, the gaps —
+# with it. To test any of that there has to be a reading to filter, and the
+# reading this fixture produced was `tool_to_system_of_record` qualifying on
+# `consolidation + multi_product`.
+#
+# That qualification was itself the defect, removed in
+# `test_system_of_record_needs_a_mechanism`: several products and
+# consolidation copy are things most B2B software companies have, and neither
+# says the customer's source of truth moved. Left alone, this fixture would
+# have gone quiet — three renderer contracts passing vacuously because no
+# hypothesis existed to leak, and a deck dropping from four slides to two.
+#
+# So `obs-5` observes the mechanism the reading asserts. Note what this
+# fixture is and is not: the signals here were always hand-attached rather
+# than detected from the excerpts, so this is a Sentry-shaped run that clears
+# the new bar, not a claim about what Sentry's own pages say today. Whether
+# the real company still qualifies is a question for the live rerun, and the
+# answer there is allowed to be no.
 SENTRY_OBS = [
     _obs("obs-1", "About Sentry | Sentry", "Bugs aren't great."),
     _obs("obs-2", "Sentry Acquires Codecov | Sentry",
@@ -44,6 +69,10 @@ SENTRY_OBS = [
          "Application performance monitoring for developers.",
          ("multi_product", "consolidation")),
     _obs("obs-4", "Media Resources | Sentry", "Press releases and logos."),
+    _obs("obs-5", "One platform, one data model | Sentry",
+         "Errors, traces and replays are written to a shared data model, so "
+         "every product reads the same underlying data.",
+         ("shared_data_model",)),
 ]
 
 
@@ -230,10 +259,10 @@ def _scaffold_report(company="Huggingface"):
     the thesis, the hypothesis, the blind spot, the vulnerability, the
     opportunity and the leadership question all come from one scaffold."""
     from intent_engine.strategic_intelligence.patterns import (
-        HYPOTHESIS_SCAFFOLDS,
+        HYPOTHESIS_SCAFFOLDS, statement_for,
     )
     scaffold = HYPOTHESIS_SCAFFOLDS["tool_to_system_of_record"]
-    statement = scaffold["statement"].format(company=company)
+    statement = statement_for(scaffold, company=company, mechanism="it runs a separate government estate")
     return {
         "company_name": company,
         "thesis": {"view": f"{company} appears to be {scaffold['title']}.",
@@ -286,12 +315,103 @@ def test_a_deck_with_nothing_concrete_is_not_presentable():
 
 
 def test_the_fallback_deck_still_keeps_what_is_real():
-    """Dropped, not sanitised: the company's own words and the genuine
-    decision survive -- only the library's sentences go."""
+    """Dropped, not sanitised: the company's own words survive.
+
+    THE RETIRED EXPECTATION
+    -----------------------
+    This also asserted `"depth or in adjacency" in text`, which is
+    `tool_to_system_of_record`'s `implications[0]` -- "Whether to keep
+    investing in depth or in adjacency". That is a decision TOPIC: a question,
+    phrased as a question, and the deck printed it under a decision heading as
+    though the analysis had answered it. The assertion could only ever pass by
+    the product handing the founder's own question back to them, so it pinned
+    the defect in place rather than guarding against anything.
+
+    What replaces it is not weaker. The topic must still be reachable
+    internally, it must NOT appear verbatim anywhere a reader can see, and the
+    deck must carry the composed decision in its place -- which for this
+    evidence is the honest bounded state, because the scaffold's mechanism is
+    the library describing itself and nothing survives to choose between.
+    """
     deck = _fallback_deck()
     text = " ".join(b["text"] for s in deck for b in s["bullets"])
     assert "helping the community work together" in text
-    assert "depth or in adjacency" in text
+
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(_scaffold_report())
+    assert decision.topic or decision.readiness == "INVESTIGATION_REQUIRED"
+    assert "depth or in adjacency" not in text.lower()
+    assert "whether to keep investing" not in text.lower()
+
+
+def test_the_fallback_deck_states_a_bounded_position_not_a_slogan():
+    """The sparse deck has to be USEFUL, not merely clean.
+
+    Filtering the library's sentences left this deck reading, in full: "We are
+    helping the community work together." and "Built from 5 company owned
+    source(s)." -- a marketing quote and a source count. Neither is
+    intelligence. A reader given those two lines learned nothing, which is the
+    same failure as the pattern label, one step further along.
+    """
+    deck = _fallback_deck()
+    investigation = [s for s in deck if s["kind"] == "investigation"]
+    assert investigation, [s["kind"] for s in deck]
+    bullets = " ".join(b["text"] for b in investigation[0]["bullets"])
+
+    # why committing is unsafe, and what would close it -- both present
+    assert "not the mechanism behind it" in bullets
+    assert "company-published" in bullets
+
+    # and the two non-answers may not be carrying the deck
+    lead = deck[0]["bullets"][0]["text"].lower()
+    assert "source(s)" not in lead
+    for slide in deck:
+        if slide["kind"] == "evidence":
+            continue
+        joined = " ".join(b["text"] for b in slide["bullets"])
+        assert joined.strip(), f"empty screen rendered: {slide['id']}"
+        assert not re.fullmatch(r"Built from [^.]+\.", joined.strip()), joined
+
+
+def test_the_topic_never_renders_as_the_finished_decision():
+    """Across the WHOLE library, not just the pattern that was reported.
+
+    `implications[0]` is the decision topic for every scaffold there is, and
+    the defect was systemic: one field, read directly by every surface. A test
+    that only pinned `tool_to_system_of_record` would let the next eleven
+    through.
+    """
+    from intent_engine.strategic_intelligence.decision import compose_decision
+    from intent_engine.strategic_intelligence.patterns import (
+        HYPOTHESIS_SCAFFOLDS, statement_for,
+    )
+    from intent_engine.strategic_intelligence.records import (
+        StrategicHypothesis,
+    )
+    for pattern_id, scaffold in HYPOTHESIS_SCAFFOLDS.items():
+        hypothesis = StrategicHypothesis(
+            hypothesis_id=f"hyp-{pattern_id}", title=scaffold["title"],
+            statement=statement_for(scaffold, company="Acme", mechanism="it runs a separate government estate"),
+            reasoning=scaffold["reasoning"],
+            supporting_observation_ids=["obs-1"], counter_observation_ids=[],
+            alternative_explanations=list(scaffold["alternatives"]),
+            confidence="moderate", confidence_reasons=["r"],
+            evidence_gaps=list(scaffold["gaps"]),
+            decision_implications=list(scaffold["implications"]),
+            falsification_questions=list(scaffold["falsification"]),
+            pattern_id=pattern_id)
+        decision = compose_decision("Acme", hypothesis,
+                                    evidence_gaps=scaffold["gaps"])
+        topic = decision.topic.lower().rstrip(".")
+
+        # the topic stays available internally ...
+        assert topic, pattern_id
+        # ... and is never what a reader is shown as the decision
+        assert topic not in decision.headline.lower(), pattern_id
+        assert topic not in decision.recommended_next_move.lower(), pattern_id
+        for option in decision.options:
+            assert topic not in option.label.lower(), pattern_id
+            assert topic not in option.description.lower(), pattern_id
 
 
 def test_a_dropped_library_question_is_replaced_by_a_checkable_one():

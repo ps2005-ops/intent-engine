@@ -264,3 +264,269 @@ def test_agenda_items_carry_the_field_the_renderer_reads():
     for item in agenda:
         assert item.get("inferred_discussion"), \
             f"agenda item the renderer cannot title: {item!r}"
+
+
+# --- a threshold counts evidence; it cannot say what the reading is about ----
+#
+# The defect above was fixed in DETECTION, and this is the same claim arriving
+# through the other door. `services_to_product` qualifies on any two of
+# ("services_motion", "multi_product", "developer_surface"), so a company with
+# an API page and a products page — every software company — met the threshold
+# without a single observation about delivering work alongside customers, and
+# was told it "converts what it learned delivering work alongside customers
+# into products those customers can run themselves".
+#
+# Measured on the deployed preview at acf4357 across a twenty-company matrix:
+# five of the seven full results (Datadog, MongoDB, Cloudflare, HubSpot, Visa)
+# returned that IDENTICAL sentence as "The answer" — the one line a founder
+# reads first. None had retrieved a services signal.
+
+def _sig_obs(oid, signal, text, excerpt):
+    from intent_engine.strategic_intelligence.records import (
+        StrategicObservation,
+    )
+    return StrategicObservation(
+        observation_id=oid, text=text, observation_type="messaging",
+        source_refs=[{"artifact_id": f"src-{oid}"}], signals=(signal,),
+        source_class="company_owned", excerpt=excerpt,
+        source_title=f"src {oid}", origin=f"https://acme.example/{oid}",
+        date="2026-08-06")
+
+
+_API = ("o1", "developer_surface", "Acme exposes a surface others can build on.",
+        "Build on our API: REST and GraphQL documentation for developers.")
+_PRODUCTS = ("o2", "multi_product",
+             "Acme sells several distinct products rather than one.",
+             "Explore the suite: Compute, Storage, Analytics and Security.")
+_SERVICES = ("o3", "services_motion",
+             "Acme embeds engineers alongside its customers.",
+             "Our implementation team works on-site alongside yours.")
+# The TRANSFER, which is a different claim from having services at all.
+_TRANSFER = ("o4", "productization",
+             "Acme turns delivered work into something sold on its own.",
+             "We productized what we learned delivering those engagements "
+             "into a repeatable product.")
+_PRICING = ("o5", "pricing_published", "Acme publishes its prices.",
+            "Pricing starts at a low monthly price per seat, free plan "
+            "available.")
+_CONSOLIDATION = ("o6", "consolidation",
+                  "Acme positions itself as replacing several tools.",
+                  "One unified platform, a single source of truth replacing "
+                  "several separate tools.")
+# The MECHANISM, which is a different claim from being a platform at all.
+#
+# `_API` and `_PRODUCTS` used to be enough on their own to produce a
+# system-of-record reading, and that was the same class of defect this file
+# documents one pattern over: an API page and a products page are things
+# almost every B2B software company has, so the reading fired on being a
+# platform rather than on the record having moved. Two tests below leaned on
+# that reading as their "other hypothesis", so they are the ones that had to
+# carry evidence of the mechanism instead.
+_RECORD = ("o7", "shared_data_model",
+           "Acme runs its products over one model of the customer's data.",
+           "Every product reads and writes the same underlying data: one "
+           "shared data model across the suite.")
+
+
+def _fired(*specs):
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    report = build_strategic_report(
+        company_name="Acme", observations=[_sig_obs(*s) for s in specs])
+    return {h.pattern_id for h in report.hypotheses}
+
+
+def test_a_services_reading_needs_evidence_of_a_service():
+    assert "services_to_product" not in _fired(_API, _PRODUCTS)
+
+
+def test_the_services_reading_still_fires_when_the_transition_is_observed():
+    """The gate must not be a mute button.
+
+    Updated when the contract tightened: the engagement alone no longer
+    qualifies, because almost every large vendor has one. With the engagement
+    AND the transfer it describes, the pattern is exactly as available as it
+    ever was — which is what stops this being a mute button rather than a gate.
+    """
+    assert "services_to_product" in _fired(_API, _PRODUCTS, _SERVICES,
+                                           _TRANSFER)
+    assert "services_to_product" in _fired(_PRODUCTS, _SERVICES, _TRANSFER)
+
+
+def test_removing_it_does_not_silence_the_reading_that_did_fit():
+    """The services gate removes one unsupported claim, not the analysis.
+
+    MIGRATED. This asserted that `_API, _PRODUCTS` alone still reached a
+    reading, and it did — the system-of-record one, which was itself firing on
+    nothing more than an API and a product suite. So the test was proving the
+    services gate was not a mute button by pointing at a second reading that
+    should never have fired either.
+
+    The property it exists to protect is real and is unchanged: gating one
+    pattern must not silence a run whose evidence fits a different pattern.
+    What changes is that the other reading now has to be earned. With the
+    mechanism observed, it is exactly as available as it ever was.
+    """
+    fired = _fired(_API, _PRODUCTS, _RECORD)
+    assert fired, "the run must still reach a reading"
+    assert "services_to_product" not in fired, \
+        "and it must not be the one this file just gated"
+
+
+def test_a_platform_shape_on_its_own_now_reaches_no_reading_at_all():
+    """The other half of the migration above, stated rather than implied.
+
+    An API and a product suite describe most of the industry. A run that has
+    retrieved only those two things has not found a strategy, and the honest
+    output is no reading — not the cheapest one that clears a signal count.
+    """
+    assert not _fired(_API, _PRODUCTS)
+
+
+def test_a_required_signal_must_be_one_the_pattern_qualifies_on():
+    import pytest
+    from intent_engine.strategic_intelligence.records import ComparablePattern
+    bad = ComparablePattern(
+        pattern_id="p", name="n", description="d", mechanism="m",
+        historical_examples=[{"name": "x", "note": "y", "source": "z"}],
+        when_it_applies="a", when_it_does_not_apply="b",
+        qualifying_signals=("multi_product",),
+        required_signals=("services_motion",))
+    with pytest.raises(Exception):
+        bad.validate()
+
+
+# --- having services is not the same claim as the transition -----------------
+#
+# Requiring `services_motion` was right and was not enough: almost every large
+# vendor publishes a professional-services or implementation page. Measured on
+# the deployed preview, the reading still dominated MongoDB, Cloudflare,
+# HubSpot and Amazon — none of which claim that engagements taught them
+# something they now sell WITHOUT the engagement. That claim is the mechanism
+# the pattern is named for, and it is its own signal.
+
+def _answer(*specs):
+    """The pattern that would be "The answer" — first in the portfolio."""
+    from intent_engine.strategic_intelligence.reasoning import (
+        build_strategic_report,
+    )
+    report = build_strategic_report(
+        company_name="Acme", observations=[_sig_obs(*s) for s in specs])
+    return report.hypotheses[0].pattern_id if report.hypotheses else None
+
+
+def test_a_professional_services_page_alone_is_not_the_transition():
+    """The live case: enterprise vendor with implementation services."""
+    assert "services_to_product" not in _fired(_API, _PRODUCTS, _SERVICES)
+
+
+def test_self_serve_saas_with_a_services_page_is_not_the_transition():
+    assert "services_to_product" not in _fired(_PRODUCTS, _SERVICES, _PRICING)
+
+
+def test_an_api_company_with_no_transfer_evidence_is_not_the_transition():
+    assert "services_to_product" not in _fired(_API, _PRODUCTS)
+
+
+def test_a_company_that_describes_the_transfer_still_gets_the_reading():
+    """A genuine services-to-product company must keep it."""
+    assert "services_to_product" in _fired(_API, _PRODUCTS, _SERVICES,
+                                           _TRANSFER)
+    assert "services_to_product" in _fired(_SERVICES, _TRANSFER)
+
+
+def test_the_transfer_reading_is_the_answer_when_nothing_argues_with_it():
+    assert _answer(_API, _PRODUCTS, _SERVICES, _TRANSFER,
+                   _CONSOLIDATION) == "services_to_product"
+
+
+def test_published_pricing_costs_the_reading_its_rank_not_only_its_wording():
+    """Disconfirming evidence has to cost something a reader can see.
+
+    Published self-serve pricing is the plainest evidence that the product is
+    already sold without the engagement. The reading is not deleted — it stays
+    available as a secondary hypothesis — but a reading the evidence argues
+    with must not be the first line on the page when a cleaner one exists.
+
+    MIGRATED. "A cleaner one exists" was doing real work in that sentence, and
+    the cleaner one used to be the system-of-record reading firing on `_API`
+    and `_PRODUCTS`. Demotion has nothing to hand the lead to unless some
+    OTHER reading genuinely qualifies, so the fixture now observes the
+    mechanism that earns one. The assertion is untouched: pricing costs this
+    reading its rank, not merely its wording.
+    """
+    case = (_API, _PRODUCTS, _SERVICES, _TRANSFER, _CONSOLIDATION, _RECORD,
+            _PRICING)
+    contested = _fired(*case)
+    assert "services_to_product" in contested, "it must remain available"
+    assert _answer(*case) != "services_to_product"
+
+
+def test_demotion_needs_somewhere_to_demote_to():
+    """The companion case, so the test above cannot pass for the wrong reason.
+
+    When the contested reading is the ONLY one that qualified, there is no
+    cleaner line to promote and the honest behaviour is to keep it — demoting
+    it to nothing would leave the page blank rather than accurate. This is why
+    `_demote_contested` returns the list unchanged rather than dropping the
+    head of it.
+    """
+    lonely = (_PRODUCTS, _SERVICES, _TRANSFER, _PRICING)
+    assert _fired(*lonely) == {"services_to_product"}
+    assert _answer(*lonely) == "services_to_product"
+
+
+def test_blocking_is_declared_per_pattern_never_applied_globally():
+    """A blanket penalty on counter-evidence was tried first, and was wrong.
+
+    Sorting contested readings down globally broke the property the product
+    deliberately has — `test_flagship_hypothesis_has_real_counter_evidence`:
+    the lead reading is SUPPOSED to carry counter-evidence, because one nobody
+    has argued with is one nobody has tested. Nine tests failed, and they were
+    right to.
+
+    So blocking is a per-pattern declaration, and a pattern may only be blocked
+    by a signal it already declares as arguing against it.
+    """
+    import pytest
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+    from intent_engine.strategic_intelligence.records import ComparablePattern
+
+    declared = [p for p in PATTERN_LIBRARY if p.blocking_signals]
+    assert declared, "no pattern declares blocking signals"
+    for pattern in declared:
+        for signal in pattern.blocking_signals:
+            assert signal in pattern.disconfirming_signals
+
+    bad = ComparablePattern(
+        pattern_id="p", name="n", description="d", mechanism="m",
+        historical_examples=[{"name": "x", "note": "y", "source": "z"}],
+        when_it_applies="a", when_it_does_not_apply="b",
+        qualifying_signals=("multi_product",),
+        disconfirming_signals=(),
+        blocking_signals=("pricing_published",))
+    with pytest.raises(Exception):
+        bad.validate()
+
+
+def test_a_blocked_reading_stays_available_as_a_secondary_hypothesis():
+    """Blocking costs it first place, not its place."""
+    from intent_engine.strategic_intelligence.reasoning import _demote_contested
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+
+    by_id = {p.pattern_id: p for p in PATTERN_LIBRARY}
+
+    class _H:
+        def __init__(self, pid):
+            self.pattern_id = pid
+
+    blocked = _H("services_to_product")
+    clean = _H("tool_to_system_of_record")
+    order = _demote_contested([blocked, clean], by_id, {"pricing_published"})
+    assert order[0] is clean, "a blocked reading is still leading"
+    assert blocked in order, "a blocked reading was dropped, not demoted"
+
+    # with nothing arguing against it, it leads again
+    unblocked = _demote_contested([blocked, clean], by_id, set())
+    assert unblocked[0] is blocked

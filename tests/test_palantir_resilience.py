@@ -115,7 +115,18 @@ def test_resolve_cik_unknown_company_returns_none():
                        transport=palantir_transport, resolver=False) is None
 
 
-def test_filing_candidates_prefer_small_html_filings():
+def test_filing_candidates_cover_more_than_one_kind_of_filing():
+    """One of each family, not three of the same one.
+
+    Ranking purely by form preference spent every slot on 8-Ks, because a
+    filer publishes far more current reports than periodic ones. Measured on
+    the deployed preview 2026-08-04: no Palantir run retrieved a filing at all,
+    and the analysis reported "Revenue split between services and product is
+    not public" as a finding — which is false, it is in the quarterly report.
+
+    The PERIODIC report leads because that is where revenue disaggregation,
+    customer concentration and risk factors live.
+    """
     resolved = resolve_cik("Palantir Technologies",
                            transport=palantir_transport, resolver=False)
     cands = filing_candidates(resolved, transport=palantir_transport,
@@ -124,7 +135,26 @@ def test_filing_candidates_prefer_small_html_filings():
     assert all(c["source_class"] == "investor_material" for c in cands)
     # the form-4 XML primary document is skipped; only parseable HTML remains
     assert all(c["url"].lower().endswith((".htm", ".html")) for c in cands)
-    assert "8-K" in cands[0]["title"]               # small 8-K preferred first
+    assert "10-Q" in cands[0]["title"], cands[0]["title"]
+    if len(cands) > 1:
+        families = {t.split()[1] for t in (c["title"] for c in cands)}
+        assert len(families) > 1, f"every slot is the same form: {families}"
+
+
+def test_a_stale_filing_never_outranks_a_current_one():
+    """A filer has exactly one S-1 and it never ages out of the index, so
+    family coverage alone handed a slot to Palantir's 2020 S-1 and Shopify's
+    2015 prospectus. Demoted, never dropped: for a company that has filed
+    nothing since, its S-1 is still the best disclosure available."""
+    from intent_engine.company_ingestion.edgar import _spread_by_family
+    forms = ["S-1", "10-Q", "8-K"]
+    dates = ["2015-05-21", "2026-05-05", "2026-07-02"]
+    order = _spread_by_family([0, 1, 2], forms, dates, today="2026-08-04")
+    assert forms[order[-1]] == "S-1", [forms[i] for i in order]
+    # ...and when everything is stale, nothing is lost
+    only_old = _spread_by_family([0], ["S-1"], ["2015-05-21"],
+                                 today="2026-08-04")
+    assert only_old == [0]
 
 
 def test_propose_edgar_never_raises_when_sec_unreachable():
@@ -382,7 +412,8 @@ def test_progress_page_terminal_styled_stops_refresh(tmp_path):
     st, hdrs2, body = c.request("GET", loc)
     # A terminal run now goes straight to the presentation rather than
     # rendering a status page with an "Open the result" link on it.
-    assert st.startswith("303") and hdrs2["Location"].endswith("/slides")
+    assert st.startswith("303")
+    assert not hdrs2["Location"].endswith("/slides"), hdrs2["Location"]
     st, _, body = c.request("GET", hdrs2["Location"])
     assert st == "200 OK"
     assert "<style" in body and "<nav" in body         # styled product shell

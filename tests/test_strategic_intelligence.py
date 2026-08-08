@@ -263,9 +263,20 @@ def test_new_shopify_report_rejects_low_value_structures(shopify_report):
     assert ">what to monitor<" in lowered
     assert ">sources<" in lowered
     assert "leadership is likely weighing" in lowered
-    # the decision the claim bears on is still stated -- as a sentence, not
-    # as a value beside a bold label in a six-row grid
-    assert "it bears on one decision in particular" in lowered
+    # THE DECISION IS STATED -- AND IT IS A DECISION, NOT THE QUESTION.
+    #
+    # This asserted the literal wrapper "it bears on one decision in
+    # particular: <thesis.why_care>", and `why_care` is `implications[0]` --
+    # a decision TOPIC. The old assertion could only ever pass by the page
+    # printing the founder's own question back at them, so it encoded the
+    # defect rather than guarding against it. What replaces it is stronger:
+    # the composed decision must be on the page, and the bare topic must not.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(shopify_report)
+    assert decision.readiness in ("DECISION_READY", "INVESTIGATION_REQUIRED")
+    assert decision.headline.lower()[:40] in lowered, decision.headline
+    topic = (shopify_report.thesis or {}).get("why_care", "")
+    assert topic and topic.lower().rstrip(".") not in lowered, topic
 
 
 # --- G: the acceptance evidence flows through the REAL compose pipeline ------
@@ -296,9 +307,17 @@ def test_shopify_acceptance_runs_through_real_compose(tmp_path):
 
 # --- unification: the LIVE pipeline (no fixture) reaches multi-class quality --
 
+# "App Store partners and developers" was a list of things this company HAS.
+# `product_to_platform` now requires the third condition its own
+# `when_it_applies` always named — third parties building on it — so the page
+# says what those partners and developers actually do. Faithful to the
+# Shopify-shaped subject this fixture stands in for, and the smallest change
+# that restores what the tests below exist to check: comparison routing and
+# multi-class reasoning, neither of which is about ecosystem evidence.
 _HOME = ("commerce infrastructure powering commerce. Shop Pay checkout and "
          "buyer identity, payments, capital, fulfillment, point of sale, "
-         "Markets and Audiences. App Store partners and developers. Online "
+         "Markets and Audiences. App Store partners and developers build on "
+         "the platform, and merchants run their business on it. Online "
          "store storefront. End-to-end first-party rails. Enterprise ready.")
 _PRESS = ("Leadership: we are building the essential infrastructure for "
           "commerce, owning checkout and identity so merchants can focus on "
@@ -671,13 +690,64 @@ def _strategic_webapp_run(tmp_path):
     return app, c, rid
 
 
-def test_webapp_strategic_run_defaults_to_the_brief(tmp_path):
-    """The default is the brief, because fifteen minutes before a meeting an
-    eleven-section report gets skimmed. The depth is one click away."""
+def test_webapp_strategic_run_defaults_to_the_founder_brief(tmp_path):
+    """The default must not be a report the reader has to work through.
+
+    ORIGINAL SAFEGUARD, unchanged: fifteen minutes before a meeting an
+    eleven-section report gets skimmed, and a skimmed report is where a reader
+    picks up the first confident sentence they see. This test existed to stop
+    the default being that report.
+
+    WHAT CHANGED (v3): the destination. The executive brief at 500-900 words
+    was still "everything" to someone with fifteen minutes, so the default is
+    now the 60-SECOND FOUNDER BRIEF -- strictly less to read than what this
+    test previously protected. The safeguard holds more strongly, not less.
+
+    The assertions below still catch the original failure: if the default ever
+    returns the full analysis again, the eleven-section markers appear and the
+    founder-brief markers do not.
+    """
     app, c, rid = _strategic_webapp_run(tmp_path)
-    status, headers, _ = c.request("GET", f"/runs/{rid}")
-    assert status.startswith("303")
-    assert headers["Location"] == f"/runs/{rid}/brief"
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+
+    # it IS the founder brief
+    assert "Why this matters" in body
+
+    # ... and it is NOT the full report — the original failure this catches
+    assert "Executive Overview" not in body
+    assert "Evidence Library" not in body
+    assert "Strongest supported observation" not in body
+    assert not re.search(r"\[(?:u|mv|c)\.[a-z_]+", body), \
+        "an internal claim id reached the default view"
+
+    # depth remains reachable, never required
+    assert f"/runs/{rid}/full" in body
+
+
+def test_the_default_route_never_reverts_to_a_deeper_layer(tmp_path):
+    """REGRESSION GUARD for the v3 routing decision.
+
+    The specific reversion this prevents: someone restores the old redirect and
+    /runs/{id} quietly becomes the executive brief or the full analysis again.
+    That change would be invisible in every other test, because both of those
+    pages render perfectly well -- they are just not a 60-second answer.
+    """
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert not status.startswith("30"), (
+        "the default must be served directly; a redirect to a deeper layer is "
+        "the reversion this guards")
+    assert "Location" not in headers
+    # The default is the scrollable decision narrative. Asserted by SECTION
+    # ID rather than by heading text: the headings are copy and will be
+    # reworded, and a guard that fails on rewording is a guard people delete.
+    for marker in ('id="executive_answer"', 'id="the_decision"',
+                   'id="next_move"', 'id="prepared"'):
+        assert marker in body, marker
+    # ...and it is a scroll, not a deck: no pager stands between the reader
+    # and any of it.
+    assert "Next →" not in body and "Slide 1 of" not in body
 
 
 def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,
@@ -695,10 +765,17 @@ def test_a_run_that_matches_no_signal_gets_the_honest_page(tmp_path,
     each one, and a "Strongest supported observation" that was the five words
     the company's own pages repeat most. It is the likeliest first impression
     the product makes on a company whose site does not server-render.
+
+    The Duolingo case is BOTH derivations empty: extraction returned titles
+    and meta descriptions, so no signal matched AND no body was long enough to
+    be analyst evidence. Patching only `derive_observations` would now describe
+    a different run -- one where the analyst has readable evidence and is
+    correctly consulted (see the test below).
     """
-    monkeypatch.setattr(
-        "intent_engine.strategic_intelligence.observations."
-        "derive_observations", lambda *a, **k: [])
+    for name in ("derive_observations", "derive_analyst_evidence"):
+        monkeypatch.setattr(
+            f"intent_engine.strategic_intelligence.observations.{name}",
+            lambda *a, **k: [])
     app, c, rid = _strategic_webapp_run(tmp_path)
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
@@ -725,10 +802,19 @@ def test_webapp_strategic_run_carries_no_legacy_extraction_view(tmp_path):
     # the full analysis keeps every contract it had; it is no longer the default
     status, _, body = c.request("GET", f"/runs/{rid}/full")
     assert status == "200 OK"
-    # executive-first content is present
-    assert "It bears on one decision in particular" in body
-    assert ">Why that evidence matters<" in body
-    assert ">What happened<" in body and ">Sources<" in body
+    # executive-first content is present. The decision is the COMPOSED one --
+    # the old assertion here matched the sentence that rendered the decision
+    # topic, which is the thing this replaces.
+    assert "The choice:" in body or "No option is safe to commit to yet" in body
+    # The dossier replaced the legacy report on this route. Reasoning is now
+    # carried by the business-model, analog and assumption passages rather
+    # than by one heading.
+    # The dossier replaced the legacy report on this route. Reasoning is now
+    # carried by the business-model, analog and assumption passages rather
+    # than by the old headings.
+    assert 'id="operating_model"' in body or 'id="assumptions"' in body
+    assert 'id="evidence_appendix"' in body
+    assert 'id="what_changed"' in body or 'id="executive_answer"' in body
     # The legacy claim/evidence view is GONE, not collapsed. Quarantining it
     # behind <details> still put it one click from a report a founder is about
     # to rely on, under a summary naming the system's own build history.
@@ -744,7 +830,7 @@ def test_webapp_strategic_run_carries_no_legacy_extraction_view(tmp_path):
         assert banned not in lo
     # the sources a reader can audit are still on the page — that is what the
     # appendix was standing in for, and it is now a first-class section
-    assert ">Sources<" in body
+    assert "Every source this rests on" in body
     # company-specific suggested questions, not generic
     assert "How is this transition similar to" in body
 
@@ -960,3 +1046,122 @@ def test_companies_differ_across_all_intelligence():
         {h.pattern_id for h in sh.hypotheses} != {h.pattern_id for h in li.hypotheses}
     assert {v["exposed_layer"] for v in sh.vulnerabilities} != \
         {v["exposed_layer"] for v in cf.vulnerabilities}
+
+
+def test_heading_levels_never_skip_a_level(shopify_report):
+    """A screen reader announces a skipped level as a heading with no parent.
+
+    The source-library sub-headings sat directly under the "Sources" h2 as
+    h4s, so the full analysis page went h2 -> h4. Found in a browser at
+    375px, not by any assertion in this file.
+    """
+    html = render_strategic_report(shopify_report)
+    levels = [int(m) for m in re.findall(r"<h([1-6])", html)]
+    assert levels, "no headings rendered"
+    for previous, nxt in zip(levels, levels[1:]):
+        assert nxt - previous <= 1, (
+            f"heading level jumped h{previous} -> h{nxt}: {levels}")
+
+
+def test_the_assistant_never_prints_a_raw_engine_object(tmp_path):
+    """A founder asked "what does this company do?" and was shown a dict.
+
+    On the EXPLAINED branch `answer_strategic` returns a STRUCTURED dict and
+    no `paragraphs` key, so the fallback str()'d the dict itself onto the
+    page: "{'direct_answer': ..., 'reasoning': ...}". Found in a browser, not
+    by any assertion here -- the route returned 200 the whole time.
+    """
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    for question in ("What+does+this+company+do%3F", "Why+does+this+matter%3F"):
+        status, _, body = c.request(
+            "POST", f"/runs/{rid}/conversation",
+            f"csrf={c.csrf()}&question={question}")
+        assert status == "200 OK"
+        for leak in ("{'direct_answer'", '{"direct_answer"', "'reasoning':",
+                     "'counter_evidence'", "'confidence_reasons'",
+                     "'falsification'", "'alternative_explanations'"):
+            assert leak not in body, f"{leak} leaked for {question}"
+
+
+# --- founder-first hierarchy: completion lands on the brief ------------------
+def test_completion_redirects_to_the_founder_brief_not_the_deck(tmp_path):
+    """A finished analysis used to redirect to /slides.
+
+    That was the right fix against an eleven-section report, but the deck is
+    not the shortest useful thing in the product any more -- the 60-second
+    brief is, and a deck is still a document to work through.
+    """
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, _ = c.request("GET", f"/runs/{rid}/progress")
+    assert status.startswith("303"), status
+    assert headers["Location"] == f"/runs/{rid}", headers["Location"]
+
+
+def test_the_deck_and_every_other_layer_stay_reachable(tmp_path):
+    """Founder-first must not mean founder-only."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    for layer in ("slides", "dashboard", "story", "brief", "full"):
+        status, _, body = c.request("GET", f"/runs/{rid}/{layer}")
+        assert status == "200 OK", (layer, status)
+        assert "<main" in body, layer
+
+
+def test_the_default_run_page_is_the_founder_brief(tmp_path):
+    """The destination itself must be the brief, not a redirect back to it."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, _, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+    assert "Why this matters" in body
+    assert body.count("<main") == 1
+
+
+def test_an_unfinished_run_does_not_masquerade_as_a_founder_brief(tmp_path):
+    """Only COMPLETE/PARTIAL may redirect; anything else keeps its status page
+    so a failed run cannot be read as a finished answer."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    status, headers, body = c.request("GET", "/runs/NOT-A-REAL-RUN/progress")
+    assert status.startswith("404"), status
+
+
+def test_no_signal_but_readable_evidence_still_reaches_the_analyst(tmp_path,
+                                                                   monkeypatch):
+    """MEASURED on five real companies: Toyota and Costco died before the
+    analyst with usable evidence in hand.
+
+    `derive_observations` requires a controlled-vocabulary SIGNAL match,
+    because a signal is the unit the pattern library matches against. The
+    analyst does not share that requirement -- observations.py says so itself,
+    and calls conflating the two harmful. Returning None when no keyword
+    matched meant the analyst was never consulted on evidence it could read.
+    """
+    monkeypatch.setattr(
+        "intent_engine.strategic_intelligence.observations."
+        "derive_observations", lambda *a, **k: [])
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    report = app.ci.compose(rid, fi_service=app.fi).get("strategic_report")
+    assert report is not None, (
+        "no pattern signal matched, so the analyst was never asked")
+    assert report.get("result_state")
+
+
+def test_reasoning_overview_reports_rich_acceptance_for_operators(tmp_path):
+    """"The reasoning backend is configured" and "a grounded analysis was
+    accepted" are different things, and nothing recorded the difference."""
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    app.ci.compose(rid, fi_service=app.fi)
+    overview = app.ci.reasoning_overview()
+    assert overview["attempts"] >= 1
+    assert 0.0 <= overview["acceptance_rate"] <= 100.0
+    assert set(overview["averages"]) == {
+        "documents", "analyst_evidence", "independent_sources", "filings"}
+    assert overview["accepted"] + overview["rejected"] == overview["attempts"]
+
+
+def test_operator_reasoning_metrics_never_reach_a_founder_screen(tmp_path):
+    app, c, rid = _strategic_webapp_run(tmp_path)
+    app.ci.compose(rid, fi_service=app.fi)
+    for layer in ("", "/brief", "/dashboard", "/story", "/full"):
+        _, _, body = c.request("GET", f"/runs/{rid}{layer}")
+        for leaked in ("acceptance_rate", "rejection_causes",
+                       "reasoning_assessed", "analyst_evidence"):
+            assert leaked not in body, (layer, leaked)

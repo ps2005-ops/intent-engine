@@ -43,7 +43,7 @@ def check(report, *, brief=None, slides=(), documents=()) -> dict:
     r = _as_dict(report)
     problems = []
     problems += _headline_agrees_with_brief(brief)
-    problems += _deck_shows_only_displayed_claims(r, slides)
+    problems += _deck_shows_only_displayed_claims(r, slides, documents)
     problems += _confidence_is_stated_once(r, brief)
     problems += _withheld_view_is_withheld_everywhere(r, brief, slides)
     problems += _citations_resolve(r, slides)
@@ -72,7 +72,7 @@ def _headline_agrees_with_brief(brief) -> list:
     return []
 
 
-def _deck_shows_only_displayed_claims(r, slides) -> list:
+def _deck_shows_only_displayed_claims(r, slides, documents=()) -> list:
     """A slide may not present a hypothesis the report suppressed.
 
     Ranking exists to keep a reader from holding five claims. It is undone if
@@ -91,6 +91,24 @@ def _deck_shows_only_displayed_claims(r, slides) -> list:
     surprises = {_norm(s.get("finding")) for s in r.get("surprises") or ()}
     suppressed = {_norm(h.get("title") or h.get("statement"))
                   for h in r.get("suppressed_hypotheses") or ()}
+    # QUOTING A RETRIEVED SOURCE IS NOT INVENTING A CLAIM.
+    #
+    # "What the company has published" falls back to the run's own retrieved
+    # documents when every hypothesis title is filtered out -- which is the
+    # normal case now that a title has to be a claim rather than a pattern
+    # label. Those bullets are the company's published words, cited, and this
+    # check flagged all ten Shopify personas for showing them because it only
+    # knew about hypotheses and surprises. The real safeguards are untouched:
+    # a SUPPRESSED hypothesis reappearing still fails, and so does a sentence
+    # that is in neither the report nor its sources.
+    published = []
+    for document in documents or ():
+        if not isinstance(document, dict):
+            continue
+        for field in ("meta_description", "text_content", "summary", "title"):
+            value = _norm(document.get(field))
+            if value:
+                published.append(value)
     problems = []
     for slide in slides or ():
         if slide.get("id") != "signals":
@@ -104,9 +122,13 @@ def _deck_shows_only_displayed_claims(r, slides) -> list:
                 problems.append("the presentation shows a claim the report "
                                 "ranked out")
                 break
+            # Containment for sources, prefix for claims: a document bullet is
+            # a passage LIFTED from a page, so it sits inside that page's text
+            # rather than starting it.
             recognised = any(claim and (text.startswith(claim[:40])
                                         or claim.startswith(text[:40]))
-                             for claim in shown | surprises)
+                             for claim in shown | surprises) or any(
+                text[:60] in page for page in published)
             if not recognised:
                 problems.append("the presentation shows a claim that appears "
                                 "nowhere in the report")

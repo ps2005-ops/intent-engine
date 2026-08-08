@@ -445,3 +445,31 @@ def test_a_completed_run_snapshot_reuses_watermarks(run):
                             company_domain=result["company_domain"],
                             as_of=DEMO_AS_OF)
     assert snap["source_high_watermarks"]["run_rows"] > 0
+
+
+from intent_engine.founder_intelligence import records as FR  # noqa: E402
+
+
+@pytest.mark.parametrize("card", [
+    "4111111111111111",                  # Visa
+    "4111 1111 1111 1111",               # as printed
+    "5500-0055-5555-5559",               # Mastercard, hyphenated
+    "378282246310005",                   # American Express
+    "6011111111111117",                  # Discover
+    "4222222222222",                     # 13-digit Visa
+])
+def test_real_card_numbers_are_still_refused(card):
+    with pytest.raises(SecretRejected):
+        FR.assert_no_secret(f"charge it to {card} today", where="note")
+
+
+@pytest.mark.parametrize("public_number", [
+    # An SEC cover page prints the commission file number beside the IRS
+    # employer number. Measured live on a Datadog 8-K: the whole filing was
+    # refused as a credential and a real disclosure was dropped.
+    "Nevada 001-39051 27-2825503",
+    "Commission File Number 001-39051 IRS Employer No. 27-2825503",
+    "Votes For 503,784,971 9,946,547 27,229,324",
+])
+def test_public_filing_identifiers_are_not_credentials(public_number):
+    FR.assert_no_secret(public_number, where="note")

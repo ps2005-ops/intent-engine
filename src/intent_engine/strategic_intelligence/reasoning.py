@@ -13,19 +13,23 @@ from intent_engine.strategic_intelligence.observations import (
     qualifying_signals_of,
 )
 from intent_engine.strategic_intelligence.patterns import (
-    HYPOTHESIS_SCAFFOLDS, PATTERN_LIBRARY, TENSIONS,
+    HYPOTHESIS_SCAFFOLDS, PATTERN_LIBRARY, TENSIONS, statement_for,
 )
 from intent_engine.strategic_intelligence.records import (
-    BlindSpot, StrategicHypothesis, StrategicObservation, StrategicQuestion,
+    BlindSpot, MechanismEvidence, StrategicHypothesis, StrategicObservation,
+    StrategicQuestion,
     StrategicReport,
 )
 
 _CONF_RANK = {"speculative": 0, "low": 1, "moderate": 2, "high": 3}
 # source classes that make a report more than one-sided
-_EXTERNAL_CLASSES = ("executive_statement", "investor_material",
-                     "customer_voice", "competitor", "independent_reporting")
-# genuinely outside the company's own publishing (cross-source corroboration)
-_INDEPENDENT_CLASSES = ("independent_reporting", "customer_voice", "competitor")
+from intent_engine.strategic_intelligence import evidence_classes as EC
+
+# Kept as aliases so existing readers of these names keep working; the tiers
+# themselves now live in one place (`evidence_classes`) because they were
+# duplicated across five modules and drifted.
+_EXTERNAL_CLASSES = EC.EXTERNAL_CLASSES
+_INDEPENDENT_CLASSES = EC.INDEPENDENT_CLASSES
 
 
 def _signals_present(observations) -> set:
@@ -128,6 +132,116 @@ def _confidence(matched_qual, support_classes, counter_count) -> tuple:
     return level, reasons
 
 
+#: source classes as a reader would say them
+_CLASS_IN_WORDS = {
+    "executive_statement": "executive statement",
+    "investor_material": "investor material",
+    "customer_voice": "customer account",
+    "competitor": "competitor",
+    "independent_reporting": "independent report",
+}
+
+
+#: How each causal mechanism reads in a sentence. A reading that fires on a
+#: mechanism SAYS WHICH ONE, so two companies that genuinely qualify differ
+#: because their evidence differs — not because the wording was varied. Every
+#: phrase here describes only what the signal itself observed.
+_MECHANISM_PHRASE = {
+    "gov_dedicated_delivery":
+        "it runs a separate government or sovereign estate alongside the "
+        "commercial one",
+    "accreditation_gate":
+        "it holds accreditations those buyers require before they may "
+        "purchase at all",
+    "public_procurement_vehicle":
+        "it is bought through public procurement machinery rather than "
+        "ordinary sales",
+    "disclosed_public_sector_exposure":
+        "it has written down what public-sector buyers contribute",
+}
+
+
+def _mechanism_phrase(pattern, present):
+    """The mechanisms this reading actually read off, in a reader's words."""
+    matched = [s for s in pattern.required_any_signals if s in present]
+    phrases = [_MECHANISM_PHRASE[s] for s in matched if s in _MECHANISM_PHRASE]
+    if not phrases:
+        return ""
+    if len(phrases) == 1:
+        return phrases[0]
+    return ", and ".join([", ".join(phrases[:-1]), phrases[-1]])
+
+
+def _mechanism_evidence(pattern, observations):
+    """The sentences that actually established this reading's mechanism.
+
+    Built HERE because this is the last place that knows which signal
+    qualified the pattern. Downstream, a surface has only the hypothesis and a
+    list of observations, and cannot tell which of a document's eighteen
+    signals the reading was about — so it showed the document's opening
+    instead. See `records.MechanismEvidence`.
+
+    An observation whose span could not be resolved is skipped rather than
+    quoted from its excerpt: the excerpt is chosen for the document, and
+    passing it off as the evidence for this signal is the defect, not the fix.
+    """
+    from intent_engine.strategic_intelligence.observations import (
+        _NEUTRAL_LABEL, _NEUTRAL_SIGNAL_KEYWORDS, _SIGNAL_KEYWORDS,
+        phrase_span,
+    )
+    # MECHANISM BEFORE SUBJECT. Surfaces quote the first item, and the first
+    # item should be the half that explains the consequence. Measured on
+    # `portfolio_run_as_one`, which requires both: the reader was shown
+    # "Segment results are reported" — true, and the least surprising thing
+    # about the company — while the coupling that actually makes the
+    # businesses one ("customers use one account across our products, with
+    # unified billing") sat second and went unread.
+    wanted = tuple(pattern.required_any_signals) + tuple(
+        pattern.required_signals)
+    out, seen = [], set()
+    for signal in wanted:
+        if signal in seen:
+            continue
+        phrases = (_NEUTRAL_SIGNAL_KEYWORDS.get(signal)
+                   or _SIGNAL_KEYWORDS.get(signal) or ())
+        for observation in observations:
+            if signal not in (observation.signals or ()):
+                continue
+            quote = (getattr(observation, "signal_spans", None)
+                     or {}).get(signal, "")
+            if not quote:
+                # NOT A FALLBACK TO THE EXCERPT — that is the defect this
+                # whole module exists to remove, and a break proof asserts it
+                # stays removed. This searches the excerpt for the PHRASE and
+                # quotes only the sentence containing it, which is the same
+                # rule as `signal_spans`, applied late.
+                #
+                # Needed because spans are captured during detection, and not
+                # every observation is built that way: fixtures, cached
+                # records and the stored path all construct
+                # `StrategicObservation` directly. Without this, a reading
+                # backed by real evidence went silent purely because of where
+                # its observation was assembled — measured as narrative
+                # overlap RISING between two unrelated companies, since what
+                # was dropped was the company-specific half of the page.
+                quote = phrase_span(
+                    f"{observation.excerpt or ''} {observation.text or ''}",
+                    phrases)
+            if not quote:
+                continue
+            seen.add(signal)
+            out.append(MechanismEvidence(
+                signal=signal,
+                label=_NEUTRAL_LABEL.get(signal, ""),
+                quote=quote,
+                observation_id=observation.observation_id,
+                source_title=observation.source_title,
+                origin=observation.origin,
+                source_class=observation.source_class))
+            break
+    return tuple(out)
+
+
 def _rank_evidence(observations):
     """Order evidence by strategic value: independent vantage first, then
     dated, then strong (not weak), then more specific (longer excerpt)."""
@@ -143,6 +257,26 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
     present = _signals_present(observations)
     matched_qual = tuple(s for s in pattern.qualifying_signals if s in present)
     if len(matched_qual) < scaffold.get("threshold", 2):
+        return None
+    # A threshold counts evidence; it cannot tell which evidence the reading is
+    # ABOUT. Without this, two of `services_to_product`'s three qualifying
+    # signals were enough, and "multi_product + developer_surface" — an API
+    # page and a product page, on any software company — asserted that the
+    # company "delivers work alongside customers". Measured on the deployed
+    # preview: five of seven full results (Datadog, MongoDB, Cloudflare,
+    # HubSpot, Visa) reached the SAME conclusion, none of which had retrieved
+    # a services signal. See `ComparablePattern.required_signals`.
+    if any(s not in present for s in pattern.required_signals):
+        return None
+    # A READING NEEDS A REASON TO BE TRUE, NOT JUST VOCABULARY FOR IT.
+    # `buyer_concentration_exposure` qualified on "regulated industries" copy
+    # plus a case-studies page, so HubSpot — whose only regulated-buyer
+    # evidence was the phrase "defense-in-depth" on its security page —
+    # received the same dominant conclusion as Snowflake, which runs GovCloud
+    # regions at DoD IL5. One of those companies has a public-sector
+    # mechanism. See `ComparablePattern.required_any_signals`.
+    if pattern.required_any_signals and not any(
+            s in present for s in pattern.required_any_signals):
         return None
     matched_disc = tuple(s for s in pattern.disconfirming_signals
                          if s in present)
@@ -182,11 +316,24 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
                if dated else "Timeliness limited: no dated evidence retrieved.")
 
     gaps = list(scaffold["gaps"])
+    # SCOPED TO WHAT THE RUN RETRIEVED, not to what supports this one
+    # hypothesis. Live on the preview after SEC periodic reports started
+    # arriving: the executive brief listed "Filings and investor material · 1"
+    # and, four lines down, "no investor material ... has corroborated this
+    # yet". Both were computed correctly and the page contradicted itself,
+    # because this sentence reads to a founder as a statement about the run.
+    retrieved_classes = {o.source_class for o in observations}
     missing_external = [c for c in _EXTERNAL_CLASSES
-                        if c not in support_classes]
+                        if c not in support_classes
+                        and c not in retrieved_classes]
     if missing_external:
-        gaps.append("no " + " / ".join(missing_external)
-                    + " source corroborates this yet")
+        # Named in a reader's words. The enum spellings are the pipeline's
+        # own, and the deployed deck printed "no investor_material /
+        # customer_voice / competitor / independent_reporting source
+        # corroborates this yet" to a founder.
+        gaps.append("no " + ", ".join(_CLASS_IN_WORDS.get(c, c)
+                                      for c in missing_external)
+                    + " has corroborated this yet")
 
     strong_ids = {o.observation_id for o in strongest_support}
     roles = ([(o.observation_id, "direct_support") for o in strongest_support]
@@ -196,7 +343,9 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
     h = StrategicHypothesis(
         hypothesis_id=f"hyp-{pattern.pattern_id}",
         title=scaffold["title"],
-        statement=scaffold["statement"].format(company=company_name),
+        statement=statement_for(
+            scaffold, company=company_name,
+            mechanism=_mechanism_phrase(pattern, present)),
         reasoning=reasoning,
         supporting_observation_ids=[o.observation_id for o in support],
         counter_observation_ids=[o.observation_id for o in counter],
@@ -216,6 +365,7 @@ def _hypothesis_for(pattern, scaffold, observations, company_name):
                           for e in pattern.historical_examples),
         evidence_roles=tuple(roles),
         provenance=_provenance(support_classes),
+        mechanism_evidence=_mechanism_evidence(pattern, support),
     )
     h.validate()
     return h
@@ -306,6 +456,12 @@ def select_portfolio(hypotheses, *, limit=MAX_DISPLAYED_HYPOTHESES) -> list:
     never handed the same claim twice under different pattern names.
     Deterministic: same inputs, same portfolio.
     """
+    # NOTE ON COUNTER-EVIDENCE AND RANK. Do not add a blanket penalty for
+    # `counter_observation_ids` here: it was tried, and it broke the property
+    # the product deliberately has — the flagship reading is supposed to carry
+    # real counter-evidence, because a lead hypothesis nobody has argued with
+    # is one nobody has tested. Disconfirmation that should cost a reading its
+    # PLACE is declared per pattern instead; see `_demote_contested`.
     ranked = sorted(
         hypotheses,
         key=lambda h: (_CONF_RANK[h.confidence],
@@ -321,6 +477,40 @@ def select_portfolio(hypotheses, *, limit=MAX_DISPLAYED_HYPOTHESES) -> list:
             continue
         chosen.append(candidate)
     return chosen
+
+
+def _demote_contested(hypotheses, patterns_by_id, present):
+    """A reading its own pattern calls contradicted may not LEAD.
+
+    Disconfirming signals only ever softened the confidence wording, so a
+    reading the evidence argues with could still be the first line on the page
+    — and the first line is the one most readers take away. `services_to_product`
+    declares `pricing_published` as blocking: published self-serve pricing is
+    the plainest evidence that the product is already sold without the
+    engagement, so that reading must not lead when another one is available.
+
+    Blocking is declared per pattern, never global: a blanket penalty on
+    counter-evidence removes the property that the flagship reading has been
+    argued with, which is the point of showing counter-evidence at all.
+
+    The reading is not deleted. It keeps its place in the portfolio as a
+    secondary hypothesis, which is where a contested reading belongs.
+    """
+    if len(hypotheses) < 2:
+        return hypotheses
+
+    def blocked(hypothesis):
+        pattern = patterns_by_id.get(hypothesis.pattern_id)
+        return bool(pattern and any(
+            s in present for s in getattr(pattern, "blocking_signals", ())))
+
+    if not blocked(hypotheses[0]):
+        return hypotheses
+    for index, candidate in enumerate(hypotheses[1:], 1):
+        if not blocked(candidate):
+            return ([candidate] + hypotheses[:index]
+                    + hypotheses[index + 1:])
+    return hypotheses                    # every reading is contested; keep order
 
 
 def _build_questions(hypotheses, observations):
@@ -349,7 +539,20 @@ def _build_questions(hypotheses, observations):
     return questions
 
 
-def _build_thesis(company_name, hypotheses, blind_spots):
+def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
+                  evidence_gaps=()):
+    from intent_engine.strategic_intelligence.decision import (
+        compose_decision, decide_across,
+    )
+
+    # WHAT WAS VERIFIED, in the company's own retrieved words. Carried on the
+    # decision because the honest investigation state is unreadable without
+    # it: "this cannot be concluded" means nothing to a reader who was never
+    # told what COULD be.
+    verified = tuple(
+        (o.excerpt or o.text) for o in (observations or ())
+        if not getattr(o, "weak", False) and (o.excerpt or o.text))[:3]
+
     if not hypotheses:
         # Flagged rather than left for a caller to recognise by its wording.
         # Downstream gates need to tell "the product declined to form a view
@@ -361,10 +564,29 @@ def _build_thesis(company_name, hypotheses, blind_spots):
         return {"view": f"What {company_name} has published is not enough to "
                         f"read a strategy from, so none is put forward here.",
                 "transition": "", "tension": "", "why_care": "",
-                "view_withheld": True}
+                "view_withheld": True,
+                "decision": compose_decision(
+                    company_name, None, blind_spots,
+                    evidence_gaps=evidence_gaps,
+                    verified=verified).as_dict()}
     top = hypotheses[0]
-    tension = (blind_spots[0].observed_tension if blind_spots
-               else "how much to invest ahead of the transition")
+    # NO FABRICATED TENSION.
+    #
+    # This fell back to the literal string "how much to invest ahead of the
+    # transition" whenever no tension was observed -- a noun phrase, not a
+    # consequence. The founder brief renders `tension` under the heading "Why
+    # this matters", so a company with no observed tension told its reader
+    # that what mattered was "how much to invest ahead of the transition",
+    # which asserts nothing and was measured on the deployed preview
+    # (Palantir, 2026-08-03). An absent tension is now absent, and the
+    # consumers below choose a real sentence instead.
+    tension = blind_spots[0].observed_tension if blind_spots else ""
+    # The blind spot already carries the CONSEQUENCE of its tension, and
+    # nothing downstream had ever read it. That is the sentence "why this
+    # matters" wants: "the complexity that wins enterprise deals can erode
+    # the ease that won the SMB base", rather than the tension restated.
+    why_it_may_matter = (blind_spots[0].why_it_may_matter if blind_spots
+                         else "")
     return {
         "view": (f"{company_name} appears to be {top.title[0].lower()}"
                  f"{top.title[1:]}. The evidence supports this as a "
@@ -372,7 +594,18 @@ def _build_thesis(company_name, hypotheses, blind_spots):
                  f"fact."),
         "transition": top.statement,
         "tension": tension,
+        "why_it_may_matter": why_it_may_matter,
+        # THE TOPIC, KEPT AS THE TOPIC.
+        #
+        # `why_care` is `implications[0]`, which is a decision TOPIC -- a
+        # question -- and every surface printed it as the finished decision.
+        # It stays here because the reasoning layer legitimately needs to know
+        # WHICH decision the evidence bears on; what changed is that the
+        # answer now lives in `decision` and the surfaces render that instead.
         "why_care": top.decision_implications[0],
+        "decision": decide_across(
+            company_name, hypotheses, blind_spots,
+            evidence_gaps=evidence_gaps, verified=verified).as_dict(),
     }
 
 
@@ -653,6 +886,32 @@ def build_strategic_report(*, company_name, observations,
     coverage = {}
     for o in observations:
         coverage[o.source_class] = coverage.get(o.source_class, 0) + 1
+    # WAS A FILING ACTUALLY READ. Not "is there an investor-material source" --
+    # `discovery.py` gives that class to any URL containing "investor" or
+    # "/ir", so an ordinary investor-relations page claimed the accountability
+    # of a 10-K. Measured live: Constellation Software, a TSX-only issuer with
+    # no SEC filing in the run, was told its filings carried the reading.
+    #
+    # THE URL IS ON THE OBSERVATION, NOT IN ITS REFS. `observations.py` builds
+    # every production `source_refs` entry as
+    # `{subsystem, artifact_type, artifact_id, source_class}` -- there is no
+    # url/source_url/final_url key in it, and there never was. Reading refs
+    # alone therefore answered "no filing" for EVERY run, so the tier this
+    # module exists to grant could not be reached in production: measured live
+    # on Datadog (preview c57af3b), whose brief cited "SEC 10-K (2026-02-18)"
+    # and whose limitation still read "every source here is published by the
+    # company itself". `origin` carries the retrieved `final_url`, which is
+    # what `service.py` already tests for sec.gov elsewhere. Refs are still
+    # consulted so callers that DO carry a URL there keep working.
+    def _filing_urls(o):
+        yield str(getattr(o, "origin", "") or "")
+        for ref in (o.source_refs or ()):
+            if isinstance(ref, dict):
+                yield str(ref.get("url") or ref.get("source_url")
+                          or ref.get("final_url") or "")
+
+    has_filing = any(EC.is_regulatory_filing(url)
+                     for o in observations for url in _filing_urls(o))
 
     patterns_by_id = {p.pattern_id: p for p in patterns}
     hypotheses = []
@@ -682,13 +941,13 @@ def build_strategic_report(*, company_name, observations,
     hypotheses = kept
 
     hypotheses = select_portfolio(hypotheses)
+    hypotheses = _demote_contested(hypotheses, patterns_by_id, present)
 
     fired_pattern_ids = {h.pattern_id for h in hypotheses}
     used_patterns = [p for p in patterns if p.pattern_id in fired_pattern_ids]
 
     blind_spots = _build_blind_spots(observations)
     questions = _build_questions(hypotheses, observations)
-    thesis = _build_thesis(company_name, hypotheses, blind_spots)
     shifts = _build_shifts(observations)
 
     evidence_gaps = []
@@ -696,18 +955,48 @@ def build_strategic_report(*, company_name, observations,
         for g in h.evidence_gaps:
             if g not in evidence_gaps:
                 evidence_gaps.append(g)
-    external_present = [c for c in _EXTERNAL_CLASSES if c in coverage]
-    independent_present = [c for c in _INDEPENDENT_CLASSES if c in coverage]
-    if not external_present:
-        evidence_gaps.insert(
-            0, "the analysis rests only on the company's own website; a "
-               "filing, an investor statement, a customer or an independent "
-               "report would be needed to test any of it")
-    elif not independent_present:
-        evidence_gaps.insert(
-            0, "every source here is published by the company itself, so "
-               "nothing in this reading has been checked against an outside "
-               "account of it")
+    # Three tiers, not two. A regulatory filing is management-authored but is
+    # made under securities law, so it is not the same evidence as a marketing
+    # page -- and treating the two alike is what made a run that HAD retrieved
+    # the 10-K report "every source here is published by the company itself"
+    # and withhold every option. See `evidence_classes` for the measurement.
+    limitation = EC.standing_limitation(coverage, has_filing=has_filing)
+    if limitation:
+        evidence_gaps.insert(0, limitation)
+
+    # WHAT THIS RUN NEARLY CONCLUDED, AND WHY IT DID NOT.
+    #
+    # A gated reading that fails is invisible: the founder cannot tell whether
+    # the analysis looked and found nothing, or never looked. Where the run
+    # holds real supporting evidence and exactly the mechanism is unverified,
+    # that is a decision-relevant gap and it is named. One canonical object,
+    # built here; the surfaces render it and none of them re-decides what a
+    # refusal meant. See `sufficiency.near_misses`.
+    from intent_engine.strategic_intelligence import sufficiency as SUF
+    misses = SUF.near_misses(company_name, patterns, observations,
+                             fired_ids=fired_pattern_ids)
+    # INSERTED NEAR THE FRONT, NOT APPENDED. Every surface truncates this list
+    # — the founder view takes two, the deck's gaps screen three — and a near
+    # miss appended after the scaffold's generic unknowns was measured live at
+    # c472e1f as reaching no page at all. It outranks them: a scaffold gap
+    # says something is unknowable from outside, while this names one specific
+    # missing fact, why it matters, and which source would settle it.
+    #
+    # Index 1 keeps the standing source-mix limitation first, which is the one
+    # thing a reader needs before anything else.
+    for miss in reversed(misses):
+        if miss["safe_explanation"]:
+            evidence_gaps.insert(1 if evidence_gaps else 0,
+                                 miss["safe_explanation"])
+
+    # Built AFTER the gaps, not before: the decision has to name what is
+    # missing, and the two coverage gaps inserted above are the most important
+    # things missing in a typical run. Composing the decision first meant the
+    # one field a founder needs to judge it by was the one field it could not
+    # see.
+    thesis = _build_thesis(company_name, hypotheses, blind_spots,
+                           observations=observations,
+                           evidence_gaps=evidence_gaps)
 
     graph = _build_evidence_graph(company_name, observations, hypotheses,
                                   used_patterns, blind_spots, questions)
@@ -745,7 +1034,7 @@ def build_strategic_report(*, company_name, observations,
         company_name=company_name, status="",
         thesis=thesis, shifts=shifts, hypotheses=hypotheses,
         patterns=used_patterns, blind_spots=blind_spots, questions=questions,
-        evidence_gaps=evidence_gaps,
+        evidence_gaps=evidence_gaps, near_misses=misses,
         decision_implications=_decision_implications(hypotheses, blind_spots),
         observations=list(observations), source_class_coverage=coverage,
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,

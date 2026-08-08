@@ -232,9 +232,38 @@ def test_slides_follow_the_narrative_order():
     against a fixture that earns the takeover.
     """
     ids = [s["id"] for s in build_slides(_rich_report())]
-    expected = ["company", "view", "changed", "market", "signals", "tension",
-                "opportunity", "questions", "evidence"]
+    # The decision screens sit directly after the central view, because "so
+    # what do I do about it" is the question a reader has the moment they have
+    # the view -- not after four screens of supporting material. Which screens
+    # appear depends on readiness: `decision` plus `option-*` and `next-*` when
+    # the evidence supports two courses of action, `investigate-*` when it does
+    # not, and none at all when no view was formed.
+    # "<Company> in one minute" now sits AFTER the decision rather than
+    # opening the deck. Measured live: it opened the Palantir presentation
+    # with "At Palantir, we believe that with good data and the right
+    # software, institutions can solve hard problems and change the world for
+    # the better." -- the company's values statement, on the first screen
+    # someone walks a room through. It is honest context and it is not the
+    # answer, so the deck opens on the reading and the choice, and it follows.
+    expected = ["view", "decision", "option-1-1", "option-1-2",
+                "next-1", "investigate-1", "company", "changed", "market",
+                "signals", "tension", "opportunity", "questions", "evidence"]
     assert ids == [i for i in expected if i in ids], ids
+    if "company" in ids and "decision" in ids:
+        assert ids.index("decision") < ids.index("company")
+
+
+def test_the_decision_screens_follow_the_view_not_the_evidence():
+    """The deck's answer to "what do I do" may not be buried behind context.
+
+    Asserted separately from the order above so that adding a context screen
+    later cannot quietly push the decision down the deck without a failure.
+    """
+    ids = [s["id"] for s in build_slides(_rich_report())]
+    decisions = [i for i in ids if i.startswith(("decision", "option-",
+                                                 "next-", "investigate-"))]
+    assert decisions, ids
+    assert ids.index(decisions[0]) <= ids.index("view") + 1, ids
 
 
 def test_evidence_is_not_repeated_across_slides():
@@ -350,11 +379,21 @@ def _webapp_run(tmp_path):
     return _strategic_webapp_run(tmp_path)
 
 
-def test_the_guest_default_is_the_brief_not_the_full_report(tmp_path):
+def test_the_guest_default_is_the_founder_brief_not_the_full_report(tmp_path):
+    """ORIGINAL SAFEGUARD unchanged: the default must not be the full report.
+
+    v3 changed only the destination -- the 60-second founder brief, which is
+    strictly less to read than the executive brief this test previously
+    accepted. The assertions still catch the original failure: a default that
+    reverted to the full analysis would carry its section markers and would
+    not carry the founder-brief ones.
+    """
     app, c, rid = _webapp_run(tmp_path)
-    status, headers, _ = c.request("GET", f"/runs/{rid}")
-    assert status.startswith("303")
-    assert headers["Location"] == f"/runs/{rid}/brief"
+    status, headers, body = c.request("GET", f"/runs/{rid}")
+    assert status == "200 OK"
+    assert "Why this matters" in body
+    assert "Executive Overview" not in body
+    assert "Evidence Library" not in body
 
 
 def test_the_brief_page_reads_as_a_brief(tmp_path):
@@ -363,8 +402,21 @@ def test_the_brief_page_reads_as_a_brief(tmp_path):
     assert status == "200 OK"
     assert "Executive brief" in body
     # short enough to be a brief: the visible prose, not the markup
-    prose = re.sub(r"<[^>]+>", " ", body.split('<main class="brief">')[1])
-    assert len(prose.split()) < 700, "the brief must not become the report"
+    # v3 layout marker: the executive brief is now rendered by the founder
+    # renderer (<main class="fb">). The safeguard below -- a brief must not
+    # become the report -- is unchanged and still the point of this test.
+    # v4: the brief is the DECISION MEMO and renders <main class="dos">. It
+    # is deliberately longer than the old 396-word page -- that page was
+    # shallower than the 60-second summary above it -- but it must still stop
+    # well short of the dossier, which is the point this test has always made.
+    prose = re.sub(r"<[^>]+>", " ", body.split('<main class="dos">')[1])
+    _, _, full = c.request("GET", f"/runs/{rid}/full")
+    # `/full` renders the dossier as a <div>: that route already opens its own
+    # <main>, and two main landmarks on one page is an accessibility defect.
+    full_prose = re.sub(r"<[^>]+>", " ", full.split('<div class="dos">')[1])
+    assert len(prose.split()) < len(full_prose.split()), \
+        "the brief must not become the report"
+    assert len(prose.split()) < 1200
 
 
 def test_the_brief_states_its_claim_once(tmp_path):
@@ -379,10 +431,13 @@ def test_the_brief_states_its_claim_once(tmp_path):
     _, _, body = c.request("GET", f"/runs/{rid}/brief")
     prose = re.sub(r"\s+", " ",
                    re.sub(r"<[^>]+>", " ",
-                          body.split('<main class="brief">')[1]))
-    from intent_engine.strategic_intelligence.brief import build_brief
-    brief = build_brief(app._strategic_report_for(rid), as_of="2026-07-29")
-    claim = " ".join((brief.headline.view or "").split())
+                          body.split('<main class="dos">')[1]))
+    # v4: the brief renders the SHARED decision, so the claim it must state
+    # exactly once is that decision's headline -- not the legacy brief's own,
+    # which was a second conclusion this page is no longer allowed to reach.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    decision = decision_of(app._strategic_report_for(rid))
+    claim = " ".join(decision.headline.split())
     assert claim, "no central claim to check"
     assert prose.count(claim) == 1, \
         f"the brief states its central claim {prose.count(claim)} times"
@@ -433,6 +488,9 @@ def test_the_full_analysis_still_contains_everything(tmp_path):
     # "Everything" means the full argument and its provenance -- not the
     # legacy extraction view, which was a <details> of internal claim ids and
     # is gone. The Sources section is what a reader auditing the report needs.
+    # The legacy report is gone: it restated the dossier that now leads this
+    # page, so every sentence appeared twice. Its one unique element -- the
+    # provenance list -- is the dossier's evidence appendix.
     assert "Technical appendix" not in body
-    assert "Every source considered" in body
-    assert ">Sources<" in body
+    assert "Every source this rests on" in body
+    assert 'id="evidence_appendix"' in body

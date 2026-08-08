@@ -90,7 +90,14 @@ def shopify_observations() -> list:
            "Shopify describes enabling agentic/AI-driven storefronts and "
            "AI-mediated buying experiences.",
            "channel_distribution", "company_owned",
-           ("agentic_commerce", "distribution_shift"),
+           # `agent_callable_endpoint` added because this observation's own
+           # text already carries it — "machine-readable commerce
+           # endpoints so buying can be mediated by assistants". Signals
+           # here are hand-attached rather than detected, so only the
+           # vocabulary ones were listed, and `human_to_agent_workflow`
+           # now needs the endpoint rather than the word "agentic".
+           ("agentic_commerce", "distribution_shift",
+            "agent_callable_endpoint"),
            excerpt="Shopify has announced tooling for AI/agent-driven shopping "
                    "and machine-readable commerce endpoints so buying can be "
                    "mediated by assistants, not only human browsing.",
@@ -100,7 +107,10 @@ def shopify_observations() -> list:
            "Independent reporting describes retail moving toward AI shopping "
            "agents that transact on buyers' behalf.",
            "market_context", "independent_reporting",
-           ("agentic_commerce", "distribution_shift"),
+           # Same migration: "AI shopping agents that transact on buyers'
+           # behalf" is the agent ACTING, which is the mechanism.
+           ("agentic_commerce", "distribution_shift",
+            "agent_executes_actions"),
            excerpt="Business/technology reporting frames AI shopping agents as "
                    "an emerging distribution layer that could intermediate "
                    "human browsing across retailers.",
@@ -120,7 +130,14 @@ def shopify_observations() -> list:
            "The App Store and partner ecosystem are central to how merchants "
            "extend the platform.",
            "monetization_ecosystem", "company_owned",
-           ("partner_ecosystem_enablement",),
+           # `third_party_builds_on` added because this observation's own text
+           # already carries it — "merchants extend the platform". Signals
+           # here are hand-attached rather than detected, so the coarse
+           # `partner_ecosystem_enablement` was the only one listed, and
+           # `product_to_platform` now needs the mechanism rather than the
+           # existence of a marketplace. Having an app store is a thing a
+           # company HAS; outsiders extending the platform is the transition.
+           ("partner_ecosystem_enablement", "third_party_builds_on"),
            excerpt="Shopify promotes an app marketplace and partner program as "
                    "the way merchants add capabilities, positioning partners "
                    "as core to extensibility.",

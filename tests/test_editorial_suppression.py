@@ -335,6 +335,12 @@ def test_machinery_findings_never_reach_the_reader():
     assert "need >= 3" not in html
     assert "strategic_hypotheses" not in html and "blind_spots" not in html
     assert "hyp-a1b2" not in html
-    # the one with reader meaning survives, in the reader's language
-    assert "has not been tested against an alternative" in html
+    # The one with reader meaning survives, in the reader's language. The
+    # wording changed because the old one was FALSE: `too_few_hypotheses`
+    # means fewer than three ranked readings, not that no alternative exists,
+    # and the deployed Palantir deck said "no competing explanation could be
+    # built" on its evidence slide while another slide was an option built
+    # entirely on the competing account.
+    assert "Only one reading of the evidence could be ranked" in html
+    assert "No competing explanation could be built" not in html
 

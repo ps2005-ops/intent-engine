@@ -31,7 +31,8 @@ import re
 from dataclasses import dataclass, field
 
 from intent_engine.strategic_intelligence.editorial import (
-    addresses_the_system, consolidate_limitations, deduplicate, is_meaningful,
+    addresses_the_system, consolidate_limitations, deduplicate,
+    is_filing_furniture, is_meaningful,
     meaningful_items, reader_limitations,
 )
 
@@ -601,7 +602,7 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
     for observation in r.get("observations", []) or ():
         support = (observation.get("text")
                    or observation.get("excerpt") or "").strip()
-        if not is_meaningful(support):
+        if not is_meaningful(support) or is_filing_furniture(support):
             continue
         candidates.append({"text": support,
                            "date": observation.get("date", ""),
@@ -610,14 +611,52 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
 
     # One counterpoint — what argues the other way. A brief with no
     # counterpoint is advocacy.
+    limitations = consolidate_limitations(
+        r.get("evidence_gaps", []),
+        reader_limitations(r.get("quality_findings", [])))
     counterpoint = (_first(r.get("surprises", []), "alternative_explanation")
                     or _first(r.get("vulnerabilities", []), "counterpoint")
                     or _first(r.get("hypotheses", []), "counter_note"))
+    if not counterpoint and len(limitations) > 1:
+        # EVERY SOURCE OF A COUNTERPOINT IS HYPOTHESIS-DERIVED, so a run that
+        # reached no hypothesis published a brief with nothing arguing against
+        # it — advocacy by this function's own definition, and the state a
+        # reading has to be in once it must earn its evidence.
+        #
+        # `limitations[0]` is already carried by the `limitation` field, so
+        # taking it here would put one sentence under two headings. The next
+        # one is a different fact: for a bounded run it is that only one
+        # reading could be ranked, so it was never weighed against a second.
+        # That is genuinely what weakens it, and it is measured from this
+        # run's own coverage rather than asserted.
+        counterpoint = limitations[1]
 
     tension = (_first(r.get("blind_spots", []), "observed_tension")
                or _first(r.get("vulnerabilities", []), "exposed_layer"))
 
-    decision = (thesis.get("why_care", "")
+    # `why_care` is the decision TOPIC and was printed here as the decision --
+    # the same defect the deck had, from the same field. One composed object
+    # now answers it for every surface; the old fallbacks stay for a report
+    # that predates it and therefore has neither.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    composed = decision_of(r)
+    # WITHHELD IS STILL AN ANSWER TO "SO WHAT DO I DO".
+    #
+    # Dropping it left the field empty, and a reader preparing for a meeting
+    # was told nothing at all rather than told that nothing can be decided
+    # yet. The deck reached the same conclusion from the same object — see
+    # `_decision_detail_slides`, where WITHHELD renders "What cannot be
+    # concluded yet" rather than vanishing.
+    #
+    # Conditioned on the run having found something, for the same reason as
+    # the deck: a company with no findings has nothing to decide about, and
+    # this must not become a sentence that makes an empty analysis look
+    # finished.
+    withheld_position = (composed.headline
+                         if (r.get("shifts") or ()) else "")
+    decision = (composed.recommended_next_move
+                or (composed.headline if composed.readiness != "WITHHELD"
+                    else withheld_position)
                 or _first(r.get("decision_implications", []), "decision")
                 or _first(r.get("questions", []), "decision_affected"))
 
@@ -634,9 +673,6 @@ def build_brief(report, *, as_of: str = "", analysis_version: str = "",
                               key="question"))
                  if q and not reads_as_taxonomy(q)][:QUESTION_COUNT]
 
-    limitations = consolidate_limitations(
-        r.get("evidence_gaps", []),
-        reader_limitations(r.get("quality_findings", [])))
     limitation = limitations[0] if limitations else ""
 
     brief = ExecutiveBrief(

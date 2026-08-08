@@ -25,6 +25,9 @@ from intent_engine.executive.records import (
     EDGE_ENABLES, EDGE_INVALIDATES, EDGE_RENDERS, EDGE_SUPERSEDES,
     RECORDED_EDGES, ExecutiveError,
 )
+from intent_engine.business_graph.model import (
+    detect_cycles_in_mappings,
+)
 
 GRAPH_VERSION = "decision_graph.v1"
 
@@ -70,29 +73,13 @@ class DecisionGraph:
 
 
 def detect_cycles(edges, edge_type: str = EDGE_DEPENDS_ON) -> list:
-    """Deterministic cycle detection over one edge type."""
-    adjacency = {}
-    for edge in edges:
-        if edge["edge"] == edge_type:
-            adjacency.setdefault(edge["from"], set()).add(edge["to"])
-    cycles, visiting, visited = [], set(), set()
+    """Deterministic cycle detection over one edge type.
 
-    def _walk(node, stack):
-        if node in visiting:
-            start = stack.index(node)
-            cycles.append(tuple(stack[start:] + [node]))
-            return
-        if node in visited:
-            return
-        visiting.add(node)
-        for nxt in sorted(adjacency.get(node, ())):
-            _walk(nxt, stack + [nxt])
-        visiting.discard(node)
-        visited.add(node)
-
-    for node in sorted(adjacency):
-        _walk(node, [node])
-    return sorted(set(cycles))
+    Delegates to the canonical implementation. This module previously carried
+    its own byte-identical copy; the edge VOCABULARY below is legitimately
+    this subsystem's, the depth-first search was not.
+    """
+    return detect_cycles_in_mappings(edges, edge_type)
 
 
 def build_graph(state, recorded_edges) -> DecisionGraph:

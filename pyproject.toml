@@ -27,9 +27,19 @@ requires-python = ">=3.9"
 # future deploy can rely on. Found by booting the installed package in a
 # clean-room, which is the only check that exercises construction rather than
 # import.
+# anthropic and python-dotenv are what the GROUNDED ANALYST needs, and they
+# were in requirements.txt only -- so a production build had neither. With
+# ANTHROPIC_API_KEY set, `default_client` gets past its "is a key configured"
+# guard and then raises ModuleNotFoundError on `import anthropic`, which is
+# worse than the honest "no reasoning backend" path it was trying to reach.
+# This is the third time a runtime dependency lived only in requirements.txt
+# (pypdf, then pydantic, now these two); the deployment builds with
+# `pip install -e .` and never reads that file.
 dependencies = [
     "pypdf==5.1.0",
     "pydantic==2.13.4",
+    "anthropic==0.116.0",
+    "python-dotenv==1.2.1",
 ]
 
 [project.scripts]

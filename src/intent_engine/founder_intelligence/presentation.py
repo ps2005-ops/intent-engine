@@ -49,7 +49,8 @@ def result_view_model(run_result: dict) -> dict:
 def _render_card(card: dict) -> str:
     avail = card.get("availability", "UNAVAILABLE")
     parts = [f'<article class="card avail-{_e(avail).lower()}">']
-    parts.append(f'<h4>{_e(card.get("headline"))}</h4>')
+    # h3, under the section's h2 — see `_render_section`.
+    parts.append(f'<h3>{_e(card.get("headline"))}</h3>')
     # availability + confidence + freshness in TEXT (not colour alone)
     parts.append(f'<p class="state"><strong>State:</strong> '
                  f'{_e(_AVAIL_LABEL.get(avail, avail))}')
@@ -90,7 +91,12 @@ def _render_section(section: dict) -> str:
     avail = section.get("availability", "SUPPORTED")
     parts = [f'<section aria-labelledby="s-{_e(section["kind"])}" '
              f'class="section avail-{_e(avail).lower()}">']
-    parts.append(f'<h3 id="s-{_e(section["kind"])}">{_e(section["title"])}</h3>')
+    # h2, NOT h3. These sections sit directly under the page's h1 with nothing
+    # between them, so starting at h3 skipped a level: a reader navigating by
+    # heading went h1 -> h3 and was given no way to tell whether they had
+    # missed a section. Cards below are h3 accordingly. Measured on the
+    # deployed result page, whose sequence was h1,h3,h4,h4,...
+    parts.append(f'<h2 id="s-{_e(section["kind"])}">{_e(section["title"])}</h2>')
     if avail in (AVAIL_UNAVAILABLE, AVAIL_OUT_OF_SCOPE) and not section.get("cards"):
         parts.append(f'<p class="unavailable">{_e(_AVAIL_LABEL.get(avail, avail))}'
                      f' — {_e(section.get("note", ""))}</p>')
@@ -106,38 +112,84 @@ def _render_section(section: dict) -> str:
 # one primary action, and type that carries the hierarchy instead of borders
 # and cards doing it. The old page read like an internal form because every
 # element had the same visual weight.
+# EVERY COLOUR HERE IS A VARIABLE because this sheet had none, and the landing
+# page is the one screen every visitor sees before deciding whether to trust
+# the product. Measured live on preview-v3 at c57af3b, in dark mode: the
+# example-analysis quote rendered #1a1a2e on #0f141c — 1.08:1, invisible — the
+# lede 1.68:1, and the consent label 1.9:1, so a visitor in dark mode could not
+# read the sentence describing what they were about to consent to.
+#
+# The generic dark floor in `webapp.app._A11Y_CSS` could not save it: these
+# selectors (`form.analyze label`, `.sample-quote`) are more specific than the
+# floor's, so the floor lost the cascade to literals it had no rule for. The
+# fix is the one that file already documents for `.brief` and `.deck` —
+# re-point the variables, do not restyle each rule from outside.
+#
+# That dark audit fixed the DARK values and never re-measured the LIGHT ones
+# these variables were extracted from, so three literals shipped below the
+# floor. Measured live on preview-v3 at 81ac65d, in light mode, against the
+# white canvas the page actually resolves to (`body` sets no background of its
+# own — the earlier "light is fine" reading came from an instrument that parsed
+# that transparency as black and inverted every ratio):
+#
+#   --l-head        #77778f  4.36:1  the "What comes back" / "Where it comes
+#                                    from" section labels, 12.8px at weight
+#                                    600 — normal text, so the floor is 4.5.
+#   --l-place       #9a9ab0  2.75:1  the input placeholders.
+#   --l-field-line  #d5d5e2  1.45:1  the border that says where a field IS.
+#                                    WCAG 1.4.11 asks 3:1, and this is the same
+#                                    defect `webapp.app` already documents
+#                                    fixing in dark (#3a4454 -> #606e88).
+#
+# Darkened along their own hue so the page keeps its cool grey cast rather
+# than turning neutral, and with margin rather than landing exactly on the
+# threshold: 5.14, 4.85 and 3.42. Their dark counterparts below already pass
+# (11.2, 6.34, 3.10) and are deliberately left alone.
 _LANDING_CSS = """
+:root{--l-ink:#1a1a2e;--l-muted:#4a4a63;--l-lede:#3a3a52;--l-label:#444;
+  --l-faint:#555;--l-head:#6b6b88;--l-line:#e9e9f2;--l-field-bg:#fff;
+  --l-field-line:#8888a8;--l-place:#6f6f8c;--l-link:#3a3a8c;--l-accent:#2f2f7a;
+  --l-accent-ink:#fff}
 main{max-width:44rem}
 h1{font-size:2.3rem;line-height:1.15;letter-spacing:-.02em;margin:.2em 0 .5rem}
-.lede{font-size:1.12rem;line-height:1.6;color:#3a3a52;margin-bottom:2.4rem}
-.try-line{font-size:.92rem;color:#555;margin:-1.4rem 0 2rem}
+.lede{font-size:1.12rem;line-height:1.6;color:var(--l-lede);
+  margin-bottom:2.4rem}
+.try-line{font-size:.92rem;color:var(--l-faint);margin:-1.4rem 0 2rem}
 button.linkish{background:none;border:0;padding:0;font:inherit;
-  color:#3a3a8c;text-decoration:underline;cursor:pointer}
+  color:var(--l-link);text-decoration:underline;cursor:pointer}
 form.golden{display:none}
 form.analyze{margin:0 0 2.6rem}
 .field-row{display:flex;gap:1rem;flex-wrap:wrap}
 .field-row .field{flex:1 1 15rem;display:flex;flex-direction:column}
-form.analyze label{font-size:.85rem;color:#444;margin-bottom:.25rem}
+form.analyze label{font-size:.85rem;color:var(--l-label);margin-bottom:.25rem}
 form.analyze input[type=text],form.analyze input[type=url],
 form.analyze input:not([type]){width:100%;padding:.65rem .75rem;
-  border:1px solid #d5d5e2;border-radius:8px;font-size:1rem;background:#fff}
-form.analyze input::placeholder{color:#9a9ab0}
+  border:1px solid var(--l-field-line);border-radius:8px;font-size:1rem;
+  background:var(--l-field-bg);color:var(--l-ink)}
+form.analyze input::placeholder{color:var(--l-place)}
 details.opt{margin:1rem 0 .4rem;font-size:.92rem}
-details.opt summary{cursor:pointer;color:#3a3a8c}
-.consent{font-size:.88rem;color:#444;margin:1rem 0 1.2rem}
-form.analyze button[type=submit]{background:#2f2f7a;color:#fff;border:0;
+details.opt summary{cursor:pointer;color:var(--l-link)}
+.consent{font-size:.88rem;color:var(--l-label);margin:1rem 0 1.2rem}
+form.analyze button[type=submit]{background:var(--l-accent);
+  color:var(--l-accent-ink);border:0;
   border-radius:8px;padding:.7rem 1.4rem;font-size:1rem;cursor:pointer}
-.sample{border-top:1px solid #e9e9f2;padding-top:1.6rem;margin-top:.5rem}
+.sample{border-top:1px solid var(--l-line);padding-top:1.6rem;margin-top:.5rem}
 .sample h2,.assurance h2{font-size:.8rem;text-transform:uppercase;
-  letter-spacing:.08em;color:#77778f;font-weight:600}
-.sample-quote{font-size:1.12rem;line-height:1.55;color:#1a1a2e;
-  border-left:3px solid #2f2f7a;padding-left:1rem;margin:.8rem 0 1rem}
-.sample-note{color:#4a4a63;line-height:1.6}
-.assurance{border-top:1px solid #e9e9f2;padding-top:1.6rem;margin-top:2.4rem}
-.assurance p{color:#4a4a63;line-height:1.6}
+  letter-spacing:.08em;color:var(--l-head);font-weight:600}
+.sample-quote{font-size:1.12rem;line-height:1.55;color:var(--l-ink);
+  border-left:3px solid var(--l-accent);padding-left:1rem;margin:.8rem 0 1rem}
+.sample-note{color:var(--l-muted);line-height:1.6}
+.assurance{border-top:1px solid var(--l-line);padding-top:1.6rem;
+  margin-top:2.4rem}
+.assurance p{color:var(--l-muted);line-height:1.6}
 .assurance .more{font-size:.92rem}
 @media (max-width:640px){h1{font-size:1.75rem}.field-row{display:block}
   .field-row .field{margin-bottom:.9rem}}
+@media (prefers-color-scheme:dark){
+:root{--l-ink:#f3f4f6;--l-muted:#c3cad6;--l-lede:#c3cad6;--l-label:#c3cad6;
+  --l-faint:#c3cad6;--l-head:#c3cad6;--l-line:#3a4454;--l-field-bg:#1b2230;
+  --l-field-line:#606e88;--l-place:#9aa4b5;--l-link:#7aa2ff;
+  --l-accent:#7aa2ff;--l-accent-ink:#0f141c}}
 """
 
 
@@ -175,7 +227,14 @@ padding:.1rem .15rem}}
 label{display:block;margin:.4rem 0 .3rem;font-weight:500}
 input[type=text],input[type=email],input[type=password],input[type=url],
 input:not([type]),textarea,select{width:100%;max-width:34rem;box-sizing:border-box;
-padding:.55rem .7rem;border:1px solid #cfd0dc;border-radius:8px;font:inherit;
+/* #cfd0dc was 1.53:1 on the white field — the same WCAG 1.4.11 defect the
+   landing sheet had at #d5d5e2, but in the SHARED shell, so it reached every
+   form outside the landing page: login, the follow-up question box on a
+   result, the add-a-source form. Found on the deployed Palantir result at
+   485ec4b, in light mode, after the landing fix had already shipped —
+   fixing one sheet says nothing about the other. #888aa4 is 3.38:1,
+   alongside the landing's 3.42:1. */
+padding:.55rem .7rem;border:1px solid #888aa4;border-radius:8px;font:inherit;
 background:#fff;color:inherit}
 textarea{min-height:6rem;resize:vertical}
 input:focus,textarea:focus,select:focus{outline:2px solid #6b6be0;
@@ -209,6 +268,30 @@ border-radius:999px;padding:.05rem .5rem;margin-left:.35rem;vertical-align:middl
 .step-badge{display:inline-block;background:#eeeefc;border-radius:999px;
 padding:.15rem .75rem;font-size:.85rem;font-weight:600;color:#2d2d70}
 .count-note{font-size:.85rem;color:#555}
+/* PANELS THAT SET A LIGHT BACKGROUND AND NO COLOUR. Under a dark scheme the
+   background stayed light while the text inherited the dark scheme's
+   near-white, so each of these rendered white-on-white. Measured live on
+   preview-v3 at 20ffb9c, on the PROGRESS page — the screen every visitor
+   watches for the whole analysis: the stage line "Writing the founder
+   briefing." inside [role=status] at 1.01:1, and the .coverage note "This
+   preview stores runs in memory..." at 1.06:1. Both invisible.
+
+   The generic floor in `webapp.app._A11Y_CSS` covers .card/.chip/details and
+   could not reach these: it has no rule for [role=status], [role=alert],
+   .coverage or a source-list label. Give each a dark counterpart here, beside
+   the light one it corrects, so the two cannot drift apart. */
+@media (prefers-color-scheme:dark){
+[role=alert]{background:#2a1717;border-color:#5b2b2b;color:#ffb4b4}
+[role=status]{background:#161c26;border-color:#3a4454;color:#f3f4f6}
+.coverage{background:#1f1b12;border-color:#4a3f28;color:#f3f4f6}
+details{background:#161c26;border-color:#3a4454}
+ul.source-list li label{background:#1b2230;border-color:#3a4454;color:#f3f4f6}
+ul.source-list li label:hover{background:#222b3b;border-color:#4a5568}
+.tag-authoritative{background:#14351f;color:#8fe0ac}
+.tag-external{background:#241a3a;color:#c4a9f5}
+.tag-unverified{background:#22262e;color:#c3cad6}
+.step-badge{background:#1e2440;color:#c9cdff}
+.count-note{color:#c3cad6}}
 """
 
 

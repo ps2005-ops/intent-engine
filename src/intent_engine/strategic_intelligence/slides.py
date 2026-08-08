@@ -30,8 +30,8 @@ import html as _html
 import re
 
 from intent_engine.strategic_intelligence.editorial import (
-    addresses_the_system, deduplicate, is_meaningful, lower_first,
-    meaningful_items,
+    SaidOnce, addresses_the_system, deduplicate, is_meaningful, lower_first,
+    meaningful_items, sentence_identity,
 )
 
 _e = _html.escape
@@ -310,6 +310,24 @@ def _confidence_in_plain_words(level: str, rationale: str) -> str:
 _lower_first = lower_first
 
 
+def _confirm_question(title: str) -> str:
+    """Turn one of the run's dated findings back into something to go and check.
+
+    ONE PHRASING, TWO DECKS. Both founder-facing decks reach the same dead end
+    — a reader with nothing to investigate because every question the run
+    produced came from the pattern library and was filtered — and both answer
+    it the same way, from the run's own findings. Written twice, the two
+    copies would drift and only one of them would be the sentence anyone
+    reviewed.
+
+    Not `_lower_first`: these titles OPEN with the company name, and
+    lowercasing turned "Linear pricing publishes its prices" into "linear
+    pricing publishes its prices" in the reader's own deck.
+    """
+    return (f"Confirm with an independent or customer source: "
+            f"{title.rstrip('.')}.")
+
+
 def founder_view_from_report(report) -> dict:
     """Adapt a deterministic report into the founder presentation contract.
 
@@ -374,9 +392,35 @@ def founder_view_from_report(report) -> dict:
     # world and cannot check "becoming the place a team's work is stored".
     fact = anchor["fact"]
     supporting = [t for t in anchor.get("supporting") or [] if t]
+    # THE READING MAY NOT ARRIVE WITHOUT WHAT CAUSED IT.
+    #
+    # "A plausible reading is that {company} appears to be broadening from a
+    # focused tool toward being the place a team's work is stored, which
+    # raises switching cost" was shown to HubSpot and Datadog with nothing
+    # behind it a reader could check. The claim was correct and the evidence
+    # existed — it just never reached this screen. The mechanism sentence now
+    # travels WITH the interpretation, from `mechanism.because_line`, and a
+    # reading that cannot produce one does not get to assert itself here.
+    # Same three states as the narrative, in the same order, from the same
+    # module — see `narrative.py`. The deck and the brief must not disagree
+    # about why a company got a reading, and the only way to guarantee that is
+    # for both to ask `mechanism` rather than each deciding for itself.
+    from intent_engine.strategic_intelligence import mechanism as MECH
     interpretation = ""
     if claim and not reads_as_taxonomy(claim):
-        interpretation = f"A plausible reading is that {_lower_first(claim)}"
+        because = MECH.because_line(top)
+        if because:
+            interpretation = (f"A plausible reading is that "
+                              f"{_lower_first(claim)} The company's own words: "
+                              f"{because}")
+        elif MECH.needs_mechanism(top):
+            interpretation = (f"A plausible reading is that "
+                              f"{_lower_first(claim)} No retrieved source "
+                              f"states this in its own words.")
+        else:
+            # A pattern that declares no mechanism gate is recorded debt, not
+            # a hidden claim; it keeps the reading it always had.
+            interpretation = f"A plausible reading is that {_lower_first(claim)}"
     elif top.get("reasoning") and not reads_as_taxonomy(top["reasoning"]):
         interpretation = top["reasoning"]
     paragraph = " ".join(x for x in [
@@ -384,7 +428,34 @@ def founder_view_from_report(report) -> dict:
         interpretation,
     ] if x).strip()
 
-    decision = thesis.get("why_care") or ""
+    # THE DECISION, NOT THE TOPIC.
+    #
+    # This was `thesis["why_care"]`, which is `implications[0]` -- "Whether to
+    # keep investing in depth or in adjacency". The deck printed the question
+    # under the heading "The decision" and the founder was left exactly where
+    # they started. The composed object states which options exist, what each
+    # wins and costs, and what would settle it, and when the evidence cannot
+    # support two options it says so instead of choosing one.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    composed = decision_of(r)
+    # WITHHELD IS A POSITION, NOT AN ABSENCE.
+    #
+    # `composed` already states it: "No decision is put forward: the public
+    # record did not carry enough to read one from", with `unsafe_because`
+    # naming what is missing. That was computed and then dropped here, so a
+    # run with real findings but no hypothesis answered "so what do I do
+    # about it" with silence — and silence reads as the analysis having
+    # forgotten to finish rather than having declined on purpose.
+    #
+    # It is carried only when the run found something. A company with no
+    # findings AND no decision has nothing to present, and
+    # `test_a_deck_with_nothing_concrete_is_not_presentable` is the contract
+    # that says so — this must not become the slide that pads that deck to
+    # the floor.
+    decision = composed.headline if composed.readiness != "WITHHELD" else ""
+    if not decision and (r.get("shifts") or ()):
+        decision = composed.headline
+    best = composed.options[0] if composed.options else None
     # WATCH ITEMS ARE FOUNDER-FACING, so taxonomy is filtered HERE -- at the
     # point where the visible item is selected, not by sanitising every string
     # in the system.
@@ -406,6 +477,14 @@ def founder_view_from_report(report) -> dict:
                  (_watchable(q.get("question", "") if isinstance(q, dict)
                              else str(q))
                   for q in (r.get("questions") or [])) if q]
+    # Every question this layer produces is built FROM a hypothesis, so a run
+    # that reached no hypothesis leaves the reader nothing to investigate —
+    # the same dead end the fallback deck already answers, and the same
+    # answer. See `_confirm_question`.
+    if not questions:
+        questions = [_confirm_question(t) for t in
+                     (s.get("title", "") for s in (r.get("shifts") or ()))
+                     if t and not reads_as_taxonomy(t)][:2]
 
     view = {
         # The one claim, stated first. Not a company description.
@@ -426,21 +505,47 @@ def founder_view_from_report(report) -> dict:
         # ranking layer is told not to promote anything to "today".
         "decisions": ([{
             "decision": decision,
-            "why_it_matters": "",
+            "readiness": composed.readiness,
+            "options": [o.as_dict() for o in composed.options],
+            "recommended_next_move": composed.recommended_next_move,
+            "limitation": composed.limitation,
+            "unsafe_because": composed.unsafe_because,
+            "evidence_required": list(composed.evidence_required),
+            "what_each_result_would_favour":
+                composed.what_each_result_would_favour,
+            "undecided_question": composed.undecided_question,
+            "why_it_matters": best.business_consequence if best else "",
             "cost_of_waiting": "",
             "what_a_competitor_may_do_first": "",
-            "upside": "", "downside": "",
-            "what_would_invalidate_it": falsifier,
+            "upside": best.upside if best else "",
+            "downside": best.downside if best else "",
+            "what_would_invalidate_it": composed.falsifier or falsifier,
             "what_to_watch": falsifier,
             "confidence": top.get("confidence", ""),
             "confidence_rationale": _readable_confidence_reason(
                 top.get("confidence_reasons")),
             "citations": list(top.get("strongest_support_ids") or []),
         }] if decision else []),
-        "strongest_case_we_are_wrong": _first(
-            top.get("alternative_explanations")),
+        # Both of these reached a live slide carrying "source of truth": the
+        # case against is an alternative explanation and the gaps are the
+        # scaffold's own, so they are library prose like everything else here
+        # and get the same filter at the point of selection.
+        "strongest_case_we_are_wrong": next(
+            (a for a in (top.get("alternative_explanations") or ())
+             if a and not reads_as_taxonomy(a)), ""),
         "questions": questions[:3],
-        "evidence_gaps": list(r.get("evidence_gaps") or [])[:2],
+        # The run's dated findings, carried rather than dropped. Only this
+        # adapter sets the key: a grounded analysis writes its own screens and
+        # must not have one appended from a different layer. Same taxonomy
+        # filter as everything else chosen for display, and the same rule —
+        # a rejected finding is dropped, never reworded.
+        "dated_findings": [
+            {"title": s.get("title", ""), "date": s.get("date", ""),
+             "observation_id": s.get("observation_id", "")}
+            for s in (r.get("shifts") or ())
+            if s.get("title") and not reads_as_taxonomy(s.get("title", ""))],
+        "evidence_gaps": [g for g in (r.get("evidence_gaps") or ())
+                          if g and not reads_as_taxonomy(g)][:2],
         # Left empty on purpose -- see the docstring. The renderer drops the
         # screens these would have filled.
         "business_model": {}, "mental_model": {}, "competitive": {},
@@ -464,15 +569,159 @@ def _readable_confidence_reason(reasons) -> str:
 
 
 def _why_now_in_plain_words(why_now: str) -> str:
-    """The reasoning layer says "Recent public signal (2026-07-20, Pricing)
-    keeps this timely", which is the system describing its own inputs. A
-    reader wants the date and the page, not the word "signal"."""
+    """"Why now" is a reason, and provenance is not one.
+
+    The reasoning layer says "Recent public signal (2026-07-20, Pricing) keeps
+    this timely", which is the system describing its own inputs. An earlier fix
+    rewrote that as "The most recent evidence is Pricing (2026-07-20)" -- which
+    reads better and still answers nothing. A founder shown that under "why
+    now" learns when a page was published, not why the situation is urgent, and
+    it was one of the three strings the deployed Palantir deck was criticised
+    for.
+
+    So a value whose entire content is a date and a page name is WITHHELD. A
+    slide with no reason omits the line instead of printing a citation stamp
+    where an argument belongs -- the same rule the founder brief applies to
+    "why this matters".
+    """
     import re
-    match = re.search(r"\(([^,]+),\s*(.+?)\)", why_now or "")
+    text = (why_now or "").strip()
+    if not text:
+        return ""
+    match = re.search(r"\(([^,]+),\s*(.+?)\)", text)
     if not match:
-        return "" if "signal" in (why_now or "").lower() else (why_now or "")
-    when, where = match.group(1).strip(), match.group(2).strip()
-    return f"The most recent evidence is {where} ({when})."
+        # Prose that never mentioned the pipeline's own vocabulary is a real
+        # reason and passes through untouched.
+        return "" if "signal" in text.lower() else text
+    # Everything outside the parenthetical is the pipeline's own phrasing
+    # ("Recent public signal ... keeps this timely"), so what remains is
+    # provenance only. That is a citation, and citations belong on evidence.
+    return ""
+
+
+def _upper_first(text: str) -> str:
+    """`unsafe_because` is written as a clause because the headline embeds it.
+    Standing alone as a bullet it is a sentence and needs a capital."""
+    text = (text or "").strip()
+    return text[:1].upper() + text[1:] if text else ""
+
+
+def _identity(text: str, limit: int = 120) -> str:
+    """A sentence's identity, so a deck can tell whether it already said it.
+
+    The rule now lives in `editorial`, because the scrollable narrative needs
+    exactly the same one and two implementations of "have I said this" is how
+    one surface deduplicates what the other repeats. Kept as a name here so
+    the call sites below read the same as they did.
+    """
+    return sentence_identity(text, limit)
+
+
+def _decision_detail_slides(decision: dict, *, index: int = 0,
+                            already_shown=()) -> list:
+    """The options, or the honest reason there are none.
+
+    Two screens at most, and only the one the readiness earns. A decision
+    slide that names a choice and then shows nothing a reader can weigh is the
+    same failure as printing the topic: it looks like an answer and carries
+    none. Where the evidence supports two courses of action they appear side
+    by side with what each wins, costs and assumes; where it does not, the
+    screen says what cannot be concluded, which evidence is missing and the
+    one bounded thing worth going to find out.
+    """
+    slides, options = [], (decision.get("options") or [])
+    readiness = decision.get("readiness", "")
+    shown = {_identity(t) for t in (already_shown or ())}
+
+    def _fresh(text):
+        """Drop a bullet this deck has already said, or already contains.
+
+        Two collapses, both measured on the deployed decks. The next move and
+        the missing evidence become the same sentence whenever no
+        falsification question survives filtering. And the mechanism is the
+        act option's key assumption, its upside, and -- on the
+        alternative-derived path -- part of the headline too, so it appeared
+        four times across two screens.
+
+        Containment, not equality: "value and lock-in migrate from the visible
+        product" and "If this reading holds, value and lock-in migrate from
+        the visible product" are one sentence to a reader, and the second is
+        not a prefix of the first.
+        """
+        key = _identity(text)
+        if not text or not key:
+            return ""
+        if any(key in seen or seen in key for seen in shown):
+            return ""
+        shown.add(key)
+        return text
+
+    if readiness == "DECISION_READY" and len(options) >= 2:
+        # ONE SCREEN PER OPTION, not both on one.
+        #
+        # Two options with an upside and a cost each is four bullets, and the
+        # slide budget drops the fourth -- which is option two's cost, the one
+        # thing a reader weighing them cannot do without. A deck compares
+        # across consecutive screens; it does not need them side by side to be
+        # a comparison, and at 375px they would not be side by side anyway.
+        for n, option in enumerate(options[:2]):
+            label = (option.get("label") or "").rstrip(":")
+            # DEDUPED WITHIN THE SCREEN, not against the deck.
+            #
+            # The upside IS this screen -- it is what the option wins, and
+            # dropping it because the decision screen already named the
+            # mechanism left "Option 1" with nothing but its cost. What has to
+            # go is the assumption when it restates what is already on the
+            # same screen, which is the common case: the act option's key
+            # assumption is the mechanism, and so is its upside.
+            upside = option.get("upside", "")
+            downside = option.get("downside", "")
+            assumption = option.get("key_assumption", "")
+            # Compared in full, not on the 120-character prefix the
+            # cross-slide check uses: the assumption sits INSIDE the upside
+            # here ("If <assumption>, nothing has been committed against it"),
+            # and a truncated needle stops matching a truncated haystack.
+            here = f"{_identity(upside, 0)} {_identity(downside, 0)}"
+            if _identity(assumption, 0) and _identity(assumption, 0) in here:
+                assumption = ""
+            slides.append(_slide(
+                f"option-{index + 1}-{n + 1}", f"Option {n + 1}: {label}", [
+                    _bullet(upside,
+                            evidence=option.get("supporting_evidence_ids")
+                            or []),
+                    _bullet(_lead("The cost: ", downside)),
+                    _bullet(_lead("This assumes ", assumption)),
+                ], kind="options",
+                note="Cited against the evidence behind it."))
+        slides.append(_slide(f"next-{index + 1}", "What to do next", [
+            _bullet(_fresh(decision.get("recommended_next_move", ""))),
+            _bullet(_lead("What this cannot settle: ",
+                          _fresh(decision.get("limitation", "")))),
+        ], kind="next_move"))
+        return [s for s in slides if s]
+
+    # WITHHELD belongs on this screen too. It is the same state one degree
+    # further along — INVESTIGATION_REQUIRED says no option can be committed
+    # to yet, WITHHELD says the record did not carry enough to name options at
+    # all — and "What cannot be concluded yet" is the heading for both. Routed
+    # anywhere else it becomes a one-line decision screen asserting that there
+    # is no decision, with the reason left off.
+    if readiness in ("INVESTIGATION_REQUIRED", "WITHHELD"):
+        verified = [v for v in (decision.get("verified") or []) if v]
+        slides.append(_slide(f"investigate-{index + 1}",
+                             "What cannot be concluded yet", [
+            _bullet(_lead("What was verified: ",
+                          _fresh(verified[0] if verified else ""))),
+            _bullet(_upper_first(_fresh(decision.get("unsafe_because", "")))),
+            _bullet(_fresh(decision.get("recommended_next_move", ""))),
+            _bullet(_lead("The evidence that would settle it: ",
+                          _fresh((decision.get("evidence_required")
+                                  or [""])[0]))),
+            _bullet(_fresh(decision.get("what_each_result_would_favour", ""))),
+        ], kind="investigation",
+            note="Stated as an open question because the public record does "
+                 "not close it."))
+    return [s for s in slides if s]
 
 
 def build_founder_slides(analysis, *, company="") -> list:
@@ -556,6 +805,28 @@ def build_founder_slides(analysis, *, company="") -> list:
         _bullet((ins.get("economics") or {}).get("mechanism", "")),
     ], kind="tension"))
 
+    # What the run actually found, dated.
+    #
+    # THE DEFECT THIS FIXES: having MORE evidence produced a WORSE deck.
+    # A concrete development is what hands a company to this deck rather than
+    # the fallback one — and the fallback builds a "What changed recently"
+    # screen from the run's dated findings while this one had nowhere to put
+    # them, so they were computed and then dropped. Invisible while a pattern
+    # was firing (its slides filled the deck), visible the moment one stopped:
+    # Brightledger, which publishes four dated findings, fell to two screens
+    # when `tool_to_system_of_record` was correctly gated off it.
+    #
+    # These are not filler. Each is an observation this run retrieved, with a
+    # date and a citation, phrased as the consequence the reader should draw.
+    # `_slide` returns None when nothing survives, so a company with no dated
+    # findings gets no screen rather than an empty heading.
+    slides.append(_slide("found", "What the analysis found", [
+        _bullet(f.get("title", ""), date=f.get("date", ""),
+                evidence=[f["observation_id"]] if f.get("observation_id")
+                else [])
+        for f in (a.get("dated_findings") or [])[:4]
+    ], kind="findings"))
+
     # 3 - what leadership is protecting and giving up
     slides.append(_slide("mental_model", "What leadership is protecting", [
         _bullet(_lead("They believe ", mm.get("they_believe", ""))),
@@ -570,15 +841,29 @@ def build_founder_slides(analysis, *, company="") -> list:
     # the decisions
     for i, d in enumerate(decisions[:2]):
         when = _URGENCY_WORDS.get(d.get("urgency", ""), "")
-        slides.append(_slide(f"decision-{i + 1}",
-                             f"The decision: {when}" if when
-                             else "The decision", [
-            _bullet(d.get("decision", ""),
-                    evidence=d.get("citations") or [], full=True),
-            _bullet(_lead("Waiting costs: ", d.get("cost_of_waiting", ""))),
-            _bullet(_lead("A rival may move first: ",
-                          d.get("what_a_competitor_may_do_first", ""))),
-        ], kind="decision"))
+        # A BOUNDED DECISION GETS ONE SCREEN, NOT TWO.
+        #
+        # Its headline is "no option is safe to commit to yet, because X", and
+        # the investigation screen below opens with that same X. Rendering
+        # both put the identical sentence on two consecutive screens under two
+        # headings, which reads as a broken deck and pads the count with a
+        # repeat. WITHHELD is the same shape — "no decision is put forward"
+        # followed by a screen whose first line is why — so it is skipped here
+        # for the same reason.
+        if d.get("readiness") not in ("INVESTIGATION_REQUIRED", "WITHHELD"):
+            slides.append(_slide(f"decision-{i + 1}",
+                                 f"The decision: {when}" if when
+                                 else "The decision", [
+                _bullet(d.get("decision", ""),
+                        evidence=d.get("citations") or [], full=True),
+                _bullet(_lead("Waiting costs: ", d.get("cost_of_waiting", ""))),
+                _bullet(_lead("A rival may move first: ",
+                              d.get("what_a_competitor_may_do_first", ""))),
+            ], kind="decision"))
+        slides.extend(_decision_detail_slides(
+            d, index=i,
+            already_shown=[b["text"] for s in slides if s
+                           for b in s["bullets"]]))
 
     # 4 - the assumption carrying the weight
     weakest = weakest_assumption(assumptions) or {}
@@ -651,10 +936,12 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # richly; a deterministic report fills less of it. Both render here.
     analysis = r.get("strategic_analysis")
     if analysis and (analysis.get("decisions") or []):
-        return build_founder_slides(analysis, company=company)
+        return meeting_quality(
+            build_founder_slides(analysis, company=company))
     adapted = founder_view_from_report(r)
     if adapted:
-        return build_founder_slides(adapted, company=company)
+        return meeting_quality(
+            build_founder_slides(adapted, company=company))
 
     # The deck below is the fallback for a company with real evidence but no
     # concrete development to lead with. It was the LAST founder-facing surface
@@ -674,8 +961,25 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
 
     def _concrete(text):
+        """A founder-facing claim, or "".
+
+        This was a non-emptiness check with a taxonomy filter, which is why
+        "Palantir Partnership Vanguard" -- a retrieved PAGE TITLE -- reached a
+        deployed slide as strategic intelligence. A title is not taxonomy, so
+        nothing stopped it; the same hole passed internal pattern names
+        ("product→platform") arriving via `hypothesis.title`.
+
+        The contract is shared with the founder brief rather than restated
+        here: a claim needs a finite assertion, not merely words. Grammar
+        alone is insufficient, so metadata openings are excluded explicitly --
+        `_is_consequence` already rejects those, which is precisely why it is
+        reused instead of a second rule being written beside it.
+        """
+        from intent_engine.founder_brief.build import _is_consequence
         text = (text or "").strip()
-        return text if text and not reads_as_taxonomy(text) else ""
+        if not text or reads_as_taxonomy(text):
+            return ""
+        return text if _is_consequence(text) else ""
 
     thesis = r.get("thesis") or {}
     slides = []
@@ -689,9 +993,19 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
                 observation.get("excerpt", ""),
                 evidence=[observation.get("observation_id")],
                 date=observation.get("date", "")))
-    slides.append(_slide("company", f"{company} in one minute",
-                         identity_bullets[:3],
-                         note="From the company's own public pages."))
+    # BUILT FIRST, SHOWN AFTER THE DECISION.
+    #
+    # This slide is the company's own copy, honestly labelled -- on the live
+    # Palantir deck it opened with "At Palantir, we believe that with good
+    # data and the right software, institutions can solve hard problems and
+    # change the world for the better." Someone walking a room through this
+    # deck should not spend their first slide on a values statement, so the
+    # deck opens on the reading and the decision, and this becomes context a
+    # reader reaches once they know why it matters. It is still built here
+    # because it must claim its bullets before the market slide does.
+    identity_slide = _slide("company", f"{company} in one minute",
+                            identity_bullets[:3],
+                            note="From the company's own public pages.")
 
     # 2. Central strategic view. `thesis["view"]` and `thesis["transition"]`
     #    are the pattern library's own sentences with the company name
@@ -704,10 +1018,55 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         view_bullets.append(_bullet(thesis["view"]))
     if _concrete(thesis.get("transition")):
         view_bullets.append(_bullet(thesis["transition"]))
-    if _concrete(thesis.get("why_care")):
-        view_bullets.append(_bullet(f"Why it matters: {thesis['why_care']}"))
+    # `why_care` is the decision TOPIC, and "Why it matters: whether to keep
+    # investing in depth or in adjacency" was the product restating the
+    # question as though it were the point. The composed decision goes on its
+    # own screens below, where it has room to say what the options are.
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
+
+    # THE DECISION, AND THE SPARSE CASE THIS DECK EXISTS FOR.
+    #
+    # Measured on the Sentry-shaped fallback: with the library's sentences
+    # filtered out, the whole deck came to "We are helping the community work
+    # together." and "Built from 5 company owned source(s)." -- a marketing
+    # quote and a source count. Neither is intelligence, and a reader given
+    # those two lines has been told nothing at all.
+    #
+    # What the run DOES have, even then, is the honest bounded state: what it
+    # verified, what it cannot conclude from that, and the one check that
+    # would move it. That is a smaller claim than a strategy and it is a real
+    # one, so it is what the screens below carry.
+    from intent_engine.strategic_intelligence.decision import decision_of
+    composed_decision = decision_of(r)
+    shown_here = [b["text"] for s in slides if s for b in s["bullets"]]
+    if composed_decision.is_ready:
+        # The headline names the mechanism when the option labels are generic,
+        # so the mechanism line below it would be the same sentence twice.
+        # Compared in FULL. The headline appends the mechanism to labels that
+        # are already a sentence long, so its 120-character identity is
+        # truncated well before the part being looked for -- and the deployed
+        # decision screen printed the mechanism twice, the second time under
+        # the label "The mechanism:".
+        mechanism = ("" if _identity(composed_decision.mechanism, 0) in
+                     _identity(composed_decision.headline, 0)
+                     else composed_decision.mechanism)
+        slides.append(_slide("decision", "The decision this bears on", [
+            _bullet(composed_decision.headline, full=True),
+            _bullet(_lead("The mechanism: ", mechanism)),
+        ], kind="decision"))
+        shown_here = [b["text"] for s in slides if s for b in s["bullets"]]
+    if composed_decision.readiness != "WITHHELD":
+        # No separate headline screen for the bounded state: the headline IS
+        # "no option is safe to commit to yet, because...", and the screen
+        # below opens with that same sentence. Printed on both, the deck said
+        # one thing twice and called it two screens.
+        slides.extend(_decision_detail_slides(
+            composed_decision.as_dict(), already_shown=shown_here))
+
+    # Context, now that the reader knows what it is context FOR.
+    if identity_slide:
+        slides.append(identity_slide)
 
     # 3. What changed recently
     change_bullets = [
@@ -790,10 +1149,18 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # 8. Questions for leadership. The same filter the brief and the full
     #    analysis apply: "How far toward a system of record do we go?" is the
     #    library asking its own falsification question in a founder's voice.
+    # The decision's OWN next check does not belong here. Live on the deployed
+    # deck, "Questions for leadership" was one bullet -- "Published pricing
+    # that assumes no implementation engagement." -- which slide five had
+    # already given as what to do next. A reader paged twice for one sentence.
+    # This slide is for what the decision screens did NOT already ask.
+    _already_asked = SaidOnce([composed_decision.falsifier,
+                               composed_decision.recommended_next_move])
     question_bullets = [
         _bullet(q.get("question", ""))
         for q in meaningful_items(r.get("questions", []), key="question")
-        if _concrete(q.get("question", ""))]
+        if _concrete(q.get("question", ""))
+        and not _already_asked.has(q.get("question", ""))]
     if not question_bullets:
         # Linear's ONLY leadership question was "Customers describing it as a
         # companion to a system of record rather than the record itself" --
@@ -812,13 +1179,12 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         # lowercasing turned "Linear pricing publishes its prices" into
         # "linear pricing publishes its prices" in the reader's own deck.
         question_bullets = [
-            _bullet(f"Confirm with an independent or customer source: "
-                    f"{title.rstrip('.')}.")
+            _bullet(_confirm_question(title))
             for title in (s.get("title", "") for s in
                           meaningful_items(r.get("shifts", []), key="title"))
             if _concrete(title)][:2]
     slides.append(_slide("questions", "Questions for leadership",
-                         question_bullets))
+                         question_bullets, kind="questions"))
 
     # 9. Evidence and limitations. Not a content slide — it never counts
     #    toward the minimum, or a deck could reach five on disclaimers alone.
@@ -829,16 +1195,100 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         _bullet(x) for x in consolidate_limitations(
             r.get("evidence_gaps", []),
             reader_limitations(r.get("quality_findings", [])))]
-    coverage = r.get("source_class_coverage", {}) or {}
-    if coverage:
-        limitation_bullets.insert(0, _bullet(
-            "Built from " + ", ".join(f"{n} {c.replace('_', ' ')}"
-                                      for c, n in sorted(coverage.items())
-                                      if n) + " source(s)."))
+    # NO SOURCE-COUNT NARRATION. "Built from 9 company owned, 1 executive
+    # statement source(s)." is the taxonomy with its underscores rubbed out
+    # and a plural the template never resolved, and counting sources tells a
+    # reader nothing about whether to trust the reading -- the limitation
+    # bullets below say what is actually missing, in English. The counts stay
+    # available on the evidence-and-sources page, where a reader who wants
+    # provenance goes to look.
     slides.append(_slide("evidence", "Evidence and limitations",
                          limitation_bullets, kind="evidence"))
 
-    return [s for s in slides if s]
+    return meeting_quality(slides)
+
+
+#: Slides that carry the decision. They are never dropped for thinness -- a
+#: deck missing the choice is not a shorter deck, it is a different one.
+# Two kinds of exemption, both learned from a gate failing.
+#
+# "questions" REFRAMES a finding as something to go and check ("Confirm with
+# an independent source: <finding>"), so an identity match against the finding
+# is a false positive -- the reader gains the instruction even though they
+# have seen the fact.
+#
+# "wrong" and "watch" restate the falsifier and the checks on purpose. They
+# are the only slides that answer "what weakens this", and dropping them for
+# restating is how the persona suite lost that answer for a private company.
+_LOAD_BEARING = frozenset({"decision", "options", "investigation",
+                           "next_move", "today", "evidence", "questions"})
+_LOAD_BEARING_IDS = frozenset({"wrong", "watch", "gaps"})
+
+
+def _load_bearing(slide) -> bool:
+    return (slide.get("kind") in _LOAD_BEARING
+            or slide.get("id") in _LOAD_BEARING_IDS)
+
+def meeting_quality(slides) -> list:
+    """Drop the slides a meeting cannot use. Slides are OPTIONAL now.
+
+    The scrollable narrative is the comprehension path, so this deck no longer
+    has to reach a slide count -- it has to be worth paging through. Measured
+    on the deployed Palantir deck, ten slides included:
+
+        "Palantir Technologies in one minute"   three lines of the company's
+                                                own marketing copy
+        "What the company has published"        a blog index blurb and
+                                                "Weighted-average shares of
+                                                common stock outstanding used
+                                                in computing earnings per
+                                                share..."
+        "Questions for leadership"              one bullet
+
+    None of those changes a decision, and a reader who paged to them paid four
+    clicks to learn nothing.
+
+    ONE RULE, AND IT IS REPETITION. Two stronger rules were tried against the
+    suite and both were wrong. Requiring a finite assertion on every slide
+    dropped "Sentry acquired Codecov." -- a dated fact is not a weak slide, it
+    is the shortest kind of strong one. A minimum word count dropped the
+    Sentry deck's opening insight for the same reason. Terseness is not the
+    defect; saying the same thing on a second screen is, and a bullet the deck
+    has already shown costs a click and returns nothing.
+
+    A slide left with no fresh bullets is dropped entirely. Load-bearing
+    slides keep theirs whatever else has been said, because a deck missing the
+    choice is not a shorter deck, it is a different one.
+    """
+    present = [s for s in slides if s]
+    # WHICH SLIDE YIELDS MATTERS AS MUCH AS THE RULE.
+    #
+    # "<Company> in one minute" is built from whatever company-owned text was
+    # retrieved first, so it claimed the product descriptions before the
+    # products-and-market slide could -- and deduplicating in document order
+    # then took Foundry, Gotham and AIP off the deck entirely, which a golden
+    # gate caught. The weakest slide is the one that gives way, so it is
+    # resolved LAST. Output order is unchanged; only claim order is.
+    order = sorted(range(len(present)),
+                   key=lambda i: present[i].get("id") == "company")
+    said, dropped, edited = SaidOnce(), set(), {}
+    for i in order:
+        slide = present[i]
+        texts = [b.get("text", "") for b in slide.get("bullets", ())]
+        if _load_bearing(slide):
+            for text in texts:
+                said.remember(text)
+            continue
+        fresh = [t for t in texts if t and not said.has(t)]
+        if not fresh:
+            dropped.add(i)
+            continue
+        edited[i] = [b for b in slide.get("bullets", ())
+                     if b.get("text") in fresh]
+        for text in fresh:
+            said.remember(text)
+    return [dict(s, bullets=edited[i]) if i in edited else s
+            for i, s in enumerate(present) if i not in dropped]
 
 
 def meaningful_slide_count(slides) -> int:
@@ -853,7 +1303,19 @@ def deck_is_presentable(slides) -> bool:
 
 _CSS = """
 <style>
-.deck{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--bg:#ffffff;
+/* TWO KINDS OF BORDER, TWO TOKENS. `--line` drew the slide frame, the meta
+   rule AND the edge of every control — so the one value had to satisfy both a
+   decorative divider (no WCAG floor) and an interactive boundary (1.4.11 asks
+   3:1). It was tuned as a divider, and the controls inherited that: measured
+   on the deployed Palantir deck at 485ec4b, in light mode, the slide nav, the
+   follow-up question button and the numbered dots all rendered #d1d5db at
+   1.47:1. (Labels are described rather than quoted here: this stylesheet is
+   inlined into the page, comments and all.)
+   Darkening `--line` would have fixed the controls by making every hairline
+   divider heavy, which is a different design applied silently. So the
+   interactive edge gets its own token; separators keep theirs. Dark mode
+   already had two values for this and only needed the name. */
+.deck{--ink:#111827;--muted:#4b5563;--line:#d1d5db;--ctl:#888aa4;--bg:#ffffff;
 --panel:#f8fafc;--accent:#1d4ed8;--accent-ink:#ffffff;
 font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 color:var(--ink);background:var(--bg);max-width:900px;margin:0 auto;
@@ -882,7 +1344,7 @@ border:0}
    the first slide stays visible. */
 .deck.is-navigated .slide:first-of-type:not(:target){display:none}
 .deck .stage{border:1px solid var(--line);border-radius:14px;
-background:var(--panel);padding:24px 26px;min-height:340px}
+background:var(--panel);padding:24px 26px}
 .deck h2{font-size:1.5rem;line-height:1.25;margin:0 0 14px;color:var(--ink)}
 .deck ul{margin:0;padding-left:1.15rem}
 .deck li{margin:0 0 12px;font-size:1.05rem}
@@ -894,7 +1356,7 @@ margin:16px 0 8px}
 .deck .nav{display:inline-flex;gap:8px}
 .deck .nav a,.deck .act a,.deck .act button{display:inline-block;
 font-size:.9rem;font-weight:600;text-decoration:none;padding:9px 16px;
-border-radius:9px;border:1px solid var(--line);background:#fff;
+border-radius:9px;border:1px solid var(--ctl);background:#fff;
 color:var(--ink);cursor:pointer}
 .deck .nav a.primary{background:var(--accent);color:var(--accent-ink);
 border-color:var(--accent)}
@@ -903,7 +1365,7 @@ border-color:var(--accent)}
 .deck .count{color:var(--muted);font-size:.86rem;font-variant-numeric:tabular-nums}
 .deck .dots{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 .deck .dots a{width:26px;height:26px;display:grid;place-items:center;
-border-radius:50%;border:1px solid var(--line);font-size:.72rem;
+border-radius:50%;border:1px solid var(--ctl);font-size:.72rem;
 text-decoration:none;color:var(--muted);background:#fff}
 .deck .act{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .deck .cites{margin-top:14px}
@@ -913,16 +1375,16 @@ font-weight:600}
 .deck .meta{color:var(--muted);font-size:.8rem;margin-top:18px;
 border-top:1px solid var(--line);padding-top:10px}
 @media (max-width:600px){
-.deck{padding:4px 10px 24px}.deck .stage{padding:18px 16px;min-height:280px}
+.deck{padding:4px 10px 24px}.deck .stage{padding:18px 16px}
 .deck h2{font-size:1.25rem}.deck li{font-size:1rem}
 .deck .dots{margin-left:0;width:100%}}
 @media print{
 .deck .slide{display:block!important;page-break-after:always;margin-bottom:20px}
 .deck .bar,.deck .act,.deck .dots{display:none!important}
-.deck .stage{border:none;background:none;min-height:0}
+.deck .stage{border:none;background:none}
 .deck .cites[open],.deck .cites{display:block}}
 @media (prefers-color-scheme:dark){
-.deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--bg:#0f141c;
+.deck{--ink:#f3f4f6;--muted:#c3cad6;--line:#3a4454;--ctl:#606e88;--bg:#0f141c;
 --panel:#161c26;--accent:#7aa2ff;--accent-ink:#0b1220}
 .deck .nav a,.deck .act a,.deck .dots a{background:#1b222e;color:var(--ink)}}
 </style>

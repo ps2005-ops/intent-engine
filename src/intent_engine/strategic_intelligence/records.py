@@ -99,6 +99,14 @@ class StrategicObservation:
     entity: str = ""                # linked product/project/entity
     weak: bool = False              # title-only / generic marketing → weak
     evidence_quality: str = "strong"  # strong | weak
+    #: signal -> the sentence IN THIS DOCUMENT that evidenced it.
+    #:
+    #: `excerpt` is one passage chosen for the whole document, so on a source
+    #: carrying many signals it is the right evidence for at most one of them.
+    #: A reading that qualified on signal X must be able to quote the words
+    #: that produced X, not the document's opening. See
+    #: `observations.signal_spans` for the measured case this comes from.
+    signal_spans: dict = field(default_factory=dict)
 
     def validate(self) -> None:
         _require(self.observation_type in OBSERVATION_TYPES,
@@ -135,7 +143,35 @@ class ComparablePattern:
     source_refs: list = field(default_factory=list)
     confidence: str = "moderate"
     qualifying_signals: tuple = ()
+    #: Signals WITHOUT WHICH THIS PATTERN MAY NOT FIRE, whatever the threshold.
+    #: A qualifying signal is evidence that a reading is plausible; a required
+    #: one is the reading's subject. `services_to_product` needs
+    #: `services_motion` in the same way "services → product" needs services:
+    #: matching two of three let an API page and a product page assert that a
+    #: company "delivers work alongside customers", which no evidence in the
+    #: run had said. Empty for every pattern whose qualifying signals are
+    #: genuinely interchangeable.
+    required_signals: tuple = ()
+    #: AT LEAST ONE of these must be present. Where `required_signals` names a
+    #: single subject the reading is about, this names a set of alternative
+    #: CAUSAL MECHANISMS, any one of which would make the reading true — the
+    #: reading may not fire on vocabulary alone when none of them is observed.
+    #:
+    #: `buyer_concentration_exposure` needs one in the way "depends on
+    #: regulated buyers" needs a reason to be true: a separate estate built for
+    #: those buyers, an authorization that gates the purchase, a procurement
+    #: vehicle, or a disclosed exposure. Without this, "regulated industries"
+    #: copy plus a case-studies page was enough, and HubSpot and Snowflake —
+    #: one of which has no public-sector mechanism at all — were handed the
+    #: same conclusion.
+    required_any_signals: tuple = ()
     disconfirming_signals: tuple = ()
+    #: Disconfirming signals strong enough that this reading may not be
+    #: the PRIMARY one while they are present. It stays in the portfolio
+    #: as a secondary hypothesis. Must be a subset of
+    #: `disconfirming_signals`, so a pattern cannot be blocked by
+    #: something it never declared as arguing against it.
+    blocking_signals: tuple = ()
     limitations: str = ""
 
     def validate(self) -> None:
@@ -145,12 +181,54 @@ class ComparablePattern:
                  f"pattern {self.pattern_id} needs >=1 cited example")
         _require(bool(self.qualifying_signals),
                  f"pattern {self.pattern_id} needs qualifying signals")
+        for signal in self.required_signals:
+            _require(signal in self.qualifying_signals,
+                     f"pattern {self.pattern_id} requires {signal!r}, which is "
+                     "not one of its qualifying signals")
+        for signal in self.required_any_signals:
+            _require(signal in self.qualifying_signals,
+                     f"pattern {self.pattern_id} requires one of "
+                     f"{signal!r}, which is not one of its qualifying "
+                     "signals")
+        for signal in self.blocking_signals:
+            _require(signal in self.disconfirming_signals,
+                     f"pattern {self.pattern_id} is blocked by {signal!r}, "
+                     "which is not one of its disconfirming signals")
 
     def as_dict(self) -> dict:
         d = asdict(self)
         d["qualifying_signals"] = list(self.qualifying_signals)
+        d["required_signals"] = list(self.required_signals)
+        d["required_any_signals"] = list(self.required_any_signals)
         d["disconfirming_signals"] = list(self.disconfirming_signals)
+        d["blocking_signals"] = list(self.blocking_signals)
         return d
+
+
+@dataclass
+class MechanismEvidence:
+    """The words that caused a reading, and where they came from.
+
+    ONE OBJECT, EVERY SURFACE. A reading asserts a structural force —
+    "switching cost rises", "the record moved" — and until now no surface
+    could show what established it. Each surface had the hypothesis and the
+    observation list and had to guess which excerpt was relevant; measured
+    live, all of them guessed the document's opening paragraph.
+
+    This is built once, where the pattern qualifies and the matched signal is
+    still known, and read everywhere. A surface that renders a mechanism claim
+    without rendering this is asserting something the reader cannot check.
+    """
+    signal: str            #: the mechanism signal that qualified the pattern
+    label: str             #: what having it means, in a reader's words
+    quote: str             #: the sentence in the source that evidenced it
+    observation_id: str
+    source_title: str = ""
+    origin: str = ""
+    source_class: str = "company_owned"
+
+    def as_dict(self) -> dict:
+        return asdict(self)
 
 
 @dataclass
@@ -183,6 +261,10 @@ class StrategicHypothesis:
     # cannot judge either one, and the two were previously indistinguishable on
     # the page.
     provenance: str = "company-stated"
+    #: The mechanism(s) this reading qualified on, each with the sentence that
+    #: evidenced it. Empty only for a pattern that declares no mechanism gate
+    #: — those are the recorded debt, not a licence to hide reasoning.
+    mechanism_evidence: tuple = ()
 
     def validate(self) -> None:
         _require(self.confidence in CONFIDENCE_LEVELS,
@@ -215,6 +297,12 @@ class StrategicHypothesis:
         for k in ("source_classes", "strongest_support_ids",
                   "strongest_counter_ids", "comparables", "evidence_roles"):
             d[k] = list(getattr(self, k))
+        # `asdict` already recursed into these; restate as a list so every
+        # surface reads the same shape whether it was handed the object or
+        # its dict.
+        d["mechanism_evidence"] = [
+            m.as_dict() if hasattr(m, "as_dict") else dict(m)
+            for m in self.mechanism_evidence]
         return d
 
 
@@ -279,6 +367,11 @@ class StrategicReport:
     source_library: dict = field(default_factory=dict)  # all sources, grouped
     analytics_events: list = field(default_factory=list)
     mental_model: dict = field(default_factory=dict)    # persistent company model
+    #: Gated readings this run ALMOST reached: enough supporting evidence
+    #: to be worth naming, one mechanism unverified. See
+    #: `sufficiency.near_misses` — the canonical object every surface
+    #: reads rather than each deciding for itself what a refusal meant.
+    near_misses: list = field(default_factory=list)
     surprises: list = field(default_factory=list)       # strategic surprises
     opportunities: list = field(default_factory=list)
     vulnerabilities: list = field(default_factory=list)
@@ -307,6 +400,10 @@ class StrategicReport:
             "blind_spots": [b.as_dict() for b in self.blind_spots],
             "questions": [q.as_dict() for q in self.questions],
             "evidence_gaps": list(self.evidence_gaps),
+            # Every founder-facing surface reads the dict, so a field that
+            # stops here is a field no reader ever sees. That is precisely how
+            # `mechanism_evidence` went missing before it was serialised.
+            "near_misses": list(self.near_misses),
             "decision_implications": list(self.decision_implications),
             "observations": [o.as_dict() for o in self.observations],
             "source_class_coverage": self.source_class_coverage,

@@ -39,6 +39,133 @@ def _has_phrase(text: str, phrase: str) -> bool:
 def _any_phrase(text: str, phrases) -> bool:
     return any(_has_phrase(text, p) for p in phrases)
 
+
+# --- WHERE a signal was found, not merely THAT it was ------------------------
+#
+# THE DEFECT THIS EXISTS TO FIX. An observation is one document, and carries
+# every signal detected anywhere in it — HubSpot's 10-K carried eighteen. Its
+# `excerpt` is chosen ONCE for the whole document (the filing's best section,
+# or its opening), so it can be the right evidence for at most one of those
+# eighteen signals, and in practice for none of them.
+#
+# Measured live at bdbc0d0: `tool_to_system_of_record` qualified for HubSpot on
+# `system_of_record_claim`, which is genuinely there — the 10-K says "Our
+# customer platform includes a system of record for maintaining a unified view
+# of the customer experience". The reader was shown "We provide an agentic
+# customer platform that helps marketing, sales, and customer service teams
+# drive business growth", the document's first 400 characters, which says
+# nothing of the kind. The gate fired correctly and the explanation layer
+# showed the wrong four hundred characters.
+#
+# So a signal now carries the sentence that produced it. Evidence for a claim
+# is the text that caused the claim, or it is not evidence for that claim.
+_MAX_SPAN = 320
+#: How many occurrences of a phrase to test for ownership before giving up.
+#: See `owned_match`.
+_MAX_OCCURRENCES = 20
+
+
+def _sentence_around(text: str, start: int, end: int) -> str:
+    """The sentence containing a match, trimmed to something quotable."""
+    left = text.rfind(". ", 0, start)
+    left = 0 if left < 0 else left + 2
+    right = text.find(". ", end)
+    right = len(text) if right < 0 else right + 1
+    span = " ".join(text[left:right].split())
+    if len(span) > _MAX_SPAN:
+        # keep the match itself in view rather than truncating from the left
+        rel = start - left
+        head = max(0, rel - _MAX_SPAN // 2)
+        # ...and cut at word boundaries. Measured on the deployed Palantir
+        # result: the quote opened "…ong with ongoing O&M services", a
+        # half-word the reader has to decode before they can judge the
+        # evidence. A quotation is only checkable if it reads as language.
+        if head:
+            space = span.find(" ", head)
+            head = space + 1 if 0 <= space < head + 40 else head
+        tail = head + _MAX_SPAN
+        if tail < len(span):
+            space = span.rfind(" ", head, tail)
+            tail = space if space > head else tail
+        span = (("…" if head else "") + span[head:tail].strip()
+                + ("…" if tail < len(span) else ""))
+    return span
+
+
+def _foreign_match(text, match, company) -> bool:
+    """Whether this occurrence belongs to somebody other than the company."""
+    from intent_engine.strategic_intelligence import subject as SUBJ
+    # Scoped to the sentence, so a subject three sentences back cannot govern
+    # this clause. `filing_detectors` has matched sentence-scoped from the
+    # start for the same reason.
+    left = text.rfind(". ", 0, match.start())
+    left = 0 if left < 0 else left + 2
+    return SUBJ.subject_of(text[left:match.end()],
+                           match.start() - left, company) == SUBJ.FOREIGN
+
+
+def owned_match(text: str, phrases, company: str = ""):
+    """The first occurrence of any phrase that is NOT somebody else's.
+
+    REJECT FOREIGN RATHER THAN REQUIRE OWN, deliberately, and this is the one
+    place this cycle does not fail closed on `unknown`.
+
+    Marketing copy is largely subjectless — "Explore the suite", "One platform
+    for everything" — so requiring an explicit owner would silence most of
+    what a company publishes about itself and call it rigour. On a page the
+    company owns, an unattributed sentence is the company talking; that is
+    provenance, which the run already establishes, not proximity, which is
+    what this module exists to stop trusting.
+
+    A demonstrably foreign subject is different, and is always rejected.
+    """
+    for phrase in phrases:
+        # BOUNDED. When every occurrence is somebody else's, the loop would
+        # otherwise walk all of them — and a 10-K can repeat a phrase across
+        # hundreds of risk-factor sentences, which is precisely the document
+        # where the subject is most often foreign. A company that owns the
+        # claim states it early; twenty occurrences is a generous place to
+        # stop looking, and stopping there fails closed rather than open.
+        for n, match in enumerate(_phrase_pattern(phrase).finditer(text or "")):
+            if n >= _MAX_OCCURRENCES:
+                break
+            if not _foreign_match(text, match, company):
+                return match
+    return None
+
+
+def phrase_span(text: str, phrases, company: str = "") -> str:
+    """The first sentence in `text` that evidences one of `phrases`.
+
+    Skips occurrences owned by someone else: quoting a competitor's sentence
+    as this company's evidence is the defect this cycle removes.
+    """
+    match = owned_match(text, phrases, company)
+    return _sentence_around(text, match.start(), match.end()) if match else ""
+
+
+def signal_spans(text: str, signals=(), company: str = "") -> dict:
+    """signal -> the sentence in this document that evidenced it.
+
+    Only the keyword-driven vocabularies are resolvable this way; filing
+    propositions are matched by their own sentence-scoped rules and carry
+    their span through `filing_detectors`. A signal with no resolvable span is
+    ABSENT from this mapping rather than present-and-empty, so a caller can
+    tell "no evidence to show" from "evidence is the empty string".
+    """
+    text = text or ""
+    wanted = set(signals) if signals else None
+    spans = {}
+    for table in (_NEUTRAL_SIGNAL_KEYWORDS, _SIGNAL_KEYWORDS,
+                  _OUTSIDE_ONLY_PHRASES):
+        for signal, phrases in table.items():
+            if signal in spans or (wanted is not None and signal not in wanted):
+                continue
+            span = phrase_span(text, phrases, company)
+            if span:
+                spans[signal] = span
+    return spans
+
 # document source_type -> strategic source_class
 _SOURCE_CLASS = {
     "external_approved": "independent_reporting",
@@ -66,7 +193,15 @@ _SIGNAL_KEYWORDS = {
                                    "powering commerce", "infrastructure for "
                                    "commerce", "payments infrastructure",
                                    "commerce backbone", "commerce platform"),
-    "checkout_identity_rails": ("checkout", "shop pay", "shoppay",
+    # BARE "checkout" WAS REMOVED. Every commerce site has a checkout; the
+    # word says nothing about owning the rails underneath one, and it was one
+    # of the three signals that fired on Shopify from a single ordinary
+    # sentence. Same defect as bare "defence" in `regulated_buyer` and bare
+    # "system of record" in the mechanism set: the phrase has to carry the
+    # claim, not merely co-occur with the topic.
+    "checkout_identity_rails": ("one-click checkout", "checkout api",
+                                "hosted checkout", "checkout rails",
+                                "shop pay", "shoppay",
                                 "buyer identity", "payment rails",
                                 "one-click checkout", "digital wallet"),
     "agentic_commerce": ("ai agent", "agentic", "ai-mediated", "ai shopping",
@@ -199,14 +334,52 @@ _SIGNAL_RELEVANCE = {
                          "that dependence is hard to unwind",
     "services_motion": "so growth needs people as well as software, and "
                        "margin follows headcount",
+    "productization": "so what the engagements taught is being sold without "
+                      "them, which is the margin the transition is for",
     "pricing_published": "so competitors can price against it directly and "
                          "customers can compare without a conversation",
     "pricing_gated": "so price is set deal by deal, which protects margin and "
                      "slows the sales cycle",
     "regulated_buyer": "so compliance becomes a moat and a constraint at the "
                        "same time",
+    "gov_dedicated_delivery": "so part of the engineering budget is spent "
+                              "serving one buyer type that the commercial "
+                              "product does not benefit from",
+    "accreditation_gate": "so the authorization, not the product, decides "
+                          "when a deal may close",
+    "public_procurement_vehicle": "so the buying cycle is set by a budget "
+                                  "calendar rather than by the customer's "
+                                  "need",
+    "disclosed_public_sector_exposure": "so a shift in public budgets reaches "
+                                        "the revenue line directly",
+    "human_intervention_reduced": "so the labour it replaces is the thing "
+                                  "being sold, not the software",
+    "agent_executes_actions": "so the work leaves the person who used to "
+                              "do it, and the labour it replaces is the "
+                              "thing being sold",
+    "agent_callable_endpoint": "so demand can arrive without a human ever "
+                               "seeing the interface it used to arrive "
+                               "through",
+    "human_in_the_loop": "so the workflow has not actually changed hands",
+    "cross_product_coupling": "so the products stop being separable to a "
+                              "customer, and to anyone reading their "
+                              "performance apart",
+    "independently_operated": "so a weak business can be sold or closed "
+                              "without disturbing the others",
+    "third_party_builds_on": "so leaving means other people's work stops "
+                             "working, not just yours",
+    "external_operations_depend": "so the switching cost is an operational "
+                                  "migration for somebody else's business, "
+                                  "not a procurement decision",
     "consolidation": "so a customer who leaves later has to rebuild more than "
                      "one workflow to do it",
+    "system_of_record_claim": "so the data other systems trust now lives here, "
+                              "and leaving means moving the record itself",
+    "shared_data_model": "so the products stop being separable: the second one "
+                         "is worth more because the first already holds the "
+                         "data",
+    "replaces_incumbent_systems": "so the customer has already retired the "
+                                  "thing they would otherwise fall back to",
     "capacity_investment": "so the cost lands now while the payoff depends on "
                            "demand that has not arrived yet",
     "customer_concentration": "so a small number of buyers can move the whole "
@@ -292,10 +465,30 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
     # the company names more than one kind of buyer. Bare "segments" was
     # removed: it matched any sentence containing the word, including
     # "customer segments" in a marketing page.
-    "segment_split": ("government and commercial", "public and private sector",
-                      "enterprise and small", "consumer and business",
-                      "business units", "public sector",
-                      "commercial customers", "government customers"),
+    #
+    # TWO GROUPS, OR IT IS NOT A SPLIT. Half of this list used to name only
+    # ONE buyer — "public sector", "commercial customers", "government
+    # customers" — and one named none at all: "business units" is the
+    # company's own org chart, not who it sells to. The signal's own label is
+    # "serves more than one clearly different buyer", and the pattern that
+    # depends on it says it does not apply when "only one buyer group is ever
+    # described". Both were contradicted by the detector.
+    #
+    # Every phrase here is a PAIR. A company that only ever mentions the
+    # public sector is a company with one buyer, and the reading built on this
+    # signal — that the organisation is pulling apart to serve a second one —
+    # is not true of it.
+    "segment_split": ("government and commercial",
+                      "commercial and government",
+                      "public and private sector",
+                      "private and public sector",
+                      "enterprise and small", "small and enterprise",
+                      "enterprise and smb", "smb and enterprise",
+                      "consumer and business", "consumers and businesses",
+                      "startups and enterprises",
+                      "individuals and teams",
+                      "self-serve and enterprise",
+                      "developers and enterprises"),
     # specific named customers or deployments, not "trusted by thousands"
     "named_customers": ("case study", "case studies", "customer story",
                         "customer stories", "deployments include",
@@ -312,18 +505,102 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                         "professional services", "implementation team",
                         "on site with", "bespoke deployment",
                         "solutions engineering"),
+    # THE TRANSFER ITSELF, which is a different claim from having services.
+    # "services → product" is not "this company has a services page"; it is
+    # "what the engagements taught became something sold without them". Almost
+    # every large vendor has the first. Only some describe the second, and the
+    # phrases below are the ones that describe it rather than imply it.
+    #
+    # Measured: with `services_motion` alone required, the reading still
+    # dominated MongoDB, Cloudflare, HubSpot and Amazon, all of which publish
+    # professional-services pages and none of which claimed the transfer.
+    "productization": ("productize", "productized", "productise",
+                       "productised", "productizing",
+                       "what we learned delivering", "learned from delivering",
+                       "learned delivering", "codified into",
+                       "codify what", "packaged into a product",
+                       "packaged as a product", "now available as a product",
+                       "from bespoke to", "turned into a repeatable",
+                       "into a repeatable product", "repeatable offering",
+                       "reusable accelerators", "delivery accelerators",
+                       "reference implementations",
+                       "self-serve version of", "productized service"),
     # price is published vs gated
     "pricing_published": ("per seat", "per user", "starts at", "free plan",
                           "monthly price", "pricing page", "per month"),
     "pricing_gated": ("contact sales", "request a quote", "talk to sales",
                       "custom pricing", "quoted"),
-    # buyers in regulated or accredited environments
-    # Bare "compliance" and "regulated" were removed — every B2B page has a
-    # compliance footer; that is not a regulated BUYER.
-    "regulated_buyer": ("defence", "defense", "intelligence community",
-                        "accredited", "regulated industries",
-                        "regulated environments", "government systems",
-                        "public procurement", "fedramp"),
+    # buyers in regulated or accredited environments — the company SAYING it
+    # serves them. This is a marketing surface, and it is kept as one: it is
+    # context and it may colour a segment reading, but on its own it is not
+    # evidence that regulated buyers drive the business. For that see the
+    # mechanism signals below.
+    #
+    # Bare "compliance" and "regulated" were removed earlier — every B2B page
+    # has a compliance footer; that is not a regulated BUYER.
+    #
+    # Bare "defence"/"defense" were removed 2026-08-06 and MUST NOT COME BACK.
+    # Measured on HubSpot's live security page: "HubSpot uses a
+    # defense-in-depth approach to implement layers of security" — a security
+    # ARCHITECTURE phrase — matched `regulated_buyer` and was, with a
+    # case-studies page, most of the reason HubSpot and Snowflake were handed
+    # the same "dependence on regulated or public-sector buyers" conclusion.
+    # The buyer has to be named as a buyer.
+    "regulated_buyer": ("defence sector", "defense sector",
+                        "defence customers", "defense customers",
+                        "department of defense", "ministry of defence",
+                        "intelligence community", "accredited",
+                        "regulated industries", "regulated environments",
+                        "government systems", "public procurement",
+                        "government agencies", "public sector customers"),
+    # --- regulated-buyer CAUSAL MECHANISMS ------------------------------------
+    # Each of the four below is something a company only has if regulated or
+    # public-sector buyers actually shaped it: a place it had to build, an
+    # authorization it had to win, a way it had to be bought, or an exposure it
+    # had to disclose. A compliance badge, a security page or one case study
+    # produces none of them.
+    #
+    # They are separate signals rather than one, so the reading can say WHICH
+    # mechanism it read off — two companies that genuinely qualify then get two
+    # different sentences because they have two different mechanisms, not
+    # because the prose was varied.
+    #
+    # somewhere it had to build: a separate region/estate for these buyers
+    "gov_dedicated_delivery": ("govcloud", "government cloud", "gov cloud",
+                               "sovereign cloud", "sovereign region",
+                               "sovereign deployment", "dedicated government "
+                               "region", "public sector edition",
+                               "government community cloud", "air gapped",
+                               "in-country data residency"),
+    # something it had to win before it could sell: an authorization that
+    # gates the purchase. NOT a general assurance badge — SOC 2, ISO 27001,
+    # GDPR and HIPAA are deliberately absent, because every B2B vendor has
+    # them and they gate nothing.
+    "accreditation_gate": ("fedramp", "stateramp", "impact level", "il4",
+                           "il5", "il6", "cjis", "itar", "dod provisional",
+                           "provisional authorization",
+                           "authority to operate", "criminal justice "
+                           "information services"),
+    # a way it had to be bought: public procurement machinery
+    "public_procurement_vehicle": ("gsa schedule", "contract vehicle",
+                                   "procurement vehicle", "g-cloud",
+                                   "sewp", "idiq",
+                                   "blanket purchase agreement",
+                                   "framework agreement", "ccs framework"),
+    # an exposure it had to write down: materiality, in its own words.
+    # "government revenue" and "federal revenue" are here because reporting
+    # one as its own line IS the disclosure — a company does not separate a
+    # revenue line for a buyer type that does not matter to it. This is what
+    # Palantir's investor page says ("quarterly results separate United States
+    # government revenue from United States commercial revenue"), and it is a
+    # far better reason to reach a buyer-concentration reading than the word
+    # "defence" appearing on a product page.
+    "disclosed_public_sector_exposure": (
+        "government customers accounted", "public sector revenue",
+        "revenue from government", "government contracts represented",
+        "sales to government", "public sector segment revenue",
+        "depend on government contracts", "government appropriations",
+        "government revenue", "federal revenue", "government segment"),
     # explicit consolidation of previously separate tools. Bare "unified" was
     # removed: it is one of the most common words in corporate English, and on
     # its own it produced "absorbing adjacent tools until the work lives inside
@@ -332,6 +609,168 @@ _NEUTRAL_SIGNAL_KEYWORDS = {
                       "all in one", "connected workspace", "one place",
                       "unified platform", "unified suite",
                       "single source of truth"),
+    # --- human-to-agent-workflow CAUSAL MECHANISMS ----------------------------
+    #
+    # THE HIGHEST-FREQUENCY UNGATED READING IN THE LIBRARY. Live it fired for
+    # Amazon, HubSpot, Shopify and Stripe, all with the identical sentence.
+    # Reproduced from one line: the bare word "agentic" plus "marketplace"
+    # qualifies it. "Agentic" is a 2025-26 marketing word every commerce and
+    # SaaS company now prints; "marketplace" is a distribution noun.
+    #
+    # `when_it_applies` names three clauses and the first is "ships agent/
+    # AI-commerce ENDPOINTS". Nothing measured that. `when_it_does_not_apply`
+    # says the reading fails where "buying remains human-driven … with no
+    # agent endpoints".
+    #
+    # An AI feature is a capability. A workflow a human used to run being
+    # executed by software that acts is the transition — which is what moves
+    # where demand is captured.
+    #
+    # DIRECTIONAL. "assistant", "copilot" and "agentic" are absent by design:
+    # drafting and suggesting leave the human doing the work.
+    "agent_executes_actions": ("acts on your behalf", "act on your behalf",
+                               "agents complete", "agent completes",
+                               "agents place orders", "agent places orders",
+                               "agents purchase", "completes the purchase",
+                               "executes the workflow", "agents execute"),
+    # THE OTHER HALF OF THE SAME TRANSITION: the human stops doing it.
+    #
+    # Split out after measuring recall at 0.60. Folded into
+    # `agent_executes_actions` these phrases produced ONE signal, so a genuine
+    # description ("agents execute the workflow with no human intervention")
+    # still needed a generic commerce attribute to clear the threshold — the
+    # mechanism was not sufficient on its own, which is backwards. Two
+    # mechanism signals mean a real description qualifies on mechanism alone
+    # and marketing vocabulary still cannot.
+    "human_intervention_reduced": ("without human intervention",
+                                   "no human intervention", "unattended",
+                                   "hands-off", "zero touch",
+                                   "end-to-end autonomously",
+                                   "runs autonomously", "fully autonomous"),
+    # A surface built for a machine caller rather than a person. This is the
+    # clause `when_it_applies` already required and nothing measured.
+    "agent_callable_endpoint": ("agentic checkout", "agent api",
+                                "agent-ready", "agent ready",
+                                "for ai agents to", "machine-readable checkout",
+                                "mcp server", "agent toolkit",
+                                "agent protocol"),
+    # The stated counter-case: the human is still doing it.
+    "human_in_the_loop": ("requires your approval", "requires human approval",
+                          "you review and approve", "human review is required",
+                          "review before it is sent",
+                          "recommends rather than", "suggests rather than",
+                          "always keeps a human in the loop"),
+    # --- portfolio-run-as-one CAUSAL MECHANISM --------------------------------
+    #
+    # `portfolio_run_as_one.when_it_applies` requires the company to report
+    # several segments AND to describe "owning both the content or product and
+    # the channel that distributes it" — a COUPLING. The gate was any two of
+    # `segment_reporting`, `content_and_channel` and `multi_product`, so
+    # "operating segments" plus "our product portfolio" was enough, and that
+    # is every multi-product filer. Measured live: HubSpot, Microsoft and
+    # Stripe all received it, the highest live frequency of any ungated
+    # pattern with no disconfirmers.
+    #
+    # `content_and_channel` already carries the coupling for a media-shaped
+    # company (owned titles plus the box they play on). This is the same
+    # coupling for a software-shaped one: the businesses are run as one
+    # because they share the machinery a customer actually touches.
+    "cross_product_coupling": ("cross-product", "across our products",
+                               "one account across", "single sign-on across",
+                               "unified billing", "common billing",
+                               "one contract across", "shared services across",
+                               "bundled across", "adopt more than one of our"),
+    # THE DISCONFIRMER THE PATTERN ALREADY DESCRIBED AND NEVER DECLARED.
+    # `when_it_does_not_apply` says "segments are unrelated holdings with no
+    # described operational connection" — the Constellation Software shape.
+    # A company that says its businesses are run separately is telling you the
+    # coupling is absent.
+    "independently_operated": ("operates independently",
+                               "operate independently",
+                               "standalone businesses", "separately managed",
+                               "autonomous business units",
+                               "decentralised operating model",
+                               "decentralized operating model",
+                               "run as separate businesses"),
+    # --- product-to-platform CAUSAL MECHANISMS --------------------------------
+    #
+    # THE PATTERN NAMED ITS OWN MECHANISM AND HAD NO SIGNAL FOR IT.
+    # `product_to_platform.when_it_applies` requires three things: the company
+    # frames itself as infrastructure, it owns payment/identity rails, AND
+    # "third parties increasingly build on it". `when_it_does_not_apply` says
+    # it does not hold when "there is no third-party build-on ecosystem".
+    # There was no signal for third-party dependence anywhere in the
+    # qualifying set, so the reading could fire with none of it.
+    #
+    # Measured live at 037f805 on Shopify, and reproducible from one ordinary
+    # sentence: "commerce platform" + "checkout" + "one platform for" lights
+    # three of the four qualifying signals against a threshold of two. Every
+    # commerce company with a checkout and a platform claim was told it is
+    # "repositioning toward operating the payment, identity, data and
+    # distribution rails its market runs on".
+    #
+    # An app store is a thing a company HAS. Outsiders whose own operations
+    # stop working without you is the mechanism. These two signals are the
+    # difference, and both are DIRECTIONAL: "build on our" cannot match "we
+    # build on AWS", which is the same relationship pointing the other way.
+    # Third-person forms are safe HERE and would not have been a cycle ago:
+    # `subject.py` now rejects an occurrence whose nearest governing subject
+    # is a rival, so "extend the platform" cannot be harvested from a sentence
+    # about a competitor's ecosystem. The possessive-only list missed the
+    # commonest phrasing — Shopify's own fixture says "merchants extend the
+    # platform", which is precisely the mechanism.
+    "third_party_builds_on": ("build on our", "built on our", "builds on our",
+                              "building on our", "developers build on",
+                              "partners build on", "apps built on",
+                              "integrations built on", "extend our platform",
+                              "extend the platform", "extends the platform",
+                              "build on the platform",
+                              "built on the platform"),
+    # Not "they integrate with us" — an integration is switchable by
+    # reconnecting it. This is the customer's own operation running on top.
+    "external_operations_depend": ("run their business on",
+                                   "run their businesses on",
+                                   "power their business",
+                                   "powers their business",
+                                   "businesses run on", "merchants run on",
+                                   "depend on our platform",
+                                   "rely on our platform",
+                                   "rely on our infrastructure",
+                                   "depend on our infrastructure"),
+    # --- tool-to-system-of-record CAUSAL MECHANISMS ---------------------------
+    # `consolidation` is what a company SAYS; `multi_product` and
+    # `developer_surface` are things almost every B2B software company HAS.
+    # The pattern's own mechanism is that the customer's source of truth moves
+    # and switching cost rises once other systems read from it — and none of
+    # those three establishes that. Measured live at dad7d28: Palantir,
+    # HubSpot and Snowflake each qualified on multi_product + developer_surface
+    # and were handed the same secondary sentence, name-substituted.
+    #
+    # Each of the three below is something a company only has if the record
+    # really is moving into it.
+    # DIRECTIONAL PHRASES ONLY. Bare "system of record" and "system of truth"
+    # were tried and removed the same day: they match the sentence that says
+    # the record lives SOMEWHERE ELSE. "We integrate with your existing tools;
+    # two-way sync keeps your system of truth wherever it already lives" is
+    # the exact opposite of this mechanism and matched it. A keyword cannot
+    # read negation, so the phrase itself has to carry the direction — the
+    # same reason bare "defence" is banned from `regulated_buyer` above.
+    "system_of_record_claim": ("system of record for", "the system of record",
+                               "becomes your system of record",
+                               "source of truth for your",
+                               "authoritative record", "golden record"),
+    # the thing that actually creates the lock-in: not several products, but
+    # several products over ONE model of the customer's data.
+    "shared_data_model": ("shared data model", "common data model",
+                          "unified data model", "single data model",
+                          "one data layer", "shared schema",
+                          "same underlying data"),
+    # the customer had a system and stopped using it. "Integrates with" is
+    # deliberately absent — integration is the opposite of replacement.
+    "replaces_incumbent_systems": ("replace your existing", "migrate off",
+                                   "rip and replace", "retire legacy",
+                                   "consolidate your stack", "sunset your",
+                                   "move off spreadsheets"),
     # --- shapes that only a company with physical or disclosed operations
     # exhibits. Added because the neutral set above is a SOFTWARE-shaped
     # neutral set: it reads pricing pages, developer surfaces and workspace
@@ -380,10 +819,33 @@ _NEUTRAL_LABEL = {
     "named_customers": "publishes named customers rather than logos alone",
     "developer_surface": "exposes a surface others can build on",
     "services_motion": "delivers through people, not only through software",
+    "productization": "describes turning delivered work into something sold on its own",
     "pricing_published": "publishes its prices",
     "pricing_gated": "keeps pricing behind a sales conversation",
     "regulated_buyer": "sells into regulated or accredited environments",
+    "gov_dedicated_delivery": "runs a separate estate built for government or "
+                              "sovereign deployment",
+    "accreditation_gate": "holds an authorization that public buyers require "
+                          "before they may purchase",
+    "public_procurement_vehicle": "is bought through public procurement "
+                                  "machinery rather than ordinary sales",
+    "disclosed_public_sector_exposure": "has written down what public-sector "
+                                        "buyers contribute",
     "consolidation": "positions itself as replacing several separate tools",
+    "agent_executes_actions": "describes software acting rather than suggesting",
+    "human_intervention_reduced": "describes the workflow running without a person",
+    "agent_callable_endpoint": "ships a surface built for a machine caller",
+    "human_in_the_loop": "keeps a person in every step of the workflow",
+    "cross_product_coupling": "runs its products over shared identity, billing or contracts",
+    "independently_operated": "says its businesses are run separately from one another",
+    "third_party_builds_on": "has outside organisations building on it",
+    "external_operations_depend": "has customers running their own operations on it",
+    "system_of_record_claim": "claims to hold the authoritative record, not a "
+                              "copy of it",
+    "shared_data_model": "runs its products over one model of the customer's "
+                         "data",
+    "replaces_incumbent_systems": "describes customers retiring a system they "
+                                  "already had",
     "capacity_investment": "is committing capital to capacity ahead of the "
                            "demand for it",
     "customer_concentration": "has written down a dependence on a few buyers",
@@ -411,26 +873,58 @@ _OUTSIDE_ONLY_PHRASES = {
     "merchant_outcome_positioning": ("helped us grow", "grew our sales",
                                      "increased our revenue"),
 }
-_OUTSIDE_VANTAGE_CLASSES = frozenset(
-    {"customer_voice", "independent_reporting", "competitor"})
+from intent_engine.strategic_intelligence import filing_detectors as FD
+from intent_engine.strategic_intelligence import filing_sections as FS
 
 
-def _detect_neutral_signals(text: str) -> list:
+def FD_looks_like_filing(text: str) -> bool:
+    return FS.looks_like_filing(text)
+from intent_engine.strategic_intelligence.evidence_classes import (
+    INDEPENDENT_CLASSES as _INDEPENDENT_CLASSES,
+)
+
+_OUTSIDE_VANTAGE_CLASSES = frozenset(_INDEPENDENT_CLASSES)
+
+
+def _detect_neutral_signals(text: str, company: str = "") -> list:
+    """Signals this document evidences ABOUT THIS COMPANY.
+
+    Was `_any_phrase(text, phrases)` — does the phrase appear anywhere in the
+    document — which infers ownership from proximity and nothing else.
+    Measured live at `037f805`: Microsoft was told it "serves two clearly
+    different buyer groups" on the strength of "Our competitors are ...
+    deploying competing cloud-based services for consumers and businesses".
+    The phrase is there; the buyers are the competitors'.
+
+    A signal now needs at least one occurrence that is not demonstrably
+    somebody else's. See `owned_match` for why the test rejects foreign
+    subjects rather than requiring explicit ownership.
+    """
     return [sig for sig, phrases in _NEUTRAL_SIGNAL_KEYWORDS.items()
-            if _any_phrase(text or "", phrases)]
+            if owned_match(text or "", phrases, company) is not None]
 
 
-def _detect_signals(text: str, source_class: str = "company_owned") -> list:
+def _detect_signals(text: str, source_class: str = "company_owned",
+                    company: str = "") -> list:
     """Domain signals when the document is in that domain, plus the neutral
     set always. A company outside every domain library still has a strategy."""
     text = text or ""
-    signals = list(_detect_neutral_signals(text))
+    signals = list(_detect_neutral_signals(text, company))
+    # FILINGS ARE THEIR OWN DOMAIN. The commerce library never matches a
+    # 10-K from a company that does not sell commerce software, so a filing
+    # contributed nothing even after section extraction found its prose.
+    # Source-specific detection, same canonical observation -- NOT a wider
+    # global vocabulary, and NOT an admission bypass: every filing rule needs
+    # a stated mechanism, so descriptive prose still fails closed.
+    if FD_looks_like_filing(text):
+        signals += [s_ for s_ in FD.detect(text) if s_ not in signals]
     if in_commerce_domain(text):
         signals += [sig for sig, phrases in _SIGNAL_KEYWORDS.items()
-                    if _any_phrase(text, phrases)]
+                    if owned_match(text, phrases, company) is not None]
         if source_class in _OUTSIDE_VANTAGE_CLASSES:
             signals += [sig for sig, phrases in _OUTSIDE_ONLY_PHRASES.items()
-                        if sig not in signals and _any_phrase(text, phrases)]
+                        if sig not in signals
+                        and owned_match(text, phrases, company) is not None]
     return signals
 
 
@@ -517,7 +1011,7 @@ def _is_weak(excerpt: str, title: str, signals: list) -> bool:
 MIN_ANALYST_EXCERPT_CHARS = 120
 
 
-def derive_analyst_evidence(documents) -> list:
+def derive_analyst_evidence(documents, company: str = "") -> list:
     """Evidence for the grounded analyst -- every strategic page, signal or not.
 
     `derive_observations` below requires a controlled-vocabulary signal match,
@@ -553,6 +1047,24 @@ def derive_analyst_evidence(documents) -> list:
             continue
 
         body = (doc.get("text_content") or "").strip()
+        # AN INDEPENDENT SOURCE STILL HAS TO SAY SOMETHING.
+        #
+        # Measured on the eighteen third-party filings this product accepts:
+        # seventeen were not statements about the subject at all -- executive
+        # compensation peer groups, XBRL taxonomy fragments, director
+        # biographies, forward-looking boilerplate. They raised the
+        # independence COUNT and taught the analyst nothing.
+        #
+        # Only third-party sources are screened. Company-owned pages are the
+        # company describing itself and are expected to; the question there is
+        # never "is this about the company".
+        if (doc.get("source_class") or "") == "competitor":
+            from intent_engine.strategic_intelligence.claim_relevance import (
+                assess,
+            )
+            verdict = assess(text=body, company_name=company or "")
+            if not verdict.usable_as_support:
+                continue
         excerpt = (body or doc.get("meta_description") or "").strip()
         if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
             continue
@@ -561,7 +1073,7 @@ def derive_analyst_evidence(documents) -> list:
             doc.get("source_type"), "company_owned")
         text = " ".join(filter(None, [
             title, doc.get("meta_description", ""), body]))
-        signals = _detect_signals(text, source_class)
+        signals = _detect_signals(text, source_class, company)
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0] if signals else ""
         entity = (title or norm).split("—")[0].strip()[:80]
@@ -652,12 +1164,51 @@ def derive_observations(documents, *, company: str = "") -> list:
             doc.get("text_content", "")]))
         source_class = doc.get("source_class") or _SOURCE_CLASS.get(
             doc.get("source_type"), "company_owned")
-        signals = _detect_signals(text, source_class)
+        signals = _detect_signals(text, source_class, company)
         if not signals:
             continue
         otype = _TYPE_FOR_SIGNAL.get(signals[0], "messaging")
-        excerpt = (doc.get("meta_description")
-                   or doc.get("text_content", "")[:280]).strip()
+        # A FILING IS NOT READ FROM ITS FIRST 280 CHARACTERS. For a web page
+        # that is the summary; for a 10-K it is the cover page -- form title,
+        # filing-status checkboxes, state of incorporation, IRS number. That
+        # is why a run which retrieved Datadog's annual report produced no
+        # filing-derived observation, and why "What was verified" fell back to
+        # blog marketing once the cover page was filtered out.
+        #
+        # Section-aware selection is tried FIRST and falls back silently, so a
+        # malformed or unrecognised filing keeps the old behaviour rather than
+        # losing its observation.
+        body_text = doc.get("text_content", "") or ""
+        excerpt, section = "", ""
+        is_filing = FS.looks_like_filing(body_text, doc.get("final_url", ""))
+        # A FILING BY SOMEONE ELSE IS READ FOR WHAT IT SAYS ABOUT US.
+        #
+        # `third_party_filings` retrieves filings by other registrants that
+        # name the subject, which is the only independent vantage most runs
+        # get. Selecting the excerpt the same way as for the subject's own
+        # filing gives the FILER's description of ITSELF: measured live on
+        # Stripe, "Infinite Group is a developer of cybersecurity software"
+        # was presented as evidence about Stripe.
+        #
+        # Fails closed. A third-party filing whose usable prose never names
+        # the subject is not evidence about the subject, and the document is
+        # dropped rather than shown with someone else's business description.
+        if is_filing and doc.get("source_class") == "competitor":
+            excerpt = FS.subject_span(body_text, company)
+            if not excerpt:
+                continue
+            section = "the passage naming this company"
+        elif is_filing:
+            # The form decides which Item carries MD&A: 7 in an annual report,
+            # 2 in a quarterly one. The parser already established it, so this
+            # never has to be guessed from the text.
+            excerpt, section = FS.best_excerpt(
+                body_text, form=(doc.get("filing") or {}).get("form", ""))
+        if not excerpt:
+            excerpt = (doc.get("meta_description")
+                       or body_text[:280]).strip()
+        else:
+            excerpt = excerpt.strip()
         weak = _is_weak(excerpt, title, signals)
         dominant = signals[0]
         entity = (title or norm).split("—")[0].strip()[:80]
@@ -688,6 +1239,12 @@ def derive_observations(documents, *, company: str = "") -> list:
             signals=tuple(signals),
             source_class=source_class,
             excerpt=excerpt[:400],
+            # Resolved against the SAME text detection ran on, so a span is
+            # the actual sentence that produced the signal rather than a
+            # second, looser search. `text` is the detection input; for a
+            # filing that is the extracted body, which is where the phrase
+            # was found.
+            signal_spans=signal_spans(text, signals, company),
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],
@@ -703,14 +1260,37 @@ def derive_observations(documents, *, company: str = "") -> list:
 # so nothing downstream needs to know there are two libraries.
 _SIGNAL_KEYWORDS.update(_NEUTRAL_SIGNAL_KEYWORDS)
 _SIGNAL_LABEL.update(_NEUTRAL_LABEL)
+# Filing propositions carry their own label and observation type, so the
+# taxonomy stays the single source of truth for both.
+_SIGNAL_LABEL.update({k: v["label"] for k, v in FD.PROPOSITIONS.items()})
+_TYPE_FOR_SIGNAL.update({k: v["type"] for k, v in FD.PROPOSITIONS.items()})
+# A signal with no stated consequence produces a bullet that restates itself
+# and stops, so the taxonomy carries the consequence too.
+_SIGNAL_RELEVANCE.update({k: v["relevance"] for k, v in FD.PROPOSITIONS.items()})
 _TYPE_FOR_SIGNAL.update({
     "multi_product": "product_surface",
     "consolidation": "product_surface",
+    "agent_executes_actions": "product_surface",
+    "human_intervention_reduced": "product_surface",
+    "agent_callable_endpoint": "infrastructure_platform",
+    "human_in_the_loop": "product_surface",
+    "cross_product_coupling": "product_surface",
+    "independently_operated": "product_surface",
+    "third_party_builds_on": "infrastructure_platform",
+    "external_operations_depend": "infrastructure_platform",
+    "system_of_record_claim": "product_surface",
+    "shared_data_model": "infrastructure_platform",
+    "replaces_incumbent_systems": "product_surface",
     "developer_surface": "infrastructure_platform",
     "segment_split": "buyer_segment",
     "regulated_buyer": "buyer_segment",
+    "gov_dedicated_delivery": "buyer_segment",
+    "accreditation_gate": "buyer_segment",
+    "public_procurement_vehicle": "buyer_segment",
+    "disclosed_public_sector_exposure": "buyer_segment",
     "named_customers": "monetization_ecosystem",
     "services_motion": "messaging",
+    "productization": "messaging",
     "pricing_published": "messaging",
     "pricing_gated": "buyer_segment",
 })

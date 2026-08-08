@@ -42,6 +42,11 @@ SIGNAL_VOCABULARY = (
     "multi_product", "segment_split", "named_customers", "developer_surface",
     "services_motion", "pricing_published", "pricing_gated",
     "regulated_buyer", "consolidation",
+    # regulated-buyer CAUSAL mechanisms. `regulated_buyer` is what a company
+    # SAYS; these are what it had to build, win, be bought through, or
+    # disclose. Only these may carry a buyer-concentration reading.
+    "gov_dedicated_delivery", "accreditation_gate",
+    "public_procurement_vehicle", "disclosed_public_sector_exposure",
     # shapes a company with physical operations or formal disclosure exhibits.
     # The neutral set above is software-shaped; without these a manufacturer's
     # evidence matched one signal and produced no hypothesis.
@@ -91,8 +96,46 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="high",
         qualifying_signals=("infrastructure_positioning", "checkout_identity_rails",
-                            "product_breadth", "platform_control"),
+                            "product_breadth", "platform_control",
+                            "third_party_builds_on",
+                            "external_operations_depend"),
+        # THE PATTERN ALREADY REQUIRED THIS IN PROSE AND HAD NO SIGNAL FOR IT.
+        #
+        # `when_it_applies` names three conditions and the third is "third
+        # parties increasingly build on it"; `when_it_does_not_apply` rules the
+        # reading out when "there is no third-party build-on ecosystem".
+        # Nothing in the qualifying set measured that, so the gate was two of
+        # four attributes — and `product_breadth` is itself listed under
+        # when_it_does_not_apply as the thing this pattern is NOT.
+        #
+        # Measured live at 037f805 on Shopify, reproducible from a single
+        # ordinary sentence: "commerce platform" + "checkout" + "one platform
+        # for" lights three of four against a threshold of two. Every commerce
+        # company with a checkout was told it operates the rails its market
+        # runs on.
+        #
+        # Owning rails is a capability. Outsiders whose own operations stop
+        # working without you is the transition, and it is what raises the
+        # switching cost this reading trades on.
+        required_any_signals=("third_party_builds_on",
+                              "external_operations_depend"),
         disconfirming_signals=("storefront_creation", "smb_simplicity"),
+        # NO BLOCKER, DELIBERATELY, AND IT WAS TRIED.
+        #
+        # `blocking_signals=("smb_simplicity",)` looked right — a company
+        # independently reported as a simple tool for small merchants should
+        # not lead with "operating the rails its market runs on". Measured, it
+        # demoted Shopify's most accurate reading and broke two tests: the
+        # brief and the executive document opened on different theses, and a
+        # counter-observation was printed twice.
+        #
+        # It is the same mistake `test_blocking_is_declared_per_pattern_never_
+        # applied_globally` already records at global scope: the lead reading
+        # is SUPPOSED to carry counter-evidence, because one nobody has argued
+        # with is one nobody has tested. Simplicity for small merchants and
+        # infrastructure for large ones are not mutually exclusive — Shopify
+        # is both — so this argues with the reading rather than displacing it,
+        # which is what `disconfirming_signals` is for.
         limitations="Infrastructure framing in marketing can precede real "
                     "infrastructure ownership; language alone is not proof of "
                     "the transition.",
@@ -154,8 +197,32 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("agentic_commerce", "distribution_shift",
-                            "checkout_identity_rails"),
-        disconfirming_signals=("storefront_creation",),
+                            "checkout_identity_rails",
+                            "agent_executes_actions",
+                            "agent_callable_endpoint",
+                            "human_intervention_reduced"),
+        # THE HIGHEST-FREQUENCY UNGATED READING IN THE LIBRARY, and the one
+        # with the least behind it. Live it fired for Amazon, HubSpot, Shopify
+        # and Stripe with the identical sentence; reproduced from one line,
+        # the bare word "agentic" plus "marketplace" was enough.
+        #
+        # `when_it_applies` names three clauses and the first is "ships
+        # agent/AI-commerce ENDPOINTS". Nothing measured it.
+        # `when_it_does_not_apply` says the reading fails where "buying
+        # remains human-driven ... with no agent endpoints".
+        #
+        # An AI feature is a capability. A workflow a human used to run being
+        # executed by software that ACTS is the transition — and it is what
+        # moves where demand is captured, which is the consequence this
+        # reading draws.
+        required_any_signals=("agent_executes_actions",
+                              "agent_callable_endpoint",
+                              "human_intervention_reduced"),
+        # The stated counter-case, which the pattern described and never
+        # declared: if a person approves every step, the workflow has not
+        # changed hands. Not a blocker — a company can ship both a supervised
+        # assistant and an autonomous endpoint.
+        disconfirming_signals=("storefront_creation", "human_in_the_loop"),
         limitations="Agentic-commerce timing is uncertain; announcements can "
                     "outrun real buyer behaviour by years.",
     ),
@@ -287,8 +354,23 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("services_motion", "multi_product",
-                            "developer_surface"),
+                            "developer_surface", "productization"),
+        # BOTH HALVES, OR IT IS NOT THIS READING.
+        #
+        # `services_motion` alone was not enough. Almost every large vendor
+        # publishes a professional-services or implementation page, so
+        # requiring it removed the reading from Visa and left it dominating
+        # MongoDB, Cloudflare, HubSpot and Amazon — none of which claim that
+        # engagements taught them something they now sell without the
+        # engagement. That claim is `productization`, and it is the mechanism
+        # the pattern is named for. Having services is a fact about delivery;
+        # the transition is a fact about where the margin is going.
+        required_signals=("services_motion", "productization"),
+        # Published self-serve pricing is the plainest evidence that the
+        # product is already sold without the engagement. It now costs the
+        # reading its PLACE as well as its confidence — see `_demote_contested`.
         disconfirming_signals=("pricing_published",),
+        blocking_signals=("pricing_published",),
         limitations="Public pages rarely disclose the revenue mix, so the "
                     "balance between services and product is not observable "
                     "from outside.",
@@ -320,8 +402,28 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("segment_split", "regulated_buyer",
-                            "pricing_gated"),
-        disconfirming_signals=(),
+                            "pricing_gated", "smb_simplicity"),
+        # THE SUBJECT WAS OPTIONAL. This qualified on any two of
+        # `segment_split`, `regulated_buyer` and `pricing_gated`, so
+        # `regulated_buyer + pricing_gated` was sufficient — "we serve
+        # regulated industries" plus "contact sales for pricing", which
+        # describes a very large share of enterprise software and names no
+        # second buyer at all. Measured on ordinary enterprise-vendor copy
+        # after the system-of-record repair, it was the ONLY ungated pattern
+        # that still asserted itself on generic text.
+        #
+        # `when_it_applies` already said what is required — "the company names
+        # two clearly different buyer groups" — and `segment_split` is exactly
+        # that signal. It is now required rather than one of three ways to
+        # reach a threshold, which makes the gate a restatement of the
+        # pattern's own declared applicability rather than a new rule.
+        required_signals=("segment_split",),
+        # Outside evidence that the product is still chosen by one kind of
+        # buyer, for the reason that buyer chooses it. Independent-vantage
+        # only (see `_OUTSIDE_ONLY_PHRASES`): the company saying it is simple
+        # is marketing, reviewers saying customers stay for the simplicity is
+        # evidence about who the buyer actually is.
+        disconfirming_signals=("smb_simplicity",),
         limitations="Segment language on marketing pages often runs ahead of "
                     "actual revenue mix.",
     ),
@@ -344,16 +446,42 @@ PATTERN_LIBRARY = [
                      "and reviewed",
              "source": "https://www.figma.com/blog/"},
         ],
-        when_it_applies="The company positions itself as replacing several "
-                        "separate tools AND ships multiple product surfaces.",
-        when_it_does_not_apply="The product stays deliberately narrow and "
-                               "integrates rather than absorbs.",
+        when_it_applies="The company shows a CAUSAL mechanism moving the "
+                        "customer's record into it — an authoritative-record "
+                        "claim, one data model beneath several products, or "
+                        "customers retiring a system they already had.",
+        when_it_does_not_apply="The breadth is a product list. Several "
+                               "products, an API and consolidation copy are "
+                               "things almost every B2B software company has, "
+                               "and none of them says the source of truth "
+                               "moved. Also: the product integrates rather "
+                               "than absorbs, or its economics are self-serve "
+                               "point-tool economics.",
         source_refs=[{"title": "curated pattern: tool→system of record",
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("consolidation", "multi_product",
-                            "developer_surface"),
-        disconfirming_signals=(),
+                            "developer_surface", "system_of_record_claim",
+                            "shared_data_model",
+                            "replaces_incumbent_systems"),
+        # THE MECHANISM, NOT THE ATTRIBUTES. This reading was gated only by
+        # "any 2 of consolidation / multi_product / developer_surface", and the
+        # last two are true of nearly every B2B software company — so it fired
+        # on being a platform at all. Measured live at dad7d28: Palantir,
+        # HubSpot and Snowflake each qualified that way and were handed the
+        # same sentence with only the name changed.
+        #
+        # The pattern's own `mechanism` field says the customer's source of
+        # truth moves and switching cost rises once other systems read from
+        # it. These are the three ways that can be evidenced, and a run
+        # showing none of them no longer gets to assert it.
+        required_any_signals=("system_of_record_claim", "shared_data_model",
+                              "replaces_incumbent_systems"),
+        # Published self-serve pricing argues against the switching cost this
+        # reading depends on: a record you can leave on a monthly plan is not
+        # the record the mechanism describes. Secondary, not blocking — a
+        # company can publish prices and still hold the record.
+        disconfirming_signals=("pricing_published",),
         limitations="Consolidation claims are marketing language; whether the "
                     "source of truth actually moved is not visible publicly.",
     ),
@@ -374,15 +502,27 @@ PATTERN_LIBRARY = [
              "note": "growth tracked appropriation cycles rather than product",
              "source": "https://www.gao.gov/"},
         ],
-        when_it_applies="Regulated or government buyers are named prominently "
-                        "AND the company describes distinct segments.",
-        when_it_does_not_apply="Buyers are diversified across many unrelated "
-                               "industries with no regulated concentration.",
+        when_it_applies="The company shows a CAUSAL mechanism tying it to "
+                        "regulated or public-sector buyers — a dedicated "
+                        "government estate, an accreditation that gates the "
+                        "purchase, a procurement vehicle, or a disclosed "
+                        "exposure.",
+        when_it_does_not_apply="The only evidence is compliance badges, a "
+                               "security page, one case study or 'serves "
+                               "regulated industries' copy; or buyers are "
+                               "diversified with no regulated concentration.",
         source_refs=[{"title": "curated pattern: buyer concentration",
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("regulated_buyer", "segment_split",
-                            "named_customers"),
+                            "named_customers", "gov_dedicated_delivery",
+                            "accreditation_gate", "public_procurement_vehicle",
+                            "disclosed_public_sector_exposure"),
+        # Vocabulary is not a mechanism. Without one of these, this reading
+        # fired on a compliance footer — see `required_any_signals`.
+        required_any_signals=("gov_dedicated_delivery", "accreditation_gate",
+                              "public_procurement_vehicle",
+                              "disclosed_public_sector_exposure"),
         disconfirming_signals=("pricing_published",),
         limitations="Without disclosed revenue by segment, concentration is "
                     "inferred from emphasis, which can mislead.",
@@ -454,13 +594,67 @@ PATTERN_LIBRARY = [
                       "origin": "strategic_pattern_library"}],
         confidence="moderate",
         qualifying_signals=("segment_reporting", "content_and_channel",
-                            "multi_product"),
-        disconfirming_signals=(),
+                            "multi_product", "cross_product_coupling",
+                            "shared_data_model", "independently_operated"),
+        # THE COUPLING IS THE PATTERN, AND ANY TWO OF THREE DID NOT NEED IT.
+        #
+        # `when_it_applies` requires several segments AND "owning both the
+        # content or product and the channel that distributes it". The gate
+        # was any two of `segment_reporting`, `content_and_channel` and
+        # `multi_product`, so "operating segments" plus "our product
+        # portfolio" qualified — which is every multi-product filer.
+        #
+        # Measured live: HubSpot, Microsoft and Stripe all received this
+        # reading, the highest live frequency of any ungated pattern that
+        # declared no disconfirmers. On shaped corpora it fires on ordinary
+        # multi-product-suite copy.
+        #
+        # Three ways the coupling can be evidenced. `content_and_channel` is
+        # the media shape the mechanism was written from (owned titles plus
+        # the box they play on); the other two are the same coupling in a
+        # software company — shared identity/billing/contracts, or one data
+        # model beneath the products. Reporting segments and listing products
+        # are what a company DISCLOSES; the coupling is what makes them one
+        # business.
+        required_any_signals=("content_and_channel", "cross_product_coupling",
+                              "shared_data_model"),
+        # THE SUBJECT HALF, ADDED AFTER THE FIRST DEPLOY OF THIS GATE.
+        #
+        # `when_it_applies` is a conjunction: several segments AND the
+        # coupling. Requiring only the coupling qualified Datadog live — it
+        # genuinely runs "a common data model" across its products, but it
+        # reports ONE segment, so "reports distinct segments while describing
+        # them as one connected portfolio" is not true of it and neither is
+        # the consequence the statement draws ("hard to read any single
+        # business from outside"). Microsoft, which does both, is unaffected:
+        # its evidence is "first-party content performance" against reported
+        # segment results.
+        #
+        # A coupling without separate disclosure is a well-built product, not
+        # a portfolio being run as one.
+        required_signals=("segment_reporting",),
+        # The disconfirmer the pattern already described in prose and never
+        # declared: "segments are unrelated holdings with no described
+        # operational connection". A company that says its businesses are run
+        # separately is telling you the coupling is absent. Not a blocker —
+        # a decentralised operator can still cross-subsidise, and this argues
+        # with the reading rather than excluding it.
+        disconfirming_signals=("independently_operated",),
         limitations="Transfers between segments are not disclosed publicly, "
                     "so which business subsidises which is inferred from "
                     "structure rather than observed.",
     ),
 ]
+
+#: A statement placeholder no caller has filled renders as a hole in the page,
+#: and a caller that does not know a placeholder exists raises KeyError at
+#: composition time. Both were live risks the moment `{mechanism}` was added:
+#: production filled it and a second caller did not. So the substitution lives
+#: HERE, once, beside the scaffolds that declare the placeholders.
+def statement_for(scaffold: dict, *, company: str, mechanism: str = "") -> str:
+    """Fill a scaffold's statement. The only place a statement is formatted."""
+    return scaffold["statement"].format(company=company, mechanism=mechanism)
+
 
 # Hypothesis scaffolds — the reasoning the engine instantiates when a pattern
 # fires. Kept beside the library (auditable) but separate from the pattern
@@ -724,13 +918,21 @@ HYPOTHESIS_SCAFFOLDS = {
     },
     "buyer_concentration_exposure": {
         "title": "leaning on a buyer type whose budget it does not control",
-        "statement": "{company}'s public emphasis suggests meaningful "
-                     "dependence on regulated or public-sector buyers, whose "
-                     "purchasing moves on cycles the company cannot "
-                     "influence.",
-        "reasoning": "Prominent regulated-buyer language, named deployments "
-                     "in those environments and an explicit segment split "
-                     "match the buyer-concentration mechanism.",
+        # NAMES THE MECHANISM IT READ OFF. The old sentence was "public
+        # emphasis suggests meaningful dependence on regulated or
+        # public-sector buyers" — true of any company with a compliance
+        # footer, and therefore identical for HubSpot and Snowflake. What
+        # differs between two companies that genuinely qualify is WHY, so the
+        # reading now says why. `{mechanism}` is filled from the causal
+        # signals actually observed; a run with none of them never gets here.
+        "statement": "{company} appears to depend on regulated or "
+                     "public-sector buyers in a way that shapes the business: "
+                     "{mechanism}. Purchasing of that kind moves on budget "
+                     "and accreditation cycles the company cannot influence.",
+        "reasoning": "A causal public-sector mechanism — not compliance "
+                     "language alone — matches the buyer-concentration "
+                     "pattern: the company has built, certified, or disclosed "
+                     "something it would only have if these buyers mattered.",
         "alternatives": [
             "Regulated buyers are prominent in marketing but small in "
             "revenue.",
