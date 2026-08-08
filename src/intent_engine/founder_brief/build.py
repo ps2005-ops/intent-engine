@@ -484,6 +484,56 @@ def _is_about_legacy(excerpt: str, company: str) -> bool:
     return False
 
 
+# --- excerpt substance ------------------------------------------------------
+#
+# Copy ABOUT A PAGE, which reads as a description until you ask what it says.
+# Every phrase below is from a real opening that shipped: Shopify's "Learn
+# about Shopify and how it works. Explore its pricing plans and essential
+# features for building and managing your business" is a meta description, is
+# genuinely Shopify writing about Shopify, and answers nothing.
+_PAGE_COPY = re.compile(
+    r"^(?:learn|discover|explore|find out|see how|read|get started|"
+    r"everything you need to know|your guide to|welcome to)\b", re.I)
+_SEO_SHAPE = re.compile(
+    r"\b(?:and how it works|pricing plans|essential features|"
+    r"everything you need|step[- ]by[- ]step|in this (?:guide|article)|"
+    r"free trial|sign up today|no credit card)\b", re.I)
+#: Second person is marketing address, not description. A business
+#: description is about the company; "your business" is about the reader.
+_SECOND_PERSON = re.compile(r"\b(?:your|you|you'?re|yours)\b", re.I)
+#: Concrete verbs a description of a working product uses.
+_MECHANISM = re.compile(
+    r"\b(?:process\w*|reconcil\w+|match\w+|route\w*|settle\w*|"
+    r"integrat\w+|analy[sz]\w+|manufactur\w+|distribut\w+|deliver\w+|"
+    r"generat\w+|detect\w+|monitor\w+|automat\w+|connect\w+|"
+    r"builds?|operates?|provides?|sells?|serves?|enables?)\b", re.I)
+
+
+def _excerpt_substance(text: str) -> int:
+    """How much this sentence says about the BUSINESS, ordinally.
+
+    Not a quality score in any calibrated sense — a ranking key, used only to
+    order candidates that have already passed the identity gate. Positive
+    signals are concrete; negative ones are the shapes metadata takes.
+    """
+    body = " ".join((text or "").split())
+    score = 0
+    if _PAGE_COPY.match(body):
+        score -= 4
+    if _SEO_SHAPE.search(body):
+        score -= 3
+    if _SECOND_PERSON.search(body):
+        score -= 2
+    if _MECHANISM.search(body):
+        score += 3
+    # Numbers and proper nouns mid-sentence are what specific claims carry.
+    if re.search(r"\b\d", body):
+        score += 1
+    if len(body.split()) >= 18:
+        score += 1
+    return score
+
+
 def _what_it_does(report: dict, observations: Sequence[dict],
                   company: str = "") -> str:
     """One plain sentence. Drawn from the company's own description, because
@@ -540,6 +590,13 @@ def _what_it_does(report: dict, observations: Sequence[dict],
     vocabulary = ID.owned_vocabulary(observations, company=company)
 
     def _pick(types):
+        # RANKED, not first-match. Shopify opened with "Learn about Shopify
+        # and how it works. Explore its pricing plans..." — the page's SEO
+        # meta description. It is Shopify writing about Shopify, so the
+        # identity gate passed it correctly; it is copy about a PAGE rather
+        # than about a business, and taking the first qualifying observation
+        # had no way to prefer the one that says what the company does.
+        candidates = []
         for obs in observations:
             if obs.get("weak") or obs.get("source_class") not in own_account:
                 continue
@@ -551,8 +608,13 @@ def _what_it_does(report: dict, observations: Sequence[dict],
                     obs.get("source_title", ""), vocabulary=vocabulary,
                     source_class=obs.get("source_class", ""),
                     observation_type=obs.get("observation_type", "")):
-                return _sentence(excerpt, 180)
-        return ""
+                candidates.append(excerpt)
+        if not candidates:
+            return ""
+        # Stable: ties keep retrieval order, so this only ever demotes copy
+        # that is positively identifiable as metadata or promotion.
+        best = sorted(candidates, key=lambda e: -_excerpt_substance(e))[0]
+        return _sentence(best, 180)
 
     return (_pick(("product_surface",)) or _pick(("messaging",))
             or _pick(()) or _fallback_label(observations))
