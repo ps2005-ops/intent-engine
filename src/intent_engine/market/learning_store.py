@@ -45,10 +45,29 @@ LIFECYCLE = "belief_lifecycle"
 #: still there. Recorded so "this page still said X a week later" survives
 #: without becoming a row that could test a belief.
 EVIDENCE_SEEN = "evidence_seen"
+#: A relationship between two actors, written where every other durable
+#: thing is written.
+#:
+#: This kind did not exist until wave 11, and its absence is the reason
+#: three valid COMPETES_WITH edges were discovered in wave 5 and measured as
+#: ZERO in wave 10: `actor_relationships` built them, the run reported them,
+#: and nothing could write them down. The store had `record_evidence`,
+#: `record_expectation`, `record_cycle`, `record_reconciliation` and
+#: `record_lifecycle` — and no way to record a relationship at all. The seam
+#: was not broken; it was missing.
+RELATIONSHIP = "relationship"
+#: Later evidence for a relationship already on the ledger. Append-only,
+#: exactly like `evidence_seen`: the original row is history and editing it
+#: to add support would destroy the record of what was known when.
+RELATIONSHIP_SUPPORT = "relationship_support"
+#: A relationship the engine no longer holds. Never a deletion — the row
+#: that asserted it stays, and this says when we stopped believing it.
+RELATIONSHIP_RETIRED = "relationship_retired"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
-                          EVIDENCE_SEEN})
+                          EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
+                          RELATIONSHIP_RETIRED})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -62,6 +81,35 @@ UNCLASSIFIABLE_INPUT = "UNCLASSIFIABLE_INPUT"  # candidates, no events
 NO_NEW_EVIDENCE = "NO_NEW_EVIDENCE"          # nothing arrived at all
 OUTCOME_CLASSES = (NEW_KNOWLEDGE, BELIEF_MOVEMENT, OBSERVED_NO_IMPACT,
                    UNCLASSIFIABLE_INPUT, NO_NEW_EVIDENCE)
+
+
+#: Predicates where "A relates to B" and "B relates to A" are the same claim.
+#: Rivalry is mutual; supply is not.
+SYMMETRIC_PREDICATES = frozenset({"COMPETES_WITH", "PARTNERS_WITH",
+                                  "SUBSTITUTES_FOR", "COMPLEMENTS"})
+
+
+def relationship_scope(row: dict) -> str:
+    """What makes two relationship claims THE SAME claim.
+
+    Not the id: ids are content hashes that move when an extractor changes,
+    and re-deriving the same rivalry after a pattern edit must not create a
+    second edge. Not the pair alone either — "Shopify and Salesforce contest
+    e-commerce platforms" and "... contest field service" are two different
+    economic claims about the same two companies, and collapsing them would
+    lose the scope that makes a rivalry actionable.
+
+    For a SYMMETRIC predicate the pair is sorted, so the same rivalry derived
+    from Shopify's page and from Salesforce's page is one edge.
+    """
+    subject = str(row.get("subject_actor_id") or "").strip().lower()
+    obj = str(row.get("object_actor_id") or "").strip().lower()
+    predicate = str(row.get("predicate") or "").strip().upper()
+    scope = str(row.get("competitive_object")
+                or row.get("relationship_object") or "").strip().lower()
+    pair = (" & ".join(sorted((subject, obj)))
+            if predicate in SYMMETRIC_PREDICATES else f"{subject} -> {obj}")
+    return f"{predicate}|{pair}|{scope}"
 
 
 class LearningStore:
@@ -211,6 +259,74 @@ class LearningStore:
     def re_observations(self) -> Tuple[dict, ...]:
         return tuple(r for r in self._rows()
                      if r.get("record") == EVIDENCE_SEEN)
+
+    # --- relationships ----------------------------------------------------
+
+    def record_relationship(self, rel) -> bool:
+        """Persist one actor relationship. Returns False if already held.
+
+        Idempotent on the SCOPE, not on the id: the same pair contesting a
+        DIFFERENT competitive object is a different economic claim and gets
+        its own row, while re-deriving the same claim from the same evidence
+        appends support rather than a second edge.
+        """
+        payload = rel.as_dict() if hasattr(rel, "as_dict") else dict(rel)
+        key = relationship_scope(payload)
+        held = self.relationship_scopes()
+        if key not in held:
+            self._append(RELATIONSHIP, payload)
+            return True
+        new_evidence = set(payload.get("evidence_ids") or ()) - \
+            self._relationship_evidence().get(key, set())
+        if new_evidence:
+            self._append(RELATIONSHIP_SUPPORT, {
+                "relationship_id": held[key],
+                "scope": key,
+                "evidence_ids": sorted(new_evidence),
+                "confirmed_at": str(payload.get("created_at") or "")[:10]})
+        return False
+
+    def relationships(self, *, include_retired: bool = False
+                      ) -> Tuple[dict, ...]:
+        """Every relationship still held, newest support folded in."""
+        retired = self.retired_relationship_ids()
+        return tuple(r for r in self._rows()
+                     if r.get("record") == RELATIONSHIP
+                     and (include_retired
+                          or r.get("relationship_id") not in retired))
+
+    def relationship_scopes(self) -> Dict[str, str]:
+        """scope key -> relationship_id, for the rows still held."""
+        return {relationship_scope(r): str(r.get("relationship_id") or "")
+                for r in self.relationships()}
+
+    def _relationship_evidence(self) -> Dict[str, set]:
+        out: Dict[str, set] = {}
+        for row in self.relationships():
+            out.setdefault(relationship_scope(row), set()).update(
+                row.get("evidence_ids") or ())
+        for row in self._rows():
+            if row.get("record") != RELATIONSHIP_SUPPORT:
+                continue
+            out.setdefault(str(row.get("scope") or ""), set()).update(
+                row.get("evidence_ids") or ())
+        return out
+
+    def retire_relationship(self, relationship_id: str, *, reason: str,
+                            as_of: str) -> bool:
+        """Stop holding a relationship without deleting the claim."""
+        if not reason.strip():
+            raise ValueError("a retirement with no reason cannot be audited")
+        if relationship_id in self.retired_relationship_ids():
+            return False
+        self._append(RELATIONSHIP_RETIRED, {
+            "relationship_id": relationship_id, "reason": reason.strip(),
+            "retired_at": as_of[:10]})
+        return True
+
+    def retired_relationship_ids(self) -> frozenset:
+        return frozenset(str(r.get("relationship_id") or "") for r in self._rows()
+                         if r.get("record") == RELATIONSHIP_RETIRED)
 
     def record_lifecycle(self, event) -> bool:
         """Append one belief-lifecycle event. Idempotent on `event_id`.

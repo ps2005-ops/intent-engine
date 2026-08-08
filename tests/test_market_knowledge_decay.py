@@ -260,7 +260,7 @@ def test_real_ledger_has_no_stale_beliefs_and_the_reason_is_the_window():
             REAL_LEDGER.read_text().splitlines() if line.strip()]
     got = KD.assess(rows, as_of="2026-08-07")
     out = KD.summarise(got, KD.events(got, as_of="2026-08-07"))
-    assert out["beliefs"] == 51
+    assert out["beliefs"] >= 51   # append-only and growing; see note below
     assert out["stale"] == 0 and out["retired"] == 0
     # The zero is earned, not assumed: every belief is refused for a NAMED
     # reason, and none of those reasons is "we did not look".

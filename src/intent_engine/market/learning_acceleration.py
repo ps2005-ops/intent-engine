@@ -292,17 +292,25 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
 
     denominators: Dict[str, Tuple[float, float]] = {}
 
-    def rate(num: float, den: float, name: str = "") -> Optional[float]:
+    def rate(num: float, den: float, name: str = "",
+             share: bool = True) -> Optional[float]:
         """A proportion, or None. Never a number greater than one.
 
         Every dimension here except `source_diversity` is a share of a
         population, and a share above 1.0 means the numerator and the
         denominator count different things. Clamping would hide that, so it
         is caught here and the mismatch is reported rather than rounded.
+
+        `share=False` marks the ratios that are NOT shares. A window may
+        revise more beliefs than it declares, because it revises beliefs
+        declared in earlier windows — 8 revisions over 6 new declarations is
+        a true statement about a healthy engine, not a population mismatch.
+        Sending it through the share guard crashed the live report the first
+        time revision outpaced declaration.
         """
         if not den:
             return None
-        if num > den:
+        if share and num > den:
             raise ValueError(
                 f"a share of {num} out of {den} counts two different "
                 f"populations; fix the denominator rather than the number")
@@ -340,7 +348,11 @@ def quality(observations: Sequence, *, ledger: Sequence[dict] = (),
                                "self_test_rate"),
         "no_op_rate": rate(classes[NO_OP] + classes[DUPLICATE],
                            len(observations), "no_op_rate"),
-        "belief_revision_rate": rate(reconciliations, declared, "belief_revision_rate"),
+        # Revisions PER declaration, not a share of them: the beliefs a
+        # window revises were mostly declared before it started.
+        "belief_revision_rate": rate(reconciliations, declared,
+                                     "belief_revision_rate",
+                                     share=False),
         "decision_impact_rate": rate(decision_impacts,
                                      totals["Founder_consumption"],
                                      "decision_impact_rate"),
