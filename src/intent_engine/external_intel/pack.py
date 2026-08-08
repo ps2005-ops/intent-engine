@@ -327,11 +327,26 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
         # asking it for EVIDENCE silently returned nothing and the rendered
         # block carried no provenance at all. This hop is the whole chain:
         # sentence → hypothesis node → supporting evidence → ledger id.
-        evidence_ids = []
+        # A supporting node is now an OCCURRENCE carrying every account of
+        # itself, so the walk collects `evidence_ids` from each. The number of
+        # in-edges is the number of things that happened; the ids under them
+        # are how many times each was written up. Both are kept: the first is
+        # what may be reasoned from, the second is what may be traced.
+        evidence_ids: List[str] = []
+        occurrences = 0
         for edge in graph.in_edges(node.node_id, SUPPORTS):
             source_node = graph.node(edge.src)
-            if source_node and source_node.attrs.get("evidence_id"):
-                evidence_ids.append(source_node.attrs["evidence_id"])
+            if not source_node:
+                continue
+            ids = source_node.attrs.get("evidence_ids")
+            if ids:
+                occurrences += 1
+                evidence_ids.extend(str(i) for i in ids)
+            elif source_node.attrs.get("evidence_id"):
+                # An older dossier that was never normalized. One row, one
+                # occurrence, and the standing below will say it is unrated.
+                occurrences += 1
+                evidence_ids.append(str(source_node.attrs["evidence_id"]))
 
         # "Reads" and "is", kept apart deliberately. The proposition is the
         # engine's reading; the basis is what it read it from.
@@ -341,7 +356,19 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
             facts.append(f"Basis: {node.attrs['basis']}")
         facts.append(f"Standing: {node.confidence}.")
 
+        # HOW SOUND THAT EVIDENCE IS, on the primary surface rather than in an
+        # appendix. Only when it changes how the line should be read: a note
+        # on every block is a methodology lecture, and a reader told about
+        # sourcing nine times stops reading the tenth.
+        note = str(node.attrs.get("trust_sentence") or "")
+        if note:
+            facts.append(note)
+
         limitations = list(node.attrs.get("limitations") or ())
+        if node.attrs.get("trust_must_bound"):
+            limitations.append(
+                "The reports behind this do not independently confirm each "
+                "other, so it is weaker than the number of articles suggests.")
         limitations.append(
             "This is a reading the market-learning engine holds, not an "
             "established fact about the company, and it does not by itself "

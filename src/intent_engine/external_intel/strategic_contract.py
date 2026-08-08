@@ -81,10 +81,35 @@ def company_key(subject: str) -> str:
 
 
 # --- the allowlist, re-declared on purpose (see module docstring) ----------
+# WHAT THE evidence_ids ARE WORTH, decided by the side that owns the judgement.
+#
+# `evidence_ids` is a list of ROWS, and a consumer holding only that list can
+# do exactly one thing with it: count it. Counting is the defect — three sites
+# carrying one press release put three ids in that list, and every reader
+# downstream, human or machine, sees three.
+#
+# This block is the same evidence normalized: how many things ACTUALLY
+# happened, how much independent support may honestly be claimed, the weight a
+# conclusion may take from it, and the sentence to say about it. This side
+# consumes it and must never re-derive it — re-deriving from source counts is
+# the arithmetic that is wrong.
+_TRUST = {
+    "contract": ..., "standing": ..., "raw_accounts": ...,
+    "distinct_events": ..., "independent_support": ..., "weight": ...,
+    "sentence": ...,
+    # The grouping itself. Without it this side would know that three rows are
+    # one occurrence but not WHICH three, and so could not build a graph that
+    # walks a rendered sentence back to the rows under it. Normalization
+    # groups rather than deletes, and this is the part that proves it.
+    "events": [{"event_id": ..., "standing": ..., "accounts": ...,
+                "weight": ..., "evidence_ids": ...}],
+}
+
 _BELIEF = {
     "proposition": ..., "subject": ..., "confidence": ...,
     "direction_of_last_change": ..., "last_updated": ..., "basis": ...,
     "update_method": ..., "evidence_ids": ..., "limitations": ...,
+    "evidence_trust": _TRUST,
 }
 
 _HIDDEN = {
@@ -168,7 +193,8 @@ ALLOWED: Dict[str, Any] = {
         "observation_kind": ..., "expected_date": ..., "priority": ...,
         "falsifies": ..., "limitation": ...,
     }],
-    "limitations": ..., "evidence_ids": ..., "disclaimer": ...,
+    "limitations": ..., "evidence_ids": ..., "evidence_trust": _TRUST,
+    "disclaimer": ...,
     "interpretation_allowed": ..., "interpretation_forbidden": ...,
 }
 
@@ -257,6 +283,10 @@ class StrategicIntel:
     priorities: Tuple[dict, ...] = ()
     market_structure: Optional[dict] = None
     limitations: Tuple[str, ...] = ()
+    #: The dossier's own normalized standing, or None when the producer did
+    #: not normalize. Those are different states and are kept different: a
+    #: missing block means nobody looked, not "one observation".
+    evidence_trust: Optional[dict] = None
     disclaimer: str = DISCLAIMER
 
     # External context never promotes a reading. Permanent, not a default.
@@ -285,6 +315,7 @@ class StrategicIntel:
                 "priorities": list(self.priorities),
                 "market_structure": self.market_structure,
                 "limitations": list(self.limitations),
+                "evidence_trust": self.evidence_trust,
                 "disclaimer": self.disclaimer,
                 "has_material": self.has_material}
 
@@ -359,6 +390,9 @@ def consume(payload: dict, *, expected_company: str = "",
                           if isinstance(payload.get("market_structure"), dict)
                           else None),
         limitations=tuple(str(x) for x in (payload.get("limitations") or ())),
+        evidence_trust=(payload.get("evidence_trust")
+                        if isinstance(payload.get("evidence_trust"), dict)
+                        else None),
         disclaimer=str(payload.get("disclaimer") or DISCLAIMER))
 
 

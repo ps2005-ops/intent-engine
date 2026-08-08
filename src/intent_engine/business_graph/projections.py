@@ -184,19 +184,42 @@ _SUPPORTED = "supported by later evidence"
 _CONTESTED = "contested by later evidence"
 
 
+#: A belief whose later evidence turned out to be re-reporting of the evidence
+#: that opened it. `update_method` says SUPPORTED; the sources say otherwise,
+#: and the sources win.
+_UNCORROBORATED = "reported again, not independently confirmed"
+_DISPUTED = "sources disagree"
+
+
 def belief_standing(belief: dict) -> str:
     """The honest one-line standing of a market belief.
 
     `update_method` is the producer's own record of how the belief reached its
     current state: DECLARED means one evidence item opened it and nothing has
     argued with it since. That is a hypothesis, and it is rendered as one.
+
+    NORMALIZED TRUST OUTRANKS UPDATE METHOD, and that ordering is the point.
+    A belief can be marked SUPPORTED because three evidence rows arrived after
+    it opened — and those three rows can be three sites carrying one press
+    release. `update_method` counts rows; `evidence_trust` counts occurrences.
+    When they disagree the belief has not actually been confirmed by anybody
+    new, so the weaker word is the true one.
     """
+    from intent_engine.external_intel import evidence_trust as ET
+
+    trust = ET.of_belief(belief)
     method = str(belief.get("update_method") or "").upper()
     direction = str(belief.get("direction_of_last_change") or "").upper()
+
+    if trust.standing == ET.CONFLICTED:
+        return _DISPUTED
     if method == "DECLARED" or not direction:
         return _DECLARED
     if direction in ("DOWN", "WEAKENED", "CONTRADICTED"):
         return _CONTESTED
+    # It says SUPPORTED. Ask what supported it.
+    if trust.known and trust.must_bound:
+        return _UNCORROBORATED
     return _SUPPORTED
 
 
@@ -226,6 +249,8 @@ def from_strategic_dossier(*, company_id: str, company_label: str = "",
     Pure, like every other projection: it stores nothing and owns nothing, so
     it cannot disagree with the dossier it was built from.
     """
+    from intent_engine.external_intel import evidence_trust as ET
+
     graph = graph or BusinessGraph()
     company_node = f"company:{company_id}"
     graph.add_node(Node(
@@ -238,6 +263,7 @@ def from_strategic_dossier(*, company_id: str, company_label: str = "",
         proposition = _clip(belief.get("proposition") or "", 240)
         if not proposition:
             continue
+        trust = ET.of_belief(belief)
         # Keyed on the dossier revision so a later revision is a NEW node
         # rather than a silent overwrite of what a founder was previously
         # shown. The graph is append-only about what was believed when.
@@ -255,6 +281,15 @@ def from_strategic_dossier(*, company_id: str, company_label: str = "",
                 "update_method": belief.get("update_method") or "",
                 "limitations": list(belief.get("limitations") or ()),
                 "dossier_revision": dossier_revision or as_of,
+                # The normalized standing travels ON THE GRAPH, so every
+                # renderer reads it from the same place it reads the claim.
+                # A surface that had to re-open the dossier to find out how
+                # sound a sentence was is a surface that will forget to.
+                "trust_standing": trust.standing,
+                "trust_sentence": ET.sentence(trust),
+                "trust_must_bound": trust.must_bound,
+                "trust_raw_accounts": trust.raw_accounts,
+                "trust_distinct_events": trust.distinct_events,
             }))
         # Derived: the dossier says this belief is about this company, so
         # nobody asserted the link and nobody can be wrong about it.
@@ -262,15 +297,61 @@ def from_strategic_dossier(*, company_id: str, company_label: str = "",
                             kind=INFORMS, derived=True,
                             source="market dossier"))
 
-        for evidence_id in (belief.get("evidence_ids") or ()):
-            evidence_node = f"market-evidence:{evidence_id}"
+        # ONE SUPPORTS EDGE PER OCCURRENCE, NOT PER ROW.
+        #
+        # This loop used to iterate `evidence_ids` directly, so three sites
+        # carrying one press release became three EVIDENCE nodes and three
+        # SUPPORTS edges — three independent supports, in the structure every
+        # downstream reader counts. The dossier now says which rows are
+        # accounts of the same occurrence, so the occurrence is the node and
+        # the rows hang off it as provenance. Nothing is discarded; a walk
+        # from the belief still reaches every raw id.
+        for event in _occurrences(belief, trust):
+            event_node = f"market-event:{event.event_id}"
             graph.add_node(Node(
-                node_id=evidence_node, kind=EVIDENCE,
-                label=f"market evidence {evidence_id}",
+                node_id=event_node, kind=EVIDENCE,
+                label=_occurrence_label(event),
                 source="market learning ledger", as_of=as_of,
-                attrs={"evidence_id": evidence_id,
-                       "origin": "market_learning_engine"}))
-            graph.add_edge(Edge(src=evidence_node, dst=belief_node,
+                confidence=event.standing or "",
+                attrs={"event_id": event.event_id,
+                       "origin": "market_learning_engine",
+                       # Every account of it, so provenance survives the
+                       # grouping and §13's walk terminates on real rows.
+                       "evidence_ids": list(event.evidence_ids),
+                       "accounts": event.accounts,
+                       "weight": event.weight}))
+            graph.add_edge(Edge(src=event_node, dst=belief_node,
                                 kind=SUPPORTS, derived=True,
                                 source="market dossier"))
     return graph
+
+
+def _occurrences(belief: dict, trust) -> Sequence:
+    """The distinct occurrences behind one belief.
+
+    When the producer normalized, its grouping is authoritative. When it did
+    NOT — an older dossier, a hand-written one — this side must not invent a
+    grouping, because guessing which rows share an origin is precisely the
+    judgement it is not entitled to make. Each row then stands alone, exactly
+    as before, and `belief_standing` reports the standing as unknown rather
+    than as confirmed.
+    """
+    from intent_engine.external_intel import evidence_trust as ET
+
+    if trust.known and trust.events:
+        return trust.events
+    return [ET.Event(event_id=str(eid), standing="", accounts=1, weight=0.0,
+                     evidence_ids=(str(eid),))
+            for eid in (belief.get("evidence_ids") or ())]
+
+
+def _occurrence_label(event) -> str:
+    """What the node is called, in rows-and-occurrences terms.
+
+    Says "3 reports of one announcement" rather than listing three ids, so a
+    reader of the graph sees the normalized shape without having to know the
+    standing vocabulary.
+    """
+    if event.accounts > 1:
+        return f"market evidence: one occurrence, {event.accounts} accounts"
+    return f"market evidence {event.evidence_ids[0] if event.evidence_ids else event.event_id}"

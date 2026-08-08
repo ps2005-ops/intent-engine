@@ -93,7 +93,11 @@ def test_the_belief_is_projected_into_the_canonical_graph():
     hypotheses = graph.of_kind(HYPOTHESIS)
     assert len(hypotheses) == 1
     evidence = graph.of_kind(EVIDENCE)
-    assert [n.attrs["evidence_id"] for n in evidence] == ["ev_abc123"]
+    # An evidence node is an OCCURRENCE carrying every account of itself, so
+    # the row id lives in `evidence_ids`. The intent is unchanged and is the
+    # reason this test exists: the ledger id must still be reachable from the
+    # graph, because that is what makes a rendered sentence traceable.
+    assert [list(n.attrs["evidence_ids"]) for n in evidence] == [["ev_abc123"]]
     # and the edge runs evidence -> hypothesis, not the other way
     edges = graph.in_edges(hypotheses[0].node_id, SUPPORTS)
     assert [e.src for e in edges] == [evidence[0].node_id]
