@@ -4,17 +4,17 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-07, wave 6.
+Updated 2026-08-07, wave 2 of continuous execution (slice 11).
 
 ## Pinned state
 
 | what | where |
 |---|---|
-| market runtime | `bbd9d44` (branch `feat/consumption-telemetry`) |
+| market runtime | `bbd9d44` (repin to `ba2e811`+ next) (branch `feat/consumption-telemetry`) |
 | founder preview | `a6c8601` (branch `feat/consumption-emitter` → `feat/founder-decision-experience-v3`) |
 | production `main` | `119d345` — **untouched, do not target** |
 | PAPER | structurally enforced in both launchd plists |
-| market suite | 3837 passed / 4 skipped / EXIT=0 |
+| market suite | 3865 passed / 4 skipped / EXIT=0 |
 | founder suite | 4563 passed / 6 skipped / EXIT=0 |
 
 ## Completed this mission
@@ -28,6 +28,9 @@ Updated 2026-08-07, wave 6.
 | 5 | Hidden-state binding | `75681e0` | companies_tracked 0 → 16, 54 observations |
 | 6 | Execution checkpoint | `bd0a9f2` | this file |
 | 7 | Interaction binding that refuses | `bbd9d44` | 3 fabricated records → 0, with the prerequisite named |
+| 8 | **Natural scheduled cycle inspected** | — | `2026-08-07:night` COMPLETED; see below |
+| 9 | Actor relationships + measured source finding | `ba2e811` | 3959 filing sentences → 0 admissible, all categories |
+| 10 | Belief maturity (derived view) | pending | 43 CANDIDATE / 6 SUPPORTED / 2 WEAKENING on the real ledger |
 
 ## The pattern this mission keeps finding
 
@@ -48,12 +51,32 @@ except beliefs.
 **Before building a subsystem, check whether it already exists and is simply
 not wired.** In this codebase that has been true five times out of five.
 
+## Natural scheduled cycle — CLOSED, and it proved the wave
+
+`2026-08-07:night:America/Toronto` COMPLETED on runtime `bbd9d44941cf`.
+Everything built this session ran unattended in production:
+
+| check | result |
+|---|---|
+| `learning_health` in the DATED report | **yes** — `market_learning_health.v1` |
+| `observation_binding` | present, 5 bound |
+| self-test guard fired live | **`restates_the_evidence_that_opened_it: 20`** |
+| `hidden_state_binding` | 16 companies tracked, 16 moved |
+| informative reconciliations | **3 CONFIRMED / 2 CONTRADICTED = 5** |
+| belief revision | 3 strengthened, 2 weakened |
+| ledger | 5 reconciliations, 5 belief_updates, 249 evidence |
+| `learned_without_trading` | true |
+
+**The canonical baseline is 5 informative / 3 confirmed / 2 contradicted.**
+The old 10/8 figure was inflated by self-tests and must not be restored.
+
 ## Remaining queue, highest value first
 
-1. **Natural scheduled cycle** — fires 20:30 America/Toronto. Verify
-   `learning_health` in the DATED report, `observation_binding`,
-   `hidden_state_binding`, and that the self-test guard reduced informative
-   results on the live ledger.
+1. **SOURCE COVERAGE for relationships** — the new #1. The extractor is
+   built and correct; the corpus cannot feed it. Needs 8-K material
+   agreements, S-1s, or partnership releases, which name counterparties.
+   Everything downstream (interactions, cross-actor expectations,
+   game-theoretic learning) is blocked on this and only this.
 2. **Actor-to-actor relationships** — now a hard PREREQUISITE, not a
    parallel task. Interaction binding is built and correctly returns zero
    because no competitor edges exist to read. Populate them from evidence
