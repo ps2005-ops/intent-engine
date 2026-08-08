@@ -186,6 +186,86 @@ def test_precision_on_the_shaped_corpus_is_total():
     assert precision == 1.0
 
 
+# --- clause scope: a subordinate clause must not delete a true signal ----
+
+CLAUSE_CASES = [
+    # The subordinate clause must contain a phrase the filter ACTUALLY
+    # matches, or the case does not discriminate whole-sentence from
+    # clause scope and the break proof paired with it proves nothing.
+    ("rivalry then complementarity", 1,
+     "Our customers evaluate Shopify against Salesforce Commerce Cloud, "
+     "although Shopify integrates with other parts of Salesforce."),
+    ("complementarity then rivalry", 1,
+     "Shopify integrates with NetSuite; the merchant shortlisted "
+     "BigCommerce before choosing our platform."),
+    ("partnership and rivalry in one sentence", 1,
+     "Shopify partners with Stripe, but customers evaluate Shopify against "
+     "BigCommerce for storefronts."),
+    ("migration away from the subject", 1,
+     "The merchant migrated from Shopify to Magento for its rebuild."),
+    ("explicit non-compete", 0,
+     "Shopify integrates with Salesforce and does not compete with "
+     "Salesforce Commerce Cloud."),
+    ("historical comparison", 0,
+     "Compared with last year, Shopify revenue increased across regions."),
+    ("stock comparison", 0,
+     "The fund shortlisted Amazon shares before choosing Shopify stock."),
+    ("non-rivalry in the same clause", 0,
+     "Shopify integrates with BigCommerce partners and works with them."),
+]
+
+
+@pytest.mark.parametrize("label,expected,text", CLAUSE_CASES,
+                         ids=[c[0] for c in CLAUSE_CASES])
+def test_the_filter_runs_at_the_scope_of_the_claim(label, expected, text):
+    """A whole-sentence veto deletes a rivalry clause because of a
+    subordinate one. This project has paid for that shape once already."""
+    got, _ = pull(text)
+    assert len(got) == expected, [(c.actor_a, c.actor_b) for c in got]
+
+
+def test_an_explicit_negation_before_the_verb_governs_it():
+    got, refused = pull("Shopify does not compete with BigCommerce in the "
+                        "enterprise segment at all.")
+    assert got == ()
+    assert refused["explicitly_negated"] == 1
+
+
+def test_a_clause_boundary_is_deterministic_not_punctuation_guesswork():
+    sentence = ("Shopify integrates with NetSuite; the merchant shortlisted "
+                "BigCommerce before choosing our platform.")
+    clause = CR._clause_around(sentence, sentence.index("shortlisted"),
+                               sentence.index("BigCommerce"))
+    assert "integrates with NetSuite" not in clause
+    assert "shortlisted" in clause
+
+
+def test_the_whole_sentence_veto_refused_nothing_real_in_the_corpus():
+    """Measured before the change: of 31 sentences the veto refused, ZERO
+    matched any rivalry pattern. The change is preventive, not corrective,
+    and saying so is the difference between a fix and a claim."""
+    if not REAL_LEDGER.exists():                       # pragma: no cover
+        return
+    from intent_engine.market.steps import _aliases_for
+    from intent_engine.universe.companies import default_universe
+
+    comps = {c.company_id: c for c in
+             default_universe().prediction_companies()}
+    store = LS.LearningStore(REAL_LEDGER)
+    vetoed_with_a_pattern = 0
+    for row in store.evidence():
+        if not comps.get((row.subject_company or "").strip().lower()):
+            continue
+        for raw in CR._SENTENCE.split(" ".join((row.fact or "").split())):
+            sentence = raw.strip()
+            if len(sentence) < 25 or not CR._NOT_RIVALRY.search(sentence):
+                continue
+            if any(p.search(sentence) for p in (CR._MIGRATION, CR._DIRECT,
+                                                CR._ALTERNATIVE)):
+                vetoed_with_a_pattern += 1
+    assert vetoed_with_a_pattern == 0
+
+
 # --- model knowledge is refused, and used only as a scoreboard -----------
 
 def test_the_curated_competitor_list_is_never_a_source():

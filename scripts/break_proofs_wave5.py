@@ -7,10 +7,11 @@ requires a FAILURE. Restore bumps mtime — a same-length restore leaves
 CPython running cached bytecode whose size and hash still match.
 """
 from __future__ import annotations
-import os, pathlib, subprocess, sys, time
+import pathlib, sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-PY = "/Users/prathamsharma/intent-engine/.venv/bin/python"
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from break_proof_harness import Proof, ROOT, run_all  # noqa: E402
+
 S = ROOT / "src/intent_engine/market"
 T = "tests"
 CR = f"{T}/test_market_competitive_relationships.py"
@@ -28,10 +29,24 @@ PROOFS = [
     # securities rather than products.
     ("1. a securities shortlist becomes COMPETES_WITH",
      S / "competitive_relationships.py",
-     "        if _NOT_RIVALRY.search(sentence):",
-     "        if False:",
+     "    if _NOT_RIVALRY.search(clause):",
+     "    if False:",
      f"{CR}::test_the_negative_corpus_produces_no_rivalry"
      f"[securities shortlist]"),
+
+    ("1b. a whole-sentence veto kills a valid rivalry clause",
+     S / "competitive_relationships.py",
+     "    clause = _clause_around(sentence, start, end)\n"
+     "    if _NOT_RIVALRY.search(clause):",
+     "    if _NOT_RIVALRY.search(sentence):",
+     f"{CR}::test_the_filter_runs_at_the_scope_of_the_claim"
+     f"[rivalry then complementarity]"),
+
+    ("1c. a local explicit non-compete is ignored",
+     S / "competitive_relationships.py",
+     "    if _NEGATED.search(sentence[:start]):",
+     "    if False:",
+     f"{CR}::test_an_explicit_negation_before_the_verb_governs_it"),
 
     ("2. a claim with no competitive object is admitted",
      S / "competitive_relationships.py",
@@ -223,44 +238,10 @@ PROOFS = [
 ]
 
 
-def run(target: str) -> bool:
-    p = subprocess.run([PY, "-m", "pytest", target, "-q", "--no-header"],
-                       cwd=ROOT, capture_output=True, text=True,
-                       env={"PYTHONPATH": "src", "PATH": "/usr/bin:/bin"})
-    return p.returncode == 0
-
 
 def main() -> int:
-    bad = []
-    for label, path, find, repl, target in PROOFS:
-        original = path.read_text(encoding="utf-8")
-        if find not in original:
-            print(f"  SKIP  {label}\n        anchor missing in {path.name}")
-            bad.append(label)
-            continue
-        if not run(target):
-            print(f"  FAIL  {label}\n        guard was already red")
-            bad.append(label)
-            continue
-        path.write_text(original.replace(find, repl, 1), encoding="utf-8")
-        try:
-            caught = not run(target)
-        finally:
-            path.write_text(original, encoding="utf-8")
-            now = time.time() + 1
-            os.utime(path, (now, now))
-        if not run(target):
-            print(f"  FAIL  {label}\n        did not restore green")
-            bad.append(label)
-        elif caught:
-            print(f"  ok    {label}")
-        else:
-            print(f"  FAIL  {label}\n        mutation NOT caught — the guard "
-                  f"or the proof is not load-bearing")
-            bad.append(label)
-    print()
-    print(f"{len(PROOFS) - len(bad)}/{len(PROOFS)} break proofs held")
-    return 1 if bad else 0
+    return run_all([Proof(*row) for row in PROOFS],
+                   title="wave-5 break proofs, hardened harness")
 
 
 if __name__ == "__main__":

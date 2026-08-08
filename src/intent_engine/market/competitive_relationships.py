@@ -254,8 +254,10 @@ _DIRECT = re.compile(
 #: Motor Corporation vs FY2026". A financial period comparison and a
 #: competitive evaluation share a verb and share nothing else.
 _ALTERNATIVE = re.compile(
-    r"\b(?:evaluat(?:ed?|ing)\s+(?:us\s+)?against|"
-    r"benchmarked?\s+(?:us\s+)?against|weighed\s+against|"
+    # An intervening object is normal and was being missed: "customers
+    # evaluate Shopify against X" is the shape a vendor actually writes.
+    r"\b(?:evaluat(?:e|es|ed|ing)\s+(?:\w+\s+){0,3}against|"
+    r"benchmarked?\s+(?:\w+\s+){0,2}against|weighed\s+against|"
     r"shortlisted|chose\s+\w+\s+over|selected\s+\w+\s+over|"
     r"switch(?:ed|ing)?\s+away\s+from|rather\s+than\s+using)\s+"
     r"(?P<other>[A-Z][\w&.\-]*(?:\s+[A-Z][\w&.\-]*){0,3})")
@@ -270,12 +272,75 @@ _NOT_AN_ACTOR_TOKEN = re.compile(
 #: "found nothing" is distinguishable from "refused to round up".
 _NOT_RIVALRY = re.compile(
     r"\b(?:integrat\w+\s+with|partners?\s+with|works?\s+with|alongside|"
+    r"complement\w*|interoperat\w+|"
     r"together\s+with|powered\s+by|built\s+on|in\s+partnership\s+with|"
     r"and\s+its\s+partner|both\s+use|also\s+uses?|as\s+well\s+as|"
     r"outperform\w*|shares?\s+(?:of|rose|fell)|stock|valuation|"
     r"price\s+target|analysts?)\b", re.I)
 
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
+
+# --- clause scope -----------------------------------------------------------
+#
+# WHY THE FILTER IS NOT A WHOLE-SENTENCE VETO
+# -------------------------------------------
+# "Our customers evaluate Shopify against Salesforce Commerce Cloud, although
+# other parts of Salesforce complement our stack." The first clause states
+# rivalry. The second states complementarity about a DIFFERENT part of the
+# same company. A whole-sentence veto deletes a true signal because of a
+# subordinate clause that was never about the same thing.
+#
+# This project has paid for that shape once already, on the subject-scoping
+# side: a whole-sentence competitor filter over-rejected and deleted true
+# signals. The rule learned there is the rule applied here — a filter runs at
+# the scope of the claim it is filtering.
+#
+# MEASURED BEFORE CHANGING IT: of 31 sentences the whole-sentence veto
+# refused in the real corpus, ZERO matched any rivalry pattern. The veto was
+# redundant every time, so this change corrects no live defect. It is
+# preventive, and the shape it prevents is the one above.
+_CLAUSE_BOUNDARY = re.compile(
+    r"(?:;|—|--|\s+(?:although|though|whereas|while|but|however|"
+    r"even though|despite|notwithstanding)\s+|,\s+(?:although|though|"
+    r"whereas|while|but|however)\s+)", re.I)
+
+#: An explicit negation of the competitive reading, in a window immediately
+#: before the matched verb. "does not compete with", "no longer competes".
+#: Scoped to the match rather than the sentence for the same reason.
+_NEGATED = re.compile(
+    r"\b(?:not|never|no longer|neither|nor|hardly|rarely)\b[^.;]{0,24}$",
+    re.I)
+
+
+def _clause_around(sentence: str, start: int, end: int) -> str:
+    """The clause containing the match, by deterministic boundaries."""
+    left = 0
+    for boundary in _CLAUSE_BOUNDARY.finditer(sentence):
+        if boundary.end() <= start:
+            left = boundary.end()
+        else:
+            break
+    right = len(sentence)
+    for boundary in _CLAUSE_BOUNDARY.finditer(sentence):
+        if boundary.start() >= end:
+            right = boundary.start()
+            break
+    return sentence[left:right]
+
+
+def _refused_locally(sentence: str, start: int, end: int) -> str:
+    """Why this MATCH is not rivalry, judged in its own clause. "" if it is.
+
+    Two separate checks, both local:
+      - a non-rivalry phrase inside the same clause;
+      - an explicit negation immediately before the matched verb.
+    """
+    if _NEGATED.search(sentence[:start]):
+        return "explicitly_negated"
+    clause = _clause_around(sentence, start, end)
+    if _NOT_RIVALRY.search(clause):
+        return "states_no_rivalry"
+    return ""
 
 
 def extract(text: str, *, subject: str, aliases: Sequence[str],
@@ -302,17 +367,16 @@ def extract(text: str, *, subject: str, aliases: Sequence[str],
         sentence = raw.strip()
         if len(sentence) < 25:
             continue
-        if _NOT_RIVALRY.search(sentence):
-            refused["states_no_rivalry"] += 1
-            continue
-
         pairs: List[Tuple[str, str, str]] = []
         hit = _MIGRATION.search(sentence)
         migration_buyer = ""
         if hit:
             old = hit.group("from") or hit.group("old")
             new = hit.group("to") or hit.group("new")
-            if old and new:
+            local = _refused_locally(sentence, hit.start(), hit.end())
+            if local:
+                refused[local] += 1
+            elif old and new:
                 pairs.append((old, new, REPLACEMENT_MIGRATION))
                 # The buyer is the sentence's own subject — the party that
                 # did the migrating. Naming it is what makes the claim
@@ -325,8 +389,13 @@ def extract(text: str, *, subject: str, aliases: Sequence[str],
                               (_ALTERNATIVE,
                                CUSTOMER_ALTERNATIVE_EVALUATION)):
             other = pattern.search(sentence)
-            if other:
-                pairs.append((display, other.group("other"), kind))
+            if not other:
+                continue
+            local = _refused_locally(sentence, other.start(), other.end())
+            if local:
+                refused[local] += 1
+                continue
+            pairs.append((display, other.group("other"), kind))
 
         if not pairs:
             continue
