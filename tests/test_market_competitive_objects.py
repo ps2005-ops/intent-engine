@@ -326,3 +326,68 @@ def test_the_live_actions_establish_nothing_and_that_is_the_finding():
                              created_at=a["event_time"])[0] or CO
                   ).__dict__.get("standing") == CO.ESTABLISHED]
     assert usable == []
+
+
+# --- buyers named by the consequence clause, tiers named without a price ---
+
+def test_a_buyer_named_by_the_consequence_clause_is_a_buyer():
+    """Live release notes name the buyer after "so" as often as after "for".
+
+    "Introducing 10 new granular permissions ... so store owners have better
+    control over staff access" locates its buyer exactly as well as "for
+    store owners" would.
+    """
+    got, _ = pull("Introducing 10 new granular permissions, including "
+                  "view-only permissions, so store owners have better "
+                  "control over staff access to products.", actor="Shopify")
+    assert got is not None
+    assert got.buyer == "store owners"
+    assert CO.WHO in got.dimensions_present
+
+
+def test_a_subordinate_so_clause_with_no_verb_is_not_a_buyer():
+    """"so merchants" alone may be going anywhere; the verb is what makes it
+    a claim about who benefits."""
+    got, _ = pull("We rebuilt the pipeline so merchants and their staff, "
+                  "developers, agencies.", actor="Shopify")
+    assert got is None or not got.buyer
+
+
+def test_a_possessive_after_so_addresses_the_reader_and_names_nobody():
+    """"so your merchants have better control" is still the second person:
+    it is the READER's merchants, and every vendor page says it.
+
+    A bare "so you have ..." needs no guard at all — the head noun must name
+    an economic agent and "you" is not one — so the rule is tested where it
+    actually fires.
+    """
+    got, _ = pull("Introducing granular permissions so your merchants have "
+                  "better control over staff access.", actor="Shopify")
+    assert got is None or not got.buyer
+
+
+def test_a_named_edition_is_a_priced_tier_without_a_price_beside_it():
+    """"Bundled with Unlimited Edition" names a thing you buy; the price
+    lives in the pricing table two screens away."""
+    got, _ = pull("Bundled with Unlimited Edition.", actor="Salesforce")
+    assert got is not None
+    assert "Unlimited Edition" in (got.use_case or got.workflow)
+    assert CO.WHAT in got.dimensions_present
+
+
+def test_a_bare_capitalised_word_is_not_a_tier():
+    """Edition, Plan, Tier and Package are what a vendor calls a thing you
+    buy. A capitalised word alone is not one."""
+    got, _ = pull("Bundled with Winter Release.", actor="Salesforce")
+    assert got is None or "winter release" not in (
+        (got.use_case or "") + (got.workflow or "")).lower()
+
+
+def test_recovering_a_buyer_does_not_establish_the_object_by_itself():
+    """The bar is unchanged. Finding the WHO on a sentence that still names
+    no WHAT moves it UNKNOWN -> PARTIAL and no further."""
+    got, _ = pull("Introducing 10 new granular permissions, including "
+                  "view-only permissions, so store owners have better "
+                  "control over staff access to products.", actor="Shopify")
+    assert got.standing == CO.PARTIAL
+    assert not got.is_usable

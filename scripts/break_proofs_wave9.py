@@ -260,6 +260,21 @@ PROOFS = [
      "    text = \" \".join((span or \"\").split()).lower()",
      f"{NM}::test_a_curly_quote_does_not_lose_a_label"),
 
+    # The first version mutated a `you\b` alternative that could never fire —
+    # the head noun must name an economic agent and "you" is not one — so the
+    # proof came back NOT_CAUGHT and the dead alternative was deleted. The
+    # POSSESSIVE is the part that does the work.
+    ("w9-10. the reader's own merchants are read as a named buyer",
+     S / "competitive_objects.py",
+     "    r\"\\bso\\s+((?!your\\b|our\\b|their\\b)(?:[a-z][\\w-]*\\s+){0,3}?\"",
+     "    r\"\\bso\\s+((?:[a-z][\\w-]*\\s+){0,3}?\"",
+     f"{CO}::test_a_possessive_after_so_addresses_the_reader_and_names_nobody"),
+    ("w9-11. any capitalised word beside 'Bundled with' is a priced tier",
+     S / "competitive_objects.py",
+     "    r\"\\b([A-Z][A-Za-z0-9+]*\\s+(?:Edition|Plan|Tier|Package))\\b\")",
+     "    r\"\\b([A-Z][A-Za-z0-9+]*\\s+[A-Z][A-Za-z0-9+]*)\\b\")",
+     f"{CO}::test_a_bare_capitalised_word_is_not_a_tier"),
+
     ("w9-5. a sub-brand is treated as a different company",
      S / "competitive_actions.py",
      "    return a in b or b in a or bool(set(a.split()) & set(b.split()))",

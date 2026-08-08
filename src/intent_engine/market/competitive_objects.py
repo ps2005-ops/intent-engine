@@ -86,7 +86,7 @@ _AGENT_NOUN = (r"merchants?|retailers?|customers?|buyers?|businesses|"
                r"business|companies|brands?|sellers?|firms?|institutions?|"
                r"agencies|teams?|developers?|entrepreneurs?|founders?|"
                r"stores?|shops?|organi[sz]ations?|enterprises|"
-               r"manufacturers?|wholesalers?|operators?|marketers?")
+               r"manufacturers?|wholesalers?|operators?|marketers?|owners?")
 
 #: A named buyer or segment. "for enterprise retailers", "for SMB merchants",
 #: "for solo entrepreneurs", "for complex businesses".
@@ -118,6 +118,24 @@ _SEGMENT = re.compile(
     r"\b((?:" + _SEGMENT_MARKER + r")"
     r"(?:[,\s]+(?!for\b|your\b|our\b|their\b)[a-z][\w-]*){0,3}?\s+"
     r"(?:" + _AGENT_NOUN + r"))\b", re.I)
+
+#: A buyer named by the CONSEQUENCE clause instead of by "for". Live release
+#: notes carry it constantly: "Introducing 10 new granular permissions ... so
+#: store owners have better control over staff access" names its buyer every
+#: bit as plainly as "for store owners" would. The verb is required — "so
+#: store owners" alone is a subordinate clause that may be going anywhere.
+_BENEFICIARY = re.compile(
+    r"\bso\s+((?!your\b|our\b|their\b)(?:[a-z][\w-]*\s+){0,3}?"
+    r"(?:" + _AGENT_NOUN + r"))\s+"
+    r"(?:have|has|get|gets|can|gain|gains|receive|see)\b", re.I)
+
+#: A named edition or plan carrying no price in the same sentence. "Bundled
+#: with Unlimited Edition" names a priced tier; the price lives in the
+#: pricing table two screens away. The noun is what makes it safe — Edition,
+#: Plan, Tier and Package are what a vendor calls a thing you buy, and a
+#: capitalised word alone is not.
+_NAMED_TIER = re.compile(
+    r"\b([A-Z][A-Za-z0-9+]*\s+(?:Edition|Plan|Tier|Package))\b")
 
 #: A tier name sitting immediately on top of its price. This is the shape of
 #: every pricing table on the internet — "Basic. CA$37/mo.", "Scale. $299." —
@@ -374,13 +392,17 @@ def extract(span: str, *, action_id: str, actor: str, source: str,
     buyer = buyer_hit.group(1).strip() if buyer_hit else ""
     if buyer and _vacuous(buyer):
         buyer = ""
-    if not buyer:
-        segment_hit = _SEGMENT.search(text)
-        if segment_hit and not _vacuous(segment_hit.group(1)):
-            buyer = segment_hit.group(1).strip()
-            spans.append(segment_hit.group(0))
-    elif buyer:
+    if buyer:
         spans.append(buyer_hit.group(0))
+    else:
+        # Same buyer, other constructions: a bare qualified segment, and the
+        # consequence clause a release note uses instead of "for".
+        for pattern in (_SEGMENT, _BENEFICIARY):
+            hit = pattern.search(text)
+            if hit and not _vacuous(hit.group(1)):
+                buyer = hit.group(1).strip()
+                spans.append(hit.group(0))
+                break
 
     workflow_hit = _WORKFLOW.search(text)
     workflow = workflow_hit.group(1).strip() if workflow_hit else ""
@@ -395,7 +417,8 @@ def extract(span: str, *, action_id: str, actor: str, source: str,
     if product:
         spans.append(product_hit.group(0))
 
-    tier_hit = _TIER.search(text) or _PRICED_TIER.search(text)
+    tier_hit = (_TIER.search(text) or _PRICED_TIER.search(text)
+                or _NAMED_TIER.search(text))
     tier = tier_hit.group(1).strip() if tier_hit else ""
     if tier and (_vacuous(tier) or tier.lower() == (actor or "").lower()):
         tier = ""
