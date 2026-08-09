@@ -1674,14 +1674,45 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         discoveries = list(
             ((payload.get("unsupervised") or {}).get("regimes") or {}
              ).get("scores") or ())
+        # THE FOUNDER CHANNEL'S ACTUAL INPUT. It reported UNMEASURABLE for
+        # three sessions because nothing passed it decision-impact records —
+        # the Founder side computed them and persisted only the ones that
+        # CHANGED something, which is a success log a rate cannot be taken
+        # over. `decision_impact.jsonl` now carries NONE and
+        # FIRST_OBSERVATION too, which is what gives the rate a denominator.
         payload["learning_acceleration"] = LA.report(
             LH.load_cycle_observations(pathlib.Path(ctx.root)),
             ledger=rows, decision_impacts=impacts,
+            decision_impact_records=_decision_impacts(ctx),
             execution_ledger=_execution_ledger(ctx),
             discoveries=discoveries)
     except Exception as exc:  # noqa: BLE001
         payload["learning_acceleration"] = {"error": str(exc)}
     return payload
+
+
+def _decision_impacts(ctx) -> List[dict]:
+    """Graded before/after comparisons produced by the Founder surface.
+
+    Read-only and optional. Absent file means the Founder channel reports
+    UNMEASURABLE, which is the honest reading for a runtime that has never
+    compared an analysis against its own prior revision.
+    """
+    import json as _json
+
+    path = pathlib.Path(ctx.root) / "reports" / "market" / "decision_impact.jsonl"
+    if not path.exists():
+        return []
+    out: List[dict] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(_json.loads(line))
+        except ValueError:
+            continue
+    return out
 
 
 def _execution_ledger(ctx) -> List[dict]:

@@ -936,12 +936,37 @@ def founder_channel(ledger: Sequence[dict],
             dossiers_published_is_not_value=True)
     changed = [e for e in components
                if str(e.get("effect_type")) in CHANGING_EFFECTS]
-    graded = [str(i.get("impact") or i.get("standing") or "")
+    graded = [str(i.get("materiality") or i.get("impact")
+                  or i.get("standing") or "")
               for i in impacts]
-    meaningful = [g for g in graded
+    # FIRST_OBSERVATION LEAVES BOTH SIDES OF THE RATE. A company whose dossier
+    # has no prior revision had nothing for this learning to change, so it is
+    # neither an impact nor a non-impact. Counting it in the numerator was the
+    # measured defect — 25 of 25 dossiers graded MEANINGFUL or better because
+    # the BEFORE was an empty context — and counting it in the denominator
+    # would swing the same metric to near zero on a first run. It is not a
+    # claim about impact in either direction.
+    claims = [g for g in graded if g and g != "FIRST_OBSERVATION"]
+    firsts = [g for g in graded if g == "FIRST_OBSERVATION"]
+    if not components and not claims and firsts:
+        # A DIFFERENT UNMEASURABLE FROM THE ONE ABOVE, AND WORTH SAYING SO.
+        # There, nothing recorded decision impact at all. Here the instrument
+        # exists and has recorded a baseline for every company; what is
+        # missing is a SECOND revision to compare against. Collapsing the two
+        # would hide the fact that this one clears itself on the next dossier
+        # that actually changes.
+        return _unmeasurable(
+            FOUNDER,
+            f"{len(firsts)} dossier baseline(s) recorded and no prior "
+            f"revision to compare any of them against yet. This is not "
+            f"'no impact' — it is the first observation, and the rate "
+            f"becomes measurable on the next revision that differs",
+            first_observations=len(firsts), impact_claims=0,
+            awaiting="a second dossier revision per company")
+    meaningful = [g for g in claims
                   if g in ("MEANINGFUL", "DECISION_CHANGING")]
     numerator = float(len(changed) + len(meaningful))
-    denominator = float(len(components) + len(impacts))
+    denominator = float(len(components) + len(claims))
     rate = round(numerator / denominator, 4) if denominator else None
     status, reason = _status_from_level(
         rate, denominator, floor=LOW_LEARNING_SHARE,
@@ -956,6 +981,9 @@ def founder_channel(ledger: Sequence[dict],
         maturity=sample_maturity(denominator), window="lifetime",
         detail={"decision_components": len(components),
                 "impacts_recorded": len(impacts),
+                "impact_claims": len(claims),
+                "first_observations": len(
+                    [g for g in graded if g == "FIRST_OBSERVATION"]),
                 "by_grade": dict(collections.Counter(g for g in graded if g))})
 
 

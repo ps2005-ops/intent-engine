@@ -384,3 +384,49 @@ def test_live_effects_span_one_write_cycle_not_seven_months():
     cycles_with_effects = sum(1 for c in LA._effect_cycles(rows) if c)
     assert len(months) > 3, "the live corpus should still span months"
     assert cycles_with_effects < len(months)
+
+
+# --- the founder channel's three states -------------------------------------
+
+def _impact(materiality: str, n: int = 0) -> dict:
+    return {"record": "decision_impact", "materiality": materiality,
+            "decision_impact_id": f"di_{materiality}_{n}",
+            "company_id": f"c{n}", "changed": materiality not in
+            ("NONE", "FIRST_OBSERVATION")}
+
+
+def test_no_impact_record_at_all_is_unmeasurable():
+    report = LA.founder_channel([], [])
+    assert report.status == LA.UNMEASURABLE
+    assert "count of publications is not an answer" in report.reason
+
+
+def test_only_first_observations_is_a_different_unmeasurable():
+    """The instrument exists and has no second revision to compare against.
+
+    Collapsing this into the reason above would hide that it clears itself
+    on the next dossier that differs.
+    """
+    report = LA.founder_channel(
+        [], [_impact("FIRST_OBSERVATION", i) for i in range(25)])
+    assert report.status == LA.UNMEASURABLE
+    assert "first observation" in report.reason
+    assert report.detail["first_observations"] == 25
+    assert report.detail["impact_claims"] == 0
+
+
+def test_a_first_observation_enters_neither_side_of_the_rate():
+    """Counting it in the numerator produced 25 of 25; counting it in the
+    denominator would swing the same metric to near zero on a first run."""
+    report = LA.founder_channel(
+        [], [_impact("DECISION_CHANGING", 1), _impact("NONE", 2)]
+        + [_impact("FIRST_OBSERVATION", i) for i in range(20)])
+    assert report.numerator == 1.0
+    assert report.denominator == 2.0
+    assert report.detail["first_observations"] == 20
+
+
+def test_the_channel_reads_materiality():
+    report = LA.founder_channel([], [_impact("MEANINGFUL", 1)])
+    assert report.numerator == 1.0
+    assert report.denominator == 1.0
