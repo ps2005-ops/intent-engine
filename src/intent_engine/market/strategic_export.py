@@ -519,32 +519,64 @@ def _thesis_history(revisions: Sequence[Any], available: bool) -> dict:
     }
 
 
+def _field(obj: Any, name: str, default: Any = "") -> Any:
+    """Read a field from an object OR a persisted row.
+
+    Both shapes are real and both reach here: the cycle holds EconomicThesis
+    objects, and `LearningStore.thesis_snapshots()` returns the rows it wrote.
+    A getattr-only reader folded every snapshot into empty strings and then
+    raised on the first attribute a dict does not have — the export failed
+    closed for the whole company and reported `published: []`.
+    """
+    if isinstance(obj, dict):
+        return obj.get(name, default)
+    return getattr(obj, name, default)
+
+
+def _alternative(alt: Any) -> str:
+    """A rival explanation, from either row shape."""
+    if isinstance(alt, str):
+        return alt
+    return str(getattr(alt, "description", "") or "")
+
+
 def _economic_thesis(thesis: Any) -> dict:
     """One thesis, with its rivals attached rather than summarised away."""
     from . import founder_v4_view as FV4
 
-    mech = getattr(thesis, "leading_mechanism", None)
+    mech = _field(thesis, "leading_mechanism", None)
+    standing = str(_field(thesis, "standing") or "")
+    # The derived implication needs the OBJECT's own logic and a persisted
+    # row does not carry it. Asking for it from a dict raised; falling back
+    # to the recorded field is the honest read, and an empty one is empty
+    # rather than invented.
+    if isinstance(thesis, dict):
+        implication = str(thesis.get("decision_implication") or "")
+    else:
+        implication = FV4._implication(thesis)
     return {
-        "thesis_id": getattr(thesis, "thesis_id", ""),
-        "claim": getattr(thesis, "claim", ""),
-        "standing": getattr(thesis, "standing", ""),
-        "question": getattr(thesis, "question", ""),
-        "horizon_days": int(getattr(thesis, "horizon_days", 0) or 0),
-        "macro_conditions": list(getattr(thesis, "macro_conditions", ())),
-        "exposures": list(getattr(thesis, "exposures", ())),
-        "mechanism": getattr(mech, "description", "") if mech else "",
-        "falsifier": getattr(mech, "falsifier", "") if mech else "",
-        "alternatives": [getattr(m, "description", "")
-                         for m in getattr(thesis, "alternatives", ())],
-        "unknowns": list(getattr(thesis, "unknowns", ())),
-        "decision_implication": FV4._implication(thesis),
-        "confidence_in_words": FV4._STANDING_WORDS.get(
-            getattr(thesis, "standing", ""), ""),
-        "evidence_ids": list(getattr(thesis, "supporting_evidence", ())),
+        "thesis_id": str(_field(thesis, "thesis_id") or ""),
+        "claim": str(_field(thesis, "claim") or ""),
+        "standing": standing,
+        "question": str(_field(thesis, "question") or ""),
+        "horizon_days": int(_field(thesis, "horizon_days", 0) or 0),
+        "macro_conditions": list(_field(thesis, "macro_conditions", ()) or ()),
+        "exposures": list(_field(thesis, "exposures", ()) or ()),
+        "mechanism": str(_field(mech, "description") or "") if mech else "",
+        "falsifier": str(_field(mech, "falsifier") or "") if mech else "",
+        # Alternatives are Mechanism OBJECTS on a live thesis and plain
+        # strings on a persisted row. Reading `description` off a string
+        # yields "" and stringifying a Mechanism ships its repr into the
+        # dossier — both were shipped by one version of this line.
+        "alternatives": [_alternative(a) for a in
+                         (_field(thesis, "alternatives", ()) or ())],
+        "unknowns": [str(u) for u in (_field(thesis, "unknowns", ()) or ())],
+        "decision_implication": implication,
+        "confidence_in_words": FV4._STANDING_WORDS.get(standing, ""),
+        "evidence_ids": [str(e) for e in
+                         (_field(thesis, "evidence_ids", ()) or ())],
     }
 
-
-# --- normalized trust: rows in, occurrences out ---------------------------
 def _trust_index(evidence_rows: Sequence[Any]) -> Dict[str, Any]:
     """evidence_id -> the trust standing of the EVENT that row belongs to.
 

@@ -160,3 +160,44 @@ def test_the_live_ledger_reports_no_movement_rather_than_no_history():
         "every live revision is CREATED, so every subject must read "
         "AVAILABLE_NO_MOVEMENT; MOVED would mean a thesis transitioned and "
         "UNAVAILABLE would mean the transport regressed")
+
+
+# --- both row shapes are real -----------------------------------------------
+
+def test_a_persisted_snapshot_exports_like_an_object():
+    """The live defect: `published: []` for every company, one attribute.
+
+    The cycle holds EconomicThesis OBJECTS and the store returns the ROWS it
+    wrote. A getattr-only projector folded every dict into empty strings and
+    then raised `'dict' object has no attribute 'standing'`, so the export
+    failed closed for the whole company and reported nothing published.
+    """
+    row = {"thesis_id": "th_1", "claim": "costs are rising",
+           "standing": "PROPOSED", "question": "q", "horizon_days": 30,
+           "macro_conditions": ["US:INFLATION"], "exposures": ["INPUT_COST"],
+           "alternatives": ["the mix shifted"], "unknowns": [],
+           "decision_implication": "hold pricing", "evidence_ids": ["ev_1"]}
+    got = SE._economic_thesis(row)
+    assert got["thesis_id"] == "th_1"
+    assert got["standing"] == "PROPOSED"
+    assert got["decision_implication"] == "hold pricing"
+    assert got["alternatives"] == ["the mix shifted"]
+
+
+def test_the_live_snapshots_survive_the_export():
+    """Against the real store, because that is the shape that failed."""
+    store = LS.LearningStore(MARKET_ROOT / LS.DEFAULT_PATH)
+    snapshots = store.thesis_snapshots()
+    if not snapshots:                                      # pragma: no cover
+        pytest.skip("no thesis snapshots in the live ledger")
+    subject = str(snapshots[0].get("subject") or "")
+    mine = [t for t in snapshots if SP._belongs(t, subject)]
+    payload = SE.build_export(
+        company_id=subject, as_of="2026-08-09", subject_id=subject,
+        display_name=subject, subject_names=[subject], beliefs=[],
+        economic_theses=mine,
+        thesis_revisions=SP._revisions_for(store.thesis_revisions(), mine),
+        history_available=True)
+    assert len(payload["economic_theses"]) == len(mine)
+    assert payload["thesis_history"]["status"] == \
+        SE.HISTORY_AVAILABLE_NO_MOVEMENT
