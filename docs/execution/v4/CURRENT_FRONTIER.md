@@ -46,7 +46,37 @@ adopted after this graph was derived and were reconciled into it once, on
 2026-08-09, as PROGRAM L. They are not to be rescoped again session by
 session.
 
-## What the last session changed (E-DEM-001)
+## H-CEO-001 is HALF DONE, and the other half is blocked upstream
+
+**Done and break-proven:** decision-impact measurement. The instrument
+existed all along, was deterministic, was wired, and had never written a
+record. Exercising it on all 59 live dossiers showed why it could not have
+helped: 25 available, 16 DECISION_CHANGING, 9 MEANINGFUL, **zero NONE** —
+because the BEFORE was `build_context(strategic=None)`, empty on all five
+fields. It measured whether a dossier was attached. The BEFORE is now the
+prior revision, `FIRST_OBSERVATION` is a third outcome entering neither side
+of the rate, and 10 mutation proofs hold — including restoring the empty
+BEFORE and watching NONE disappear.
+
+**FOUNDER_VALUE is still UNMEASURABLE and that is correct.** All 25 live
+records are baselines. It clears on the first dossier revision that differs.
+Do not manufacture one.
+
+**Not done: the CEO Q&A half, and Q6 is blocked by the TRANSPORT.** "What
+changed your mind" must resolve thesis → non-CREATED ThesisRevision →
+KnowledgeEffect → evidence. The live market→Founder dossier carries
+`strategic_beliefs`, `causal_pathways`, `hidden_states`, `interactions`,
+`expectation_mismatches` and `information_priorities` — and **no revision
+history and no economic_theses**. So the Founder side cannot tell "this
+thesis never moved" from "revisions exist and are not transported", and those
+need opposite answers.
+
+Today the market's 18 thesis_revision rows are ALL CREATED, so both readings
+produce the same sentence and the defect is invisible. **It starts giving a
+wrong answer the moment a thesis first moves.** Build the export leg before
+the planner.
+
+## What the session before that changed (E-DEM-001)
 
 **The demand problem was never a reasoning problem.** The node reads
 "targeted demand-variable extraction" and the obvious move was to add
