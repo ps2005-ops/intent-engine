@@ -155,7 +155,16 @@ def test_a_causal_claim_is_never_easier_than_its_own_predictor():
 
 # --- the real ledger ------------------------------------------------------
 
-def test_the_real_ledger_reads_two_unmeasurable_and_two_emerging():
+def test_the_real_ledger_keeps_its_causal_statuses_honest():
+    """Invariants, not a snapshot.
+
+    This test used to assert REPEATEDLY_SUPPORTED == 0, which was true of the
+    ledger on the day it was written and stopped being true the night
+    `demand_strengthening` reached its eighth confirmation. Nothing in the
+    code changed; production appended. A count of a live artifact is not an
+    invariant, so what is asserted here is what must hold at every size the
+    ledger will ever be.
+    """
     from intent_engine.universe.companies import default_universe
     industries = {c.company_id: getattr(c, "industry", "")
                   or getattr(c, "sector", "")
@@ -163,11 +172,15 @@ def test_the_real_ledger_reads_two_unmeasurable_and_two_emerging():
     got = CC.summarise(CC.calibrate(rows(), industry_of=industries))
     assert got["by_status"][CC.UNMEASURABLE] >= 1
     assert got["by_status"][CC.EMERGING] >= 1
-    # SUPPORTED may legitimately appear as the live ledger grows; what
-    # must never happen is a causal edge reaching OBSERVED.
+    # A causal edge must never reach OBSERVED, at any ledger size.
     assert CC.OBSERVED not in got["by_status"] if hasattr(CC, "OBSERVED") \
         else True
-    assert got["by_status"][CC.REPEATEDLY_SUPPORTED] == 0
+    # Promotion is earned, never granted: nothing may be REPEATEDLY_SUPPORTED
+    # on fewer tests than SUPPORTED requires.
+    promoted = [f for f in CC.calibrate(rows(), industry_of=industries)
+                if f.status == CC.REPEATEDLY_SUPPORTED]
+    assert all(f.tests >= CC.MIN_TESTS for f in promoted)
+    assert all(f.contradicted == 0 for f in promoted)
     assert got["total_tests"] >= 5
     assert got["total_contradictions"] >= 2
 

@@ -125,6 +125,28 @@ PUBLISHER = "PUBLISHER"        # the source stated the release date
 ASSUMED_LAG = "ASSUMED_LAG"    # derived from the period end, deliberately late
 PUBLICATION_BASES = (PUBLISHER, ASSUMED_LAG)
 
+# --- whose economy -----------------------------------------------------------
+#
+# THE ECONOMY IS NOT ONE ECONOMY. As soon as a second publisher was reachable
+# the engine held a Canadian policy rate and an American market rate, and with
+# no area on the observation both landed in the same bucket: `state_of` sorts
+# by reference period, so the Bank of Canada's daily rate would have silently
+# outranked and then been DIFFERENCED against a US monthly series. Two
+# countries' conditions are two facts, and a direction computed across them is
+# not a direction at all.
+#
+# GLOBAL is for conditions with no single jurisdiction — a commodity index, a
+# cross rate — and it is deliberately not a synonym for "we did not check".
+US = "US"
+CA = "CA"
+GLOBAL = "GLOBAL"
+AREAS = (US, CA, GLOBAL)
+
+#: The area assumed when a caller does not say. Existing records predate the
+#: field and were all US Treasury figures, so this keeps them meaning what
+#: they meant when they were written.
+DEFAULT_AREA = US
+
 
 class MacroRejected(ValueError):
     """A macro observation that would assert more than it measured."""
@@ -151,6 +173,11 @@ class MacroObservation:
     measure: str = LEVEL
     standing: str = OBSERVED
 
+    #: Whose economy this figure describes. Defaulted rather than required so
+    #: the figures already in the ledger keep the meaning they were written
+    #: with; every new adapter states it explicitly.
+    area: str = DEFAULT_AREA
+
     #: The span the figure DESCRIBES. Never the day it was read.
     reference_period: str = ""
     #: When the publisher released it. A figure cannot inform a decision made
@@ -172,6 +199,10 @@ class MacroObservation:
     def __post_init__(self) -> None:
         if self.state_kind not in STATE_KINDS:
             raise MacroRejected(f"unknown state kind {self.state_kind!r}")
+        if self.area not in AREAS:
+            raise MacroRejected(
+                f"unknown area {self.area!r}: a figure whose economy is not "
+                "named will be folded together with another country's")
         if self.standing not in STANDINGS:
             raise MacroRejected(f"unknown standing {self.standing!r}")
         if self.measure not in MEASURES:
@@ -204,6 +235,11 @@ class MacroObservation:
 
     @property
     def observation_id(self) -> str:
+        # Area is deliberately NOT in the hash. A series id already names one
+        # publisher's one series, so area cannot discriminate two figures that
+        # this key would otherwise collide — and adding it would re-key every
+        # figure already in the ledger, duplicating the whole stored history
+        # against itself on the next cycle.
         raw = "|".join((self.series_id, self.reference_period,
                         self.published_at, f"{self.value!r}", self.measure))
         return "macro_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
@@ -301,6 +337,11 @@ def direction(current: MacroObservation,
         raise MacroRejected(
             f"cannot difference {previous.series_id} against "
             f"{current.series_id}: they measure different things")
+    if previous.area != current.area:
+        raise MacroRejected(
+            f"cannot difference a {previous.area} figure against a "
+            f"{current.area} one: two economies moving apart is not one "
+            "economy moving")
     if previous.measure != current.measure:
         raise MacroRejected("cannot difference a level against a change")
     if current.value > previous.value:
@@ -320,6 +361,7 @@ class EconomicState:
     moved: str = FLAT
     prior: Optional[MacroObservation] = None
     reason: str = ""
+    area: str = DEFAULT_AREA
 
     @property
     def known(self) -> bool:
@@ -329,8 +371,14 @@ class EconomicState:
     def anchors(self) -> bool:
         return self.standing in ANCHORING
 
+    @property
+    def key(self) -> Tuple[str, str]:
+        """What this state is a state OF. Never the kind alone."""
+        return (self.area, self.state_kind)
+
     def as_dict(self) -> dict:
         return {"contract": CONTRACT, "state_kind": self.state_kind,
+                "area": self.area,
                 "standing": self.standing, "moved": self.moved,
                 "known": self.known, "anchors": self.anchors,
                 "reason": self.reason,
@@ -340,7 +388,8 @@ class EconomicState:
                                          if self.prior else "")}
 
 
-def unknown(state_kind: str, reason: str = "") -> EconomicState:
+def unknown(state_kind: str, reason: str = "",
+            area: str = DEFAULT_AREA) -> EconomicState:
     """An honest absence. Not a zero, and not a neutral reading.
 
     UNKNOWN must never be rendered as FLAT or as 'no change': "we did not
@@ -349,36 +398,165 @@ def unknown(state_kind: str, reason: str = "") -> EconomicState:
     calm one.
     """
     return EconomicState(
-        state_kind=state_kind, standing=UNKNOWN,
+        state_kind=state_kind, standing=UNKNOWN, area=area,
         reason=reason or "no series in evidence measures this condition")
 
 
+#: (area, kind) -> the series that IS that condition when several measure it.
+#:
+#: THE DEFECT THIS CLOSES. Canada publishes a 2-year and a 10-year benchmark
+#: yield, both MARKET_RATE, both daily. With no rule, `state_of` sorted by
+#: reference period and the winner flipped between them on ties — so the
+#: engine's reading of Canadian market rates alternated between 2.82% and
+#: 3.61%, and `direction` faithfully reported a violent move that was really
+#: the state changing which question it was answering.
+#:
+#: A condition may be measured by many series and IS at most one of them.
+#: Where the choice is not declared here it is made by sorted series id, which
+#: is arbitrary but at least stable, and the ambiguity is named in `reason`.
+PRIMARY_SERIES = {
+    (US, MARKET_RATE): "TREASURY_NOTES_AVG_RATE",
+    (CA, MARKET_RATE): "BOC_BD.CDN.10YR.DQ.YLD",
+}
+
+
 def state_of(state_kind: str, observations: Sequence[MacroObservation], *,
-             as_of: str) -> EconomicState:
-    """The engine's dated reading of one condition.
+             as_of: str, area: str = DEFAULT_AREA) -> EconomicState:
+    """The engine's dated reading of one condition in one economy.
 
     Vintage-correct by construction: it reads only what was published on or
     before `as_of`, so a state built for a past date cannot see a revision
     that had not happened yet.
+
+    Area-scoped, because a national statistic is a fact about one nation. The
+    Bank of Canada publishes daily and the US Treasury monthly, so an
+    unscoped fold would have let the Canadian series win every comparison on
+    recency and then be differenced against the American one.
     """
     if state_kind not in STATE_KINDS:
         raise MacroRejected(f"unknown state kind {state_kind!r}")
+    if area not in AREAS:
+        raise MacroRejected(f"unknown area {area!r}")
     mine = [o for o in as_known_at(observations, as_of)
-            if o.state_kind == state_kind]
+            if o.state_kind == state_kind and o.area == area]
     if not mine:
-        return unknown(state_kind)
+        return unknown(state_kind, area=area)
+
+    # WHICH SERIES IS THIS CONDITION. Decided before recency, not after: if
+    # the newest figure decides, a condition measured by two series changes
+    # identity whenever one of them publishes, and every such switch is
+    # reported as an economic move that never happened.
+    available = sorted({o.series_id for o in mine})
+    chosen = PRIMARY_SERIES.get((area, state_kind))
+    if chosen not in available:
+        chosen = available[0]
+    others = [s for s in available if s != chosen]
+    mine = [o for o in mine if o.series_id == chosen]
+
     # Newest reference period wins; a longer series is not a better one.
     mine.sort(key=lambda o: (o.reference_period, o.published_at))
     current = mine[-1]
-    earlier = [o for o in mine[:-1] if o.series_id == current.series_id]
-    prior = earlier[-1] if earlier else None
+    prior = mine[-2] if len(mine) > 1 else None
+    reason = (f"{current.label} {current.value}{current.unit} for "
+              f"{current.reference_period}, published "
+              f"{current.published_at or 'undated'}")
+    if others:
+        reason += (f"; {len(others)} other series measure this condition and "
+                   f"were not read: {', '.join(others)}")
     return EconomicState(
-        state_kind=state_kind, standing=current.standing,
+        state_kind=state_kind, standing=current.standing, area=area,
         observation=current, prior=prior,
-        moved=direction(current, prior),
-        reason=(f"{current.label} {current.value}{current.unit} for "
-                f"{current.reference_period}, published "
-                f"{current.published_at or 'undated'}"))
+        moved=direction(current, prior), reason=reason)
+
+
+#: Conditions that are national, and so are asked of each country separately.
+_NATIONAL = tuple(k for k in STATE_KINDS if k != CURRENCY)
+
+#: Conditions that belong to no single country. A commodity index and a cross
+#: rate are set in world markets; asking for "US commodity prices" as distinct
+#: from global ones invents a condition no publisher measures.
+_WORLDWIDE = (COMMODITY_PRICE, ENERGY_PRICE, CURRENCY, TRADE)
+
+#: (area, kind) pairs the engine is actually trying to hold.
+#:
+#: NOT THE CROSS PRODUCT. Multiplying every area by every kind manufactured
+#: blind spots — GLOBAL:HOUSING, GLOBAL:UNEMPLOYMENT — that no publisher
+#: measures and nobody intended to measure, and a coverage figure computed
+#: against them understates coverage by describing absences that are not
+#: gaps. A gap is a condition the engine MEANT to hold and does not.
+TRACKED_CONDITIONS = tuple(
+    [(US, k) for k in _NATIONAL if k not in _WORLDWIDE]
+    + [(CA, k) for k in _NATIONAL if k not in _WORLDWIDE]
+    + [(GLOBAL, k) for k in _WORLDWIDE])
+
+
+def all_states(observations: Sequence[MacroObservation], *, as_of: str,
+               tracked: Sequence[Tuple[str, str]] = TRACKED_CONDITIONS
+               ) -> Tuple[EconomicState, ...]:
+    """Every condition in every economy the engine tries to hold.
+
+    Returns UNKNOWN states as well as known ones, on purpose. A world model
+    that only lists what it measured cannot report its own blind spots, and
+    "how many of the conditions I meant to hold do I actually hold" is the
+    single most useful number this layer produces.
+    """
+    return tuple(state_of(kind, observations, as_of=as_of, area=area)
+                 for area, kind in tracked)
+
+
+def term_spread(observations: Sequence[MacroObservation], *, as_of: str,
+                long_series: str, short_series: str,
+                area: str = DEFAULT_AREA,
+                label: str = "") -> Optional[MacroObservation]:
+    """The long rate minus the short rate, as an INFERRED credit condition.
+
+    WHY THIS IS NOT A LEVEL. "Rates rose" is compatible with an economy
+    tightening and an economy overheating; the two rates moving APART or
+    CROSSING is a different fact, and it is the one that changes what
+    borrowing costs a company will actually face. Neither series holds it.
+
+    INFERRED, never OBSERVED. Nobody published this number — the engine
+    subtracted two figures that were published — and the distinction is what
+    keeps a derived series from being cited as a measurement.
+
+    SAME PERIOD, OR NOTHING. Differencing a July long rate against a March
+    short rate produces a spread that describes no month at all, so the two
+    legs must share a reference period. Returns None rather than reaching for
+    the nearest available leg, because a spread built from mismatched vintages
+    is worse than an absent one: it looks like data.
+    """
+    known = as_known_at(observations, as_of)
+    longs = {o.reference_period: o for o in known
+             if o.series_id == long_series}
+    shorts = {o.reference_period: o for o in known
+              if o.series_id == short_series}
+    shared = sorted(set(longs) & set(shorts))
+    if not shared:
+        return None
+    period = shared[-1]
+    lo, sh = longs[period], shorts[period]
+    if lo.measure != sh.measure:
+        raise MacroRejected("cannot spread a level against a change")
+    if lo.area != sh.area:
+        raise MacroRejected(
+            f"cannot spread a {lo.area} rate against a {sh.area} one")
+    # The later of the two publication dates: the spread was not knowable
+    # until both legs were.
+    published = max(lo.published_at[:10], sh.published_at[:10])
+    basis = (PUBLISHER if lo.publication_basis == sh.publication_basis ==
+             PUBLISHER else ASSUMED_LAG)
+    return MacroObservation(
+        state_kind=CREDIT_CONDITIONS, area=area,
+        series_id=f"SPREAD::{long_series}::{short_series}",
+        label=label or f"{lo.label} less {sh.label}",
+        value=round(lo.value - sh.value, 6), unit=lo.unit,
+        measure=lo.measure, standing=INFERRED,
+        reference_period=period, published_at=published,
+        publication_basis=basis,
+        retrieved_at=max(lo.retrieved_at, sh.retrieved_at),
+        source=f"derived: {lo.source} and {sh.source}",
+        note=("term spread derived by subtraction; not published by any "
+              "source, and INFERRED so it is never cited as a measurement"))
 
 
 def consequence_of(state: EconomicState, *_args, **_kwargs):
@@ -410,14 +588,28 @@ def summarise(states: Sequence[EconomicState]) -> dict:
     for s in states:
         by_standing[s.standing] = by_standing.get(s.standing, 0) + 1
     anchoring = [s for s in states if s.anchors]
+    by_area: Dict[str, Dict[str, int]] = {}
+    for s in states:
+        slot = by_area.setdefault(s.area, {"known": 0, "unknown": 0})
+        slot["known" if s.known else "unknown"] += 1
     return {
         "contract": CONTRACT,
         "conditions": len(states),
         "by_standing": by_standing,
+        "by_area": by_area,
+        "areas": sorted({s.area for s in states}),
         "anchoring": len(anchoring),
         "anchoring_kinds": sorted(s.state_kind for s in anchoring),
-        "unknown_kinds": sorted(s.state_kind for s in states if not s.known),
-        "moved": {s.state_kind: s.moved for s in states
+        "anchoring_keys": sorted(f"{s.area}:{s.state_kind}"
+                                 for s in anchoring),
+        # Kinds are de-duplicated across areas; a condition measured in Canada
+        # and not in the US is still a blind spot, and `unknown_keys` is where
+        # you find out which economy it is a blind spot in.
+        "unknown_kinds": sorted({s.state_kind for s in states
+                                 if not s.known}),
+        "unknown_keys": sorted(f"{s.area}:{s.state_kind}" for s in states
+                               if not s.known),
+        "moved": {f"{s.area}:{s.state_kind}": s.moved for s in states
                   if s.known and s.moved != FLAT},
         "note": ("standings are counted, never averaged; an unmeasured "
                  "condition is UNKNOWN and never FLAT"),

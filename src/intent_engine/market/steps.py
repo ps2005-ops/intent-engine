@@ -96,6 +96,15 @@ def research_step(research_fn: Optional[Callable] = None) -> Callable:
     return step
 
 
+#: (area, long leg, short leg) for the credit conditions the engine derives.
+#: Declared here rather than inside the fold so the set of derived conditions
+#: is a listed decision and not an expression buried in a loop.
+_CREDIT_SPREADS = (
+    ("CA", "BOC_BD.CDN.10YR.DQ.YLD", "BOC_BD.CDN.2YR.DQ.YLD"),
+    ("US", "TREASURY_NOTES_AVG_RATE", "TREASURY_BILLS_AVG_RATE"),
+)
+
+
 def _macro_sweep(ctx: C.CycleContext) -> dict:
     """Acquire the economy, and keep it.
 
@@ -845,12 +854,22 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         from . import macro_state as MS
 
         history = [MS.from_dict(r) for r in store.macro_observations()]
-        states[:] = [MS.state_of(kind, history, as_of=ctx.as_of)
-                     for kind in MS.STATE_KINDS]
+        # DERIVED HERE, NOT STORED. A spread is a fold over two figures the
+        # ledger already holds, so persisting it would put the same fact in
+        # twice and let a stale copy outlive the legs it was computed from.
+        derived = [s for s in (
+            MS.term_spread(history, as_of=ctx.as_of, area=area,
+                           long_series=long_id, short_series=short_id)
+            for area, long_id, short_id in _CREDIT_SPREADS) if s]
+        states[:] = list(MS.all_states(history + derived, as_of=ctx.as_of))
         anchoring = [s for s in states if s.anchors]
         macro_state = anchoring[0] if anchoring else None
-        payload["macro_state"] = {**MS.summarise(states),
-                                  "history_rows": len(history)}
+        payload["macro_state"] = {
+            **MS.summarise(states),
+            "history_rows": len(history),
+            "tracked_conditions": len(MS.TRACKED_CONDITIONS),
+            "derived_conditions": [s.series_id for s in derived],
+        }
     except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
         payload["macro_state"] = {"error": f"{type(exc).__name__}: {exc}"}
 
