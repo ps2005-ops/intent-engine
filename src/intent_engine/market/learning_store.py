@@ -116,6 +116,16 @@ RESEARCH_OUTCOME = "research_outcome"
 #: only honest record of what was knowable at the time.
 RESEARCH_DELAYED_OUTCOME = "research_delayed_outcome"
 
+#: One dated change to one thesis, and the knowledge effects that caused it.
+#: Append-only and contiguous: this is the only record of what the engine used
+#: to believe, and a reversal is only legible against it.
+THESIS_REVISION = "thesis_revision"
+#: The thesis as it stood at the end of a cycle, so the NEXT cycle has
+#: something to compare against. Without it every cycle rebuilds its theses
+#: from scratch and the temporal comparison is lost, which is why no revision
+#: was ever written.
+THESIS_SNAPSHOT = "thesis_snapshot"
+
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
@@ -126,6 +136,7 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           KNOWLEDGE_EFFECT,
                           RESEARCH_DECISION, RESEARCH_OUTCOME,
                           RESEARCH_DELAYED_OUTCOME,
+                          THESIS_REVISION, THESIS_SNAPSHOT,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
                           MACRO_OBSERVATION})
 
@@ -442,6 +453,54 @@ class LearningStore:
     def research_delayed_outcomes(self) -> Tuple[dict, ...]:
         return tuple(r for r in self._rows()
                      if r.get("record") == RESEARCH_DELAYED_OUTCOME)
+
+    def record_thesis_revision(self, revision) -> bool:
+        """Append one revision. Idempotent on the content-keyed revision id."""
+        payload = (revision.as_dict() if hasattr(revision, "as_dict")
+                   else dict(revision))
+        rid = str(payload.get("revision_id") or "")
+        if not rid:
+            raise ValueError("a thesis revision needs its content-keyed id")
+        if rid in frozenset(str(r.get("revision_id") or "")
+                            for r in self._rows()
+                            if r.get("record") == THESIS_REVISION):
+            return False
+        self._append(THESIS_REVISION, payload)
+        return True
+
+    def thesis_revisions(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == THESIS_REVISION)
+
+    def record_thesis_snapshot(self, thesis, *, as_of: str) -> bool:
+        """Keep this cycle's thesis so the next cycle can compare to it."""
+        payload = (thesis.as_dict() if hasattr(thesis, "as_dict")
+                   else dict(thesis))
+        payload["snapshot_as_of"] = as_of
+        key = (str(payload.get("thesis_id") or ""), as_of)
+        if not key[0]:
+            raise ValueError("a thesis snapshot needs its thesis_id")
+        if key in frozenset(
+                (str(r.get("thesis_id") or ""), str(r.get("snapshot_as_of")
+                                                    or ""))
+                for r in self._rows() if r.get("record") == THESIS_SNAPSHOT):
+            return False
+        self._append(THESIS_SNAPSHOT, payload)
+        return True
+
+    def thesis_snapshots(self, *, latest_only: bool = True
+                         ) -> Tuple[dict, ...]:
+        """Snapshots, by default only the most recent cycle's.
+
+        Comparing against every historical snapshot would diff a thesis
+        against its own ancestors and report movement that already happened.
+        """
+        rows = [r for r in self._rows() if r.get("record") == THESIS_SNAPSHOT]
+        if not rows or not latest_only:
+            return tuple(rows)
+        newest = max(str(r.get("snapshot_as_of") or "") for r in rows)
+        return tuple(r for r in rows
+                     if str(r.get("snapshot_as_of") or "") == newest)
 
     def macro_observation_ids(self) -> frozenset:
         return frozenset(str(r.get("observation_id") or "")

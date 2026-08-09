@@ -875,6 +875,53 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
     return payload
 
 
+def _rehydrate_thesis(row: dict):
+    """A persisted thesis snapshot back into an EconomicThesis.
+
+    Returns None rather than raising on a row this build cannot read. A
+    snapshot written by an older schema is not a reason to fail a cycle, and
+    silently dropping it is honest: the comparison for that thesis is simply
+    unavailable, which shows up as `loaded` being lower than expected.
+    """
+    from . import economic_thesis as ET
+
+    def mech(d):
+        if not isinstance(d, dict):
+            return None
+        return ET.Mechanism(
+            description=str(d.get("description") or ""),
+            direction=str(d.get("direction") or ""),
+            lag_days=int(d.get("lag_days") or 0),
+            falsifier=str(d.get("falsifier") or ""),
+            evidence_ids=tuple(d.get("evidence_ids") or ()),
+            standing=str(d.get("standing") or ET.PROPOSED))
+
+    try:
+        leading = mech(row.get("leading_mechanism"))
+        if leading is None:
+            return None
+        return ET.EconomicThesis(
+            subject=str(row.get("subject") or ""),
+            question=str(row.get("question") or ""),
+            claim=str(row.get("claim") or ""),
+            leading_mechanism=leading,
+            alternatives=tuple(m for m in
+                               (mech(d) for d in (row.get("alternatives")
+                                                  or ())) if m is not None),
+            macro_conditions=tuple(row.get("macro_conditions") or ()),
+            exposures=tuple(row.get("exposures") or ()),
+            supporting_evidence=tuple(row.get("supporting_evidence") or ()),
+            contradicting_evidence=tuple(
+                row.get("contradicting_evidence") or ()),
+            unknowns=tuple(row.get("unknowns") or ()),
+            horizon_days=int(row.get("horizon_days") or 90),
+            standing=str(row.get("standing") or ET.PROPOSED),
+            as_of=str(row.get("as_of") or ""),
+            supersedes=str(row.get("supersedes") or ""))
+    except Exception:  # noqa: BLE001 - see docstring
+        return None
+
+
 def knowledge_step(ctx: C.CycleContext) -> dict:
     """Derive standing, currency and research value from the ledger.
 
@@ -1204,6 +1251,31 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             "contested": sum(1 for c in contests if c.contested),
             "proofs": [ETH.prove(t).as_dict() for t in theses],
         }
+        # WHAT CHANGED SINCE LAST CYCLE. Theses were rebuilt from scratch
+        # every night and never compared to the previous night's, so the
+        # temporal question — did this claim move, and what moved it — had no
+        # data behind it and "what changed your mind?" answered "nothing" for
+        # every thesis. The snapshot is what gives the next cycle something to
+        # compare against.
+        from . import thesis_history as THI
+
+        prior = [_rehydrate_thesis(r) for r in store.thesis_snapshots()]
+        prior = [t for t in prior if t is not None]
+        history, revision_summary = THI.reconcile(
+            prior, theses, as_of=ctx.as_of, effects=exposure_effects)
+        revisions_written = 0
+        if not ctx.dry_run:
+            for revision in history.chain_all():
+                if store.record_thesis_revision(revision):
+                    revisions_written += 1
+            for thesis in theses:
+                store.record_thesis_snapshot(thesis, as_of=ctx.as_of)
+        payload["thesis_history"] = {
+            **revision_summary,
+            "revision_records_written": revisions_written,
+            "revisions_held": len(store.thesis_revisions()),
+        }
+
         payload["founder_v4"] = {
             **FV4.summarise(views),
             "briefings": [v.as_dict() for v in views],

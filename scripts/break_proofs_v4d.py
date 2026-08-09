@@ -199,6 +199,30 @@ PROOFS = [
      "        if False:",
      f"{H}::test_a_revision_whose_parent_is_not_the_head_is_refused"),
 
+    ("v4d-27. any effect on the same company evidences any thesis",
+     TH,
+     "        elif target_id and target_id in basis:",
+     "        elif target_id:",
+     f"{H}::test_an_effect_on_another_object_does_not_evidence_this_thesis"),
+
+    ("v4d-28. a thesis whose claim moved is treated as a new thesis",
+     TH,
+     "    return (thesis.subject, thesis.question)",
+     "    return (thesis.subject, thesis.question, thesis.claim)",
+     f"{H}::test_identity_is_subject_and_question_not_the_hashed_claim"),
+
+    ("v4d-29. a strengthening with no bearing effect is recorded as stronger",
+     TH,
+     "        if transition in UPWARD and not bearing:",
+     "        if False:",
+     f"{H}::test_a_strengthening_with_no_bearing_effect_is_not_recorded_as_stronger"),
+
+    ("v4d-30. an unchanged thesis records a revision every cycle",
+     TH,
+     "        if not changed:",
+     "        if False:",
+     f"{H}::test_an_unchanged_thesis_records_no_revision"),
+
     ("v4d-22. attribution is computed and not persisted",
      ST,
      "                if store.record_knowledge_effect(effect):",

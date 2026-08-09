@@ -228,6 +228,9 @@ class ThesisHistory:
                 m.description for m in (after.alternatives or ()))))
 
     # --- reading ----------------------------------------------------------
+    def chain_all(self) -> Tuple[ThesisRevision, ...]:
+        return tuple(self._rows)
+
     def chain(self, thesis_id: str) -> Tuple[ThesisRevision, ...]:
         return tuple(r for r in self._rows if r.thesis_id == thesis_id)
 
@@ -290,3 +293,117 @@ class ThesisHistory:
                      "must name an effect, because a claim may only become "
                      "more believed on evidence that changed something"),
         }
+
+
+# --- the production seam -------------------------------------------------------
+
+def effects_bearing_on(thesis, effects: Sequence) -> Tuple[str, ...]:
+    """The effect ids that actually bear on THIS thesis.
+
+    THE RULE THAT MATTERS. The lazy version attaches every effect from the
+    cycle to every thesis about the same company, which makes each revision
+    look thoroughly evidenced and means nothing: a thesis about capex would
+    cite an effect on a demand state because they share a subject. Then the
+    strengthening guard passes on evidence that had no bearing, and the guard
+    is decoration.
+
+    So an effect counts only when it names something the thesis rests on:
+    the thesis itself, or one of the exposures or macro conditions it is
+    built from. Everything else is about the same company and irrelevant.
+    """
+    from . import knowledge_effect as KE
+
+    basis = set(thesis.exposures or ()) | set(thesis.macro_conditions or ())
+    out = []
+    for effect in effects:
+        target_type = getattr(effect, "target_type", "")
+        target_id = str(getattr(effect, "target_id", ""))
+        if target_type == KE.THESIS and target_id == thesis.thesis_id:
+            out.append(effect.effect_id)
+        elif target_id and target_id in basis:
+            out.append(effect.effect_id)
+    return tuple(sorted(set(out)))
+
+
+def identity(thesis) -> Tuple[str, str]:
+    """What makes two theses the SAME thesis across cycles.
+
+    Not `thesis_id`: that hashes the claim and the date, so a thesis whose
+    claim moved by one word is a different id and would read as a brand new
+    thesis every cycle — which is precisely the comparison being lost. The
+    durable identity is the subject and the question.
+    """
+    return (thesis.subject, thesis.question)
+
+
+def reconcile(previous: Sequence, current: Sequence, *, as_of: str,
+              effects: Sequence = (), history: Optional[ThesisHistory] = None
+              ) -> Tuple[ThesisHistory, dict]:
+    """Compare two cycles' theses and record what moved.
+
+    Returns the history and a bounded summary. A thesis present in both with
+    no semantic difference records NOTHING — a revision per cycle per thesis
+    would bury the real movements under a log of restatements.
+    """
+    from . import economic_thesis as ET
+
+    history = history if history is not None else ThesisHistory()
+    before = {identity(t): t for t in previous}
+    counts = {k: 0 for k in ("loaded", "compared", "unchanged", "created",
+                             "strengthened", "weakened", "contested",
+                             "falsified", "superseded", "written",
+                             "unattributed")}
+    counts["loaded"] = len(before)
+    for thesis in current:
+        key = identity(thesis)
+        prior = before.get(key)
+        if prior is None:
+            if history.head(thesis.thesis_id):
+                continue
+            history.append(ThesisRevision(
+                thesis_id=thesis.thesis_id, transition=CREATED,
+                previous_standing="", new_standing=thesis.standing,
+                reason=f"first stated for {thesis.subject}: {thesis.claim}",
+                changed_at=as_of))
+            counts["created"] += 1
+            counts["written"] += 1
+            continue
+        counts["compared"] += 1
+        changed = diff(prior, thesis)
+        if not changed:
+            counts["unchanged"] += 1
+            continue
+        bearing = effects_bearing_on(thesis, effects)
+        transition = classify(prior, thesis)
+        # A strengthening with no effect bearing on this thesis is not
+        # recorded as a strengthening. The guard would refuse it anyway; the
+        # honest reading is that the claim moved for a reason the ledger
+        # cannot name, which is CONTESTED, not stronger.
+        if transition in UPWARD and not bearing:
+            counts["unattributed"] += 1
+            continue
+        evidence = tuple(thesis.supporting_evidence or ())
+        if transition != CREATED and not bearing and not evidence:
+            counts["unattributed"] += 1
+            continue
+        history.append(ThesisRevision(
+            thesis_id=prior.thesis_id, transition=transition,
+            previous_standing=prior.standing, new_standing=thesis.standing,
+            reason=(f"{', '.join(changed)} moved between cycles"),
+            changed_at=as_of, previous_revision=history.head(prior.thesis_id),
+            knowledge_effect_ids=bearing, triggering_evidence=evidence,
+            changed_fields=changed,
+            alternatives_before=tuple(m.description
+                                      for m in (prior.alternatives or ())),
+            alternatives_after=tuple(m.description
+                                     for m in (thesis.alternatives or ()))))
+        counts[transition.lower()] = counts.get(transition.lower(), 0) + 1
+        counts["written"] += 1
+    summary = dict(counts)
+    summary.update(
+        contract=CONTRACT,
+        note=("a thesis present in both cycles with no semantic difference "
+              "records nothing; `unattributed` counts claims that moved with "
+              "no knowledge effect bearing on them, which is a finding about "
+              "the attribution seam rather than a revision"))
+    return history, summary

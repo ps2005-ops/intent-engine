@@ -690,6 +690,17 @@ def _knowledge_summary(knowledge: dict) -> dict:
             for k in ("decisions", "outcomes", "empty_handed",
                       "with_a_forgone_option", "by_status", "standing", "why")
             if (knowledge.get("research_decisions") or {}).get(k) is not None},
+        # WHAT MOVED, AND WHETHER ANYTHING DID. `unattributed` is projected
+        # deliberately: a claim that changed with no knowledge effect bearing
+        # on it is a finding about the attribution seam, and hiding it would
+        # make the revision log look better than the evidence behind it.
+        "thesis_history": {
+            k: (knowledge.get("thesis_history") or {}).get(k)
+            for k in ("loaded", "compared", "unchanged", "created",
+                      "strengthened", "weakened", "contested", "falsified",
+                      "superseded", "unattributed", "revision_records_written",
+                      "revisions_held", "error")
+            if (knowledge.get("thesis_history") or {}).get(k) is not None},
         "economic_thesis": {
             k: (knowledge.get("economic_thesis") or {}).get(k)
             for k in ("theses", "by_standing", "assertable",
