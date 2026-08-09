@@ -166,3 +166,42 @@ def test_the_live_corpus_grades_none_on_a_second_identical_pass(tmp_path):
     assert second == {di.NONE}, (
         "an unchanged dossier must grade NONE; anything else means the "
         "comparison is measuring the dossier's presence again")
+
+
+# --- identity walls ---------------------------------------------------------
+
+def test_another_companys_prior_is_not_a_prior(tmp_path):
+    """A comparison is only meaningful against THIS company's own history."""
+    di.record_revision(tmp_path, company_id="acme",
+                       state=state(ASSUMPTION=["acme reading"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a1", company_id="globex",
+        after=state(ASSUMPTION=["globex reading"]), provenance=["ev_1"])
+    assert got.materiality == di.FIRST_OBSERVATION, (
+        "globex has no prior of its own; borrowing acme's would compare two "
+        "different companies and grade the difference as learning")
+
+
+def test_an_unprovenanced_change_gets_no_credit(tmp_path):
+    """A field that moved with no market evidence behind it is not the
+    market engine's doing — it could be a different retrieval or sample."""
+    di.record_revision(tmp_path, company_id="acme",
+                       state=state(ASSUMPTION=["old reading"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a2", company_id="acme",
+        after=state(ASSUMPTION=["new reading"],
+                    BOUNDED_CONCLUSION=["one period is not a trend"]),
+        provenance=[])
+    assert got.materiality == di.NONE
+    assert "unprovenanced" in got.reason
+
+
+def test_a_wording_only_change_is_not_meaningful(tmp_path):
+    """Whitespace and case are not decisions."""
+    di.record_revision(tmp_path, company_id="acme",
+                       state=state(ASSUMPTION=["Market evidence supports X"]))
+    got = di.assess_against_prior(
+        tmp_path, analysis_id="a2", company_id="acme",
+        after=state(ASSUMPTION=["  market   evidence supports x  "]),
+        provenance=["ev_1"])
+    assert got.materiality == di.NONE
