@@ -54,9 +54,12 @@ PROOFS = [
     # 5. an unmeasured condition reads as flat rather than unknown
     ("v4-5. an unmeasured condition stops being UNKNOWN",
      MS,
-     "    if not mine:\n        return unknown(state_kind)",
+     # Anchor updated when `state_of` gained an area; the guard is unchanged
+     # and the mutation is the same one — an unmeasured condition reporting
+     # itself as a measured, flat one.
+     "    if not mine:\n        return unknown(state_kind, area=area)",
      "    if not mine:\n        return EconomicState(state_kind=state_kind, "
-     "standing=OBSERVED, reason='flat')",
+     "standing=OBSERVED, area=area, reason='flat')",
      f"{M}::test_an_unmeasured_condition_is_unknown_and_never_flat"),
 
     # 6. the sector prior comes back

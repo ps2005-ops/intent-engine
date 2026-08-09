@@ -116,8 +116,11 @@ def test_both_right_is_the_only_correct():
 
 def test_agreement_among_sources_is_not_proof():
     """Three outlets repeating one release is one source."""
+    # THREE INDEPENDENT SOURCES, deliberately. With one, the status is
+    # BOUNDED whether or not the falsifier clause exists, and a break proof
+    # against that clause passed on the source count instead.
     proof = ET.ProofPackage(
-        claim="c", evidence_ids=("a", "b", "c"), independent_sources=1,
+        claim="c", evidence_ids=("a", "b", "c"), independent_sources=3,
         causal_basis="m", alternative_explanations=("x",), counterevidence=(),
         falsifier="f", falsifier_tested=False)
     assert proof.status == ET.BOUNDED
@@ -186,10 +189,22 @@ def test_a_path_is_worth_its_weakest_hop_not_its_average():
 
 
 def test_a_refuted_hop_voids_the_rest_rather_than_weakening_it():
-    path = [cons(1, ET.REFUTED), cons(2, ET.TESTED)]
+    """Void, not weak — and the downstream hops must be named as void.
+
+    REFUTED already sorts lowest, so the standing alone would read the same
+    with or without the rule; `void_below` is the field that says the rest of
+    the path is not merely less supported but does not follow at all.
+    """
+    # A SUPERSEDED HOP SORTS LOWER THAN A REFUTED ONE, so without the
+    # explicit rule the weakest-link answer here would be SUPERSEDED — a hop
+    # that has merely been replaced, reported in place of one that was shown
+    # to be false.
+    path = [cons(1, ET.REFUTED), cons(2, ET.SUPERSEDED, "hop1"),
+            cons(3, ET.TESTED, "hop2")]
     got = ET.propagate(path)
     assert got["standing"] == ET.REFUTED
     assert got["void_below"] == "order 1"
+    assert "voids everything downstream" in got["note"]
 
 
 # --- scenarios -----------------------------------------------------------------------

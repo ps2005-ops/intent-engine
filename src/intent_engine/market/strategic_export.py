@@ -162,6 +162,33 @@ ALLOWED: Dict[str, Any] = {
         "events": [{"event_id": None, "standing": None, "accounts": None,
                     "weight": None, "evidence_ids": None}],
     },
+    # V4. THE ECONOMY, CROSSING. Without this block the founder side has to
+    # rebuild the economics from scratch — which is how two systems end up
+    # holding two different readings of the same rate move and neither knows
+    # it. Every field is a projection of an EconomicThesis, so the standing
+    # that crosses is the standing that was earned; nothing here may be
+    # rendered more confidently than it arrives.
+    "economic_context": {
+        "conditions": [{"area": None, "state_kind": None, "standing": None,
+                        "moved": None, "reason": None}],
+        "conditions_tracked": None,
+        "conditions_known": None,
+        "note": None,
+    },
+    "economic_theses": [{
+        "thesis_id": None, "claim": None, "standing": None,
+        "question": None, "horizon_days": None,
+        "macro_conditions": None, "exposures": None,
+        "mechanism": None, "falsifier": None,
+        # ALTERNATIVES ARE PART OF THE PAYLOAD, not an optional extra. A
+        # consumer that receives a claim without its rivals has been handed a
+        # leading explanation and will render it as the only one.
+        "alternatives": None,
+        "unknowns": None,
+        "decision_implication": None,
+        "confidence_in_words": None,
+        "evidence_ids": None,
+    }],
     "disclaimer": None,
     "interpretation_allowed": None,
     "interpretation_forbidden": None,
@@ -307,6 +334,8 @@ def build_export(*, company_id: str, as_of: str,
                  competitor_reactions: Sequence[Any] = (),
                  information_priorities: Sequence[Any] = (),
                  evidence_rows: Sequence[Any] = (),
+                 economic_states: Sequence[Any] = (),
+                 economic_theses: Sequence[Any] = (),
                  limitations: Sequence[str] = ()) -> dict:
     """Assemble one company's sanitized strategic intelligence.
 
@@ -350,6 +379,11 @@ def build_export(*, company_id: str, as_of: str,
     }
     if market_structure is not None:
         payload["market_structure"] = _structure(market_structure)
+    if economic_states:
+        payload["economic_context"] = _economic_context(economic_states)
+    if economic_theses:
+        payload["economic_theses"] = [_economic_thesis(t)
+                                      for t in economic_theses]
 
     ids: Set[str] = set()
     _collect_ids(payload, ids)
@@ -362,6 +396,54 @@ def build_export(*, company_id: str, as_of: str,
 
     assert_sanitized(payload)
     return payload
+
+
+def _economic_context(states: Sequence[Any]) -> dict:
+    """The economy as it crosses: only what is measured, and the gap count.
+
+    UNKNOWN CONDITIONS DO NOT CROSS AS ROWS but their number does. Shipping
+    thirty rows of "we do not measure this" would fill the founder's dossier
+    with absences; shipping none of them would let fifteen measured conditions
+    read as a complete picture. The count is the honest middle.
+    """
+    known = [s for s in states if getattr(s, "known", False)]
+    return {
+        "conditions": [{"area": getattr(s, "area", ""),
+                        "state_kind": getattr(s, "state_kind", ""),
+                        "standing": getattr(s, "standing", ""),
+                        "moved": getattr(s, "moved", ""),
+                        "reason": getattr(s, "reason", "")} for s in known],
+        "conditions_tracked": len(states),
+        "conditions_known": len(known),
+        "note": ("an unmeasured condition is absent from this list and "
+                 "counted in the gap; it is never a condition that did not "
+                 "move"),
+    }
+
+
+def _economic_thesis(thesis: Any) -> dict:
+    """One thesis, with its rivals attached rather than summarised away."""
+    from . import founder_v4_view as FV4
+
+    mech = getattr(thesis, "leading_mechanism", None)
+    return {
+        "thesis_id": getattr(thesis, "thesis_id", ""),
+        "claim": getattr(thesis, "claim", ""),
+        "standing": getattr(thesis, "standing", ""),
+        "question": getattr(thesis, "question", ""),
+        "horizon_days": int(getattr(thesis, "horizon_days", 0) or 0),
+        "macro_conditions": list(getattr(thesis, "macro_conditions", ())),
+        "exposures": list(getattr(thesis, "exposures", ())),
+        "mechanism": getattr(mech, "description", "") if mech else "",
+        "falsifier": getattr(mech, "falsifier", "") if mech else "",
+        "alternatives": [getattr(m, "description", "")
+                         for m in getattr(thesis, "alternatives", ())],
+        "unknowns": list(getattr(thesis, "unknowns", ())),
+        "decision_implication": FV4._implication(thesis),
+        "confidence_in_words": FV4._STANDING_WORDS.get(
+            getattr(thesis, "standing", ""), ""),
+        "evidence_ids": list(getattr(thesis, "supporting_evidence", ())),
+    }
 
 
 # --- normalized trust: rows in, occurrences out ---------------------------

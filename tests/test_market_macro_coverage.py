@@ -78,6 +78,15 @@ def test_the_condition_does_not_change_identity_when_a_series_publishes():
                         area=MS.CA)
     assert state.observation.series_id == "BOC_BD.CDN.10YR.DQ.YLD"
     assert state.observation.value == 3.61
+    # AND IT MUST BE THE DECLARED RULE DOING THE WORK. Sorted alphabetically
+    # "BOC_BD.CDN.10YR..." already comes first, so deleting PRIMARY_SERIES
+    # left this test passing on the fallback; the US pair is the one where
+    # the declared choice and the alphabetical one disagree.
+    us = [obs(area=MS.US, series="TREASURY_BILLS_AVG_RATE", value=3.758),
+          obs(area=MS.US, series="TREASURY_NOTES_AVG_RATE", value=3.283)]
+    assert MS.state_of(MS.MARKET_RATE, us, as_of="2026-08-10",
+                       area=MS.US).observation.series_id == \
+        "TREASURY_NOTES_AVG_RATE"
 
 
 def test_the_unread_series_is_named_rather_than_hidden():
@@ -199,16 +208,20 @@ def test_summary_counts_a_blind_spot_per_economy():
 
 def _fiscal_interest_rows():
     """Three accounting lines per month, one of them negative."""
+    # THE NEGATIVE LINE COMES FIRST. With accrued interest first, the
+    # per-period de-duplication drops the other two and the group filter is
+    # never exercised — a break proof against the filter passed on the wrong
+    # guard. Ordered this way, only the group filter can save the figure.
     return {"data": [
         {"record_date": "2026-07-31", "expense_type_desc": "Treasury Notes",
-         "expense_group_desc": "ACCRUED INTEREST EXPENSE",
-         "month_expense_amt": "43854569972.32"},
+         "expense_group_desc": "AMORTIZED PREMIUM",
+         "month_expense_amt": "-138894838.86"},
         {"record_date": "2026-07-31", "expense_type_desc": "Treasury Notes",
          "expense_group_desc": "AMORTIZED DISCOUNT",
          "month_expense_amt": "959912479.75"},
         {"record_date": "2026-07-31", "expense_type_desc": "Treasury Notes",
-         "expense_group_desc": "AMORTIZED PREMIUM",
-         "month_expense_amt": "-138894838.86"},
+         "expense_group_desc": "ACCRUED INTEREST EXPENSE",
+         "month_expense_amt": "43854569972.32"},
     ]}
 
 
@@ -222,9 +235,17 @@ def test_the_government_is_not_paid_to_borrow():
     assert round(got[0].value, 2) == 43.85
 
 
-def test_a_blank_cell_is_not_a_zero():
+@pytest.mark.parametrize("cell", ["", None, "(D)", "n/a", "NULL"])
+def test_a_suppressed_cell_is_not_a_zero(cell):
+    """Feeds write absence several ways and float() turns none of them into 0.
+
+    The empty string is covered by an explicit check AND by the parse guard,
+    so a break proof against either one passed on the other. A suppression
+    marker is covered only by the parse guard, which is what makes it the
+    case worth asserting.
+    """
     body = {"data": [{"record_date": "2026-07-31",
-                      "avg_interest_rate_amt": ""}]}
+                      "avg_interest_rate_amt": cell}]}
     assert MI.treasury_bill_rate(retrieved_at="2026-08-08",
                                  fetcher=lambda url: body) == []
 

@@ -35,6 +35,14 @@ AXES = (
     "INTERNAL_COMPANY_MODEL", "ACTIVE_RESEARCH", "CALIBRATION",
     "ECONOMIC_MEMORY", "FOUNDER_CONSUMPTION", "FOUNDER_DECISION_VALUE",
     "META_LEARNING", "PRODUCT_RELIABILITY",
+    # Session 2. Added rather than folded into the existing axes: an engine
+    # that discovers structure and an engine that chooses what to research
+    # fail in different ways, and one axis covering both would let a working
+    # half carry a missing half.
+    "SURPRISE", "REGIME_DISCOVERY", "UNSUPERVISED_DISCOVERY",
+    "ACTIVE_LEARNING", "RESEARCH_POLICY", "METHOD_PERFORMANCE",
+    "THIRD_ORDER", "THESIS_ENGINE", "PROOF_ENGINE", "CEO_CONVERSATION",
+    "PRESENTATION", "RETENTION", "PAPER",
 )
 
 

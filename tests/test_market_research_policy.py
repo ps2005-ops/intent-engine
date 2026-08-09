@@ -163,13 +163,25 @@ def test_a_reward_that_prices_discrimination_resists_the_volume_attack():
 
 
 def test_an_untrustworthy_estimate_cannot_exonerate_the_reward():
-    """A bandit matching 12 of 316 rows must not outrank an attack."""
-    log = [record(RP.INDEPENDENT_REPORTING) for _ in range(80)]
+    """A policy matching a handful of rows must not outrank an attack.
+
+    The log is built so the thin slice is the GOOD one: five excellent
+    filings among eighty duplicated press releases. The VOI heuristic prefers
+    filings, so it matches those five and posts by far the highest mean in the
+    table — and on five matches that mean is noise. Counted, it would put an
+    honest policy on top and the audit would report the reward as safe while
+    the volume attack still beats every policy that is actually measurable.
+    """
+    log = ([record(RP.COMPANY_OWNED, independent=False, duplicate=True)
+            for _ in range(80)]
+           + [record(RP.REGULATORY_FILING, independent=True, resolved=True,
+                     discriminating=True, decision=True) for _ in range(5)])
     got = RP.audit_reward(log)
-    assert all(name in got["scores"] or name in got["not_trustworthy"]
-               for name in ("CONTEXTUAL_BANDIT", "RANDOM"))
+    assert "VOI_HEURISTIC" in got["not_trustworthy"]
+    assert "VOI_HEURISTIC" not in got["scores"]
     for name in got["scores"]:
         assert name not in got["not_trustworthy"]
+    assert got["hackable"] is True
 
 
 # --- reconstruction --------------------------------------------------------------------
@@ -188,10 +200,13 @@ def test_independence_is_read_as_a_score_not_a_label():
                                 "independent_reporting",
                                 "subject_company": "a", "fact": "f",
                                 "independence": 0.9, "self_authored": False}])
+    # SELF-AUTHORED IS DELIBERATELY FALSE HERE. With it set the record fails
+    # on the second condition too, and a break proof against the threshold
+    # passed on the flag; only a low score with no flag isolates the number.
     low = RP.reconstruct_log([{"record": "evidence", "source_role":
                                "company_owned", "subject_company": "a",
                                "fact": "f", "independence": 0.25,
-                               "self_authored": True}])
+                               "self_authored": False}])
     assert high[0].outcome.independent is True
     assert low[0].outcome.independent is False
 
