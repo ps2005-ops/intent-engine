@@ -230,3 +230,84 @@ def test_a_reconstructed_log_cannot_measure_discrimination():
 
 def test_non_evidence_rows_are_ignored():
     assert RP.reconstruct_log([{"record": "belief"}, {"record": "cycle"}]) == []
+
+
+# --- the menu that existed (B-POL-001) ----------------------------------------
+
+def test_a_row_with_no_recorded_menu_is_counted_as_assumed():
+    """A reconstructed row cannot know what else was available."""
+    log = [record(RP.REGULATORY_FILING) for _ in range(40)]
+    got = RP.evaluate_offline(log, RP.VOIPolicy())
+    assert got.assumed_menu == 40
+    assert "no recorded choice set" in got.note
+
+
+def test_a_score_built_only_on_assumed_menus_has_no_real_menu():
+    """Reported apart from `trustworthy`, which other guards depend on."""
+    log = [record(RP.REGULATORY_FILING) for _ in range(40)]
+    got = RP.evaluate_offline(log, RP.VOIPolicy())
+    assert got.menu_is_real is False
+    assert got.trustworthy is True, (
+        "a cross-policy comparison stays meaningful under an assumed menu "
+        "because every policy faces the same one; folding this into "
+        "trustworthy would switch off the reward-hack audit instead")
+
+
+def test_a_policy_is_scored_against_the_menu_the_row_carries():
+    """Filing was not on offer, so preferring it cannot count as a choice."""
+    log = [record(RP.INDEPENDENT_REPORTING)._replace_options()
+           if hasattr(record(RP.INDEPENDENT_REPORTING), "_replace_options")
+           else RP.ResearchRecord(
+               action=RP.ResearchAction(
+                   source_family=RP.INDEPENDENT_REPORTING, subject="acme"),
+               outcome=RP.ResearchOutcome(outcome=RP.USED, independent=True),
+               eligible_options=(RP.INDEPENDENT_REPORTING,))
+           for _ in range(40)]
+    got = RP.evaluate_offline(log, RP.VOIPolicy())
+    assert got.assumed_menu == 0
+    assert got.matched == 40, (
+        "with only independent_reporting on the menu, the VOI order must fall "
+        "through to it rather than selecting a family that was not offered")
+
+
+def test_the_recorded_menu_can_make_a_preferred_family_unreachable():
+    log = [RP.ResearchRecord(
+        action=RP.ResearchAction(source_family=RP.COMPANY_OWNED,
+                                 subject="acme"),
+        outcome=RP.ResearchOutcome(outcome=RP.USED),
+        eligible_options=(RP.COMPANY_OWNED, RP.ANALYST_COVERAGE))
+        for _ in range(40)]
+    got = RP.evaluate_offline(log, RP.VOIPolicy())
+    assert got.matched == 0, (
+        "VOI prefers analyst_coverage over company_owned when both are the "
+        "only options, so it must disagree with the logger here")
+
+
+# --- the diagnosis (B-VOI-001) -------------------------------------------------
+
+def test_the_voi_order_is_reported_as_a_constant_not_an_estimate():
+    log = ([record(RP.REGULATORY_FILING, duplicate=True) for _ in range(20)]
+           + [record(RP.INDEPENDENT_REPORTING, resolved=True)
+              for _ in range(20)])
+    got = RP.diagnose_source_preference(log)
+    assert got["cause"]["policy_is_a_constant"] is True
+    assert got["cause"]["policy_reads_performance_state"] is False
+
+
+def test_the_diagnosis_names_the_disagreement_without_flipping_the_order():
+    log = ([record(RP.REGULATORY_FILING, duplicate=True) for _ in range(20)]
+           + [record(RP.INDEPENDENT_REPORTING, resolved=True)
+              for _ in range(20)])
+    got = RP.diagnose_source_preference(log)
+    assert got["stated_first"] == RP.REGULATORY_FILING
+    assert got["measured_first"] == RP.INDEPENDENT_REPORTING
+    assert got["order_agrees_with_measurement"] is False
+    assert RP.VOIPolicy.ORDER[0] == RP.REGULATORY_FILING, (
+        "the diagnosis must not have mutated the stated order")
+
+
+def test_the_diagnosis_says_what_settles_it():
+    log = [record(RP.REGULATORY_FILING, duplicate=True) for _ in range(20)]
+    got = RP.diagnose_source_preference(log)
+    assert "returned nothing" in got["why_not_corrected_here"]
+    assert "prospective" in got["settled_by"]

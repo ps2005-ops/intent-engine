@@ -40,7 +40,7 @@ tasks:
     program: A
     title: ResearchDecision written BEFORE the external call
     dependencies: []
-    status: READY
+    status: COMPLETE
     priority: 1
     expected_value: >
       Unblocks all of PROGRAM B. Without it the research log is a success log:
@@ -54,15 +54,15 @@ tasks:
         selection_probability_status, chosen_at, provenance
       - selection_probability_status distinguishes KNOWN / DETERMINISTIC /
         UNAVAILABLE and a deterministic policy is never given a fake propensity
-    tests: tests/market/test_research_decision.py
+    tests: tests/test_market_research_decision.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "b34ee0e+pending; 77 tests green across research_decision, wiring and policy"
 
   - id: A-RD-002
     program: A
     title: Candidate action set recorded, including unchosen options
     dependencies: [A-RD-001]
-    status: WAITING_DEPENDENCY
+    status: COMPLETE
     priority: 1
     expected_value: >
       Load-bearing and currently the single largest defect in policy
@@ -76,15 +76,15 @@ tasks:
       - unchosen candidates are present
       - cadence-blocked families appear as ineligible WITH the reason, not as
         absent
-    tests: tests/market/test_research_decision.py
+    tests: tests/test_market_research_decision.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "b34ee0e+pending; 77 tests green across research_decision, wiring and policy"
 
   - id: A-RD-003
     program: A
     title: DecisionOutcome, preserving NO_RESULT and FAILED
     dependencies: [A-RD-001]
-    status: WAITING_DEPENDENCY
+    status: COMPLETE
     priority: 1
     expected_value: >
       NO_RESULT is training data. Discarding it is what makes the historical
@@ -96,15 +96,15 @@ tasks:
         accepted_evidence, refused_evidence, new/independent/dependent events,
         knowledge_effect_ids, immediate_reward, latency, cost, failure_type
       - an outcome cannot be written without a matching decision_id
-    tests: tests/market/test_research_decision.py
+    tests: tests/test_market_research_decision.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "b34ee0e+pending; 77 tests green across research_decision, wiring and policy"
 
   - id: A-RD-004
     program: A
     title: DelayedOutcome appended, never mutating immediate reward
     dependencies: [A-RD-003]
-    status: WAITING_DEPENDENCY
+    status: COMPLETE
     priority: 2
     expected_value: Supports delayed credit assignment; closes the reward path from I.
     acceptance_criteria:
@@ -113,15 +113,15 @@ tasks:
         / mechanism tested / thesis changed / Founder DecisionImpact
       - carries decision_id, outcome_type, target_id, reward_delta, observed_at,
         provenance
-    tests: tests/market/test_research_decision.py
+    tests: tests/test_market_research_decision.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "b34ee0e+pending; 77 tests green across research_decision, wiring and policy"
 
   - id: A-RD-005
     program: A
     title: PROSPECTIVE / RECONSTRUCTED wall
     dependencies: [A-RD-001]
-    status: WAITING_DEPENDENCY
+    status: COMPLETE
     priority: 1
     expected_value: >
       Prevents the reconstructed success log from silently establishing policy
@@ -131,15 +131,15 @@ tasks:
       - policy evaluation reports the two separately
       - a guard refuses to declare a policy production-ready primarily from
         reconstructed data
-    tests: tests/market/test_research_decision.py
+    tests: tests/test_market_research_decision.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "b34ee0e+pending; 77 tests green across research_decision, wiring and policy"
 
   - id: A-RD-006
     program: A
     title: Bounded state snapshot for policy learning
     dependencies: [A-RD-001]
-    status: WAITING_DEPENDENCY
+    status: COMPLETE
     priority: 2
     expected_value: Gives a future policy a stable feature vector to condition on.
     acceptance_criteria:
@@ -147,15 +147,15 @@ tasks:
       - open hypotheses, uncertainty, stale knowledge, falsifiers, source
         performance, question type, budget, world-model gaps
       - snapshot is content-keyed and referenced by id from the decision
-    tests: tests/market/test_research_decision.py
+    tests: tests/test_market_research_decision.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "b34ee0e+pending; 77 tests green across research_decision, wiring and policy"
 
   - id: A-RD-007
     program: A
     title: INSTRUMENT -- production acquisition path writes decisions
     dependencies: [A-RD-001, A-RD-002, A-RD-003, A-RD-005, A-RD-006]
-    status: WAITING_DEPENDENCY
+    status: IN_PROGRESS
     priority: 1
     expected_value: >
       The BUILD/INSTRUMENT split exists because of two recorded failures where
@@ -166,7 +166,7 @@ tasks:
       - LearningStore has record + read methods and the record kinds are
         registered
       - a FRESH PROCESS reads back what the cycle wrote
-    tests: tests/market/test_research_decision_wiring.py
+    tests: tests/test_market_research_decision_wiring.py
     minimum_data: none
     completion_evidence: null
 
@@ -174,7 +174,7 @@ tasks:
     program: A
     title: COLLECT -- run a real PAPER cycle and report the counts
     dependencies: [A-RD-007]
-    status: WAITING_DEPENDENCY
+    status: READY
     priority: 1
     expected_value: The first legitimate prospective policy-training records.
     acceptance_criteria:
@@ -192,7 +192,7 @@ tasks:
     program: B
     title: Diagnose the VOI filing bias by measurement
     dependencies: []
-    status: READY
+    status: COMPLETE
     priority: 2
     expected_value: >
       A live, falsifiable defect in a policy that is reported every cycle.
@@ -204,15 +204,15 @@ tasks:
       - independent_reporting > filing is NOT hardcoded
       - before/after routing compared on knowledge change per action,
         discrimination, duplicate rate, cost, latency
-    tests: tests/market/test_research_policy.py
+    tests: tests/test_market_research_policy.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "measured on the 316-row reconstructed log: VOI_HEURISTIC identical to FIXED_REGULATORY_FILING on all six figures; independence 1.0 both, duplication 0.75 vs 0.027; cause isolated to a constant order whose stated rationale does not discriminate"
 
   - id: B-POL-001
     program: B
     title: Choice-set-aware offline evaluation
     dependencies: [A-RD-002, B-VOI-001]
-    status: WAITING_DEPENDENCY
+    status: COMPLETE
     priority: 2
     expected_value: >
       evaluate_offline currently assumes all five families were available on
@@ -223,9 +223,9 @@ tasks:
       - overlap is reported against the real choice set
       - reconstructed rows, which have no recorded choice set, are reported
         separately and never pooled
-    tests: tests/market/test_research_policy.py
+    tests: tests/test_market_research_policy.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "choice-set-aware evaluate_offline; assumed_menu reported; menu_is_real kept out of trustworthy so the reward-hack audit stays on"
 
   - id: B-POL-002
     program: B

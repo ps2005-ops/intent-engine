@@ -202,6 +202,23 @@ def test_the_acquisition_step_persists_what_it_accepts(tmp_path, monkeypatch):
         created_at="2026-08-08")
 
     class _Report:
+        """A stand-in for counterparty_sources.Yield.
+
+        The counts are present because the step now prices the sweep as a
+        research outcome as well as persisting what it accepted, and a fake
+        that carries fewer fields than the real Yield would let the two drift
+        apart without a test noticing.
+        """
+
+        family = "government_award"
+        documents_attempted = 1
+        documents_retrieved = 1
+        relationships_accepted = 1
+        relationships_refused = 0
+        duplicates = 0
+        latency_seconds = 0.1
+        errors: list = []
+
         def as_dict(self):
             return {"family": "government_award"}
 

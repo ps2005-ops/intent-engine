@@ -103,6 +103,19 @@ ACTOR_RESPONSE_EPISODE = "actor_response_episode"
 MACRO_OBSERVATION = "macro_observation"
 KNOWLEDGE_EFFECT = "knowledge_effect"
 
+#: The choice, written BEFORE the external call, with the menu attached. Every
+#: other research row in this ledger was inferred from a document that
+#: survived, so an action that returned nothing left no trace. These three
+#: kinds are the only ones that can hold a research action which produced
+#: nothing, and they are therefore the only ones a policy can honestly learn
+#: from.
+RESEARCH_DECISION = "research_decision"
+RESEARCH_OUTCOME = "research_outcome"
+#: A consequence that arrived later. Appended beside the immediate outcome
+#: rather than folded into it, because rewriting the first would destroy the
+#: only honest record of what was knowable at the time.
+RESEARCH_DELAYED_OUTCOME = "research_delayed_outcome"
+
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
@@ -111,6 +124,8 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           COUNTERFACTUAL_ADJUDICATION, FALSIFIER,
                           RESPONSE_WATCH, STRATEGIC_OBJECTIVE,
                           KNOWLEDGE_EFFECT,
+                          RESEARCH_DECISION, RESEARCH_OUTCOME,
+                          RESEARCH_DELAYED_OUTCOME,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
                           MACRO_OBSERVATION})
 
@@ -357,6 +372,76 @@ class LearningStore:
     def knowledge_effects(self) -> Tuple[dict, ...]:
         return tuple(r for r in self._rows()
                      if r.get("record") == KNOWLEDGE_EFFECT)
+
+    def record_research_decision(self, decision) -> bool:
+        """Persist one choice, written before the call it describes.
+
+        Idempotent on `decision_id`, which is keyed on the subject, question,
+        chosen action, timestamp and the CANDIDATE SET — so re-deciding the
+        same question with a different menu is a different decision, which is
+        the case a policy most needs to be able to see.
+        """
+        payload = (decision.as_dict() if hasattr(decision, "as_dict")
+                   else dict(decision))
+        did = str(payload.get("decision_id") or "")
+        if not did:
+            raise ValueError("a research decision needs its content-keyed id")
+        if did in self.research_decision_ids():
+            return False
+        self._append(RESEARCH_DECISION, payload)
+        return True
+
+    def record_research_outcome(self, outcome) -> bool:
+        """Persist what a logged decision returned, including nothing.
+
+        Refuses an outcome whose decision was never written. An outcome with
+        no choice attached is the row this whole table exists to stop: it is
+        indistinguishable from the reconstructed evidence the engine already
+        had, and it would reintroduce the success bias through the back door.
+        """
+        payload = (outcome.as_dict() if hasattr(outcome, "as_dict")
+                   else dict(outcome))
+        did = str(payload.get("decision_id") or "")
+        if not did:
+            raise ValueError("a research outcome needs its decision_id")
+        if did not in self.research_decision_ids():
+            raise ValueError(
+                f"no research decision {did!r} was written before this "
+                "outcome; the decision must be durable BEFORE the call, or "
+                "the log is a reconstruction wearing a prospective label")
+        self._append(RESEARCH_OUTCOME, payload)
+        return True
+
+    def record_research_delayed_outcome(self, delayed) -> bool:
+        """Append a later consequence. Never rewrites the immediate reward."""
+        payload = (delayed.as_dict() if hasattr(delayed, "as_dict")
+                   else dict(delayed))
+        did = str(payload.get("delayed_id") or "")
+        if not did:
+            raise ValueError("a delayed outcome needs its content-keyed id")
+        if did in frozenset(str(r.get("delayed_id") or "")
+                            for r in self._rows()
+                            if r.get("record") == RESEARCH_DELAYED_OUTCOME):
+            return False
+        self._append(RESEARCH_DELAYED_OUTCOME, payload)
+        return True
+
+    def research_decision_ids(self) -> frozenset:
+        return frozenset(str(r.get("decision_id") or "")
+                         for r in self._rows()
+                         if r.get("record") == RESEARCH_DECISION)
+
+    def research_decisions(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == RESEARCH_DECISION)
+
+    def research_outcomes(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == RESEARCH_OUTCOME)
+
+    def research_delayed_outcomes(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == RESEARCH_DELAYED_OUTCOME)
 
     def macro_observation_ids(self) -> frozenset:
         return frozenset(str(r.get("observation_id") or "")

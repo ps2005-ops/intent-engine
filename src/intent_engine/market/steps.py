@@ -647,6 +647,35 @@ SOURCE_CADENCE_DAYS = {
 }
 
 
+#: The question the counterparty sweep is asking. Named once so the decision
+#: log and any later analysis agree on it.
+_COUNTERPARTY_QUESTION = "NEEDS_COUNTERPARTY"
+
+def _acquisition_status(report, *, integrated: bool) -> str:
+    """Classify one family's sweep, keeping the empty-handed cases apart.
+
+    THE DISTINCTION THAT MATTERS. `NO_RESULT` means the sources were reached
+    and had nothing; `NO_NEW_INFORMATION` means documents came back and every
+    relationship in them was already held. Both are actions that produced no
+    knowledge, and both are invisible to a log reconstructed from surviving
+    evidence — but they call for opposite fixes, so collapsing them into one
+    status would hide which one the engine is suffering from.
+    """
+    from . import research_decision as RD
+
+    if not report.documents_retrieved:
+        # Reached nothing at all. If every subject errored it is a failure;
+        # if the hosts answered and held nothing, it is a real empty result.
+        return RD.FAILED if report.errors else RD.NO_RESULT
+    if integrated and report.relationships_accepted:
+        return RD.SUCCESS
+    if report.relationships_refused and not report.relationships_accepted:
+        return RD.REFUSED
+    if report.duplicates and not report.relationships_accepted:
+        return RD.NO_NEW_INFORMATION
+    return RD.NO_RESULT
+
+
 def source_acquisition_step(ctx: C.CycleContext) -> dict:
     """Acquire documents that NAME a counterparty, and measure each family.
 
@@ -696,6 +725,41 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
 
     payload: dict = {"families": {}, "relationships": []}
     accepted: List = []
+
+    # --- the choice, written before the call ------------------------------
+    #
+    # THIS IS THE SEAM. Every other research row in the ledger was inferred
+    # from a document that survived, so an action returning nothing left no
+    # trace and every rate computed from the log was biased toward success.
+    # The decision goes to disk BEFORE `CS.measure` runs, carrying the menu
+    # that was actually on the table — including the families that were
+    # cadence-blocked, which are choices closed rather than choices not
+    # considered.
+    from . import learning_store as _LS
+    from . import research_decision as RD
+
+    store = _LS.LearningStore(pathlib.Path(ctx.root) / _LS.DEFAULT_PATH)
+    snapshot = RD.StateSnapshot(
+        as_of=ctx.as_of[:10],
+        subjects_without_exposure=len(subjects),
+        research_budget_remaining=float(len(families)))
+    candidates = tuple(
+        RD.CandidateAction(
+            source_family=name,
+            query_strategy="counterparty_sweep",
+            estimated_cost=1.0,
+            expected_voi=0.0,
+            eligible=not (SOURCE_CADENCE_DAYS.get(name, 1) > 1
+                          and day % SOURCE_CADENCE_DAYS.get(name, 1)),
+            refusal_reason=(
+                "" if not (SOURCE_CADENCE_DAYS.get(name, 1) > 1
+                           and day % SOURCE_CADENCE_DAYS.get(name, 1))
+                else f"cadence {SOURCE_CADENCE_DAYS.get(name, 1)}d; not due "
+                     f"today"))
+        for name in families)
+    decisions: dict = {}
+    logged = outcomes_written = 0
+
     for family, (fetch, extract) in families.items():
         cadence = SOURCE_CADENCE_DAYS.get(family, 1)
         if cadence > 1 and day % cadence:
@@ -704,17 +768,71 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
                 "note": "not due today; a family not asked is not a family "
                         "that found nothing"}
             continue
+        # Written first, and only for a family that is actually about to be
+        # asked. A decision recorded for a skipped family would be a choice
+        # nobody made.
+        decision = RD.ResearchDecision(
+            subject="ALL", question_type=_COUNTERPARTY_QUESTION,
+            chosen_action=family, candidates=candidates,
+            selection_policy="CADENCE_GATED_SWEEP", policy_version="1",
+            missing_fact="a named counterparty for a tracked company",
+            state_snapshot_id=snapshot.snapshot_id,
+            expected_cost=1.0, budget_remaining=float(len(families)),
+            query_strategy="counterparty_sweep",
+            selection_probability=None,
+            selection_probability_status=RD.DETERMINISTIC,
+            chosen_at=ctx.as_of, provenance=RD.PROSPECTIVE,
+            policy_family=RD.RP_FAMILY_FOR.get(family, ""))
+        started = _dt.datetime.now(_dt.timezone.utc).isoformat()
+        if store.record_research_decision(decision):
+            logged += 1
+        decisions[family] = decision
+
         try:
             found, report = CS.measure(
                 family, subjects=subjects, fetch=fetch, extract=extract,
                 as_of=ctx.as_of)
         except Exception as exc:  # noqa: BLE001 - see docstring
             payload["families"][family] = {"error": str(exc)}
+            # A FAILURE IS AN OUTCOME. The reconstructed log could not hold
+            # this row at all, which is precisely why the engine's measured
+            # hit rate was never its real one.
+            store.record_research_outcome(RD.DecisionOutcome(
+                decision_id=decision.decision_id, status=RD.FAILED,
+                started_at=started,
+                completed_at=_dt.datetime.now(_dt.timezone.utc).isoformat(),
+                failure_type=f"{type(exc).__name__}: {exc}"[:200]))
+            outcomes_written += 1
             continue
         payload["families"][family] = report.as_dict()
         # Integrate on the MEASURED verdict, never on the family's name.
-        if report.verdict()[0] == CS.INTEGRATE:
+        integrated = report.verdict()[0] == CS.INTEGRATE
+        if integrated:
             accepted.extend(found)
+        store.record_research_outcome(RD.DecisionOutcome(
+            decision_id=decision.decision_id,
+            status=_acquisition_status(report, integrated=integrated),
+            started_at=started,
+            completed_at=_dt.datetime.now(_dt.timezone.utc).isoformat(),
+            documents_attempted=report.documents_attempted,
+            documents_retrieved=report.documents_retrieved,
+            accepted_evidence=(report.relationships_accepted if integrated
+                               else 0),
+            refused_evidence=report.relationships_refused,
+            new_events=report.relationships_accepted,
+            latency_seconds=report.latency_seconds, cost=1.0,
+            failure_type=("; ".join(report.errors)[:200] if report.errors
+                          and not report.documents_retrieved else "")))
+        outcomes_written += 1
+
+    payload["research_decisions"] = {
+        "written": logged, "outcomes": outcomes_written,
+        "candidate_rows": len(candidates),
+        "eligible": sum(1 for c in candidates if c.eligible),
+        "provenance": RD.PROSPECTIVE,
+        "note": ("written before the call, so a family that returned nothing "
+                 "leaves a row; the reconstructed log could not"),
+    }
 
     payload["relationships"] = [r.as_dict() for r in accepted]
 
@@ -725,10 +843,8 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
     #
     # It writes AFTER the measured verdict, so a family that did not reach
     # INTEGRATE contributes nothing, and never before validation.
-    from . import learning_store as _LS
     persisted = duplicates = 0
     if not ctx.dry_run:
-        store = _LS.LearningStore(pathlib.Path(ctx.root) / _LS.DEFAULT_PATH)
         for relationship in accepted:
             row = (relationship.as_dict() if hasattr(relationship, "as_dict")
                    else dict(relationship))

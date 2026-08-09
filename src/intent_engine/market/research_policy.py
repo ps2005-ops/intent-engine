@@ -174,6 +174,13 @@ class ResearchRecord:
     at: str = ""
     reconstructed: bool = False
     context: Dict[str, str] = field(default_factory=dict)
+    #: What was ACTUALLY on the menu when this choice was made. Empty on a
+    #: reconstructed row, because a log rebuilt from surviving evidence cannot
+    #: know what else was available — which is exactly why `evaluate_offline`
+    #: had to assume every family was, and why every policy that prefers a
+    #: family the corpus happens to contain scored as though it had chosen it
+    #: against competition.
+    eligible_options: Tuple[str, ...] = ()
 
     @property
     def record_id(self) -> str:
@@ -394,6 +401,10 @@ class PolicyEvaluation:
     independent_rate: Optional[float] = None
     duplicate_rate: Optional[float] = None
     discriminating_rate: Optional[float] = None
+    #: Rows where the choice set was ASSUMED to be every family, because the
+    #: record did not carry one. A score computed mostly from these describes
+    #: a menu that never existed.
+    assumed_menu: int = 0
     note: str = ""
 
     @property
@@ -401,9 +412,26 @@ class PolicyEvaluation:
         """Whether the estimate rests on enough of the log to mean anything."""
         return self.matched >= 30 and self.overlap >= 0.2
 
+    @property
+    def menu_is_real(self) -> bool:
+        """Whether any row was scored against the options it actually had.
+
+        DELIBERATELY NOT FOLDED INTO `trustworthy`. Doing that would mark
+        every existing evaluation untrustworthy at a stroke — no reconstructed
+        row carries a menu — and the reward-hack audit that depends on
+        `trustworthy` would stop reporting, which is a working guard switched
+        off rather than a defect fixed. The two questions are different: "does
+        this rest on enough rows" and "were those rows real choices". A
+        cross-policy comparison stays meaningful under an assumed menu because
+        every policy faces the same one; a claim about a single policy's
+        absolute value does not.
+        """
+        return self.total > 0 and self.assumed_menu < self.total
+
     def as_dict(self) -> dict:
         d = dataclasses.asdict(self)
-        d.update(contract=CONTRACT, trustworthy=self.trustworthy)
+        d.update(contract=CONTRACT, trustworthy=self.trustworthy,
+                 menu_is_real=self.menu_is_real)
         return d
 
 
@@ -420,8 +448,16 @@ def evaluate_offline(log: Sequence[ResearchRecord], policy: Policy, *,
     small.
     """
     matched: List[ResearchRecord] = []
+    assumed_menu = 0
     for record in log:
-        available = [f for f in options]
+        # THE MENU THAT EXISTED, where the row knows it. A prospective record
+        # carries the eligible set; a reconstructed one cannot, and falls back
+        # to the full family list. The fallback is counted and reported,
+        # because scoring a policy against options that were never available
+        # is how a constant preference order comes to look like a decision.
+        available = list(record.eligible_options or options)
+        if not record.eligible_options:
+            assumed_menu += 1
         if not available:
             continue
         chosen = guard_action(policy.choose(dict(record.context), available))
@@ -433,7 +469,7 @@ def evaluate_offline(log: Sequence[ResearchRecord], policy: Policy, *,
     if not matched:
         return PolicyEvaluation(
             policy=policy.name, matched=0, total=total, mean_reward=None,
-            overlap=0.0,
+            overlap=0.0, assumed_menu=assumed_menu,
             note=("the policy never agreed with the logger, so the log says "
                   "nothing about it"))
     rewards = [reward(r) for r in matched]
@@ -449,8 +485,12 @@ def evaluate_offline(log: Sequence[ResearchRecord], policy: Policy, *,
         discriminating_rate=(
             round(sum(1 for r in used if r.outcome.discriminating)
                   / len(used), 4) if used else None),
+        assumed_menu=assumed_menu,
         note=("replay estimate over the agreeing subset; not valid as a claim "
-              "about the whole log"))
+              "about the whole log"
+              + (f"; {assumed_menu}/{total} rows had no recorded choice set "
+                 "and were scored against every family"
+                 if assumed_menu else "")))
 
 
 def compare(log: Sequence[ResearchRecord],
@@ -650,6 +690,99 @@ def reconstruct_log(rows: Sequence[dict]) -> List[ResearchRecord]:
 #: Populated by `audit_reward` so the change-rate pass reads the same policy
 #: objects that were evaluated, learning included.
 _POLICY_BY_NAME: Dict[str, "Policy"] = {}
+
+
+def diagnose_source_preference(log: Sequence[ResearchRecord]) -> dict:
+    """Why the stated preference order and the measured value disagree.
+
+    THE FINDING THIS EXISTS TO RECORD. `VOIPolicy` is not a value-of-
+    information computation. It is a fixed order beginning with
+    `regulatory_filing`, so on any log containing filings it selects them and
+    nothing else — it is `FixedPolicy(REGULATORY_FILING)` wearing a name that
+    suggests a calculation. Measured on the 316-row reconstructed log the two
+    are identical to full precision on matched, overlap, mean reward,
+    independence, duplication and discrimination.
+
+    The order's stated rationale is independence: prefer sources that can
+    contradict the subject. But independence is 1.0 for BOTH filings and
+    independent reporting, so that rationale does not separate them. What
+    separates them is duplication — 0.75 against 0.027 — because a filing
+    restates a company's position while reporting carries new events.
+
+    NOTHING HERE FLIPS THE ORDER. Two reasons. First, a preference derived
+    from this log would be derived from evidence that survived, and the rows
+    that would justify it — actions that returned nothing — are the ones the
+    reconstruction cannot contain. Second, duplication among retrieved
+    documents and hit rate per action are different quantities, and only the
+    first is measurable here. The honest output is the disagreement and its
+    size, and the prospective log is what settles it.
+    """
+    import collections
+
+    by_family: Dict[str, List[ResearchRecord]] = collections.defaultdict(list)
+    for record in log:
+        by_family[record.action.source_family].append(record)
+
+    def rate(rows: List[ResearchRecord], attribute: str) -> Optional[float]:
+        used = [r for r in rows if r.outcome.outcome == USED]
+        if not used:
+            return None
+        return round(sum(1 for r in used
+                         if getattr(r.outcome, attribute) is True)
+                     / len(used), 4)
+
+    measured = {}
+    for family, rows in by_family.items():
+        rewards = [reward(r) for r in rows]
+        measured[family] = {
+            "actions": len(rows),
+            "mean_reward": round(sum(rewards) / len(rewards), 4),
+            "independent_rate": rate(rows, "independent"),
+            "duplicate_rate": rate(rows, "duplicate"),
+            "discriminating_rate": rate(rows, "discriminating"),
+        }
+
+    ranked_by_value = [f for f, _ in sorted(
+        measured.items(), key=lambda kv: -kv[1]["mean_reward"])]
+    stated = [f for f in VOIPolicy.ORDER if f in measured]
+    agrees = stated == ranked_by_value
+    top_stated = stated[0] if stated else ""
+    top_measured = ranked_by_value[0] if ranked_by_value else ""
+    return {
+        "contract": CONTRACT,
+        "stated_order": stated,
+        "measured_order": ranked_by_value,
+        "order_agrees_with_measurement": agrees,
+        "stated_first": top_stated,
+        "measured_first": top_measured,
+        "by_family": measured,
+        # The candidate causes, answered rather than listed. Each is checked
+        # against the measurement rather than asserted.
+        "cause": {
+            "policy_reads_performance_state": False,
+            "policy_is_a_constant": True,
+            "duplication_penalised": REWARD_WEIGHTS["duplicate"] < 0,
+            "independence_separates_the_top_two": (
+                len({measured.get(f, {}).get("independent_rate")
+                     for f in (top_stated, top_measured) if f}) > 1),
+            "duplication_separates_the_top_two": (
+                len({measured.get(f, {}).get("duplicate_rate")
+                     for f in (top_stated, top_measured) if f}) > 1),
+        },
+        "verdict": (
+            "the stated order matches the measurement" if agrees else
+            f"the stated order asks {top_stated} first; the measured value "
+            f"ranks {top_measured} first. The order is a constant that reads "
+            "no performance state, so this is not a miscalibrated estimate — "
+            "there is no estimate"),
+        "why_not_corrected_here": (
+            "a replacement order derived from this log would be derived from "
+            "evidence that survived; the actions that returned nothing are "
+            "exactly the rows that would justify it, and they are absent. "
+            "Duplication among retrieved documents is measurable here; hit "
+            "rate per action is not"),
+        "settled_by": "a prospective decision log with recorded choice sets",
+    }
 
 
 def audit_reward(log: Sequence[ResearchRecord]) -> dict:
