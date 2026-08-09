@@ -554,7 +554,7 @@ tasks:
     program: J
     title: Break proofs for the new research-observability guards
     dependencies: [A-RD-007]
-    status: DERIVED
+    status: COMPLETE
     priority: 2
     expected_value: >
       Guards that have never been shown to fail are guards nobody has tested.
@@ -568,6 +568,7 @@ tasks:
       - mutation lock held; restore verified by hash; mtime bumped so CPython
         does not run stale bytecode
     minimum_data: none
+    completion_evidence: "22/22 after repair; 3 NOT_CAUGHT/ALREADY_RED findings fixed in code and tests"
 
   - id: J-ADV-001
     program: J
@@ -608,7 +609,7 @@ tasks:
     program: K
     title: Verify source_preference and research_decisions reach a report
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 1
     expected_value: >
       The 2026-08-09 cycle emitted both keys EMPTY, because the run started
@@ -623,4 +624,23 @@ tasks:
         the ledger
     tests: null
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "reports/market/2026-08-09_night.json, EXIT=0, runtime_git_sha c930b36. research_decisions non-empty (4/4, REPLAY_ONLY); source_preference non-empty (stated regulatory_filing vs measured independent_reporting); knowledge_effects persisted 344 persistence_gap 0."
+
+  - id: K-RUN-001
+    program: K
+    title: Align the scheduled PAPER runtime to the verified branch tip
+    dependencies: []
+    status: COMPLETE
+    priority: 1
+    expected_value: >
+      launchd ran from a checkout detached at 66c4a15 while the branch had
+      advanced four commits. The live learning system was quietly running an
+      older architecture, so every "V4 is live" claim was about code the
+      scheduler never loaded.
+    acceptance_criteria:
+      - runtime data preserved and verified append-only
+      - production baseline untouched, no merge to main, PAPER structural
+      - the next scheduled invocation resolves imports from the new SHA
+    tests: null
+    minimum_data: none
+    completion_evidence: "66c4a15 -> f026e96 detached. Pre-checks: only this session held v4b/market, no live cycle, funnel_history.json identical between both commits so the local edit survived (hash unchanged fe373aee), ledger untracked. Post: imports resolve to /Users/prathamsharma/intent-engine-market/src, runtime_git_sha reads f026e96, PAPER enforced, ledger append-only with 2922 rows byte-identical and 347 appended."

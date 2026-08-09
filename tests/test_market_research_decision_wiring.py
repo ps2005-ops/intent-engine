@@ -200,3 +200,52 @@ def test_a_fresh_process_reads_back_what_this_one_wrote(tmp_path):
     assert got["status"] == RD.NO_RESULT, (
         "an action that found nothing is the row a reconstructed log cannot "
         "hold; it must survive the process that wrote it")
+
+
+# --- attribution reaches the ledger, not only the report ----------------------
+
+def test_the_knowledge_step_persists_the_attributions_it_computes(tmp_path,
+                                                                  monkeypatch):
+    """The report said 343 effects while the ledger held 6.
+
+    Within one cycle the in-memory list made everything work, so the defect
+    was invisible from inside the run that had the data and only visible from
+    the next one, which did not. This asserts the count that survives.
+    """
+    from intent_engine.market import cycle as C
+    from intent_engine.market import knowledge_effect as KE
+    from intent_engine.market import steps as ST
+
+    (tmp_path / "reports" / "market").mkdir(parents=True)
+    # A subject has to exist or no attribution is computed at all, and the
+    # persistence gap would read 0 for the wrong reason.
+    ledger = tmp_path / LS.DEFAULT_PATH
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    ledger.write_text(json.dumps({
+        "record": "evidence", "evidence_id": "ev_1",
+        "subject_company": "acme", "observed_at": "2026-08-09",
+        "fact": "a fact", "evidence_type": "EARNINGS",
+        "source_role": "independent_reporting", "independence": 0.9,
+    }) + "\n", encoding="utf-8")
+    effect = KE.no_change("ev_1", reason="matched no exposure pattern",
+                          occurred_at="2026-08-09", created_at="2026-08-09")
+
+    def fake_profile(rows, *, company_id, effects=None):
+        if effects is not None:
+            effects.append(effect)
+        return {}
+
+    monkeypatch.setattr(
+        "intent_engine.market.company_exposure.profile", fake_profile)
+    ctx = C.CycleContext(cycle="market", as_of="2026-08-09", root=tmp_path,
+                         session=None, run_id="k1")
+    payload = ST.knowledge_step(ctx)
+
+    got = payload.get("knowledge_effects") or {}
+    assert got.get("persistence_gap") == 0, (
+        f"attribution outran storage: {got.get('persisted')} persisted of "
+        f"{got.get('effects')} computed")
+    # And a store that did not write it can read it back.
+    assert LS.LearningStore(tmp_path / LS.DEFAULT_PATH).knowledge_effects(), (
+        "the effects reached the report and not the ledger, which is the "
+        "state that made every cross-cycle attribution claim vacuous")

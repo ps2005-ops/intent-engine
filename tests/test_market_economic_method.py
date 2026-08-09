@@ -82,6 +82,15 @@ def test_all_methods_are_scored_on_one_training_window():
     assert len(set(counts.values())) == 1, (
         f"methods were scored on different numbers of predictions: {counts}; "
         "a method needing less history would get more and easier ones")
+    # Equality alone does not pin the window: taking the MINIMUM minimum_sample
+    # also gives every method the same count, while scoring AR1 from one point
+    # of history — below the eight it declares it needs. The window has to be
+    # large enough for the hungriest method in the comparison.
+    needed = max(EM.METHODS[m].minimum_sample for m in counts)
+    assert got["training_window"] >= needed, (
+        f"training window {got['training_window']} is below the "
+        f"{needed} observations the most demanding method declares; it would "
+        "be scored on a history it says is too short to fit")
 
 
 def test_drift_beats_persistence_on_a_pure_trend():

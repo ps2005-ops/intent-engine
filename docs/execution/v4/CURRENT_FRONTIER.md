@@ -1,74 +1,85 @@
 # CURRENT FRONTIER
 
-Resume pointer. A new session needs only this file plus AGENT_PROTOCOL.md to
-continue; everything here is recomputable from TASK_GRAPH.yaml.
+Resume pointer. A new session needs only this file plus AGENT_PROTOCOL.md.
 
-    python3 docs/execution/v4/frontier.py
+    python3 docs/execution/v4/metrics.py --write   # remeasure the data gates
+    python3 docs/execution/v4/frontier.py          # what is runnable
+    python3 docs/execution/v4/frontier.py --check  # fails if drift reappeared
 
-Do not trust this file over the script. If they disagree, the script is right
-and this file is stale.
+Do not trust this file over the script. If they disagree, the script is right.
 
-## As of 2026-08-09 (end of the bootstrap + PROGRAM A run)
+## As of 2026-08-09, end of the executor-repair run
 
-    37 nodes   COMPLETE=11   READY=5   WAITING_DEPENDENCY=17   BLOCKED_DATA=4
+    38 nodes   COMPLETE=16   READY=6   WAITING_DEPENDENCY=13   BLOCKED_DATA=3
 
-    p1  K-CYC-002   Verify source_preference and research_decisions reach a report
-    p2  J-BRK-001   Break proofs for the new research-observability guards
-    p3  D-REP-001   Vintage wall for replay                     (unblocks 5)
-    p3  G-THE-001   Thesis revision history                     (unblocks 4)
-    p3  C-MET-001   EconomicMethod registry                     (unblocks 2)
-    p3  E-DEM-001   Targeted demand-variable extraction         (unblocks 1)
-    p3  I-ACC-001   Learning acceleration from KnowledgeEffect  (unblocks 1)
+    p3  G-THE-001   Thesis revision history                  (unblocks 4)
+    p3  C-MET-002   MethodAssumptionCheck ledger             (unblocks 1)
+    p3  E-DEM-001   Targeted demand-variable extraction      (unblocks 1)
+    p3  I-ACC-001   Learning acceleration from KnowledgeEffect (unblocks 1)
     p3  J-ADV-001   Adversarial suite extension
+    p4  D-REP-002   Historical thesis replay                 (unblocks 4)
 
-`frontier.py` ranks by dependencies only and does NOT read `minimum_data`.
-B-POL-002, B-HACK-001 and B-VOI-002 became READY when A-RD-008 completed and
-were set to BLOCKED_DATA by hand, because the prospective sample is 2 against a
-gate of 100. Check `minimum_data` against BLOCKERS.yaml before claiming a node.
+BLOCKED_DATA, measured rather than asserted:
 
-## What PROGRAM A established
+    B-POL-002   prospective_decisions   4 / 100
+    B-HACK-001  prospective_decisions   4 / 100
+    B-VOI-002   prospective_decisions   4 / 50
 
-The engine now writes the choice BEFORE the call. A live night cycle against
-the production root wrote 2 decisions and 2 outcomes, each carrying the full
-menu — including `partnership_release` marked ineligible with the reason
-`cadence 3d; not due today` — and the forgone option.
+These move to READY on their own when the metric crosses. Do not edit them.
 
-## What it did NOT establish
+## The executor now enforces its own gates
 
-1. **No empty-handed row has occurred in production.** Both live outcomes were
-   SUCCESS. `NO_RESULT` and `FAILED` — the rows this whole module exists to
-   preserve — are unit-tested across all six statuses and have never been
-   observed live. Until one appears, the claim that the log is unbiased is
-   architectural, not empirical.
+`frontier.py` evaluates `minimum_data` as `{metric: required}` against
+`METRICS.json`, measured from the live ledger with a `measured_at`. A missing
+metric blocks — "we looked and there are none" and "we could not look" are
+different claims and neither makes a node runnable.
 
-2. **Two projections reached the report empty.** `source_preference` and
-   `research_decisions` were `{}` in `2026-08-09_night.json`, because the run
-   started before `431538b`. K-CYC-002.
+Derived state is **not stored**. READY / WAITING_DEPENDENCY / BLOCKED_DATA are
+computed; TASK_GRAPH declares only what a measurement cannot establish and
+marks the rest `DERIVED`. `--check` fails if a concrete derivable status
+reappears, which is the drift that had TASK_GRAPH and BLOCKERS disagreeing.
 
-3. **The sample is rate-bound.** ~2 decisions per night; the 100 gate is ~50
-   cycles away. Do not raise it by logging a decision per (family, subject) —
-   the cycle chooses families, not subjects, and those rows would be choices
-   nobody made.
+## Runtime is aligned
 
-## Live findings a resuming session must not re-derive
+    launchd checkout   f026e96   (was 66c4a15, four commits behind)
+    imports resolve    /Users/prathamsharma/intent-engine-market/src
+    PAPER              enforced
+    production         119d345 untouched, no merge to main
 
-1. **VOIPolicy is a constant, not an estimate.** Measured identical to
+Every cycle report now carries `runtime.runtime_git_sha`, captured at process
+start. `runtime_provenance.ran_at_or_after(artifact, sha)` is the release gate:
+it returned True for the three commits the last run contained and False for the
+one that landed after it started.
+
+## What is still architectural rather than empirical
+
+**No empty-handed research row has ever occurred in production.** All four live
+outcomes were SUCCESS. `NO_RESULT` and `FAILED` — the rows a reconstructed log
+cannot hold, and the reason the prospective log exists — are unit-tested across
+all six statuses and never observed. Do not manufacture one. Until one appears
+naturally, "the log is unbiased" is a claim about the architecture.
+
+Rate: ~2 decisions per night cycle. The 100 gate is ~48 cycles out. The
+tempting shortcut is a decision per (family, subject), which would give 52 by
+morning and every one would be a choice nobody made. The cycle picks families.
+
+## Findings a resuming session must not re-derive
+
+1. **VOIPolicy is a constant, not an estimate.** Identical to
    `FixedPolicy(regulatory_filing)` on all six figures. Independence is 1.0 for
-   both top families, so the order's own rationale does not separate them;
-   duplication does, 0.75 vs 0.027. The order was deliberately not flipped.
+   both top families so its stated rationale cannot separate them; duplication
+   does, 0.75 vs 0.027. Not flipped by hand — see B-VOI-001 and §12 of the
+   brief. `diagnose_source_preference` reports the gap every cycle.
 
-2. **The market venv is the Founder venv.** With `PYTHONPATH` unset,
-   `intent_engine` resolves to `/Users/prathamsharma/intent-engine/src`, which
-   has no `market` subpackage. Any subprocess in a test must be handed the
-   source root explicitly.
+2. **Persistence is the bar for macro levels.** Walk-forward over 15 real
+   series: persistence best on 9, AR1 on 4, drift on 2, and effectively
+   unbeaten on the four 520-point series. The 24-point wins are ~16
+   out-of-sample predictions and are recorded as suggestive, not promoted.
 
-3. **The deployed runtime is behind.** launchd runs from
-   `/Users/prathamsharma/intent-engine-market`, whose checkout is detached at
-   `66c4a15`. `v4b/market` is at `431538b`. The scheduled cycles are therefore
-   NOT running this code. Moving the live checkout is a deployment decision and
-   was deliberately left to the owner.
+3. **The market venv is the Founder venv.** With `PYTHONPATH` unset,
+   `intent_engine` resolves to the other repository, which has no `market`
+   subpackage. Any subprocess in a test must be handed the source root.
 
 ## Next action
 
-Run `frontier.py` and take the top node. K-CYC-002 needs one cycle at
-`>= 431538b`; it is cheap and it closes the last open claim from this run.
+`G-THE-001`. Then recompute — do not assume the order holds.

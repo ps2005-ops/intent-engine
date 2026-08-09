@@ -271,16 +271,26 @@ def test_a_policy_is_scored_against_the_menu_the_row_carries():
 
 
 def test_the_recorded_menu_can_make_a_preferred_family_unreachable():
+    """The menu, not the preference, decides what a policy could have chosen.
+
+    company_owned is LAST in VOI's order, so with every family on offer VOI
+    never picks it and matches nothing. With company_owned the only eligible
+    option, VOI must fall through to it and match everything. A test asserting
+    only `matched == 0` passes under both readings — which is how a mutation
+    replacing the recorded menu with the full family list went uncaught.
+    """
     log = [RP.ResearchRecord(
         action=RP.ResearchAction(source_family=RP.COMPANY_OWNED,
                                  subject="acme"),
         outcome=RP.ResearchOutcome(outcome=RP.USED),
-        eligible_options=(RP.COMPANY_OWNED, RP.ANALYST_COVERAGE))
+        eligible_options=(RP.COMPANY_OWNED,))
         for _ in range(40)]
     got = RP.evaluate_offline(log, RP.VOIPolicy())
-    assert got.matched == 0, (
-        "VOI prefers analyst_coverage over company_owned when both are the "
-        "only options, so it must disagree with the logger here")
+    assert got.assumed_menu == 0
+    assert got.matched == 40, (
+        "company_owned was the only eligible option, so VOI had to fall "
+        "through to it; scoring against all five families instead would make "
+        "it pick regulatory_filing, which was never on offer")
 
 
 # --- the diagnosis (B-VOI-001) -------------------------------------------------
