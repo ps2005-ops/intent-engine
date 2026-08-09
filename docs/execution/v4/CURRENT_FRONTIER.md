@@ -46,7 +46,39 @@ adopted after this graph was derived and were reconciled into it once, on
 2026-08-09, as PROGRAM L. They are not to be rescoped again session by
 session.
 
-## H-CEO-001 is HALF DONE, and the other half is blocked upstream
+## The permanent rule this program keeps re-learning
+
+**ABSENCE MUST NEVER IMPERSONATE A NEGATIVE FACT.** The same defect has now
+been found five times in five different layers:
+
+    a degraded source                 read as "no economic activity"
+    missing thesis history            read as "the thesis never changed"
+    no prior DecisionImpact baseline  read as "the intelligence changed it"
+    an empty strategic section        read as "no market intelligence exists"
+    an empty before-state             read as "every dossier changed a decision"
+
+`NONE`, `NO_CHANGE`, `UNAVAILABLE`, `NOT_OBSERVED`, `BLOCKED_DATA` and
+`FAILED` are six different states. Before explaining anything to a founder,
+the system has to know which one it is in. When adding any new reader, ask
+what its empty case is and whether it can tell that from a measured zero.
+
+## H-CEO-002 is COMPLETE — thesis history crosses the bridge
+
+TWO missing production callers, not one. `economic_theses` was ALREADY an
+allowlisted export field with a projector, and `strategic_publish` never
+passed it. `thesis_revisions` had no field at all. The ledger has carried 18
+revision rows with effects, evidence and both standings the whole time.
+
+`thesis_history.status` is STATED, never inferred from the list's length —
+"no revisions crossed" and "no revision exists" are the same empty list. A
+producer sending no status is UNAVAILABLE, not NO_MOVEMENT.
+
+Verified on the live ledger: america_movil 8/8, honda 2/2, linde 8/8, every
+one `HISTORY_AVAILABLE_NO_MOVEMENT`. That is the honest reading — all 18 live
+transitions are CREATED. **The transport is proven without a single thesis
+having moved**, which is the point: it will be right the first time one does.
+
+## H-CEO-001 is STILL HALF DONE — and no longer blocked
 
 **Done and break-proven:** decision-impact measurement. The instrument
 existed all along, was deterministic, was wired, and had never written a
@@ -62,19 +94,14 @@ BEFORE and watching NONE disappear.
 records are baselines. It clears on the first dossier revision that differs.
 Do not manufacture one.
 
-**Not done: the CEO Q&A half, and Q6 is blocked by the TRANSPORT.** "What
-changed your mind" must resolve thesis → non-CREATED ThesisRevision →
-KnowledgeEffect → evidence. The live market→Founder dossier carries
-`strategic_beliefs`, `causal_pathways`, `hidden_states`, `interactions`,
-`expectation_mismatches` and `information_priorities` — and **no revision
-history and no economic_theses**. So the Founder side cannot tell "this
-thesis never moved" from "revisions exist and are not transported", and those
-need opposite answers.
+**Not done: the CEO Q&A half.** The transport that blocked it is now closed,
+and `decision_impact.what_changed_your_mind` answers that one question from
+the record with three distinct states. The remaining fourteen questions, the
+answer planner and challenge mode are unbuilt.
 
-Today the market's 18 thesis_revision rows are ALL CREATED, so both readings
-produce the same sentence and the defect is invisible. **It starts giving a
-wrong answer the moment a thesis first moves.** Build the export leg before
-the planner.
+Build the planner on the EXISTING conversation/provenance layer
+(`founder_intelligence/conversation.py`), which already scopes claims to one
+run and validates them. Do not start a second reasoning engine.
 
 ## What the session before that changed (E-DEM-001)
 

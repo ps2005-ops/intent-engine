@@ -1346,3 +1346,53 @@ BACKLOG / UP / OBSERVED from a real Caterpillar filing end to end.
   SENTENCE.** Three failed here: a both-directions guard is only load-bearing
   when a quantity is present, and a wrong-role guard needs the company named
   in the third person or the first-person rule catches it anyway.
+
+## V4 session — the transport that made a CEO answer possible (2026-08-09)
+
+**The rule this program keeps re-learning, now stated permanently:
+ABSENCE MUST NEVER IMPERSONATE A NEGATIVE FACT.** Five instances in five
+layers, all found within days of each other:
+
+    a degraded source                 read as "no economic activity"
+    missing thesis history            read as "the thesis never changed"
+    no prior DecisionImpact baseline  read as "the intelligence changed it"
+    an empty strategic section        read as "no market intelligence exists"
+    an empty before-state             read as "every dossier changed a decision"
+
+`NONE`, `NO_CHANGE`, `UNAVAILABLE`, `NOT_OBSERVED`, `BLOCKED_DATA` and
+`FAILED` are six different states, and a system that cannot tell them apart
+will explain the wrong one confidently.
+
+**H-CEO-002.** "What changed your mind?" must resolve thesis → non-CREATED
+revision → KnowledgeEffect → evidence. The dossier carried the current view
+and nothing about how it got there.
+
+TWO missing production callers, not one. `economic_theses` was already an
+allowlisted export field with a working projector, and the publish call site
+never passed it — so it had never crossed in production. `thesis_revisions`
+had no field at all. The ledger has carried 18 revision rows, with effects,
+evidence and both standings, the entire time.
+
+The status is STATED rather than inferred, because "no revisions crossed" and
+"no revision exists" are the same empty list. A producer that sends no status
+is UNAVAILABLE, not NO_MOVEMENT: an older producer that cannot send history
+must not be read as one reporting a quiet thesis.
+
+A fourth case the three states do not cover: a transition naming no effect
+and no evidence. The record says the view moved and cannot say what moved it,
+so the answer says exactly that rather than presenting the transition as its
+own explanation.
+
+Live: america_movil 8 theses / 8 revisions, honda 2/2, linde 8/8, all
+`HISTORY_AVAILABLE_NO_MOVEMENT`. **The transport is proven without a single
+thesis having moved** — which is the point. It will be right the first time
+one does.
+
+### Added to the standing rules
+
+- Every new reader needs its empty case decided before it ships. Ask what
+  the reader does when the input is missing, and whether it can tell that
+  from a measured zero. If it cannot, it will report the flattering one.
+- An allowlisted field with no production caller has never crossed. Check
+  the call site, not the schema — `economic_theses` had a projector, an
+  allowlist entry and a test, and had never once been sent.
