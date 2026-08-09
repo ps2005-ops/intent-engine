@@ -161,8 +161,64 @@ TRANSPORT_PROOFS = [
 PROOFS.extend(TRANSPORT_PROOFS)
 
 
+
+CA_T = f"{T}/test_ceo_answers.py"
+
+QA_PROOFS = [
+    ("O. a leading question is answered instead of adjudicated",
+     E / "ceo_answers.py",
+     "    if leading_premise(text):\n        return CHALLENGE",
+     "    if False:\n        return CHALLENGE",
+     f"{CA_T}::test_a_leading_question_is_challenged"),
+
+    ("P. an unrecognised question gets a default class",
+     E / "ceo_answers.py",
+     "    return UNKNOWN_QUESTION\n\n\ndef leading_premise",
+     "    return CURRENT_STATE\n\n\ndef leading_premise",
+     f"{CA_T}::test_an_unrecognised_question_is_not_guessed"),
+
+    ("Q. a missing causal hop is bridged rather than named",
+     E / "ceo_answers.py",
+     "    if cls in (WHY, WHY_IT_MATTERS) and stopped is not None:",
+     "    if False:",
+     f"{CA_T}::test_a_missing_hop_stops_the_causal_statement"),
+
+    ("R. an absent alternative reads as an uncontested view",
+     E / "ceo_answers.py",
+     '            "No competing explanation is recorded for this view. That is a "\n'
+     '            "gap in the analysis rather than evidence the view is "\n'
+     '            "uncontested.", source_constraints=constraints,',
+     '            "No competing explanation applies here.",\n'
+     '            source_constraints=constraints,',
+     f"{CA_T}::test_an_absent_alternative_is_not_consensus"),
+
+    ("S. the certainty wall stops reading the plan's standing",
+     E / "ceo_answers.py",
+     "    return tuple(word for word in FORBIDDEN_UPGRADES\n"
+     "                 if f\" {word} \" in lowered)",
+     "    return ()",
+     f"{CA_T}::test_a_renderer_may_not_upgrade_the_standing"),
+
+    ("T. a degraded source stops caveating the answer",
+     E / "ceo_answers.py",
+     "    if not impaired:\n        return ()",
+     "    if True:\n        return ()",
+     f"{CA_T}::test_a_degraded_source_reduces_visibility_not_activity"),
+
+    ("U. 'what changed' is answered with the mind-change record",
+     E / "ceo_answers.py",
+     "    if cls == WHAT_CHANGED:\n"
+     "        return _what_changed(question, intel, constraints)",
+     "    if cls == WHAT_CHANGED:\n"
+     "        return _changed_your_mind(question, intel, constraints)",
+     f"{CA_T}::test_what_changed_is_not_what_changed_your_mind"),
+]
+
+PROOFS.extend(QA_PROOFS)
+
+
 if __name__ == "__main__":
     raise SystemExit(run_all(
         [Proof(*p) for p in PROOFS],
-        title=(f"ceo — decision impact + thesis transport: {len(PROOFS)} proofs, "
+        title=(f"ceo — decision impact + transport + CEO answers: {len(PROOFS)} proofs, "
                f"{NOT_BUILT} recorded NOT_BUILT")))
