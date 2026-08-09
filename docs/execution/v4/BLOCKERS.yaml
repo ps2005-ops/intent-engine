@@ -1,0 +1,62 @@
+# Standing blockers. A blocker parks its node and that node's descendants.
+# It does not stop the program.
+#
+# A blocker must quantify the shortfall. "More data would be useful" is not a
+# blocker; "prospective_decisions 0 / 100 required" is.
+
+contract: v4_blockers.v1
+
+blockers:
+
+  - id: BLK-PROSPECTIVE-SAMPLE
+    class: BLOCKED_DATA
+    blocks: [B-POL-002, B-VOI-002, B-HACK-001, B-BANDIT-001]
+    measured: "prospective_decisions = 0"
+    required: "100 for policy comparison and hack audit; 50 for VOI calibration"
+    why: >
+      The research log is reconstructed from evidence that survived. Actions
+      returning nothing are structurally absent, so every rate is biased toward
+      success. No amount of analysis fixes this; only collection does.
+    prerequisite: A-RD-008
+    invalid_workaround: >
+      Do not evaluate a policy on reconstructed rows and report it as a policy
+      result. A-RD-005 exists to make that mixing impossible.
+
+  - id: BLK-NO-EXPLORATION
+    class: BLOCKED_DATA
+    blocks: [B-BANDIT-001]
+    measured: "logged exploration events = 0; every propensity is 1 or 0"
+    required: "a logging policy that randomises within the allowed source set"
+    why: >
+      Off-policy estimators that assume a randomising logger (IPW and
+      relatives) are not merely imprecise here, they are inapplicable. Replay
+      over the agreeing subset is what remains, and it is a smaller claim.
+    prerequisite: "controlled exploration design, itself gated on A-RD-008"
+    invalid_workaround: >
+      Do not fit a contextual bandit to satisfy a checklist and report an
+      offline improvement the logs cannot support. Report UNMEASURABLE.
+
+  - id: BLK-DEMAND-CORPUS
+    class: BLOCKED_DATA
+    blocks: [E-DEM-002, F-ORD-002]
+    measured: "21 / 260 company-demand state cells; 15 / 26 companies with any state"
+    required: "multiple measured stages on at least one company for a chain"
+    why: >
+      The nine-state demand vocabulary works. The corpus is thin: press
+      releases do not carry bookings, RPO or backlog. This is a source-coverage
+      problem, addressed by targeted extraction (E-DEM-001), not by loosening
+      the extractor.
+    prerequisite: E-DEM-001
+    invalid_workaround: >
+      Do not flatten contradictory or missing stages into "demand strong".
+
+  - id: BLK-SUPPLIER-EVIDENCE
+    class: BLOCKED_DATA
+    blocks: [F-ORD-002]
+    measured: "named supplier relationships = 0"
+    required: ">= 1 established supplier edge to mediate a third-order path"
+    why: >
+      A third-order consequence needs a real mediator. Without a named supplier
+      the path is a story.
+    invalid_workaround: >
+      Do not let an LLM complete the chain. Report BLOCKED/MISSING.

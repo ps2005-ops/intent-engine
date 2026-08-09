@@ -1,0 +1,598 @@
+# TASK_GRAPH.yaml -- machine-readable V4 backlog.
+#
+# Status vocabulary is defined in AGENT_PROTOCOL.md. A BLOCKED_* node is
+# terminal for that node only and leaves the runnable frontier; it does not
+# stop the program.
+#
+# `minimum_data` is a GATE, not an aspiration. A node whose minimum_data is
+# unmet is BLOCKED_DATA with the shortfall quantified, and a COLLECT
+# prerequisite is created.
+#
+# Derived 2026-08-09 from: docs/EXECUTION_CHECKPOINT.md, the session-3
+# closure matrix (PASS 11 / PARTIAL 25 / BLOCKED_DATA 1 / NO 1), direct
+# reading of src/intent_engine/market/, and reconciliation against the live
+# ledger and run reports.
+
+contract: v4_task_graph.v1
+repository_default: market
+generated_at: "2026-08-09"
+
+programs:
+  A: RESEARCH OBSERVABILITY
+  B: ACTIVE RESEARCH LEARNING
+  C: ECONOMIC METHODS
+  D: HISTORICAL SCIENTIFIC VALIDATION
+  E: WORLD MODEL
+  F: STRATEGIC ECONOMIC REASONING
+  G: THESIS / PROOF
+  H: FOUNDER / CEO
+  I: META-LEARNING
+  J: ROBUSTNESS
+  K: LIVE VALIDATION
+
+tasks:
+
+  # ---- PROGRAM A: RESEARCH OBSERVABILITY --------------------------------
+  # The root of the graph. Everything in B, and the reward half of I,
+  # depends on these.
+
+  - id: A-RD-001
+    program: A
+    title: ResearchDecision written BEFORE the external call
+    dependencies: []
+    status: READY
+    priority: 1
+    expected_value: >
+      Unblocks all of PROGRAM B. Without it the research log is a success log:
+      actions returning nothing are structurally absent.
+    acceptance_criteria:
+      - a decision record is durably written before any external research call
+      - carries state_snapshot_id, subject, question_id, question_type,
+        missing_fact, candidate_actions, chosen_action, selection_policy,
+        policy_version, expected_voi, expected_cost, budget_remaining,
+        source_family, query_strategy, selection_probability,
+        selection_probability_status, chosen_at, provenance
+      - selection_probability_status distinguishes KNOWN / DETERMINISTIC /
+        UNAVAILABLE and a deterministic policy is never given a fake propensity
+    tests: tests/market/test_research_decision.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-002
+    program: A
+    title: Candidate action set recorded, including unchosen options
+    dependencies: [A-RD-001]
+    status: WAITING_DEPENDENCY
+    priority: 1
+    expected_value: >
+      Load-bearing and currently the single largest defect in policy
+      evaluation. research_policy.evaluate_offline offers ALL five families as
+      options on EVERY record, so a policy is scored against a choice set that
+      never existed. Recording the real eligible set is what makes any policy
+      comparison mean anything.
+    acceptance_criteria:
+      - every eligible candidate is recorded with source_family, query_strategy,
+        estimated_cost, estimated_latency, expected_voi, eligible, refusal_reason
+      - unchosen candidates are present
+      - cadence-blocked families appear as ineligible WITH the reason, not as
+        absent
+    tests: tests/market/test_research_decision.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-003
+    program: A
+    title: DecisionOutcome, preserving NO_RESULT and FAILED
+    dependencies: [A-RD-001]
+    status: WAITING_DEPENDENCY
+    priority: 1
+    expected_value: >
+      NO_RESULT is training data. Discarding it is what makes the historical
+      log biased toward success.
+    acceptance_criteria:
+      - status in SUCCESS / NO_RESULT / NO_NEW_INFORMATION / REFUSED / FAILED /
+        TIMEOUT
+      - carries decision_id, timings, documents_attempted, documents_retrieved,
+        accepted_evidence, refused_evidence, new/independent/dependent events,
+        knowledge_effect_ids, immediate_reward, latency, cost, failure_type
+      - an outcome cannot be written without a matching decision_id
+    tests: tests/market/test_research_decision.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-004
+    program: A
+    title: DelayedOutcome appended, never mutating immediate reward
+    dependencies: [A-RD-003]
+    status: WAITING_DEPENDENCY
+    priority: 2
+    expected_value: Supports delayed credit assignment; closes the reward path from I.
+    acceptance_criteria:
+      - append-only; the original immediate reward is never rewritten
+      - fires on belief resolved / falsifier resolved / hypothesis discriminated
+        / mechanism tested / thesis changed / Founder DecisionImpact
+      - carries decision_id, outcome_type, target_id, reward_delta, observed_at,
+        provenance
+    tests: tests/market/test_research_decision.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-005
+    program: A
+    title: PROSPECTIVE / RECONSTRUCTED wall
+    dependencies: [A-RD-001]
+    status: WAITING_DEPENDENCY
+    priority: 1
+    expected_value: >
+      Prevents the reconstructed success log from silently establishing policy
+      value once a real log exists alongside it.
+    acceptance_criteria:
+      - every research row carries provenance PROSPECTIVE or RECONSTRUCTED
+      - policy evaluation reports the two separately
+      - a guard refuses to declare a policy production-ready primarily from
+        reconstructed data
+    tests: tests/market/test_research_decision.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-006
+    program: A
+    title: Bounded state snapshot for policy learning
+    dependencies: [A-RD-001]
+    status: WAITING_DEPENDENCY
+    priority: 2
+    expected_value: Gives a future policy a stable feature vector to condition on.
+    acceptance_criteria:
+      - bounded, stable features only; no arbitrary application state
+      - open hypotheses, uncertainty, stale knowledge, falsifiers, source
+        performance, question type, budget, world-model gaps
+      - snapshot is content-keyed and referenced by id from the decision
+    tests: tests/market/test_research_decision.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-007
+    program: A
+    title: INSTRUMENT -- production acquisition path writes decisions
+    dependencies: [A-RD-001, A-RD-002, A-RD-003, A-RD-005, A-RD-006]
+    status: WAITING_DEPENDENCY
+    priority: 1
+    expected_value: >
+      The BUILD/INSTRUMENT split exists because of two recorded failures where
+      an API existed and the cycle never called it. This node is the call site.
+    acceptance_criteria:
+      - steps.source_acquisition_step writes a decision before CS.measure and an
+        outcome after, for every family including cadence-skipped ones
+      - LearningStore has record + read methods and the record kinds are
+        registered
+      - a FRESH PROCESS reads back what the cycle wrote
+    tests: tests/market/test_research_decision_wiring.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: A-RD-008
+    program: A
+    title: COLLECT -- run a real PAPER cycle and report the counts
+    dependencies: [A-RD-007]
+    status: WAITING_DEPENDENCY
+    priority: 1
+    expected_value: The first legitimate prospective policy-training records.
+    acceptance_criteria:
+      - a real production-equivalent cycle, not a fixture
+      - reports decisions, candidate sets, chosen, no-result, failed,
+        state-changing, no-change, immediate reward
+      - counts are read from the persisted ledger, not from an in-process probe
+    tests: null
+    minimum_data: none
+    completion_evidence: null
+
+  # ---- PROGRAM B: ACTIVE RESEARCH LEARNING ------------------------------
+
+  - id: B-VOI-001
+    program: B
+    title: Diagnose the VOI filing bias by measurement
+    dependencies: []
+    status: READY
+    priority: 2
+    expected_value: >
+      A live, falsifiable defect in a policy that is reported every cycle.
+      Independent of the collection nodes, so it runs in parallel.
+    acceptance_criteria:
+      - the cause is traced, not assumed; candidates are stale
+        SourceFamilyPerformance, low duplication penalty, undervalued
+        independence, question-type routing mismatch, cost/latency imbalance
+      - independent_reporting > filing is NOT hardcoded
+      - before/after routing compared on knowledge change per action,
+        discrimination, duplicate rate, cost, latency
+    tests: tests/market/test_research_policy.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: B-POL-001
+    program: B
+    title: Choice-set-aware offline evaluation
+    dependencies: [A-RD-002, B-VOI-001]
+    status: WAITING_DEPENDENCY
+    priority: 2
+    expected_value: >
+      evaluate_offline currently assumes all five families were available on
+      every decision. Scoring against the recorded eligible set is a
+      correctness fix, not a feature.
+    acceptance_criteria:
+      - a policy is scored only against the candidate set actually recorded
+      - overlap is reported against the real choice set
+      - reconstructed rows, which have no recorded choice set, are reported
+        separately and never pooled
+    tests: tests/market/test_research_policy.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: B-POL-002
+    program: B
+    title: Baseline policy comparison on prospective data
+    dependencies: [A-RD-008, B-POL-001]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    acceptance_criteria:
+      - static order, historical acceptance, historical knowledge-change rate,
+        source-performance, VOI heuristic, random
+      - immediate and delayed reward both reported
+    minimum_data: prospective_decisions >= 100
+    completion_evidence: null
+
+  - id: B-VOI-002
+    program: B
+    title: Predicted vs realized VOI calibration
+    dependencies: [A-RD-008]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    acceptance_criteria:
+      - expected_voi paired with realized KnowledgeEffect-derived utility
+      - persisted as VOICalibration
+      - reports where VOI is miscalibrated, by question type and source family
+    minimum_data: prospective_decisions >= 50
+    completion_evidence: null
+
+  - id: B-HACK-001
+    program: B
+    title: Reward-hack audit re-run on prospective data
+    dependencies: [A-RD-008]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    expected_value: >
+      Session 3 corrected a false HACKABLE finding: the volume arm was also the
+      value arm. The correct test is whether an attack wins while changing LESS
+      than the best honest policy. That test must now run on real records.
+    acceptance_criteria:
+      - attacks span volume, cheap sources, confirmation bias, document-rich
+        companies, trivial questions, duplicated news, easy facts, noisy numerics
+      - reports best honest strategy, best attack, change rate, discrimination,
+        delayed utility, cost
+      - a low-change window reports UNRESOLVED rather than a smoothed pass
+    minimum_data: prospective_decisions >= 100
+    completion_evidence: null
+
+  - id: B-BANDIT-001
+    program: B
+    title: Bandit maturity ladder, one step only
+    dependencies: [B-POL-002, B-HACK-001]
+    status: BLOCKED_DATA
+    priority: 5
+    expected_value: >
+      Deliberately parked. L0 interface exists (ContextualBanditPolicy). The
+      logging policy is deterministic, so every propensity is 1 or 0 and
+      off-policy estimators are inapplicable, not merely imprecise.
+    blocker: >
+      Valid counterfactual evaluation requires logged exploration. None exists.
+      Build only the next justified maturity step; do not fit a bandit to
+      satisfy a checklist.
+    minimum_data: prospective_decisions with logged exploration >= 200
+    completion_evidence: null
+
+  - id: B-POL-003
+    program: B
+    title: Policy maturity states
+    dependencies: [B-POL-002]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - NOT_READY / EARLY / OFFLINE_EVALUABLE / OUTPERFORMING / DEPLOYABLE /
+        DEGRADED
+      - thresholds are not chosen to reach DEPLOYABLE
+      - expected current state is EARLY and that is an acceptable answer
+    minimum_data: none
+    completion_evidence: null
+
+  # ---- PROGRAM C: ECONOMIC METHODS --------------------------------------
+
+  - id: C-MET-001
+    program: C
+    title: EconomicMethod registry
+    dependencies: []
+    status: READY
+    priority: 3
+    acceptance_criteria:
+      - each method declares question types, input requirements, minimum
+        sample, assumptions, output type, known failure modes
+      - a registry entry does NOT imply the estimator is implemented
+    minimum_data: none
+    completion_evidence: null
+
+  - id: C-MET-002
+    program: C
+    title: MethodAssumptionCheck ledger
+    dependencies: [C-MET-001]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    acceptance_criteria:
+      - assumptions persisted per evaluation with pass/fail and evidence
+      - a failed critical assumption yields REFUSED, never a fabricated estimate
+    minimum_data: none
+    completion_evidence: null
+
+  - id: C-MET-003
+    program: C
+    title: One real historical causal study
+    dependencies: [C-MET-002]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - economically meaningful question chosen on stated criteria
+      - vintage-safe data; outcome NOT inspected during selection
+      - descriptive baseline PLUS one formal method whose assumptions hold
+      - result stores estimand, sample, period, effect, uncertainty,
+        assumption status, alternative interpretation, standing
+    minimum_data: macro series depth sufficient for the chosen estimand
+    completion_evidence: null
+
+  # ---- PROGRAM D: HISTORICAL SCIENTIFIC VALIDATION ----------------------
+
+  - id: D-REP-001
+    program: D
+    title: Vintage wall for replay
+    dependencies: []
+    status: READY
+    priority: 3
+    acceptance_criteria:
+      - data access at historical T is restricted to what existed at T
+      - a leakage attempt raises rather than warns
+    minimum_data: none
+    completion_evidence: null
+
+  - id: D-REP-002
+    program: D
+    title: Historical thesis replay with deterministic episode selection
+    dependencies: [D-REP-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - episodes chosen by date window / data availability / event type BEFORE
+        outcomes are inspected
+      - wins, losses and ambiguous results all retained
+    minimum_data: episodes with sufficient pre-period coverage >= 3
+    completion_evidence: null
+
+  - id: D-REP-003
+    program: D
+    title: Outcome vs mechanism scoring
+    dependencies: [D-REP-002]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - OUTCOME_RIGHT_MECHANISM_RIGHT / OUTCOME_RIGHT_MECHANISM_WRONG /
+        OUTCOME_WRONG_MECHANISM_PLAUSIBLE / OUTCOME_WRONG_MECHANISM_WRONG /
+        UNRESOLVED
+      - feeds mechanism calibration; unrelated mechanisms are not pooled
+    minimum_data: none
+    completion_evidence: null
+
+  # ---- PROGRAM E: WORLD MODEL -------------------------------------------
+
+  - id: E-DEM-001
+    program: E
+    title: Targeted demand-variable extraction
+    dependencies: []
+    status: READY
+    priority: 3
+    expected_value: >
+      Measured 21/260 company-state cells and 15/26 companies with any state.
+      The layer works; the corpus is thin. Targeted extraction from filings and
+      earnings is the lever, not generic web copy.
+    acceptance_criteria:
+      - orders, bookings, RPO, backlog, contract liabilities, cancellations,
+        shipments, customer adds, usage
+      - coverage measured before and after
+    minimum_data: none
+    completion_evidence: null
+
+  - id: E-DEM-002
+    program: E
+    title: Demand-state contradiction handling
+    dependencies: [E-DEM-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - backlog up with cancellations up, revenue up with bookings down, orders
+        up with shipments constrained are all representable
+      - never flattened to "demand strong"
+    minimum_data: none
+    completion_evidence: null
+
+  # ---- PROGRAM F/G/H/I: parked behind their prerequisites ---------------
+  # Encoded so the frontier algorithm can see them, not yet elaborated. Each
+  # is elaborated when its dependencies clear.
+
+  - id: F-ORD-001
+    program: F
+    title: Second-order consequences require a named mediator
+    dependencies: [D-REP-003]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - intermediate node, lag, support, alternative, falsifier, standing
+      - a missing mediator breaks the path rather than being narrated across
+    minimum_data: none
+
+  - id: F-ORD-002
+    program: F
+    title: Third-order consequences, depth-capped
+    dependencies: [F-ORD-001]
+    status: WAITING_DEPENDENCY
+    priority: 5
+    acceptance_criteria:
+      - one further mediated step, hard depth cap
+      - missing supplier relationship yields BLOCKED/MISSING, never LLM
+        story completion
+    minimum_data: named supplier relationships >= 1
+
+  - id: F-SCN-001
+    program: F
+    title: Scenario engine over the canonical graph
+    dependencies: [F-ORD-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - BASE / UPSIDE / DOWNSIDE / ALTERNATIVE_MECHANISM as world-state
+        perturbations, not prose
+      - propagation stops at a missing link and names the missing dependency
+      - quantified only where calibrated; otherwise bounded and directional
+    minimum_data: none
+
+  - id: G-THE-001
+    program: G
+    title: Thesis revision history answering "what changed your mind"
+    dependencies: []
+    status: READY
+    priority: 3
+    acceptance_criteria:
+      - created / strengthened / weakened / contested / superseded transitions
+      - each transition names the KnowledgeEffect ids responsible
+    minimum_data: none
+
+  - id: H-CEO-001
+    program: H
+    title: CEO Q&A derived from canonical records
+    dependencies: [G-THE-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - answers trace canonical records; no new facts invented under repeated
+        "why?"
+      - the eleven standing questions are answerable
+    minimum_data: none
+
+  - id: H-CEO-002
+    program: H
+    title: CEO challenge mode -- refuse a leading premise
+    dependencies: [H-CEO-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - a leading premise such as -- tell me why demand is collapsing -- is
+        refused when the evidence does not show it, and answered instead with
+        the evidence, the leading thesis, the alternative, and the missing test
+    minimum_data: none
+
+  - id: H-CON-001
+    program: H
+    title: Standing consistency wall across thesis/proof/presentation/Q&A
+    dependencies: [H-CEO-001]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    acceptance_criteria:
+      - a PROPOSED thesis cannot become a CONFIRMED slide
+      - a CONTESTED proof cannot become a high-confidence answer
+      - a decision-material alternative cannot disappear downstream
+    minimum_data: none
+
+  - id: H-IMP-001
+    program: H
+    title: Founder DecisionImpact, real company first
+    dependencies: [H-CON-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - deterministic Founder-without-V4 vs Founder-with-V4 on the same company
+      - scored NONE / PRESENTATIONAL / MEANINGFUL / DECISION_CHANGING
+      - a NONE result is recorded as NONE, and the missing evidence identified
+    minimum_data: none
+
+  - id: I-ACC-001
+    program: I
+    title: Learning acceleration recomputed from KnowledgeEffect
+    dependencies: [A-RD-008]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    acceptance_criteria:
+      - rolling windows from effects rather than accepted rows
+      - ECONOMIC / SYSTEM / CALIBRATION / FOUNDER / RETENTION / RESEARCH /
+        UNSUPERVISED classified independently
+    minimum_data: none
+
+  - id: I-STA-001
+    program: I
+    title: Stagnation detection
+    dependencies: [I-ACC-001]
+    status: WAITING_DEPENDENCY
+    priority: 4
+    acceptance_criteria:
+      - alerts on high evidence + low effect rate; high thesis count + low
+        resolution; high cost + low realized VOI; many discoveries + low
+        validation; many Founder analyses + zero DecisionImpact
+    minimum_data: none
+
+  # ---- PROGRAM J: ROBUSTNESS --------------------------------------------
+
+  - id: J-BRK-001
+    program: J
+    title: Break proofs for the new research-observability guards
+    dependencies: [A-RD-007]
+    status: WAITING_DEPENDENCY
+    priority: 2
+    expected_value: >
+      Guards that have never been shown to fail are guards nobody has tested.
+      Session 3 found 4 of 21 mutations NOT_CAUGHT, each naming a real
+      unasserted guard.
+    acceptance_criteria:
+      - mutations cover prospective logging removed; NO_RESULT rows dropped;
+        choice set absent; fake propensity accepted; delayed reward applied
+        immediately; expected VOI copied into realized reward
+      - each must go RED for the intended reason
+      - mutation lock held; restore verified by hash; mtime bumped so CPython
+        does not run stale bytecode
+    minimum_data: none
+
+  - id: J-ADV-001
+    program: J
+    title: Adversarial suite extension
+    dependencies: [A-RD-008]
+    status: WAITING_DEPENDENCY
+    priority: 3
+    acceptance_criteria:
+      - retains all 27 prior attacks
+      - adds no-result omitted; choice set reconstructed after outcome;
+        propensity invented; volume hack; high-cost low-value source;
+        easy-source confirmation bias; KnowledgeEffect assigned to an unrelated
+        hypothesis; synthetic/live mixing; trade P&L validating a mechanism
+    minimum_data: none
+
+  # ---- PROGRAM K: LIVE VALIDATION ---------------------------------------
+
+  - id: K-CYC-001
+    program: K
+    title: Verify V4 projections actually reach a run report
+    dependencies: []
+    status: READY
+    priority: 1
+    expected_value: >
+      Reconciliation finding 2026-08-09: no cycle has ever run with the V4
+      projections in place. report.py gained research_policy at 3eb24d2
+      (21:31); the last night report was written at 20:28. The session-3 claim
+      that the research log reads reconstructed:0 came from an in-process
+      probe, not from a cycle. This is the "committed is not deployed" pattern.
+    acceptance_criteria:
+      - a cycle is run at this SHA and the written report contains
+        research_policy, knowledge_effects, economic_thesis, unsupervised
+      - any key still missing is diagnosed rather than reported as present
+    minimum_data: none
+    completion_evidence: null
