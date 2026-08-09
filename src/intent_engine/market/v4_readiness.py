@@ -43,6 +43,11 @@ AXES = (
     "ACTIVE_LEARNING", "RESEARCH_POLICY", "METHOD_PERFORMANCE",
     "THIRD_ORDER", "THESIS_ENGINE", "PROOF_ENGINE", "CEO_CONVERSATION",
     "PRESENTATION", "RETENTION", "PAPER",
+    # Session 3. The bottleneck itself became an axis: an engine that
+    # cannot say what its evidence changed cannot score anything
+    # downstream of the evidence.
+    "EVIDENCE_LINKAGE", "RESEARCH_REWARD",
+    "PROSPECTIVE_RESEARCH_LOG",
 )
 
 

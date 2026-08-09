@@ -1,4 +1,4 @@
-"""The V4 readiness scorecard, session 2, computed from what was measured.
+"""The V4 readiness scorecard, session 3, computed from what was measured.
 
 Every reason below is a number this session actually produced. A status with a
 reason that could have been written before the run is a status somebody chose,
@@ -35,9 +35,10 @@ AXES = [
     A("SUPPLY_CHAIN", R.BLOCKED_DATA,
       "no document in the corpus names a counterparty; unchanged from "
       "session 1 and not addressable by effort"),
-    A("DEMAND_CHAIN", R.NO,
-      "not built; CONSUMER_DEMAND is UNKNOWN in both areas, so the top of "
-      "the chain has no source"),
+    A("DEMAND_CHAIN", R.PARTIAL,
+      "nine states, per-link standing and a refusal to speak for demand from "
+      "a backlog figure; live, 15 of 26 companies show any state and 21 of "
+      "260 states are measured, so every chain reads UNKNOWN overall"),
     A("EXPECTATIONS", R.PASS,
       "6 baselines with vintage-correct origins; AR1 beats the random walk "
       "0.40 on the Treasury note rate and nothing beats it on Canadian "
@@ -74,14 +75,28 @@ AXES = [
       "state, action, observation and reward are stated; a contextual bandit "
       "and 5 baselines are scored offline; nothing is deployable because the "
       "log contains no exploration"),
+    A("EVIDENCE_LINKAGE", R.PASS,
+      "316 of 316 evidence rows attributed, zero unattributed; 201 changed "
+      "something and 115 changed nothing, and a changing effect whose before "
+      "and after are equal is refused"),
+    A("RESEARCH_REWARD", R.PARTIAL,
+      "three of four positive terms are now measured off the effect log; "
+      "REWARD_HACKABLE=False because the volume attack changes MORE per "
+      "action (0.76) than the VOI heuristic (0.52), which is the reward "
+      "working rather than failing"),
+    A("PROSPECTIVE_RESEARCH_LOG", R.NO,
+      "the log is still reconstructed from evidence that survived, so every "
+      "action that returned nothing is missing; no learned policy can be "
+      "trusted until choices are logged before their outcomes"),
     A("ACTIVE_RESEARCH", R.PARTIAL,
       "the session-1 name for what ACTIVE_LEARNING and RESEARCH_POLICY now "
       "split; kept so the axis list has no hole, and scored as the weaker of "
       "the two"),
     A("RESEARCH_POLICY", R.PARTIAL,
-      "316-row log, best trustworthy policy FIXED_INDEPENDENT_REPORTING at "
-      "+0.77 against VOI_HEURISTIC at +0.05; the reward audit reports "
-      "HACKABLE=True and names why"),
+      "316-row log priced by knowledge effects; independent reporting has the "
+      "highest change rate (0.76) and lowest duplication (0.03) while "
+      "regulatory filings repeat a known fact 75% of the time, which is why "
+      "the VOI heuristic loses on this corpus"),
     A("CAUSAL_METHODS", R.PARTIAL,
       "6 forecast methods benchmarked against the random walk per series; no "
       "DiD, synthetic control or local projection, because no treated and "
@@ -122,9 +137,11 @@ AXES = [
       "9 question forms answered from named fields, a refusal for anything "
       "no field answers, and a challenge mode that declines a leading "
       "question and returns the argument instead; no multi-turn state"),
-    A("PRESENTATION", R.NO,
-      "not built; consistent_with exists and would enforce the invariant, "
-      "and nothing calls it from a deck"),
+    A("PRESENTATION", R.PASS,
+      "12 sections generated from the thesis, every slide naming the field it "
+      "renders, the headline verb bound to the standing by table, and the "
+      "alternatives and falsifier slides required; check() re-verifies an "
+      "edited deck"),
     A("CALIBRATION", R.PARTIAL,
       "forecast calibration is real and measured; thesis calibration has "
       "nothing to score because no falsifier is due before 2027-05-05"),

@@ -6,6 +6,87 @@ of restarting from an audit.
 
 Updated 2026-08-08, V4 SESSION 1.
 
+## V4 session 3 — evidence learns what it changed
+
+V3 FROZEN at market `2ee1635` / founder `247ad23`. Production `119d345`
+untouched. PAPER in all three plists.
+
+### The seam was in the wrong place
+
+`affected_hypotheses` and its neighbours live on MicroEvidence, which is built
+from a document BEFORE any belief exists for it to affect. At that moment there
+is nothing true to write there — which is why all 316 rows carried empty
+tuples, and why filling them in later from text similarity would have been a
+guess wearing a provenance field.
+
+An effect is a fact about a STATE CHANGE, so `KnowledgeEffect` is its own
+append-only record written where the state changes. `belief_formation.propose`
+already knew which evidence opened which belief and which went nowhere; it
+counted the second and discarded the first.
+
+    316 / 316 evidence rows attributed, 0 unattributed
+    201 changed something · 115 changed nothing
+    855 effects: 428 NO_CHANGE · 405 CREATED · 11 RESOLVED
+                 8 SUPPORTED · 3 CONTRADICTED
+
+NO_CHANGE is half the log and is the half that matters: without it, "we
+accepted 316 rows" and "we learned 316 things" are the same number.
+
+### The correction I owe the previous run
+
+The reward audit reported HACKABLE because a volume attack topped the table.
+Measured properly, that attack picks independent reporting, which has the
+HIGHEST knowledge-change rate in the corpus:
+
+    family                   n   change  discrim   dup    mean reward
+    independent_reporting  146    0.76     0.06   0.03       +2.06
+    regulatory_filing       84    0.52     0.00   0.75       +0.86
+    analyst_coverage        22    0.45     0.05   0.09       +1.48
+    company_owned           64    0.56     0.00   0.73       -0.09
+
+The volume arm and the value arm are the same arm. Hackability now tests
+whether an attack wins WHILE CHANGING LESS than the best honest policy.
+**REWARD_HACKABLE = False.** The finding underneath is that the VOI heuristic
+is wrong for this corpus: it prefers filings, and 75% of filing rows repeat a
+fact the ledger already holds.
+
+### Two NOs closed
+
+DEMAND_CHAIN: nine states, because backlog rising is equally consistent with
+orders rising and shipments slipping. Cancellations are a LEAK, not a step.
+Live: 15 of 26 companies show any state, 21 of 260 states measured, every chain
+UNKNOWN overall — the corpus, not the layer.
+
+PRESENTATION: 12 sections generated from the thesis, the headline verb bound to
+the standing by table, and the alternatives and falsifier slides REQUIRED.
+
+### numeric_values, finally, and why the yield is 6%
+
+Subject-first extraction: a digit no economic subject claims is discarded. Two
+precision defects the live corpus found — a $400M buyback read as revenue, and
+`EUR 9.3 billion total net sales` read as the 2.9 billion net income figure
+because the scan only looked forward.
+
+### The bottleneck now
+
+`PROSPECTIVE_RESEARCH_LOG`. The log is still reconstructed from evidence that
+SURVIVED, so every action that returned nothing is missing and every rate over
+it is biased toward success. Until choices are written down before their
+outcomes, no learned policy can be shown to beat the heuristic.
+
+### Break proofs
+
+Session 3: **21/21**, after four NOT_CAUGHT each named a test that did not
+discriminate its guard. `run_all` now takes a mutation lock — the previous
+session ran two scripts against one worktree and they corrupted each other's
+restores.
+
+### Readiness
+
+    PASS 11 · PARTIAL 25 · BLOCKED_DATA 1 · NO 1
+
+against session 2's PASS 9 · PARTIAL 22 · BLOCKED_DATA 1 · NO 2.
+
 ## V4 session 2 — the economy stops being one series, and the reasoning gets a shape
 
 V3 is FROZEN at market `2ee1635` / founder `247ad23`. Production `119d345`

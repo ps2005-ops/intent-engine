@@ -658,7 +658,8 @@ def _knowledge_summary(knowledge: dict) -> dict:
         "reward_audit": {
             k: ((knowledge.get("research_policy") or {}).get("reward_audit")
                 or {}).get(k)
-            for k in ("audited", "top", "hackable", "tied_at_the_top")
+            for k in ("audited", "top", "hackable", "tied_at_the_top",
+                      "hacking_policies", "change_rate", "best_honest")
             if ((knowledge.get("research_policy") or {}).get("reward_audit")
                 or {}).get(k) is not None},
         "economic_thesis": {
