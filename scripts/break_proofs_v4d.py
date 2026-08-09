@@ -223,6 +223,12 @@ PROOFS = [
      "        if False:",
      f"{H}::test_an_unchanged_thesis_records_no_revision"),
 
+    ("v4d-31. an untraceable revision credits every action that night",
+     RD,
+     "        if not matched:",
+     "        if False:",
+     f"{D}::test_an_untraceable_revision_credits_nobody"),
+
     ("v4d-22. attribution is computed and not persisted",
      ST,
      "                if store.record_knowledge_effect(effect):",

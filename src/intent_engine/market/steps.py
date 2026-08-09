@@ -826,6 +826,14 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
                                else 0),
             refused_evidence=report.relationships_refused,
             new_events=report.relationships_accepted,
+            # WHAT THIS ACTION PRODUCED, so a consequence weeks later can be
+            # traced back to the choice that found it. Without these ids the
+            # delayed reward can only be spread across every action that ran
+            # that night, which teaches an association nobody observed.
+            produced_evidence_ids=tuple(
+                str(getattr(r, "relationship_id", "") or "")
+                for r in (found if integrated else ())
+                if getattr(r, "relationship_id", "")),
             latency_seconds=report.latency_seconds, cost=1.0,
             failure_type=("; ".join(report.errors)[:200] if report.errors
                           and not report.documents_retrieved else "")))
@@ -873,6 +881,68 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
                                | {r.object_actor for r in accepted}),
     }
     return payload
+
+
+def _rehydrate_decision(row: dict):
+    """A persisted research decision back into its record."""
+    from . import research_decision as RD
+
+    try:
+        candidates = tuple(
+            RD.CandidateAction(
+                source_family=str(c.get("source_family") or ""),
+                query_strategy=str(c.get("query_strategy") or ""),
+                estimated_cost=float(c.get("estimated_cost") or 1.0),
+                estimated_latency=float(c.get("estimated_latency") or 0.0),
+                expected_voi=float(c.get("expected_voi") or 0.0),
+                eligible=bool(c.get("eligible", True)),
+                refusal_reason=str(c.get("refusal_reason") or ""))
+            for c in (row.get("candidate_actions") or ()))
+        return RD.ResearchDecision(
+            subject=str(row.get("subject") or ""),
+            question_type=str(row.get("question_type") or ""),
+            chosen_action=str(row.get("chosen_action") or ""),
+            candidates=candidates,
+            selection_policy=str(row.get("selection_policy") or ""),
+            policy_version=str(row.get("policy_version") or "1"),
+            missing_fact=str(row.get("missing_fact") or ""),
+            state_snapshot_id=str(row.get("state_snapshot_id") or ""),
+            expected_voi=float(row.get("expected_voi") or 0.0),
+            expected_cost=float(row.get("expected_cost") or 1.0),
+            budget_remaining=float(row.get("budget_remaining") or 0.0),
+            query_strategy=str(row.get("query_strategy") or ""),
+            selection_probability=row.get("selection_probability"),
+            selection_probability_status=str(
+                row.get("selection_probability_status") or RD.DETERMINISTIC),
+            chosen_at=str(row.get("chosen_at") or ""),
+            provenance=str(row.get("provenance") or RD.PROSPECTIVE),
+            policy_family=str(row.get("policy_family") or ""))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _rehydrate_outcome(row: dict):
+    from . import research_decision as RD
+
+    try:
+        return RD.DecisionOutcome(
+            decision_id=str(row.get("decision_id") or ""),
+            status=str(row.get("status") or ""),
+            started_at=str(row.get("started_at") or ""),
+            completed_at=str(row.get("completed_at") or ""),
+            documents_attempted=int(row.get("documents_attempted") or 0),
+            documents_retrieved=int(row.get("documents_retrieved") or 0),
+            accepted_evidence=int(row.get("accepted_evidence") or 0),
+            refused_evidence=int(row.get("refused_evidence") or 0),
+            new_events=int(row.get("new_events") or 0),
+            knowledge_effect_ids=tuple(row.get("knowledge_effect_ids") or ()),
+            produced_evidence_ids=tuple(
+                row.get("produced_evidence_ids") or ()),
+            latency_seconds=float(row.get("latency_seconds") or 0.0),
+            cost=float(row.get("cost") or 0.0),
+            failure_type=str(row.get("failure_type") or ""))
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def _rehydrate_thesis(row: dict):
@@ -1274,6 +1344,32 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             **revision_summary,
             "revision_records_written": revisions_written,
             "revisions_held": len(store.thesis_revisions()),
+        }
+
+        # THE DELAYED HALF OF THE RESEARCH REWARD. An action that found
+        # evidence which later moved a thesis earns credit for it, weeks after
+        # the night it ran. The immediate outcome is never rewritten — this
+        # appends beside it, because the first record is the only honest
+        # measurement of what was knowable at the time.
+        delayed_written = 0
+        try:
+            logged = [_rehydrate_decision(r) for r in
+                      store.research_decisions()]
+            logged_outcomes = [_rehydrate_outcome(r) for r in
+                               store.research_outcomes()]
+            delayed, delayed_summary = RD.credit_revisions(
+                [d for d in logged if d is not None],
+                [o for o in logged_outcomes if o is not None],
+                history.chain_all(), observed_at=ctx.as_of)
+            if not ctx.dry_run:
+                for row in delayed:
+                    if store.record_research_delayed_outcome(row):
+                        delayed_written += 1
+        except Exception as exc:  # noqa: BLE001
+            delayed_summary = {"error": str(exc)}
+        payload["delayed_reward"] = {
+            **delayed_summary, "written": delayed_written,
+            "held": len(store.research_delayed_outcomes()),
         }
 
         payload["founder_v4"] = {

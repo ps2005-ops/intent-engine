@@ -339,6 +339,11 @@ class DecisionOutcome:
     independent_events: int = 0
     dependent_events: int = 0
     knowledge_effect_ids: Tuple[str, ...] = ()
+    #: WHICH evidence this action produced. Without it the delayed half of
+    #: the reward has no way to trace a later consequence back to the action
+    #: that found the evidence, and credit could only be spread across
+    #: everything that ran that night.
+    produced_evidence_ids: Tuple[str, ...] = ()
     immediate_reward: Optional[float] = None
     latency_seconds: float = 0.0
     cost: float = 0.0
@@ -368,6 +373,7 @@ class DecisionOutcome:
     def as_dict(self) -> dict:
         out = dataclasses.asdict(self)
         out["knowledge_effect_ids"] = list(self.knowledge_effect_ids)
+        out["produced_evidence_ids"] = list(self.produced_evidence_ids)
         out.update(record="research_outcome", contract=CONTRACT)
         return out
 
@@ -590,4 +596,87 @@ def summarise(decisions: Sequence[ResearchDecision],
                  "contain; if this is zero on a real run, check that the "
                  "logger is writing outcomes for families that returned "
                  "nothing rather than only for the ones that produced"),
+    }
+
+
+# --- the delayed half of the reward --------------------------------------------
+
+#: Consequence kinds an action can earn credit for after the fact.
+BELIEF_RESOLVED = "BELIEF_RESOLVED"
+FALSIFIER_RESOLVED = "FALSIFIER_RESOLVED"
+THESIS_REVISED = "THESIS_REVISED"
+MECHANISM_TESTED = "MECHANISM_TESTED"
+DECISION_IMPACT = "FOUNDER_DECISION_IMPACT"
+
+#: What a consequence is worth. Stated, not tuned. A revision that WEAKENED a
+#: thesis is worth as much as one that strengthened it: an action that showed
+#: the engine it was wrong did the same job as one that confirmed it, and a
+#: reward that paid only for confirmation would teach the policy to seek it.
+DELAYED_WEIGHTS = {
+    BELIEF_RESOLVED: 1.5,
+    FALSIFIER_RESOLVED: 2.0,
+    THESIS_REVISED: 2.0,
+    MECHANISM_TESTED: 1.5,
+    DECISION_IMPACT: 3.0,
+}
+
+
+def credit_revisions(decisions: Sequence[ResearchDecision],
+                     outcomes: Sequence[DecisionOutcome],
+                     revisions: Sequence, *, observed_at: str = ""
+                     ) -> Tuple[List[DelayedOutcome], dict]:
+    """Pay an action for a thesis revision its evidence later caused.
+
+    THE LINK, AND WHERE IT BREAKS. A revision names the knowledge effects that
+    moved the thesis. An effect names the evidence it came from. So an action
+    earns delayed credit when a revision cites an effect whose evidence that
+    action produced — decision -> outcome -> evidence -> effect -> revision.
+
+    That chain only closes if the outcome recorded WHICH evidence it produced,
+    which is why `produced_evidence_ids` exists. Where it is empty the credit
+    is unattributable, and this returns zero with the reason rather than
+    spreading the reward across every action from that night. An action
+    credited for a consequence it cannot be shown to have caused is worse than
+    an uncredited one: it teaches the policy a false association.
+    """
+    by_decision = {}
+    for outcome in outcomes:
+        for evidence_id in outcome.produced_evidence_ids:
+            by_decision.setdefault(str(evidence_id), outcome.decision_id)
+    known = {d.decision_id for d in decisions}
+    out: List[DelayedOutcome] = []
+    unattributable = 0
+    for revision in revisions:
+        cited = list(getattr(revision, "knowledge_effect_ids", ())
+                     or (revision.get("knowledge_effect_ids", ())
+                         if isinstance(revision, dict) else ()))
+        evidence = list(getattr(revision, "triggering_evidence", ())
+                        or (revision.get("triggering_evidence", ())
+                            if isinstance(revision, dict) else ()))
+        matched = [by_decision[e] for e in evidence if e in by_decision]
+        if not matched:
+            if cited or evidence:
+                unattributable += 1
+            continue
+        for decision_id in sorted(set(matched)):
+            if decision_id not in known:
+                continue
+            out.append(DelayedOutcome(
+                decision_id=decision_id, outcome_type=THESIS_REVISED,
+                target_id=str(getattr(revision, "thesis_id", "")
+                              or (revision.get("thesis_id", "")
+                                  if isinstance(revision, dict) else "")),
+                reward_delta=DELAYED_WEIGHTS[THESIS_REVISED],
+                observed_at=observed_at, provenance="thesis_revision"))
+    return out, {
+        "contract": CONTRACT,
+        "revisions_considered": len(revisions),
+        "delayed_outcomes": len(out),
+        "unattributable_revisions": unattributable,
+        "actions_with_produced_evidence": sum(
+            1 for o in outcomes if o.produced_evidence_ids),
+        "note": ("a revision whose evidence cannot be traced to a logged "
+                 "action earns nobody credit; spreading it over the night's "
+                 "actions would teach the policy an association that was "
+                 "never observed"),
     }

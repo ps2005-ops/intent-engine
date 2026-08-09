@@ -301,3 +301,68 @@ def test_the_summary_counts_the_rows_a_reconstruction_cannot_have():
     assert got["by_status"][RD.NO_RESULT] == 1
     assert got["decisions_with_a_forgone_option"] == 2
     assert got["mean_choice_set"] == 2.0
+
+
+# --- the delayed half of the reward (A-RD-009) --------------------------------
+
+class _Rev:
+    def __init__(self, thesis_id="th_1", effects=(), evidence=()):
+        self.thesis_id = thesis_id
+        self.knowledge_effect_ids = tuple(effects)
+        self.triggering_evidence = tuple(evidence)
+
+
+def test_an_action_is_credited_for_a_revision_its_evidence_caused():
+    d = decision()
+    o = RD.DecisionOutcome(decision_id=d.decision_id, status=RD.SUCCESS,
+                           accepted_evidence=1,
+                           produced_evidence_ids=("rel_1",))
+    got, summary = RD.credit_revisions(
+        [d], [o], [_Rev(effects=("ke_1",), evidence=("rel_1",))],
+        observed_at="2026-09-01")
+    assert len(got) == 1
+    assert got[0].outcome_type == RD.THESIS_REVISED
+    assert got[0].reward_delta == RD.DELAYED_WEIGHTS[RD.THESIS_REVISED]
+    assert summary["delayed_outcomes"] == 1
+
+
+def test_an_untraceable_revision_credits_nobody():
+    """Spreading it over the night's actions teaches an unobserved association."""
+    d = decision()
+    o = RD.DecisionOutcome(decision_id=d.decision_id, status=RD.SUCCESS,
+                           accepted_evidence=1, produced_evidence_ids=())
+    got, summary = RD.credit_revisions(
+        [d], [o], [_Rev(effects=("ke_1",), evidence=("rel_9",))])
+    assert got == []
+    assert summary["unattributable_revisions"] == 1
+    assert summary["actions_with_produced_evidence"] == 0
+
+
+def test_credit_goes_only_to_the_action_that_produced_the_evidence():
+    one, two = decision(at="2026-08-09T01:00:00"), decision(
+        at="2026-08-09T02:00:00", subject="beta")
+    outcomes = [
+        RD.DecisionOutcome(decision_id=one.decision_id, status=RD.SUCCESS,
+                           accepted_evidence=1,
+                           produced_evidence_ids=("rel_1",)),
+        RD.DecisionOutcome(decision_id=two.decision_id, status=RD.SUCCESS,
+                           accepted_evidence=1,
+                           produced_evidence_ids=("rel_2",))]
+    got, _ = RD.credit_revisions([one, two], outcomes,
+                                 [_Rev(evidence=("rel_2",))])
+    assert [g.decision_id for g in got] == [two.decision_id]
+
+
+def test_a_weakening_revision_pays_the_same_as_a_strengthening_one():
+    """An action that showed the engine it was wrong did the same job."""
+    assert RD.DELAYED_WEIGHTS[RD.THESIS_REVISED] > 0
+    assert RD.DELAYED_WEIGHTS[RD.FALSIFIER_RESOLVED] > 0
+
+
+def test_delayed_credit_never_rewrites_the_immediate_outcome():
+    d = decision()
+    o = RD.DecisionOutcome(decision_id=d.decision_id, status=RD.SUCCESS,
+                           accepted_evidence=1, immediate_reward=0.5,
+                           produced_evidence_ids=("rel_1",))
+    RD.credit_revisions([d], [o], [_Rev(evidence=("rel_1",))])
+    assert o.immediate_reward == 0.5
