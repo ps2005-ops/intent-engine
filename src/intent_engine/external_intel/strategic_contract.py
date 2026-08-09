@@ -193,10 +193,39 @@ ALLOWED: Dict[str, Any] = {
         "observation_kind": ..., "expected_date": ..., "priority": ...,
         "falsifies": ..., "limitation": ...,
     }],
+    # V4. The economy, arriving rather than being rebuilt on this side.
+    #
+    # DECLARED TWICE ON PURPOSE, like every other block here: this package
+    # cannot import the market package, so the two allowlists are independent
+    # and a field the producer adds without adding it here is refused. That is
+    # the safe direction and it is also how the whole bridge stayed silently
+    # closed for 22 dossiers, so a new block on one side is a change on both
+    # sides or it is not a change at all.
+    "economic_context": {
+        "conditions": [{"area": ..., "state_kind": ..., "standing": ...,
+                        "moved": ..., "reason": ...}],
+        "conditions_tracked": ..., "conditions_known": ..., "note": ...,
+    },
+    "economic_theses": [{
+        "thesis_id": ..., "claim": ..., "standing": ..., "question": ...,
+        "horizon_days": ..., "macro_conditions": ..., "exposures": ...,
+        "mechanism": ..., "falsifier": ...,
+        # A thesis that arrived without its rivals would be rendered as the
+        # only explanation, so this field is read on the way in and the
+        # consumer refuses to treat an assertable thesis that lacks it.
+        "alternatives": ..., "unknowns": ...,
+        "decision_implication": ..., "confidence_in_words": ...,
+        "evidence_ids": ...,
+    }],
     "limitations": ..., "evidence_ids": ..., "evidence_trust": _TRUST,
     "disclaimer": ...,
     "interpretation_allowed": ..., "interpretation_forbidden": ...,
 }
+
+#: Standings the founder side will render as a conclusion. Mirrors the
+#: producer's ASSERTABLE set and is stated here because this package cannot
+#: import it; if the two ever disagree, the stricter reading is this one.
+_ASSERTABLE_STANDINGS = frozenset({"SUPPORTED", "TESTED"})
 
 # Independently maintained. The producer has its own list; if one side gains a
 # term the other has not, the stricter side wins, which is the safe direction.
@@ -282,6 +311,12 @@ class StrategicIntel:
     pathways: Tuple[dict, ...] = ()
     priorities: Tuple[dict, ...] = ()
     market_structure: Optional[dict] = None
+    #: V4. What the market engine measured about the economy, and what it
+    #: concluded from it. None means the producer sent nothing — which is a
+    #: different state from "it looked and the economy is quiet", and the two
+    #: are never collapsed on the page.
+    economic_context: Optional[dict] = None
+    economic_theses: Tuple[dict, ...] = ()
     limitations: Tuple[str, ...] = ()
     #: The dossier's own normalized standing, or None when the producer did
     #: not normalize. Those are different states and are kept different: a
@@ -332,6 +367,32 @@ def _age_days(as_of: str, today: str) -> Optional[int]:
                 - date.fromisoformat(as_of[:10])).days
     except (ValueError, TypeError):
         return None
+
+
+def _economic_theses(payload: dict) -> Tuple[dict, ...]:
+    """Read the economic theses, downgrading any that arrived without rivals.
+
+    A thesis the producer marked SUPPORTED or TESTED but sent with an empty
+    `alternatives` list would be rendered here as the only explanation there
+    is. This side cannot check whether the producer's alternatives were real,
+    but it can refuse to present a conclusion whose rivals are missing — so
+    the standing is dropped to PROPOSED and the reason travels with it. Losing
+    confidence is the safe direction; the page says less than the producer
+    meant, which is exactly the tolerance the whole bridge is built on.
+    """
+    out = []
+    for row in (payload.get("economic_theses") or ()):
+        if not isinstance(row, dict):
+            continue
+        row = dict(row)
+        standing = str(row.get("standing") or "")
+        if standing in _ASSERTABLE_STANDINGS and not row.get("alternatives"):
+            row["standing"] = "PROPOSED"
+            row["downgraded_because"] = (
+                f"arrived as {standing} with no alternative explanation; a "
+                "leading explanation with no rivals renders as the only one")
+        out.append(row)
+    return tuple(out)
 
 
 def consume(payload: dict, *, expected_company: str = "",
@@ -389,6 +450,10 @@ def consume(payload: dict, *, expected_company: str = "",
         market_structure=(payload.get("market_structure")
                           if isinstance(payload.get("market_structure"), dict)
                           else None),
+        economic_context=(payload.get("economic_context")
+                          if isinstance(payload.get("economic_context"), dict)
+                          else None),
+        economic_theses=_economic_theses(payload),
         limitations=tuple(str(x) for x in (payload.get("limitations") or ())),
         evidence_trust=(payload.get("evidence_trust")
                         if isinstance(payload.get("evidence_trust"), dict)
