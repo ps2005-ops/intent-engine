@@ -13,6 +13,7 @@ import shutil
 
 from intent_engine.market import cycle as C
 from intent_engine.market import knowledge_decay as KD
+from intent_engine.market import learning_acceleration as LA
 from intent_engine.market import learning_store as LS
 from intent_engine.market import steps as S
 
@@ -162,3 +163,41 @@ def test_against_the_real_ledger(tmp_path):
     # copied root, so it sees no cycle reports here and says so rather than
     # inventing a trend.
     assert got["learning_acceleration"]["cycles_total"] == 0
+    # The SEVEN CHANNELS, measured from production's own effect log rather
+    # than from the cycle counters. The economic channel has a real
+    # denominator here because the copied ledger carries the effects.
+    channels = got["learning_acceleration"]["channels"]
+    assert set(channels) == set(LA.CHANNELS)
+    assert channels[LA.ECONOMIC]["denominator"] >= 100
+    # Nothing records whether a dossier changed a decision, and the channel
+    # says so rather than counting publications.
+    assert channels[LA.FOUNDER]["status"] == LA.UNMEASURABLE
+
+
+def test_the_dated_report_carries_the_learning_channels(tmp_path):
+    """The projection defect, pinned.
+
+    `knowledge_step` computed this block every cycle and `_knowledge_summary`
+    is a whitelist that did not name it, so the entire result was discarded
+    on the way to the dated artifact — no error, no log, and a report section
+    titled LEARNING ACCELERATION showing trading throughput instead.
+
+    This asserts the block SURVIVES the projection, which is the part that
+    was missing. A test on `knowledge_step` alone passed throughout.
+    """
+    from intent_engine.market import report as R
+
+    knowledge = S.knowledge_step(context(tmp_path))
+    projected = R._knowledge_summary(knowledge)
+    assert "learning_acceleration" in projected, \
+        "the projection dropped the block again"
+    block = projected["learning_acceleration"]
+    assert block["present"] is True
+    assert set(block["channels"]) == set(LA.CHANNELS)
+    # Every channel keeps the pair it was computed from: a rate without its
+    # denominator is not a measurement.
+    for channel in block["channels"].values():
+        assert "numerator" in channel and "denominator" in channel
+        assert "maturity" in channel
+    assert "bottleneck" in block
+    assert block["operator_summary"]

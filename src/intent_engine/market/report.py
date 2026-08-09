@@ -551,6 +551,61 @@ def _learning_acceleration(ctx) -> list:
               "*Replay observations are NOT independent. The effective count "
               "is the one that carries information; the raw count is shown "
               "only so the gap between them stays visible.*"]
+    lines += _learning_channels_section(ctx)
+    return lines
+
+
+def _learning_channels_section(ctx) -> list:
+    """The seven channels, under the heading that was showing trading volume.
+
+    Everything above this in the LEARNING ACCELERATION section is throughput:
+    securities evaluated, signals fired, positions resolved. All of it is
+    activity, and none of it says whether the engine knows more than it did.
+    The section kept the name and answered a different question, which is why
+    the block below is here rather than in a section of its own — a reader
+    who scrolls to LEARNING ACCELERATION should find out whether the engine
+    is learning.
+    """
+    block = (ctx.results.get("knowledge") or {}).get(
+        "learning_acceleration") or {}
+    if not block:
+        return ["", "### is the engine LEARNING", "",
+                "**UNMEASURABLE** — the knowledge step produced no learning "
+                "acceleration block this cycle.", ""]
+    if block.get("error"):
+        return ["", "### is the engine LEARNING", "",
+                f"**ERROR** — {block['error']}", ""]
+
+    lines = ["", "### is the engine LEARNING (seven channels, never blended)",
+             "",
+             "| channel | status | measured | maturity | reading |",
+             "|---|---|---|---|---|"]
+    for name, channel in (block.get("channels") or {}).items():
+        num, den = channel.get("numerator"), channel.get("denominator")
+        pair = (f"{num:.0f}/{den:.0f}" if num is not None and den
+                else "—")
+        lines.append(
+            f"| {name} | **{channel.get('status')}** | {pair} | "
+            f"{channel.get('maturity')} | "
+            f"{str(channel.get('reason') or '')[:160]} |")
+
+    activity = block.get("high_activity_low_learning") or {}
+    limit = block.get("bottleneck") or {}
+    lines += ["",
+              (f"**HIGH ACTIVITY, LOW LEARNING** — {activity.get('reason')}"
+               if activity.get("detected")
+               else f"Activity vs learning: {activity.get('reason')}"),
+              "",
+              f"**Current bottleneck: {limit.get('bottleneck')}** "
+              f"({limit.get('status')}) — {limit.get('reason')}",
+              ""]
+    for line in block.get("operator_summary") or ():
+        lines.append(f"- {line}")
+    lines += ["",
+              "*A channel reading UNMEASURABLE has no instrument, which is "
+              "not a zero. The seven are never averaged: a system can improve "
+              "technically while learning nothing economically, and one "
+              "number hides exactly that.*", ""]
     return lines
 
 
@@ -576,6 +631,47 @@ def _recommendation(funnel: dict, health: dict) -> str:
         return ("PAUSE FOR ONE ENGINEERING CYCLE — operational health is DOWN; "
                 "the engine cannot run unattended in this state")
     return "CONTINUE OPERATING"
+
+
+def _learning_acceleration_summary(block: dict) -> dict:
+    """The seven channels, bounded to what a dated record should carry.
+
+    Every channel keeps its numerator, denominator and maturity. A rate
+    without its denominator is not a measurement — 0.400 over five is two
+    events and over five hundred is a finding — and a projection that kept
+    only the ratio would reintroduce the defect the channel layer carries the
+    pair to prevent.
+    """
+    if not block:
+        return {"present": False,
+                "reason": "the knowledge step produced no learning "
+                          "acceleration this cycle"}
+    if block.get("error"):
+        return {"present": False, "error": block["error"]}
+
+    channels = block.get("channels") or {}
+    return {
+        "present": True,
+        "status": block.get("status"),
+        "reason": block.get("reason"),
+        "cycles_total": block.get("cycles_total"),
+        "cycles_comparable": block.get("cycles_comparable"),
+        "effect_cycles": block.get("effect_cycles"),
+        "windows_computed": block.get("windows_computed"),
+        "degradations": block.get("degradations"),
+        "channels": {
+            name: {k: channel.get(k) for k in
+                   ("status", "numerator", "denominator", "rate",
+                    "maturity", "window", "trend", "reason")}
+            for name, channel in channels.items()},
+        "channels_measurable": block.get("channels_measurable"),
+        "channels_unmeasurable": block.get("channels_unmeasurable"),
+        "high_activity_low_learning": block.get("high_activity_low_learning"),
+        "bottleneck": (block.get("bottleneck") or {}).get("bottleneck"),
+        "bottleneck_status": (block.get("bottleneck") or {}).get("status"),
+        "bottleneck_reason": (block.get("bottleneck") or {}).get("reason"),
+        "operator_summary": block.get("operator_summary"),
+    }
 
 
 def _knowledge_summary(knowledge: dict) -> dict:
@@ -649,6 +745,26 @@ def _knowledge_summary(knowledge: dict) -> dict:
         "belief_maturity": {
             "beliefs": (knowledge.get("belief_maturity") or {}).get("beliefs"),
         },
+        # LEARNING ACCELERATION, WHICH RAN EVERY CYCLE AND REACHED NO RECORD.
+        # `knowledge_step` has computed this block since the module was
+        # written and this projection is a whitelist, so the entire result —
+        # status, quality dimensions, degradations — was discarded on the way
+        # to the dated artifact. Nothing failed and nothing was logged: the
+        # step ran, the key was dropped, and the report grew a section titled
+        # LEARNING ACCELERATION that renders trading throughput from
+        # `throughput.py` instead. A reader looking for whether the engine is
+        # learning saw securities evaluated and signal fires.
+        #
+        # This is the same defect as `a caller is not a call`, one layer out:
+        # there, a block raised every cycle and nothing projected the error;
+        # here, a block succeeded every cycle and nothing projected the
+        # result. Both are invisible for exactly as long as no one asks the
+        # artifact a question it should be able to answer.
+        #
+        # Bounded like the rest — the seven channels carry counts, statuses
+        # and reasons, never the ledger they were computed from.
+        "learning_acceleration": _learning_acceleration_summary(
+            knowledge.get("learning_acceleration") or {}),
         # V4. Bounded like the rest: counts and standings, never the prose.
         # The full theses and briefings live in the knowledge payload; what a
         # reader of the report needs is whether the layer produced anything

@@ -1635,14 +1635,56 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         payload["world_model"] = {"error": str(exc)}
 
     try:
+        # `impacts` is a count of PUBLISHED dossiers and it feeds only the
+        # volume/quality half, which has used it as a denominator since
+        # before the channels existed. It is deliberately NOT passed to the
+        # Founder channel: publication is volume, and a channel named Founder
+        # VALUE that counts publications is the substitution I-ACC-001 exists
+        # to stop. The channel reads decision-impact RECORDS, and where there
+        # are none it reports UNMEASURABLE rather than a flattering zero.
         impacts = len((ctx.results.get("learning") or {}).get(
             "strategic_export", {}).get("published") or ())
+        # The SCORES, not the discoveries. 117 discoveries were made and 4
+        # partitions were scored; the channel asks whether knowing the group
+        # reduced held-out error, which only a score can answer. Counting
+        # discoveries here would rate a tidy partition of noise as a gain.
+        discoveries = list(
+            ((payload.get("unsupervised") or {}).get("regimes") or {}
+             ).get("scores") or ())
         payload["learning_acceleration"] = LA.report(
             LH.load_cycle_observations(pathlib.Path(ctx.root)),
-            ledger=rows, decision_impacts=impacts)
+            ledger=rows, decision_impacts=impacts,
+            execution_ledger=_execution_ledger(ctx),
+            discoveries=discoveries)
     except Exception as exc:  # noqa: BLE001
         payload["learning_acceleration"] = {"error": str(exc)}
     return payload
+
+
+def _execution_ledger(ctx) -> List[dict]:
+    """The planner's own record, for the SYSTEM capability channel.
+
+    Read-only and optional: if the file is absent the channel reports
+    UNMEASURABLE, which is the honest reading for a runtime that has no
+    engineering history to look at. It is a separate function so the failure
+    mode is a missing file rather than a knowledge step that dies on one.
+    """
+    import json as _json
+
+    path = (pathlib.Path(ctx.root) / "docs" / "execution" / "v4"
+            / "EXECUTION_LEDGER.jsonl")
+    if not path.exists():
+        return []
+    out: List[dict] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(_json.loads(line))
+        except ValueError:
+            continue
+    return out
 
 
 def _world_model(ctx: C.CycleContext) -> dict:

@@ -573,9 +573,713 @@ def _status(volume: str, quality_direction: str, degraded: Sequence[str],
         f"{quality_direction}")
 
 
+# ============================================================================
+# THE SEVEN CHANNELS
+# ============================================================================
+#
+# WHY CHANNELS AT ALL, WHEN THERE IS ALREADY A STATUS
+# ---------------------------------------------------
+# Everything above answers one question — is the engine learning faster —
+# with one status. That is the wrong shape for the failure this project keeps
+# hitting, which is a system that improves TECHNICALLY while learning NOTHING
+# ECONOMICALLY. A single composite hides exactly that: wire a producer, fix a
+# read path, align a runtime pin, and a blended score goes up in a week where
+# no belief moved.
+#
+# So the channels are computed independently and are never averaged into one
+# number. A caller who wants a headline gets the WORST measurable channel,
+# not the mean, because a mean of seven is a way of not answering.
+#
+# WHY THE INPUT IS THE EFFECT LOG AND NOT THE CYCLE COUNTERS
+# ----------------------------------------------------------
+# `_observation_metrics` reads what a cycle DID: rows accepted, beliefs
+# declared, documents considered. Those are activity counts, and a research
+# policy optimised against them learns to fetch more documents. A
+# `KnowledgeEffect` is the other thing: one evidence item, one knowledge
+# object, and what actually happened to it — including NO_CHANGE, which is
+# the majority and the only reason the log can price anything.
+#
+# WHY THE WINDOW KEY IS APPEND ORDER AND NOT `created_at`
+# -------------------------------------------------------
+# THIS IS THE TRAP IN THIS MODULE AND IT IS WORTH THE PARAGRAPH.
+#
+# 347 of the 402 live effects are written by the exposure fold, which sets
+# `created_at` to the EVIDENCE'S OBSERVATION DATE, not to the day the effect
+# was written. It does that on purpose: `effect_id` is keyed on `created_at`,
+# so a stable value is what stops a nightly re-derivation of the standing
+# evidence pool appending 347 fresh rows every night.
+#
+# The cost is that `created_at` is not a write time, and windowing on it
+# produces a learning history stretching back to February — months in which
+# this log did not exist. It would look like a rich trend and it would be
+# retrieval time wearing occurrence time's clothes, which is the same defect
+# that blocks historical thesis replay one layer down.
+#
+# The ledger is append-only and carries a `cycle` record at the end of every
+# cycle. Position relative to those markers is a TRUE write order, so that is
+# the window key. `created_at` is never read here, and a test pins that.
+#
+# WHAT THIS BUYS TODAY, HONESTLY
+# ------------------------------
+# 393 of 402 effects were appended in ONE cycle — the cycle that first gave
+# the effect log a write path. So effect-based TRENDS have one cycle of
+# history and report INSUFFICIENT_HISTORY. The LEVELS are measurable now, and
+# the level is already the finding: 373 of 402 effects are NO_CHANGE.
+
+# The NAMES come from `learning_channels`, which already defined four of them
+# for declared movements. Importing rather than redeclaring is deliberate: two
+# vocabularies for one idea disagree the first week either gains a member, and
+# a report that says ECONOMIC_KNOWLEDGE_GAIN in two places must mean the same
+# thing in both.
+from .learning_channels import (  # noqa: E402
+    ALL_CHANNELS as CHANNELS,
+    CALIBRATION,
+    ECONOMIC_KNOWLEDGE as ECONOMIC,
+    FOUNDER_UTILITY as FOUNDER,
+    RESEARCH_POLICY as RESEARCH,
+    RETENTION,
+    SYSTEM_CAPABILITY as SYSTEM,
+    UNSUPERVISED_UTILITY as UNSUPERVISED,
+)
+
+#: A channel with no telemetry at all. Distinct from a measured zero, and the
+#: distinction is the whole point: "no Founder decision was changed" and "no
+#: mechanism records whether one was" call for opposite responses.
+UNMEASURABLE = "UNMEASURABLE"
+
+CHANNEL_STATUSES = (ACCELERATING, STABLE, PLATEAUING, DEGRADING,
+                    EARLY_WARNING_STATUS, INSUFFICIENT_HISTORY, UNMEASURABLE)
+
+#: Target types whose movement is ECONOMIC knowledge. `RESEARCH_QUESTION` and
+#: `FOUNDER_DECISION_COMPONENT` are deliberately absent: they belong to the
+#: research and Founder channels, and counting them here is how a Founder
+#: rewrite would show up as economic learning.
+ECONOMIC_TARGETS = frozenset({
+    "EVENT", "BELIEF", "EXPECTATION", "CAUSAL_NODE", "CAUSAL_EDGE",
+    "MECHANISM", "HYPOTHESIS", "THESIS", "HIDDEN_STATE", "RELATIONSHIP",
+    "FALSIFIER", "COUNTERFACTUAL", "ECONOMIC_STATE", "COMPANY_EXPOSURE"})
+
+#: Effect types that assert the knowledge state is different than it was.
+#: Mirrors `knowledge_effect.CHANGING` without importing it, because this
+#: module is read by the report layer and must not drag the write path in.
+CHANGING_EFFECTS = frozenset({"CREATED", "SUPPORTED", "WEAKENED",
+                              "CONTRADICTED", "REVISED", "RESOLVED",
+                              "DISCRIMINATED", "INVALIDATED"})
+
+#: Below this share of changing effects, a window ingested a great deal and
+#: moved almost nothing. Not a failure on its own — most evidence SHOULD
+#: change nothing — but the operator is told, because it is the difference
+#: between a busy engine and a learning one.
+LOW_LEARNING_SHARE = 0.10
+
+#: `research_decision` rows needed before a POLICY claim is allowed. Matches
+#: the graph's gate for B-POL-002 so the two cannot disagree.
+MIN_RESEARCH_DECISIONS = 100
+
+
+@dataclass(frozen=True)
+class ChannelReport:
+    """One learning channel, measured or explicitly not."""
+    channel: str
+    status: str
+    reason: str
+    numerator: Optional[float] = None
+    denominator: Optional[float] = None
+    rate: Optional[float] = None
+    maturity: str = INSUFFICIENT_SAMPLE
+    window: str = "lifetime"
+    trend: str = ""
+    detail: Dict[str, object] = field(default_factory=dict)
+
+    def as_dict(self) -> dict:
+        return {
+            "channel": self.channel, "status": self.status,
+            "reason": self.reason, "numerator": self.numerator,
+            "denominator": self.denominator, "rate": self.rate,
+            "maturity": self.maturity, "window": self.window,
+            "trend": self.trend, "detail": dict(self.detail),
+        }
+
+
+def _unmeasurable(channel: str, why: str, **detail) -> ChannelReport:
+    return ChannelReport(channel=channel, status=UNMEASURABLE, reason=why,
+                         detail=detail)
+
+
+def _rows(ledger: Sequence[dict], record: str) -> List[dict]:
+    return [r for r in ledger if r.get("record") == record]
+
+
+def cycle_segments(ledger: Sequence[dict]) -> List[List[dict]]:
+    """The ledger split into cycles by APPEND ORDER, not by any date field.
+
+    A `cycle` record is written at the end of a cycle, so everything since the
+    previous marker belongs to the cycle that marker closes. Rows after the
+    last marker are a cycle still open and are returned as a final segment —
+    dropping them would silently lose the newest learning, and counting them
+    as a closed cycle would report a partial cycle as a whole one, so the
+    caller is told which it is by position.
+
+    This function exists so that no caller is ever tempted to bucket effects
+    by `created_at`. See the section header for why that field cannot carry a
+    window.
+    """
+    segments: List[List[dict]] = []
+    current: List[dict] = []
+    for row in ledger:
+        current.append(row)
+        if row.get("record") == "cycle":
+            segments.append(current)
+            current = []
+    if current:
+        segments.append(current)
+    return segments
+
+
+def _effect_cycles(ledger: Sequence[dict]) -> List[List[dict]]:
+    """Per cycle, the effects appended during it. Cycles with none are kept.
+
+    An empty cycle is data: it is a cycle in which the engine attributed
+    nothing, and dropping it would make the rate a rate over productive
+    cycles only.
+    """
+    return [[r for r in seg if r.get("record") == "knowledge_effect"]
+            for seg in cycle_segments(ledger)]
+
+
+def _status_from_level(rate: Optional[float], denominator: float, *,
+                       floor: float, low_reason: str, ok_reason: str,
+                       trend: str = "") -> Tuple[str, str]:
+    """A status from a LEVEL, with the sample deciding how hard it may speak.
+
+    An immature sample may report a level and may not carry DEGRADING; that
+    rule is the same one `_all_immature` enforces for trends, applied where
+    there is no trend to have.
+    """
+    if rate is None:
+        return UNMEASURABLE, low_reason
+    mature_enough = denominator >= MIN_DENOMINATOR_FOR_VERDICT
+    if rate < floor:
+        if not mature_enough:
+            return EARLY_WARNING_STATUS, (
+                f"{low_reason} — on {denominator:.0f} observation(s), which "
+                f"is too few to carry a verdict")
+        return DEGRADING, low_reason
+    if not mature_enough:
+        return EARLY_WARNING_STATUS, (
+            f"{ok_reason} — on {denominator:.0f} observation(s), too few to "
+            f"carry a verdict either way")
+    return (STABLE if not trend else
+            {"UP": ACCELERATING, "DOWN": PLATEAUING}.get(trend, STABLE)), \
+        ok_reason
+
+
+def economic_channel(ledger: Sequence[dict]) -> ChannelReport:
+    """Did the ECONOMIC knowledge state change, and how often.
+
+    The denominator is every effect on an economic object, including
+    NO_CHANGE. That is the point of the log: a numerator on its own is a
+    success count, and a success count cannot tell a productive cycle from a
+    prolific one.
+    """
+    effects = [r for r in _rows(ledger, "knowledge_effect")
+               if r.get("target_type") in ECONOMIC_TARGETS]
+    if not effects:
+        return _unmeasurable(
+            ECONOMIC,
+            "no knowledge effect has been written against an economic "
+            "object; this is absent telemetry, not an engine that learned "
+            "nothing")
+    changed = [e for e in effects
+               if str(e.get("effect_type")) in CHANGING_EFFECTS]
+    discriminating = [e for e in effects if e.get("discriminating")]
+    rate = round(len(changed) / len(effects), 4)
+    cycles = [c for c in _effect_cycles(ledger) if c]
+    status, reason = _status_from_level(
+        rate, float(len(effects)), floor=LOW_LEARNING_SHARE,
+        low_reason=(f"{len(changed)} of {len(effects)} effects on economic "
+                    f"objects changed anything; the rest were processed and "
+                    f"moved nothing"),
+        ok_reason=(f"{len(changed)} of {len(effects)} effects changed an "
+                   f"economic object"))
+    if len(cycles) < 2:
+        status = INSUFFICIENT_HISTORY if status in (STABLE, ACCELERATING) \
+            else status
+        reason += (f". {len(cycles)} cycle(s) have appended effects, so a "
+                   f"direction is not available; the level is")
+    return ChannelReport(
+        channel=ECONOMIC, status=status, reason=reason,
+        numerator=float(len(changed)), denominator=float(len(effects)),
+        rate=rate, maturity=sample_maturity(len(effects)),
+        window="lifetime",
+        detail={
+            "discriminating": len(discriminating),
+            "by_effect": dict(collections.Counter(
+                str(e.get("effect_type")) for e in effects)),
+            "by_target": dict(collections.Counter(
+                str(e.get("target_type")) for e in effects)),
+            "cycles_with_effects": len(cycles),
+            "note": ("DISCRIMINATED / CONTRADICTED / RESOLVED separate live "
+                     "explanations; SUPPORTED adds weight to the one already "
+                     "ahead, and a confirmation-seeking policy can farm it"),
+        })
+
+
+def system_channel(execution_ledger: Sequence[dict] = ()) -> ChannelReport:
+    """Engineering and runtime capability, kept OUT of the economic number.
+
+    Wiring a producer, repairing a read path and pinning a runtime are real
+    and valuable, and none of them is economic learning. They are counted
+    here so that a week of them cannot be reported as the engine getting
+    smarter about the world.
+    """
+    if not execution_ledger:
+        return _unmeasurable(
+            SYSTEM,
+            "no execution record was supplied; system capability is tracked "
+            "in the planner's ledger and this caller did not pass one")
+    kinds = collections.Counter(str(r.get("kind")) for r in execution_ledger)
+    gains = sum(kinds[k] for k in ("task", "repair", "experiment"))
+    findings = kinds["finding"]
+    days = len({str(r.get("at") or "")[:10] for r in execution_ledger} - {""})
+    total = len(execution_ledger)
+    status = STABLE if gains else PLATEAUING
+    reason = (f"{gains} capability change(s) and {findings} finding(s) "
+              f"recorded over {days} day(s) of execution history")
+    if days < 2:
+        status = INSUFFICIENT_HISTORY
+        reason += ("; one day of history has no two halves to compare, so "
+                   "the counts are reported and a direction is not")
+    return ChannelReport(
+        channel=SYSTEM, status=status, reason=reason,
+        numerator=float(gains), denominator=float(total),
+        rate=round(gains / total, 4) if total else None,
+        maturity=sample_maturity(total), window="lifetime",
+        detail={"by_kind": dict(kinds), "days": days,
+                "note": ("system capability is NOT economic learning and is "
+                         "never added to it")})
+
+
+def calibration_channel(ledger: Sequence[dict]) -> ChannelReport:
+    """Did the engine get better at being RIGHT, not at being busy.
+
+    Measured from things that can come out wrong: reconciliations that
+    reached a verdict, and methods scored against persistence. A method that
+    beat nothing is still a calibration measurement — it is the measurement
+    that says do not deploy this.
+    """
+    reconciliations = _rows(ledger, "reconciliation")
+    performance = _rows(ledger, "method_performance")
+    resolved = [e for e in _rows(ledger, "knowledge_effect")
+                if str(e.get("effect_type")) == "RESOLVED"]
+    if not reconciliations and not performance:
+        return _unmeasurable(
+            CALIBRATION,
+            "nothing has been scored against an outcome: no reconciliation "
+            "reached a verdict and no method was measured against "
+            "persistence")
+    contradicted = [r for r in reconciliations
+                    if str(r.get("outcome")) == "CONTRADICTED"]
+    useful = [p for p in performance
+              if str(p.get("standing")) not in
+              ("NO_INCREMENTAL_VALUE", "REFUSED")]
+    denominator = float(len(reconciliations))
+    rate = (round(len(contradicted) / denominator, 4)
+            if denominator else None)
+    # A reconciliation set that never reaches disagreement is a report about
+    # the filter, not a calibrated engine. That is why the numerator here is
+    # CONTRADICTED rather than CONFIRMED.
+    status, reason = _status_from_level(
+        rate, denominator, floor=0.01,
+        low_reason=(f"{len(reconciliations)} reconciliation(s) and not one "
+                    f"contradicted anything; a set that cannot reach "
+                    f"disagreement measures the filter, not the engine"),
+        ok_reason=(f"{len(contradicted)} of {len(reconciliations)} "
+                   f"reconciliations contradicted the belief behind them"))
+    return ChannelReport(
+        channel=CALIBRATION, status=status, reason=reason,
+        numerator=float(len(contradicted)), denominator=denominator,
+        rate=rate, maturity=sample_maturity(denominator), window="lifetime",
+        detail={
+            "reconciliations": len(reconciliations),
+            "expectations_resolved": len(resolved),
+            "methods_scored": len(performance),
+            "methods_with_incremental_value": len(useful),
+            "by_standing": dict(collections.Counter(
+                str(p.get("standing")) for p in performance)),
+            "note": ("a method that beat persistence and came back BOUNDED "
+                     "or REFUSED is a calibration RESULT, not a shortfall"),
+        })
+
+
+def founder_channel(ledger: Sequence[dict],
+                    decision_impacts: Sequence[dict] = ()) -> ChannelReport:
+    """Did any of this CHANGE A DECISION.
+
+    The one thing this channel may not do is count dossiers. A published
+    report, a longer report and a new strategic section are all volume, and
+    the call site that fed this module `len(published)` was reporting exactly
+    that as decision value. Value is a FOUNDER_DECISION_COMPONENT effect or a
+    recorded DecisionImpact, and where neither exists the honest answer is
+    that nothing measures it.
+    """
+    components = [e for e in _rows(ledger, "knowledge_effect")
+                  if str(e.get("target_type")) == "FOUNDER_DECISION_COMPONENT"]
+    impacts = [i for i in decision_impacts if i]
+    if not components and not impacts:
+        return _unmeasurable(
+            FOUNDER,
+            "no FOUNDER_DECISION_COMPONENT effect and no recorded decision "
+            "impact exist. Dossiers were published; whether any of them "
+            "changed a decision is not recorded anywhere, and a count of "
+            "publications is not an answer to that question",
+            dossiers_published_is_not_value=True)
+    changed = [e for e in components
+               if str(e.get("effect_type")) in CHANGING_EFFECTS]
+    graded = [str(i.get("impact") or i.get("standing") or "")
+              for i in impacts]
+    meaningful = [g for g in graded
+                  if g in ("MEANINGFUL", "DECISION_CHANGING")]
+    numerator = float(len(changed) + len(meaningful))
+    denominator = float(len(components) + len(impacts))
+    rate = round(numerator / denominator, 4) if denominator else None
+    status, reason = _status_from_level(
+        rate, denominator, floor=LOW_LEARNING_SHARE,
+        low_reason=(f"{numerator:.0f} of {denominator:.0f} Founder records "
+                    f"changed a decision component or graded above "
+                    f"PRESENTATIONAL"),
+        ok_reason=(f"{numerator:.0f} of {denominator:.0f} Founder records "
+                   f"carried decision value"))
+    return ChannelReport(
+        channel=FOUNDER, status=status, reason=reason, numerator=numerator,
+        denominator=denominator, rate=rate,
+        maturity=sample_maturity(denominator), window="lifetime",
+        detail={"decision_components": len(components),
+                "impacts_recorded": len(impacts),
+                "by_grade": dict(collections.Counter(g for g in graded if g))})
+
+
+def retention_channel(ledger: Sequence[dict]) -> ChannelReport:
+    """Is what was learned still USABLE — or has it quietly rotted.
+
+    Retention failure turns past learning into unusable learning, and it is
+    invisible to every rate above: an orphaned effect, a belief no
+    observation can refresh and a duplicate fact all leave the counts intact
+    and the knowledge worse.
+    """
+    effects = _rows(ledger, "knowledge_effect")
+    beliefs = _rows(ledger, "belief")
+    if not effects and not beliefs:
+        return _unmeasurable(
+            RETENTION, "nothing has been persisted to retain")
+    # An effect that claims a change and names no object cannot be audited,
+    # disputed or reloaded against anything.
+    orphaned = [e for e in effects
+                if str(e.get("effect_type")) in CHANGING_EFFECTS
+                and not str(e.get("target_id") or "")]
+    unprovenanced = [e for e in effects if not str(e.get("reason") or "")]
+    stale = [b for b in beliefs
+             if str(b.get("lifecycle_state") or "") in ("STALE", "RETIRED")]
+    ids = [str(e.get("effect_id") or "") for e in effects]
+    duplicates = len(ids) - len(set(ids))
+    intact = len(effects) - len(orphaned) - len(unprovenanced) - duplicates
+    denominator = float(len(effects))
+    rate = round(intact / denominator, 4) if denominator else None
+    status, reason = _status_from_level(
+        rate, denominator, floor=0.95,
+        low_reason=(f"{len(orphaned)} orphaned, {len(unprovenanced)} "
+                    f"unexplained and {duplicates} duplicate effect(s) of "
+                    f"{len(effects)}"),
+        ok_reason=(f"{intact} of {len(effects)} persisted effects are "
+                   f"attributable, explained and unduplicated"))
+    return ChannelReport(
+        channel=RETENTION, status=status, reason=reason,
+        numerator=float(intact), denominator=denominator, rate=rate,
+        maturity=sample_maturity(denominator), window="lifetime",
+        detail={"orphaned": len(orphaned),
+                "unexplained": len(unprovenanced),
+                "duplicate_ids": duplicates,
+                "beliefs": len(beliefs), "stale_or_retired": len(stale),
+                "note": ("append-only integrity is checked by id, so a "
+                         "duplicate id is a storage fault and not a second "
+                         "observation")})
+
+
+def research_channel(ledger: Sequence[dict]) -> ChannelReport:
+    """Did RESEARCH get better at being useful, not at retrieving.
+
+    A research action is priced by what its evidence DID, so the numerator is
+    outcomes whose effects changed something. The channel refuses to claim a
+    learned policy below the decision floor: architecture may pass while
+    policy maturity stays blocked, and saying so is the difference between a
+    measurement and a slogan.
+    """
+    decisions = _rows(ledger, "research_decision")
+    outcomes = _rows(ledger, "research_outcome")
+    if not decisions:
+        return _unmeasurable(
+            RESEARCH, "no research decision has been logged before its call")
+    effects = {str(e.get("effect_id") or ""): e
+               for e in _rows(ledger, "knowledge_effect")}
+    linked_ids = [str(i) for o in outcomes
+                  for i in (o.get("knowledge_effect_ids") or ())]
+    by_status = collections.Counter(str(o.get("status")) for o in outcomes)
+    # AN ABSENT LINK IS NOT A ZERO. Every outcome carrying an empty
+    # `knowledge_effect_ids` means nothing recorded what the research
+    # PRODUCED — which reads identically to research that produced nothing,
+    # and is the opposite finding. The first version of this channel divided
+    # anyway and reported 0 of 14, an accusation the ledger cannot support.
+    if outcomes and not linked_ids:
+        return _unmeasurable(
+            RESEARCH,
+            f"{len(decisions)} decision(s) and {len(outcomes)} outcome(s) "
+            f"are logged, and not one outcome names the knowledge effects "
+            f"its evidence produced. Whether research was USEFUL is "
+            f"therefore unmeasured — which is not the same as research that "
+            f"was useless, and the rate that would say so is withheld",
+            decisions=len(decisions), outcomes=len(outcomes),
+            by_status=dict(by_status),
+            accepted_evidence=sum(int(o.get("accepted_evidence") or 0)
+                                  for o in outcomes),
+            missing_link="research_outcome.knowledge_effect_ids",
+            policy_maturity="BLOCKED_DATA")
+    productive = 0
+    for outcome in outcomes:
+        linked = [effects.get(str(i)) for i in
+                  (outcome.get("knowledge_effect_ids") or ())]
+        if any(e is not None
+               and str(e.get("effect_type")) in CHANGING_EFFECTS
+               for e in linked):
+            productive += 1
+    denominator = float(len(outcomes))
+    rate = round(productive / denominator, 4) if denominator else None
+    if len(decisions) < MIN_RESEARCH_DECISIONS:
+        return ChannelReport(
+            channel=RESEARCH, status=INSUFFICIENT_HISTORY,
+            reason=(f"{len(decisions)} prospective decision(s) against a "
+                    f"floor of {MIN_RESEARCH_DECISIONS}. The rate is "
+                    f"reported; a policy claim is not, and the sample grows "
+                    f"about two decisions a cycle"),
+            numerator=float(productive), denominator=denominator, rate=rate,
+            maturity=sample_maturity(len(decisions)), window="lifetime",
+            detail={"decisions": len(decisions), "outcomes": len(outcomes),
+                    "by_status": dict(by_status),
+                    "empty_handed": by_status.get("NO_RESULT", 0),
+                    "failed": by_status.get("FAILED", 0),
+                    "policy_maturity": "BLOCKED_DATA"})
+    status, reason = _status_from_level(
+        rate, denominator, floor=LOW_LEARNING_SHARE,
+        low_reason=(f"{productive} of {len(outcomes)} research outcomes "
+                    f"produced an effect that changed anything"),
+        ok_reason=(f"{productive} of {len(outcomes)} research outcomes "
+                   f"changed something"))
+    return ChannelReport(
+        channel=RESEARCH, status=status, reason=reason,
+        numerator=float(productive), denominator=denominator, rate=rate,
+        maturity=sample_maturity(len(decisions)), window="lifetime",
+        detail={"decisions": len(decisions), "outcomes": len(outcomes),
+                "by_status": dict(by_status),
+                "policy_maturity": "MEASURABLE"})
+
+
+def unsupervised_channel(discoveries: Sequence[dict] = ()) -> ChannelReport:
+    """Did a discovery turn out to be USEFUL, not tidy.
+
+    Geometry is not the measure. A mixture model can partition noise
+    beautifully; the question this channel asks is whether knowing the group
+    reduced held-out forecast error. The recorded result — better geometry
+    from KMeans/GMM, better held-out utility from the deterministic economic
+    rule — is exactly the reading this channel must be able to reproduce, and
+    a silhouette-based score would invert it.
+    """
+    if not discoveries:
+        return _unmeasurable(
+            UNSUPERVISED,
+            "no discovery has been scored; unsupervised structure is a "
+            "hypothesis generator and an unscored hypothesis is not a gain")
+    scored = [d for d in discoveries if d.get("utility") is not None]
+    if not scored:
+        return _unmeasurable(
+            UNSUPERVISED,
+            f"{len(discoveries)} discovery/discoveries exist and none "
+            f"carries a held-out utility score; separation and coherence "
+            f"describe the partition, not its worth",
+            discoveries=len(discoveries))
+    useful = [d for d in scored if float(d.get("utility") or 0) > 0]
+    denominator = float(len(scored))
+    rate = round(len(useful) / denominator, 4)
+    status, reason = _status_from_level(
+        rate, denominator, floor=LOW_LEARNING_SHARE,
+        low_reason=(f"{len(useful)} of {len(scored)} scored discoveries "
+                    f"reduced held-out error; the rest are patterns in the "
+                    f"data, which is not the same thing as knowledge"),
+        ok_reason=(f"{len(useful)} of {len(scored)} scored discoveries "
+                   f"reduced held-out forecast error"))
+    return ChannelReport(
+        channel=UNSUPERVISED, status=status, reason=reason,
+        numerator=float(len(useful)), denominator=denominator, rate=rate,
+        maturity=sample_maturity(denominator), window="lifetime",
+        detail={"scored": len(scored), "unscored": len(discoveries) - len(scored),
+                "note": ("utility is held-out error reduction; silhouette "
+                         "and coherence are never utility")})
+
+
+def channels(ledger: Sequence[dict], *,
+             execution_ledger: Sequence[dict] = (),
+             decision_impacts: Sequence[dict] = (),
+             discoveries: Sequence[dict] = ()) -> Dict[str, ChannelReport]:
+    """All seven, computed independently and never blended."""
+    return {
+        ECONOMIC: economic_channel(ledger),
+        SYSTEM: system_channel(execution_ledger),
+        CALIBRATION: calibration_channel(ledger),
+        FOUNDER: founder_channel(ledger, decision_impacts),
+        RETENTION: retention_channel(ledger),
+        RESEARCH: research_channel(ledger),
+        UNSUPERVISED: unsupervised_channel(discoveries),
+    }
+
+
+def high_activity_low_learning(ledger: Sequence[dict]) -> dict:
+    """Is the engine busy and not learning — stated in those words.
+
+    This is the reading a volume metric cannot produce and an operator most
+    needs. It is deliberately not a status: it is a named condition with the
+    three counts that establish it, because "120 rows accepted" and "105 of
+    them changed nothing" are the same cycle described twice and only the
+    second is about learning.
+    """
+    effects = _rows(ledger, "knowledge_effect")
+    evidence = _rows(ledger, "evidence")
+    if not effects:
+        return {"detected": False, "status": UNMEASURABLE,
+                "reason": ("no effect has been attributed, so activity "
+                           "cannot be compared with learning")}
+    changed = [e for e in effects
+               if str(e.get("effect_type")) in CHANGING_EFFECTS]
+    no_change = len(effects) - len(changed)
+    share = round(len(changed) / len(effects), 4)
+    revisions = [r for r in _rows(ledger, "thesis_revision")
+                 if str(r.get("transition") or r.get("kind") or "")
+                 not in ("", "CREATED")]
+    detected = (share < LOW_LEARNING_SHARE
+                and len(effects) >= MIN_DENOMINATOR_FOR_VERDICT)
+    return {
+        "detected": bool(detected),
+        "status": DEGRADING if detected else STABLE,
+        "evidence_rows": len(evidence),
+        "effects": len(effects),
+        "effects_that_changed_something": len(changed),
+        "effects_that_changed_nothing": no_change,
+        "changing_share": share,
+        "thesis_transitions": len(revisions),
+        "reason": (
+            (f"{len(evidence)} evidence rows produced {len(effects)} "
+             f"attributions and {len(changed)} of them changed anything "
+             f"({share:.1%}); {len(revisions)} thesis transition(s). The "
+             f"engine is working and its knowledge is nearly static")
+            if detected else
+            (f"{len(changed)} of {len(effects)} attributions changed "
+             f"something ({share:.1%}), at or above the "
+             f"{LOW_LEARNING_SHARE:.0%} floor")),
+        "note": ("most evidence SHOULD change nothing; this reads as a "
+                 "finding only when the share is low AND the volume is "
+                 "large enough for the share to mean something"),
+    }
+
+
+#: The candidate bottlenecks, and the channel or gate that measures each. The
+#: current one is COMPUTED from these, never declared: a hardcoded bottleneck
+#: is a belief about the system that stops being checked the day it is typed.
+BOTTLENECKS: Tuple[Tuple[str, str], ...] = (
+    ("ECONOMIC_STATE_COVERAGE", ECONOMIC),
+    ("METHOD_VALIDATION", CALIBRATION),
+    ("FOUNDER_VALUE", FOUNDER),
+    ("RETENTION", RETENTION),
+    ("PROSPECTIVE_SAMPLE_SIZE", RESEARCH),
+    ("UNSUPERVISED_UTILITY", UNSUPERVISED),
+    ("RUNTIME_ALIGNMENT", SYSTEM),
+)
+
+#: Worst first. A channel nothing measures outranks a channel measured badly:
+#: an unmeasured capability cannot be improved deliberately, and improving a
+#: measured one while another is dark is how a system optimises what it can
+#: see.
+_BOTTLENECK_RANK = {UNMEASURABLE: 0, DEGRADING: 1, INSUFFICIENT_HISTORY: 2,
+                    EARLY_WARNING_STATUS: 3, PLATEAUING: 4, STABLE: 5,
+                    ACCELERATING: 6}
+
+
+def bottleneck(reports: Dict[str, ChannelReport]) -> dict:
+    """Which channel is holding the system back, derived from the channels."""
+    ranked = sorted(
+        BOTTLENECKS,
+        key=lambda pair: (_BOTTLENECK_RANK.get(
+            reports[pair[1]].status if pair[1] in reports else UNMEASURABLE,
+            0), pair[0]))
+    name, channel = ranked[0]
+    report_ = reports.get(channel)
+    return {
+        "bottleneck": name,
+        "channel": channel,
+        "status": report_.status if report_ else UNMEASURABLE,
+        "reason": report_.reason if report_ else "channel not computed",
+        "ranking": [{"bottleneck": n, "channel": c,
+                     "status": (reports[c].status if c in reports
+                                else UNMEASURABLE)}
+                    for n, c in ranked],
+        "note": ("computed from measured channel status, worst first; an "
+                 "UNMEASURABLE channel outranks a DEGRADING one because a "
+                 "capability nothing measures cannot be improved on purpose"),
+    }
+
+
+def operator_summary(reports: Dict[str, ChannelReport], *,
+                     activity: dict, limit: dict) -> List[str]:
+    """What an operator needs, in sentences, with no debug dump."""
+    lines: List[str] = []
+    measured = [r for r in reports.values() if r.status != UNMEASURABLE]
+    dark = [r for r in reports.values() if r.status == UNMEASURABLE]
+    economic = reports.get(ECONOMIC)
+    if economic and economic.rate is not None:
+        lines.append(
+            f"The engine attributed {economic.denominator:.0f} effects and "
+            f"{economic.numerator:.0f} of them changed an economic object "
+            f"({economic.rate:.1%}).")
+    if activity.get("detected"):
+        lines.append(
+            f"HIGH ACTIVITY, LOW LEARNING: {activity['evidence_rows']} "
+            f"evidence rows, {activity['effects_that_changed_nothing']} "
+            f"attributions that moved nothing, "
+            f"{activity['thesis_transitions']} thesis transition(s).")
+    calibration = reports.get(CALIBRATION)
+    if calibration and calibration.status != UNMEASURABLE:
+        lines.append(f"Calibration: {calibration.reason}.")
+    if dark:
+        lines.append(
+            "Nothing measures: "
+            + ", ".join(sorted(r.channel for r in dark))
+            + " — these are absent instruments, not zero results.")
+    lines.append(f"Bottleneck: {limit['bottleneck']} ({limit['status']}).")
+    lines.append(
+        f"{len(measured)} of {len(reports)} channels are measurable.")
+    return lines
+
+
 def report(observations: Sequence, *, ledger: Sequence[dict] = (),
-           decision_impacts: int = 0) -> dict:
-    """Every window that the history defends, and the reason for the rest."""
+           decision_impacts: int = 0,
+           execution_ledger: Sequence[dict] = (),
+           decision_impact_records: Sequence[dict] = (),
+           discoveries: Sequence[dict] = ()) -> dict:
+    """Every window that the history defends, and the reason for the rest.
+
+    `decision_impacts` stays an int for the volume/quality half above, which
+    has used it as a denominator since before the channels existed. The
+    Founder CHANNEL deliberately ignores it and reads
+    `decision_impact_records`: a count of published dossiers is publication
+    volume, and feeding it to a channel called Founder VALUE is the exact
+    substitution this node exists to stop.
+    """
     windows = [window(observations, name=name, size=size, ledger=ledger,
                       decision_impacts=decision_impacts)
                for name, size in WINDOWS]
@@ -583,6 +1287,11 @@ def report(observations: Sequence, *, ledger: Sequence[dict] = (),
     headline = computed[0] if computed else windows[0]
     backlog = [o for o in observations
                if getattr(o, "backlog_drain", False)]
+    per_channel = channels(ledger, execution_ledger=execution_ledger,
+                           decision_impacts=decision_impact_records,
+                           discoveries=discoveries)
+    activity = high_activity_low_learning(ledger)
+    limit = bottleneck(per_channel)
     return {
         "contract": CONTRACT,
         "status": headline.status,
@@ -594,8 +1303,25 @@ def report(observations: Sequence, *, ledger: Sequence[dict] = (),
         "windows_computed": [w.window for w in computed],
         "quality": headline.quality,
         "degradations": list(headline.degradations),
+        # THE SEVEN, INDEPENDENT AND UNBLENDED.
+        "channels": {name: rep.as_dict()
+                     for name, rep in per_channel.items()},
+        "channels_measurable": sorted(
+            name for name, rep in per_channel.items()
+            if rep.status != UNMEASURABLE),
+        "channels_unmeasurable": sorted(
+            name for name, rep in per_channel.items()
+            if rep.status == UNMEASURABLE),
+        "effect_cycles": sum(1 for c in _effect_cycles(ledger) if c),
+        "high_activity_low_learning": activity,
+        "bottleneck": limit,
+        "operator_summary": operator_summary(per_channel, activity=activity,
+                                             limit=limit),
         "note": ("volume never sets the status on its own: a window with any "
                  "degrading quality dimension cannot read ACCELERATING, "
                  "however much it ingested. A None quality reading is "
-                 "absent telemetry, not a zero"),
+                 "absent telemetry, not a zero. The seven channels are "
+                 "computed independently and are never averaged: a system "
+                 "can improve technically while learning nothing "
+                 "economically, and one number hides exactly that"),
     }

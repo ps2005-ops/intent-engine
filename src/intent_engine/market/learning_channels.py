@@ -39,14 +39,42 @@ from typing import Dict, Optional, Sequence, Tuple
 
 CONTRACT = "learning_channels.v1"
 
-# --- the four channels ------------------------------------------------------
+# --- the seven channels -----------------------------------------------------
+#
+# THIS IS THE ONE PLACE THE CHANNEL VOCABULARY IS DEFINED
+# ------------------------------------------------------
+# Four channels were declared here for MOVEMENTS — things a cycle or an
+# operator states it changed. `learning_acceleration` later needed the same
+# separation for measurements DERIVED from the effect log, and the obvious
+# move was to define its own list. Two vocabularies for one idea disagree the
+# first week one of them gains a member, and then two reports name different
+# things by the same word.
+#
+# So the names live here and the derived layer imports them. A channel with
+# no movement kinds is one nothing can be manually filed under, which is
+# correct for the three added below: retention, research policy and
+# unsupervised utility are read off records, never declared.
 ECONOMIC_KNOWLEDGE = "ECONOMIC_KNOWLEDGE_GAIN"
 SYSTEM_CAPABILITY = "SYSTEM_CAPABILITY_GAIN"
 CALIBRATION = "CALIBRATION_GAIN"
 FOUNDER_UTILITY = "FOUNDER_UTILITY_GAIN"
+RETENTION = "RETENTION_QUALITY"
+RESEARCH_POLICY = "RESEARCH_POLICY_GAIN"
+UNSUPERVISED_UTILITY = "UNSUPERVISED_UTILITY_GAIN"
 
-CHANNELS = (ECONOMIC_KNOWLEDGE, SYSTEM_CAPABILITY, CALIBRATION,
-            FOUNDER_UTILITY)
+#: The four that accept declared movements. Kept as its own name because
+#: `movement()` refuses anything outside it, and widening that refusal to
+#: channels with no kinds would let a caller file a movement nothing can
+#: validate.
+MOVEMENT_CHANNELS = (ECONOMIC_KNOWLEDGE, SYSTEM_CAPABILITY, CALIBRATION,
+                     FOUNDER_UTILITY)
+
+CHANNELS = MOVEMENT_CHANNELS
+
+#: Every channel the engine reports on, declared or derived.
+ALL_CHANNELS = (ECONOMIC_KNOWLEDGE, SYSTEM_CAPABILITY, CALIBRATION,
+                FOUNDER_UTILITY, RETENTION, RESEARCH_POLICY,
+                UNSUPERVISED_UTILITY)
 
 #: What may be counted in each channel. A movement whose kind is not listed
 #: for its channel is refused rather than filed under the nearest match.
