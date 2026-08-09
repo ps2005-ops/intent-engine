@@ -104,6 +104,12 @@ _CREDIT_SPREADS = (
     ("US", "TREASURY_NOTES_AVG_RATE", "TREASURY_BILLS_AVG_RATE"),
 )
 
+#: What a discovered regime has to help predict before it counts as useful.
+#: Consumer prices, because it is the deepest monthly series with a real
+#: publisher-stated release date, so the held-out test is not scoring a
+#: forecast against a figure whose vintage the engine had to guess.
+_REGIME_TARGET_SERIES = "STATCAN_V41690973"
+
 
 def _macro_sweep(ctx: C.CycleContext) -> dict:
     """Acquire the economy, and keep it.
@@ -901,6 +907,34 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         payload["transmission"] = {
             **TX.summarise(proposed),
             "hypotheses": [t.as_dict() for t in proposed],
+        }
+
+        # STRUCTURE NOBODY ASKED FOR. Every partition here is a hypothesis
+        # with a research question attached and no path to becoming a fact;
+        # the fitted models are scored against the stated rule rather than
+        # against each other, because two models agreeing is not evidence.
+        from . import unsupervised as UN
+
+        regimes = UN.discover_regimes(
+            history, as_of=ctx.as_of, groups=3,
+            target_series=_REGIME_TARGET_SERIES)
+        clusters = UN.discover_exposure_clusters(
+            profiles, as_of=ctx.as_of, groups=3)
+        odd = UN.find_anomalies(history, as_of=ctx.as_of)
+        payload["unsupervised"] = {
+            **UN.summarise(regimes, clusters, odd),
+            "regimes": {k: regimes[k] for k in
+                        ("periods", "series", "scores",
+                         "any_economically_useful", "note")
+                        if k in regimes},
+            "regime_groups": [
+                {k: d[k] for k in ("method", "label", "size", "members",
+                                   "distinguishing")}
+                for d in regimes.get("discoveries", [])],
+            "exposure_clusters": [
+                {k: d[k] for k in ("label", "size", "members")}
+                for d in clusters.get("discoveries", [])],
+            "anomalies": [d["label"] for d in odd.get("discoveries", [])],
         }
     except Exception as exc:  # noqa: BLE001
         payload["company_exposure"] = {"error": f"{type(exc).__name__}: {exc}"}

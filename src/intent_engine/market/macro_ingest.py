@@ -250,25 +250,32 @@ _VALET = "https://www.bankofcanada.ca/valet/observations"
 #: Three days covers a weekend without ever claiming same-day knowledge.
 DAILY_PUBLICATION_LAG_DAYS = 3
 
-#: Valet series -> (state kind, area, label, unit, measure).
+#: Valet series -> (state kind, area, label, unit, measure, periods).
+#:
+#: PERIODS IS PER SERIES BECAUSE FREQUENCY IS. Asking for 24 observations of a
+#: daily yield buys one month of history, and a panel built from it can only
+#: compare August with July. The daily series ask for two years of business
+#: days; the monthly indices ask for two years of months. One number for both
+#: would either starve the panel or store forty years of a monthly index.
 BOC_SERIES = {
     "V39079": (MS.POLICY_RATE, MS.CA,
-               "Bank of Canada target for the overnight rate", "%", MS.LEVEL),
+               "Bank of Canada target for the overnight rate", "%", MS.LEVEL,
+               520),
     "BD.CDN.10YR.DQ.YLD": (MS.MARKET_RATE, MS.CA,
                            "Government of Canada 10-year benchmark yield",
-                           "%", MS.LEVEL),
+                           "%", MS.LEVEL, 520),
     "BD.CDN.2YR.DQ.YLD": (MS.MARKET_RATE, MS.CA,
                           "Government of Canada 2-year benchmark yield",
-                          "%", MS.LEVEL),
+                          "%", MS.LEVEL, 520),
     "FXUSDCAD": (MS.CURRENCY, MS.GLOBAL,
                  "US dollar in Canadian dollars, daily average",
-                 "CAD per USD", MS.LEVEL),
+                 "CAD per USD", MS.LEVEL, 520),
     "M.BCPI": (MS.COMMODITY_PRICE, MS.GLOBAL,
                "Bank of Canada commodity price index, all commodities",
-               "index", MS.LEVEL),
+               "index", MS.LEVEL, 24),
     "M.ENER": (MS.ENERGY_PRICE, MS.GLOBAL,
                "Bank of Canada commodity price index, energy",
-               "index", MS.LEVEL),
+               "index", MS.LEVEL, 24),
 }
 
 
@@ -286,9 +293,9 @@ def bank_of_canada(*, retrieved_at: str, periods: int = 24,
     wanted = [s for s in BOC_SERIES if not only or s in only]
     out: List[MS.MacroObservation] = []
     for series_id in wanted:
-        kind, area, label, unit, measure = BOC_SERIES[series_id]
+        kind, area, label, unit, measure, depth = BOC_SERIES[series_id]
         body = get(f"{_VALET}/{urllib.parse.quote(series_id)}/json"
-                   f"?recent={int(periods)}")
+                   f"?recent={int(max(periods, depth))}")
         for row in (body or {}).get("observations") or []:
             if not isinstance(row, dict):
                 continue
