@@ -136,10 +136,37 @@ CONTESTED have never been produced live, and the delayed reward has never
 paid anyone — correctly, since a first statement is not a consequence of any
 action. Do not synthesize a transition.
 
+## The replay blocker, because it will look like a bug
+
+`D-REP-002` is BLOCKED_DATA on a measured gate: `macro_retrieval_months 1/6`.
+
+Every macro observation was retrieved inside ONE month (2026-08) while
+describing periods across 2024–2026. The engine learned all of history at
+once, so `vintage.freeze` admits **zero** rows at any earlier instant and
+`select_episodes` returns `[]` on the live corpus.
+
+**The shortcut is filtering on `published_at`, and it is the exact defect
+D-REP-001 built the wall against.** It would admit 1572 unseen figures at
+2026-01-01 and the replay would look entirely healthy. If replay suddenly
+starts producing live episodes, check the wall still reads observation time
+before believing it.
+
+The capability is built and proven on a fixture with real observation spread
+(`tests/test_market_thesis_replay.py`): 6 episodes, 5 outcomes right, 1 wrong,
+**every verdict UNRESOLVED** — the transmission leg predicts company capital
+spending, which the corpus does not carry. Five of six right and zero wins is
+the correct reading, not a shortfall. The gate clears on its own as cycles
+accumulate observation history.
+
 ## Next action
 
 Run `frontier.py`. Do not assume the order in this file still holds.
 
-As of `5ffca7e`: 43 nodes, COMPLETE 23, READY 6, WAITING_DEPENDENCY 11,
-BLOCKED_DATA 3. Runtime pinned to `5ffca7e`, imports verified, PAPER
+As of `0c652b2`: 43 nodes, COMPLETE 23, READY 5, WAITING_DEPENDENCY 11,
+BLOCKED_DATA 4. Runtime pinned to `0c652b2`, imports verified, PAPER
 enforced, production `119d345` untouched.
+
+`I-ACC-001` is next by rank and is NOT a small node: `learning_acceleration`
+is 601 lines and the acceptance wants seven channels classified
+independently from effects rather than accepted rows, plus a live cycle.
+Budget a full slice for it rather than starting it late.

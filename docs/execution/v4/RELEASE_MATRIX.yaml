@@ -52,7 +52,15 @@ axes:
     status: PARTIAL
     note: no formal historical study run yet
   THESIS_REPLAY:
-    status: PARTIAL
+    status: BLOCKED_DATA
+    note: 'D-REP-002. Capability built, tested (19) and leak-proofed (13 mutation proofs, all held first
+      pass). Empirical replay blocked on a MEASURED gate, macro_retrieval_months 1/6: all 2344 macro observations
+      were retrieved in one month while describing 2024-2026, so vintage.freeze admits zero rows at any
+      historical instant and select_episodes returns [] on the live corpus. leak_surface quantifies the
+      shortcut - filtering on published_at would admit 1572 unseen figures at 2026-01-01. Proven on a
+      fixture with real observation spread: 6 episodes, 5 outcomes right, 1 wrong, every verdict UNRESOLVED
+      because the transmission leg predicts a company observable the corpus lacks. Determinism proven
+      by flipping every value and getting identical selections. The gate clears as cycles run.'
   MECHANISM_CALIBRATION:
     status: PARTIAL
   SECOND_ORDER:
