@@ -662,6 +662,25 @@ def _knowledge_summary(knowledge: dict) -> dict:
                       "hacking_policies", "change_rate", "best_honest")
             if ((knowledge.get("research_policy") or {}).get("reward_audit")
                 or {}).get(k) is not None},
+        # The gap between the order the engine STATES and the value it
+        # MEASURES. Projected because a preference that no longer matches the
+        # evidence is a standing finding, not a one-off audit result.
+        "source_preference": {
+            k: ((knowledge.get("research_policy") or {}).get(
+                "source_preference") or {}).get(k)
+            for k in ("stated_first", "measured_first",
+                      "order_agrees_with_measurement", "verdict")
+            if ((knowledge.get("research_policy") or {}).get(
+                "source_preference") or {}).get(k) is not None},
+        # PROSPECTIVE ROWS, KEPT APART FROM THE RECONSTRUCTED ONES. A reader
+        # who sees only `research_policy` above is reading a success log; this
+        # is the count of choices written before their calls, and `standing`
+        # says what may honestly be concluded from them.
+        "research_decisions": {
+            k: (knowledge.get("research_decisions") or {}).get(k)
+            for k in ("decisions", "outcomes", "empty_handed",
+                      "with_a_forgone_option", "by_status", "standing", "why")
+            if (knowledge.get("research_decisions") or {}).get(k) is not None},
         "economic_thesis": {
             k: (knowledge.get("economic_thesis") or {}).get(k)
             for k in ("theses", "by_standing", "assertable",

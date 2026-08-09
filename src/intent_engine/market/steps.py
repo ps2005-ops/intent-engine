@@ -1104,6 +1104,48 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
                 RPOL.FixedPolicy(RPOL.INDEPENDENT_REPORTING),
                 RPOL.FixedPolicy(RPOL.REGULATORY_FILING)]),
             "reward_audit": RPOL.audit_reward(research_log),
+            # THE DIAGNOSIS, STANDING RATHER THAN ONE-OFF. It reports the gap
+            # between the preference order the engine states and the value it
+            # measures, and it does not close that gap — a replacement order
+            # derived from a log rebuilt from surviving evidence would be
+            # justified by exactly the rows such a log cannot contain.
+            "source_preference": RPOL.diagnose_source_preference(research_log),
+        }
+
+        # THE PROSPECTIVE LOG, REPORTED APART FROM THE RECONSTRUCTED ONE.
+        # `research_policy` above is scored on rows inferred from evidence
+        # that survived. These rows were written BEFORE the call, so they can
+        # contain an action that returned nothing — and the two must never be
+        # pooled, because the success bias in the first would silently
+        # establish the value of the second.
+        from . import research_decision as RDEC
+
+        decision_rows = store.research_decisions()
+        outcome_rows = store.research_outcomes()
+        payload["research_decisions"] = {
+            "decisions": len(decision_rows),
+            "outcomes": len(outcome_rows),
+            "by_status": dict(collections.Counter(
+                str(r.get("status") or "") for r in outcome_rows)),
+            "empty_handed": sum(
+                1 for r in outcome_rows
+                if str(r.get("status") or "") in RDEC.EMPTY_HANDED),
+            "with_a_forgone_option": sum(1 for r in decision_rows
+                                         if r.get("forgone")),
+            "standing": ("NOT_EVALUABLE" if not decision_rows else
+                         "REPLAY_ONLY"),
+            "why": ("no prospective decision has been written yet; every "
+                    "research row is inferred from evidence that survived, so "
+                    "actions returning nothing are absent and every rate is "
+                    "biased toward success"
+                    if not decision_rows else
+                    f"{len(decision_rows)} prospective decisions written "
+                    "before their calls; the selection policy is "
+                    "deterministic, so replay can rank policies on the subset "
+                    "they agree with and cannot say what an unchosen option "
+                    "would have returned"),
+            "note": ("counted from the ledger rather than from this run, so "
+                     "the figure is what a fresh process would read"),
         }
 
         # THE OBJECT EVERY CEO-FACING SURFACE IS A PROJECTION OF. Built from
