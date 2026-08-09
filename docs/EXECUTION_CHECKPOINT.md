@@ -4,7 +4,52 @@ Machine-readable continuation state. A completed slice is a checkpoint, not an
 endpoint: this file exists so the mission survives a context boundary instead
 of restarting from an audit.
 
-Updated 2026-08-08, V3 FINAL CLOSURE RUN.
+Updated 2026-08-08, V4 SESSION 1.
+
+## V4 session 1 — the engine gets an economy, and the causal layer gets a memory
+
+V3 is FROZEN at market `2ee1635` / founder `247ad23`. Nothing on the V3
+contracts was renamed, duplicated or reopened; the founder preview still
+serves `247ad23` and production is untouched at `119d345`.
+
+### The bottleneck was measured, not guessed
+
+Every economic chain was decapitated. The ledger holds only company-scoped
+evidence, so MACRO_STATE had no possible source — not unobserved,
+UNREACHABLE — and the top link of every subject's chain sat at UNKNOWN
+permanently: known 4, unknown 3, links {UNKNOWN: 4, HYPOTHESIZED: 2}.
+
+### What now exists and runs every cycle
+
+| object | live measurement |
+|---|---|
+| `macro_state` | 24 monthly figures persisted; MARKET_RATE OBSERVED, moving UP; 16 of 17 conditions UNKNOWN |
+| `company_exposure` | 26 companies × 10 dimensions; 3 rated, 257 UNKNOWN |
+| `transmission` | 2 dated falsifiable hypotheses, provenance to both ends |
+| `economic_chain` | known nodes 4 → 5; names its own weakest link |
+
+### The observability repair
+
+The whole causal layer — chain, causal calibration, counterfactual memory,
+world model, VOI, belief maturity — was computed every cycle and dropped from
+the persisted report. None of it had a history, so a regime change was
+structurally unobservable. The comment above the report payload had already
+predicted this exact seam. Now persisted as a bounded projection.
+
+### V4 readiness
+
+    PASS 3 · PARTIAL 10 · BLOCKED_DATA 1 · UNMEASURABLE 1 · NO 5
+
+NO: demand chain, second-order effects, scenarios, internal company model,
+founder consumption. FOUNDER_DECISION_VALUE is UNMEASURABLE by construction
+until a V4 object crosses the bridge.
+
+### First executable continuation
+
+Widen macro source coverage. 16 of 17 conditions are UNKNOWN because one
+keyless publisher covers one condition, and every downstream axis — exposure
+routes, transmissions, regime detection — is rate-limited by it. FRED needs an
+owner-supplied key; BLS and Treasury series do not.
 
 ## V3 final closure — the bridge carries trust, end to end, in production
 
