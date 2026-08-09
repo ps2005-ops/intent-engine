@@ -12,7 +12,13 @@ recomputed_at: "2026-08-09"
 
 axes:
   ECONOMIC_DATA:            {status: PARTIAL, note: "15/30 macro conditions populated"}
-  TEMPORAL_VINTAGE_TRUTH:   {status: PARTIAL, note: "vintage wall not yet enforced for replay (D-REP-001)"}
+  TEMPORAL_VINTAGE_TRUTH:
+    status: PASS
+    note: >
+      D-REP-001. The wall raises rather than filtering; admission is by
+      observation time, never occurrence, so a fact that happened before T but
+      was published after it stays invisible. leak_surface measures how many
+      rows an occurrence-time filter would have admitted. 19 tests.
   COMPANY_EXPOSURES:        {status: PARTIAL}
   DEMAND_CHAIN:             {status: PARTIAL, note: "21/260 cells; corpus-bound, see BLK-DEMAND-CORPUS"}
   SUPPLY_CHAIN:             {status: BLOCKED_DATA, note: "no named supplier edges"}
@@ -28,7 +34,15 @@ axes:
       unit-tested and unwitnessed.
   ACTIVE_LEARNING:          {status: BLOCKED_DATA, note: "gated on A-RD-008"}
   BANDIT_MATURITY:          {status: BLOCKED_DATA, note: "L0 interface only; no logged exploration"}
-  METHOD_VALIDATION:        {status: PARTIAL}
+  METHOD_VALIDATION:
+    status: PARTIAL
+    note: >
+      C-MET-001. Nine methods declared with assumptions and failure modes,
+      three implemented, and an unimplemented one raises rather than falling
+      back. Measured walk-forward on 15 real macro series: persistence best on
+      9, AR1 on 4, drift on 2. On the four 520-point series persistence is
+      effectively unbeaten. PARTIAL because no formal causal method has run
+      and the assumption ledger (C-MET-002) does not exist yet.
   CAUSAL_INFERENCE:         {status: PARTIAL, note: "no formal historical study run yet"}
   THESIS_REPLAY:            {status: PARTIAL}
   MECHANISM_CALIBRATION:    {status: PARTIAL}
