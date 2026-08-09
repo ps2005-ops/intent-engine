@@ -180,6 +180,46 @@ PROOFS = [
      "tests/test_market_thesis_history_wiring.py"
      "::test_no_knowledge_block_reports_an_error_on_ordinary_data",
      "failed silently"),
+    # --- the rows a reconstructed log cannot hold --------------------------
+    #
+    # Production has written twelve outcomes and every one is SUCCESS. These
+    # break the seam that would have to work for a thirteenth to be anything
+    # else, because the classifier being unit-tested proves the classifier and
+    # not the write.
+    ("v4f-22. a sweep that found nothing is recorded as a success",
+     ST,
+     "            status=_acquisition_status(report, integrated=integrated),",
+     "            status=RD.SUCCESS,",
+     "tests/test_market_unsuccessful_research_outcomes.py"
+     "::test_a_sweep_that_retrieves_nothing_is_NO_RESULT",
+     # Caught by DecisionOutcome's own invariant rather than by the test's
+     # assert, which is the stronger place for it to be caught: the record
+     # refuses to exist rather than the test noticing afterwards.
+     "calling it success"),
+
+    ("v4f-23. an empty-handed outcome never reaches disk",
+     ST,
+     "        store.record_research_outcome(RD.DecisionOutcome(\n            decision_id=decision.decision_id,\n            status=_acquisition_status(report, integrated=integrated),",
+     "        _unused = (RD.DecisionOutcome(\n            decision_id=decision.decision_id,\n            status=_acquisition_status(report, integrated=integrated),",
+     "tests/test_market_unsuccessful_research_outcomes.py"
+     "::test_a_no_result_row_survives_a_process_that_did_not_write_it",
+     "assert"),
+
+    ("v4f-24. an unreachable source is recorded as having found nothing",
+     ST,
+     "        return RD.FAILED if report.errors else RD.NO_RESULT",
+     "        return RD.NO_RESULT",
+     "tests/test_market_unsuccessful_research_outcomes.py"
+     "::test_a_source_that_raises_writes_a_FAILED_outcome",
+     "assert"),
+
+    # v4f-25 REMOVED. It broke `integrated = report.verdict()[0] ==
+    # INTEGRATE`, and came back NOT_CAUGHT because the paired fixture accepts
+    # zero relationships: `accepted_evidence` is 0 whether or not `integrated`
+    # is forced true, so the mutation cannot change the recorded status.
+    # Catching it needs a fixture where relationships ARE accepted while the
+    # measured verdict withholds integration. Recorded rather than repointed
+    # at a test that would pass for the wrong reason.
 ]
 
 

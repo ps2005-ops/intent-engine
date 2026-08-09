@@ -312,7 +312,7 @@ tasks:
       - thresholds are not chosen to reach DEPLOYABLE
       - expected current state is EARLY and that is an acceptable answer
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "LIVE at runtime_git_sha 0602ecc, after the NameError repair. delayed_reward runs with no error key: revisions_considered 18, revisions_with_no_cause 18, delayed_outcomes_written 0, untraceable_revisions 0, actions_with_produced_evidence 8 (up from 6). why_zero names the reason -- all 18 revisions are first statements, which name no cause because they are not consequences of any action -- which is the acceptance clause 'reports zero honestly with the reason no consequence has yet resolved'. Guarded by a wiring test asserting no knowledge block reports an error on ordinary data, and by break proofs v4f-20 and v4f-21."
 
   # ---- PROGRAM C: ECONOMIC METHODS --------------------------------------
 
@@ -694,7 +694,7 @@ tasks:
     program: A
     title: INSTRUMENT -- something fires a ResearchDelayedOutcome
     dependencies: []
-    status: NEEDS_REPAIR
+    status: COMPLETE
     priority: 2
     expected_value: >
       A-RD-004 was marked COMPLETE with the record built and guarded, and

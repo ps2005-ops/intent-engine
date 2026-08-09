@@ -1,79 +1,123 @@
-# V4 release matrix. Recomputed at closure, never carried forward blindly.
-#
-# PASS / PARTIAL / BLOCKED_DATA / BLOCKED_EXTERNAL / BLOCKED_OWNER /
-# INVALIDATED / NOT_APPLICABLE
-#
-# Seeded 2026-08-09 from the session-3 scorecard (PASS 11 / PARTIAL 25 /
-# BLOCKED_DATA 1 / NO 1), with two statuses corrected by reconciliation. NO is
-# not a permitted terminal value at closure; an executable NO must be attacked.
-
 contract: v4_release_matrix.v1
-recomputed_at: "2026-08-09"
-
+recomputed_at: '2026-08-09'
 axes:
-  ECONOMIC_DATA:            {status: PARTIAL, note: "15/30 macro conditions populated"}
+  ECONOMIC_DATA:
+    status: PARTIAL
+    note: 15/30 macro conditions populated
   TEMPORAL_VINTAGE_TRUTH:
     status: PASS
-    note: >
-      D-REP-001. The wall raises rather than filtering; admission is by
-      observation time, never occurrence, so a fact that happened before T but
-      was published after it stays invisible. leak_surface measures how many
-      rows an occurrence-time filter would have admitted. 19 tests.
-  COMPANY_EXPOSURES:        {status: PARTIAL}
-  DEMAND_CHAIN:             {status: PARTIAL, note: "21/260 cells; corpus-bound, see BLK-DEMAND-CORPUS"}
-  SUPPLY_CHAIN:             {status: BLOCKED_DATA, note: "no named supplier edges"}
-  KNOWLEDGE_ATTRIBUTION:    {status: PASS, note: "session 3; 855 effects, 316/316 rows attributed"}
-  UNSUPERVISED_DISCOVERY:   {status: PARTIAL, note: "geometry good, downstream utility unmeasured"}
+    note: 'D-REP-001. The wall raises rather than filtering; admission is by observation time, never occurrence,
+      so a fact that happened before T but was published after it stays invisible. leak_surface measures
+      how many rows an occurrence-time filter would have admitted. 19 tests.
+
+      '
+  COMPANY_EXPOSURES:
+    status: PARTIAL
+  DEMAND_CHAIN:
+    status: PARTIAL
+    note: 21/260 cells; corpus-bound, see BLK-DEMAND-CORPUS
+  SUPPLY_CHAIN:
+    status: BLOCKED_DATA
+    note: no named supplier edges
+  KNOWLEDGE_ATTRIBUTION:
+    status: PASS
+    note: session 3; 855 effects, 316/316 rows attributed
+  UNSUPERVISED_DISCOVERY:
+    status: PARTIAL
+    note: geometry good, downstream utility unmeasured
   RESEARCH_OBSERVABILITY:
     status: PARTIAL
-    note: >
-      Decisions are now written before the call and a live cycle produced 2 of
-      them with full candidate sets. Still PARTIAL, not PASS: both live
-      outcomes were SUCCESS, so no NO_RESULT or FAILED row has ever been
-      observed in production. The rows this layer exists to preserve are
-      unit-tested and unwitnessed.
-  ACTIVE_LEARNING:          {status: BLOCKED_DATA, note: "gated on A-RD-008"}
-  BANDIT_MATURITY:          {status: BLOCKED_DATA, note: "L0 interface only; no logged exploration"}
+    note: 'Decisions are now written before the call and a live cycle produced 2 of them with full candidate
+      sets. Still PARTIAL, not PASS: both live outcomes were SUCCESS, so no NO_RESULT or FAILED row has
+      ever been observed in production. The rows this layer exists to preserve are unit-tested and unwitnessed.
+
+      '
+  ACTIVE_LEARNING:
+    status: BLOCKED_DATA
+    note: gated on A-RD-008
+  BANDIT_MATURITY:
+    status: BLOCKED_DATA
+    note: L0 interface only; no logged exploration
   METHOD_VALIDATION:
     status: PARTIAL
-    note: >
-      C-MET-001. Nine methods declared with assumptions and failure modes,
-      three implemented, and an unimplemented one raises rather than falling
-      back. Measured walk-forward on 15 real macro series: persistence best on
-      9, AR1 on 4, drift on 2. On the four 520-point series persistence is
-      effectively unbeaten. PARTIAL because no formal causal method has run
-      and the assumption ledger (C-MET-002) does not exist yet.
-  CAUSAL_INFERENCE:         {status: PARTIAL, note: "no formal historical study run yet"}
-  THESIS_REPLAY:            {status: PARTIAL}
-  MECHANISM_CALIBRATION:    {status: PARTIAL}
-  SECOND_ORDER:             {status: PARTIAL}
-  THIRD_ORDER:              {status: BLOCKED_DATA, note: "needs a named mediator"}
-  SCENARIOS:                {status: PARTIAL}
-  THESIS:                   {status: PARTIAL, note: "7 theses, 3 alternatives each, 28 falsifiers, 0 assertable"}
-  PROOF:                    {status: PARTIAL}
-  FOUNDER:                  {status: PARTIAL}
-  PRESENTATION:             {status: PARTIAL, note: "12 sections build and re-verify; not yet confirmed reaching a deployed surface"}
-  CEO_QA:                   {status: PARTIAL}
-  DECISION_IMPACT:          {status: PARTIAL, note: "not sufficiently proven on a real company"}
-  TRADING_ECONOMIC_SEPARATION: {status: PARTIAL}
-  LEARNING_ACCELERATION:    {status: PARTIAL, note: "still computed from accepted rows, not effects (I-ACC-001)"}
-  RETENTION:                {status: PARTIAL}
-  ADVERSARIAL:              {status: PARTIAL, note: "27 attacks; extension gated on prospective data"}
-  BREAK_PROOFS:             {status: PARTIAL, note: "session 3 21/21 after repair; mutation lock in place"}
-  PERFORMANCE:              {status: PARTIAL}
-  PAPER:                    {status: PASS, note: "structurally enforced"}
-  PRODUCTION_SAFETY:        {status: PASS, note: "119d345 untouched"}
+    note: 'C-MET-002 and C-MET-004, live at 1b6c84c. Assumptions are TESTED rather than listed: 60 MethodAssumptionCheck
+      rows written and read back, every declared assumption answered for including UNTESTED, and a failed
+      critical assumption REFUSES the causal reading while retaining the descriptive estimate. The cycle
+      scores its own economy vintage-safely - 15 of 17 series, 45 evaluations, 0.09s - instead of relying
+      on one offline comparison. Result: every method that beat persistence came back BOUNDED or REFUSED
+      and NONE useful. Five short-series wins are bounded by a 30-prediction floor; AR1 on GLOBAL:CURRENCY
+      (519 points, skill 0.0043) is refused on a fitted coefficient of 0.9854. STILL PARTIAL: only the
+      three baselines are implemented and no formal causal method has been run (C-MET-003).'
+  CAUSAL_INFERENCE:
+    status: PARTIAL
+    note: no formal historical study run yet
+  THESIS_REPLAY:
+    status: PARTIAL
+  MECHANISM_CALIBRATION:
+    status: PARTIAL
+  SECOND_ORDER:
+    status: PARTIAL
+  THIRD_ORDER:
+    status: BLOCKED_DATA
+    note: needs a named mediator
+  SCENARIOS:
+    status: PARTIAL
+  THESIS:
+    status: PARTIAL
+    note: 'G-THE-004, live at 1b6c84c. Identity is canonical: subject, area, question, exposures, conditions
+      and the mechanism''s catalogue key - never the claim, the date or the standing. 11 theses built
+      and 11 persisted (was 7 of 11: two economies moving one condition shared an id and the store silently
+      refused the duplicate). Reconciliation is one-to-one, compared 11 <= loaded 18, identity_collisions
+      0, and the revision chain is reloaded rather than rebuilt empty. STILL PARTIAL: no thesis has yet
+      MOVED. 0 strengthened, 0 weakened, 0 contested. classify() has run on real data and found nothing
+      to classify, which is the honest state and not a pass.'
+  PROOF:
+    status: PARTIAL
+  FOUNDER:
+    status: PARTIAL
+  PRESENTATION:
+    status: PARTIAL
+    note: 12 sections build and re-verify; not yet confirmed reaching a deployed surface
+  CEO_QA:
+    status: PARTIAL
+  DECISION_IMPACT:
+    status: PARTIAL
+    note: not sufficiently proven on a real company
+  TRADING_ECONOMIC_SEPARATION:
+    status: PARTIAL
+  LEARNING_ACCELERATION:
+    status: PARTIAL
+    note: still computed from accepted rows, not effects (I-ACC-001)
+  RETENTION:
+    status: PARTIAL
+  ADVERSARIAL:
+    status: PARTIAL
+    note: 27 attacks; extension gated on prospective data
+  BREAK_PROOFS:
+    status: PARTIAL
+    note: 'v4d 30/30, v4e 19/19, v4f 20/20 held at 0602ecc under the hardened harness (mutation lock,
+      hash change required, RED for the stated reason, exact restore, bytecode cleared). Nine proofs came
+      back NOT_CAUGHT during this run and every one named a real gap: five were tests that did not discriminate,
+      and v4f-19 was an unreachable guard, deleted along with its proof rather than repointed. STILL PARTIAL:
+      section 37 lists twelve required proofs and the replay, scenario, CEO and DecisionImpact ones have
+      no capability to break yet.'
+  PERFORMANCE:
+    status: PARTIAL
+    note: 'Measured for the work added this run: method evaluation over the live ledger is 0.09s for 15
+      series and 45 evaluations, and thesis reconciliation is O(current) against a dict of priors. No
+      regression measured against a prior baseline because none was recorded; the >10% rule has nothing
+      to compare to yet, which is why this is PARTIAL rather than PASS.'
+  PAPER:
+    status: PASS
+    note: structurally enforced
+  PRODUCTION_SAFETY:
+    status: PASS
+    note: 119d345 untouched
   LIVE_PROJECTION_REACHES_REPORT:
     status: PARTIAL
-    note: >
-      RESOLVED IN PART, same day. The 2026-08-09 night cycle emitted the
-      session-3 projections: research_policy (log_size 321, reconstructed 0),
-      knowledge_effects (343 effects, 0 unattributed), economic_thesis,
-      unsupervised, founder_v4, demand_chain, presentation. That code was
-      correct all along and had never been run.
-
-      Still PARTIAL because the SAME cycle emitted source_preference and
-      research_decisions as empty objects — the run predated 431538b. The axis
-      stays open until a report carries them, because "the object was built"
-      and "the object reached an artifact a reader sees" are the two claims
-      this axis exists to keep apart.
+    note: 'Every V4 block added since is projected AND pinned by a test (tests/test_market_report_projections.py
+      asserts the keys each node''s acceptance depends on survive _knowledge_summary, that a zero is not
+      dropped as absent, and that a block''s error is projected rather than swallowed). This axis is why
+      A-RD-009 was caught: the delayed_reward block had no projection, so a NameError that fired on every
+      cycle had no surface anywhere and the node was marked COMPLETE. STILL PARTIAL until the remaining
+      V4 surfaces - replay, scenarios, CEO Q&A, DecisionImpact - exist to be projected.'

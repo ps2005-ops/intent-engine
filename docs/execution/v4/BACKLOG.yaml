@@ -27,6 +27,41 @@ items:
       a surface starts reporting belief-effect attribution rates, or a thesis
       declares a belief as a dependency object.
 
+  - id: BKL-ATTEMPTED-COUNTS-SUBJECTS
+    class: HARDENING
+    found_in: "section 9 investigation, zero NO_RESULT anomaly"
+    observed: >
+      `counterparty_sources.Yield.documents_attempted` increments once per
+      SUBJECT, while `documents_retrieved` increments once per DOCUMENT. A
+      live outcome row therefore reads `attempted 28, retrieved 64`. The
+      names say otherwise, and `research_planning.from_yield` carries them
+      into `SourceFamilyPerformance` as `attempts` and `retrieved`.
+    why_not_a_blocker: >
+      Nothing divides one by the other today. `attempts` is used only to gate
+      maturity at a PROVISIONAL threshold, and `SourceFamilyPerformance` has
+      no production consumer outside its own module. No current claim is
+      wrong.
+    would_become_material_if: >
+      any surface computes a retrieval or hit rate from the pair. It would
+      read 228% on live data, and a rate above one is the kind of number a
+      reader rationalises rather than reports.
+
+  - id: BKL-SOURCE-DEGRADED-STATUS
+    class: HARDENING
+    found_in: "section 9 investigation"
+    observed: >
+      The outcome vocabulary is SUCCESS / NO_RESULT / NO_NEW_INFORMATION /
+      REFUSED / FAILED / TIMEOUT. There is no SOURCE_DEGRADED, so a source
+      that is reachable but returning less than it used to is recorded the
+      same way as one that was asked and honestly held nothing.
+    why_not_a_blocker: >
+      New capability rather than a repair, and it is the smallest piece of a
+      much larger pillar (source health lifecycle, cadence expectations,
+      failure streaks, propagation into belief uncertainty). Adding the enum
+      value alone would create a status nothing can ever set, which is the
+      shape this project already has too much of.
+    goes_to: "its own node when the source-health lifecycle is scoped"
+
   - id: BKL-EFFECT-READBACK
     class: HARDENING
     found_in: COMPLETE_NODE_MATURITY_AUDIT
