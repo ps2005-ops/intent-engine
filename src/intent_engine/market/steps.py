@@ -1018,6 +1018,49 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             **FV4.summarise(views),
             "briefings": [v.as_dict() for v in views],
         }
+
+        # DEMAND, AS NINE STATES. Expect most of them empty: a press-release
+        # corpus does not disclose bookings or backlog, and the honest output
+        # is a chain with holes in it rather than a demand reading inferred
+        # from the one figure companies always publish.
+        from . import demand_chain as DCH
+        from . import economic_quantity as EQU
+        from . import presentation as PRES
+
+        chains = [DCH.build(rows, company_id=c, as_of=ctx.as_of)
+                  for c in subjects]
+        payload["demand_chain"] = {
+            **DCH.summarise(chains),
+            "chains": [c.as_dict() for c in chains if c.known_states],
+        }
+
+        quantities, refused_q = [], {}
+        for row in rows:
+            if row.get("record") != "evidence":
+                continue
+            got, why = EQU.extract(
+                str(row.get("fact") or ""),
+                evidence_id=str(row.get("evidence_id") or ""),
+                period=str(row.get("observed_at") or "")[:10])
+            quantities.extend(got)
+            for key, count in why.items():
+                refused_q[key] = refused_q.get(key, 0) + count
+        payload["economic_quantities"] = {
+            **EQU.summarise(quantities, refused_q),
+            "extracted": [q.as_dict() for q in quantities[:40]],
+        }
+
+        # THE DECK IS A VIEW. Built here so the standing wall runs inside the
+        # cycle rather than at presentation time, where a failure would be
+        # discovered by whoever was about to present it.
+        decks = [PRES.build(t, view=v, proof=ETH.prove(t), as_of=ctx.as_of)
+                 for t, v in zip(theses, views)]
+        payload["presentation"] = {
+            **PRES.summarise(decks),
+            "consistency": [PRES.check(d, t)
+                            for d, t in zip(decks, theses)],
+            "decks": [d.as_dict() for d in decks[:3]],
+        }
     except Exception as exc:  # noqa: BLE001
         payload["company_exposure"] = {"error": f"{type(exc).__name__}: {exc}"}
         payload.setdefault("transmission",

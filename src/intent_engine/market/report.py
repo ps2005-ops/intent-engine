@@ -671,6 +671,31 @@ def _knowledge_summary(knowledge: dict) -> dict:
             for k in ("views", "subjects", "all_carry_alternatives",
                       "all_carry_a_watch_item", "by_standing", "error")
             if (knowledge.get("founder_v4") or {}).get(k) is not None},
+        "knowledge_effects": {
+            k: (knowledge.get("knowledge_effects") or {}).get(k)
+            for k in ("effects", "by_effect", "evidence_attributed",
+                      "evidence_that_changed_something",
+                      "evidence_that_changed_nothing",
+                      "evidence_unattributed", "discriminating", "error")
+            if (knowledge.get("knowledge_effects") or {}).get(k)
+            is not None},
+        "demand_chain": {
+            k: (knowledge.get("demand_chain") or {}).get(k)
+            for k in ("companies", "companies_with_any_state",
+                      "by_chain_standing", "states_measured",
+                      "states_possible", "contradicted_links", "error")
+            if (knowledge.get("demand_chain") or {}).get(k) is not None},
+        "economic_quantities": {
+            k: (knowledge.get("economic_quantities") or {}).get(k)
+            for k in ("quantities", "by_type", "by_basis", "refused",
+                      "yield", "error")
+            if (knowledge.get("economic_quantities") or {}).get(k)
+            is not None},
+        "presentation": {
+            k: (knowledge.get("presentation") or {}).get(k)
+            for k in ("decks", "subjects", "all_carry_alternatives",
+                      "empty_sections", "error")
+            if (knowledge.get("presentation") or {}).get(k) is not None},
         "note": ("bounded projection; the append-only ledger is the record "
                  "and every figure here is recomputable from it"),
     }
