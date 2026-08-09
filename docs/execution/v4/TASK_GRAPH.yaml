@@ -521,6 +521,7 @@ tasks:
         "why?"
       - the eleven standing questions are answerable
     minimum_data: none
+    progress: "2026-08-09, HALF DONE — the DECISION IMPACT half is built and proven, the CEO Q&A half is not started. FOUNDER_VALUE read UNMEASURABLE for three sessions and the capability was never missing: decision_impact.assess exists, is deterministic (it compares the same analysis with and without the dossier, not two LLM samples), is wired into the analysis path, and had never written a record — no receipt file exists anywhere. Exercising it on all 59 live dossiers exposed why it could not have helped: 25 available, 16 DECISION_CHANGING, 9 MEANINGFUL, ZERO NONE, because the BEFORE was build_context(strategic=None) whose semantic_state is EMPTY on all five fields. It was measuring dossier PRESENCE, which was already known, and would have read 100% forever. Repaired at founder a90d5b5: the BEFORE is the prior revision, with FIRST_OBSERVATION as a third outcome entering NEITHER side of the rate. Proven on production's own dossiers — pass 1: 25 FIRST_OBSERVATION; pass 2 over the SAME files: 25 NONE. Market side ab397fa reads reports/market/decision_impact.jsonl. The channel still reports UNMEASURABLE and is RIGHT: 25 baselines exist and no second revision does. It clears on the next cycle whose dossier differs. REMAINING: the eleven CEO questions, challenge mode, and what-changed-your-mind traced to ThesisRevision."
 
   - id: H-CEO-002
     program: H
