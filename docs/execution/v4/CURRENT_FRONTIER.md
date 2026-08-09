@@ -106,13 +106,40 @@ Two more defects surfaced from the same seam, both live for two cycles:
    `knowledge_effect` genuinely has none, and attribution does not depend on
    it (`BKL-EFFECT-READBACK`).
 
+6. **A caller is not a call.** A-RD-009 was COMPLETE and had never executed:
+   `knowledge_step` called `RD.credit_revisions(...)` with `RD` bound as a
+   local in four OTHER functions. `NameError` every cycle, swallowed by
+   `except Exception`, invisible because nothing projected the block. It was
+   found by adding the projection — the instrumentation falsified the node it
+   was instrumenting. A wiring test now asserts no knowledge block reports an
+   error on ordinary data.
+
 ## What is still architectural rather than empirical
 
-**No empty-handed research row has ever occurred in production.** `NO_RESULT`
-and `FAILED` are unit-tested across all six statuses and never observed. Do
-not manufacture one. Rate is ~2 decisions per night cycle; the 100 gate is
-tens of cycles out.
+**No empty-handed research row has ever occurred in production.** All 12
+prospective outcomes are SUCCESS. The cause is measured and it is SELECTION,
+not logging: the sweep offers three families, cadence gates one, and the two
+that run are the two that reliably return documents. Refusals are already
+recorded as ineligible candidates with reasons.
+
+The classifier was unit-tested across all six statuses, which proves the
+classifier. `tests/test_market_unsuccessful_research_outcomes.py` now drives
+the real acquisition step with adapters that raise, return nothing and return
+only refusals, and asserts the persisted status. **Production's `NO_RESULT`
+count is still zero and must not be manufactured** — what changed is that the
+zero can be told apart from an incapacity. Rate is ~2 decisions per cycle;
+the 100 gate is tens of cycles out.
+
+**No thesis has moved.** 18 revisions, all CREATED. `classify()` has executed
+on real data and found nothing to classify, so STRENGTHENED / WEAKENED /
+CONTESTED have never been produced live, and the delayed reward has never
+paid anyone — correctly, since a first statement is not a consequence of any
+action. Do not synthesize a transition.
 
 ## Next action
 
 Run `frontier.py`. Do not assume the order in this file still holds.
+
+As of `5ffca7e`: 43 nodes, COMPLETE 23, READY 6, WAITING_DEPENDENCY 11,
+BLOCKED_DATA 3. Runtime pinned to `5ffca7e`, imports verified, PAPER
+enforced, production `119d345` untouched.
