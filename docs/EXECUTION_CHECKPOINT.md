@@ -6,6 +6,139 @@ of restarting from an audit.
 
 Updated 2026-08-08, V4 SESSION 1.
 
+## V4 session 2 — the economy stops being one series, and the reasoning gets a shape
+
+V3 is FROZEN at market `2ee1635` / founder `247ad23`. Production `119d345`
+untouched. PAPER enforced in all three plists.
+
+### Source coverage: 1 condition -> 15 of 30
+
+| publisher | keyless | gives |
+|---|---|---|
+| US Treasury FiscalData | yes | note rate, bill rate, interest expense |
+| Bank of Canada Valet | yes | policy rate, 2y/10y yields, USDCAD, BCPI, energy |
+| Statistics Canada WDS | yes | unemployment, CPI, GDP, manufacturing, wages, housing |
+| US BLS | **503 on every probe** | adapter written, reports by name each cycle |
+| FRED, EIA, Census | key required | not attempted |
+
+StatCan is the only source that publishes its own release date. Everything else
+assumes one, deliberately late.
+
+### Two defects the live data found
+
+The federal interest-expense endpoint returns three accounting lines a month
+under one security type and the amortised PREMIUM line is negative; sorted
+last, it made the United States look paid 0.134bn a month to borrow. And a 2-
+and a 10-year yield are both MARKET_RATE, so the engine's reading of Canadian
+rates flipped between them on ties and reported a 0.7-point move that was a
+change of subject. `PRIMARY_SERIES` and an `area` on every figure close both.
+
+### The measurement that matters most
+
+    method            silhouette  coherence  stability  utility
+    RULE                   -0.09       1.03       1.00    +0.23   <- useful
+    KMEANS                  0.46       0.97       1.00    -0.00
+    GAUSSIAN_MIXTURE        0.46       0.97       1.00    -0.00
+
+The fitted models have the best geometry and carry no information about the
+next CPI change. The stated economic rule has the worst silhouette of the three
+and is the only partition that reduces held-out error. Statistical quality and
+economic utility are tracked separately because they disagree.
+
+### Forecast baselines, on real series
+
+    TREASURY_NOTES_AVG_RATE   AR1 skill 0.40   beats the random walk decisively
+    STATCAN CPI               DRIFT skill 0.95 beats it slightly
+    BOC 10-year yield         AR1 skill 0.96   barely beats it
+    STATCAN unemployment      nothing beats the random walk
+
+### The reward is hackable, and the reason is the finding
+
+`affected_causal_nodes`, `affected_hypotheses`, `affected_hidden_states` and
+`numeric_values` are empty on **all 316** evidence rows. Three of the reward's
+four positive terms are therefore unmeasurable, only independence and
+duplication remain, and under that reduced reward ATTACK_VOLUME ties the best
+honest policy. The audit reports HACKABLE=True rather than hiding it.
+
+Family mean reward on the reconstructed log:
+
+    independent_reporting  +0.773    analyst_coverage  +0.709
+    regulatory_filing      +0.050    company_owned     -0.934
+
+Filings score low because 75% of their rows repeat a fact already in the
+ledger, which is a defect in the filing adapter and not a fact about filings.
+
+### What now exists and runs every cycle
+
+| object | live measurement |
+|---|---|
+| `macro_state` | 15/30 tracked conditions, 3 areas, 2 derived spreads |
+| `macro_expectation` | 6 baselines, scored against the random walk |
+| `unsupervised` | regimes, exposure clusters, 14 anomalies, all with questions |
+| `research_policy` | 316-row reconstructed log, 6 policies, reward audit |
+| `economic_thesis` | 7 theses, 3 alternatives each, 28 falsifiers, 2 contested |
+| `founder_v4_view` | briefing + Q&A + challenge refusal + DecisionImpact |
+| `internal_state` | synthetic enterprise, permission and provenance walls |
+| bridge | economic block crosses `strategic_market_intel.v1` both ways |
+
+### Break proofs
+
+V4 session 2: **36/36 held**. Seven came back NOT_CAUGHT first and every one
+named a test that did not discriminate its guard rather than a guard that did
+not hold. V4 session 1: 12/12 after one anchor was updated for the new `area`
+parameter.
+
+### The bottleneck, measured
+
+`EVIDENCE_LINKAGE`. Not source coverage any more — that moved from 1 condition
+to 15. The producer writes evidence rows whose "what did this touch" fields are
+empty on every row, which makes the research reward unfalsifiable, keeps
+`decision_relevant` and `resolved_open_question` at zero, and leaves the
+discriminating term structurally unmeasurable.
+
+### Verified live
+
+One production-equivalent PAPER cycle, EXIT=0, runtime pinned to the branch
+tip. In the persisted report:
+
+    macro_state       OBSERVED 13, INFERRED 2, UNKNOWN 15; 2344 history rows
+    unsupervised      113 discoveries (102 anomalies, 11 regimes),
+                      3 methods scored, 1 economically useful
+    research_policy   107-row log, best FIXED_INDEPENDENT_REPORTING,
+                      beats_random true, deployable false
+    reward_audit      hackable true, top ATTACK_VOLUME
+    economic_thesis   6 theses, 24 falsifiers, 2 contested, 0 assertable
+    founder_v4        6 briefings over 2 subjects, all carrying alternatives
+
+102 anomalies is a generous detector on 2344 rows, not 102 findings. Ranking
+them by value of information is the next thing that layer needs.
+
+### Break proofs, whole-project
+
+    V4 session 2   36/36     V4 session 1   12/12
+    wave 11 55/55  wave 10 41/41  wave 9 32/32  wave 8 21/21
+    wave 4 35/35   wave 3 14/14
+    wave 12 64/65  wave 7 21/22  -- two PRE-EXISTING stale anchors, on files
+                                    this session never touched
+
+A caution learned the hard way: two break-proof scripts run concurrently
+against one worktree mutate the same files and produce DIRTY_RESTORE and
+spurious ANCHOR_MISSING. Run them serially, and check `git status` before
+staging anything after a break-proof run.
+
+### V4 readiness, session 2
+
+    PASS 9 · PARTIAL 22 · BLOCKED_DATA 1 · NO 2
+
+against session 1's PASS 3 · PARTIAL 10 · BLOCKED_DATA 1 · UNMEASURABLE 1 ·
+NO 5. NO: DEMAND_CHAIN, PRESENTATION.
+
+### First executable continuation
+
+Populate `affected_causal_nodes` and `affected_hypotheses` at the point evidence
+is written, so the research reward has more than independence and duplication
+to work with and the reward audit can stop reporting HACKABLE.
+
 ## V4 session 1 — the engine gets an economy, and the causal layer gets a memory
 
 V3 is FROZEN at market `2ee1635` / founder `247ad23`. Nothing on the V3
