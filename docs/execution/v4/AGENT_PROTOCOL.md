@@ -96,6 +96,28 @@ commit, a test result, and a measured observation from a real run.
 - Never use `--no-verify`. Never weaken a test to make it green.
 - Never mutate outside the verified session-owned repository root.
 
+## A live cycle needs a frozen tree
+
+Commit, then launch, then **do not touch `src/` until the cycle exits.**
+
+A cycle is launched with `PYTHONPATH` pointing at the session worktree and
+takes ten to twenty minutes. This module lazily imports inside functions, so
+`steps.py` is loaded at process start and `report.py` near the end. Editing
+`src/` in between produces one process running two revisions of the codebase.
+
+`runtime_provenance` cannot catch it. It captures the SHA and the dirty flag
+AT IMPORT — correct for the case it was built for, a branch moving under a
+long run, and blind to the working tree changing under one. The artifact
+reports a clean SHA and is not evidence for either revision.
+
+This has happened once, on 2026-08-09: a cycle came back with
+`economic_method: {}` because the projection existed and the step that fills
+it did not. Twenty minutes, and the temptation was to debug the empty block.
+
+Docs, `tests/` and `scripts/` are safe to edit during a cycle. `src/` is not.
+The same rule covers break-proof runs, which mutate `src/` in place: never run
+them while a cycle or a full suite is in flight.
+
 ## Per-node loop
 
     reconcile repo state

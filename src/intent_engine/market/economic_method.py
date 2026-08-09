@@ -653,8 +653,16 @@ def interpret(checks: Sequence[MethodAssumptionCheck], *,
         "contract": CONTRACT,
         "standing": standing,
         "out_of_sample_predictions": predictions,
-        "causal_reading_allowed": standing in (USEFUL, BOUNDED)
-                                  and not failed_critical,
+        # IDENTIFICATION REQUIRES THE CRITICAL ASSUMPTIONS TO HAVE BEEN
+        # CHECKED, not merely to have avoided failing. An untested one is
+        # unknown, and unknown is not permission: "the window was chosen
+        # before the effect was seen" can never be established from a series,
+        # and an event study that treats it as satisfied is the exact study
+        # the assumption exists to stop. BOUNDED still describes the sample;
+        # it just may not claim to have identified an effect.
+        "causal_reading_allowed": (not failed_critical
+                                   and not untested_critical
+                                   and standing in (USEFUL, BOUNDED)),
         "why": why,
         "checks": len(checks),
         "tested": sum(1 for c in checks if c.tested),

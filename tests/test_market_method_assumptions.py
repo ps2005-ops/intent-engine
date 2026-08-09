@@ -188,6 +188,10 @@ def test_an_untestable_critical_assumption_bounds_rather_than_passes():
     reading = EM.interpret(got, beat_baseline=True, predictions=200)
     assert reading["standing"] == EM.BOUNDED
     assert reading["untested"] > 0
+    assert reading["causal_reading_allowed"] is False, (
+        "identification requires the critical assumptions to have been "
+        "CHECKED, not merely to have avoided failing; an event study whose "
+        "window-choice assumption is untestable has not identified anything")
 
 
 # --- the rows survive the process ------------------------------------------

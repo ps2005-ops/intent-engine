@@ -333,7 +333,7 @@ tasks:
     program: C
     title: MethodAssumptionCheck ledger
     dependencies: [C-MET-001]
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     expected_value: >
       `EconomicMethod.assumptions` was a tuple of sentences, and sentences do
@@ -349,7 +349,7 @@ tasks:
     maturity_required: EVALUATED
     tests: tests/test_market_method_assumptions.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "LIVE at runtime_git_sha 1b6c84c. 60 MethodAssumptionCheck rows written and held; assumption_failures_critical 3, assumptions_untested 0. A failed critical assumption REFUSES the causal reading and retains the descriptive estimate. Every method that beat persistence came back BOUNDED or REFUSED and none USEFUL: five short-series wins bounded by a 30-prediction floor, and AR1 on GLOBAL:CURRENCY (519 points, skill 0.0043) refused on a fitted coefficient of 0.9854. 12 break proofs (v4f-1..12) all held." 
 
   - id: C-MET-003
     program: C
@@ -734,7 +734,7 @@ tasks:
     program: C
     title: INSTRUMENT -- MethodPerformance accumulates from the cycle
     dependencies: [C-MET-001]
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     expected_value: >
       C-MET-001 was measured offline on 15 real macro series, which is a real
@@ -748,9 +748,9 @@ tasks:
       - persistence is measured, not assumed; a fresh process reads it back
       - the report carries which method currently leads per question type
     maturity_required: INSTRUMENTED
-    tests: tests/test_market_economic_method.py
+    tests: tests/test_market_method_assumptions.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "LIVE at runtime_git_sha 1b6c84c. The cycle scored its own economy: series_available 17, series_scored 15, series_too_short 2, evaluations 45, performance_records_written 45, performances_held 45. A fresh process reads them back; a second run of one date appends nothing. Vintage-safe (as_known_at), 0.09s over 15 series. leader AR1 reported per question type per date, with the assumption failures beside it. 8 break proofs (v4f-13..18, 20, 21) all held." 
 
   - id: G-THE-003
     program: G
@@ -779,7 +779,7 @@ tasks:
     program: G
     title: Thesis identity is not unique, so snapshots are silently dropped
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 2
     severity: RELEASE_BLOCKER
     expected_value: >
@@ -805,5 +805,5 @@ tasks:
     maturity_required: EVALUATED
     tests: tests/test_market_thesis_history.py tests/test_market_thesis_history_wiring.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "LIVE at runtime_git_sha 1b6c84c. theses_built 11, snapshot_records_written 11 (was 7 of 11), theses_sharing_an_identity 0, identity_collisions 0, loaded 18, compared 11, unchanged 11, compared <= loaded holds. prior_revisions_loaded 18 proves the chain read path, which did not exist before: every revision ever written had an empty parent. unmatched_prior 7 is the pre-fix identity generation, correctly never matched and reported rather than hidden. 19 break proofs (v4e) all held." 
 

@@ -721,7 +721,8 @@ def _knowledge_summary(knowledge: dict) -> dict:
             for k in ("delayed_outcomes_written", "decisions_credited",
                       "revisions_credited", "untraceable_revisions",
                       "reward_delta_total", "reward_by_transition",
-                      "revisions_considered", "actions_with_produced_evidence",
+                      "revisions_considered", "revisions_with_no_cause",
+                      "why_zero", "actions_with_produced_evidence",
                       "written", "held", "error")
             if (knowledge.get("delayed_reward") or {}).get(k) is not None},
         # WHICH METHOD CURRENTLY LEADS, AND ON WHAT. Projected with the

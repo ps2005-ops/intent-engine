@@ -646,6 +646,7 @@ def credit_revisions(decisions: Sequence[ResearchDecision],
     known = {d.decision_id for d in decisions}
     out: List[DelayedOutcome] = []
     unattributable = 0
+    no_cause = 0
     credited_revisions = set()
     reward_by_transition: dict = {}
     for revision in revisions:
@@ -655,10 +656,17 @@ def credit_revisions(decisions: Sequence[ResearchDecision],
         evidence = list(getattr(revision, "triggering_evidence", ())
                         or (revision.get("triggering_evidence", ())
                             if isinstance(revision, dict) else ()))
+        if not (cited or evidence):
+            # A CREATED revision names no cause because it HAS none: a thesis
+            # being stated for the first time is not a consequence anybody's
+            # action produced. Counted separately so a total of zero credits
+            # says WHICH zero it is — nothing has moved yet, rather than
+            # things moved and could not be traced.
+            no_cause += 1
+            continue
         matched = [by_decision[e] for e in evidence if e in by_decision]
         if not matched:
-            if cited or evidence:
-                unattributable += 1
+            unattributable += 1
             continue
         thesis_id = str(getattr(revision, "thesis_id", "")
                         or (revision.get("thesis_id", "")
@@ -694,6 +702,20 @@ def credit_revisions(decisions: Sequence[ResearchDecision],
         "revisions_credited": len(credited_revisions),
         "untraceable_revisions": unattributable,
         "reward_delta_total": round(sum(o.reward_delta for o in out), 6),
+        # WHICH ZERO THIS IS. A total of no credits means one of two very
+        # different things: no thesis has moved yet, or theses moved and the
+        # evidence behind them traces to no logged action. Reporting only the
+        # total makes an engine that has never learned anything look like one
+        # whose learning cannot be attributed.
+        "revisions_with_no_cause": no_cause,
+        "why_zero": (
+            "" if out else
+            (f"all {no_cause} revisions are first statements, which name no "
+             "cause because they are not consequences of any action"
+             if no_cause and not unattributable else
+             f"{unattributable} revisions cite evidence that traces to no "
+             "logged action" if unattributable else
+             "no revisions were considered")),
         # SYMMETRY, MADE CHECKABLE. One weight pays every revision, so a
         # weakening earns exactly what a strengthening earns. That is
         # deliberate — an action that found the evidence which knocked a
