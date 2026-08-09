@@ -29,6 +29,7 @@ RD = S / "research_decision.py"
 RP = S / "research_policy.py"
 VG = S / "vintage.py"
 EM = S / "economic_method.py"
+TH = S / "thesis_history.py"
 ST = S / "steps.py"
 LS = S / "learning_store.py"
 
@@ -37,6 +38,7 @@ W = "tests/test_market_research_decision_wiring.py"
 P = "tests/test_market_research_policy.py"
 V = "tests/test_market_vintage.py"
 M = "tests/test_market_economic_method.py"
+H = "tests/test_market_thesis_history.py"
 
 PROOFS = [
     # --- the prospective log's own invariants ---------------------------
@@ -171,6 +173,31 @@ PROOFS = [
      '    "customer_case_study": "company_owned",',
      '    "customer_case_study": "independent_reporting",',
      f"{W}::test_a_company_published_family_is_not_recorded_as_independent"),
+
+    # --- thesis history --------------------------------------------------
+    ("v4d-23. a transition may be explained by prose alone",
+     TH,
+     "        if self.transition != CREATED and not caused:",
+     "        if False:",
+     f"{H}::test_a_transition_explained_only_by_prose_is_refused"),
+
+    ("v4d-24. a claim may be strengthened without an effect",
+     TH,
+     "        if self.transition in UPWARD and not self.knowledge_effect_ids:",
+     "        if False:",
+     f"{H}::test_strengthening_on_evidence_alone_is_refused"),
+
+    ("v4d-25. an alternative may vanish without a named cause",
+     TH,
+     "        if dropped and not caused:",
+     "        if False:",
+     f"{H}::test_an_alternative_may_not_vanish_without_a_named_cause"),
+
+    ("v4d-26. the revision chain may fork silently",
+     TH,
+     "        if revision.previous_revision != current:",
+     "        if False:",
+     f"{H}::test_a_revision_whose_parent_is_not_the_head_is_refused"),
 
     ("v4d-22. attribution is computed and not persisted",
      ST,

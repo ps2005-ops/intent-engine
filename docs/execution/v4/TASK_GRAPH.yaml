@@ -469,12 +469,13 @@ tasks:
     program: G
     title: Thesis revision history answering "what changed your mind"
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     acceptance_criteria:
       - created / strengthened / weakened / contested / superseded transitions
       - each transition names the KnowledgeEffect ids responsible
     minimum_data: none
+    completion_evidence: "19 tests + 4 break proofs; append-only contiguous chain; IMPLEMENTED not yet INSTRUMENTED"
 
   - id: H-CEO-001
     program: H
@@ -644,3 +645,24 @@ tasks:
     tests: null
     minimum_data: none
     completion_evidence: "66c4a15 -> f026e96 detached. Pre-checks: only this session held v4b/market, no live cycle, funnel_history.json identical between both commits so the local edit survived (hash unchanged fe373aee), ledger untracked. Post: imports resolve to /Users/prathamsharma/intent-engine-market/src, runtime_git_sha reads f026e96, PAPER enforced, ledger append-only with 2922 rows byte-identical and 347 appended."
+
+  - id: G-THE-002
+    program: G
+    title: INSTRUMENT -- the cycle writes thesis revisions
+    dependencies: [G-THE-001]
+    status: DERIVED
+    priority: 2
+    expected_value: >
+      G-THE-001 is IMPLEMENTED, not INSTRUMENTED. knowledge_step rebuilds
+      theses each cycle and does not compare them to the previous cycle's, so
+      no revision is ever written and what_changed_your_mind answers "nothing
+      has changed this thesis" for every thesis. True, and useless. H-CEO-001
+      depends on a chain that has rows in it.
+    acceptance_criteria:
+      - knowledge_step loads the prior cycle's theses, diffs them, and records
+        a revision for each that moved
+      - revisions are persisted and a fresh process reads them back
+      - a live cycle report carries a non-zero revision count
+    tests: tests/test_market_thesis_history.py
+    minimum_data: none
+    completion_evidence: null
