@@ -8,16 +8,27 @@ Resume pointer. A new session needs only this file plus AGENT_PROTOCOL.md.
 
 Do not trust this file over the script. If they disagree, the script is right.
 
-## As of 2026-08-09, end of the executor-repair run
+## As of 2026-08-09, end of the closure run
 
-    38 nodes   COMPLETE=16   READY=6   WAITING_DEPENDENCY=13   BLOCKED_DATA=3
+    39 nodes   COMPLETE=17   READY=7   WAITING_DEPENDENCY=12   BLOCKED_DATA=3
 
-    p3  G-THE-001   Thesis revision history                  (unblocks 4)
+    p2  G-THE-002   INSTRUMENT: the cycle writes thesis revisions
     p3  C-MET-002   MethodAssumptionCheck ledger             (unblocks 1)
     p3  E-DEM-001   Targeted demand-variable extraction      (unblocks 1)
     p3  I-ACC-001   Learning acceleration from KnowledgeEffect (unblocks 1)
     p3  J-ADV-001   Adversarial suite extension
     p4  D-REP-002   Historical thesis replay                 (unblocks 4)
+    p4  H-CEO-001   CEO Q&A from canonical records           (unblocks 3)
+
+V4 IS NOT CLOSED. Seven safe executable nodes remain, none blocked. The
+closure condition is ready_remaining = 0 and it is not met.
+
+G-THE-002 is first and it exists because G-THE-001 stopped at IMPLEMENTED.
+The revision chain is built, guarded and break-proven, and no cycle writes to
+it — knowledge_step rebuilds theses each cycle without comparing them to the
+previous cycle's, so every thesis answers "nothing has changed this". Wiring it
+is what makes H-CEO-001 worth doing; a CEO answer sourced from an empty chain
+is true and useless.
 
 BLOCKED_DATA, measured rather than asserted:
 
@@ -25,7 +36,8 @@ BLOCKED_DATA, measured rather than asserted:
     B-HACK-001  prospective_decisions   4 / 100
     B-VOI-002   prospective_decisions   4 / 50
 
-These move to READY on their own when the metric crosses. Do not edit them.
+These are elapsed real-world experience, not engineering. They move on their
+own; do not edit them, and do not lower a gate to reach closure.
 
 ## The executor now enforces its own gates
 
