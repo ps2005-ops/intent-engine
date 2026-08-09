@@ -145,16 +145,39 @@ def _macro_sweep(ctx: C.CycleContext) -> dict:
     from intent_engine.market import learning_store as LS
     from intent_engine.market import macro_ingest as MI
 
+    from intent_engine.market import source_health as SH
+
     try:
         store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
         got = MI.collect(retrieved_at=ctx.as_of)
         stored = sum(1 for o in got["observations"]
                      if store.record_macro_observation(o))
+        # SOURCE HEALTH AS A STATE, NOT A LINE IN THIS CYCLE'S REPORT.
+        # `failures` has named the Bureau of Labor Statistics 503 on every
+        # recorded run and been forgotten every time, so there was no
+        # streak, no last_success and no way to tell a source that went dark
+        # from an economy that went quiet. Successes are recorded too:
+        # "when did this last work" is the question that decides whether
+        # silence is new.
+        prior = {family: SH.SourceHealth(
+                     source_family=family,
+                     state=str(row.get("state") or SH.HEALTHY),
+                     detected_at=str(row.get("detected_at") or ""),
+                     last_success=str(row.get("last_success") or ""),
+                     failure_streak=int(row.get("failure_streak") or 0),
+                     failure=str(row.get("failure") or ""))
+                 for family, row in store.latest_source_health().items()}
+        healths = SH.from_collection(got, as_of=ctx.as_of, prior=prior,
+                                     attempted=sorted(MI.SERIES))
+        if not ctx.dry_run:
+            for health in healths:
+                store.record_source_health(health)
         return {"fetched": got["observation_count"],
                 "newly_persisted": stored,
                 "series_attempted": got["series_attempted"],
                 "series_failed": got["series_failed"],
-                "failures": got["failures"]}
+                "failures": got["failures"],
+                "source_health": SH.summarise(healths)}
     except Exception as exc:  # noqa: BLE001 - a feed must not fail a cycle
         return {"error": f"{type(exc).__name__}: {exc}"}
 

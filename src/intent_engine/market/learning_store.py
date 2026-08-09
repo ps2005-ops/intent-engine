@@ -101,6 +101,10 @@ ACTOR_RESPONSE_EPISODE = "actor_response_episode"
 #: it only ever knows what the economy is doing today, which is exactly the
 #: knowledge a world model is supposed to accumulate.
 MACRO_OBSERVATION = "macro_observation"
+#: One source family's standing per cycle. Successes are recorded too:
+#: a log that keeps only the outages cannot answer "when did this last
+#: work", which is the question that decides whether silence is new.
+SOURCE_HEALTH = "source_health"
 KNOWLEDGE_EFFECT = "knowledge_effect"
 
 #: The choice, written BEFORE the external call, with the menu attached. Every
@@ -149,7 +153,7 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           THESIS_REVISION, THESIS_SNAPSHOT,
                           METHOD_PERFORMANCE, METHOD_ASSUMPTION_CHECK,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
-                          MACRO_OBSERVATION})
+                          MACRO_OBSERVATION, SOURCE_HEALTH})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -385,6 +389,39 @@ class LearningStore:
             return False
         self._append(KNOWLEDGE_EFFECT, payload)
         return True
+
+    def record_source_health(self, health) -> None:
+        """One source family's standing this cycle. Appended, never merged.
+
+        NOT idempotent and deliberately so: the same source being down again
+        tomorrow is a second real observation, and it is the streak that
+        turns a bad minute into an outage. Collapsing repeats would delete
+        the only evidence that distinguishes them.
+        """
+        payload = (health.as_dict() if hasattr(health, "as_dict")
+                   else dict(health))
+        payload.pop("record", None)
+        if not str(payload.get("source_family") or ""):
+            raise ValueError(
+                "a source health record needs the family it describes")
+        self._append(SOURCE_HEALTH, payload)
+
+    def source_health(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == SOURCE_HEALTH)
+
+    def latest_source_health(self) -> Dict[str, dict]:
+        """The newest standing per family, by append order.
+
+        Append order rather than `detected_at`: the ledger is the record of
+        what was written and when, and a date field can be set by a caller.
+        """
+        latest: Dict[str, dict] = {}
+        for row in self.source_health():
+            family = str(row.get("source_family") or "")
+            if family:
+                latest[family] = row
+        return latest
 
     def knowledge_effect_ids(self) -> frozenset:
         return frozenset(str(r.get("effect_id") or "")

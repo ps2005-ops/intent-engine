@@ -36,6 +36,7 @@ programs:
   I: META-LEARNING
   J: ROBUSTNESS
   K: LIVE VALIDATION
+  L: SYSTEMIC RESILIENCE AND TRUST
 
 tasks:
 
@@ -558,13 +559,16 @@ tasks:
     program: I
     title: Learning acceleration recomputed from KnowledgeEffect
     dependencies: [A-RD-008]
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     acceptance_criteria:
       - rolling windows from effects rather than accepted rows
       - ECONOMIC / SYSTEM / CALIBRATION / FOUNDER / RETENTION / RESEARCH /
         UNSUPERVISED classified independently
+    maturity_required: EVALUATED
+    tests: tests/test_market_learning_acceleration_channels.py tests/test_market_learning_acceleration.py tests/test_market_knowledge_step.py
     minimum_data: none
+    completion_evidence: "LIVE at runtime_git_sha 80f3aa5, night cycle 2026-08-09, dry_run false. All seven channels reach the dated artifact: ECONOMIC 29/402 (7.2%) DEGRADING MATURE; SYSTEM 20/41 INSUFFICIENT_HISTORY (one day of execution history); CALIBRATION 3/11 STABLE EARLY; FOUNDER UNMEASURABLE; RETENTION 402/402 STABLE MATURE; RESEARCH UNMEASURABLE (16 outcomes, not one naming an effect); UNSUPERVISED 1/3 EARLY_WARNING. HIGH_ACTIVITY_LOW_LEARNING detected: 347 evidence rows, 373 attributions that moved nothing, 0 thesis transitions. Bottleneck COMPUTED to FOUNDER_VALUE. Windows keyed on ledger append order (effect_cycles 3), never created_at. Three defects closed in the seam: the block never reached the dated report (whitelist projection dropped it silently every cycle), an absent effect link reported as a measured zero, and published-dossier counts passed as Founder decision value. Suite 5113 passed / 4 skipped EXIT=0 via the guard; break proofs v4h 16/16 with 2 recorded NOT_BUILT."
 
   - id: I-STA-001
     program: I
@@ -819,3 +823,233 @@ tasks:
     minimum_data: none
     completion_evidence: "LIVE at runtime_git_sha 1b6c84c. theses_built 11, snapshot_records_written 11 (was 7 of 11), theses_sharing_an_identity 0, identity_collisions 0, loaded 18, compared 11, unchanged 11, compared <= loaded holds. prior_revisions_loaded 18 proves the chain read path, which did not exist before: every revision ever written had an empty parent. unmatched_prior 7 is the pre-fix identity generation, correctly never matched and reported rather than hidden. 19 break proofs (v4e) all held." 
 
+
+  # ---- PROGRAM L: SYSTEMIC RESILIENCE AND TRUST -------------------------
+  #
+  # THE ONE-TIME ROADMAP RECONCILIATION, 2026-08-09.
+  #
+  # The governing roadmap added five systemic pillars AFTER this graph was
+  # derived, so they sat outside the frontier: not deferred, not refused,
+  # simply unrepresented. A requirement that cannot appear in the frontier
+  # cannot be scheduled against, and the omission is itself material.
+  #
+  # This is that reconciliation, performed ONCE. The convergence rule in
+  # SEVERITY.md otherwise forbids new scope; governing-plan requirements are
+  # its stated exception, and the exception is spent here. These five are not
+  # to be rescoped again session by session.
+  #
+  # THE RULE APPLIED: build only what THIS branch can honestly verify.
+  # Two of the five need an internal Business Graph that does not exist, and
+  # a private-data firewall built where there is no private data would be
+  # architecture-only completion — the exact failure mode this program keeps
+  # having to undo. They are recorded as V4-INTERNAL handoff prerequisites
+  # with their invariants stated now, so the internal phase inherits them as
+  # requirements rather than rediscovering them.
+
+  - id: L-SRC-001
+    program: L
+    title: Source health is a state, so a dead source cannot read as a quiet economy
+    dependencies: []
+    status: DERIVED
+    priority: 2
+    severity: MATERIAL_DEFECT
+    expected_value: >
+      NOT speculative — measured on every live cycle. The Bureau of Labor
+      Statistics has returned "HTTP Error 503: Service Unavailable" on every
+      run in the record; one of six macro series families is down, and has
+      been for the whole observed history.
+
+      Today that failure is reported per cycle in `research.macro.failures`
+      and nowhere else. There is no state, so there is no streak, no
+      last_success, no expected cadence and no fallback. The consequence is
+      the one this pillar exists to prevent: a thesis whose evidence comes
+      from a degraded source stops receiving confirming evidence, and the
+      engine cannot tell that from the economy going quiet. OBSERVABILITY
+      FELL; the engine would report that ACTIVITY fell.
+
+      This is the same class as `observability is not validity`: a real
+      rivalry with a silent rival is unlearnable, and the honest reading is
+      reduced visibility, never a weakened claim.
+    acceptance_criteria:
+      - a persisted SourceHealth record per source family carrying at least
+        state, detected_at, last_success, failure streak, expected cadence
+        and the failure that produced it
+      - states are explicit — HEALTHY / DEGRADED / UNAVAILABLE /
+        RATE_LIMITED / AUTH_EXPIRED / SCHEMA_CHANGED / PARSER_BROKEN /
+        STALE / RETIRED — and an unrecognised failure is never silently
+        mapped onto the nearest one
+      - a degraded source RAISES uncertainty on the beliefs it feeds and
+        never weakens the economic claim itself; a test drives a source from
+        HEALTHY to UNAVAILABLE and asserts the thesis standing is unchanged
+        while its observability is reduced
+      - fallback routing is provenance-tracked; a substituted source is
+        recorded as a substitution and never silently swapped
+      - the live BLS 503 appears as a DEGRADED or UNAVAILABLE state in a
+        real cycle artifact, not only in a test
+    maturity_required: EVALUATED
+    tests: tests/test_market_source_health.py
+    minimum_data: none
+
+  - id: L-ADV-001
+    program: L
+    title: AdversaryCase — a bounded failure path, not a competitor's mind
+    dependencies: [G-THE-003]
+    status: DERIVED
+    priority: 3
+    severity: MATERIAL_DEFECT
+    expected_value: >
+      The thesis layer states what the engine believes and what would falsify
+      it. Nothing states how it FAILS while remaining superficially intact —
+      the attacked assumption, the counterparty response, the conditions the
+      thesis silently requires.
+
+      Deliberately NOT an autonomous agent. One canonical analytical object
+      over records that already exist: thesis, falsifiers, mechanisms,
+      alternatives.
+    acceptance_criteria:
+      - AdversaryCase carries failure path, attacked assumption, counterparty
+        response hypothesis, required conditions, early warning, mitigation,
+        kill/reversal condition and standing
+      - CAPABILITY, INCENTIVE, OBSERVED_ACTION and HYPOTHESIZED_RESPONSE are
+        distinct standings, and a response may not exceed HYPOTHESIZED
+        without evidence naming it
+      - a test proves that a rival's mere existence produces no predicted
+        action — "a competitor will cut prices because it is a competitor"
+        is refused
+      - the strongest defensible case feeds the existing premortem and kill
+        switches rather than generating separate prose
+    maturity_required: EVALUATED
+    tests: tests/test_market_adversary_case.py
+    minimum_data: none
+
+  - id: L-SAN-001
+    program: L
+    title: External text is DATA, and a guard keeps it that way
+    dependencies: []
+    status: DERIVED
+    priority: 3
+    severity: MATERIAL_DEFECT
+    expected_value: >
+      MEASURED SCOPE, NOT ASSUMED. The market branch has no LLM call site —
+      the pipeline is regex and statistics, so scraped text is inert here
+      today by construction rather than by design. The live injection
+      boundary is the SEAM: market evidence crosses into Founder reasoning,
+      which does call a model, and a filing sentence carrying "ignore your
+      instructions" travels as ordinary evidence text.
+
+      So this node is bounded to what this branch can honestly verify: the
+      invariant that market evidence is stored and exported as data, with a
+      guard that fails if a model call is ever added to this pipeline without
+      an instruction/data separation. Building a full sanitiser here, where
+      nothing interprets text, would be a guard over an empty path.
+    acceptance_criteria:
+      - a test feeds evidence whose text contains explicit instructions
+        ("ignore previous instructions", tool-call syntax, system-prompt
+        framing) through acquisition, translation and export, and asserts it
+        remains inert evidence text with its provenance intact
+      - a structural guard fails if an LLM call site appears in
+        src/intent_engine/market/ without passing external text through a
+        declared data boundary — tokenised, not grepped for a phrase, since
+        a grep matches the comment explaining the removal
+      - the Founder-side obligation is recorded as a cross-repo prerequisite
+        rather than assumed satisfied here
+    maturity_required: EVALUATED
+    tests: tests/test_market_external_text_is_data.py
+    minimum_data: none
+
+  - id: L-CLD-001
+    program: L
+    title: Cold start — a prior presented as a prior, never as an observation
+    dependencies: []
+    status: DERIVED
+    priority: 4
+    severity: MATERIAL_DEFECT
+    repository: founder
+    expected_value: >
+      At T0 a company has no company-specific evidence, and the engine must
+      still say something. The failure this prevents is the one the whole
+      standing vocabulary exists against: a sector prior or a global default
+      rendered in the same voice as an observed fact.
+
+      Recorded against the FOUNDER repository because that is where
+      hydration and the decision surface live. The market side owns the
+      priors' provenance, not their presentation, and shoehorning UI
+      hydration into this branch would put the node where it cannot be
+      verified.
+    acceptance_criteria:
+      - a T0 baseline exists and every element of it carries a standing that
+        marks it as prior, sector or global default
+      - company-specific evidence REPLACES priors as it arrives, and the
+        replacement is visible rather than silent
+      - no default is ever rendered in the same voice as an observation; a
+        test asserts the surface distinguishes them
+      - hydration is asynchronous and a partially hydrated view says so
+    maturity_required: EVALUATED
+    tests: (founder repo)
+    minimum_data: none
+
+  - id: L-BAR-001
+    program: L
+    title: Information barrier — V4-INTERNAL handoff prerequisite
+    dependencies: []
+    status: NOT_APPLICABLE
+    priority: 5
+    severity: RELEASE_BLOCKER
+    expected_value: >
+      NOT APPLICABLE TO THIS BRANCH, AND RECORDED SO IT IS INHERITED.
+
+      A full public/private information barrier requires private tenant data
+      to separate from public data. The external foundation has only public
+      data, so every control here would be a wall with nothing behind it —
+      and it would report PASS. That is architecture-only completion, which
+      this program has already had to undo more than once.
+
+      The invariant is stated NOW so the internal phase inherits it as a
+      requirement rather than discovering it after the Business Graph is
+      built and the seams are set.
+    acceptance_criteria:
+      - taint tracking from ingestion to surface
+      - tenant-scoped graph and tenant-scoped vector retrieval
+      - egress controls and secret redaction
+      - private/public context separation at prompt assembly
+      - tool permission wall
+      - EVERY one of these is verified against a real internal Business
+        Graph; none may be marked satisfied by a mock tenant
+    maturity_required: BUILD
+    tests: (V4 internal)
+    minimum_data: none
+    blocked_reason: >
+      No internal Business Graph exists on this branch. Belongs to V4-I9.
+
+  - id: L-ANT-001
+    program: L
+    title: Antitrust air-gap — V4-INTERNAL handoff prerequisite
+    dependencies: []
+    status: NOT_APPLICABLE
+    priority: 5
+    severity: RELEASE_BLOCKER
+    expected_value: >
+      NOT APPLICABLE TO THIS BRANCH, AND RECORDED SO IT IS INHERITED.
+
+      A cross-tenant air-gap needs more than one tenant. What the external
+      foundation CAN guarantee, and does today, is that competitive
+      reasoning runs on public evidence: `company-published sources never
+      name rivals` is already an enforced rule, and COMPETES_WITH requires a
+      third-party publisher.
+
+      The multi-tenant obligation is recorded here so the internal phase
+      inherits it. Marking it PASS on a single-tenant public-data system
+      would be true and worthless.
+    acceptance_criteria:
+      - competitive reasoning uses public or sanitized evidence plus the
+        current tenant's own permitted state, and never another tenant's
+        private data
+      - a test proves cross-tenant retrieval is impossible rather than
+        merely absent
+      - action-level competition-law constraints are deferred to V5 and
+        recorded as such
+    maturity_required: BUILD
+    tests: (V4 internal)
+    minimum_data: none
+    blocked_reason: >
+      Single-tenant by construction on this branch. Belongs to V4-I10.
