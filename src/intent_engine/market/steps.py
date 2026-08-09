@@ -964,7 +964,11 @@ def _rehydrate_thesis(row: dict):
             lag_days=int(d.get("lag_days") or 0),
             falsifier=str(d.get("falsifier") or ""),
             evidence_ids=tuple(d.get("evidence_ids") or ()),
-            standing=str(d.get("standing") or ET.PROPOSED))
+            standing=str(d.get("standing") or ET.PROPOSED),
+            # IDENTITY-BEARING. Dropped here, a reloaded thesis computes a
+            # different `thesis_id` than the live one it should match, and
+            # every night reads as a brand new thesis with no history.
+            key=str(d.get("key") or ""))
 
     try:
         leading = mech(row.get("leading_mechanism"))
@@ -978,6 +982,7 @@ def _rehydrate_thesis(row: dict):
             alternatives=tuple(m for m in
                                (mech(d) for d in (row.get("alternatives")
                                                   or ())) if m is not None),
+            area=str(row.get("area") or ""),
             macro_conditions=tuple(row.get("macro_conditions") or ()),
             exposures=tuple(row.get("exposures") or ()),
             supporting_evidence=tuple(row.get("supporting_evidence") or ()),
@@ -1305,9 +1310,15 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         from . import founder_v4_view as FV4
 
         theses = ETH.build_all(proposed, as_of=ctx.as_of)
-        reasons = {s.state_kind: s.reason for s in states if s.known}
+        # KEYED BY (area, kind), which is how an EconomicState is keyed.
+        # Keyed by kind alone, CA:MARKET_RATE and US:MARKET_RATE collapsed to
+        # one entry and a briefing about one economy carried the other's
+        # reason for moving — a sourced-looking sentence about the wrong
+        # country.
+        reasons = {(s.area, s.state_kind): s.reason for s in states if s.known}
         views = [FV4.project(t, state_reason=reasons.get(
-            t.macro_conditions[0] if t.macro_conditions else "", ""))
+            (t.area, t.macro_conditions[0]) if t.macro_conditions else
+            (t.area, ""), ""))
             for t in theses]
         contests = ETH.competitions(theses)
         # KEYED APART FROM THE COUNTS. `summarise` reports `theses` and
@@ -1331,19 +1342,52 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
 
         prior = [_rehydrate_thesis(r) for r in store.thesis_snapshots()]
         prior = [t for t in prior if t is not None]
+        # The chain is REBUILT from the ledger before tonight's comparison is
+        # appended to it, so a revision names the revision it follows. Built
+        # empty, every row was written with an empty parent and the history
+        # was a pile of first links.
+        stored_revisions = store.thesis_revisions()
+        history, unreadable = THI.ThesisHistory.load(stored_revisions)
         history, revision_summary = THI.reconcile(
-            prior, theses, as_of=ctx.as_of, effects=exposure_effects)
+            prior, theses, as_of=ctx.as_of, effects=exposure_effects,
+            history=history)
         revisions_written = 0
+        snapshots_written = 0
+        snapshots_refused = 0
         if not ctx.dry_run:
             for revision in history.chain_all():
                 if store.record_thesis_revision(revision):
                     revisions_written += 1
             for thesis in theses:
-                store.record_thesis_snapshot(thesis, as_of=ctx.as_of)
+                if store.record_thesis_snapshot(thesis, as_of=ctx.as_of):
+                    snapshots_written += 1
+                else:
+                    snapshots_refused += 1
         payload["thesis_history"] = {
             **revision_summary,
             "revision_records_written": revisions_written,
             "revisions_held": len(store.thesis_revisions()),
+            # TWO THESES THE STORE CANNOT TELL APART. This is the defect
+            # figure and it is computed from the theses themselves, not from
+            # the store's refusals: the store is idempotent on
+            # `(thesis_id, as_of)`, so re-running a cycle for a date it has
+            # already written legitimately refuses every snapshot. Reading
+            # the refusal count as the collision count would report a clean
+            # re-run as eleven dropped theses, and a genuine collision on a
+            # first run as nothing at all.
+            "theses_sharing_an_identity": (
+                len(theses) - len({t.thesis_id for t in theses})),
+            "snapshot_records_written": snapshots_written,
+            "snapshots_refused_as_duplicate": snapshots_refused,
+            "theses_built": len(theses),
+            # HOW MUCH HISTORY THIS CYCLE ACTUALLY PICKED UP. Without it, a
+            # step that reloaded nothing is indistinguishable from one that
+            # reloaded everything and found no movement — both report zero
+            # revisions written, which is what a rebuilt-empty chain looked
+            # like for every cycle it ran.
+            "prior_revisions_loaded": len(history.chain_all()) - revision_summary["written"],
+            "prior_revisions_on_disk": len(stored_revisions),
+            "unreadable_prior_revisions": len(unreadable),
         }
 
         # THE DELAYED HALF OF THE RESEARCH REWARD. An action that found

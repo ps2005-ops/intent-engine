@@ -43,6 +43,15 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 CONTRACT = "economic_thesis.v1"
 
+#: Separators for the identity hash, named rather than written inline because
+#: a control character in a source file is invisible in every editor and this
+#: one decides whether two theses are the same thesis. Not "|" or " ": a
+#: mechanism key is free text here, and joining on a printable character lets
+#: one field's content impersonate a field boundary — which is the identity
+#: collision this whole derivation exists to prevent.
+_FIELD_SEP = "\x00"
+_LIST_SEP = "\x1f"
+
 # --- how strongly a thesis is held ------------------------------------------
 #
 # There is no CONFIRMED. The strongest available standing says the falsifier
@@ -90,6 +99,14 @@ class Mechanism:
     falsifier: str = ""
     evidence_ids: Tuple[str, ...] = ()
     standing: str = PROPOSED
+    #: WHICH ROUTE THIS IS, stable under rewording. `description` is the
+    #: sentence a reader sees and is expected to be edited; a thesis whose
+    #: identity is derived from it would become a different thesis the day
+    #: somebody improved the wording, and its history would restart silently.
+    #: Callers that select a mechanism from a fixed catalogue pass the
+    #: catalogue's key here. Left empty, the description is the key, which is
+    #: correct for one-off mechanisms nobody will reword.
+    key: str = ""
 
     def __post_init__(self) -> None:
         if not self.description.strip():
@@ -100,6 +117,10 @@ class Mechanism:
                 "disprove fits every outcome and discriminates none")
         if self.standing not in STANDINGS:
             raise ThesisRejected(f"unknown standing {self.standing!r}")
+
+    @property
+    def identity_key(self) -> str:
+        return self.key.strip() or self.description.strip()
 
     def as_dict(self) -> dict:
         return dataclasses.asdict(self)
@@ -117,6 +138,12 @@ class EconomicThesis:
     #: thesis — "nothing else could explain this" is a claim, and an empty
     #: list is that claim made silently.
     alternatives: Tuple[Mechanism, ...] = ()
+    #: WHICH ECONOMY the condition was measured in. An `EconomicState` is
+    #: keyed `(area, state_kind)` and always has been; the thesis built from
+    #: one used to keep only the kind. A live cycle therefore held a thesis
+    #: about Canadian market rates and a thesis about US market rates for the
+    #: same company, gave them the same identity, and persisted one of them.
+    area: str = ""
     macro_conditions: Tuple[str, ...] = ()
     exposures: Tuple[str, ...] = ()
     supporting_evidence: Tuple[str, ...] = ()
@@ -143,8 +170,54 @@ class EconomicThesis:
                 "a tested thesis needs the evidence that tested it")
 
     @property
+    def question_key(self) -> Tuple[str, str, str]:
+        """The question this answers. Rival theses share it; others must not.
+
+        Used to group competitions. It deliberately excludes the exposure and
+        the mechanism, because two routes from one condition to one company
+        ARE rival explanations and should meet. It includes `area`, because
+        two different economies are two different questions, and grouping
+        them together manufactured contests between theses that were never in
+        disagreement — they were about different countries.
+        """
+        return (self.subject, self.area, self.question)
+
+    @property
+    def identity(self) -> Tuple[str, ...]:
+        """What makes this THIS thesis, across cycles and across rewrites.
+
+        THREE THINGS ARE DELIBERATELY ABSENT, and each was in the previous
+        derivation:
+
+        `as_of` — a thesis restated tomorrow is the same thesis. Keying on
+        the date meant every thesis was new every night, which is the whole
+        comparison this record exists to make.
+
+        `claim` — the claim is the thing that MOVES. A thesis whose claim
+        changed by one word became a different thesis with an empty history,
+        so the one event worth recording was the one event that destroyed the
+        record of it.
+
+        `standing` and evidence — a thesis does not become a different thesis
+        by being believed more, or by acquiring a citation.
+
+        What remains is the question it answers and the route it answers it
+        by: subject, economy, question, exposure, condition, mechanism. Two
+        theses agreeing on all six are the same thesis. Two differing on any
+        are rivals or strangers, and must reconcile separately.
+        """
+        return (
+            self.subject,
+            self.area,
+            self.question,
+            _LIST_SEP.join(sorted(self.exposures or ())),
+            _LIST_SEP.join(sorted(self.macro_conditions or ())),
+            self.leading_mechanism.identity_key,
+        )
+
+    @property
     def thesis_id(self) -> str:
-        raw = "|".join((self.subject, self.question, self.claim, self.as_of))
+        raw = _FIELD_SEP.join(self.identity)
         return "th_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
     @property
@@ -177,6 +250,20 @@ def supersede(previous: EconomicThesis, *, claim: str, as_of: str,
     successor = dataclasses.replace(previous, claim=claim, as_of=as_of,
                                     standing=standing,
                                     supersedes=previous.thesis_id, **changes)
+    # A SUPERSESSION MUST PRODUCE A DIFFERENT THESIS. Identity no longer
+    # includes the claim or the date, so rewording a claim yields a successor
+    # with the SAME id — which would make `supersedes` a self-reference, put
+    # two rows with one id into the same Competition, and give reconciliation
+    # two priors for one identity. A claim that moved while the question, the
+    # exposure and the mechanism stayed put is a revision of this thesis, and
+    # `thesis_history` is where that is recorded.
+    if successor.thesis_id == previous.thesis_id:
+        raise ThesisRejected(
+            "this supersession changes only the wording: the successor has "
+            f"the same identity ({previous.thesis_id}) as the thesis it "
+            "claims to replace. A thesis is superseded by a DIFFERENT "
+            "explanation — a different mechanism, exposure or question. Record "
+            "a reworded claim as a revision in thesis_history instead")
     return successor, retired
 
 
@@ -574,6 +661,7 @@ def from_transmission(transmission, *, as_of: str = "",
     """
     subject = getattr(transmission, "company_id", "")
     kind = getattr(transmission, "state_kind", "")
+    area = str(getattr(transmission, "area", "") or "")
     dimension = getattr(transmission, "dimension", "")
     lag = int(getattr(transmission, "lag_days", 0) or 0)
     leading = Mechanism(
@@ -582,7 +670,11 @@ def from_transmission(transmission, *, as_of: str = "",
         lag_days=lag,
         falsifier=str(getattr(transmission, "falsifier", "")) or
         f"{dimension} does not move as predicted within {lag} days",
-        evidence_ids=tuple(getattr(transmission, "exposure_evidence_ids", ())))
+        evidence_ids=tuple(getattr(transmission, "exposure_evidence_ids", ())),
+        # The catalogue slot, not the sentence. `transmission._MECHANISM` is
+        # keyed by exposure dimension and its descriptions are prose that will
+        # be edited; identity must survive that edit.
+        key=f"transmission:{dimension}")
     stated = str(getattr(transmission, "alternative_explanation", "") or "")
     alternatives = []
     if stated.strip():
@@ -602,12 +694,18 @@ def from_transmission(transmission, *, as_of: str = "",
             "the condition's move was "
             f"{getattr(surprise, 'direction', 'unmeasured')} relative to "
             "expectation, which the mechanism does not distinguish")
+    # THE AREA IS IN THE QUESTION, not only in the identity. Two briefings
+    # headed "what does MARKET_RATE mean for america_movil?" — one about
+    # Canada, one about the US — are indistinguishable on the page, and a
+    # reader resolves the ambiguity by assuming there is only one.
+    where = f" in {area}" if area else ""
     return EconomicThesis(
         subject=subject,
-        question=f"what does {kind} mean for {subject}?",
+        question=f"what does {kind}{where} mean for {subject}?",
         claim=claim,
         leading_mechanism=leading,
         alternatives=tuple(alternatives),
+        area=area,
         macro_conditions=(kind,),
         exposures=(dimension,),
         supporting_evidence=tuple(
@@ -628,14 +726,21 @@ def build_all(transmissions: Sequence, *, as_of: str) -> List[EconomicThesis]:
 
 
 def competitions(theses: Sequence[EconomicThesis]) -> List[Competition]:
-    """Group theses by the question they answer, so rivals meet."""
-    grouped: Dict[Tuple[str, str], List[EconomicThesis]] = {}
+    """Group theses by the question they answer, so rivals meet.
+
+    Grouped on `question_key`, which carries the area. Grouping on the
+    question TEXT alone put a thesis about Canadian rates and a thesis about
+    US rates for one company into the same contest, and a live cycle reported
+    four contested questions on that basis. They were not disagreeing; they
+    were about different economies, and each was the only answer to its own
+    question.
+    """
+    grouped: Dict[Tuple[str, str, str], List[EconomicThesis]] = {}
     for thesis in theses:
-        grouped.setdefault((thesis.subject, thesis.question),
-                           []).append(thesis)
+        grouped.setdefault(thesis.question_key, []).append(thesis)
     return [Competition(question=question, subject=subject,
                         theses=tuple(group))
-            for (subject, question), group in sorted(grouped.items())]
+            for (subject, _area, question), group in sorted(grouped.items())]
 
 
 def summarise(theses: Sequence[EconomicThesis]) -> dict:

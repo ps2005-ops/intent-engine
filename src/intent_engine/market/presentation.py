@@ -128,6 +128,13 @@ class Deck:
     standing: str
     slides: Tuple[Slide, ...]
     as_of: str = ""
+    #: THE CLAIM THIS DECK WAS RENDERED FROM. `thesis_id` binds a deck to a
+    #: thesis, and identity deliberately survives a reworded claim — the same
+    #: thesis is allowed to restate itself. That leaves a gap `thesis_id`
+    #: alone cannot close: a deck whose headline still asserts last month's
+    #: wording belongs to this thesis and no longer says what it says. Stale
+    #: is a different failure from foreign, and both reach the room.
+    claim: str = ""
 
     @property
     def missing_required(self) -> Tuple[str, ...]:
@@ -241,7 +248,7 @@ def build(thesis: ET.EconomicThesis, *, view=None,
                            surface=f"slide {one.section}")
     return Deck(subject=thesis.subject, thesis_id=thesis.thesis_id,
                 standing=thesis.standing, slides=tuple(slides),
-                as_of=as_of or thesis.as_of)
+                as_of=as_of or thesis.as_of, claim=thesis.claim)
 
 
 def _default_implication(thesis: ET.EconomicThesis) -> str:
@@ -261,6 +268,10 @@ def check(deck: Deck, thesis: ET.EconomicThesis) -> dict:
     problems: List[str] = []
     if deck.thesis_id != thesis.thesis_id:
         problems.append("deck does not belong to this thesis")
+    elif deck.claim and deck.claim != thesis.claim:
+        problems.append(
+            "deck renders a claim this thesis no longer makes: "
+            f"{deck.claim!r} against {thesis.claim!r}")
     for one in deck.slides:
         try:
             ET.consistent_with(thesis, rendered_standing=one.standing,

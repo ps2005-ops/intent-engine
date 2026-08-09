@@ -247,12 +247,151 @@ def test_an_effect_on_another_object_does_not_evidence_this_thesis():
         "evidence this thesis")
 
 
-def test_identity_is_subject_and_question_not_the_hashed_claim():
-    """A claim that moved by a word must still be the same thesis."""
+def _production_shaped_thesis(subject="acme"):
+    """The shape `from_transmission` actually builds: a BARE dimension.
+
+    Test fixtures had been writing `exposures=("acme:REFINANCING",)` while
+    production wrote `exposures=("CAPITAL_INTENSITY",)`, so the attribution
+    rule was only ever exercised on a shape production does not emit.
+    """
+    return ET.EconomicThesis(
+        subject=subject, question=f"what does MARKET_RATE mean for {subject}?",
+        claim="capex will fall", leading_mechanism=mech(),
+        area="CA", macro_conditions=("MARKET_RATE",),
+        exposures=("CAPITAL_INTENSITY",), as_of="2026-08-01")
+
+
+def test_an_effect_on_this_companys_exposure_bears_on_its_thesis():
+    """The live seam. Two cycles reported zero attributed effects.
+
+    An exposure effect is written with `target_id = "acme:CAPITAL_INTENSITY"`
+    and the basis was built from the bare dimension, so the two never matched
+    and the attribution rule could not fire. A guard that cannot fire reads
+    exactly like a strict guard that nothing tripped.
+    """
+    from intent_engine.market import knowledge_effect as KE
+
+    t = _production_shaped_thesis()
+    bearing = effect(KE.COMPANY_EXPOSURE, "acme:CAPITAL_INTENSITY")
+    assert TH.effects_bearing_on(t, [bearing]) == (bearing.effect_id,)
+
+
+def test_an_effect_on_this_economys_condition_bears_on_its_thesis():
+    from intent_engine.market import knowledge_effect as KE
+
+    t = _production_shaped_thesis()          # area CA, MARKET_RATE
+    ours = effect(KE.ECONOMIC_STATE, "CA:MARKET_RATE")
+    assert TH.effects_bearing_on(t, [ours]) == (ours.effect_id,)
+
+
+def test_another_economys_condition_does_not_bear_on_this_thesis():
+    """A US rate effect must not strengthen a thesis about Canadian rates.
+
+    This is the identity collision one layer down: even with two distinct
+    theses, an unqualified condition name would let either economy's evidence
+    move either thesis.
+    """
+    from intent_engine.market import knowledge_effect as KE
+
+    t = _production_shaped_thesis()          # area CA
+    theirs = effect(KE.ECONOMIC_STATE, "US:MARKET_RATE")
+    assert TH.effects_bearing_on(t, [theirs]) == ()
+
+
+def test_another_companys_exposure_does_not_bear_on_this_thesis():
+    """Qualifying by subject is what stops the bare dimension matching all."""
+    from intent_engine.market import knowledge_effect as KE
+
+    t = _production_shaped_thesis()
+    theirs = effect(KE.COMPANY_EXPOSURE, "othercorp:CAPITAL_INTENSITY")
+    assert TH.effects_bearing_on(t, [theirs]) == ()
+
+
+def test_a_claim_that_moved_by_a_word_is_still_the_same_thesis():
+    """The one event worth recording must not destroy the record of it.
+
+    This test used to assert the opposite — that a reworded claim produced a
+    different `thesis_id` — and worked around it with a separate, coarser
+    identity. That workaround was `(subject, question)`, and it collapsed
+    eleven live theses into seven.
+    """
     one = thesis(claim="capex will fall")
     two = thesis(claim="capex will fall sharply")
-    assert one.thesis_id != two.thesis_id
+    assert one.thesis_id == two.thesis_id
     assert TH.identity(one) == TH.identity(two)
+
+
+def test_a_restatement_on_a_later_date_is_the_same_thesis():
+    """Keyed on the date, every thesis was new every night."""
+    assert (TH.identity(thesis(as_of="2026-08-01"))
+            == TH.identity(thesis(as_of="2026-09-01")))
+
+
+def test_believing_a_thesis_more_does_not_make_it_another_thesis():
+    assert (TH.identity(thesis(standing=ET.PROPOSED))
+            == TH.identity(thesis(standing=ET.SUPPORTED,
+                                  supporting=("ev_1",))))
+
+
+def test_rewording_a_catalogue_mechanism_does_not_restart_its_history():
+    """The reason identity uses a key and not the sentence.
+
+    `transmission._MECHANISM` holds prose that is expected to be edited. If
+    identity read the description, the first improvement to that wording
+    would silently give every thesis a new id and an empty history — the same
+    failure as keying on the claim, arriving through a different door.
+    """
+    def with_description(text):
+        return ET.EconomicThesis(
+            subject="acme", question="will capex fall?",
+            claim="capex will fall",
+            leading_mechanism=ET.Mechanism(
+                description=text, falsifier="capex guidance is raised",
+                key="transmission:CAPITAL_INTENSITY"),
+            exposures=("CAPITAL_INTENSITY",), as_of="2026-08-01")
+
+    before = with_description("a higher cost of capital defers spending")
+    after = with_description(
+        "a higher cost of capital raises the hurdle a programme must clear")
+    assert TH.identity(before) == TH.identity(after)
+
+
+def test_two_mechanisms_answering_one_question_are_two_theses():
+    """The live class: same subject, same question, different explanation."""
+    rate = thesis()
+    demand = thesis(alternatives=(mech("the programme was precommitted",
+                                       "a new programme is announced"),))
+    demand = ET.EconomicThesis(
+        subject=demand.subject, question=demand.question, claim=demand.claim,
+        leading_mechanism=mech("demand fell so capex was deferred",
+                               "orders recover"),
+        alternatives=demand.alternatives, standing=demand.standing,
+        as_of=demand.as_of)
+    assert rate.question_key == demand.question_key, (
+        "rival explanations of one question must still meet in a Competition")
+    assert TH.identity(rate) != TH.identity(demand)
+
+
+def test_two_economies_moving_one_condition_are_two_theses():
+    """CA:MARKET_RATE and US:MARKET_RATE are different states.
+
+    The live cycle held both for one company, gave them one identity, and
+    persisted one of them.
+    """
+    ca = ET.EconomicThesis(
+        subject="acme", question="what does MARKET_RATE mean for acme?",
+        claim="capex will fall", leading_mechanism=mech(),
+        area="CA", macro_conditions=("MARKET_RATE",),
+        exposures=("CAPITAL_INTENSITY",), as_of="2026-08-01")
+    us = ET.EconomicThesis(
+        subject="acme", question="what does MARKET_RATE mean for acme?",
+        claim="capex will fall", leading_mechanism=mech(),
+        area="US", macro_conditions=("MARKET_RATE",),
+        exposures=("CAPITAL_INTENSITY",), as_of="2026-08-01")
+    assert TH.identity(ca) != TH.identity(us)
+    assert ca.question_key != us.question_key, (
+        "two economies are two questions; grouping them manufactured a "
+        "contest between theses that were not disagreeing")
 
 
 def test_an_unchanged_thesis_records_no_revision():
@@ -332,6 +471,137 @@ def test_the_cycle_persists_revisions_and_a_fresh_store_reads_them(tmp_path):
     fresh = LS.LearningStore(tmp_path / "ledger.jsonl")
     assert len(fresh.thesis_revisions()) == 1
     assert fresh.thesis_revisions()[0]["knowledge_effect_ids"]
+
+
+# --- one persisted thesis, one current thesis --------------------------------
+
+def _two_rivals(*, standing_a=ET.PROPOSED, standing_b=ET.PROPOSED,
+                supporting_a=(), supporting_b=()):
+    """Two theses answering ONE question by two different mechanisms.
+
+    Exactly the shape a live cycle produced and could not persist: same
+    subject, same question, different route.
+    """
+    shared = dict(subject="acme", question="will capex fall?",
+                  exposures=("acme:REFINANCING",), as_of="2026-08-01",
+                  alternatives=(mech("precommitted", "new programme"),))
+    a = ET.EconomicThesis(
+        claim="capex will fall because borrowing got dearer",
+        leading_mechanism=mech("rates rose so capex was deferred",
+                               "capex guidance is raised"),
+        standing=standing_a, supporting_evidence=tuple(supporting_a), **shared)
+    b = ET.EconomicThesis(
+        claim="capex will fall because orders dried up",
+        leading_mechanism=mech("demand fell so capex was deferred",
+                               "orders recover"),
+        standing=standing_b, supporting_evidence=tuple(supporting_b), **shared)
+    return a, b
+
+
+def test_two_theses_under_one_question_both_persist(tmp_path):
+    from intent_engine.market import learning_store as LS
+
+    store = LS.LearningStore(tmp_path / "ledger.jsonl")
+    a, b = _two_rivals()
+    assert a.thesis_id != b.thesis_id
+    assert store.record_thesis_snapshot(a, as_of="2026-08-01") is True
+    assert store.record_thesis_snapshot(b, as_of="2026-08-01") is True, (
+        "the second thesis was refused as a duplicate of the first; a live "
+        "cycle built 11 theses and persisted 7 this way")
+    assert len(store.thesis_snapshots()) == 2
+
+
+def test_each_thesis_reconciles_against_its_own_prior():
+    a, b = _two_rivals()
+    _, summary = TH.reconcile([a, b], [a, b], as_of="2026-08-09")
+    assert summary["loaded"] == 2
+    assert summary["compared"] == 2
+    assert summary["unchanged"] == 2
+    assert summary["identity_collisions"] == 0
+    assert summary["unmatched_prior"] == 0
+    assert summary["unmatched_current"] == 0
+
+
+def test_moving_one_rival_revises_only_that_rival():
+    from intent_engine.market import knowledge_effect as KE
+
+    a, b = _two_rivals()
+    moved_a, _ = _two_rivals(standing_a=ET.SUPPORTED, supporting_a=("ev_1",))
+    history, summary = TH.reconcile(
+        [a, b], [moved_a, b], as_of="2026-08-09",
+        effects=[effect(KE.COMPANY_EXPOSURE, "acme:REFINANCING")])
+    assert summary["compared"] == 2
+    assert summary["written"] == 1
+    assert summary["unchanged"] == 1
+    written = history.chain_all()
+    assert len(written) == 1
+    assert written[0].thesis_id == a.thesis_id, (
+        "the revision names the thesis that moved, not its rival")
+    assert written[0].thesis_id != b.thesis_id
+    assert history.chain(b.thesis_id) == ()
+
+
+def test_a_prior_is_never_compared_against_twice():
+    """The live defect: `compared` exceeded `loaded`.
+
+    Eleven current theses matched seven priors, so four were graded against
+    another thesis's past. It returned `unchanged`, which was luck: under a
+    real movement the revision would have named the wrong thesis and the
+    strengthening guard would have passed, because the effect genuinely bore
+    on the identity — just not on that thesis.
+    """
+    a, _ = _two_rivals()
+    _, summary = TH.reconcile([a], [a, a], as_of="2026-08-09")
+    assert summary["loaded"] == 1
+    assert summary["current"] == 2
+    assert summary["compared"] == 1
+    assert summary["identity_collisions"] == 1
+    assert summary["compared"] <= summary["loaded"]
+
+
+def test_two_priors_sharing_an_identity_are_refused_not_silently_dropped():
+    a, _ = _two_rivals()
+    _, summary = TH.reconcile([a, a], [a], as_of="2026-08-09")
+    assert summary["loaded"] == 2
+    assert summary["identity_collisions"] == 1
+    assert summary["compared"] == 1
+    assert summary["unmatched_prior"] == 1
+
+
+def test_a_prior_with_no_current_thesis_is_counted_unmatched():
+    a, b = _two_rivals()
+    _, summary = TH.reconcile([a, b], [a], as_of="2026-08-09")
+    assert summary["compared"] == 1
+    assert summary["unmatched_prior"] == 1
+    assert summary["unmatched_current"] == 0
+
+
+# --- the chain survives the process ------------------------------------------
+
+def test_a_reloaded_history_chains_the_next_revision_to_the_last(tmp_path):
+    """Built empty each cycle, every revision was a first link forever."""
+    from intent_engine.market import knowledge_effect as KE
+    from intent_engine.market import learning_store as LS
+
+    store = LS.LearningStore(tmp_path / "ledger.jsonl")
+    a, _ = _two_rivals()
+    moved, _ = _two_rivals(standing_a=ET.SUPPORTED, supporting_a=("ev_1",))
+
+    first, _ = TH.reconcile([], [a], as_of="2026-08-01")
+    for revision in first.chain_all():
+        store.record_thesis_revision(revision)
+
+    reloaded, dropped = TH.ThesisHistory.load(store.thesis_revisions())
+    assert dropped == []
+    assert len(reloaded.chain(a.thesis_id)) == 1
+
+    second, _ = TH.reconcile(
+        [a], [moved], as_of="2026-08-09", history=reloaded,
+        effects=[effect(KE.COMPANY_EXPOSURE, "acme:REFINANCING")])
+    chain = second.chain(a.thesis_id)
+    assert len(chain) == 2
+    assert chain[1].previous_revision == chain[0].revision_id, (
+        "a revision that does not name its parent cannot be walked back")
 
 
 def test_snapshots_return_only_the_latest_cycle(tmp_path):

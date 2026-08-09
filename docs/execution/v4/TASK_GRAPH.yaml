@@ -8,6 +8,13 @@
 # unmet is BLOCKED_DATA with the shortfall quantified, and a COLLECT
 # prerequisite is created.
 #
+# `severity` is REQUIRED on every node opened from a discovery rather than
+# from the original scope. Only RELEASE_BLOCKER and MATERIAL_DEFECT may live
+# here; HARDENING and FUTURE_IMPROVEMENT go to BACKLOG.yaml and do not extend
+# the release frontier. See SEVERITY.md for why: the maturity audit was
+# opening nodes as fast as they were closed, so READY could never reach zero
+# however much the software improved.
+#
 # Derived 2026-08-09 from: docs/EXECUTION_CHECKPOINT.md, the session-3
 # closure matrix (PASS 11 / PARTIAL 25 / BLOCKED_DATA 1 / NO 1), direct
 # reading of src/intent_engine/market/, and reconciliation against the live
@@ -748,23 +755,29 @@ tasks:
     dependencies: []
     status: DERIVED
     priority: 2
+    severity: RELEASE_BLOCKER
     expected_value: >
-      The second cycle reported loaded 7 and compared 11. Eleven current
-      theses matched seven loaded identities, so (subject, question) is not a
-      key: `before` is a dict keyed on it and keeps only the LAST snapshot per
-      identity, silently discarding the others. Every thesis after the first
-      per identity is therefore compared against a DIFFERENT thesis. It
-      reported unchanged this time, which is luck rather than correctness —
-      the same collision under a real movement would attribute one thesis's
-      change to another.
+      The second cycle reported loaded 7 and compared 11. The diagnosis
+      recorded when this node was opened was that `before` kept only the last
+      snapshot per identity; reading the ledger showed something worse. All
+      seven persisted snapshots had DISTINCT identities. The collision was on
+      the CURRENT side: the cycle built ELEVEN theses whose thesis_id took
+      only (subject, question, claim, as_of), and `from_transmission` dropped
+      the economic state's `area`. CA:MARKET_RATE and US:MARKET_RATE are two
+      states; they produced two theses with byte-identical claims, one id,
+      and one snapshot — `record_thesis_snapshot` is idempotent on
+      (thesis_id, as_of), so four of the eleven were never persisted at all
+      and their absence was reported as nothing.
     acceptance_criteria:
       - identity is a real key, or reconcile handles many theses per identity
         explicitly rather than by last-write-wins
       - a test pins two theses sharing (subject, question) and proves neither
         snapshot is dropped
       - compared never exceeds loaded
+      - a live cycle reports identity_collisions 0 and theses_built equal to
+        snapshot_records_written
     maturity_required: EVALUATED
-    tests: tests/test_market_thesis_history.py
+    tests: tests/test_market_thesis_history.py tests/test_market_thesis_history_wiring.py
     minimum_data: none
     completion_evidence: null
 

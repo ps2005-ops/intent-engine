@@ -205,11 +205,14 @@ PROOFS = [
      "        elif target_id:",
      f"{H}::test_an_effect_on_another_object_does_not_evidence_this_thesis"),
 
-    ("v4d-28. a thesis whose claim moved is treated as a new thesis",
-     TH,
-     "    return (thesis.subject, thesis.question)",
-     "    return (thesis.subject, thesis.question, thesis.claim)",
-     f"{H}::test_identity_is_subject_and_question_not_the_hashed_claim"),
+    # v4d-28 RETIRED, NOT DROPPED. It broke `thesis_history.identity` when
+    # that function assembled `(subject, question)` itself. G-THE-004 moved
+    # identity to its only correct home, `EconomicThesis.thesis_id`, and
+    # `identity` now returns it rather than recomputing a coarser version.
+    # The same guarantee — a reworded claim is the same thesis — is proved at
+    # the new site by v4e-2 in break_proofs_v4e.py. Left as a comment because
+    # a proof whose anchor has moved reports ANCHOR_MISSING, which is
+    # indistinguishable from a proof somebody broke.
 
     ("v4d-29. a strengthening with no bearing effect is recorded as stronger",
      TH,

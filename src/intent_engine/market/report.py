@@ -694,13 +694,36 @@ def _knowledge_summary(knowledge: dict) -> dict:
         # deliberately: a claim that changed with no knowledge effect bearing
         # on it is a finding about the attribution seam, and hiding it would
         # make the revision log look better than the evidence behind it.
+        # `identity_collisions`, `unmatched_prior` and `unmatched_current` are
+        # projected because their absence is what let `compared: 11` sit
+        # beside `loaded: 7` for two cycles without either number being
+        # questioned. A reconciliation that cannot report what it FAILED to
+        # match reports only its successes.
         "thesis_history": {
             k: (knowledge.get("thesis_history") or {}).get(k)
-            for k in ("loaded", "compared", "unchanged", "created",
+            for k in ("loaded", "current", "compared", "unchanged", "created",
                       "strengthened", "weakened", "contested", "falsified",
-                      "superseded", "unattributed", "revision_records_written",
-                      "revisions_held", "error")
+                      "superseded", "unattributed", "identity_collisions",
+                      "unmatched_prior", "unmatched_current",
+                      "revision_records_written", "revisions_held",
+                      "theses_built", "theses_sharing_an_identity",
+                      "snapshot_records_written",
+                      "snapshots_refused_as_duplicate",
+                      "prior_revisions_loaded", "prior_revisions_on_disk",
+                      "unreadable_prior_revisions", "error")
             if (knowledge.get("thesis_history") or {}).get(k) is not None},
+        # WHO GOT PAID FOR WHAT, WEEKS LATER. The counts were computed and
+        # persisted but never projected, so an operator could not tell a
+        # delayed reward that credited a real decision from one that credited
+        # nobody — which is the only thing the record is for.
+        "delayed_reward": {
+            k: (knowledge.get("delayed_reward") or {}).get(k)
+            for k in ("delayed_outcomes_written", "decisions_credited",
+                      "revisions_credited", "untraceable_revisions",
+                      "reward_delta_total", "reward_by_transition",
+                      "revisions_considered", "actions_with_produced_evidence",
+                      "written", "held", "error")
+            if (knowledge.get("delayed_reward") or {}).get(k) is not None},
         "economic_thesis": {
             k: (knowledge.get("economic_thesis") or {}).get(k)
             for k in ("theses", "by_standing", "assertable",

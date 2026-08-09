@@ -646,6 +646,8 @@ def credit_revisions(decisions: Sequence[ResearchDecision],
     known = {d.decision_id for d in decisions}
     out: List[DelayedOutcome] = []
     unattributable = 0
+    credited_revisions = set()
+    reward_by_transition: dict = {}
     for revision in revisions:
         cited = list(getattr(revision, "knowledge_effect_ids", ())
                      or (revision.get("knowledge_effect_ids", ())
@@ -658,16 +660,24 @@ def credit_revisions(decisions: Sequence[ResearchDecision],
             if cited or evidence:
                 unattributable += 1
             continue
+        thesis_id = str(getattr(revision, "thesis_id", "")
+                        or (revision.get("thesis_id", "")
+                            if isinstance(revision, dict) else ""))
+        transition = str(getattr(revision, "transition", "")
+                         or (revision.get("transition", "")
+                             if isinstance(revision, dict) else ""))
         for decision_id in sorted(set(matched)):
             if decision_id not in known:
                 continue
             out.append(DelayedOutcome(
                 decision_id=decision_id, outcome_type=THESIS_REVISED,
-                target_id=str(getattr(revision, "thesis_id", "")
-                              or (revision.get("thesis_id", "")
-                                  if isinstance(revision, dict) else "")),
+                target_id=thesis_id,
                 reward_delta=DELAYED_WEIGHTS[THESIS_REVISED],
                 observed_at=observed_at, provenance="thesis_revision"))
+            credited_revisions.add((thesis_id, transition))
+            reward_by_transition[transition] = round(
+                reward_by_transition.get(transition, 0.0)
+                + DELAYED_WEIGHTS[THESIS_REVISED], 6)
     return out, {
         "contract": CONTRACT,
         "revisions_considered": len(revisions),
@@ -675,6 +685,22 @@ def credit_revisions(decisions: Sequence[ResearchDecision],
         "unattributable_revisions": unattributable,
         "actions_with_produced_evidence": sum(
             1 for o in outcomes if o.produced_evidence_ids),
+        # THE SAME FIGURES UNDER THE NAMES AN OPERATOR ASKS FOR. Delayed
+        # credit was computed and persisted for a run before anything
+        # projected it, so "did this action get paid for what it found" had a
+        # correct answer nobody could read.
+        "delayed_outcomes_written": len(out),
+        "decisions_credited": len({o.decision_id for o in out}),
+        "revisions_credited": len(credited_revisions),
+        "untraceable_revisions": unattributable,
+        "reward_delta_total": round(sum(o.reward_delta for o in out), 6),
+        # SYMMETRY, MADE CHECKABLE. One weight pays every revision, so a
+        # weakening earns exactly what a strengthening earns. That is
+        # deliberate — an action that found the evidence which knocked a
+        # thesis down did the same job as one that propped it up — and it is
+        # reported per transition so the claim can be verified rather than
+        # taken on trust.
+        "reward_by_transition": dict(sorted(reward_by_transition.items())),
         "note": ("a revision whose evidence cannot be traced to a logged "
                  "action earns nobody credit; spreading it over the night's "
                  "actions would teach the policy an association that was "

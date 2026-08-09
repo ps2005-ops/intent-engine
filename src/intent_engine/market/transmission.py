@@ -74,6 +74,11 @@ class Transmission:
     falsifier: str
     alternative_explanation: str
     standing: str = HYPOTHESIZED
+    #: WHICH ECONOMY moved. An `EconomicState` is keyed `(area, state_kind)`,
+    #: so CA:MARKET_RATE and US:MARKET_RATE are two states; dropping the area
+    #: here gave both the same `transmission_id` and, downstream, the same
+    #: thesis identity.
+    area: str = ""
     #: Both ends' provenance, so a rendered sentence walks back to a series
     #: and to the company's own words.
     macro_observation_id: str = ""
@@ -101,8 +106,8 @@ class Transmission:
 
     @property
     def transmission_id(self) -> str:
-        raw = "|".join((self.company_id, self.state_kind, self.dimension,
-                        self.mechanism))
+        raw = "|".join((self.company_id, self.area, self.state_kind,
+                        self.dimension, self.mechanism))
         return "tx_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
     @property
@@ -209,6 +214,7 @@ def propose(*, exposure: CX.Exposure, state: MS.EconomicState,
     mechanism, direction, lag, falsifier, alternative = route
     return Transmission(
         company_id=exposure.company_id, state_kind=state.state_kind,
+        area=str(getattr(state, "area", "") or ""),
         dimension=exposure.dimension, mechanism=mechanism,
         direction=direction, lag_days=lag, falsifier=falsifier,
         alternative_explanation=alternative, standing=HYPOTHESIZED,

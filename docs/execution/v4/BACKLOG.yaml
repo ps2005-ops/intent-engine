@@ -1,0 +1,74 @@
+# Discoveries that are real and do NOT extend the V4 release frontier.
+#
+# See SEVERITY.md. HARDENING means the behaviour is correct and could be more
+# robust. FUTURE_IMPROVEMENT means new capability. Neither opens a READY node;
+# both are recorded so that "we did not notice" and "we noticed and did not
+# schedule it" stay different statements.
+
+contract: v4_backlog.v1
+
+items:
+
+  - id: BKL-EFFECT-TARGET-VOCAB
+    class: HARDENING
+    found_in: G-THE-004
+    observed: >
+      Every BELIEF-typed KnowledgeEffect in the live ledger carries an empty
+      target_id (39 of 39), as does the majority of COMPANY_EXPOSURE effects
+      written by the no-change path. `effects_bearing_on` skips empty target
+      ids, so they can never attribute to anything.
+    why_not_a_blocker: >
+      A no-change effect legitimately names no target — it records that this
+      evidence moved nothing, which is the row that keeps the denominator
+      honest. The empty id is correct for that class. The BELIEF case is a
+      separate producer whose targets are not thesis dependencies today, so
+      no current claim rests on them matching.
+    would_become_material_if: >
+      a surface starts reporting belief-effect attribution rates, or a thesis
+      declares a belief as a dependency object.
+
+  - id: BKL-MECHANISM-CATALOGUE-KEYS
+    class: HARDENING
+    found_in: G-THE-004
+    observed: >
+      `Mechanism.key` falls back to the description when unset. Only
+      `from_transmission` sets it today, so a mechanism written by any future
+      producer inherits the rewording hazard identity was repaired to avoid.
+    why_not_a_blocker: >
+      Every mechanism reaching a persisted thesis today comes through
+      `from_transmission`, which sets the key. The fallback is correct for
+      one-off mechanisms nobody will reword.
+    would_become_material_if: >
+      a second producer of persisted theses appears.
+
+  - id: BKL-SNAPSHOT-KEY-GRANULARITY
+    class: HARDENING
+    found_in: G-THE-004
+    observed: >
+      `record_thesis_snapshot` is idempotent on `(thesis_id, as_of)`, so
+      re-running one date refuses every snapshot. That is correct, but it
+      means a same-day re-run cannot record a thesis that genuinely moved
+      between two runs of the same date.
+    why_not_a_blocker: >
+      The cycle runs once per operating day. A second run of one date is a
+      rehearsal, and appending a second snapshot for it would make the
+      "latest cycle" read ambiguous.
+    would_become_material_if: >
+      intra-day cycles are introduced.
+
+  - id: BKL-THESIS-COMPETITION-DEPTH
+    class: FUTURE_IMPROVEMENT
+    found_in: G-THE-004
+    observed: >
+      With the area in `question_key`, the live corpus produces one thesis
+      per question and `contested` is 0. Genuine competition needs two
+      mechanisms proposed for one (subject, area, condition), which
+      `_MECHANISM` cannot do — it is keyed by exposure dimension and returns
+      exactly one route.
+    why_not_a_blocker: >
+      The previous `contested: 4` was an artefact of merging two economies'
+      theses into one question, not evidence of competing explanations. Zero
+      is the honest count for a catalogue with one route per dimension.
+      Reporting rival mechanisms requires a second route to exist, which is
+      new capability rather than a repair.
+    goes_to: V5

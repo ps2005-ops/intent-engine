@@ -60,11 +60,26 @@ def test_an_undated_thesis_is_refused():
 
 def test_a_beaten_thesis_is_retired_not_deleted():
     original = thesis()
-    successor, retired = ET.supersede(original, claim="prices rose",
-                                      as_of="2026-09-01")
+    successor, retired = ET.supersede(
+        original, claim="prices rose", as_of="2026-09-01",
+        leading_mechanism=mech("pricing power lifted margin",
+                               "margin fell while prices rose"))
     assert retired.standing == ET.SUPERSEDED
     assert successor.supersedes == original.thesis_id
     assert successor.thesis_id != original.thesis_id
+
+
+def test_a_supersession_that_only_rewords_the_claim_is_refused():
+    """Otherwise `supersedes` points at itself and one id names two rows.
+
+    Identity no longer carries the claim or the date, so a wording change
+    yields a successor with the previous thesis's id. Two rows under one id
+    is what reconciliation cannot resolve: it has no way to say which of them
+    a later thesis descends from.
+    """
+    with pytest.raises(ET.ThesisRejected) as err:
+        ET.supersede(thesis(), claim="prices rose", as_of="2026-09-01")
+    assert "same identity" in str(err.value)
 
 
 def test_two_equally_supported_rivals_produce_no_leader():

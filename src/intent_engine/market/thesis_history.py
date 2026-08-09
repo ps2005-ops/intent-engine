@@ -183,6 +183,25 @@ def classify(before, after) -> str:
     return CONTESTED
 
 
+def revision_from_row(row: dict) -> ThesisRevision:
+    """One stored row back into the record it was written from.
+
+    Only the fields `ThesisRevision` declares are read. `as_dict` adds
+    `record`, `contract` and the derived `revision_id`; passing those back
+    into the constructor would be an error, and recomputing `revision_id`
+    rather than trusting the stored one means a row whose id was edited no
+    longer matches its own content.
+    """
+    fields = {f.name for f in dataclasses.fields(ThesisRevision)}
+    kwargs = {k: v for k, v in dict(row).items() if k in fields}
+    for name in ("knowledge_effect_ids", "triggering_evidence",
+                 "changed_fields", "alternatives_before",
+                 "alternatives_after"):
+        if name in kwargs:
+            kwargs[name] = tuple(kwargs[name] or ())
+    return ThesisRevision(**kwargs)
+
+
 class ThesisHistory:
     """The append-only chain, and the answers it can give."""
 
@@ -226,6 +245,36 @@ class ThesisHistory:
                 m.description for m in (before.alternatives or ())),
             alternatives_after=tuple(
                 m.description for m in (after.alternatives or ()))))
+
+    @classmethod
+    def load(cls, rows: Sequence[dict]) -> Tuple["ThesisHistory", List[str]]:
+        """Rebuild the chain from stored rows, and say what would not fit.
+
+        THE READ PATH THAT DID NOT EXIST. The cycle built a fresh, empty
+        history every night, so `previous_revision` was "" on every row ever
+        written and no chain had more than one link. The write path was live
+        and verified; nothing read it back, which meant "what changed your
+        mind?" was answered from a single night's comparison rather than from
+        the record.
+
+        Rows that cannot be placed are returned rather than raised on: a
+        ledger written by an older derivation should not stop tonight's cycle.
+        They are returned so the count reaches the report — a rehydration that
+        drops rows silently is the same failure one layer down.
+        """
+        history = cls()
+        dropped: List[str] = []
+        for row in rows:
+            try:
+                revision = revision_from_row(row)
+            except (RevisionRejected, TypeError, ValueError) as exc:
+                dropped.append(f"{row.get('revision_id', '?')}: {exc}")
+                continue
+            try:
+                history.append(revision)
+            except RevisionRejected as exc:
+                dropped.append(f"{revision.revision_id}: {exc}")
+        return history, dropped
 
     # --- reading ----------------------------------------------------------
     def chain_all(self) -> Tuple[ThesisRevision, ...]:
@@ -297,6 +346,47 @@ class ThesisHistory:
 
 # --- the production seam -------------------------------------------------------
 
+def dependency_objects(thesis) -> frozenset:
+    """The canonical objects this thesis rests on, in the ids effects use.
+
+    THE FORMAT IS THE WHOLE POINT. An exposure effect is written with
+    `target_id = f"{company_id}:{dimension}"` — that is the exposure object's
+    canonical id. This set was previously built from the bare dimension
+    names, so `"CAPITAL_INTENSITY"` was compared against
+    `"america_movil:CAPITAL_INTENSITY"` and never matched. Two live cycles
+    reported zero attributed effects, which read as a strict rule working and
+    was a rule that could not fire.
+
+    Bare dimensions are deliberately NOT accepted. `"CAPITAL_INTENSITY"`
+    without a company matches every company's exposure, which is the
+    over-attribution this guard exists to prevent, in a subtler form.
+    """
+    subject = getattr(thesis, "subject", "")
+    area = str(getattr(thesis, "area", "") or "")
+    out = set()
+    prefix = f"{subject}:"
+    for dimension in (getattr(thesis, "exposures", None) or ()):
+        # `exposures` holds a bare dimension when the thesis was built from a
+        # transmission, and an already-qualified reference when a caller
+        # wrote one. Both name the same object; neither is normalised into a
+        # bare dimension, because `"CAPITAL_INTENSITY"` with no company in
+        # front of it matches every company's exposure.
+        text = str(dimension)
+        out.add(text if text.startswith(prefix) else prefix + text)
+    for kind in (getattr(thesis, "macro_conditions", None) or ()):
+        # An economic state is keyed `(area, state_kind)`. Unqualified kinds
+        # are accepted only when the thesis itself does not know its area,
+        # because otherwise a US rate effect would bear on a Canadian thesis.
+        out.add(f"{area}:{kind}" if area else kind)
+    mechanism = getattr(thesis, "leading_mechanism", None)
+    if mechanism is not None:
+        out.add(getattr(mechanism, "identity_key", "")
+                or getattr(mechanism, "description", ""))
+    out.update(getattr(thesis, "falsifiers", None) or ())
+    out.discard("")
+    return frozenset(out)
+
+
 def effects_bearing_on(thesis, effects: Sequence) -> Tuple[str, ...]:
     """The effect ids that actually bear on THIS thesis.
 
@@ -307,13 +397,13 @@ def effects_bearing_on(thesis, effects: Sequence) -> Tuple[str, ...]:
     strengthening guard passes on evidence that had no bearing, and the guard
     is decoration.
 
-    So an effect counts only when it names something the thesis rests on:
-    the thesis itself, or one of the exposures or macro conditions it is
-    built from. Everything else is about the same company and irrelevant.
+    So an effect counts only when it names the thesis itself, or one of the
+    canonical objects the thesis declares it depends on. Sharing a subject is
+    not enough and never was.
     """
     from . import knowledge_effect as KE
 
-    basis = set(thesis.exposures or ()) | set(thesis.macro_conditions or ())
+    basis = dependency_objects(thesis)
     out = []
     for effect in effects:
         target_type = getattr(effect, "target_type", "")
@@ -325,15 +415,21 @@ def effects_bearing_on(thesis, effects: Sequence) -> Tuple[str, ...]:
     return tuple(sorted(set(out)))
 
 
-def identity(thesis) -> Tuple[str, str]:
+def identity(thesis) -> str:
     """What makes two theses the SAME thesis across cycles.
 
-    Not `thesis_id`: that hashes the claim and the date, so a thesis whose
-    claim moved by one word is a different id and would read as a brand new
-    thesis every cycle — which is precisely the comparison being lost. The
-    durable identity is the subject and the question.
+    This is `thesis_id`, and it is one value rather than a tuple assembled
+    here. The previous identity was `(subject, question)`, chosen because
+    `thesis_id` then hashed the claim and the date and so changed every night.
+    That derivation has been repaired in `economic_thesis`; keeping a second,
+    coarser notion of identity beside it is how the two drift apart.
+
+    `(subject, question)` was also wrong on its own terms. A live cycle built
+    eleven theses over seven of those pairs, because two economies can move
+    the same condition for one company: `CA:MARKET_RATE` and `US:MARKET_RATE`
+    are different states and were the same identity.
     """
-    return (thesis.subject, thesis.question)
+    return thesis.thesis_id
 
 
 def reconcile(previous: Sequence, current: Sequence, *, as_of: str,
@@ -348,16 +444,40 @@ def reconcile(previous: Sequence, current: Sequence, *, as_of: str,
     from . import economic_thesis as ET
 
     history = history if history is not None else ThesisHistory()
-    before = {identity(t): t for t in previous}
-    counts = {k: 0 for k in ("loaded", "compared", "unchanged", "created",
-                             "strengthened", "weakened", "contested",
-                             "falsified", "superseded", "written",
-                             "unattributed")}
-    counts["loaded"] = len(before)
+
+    # ONE PRIOR, ONE CURRENT. `before` was a dict comprehension over the
+    # priors, which silently kept the last snapshot per key, and nothing
+    # stopped several current theses from matching one prior. A live cycle
+    # reported `compared: 11` against `loaded: 7` — arithmetic that is not
+    # possible for a one-to-one match, and the signal that eleven theses were
+    # being graded against seven other theses' pasts.
+    before: Dict[str, object] = {}
+    counts = {k: 0 for k in ("loaded", "current", "compared", "unchanged",
+                             "created", "strengthened", "weakened",
+                             "contested", "falsified", "superseded",
+                             "written", "unattributed", "identity_collisions",
+                             "unmatched_prior", "unmatched_current")}
+    for prior_thesis in previous:
+        key = identity(prior_thesis)
+        if key in before:
+            # Two persisted theses with one identity. Neither can be compared
+            # against, because there is no way to say which one a current
+            # thesis descends from.
+            counts["identity_collisions"] += 1
+            continue
+        before[key] = prior_thesis
+    counts["loaded"] = len(previous)
+    counts["current"] = len(current)
+
+    consumed = set()
     for thesis in current:
         key = identity(thesis)
         prior = before.get(key)
+        if prior is not None and key in consumed:
+            counts["identity_collisions"] += 1
+            continue
         if prior is None:
+            counts["unmatched_current"] += 1
             if history.head(thesis.thesis_id):
                 continue
             history.append(ThesisRevision(
@@ -368,6 +488,7 @@ def reconcile(previous: Sequence, current: Sequence, *, as_of: str,
             counts["created"] += 1
             counts["written"] += 1
             continue
+        consumed.add(key)
         counts["compared"] += 1
         changed = diff(prior, thesis)
         if not changed:
@@ -399,11 +520,33 @@ def reconcile(previous: Sequence, current: Sequence, *, as_of: str,
                                      for m in (thesis.alternatives or ()))))
         counts[transition.lower()] = counts.get(transition.lower(), 0) + 1
         counts["written"] += 1
+
+    counts["unmatched_prior"] = len(previous) - len(consumed)
+
+    # THE INVARIANT, CHECKED RATHER THAN DOCUMENTED. Both conditions are
+    # unreachable given the loop above, which is exactly why they are worth
+    # asserting: if either fires, the matching rule has been changed and
+    # revisions are being attributed to theses that did not earn them. That
+    # is a wrong entry in an append-only record, so it stops the cycle rather
+    # than being counted and written.
+    if counts["compared"] > counts["loaded"]:
+        raise RevisionRejected(
+            f"compared {counts['compared']} theses against {counts['loaded']} "
+            "prior snapshots; more comparisons than priors means some prior "
+            "was reused, and a revision built on a reused prior names the "
+            "wrong thesis")
+    if len(consumed) > len(before):
+        raise RevisionRejected(
+            "more priors were consumed than were loaded; the match is no "
+            "longer one-to-one")
+
     summary = dict(counts)
     summary.update(
         contract=CONTRACT,
         note=("a thesis present in both cycles with no semantic difference "
               "records nothing; `unattributed` counts claims that moved with "
               "no knowledge effect bearing on them, which is a finding about "
-              "the attribution seam rather than a revision"))
+              "the attribution seam rather than a revision; "
+              "`identity_collisions` counts theses that could not be matched "
+              "one-to-one and were therefore not compared at all"))
     return history, summary

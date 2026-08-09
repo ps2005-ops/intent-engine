@@ -254,6 +254,24 @@ def test_a_deck_edited_afterwards_is_caught_by_check():
 
 
 def test_a_deck_belonging_to_another_thesis_is_caught():
-    got = PR.check(PR.build(thesis()), thesis(claim="something else"))
+    other = thesis(question="what does demand mean?",
+                   leading_mechanism=mech("orders dried up", "orders recover"))
+    got = PR.check(PR.build(thesis()), other)
     assert got["consistent"] is False
     assert any("does not belong" in p for p in got["problems"])
+
+
+def test_a_deck_still_asserting_a_withdrawn_claim_is_caught():
+    """Stale is not foreign, and only one of the two used to be caught.
+
+    Identity survives a reworded claim on purpose — the same thesis is
+    allowed to restate itself. That is exactly what lets a deck built last
+    month keep its `thesis_id` while its headline asserts a sentence the
+    thesis has since abandoned.
+    """
+    deck = PR.build(thesis(claim="capex falls"))
+    moved = thesis(claim="capex falls sharply")
+    assert deck.thesis_id == moved.thesis_id
+    got = PR.check(deck, moved)
+    assert got["consistent"] is False
+    assert any("no longer makes" in p for p in got["problems"])
