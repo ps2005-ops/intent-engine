@@ -46,7 +46,46 @@ adopted after this graph was derived and were reconciled into it once, on
 2026-08-09, as PROGRAM L. They are not to be rescoped again session by
 session.
 
-## What the last session changed
+## What the last session changed (E-DEM-001)
+
+**The demand problem was never a reasoning problem.** The node reads
+"targeted demand-variable extraction" and the obvious move was to add
+detectors. Measuring first said otherwise: six of ten demand states stood at
+ZERO companies and the words were absent from the corpus text entirely — 0
+raw hits across 348 evidence rows. Detectors would have extracted nothing and
+looked built.
+
+`company_ingestion.parsing` buffered text only inside a block whitelist with
+no `<div>`, and SEC filings write prose in `<div>`/`<font>`. On a real
+Caterpillar exhibit it kept **13,462 of 64,547 characters**: every numeric
+`<td>` survived and every sentence of narrative did not. Live after the
+repair: candidates 1281 → 1815, evidence 105 → 134, navigation 9 → 11.
+
+Then the reader. The existing phrase list, used as a detector, scores
+**precision 0.50** on a labelled corpus — and its errors are four different
+questions, not one:
+
+    "We placed orders for new equipment"      the company BUYING
+    "Komatsu reported strong bookings"        a rival's demand
+    "We expect bookings to improve"           an expectation
+    "reduced its ticket backlog by 40%"       another domain
+
+`demand_extraction` asks them separately: **1.00 / 1.00**, refusal reasons
+agreeing with the labels. Live: DEMAND_SIGNAL 21 rows, coverage 18 → 23
+cells, and the dated report now carries a real demand contradiction —
+`infosys: REVENUE->GUIDANCE`.
+
+**Coverage FELL first, 23 → 18, and that was the result.** The old count
+included a vendor's case study about what a CUSTOMER achieved and product
+copy listing "revenue reporting" as a feature. Adjudicate refusals before
+believing a coverage number.
+
+**BOOKINGS, BACKLOG, CANCELLATIONS, SHIPMENTS and END_DEMAND are still zero,
+and that is the CORPUS.** The same reader extracts BACKLOG / UP / OBSERVED
+from a real Caterpillar filing end to end. These 27 companies' fetched
+sources do not state those figures. Do not "fix" it with looser patterns.
+
+## What the session before that changed
 
 **I-ACC-001 is COMPLETE and live at `80f3aa5`.** Seven learning channels
 derived from the effect log, never averaged. Three defects were found in its
@@ -142,13 +181,23 @@ observation time before believing it.
 
 Run `frontier.py`. Do not assume the order in this file still holds.
 
-As of `8f14906`: 49 nodes, COMPLETE 24, READY 8, WAITING_DEPENDENCY 11,
-BLOCKED_DATA 4, NOT_APPLICABLE 2. Runtime pinned to `8f14906`, PAPER
+As of `cef65d3`: 49 nodes, COMPLETE 26, READY 8, WAITING_DEPENDENCY 9,
+BLOCKED_DATA 4, NOT_APPLICABLE 2. Runtime pinned to `cef65d3`, PAPER
 enforced, production `119d345` untouched.
 
-The remaining frontier is real work, none of it blocked:
-`E-DEM-001`, `J-ADV-001`, `L-ADV-001`, `L-SAN-001`, `H-CEO-001`,
-`C-MET-003`, `L-CLD-001` (founder repo).
+`H-CEO-001` unblocks three others and is the highest-reach node left — and
+the learning channels have said FOUNDER_VALUE = UNMEASURABLE for three
+sessions running, which makes it the bottleneck the system itself is
+pointing at. It needs the Founder repo and real DecisionImpact records;
+publication counts are not decision value and the channel already refuses
+them.
 
-`L-ADV-001` and `L-SAN-001` are the two newly opened nodes this branch can
-finish. `H-CEO-001` unblocks three others and is the highest-reach node left.
+`L-ADV-001` and `L-SAN-001` are bounded and finishable on this branch.
+`E-DEM-002` (demand-state contradiction handling) opened when E-DEM-001
+closed, and the live corpus already produced one contradiction to work from.
+
+**The governing lesson of the last two sessions, worth applying before any
+new intelligence layer: prove the information survives the whole path into
+canonical evidence BEFORE building the reasoning that consumes it.** Two
+sessions running, the binding constraint was upstream representation loss,
+not the reasoning at the end of the pipe.

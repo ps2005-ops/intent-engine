@@ -428,7 +428,7 @@ tasks:
     program: E
     title: Targeted demand-variable extraction
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     expected_value: >
       Measured 21/260 company-state cells and 15/26 companies with any state.
@@ -438,7 +438,10 @@ tasks:
       - orders, bookings, RPO, backlog, contract liabilities, cancellations,
         shipments, customer adds, usage
       - coverage measured before and after
+    maturity_required: EVALUATED
+    tests: tests/test_market_demand_extraction.py tests/test_market_filing_prose_survives_parsing.py tests/demand_corpus.py
     minimum_data: none
+    completion_evidence: "LIVE at runtime_git_sha cef65d3, night cycle 2026-08-09, dry_run false. Closed in two halves, and the first was three layers upstream: company_ingestion.parsing discarded 79% of every SEC filing because text was buffered only inside a block whitelist with no <div>, so on Caterpillar's Q2 exhibit 13,462 of 64,547 characters survived and every sentence of narrative did not. Repaired at 69a2438 and confirmed live: candidates 1281 -> 1815, evidence 105 -> 134, navigation 9 -> 11 (no leak). The second half is demand_extraction: the phrase list it replaces scored PRECISION 0.50 on a labelled corpus written BEFORE the detector, its ten false positives being four distinct mistakes (company buying, rival's demand, expectation, another domain); the four-question reader scores 1.00/1.00 with refusal reasons agreeing with the labels. LIVE: DEMAND_SIGNAL 21 rows admitted, coverage 18 -> 23 cells, ORDERS 1 -> 2 companies, CUSTOMER_INTENT and COMMITTED_DEMAND populated for the first time. CONSUMED downstream: the dated report carries demand_chain with 23 states measured and a real contradiction found, infosys REVENUE->GUIDANCE. The single no_commercial_event bucket (1,256 a cycle) is gone, decomposed into demand_no_commercial_object 1125 / no_direction 21 / generic_language 7 / speculative 3. Economic learning moved 29/402 (7.2%) -> 47/492 (9.55%) and HIGH_ACTIVITY_LOW_LEARNING correctly still fires. BOOKINGS, BACKLOG, CANCELLATIONS, SHIPMENTS and END_DEMAND remain at ZERO companies: that is the CORPUS, not the capability — the same reader extracts BACKLOG/UP/OBSERVED from a real Caterpillar filing end to end, and these 27 companies' fetched sources do not state those figures. Suite 5217. Break proofs v4j 7/7, v4k 12/12, 2 recorded NOT_BUILT."
     completion_evidence: null
 
   - id: E-DEM-002

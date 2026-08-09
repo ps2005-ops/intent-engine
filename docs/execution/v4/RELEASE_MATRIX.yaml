@@ -59,6 +59,18 @@ axes:
       single-tenant public-data system would be true and worthless. Belongs to V4-I10.
 
       '
+  DEMAND_INTELLIGENCE:
+    status: PARTIAL
+    note: 'E-DEM-001. Subject-, role- and standing-aware extraction at cef65d3. The phrase list it replaces
+      scored PRECISION 0.50 on a labelled corpus written before the detector existed; the four questions
+      — object, standing, subject, role — score 1.00/1.00 with refusal reasons that agree with the labels.
+      End to end on a real filing: "Strong order rates and a growing backlog reflect broadening momentum"
+      becomes a DEMAND_SIGNAL row and reads BACKLOG / UP / OBSERVED. PARTIAL not PASS: the live corpus
+      still has ZERO companies for CUSTOMER_INTENT, BOOKINGS, COMMITTED_DEMAND, BACKLOG, CANCELLATIONS
+      and SHIPMENTS, so no transmission path can be built — the chain has both ends and no middle. Live
+      coverage FELL 23 -> 18 cells because the refusals were correct.
+
+      '
   EVIDENCE_EXTRACTION:
     status: PARTIAL
     note: 'E-DEM-001, repaired at 69a2438. The parser was discarding 79% of every filing: text was

@@ -1279,3 +1279,70 @@ which is the architecture-only completion this program keeps having to undo.
   showed that admitting Founder objects to the economic channel changed the
   numerator and failed no test: every test asserted names, none asserted
   membership. Write the missing guard; do not repoint the proof.
+
+## V4 session — E-DEM-001, and where the demand actually went (2026-08-09)
+
+**The demand problem was never a reasoning problem.** That is the whole
+lesson and it cost two sessions to learn properly.
+
+The node reads "targeted demand-variable extraction". The obvious execution
+is to add detectors for orders, bookings and shipments. Measuring the corpus
+first said six of ten demand states stood at ZERO companies and the words
+were absent from the evidence text entirely — 0 raw hits across 348 rows.
+Detectors against that corpus would have extracted nothing, passed their unit
+tests, and shipped as a capability.
+
+The loss was three layers upstream. `company_ingestion.parsing` buffered text
+only inside a block whitelist that contained no `<div>`, and SEC filings lay
+their prose out in `<div>` and `<font>`. On Caterpillar's Q2 exhibit the
+parser kept **13,462 of 64,547 characters**: every numeric `<td>` survived and
+every sentence of narrative did not. 2,815 blocks averaging ELEVEN characters
+came out instead, which is why `fragment` was production's largest rejection
+reason at 3,200 a cycle. Live after the repair: candidates 1281 → 1815,
+evidence 105 → 134, navigation 9 → 11.
+
+Only then was the detector worth writing — and it was worth writing
+carefully. The existing phrase list, measured as a detector against a
+labelled corpus written BEFORE it, scores **precision 0.50**. Its errors are
+not one problem:
+
+    "We placed orders for new equipment"      the company BUYING — capex
+    "Komatsu reported strong bookings"        a rival's demand
+    "We expect bookings to improve"           an expectation, not a fact
+    "reduced its ticket backlog by 40%"       the word from another domain
+
+Four different questions, so `demand_extraction` asks them separately and
+refuses with the reason that applies. 1.00 / 1.00 on that corpus, and the
+refusal reasons agree with the labels rather than just the verdicts.
+
+**Live coverage FELL before it rose — 23 → 18 cells — and that was the
+result.** The old count included a vendor's own case study about what a
+CUSTOMER achieved, and product copy listing "revenue reporting" among
+software features. After the admission seam: 23 cells again, but with
+ORDERS 1 → 2, and CUSTOMER_INTENT and COMMITTED_DEMAND populated for the
+first time. The dated report now carries a real demand contradiction:
+`infosys: REVENUE->GUIDANCE`.
+
+Economic learning moved 29/402 (7.2%) → 47/492 (9.55%), and
+`HIGH_ACTIVITY_LOW_LEARNING` correctly still fires — the floor is 10%.
+
+BOOKINGS, BACKLOG, CANCELLATIONS, SHIPMENTS and END_DEMAND remain at zero
+companies. That is the CORPUS, not the capability: the same reader extracts
+BACKLOG / UP / OBSERVED from a real Caterpillar filing end to end.
+
+### Added to the standing rules
+
+- **Before building intelligence, prove the information survives the whole
+  path into canonical evidence.** Two sessions running, the binding
+  constraint was upstream representation loss and the reasoning layer was
+  blameless. A downstream zero is a claim about the pipeline, not about the
+  world.
+- **Write the labelled corpus before the detector.** A detector justified by
+  the sentences its author imagined measures its author. The baseline number
+  (0.50) is what made the work legible.
+- **Adjudicate refusals before believing a coverage number.** Coverage
+  falling was the correct outcome and would have read as a regression.
+- **A NOT_CAUGHT break proof is usually a finding about the proof's chosen
+  SENTENCE.** Three failed here: a both-directions guard is only load-bearing
+  when a quantity is present, and a wrong-role guard needs the company named
+  in the third person or the first-person rule catches it anyway.
