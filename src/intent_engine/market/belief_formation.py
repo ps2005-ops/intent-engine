@@ -349,7 +349,8 @@ def routes_for(item: ME.MicroEvidence) -> List[str]:
 
 
 def propose(evidence: Sequence[ME.MicroEvidence], *, as_of: str,
-            existing: Sequence[B.StrategicBelief] = ()
+            existing: Sequence[B.StrategicBelief] = (),
+            effects: Optional[list] = None
             ) -> Tuple[List[Candidate], Dict[str, int]]:
     """Candidate beliefs from evidence. Returns (candidates, why-not counts).
 
@@ -357,22 +358,48 @@ def propose(evidence: Sequence[ME.MicroEvidence], *, as_of: str,
     formed" has several causes — no direction in the text, a structural claim
     resting on the company's own word, a belief that already exists — and an
     operator reading a zero deserves to know which.
+
+    ATTRIBUTION IS WRITTEN HERE BECAUSE THIS IS WHERE THE CHANGE HAPPENS.
+    This function already knows exactly which evidence opened which belief and
+    which evidence went nowhere and why; until now it counted the second and
+    discarded the first, so the ledger recorded 316 pieces of evidence and not
+    one record of what any of them did. Pass a list as `effects` and it comes
+    back holding one `KnowledgeEffect` per item — CREATED for the evidence
+    that opened a belief, NO_CHANGE with the refusal reason for the rest.
+
+    The parameter is optional so no existing caller changes behaviour, and the
+    NO_CHANGE branch is deliberately the one that costs nothing to write: a
+    layer where recording a null result is more work than recording a positive
+    one fills up with successes and stops being able to price anything.
     """
+    from . import knowledge_effect as KE
+
     known = {b.belief_id for b in existing}
     grouped: Dict[Tuple[str, str], List[ME.MicroEvidence]] = {}
     refused: Dict[str, int] = {}
+    log = effects if effects is not None else None
 
     def refuse(reason: str) -> None:
         refused[reason] = refused.get(reason, 0) + 1
+
+    def nothing_moved(items, reason: str) -> None:
+        if log is None:
+            return
+        for one in items:
+            log.append(KE.no_change(
+                one.evidence_id, reason=reason, target_type=KE.BELIEF,
+                occurred_at=one.observed_at, created_at=as_of[:10]))
 
     for item in ME.deduplicate(evidence):
         families = routes_for(item)
         if not families:
             # Either the type routes nowhere, or it routes only on a
             # direction this sentence does not state.
-            refuse("no_family" if not any(
+            reason = ("no_family" if not any(
                 e == item.evidence_type for e, _, _ in _ROUTES)
                 else "no_direction_stated")
+            refuse(reason)
+            nothing_moved([item], reason)
             continue
         for family in families:
             grouped.setdefault((item.subject_company, family), []).append(item)
@@ -383,12 +410,14 @@ def propose(evidence: Sequence[ME.MicroEvidence], *, as_of: str,
         bid = belief_id_for(subject, family)
         if bid in known:
             refuse("belief_already_declared")
+            nothing_moved(items, "belief_already_declared")
             continue
         self_only = all(i.self_authored for i in items)
         if spec.structural and self_only and len(items) < MIN_STRUCTURAL_ITEMS:
             # One press release may not open a structural belief about the
             # company that published it.
             refuse("structural_claim_on_self_authored_evidence")
+            nothing_moved(items, "structural_claim_on_self_authored_evidence")
             continue
 
         ess = B.design_effect(items)
@@ -416,12 +445,44 @@ def propose(evidence: Sequence[ME.MicroEvidence], *, as_of: str,
             limitations=limitations,
             supporting_evidence_ids=tuple(i.evidence_id for i in items))
         ids = tuple(i.evidence_id for i in items)
+        expectation = _expectation_for(spec, belief, as_of=as_of,
+                                       evidence=items)
         out.append(Candidate(
-            belief=belief,
-            expectation=_expectation_for(spec, belief, as_of=as_of,
-                                         evidence=items),
+            belief=belief, expectation=expectation,
             family=family, evidence_ids=ids, self_authored_only=self_only))
         known.add(bid)
+        if log is not None:
+            for one in items:
+                log.append(KE.KnowledgeEffect(
+                    evidence_id=one.evidence_id, target_type=KE.BELIEF,
+                    target_id=bid, effect_type=KE.CREATED,
+                    before_state="absent",
+                    after_state=f"prior={belief.prior_probability}",
+                    occurred_at=one.observed_at, created_at=as_of[:10],
+                    reason=(f"opened {family} for {subject} from "
+                            f"{len(items)} item(s) of type "
+                            f"{one.evidence_type}"),
+                    standing=KE.DIRECT,
+                    provenance="belief_formation.propose"))
+                if expectation is not None:
+                    # A preregistered expectation is a second, different
+                    # thing this evidence did: it committed the engine to an
+                    # observation that can contradict it. Recorded apart from
+                    # the belief because a belief with no falsifier and a
+                    # belief with one are not equally valuable, and the
+                    # research reward should be able to tell them apart.
+                    log.append(KE.KnowledgeEffect(
+                        evidence_id=one.evidence_id,
+                        target_type=KE.EXPECTATION,
+                        target_id=expectation.expectation_id,
+                        effect_type=KE.CREATED,
+                        before_state="absent",
+                        after_state=f"window closes {spec.window_days}d",
+                        occurred_at=one.observed_at, created_at=as_of[:10],
+                        reason=("committed to a falsifiable observation: "
+                                f"{spec.falsifier}"),
+                        standing=KE.DIRECT,
+                        provenance="belief_formation.propose"))
     return out, refused
 
 

@@ -38,6 +38,25 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import belief_formation as BF
+
+
+def _effect_summary(effects) -> dict:
+    """Bounded projection of what this session's evidence did.
+
+    Imported lazily inside the function so the module keeps its existing
+    import graph; the summary itself lives in `knowledge_effect` because the
+    denominators belong with the contract that defines them.
+    """
+    from . import knowledge_effect as KE
+
+    if not effects:
+        return {"effects": 0,
+                "note": "no evidence was examined for attribution"}
+    keep = ("effects", "by_effect", "by_target",
+            "evidence_that_changed_something",
+            "evidence_that_changed_nothing", "discriminating", "note")
+    got = KE.summarise(list(effects))
+    return {k: got[k] for k in keep if k in got}
 from . import beliefs as B
 from . import causal as C
 from . import counterfactual as CF
@@ -129,6 +148,11 @@ class LearningResult:
     reconciliations_seen: Tuple[Any, ...] = ()
     priorities_seen: Tuple[Any, ...] = ()
     candidates_formed: Tuple[Any, ...] = ()
+    #: What this session's evidence actually did, one record per
+    #: (evidence, target) pair — NO_CHANGE included, because
+    #: evidence that moved nothing is the majority and is the
+    #: only thing that makes a research action priceable.
+    knowledge_effects: Tuple[Any, ...] = ()
 
     @property
     def observations_ingested(self) -> int:
@@ -191,6 +215,7 @@ class LearningResult:
             "steps_total": len(STEPS),
             "belief_learning": self.belief_summary,
             "belief_formation": self.formation_summary,
+            "knowledge_effects": _effect_summary(self.knowledge_effects),
             "belief_formation_backfill": self.backfill_summary,
             "expected_vs_observed": self.reconciliation_summary,
             "hidden_states": self.hidden_state_summary,
@@ -268,13 +293,23 @@ def run(*, as_of: str, store: LS.LearningStore,
     # Without this step the engine could translate perfect evidence for
     # twenty-eight companies and still report zero, because revision needs a
     # belief to revise and nothing anywhere created the first one.
+    # ATTRIBUTION IS WRITTEN AT THE SEAM, not derived later. `propose`
+    # already knows which evidence opened which belief and which evidence
+    # went nowhere; before this list existed it counted the second and threw
+    # away the first, and the ledger recorded 316 pieces of evidence with no
+    # record of what any of them did.
+    effects: list = []
     candidates, refused = BF.propose(fresh, as_of=as_of,
-                                     existing=tuple(working.values()))
+                                     existing=tuple(working.values()),
+                                     effects=effects)
     for candidate in candidates:
         store.declare_belief(candidate.belief)
         working[candidate.belief.belief_id] = candidate.belief
         if candidate.expectation is not None:
             store.record_expectation(candidate.expectation)
+    for effect in effects:
+        store.record_knowledge_effect(effect)
+    result.knowledge_effects = tuple(effects)
     result.formation_summary = BF.summarise(candidates, refused)
     result.candidates_formed = tuple(candidates)
     result.steps.append(StepResult(

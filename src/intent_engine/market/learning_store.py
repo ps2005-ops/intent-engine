@@ -101,6 +101,7 @@ ACTOR_RESPONSE_EPISODE = "actor_response_episode"
 #: it only ever knows what the economy is doing today, which is exactly the
 #: knowledge a world model is supposed to accumulate.
 MACRO_OBSERVATION = "macro_observation"
+KNOWLEDGE_EFFECT = "knowledge_effect"
 
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
@@ -109,6 +110,7 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           CROSS_ACTOR_OUTCOME,
                           COUNTERFACTUAL_ADJUDICATION, FALSIFIER,
                           RESPONSE_WATCH, STRATEGIC_OBJECTIVE,
+                          KNOWLEDGE_EFFECT,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
                           MACRO_OBSERVATION})
 
@@ -324,6 +326,37 @@ class LearningStore:
             return False
         self._append(MACRO_OBSERVATION, payload)
         return True
+
+    def record_knowledge_effect(self, effect) -> bool:
+        """Persist one attribution: what this evidence did to what.
+
+        Idempotent on `effect_id`, which is keyed on the evidence, the target
+        and the day it was written — so a fold that re-derives the same
+        attribution on the same day appends nothing, while the same evidence
+        moving the same object again tomorrow is a second, real record.
+
+        NO_CHANGE rows are stored exactly like changes. An effect log that
+        only keeps the positives is a success log, and a success log cannot
+        price a research action, which is the only reason this table exists.
+        """
+        payload = (effect.as_dict() if hasattr(effect, "as_dict")
+                   else dict(effect))
+        eid = str(payload.get("effect_id") or "")
+        if not eid:
+            raise ValueError("a knowledge effect needs its content-keyed id")
+        if eid in self.knowledge_effect_ids():
+            return False
+        self._append(KNOWLEDGE_EFFECT, payload)
+        return True
+
+    def knowledge_effect_ids(self) -> frozenset:
+        return frozenset(str(r.get("effect_id") or "")
+                         for r in self._rows()
+                         if r.get("record") == KNOWLEDGE_EFFECT)
+
+    def knowledge_effects(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == KNOWLEDGE_EFFECT)
 
     def macro_observation_ids(self) -> frozenset:
         return frozenset(str(r.get("observation_id") or "")

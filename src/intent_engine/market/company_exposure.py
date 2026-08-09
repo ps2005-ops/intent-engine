@@ -236,45 +236,87 @@ def _sentences(text: str) -> List[str]:
             if s.strip()]
 
 
-def read_exposures(rows: Sequence[dict], *, company_id: str) -> List[Exposure]:
+def read_exposures(rows: Sequence[dict], *, company_id: str,
+                   effects: Optional[list] = None) -> List[Exposure]:
     """Every exposure this company's OWN evidence establishes.
 
     Reads only rows filed under this company. A sentence in a competitor's
     filing that mentions this company does not establish this company's
     exposure — it establishes the competitor's view of it, which is a
     different and weaker fact.
+
+    Pass a list as `effects` to have the attribution recorded: CREATED when a
+    sentence first establishes a dimension, REVISED when a filing upgrades a
+    reporting-derived rating, and NO_CHANGE for the great majority of rows
+    that match nothing. The NO_CHANGE rows are the point — 257 of 260
+    dimensions are unrated, and without a record of the evidence that failed
+    to move them the research reward cannot tell a productive source from a
+    prolific one.
     """
+    from . import knowledge_effect as KE
+
     mine = [r for r in rows
             if r.get("record") == "evidence"
             and r.get("subject_company") == company_id]
 
     found: Dict[str, Exposure] = {}
     for row in mine:
+        eid = str(row.get("evidence_id") or "")
+        observed = str(row.get("observed_at") or "")[:10]
         standing = standing_for(row.get("source_role"))
         if standing == UNKNOWN:
+            if effects is not None and eid:
+                effects.append(KE.no_change(
+                    eid, reason=("source role establishes no exposure "
+                                 f"standing: {row.get('source_role')!r}"),
+                    target_type=KE.COMPANY_EXPOSURE, occurred_at=observed,
+                    created_at=observed))
             continue
         text = str(row.get("fact") or "")
-        eid = str(row.get("evidence_id") or "")
+        moved = False
         for sentence in _sentences(text):
             for dimension, pattern in _COMPILED:
                 held = found.get(dimension)
                 # The company's own word outranks a report of it, so a filing
                 # arriving after a headline UPGRADES the standing rather than
                 # being discarded as a duplicate.
-                if held is not None and not (
-                        held.standing == INFERRED and standing == OBSERVED):
+                upgrade = (held is not None and held.standing == INFERRED
+                           and standing == OBSERVED)
+                if held is not None and not upgrade:
                     continue
                 if pattern.search(sentence):
                     found[dimension] = Exposure(
                         company_id=company_id, dimension=dimension,
                         standing=standing, basis=sentence[:240],
                         evidence_ids=(eid,) if eid else (),
-                        observed_at=str(row.get("observed_at") or "")[:10],
+                        observed_at=observed,
                         note=f"established by {row.get('source_role')}")
+                    moved = True
+                    if effects is not None and eid:
+                        effects.append(KE.KnowledgeEffect(
+                            evidence_id=eid,
+                            target_type=KE.COMPANY_EXPOSURE,
+                            target_id=f"{company_id}:{dimension}",
+                            effect_type=(KE.REVISED if upgrade
+                                         else KE.CREATED),
+                            before_state=(held.standing if held else UNKNOWN),
+                            after_state=standing,
+                            occurred_at=observed, created_at=observed,
+                            reason=(f"{'upgraded' if upgrade else 'opened'} "
+                                    f"{dimension} from a "
+                                    f"{row.get('source_role')} source"),
+                            standing=KE.DIRECT,
+                            provenance="company_exposure.read_exposures"))
+        if effects is not None and eid and not moved:
+            effects.append(KE.no_change(
+                eid, reason="no sentence in this evidence names an exposure",
+                target_type=KE.COMPANY_EXPOSURE, occurred_at=observed,
+                created_at=observed))
     return [found[d] for d in DIMENSIONS if d in found]
 
 
-def profile(rows: Sequence[dict], *, company_id: str) -> Dict[str, Exposure]:
+def profile(rows: Sequence[dict], *, company_id: str,
+            effects: Optional[list] = None) -> Dict[str, Exposure]:
     """The full profile — every dimension, rated or explicitly unknown.
 
     Total by construction. A caller that only receives the rated dimensions
@@ -282,7 +324,8 @@ def profile(rows: Sequence[dict], *, company_id: str) -> Dict[str, Exposure]:
     the ones a reader most needs to be told about.
     """
     rated = {e.dimension: e for e in read_exposures(rows,
-                                                    company_id=company_id)}
+                                                    company_id=company_id,
+                                                    effects=effects)}
     return {d: rated.get(d) or unknown(company_id, d) for d in DIMENSIONS}
 
 

@@ -486,6 +486,85 @@ def compare(log: Sequence[ResearchRecord],
     }
 
 
+# --- the log, built from what the evidence actually did -------------------------------
+
+def log_from_effects(rows: Sequence[dict], effects: Sequence,
+                     *, costs: Optional[Dict[str, float]] = None
+                     ) -> List[ResearchRecord]:
+    """A research log priced by knowledge effects rather than by proxies.
+
+    THE DIFFERENCE FROM `reconstruct_log`. That function had to guess what a
+    piece of evidence was worth from the shape of the row: it could see
+    independence and duplication and nothing else, so three of the reward's
+    four positive terms were permanently zero and the volume attack won. This
+    one reads the effect log — what the evidence CHANGED — so
+    `resolved_open_question`, `discriminating` and `decision_relevant` become
+    measurements instead of blanks.
+
+    Evidence with a NO_CHANGE effect is a real, priced outcome: the source was
+    consulted and moved nothing. Evidence with NO effect record at all is not
+    in this log, because nobody examined it and pricing an unexamined action
+    would invent a result.
+    """
+    from . import knowledge_effect as KE
+
+    by_evidence = KE.by_evidence([e for e in effects])
+    meta = {str(r.get("evidence_id") or ""): r for r in rows
+            if r.get("record") == "evidence"}
+    out: List[ResearchRecord] = []
+    seen: Dict[Tuple[str, str, str], int] = {}
+    for evidence_id, mine in sorted(by_evidence.items()):
+        row = meta.get(evidence_id)
+        if row is None:
+            continue
+        family = _ROLE_TO_FAMILY.get(str(row.get("source_role") or ""))
+        subject = str(row.get("subject_company") or "")
+        if not family or not subject:
+            continue
+        # Only DIRECT effects may price an action; a reconstructed attribution
+        # is evidence about the past, not a measurement of this choice.
+        priceable = [e for e in mine if e.priceable]
+        changed = [e for e in priceable if e.changed]
+        fact = str(row.get("fact") or "")[:160]
+        key = (family, subject, fact)
+        duplicate = key in seen
+        seen[key] = seen.get(key, 0) + 1
+        try:
+            independence = float(row.get("independence"))
+        except (TypeError, ValueError):
+            independence = 0.0
+        out.append(ResearchRecord(
+            action=ResearchAction(
+                source_family=family, subject=subject,
+                question=str(row.get("evidence_type") or ""),
+                cost=(costs or {}).get(family, 1.0)),
+            outcome=ResearchOutcome(
+                outcome=USED,
+                independent=(independence >= INDEPENDENCE_THRESHOLD
+                             and not row.get("self_authored", False)),
+                duplicate=duplicate,
+                resolved_open_question=any(
+                    e.effect_type in (KE.RESOLVED, KE.CREATED)
+                    for e in changed),
+                # MEASURED NOW, not None. An effect that contradicted,
+                # resolved, invalidated or discriminated separated two live
+                # explanations; one that merely supported the leader did not.
+                discriminating=(bool(any(e.discriminating for e in changed))
+                                if priceable else None),
+                decision_relevant=any(
+                    e.target_type in (KE.CAUSAL_NODE, KE.CAUSAL_EDGE,
+                                      KE.THESIS, KE.COMPANY_EXPOSURE,
+                                      KE.ECONOMIC_STATE,
+                                      KE.FOUNDER_DECISION_COMPONENT)
+                    for e in changed)),
+            at=str(row.get("observed_at") or ""),
+            reconstructed=not any(e.priceable for e in mine),
+            context={"subject": subject,
+                     "question_type": str(row.get("evidence_type")
+                                          or "unknown")}))
+    return out
+
+
 # --- rebuilding a log the engine never kept -----------------------------------------
 
 #: How a source role in the ledger maps onto the family a policy would choose.
@@ -568,6 +647,11 @@ def reconstruct_log(rows: Sequence[dict]) -> List[ResearchRecord]:
 
 # --- reward hacking ---------------------------------------------------------------
 
+#: Populated by `audit_reward` so the change-rate pass reads the same policy
+#: objects that were evaluated, learning included.
+_POLICY_BY_NAME: Dict[str, "Policy"] = {}
+
+
 def audit_reward(log: Sequence[ResearchRecord]) -> dict:
     """Try to farm the reward, and report whether it can be farmed.
 
@@ -603,6 +687,12 @@ def audit_reward(log: Sequence[ResearchRecord]) -> dict:
                          / max(1, len(rs))), name="ATTACK_CHEAPEST"),
     ]
     honest = [VOIPolicy(), ContextualBanditPolicy(), RandomPolicy()]
+    # Kept by name so the change-rate pass can re-ask each policy what it
+    # would have chosen. A fresh instance would be wrong: the bandit learned
+    # during the evaluation, and re-running it cold would score a different
+    # policy from the one that was measured.
+    global _POLICY_BY_NAME
+    _POLICY_BY_NAME = {p.name: p for p in attacks + honest}
     results = {p.name: evaluate_offline(log, p) for p in attacks + honest}
     # TRUSTWORTHY ONLY. A bandit that matched twelve of three hundred rows can
     # post the highest mean in the table on noise, and letting it sit above an
@@ -618,16 +708,73 @@ def audit_reward(log: Sequence[ResearchRecord]) -> dict:
     top = max(scored, key=lambda n: scored[n])
     ties = sorted(n for n, v in scored.items()
                   if abs(v - scored[top]) < 1e-9)
+
+    # AN ATTACK WINNING IS NOT THE SAME AS THE REWARD BEING HACKED, and the
+    # first version of this audit could not tell the difference. It reported
+    # HACKABLE because ATTACK_VOLUME topped the table — but ATTACK_VOLUME
+    # picks the family with the most accepted answers, and in this corpus that
+    # family also has the HIGHEST rate of knowledge change (0.76), the highest
+    # discrimination rate and the LOWEST duplication (0.03). The volume arm and
+    # the value arm are the same arm. Calling that a hack would mean the audit
+    # fires whenever the best source is also the most prolific one, which is
+    # most of the time, and an alarm that is always on is not an alarm.
+    #
+    # A hack is winning WITHOUT producing knowledge. So the test is whether
+    # the leading attack changes less per action than the best honest policy:
+    # farming volume means a low change rate, and a source that genuinely
+    # teaches has a high one.
+    change_rate = _change_rate_by_policy(log, results)
+    attackers = [n for n in ties if n.startswith("ATTACK_")]
+    honest_best = max((n for n in scored if not n.startswith("ATTACK_")),
+                      key=lambda n: scored[n], default="")
+    hacked = []
+    for name in attackers:
+        mine = change_rate.get(name)
+        theirs = change_rate.get(honest_best)
+        if mine is None or theirs is None or mine < theirs:
+            hacked.append(name)
     return {
         "contract": CONTRACT,
         "audited": len(log),
         "scores": {n: round(v, 4) for n, v in sorted(scored.items())},
+        "change_rate": {n: round(v, 4) for n, v in sorted(change_rate.items())},
         "not_trustworthy": unscored,
         "top": top,
-        "hackable": any(n.startswith("ATTACK_") for n in ties),
         "tied_at_the_top": ties,
-        "note": ("an attack topping this ranking — or tying with the best "
-                 "honest policy — is a defect in the reward, not a good "
-                 "policy; the fix is a reward term, never a rule forbidding "
-                 "the attack"),
+        "best_honest": honest_best,
+        "hackable": bool(hacked),
+        "hacking_policies": sorted(hacked),
+        "note": ("an attack is a hack when it wins while changing LESS per "
+                 "action than the best honest policy; an attack that wins "
+                 "because the prolific source is also the informative one is "
+                 "the reward working, not failing"),
     }
+
+
+def _change_rate_by_policy(log: Sequence[ResearchRecord],
+                           results: Dict[str, PolicyEvaluation],
+                           options: Sequence[str] = SOURCE_FAMILIES
+                           ) -> Dict[str, float]:
+    """Share of a policy's matched actions that changed a knowledge object.
+
+    Measured off the outcome fields the effect log now fills in. Before
+    attribution existed this could not be computed at all, which is why the
+    audit had to fall back on "did an attack win" and reported a false
+    positive on the first corpus it saw.
+    """
+    out: Dict[str, float] = {}
+    for name in results:
+        policy = _POLICY_BY_NAME.get(name)
+        if policy is None:
+            continue
+        matched = [r for r in log
+                   if policy.choose(dict(r.context), list(options))
+                   == r.action.source_family]
+        if not matched:
+            continue
+        changed = sum(1 for r in matched
+                      if r.outcome.resolved_open_question
+                      or r.outcome.decision_relevant
+                      or r.outcome.discriminating is True)
+        out[name] = changed / len(matched)
+    return out

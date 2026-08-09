@@ -111,6 +111,19 @@ _CREDIT_SPREADS = (
 _REGIME_TARGET_SERIES = "STATCAN_V41690973"
 
 
+class _Row:
+    """A ledger dict read with attribute access.
+
+    `from_reconciliation` reads a Reconciliation object; the ledger stores
+    dicts. Wrapping is the row-shape seam this project has been caught by
+    before — a getattr-only reader silently folds a dict into one empty
+    record rather than failing.
+    """
+
+    def __init__(self, row: dict) -> None:
+        self.__dict__.update(row)
+
+
 def _macro_sweep(ctx: C.CycleContext) -> dict:
     """Acquire the economy, and keep it.
 
@@ -890,7 +903,25 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         subjects = sorted({str(r.get("subject_company") or "") for r in rows
                            if r.get("record") == "evidence"
                            and r.get("subject_company")})
-        profiles = {c: CX.profile(rows, company_id=c) for c in subjects}
+        # ATTRIBUTION, WRITTEN WHERE THE EXPOSURE IS READ. Most rows match
+        # no pattern and produce NO_CHANGE; those are the majority and they
+        # are what makes a prolific source distinguishable from a productive
+        # one.
+        from . import knowledge_effect as KEF
+
+        exposure_effects: list = []
+        profiles = {c: CX.profile(rows, company_id=c, effects=exposure_effects)
+                    for c in subjects}
+        for row in rows:
+            if row.get("record") == "reconciliation":
+                exposure_effects.extend(KEF.from_reconciliation(
+                    _Row(row), created_at=ctx.as_of[:10]))
+        payload["knowledge_effects"] = {
+            **KEF.summarise(exposure_effects,
+                            evidence_total=sum(1 for r in rows
+                                               if r.get("record")
+                                               == "evidence")),
+        }
         payload["company_exposure"] = {
             **CX.summarise(profiles),
             "rated": [e.as_dict() for p in profiles.values()
@@ -944,7 +975,12 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         # exists this reads it instead.
         from . import research_policy as RPOL
 
-        research_log = RPOL.reconstruct_log(rows)
+        # PRICED BY WHAT THE EVIDENCE DID, not by the shape of the row. The
+        # reconstructed log could only see independence and duplication, so
+        # three of the reward's four positive terms were permanently zero and
+        # the volume attack could not lose. With effects, they are measured.
+        research_log = (RPOL.log_from_effects(rows, exposure_effects)
+                        or RPOL.reconstruct_log(rows))
         payload["research_policy"] = {
             **RPOL.compare(research_log, [
                 RPOL.VOIPolicy(), RPOL.ContextualBanditPolicy(),
