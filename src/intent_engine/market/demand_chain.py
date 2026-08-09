@@ -183,14 +183,15 @@ def _sentences(text: str) -> List[str]:
             if s.strip()]
 
 
-def read_states(rows: Sequence[dict], *, company_id: str
-                ) -> Dict[str, DemandReading]:
+def read_states(rows: Sequence[dict], *, company_id: str,
+                aliases: Sequence[str] = ()) -> Dict[str, DemandReading]:
     """Every demand state this company's own material states a figure for.
 
     A state claimed by a third party is INFERRED, not OBSERVED. A backlog is a
     number only the company can produce, so a report of one is a report of what
     the company said, which is a weaker fact than the company saying it.
     """
+    from . import demand_extraction as DX
     from . import economic_quantity as EQ
 
     mine = [r for r in rows if r.get("record") == "evidence"
@@ -202,23 +203,35 @@ def read_states(rows: Sequence[dict], *, company_id: str
         eid = str(row.get("evidence_id") or "")
         period = str(row.get("observed_at") or "")[:10]
         for sentence in _sentences(str(row.get("fact") or "")):
-            for state, pattern in _COMPILED:
-                if not pattern.search(sentence):
-                    continue
-                held = found.get(state)
-                if held is not None and _RANK[held.standing] >= \
-                        _RANK[standing]:
-                    continue
-                quantities, _ = EQ.extract(sentence, evidence_id=eid,
-                                           period=period)
-                relevant = [q for q in quantities]
-                found[state] = DemandReading(
-                    company_id=company_id, state=state,
-                    direction=_direction(sentence), standing=standing,
-                    value=relevant[0].value if relevant else None,
-                    unit=relevant[0].unit if relevant else "",
-                    period=period, basis=sentence[:240],
-                    evidence_ids=(eid,) if eid else ())
+            # THE PHRASE LIST USED TO DECIDE THIS ON ITS OWN, AND IT WAS
+            # WRONG HALF THE TIME. Measured against a labelled corpus, using
+            # `_PHRASES` as a detector scores precision 0.50: it admits "we
+            # placed orders for new manufacturing equipment" as customer
+            # ORDERS, a rival's bookings as ours, "we expect bookings to
+            # improve" as an observed booking, and an engineering team's
+            # ticket backlog as committed demand.
+            #
+            # `demand_extraction` asks the four questions separately —
+            # object, standing, subject, role — and refuses with the reason
+            # that applies. `_PHRASES` stays as the module's vocabulary and
+            # no longer decides admission.
+            reading = DX.read(sentence, aliases=aliases)
+            if not reading.admitted:
+                continue
+            state = reading.state
+            held = found.get(state)
+            if held is not None and _RANK[held.standing] >= _RANK[standing]:
+                continue
+            quantities, _ = EQ.extract(sentence, evidence_id=eid,
+                                       period=period)
+            relevant = [q for q in quantities]
+            found[state] = DemandReading(
+                company_id=company_id, state=state,
+                direction=reading.direction, standing=standing,
+                value=relevant[0].value if relevant else None,
+                unit=relevant[0].unit if relevant else "",
+                period=period, basis=sentence[:240],
+                evidence_ids=(eid,) if eid else ())
     return found
 
 
@@ -312,9 +325,10 @@ class Chain:
         }
 
 
-def build(rows: Sequence[dict], *, company_id: str, as_of: str = "") -> Chain:
+def build(rows: Sequence[dict], *, company_id: str, as_of: str = "",
+          aliases: Sequence[str] = ()) -> Chain:
     """Assemble the chain from what the company's own material states."""
-    readings = read_states(rows, company_id=company_id)
+    readings = read_states(rows, company_id=company_id, aliases=aliases)
     full = {s: readings.get(s) or unknown(company_id, s) for s in STATES}
     links: List[DemandLink] = []
     for upstream, downstream in LINKS:

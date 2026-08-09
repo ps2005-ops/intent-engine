@@ -198,3 +198,23 @@ items:
       exists would be a guard over an empty path — recorded as NOT_BUILT in
       break_proofs_v4i rather than proven against nothing.
     goes_to: V4_LATE
+
+  - id: BKL-UNCLOSED-REGION-FALLBACK
+    class: HARDENING
+    found_in: E-DEM-001
+    observed: >
+      A page that opens <nav> and never closes it leaves the chrome region on
+      the stack for the rest of the document, so <main> content is tagged
+      chrome too, `body_blocks` comes back empty, and `parse_html`'s
+      whole-page fallback then restores the navigation it was trying to
+      strip. Reproduced deliberately while writing the parser tests.
+    why_not_a_blocker: >
+      Pre-existing and unrelated to the filing-prose repair: it is a property
+      of the region stack, not of what gets buffered. A test asserting the
+      correct behaviour was written, failed, and was REMOVED rather than left
+      red or weakened — asserting a guarantee the parser does not make would
+      have been a test about an intention.
+
+      The real repair is for a region to close when its parent closes, which
+      changes region semantics for every page and belongs in its own node.
+    goes_to: V4_LATE

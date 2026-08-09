@@ -59,6 +59,17 @@ axes:
       single-tenant public-data system would be true and worthless. Belongs to V4-I10.
 
       '
+  EVIDENCE_EXTRACTION:
+    status: PARTIAL
+    note: 'E-DEM-001, repaired at 69a2438. The parser was discarding 79% of every filing: text was
+      buffered only inside a block-tag whitelist that had no <div>, and SEC filings write prose in
+      <div>/<font>. Measured on Caterpillar Q2 2026: 13,462 -> 33,742 characters, 30 -> 128 candidate
+      sentences, 0 -> 5 demand sentences. PARTIAL not PASS: the sentences now reach the classifier and
+      the classifier still refuses the narrative ones, because no family carries orders, bookings or
+      shipments as an object. Coverage in the LEDGER changes only as new cycles ingest — the corpus
+      already written was extracted under the old parser and is not rewritten.
+
+      '
   ECONOMIC_DATA:
     status: PARTIAL
     note: 15/30 macro conditions populated

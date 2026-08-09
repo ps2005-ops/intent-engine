@@ -48,6 +48,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from intent_engine.strategic_intelligence import evidence_text as EText
 
+from . import demand_extraction as DX
 from . import event_patterns as EP
 from . import micro_evidence as ME
 
@@ -450,10 +451,30 @@ def translate(observations: Sequence[Any], *, subject_company: str,
             if kept >= MAX_ITEMS_PER_OBSERVATION:
                 break
             etype, action, _obj = EP.explain(candidate.text)
+            demand = None
+            if etype is None:
+                # THE DEMAND SECOND OPINION. The commercial-event families
+                # model an ACTION on an OBJECT, and a demand sentence often
+                # has neither in that shape: "Strong order rates and a
+                # growing backlog reflect broadening momentum" states a
+                # commercial fact and no family can express it.
+                #
+                # `demand_extraction` asks a different set of questions —
+                # object, standing, subject, role — and refuses with the
+                # reason that applies, so a wrong-role sentence ("we placed
+                # orders for new equipment") is refused as WRONG_ROLE rather
+                # than admitted as customer demand. Its refusal reason is
+                # recorded here instead of `no_commercial_event`, which is
+                # what 1,059 candidates a cycle used to collapse into.
+                demand = DX.read(candidate.text, aliases=aliases)
+                if demand.admitted:
+                    etype = ME.DEMAND_SIGNAL
             etype = etype or default_type
             if etype is None:
                 stats.unclassifiable += 1
-                stats.note_reason("no_commercial_event")
+                stats.note_reason(
+                    f"demand_{demand.reason.lower()}" if demand is not None
+                    and demand.reason else "no_commercial_event")
                 rejected.append(f"unclassifiable: {candidate.text[:60]!r}")
                 continue
             # Naming the subject got this far; being the company the results

@@ -106,6 +106,19 @@ COMMITTED_DEMAND = "COMMITTED_DEMAND"
 #: differ: a company can pass a tariff through, absorb it, or relocate, and
 #: which one it does is exactly the strategic question worth asking.
 COST_SHOCK = "COST_SHOCK"
+#: A demand-stage fact the commercial-event families cannot express: orders,
+#: bookings, shipments, cancellations, customer intent. Added 2026-08-09 after
+#: the parser repair put these sentences in front of the classifier for the
+#: first time and it returned None for all of them — "Strong order rates and a
+#: growing backlog reflect broadening momentum" carries no action/object pair
+#: any family models.
+#:
+#: ONE type rather than one per stage, deliberately. The STAGE is not lost: it
+#: is recoverable from the sentence by `demand_extraction`, which is the same
+#: reader `demand_chain` uses, so the two cannot disagree about what a row
+#: says. Six near-identical types would have to be kept in step with that
+#: reader by hand, and the vocabulary has already disagreed with itself once.
+DEMAND_SIGNAL = "DEMAND_SIGNAL"
 
 EVIDENCE_TYPES = frozenset({
     EARNINGS_SURPRISE, GUIDANCE_REVISION, ESTIMATE_REVISION, PRICE_CHANGE,
@@ -126,7 +139,7 @@ EVIDENCE_TYPES = frozenset({
     # No production row has hit it yet, because the sentences were being
     # discarded a layer earlier by the HTML parser. Fixing that parser is
     # what makes this reachable, which is why both land in one commit.
-    COMMITTED_DEMAND, COST_SHOCK,
+    COMMITTED_DEMAND, COST_SHOCK, DEMAND_SIGNAL,
 })
 
 # --- contradiction role ---------------------------------------------------
