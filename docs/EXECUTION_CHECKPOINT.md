@@ -1211,3 +1211,71 @@ in customer stories usually names companies outside it.
   believing the yield.
 - A rivalry with no competitive object is refused. A motive with no
   alternatives is refused. One response is not a habit.
+
+## V4 session — I-ACC-001 and the pillar reconciliation (2026-08-09)
+
+Planner state is in `docs/execution/v4/`; this is the narrative record.
+
+**The engine can now say it is barely learning, which it previously could
+not.** Seven channels, derived from the effect log rather than cycle
+counters, computed independently and never averaged. Live at `80f3aa5`:
+ECONOMIC 29/402 changed (7.2%, MATURE) DEGRADING; RETENTION 402/402;
+CALIBRATION 3/11 EARLY; SYSTEM 20/41 INSUFFICIENT_HISTORY; FOUNDER and
+RESEARCH UNMEASURABLE; UNSUPERVISED 1/3 EARLY_WARNING.
+`HIGH_ACTIVITY_LOW_LEARNING` fires on real data: 347 evidence rows, 373
+attributions that moved nothing, **0 thesis transitions**.
+
+Three defects in that node's own seam, all live, none of which had ever
+raised or logged anything:
+
+1. **A block that succeeded every cycle and reached no record.**
+   `_knowledge_summary` is a whitelist projection and did not name
+   `learning_acceleration`, so every cycle's result was dropped on the way to
+   the dated artifact. The report meanwhile had a section *titled* LEARNING
+   ACCELERATION rendering trading throughput. This is `a caller is not a
+   call` inverted: there, a block raised every cycle and nothing projected
+   the error; here, a block succeeded and nothing projected the result. Both
+   are invisible for exactly as long as nobody asks the artifact a question
+   it should be able to answer.
+
+2. **An absent link reported as a measured zero.** The research channel's
+   first implementation graded `0 of 14` outcomes productive. All 14 carry an
+   EMPTY `knowledge_effect_ids` — nothing records what research produced, and
+   that reads identically to research that produced nothing while being the
+   opposite finding.
+
+3. **Founder value was publication volume**: `len(strategic_export.published)`
+   passed as `decision_impacts`.
+
+**The window key was the trap.** `created_at` on 347 of 402 effects is the
+evidence's observation date, set deliberately so `effect_id` stays stable
+against nightly re-derivation. Windowing on it yields a learning history back
+to February for a log whose write path landed on 2026-08-09 — retrieval time
+wearing occurrence time's clothes, the same defect that blocks D-REP-002 one
+layer down. Windows key on ledger append order instead.
+
+**L-SRC-001**: source health is a persisted state per family per cycle. BLS
+has returned 503 on every recorded cycle, and that fact was reported and
+forgotten every time. The rule proven by mutation: a degraded source raises
+uncertainty and NEVER weakens the claim — otherwise "we stopped looking"
+becomes "we were wrong". An unrecognised failure is UNCLASSIFIED carrying its
+message, never mapped onto the nearest known state.
+
+**The five pillars were reconciled into the graph once**, as PROGRAM L, and
+scoped by what this branch can honestly verify. The information barrier and
+the tenant air-gap are NOT_APPLICABLE with their invariants recorded: a
+private-data firewall built where there is no private data would report PASS,
+which is the architecture-only completion this program keeps having to undo.
+
+**D-REP-002 was not touched.** `macro_retrieval_months` is still 1 of 6.
+
+### Added to the standing rules
+
+- A channel that measures nothing must say UNMEASURABLE. A denominator of
+  zero is not a rate of zero, and an absent link is not a measured failure.
+- Never window learning on a date field a writer can set. Append order is the
+  only write order the ledger actually has.
+- NOT_CAUGHT on a break proof is a finding about the code. Proof 3 of v4h
+  showed that admitting Founder objects to the economic channel changed the
+  numerator and failed no test: every test asserted names, none asserted
+  membership. Write the missing guard; do not repoint the proof.

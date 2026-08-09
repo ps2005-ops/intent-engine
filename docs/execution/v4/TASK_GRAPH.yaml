@@ -850,7 +850,7 @@ tasks:
     program: L
     title: Source health is a state, so a dead source cannot read as a quiet economy
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 2
     severity: MATERIAL_DEFECT
     expected_value: >
@@ -889,6 +889,7 @@ tasks:
     maturity_required: EVALUATED
     tests: tests/test_market_source_health.py
     minimum_data: none
+    completion_evidence: "LIVE at runtime_git_sha 8f14906, night cycle 2026-08-09, dry_run false. The Bureau of Labor Statistics 503 now appears as a STATE in the dated artifact: DEGRADED, failure_streak 1, last_success '' (it has never succeeded in the record, and the empty string says so rather than inventing a date). observability 0.8333, 5 of 6 families delivering, unclassified []. Six source_health rows persisted to the ledger — successes included, because 'when did this last work' is the question that decides whether silence is new — and repeats are not deduped, because it is the streak that turns a bad minute into an outage. The rule is proven by mutation rather than asserted: break proofs v4i-4 and v4i-5 shade the confidence and suppress the uncertainty flag, and both are caught. 30 tests. 1 recorded NOT_BUILT: staleness from expected cadence has no reader, since the macro adapters publish no cadence."
 
   - id: L-ADV-001
     program: L
