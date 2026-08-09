@@ -313,14 +313,14 @@ tasks:
     program: C
     title: EconomicMethod registry
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     acceptance_criteria:
       - each method declares question types, input requirements, minimum
         sample, assumptions, output type, known failure modes
       - a registry entry does NOT imply the estimator is implemented
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "647d2e2+; 16 tests; 9 declared / 3 implemented; measured on 15 real macro series, persistence best on 9"
 
   - id: C-MET-002
     program: C
@@ -356,13 +356,13 @@ tasks:
     program: D
     title: Vintage wall for replay
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     acceptance_criteria:
       - data access at historical T is restricted to what existed at T
       - a leakage attempt raises rather than warns
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "647d2e2+; 19 tests; wall raises, admission by observation time, leak_surface measured, episode selection AST-guarded"
 
   - id: D-REP-002
     program: D
