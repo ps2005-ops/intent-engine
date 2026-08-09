@@ -11,13 +11,21 @@ blockers:
   - id: BLK-PROSPECTIVE-SAMPLE
     class: BLOCKED_DATA
     blocks: [B-POL-002, B-VOI-002, B-HACK-001, B-BANDIT-001]
-    measured: "prospective_decisions = 0"
+    measured: "prospective_decisions = 2 (first written 2026-08-09)"
     required: "100 for policy comparison and hack audit; 50 for VOI calibration"
     why: >
       The research log is reconstructed from evidence that survived. Actions
       returning nothing are structurally absent, so every rate is biased toward
       success. No amount of analysis fixes this; only collection does.
-    prerequisite: A-RD-008
+    prerequisite: A-RD-008 (done) -- now rate-bound, not capability-bound
+    rate: >
+      The night cycle writes ONE decision per eligible acquisition family, and
+      cadence gating left 2 of 3 eligible on 2026-08-09. At ~2 per night, the
+      100-decision gate is ~50 cycles away. Raising the count by logging a
+      decision per (family, subject) would be inventing choices the cycle never
+      made: it picks families, not subjects. The honest levers are more
+      families or a finer real decision point, both of which are their own
+      nodes.
     invalid_workaround: >
       Do not evaluate a policy on reconstructed rows and report it as a policy
       result. A-RD-005 exists to make that mixing impossible.

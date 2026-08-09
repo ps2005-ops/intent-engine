@@ -18,7 +18,14 @@ axes:
   SUPPLY_CHAIN:             {status: BLOCKED_DATA, note: "no named supplier edges"}
   KNOWLEDGE_ATTRIBUTION:    {status: PASS, note: "session 3; 855 effects, 316/316 rows attributed"}
   UNSUPERVISED_DISCOVERY:   {status: PARTIAL, note: "geometry good, downstream utility unmeasured"}
-  RESEARCH_OBSERVABILITY:   {status: PARTIAL, note: "CORRECTED. Reconstructed log only; no prospective decision has ever been written. Program A."}
+  RESEARCH_OBSERVABILITY:
+    status: PARTIAL
+    note: >
+      Decisions are now written before the call and a live cycle produced 2 of
+      them with full candidate sets. Still PARTIAL, not PASS: both live
+      outcomes were SUCCESS, so no NO_RESULT or FAILED row has ever been
+      observed in production. The rows this layer exists to preserve are
+      unit-tested and unwitnessed.
   ACTIVE_LEARNING:          {status: BLOCKED_DATA, note: "gated on A-RD-008"}
   BANDIT_MATURITY:          {status: BLOCKED_DATA, note: "L0 interface only; no logged exploration"}
   METHOD_VALIDATION:        {status: PARTIAL}
@@ -45,8 +52,14 @@ axes:
   LIVE_PROJECTION_REACHES_REPORT:
     status: PARTIAL
     note: >
-      NEW AXIS, opened by reconciliation 2026-08-09. No run report on disk
-      contains the V4 projections; the code that emits them postdates the last
-      cycle by 63 minutes. Tracked as K-CYC-001. This axis exists because
-      "the object was built" and "the object reached an artifact a reader sees"
-      were being reported as the same claim.
+      RESOLVED IN PART, same day. The 2026-08-09 night cycle emitted the
+      session-3 projections: research_policy (log_size 321, reconstructed 0),
+      knowledge_effects (343 effects, 0 unattributed), economic_thesis,
+      unsupervised, founder_v4, demand_chain, presentation. That code was
+      correct all along and had never been run.
+
+      Still PARTIAL because the SAME cycle emitted source_preference and
+      research_decisions as empty objects — the run predated 431538b. The axis
+      stays open until a report carries them, because "the object was built"
+      and "the object reached an artifact a reader sees" are the two claims
+      this axis exists to keep apart.

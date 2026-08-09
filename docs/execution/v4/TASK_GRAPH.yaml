@@ -155,7 +155,7 @@ tasks:
     program: A
     title: INSTRUMENT -- production acquisition path writes decisions
     dependencies: [A-RD-001, A-RD-002, A-RD-003, A-RD-005, A-RD-006]
-    status: IN_PROGRESS
+    status: COMPLETE
     priority: 1
     expected_value: >
       The BUILD/INSTRUMENT split exists because of two recorded failures where
@@ -168,13 +168,13 @@ tasks:
       - a FRESH PROCESS reads back what the cycle wrote
     tests: tests/test_market_research_decision_wiring.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "431538b; live night cycle 2026-08-09 wrote 2 decisions + 2 outcomes to the production ledger at /Users/prathamsharma/intent-engine-market; candidate sets carry the cadence-blocked family with its reason; fresh-process readback verified by test and by direct probe"
 
   - id: A-RD-008
     program: A
     title: COLLECT -- run a real PAPER cycle and report the counts
     dependencies: [A-RD-007]
-    status: READY
+    status: COMPLETE
     priority: 1
     expected_value: The first legitimate prospective policy-training records.
     acceptance_criteria:
@@ -184,7 +184,7 @@ tasks:
       - counts are read from the persisted ledger, not from an in-process probe
     tests: null
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "live night cycle EXIT=0; 2 prospective decisions, 2 outcomes, both SUCCESS, 0 empty-handed, 2 with a forgone option; standing REPLAY_ONLY"
 
   # ---- PROGRAM B: ACTIVE RESEARCH LEARNING ------------------------------
 
@@ -231,7 +231,7 @@ tasks:
     program: B
     title: Baseline policy comparison on prospective data
     dependencies: [A-RD-008, B-POL-001]
-    status: WAITING_DEPENDENCY
+    status: BLOCKED_DATA
     priority: 3
     acceptance_criteria:
       - static order, historical acceptance, historical knowledge-change rate,
@@ -244,7 +244,7 @@ tasks:
     program: B
     title: Predicted vs realized VOI calibration
     dependencies: [A-RD-008]
-    status: WAITING_DEPENDENCY
+    status: BLOCKED_DATA
     priority: 3
     acceptance_criteria:
       - expected_voi paired with realized KnowledgeEffect-derived utility
@@ -257,7 +257,7 @@ tasks:
     program: B
     title: Reward-hack audit re-run on prospective data
     dependencies: [A-RD-008]
-    status: WAITING_DEPENDENCY
+    status: BLOCKED_DATA
     priority: 3
     expected_value: >
       Session 3 corrected a false HACKABLE finding: the volume arm was also the
@@ -582,7 +582,7 @@ tasks:
     program: K
     title: Verify V4 projections actually reach a run report
     dependencies: []
-    status: READY
+    status: COMPLETE
     priority: 1
     expected_value: >
       Reconciliation finding 2026-08-09: no cycle has ever run with the V4
@@ -594,5 +594,26 @@ tasks:
       - a cycle is run at this SHA and the written report contains
         research_policy, knowledge_effects, economic_thesis, unsupervised
       - any key still missing is diagnosed rather than reported as present
+    minimum_data: none
+    completion_evidence: "2026-08-09_night.json contains research_policy, knowledge_effects, economic_thesis, unsupervised, founder_v4, demand_chain, economic_quantities, presentation. research_policy reads log_size 321 reconstructed 0, which confirms the session-3 figure that previously had no artifact behind it."
+
+  - id: K-CYC-002
+    program: K
+    title: Verify source_preference and research_decisions reach a report
+    dependencies: []
+    status: READY
+    priority: 1
+    expected_value: >
+      The 2026-08-09 cycle emitted both keys EMPTY, because the run started
+      before 431538b and the process had already imported the older module.
+      This is the same staleness that K-CYC-001 was opened for, caught this
+      time by its own guard rather than reported as success. A cycle at
+      431538b or later settles it.
+    acceptance_criteria:
+      - a cycle is run at >= 431538b and the written report carries a non-empty
+        knowledge.research_decisions and knowledge.source_preference
+      - the decision count in the report equals what a fresh process reads from
+        the ledger
+    tests: null
     minimum_data: none
     completion_evidence: null
