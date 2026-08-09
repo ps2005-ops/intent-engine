@@ -666,3 +666,56 @@ tasks:
     tests: tests/test_market_thesis_history.py
     minimum_data: none
     completion_evidence: null
+
+  # ---- maturity audit 2026-08-09 (AGENT_PROTOCOL section on maturity) ----
+  # Mechanical check: for each COMPLETE capability whose acceptance implies
+  # runtime use, is there a production caller? Three had none. Two are real
+  # disconnections and get instrumentation nodes; the third is infrastructure
+  # whose consumer is already a node.
+
+  - id: A-RD-009
+    program: A
+    title: INSTRUMENT -- something fires a ResearchDelayedOutcome
+    dependencies: []
+    status: COMPLETE
+    priority: 2
+    expected_value: >
+      A-RD-004 was marked COMPLETE with the record built and guarded, and
+      grep finds ZERO production callers. Its own acceptance says it fires on
+      belief resolved / falsifier resolved / hypothesis discriminated /
+      thesis changed. Nothing fires it, so the delayed half of the research
+      reward is permanently empty and every action is priced only on what it
+      returned the same night. This is the G-THE-001 pattern, found by audit.
+    acceptance_criteria:
+      - a production seam appends a DelayedOutcome when a belief or falsifier
+        resolves, or when a thesis revision cites the evidence an action found
+      - the immediate reward is never rewritten
+      - a live cycle persists at least one, or reports zero honestly with the
+        reason no consequence has yet resolved
+    maturity_required: INSTRUMENTED
+    tests: tests/test_market_research_decision.py
+    minimum_data: none
+    completion_evidence: "58566f9; 5 tests + break proof v4d-31; DecisionOutcome.produced_evidence_ids filled by the acquisition step; credit_revisions wired into knowledge_step; an untraceable revision credits nobody rather than spreading reward across the night"
+
+  - id: C-MET-004
+    program: C
+    title: INSTRUMENT -- MethodPerformance accumulates from the cycle
+    dependencies: [C-MET-001]
+    status: DERIVED
+    priority: 3
+    expected_value: >
+      C-MET-001 was measured offline on 15 real macro series, which is a real
+      evaluation, but nothing in the cycle imports economic_method. So the
+      comparison is a one-off a human ran, not memory the engine keeps, and
+      the question "which method works for which question, in this regime"
+      cannot accumulate an answer.
+    acceptance_criteria:
+      - the cycle scores the baselines on the macro series it holds and
+        persists MethodPerformance per (method, series, question)
+      - persistence is measured, not assumed; a fresh process reads it back
+      - the report carries which method currently leads per question type
+    maturity_required: INSTRUMENTED
+    tests: tests/test_market_economic_method.py
+    minimum_data: none
+    completion_evidence: null
+
