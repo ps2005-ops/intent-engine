@@ -936,6 +936,52 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
                 for d in clusters.get("discoveries", [])],
             "anomalies": [d["label"] for d in odd.get("discoveries", [])],
         }
+
+        # WHAT THE ENGINE CHOSE TO LOOK AT, SCORED. The log is reconstructed
+        # from evidence that survived, so it is biased toward success and says
+        # so; the point of running it every cycle is that the reward audit is
+        # a standing check rather than a one-off, and the day a real log
+        # exists this reads it instead.
+        from . import research_policy as RPOL
+
+        research_log = RPOL.reconstruct_log(rows)
+        payload["research_policy"] = {
+            **RPOL.compare(research_log, [
+                RPOL.VOIPolicy(), RPOL.ContextualBanditPolicy(),
+                RPOL.HistoricalYieldPolicy(), RPOL.RandomPolicy(),
+                RPOL.FixedPolicy(RPOL.INDEPENDENT_REPORTING),
+                RPOL.FixedPolicy(RPOL.REGULATORY_FILING)]),
+            "reward_audit": RPOL.audit_reward(research_log),
+        }
+
+        # THE OBJECT EVERY CEO-FACING SURFACE IS A PROJECTION OF. Built from
+        # the transmissions rather than written beside them, so a briefing
+        # cannot contain a claim the thesis does not — `project` runs the
+        # overclaim check on its way out.
+        from . import economic_thesis as ETH
+        from . import founder_v4_view as FV4
+
+        theses = ETH.build_all(proposed, as_of=ctx.as_of)
+        reasons = {s.state_kind: s.reason for s in states if s.known}
+        views = [FV4.project(t, state_reason=reasons.get(
+            t.macro_conditions[0] if t.macro_conditions else "", ""))
+            for t in theses]
+        contests = ETH.competitions(theses)
+        # KEYED APART FROM THE COUNTS. `summarise` reports `theses` and
+        # `views` as integers; spreading the full records under the same keys
+        # replaced both counts with lists, and the report's bounded projection
+        # would then have embedded every briefing in full.
+        payload["economic_thesis"] = {
+            **ETH.summarise(theses),
+            "thesis_records": [t.as_dict() for t in theses],
+            "competitions": [c.as_dict() for c in contests],
+            "contested": sum(1 for c in contests if c.contested),
+            "proofs": [ETH.prove(t).as_dict() for t in theses],
+        }
+        payload["founder_v4"] = {
+            **FV4.summarise(views),
+            "briefings": [v.as_dict() for v in views],
+        }
     except Exception as exc:  # noqa: BLE001
         payload["company_exposure"] = {"error": f"{type(exc).__name__}: {exc}"}
         payload.setdefault("transmission",

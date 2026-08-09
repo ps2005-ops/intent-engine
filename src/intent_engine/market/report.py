@@ -640,6 +640,37 @@ def _knowledge_summary(knowledge: dict) -> dict:
         "belief_maturity": {
             "beliefs": (knowledge.get("belief_maturity") or {}).get("beliefs"),
         },
+        # V4. Bounded like the rest: counts and standings, never the prose.
+        # The full theses and briefings live in the knowledge payload; what a
+        # reader of the report needs is whether the layer produced anything
+        # and whether any of it overclaimed.
+        "unsupervised": {k: (knowledge.get("unsupervised") or {}).get(k)
+                         for k in ("discoveries", "by_kind", "methods_scored",
+                                   "methods_economically_useful",
+                                   "all_have_a_research_question", "error")
+                         if (knowledge.get("unsupervised") or {}).get(k)
+                         is not None},
+        "research_policy": {
+            k: (knowledge.get("research_policy") or {}).get(k)
+            for k in ("log_size", "reconstructed", "best", "beats_random",
+                      "deployable", "error")
+            if (knowledge.get("research_policy") or {}).get(k) is not None},
+        "reward_audit": {
+            k: ((knowledge.get("research_policy") or {}).get("reward_audit")
+                or {}).get(k)
+            for k in ("audited", "top", "hackable", "tied_at_the_top")
+            if ((knowledge.get("research_policy") or {}).get("reward_audit")
+                or {}).get(k) is not None},
+        "economic_thesis": {
+            k: (knowledge.get("economic_thesis") or {}).get(k)
+            for k in ("theses", "by_standing", "assertable",
+                      "with_alternatives", "falsifiers", "contested", "error")
+            if (knowledge.get("economic_thesis") or {}).get(k) is not None},
+        "founder_v4": {
+            k: (knowledge.get("founder_v4") or {}).get(k)
+            for k in ("views", "subjects", "all_carry_alternatives",
+                      "all_carry_a_watch_item", "by_standing", "error")
+            if (knowledge.get("founder_v4") or {}).get(k) is not None},
         "note": ("bounded projection; the append-only ledger is the record "
                  "and every figure here is recomputable from it"),
     }
