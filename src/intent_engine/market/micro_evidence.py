@@ -115,6 +115,18 @@ EVIDENCE_TYPES = frozenset({
     MACRO_RELEASE, MARKET_REACTION, CAPEX_SIGNAL, PRICING_SIGNAL,
     PROCUREMENT_SIGNAL, EARNINGS_RESULT, EXECUTIVE_CHANGE, CAPITAL_RETURN,
     PARTNERSHIP, MA_ACTIVITY,
+    # THE TWO ADDED ON 2026-08-07 AND NEVER ADMITTED HERE.
+    # Both were introduced with documented patterns after five real filings
+    # were measured, and `evidence()` rejects any type absent from this set —
+    # so `classify_sentence` returned COMMITTED_DEMAND for "contract
+    # liabilities were $7,280 million", and `build` then raised
+    # EvidenceRejected on it. A type the classifier can produce and the
+    # constructor refuses is a vocabulary that disagrees with itself.
+    #
+    # No production row has hit it yet, because the sentences were being
+    # discarded a layer earlier by the HTML parser. Fixing that parser is
+    # what makes this reachable, which is why both land in one commit.
+    COMMITTED_DEMAND, COST_SHOCK,
 })
 
 # --- contradiction role ---------------------------------------------------
