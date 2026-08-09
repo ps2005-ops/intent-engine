@@ -169,10 +169,59 @@ def verify(proof: Proof) -> Result:
     return Result(proof.label, HELD)
 
 
+#: One mutation run at a time, per worktree.
+#:
+#: THE INCIDENT THIS PREVENTS. Two break-proof scripts were once started
+#: against the same worktree minutes apart. They mutated the same files
+#: simultaneously, which produced a DIRTY_RESTORE, two spurious ANCHOR_MISSING
+#: results, and three source files left mutated — one of them an
+#: `import nonexistent_module_xyz` that broke a module at import and turned
+#: three unrelated tests red. Every one of those looks like a real finding and
+#: none of them was. A lock is cheaper than the hour spent telling them apart.
+LOCK = ROOT / ".break_proof.lock"
+
+#: A lock older than this is assumed to belong to a run that was killed.
+#: Long enough that a slow suite never trips it, short enough that a stale
+#: file does not block the next session.
+STALE_LOCK_SECONDS = 3600
+
+
+class ConcurrentMutation(RuntimeError):
+    """Another mutation run holds this worktree."""
+
+
+def _acquire_lock() -> None:
+    if LOCK.exists():
+        age = time.time() - LOCK.stat().st_mtime
+        if age < STALE_LOCK_SECONDS:
+            raise ConcurrentMutation(
+                f"{LOCK} is held (age {int(age)}s) by pid "
+                f"{LOCK.read_text().strip() or 'unknown'}. Break proofs "
+                "mutate real source files and MUST run one at a time against "
+                "a worktree; two at once corrupt each other's restores. Wait, "
+                "or delete the lock if that process is gone.")
+        LOCK.unlink()
+    LOCK.write_text(str(os.getpid()))
+
+
+def _release_lock() -> None:
+    try:
+        LOCK.unlink()
+    except OSError:
+        pass
+
+
 def run_all(proofs: Sequence[Proof], *, title: str = "") -> int:
     if title:
         print(title)
-    results = [verify(p) for p in proofs]
+    _acquire_lock()
+    try:
+        results = [verify(p) for p in proofs]
+    finally:
+        # Released even on a crash, so a killed run does not block the next
+        # one for an hour — the staleness window is the backstop, not the
+        # normal path.
+        _release_lock()
     for result in results:
         mark = "ok   " if result.ok else "FAIL "
         print(f"  {mark} {result.label}")

@@ -36,9 +36,13 @@ def test_a_number_belonging_to_analysts_is_refused():
 
 def test_a_buyback_is_not_revenue():
     """The live defect: the sentence names revenue and the number is a buyback."""
-    got, _ = EQ.extract("Grows Q2 revenue and details $400M buyback")
-    assert all(q.quantity_type != EQ.REVENUE or q.value != 400.0
-               for q in got)
+    # The figure carries a unit and a scale, so nothing else refuses it: the
+    # only thing standing between this sentence and "revenue of 400 million"
+    # is the check that a use word downstream claims the number.
+    got, refused = EQ.extract(
+        "Revenue grew and the board approved a $400 million buyback.")
+    assert [q for q in got if q.quantity_type == EQ.REVENUE] == []
+    assert "number_claimed_by_another_use" in refused
 
 
 def test_the_nearest_number_wins_even_when_it_precedes_the_subject():
@@ -127,10 +131,15 @@ def test_two_states_moving_together_is_consistent_and_not_established():
 
 
 def test_a_chain_is_worth_its_weakest_link():
-    chain = DC.build([row("Revenue rose in the period.")], company_id="acme")
+    # TWO KINDS OF LINK, deliberately. Shipments and revenue both measured
+    # gives one HYPOTHESIZED link; the seven links above them have nothing at
+    # either end. A chain that took its BEST link would read HYPOTHESIZED, so
+    # this fixture is what makes the weakest-link rule load-bearing.
+    chain = DC.build([row("Shipments rose in the period.", eid="e1"),
+                      row("Revenue rose in the period.", eid="e2")],
+                     company_id="acme")
+    assert {l.standing for l in chain.links} == {DC.HYPOTHESIZED, DC.UNKNOWN}
     assert chain.standing == DC.UNKNOWN
-    # One measured state out of ten leaves seven links with nothing at either
-    # end; the weakest is reported by name rather than averaged into a score.
     assert "is measured" in chain.weakest.reason
     assert chain.as_dict()["weakest_link"].startswith("END_DEMAND")
 

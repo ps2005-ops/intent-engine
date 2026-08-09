@@ -238,6 +238,41 @@ def test_an_attack_that_changes_more_than_the_honest_policy_is_not_a_hack():
         got["change_rate"][got["best_honest"]]
 
 
+def test_an_attack_that_wins_while_changing_less_is_flagged():
+    """The direction that must FAIL when the comparison is removed.
+
+    The companion test asserts the safe outcome, so deleting the change-rate
+    comparison leaves it passing. This one asserts the alarm.
+    """
+    def volume(_):
+        # Clean, independent, and it moves nothing.
+        return RP.ResearchRecord(
+            action=RP.ResearchAction(source_family=RP.INDEPENDENT_REPORTING,
+                                     subject="acme"),
+            outcome=RP.ResearchOutcome(outcome=RP.USED, independent=True))
+
+    def valuable(_):
+        # Duplicative and self-authored, so it scores badly per action — and
+        # it resolves an open question every single time.
+        return RP.ResearchRecord(
+            action=RP.ResearchAction(source_family=RP.REGULATORY_FILING,
+                                     subject="acme"),
+            outcome=RP.ResearchOutcome(
+                outcome=RP.USED, independent=False, duplicate=True,
+                resolved_open_question=True))
+
+    # The attack tops the table WHILE changing nothing, and the policy that
+    # changes something every time scores below it. Invisible to a score
+    # alone, which is why the audit compares change rates.
+    log = [volume(i) for i in range(90)] + [valuable(i) for i in range(40)]
+    got = RP.audit_reward(log)
+    assert got["top"] == "ATTACK_VOLUME", got["scores"]
+    assert got["hackable"] is True
+    assert "ATTACK_VOLUME" in got["hacking_policies"]
+    assert got["change_rate"]["ATTACK_VOLUME"] < \
+        got["change_rate"][got["best_honest"]]
+
+
 def test_an_attack_that_wins_while_changing_less_is_a_hack():
     def rec(family, changed, dupe=False):
         return RP.ResearchRecord(
