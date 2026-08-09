@@ -127,11 +127,48 @@ def bundles(result, *, market_structures: Sequence[Any] = (),
     return out
 
 
+def _belongs(thesis: Any, subject_id: str) -> bool:
+    """Whether this thesis is about this subject, by id and never by text."""
+    if isinstance(thesis, dict):
+        subject = str(thesis.get("subject") or "")
+    else:
+        subject = str(getattr(thesis, "subject", "") or "")
+    return subject == subject_id
+
+
+def _revisions_for(revisions: Sequence[Any], theses: Sequence[Any]) -> list:
+    """Revisions belonging to these theses, matched on thesis_id.
+
+    Matched by ID rather than by claim text, deliberately. Two theses can
+    carry byte-identical claims — G-THE-004 was exactly that, and matching on
+    wording silently merged them and dropped four snapshots a night.
+    """
+    ids = set()
+    for thesis in theses:
+        if isinstance(thesis, dict):
+            ids.add(str(thesis.get("thesis_id") or ""))
+        else:
+            ids.add(str(getattr(thesis, "thesis_id", "") or ""))
+    ids.discard("")
+    out = []
+    for revision in revisions:
+        if isinstance(revision, dict):
+            tid = str(revision.get("thesis_id") or "")
+        else:
+            tid = str(getattr(revision, "thesis_id", "") or "")
+        if tid and tid in ids:
+            out.append(revision)
+    return out
+
+
 def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             pricing_actions: Sequence[Any] = (),
             causal_pathways: Sequence[Any] = (),
             identities: Optional[Dict[str, Any]] = None,
             evidence_rows: Sequence[Any] = (),
+            economic_theses: Sequence[Any] = (),
+            thesis_revisions: Sequence[Any] = (),
+            history_available: bool = True,
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
 
@@ -192,6 +229,19 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
                 # clusters by wording and date, so it is safe across subjects
                 # and the export only reads back the ids its own beliefs cite.
                 evidence_rows=evidence_rows,
+                # THE HISTORY LEG. `economic_theses` was an accepted export
+                # field with an allowlist entry that this call site never
+                # passed, and revisions had no field at all — so the consumer
+                # received a current view and no record of how it got there.
+                # Both are filtered to THIS subject by id: a thesis history
+                # is only meaningful against the thesis it belongs to.
+                economic_theses=[t for t in economic_theses
+                                 if _belongs(t, subject_id)],
+                thesis_revisions=_revisions_for(
+                    thesis_revisions,
+                    [t for t in economic_theses
+                     if _belongs(t, subject_id)]),
+                history_available=history_available,
                 limitations=list(limitations))
             SE.write_export(payload, root=root)
         except SE.ExportLeak as exc:

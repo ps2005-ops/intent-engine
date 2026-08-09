@@ -1059,3 +1059,32 @@ tasks:
     minimum_data: none
     blocked_reason: >
       Single-tenant by construction on this branch. Belongs to V4-I10.
+
+  - id: H-CEO-002
+    program: H
+    title: Market to Founder thesis-history transport
+    dependencies: []
+    status: COMPLETE
+    priority: 3
+    severity: MATERIAL_DEFECT
+    expected_value: >
+      Blocks the unfinished half of H-CEO-001. "What changed your mind" must
+      resolve thesis -> non-CREATED ThesisRevision -> KnowledgeEffect ->
+      evidence, and the dossier carried the current view with no record of
+      how it got there. The consumer could not tell a thesis that has never
+      moved from one whose history was not transported, and those need
+      opposite answers.
+
+      Latent rather than harmless: every live revision is CREATED, so both
+      readings produce the same sentence today. It starts being wrong the
+      moment a thesis first moves.
+    acceptance_criteria:
+      - economic_theses and thesis_revisions cross the allowlist
+      - the history STATUS is stated, never inferred from the list length
+      - three states are distinguishable — available/no movement, available/
+        moved, unavailable
+      - revisions are matched to theses by id, never by claim text
+    maturity_required: EVALUATED
+    tests: tests/test_market_thesis_history_transport.py
+    minimum_data: none
+    completion_evidence: "Market 1f0701b -> pending, Founder e525a73. TWO missing production callers, not one: economic_theses was already allowlisted with a projector and strategic_publish never passed it, so it had never crossed; thesis_revisions had no field at all. Verified against the live ledger: america_movil 8 theses/8 revisions, honda 2/2, linde 8/8, every one HISTORY_AVAILABLE_NO_MOVEMENT — the honest reading, since all 18 live transitions are CREATED. A producer sending no status is read as UNAVAILABLE rather than NO_MOVEMENT. A transition naming no effect and no evidence is reported as unsupported rather than as an answer. 12 market tests, 6 founder tests, break proofs 14/14 with four on the new states. Suites 5233 and 4684."

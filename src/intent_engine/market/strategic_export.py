@@ -189,6 +189,30 @@ ALLOWED: Dict[str, Any] = {
         "confidence_in_words": None,
         "evidence_ids": None,
     }],
+    # THESIS HISTORY, WITHOUT WHICH "WHAT CHANGED YOUR MIND" CANNOT BE
+    # ANSWERED HONESTLY. The consumer previously received the CURRENT thesis
+    # and nothing about how it got there, so it could not tell a thesis that
+    # has never moved from a thesis whose history was simply not transported
+    # — and those need opposite answers. Today every live revision is
+    # CREATED, so both readings produce the same sentence and the defect is
+    # invisible; it starts giving a wrong answer the moment a thesis first
+    # moves.
+    #
+    # `thesis_history` is a STATED STATUS rather than an inference from the
+    # length of the list below. An empty list means "no revisions crossed",
+    # which is exactly the ambiguity this field exists to remove.
+    "thesis_history": {"status": None, "revisions": None, "moved": None,
+                       "note": None},
+    "thesis_revisions": [{
+        "revision_id": None, "thesis_id": None, "previous_revision": None,
+        "transition": None, "changed_at": None, "changed_fields": None,
+        # The CAUSE, carried as ids rather than prose. A consumer that gets
+        # "the view weakened" without the effect and evidence behind it can
+        # render a claim it cannot substantiate, which is the failure the
+        # whole provenance chain exists to prevent.
+        "knowledge_effect_ids": None, "triggering_evidence": None,
+        "previous_standing": None, "new_standing": None, "reason": None,
+    }],
     "disclaimer": None,
     "interpretation_allowed": None,
     "interpretation_forbidden": None,
@@ -336,6 +360,8 @@ def build_export(*, company_id: str, as_of: str,
                  evidence_rows: Sequence[Any] = (),
                  economic_states: Sequence[Any] = (),
                  economic_theses: Sequence[Any] = (),
+                 thesis_revisions: Sequence[Any] = (),
+                 history_available: bool = True,
                  limitations: Sequence[str] = ()) -> dict:
     """Assemble one company's sanitized strategic intelligence.
 
@@ -384,6 +410,9 @@ def build_export(*, company_id: str, as_of: str,
     if economic_theses:
         payload["economic_theses"] = [_economic_thesis(t)
                                       for t in economic_theses]
+    payload["thesis_revisions"] = [_revision(r) for r in thesis_revisions]
+    payload["thesis_history"] = _thesis_history(thesis_revisions,
+                                                history_available)
 
     ids: Set[str] = set()
     _collect_ids(payload, ids)
@@ -418,6 +447,75 @@ def _economic_context(states: Sequence[Any]) -> dict:
         "note": ("an unmeasured condition is absent from this list and "
                  "counted in the gap; it is never a condition that did not "
                  "move"),
+    }
+
+
+#: What the consumer is entitled to conclude about thesis movement.
+#: Three states, never two: an absent history and a history that recorded no
+#: movement are different facts and the CEO answer differs between them.
+HISTORY_AVAILABLE_NO_MOVEMENT = "HISTORY_AVAILABLE_NO_MOVEMENT"
+HISTORY_AVAILABLE_MOVED = "HISTORY_AVAILABLE_MOVED"
+HISTORY_UNAVAILABLE = "HISTORY_UNAVAILABLE"
+HISTORY_STATES = (HISTORY_AVAILABLE_NO_MOVEMENT, HISTORY_AVAILABLE_MOVED,
+                  HISTORY_UNAVAILABLE)
+
+#: The transition that opens a thesis rather than moving it. A log of nothing
+#: but these is a thesis that has never changed its mind.
+_OPENING_TRANSITION = "CREATED"
+
+
+def _revision(revision: Any) -> dict:
+    """One recorded transition, as ids rather than prose."""
+    def field(name, default=""):
+        if isinstance(revision, dict):
+            return revision.get(name, default)
+        return getattr(revision, name, default)
+
+    return {
+        "revision_id": str(field("revision_id") or ""),
+        "thesis_id": str(field("thesis_id") or ""),
+        "previous_revision": str(field("previous_revision") or ""),
+        "transition": str(field("transition") or ""),
+        "changed_at": str(field("changed_at") or "")[:10],
+        "changed_fields": list(field("changed_fields", ()) or ()),
+        "knowledge_effect_ids": list(field("knowledge_effect_ids", ()) or ()),
+        "triggering_evidence": list(field("triggering_evidence", ()) or ()),
+        "previous_standing": str(field("previous_standing") or ""),
+        "new_standing": str(field("new_standing") or ""),
+        "reason": str(field("reason") or "")[:400],
+    }
+
+
+def _thesis_history(revisions: Sequence[Any], available: bool) -> dict:
+    """The status the consumer must read INSTEAD of counting the list.
+
+    Stated rather than inferred, because "no revisions crossed" and "no
+    revision exists" produce the same empty list and require opposite
+    answers from a CEO surface.
+    """
+    if not available:
+        return {
+            "status": HISTORY_UNAVAILABLE, "revisions": 0, "moved": 0,
+            "note": ("thesis revision history was not available to this "
+                     "export; the current view crossed without the record of "
+                     "how it got there, and no claim about what changed it "
+                     "can be supported"),
+        }
+    rows = [_revision(r) for r in revisions]
+    moved = [r for r in rows if r["transition"] != _OPENING_TRANSITION]
+    if moved:
+        return {
+            "status": HISTORY_AVAILABLE_MOVED, "revisions": len(rows),
+            "moved": len(moved),
+            "note": (f"{len(moved)} of {len(rows)} recorded revision(s) "
+                     f"changed the view rather than opening it"),
+        }
+    return {
+        "status": HISTORY_AVAILABLE_NO_MOVEMENT, "revisions": len(rows),
+        "moved": 0,
+        "note": ("revision history is present and every recorded revision "
+                 "opens a thesis rather than moving one; nothing has changed "
+                 "this view yet"),
     }
 
 

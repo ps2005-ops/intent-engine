@@ -640,7 +640,17 @@ def learning_step(ctx: C.CycleContext) -> dict:
             # founder side can only COUNT them. The module that normalizes
             # them has existed since wave 8 with no production caller, which
             # is the same shape as every other silent zero in this cycle.
-            evidence_rows=store.evidence())
+            evidence_rows=store.evidence(),
+            # THE HISTORY LEG, which had no production caller either.
+            # `economic_theses` was an allowlisted export field this call
+            # site never passed, and revisions had no field at all — so the
+            # Founder side received the CURRENT view and no record of how it
+            # got there. It could not tell "this thesis never moved" from
+            # "the history was not transported", and those need opposite
+            # answers to "what changed your mind".
+            economic_theses=store.thesis_snapshots(),
+            thesis_revisions=store.thesis_revisions(),
+            history_available=True)
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}
     # Ship what was just published to a deployed founder service, when one is
