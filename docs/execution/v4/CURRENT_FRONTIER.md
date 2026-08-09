@@ -8,36 +8,40 @@ Resume pointer. A new session needs only this file plus AGENT_PROTOCOL.md.
 
 Do not trust this file over the script. If they disagree, the script is right.
 
-## As of 2026-08-09, end of the closure run
+## As of 2026-08-09, end of the frontier-exhaustion run
 
-    39 nodes   COMPLETE=17   READY=7   WAITING_DEPENDENCY=12   BLOCKED_DATA=3
+    42 nodes   COMPLETE=19   READY=8   WAITING_DEPENDENCY=12   BLOCKED_DATA=3
 
-    p2  G-THE-002   INSTRUMENT: the cycle writes thesis revisions
-    p3  C-MET-002   MethodAssumptionCheck ledger             (unblocks 1)
-    p3  E-DEM-001   Targeted demand-variable extraction      (unblocks 1)
+    p2  G-THE-003   EVALUATE: a second cycle produces a real transition
+    p3  C-MET-002   MethodAssumptionCheck ledger              (unblocks 1)
+    p3  E-DEM-001   Targeted demand-variable extraction       (unblocks 1)
     p3  I-ACC-001   Learning acceleration from KnowledgeEffect (unblocks 1)
+    p3  C-MET-004   INSTRUMENT: MethodPerformance accumulates
     p3  J-ADV-001   Adversarial suite extension
-    p4  D-REP-002   Historical thesis replay                 (unblocks 4)
-    p4  H-CEO-001   CEO Q&A from canonical records           (unblocks 3)
+    p4  D-REP-002   Historical thesis replay                  (unblocks 4)
+    p4  H-CEO-001   CEO Q&A from canonical records            (unblocks 3)
 
-V4 IS NOT CLOSED. Seven safe executable nodes remain, none blocked. The
-closure condition is ready_remaining = 0 and it is not met.
+V4 IS NOT CLOSED. Eight executable nodes remain and none is blocked.
 
-G-THE-002 is first and it exists because G-THE-001 stopped at IMPLEMENTED.
-The revision chain is built, guarded and break-proven, and no cycle writes to
-it — knowledge_step rebuilds theses each cycle without comparing them to the
-previous cycle's, so every thesis answers "nothing has changed this". Wiring it
-is what makes H-CEO-001 worth doing; a CEO answer sourced from an empty chain
-is true and useless.
+Three of the eight exist because of the maturity audit, not because new
+capability was scoped: A-RD-009 (done), C-MET-004 and G-THE-003. The audit
+greps production importers for every COMPLETE capability whose acceptance
+implies runtime use. Run it again before believing any COMPLETE:
 
-BLOCKED_DATA, measured rather than asserted:
+    for m in <module>; do grep -rl "import $m" --include="*.py" src/ ; done
 
-    B-POL-002   prospective_decisions   4 / 100
-    B-HACK-001  prospective_decisions   4 / 100
-    B-VOI-002   prospective_decisions   4 / 50
+`vintage` and `economic_method` still have zero production importers.
+`vintage` is fine — its consumer is D-REP-002. `economic_method` is C-MET-004.
 
-These are elapsed real-world experience, not engineering. They move on their
-own; do not edit them, and do not lower a gate to reach closure.
+## What the live cycle proved, and what it did not
+
+Thesis revisions are LIVE: 7 written and held at runtime_git_sha 58566f9,
+with 7 snapshots persisted. But `loaded` was 0 and `compared` was 0, because
+it was the first cycle to write snapshots — every revision is CREATED, and
+`classify()` plus the effect-attribution rule have never run on a real
+movement. G-THE-003 is exactly that gap and needs only a second cycle.
+
+Prospective decisions moved 4 -> 6 on their own during this run.
 
 ## The executor now enforces its own gates
 

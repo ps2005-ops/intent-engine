@@ -650,7 +650,7 @@ tasks:
     program: G
     title: INSTRUMENT -- the cycle writes thesis revisions
     dependencies: [G-THE-001]
-    status: DERIVED
+    status: COMPLETE
     priority: 2
     expected_value: >
       G-THE-001 is IMPLEMENTED, not INSTRUMENTED. knowledge_step rebuilds
@@ -665,7 +665,7 @@ tasks:
       - a live cycle report carries a non-zero revision count
     tests: tests/test_market_thesis_history.py
     minimum_data: none
-    completion_evidence: null
+    completion_evidence: "LIVE_VERIFIED. reports/market/2026-08-09_night.json, runtime_git_sha 58566f9: thesis_history created 7, revision_records_written 7, revisions_held 7. Ledger holds 7 thesis_revision and 7 thesis_snapshot rows. loaded=0 because this was the first cycle to write snapshots — there was no prior state to compare against, which is the honest reading, not a failure."
 
   # ---- maturity audit 2026-08-09 (AGENT_PROTOCOL section on maturity) ----
   # Mechanical check: for each COMPLETE capability whose acceptance implies
@@ -716,6 +716,29 @@ tasks:
       - the report carries which method currently leads per question type
     maturity_required: INSTRUMENTED
     tests: tests/test_market_economic_method.py
+    minimum_data: none
+    completion_evidence: null
+
+  - id: G-THE-003
+    program: G
+    title: EVALUATE -- a second cycle produces a real transition
+    dependencies: [G-THE-002]
+    status: DERIVED
+    priority: 2
+    expected_value: >
+      The first snapshotting cycle recorded 7 CREATED and nothing else,
+      because loaded was 0. The comparison path is live but has never
+      classified a real movement. Until a second cycle loads those snapshots
+      and produces a STRENGTHENED, WEAKENED, CONTESTED or FALSIFIED
+      transition, classify() and the attribution rule are unexercised in
+      production.
+    acceptance_criteria:
+      - a cycle reports loaded > 0 and compared > 0
+      - at least one non-CREATED transition, or unchanged == compared with the
+        economy genuinely still, reported honestly either way
+      - what_changed_your_mind returns a record-backed answer for a real thesis
+    maturity_required: EVALUATED
+    tests: tests/test_market_thesis_history.py
     minimum_data: none
     completion_evidence: null
 
