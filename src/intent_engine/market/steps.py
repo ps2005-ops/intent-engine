@@ -771,6 +771,12 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
         # Written first, and only for a family that is actually about to be
         # asked. A decision recorded for a skipped family would be a choice
         # nobody made.
+        # WHEN THE CHOICE WAS MADE, to the second. It was the cycle DATE,
+        # which made `decision_id` collide across two runs on one day: the
+        # second run's decision deduplicated away while its outcome appended,
+        # leaving one decision carrying two outcomes and a pairing that is no
+        # longer one-to-one. Two sweeps on one day are two real choices.
+        chosen_at = _dt.datetime.now(_dt.timezone.utc).isoformat()
         decision = RD.ResearchDecision(
             subject="ALL", question_type=_COUNTERPARTY_QUESTION,
             chosen_action=family, candidates=candidates,
@@ -781,7 +787,7 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
             query_strategy="counterparty_sweep",
             selection_probability=None,
             selection_probability_status=RD.DETERMINISTIC,
-            chosen_at=ctx.as_of, provenance=RD.PROSPECTIVE,
+            chosen_at=chosen_at, provenance=RD.PROSPECTIVE,
             policy_family=RD.RP_FAMILY_FOR.get(family, ""))
         started = _dt.datetime.now(_dt.timezone.utc).isoformat()
         if store.record_research_decision(decision):
@@ -1032,11 +1038,37 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             if row.get("record") == "reconciliation":
                 exposure_effects.extend(KEF.from_reconciliation(
                     _Row(row), created_at=ctx.as_of[:10]))
+        # PERSIST THE ATTRIBUTION. It was computed here, summarised into the
+        # report, and dropped: the report said 343 effects while the ledger
+        # held 6, and those 6 came from belief formation in learning_cycle,
+        # the one place with a write path. So the effect log — the table the
+        # research reward is priced from — could never accumulate across
+        # cycles, and every cross-cycle claim about what evidence CHANGED was
+        # being made against a table that was empty for practical purposes.
+        #
+        # Idempotent on effect_id, which is keyed on evidence, target and day,
+        # so re-deriving the same attribution today appends nothing while the
+        # same evidence moving the same object tomorrow is a second, real row.
+        effects_written = effects_already_held = 0
+        if not ctx.dry_run:
+            for effect in exposure_effects:
+                if store.record_knowledge_effect(effect):
+                    effects_written += 1
+                else:
+                    effects_already_held += 1
         payload["knowledge_effects"] = {
             **KEF.summarise(exposure_effects,
                             evidence_total=sum(1 for r in rows
                                                if r.get("record")
                                                == "evidence")),
+            "persisted": effects_written,
+            "already_held": effects_already_held,
+            # Computed minus persisted minus already-held must be zero on a
+            # real run. Anything else means attribution outran storage, which
+            # is the defect this line was added to close.
+            "persistence_gap": (0 if ctx.dry_run else
+                                len(exposure_effects) - effects_written
+                                - effects_already_held),
         }
         payload["company_exposure"] = {
             **CX.summarise(profiles),

@@ -231,33 +231,35 @@ tasks:
     program: B
     title: Baseline policy comparison on prospective data
     dependencies: [A-RD-008, B-POL-001]
-    status: BLOCKED_DATA
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - static order, historical acceptance, historical knowledge-change rate,
         source-performance, VOI heuristic, random
       - immediate and delayed reward both reported
-    minimum_data: prospective_decisions >= 100
+    minimum_data:
+      prospective_decisions: 100
     completion_evidence: null
 
   - id: B-VOI-002
     program: B
     title: Predicted vs realized VOI calibration
     dependencies: [A-RD-008]
-    status: BLOCKED_DATA
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - expected_voi paired with realized KnowledgeEffect-derived utility
       - persisted as VOICalibration
       - reports where VOI is miscalibrated, by question type and source family
-    minimum_data: prospective_decisions >= 50
+    minimum_data:
+      prospective_decisions: 50
     completion_evidence: null
 
   - id: B-HACK-001
     program: B
     title: Reward-hack audit re-run on prospective data
     dependencies: [A-RD-008]
-    status: BLOCKED_DATA
+    status: DERIVED
     priority: 3
     expected_value: >
       Session 3 corrected a false HACKABLE finding: the volume arm was also the
@@ -269,14 +271,15 @@ tasks:
       - reports best honest strategy, best attack, change rate, discrimination,
         delayed utility, cost
       - a low-change window reports UNRESOLVED rather than a smoothed pass
-    minimum_data: prospective_decisions >= 100
+    minimum_data:
+      prospective_decisions: 100
     completion_evidence: null
 
   - id: B-BANDIT-001
     program: B
     title: Bandit maturity ladder, one step only
     dependencies: [B-POL-002, B-HACK-001]
-    status: BLOCKED_DATA
+    status: DERIVED
     priority: 5
     expected_value: >
       Deliberately parked. L0 interface exists (ContextualBanditPolicy). The
@@ -286,14 +289,15 @@ tasks:
       Valid counterfactual evaluation requires logged exploration. None exists.
       Build only the next justified maturity step; do not fit a bandit to
       satisfy a checklist.
-    minimum_data: prospective_decisions with logged exploration >= 200
+    minimum_data:
+      logged_exploration_events: 200
     completion_evidence: null
 
   - id: B-POL-003
     program: B
     title: Policy maturity states
     dependencies: [B-POL-002]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - NOT_READY / EARLY / OFFLINE_EVALUABLE / OUTPERFORMING / DEPLOYABLE /
@@ -309,7 +313,7 @@ tasks:
     program: C
     title: EconomicMethod registry
     dependencies: []
-    status: READY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - each method declares question types, input requirements, minimum
@@ -322,7 +326,7 @@ tasks:
     program: C
     title: MethodAssumptionCheck ledger
     dependencies: [C-MET-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - assumptions persisted per evaluation with pass/fail and evidence
@@ -334,7 +338,7 @@ tasks:
     program: C
     title: One real historical causal study
     dependencies: [C-MET-002]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - economically meaningful question chosen on stated criteria
@@ -342,7 +346,8 @@ tasks:
       - descriptive baseline PLUS one formal method whose assumptions hold
       - result stores estimand, sample, period, effect, uncertainty,
         assumption status, alternative interpretation, standing
-    minimum_data: macro series depth sufficient for the chosen estimand
+    minimum_data:
+      macro_observations: 24
     completion_evidence: null
 
   # ---- PROGRAM D: HISTORICAL SCIENTIFIC VALIDATION ----------------------
@@ -351,7 +356,7 @@ tasks:
     program: D
     title: Vintage wall for replay
     dependencies: []
-    status: READY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - data access at historical T is restricted to what existed at T
@@ -363,20 +368,21 @@ tasks:
     program: D
     title: Historical thesis replay with deterministic episode selection
     dependencies: [D-REP-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - episodes chosen by date window / data availability / event type BEFORE
         outcomes are inspected
       - wins, losses and ambiguous results all retained
-    minimum_data: episodes with sufficient pre-period coverage >= 3
+    minimum_data:
+      macro_observations: 24
     completion_evidence: null
 
   - id: D-REP-003
     program: D
     title: Outcome vs mechanism scoring
     dependencies: [D-REP-002]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - OUTCOME_RIGHT_MECHANISM_RIGHT / OUTCOME_RIGHT_MECHANISM_WRONG /
@@ -392,7 +398,7 @@ tasks:
     program: E
     title: Targeted demand-variable extraction
     dependencies: []
-    status: READY
+    status: DERIVED
     priority: 3
     expected_value: >
       Measured 21/260 company-state cells and 15/26 companies with any state.
@@ -409,7 +415,7 @@ tasks:
     program: E
     title: Demand-state contradiction handling
     dependencies: [E-DEM-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - backlog up with cancellations up, revenue up with bookings down, orders
@@ -426,7 +432,7 @@ tasks:
     program: F
     title: Second-order consequences require a named mediator
     dependencies: [D-REP-003]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - intermediate node, lag, support, alternative, falsifier, standing
@@ -437,19 +443,20 @@ tasks:
     program: F
     title: Third-order consequences, depth-capped
     dependencies: [F-ORD-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 5
     acceptance_criteria:
       - one further mediated step, hard depth cap
       - missing supplier relationship yields BLOCKED/MISSING, never LLM
         story completion
-    minimum_data: named supplier relationships >= 1
+    minimum_data:
+      named_supplier_edges: 1
 
   - id: F-SCN-001
     program: F
     title: Scenario engine over the canonical graph
     dependencies: [F-ORD-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - BASE / UPSIDE / DOWNSIDE / ALTERNATIVE_MECHANISM as world-state
@@ -462,7 +469,7 @@ tasks:
     program: G
     title: Thesis revision history answering "what changed your mind"
     dependencies: []
-    status: READY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - created / strengthened / weakened / contested / superseded transitions
@@ -473,7 +480,7 @@ tasks:
     program: H
     title: CEO Q&A derived from canonical records
     dependencies: [G-THE-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - answers trace canonical records; no new facts invented under repeated
@@ -485,7 +492,7 @@ tasks:
     program: H
     title: CEO challenge mode -- refuse a leading premise
     dependencies: [H-CEO-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - a leading premise such as -- tell me why demand is collapsing -- is
@@ -497,7 +504,7 @@ tasks:
     program: H
     title: Standing consistency wall across thesis/proof/presentation/Q&A
     dependencies: [H-CEO-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - a PROPOSED thesis cannot become a CONFIRMED slide
@@ -509,7 +516,7 @@ tasks:
     program: H
     title: Founder DecisionImpact, real company first
     dependencies: [H-CON-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - deterministic Founder-without-V4 vs Founder-with-V4 on the same company
@@ -521,7 +528,7 @@ tasks:
     program: I
     title: Learning acceleration recomputed from KnowledgeEffect
     dependencies: [A-RD-008]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - rolling windows from effects rather than accepted rows
@@ -533,7 +540,7 @@ tasks:
     program: I
     title: Stagnation detection
     dependencies: [I-ACC-001]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 4
     acceptance_criteria:
       - alerts on high evidence + low effect rate; high thesis count + low
@@ -547,7 +554,7 @@ tasks:
     program: J
     title: Break proofs for the new research-observability guards
     dependencies: [A-RD-007]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 2
     expected_value: >
       Guards that have never been shown to fail are guards nobody has tested.
@@ -566,7 +573,7 @@ tasks:
     program: J
     title: Adversarial suite extension
     dependencies: [A-RD-008]
-    status: WAITING_DEPENDENCY
+    status: DERIVED
     priority: 3
     acceptance_criteria:
       - retains all 27 prior attacks
@@ -601,7 +608,7 @@ tasks:
     program: K
     title: Verify source_preference and research_decisions reach a report
     dependencies: []
-    status: READY
+    status: DERIVED
     priority: 1
     expected_value: >
       The 2026-08-09 cycle emitted both keys EMPTY, because the run started

@@ -177,9 +177,18 @@ def render_report(ctx) -> Tuple[str, dict]:
     learning_health = ctx.results.get("learning_health") or {}
     session = ctx.session
 
+    from . import runtime_provenance as RPV
+
     payload = {
         "run_id": ctx.run_id, "cycle": ctx.cycle, "as_of": ctx.as_of,
         "timezone": S.TIMEZONE, "dry_run": ctx.dry_run,
+        # WHICH CODE WROTE THIS. Captured when the process started, not read
+        # from the checkout now — those differ exactly in the case worth
+        # catching, where a long cycle is still running while the branch moves
+        # underneath it. Without this field, "did the feature run?" is answered
+        # by comparing a file's mtime to a commit timestamp, which is how the
+        # last four instances of that question were actually settled.
+        "runtime": RPV.provenance(),
         "session": session.as_dict(),
         "research": {k: v for k, v in research.items() if k != "rows"},
         # `rows` is still stripped — it carries a document's worth of free
@@ -693,10 +702,15 @@ def _knowledge_summary(knowledge: dict) -> dict:
             if (knowledge.get("founder_v4") or {}).get(k) is not None},
         "knowledge_effects": {
             k: (knowledge.get("knowledge_effects") or {}).get(k)
+            # `persisted` and `persistence_gap` are projected because the
+            # report once said 343 effects while the ledger held 6. A count of
+            # what was COMPUTED, with no count of what was KEPT beside it, is
+            # the shape that hid it.
             for k in ("effects", "by_effect", "evidence_attributed",
                       "evidence_that_changed_something",
                       "evidence_that_changed_nothing",
-                      "evidence_unattributed", "discriminating", "error")
+                      "evidence_unattributed", "discriminating",
+                      "persisted", "already_held", "persistence_gap", "error")
             if (knowledge.get("knowledge_effects") or {}).get(k)
             is not None},
         "demand_chain": {
