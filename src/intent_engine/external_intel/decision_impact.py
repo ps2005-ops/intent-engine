@@ -340,3 +340,197 @@ def evidence_of(context) -> List[str]:
             continue
         out.extend(str(e) for e in (block.get("evidence_ids") or ()))
     return out
+
+
+# ---------------------------------------------------------------------------
+# THE PRIOR STATE, WITHOUT WHICH THIS METRIC MEASURES ITS OWN PRESENCE
+# ---------------------------------------------------------------------------
+#
+# MEASURED, 2026-08-09, ON ALL 59 LIVE DOSSIERS: 25 were available and every
+# single one graded MEANINGFUL or DECISION_CHANGING. Sixteen the latter, nine
+# the former, and NOT ONE `NONE`.
+#
+# The cause is not a threshold. The production call site builds its BEFORE as
+# `build_context(strategic=None)`, and `semantic_state` of that context is
+# EMPTY on all five fields. So every field goes empty -> populated, every
+# field is "changed", and an available dossier is structurally incapable of
+# grading NONE. The metric answers "was a dossier attached", which is already
+# known, and reads 100% forever — the exact failure this module's own
+# docstring predicted and named.
+#
+# A metric that cannot report the negative is not evidence. What the founder
+# question actually asks is whether the NEW learning changed anything, so the
+# BEFORE has to be what the founder saw LAST TIME: the previous revision of
+# this company's dossier.
+#
+# Three outcomes, not two:
+#
+#   FIRST_OBSERVATION   no prior revision exists. Not an impact and not a
+#                       non-impact — there was nothing to change. Counting it
+#                       either way is what produced 25 of 25.
+#   NONE / MINOR / ...  a real comparison against what was there before.
+#
+# The store is append-only and keyed by content, so re-deriving the same
+# dossier appends nothing and a genuinely new revision is a second row.
+
+FIRST_OBSERVATION = "FIRST_OBSERVATION"
+
+#: Outcomes that make no claim about impact and must never enter an impact
+#: rate's numerator OR its denominator.
+NON_CLAIMS = frozenset({FIRST_OBSERVATION})
+
+REVISION_PATH = "reports/market/dossier_revisions.jsonl"
+
+
+def revision_key(state: Dict[str, Sequence[object]]) -> str:
+    """Content key for one semantic state. Same content, same key."""
+    payload = "|".join(
+        f"{field}:{';'.join(sorted(_content(state.get(field, ()))))}"
+        for field in IMPACT_TYPES)
+    return "rev_" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def load_revisions(root, *, path: str = REVISION_PATH) -> Dict[str, dict]:
+    """The newest recorded revision per company, by append order.
+
+    Append order rather than a date field, for the same reason the market's
+    learning windows use it: a date on a record is set by whoever wrote it,
+    and the ledger already knows what order it accepted things in.
+    """
+    import json as _json
+    import pathlib as _pathlib
+
+    target = _pathlib.Path(root) / path
+    if not target.exists():
+        return {}
+    latest: Dict[str, dict] = {}
+    for line in target.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = _json.loads(line)
+        except ValueError:
+            continue          # a corrupt line is skipped, never repaired
+        company = str(row.get("company_id") or "")
+        if company:
+            latest[company] = row
+    return latest
+
+
+def record_revision(root, *, company_id: str,
+                    state: Dict[str, Sequence[object]],
+                    dossier_revision: str = "",
+                    path: str = REVISION_PATH) -> bool:
+    """Persist one company's semantic state. False if unchanged.
+
+    Returning False on an unchanged dossier is what keeps the file from
+    growing by one row per company per cycle forever, and it is also the
+    signal the caller needs: nothing to compare means nothing happened.
+    """
+    import json as _json
+    import pathlib as _pathlib
+
+    if not company_id:
+        raise ValueError("a dossier revision needs the company it belongs to")
+    key = revision_key(state)
+    prior = load_revisions(root, path=path).get(company_id)
+    if prior and str(prior.get("revision_key")) == key:
+        return False
+    target = _pathlib.Path(root) / path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    row = {
+        "record": "dossier_revision", "contract": CONTRACT,
+        "company_id": company_id, "revision_key": key,
+        "dossier_revision": dossier_revision,
+        "state": {field: list(_content(state.get(field, ())))
+                  for field in IMPACT_TYPES},
+        "recorded_at": _dt.datetime.now(
+            _dt.timezone.utc).isoformat(timespec="seconds"),
+    }
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(_json.dumps(row, sort_keys=True) + "\n")
+    return True
+
+
+def assess_against_prior(root, *, analysis_id: str, company_id: str,
+                         after: Dict[str, Sequence[object]],
+                         provenance: Sequence[str] = (),
+                         dossier_revision: str = "",
+                         path: str = REVISION_PATH) -> DecisionImpact:
+    """Grade this dossier against the one the founder saw last time.
+
+    The BEFORE is a recorded prior revision, never an empty context. When no
+    prior exists the answer is FIRST_OBSERVATION, which is neither an impact
+    nor a non-impact: there was nothing for the learning to change.
+    """
+    prior = load_revisions(root, path=path).get(company_id)
+    if prior is None:
+        return DecisionImpact(
+            analysis_id=analysis_id, company_id=company_id,
+            dossier_id=company_id, dossier_revision=dossier_revision,
+            belief_id="", graph_node_id="", deltas=(),
+            materiality=FIRST_OBSERVATION,
+            reason=("no prior revision of this dossier is recorded, so there "
+                    "was nothing for this learning to change; the state is "
+                    "now recorded and the next revision can be compared"),
+            provenance=tuple(provenance),
+            created_at=_dt.datetime.now(
+                _dt.timezone.utc).isoformat(timespec="seconds"))
+    before = {field: list(values)
+              for field, values in (prior.get("state") or {}).items()}
+    return assess(analysis_id=analysis_id, company_id=company_id,
+                  dossier_revision=dossier_revision, before=before,
+                  after=after, provenance=provenance)
+
+
+IMPACT_PATH = "reports/market/decision_impact.jsonl"
+
+
+def record_impact(root, *, impact: DecisionImpact,
+                  path: str = IMPACT_PATH) -> bool:
+    """Persist one graded comparison, INCLUDING the ones that changed nothing.
+
+    The production call site records an impact only `if impact.changed`, which
+    makes the file a success log: a rate computed over it is 100% by
+    construction and cannot fall. NONE and FIRST_OBSERVATION are the rows that
+    give the rate a denominator, and they are the reason this function exists
+    beside the receipt rather than inside it.
+
+    Idempotent on `decision_impact_id`, so re-deriving the same comparison on
+    the same day appends nothing.
+    """
+    import json as _json
+    import pathlib as _pathlib
+
+    target = _pathlib.Path(root) / path
+    payload = impact.as_dict()
+    impact_id = str(payload.get("decision_impact_id") or "")
+    if target.exists():
+        for line in target.read_text(encoding="utf-8").splitlines():
+            if impact_id and f'"{impact_id}"' in line:
+                return False
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload["record"] = "decision_impact"
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(_json.dumps(payload, sort_keys=True) + "\n")
+    return True
+
+
+def load_impacts(root, *, path: str = IMPACT_PATH) -> List[dict]:
+    import json as _json
+    import pathlib as _pathlib
+
+    target = _pathlib.Path(root) / path
+    if not target.exists():
+        return []
+    out: List[dict] = []
+    for line in target.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(_json.loads(line))
+        except ValueError:
+            continue
+    return out
