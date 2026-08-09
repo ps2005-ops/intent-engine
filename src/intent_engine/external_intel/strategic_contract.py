@@ -217,6 +217,19 @@ ALLOWED: Dict[str, Any] = {
         "decision_implication": ..., "confidence_in_words": ...,
         "evidence_ids": ...,
     }],
+    # THESIS HISTORY. Without it this consumer could not tell a thesis that
+    # has never moved from a thesis whose history was not transported, and
+    # "what changed your mind" needs opposite answers for the two. The STATUS
+    # is read rather than inferred from the list's length: an empty list is
+    # produced by both.
+    "thesis_history": {"status": ..., "revisions": ..., "moved": ...,
+                       "note": ...},
+    "thesis_revisions": [{
+        "revision_id": ..., "thesis_id": ..., "previous_revision": ...,
+        "transition": ..., "changed_at": ..., "changed_fields": ...,
+        "knowledge_effect_ids": ..., "triggering_evidence": ...,
+        "previous_standing": ..., "new_standing": ..., "reason": ...,
+    }],
     "limitations": ..., "evidence_ids": ..., "evidence_trust": _TRUST,
     "disclaimer": ...,
     "interpretation_allowed": ..., "interpretation_forbidden": ...,
@@ -317,6 +330,13 @@ class StrategicIntel:
     #: are never collapsed on the page.
     economic_context: Optional[dict] = None
     economic_theses: Tuple[dict, ...] = ()
+    #: Recorded transitions, and the STATED status of whether history was
+    #: transported at all. `thesis_history` is None when the producer sent
+    #: no status — which this consumer treats as HISTORY_UNAVAILABLE rather
+    #: than as "nothing moved", because an older producer that cannot send
+    #: history must not be read as one reporting a quiet thesis.
+    thesis_revisions: Tuple[dict, ...] = ()
+    thesis_history: Optional[dict] = None
     limitations: Tuple[str, ...] = ()
     #: The dossier's own normalized standing, or None when the producer did
     #: not normalize. Those are different states and are kept different: a
@@ -454,6 +474,8 @@ def consume(payload: dict, *, expected_company: str = "",
                           if isinstance(payload.get("economic_context"), dict)
                           else None),
         economic_theses=_economic_theses(payload),
+        thesis_revisions=tuple(payload.get("thesis_revisions") or ()),
+        thesis_history=payload.get("thesis_history"),
         limitations=tuple(str(x) for x in (payload.get("limitations") or ())),
         evidence_trust=(payload.get("evidence_trust")
                         if isinstance(payload.get("evidence_trust"), dict)

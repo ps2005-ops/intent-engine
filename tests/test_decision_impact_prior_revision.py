@@ -205,3 +205,81 @@ def test_a_wording_only_change_is_not_meaningful(tmp_path):
         after=state(ASSUMPTION=["  market   evidence supports x  "]),
         provenance=["ev_1"])
     assert got.materiality == di.NONE
+
+
+# --- what changed your mind: three states, three answers --------------------
+
+class _Intel:
+    def __init__(self, history=None, revisions=()):
+        self.thesis_history = history
+        self.thesis_revisions = revisions
+
+
+def moved_revision(**kwargs) -> dict:
+    row = {"revision_id": "rev_2", "thesis_id": "th_1",
+           "transition": "WEAKENED", "changed_at": "2026-08-09",
+           "previous_standing": "SUPPORTED", "new_standing": "CONTESTED",
+           "reason": "two filings disagreed",
+           "knowledge_effect_ids": ["ke_1"], "triggering_evidence": ["ev_1"]}
+    row.update(kwargs)
+    return row
+
+
+def test_missing_history_is_not_no_movement():
+    """The defect this whole transport exists to close.
+
+    A producer that sends no history at all must not be read as one
+    reporting a quiet thesis. Those need opposite answers and an older
+    producer would have produced the confident wrong one.
+    """
+    got = di.what_changed_your_mind(_Intel(history=None))
+    assert got["state"] == di.HISTORY_UNAVAILABLE
+    assert "not enough revision history" in got["answer"]
+    assert got["supported"] is False
+
+
+def test_created_only_says_nothing_has_changed_it():
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_NO_MOVEMENT},
+               revisions=({"transition": "CREATED"},)))
+    assert got["state"] == di.HISTORY_AVAILABLE_NO_MOVEMENT
+    assert "Nothing has changed this view yet" in got["answer"]
+    assert got["supported"] is True
+
+
+def test_a_real_transition_is_answered_from_the_record():
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_MOVED},
+               revisions=(moved_revision(),)))
+    assert got["state"] == di.HISTORY_AVAILABLE_MOVED
+    assert "SUPPORTED to CONTESTED" in got["answer"]
+    assert got["effects"] == ["ke_1"]
+    assert got["evidence"] == ["ev_1"]
+    assert got["supported"] is True
+
+
+def test_a_transition_with_no_cause_is_not_a_supported_answer():
+    """The record says the view moved and cannot say what moved it."""
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_MOVED},
+               revisions=(moved_revision(knowledge_effect_ids=[],
+                                         triggering_evidence=[]),)))
+    assert got["supported"] is False
+    assert "does not name the evidence" in got["answer"]
+
+
+def test_an_unknown_status_is_treated_as_unavailable():
+    got = di.what_changed_your_mind(_Intel(history={"status": "WHATEVER"}))
+    assert got["state"] == di.HISTORY_UNAVAILABLE
+
+
+def test_the_latest_transition_wins():
+    got = di.what_changed_your_mind(
+        _Intel(history={"status": di.HISTORY_AVAILABLE_MOVED},
+               revisions=(moved_revision(changed_at="2026-07-01",
+                                         reason="older"),
+                          moved_revision(revision_id="rev_3",
+                                         changed_at="2026-08-09",
+                                         reason="newer"))))
+    assert "newer" in got["answer"]
+    assert got["revisions"] == ["rev_3"]

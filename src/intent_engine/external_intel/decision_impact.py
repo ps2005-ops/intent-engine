@@ -534,3 +534,94 @@ def load_impacts(root, *, path: str = IMPACT_PATH) -> List[dict]:
         except ValueError:
             continue
     return out
+
+
+# ---------------------------------------------------------------------------
+# WHAT CHANGED YOUR MIND — three states, three answers, never two
+# ---------------------------------------------------------------------------
+#
+# The question a founder asks that this system is least entitled to guess at.
+# It must resolve:
+#
+#     thesis -> latest non-CREATED revision -> KnowledgeEffect -> evidence
+#
+# and it has exactly three honest outcomes. The one that matters is the third:
+# a dossier that arrived WITHOUT revision history is not a thesis that never
+# moved. Before the transport carried history, this consumer could only have
+# said the second, and would have said it confidently.
+
+HISTORY_AVAILABLE_NO_MOVEMENT = "HISTORY_AVAILABLE_NO_MOVEMENT"
+HISTORY_AVAILABLE_MOVED = "HISTORY_AVAILABLE_MOVED"
+HISTORY_UNAVAILABLE = "HISTORY_UNAVAILABLE"
+
+_OPENING_TRANSITION = "CREATED"
+
+
+def mind_change_state(intel) -> str:
+    """Which of the three states this dossier is in.
+
+    A producer that sends no `thesis_history` at all is UNAVAILABLE, not
+    NO_MOVEMENT. An older producer that cannot send history must never be
+    read as one reporting a quiet thesis.
+    """
+    stated = getattr(intel, "thesis_history", None)
+    if not isinstance(stated, dict) or not stated.get("status"):
+        return HISTORY_UNAVAILABLE
+    status = str(stated.get("status") or "")
+    return status if status in (
+        HISTORY_AVAILABLE_NO_MOVEMENT, HISTORY_AVAILABLE_MOVED,
+        HISTORY_UNAVAILABLE) else HISTORY_UNAVAILABLE
+
+
+def what_changed_your_mind(intel) -> dict:
+    """The answer, its state, and the records that support it.
+
+    Returns the sentence to say and the ids behind it. It never composes a
+    reason from the current thesis: a claim about what CHANGED a view can
+    only come from a recorded transition, and inferring one from the view's
+    present wording is the fabrication this whole chain exists to prevent.
+    """
+    state = mind_change_state(intel)
+    if state == HISTORY_UNAVAILABLE:
+        return {
+            "state": state, "answer": (
+                "I have the current view, but not enough revision history in "
+                "this analysis to tell you what changed it."),
+            "revisions": [], "effects": [], "evidence": [],
+            "supported": False,
+        }
+    moved = [r for r in (getattr(intel, "thesis_revisions", ()) or ())
+             if str(r.get("transition") or "") != _OPENING_TRANSITION]
+    if not moved:
+        return {
+            "state": HISTORY_AVAILABLE_NO_MOVEMENT, "answer": (
+                "Nothing has changed this view yet. This is still the first "
+                "recorded version of it."),
+            "revisions": [], "effects": [], "evidence": [],
+            "supported": True,
+        }
+    latest = sorted(moved, key=lambda r: str(r.get("changed_at") or ""))[-1]
+    effects = list(latest.get("knowledge_effect_ids") or ())
+    evidence = list(latest.get("triggering_evidence") or ())
+    # A TRANSITION WITH NO CAUSE IS NOT AN ANSWER. The record says the view
+    # moved and cannot say what moved it, so the sentence says exactly that
+    # rather than naming the transition as if it explained itself.
+    if not effects and not evidence:
+        return {
+            "state": HISTORY_AVAILABLE_MOVED, "answer": (
+                f"The view was recorded as {latest.get('transition')} on "
+                f"{latest.get('changed_at')}, and the record does not name "
+                f"the evidence behind that change."),
+            "revisions": [latest.get("revision_id")], "effects": [],
+            "evidence": [], "supported": False,
+        }
+    was = str(latest.get("previous_standing") or "its opening standing")
+    now = str(latest.get("new_standing") or "an unrecorded standing")
+    why = str(latest.get("reason") or "no reason was recorded")
+    return {
+        "state": HISTORY_AVAILABLE_MOVED, "answer": (
+            f"The view moved from {was} to {now} on "
+            f"{latest.get('changed_at')}: {why}."),
+        "revisions": [latest.get("revision_id")], "effects": effects,
+        "evidence": evidence, "supported": True,
+    }

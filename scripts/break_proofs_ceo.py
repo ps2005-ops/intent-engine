@@ -123,8 +123,46 @@ PROOFS = [
 # record is that this wall does not exist yet.
 NOT_BUILT = 1
 
+
+
+TRANSPORT_PROOFS = [
+    # --- missing history impersonates a quiet thesis --------------------
+    ("K. an absent history is read as 'nothing has changed this view'",
+     E / "decision_impact.py",
+     "    if not isinstance(stated, dict) or not stated.get(\"status\"):\n"
+     "        return HISTORY_UNAVAILABLE",
+     "    if not isinstance(stated, dict) or not stated.get(\"status\"):\n"
+     "        return HISTORY_AVAILABLE_NO_MOVEMENT",
+     f"{DI}::test_missing_history_is_not_no_movement"),
+
+    # --- CREATED counted as a change of mind ---------------------------
+    ("L. an opening revision counts as a transition",
+     E / "decision_impact.py",
+     "    moved = [r for r in (getattr(intel, \"thesis_revisions\", ()) or ())\n"
+     "             if str(r.get(\"transition\") or \"\") != _OPENING_TRANSITION]",
+     "    moved = list(getattr(intel, \"thesis_revisions\", ()) or ())",
+     f"{DI}::test_created_only_says_nothing_has_changed_it"),
+
+    # --- a causeless transition is presented as an answer --------------
+    ("M. a transition with no effect or evidence is reported as supported",
+     E / "decision_impact.py",
+     "    if not effects and not evidence:",
+     "    if False:",
+     f"{DI}::test_a_transition_with_no_cause_is_not_a_supported_answer"),
+
+    # --- an unknown status is trusted ----------------------------------
+    ("N. an unrecognised history status is passed through",
+     E / "decision_impact.py",
+     "    return status if status in (",
+     "    return status or HISTORY_AVAILABLE_NO_MOVEMENT if True else (",
+     f"{DI}::test_an_unknown_status_is_treated_as_unavailable"),
+]
+
+PROOFS.extend(TRANSPORT_PROOFS)
+
+
 if __name__ == "__main__":
     raise SystemExit(run_all(
         [Proof(*p) for p in PROOFS],
-        title=(f"ceo — decision impact: {len(PROOFS)} proofs, "
+        title=(f"ceo — decision impact + thesis transport: {len(PROOFS)} proofs, "
                f"{NOT_BUILT} recorded NOT_BUILT")))
