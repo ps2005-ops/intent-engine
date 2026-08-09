@@ -129,3 +129,72 @@ items:
       Reporting rival mechanisms requires a second route to exist, which is
       new capability rather than a repair.
     goes_to: V5
+
+  - id: BKL-EFFECT-CREATED-AT-IS-NOT-A-WRITE-TIME
+    class: HARDENING
+    found_in: I-ACC-001
+    observed: >
+      347 of 402 live KnowledgeEffects carry a `created_at` that is the
+      EVIDENCE'S observation date, not the day the effect was written.
+      `company_exposure.read_exposures` passes `created_at=observed`, while
+      `belief_formation` correctly passes `created_at=as_of`. The store's
+      own docstring says the id is keyed on "the day it was written", which
+      is true for one writer and false for the other.
+
+      Measured consequence: `created_at` on the effect log spans 2026-02 to
+      2026-08, and the log's write path landed on 2026-08-09. Any rolling
+      window keyed on that field manufactures a learning history for months
+      in which the log did not exist.
+    why_not_a_blocker: >
+      The behaviour is deliberate and load-bearing. `effect_id` includes
+      `created_at`, so a stable value is exactly what makes the nightly
+      re-derivation of the standing evidence pool idempotent; setting it to
+      `as_of` would append ~347 fresh NO_CHANGE rows every night, which is
+      the "backfill counted as a day's learning" failure this project
+      already refuses.
+
+      I-ACC-001 does not depend on repairing it: windows key on ledger
+      append order delimited by `cycle` records, which is a true write
+      order, and break proof v4h-13 mutates the key to `created_at` and the
+      guard holds.
+
+      The clean repair is to key `effect_id` on the FACT's identity
+      (evidence, target, effect_type, occurred_at) and let `created_at` be
+      the honest write day. That changes the id of every row already
+      written, so it needs a migration against a live append-only ledger
+      and deserves its own node rather than a side effect of this one.
+    goes_to: V4_LATE
+
+  - id: BKL-RESEARCH-OUTCOME-EFFECT-LINK
+    class: FUTURE_IMPROVEMENT
+    found_in: I-ACC-001
+    observed: >
+      All 16 live `research_outcome` rows carry an EMPTY
+      `knowledge_effect_ids` while accepting 11-12 evidence rows each. The
+      field exists on the contract and nothing populates it, so there is no
+      path from a research ACTION to what its evidence eventually CHANGED.
+    why_not_a_blocker: >
+      The research channel now reports UNMEASURABLE and names the missing
+      field rather than dividing by it — the first implementation graded
+      "0 of 14 productive", which is an accusation the ledger cannot
+      support and reads identically to research that produced nothing.
+
+      Populating the link is new capability, not a repair: the effects an
+      action produced are not all known when the outcome is written, since
+      an expectation opened today may resolve in three weeks. It belongs
+      with the delayed-reward path, which already models that lag.
+    goes_to: V4_LATE
+
+  - id: BKL-SOURCE-STALENESS-FROM-CADENCE
+    class: HARDENING
+    found_in: L-SRC-001
+    observed: >
+      `SourceHealth.expected_cadence_days` is carried on the record and no
+      code computes STALE from it. A feed answering every call with
+      month-old figures is failing at its job while reporting HEALTHY.
+    why_not_a_blocker: >
+      The macro adapters do not publish a cadence, so the field has no
+      populated source to read. Building the detector before the input
+      exists would be a guard over an empty path — recorded as NOT_BUILT in
+      break_proofs_v4i rather than proven against nothing.
+    goes_to: V4_LATE

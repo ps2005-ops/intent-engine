@@ -19,154 +19,136 @@ repo's `.git`. Consequences a resuming session will otherwise rediscover:
   in a worktree. `--no-verify` is never the fix, and neither is
   `-c core.hooksPath=…`, which is the same thing wearing a different hat.
 - `origin/v4b/market` is the source of truth. The local `refs/heads/v4b/market`
-  may be pinned by another session's worktree registration; `git update-ref`
-  moves it without touching that directory.
+  is usually pinned by another session's worktree; `git update-ref` moves it
+  without touching that directory.
 - The venv at `intent-engine-market/.venv` resolves `intent_engine` to the
-  FOUNDER tree unless `PYTHONPATH` names the market source root. Every command
-  below sets it.
+  FOUNDER tree unless `PYTHONPATH` names the market source root.
 
-Run tests from the repo root — several read repo-relative paths and fail from
-anywhere else, which looks like a broken test and is a broken invocation:
+**THE RUNTIME IS THE CANONICAL CHECKOUT ITSELF.** launchd runs
+`/Users/prathamsharma/intent-engine-market/.venv/bin/python -m intent_engine.market`
+with `PYTHONPATH=<that root>/src`. So "repin the runtime" means `git checkout
+<sha>` in `/Users/prathamsharma/intent-engine-market` — and it means a live
+cycle is reading THAT tree, not your worktree. Editing your own worktree
+during a cycle is safe; editing the canonical checkout is the mixed-revision
+trap `runtime_provenance` cannot catch.
+
+Run tests from the repo root — several read repo-relative paths:
 
     env -C <worktree> PYTHONPATH=src <venv>/bin/python -m pytest tests -q
 
-## The convergence rule (new, and the point of this run)
+## The convergence rule
 
 `SEVERITY.md`. Only **RELEASE_BLOCKER** and **MATERIAL_DEFECT** may open a
-READY node. **HARDENING** and **FUTURE_IMPROVEMENT** go to `BACKLOG.yaml` and
-do not extend the release frontier.
+READY node. **HARDENING** and **FUTURE_IMPROVEMENT** go to `BACKLOG.yaml`.
 
-This exists because the maturity audit was working too well to finish: two
-runs closed six nodes between them and READY went 7 → 8. Every discovery is
-still recorded; the classification decides whether it blocks a release.
+**The governing-plan exception is now SPENT.** Five systemic pillars were
+adopted after this graph was derived and were reconciled into it once, on
+2026-08-09, as PROGRAM L. They are not to be rescoped again session by
+session.
 
-`COMPLETE_NODE_MATURITY_AUDIT = DONE` (see `MATURITY_AUDIT.md`). The global
-survey is not repeated per session. The ladder is enforced per node through
-`maturity_required` and through live cycles — which is how G-THE-004 was
-found, not by an audit.
+## What the last session changed
 
-## What G-THE-004 turned out to be
+**I-ACC-001 is COMPLETE and live at `80f3aa5`.** Seven learning channels
+derived from the effect log, never averaged. Three defects were found in its
+own seam and all three were live:
 
-The recorded diagnosis was wrong, and instructively so. It said the prior
-snapshot dict kept only the last thesis per identity. Reading the ledger:
-**all seven persisted snapshots had distinct identities.**
+1. **The block never reached the record.** `knowledge_step` computed
+   `learning_acceleration` every cycle since the module was written;
+   `report._knowledge_summary` is a WHITELIST and did not name the key, so the
+   whole result was discarded on the way to the dated artifact. Nothing
+   raised, nothing logged. Meanwhile the report's section *titled* LEARNING
+   ACCELERATION renders `throughput.py` — securities evaluated, signal fires
+   — so a reader asking whether the engine learns saw trading volume. Same
+   shape as *a caller is not a call*, one layer out.
+2. **An absent link reported as a measured zero.** The research channel first
+   graded 0 of 14 outcomes productive; all 14 carry an EMPTY
+   `knowledge_effect_ids`. It now returns UNMEASURABLE and names the field.
+3. **Founder value was publication volume.** The call site passed
+   `len(strategic_export.published)`. The channel reads decision-impact
+   records and reports UNMEASURABLE, which is the true state.
 
-The collision was on the CURRENT side and started two layers up. An
-`EconomicState` is keyed `(area, state_kind)`; `from_transmission` kept only
-the kind. `CA:MARKET_RATE` and `US:MARKET_RATE` are two states, and for one
-company they produced two theses with byte-identical claims, one `thesis_id`,
-and one snapshot — the store is idempotent on `(thesis_id, as_of)` and
-returned `False` for the other four of eleven. **Four theses were never
-persisted, every night, and nothing counted the refusal.**
+**L-SRC-001 is built, proven and committed at `8f14906`.** Source health is a
+persisted state per family per cycle, with streak and `last_success`.
 
-`compared: 11 > loaded: 7` was the symptom. Repairing `reconcile` alone would
-have made the arithmetic legal and left four theses unpersisted.
+## The live reading, and what it means
 
-Two more defects surfaced from the same seam, both live for two cycles:
+    ECONOMIC      29/402  (7.2%)   DEGRADING  MATURE
+    SYSTEM        20/41            INSUFFICIENT_HISTORY (one day)
+    CALIBRATION    3/11            STABLE     EARLY
+    FOUNDER          —             UNMEASURABLE
+    RETENTION    402/402           STABLE     MATURE
+    RESEARCH         —             UNMEASURABLE
+    UNSUPERVISED   1/3             EARLY_WARNING
 
-1. **The attribution wall could not fire.** Exposure effects carry
-   `target_id = "company:DIMENSION"`; the basis was built from the bare
-   dimension. `unattributed 0` read as a strict rule nothing tripped. Test
-   fixtures had been passing already-qualified exposures, so the only shape
-   ever exercised was one production does not emit.
-2. **The revision chain was rebuilt empty every night**, so every row ever
-   written had an empty parent. The write path was verified; nothing read it
-   back. `prior_revisions_loaded` now discriminates — `written: 0` reads the
-   same whether the chain was loaded and nothing moved or never loaded at all.
+`HIGH_ACTIVITY_LOW_LEARNING` fires: 347 evidence rows, 373 attributions that
+moved nothing, **0 thesis transitions**. That is not a defect in the metric.
+It is the engine, measured.
+
+Bottleneck computes to **FOUNDER_VALUE (UNMEASURABLE)** — the ranking puts an
+unmeasured channel above a badly measured one, because a capability nothing
+measures cannot be improved on purpose. Do not hardcode a different one.
 
 ## Findings a resuming session must not re-derive
 
-1. **VOIPolicy is a constant, not an estimate.** Identical to
+1. **`created_at` on effects is NOT a write time.** 347 of 402 are written by
+   the exposure fold with `created_at` = the EVIDENCE'S observation date, on
+   purpose: `effect_id` is keyed on it, and a stable value is what stops the
+   nightly re-derivation appending 347 rows a night. Windowing learning on it
+   yields a history running back to February in a log whose write path landed
+   on 2026-08-09. **Windows key on ledger APPEND ORDER, delimited by `cycle`
+   records.** Break proof 13 (v4h) mutates the key and the guard holds. The
+   field's mislabelling is real, and its migration would change every
+   `effect_id` on a live append-only ledger, so it is in BACKLOG, not here.
+
+2. **VOIPolicy is a constant, not an estimate.** Identical to
    `FixedPolicy(regulatory_filing)` on all six figures. See B-VOI-001.
 
-2. **Persistence is the bar for macro levels, and it now holds by rule.**
-   Over the 15 live series: 36 NO_INCREMENTAL_VALUE, 6 BOUNDED, 3 REFUSED.
-   Every method that beat persistence came back BOUNDED or REFUSED — **not
-   one is USEFUL.** The five short-series wins (23–24 points, ~16 held-out
-   predictions) are bounded by a 30-prediction floor; the one long-series win
-   (AR1 on `GLOBAL:CURRENCY`, 519 points, skill 0.0043) is REFUSED because the
-   fitted coefficient is 0.9854 and a unit root makes that mean reversion a
-   finite-sample artefact. C-MET-001's "suggestive, not promoted" is now
-   enforced by the standing rule rather than restated in prose.
+3. **Persistence is the bar for macro levels, and it holds by rule.** Over 15
+   live series: 36 NO_INCREMENTAL_VALUE, 6 BOUNDED, 3 REFUSED. **Not one is
+   USEFUL.**
 
-3. **The market venv is the Founder venv.** See above.
-
-4. **An assumption check that fails on everything is as useless as one that
-   passes on everything, and more convincing.** Two first implementations
-   were wrong and only visible against real data: stationarity screened on
-   the levels' autocorrelation rather than on the coefficient the method
-   actually fits, and residual autocorrelation computed from walk-forward
-   forecast errors — which an expanding-window fit makes negatively
-   autocorrelated by construction, so every series on earth "failed".
+4. **The market venv is the Founder venv.** See above.
 
 5. **A store accessor with no production caller is not a missing read path.**
-   `knowledge_step` loads every ledger line as raw dicts and each module
-   filters by `record`. Auditing the typed accessors reported twelve
-   capabilities with no reader and would have opened a dozen nodes. Only
-   `knowledge_effect` genuinely has none, and attribution does not depend on
-   it (`BKL-EFFECT-READBACK`).
+   `knowledge_step` loads the ledger as raw dicts and each module filters by
+   `record`. Only `knowledge_effect` genuinely has none.
 
-6. **A caller is not a call.** A-RD-009 was COMPLETE and had never executed:
-   `knowledge_step` called `RD.credit_revisions(...)` with `RD` bound as a
-   local in four OTHER functions. `NameError` every cycle, swallowed by
-   `except Exception`, invisible because nothing projected the block. It was
-   found by adding the projection — the instrumentation falsified the node it
-   was instrumenting. A wiring test now asserts no knowledge block reports an
-   error on ordinary data.
+6. **A caller is not a call.** A-RD-009 was COMPLETE and had never executed.
 
-## What is still architectural rather than empirical
+7. **The market pipeline has no LLM call site.** Measured, not assumed. The
+   prompt-injection boundary is the seam into Founder reasoning, which is why
+   L-SAN-001 is a guard against a call site appearing rather than a sanitiser
+   over an empty path.
 
-**No empty-handed research row has ever occurred in production.** All 12
-prospective outcomes are SUCCESS. The cause is measured and it is SELECTION,
-not logging: the sweep offers three families, cadence gates one, and the two
-that run are the two that reliably return documents. Refusals are already
-recorded as ineligible candidates with reasons.
-
-The classifier was unit-tested across all six statuses, which proves the
-classifier. `tests/test_market_unsuccessful_research_outcomes.py` now drives
-the real acquisition step with adapters that raise, return nothing and return
-only refusals, and asserts the persisted status. **Production's `NO_RESULT`
-count is still zero and must not be manufactured** — what changed is that the
-zero can be told apart from an incapacity. Rate is ~2 decisions per cycle;
-the 100 gate is tens of cycles out.
-
-**No thesis has moved.** 18 revisions, all CREATED. `classify()` has executed
-on real data and found nothing to classify, so STRENGTHENED / WEAKENED /
-CONTESTED have never been produced live, and the delayed reward has never
-paid anyone — correctly, since a first statement is not a consequence of any
-action. Do not synthesize a transition.
+8. **BLS has returned 503 on every recorded cycle.** One of six macro
+   families. This is why L-SRC-001 is release work and not speculation.
 
 ## The replay blocker, because it will look like a bug
 
 `D-REP-002` is BLOCKED_DATA on a measured gate: `macro_retrieval_months 1/6`.
 
 Every macro observation was retrieved inside ONE month (2026-08) while
-describing periods across 2024–2026. The engine learned all of history at
-once, so `vintage.freeze` admits **zero** rows at any earlier instant and
-`select_episodes` returns `[]` on the live corpus.
+describing periods across 2024–2026, so `vintage.freeze` admits **zero** rows
+at any earlier instant and `select_episodes` returns `[]` on the live corpus.
 
 **The shortcut is filtering on `published_at`, and it is the exact defect
 D-REP-001 built the wall against.** It would admit 1572 unseen figures at
-2026-01-01 and the replay would look entirely healthy. If replay suddenly
-starts producing live episodes, check the wall still reads observation time
-before believing it.
-
-The capability is built and proven on a fixture with real observation spread
-(`tests/test_market_thesis_replay.py`): 6 episodes, 5 outcomes right, 1 wrong,
-**every verdict UNRESOLVED** — the transmission leg predicts company capital
-spending, which the corpus does not carry. Five of six right and zero wins is
-the correct reading, not a shortfall. The gate clears on its own as cycles
-accumulate observation history.
+2026-01-01 and the replay would look entirely healthy. **Do not touch this
+node.** The gate clears on its own as observation history accumulates. If
+replay suddenly produces live episodes, check the wall still reads
+observation time before believing it.
 
 ## Next action
 
 Run `frontier.py`. Do not assume the order in this file still holds.
 
-As of `0c652b2`: 43 nodes, COMPLETE 23, READY 5, WAITING_DEPENDENCY 11,
-BLOCKED_DATA 4. Runtime pinned to `0c652b2`, imports verified, PAPER
+As of `8f14906`: 49 nodes, COMPLETE 24, READY 8, WAITING_DEPENDENCY 11,
+BLOCKED_DATA 4, NOT_APPLICABLE 2. Runtime pinned to `8f14906`, PAPER
 enforced, production `119d345` untouched.
 
-`I-ACC-001` is next by rank and is NOT a small node: `learning_acceleration`
-is 601 lines and the acceptance wants seven channels classified
-independently from effects rather than accepted rows, plus a live cycle.
-Budget a full slice for it rather than starting it late.
+The remaining frontier is real work, none of it blocked:
+`E-DEM-001`, `J-ADV-001`, `L-ADV-001`, `L-SAN-001`, `H-CEO-001`,
+`C-MET-003`, `L-CLD-001` (founder repo).
+
+`L-ADV-001` and `L-SAN-001` are the two newly opened nodes this branch can
+finish. `H-CEO-001` unblocks three others and is the highest-reach node left.
