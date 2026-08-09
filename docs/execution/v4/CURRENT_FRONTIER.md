@@ -8,94 +8,111 @@ Resume pointer. A new session needs only this file plus AGENT_PROTOCOL.md.
 
 Do not trust this file over the script. If they disagree, the script is right.
 
-## As of 2026-08-09, end of the frontier-exhaustion run
+## Repository, before anything else
 
-    42 nodes   COMPLETE=19   READY=8   WAITING_DEPENDENCY=12   BLOCKED_DATA=3
+The market checkout is a **linked worktree of `/Users/prathamsharma/intent-engine`**;
+`git rev-parse --git-common-dir` from the market root returns the Founder
+repo's `.git`. Consequences a resuming session will otherwise rediscover:
 
-    p2  G-THE-003   EVALUATE: a second cycle produces a real transition
-    p3  C-MET-002   MethodAssumptionCheck ledger              (unblocks 1)
-    p3  E-DEM-001   Targeted demand-variable extraction       (unblocks 1)
-    p3  I-ACC-001   Learning acceleration from KnowledgeEffect (unblocks 1)
-    p3  C-MET-004   INSTRUMENT: MethodPerformance accumulates
-    p3  J-ADV-001   Adversarial suite extension
-    p4  D-REP-002   Historical thesis replay                  (unblocks 4)
-    p4  H-CEO-001   CEO Q&A from canonical records            (unblocks 3)
+- The pre-commit hook lives in the Founder repo's shared hooks dir and runs
+  the offline suite. It needs `GUARD_PYTHON=/Users/prathamsharma/intent-engine-market/.venv/bin/python`
+  in a worktree. `--no-verify` is never the fix, and neither is
+  `-c core.hooksPath=…`, which is the same thing wearing a different hat.
+- `origin/v4b/market` is the source of truth. The local `refs/heads/v4b/market`
+  may be pinned by another session's worktree registration; `git update-ref`
+  moves it without touching that directory.
+- The venv at `intent-engine-market/.venv` resolves `intent_engine` to the
+  FOUNDER tree unless `PYTHONPATH` names the market source root. Every command
+  below sets it.
 
-V4 IS NOT CLOSED. Eight executable nodes remain and none is blocked.
+Run tests from the repo root — several read repo-relative paths and fail from
+anywhere else, which looks like a broken test and is a broken invocation:
 
-Three of the eight exist because of the maturity audit, not because new
-capability was scoped: A-RD-009 (done), C-MET-004 and G-THE-003. The audit
-greps production importers for every COMPLETE capability whose acceptance
-implies runtime use. Run it again before believing any COMPLETE:
+    env -C <worktree> PYTHONPATH=src <venv>/bin/python -m pytest tests -q
 
-    for m in <module>; do grep -rl "import $m" --include="*.py" src/ ; done
+## The convergence rule (new, and the point of this run)
 
-`vintage` and `economic_method` still have zero production importers.
-`vintage` is fine — its consumer is D-REP-002. `economic_method` is C-MET-004.
+`SEVERITY.md`. Only **RELEASE_BLOCKER** and **MATERIAL_DEFECT** may open a
+READY node. **HARDENING** and **FUTURE_IMPROVEMENT** go to `BACKLOG.yaml` and
+do not extend the release frontier.
 
-## What the live cycle proved, and what it did not
+This exists because the maturity audit was working too well to finish: two
+runs closed six nodes between them and READY went 7 → 8. Every discovery is
+still recorded; the classification decides whether it blocks a release.
 
-Thesis revisions are LIVE: 7 written and held at runtime_git_sha 58566f9,
-with 7 snapshots persisted. But `loaded` was 0 and `compared` was 0, because
-it was the first cycle to write snapshots — every revision is CREATED, and
-`classify()` plus the effect-attribution rule have never run on a real
-movement. G-THE-003 is exactly that gap and needs only a second cycle.
+`COMPLETE_NODE_MATURITY_AUDIT = DONE` (see `MATURITY_AUDIT.md`). The global
+survey is not repeated per session. The ladder is enforced per node through
+`maturity_required` and through live cycles — which is how G-THE-004 was
+found, not by an audit.
 
-Prospective decisions moved 4 -> 6 on their own during this run.
+## What G-THE-004 turned out to be
 
-## The executor now enforces its own gates
+The recorded diagnosis was wrong, and instructively so. It said the prior
+snapshot dict kept only the last thesis per identity. Reading the ledger:
+**all seven persisted snapshots had distinct identities.**
 
-`frontier.py` evaluates `minimum_data` as `{metric: required}` against
-`METRICS.json`, measured from the live ledger with a `measured_at`. A missing
-metric blocks — "we looked and there are none" and "we could not look" are
-different claims and neither makes a node runnable.
+The collision was on the CURRENT side and started two layers up. An
+`EconomicState` is keyed `(area, state_kind)`; `from_transmission` kept only
+the kind. `CA:MARKET_RATE` and `US:MARKET_RATE` are two states, and for one
+company they produced two theses with byte-identical claims, one `thesis_id`,
+and one snapshot — the store is idempotent on `(thesis_id, as_of)` and
+returned `False` for the other four of eleven. **Four theses were never
+persisted, every night, and nothing counted the refusal.**
 
-Derived state is **not stored**. READY / WAITING_DEPENDENCY / BLOCKED_DATA are
-computed; TASK_GRAPH declares only what a measurement cannot establish and
-marks the rest `DERIVED`. `--check` fails if a concrete derivable status
-reappears, which is the drift that had TASK_GRAPH and BLOCKERS disagreeing.
+`compared: 11 > loaded: 7` was the symptom. Repairing `reconcile` alone would
+have made the arithmetic legal and left four theses unpersisted.
 
-## Runtime is aligned
+Two more defects surfaced from the same seam, both live for two cycles:
 
-    launchd checkout   f026e96   (was 66c4a15, four commits behind)
-    imports resolve    /Users/prathamsharma/intent-engine-market/src
-    PAPER              enforced
-    production         119d345 untouched, no merge to main
-
-Every cycle report now carries `runtime.runtime_git_sha`, captured at process
-start. `runtime_provenance.ran_at_or_after(artifact, sha)` is the release gate:
-it returned True for the three commits the last run contained and False for the
-one that landed after it started.
-
-## What is still architectural rather than empirical
-
-**No empty-handed research row has ever occurred in production.** All four live
-outcomes were SUCCESS. `NO_RESULT` and `FAILED` — the rows a reconstructed log
-cannot hold, and the reason the prospective log exists — are unit-tested across
-all six statuses and never observed. Do not manufacture one. Until one appears
-naturally, "the log is unbiased" is a claim about the architecture.
-
-Rate: ~2 decisions per night cycle. The 100 gate is ~48 cycles out. The
-tempting shortcut is a decision per (family, subject), which would give 52 by
-morning and every one would be a choice nobody made. The cycle picks families.
+1. **The attribution wall could not fire.** Exposure effects carry
+   `target_id = "company:DIMENSION"`; the basis was built from the bare
+   dimension. `unattributed 0` read as a strict rule nothing tripped. Test
+   fixtures had been passing already-qualified exposures, so the only shape
+   ever exercised was one production does not emit.
+2. **The revision chain was rebuilt empty every night**, so every row ever
+   written had an empty parent. The write path was verified; nothing read it
+   back. `prior_revisions_loaded` now discriminates — `written: 0` reads the
+   same whether the chain was loaded and nothing moved or never loaded at all.
 
 ## Findings a resuming session must not re-derive
 
 1. **VOIPolicy is a constant, not an estimate.** Identical to
-   `FixedPolicy(regulatory_filing)` on all six figures. Independence is 1.0 for
-   both top families so its stated rationale cannot separate them; duplication
-   does, 0.75 vs 0.027. Not flipped by hand — see B-VOI-001 and §12 of the
-   brief. `diagnose_source_preference` reports the gap every cycle.
+   `FixedPolicy(regulatory_filing)` on all six figures. See B-VOI-001.
 
-2. **Persistence is the bar for macro levels.** Walk-forward over 15 real
-   series: persistence best on 9, AR1 on 4, drift on 2, and effectively
-   unbeaten on the four 520-point series. The 24-point wins are ~16
-   out-of-sample predictions and are recorded as suggestive, not promoted.
+2. **Persistence is the bar for macro levels, and it now holds by rule.**
+   Over the 15 live series: 36 NO_INCREMENTAL_VALUE, 6 BOUNDED, 3 REFUSED.
+   Every method that beat persistence came back BOUNDED or REFUSED — **not
+   one is USEFUL.** The five short-series wins (23–24 points, ~16 held-out
+   predictions) are bounded by a 30-prediction floor; the one long-series win
+   (AR1 on `GLOBAL:CURRENCY`, 519 points, skill 0.0043) is REFUSED because the
+   fitted coefficient is 0.9854 and a unit root makes that mean reversion a
+   finite-sample artefact. C-MET-001's "suggestive, not promoted" is now
+   enforced by the standing rule rather than restated in prose.
 
-3. **The market venv is the Founder venv.** With `PYTHONPATH` unset,
-   `intent_engine` resolves to the other repository, which has no `market`
-   subpackage. Any subprocess in a test must be handed the source root.
+3. **The market venv is the Founder venv.** See above.
+
+4. **An assumption check that fails on everything is as useless as one that
+   passes on everything, and more convincing.** Two first implementations
+   were wrong and only visible against real data: stationarity screened on
+   the levels' autocorrelation rather than on the coefficient the method
+   actually fits, and residual autocorrelation computed from walk-forward
+   forecast errors — which an expanding-window fit makes negatively
+   autocorrelated by construction, so every series on earth "failed".
+
+5. **A store accessor with no production caller is not a missing read path.**
+   `knowledge_step` loads every ledger line as raw dicts and each module
+   filters by `record`. Auditing the typed accessors reported twelve
+   capabilities with no reader and would have opened a dozen nodes. Only
+   `knowledge_effect` genuinely has none, and attribution does not depend on
+   it (`BKL-EFFECT-READBACK`).
+
+## What is still architectural rather than empirical
+
+**No empty-handed research row has ever occurred in production.** `NO_RESULT`
+and `FAILED` are unit-tested across all six statuses and never observed. Do
+not manufacture one. Rate is ~2 decisions per night cycle; the 100 gate is
+tens of cycles out.
 
 ## Next action
 
-`G-THE-001`. Then recompute — do not assume the order holds.
+Run `frontier.py`. Do not assume the order in this file still holds.

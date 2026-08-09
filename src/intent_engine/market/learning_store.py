@@ -126,6 +126,16 @@ THESIS_REVISION = "thesis_revision"
 #: was ever written.
 THESIS_SNAPSHOT = "thesis_snapshot"
 
+#: How one method did on one series, out of sample. Persisted so the answer to
+#: "which method works for which question, in this regime" accumulates instead
+#: of being a comparison a human ran once and wrote down.
+METHOD_PERFORMANCE = "method_performance"
+#: One assumption of one method, tested against one series. Kept beside the
+#: performance row because a method that won while its critical assumption
+#: failed has produced a description, not an effect, and the two rows must be
+#: read together or the win reads as an identification.
+METHOD_ASSUMPTION_CHECK = "method_assumption_check"
+
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
@@ -137,6 +147,7 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RESEARCH_DECISION, RESEARCH_OUTCOME,
                           RESEARCH_DELAYED_OUTCOME,
                           THESIS_REVISION, THESIS_SNAPSHOT,
+                          METHOD_PERFORMANCE, METHOD_ASSUMPTION_CHECK,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
                           MACRO_OBSERVATION})
 
@@ -501,6 +512,59 @@ class LearningStore:
         newest = max(str(r.get("snapshot_as_of") or "") for r in rows)
         return tuple(r for r in rows
                      if str(r.get("snapshot_as_of") or "") == newest)
+
+    def record_method_performance(self, performance, *, as_of: str,
+                                  question_type: str = "") -> bool:
+        """One method's out-of-sample score on one series, on one date.
+
+        Keyed `(method, series, question_type, as_of)`. The date is in the key
+        deliberately: a score is a measurement taken on a day, and next
+        month's score on a longer series is a NEW measurement rather than a
+        correction of this one. Folding them would make "AR1 beats
+        persistence" a statement with no date attached, which is how a result
+        outlives the regime it was measured in.
+        """
+        payload = (performance.as_dict() if hasattr(performance, "as_dict")
+                   else dict(performance))
+        payload["measured_as_of"] = as_of
+        if question_type:
+            payload.setdefault("question_type", question_type)
+        key = (str(payload.get("method") or ""),
+               str(payload.get("series") or ""),
+               str(payload.get("question_type") or ""), as_of)
+        if not key[0]:
+            raise ValueError("a method performance row needs its method")
+        held = frozenset(
+            (str(r.get("method") or ""), str(r.get("series") or ""),
+             str(r.get("question_type") or ""),
+             str(r.get("measured_as_of") or ""))
+            for r in self._rows() if r.get("record") == METHOD_PERFORMANCE)
+        if key in held:
+            return False
+        self._append(METHOD_PERFORMANCE, payload)
+        return True
+
+    def method_performances(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == METHOD_PERFORMANCE)
+
+    def record_method_assumption_check(self, check) -> bool:
+        """Idempotent on the check's content-keyed id."""
+        payload = (check.as_dict() if hasattr(check, "as_dict")
+                   else dict(check))
+        cid = str(payload.get("check_id") or "")
+        if not cid:
+            raise ValueError("an assumption check needs its content-keyed id")
+        if cid in frozenset(str(r.get("check_id") or "")
+                            for r in self._rows()
+                            if r.get("record") == METHOD_ASSUMPTION_CHECK):
+            return False
+        self._append(METHOD_ASSUMPTION_CHECK, payload)
+        return True
+
+    def method_assumption_checks(self) -> Tuple[dict, ...]:
+        return tuple(r for r in self._rows()
+                     if r.get("record") == METHOD_ASSUMPTION_CHECK)
 
     def macro_observation_ids(self) -> frozenset:
         return frozenset(str(r.get("observation_id") or "")

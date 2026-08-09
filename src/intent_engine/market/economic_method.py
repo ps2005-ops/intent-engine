@@ -36,6 +36,7 @@ the caller.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import math
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
@@ -108,23 +109,38 @@ def _drift(history: Sequence[float]) -> float:
     return float(history[-1] + span)
 
 
-def _ar1(history: Sequence[float]) -> float:
-    """Mean-reverting first-order autoregression, fitted on the history given.
+def _fit_ar1(history: Sequence[float]) -> Optional[Tuple[float, float]]:
+    """Least squares on (x_t, x_{t+1}) pairs, or None when there is no slope.
 
-    Fitted by least squares on (x_t, x_{t+1}) pairs. Falls back to persistence
-    when the regressor has no variance — a constant series has no slope, and
-    inventing one would produce confident nonsense.
+    Returned rather than folded into the prediction because the fitted
+    coefficient is itself the thing the stationarity assumption is ABOUT: a
+    beta at one says the series has a unit root and the model's mean
+    reversion is a finite-sample artefact. Testing that on a statistic other
+    than the coefficient the method actually fits would be testing a
+    different model.
     """
     if len(history) < 3:
-        return float(history[-1])
+        return None
     xs, ys = list(history[:-1]), list(history[1:])
     n = len(xs)
     mean_x, mean_y = sum(xs) / n, sum(ys) / n
     var = sum((x - mean_x) ** 2 for x in xs)
     if var <= 1e-12:
-        return float(history[-1])
+        return None
     beta = sum((x - mean_x) * (y - mean_y) for x, y in zip(xs, ys)) / var
-    alpha = mean_y - beta * mean_x
+    return mean_y - beta * mean_x, beta
+
+
+def _ar1(history: Sequence[float]) -> float:
+    """Mean-reverting first-order autoregression, fitted on the history given.
+
+    Falls back to persistence when the regressor has no variance — a constant
+    series has no slope, and inventing one would produce confident nonsense.
+    """
+    fit = _fit_ar1(history)
+    if fit is None:
+        return float(history[-1])
+    alpha, beta = fit
     return float(alpha + beta * history[-1])
 
 
@@ -346,6 +362,309 @@ def compare(series: Sequence[float], *, names: Sequence[str] = (),
         "note": ("all methods scored on one training window so the "
                  "comparison is like-for-like; skill is relative MAE "
                  "improvement over persistence"),
+    }
+
+
+# --- assumptions, tested rather than listed -----------------------------------
+#
+# WHY A LEDGER AND NOT A DOCSTRING
+# --------------------------------
+# `EconomicMethod.assumptions` is a tuple of sentences. Sentences do not fail.
+# A method whose assumptions are written down and never checked produces
+# exactly the same number as one whose assumptions hold, and the number is
+# reported with the same confidence — which is how "AR1 beat persistence"
+# becomes a causal statement about an economy that happened to be trending.
+#
+# So each assumption gets a test, a result, and the evidence the result came
+# from. An assumption nobody can test is recorded as UNTESTED, which is a
+# third thing and must not be read as passing.
+
+PASSED = "PASSED"
+FAILED = "FAILED"
+UNTESTED = "UNTESTED"
+ASSUMPTION_RESULTS = (PASSED, FAILED, UNTESTED)
+
+#: A failed CRITICAL assumption forbids the causal reading. A failed
+#: ADVISORY one bounds it and is reported beside the estimate.
+CRITICAL = "CRITICAL"
+ADVISORY = "ADVISORY"
+SEVERITIES = (CRITICAL, ADVISORY)
+
+#: What may be said once the assumptions have been read.
+USEFUL = "USEFUL"                      # assumptions hold; the estimate stands
+BOUNDED = "BOUNDED"                    # advisory failures; stated limits
+REFUSED = "REFUSED"                    # a critical assumption failed
+NO_INCREMENTAL_VALUE = "NO_INCREMENTAL_VALUE"   # ran, did not beat the baseline
+STANDINGS = (USEFUL, BOUNDED, REFUSED, NO_INCREMENTAL_VALUE)
+
+
+@dataclass(frozen=True)
+class MethodAssumptionCheck:
+    """One assumption of one method, on one series, and what testing it said."""
+
+    method: str
+    question: str
+    assumption: str
+    severity: str
+    result: str
+    evidence: str
+    series: str = ""
+    statistic: Optional[float] = None
+    threshold: Optional[float] = None
+    as_of: str = ""
+
+    def __post_init__(self) -> None:
+        if self.result not in ASSUMPTION_RESULTS:
+            raise MethodRefused(f"unknown assumption result {self.result!r}")
+        if self.severity not in SEVERITIES:
+            raise MethodRefused(f"unknown severity {self.severity!r}")
+        if not self.evidence.strip():
+            raise MethodRefused(
+                f"the check of {self.assumption!r} states no evidence; an "
+                "assumption recorded as passing with nothing behind it is "
+                "weaker than one recorded as untested, because it reads as "
+                "having been checked")
+
+    @property
+    def tested(self) -> bool:
+        return self.result != UNTESTED
+
+    @property
+    def blocks_causal_reading(self) -> bool:
+        return self.result == FAILED and self.severity == CRITICAL
+
+    @property
+    def check_id(self) -> str:
+        raw = "|".join((self.method, self.series, self.assumption,
+                        self.as_of))
+        return "mac_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+    def as_dict(self) -> dict:
+        out = dataclasses.asdict(self)
+        out.update(contract=CONTRACT, record="method_assumption_check",
+                   check_id=self.check_id, tested=self.tested,
+                   blocks_causal_reading=self.blocks_causal_reading)
+        return out
+
+
+def _first_difference(series: Sequence[float]) -> List[float]:
+    return [series[i + 1] - series[i] for i in range(len(series) - 1)]
+
+
+def _lag1_autocorrelation(values: Sequence[float]) -> Optional[float]:
+    if len(values) < 3:
+        return None
+    n = len(values)
+    mean = sum(values) / n
+    denominator = sum((v - mean) ** 2 for v in values)
+    if denominator <= 1e-12:
+        return None
+    numerator = sum((values[i] - mean) * (values[i + 1] - mean)
+                    for i in range(n - 1))
+    return numerator / denominator
+
+
+#: An AR(1) coefficient this close to one is a random walk for practical
+#: purposes: the fitted mean reversion is an artefact of a finite sample and
+#: the model's own standard errors are wrong. Not a p-value — this is a
+#: deliberately blunt screen, and it is reported with the statistic so a
+#: reader can disagree with the threshold rather than with a verdict.
+_UNIT_ROOT_RHO = 0.98
+
+#: Residual autocorrelation above this says one lag did not carry the
+#: dependence, so the coefficient is absorbing structure it does not model.
+_RESIDUAL_AC = 0.30
+
+#: Half the sample's steps in the same direction is a drift; more than this
+#: much imbalance means "no reliable short-horizon drift" is false.
+_DRIFT_IMBALANCE = 0.70
+
+
+def check_assumptions(series: Sequence[float], name: str, *,
+                      question: str = "", series_name: str = "",
+                      as_of: str = "") -> List[MethodAssumptionCheck]:
+    """Test what this method assumes about THIS series.
+
+    Every assumption the registry declares comes back with a result, so the
+    count of checks always equals the count of declared assumptions. A method
+    whose assumptions are partly untestable here reports UNTESTED for those
+    and the caller can see the gap; silently returning only the testable ones
+    would make a partial check look complete.
+    """
+    method = METHODS.get(name)
+    if method is None:
+        raise MethodRefused(f"unknown method {name!r}")
+
+    def build(assumption, severity, result, evidence, statistic=None,
+              threshold=None):
+        return MethodAssumptionCheck(
+            method=name, question=question, assumption=assumption,
+            severity=severity, result=result, evidence=evidence,
+            series=series_name, statistic=statistic, threshold=threshold,
+            as_of=as_of)
+
+    values = [float(v) for v in series]
+    out: List[MethodAssumptionCheck] = []
+    for assumption in method.assumptions:
+        lowered = assumption.lower()
+
+        if "stationary" in lowered:
+            fit = _fit_ar1(values)
+            if fit is None:
+                out.append(build(
+                    assumption, CRITICAL, UNTESTED,
+                    f"{len(values)} observations with no variance to fit a "
+                    "lag-1 coefficient on"))
+            else:
+                beta = fit[1]
+                out.append(build(
+                    assumption, CRITICAL,
+                    FAILED if beta >= _UNIT_ROOT_RHO else PASSED,
+                    f"fitted AR(1) coefficient {beta:.4f} against a unit-root "
+                    f"screen at {_UNIT_ROOT_RHO}; at or above it the fitted "
+                    "mean reversion is a finite-sample artefact",
+                    statistic=round(beta, 6), threshold=_UNIT_ROOT_RHO))
+
+        elif "one lag carries" in lowered:
+            # IN-SAMPLE RESIDUALS FROM ONE FIT. The first version differenced
+            # walk-forward forecasts against the actuals, which measures
+            # something else entirely: an expanding-window fit chases the
+            # series, so its forecast errors are negatively autocorrelated by
+            # construction and every series on earth "failed". The assumption
+            # is about whether one lag captured the dependence, which is a
+            # question about the residuals of a single fitted model.
+            residual_ac = None
+            fit = _fit_ar1(values)
+            if fit is not None and len(values) >= 5:
+                alpha, beta = fit
+                residuals = [values[i + 1] - (alpha + beta * values[i])
+                             for i in range(len(values) - 1)]
+                residual_ac = _lag1_autocorrelation(residuals)
+            if residual_ac is None:
+                out.append(build(
+                    assumption, ADVISORY, UNTESTED,
+                    "too few observations to leave residuals to test"))
+            else:
+                out.append(build(
+                    assumption, ADVISORY,
+                    FAILED if abs(residual_ac) > _RESIDUAL_AC else PASSED,
+                    f"residual lag-1 autocorrelation {residual_ac:.4f} "
+                    f"against {_RESIDUAL_AC}; above it the single lag is "
+                    "absorbing structure it does not model",
+                    statistic=round(residual_ac, 6),
+                    threshold=_RESIDUAL_AC))
+
+        elif "average historical step continues" in lowered:
+            steps = _first_difference(values)
+            if not steps:
+                out.append(build(assumption, CRITICAL, UNTESTED,
+                                 "a single observation has no steps"))
+            else:
+                up = sum(1 for s in steps if s > 0)
+                share = max(up, len(steps) - up) / len(steps)
+                out.append(build(
+                    assumption, ADVISORY,
+                    PASSED if share >= _DRIFT_IMBALANCE else FAILED,
+                    f"{share:.2%} of {len(steps)} steps share one sign; "
+                    f"below {_DRIFT_IMBALANCE:.0%} the historical average "
+                    "step is a wash and extrapolating it is extrapolating "
+                    "noise",
+                    statistic=round(share, 6), threshold=_DRIFT_IMBALANCE))
+
+        elif "no reliable short-horizon drift" in lowered:
+            steps = _first_difference(values)
+            if not steps:
+                out.append(build(assumption, ADVISORY, UNTESTED,
+                                 "a single observation has no steps"))
+            else:
+                up = sum(1 for s in steps if s > 0)
+                share = max(up, len(steps) - up) / len(steps)
+                out.append(build(
+                    assumption, ADVISORY,
+                    FAILED if share >= _DRIFT_IMBALANCE else PASSED,
+                    f"{share:.2%} of {len(steps)} steps share one sign; at or "
+                    f"above {_DRIFT_IMBALANCE:.0%} there IS a drift and "
+                    "persistence is leaving it on the table",
+                    statistic=round(share, 6), threshold=_DRIFT_IMBALANCE))
+
+        else:
+            # DESIGN ASSUMPTIONS, NOT DATA ASSUMPTIONS. "the window was chosen
+            # before the effect was seen" is a fact about how the study was
+            # run and no series can answer it. Recorded UNTESTED with the
+            # reason, never quietly counted as holding.
+            out.append(build(
+                assumption, CRITICAL, UNTESTED,
+                "this is a statement about how the study was conducted, not "
+                "about the series; no test of the data can establish it"))
+    return out
+
+
+#: Out-of-sample predictions below which a win is suggestive, not a result.
+#: C-MET-001 measured AR1 beating persistence on four 24-point series — about
+#: sixteen held-out predictions each — and recorded them as suggestive rather
+#: than promoting them. A standing of USEFUL on sixteen points would undo
+#: that judgement silently, which is the way a careful reading gets lost:
+#: not by being argued down, but by a later layer not knowing it was made.
+_MINIMUM_OUT_OF_SAMPLE = 30
+
+
+def interpret(checks: Sequence[MethodAssumptionCheck], *,
+              beat_baseline: Optional[bool] = None,
+              predictions: Optional[int] = None) -> dict:
+    """What may honestly be said, given what the assumptions came to.
+
+    REFUSED IS NOT AN ERROR. A method whose critical assumption failed still
+    produced a number, and that number may be a perfectly good DESCRIPTION of
+    the sample. What it may not do is carry a causal reading. Both halves are
+    returned, because discarding the descriptive result would push the caller
+    toward a method that fails silently instead.
+    """
+    failed_critical = [c for c in checks if c.blocks_causal_reading]
+    failed_advisory = [c for c in checks
+                       if c.result == FAILED and c.severity == ADVISORY]
+    untested_critical = [c for c in checks
+                         if c.result == UNTESTED and c.severity == CRITICAL]
+    if failed_critical:
+        standing = REFUSED
+        why = ("a critical assumption failed: "
+               + "; ".join(c.assumption for c in failed_critical))
+    elif untested_critical:
+        standing = BOUNDED
+        why = ("a critical assumption could not be tested here: "
+               + "; ".join(c.assumption for c in untested_critical))
+    elif beat_baseline is False:
+        standing = NO_INCREMENTAL_VALUE
+        why = ("every assumption held and the method did not beat the "
+               "baseline; that is a result about the method, not a failure "
+               "of the run")
+    elif failed_advisory:
+        standing = BOUNDED
+        why = ("an advisory assumption failed: "
+               + "; ".join(c.assumption for c in failed_advisory))
+    elif predictions is not None and predictions < _MINIMUM_OUT_OF_SAMPLE:
+        standing = BOUNDED
+        why = (f"every assumption held, on {predictions} out-of-sample "
+               f"predictions against a floor of {_MINIMUM_OUT_OF_SAMPLE}; "
+               "a win this size is suggestive and is not promoted")
+    else:
+        standing = USEFUL
+        why = "every declared assumption was tested and held"
+    return {
+        "contract": CONTRACT,
+        "standing": standing,
+        "out_of_sample_predictions": predictions,
+        "causal_reading_allowed": standing in (USEFUL, BOUNDED)
+                                  and not failed_critical,
+        "why": why,
+        "checks": len(checks),
+        "tested": sum(1 for c in checks if c.tested),
+        "untested": sum(1 for c in checks if not c.tested),
+        "failed_critical": len(failed_critical),
+        "failed_advisory": len(failed_advisory),
+        "descriptive_result_retained": True,
+        "note": ("a refused causal reading does not discard the estimate; it "
+                 "records that the estimate describes the sample and does "
+                 "not identify an effect"),
     }
 
 

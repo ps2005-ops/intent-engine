@@ -1,16 +1,16 @@
 {
-  "measured_at": "2026-08-09T07:12:32.235429+00:00",
+  "measured_at": "2026-08-09T09:09:33.311108+00:00",
   "metrics": {
-    "evidence_rows": 343,
-    "knowledge_effects": 393,
+    "evidence_rows": 344,
+    "knowledge_effects": 395,
     "logged_exploration_events": 0,
     "macro_observations": 2344,
     "named_supplier_edges": 0,
-    "prospective_decisions": 6,
+    "prospective_decisions": 10,
     "prospective_empty_handed": 0,
     "prospective_failed": 0,
-    "prospective_outcomes": 6,
-    "prospective_with_forgone_option": 6
+    "prospective_outcomes": 10,
+    "prospective_with_forgone_option": 10
   },
   "readable": true,
   "source": "/Users/prathamsharma/intent-engine-market/reports/market/learning_ledger.jsonl"

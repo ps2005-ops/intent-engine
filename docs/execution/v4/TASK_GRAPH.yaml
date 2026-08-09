@@ -335,9 +335,19 @@ tasks:
     dependencies: [C-MET-001]
     status: DERIVED
     priority: 3
+    expected_value: >
+      `EconomicMethod.assumptions` was a tuple of sentences, and sentences do
+      not fail. A method whose assumptions were violated produced the same
+      number, with the same confidence, as one whose assumptions held — so
+      C-MET-001's finding that AR1 beat persistence on four short series had
+      no way to say whether those four were even stationary.
     acceptance_criteria:
       - assumptions persisted per evaluation with pass/fail and evidence
       - a failed critical assumption yields REFUSED, never a fabricated estimate
+      - every declared assumption returns a result, UNTESTED included, so a
+        partial check cannot read as a complete one
+    maturity_required: EVALUATED
+    tests: tests/test_market_method_assumptions.py
     minimum_data: none
     completion_evidence: null
 
@@ -684,7 +694,7 @@ tasks:
     program: A
     title: INSTRUMENT -- something fires a ResearchDelayedOutcome
     dependencies: []
-    status: COMPLETE
+    status: NEEDS_REPAIR
     priority: 2
     expected_value: >
       A-RD-004 was marked COMPLETE with the record built and guarded, and
@@ -700,9 +710,25 @@ tasks:
       - a live cycle persists at least one, or reports zero honestly with the
         reason no consequence has yet resolved
     maturity_required: INSTRUMENTED
-    tests: tests/test_market_research_decision.py
+    tests: tests/test_market_research_decision.py tests/test_market_thesis_history_wiring.py
     minimum_data: none
-    completion_evidence: "58566f9; 5 tests + break proof v4d-31; DecisionOutcome.produced_evidence_ids filled by the acquisition step; credit_revisions wired into knowledge_step; an untraceable revision credits nobody rather than spreading reward across the night"
+    severity: RELEASE_BLOCKER
+    reopened: >
+      2026-08-09. Marked COMPLETE and it had never executed. `knowledge_step`
+      called `RD.credit_revisions(...)` while `RD` was bound as a local inside
+      four OTHER functions in steps.py and never inside that one, so every
+      cycle raised `NameError: name 'RD' is not defined`. The surrounding
+      `except Exception` turned it into `delayed_summary = {"error": ...}`,
+      and nothing projected `delayed_reward` into the report — so the failure
+      had no surface anywhere. The note recorded beside the completion read
+      "the code ran but its counts are unobservable". The counts were
+      unobservable because there were none.
+      Found on the first live cycle after adding the projection (§8), at
+      runtime_git_sha 4561ee9. This is the strongest argument in the graph for
+      projecting a count before believing a capability: the projection was
+      added as instrumentation and immediately falsified the node it was
+      instrumenting.
+    completion_evidence: null
 
   - id: C-MET-004
     program: C

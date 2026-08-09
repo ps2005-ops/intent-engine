@@ -724,6 +724,21 @@ def _knowledge_summary(knowledge: dict) -> dict:
                       "revisions_considered", "actions_with_produced_evidence",
                       "written", "held", "error")
             if (knowledge.get("delayed_reward") or {}).get(k) is not None},
+        # WHICH METHOD CURRENTLY LEADS, AND ON WHAT. Projected with the
+        # assumption failures beside it: a method that beat persistence while
+        # its stationarity assumption failed produced a description of the
+        # sample, and reporting the win without the failure is how that
+        # becomes an identified effect.
+        "economic_method": {
+            k: (knowledge.get("economic_method") or {}).get(k)
+            for k in ("series_available", "series_scored", "series_too_short",
+                      "evaluations", "by_standing", "beat_persistence_on",
+                      "leader", "assumption_failures_critical",
+                      "assumptions_untested",
+                      "performance_records_written",
+                      "assumption_checks_written", "performances_held",
+                      "assumption_checks_held", "error")
+            if (knowledge.get("economic_method") or {}).get(k) is not None},
         "economic_thesis": {
             k: (knowledge.get("economic_thesis") or {}).get(k)
             for k in ("theses", "by_standing", "assertable",

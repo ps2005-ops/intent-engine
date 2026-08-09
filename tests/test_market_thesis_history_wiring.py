@@ -215,6 +215,47 @@ def test_a_collision_the_step_cannot_prevent_is_still_counted(root,
     assert got["snapshot_records_written"] < got["theses_built"]
 
 
+#: Blocks of `knowledge_step` that must not report an error on a fixture
+#: holding ordinary data. Each is wrapped in `except Exception` so that a
+#: derived view cannot fail the cycle — correct, and it is also how a
+#: `NameError` in the delayed-reward block survived every cycle it ever ran,
+#: reported as `{"error": "name 'RD' is not defined"}` into a payload nothing
+#: projected. A capability that had never once executed was marked COMPLETE.
+_MUST_NOT_ERROR = (
+    "thesis_history", "delayed_reward", "economic_thesis", "founder_v4",
+    "macro_state", "company_exposure", "transmission", "economic_method",
+)
+
+
+def test_no_knowledge_block_reports_an_error_on_ordinary_data(root):
+    """The guard that would have caught A-RD-009 never running.
+
+    `except Exception` around a derived view is right — a projection must not
+    be able to stop the cycle that produces the thing being projected. What
+    is not right is nobody ever looking at what it caught.
+    """
+    payload = _payload(root)
+    errored = {name: (payload.get(name) or {}).get("error")
+               for name in _MUST_NOT_ERROR
+               if isinstance(payload.get(name), dict)
+               and (payload.get(name) or {}).get("error")}
+    assert not errored, (
+        "knowledge blocks failed silently and were swallowed into an error "
+        f"string: {errored}")
+
+
+def test_the_delayed_reward_block_actually_runs(root):
+    """Its counts must be present, not merely absent-without-error."""
+    got = _payload(root).get("delayed_reward") or {}
+    assert "error" not in got, got["error"]
+    for key in ("delayed_outcomes_written", "decisions_credited",
+                "revisions_credited", "untraceable_revisions",
+                "reward_delta_total"):
+        assert key in got, (
+            f"{key} missing; an operator cannot tell a delayed reward that "
+            "credited a real decision from one that credited nobody")
+
+
 def test_each_briefing_carries_its_own_economys_reason(root):
     """A sourced-looking sentence about the wrong country.
 

@@ -945,6 +945,122 @@ def _rehydrate_outcome(row: dict):
         return None
 
 
+#: A series shorter than this cannot leave enough held-out predictions for a
+#: comparison to mean anything, and scoring it anyway fills the ledger with
+#: rows whose only content is that the sample was too small.
+_METHOD_MIN_SERIES = 12
+
+
+def _evaluate_methods(store, observations, *, as_of: str, dry_run: bool
+                      ) -> dict:
+    """Score the baselines on the economy this cycle actually holds.
+
+    C-MET-004. `economic_method` was measured once, offline, by a human, on
+    fifteen series. That is a real evaluation and it is not memory: nothing in
+    the cycle imported the module, so "which method works for which question,
+    in this regime" could never accumulate an answer, and the offline result
+    was frozen at the regime it was taken in.
+
+    VINTAGE-SAFE BY CONSTRUCTION. Only figures published on or before `as_of`
+    are read, so a score computed for a past date cannot use a revision that
+    had not happened yet — the same wall `macro_state.state_of` enforces, for
+    the same reason.
+
+    ASSUMPTIONS BEFORE STANDING. Every scored series gets its assumptions
+    tested and the result decides what the number may be called. A method that
+    wins while its critical assumption failed has described the sample and has
+    not identified anything, and the two rows are stored together so nobody
+    reads the win on its own.
+    """
+    from . import economic_method as EM
+    from . import macro_state as MS
+
+    known = MS.as_known_at(observations, as_of)
+    series: Dict[tuple, list] = {}
+    for observation in known:
+        key = (getattr(observation, "area", "") or "",
+               observation.state_kind, observation.series_id)
+        series.setdefault(key, []).append(observation)
+
+    performances, checks = [], []
+    refused_short = 0
+    for (area, kind, series_id), rows in sorted(series.items()):
+        # Sorted by the period the figure DESCRIBES, never by when it was
+        # read. One figure per period already: `as_known_at` keeps the latest
+        # publication per `(series_id, reference_period)`, so a revision has
+        # superseded rather than extended before this loop sees it. A second
+        # dedupe here was written and removed — it could not fire, and an
+        # unreachable guard is a guard nobody can prove is connected.
+        ordered = sorted(rows, key=lambda o: o.reference_period)
+        if len(ordered) < _METHOD_MIN_SERIES:
+            refused_short += 1
+            continue
+        values = [float(o.value) for o in ordered]
+        name = f"{area}:{kind}:{series_id}"
+        comparison = EM.compare(values, series_name=name,
+                                question_type=EM.FORECAST_LEVEL)
+        for result in comparison["results"]:
+            method = result["method"]
+            got = EM.check_assumptions(
+                values, method, question=EM.FORECAST_LEVEL, series_name=name,
+                as_of=as_of)
+            reading = EM.interpret(
+                got, beat_baseline=result.get("beat_baseline"),
+                predictions=result.get("predictions"))
+            performances.append({**result, "area": area, "state_kind": kind,
+                                 "standing": reading["standing"],
+                                 "causal_reading_allowed":
+                                     reading["causal_reading_allowed"],
+                                 "assumption_note": reading["why"]})
+            checks.extend(got)
+
+    written_p = written_c = 0
+    if not dry_run:
+        for row in performances:
+            if store.record_method_performance(
+                    row, as_of=as_of, question_type=EM.FORECAST_LEVEL):
+                written_p += 1
+        for check in checks:
+            if store.record_method_assumption_check(check):
+                written_c += 1
+
+    # WHICH METHOD CURRENTLY LEADS, and on how much. Never "AR1 is best":
+    # a leader is a leader for one question type, on the series measured, on
+    # this date, and the count is carried so a lead of one is not read as a
+    # finding.
+    leaders: Dict[str, int] = {}
+    for row in performances:
+        if row.get("beat_baseline") is True:
+            leaders[row["method"]] = leaders.get(row["method"], 0) + 1
+    scored_series = len({row["series"] for row in performances})
+    by_standing: Dict[str, int] = {}
+    for row in performances:
+        by_standing[row["standing"]] = by_standing.get(row["standing"], 0) + 1
+    return {
+        "contract": EM.CONTRACT,
+        "series_available": len(series),
+        "series_scored": scored_series,
+        "series_too_short": refused_short,
+        "minimum_series_length": _METHOD_MIN_SERIES,
+        "evaluations": len(performances),
+        "performance_records_written": written_p,
+        "assumption_checks_written": written_c,
+        "performances_held": len(store.method_performances()),
+        "assumption_checks_held": len(store.method_assumption_checks()),
+        "by_standing": dict(sorted(by_standing.items())),
+        "beat_persistence_on": dict(sorted(leaders.items())),
+        "leader": (max(leaders, key=leaders.get) if leaders
+                   else EM.PERSISTENCE),
+        "assumption_failures_critical": sum(
+            1 for c in checks if c.blocks_causal_reading),
+        "assumptions_untested": sum(1 for c in checks if not c.tested),
+        "note": ("a method that did not beat persistence is recorded, not "
+                 "dropped; the leader is per question type on the series "
+                 "measured on this date, and persistence is the leader when "
+                 "nothing beat it"),
+    }
+
+
 def _rehydrate_thesis(row: dict):
     """A persisted thesis snapshot back into an EconomicThesis.
 
@@ -1133,6 +1249,15 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             "tracked_conditions": len(MS.TRACKED_CONDITIONS),
             "derived_conditions": [s.series_id for s in derived],
         }
+        # WHICH METHOD EARNS THE RIGHT TO ANSWER, measured on the economy this
+        # cycle holds rather than on a comparison somebody ran once offline.
+        try:
+            payload["economic_method"] = _evaluate_methods(
+                store, history + derived, as_of=ctx.as_of,
+                dry_run=ctx.dry_run)
+        except Exception as exc:  # noqa: BLE001
+            payload["economic_method"] = {
+                "error": f"{type(exc).__name__}: {exc}"}
     except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
         payload["macro_state"] = {"error": f"{type(exc).__name__}: {exc}"}
 
@@ -1397,6 +1522,20 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         # measurement of what was knowable at the time.
         delayed_written = 0
         try:
+            # IMPORTED HERE, and this line is the whole of A-RD-009's live
+            # existence. `RD` is bound as a local inside four OTHER functions
+            # in this module and never inside this one, so the call below
+            # raised `NameError: name 'RD' is not defined` on every cycle it
+            # ever ran. The bare except turned that into
+            # `delayed_summary = {"error": ...}`, and nothing projected
+            # `delayed_reward` into the report — so a capability that had
+            # never once executed was marked COMPLETE, and the note beside it
+            # read "the code ran but its counts are unobservable".
+            #
+            # The counts were unobservable because there were none. Adding
+            # the projection surfaced it on the first live cycle.
+            from . import research_decision as RD
+
             logged = [_rehydrate_decision(r) for r in
                       store.research_decisions()]
             logged_outcomes = [_rehydrate_outcome(r) for r in

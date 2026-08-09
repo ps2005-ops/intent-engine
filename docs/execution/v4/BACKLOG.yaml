@@ -27,6 +27,28 @@ items:
       a surface starts reporting belief-effect attribution rates, or a thesis
       declares a belief as a dependency object.
 
+  - id: BKL-EFFECT-READBACK
+    class: HARDENING
+    found_in: COMPLETE_NODE_MATURITY_AUDIT
+    observed: >
+      `store.record_knowledge_effect` is called by the cycle and
+      `store.knowledge_effects()` is called by nothing in src/. No module
+      filters the raw rows for `record == "knowledge_effect"` either. The
+      persisted effects are a durable archive that no production path opens.
+    why_not_a_blocker: >
+      Attribution does not depend on reading them. `knowledge_step` loads the
+      entire ledger and hands every evidence row ever stored to
+      `company_exposure.profile`, so the effects are recomputed over full
+      history each cycle and an old evidence row's effect is in memory
+      regardless. Nothing claims prior cycles' persisted effects were read.
+    would_become_material_if: >
+      the exposure recomputation becomes incremental — scoped to newly
+      acquired evidence rather than to every row. Attribution would then
+      silently lose everything older than tonight, and `unattributed` would
+      rise while reading like a finding about the evidence rather than about
+      the scope of a loop. This is the same shape as
+      `belief-formation-fresh-only`, which took a live zero to notice.
+
   - id: BKL-MECHANISM-CATALOGUE-KEYS
     class: HARDENING
     found_in: G-THE-004
