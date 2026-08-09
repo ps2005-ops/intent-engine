@@ -837,12 +837,16 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     # touches the step. Acquisition is the research step's job, and what it
     # persisted is what this reads.
     macro_state = None
+    # Bound before the try so a failed feed degrades the transmission step to
+    # "no economy measured" instead of a NameError on a path that is meant to
+    # be incapable of failing the cycle.
+    states: list = []
     try:
         from . import macro_state as MS
 
         history = [MS.from_dict(r) for r in store.macro_observations()]
-        states = [MS.state_of(kind, history, as_of=ctx.as_of)
-                  for kind in MS.STATE_KINDS]
+        states[:] = [MS.state_of(kind, history, as_of=ctx.as_of)
+                     for kind in MS.STATE_KINDS]
         anchoring = [s for s in states if s.anchors]
         macro_state = anchoring[0] if anchoring else None
         payload["macro_state"] = {**MS.summarise(states),
@@ -867,8 +871,22 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             "rated": [e.as_dict() for p in profiles.values()
                       for e in p.values() if e.conditions],
         }
+        # WHERE THE TWO HALVES MEET. A measured economy and an established
+        # exposure are each useless alone; this is the dated, falsifiable
+        # hypothesis they support together. All HYPOTHESIZED — the join is
+        # never an observation, because a company may have hedged, refinanced
+        # early, or be sitting on cash.
+        from . import transmission as TX
+
+        proposed = TX.propose_all(profiles, states, as_of=ctx.as_of)
+        payload["transmission"] = {
+            **TX.summarise(proposed),
+            "hypotheses": [t.as_dict() for t in proposed],
+        }
     except Exception as exc:  # noqa: BLE001
         payload["company_exposure"] = {"error": f"{type(exc).__name__}: {exc}"}
+        payload.setdefault("transmission",
+                           {"error": f"{type(exc).__name__}: {exc}"})
 
     try:
         # One chain, for the subject whose evidence can actually carry one.
