@@ -723,7 +723,7 @@ tasks:
     program: G
     title: EVALUATE -- a second cycle produces a real transition
     dependencies: [G-THE-002]
-    status: DERIVED
+    status: COMPLETE
     priority: 2
     expected_value: >
       The first snapshotting cycle recorded 7 CREATED and nothing else,
@@ -737,6 +737,32 @@ tasks:
       - at least one non-CREATED transition, or unchanged == compared with the
         economy genuinely still, reported honestly either way
       - what_changed_your_mind returns a record-backed answer for a real thesis
+    maturity_required: EVALUATED
+    tests: tests/test_market_thesis_history.py
+    minimum_data: none
+    completion_evidence: "runtime_git_sha 6f055a7: loaded 7, compared 11, unchanged 11, written 0. The comparison path ran and classified every thesis as unmoved — the acceptance clause unchanged == compared, reported honestly. Surfaced G-THE-004."
+
+  - id: G-THE-004
+    program: G
+    title: Thesis identity is not unique, so snapshots are silently dropped
+    dependencies: []
+    status: DERIVED
+    priority: 2
+    expected_value: >
+      The second cycle reported loaded 7 and compared 11. Eleven current
+      theses matched seven loaded identities, so (subject, question) is not a
+      key: `before` is a dict keyed on it and keeps only the LAST snapshot per
+      identity, silently discarding the others. Every thesis after the first
+      per identity is therefore compared against a DIFFERENT thesis. It
+      reported unchanged this time, which is luck rather than correctness —
+      the same collision under a real movement would attribute one thesis's
+      change to another.
+    acceptance_criteria:
+      - identity is a real key, or reconcile handles many theses per identity
+        explicitly rather than by last-write-wins
+      - a test pins two theses sharing (subject, question) and proves neither
+        snapshot is dropped
+      - compared never exceeds loaded
     maturity_required: EVALUATED
     tests: tests/test_market_thesis_history.py
     minimum_data: none
