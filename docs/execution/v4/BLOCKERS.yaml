@@ -30,6 +30,36 @@ blockers:
       Do not evaluate a policy on reconstructed rows and report it as a policy
       result. A-RD-005 exists to make that mixing impossible.
 
+  - id: BLK-NO-OBSERVATION-HISTORY
+    class: BLOCKED_DATA
+    blocks: [D-REP-002, D-REP-003, D-CAL-001, D-CF-001]
+    measured: >
+      All 2344 macro_observation rows carry `retrieved_at` inside ONE month,
+      2026-08, while `published_at` spans 2024 (488), 2025 (1080) and 2026
+      (776). `vintage.freeze` admits 0 rows at 2025-01-01, 2025-06-01 and
+      2026-01-01, and 2344 only at 2026-08-09. `leak_surface` — rows that had
+      already happened but had not been observed — is 488 / 942 / 1572 at
+      those three instants.
+    required: >
+      a corpus whose observation times are spread across the replay window,
+      which the engine produces at roughly one cycle per day going forward
+    why: >
+      The engine learned every historical figure at once. There is therefore
+      no historical T0 at which it knew anything, and a replay formed at one
+      would be reasoning from an empty state. This is a property of when the
+      corpus was ingested, not of the replay code: the machinery is built,
+      tested and leak-proofed against a fixture with a real observation
+      spread (tests/test_market_thesis_replay.py, 6 episodes, 5 outcomes
+      right, 1 wrong, every verdict UNRESOLVED because the mechanism leg has
+      no observable).
+    invalid_workaround: >
+      Do NOT filter on `published_at` to make episodes appear. That is the
+      exact defect D-REP-001 built the wall against, and it is measured: at
+      2026-01-01 it would admit 1572 figures nobody had seen, and the replay
+      would look entirely healthy while reasoning from the future. If a
+      replay suddenly starts producing episodes on the live corpus, check
+      that the wall is still reading observation time before believing it.
+
   - id: BLK-NO-EXPLORATION
     class: BLOCKED_DATA
     blocks: [B-BANDIT-001]

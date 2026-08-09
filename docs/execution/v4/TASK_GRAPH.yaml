@@ -387,13 +387,25 @@ tasks:
     dependencies: [D-REP-001]
     status: DERIVED
     priority: 4
+    blocker: BLK-NO-OBSERVATION-HISTORY
+    expected_value: >
+      The capability is BUILT, tested and leak-proofed
+      (src/intent_engine/market/thesis_replay.py, 19 tests). What cannot run
+      is the empirical replay, and the reason is measured rather than
+      assumed: every macro observation was retrieved in one month, so
+      `vintage.freeze` admits ZERO rows at any historical instant. There is
+      no T0 at which the engine knew anything.
     acceptance_criteria:
       - episodes chosen by date window / data availability / event type BEFORE
         outcomes are inspected
       - wins, losses and ambiguous results all retained
+      - a real historical episode resolves against observation-time-safe data
+    maturity_required: EVALUATED
+    tests: tests/test_market_thesis_replay.py
     minimum_data:
       macro_observations: 24
-    completion_evidence: null
+      macro_retrieval_months: 6
+    completion_evidence: "CAPABILITY PROVEN, EMPIRICAL REPLAY BLOCKED. Deterministic selection holds: reversing every value in the corpus leaves the selected instants and replay_ids identical, so the sample cannot be a sample of the engine's own successes. On a fixture with real observation spread: 6 episodes, outcome_tested 6, outcome_right 5, outcome_wrong 1, and every verdict UNRESOLVED because the mechanism leg predicts a company-level observable the corpus does not carry. Five leak attacks refused, including a figure published before t0 but seen after it -- the exact shape of the live corpus. The third acceptance clause is unmet and is BLK-NO-OBSERVATION-HISTORY, not a code gap." 
 
   - id: D-REP-003
     program: D

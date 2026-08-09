@@ -88,6 +88,18 @@ def measure(ledger=RUNTIME_LEDGER) -> dict:
         "named_supplier_edges": len(supplier),
         "macro_observations": sum(1 for r in rows
                                   if r.get("record") == "macro_observation"),
+        # HOW MUCH OBSERVATION HISTORY EXISTS, which is a different quantity
+        # from how much HISTORY exists. Every macro figure in the ledger was
+        # retrieved inside one month while describing periods across three
+        # years, so at any earlier instant the vintage admits nothing and a
+        # historical replay has no T0 to stand on. Counting distinct
+        # retrieval months makes that a gate the executor measures rather
+        # than a judgement someone records — and it rises on its own as the
+        # cycle keeps running.
+        "macro_retrieval_months": len({
+            str(r.get("retrieved_at") or "")[:7]
+            for r in rows if r.get("record") == "macro_observation"
+            and r.get("retrieved_at")}),
         "knowledge_effects": sum(1 for r in rows
                                  if r.get("record") == "knowledge_effect"),
         "evidence_rows": sum(1 for r in rows if r.get("record") == "evidence"),
