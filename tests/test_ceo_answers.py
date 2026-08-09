@@ -230,3 +230,23 @@ def test_every_plan_is_serialisable_and_declares_support():
 def test_an_empty_dossier_answers_nothing_confidently():
     for question in ("What is happening?", "Why?", "What changed?"):
         assert CA.plan(question, Intel()).supported is False
+
+
+# --- defects the live corpus surfaced ---------------------------------------
+
+def test_a_missing_first_hop_does_not_wrap_to_the_last():
+    """`hops[index - 1]` wrapped and produced "I can trace that as far as
+    decision consequence ... evidence is not recorded"."""
+    got = CA.plan("Why is that?",
+                  Intel(theses=[thesis(evidence_ids=[])]))
+    assert "cannot trace that back at all" in got.direct_answer
+    assert "as far as decision consequence" not in got.direct_answer
+
+
+def test_a_blank_alternative_is_not_an_alternative():
+    """A Mechanism with no description arrives as "" and rendered as
+    "The strongest recorded alternative is: "."""
+    got = CA.plan("What's the strongest alternative?",
+                  Intel(theses=[thesis(alternatives=["", "  "])]))
+    assert got.supported is False
+    assert got.direct_answer.rstrip().endswith("uncontested.")

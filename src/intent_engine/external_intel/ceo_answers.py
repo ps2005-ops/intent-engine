@@ -340,7 +340,11 @@ def _what_changed(question, intel, constraints) -> CEOAnswerPlan:
 
 def _alternative(question, intel, constraints) -> CEOAnswerPlan:
     theses = _theses(intel)
-    alts = [a for t in theses for a in (t.get("alternatives") or ())]
+    # Blank entries are dropped BEFORE the emptiness check. A Mechanism with
+    # no description arrives as "", which is not an alternative and rendered
+    # as "The strongest recorded alternative is: " on a live dossier.
+    alts = [str(a) for t in theses for a in (t.get("alternatives") or ())
+            if str(a or "").strip()]
     if not alts:
         return _unsupported(
             question, STRONGEST_ALTERNATIVE,
@@ -402,10 +406,19 @@ def _current_state(question, cls, intel, constraints) -> CEOAnswerPlan:
     stopped = next((h for h in hops if h.standing == MISSING), None)
     answer = str(leading.get("claim") or "")
     if cls in (WHY, WHY_IT_MATTERS) and stopped is not None:
-        answer = (f"{answer} I can trace that as far as "
-                  f"{hops[hops.index(stopped) - 1].name.lower().replace('_', ' ')} "
-                  f"and no further: {stopped.name.lower().replace('_', ' ')} "
-                  f"is not recorded for this company.")
+        # `hops[index - 1]` wrapped to the LAST hop when the FIRST one was
+        # missing, and produced "I can trace that as far as decision
+        # consequence and no further: evidence is not recorded". Caught on a
+        # live dossier, not by a fixture.
+        index = hops.index(stopped)
+        gap = stopped.name.lower().replace("_", " ")
+        if index == 0:
+            answer = (f"{answer} I cannot trace that back at all: {gap} is "
+                      f"not recorded for this company.")
+        else:
+            reached = hops[index - 1].name.lower().replace("_", " ")
+            answer = (f"{answer} I can trace that as far as {reached} and no "
+                      f"further: {gap} is not recorded for this company.")
     return CEOAnswerPlan(
         question=question, question_class=cls, direct_answer=answer,
         supported=True, standing=str(leading.get("standing") or ""),
@@ -415,7 +428,8 @@ def _current_state(question, cls, intel, constraints) -> CEOAnswerPlan:
                            (leading.get("evidence_ids") or ())),
         hops=tuple(hops),
         alternatives=tuple(str(a) for a in
-                           (leading.get("alternatives") or ())),
+                           (leading.get("alternatives") or ())
+                           if str(a or "").strip()),
         falsifiers=((str(leading.get("falsifier")),)
                     if leading.get("falsifier") else ()),
         missing_information=tuple(
@@ -456,7 +470,8 @@ def _challenge(question, intel, constraints) -> CEOAnswerPlan:
     """
     why = leading_premise(question) or "assumes a conclusion"
     theses = _theses(intel)
-    alts = [a for t in theses for a in (t.get("alternatives") or ())]
+    alts = [str(a) for t in theses for a in (t.get("alternatives") or ())
+            if str(a or "").strip()]
     falsifiers = [str(t.get("falsifier") or "") for t in theses
                   if str(t.get("falsifier") or "").strip()]
     leading = theses[0] if theses else {}
