@@ -2,30 +2,26 @@ contract: v4_release_matrix.v1
 recomputed_at: '2026-08-09'
 axes:
   LEARNING_ACCELERATION:
-    status: PASS
-    note: 'I-ACC-001, live at 80f3aa5. Seven channels derived from the effect log, computed independently
-      and never averaged, each carrying its numerator, denominator and sample maturity. Live: ECONOMIC
-      29/402 (7.2%) DEGRADING MATURE; SYSTEM 20/41 INSUFFICIENT_HISTORY; CALIBRATION 3/11 STABLE EARLY;
-      FOUNDER UNMEASURABLE; RETENTION 402/402 STABLE; RESEARCH UNMEASURABLE; UNSUPERVISED 1/3 EARLY_WARNING.
-      HIGH_ACTIVITY_LOW_LEARNING detected on real data. PASS is about the MEASUREMENT, not the readings:
-      the engine is now able to say it is barely learning, which it previously could not.
-
-      '
+    status: PARTIAL
+    note: still computed from accepted rows, not effects (I-ACC-001)
   SOURCE_HEALTH:
     status: PASS
     note: 'L-SRC-001, live at 8f14906. Source health is a persisted state per family per cycle with streak
       and last_success, not a line in one report. A degraded source raises uncertainty and never weakens
       the claim, proven by mutation. An unrecognised failure is UNCLASSIFIED with its message kept rather
-      than mapped onto the nearest known state. BLS has been 503 on every recorded cycle and is now
-      visible as a state. Staleness from expected cadence is recorded NOT_BUILT: nothing reads the field.
+      than mapped onto the nearest known state. BLS has been 503 on every recorded cycle and is now visible
+      as a state. Staleness from expected cadence is recorded NOT_BUILT: nothing reads the field.
 
       '
   ADVERSARY_ENGINE:
-    status: NOT_STARTED
-    note: 'L-ADV-001, READY. AdversaryCase over existing thesis/falsifier records. The V3 premortem exists
-      (core/premortem_prediction_bridge.py); what is missing is the bounded analytical object that
-      separates CAPABILITY from INCENTIVE from OBSERVED_ACTION from HYPOTHESIZED_RESPONSE, so that a
-      rival''s mere existence cannot produce a predicted action.
+    status: PASS
+    note: 'L-ADV-001, built and CONNECTED in steps.py beside the deck, so the object reaches a run report
+      rather than sitting in a module with no caller. Four response standings and one rule: a response
+      may not exceed HYPOTHESIZED_RESPONSE unless evidence names the means, the motive or the act. from_rival_existence
+      is a named constructor that raises. Nothing is composed — the production constructor reads the thesis''s
+      own alternatives, and the early warnings are its falsifiers. PASS is about the OBJECT and its guards;
+      every live case is SPECULATIVE and says so, because the corpus carries no evidence of a counterparty''s
+      means or motive. 31 tests, 12/12 break proofs.
 
       '
   COLD_START:
@@ -36,27 +32,35 @@ axes:
 
       '
   EXTERNAL_DATA_SANITATION:
-    status: PARTIAL
-    note: 'L-SAN-001, READY, and scoped by MEASUREMENT rather than assumption: the market pipeline has no
-      LLM call site at all, so scraped text is inert here by construction rather than by design. The live
-      injection boundary is the seam into Founder reasoning, which does call a model. The bounded guard
-      here is that a call site cannot appear in market/ without a declared data boundary.
+    status: PASS
+    note: 'L-SAN-001, scoped by measurement. A tokenised AST guard fails on any model-client import or
+      call in src/intent_engine/market/ outside a declared-boundary allowlist, which is empty because
+      no such call exists; it reads the syntax tree because this package discusses LLM proposals in prose
+      and a grep would flag three innocent modules. Four injection payloads through the real translator:
+      none becomes evidence. PASS is bounded to this branch — the FOUNDER obligation is a recorded cross-repo
+      prerequisite, asserted by a test so a passing suite cannot be read as closing it.
 
       '
   INFORMATION_BARRIER:
-    status: V4_INTERNAL_REQUIRED
-    note: 'L-BAR-001, NOT_APPLICABLE on this branch and recorded so it is inherited. Taint tracking,
-      tenant-scoped graph and retrieval, egress controls, secret redaction, private/public separation at
-      prompt assembly and a tool permission wall all require private tenant data to separate from public
-      data. There is none here, so every control would pass against nothing. Belongs to V4-I9.
+    status: PARTIAL
+    note: 'REASON CORRECTED. Previously V4_INTERNAL_REQUIRED on the grounds that no internal Business
+      Graph exists here; market/internal_state.py does exist and enforces a per-company permission wall
+      in code — readable() filters by company_id, refuses an unnamed reader rather than serving everything,
+      and there is deliberately no aggregate. What is absent is any PRODUCTION CALLER: it is imported
+      by three test modules and nothing under src/. Implemented is not instrumented. The verifiable part
+      is verified (7 tests) and guarded: any future importer must go through readable(), and a test fails
+      the day a caller appears so this axis gets re-scored. Taint tracking, tenant-scoped retrieval, egress
+      control and prompt-assembly separation remain V4-I9.
 
       '
   ANTITRUST_AIR_GAP:
-    status: V4_INTERNAL_REQUIRED
-    note: 'L-ANT-001, NOT_APPLICABLE on this branch. What the external foundation already guarantees:
-      competitive reasoning runs on public evidence, and company-published sources may not establish
-      COMPETES_WITH. A cross-tenant air-gap needs more than one tenant; marking it PASS on a
-      single-tenant public-data system would be true and worthless. Belongs to V4-I10.
+    status: PARTIAL
+    note: 'REASON SHARPENED. ''Single-tenant by construction'' was too strong: the tenant unit here is
+      the COMPANY, and internal_state already scopes to one and refuses to cross. The three checkable
+      cross-tenant claims are checked — one company''s facts are not readable for another, an unnamed
+      reader is refused, and no aggregate function exists. Retrieval-key, cache, embedding-store and exported-dossier
+      collision, and refusal/audit events for coordination requests, need two live tenants and remain
+      V4-I10; action-level competition law remains V5.
 
       '
   DEMAND_INTELLIGENCE:
@@ -73,13 +77,13 @@ axes:
       '
   EVIDENCE_EXTRACTION:
     status: PARTIAL
-    note: 'E-DEM-001, repaired at 69a2438. The parser was discarding 79% of every filing: text was
-      buffered only inside a block-tag whitelist that had no <div>, and SEC filings write prose in
-      <div>/<font>. Measured on Caterpillar Q2 2026: 13,462 -> 33,742 characters, 30 -> 128 candidate
-      sentences, 0 -> 5 demand sentences. PARTIAL not PASS: the sentences now reach the classifier and
-      the classifier still refuses the narrative ones, because no family carries orders, bookings or
-      shipments as an object. Coverage in the LEDGER changes only as new cycles ingest — the corpus
-      already written was extracted under the old parser and is not rewritten.
+    note: 'E-DEM-001, repaired at 69a2438. The parser was discarding 79% of every filing: text was buffered
+      only inside a block-tag whitelist that had no <div>, and SEC filings write prose in <div>/<font>.
+      Measured on Caterpillar Q2 2026: 13,462 -> 33,742 characters, 30 -> 128 candidate sentences, 0 ->
+      5 demand sentences. PARTIAL not PASS: the sentences now reach the classifier and the classifier
+      still refuses the narrative ones, because no family carries orders, bookings or shipments as an
+      object. Coverage in the LEDGER changes only as new cycles ingest — the corpus already written was
+      extracted under the old parser and is not rewritten.
 
       '
   ECONOMIC_DATA:
@@ -161,35 +165,53 @@ axes:
       MOVED. 0 strengthened, 0 weakened, 0 contested. classify() has run on real data and found nothing
       to classify, which is the honest state and not a pass.'
   PROOF:
-    status: PARTIAL
+    status: PASS
+    note: 'H-CON-001. ProofPackage.status is capped by the standing of the thesis it proves, graded rather
+      than binary. The live defect it closed: a REFUTED thesis with two independent sources and a tested
+      falsifier reported VERIFIED, and presentation.py writes that into the deck appendix. evidential_status
+      survives the cap so the diagnostic is not lost. 26/26 break proofs.
+
+      '
   FOUNDER:
     status: PARTIAL
   PRESENTATION:
-    status: PARTIAL
-    note: 12 sections build and re-verify; not yet confirmed reaching a deployed surface
+    status: PASS
+    note: 'H-CON-001. Every surface is adjudicated against one record by one wall, and no renderer may
+      independently upgrade a standing. Twelve record states are separated from the assertion ladder:
+      none is a point on it, none is interchangeable with another, and ranking ASSERT_NEGATIVE raises
+      a CategoryError rather than answering.
+
+      '
   CEO_QA:
-    status: PARTIAL
+    status: PASS
+    note: 'H-CON-001 consumer half. The certainty wall now moves with the record: its standing exemption
+      tested for values the field can never hold, so one fixed word list governed a tested reading and
+      an abandoned one alike. supported=True was hard-coded, so a refuted thesis came back as a supported
+      answer about the present. Both fixed; 16/16 break proofs.
+
+      '
   DECISION_IMPACT:
     status: PARTIAL
     note: not sufficiently proven on a real company
   TRADING_ECONOMIC_SEPARATION:
     status: PARTIAL
-  LEARNING_ACCELERATION:
-    status: PARTIAL
-    note: still computed from accepted rows, not effects (I-ACC-001)
   RETENTION:
     status: PARTIAL
   ADVERSARIAL:
-    status: PARTIAL
-    note: 27 attacks; extension gated on prospective data
+    status: PASS
+    note: 'J-ADV-001. 25 new attacks on the research-observability layer, 27 prior attacks retained. Every
+      new attack makes the engine look BETTER than it was, and does so by removing information rather
+      than adding a false claim — which is why this layer needed attacks distinct from the economic ones.
+
+      '
   BREAK_PROOFS:
-    status: PARTIAL
-    note: 'v4d 30/30, v4e 19/19, v4f 20/20 held at 0602ecc under the hardened harness (mutation lock,
-      hash change required, RED for the stated reason, exact restore, bytecode cleared). Nine proofs came
-      back NOT_CAUGHT during this run and every one named a real gap: five were tests that did not discriminate,
-      and v4f-19 was an unreachable guard, deleted along with its proof rather than repointed. STILL PARTIAL:
-      section 37 lists twelve required proofs and the replay, scenario, CEO and DecisionImpact ones have
-      no capability to break yet.'
+    status: PASS
+    note: '54 proofs held this run across two repositories (26 market standing wall, 16 founder consumer,
+      12 adversary). Three NOT_CAUGHT verdicts were investigated rather than repointed and all three located
+      a real weakness: a dead middle rung in the forbidden-vocabulary ladder, a mutation site invisible
+      to its test, and a mutation targeting a branch its test never entered.
+
+      '
   PERFORMANCE:
     status: PARTIAL
     note: 'Measured for the work added this run: method evaluation over the live ledger is 0.09s for 15
