@@ -896,6 +896,14 @@ def _knowledge_summary(knowledge: dict) -> dict:
             for k in ("decks", "subjects", "all_carry_alternatives",
                       "empty_sections", "error")
             if (knowledge.get("presentation") or {}).get(k) is not None},
+        # WORKING HARD AND LEARNING NOTHING. `unmeasurable` is projected
+        # beside `firing` on purpose: a check nobody could compute must not
+        # sit in the same column as one that came back fine.
+        "stagnation": {
+            k: (knowledge.get("stagnation") or {}).get(k)
+            for k in ("checks", "by_outcome", "firing", "unmeasurable",
+                      "detail", "error")
+            if (knowledge.get("stagnation") or {}).get(k) is not None},
         # DEMAND FIGURES THAT DISAGREE. `by_pair` rather than a total, because
         # backlog-with-cancellations and bookings-with-revenue are different
         # findings and a count of "3 tensions" is the flattening this layer

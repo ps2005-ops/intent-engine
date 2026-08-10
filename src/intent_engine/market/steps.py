@@ -1723,6 +1723,36 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             discoveries=discoveries)
     except Exception as exc:  # noqa: BLE001
         payload["learning_acceleration"] = {"error": str(exc)}
+
+    # WORKING HARD AND LEARNING NOTHING, as five separate questions. Each is
+    # computed from a denominator this cycle actually holds, and each may come
+    # back UNMEASURABLE — which is not a pass. An engine that cannot tell
+    # whether it is learning is in a worse position than one that knows it is
+    # not, and folding the two into a comfortable zero is how it stops being
+    # able to tell.
+    try:
+        from . import stagnation as STG
+
+        effects = payload.get("knowledge_effects") or {}
+        theses_block = payload.get("economic_thesis") or {}
+        impacts_seen = _decision_impacts(ctx)
+        payload["stagnation"] = STG.summarise(STG.evaluate(
+            evidence_rows=sum(1 for r in rows if r.get("record") == "evidence"),
+            knowledge_effects=effects.get("effects"),
+            theses=theses_block.get("theses"),
+            theses_resolved=theses_block.get("tested"),
+            discoveries=(payload.get("unsupervised") or {}).get("clusters"),
+            discoveries_validated=(payload.get("unsupervised") or {}).get(
+                "validated"),
+            analyses=len(impacts_seen) or None,
+            decision_impacts=sum(
+                1 for i in impacts_seen
+                if str(i.get("impact") or "") not in ("", "NONE",
+                                                      "FIRST_OBSERVATION"))
+            if impacts_seen else None,
+        ))
+    except Exception as exc:  # noqa: BLE001
+        payload["stagnation"] = {"error": str(exc)}
     return payload
 
 

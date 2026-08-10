@@ -37,6 +37,12 @@ REQUIRED = {
         "series_scored", "evaluations", "leader", "by_standing",
         "assumption_failures_critical", "performance_records_written",
     ),
+    "stagnation": (
+        # I-STA-001. `unmeasurable` is the one that must survive: a check
+        # nobody could compute is not a check that passed, and a projection
+        # dropping it would leave five questions looking answered.
+        "checks", "by_outcome", "firing", "unmeasurable",
+    ),
     "demand_tension": (
         # E-DEM-002. `by_pair` is the one that matters: a total flattens
         # backlog-with-cancellations and bookings-with-revenue into one

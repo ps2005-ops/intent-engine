@@ -661,7 +661,42 @@ tasks:
     program: I
     title: Stagnation detection
     dependencies: [I-ACC-001]
-    status: DERIVED
+    status: COMPLETE
+    tests: tests/test_market_stagnation.py
+    maturity_required: INSTRUMENTED
+    completion_evidence: >
+      FIVE QUESTIONS, NEVER AVERAGED. learning_health.alerts already fires
+      when nothing has been learned at all. The condition this adds is worse,
+      because it looks like health from every angle an operator normally
+      checks: throughput high, counts rising, reports longer, and none of it
+      turning into knowledge that changes a decision.
+
+      That failure has five distinct causes and each names a different team's
+      next morning — evidence with no effects (the readers), theses with no
+      resolution (nothing tests the falsifiers), spend with no realised value
+      (the policy), discoveries with no validation (the validator), analyses
+      with no DecisionImpact (the product is decoration). A single stagnation
+      score would average them into a number nobody could act on, and a test
+      asserts no such field appears.
+
+      THREE OUTCOMES, NOT TWO. FIRING, CLEAR and UNMEASURABLE — and
+      UNMEASURABLE is returned whenever a denominator is absent or below a
+      per-check activity floor, never a comfortable zero. This project has
+      shipped a metric that could only return a positive; the inverse matters
+      as much, and a ratio nobody could compute must not sit in the same
+      column as one that came back fine. The projection carries `unmeasurable`
+      beside `firing` for that reason.
+
+      A per-check activity floor rather than a shared one: fifty evidence rows
+      and five theses are different amounts of activity, and one floor would
+      either silence the theses check or fire the evidence check on noise.
+
+      CONNECTED and PROJECTED in the same change. 18 tests, break proofs 8/8.
+
+      NOT YET LIVE_VERIFIED at the time of writing: wired into knowledge_step
+      and projected, but the cycle that would exercise it was launched from
+      the previous commit. Recorded as INSTRUMENTED rather than claimed as
+      live.
     priority: 4
     acceptance_criteria:
       - alerts on high evidence + low effect rate; high thesis count + low
