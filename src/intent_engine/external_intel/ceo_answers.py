@@ -40,6 +40,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from intent_engine.external_intel import decision_impact as di
+from intent_engine.external_intel import coverage_state as CV
 from intent_engine.external_intel import standing_ceiling as SC
 
 CONTRACT = "ceo_answers.v1"
@@ -260,8 +261,39 @@ def _source_constraints(intel) -> Tuple[str, ...]:
 
 def _unsupported(question: str, cls: str, why: str,
                  **kwargs) -> CEOAnswerPlan:
+    # THE CEILING IS DECIDED HERE, not left empty. An unsupported plan used to
+    # carry ceiling="" — an undecided value, which the certainty wall then had
+    # to interpret. "Nothing may be asserted" is a decision and "" is the
+    # absence of one, and this layer is the one that knows which.
+    kwargs.setdefault("ceiling", SC.ASSERT_NONE)
     return CEOAnswerPlan(question=question, question_class=cls,
                          direct_answer=why, supported=False, **kwargs)
+
+
+def _no_view_answer(intel) -> Tuple[str, Tuple[str, ...], str]:
+    """WHICH KIND OF NOTHING this is, rather than one sentence for six.
+
+    Every branch below used to return "No economic view is recorded for this
+    company yet." That is honest and it is the same sentence for a company
+    nobody has looked at and a company whose sources went dark — and those
+    call for opposite actions: the first is a research task, the second is a
+    risk. It is the ABSENT / SOURCE_DEGRADED distinction the engine already
+    enforces per source, applied where it never had been: to the company.
+
+    THE CEILING COMES BACK WITH THE SENTENCE. An earlier version returned only
+    the words and let the caller hard-code ASSERT_NONE. That happened to be
+    right for every state and was right by coincidence rather than by wiring —
+    a break proof that widened OBSERVED to cover sparse dossiers went
+    uncaught, because the coverage state said "observed" while the plan went
+    on saying "assert nothing" from a constant. Two answers to one question is
+    how they drift.
+    """
+    state = CV.classify(
+        intel,
+        hydrating=bool(getattr(intel, "hydrating", False)),
+        degraded_sources=tuple(getattr(intel, "degraded_sources", ()) or ()))
+    return (CV.STATE_WORDS[state], (CV.MUST_NOT_CONCLUDE[state],),
+            CV.ceiling_for(state))
 
 
 def plan(question: str, intel) -> CEOAnswerPlan:
@@ -430,10 +462,10 @@ def _not_conclude(question, intel, constraints) -> CEOAnswerPlan:
 def _current_state(question, cls, intel, constraints) -> CEOAnswerPlan:
     theses = _theses(intel)
     if not theses:
+        answer, forbids, ceiling_ = _no_view_answer(intel)
         return _unsupported(
-            question, cls,
-            "No economic view is recorded for this company yet.",
-            source_constraints=constraints)
+            question, cls, answer, source_constraints=constraints,
+            must_not_conclude=forbids, ceiling=ceiling_)
     leading = theses[0]
     hops = _why_hops(leading, intel)
     stopped = next((h for h in hops if h.standing == MISSING), None)
@@ -571,7 +603,7 @@ def _challenge(question, intel, constraints) -> CEOAnswerPlan:
         "I can't answer that as asked — it " + why + ". "
         + (f"What the evidence currently supports is: "
            f"{leading.get('claim')}" if leading
-           else "No economic view is recorded for this company yet."))
+           else _no_view_answer(intel)[0]))
     return CEOAnswerPlan(
         question=question, question_class=CHALLENGE, direct_answer=answer,
         supported=bool(theses), premise_challenged=why,
