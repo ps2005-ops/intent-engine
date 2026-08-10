@@ -188,6 +188,13 @@ ALLOWED: Dict[str, Any] = {
         "decision_implication": None,
         "confidence_in_words": None,
         "evidence_ids": None,
+        # THE ADJUDICATED CEILING, not the standing alone. A consumer handed a
+        # bare standing has to re-derive what it may say from it, and that
+        # second derivation is where the two sides drift. What crosses is the
+        # decision and the words it forbids; the consumer may make it
+        # stricter, never looser.
+        "ceiling": None,
+        "forbidden_words": None,
     }],
     # THESIS HISTORY, WITHOUT WHICH "WHAT CHANGED YOUR MIND" CANNOT BE
     # ANSWERED HONESTLY. The consumer previously received the CURRENT thesis
@@ -451,13 +458,22 @@ def _economic_context(states: Sequence[Any]) -> dict:
 
 
 #: What the consumer is entitled to conclude about thesis movement.
-#: Three states, never two: an absent history and a history that recorded no
-#: movement are different facts and the CEO answer differs between them.
+#: FOUR states, never three, and never two. An absent history, a readable
+#: history holding nothing about this subject, and a history that recorded no
+#: movement are three different facts, and the CEO answer differs between all
+#: of them.
+#:
+#: The fourth was added after a live audit: 22 of the 25 published company
+#: dossiers carried `revisions: 0` under the status
+#: HISTORY_AVAILABLE_NO_MOVEMENT, whose note read "nothing has changed this
+#: view yet" — about companies for which no view had ever been formed. An
+#: empty list was being read as a finding about a thesis that did not exist.
 HISTORY_AVAILABLE_NO_MOVEMENT = "HISTORY_AVAILABLE_NO_MOVEMENT"
 HISTORY_AVAILABLE_MOVED = "HISTORY_AVAILABLE_MOVED"
+HISTORY_AVAILABLE_NO_THESIS = "HISTORY_AVAILABLE_NO_THESIS"
 HISTORY_UNAVAILABLE = "HISTORY_UNAVAILABLE"
 HISTORY_STATES = (HISTORY_AVAILABLE_NO_MOVEMENT, HISTORY_AVAILABLE_MOVED,
-                  HISTORY_UNAVAILABLE)
+                  HISTORY_AVAILABLE_NO_THESIS, HISTORY_UNAVAILABLE)
 
 #: The transition that opens a thesis rather than moving it. A log of nothing
 #: but these is a thesis that has never changed its mind.
@@ -502,6 +518,19 @@ def _thesis_history(revisions: Sequence[Any], available: bool) -> dict:
                      "can be supported"),
         }
     rows = [_revision(r) for r in revisions]
+    if not rows:
+        # THE STORE WAS READABLE AND HAD NOTHING FOR THIS SUBJECT. Falling
+        # through to NO_MOVEMENT here is what put "nothing has changed this
+        # view yet" into 22 dossiers describing companies about which no view
+        # had ever been formed. Zero revisions is not a stable view; it is the
+        # absence of one, and the honest answer to "what changed your mind" is
+        # that there is no mind to have changed yet.
+        return {
+            "status": HISTORY_AVAILABLE_NO_THESIS, "revisions": 0, "moved": 0,
+            "note": ("revision history was readable and holds no revision for "
+                     "this subject; no economic view has been opened, so "
+                     "there is nothing for evidence to have changed"),
+        }
     moved = [r for r in rows if r["transition"] != _OPENING_TRANSITION]
     if moved:
         return {
@@ -575,7 +604,27 @@ def _economic_thesis(thesis: Any) -> dict:
         "confidence_in_words": FV4._STANDING_WORDS.get(standing, ""),
         "evidence_ids": [str(e) for e in
                          (_field(thesis, "evidence_ids", ()) or ())],
+        **_ceiling_fields(standing),
     }
+
+
+def _ceiling_fields(standing: str) -> dict:
+    """What the consumer may assert, decided here rather than re-derived there.
+
+    An unrecognised standing is NOT mapped onto the nearest known one. It
+    crosses as an empty ceiling, which the consumer treats as "assert
+    nothing" — the failure of a producer to name its own standing is not
+    evidence that the claim is weak, it is evidence that we do not know, and
+    those license the same silence for different reasons.
+    """
+    from . import standing_wall as SW
+
+    try:
+        exported = SW.export(standing)
+    except SW.StandingViolation:
+        return {"ceiling": "", "forbidden_words": []}
+    return {"ceiling": exported["ceiling"],
+            "forbidden_words": exported["forbidden_words"]}
 
 def _trust_index(evidence_rows: Sequence[Any]) -> Dict[str, Any]:
     """evidence_id -> the trust standing of the EVENT that row belongs to.

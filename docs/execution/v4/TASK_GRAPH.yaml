@@ -523,24 +523,76 @@ tasks:
     minimum_data: none
     completion_evidence: "LIVE at Founder dab37f1 against a real published dossier. Deterministic answer planner, 14 question classes plus challenge mode; the renderer phrases the plan and may not add to it. END TO END: 'What changed your mind?' returns 'Nothing has changed this view yet. This is still the first recorded version of it.' — the NO_MOVEMENT answer, sayable only because H-CEO-002 now carries history; the same dossier produced HISTORY_UNAVAILABLE before this run. 'What changed?' returns 'new evidence arrived; the conclusions did not change', which is the distinction the product rests on and which break proof U pins by swapping the two readers. Challenge mode names the premise in 'tell me why this will definitely work' and still reports what the evidence shows. Every empty case is decided: no falsifier reads as 'not stated in a way evidence could overturn', no alternative as 'a gap in the analysis', an unrecognised question is declined. TWO defects passed 34 tests and 21 break proofs and only the live corpus showed them: a causal-chain off-by-one that wrapped to the last hop, and a blank alternative that rendered an empty sentence. 36 tests, break proofs 21/21. NOT included: monitoring/next-information/premortem answer bodies route to the current-state plan rather than dedicated readers. The transport that blocked this is H-CEO-002, closed in the same run."
 
-  - id: H-CEO-002
+  - id: H-CEO-003
     program: H
     title: CEO challenge mode -- refuse a leading premise
     dependencies: [H-CEO-001]
-    status: DERIVED
+    status: COMPLETE
     priority: 4
     acceptance_criteria:
       - a leading premise such as -- tell me why demand is collapsing -- is
         refused when the evidence does not show it, and answered instead with
         the evidence, the leading thesis, the alternative, and the missing test
     minimum_data: none
+    completion_evidence: >
+      ID REPAIRED. This node carried the id H-CEO-002 until 2026-08-09, when a
+      later session gave the thesis-history transport the same id. `frontier.py`
+      builds its index with a dict comprehension, so the last entry won and this
+      node was invisible to every frontier computation of its life -- never
+      READY, never blocked, never reported. It was nonetheless BUILT, as part of
+      the H-CEO-001 run, which is why nobody noticed. The planner now refuses to
+      run at all on a duplicate id rather than silently dropping a node.
+
+      Built and live-verified at Founder dab37f1. `leading_premise` names six
+      premise classes, most specific first, and CHALLENGE answers by
+      adjudicating rather than obeying: "Prove demand is collapsing" and
+      "assume the competitor won't respond" are each named as the premise they
+      smuggle in, and the answer still reports what the evidence shows with the
+      alternative and the falsifier attached. Covered by tests/test_ceo_answers.py.
 
   - id: H-CON-001
     program: H
     title: Standing consistency wall across thesis/proof/presentation/Q&A
     dependencies: [H-CEO-001]
-    status: DERIVED
+    status: COMPLETE
     priority: 3
+    maturity_required: LIVE_VERIFIED
+    tests: tests/test_market_standing_wall.py + (founder) tests/test_founder_standing_ceiling.py
+    completion_evidence: >
+      ONE CEILING, FIVE SURFACES. market/standing_wall.py adjudicates thesis,
+      proof, deck, founder view and CEO answer against the single record they
+      all render; external_intel/standing_ceiling.py mirrors it on the consumer
+      side and may only narrow it. The ceiling is EXPORTED as data rather than
+      re-derived from the standing, because a second derivation is a second
+      copy of the rule.
+
+      THE DEFECT IT WAS OPENED FOR WAS REAL AND LIVE. ProofPackage.status was
+      computed from evidence counts alone, so a REFUTED thesis with two
+      independent sources and a tested falsifier reported VERIFIED, and
+      presentation.py writes "proof status: VERIFIED" into the deck appendix.
+      The cap is graded rather than binary: PROPOSED->OPEN, SUPPORTED->BOUNDED,
+      TESTED->VERIFIED, WEAKENED->OPEN, REFUTED/SUPERSEDED->FAILED, and
+      evidential_status survives so "the sources would have carried VERIFIED
+      and the thesis did not" stays readable.
+
+      RECORD STATES ARE NOT WEAK WORLD STATES. Twelve of them, none a point on
+      the assertion ladder, none interchangeable with another, and ranking
+      ASSERT_NEGATIVE raises rather than answering. This is what caught the
+      live defect below.
+
+      TWO CONSUMER DEFECTS FIXED. `violates_certainty_wall` exempted standings
+      the field can never hold, so its "ceiling" was one fixed word list for
+      every standing; `supported=True` was hard-coded, so a refuted thesis came
+      back as a supported answer about the present.
+
+      LIVE: all 59 files in reports/market/strategic consume without refusal;
+      25 are company dossiers and every thesis row in them reaches a decided
+      ceiling. Every live standing is PROPOSED, so ASSERT_LEADING is the only
+      ceiling the corpus exercises today — the REFUTED and TESTED paths are
+      covered by tests and break proofs, not by live data, and that is recorded
+      rather than claimed.
+
+      46 market tests, 33 founder tests, break proofs 26/26 and 16/16.
     acceptance_criteria:
       - a PROPOSED thesis cannot become a CONFIRMED slide
       - a CONTESTED proof cannot become a high-confidence answer

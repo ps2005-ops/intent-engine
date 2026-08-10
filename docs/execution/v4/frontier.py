@@ -132,6 +132,23 @@ def main(argv):
     by_id = {t["id"]: t for t in tasks}
     counts = collections.Counter(s for s, _ in status.values())
 
+    # A DUPLICATE ID IS NOT A COSMETIC PROBLEM. `by_id` keeps the last entry,
+    # so a node whose id another node reused disappears from the frontier
+    # entirely — it is never scheduled, never blocked, never reported. That
+    # happened to H-CEO-002 (CEO challenge mode) when a later session gave the
+    # thesis-history transport the same id: the challenge-mode node was
+    # invisible for the whole of its life. This runs on every invocation, not
+    # only under --check, because a planner that silently loses a node is
+    # worse than one that refuses to start.
+    seen = collections.Counter(t["id"] for t in tasks)
+    duplicates = sorted(i for i, n in seen.items() if n > 1)
+    if duplicates:
+        print("DUPLICATE TASK IDS — each of these hides an earlier node "
+              "completely; the frontier cannot see it:")
+        for tid in duplicates:
+            print(f"  {tid} appears {seen[tid]} times")
+        return 1
+
     if "--check" in argv:
         # DERIVED is the marker meaning "this node's state is computed, and is
         # deliberately not stored". Drift is a node whose graph entry names a

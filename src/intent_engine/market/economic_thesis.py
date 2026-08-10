@@ -390,15 +390,19 @@ class ProofPackage:
     prediction: str = ""
     limitations: Tuple[str, ...] = ()
     as_of: str = ""
+    #: THE STANDING OF THE THESIS THIS PROVES. Empty means unbound, which is
+    #: what every caller predating the standing wall passes; the cap below is
+    #: then skipped and the historical behaviour is unchanged. `prove` always
+    #: sets it, so nothing on the production path is unbound.
+    thesis_standing: str = ""
 
     @property
-    def status(self) -> str:
-        """VERIFIED is rare on purpose.
+    def evidential_status(self) -> str:
+        """What the EVIDENCE alone supports, before the thesis is consulted.
 
-        Agreement among sources is not proof; three outlets repeating one
-        press release is one source. VERIFIED requires the falsifier to have
-        been tested AND more than one independent source AND no live
-        counterevidence, and anything short of that is BOUNDED or OPEN.
+        Kept separate and public because the cap below needs something to cap,
+        and because "the sources would have carried VERIFIED, the thesis did
+        not" is the diagnostic a reader wants when a status looks low.
         """
         if self.counterevidence and not self.falsifier_tested:
             return OPEN
@@ -411,11 +415,48 @@ class ProofPackage:
             return BOUNDED
         return OPEN
 
+    @property
+    def status(self) -> str:
+        """VERIFIED is rare on purpose, and never more than the thesis.
+
+        Agreement among sources is not proof; three outlets repeating one
+        press release is one source. VERIFIED requires the falsifier to have
+        been tested AND more than one independent source AND no live
+        counterevidence, and anything short of that is BOUNDED or OPEN.
+
+        AND IT IS CAPPED BY THE THESIS. This derivation used to run on
+        evidence counts alone, which meant a REFUTED thesis with two
+        independent sources reported status VERIFIED — and the deck printed
+        "proof status: VERIFIED" in the appendix of a reading the engine had
+        already abandoned. A proof package is a statement about one thesis; it
+        cannot outrank the thesis it is about.
+        """
+        from . import standing_wall as SW  # local: SW imports this module
+        raw = self.evidential_status
+        if not self.thesis_standing:
+            return raw
+        if SW.permits(self.thesis_standing, raw):
+            return raw
+        if SW.ceiling(self.thesis_standing) == SW.ASSERT_NEGATIVE:
+            return FAILED
+        for candidate in (VERIFIED, BOUNDED, OPEN):
+            if SW.permits(self.thesis_standing, candidate):
+                return candidate
+        return OPEN
+
+    @property
+    def capped_by_thesis(self) -> bool:
+        """Whether the thesis, not the evidence, is what limits this proof."""
+        return self.status != self.evidential_status
+
     def as_dict(self) -> dict:
         d = dataclasses.asdict(self)
         d.update(contract=CONTRACT, status=self.status,
+                 evidential_status=self.evidential_status,
+                 capped_by_thesis=self.capped_by_thesis,
                  note=("status is a statement about what was tested, not "
-                       "about how many sources agreed"))
+                       "about how many sources agreed, and never more than "
+                       "the standing of the thesis it proves"))
         return d
 
 
@@ -433,7 +474,8 @@ def prove(thesis: EconomicThesis, *, falsifier_tested: bool = False,
         falsifier=thesis.leading_mechanism.falsifier,
         falsifier_tested=falsifier_tested,
         limitations=thesis.unknowns,
-        as_of=as_of or thesis.as_of)
+        as_of=as_of or thesis.as_of,
+        thesis_standing=thesis.standing)
 
 
 # --- consequences beyond the first hop ---------------------------------------------

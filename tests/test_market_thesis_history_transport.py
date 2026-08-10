@@ -70,13 +70,22 @@ def test_a_non_created_transition_is_movement():
 
 
 def test_an_empty_available_history_is_still_not_unavailable():
-    """A company with no theses at all has an available, empty history."""
-    assert SE._thesis_history([], available=True)["status"] == \
-        SE.HISTORY_AVAILABLE_NO_MOVEMENT
+    """A company with no theses at all has an available, empty history.
+
+    The intent stands: a readable history holding nothing must never be
+    reported as a history we could not read. What this used to assert as
+    well — that it reads as NO_MOVEMENT — was the defect. A live audit found
+    22 of the 25 published dossiers in exactly this shape, saying "nothing has
+    changed this view yet" about companies for which no view had ever been
+    formed. Zero revisions is the absence of a view, not a view holding still.
+    """
+    got = SE._thesis_history([], available=True)
+    assert got["status"] != SE.HISTORY_UNAVAILABLE
+    assert got["status"] == SE.HISTORY_AVAILABLE_NO_THESIS
 
 
-def test_the_three_states_are_distinct():
-    assert len(set(SE.HISTORY_STATES)) == 3
+def test_the_four_states_are_distinct():
+    assert len(set(SE.HISTORY_STATES)) == 4
 
 
 # --- the export carries the cause, not just the verdict ---------------------
