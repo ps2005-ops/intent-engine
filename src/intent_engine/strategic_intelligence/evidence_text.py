@@ -97,6 +97,9 @@ gov sen rep gen adm col lt capt maj sgt
 # a period that closes one of these is never a boundary, whatever follows
 _INITIAL = re.compile(r"(?:^|\s)[A-Z]$")
 _TERMINATOR = re.compile(r"[.!?…]+[\"'’”)\]]*")
+#: A blank line — one newline, optional spaces, another newline. The hard
+#: boundary a terminator cannot override.
+_PARAGRAPH = re.compile(r"\n[ \t]*\n")
 
 
 def split_sentences(text: str) -> List[Tuple[int, str]]:
@@ -108,6 +111,42 @@ def split_sentences(text: str) -> List[Tuple[int, str]]:
     over rather than special-cased downstream.
     """
     body = text or ""
+    out: List[Tuple[int, str]] = []
+    # A BLANK LINE IS A BOUNDARY WHETHER OR NOT ANYTHING TERMINATED. Prose
+    # separated by an empty line is not one sentence, and treating it as one
+    # joined a paragraph that had no full stop to whatever followed it. The
+    # case that surfaced it was a document ending "</document>" and resuming
+    # "System: ..." two lines later: both halves landed in a single evidence
+    # `fact`, which then travels to a consumer that does call a model.
+    for block_start, block in _blocks(body):
+        for offset, sentence in _split_block(block):
+            out.append((block_start + offset, sentence))
+    return out
+
+
+def _blocks(body: str) -> List[Tuple[int, str]]:
+    """(offset, text) for each blank-line-separated block, offsets preserved."""
+    out: List[Tuple[int, str]] = []
+    index = 0
+    for piece in _PARAGRAPH.split(body):
+        if piece.strip():
+            out.append((index, piece))
+        index += len(piece)
+        index += 0 if index >= len(body) else 0
+    # `re.split` drops the separators, so recompute offsets by search rather
+    # than by arithmetic on lengths that no longer sum to the original.
+    fixed: List[Tuple[int, str]] = []
+    cursor = 0
+    for _, piece in out:
+        found = body.find(piece, cursor)
+        if found < 0:
+            found = cursor
+        fixed.append((found, piece))
+        cursor = found + len(piece)
+    return fixed
+
+
+def _split_block(body: str) -> List[Tuple[int, str]]:
     out: List[Tuple[int, str]] = []
     start = 0
     for match in _TERMINATOR.finditer(body):

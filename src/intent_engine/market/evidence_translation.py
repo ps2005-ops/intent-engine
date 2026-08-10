@@ -68,6 +68,12 @@ _SOURCE_CLASS_TO_ROLE = {
     "government_statistic": "government_statistic",
 }
 
+#: Where a source class this table does not recognise lands. The least
+#: independent role, deliberately: under-weighting a document whose publisher
+#: we cannot name costs a little corroboration, and over-weighting one costs
+#: the independence count that decides whether a thesis may be asserted.
+UNKNOWN_PUBLISHER_ROLE = "company_owned"
+
 # Hosted evidence `kind` → source class, for rows that carry a kind instead.
 # `market.daily._KIND_TO_SOURCE_CLASS` is the same mapping; duplicated here
 # rather than imported because `daily` imports the hosted budget and the
@@ -441,8 +447,15 @@ def translate(observations: Sequence[Any], *, subject_company: str,
                           "as_of") or as_of
         source_class = _source_class_of(obs)
         author = _field(obs, "source_author", "author", "publisher")
+        # AN UNRECOGNISED CLASS FAILS TOWARDS THE COMPANY, NOT AWAY FROM IT.
+        # This defaulted to `independent_reporting` — the most independent
+        # role in the table, and the one carrying the highest reliability.
+        # A class this map has not seen is not evidence of independence; it is
+        # evidence that we do not know who published it, and treating the two
+        # alike is how a company's own document acquires a third party's
+        # weight and inflates the corroboration count behind a thesis.
         role = (roles or {}).get(source_class) or _SOURCE_CLASS_TO_ROLE.get(
-            source_class, "independent_reporting")
+            source_class, UNKNOWN_PUBLISHER_ROLE)
 
         candidates = extract_candidates(obs, stats=stats)
         stats.candidates += len(candidates)
