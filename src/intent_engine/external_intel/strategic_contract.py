@@ -49,6 +49,8 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Dict, Optional, Tuple
 
+from intent_engine.external_intel import standing_ceiling as SC
+
 SCHEMA_VERSION = "strategic_market_intel.v1"
 
 # Posture and strategic interaction move on filings and announcements, not on
@@ -216,6 +218,12 @@ ALLOWED: Dict[str, Any] = {
         "alternatives": ..., "unknowns": ...,
         "decision_implication": ..., "confidence_in_words": ...,
         "evidence_ids": ...,
+        # The producer's adjudicated ceiling and the words it forbids. Read
+        # rather than re-derived from the standing, because a second
+        # derivation is a second copy of the rule and the two drift. This
+        # side may narrow it — and does, below, whenever it downgrades a
+        # thesis after the ceiling was already computed.
+        "ceiling": ..., "forbidden_words": ...,
     }],
     # THESIS HISTORY. Without it this consumer could not tell a thesis that
     # has never moved from a thesis whose history was not transported, and
@@ -411,6 +419,15 @@ def _economic_theses(payload: dict) -> Tuple[dict, ...]:
             row["downgraded_because"] = (
                 f"arrived as {standing} with no alternative explanation; a "
                 "leading explanation with no rivals renders as the only one")
+        # THE CEILING IS RE-DECIDED AFTER THE DOWNGRADE, never before. It was
+        # computed by the producer against the standing that was sent; a row
+        # this side has just weakened would otherwise carry a ceiling
+        # outranking the standing it exists to cap, and the downgrade would
+        # change the word on the page and nothing about what may be said.
+        row["ceiling"] = SC.ceiling_for(row)
+        row["forbidden_words"] = list(
+            SC.banned_words(row["ceiling"])
+            + tuple(str(w) for w in (row.get("forbidden_words") or ())))
         out.append(row)
     return tuple(out)
 

@@ -552,25 +552,50 @@ def load_impacts(root, *, path: str = IMPACT_PATH) -> List[dict]:
 
 HISTORY_AVAILABLE_NO_MOVEMENT = "HISTORY_AVAILABLE_NO_MOVEMENT"
 HISTORY_AVAILABLE_MOVED = "HISTORY_AVAILABLE_MOVED"
+#: The history was readable and holds no revision for this subject. NOT the
+#: same as NO_MOVEMENT: there is no view here that could have stayed put. A
+#: live audit found 22 of 25 published dossiers reporting NO_MOVEMENT with
+#: zero revisions, which said "nothing has changed this view yet" about
+#: companies for which no view had ever been formed.
+HISTORY_AVAILABLE_NO_THESIS = "HISTORY_AVAILABLE_NO_THESIS"
 HISTORY_UNAVAILABLE = "HISTORY_UNAVAILABLE"
+
+_KNOWN_HISTORY_STATES = (HISTORY_AVAILABLE_NO_MOVEMENT,
+                         HISTORY_AVAILABLE_MOVED,
+                         HISTORY_AVAILABLE_NO_THESIS,
+                         HISTORY_UNAVAILABLE)
 
 _OPENING_TRANSITION = "CREATED"
 
 
 def mind_change_state(intel) -> str:
-    """Which of the three states this dossier is in.
+    """Which of the four states this dossier is in.
 
     A producer that sends no `thesis_history` at all is UNAVAILABLE, not
     NO_MOVEMENT. An older producer that cannot send history must never be
     read as one reporting a quiet thesis.
+
+    A producer that CLAIMS no movement while sending no revisions is not
+    believed either. The status is stated rather than counted precisely so
+    the two cannot be confused — but a stated status contradicted by the
+    payload it describes is a producer defect, and reading it as the finding
+    it claims to be would import that defect wholesale. The stricter reading
+    wins here, as everywhere else on this bridge.
     """
     stated = getattr(intel, "thesis_history", None)
     if not isinstance(stated, dict) or not stated.get("status"):
         return HISTORY_UNAVAILABLE
     status = str(stated.get("status") or "")
-    return status if status in (
-        HISTORY_AVAILABLE_NO_MOVEMENT, HISTORY_AVAILABLE_MOVED,
-        HISTORY_UNAVAILABLE) else HISTORY_UNAVAILABLE
+    if status not in _KNOWN_HISTORY_STATES:
+        return HISTORY_UNAVAILABLE
+    if status == HISTORY_AVAILABLE_NO_MOVEMENT and not _revisions(intel):
+        return HISTORY_AVAILABLE_NO_THESIS
+    return status
+
+
+def _revisions(intel) -> list:
+    return [r for r in (getattr(intel, "thesis_revisions", ()) or ())
+            if isinstance(r, dict)]
 
 
 def what_changed_your_mind(intel) -> dict:
@@ -590,7 +615,16 @@ def what_changed_your_mind(intel) -> dict:
             "revisions": [], "effects": [], "evidence": [],
             "supported": False,
         }
-    moved = [r for r in (getattr(intel, "thesis_revisions", ()) or ())
+    if state == HISTORY_AVAILABLE_NO_THESIS:
+        return {
+            "state": state, "answer": (
+                "Nothing, because there is no view here yet. No economic "
+                "thesis has been opened for this company, so there is nothing "
+                "for evidence to have changed."),
+            "revisions": [], "effects": [], "evidence": [],
+            "supported": True,
+        }
+    moved = [r for r in _revisions(intel)
              if str(r.get("transition") or "") != _OPENING_TRANSITION]
     if not moved:
         return {

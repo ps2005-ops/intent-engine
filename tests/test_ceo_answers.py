@@ -111,11 +111,30 @@ def test_a_real_transition_is_answered_from_the_record():
 
 
 def test_no_movement_still_warns_against_reading_it_as_settled():
+    """A THESIS THAT WAS OPENED AND HAS NOT MOVED — which needs a revision.
+
+    This fixture used to declare NO_MOVEMENT while supplying no revisions, and
+    that combination is the shape 22 of the 25 published dossiers were in: the
+    producer said "nothing has changed this view yet" about companies for
+    which no view had ever been formed. The consumer now reclassifies it, so
+    the fixture has to say which case it means.
+    """
     got = CA.plan("What changed your mind?", Intel(
         theses=[thesis()],
+        revisions=[{"revision_id": "r1", "transition": "CREATED"}],
         history={"status": di.HISTORY_AVAILABLE_NO_MOVEMENT}))
     assert any("nothing has tested it yet" in item
                for item in got.must_not_conclude)
+
+
+def test_no_revisions_is_not_a_view_that_held_still():
+    """The same declared status with an empty payload is a different answer."""
+    got = CA.plan("What changed your mind?", Intel(
+        theses=[thesis()],
+        history={"status": di.HISTORY_AVAILABLE_NO_MOVEMENT}))
+    assert any("absence of analysis" in item
+               for item in got.must_not_conclude)
+    assert "no view here yet" in got.direct_answer
 
 
 # --- gaps are named, never bridged ------------------------------------------
@@ -188,10 +207,30 @@ def test_a_renderer_may_not_upgrade_the_standing():
     assert CA.violates_certainty_wall(bad, got)
 
 
-def test_an_observed_standing_may_speak_plainly():
-    got = CA.plan("What is happening?",
-                  Intel(theses=[thesis(standing="OBSERVED")]))
-    assert CA.violates_certainty_wall("This proves the cost rose.", got) == ()
+def test_a_stronger_standing_may_speak_more_plainly():
+    """The ceiling has to MOVE, or it is a constant with a ceiling's name.
+
+    This replaces a test that built a thesis with standing "OBSERVED" and
+    asserted the wall let it through. No producer emits that word — it belongs
+    to the causal-hop vocabulary, and `plan.standing` is read off a
+    transported thesis, whose standings are PROPOSED / SUPPORTED / TESTED /
+    WEAKENED / REFUTED / SUPERSEDED. The exemption under test was unreachable
+    for every value the field can hold, so the test passed by describing a
+    world the bridge does not produce, and one fixed word list governed a
+    tested reading and an abandoned one alike.
+
+    The intent survives: a stronger record licenses plainer language. It is
+    now asserted against standings production actually sends.
+    """
+    tested = CA.plan("What is happening?",
+                     Intel(theses=[thesis(standing="TESTED")]))
+    proposed = CA.plan("What is happening?",
+                       Intel(theses=[thesis(standing="PROPOSED")]))
+    # "withstood" is the claim that the falsifier was tested — available at
+    # TESTED, and the first thing SUPPORTED loses.
+    sentence = "The reading withstood the test and costs rose."
+    assert CA.violates_certainty_wall(sentence, tested) == ()
+    assert CA.violates_certainty_wall(sentence, proposed) != ()
 
 
 def test_a_measured_answer_passes_the_wall():

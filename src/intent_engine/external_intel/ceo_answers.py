@@ -40,6 +40,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from intent_engine.external_intel import decision_impact as di
+from intent_engine.external_intel import standing_ceiling as SC
 
 CONTRACT = "ceo_answers.v1"
 
@@ -175,6 +176,13 @@ class CEOAnswerPlan:
     must_not_conclude: Tuple[str, ...] = ()
     limitations: Tuple[str, ...] = ()
     premise_challenged: str = ""
+    #: What this answer is permitted to assert, adjudicated by the producer
+    #: and narrowed on this side. Empty means it was never decided, which the
+    #: certainty wall reads as "assert nothing" rather than as "no limit".
+    ceiling: str = ""
+    #: The producer's own forbidden vocabulary, carried so a phrase this side
+    #: never thought of is still caught when the producer named it.
+    forbidden_words: Tuple[str, ...] = ()
 
     def as_dict(self) -> dict:
         return {
@@ -196,6 +204,8 @@ class CEOAnswerPlan:
             "must_not_conclude": list(self.must_not_conclude),
             "limitations": list(self.limitations),
             "premise_challenged": self.premise_challenged,
+            "ceiling": self.ceiling,
+            "forbidden_words": list(self.forbidden_words),
         }
 
 
@@ -294,17 +304,40 @@ def _changed_your_mind(question, intel, constraints) -> CEOAnswerPlan:
         limitations.append(
             "revision history did not reach this analysis; this is not the "
             "same as the view never having changed")
+    if got["state"] == di.HISTORY_AVAILABLE_NO_THESIS:
+        limitations.append(
+            "no economic view has been opened for this company; the silence "
+            "here is an absence of analysis, not a stable conclusion")
+    # THE STATE IS A FACT ABOUT THE RECORD, NOT ABOUT THE WORLD, so it caps
+    # this answer at ASSERT_NONE. "We cannot see whether it moved" and "it did
+    # not move" are the same sentence to a renderer that treats the state as a
+    # standing, and this is the one place that difference is decided.
     return CEOAnswerPlan(
         question=question, question_class=WHAT_CHANGED_YOUR_MIND,
         direct_answer=got["answer"], supported=bool(got["supported"]),
-        standing=got["state"],
+        standing=got["state"], ceiling=SC.from_standing(got["state"]),
         revision_ids=tuple(str(r) for r in got["revisions"] if r),
         effect_ids=tuple(got["effects"]), evidence_ids=tuple(got["evidence"]),
         source_constraints=constraints, limitations=tuple(limitations),
-        must_not_conclude=(
-            ("an absence of recorded change is not evidence the view is "
-             "settled; it may only mean nothing has tested it yet",)
-            if got["state"] == di.HISTORY_AVAILABLE_NO_MOVEMENT else ()))
+        must_not_conclude=_history_must_not_conclude(got["state"]))
+
+
+def _history_must_not_conclude(state: str) -> Tuple[str, ...]:
+    """What each history state specifically forbids concluding.
+
+    One sentence per state rather than one shared sentence, because the whole
+    reason there are four states is that they license four different silences.
+    """
+    if state == di.HISTORY_AVAILABLE_NO_MOVEMENT:
+        return ("an absence of recorded change is not evidence the view is "
+                "settled; it may only mean nothing has tested it yet",)
+    if state == di.HISTORY_AVAILABLE_NO_THESIS:
+        return ("an absence of analysis is not a finding about this company; "
+                "nothing here says the situation is quiet",)
+    if state == di.HISTORY_UNAVAILABLE:
+        return ("not seeing the history is not the same as the history being "
+                "empty; no claim about movement can be made either way",)
+    return ()
 
 
 def _what_changed(question, intel, constraints) -> CEOAnswerPlan:
@@ -419,9 +452,22 @@ def _current_state(question, cls, intel, constraints) -> CEOAnswerPlan:
             reached = hops[index - 1].name.lower().replace("_", " ")
             answer = (f"{answer} I can trace that as far as {reached} and no "
                       f"further: {gap} is not recorded for this company.")
+    # `supported` WAS HARD-CODED TRUE. A thesis the producer had abandoned —
+    # REFUTED, or SUPERSEDED by a later reading — arrived here and came back
+    # out as a supported answer about the current state, because the presence
+    # of a thesis row was being read as support for its claim. Whether an
+    # answer is supported is a question about the standing, and the ceiling is
+    # where that question is already answered.
+    ceiling_ = SC.ceiling_for(leading)
+    if not SC.may_assert(ceiling_):
+        answer = _abandoned_reading(leading, answer, ceiling_)
     return CEOAnswerPlan(
         question=question, question_class=cls, direct_answer=answer,
-        supported=True, standing=str(leading.get("standing") or ""),
+        supported=SC.may_assert(ceiling_),
+        standing=str(leading.get("standing") or ""),
+        ceiling=ceiling_,
+        forbidden_words=tuple(str(w) for w in
+                              (leading.get("forbidden_words") or ())),
         decision_implication=str(leading.get("decision_implication") or ""),
         thesis_ids=(str(leading.get("thesis_id") or ""),),
         evidence_ids=tuple(str(e) for e in
@@ -436,6 +482,46 @@ def _current_state(question, cls, intel, constraints) -> CEOAnswerPlan:
             h.name for h in hops if h.standing == MISSING),
         source_constraints=constraints,
         limitations=tuple(getattr(intel, "limitations", ()) or ()))
+
+
+#: Thesis standing -> how well THIS HOP is known. A translation, so the two
+#: vocabularies never share a slot. CONTRADICTED is the reading for a thesis
+#: the producer abandoned: the hop is known, and what is known is that it
+#: failed — which is not the same as MISSING, where nothing is known at all.
+_THESIS_HOP = {
+    "PROPOSED": HYPOTHESIZED,
+    "SUPPORTED": SUPPORTED,
+    "TESTED": OBSERVED,
+    "WEAKENED": HYPOTHESIZED,
+    "REFUTED": CONTRADICTED,
+    "SUPERSEDED": CONTRADICTED,
+}
+
+
+def _hop_standing(thesis: dict) -> str:
+    """The causal-hop standing for the thesis hop, translated not copied."""
+    if not str(thesis.get("claim") or "").strip():
+        return MISSING
+    return _THESIS_HOP.get(str(thesis.get("standing") or "").upper(),
+                           HYPOTHESIZED)
+
+
+def _abandoned_reading(thesis: dict, claim: str, ceiling_: str) -> str:
+    """Say that a reading no longer holds, rather than reporting it as news.
+
+    The claim still travels — an executive who was told this last month is
+    owed the correction, not silence — but it travels in the past tense with
+    the standing that ended it attached.
+    """
+    standing = str(thesis.get("standing") or "").upper()
+    if standing == "SUPERSEDED":
+        return (f"That reading has been replaced. What we previously said was: "
+                f"{claim} A later reading now stands in its place.")
+    if standing == "REFUTED":
+        return (f"That reading no longer holds. What we previously said was: "
+                f"{claim} The test that would break it fired.")
+    return (f"I cannot state a current view here. The recorded reading is "
+            f"{standing or 'unnamed'}, which does not support asserting it.")
 
 
 def _why_hops(thesis: dict, intel) -> List[Hop]:
@@ -453,7 +539,13 @@ def _why_hops(thesis: dict, intel) -> List[Hop]:
         Hop("COMPANY_EXPOSURE", SUPPORTED if exposures else MISSING,
             ", ".join(str(e) for e in exposures[:3])),
         Hop("MECHANISM", HYPOTHESIZED if mechanism else MISSING, mechanism),
-        Hop("THESIS", str(thesis.get("standing") or HYPOTHESIZED),
+        # THE HOP VOCABULARY, NOT THE THESIS ONE. This slot used to receive
+        # the transported thesis standing directly, so one field held values
+        # from two vocabularies that overlap only at SUPPORTED — and every
+        # reader of `Hop.standing` had to know which kind it had been handed.
+        # The thesis standing is not lost: it is on the plan, where it means
+        # what it says.
+        Hop("THESIS", _hop_standing(thesis),
             str(thesis.get("claim") or "")),
         Hop("DECISION_CONSEQUENCE",
             SUPPORTED if consequence else MISSING, consequence),
@@ -492,16 +584,27 @@ def _challenge(question, intel, constraints) -> CEOAnswerPlan:
             "a question asserting a conclusion is not evidence for it",))
 
 
-#: Words a renderer may not introduce. The plan's standing is the ceiling,
-#: and an executive asking for confidence does not raise it.
+#: Words a renderer may not introduce AT ANY STANDING. The graded list lives
+#: in `standing_ceiling` and narrows as the record weakens; these are the ones
+#: nothing this engine can produce would ever license.
 FORBIDDEN_UPGRADES = ("definitely", "certainly", "guaranteed", "proven",
                       "proves", "must be", "always", "never fails")
 
 
 def violates_certainty_wall(text: str, plan_: CEOAnswerPlan) -> Tuple[str, ...]:
-    """Words in a rendered answer that its plan does not support."""
-    if str(plan_.standing).upper() in ("OBSERVED", "MEASURED"):
-        return ()
-    lowered = " " + " ".join((text or "").lower().split()) + " "
-    return tuple(word for word in FORBIDDEN_UPGRADES
-                 if f" {word} " in lowered)
+    """Words in a rendered answer that its plan does not support.
+
+    THE CEILING MOVES WITH THE PLAN, which it did not before. This function
+    used to exempt plans whose standing was OBSERVED or MEASURED — values from
+    the causal-hop vocabulary, which `plan_.standing` never holds, because it
+    is read off a transported thesis whose standings are PROPOSED, SUPPORTED,
+    TESTED, WEAKENED, REFUTED and SUPERSEDED. The branch was unreachable for
+    every value the field can carry, so one fixed word list applied to a
+    tested reading and an abandoned one alike. A ceiling that does not move
+    with the record is a constant wearing the name of a ceiling.
+    """
+    ceiling_ = SC.stricter_of(plan_.ceiling or "",
+                             SC.from_standing(plan_.standing))
+    return SC.words_beyond(text, ceiling_,
+                           extra=tuple(FORBIDDEN_UPGRADES)
+                           + tuple(plan_.forbidden_words))
