@@ -142,18 +142,23 @@ tasks:
       - weight concentration above threshold is reported as a named risk
       - any post-treatment observation reaching the fitting objective raises,
         it does not warn
-      - the diagnostic verdict is IDENTIFIED / BOUNDED / REFUSED and the
-        estimate cannot be consumed above its verdict
+      - each diagnostic emits an economic_method.MethodAssumptionCheck with a
+        severity and its statistic, so the verdict comes from the EXISTING
+        interpret() and its existing standings — USEFUL, BOUNDED, REFUSED,
+        NO_INCREMENTAL_VALUE. A second verdict vocabulary beside that one is
+        how the thesis and the proof package came to disagree in V3, and the
+        estimate cannot be consumed above the standing interpret() returns
     tests: tests/test_market_causal_diagnostics.py
     minimum_data: none
     vertical:
       producer: intent_engine.market.causal_diagnostics.stress
       persistence: diagnostics block inside the causal_estimate row
       reload: verdict re-derivable from the persisted diagnostics, asserted
-      consumer: A-ASSUME-001 registry and the standing wall
+      consumer: economic_method.interpret, A-ASSUME-001, the standing wall
       surface: proof package and report.py causal block
       telemetry: verdict distribution per cycle
-      failure_states: IDENTIFIED, BOUNDED, REFUSED, INSUFFICIENT_FOR_DIAGNOSIS
+      failure_states: the economic_method standings, plus
+        INSUFFICIENT_FOR_DIAGNOSIS for a fit too short to attack
       live_proof: a cycle report carrying a verdict other than IDENTIFIED
       adversarial_proof: the ten negative controls in section 11 of the
         constitution, each asserted separately
@@ -165,28 +170,35 @@ tasks:
     dependencies: [A-DIAG-001]
     priority: 1
     expected_value: >
-      economic_method already declares assumptions per method as prose. Nothing
-      checks them and nothing records which were tested. This node turns each
-      declared assumption into a named check with three states — SUPPORTED,
-      VIOLATED, UNTESTED — and forbids an estimate from being presented above
-      the standing its weakest assumption allows.
+      economic_method.check_assumptions already exists and already returns
+      PASSED / FAILED / UNTESTED with CRITICAL and ADVISORY severities. What it
+      does NOT have is any branch for the policy-effect methods: it dispatches
+      on keywords drawn from the forecasting assumptions, so every assumption
+      SYNTHETIC_CONTROL declares falls into the catch-all and is recorded
+      CRITICAL/UNTESTED. That is honest and it means a synthetic control can
+      never rise above BOUNDED however well it fits. This node wires the
+      A-DIAG-001 diagnostics into that dispatch. It is an extension of one
+      registry, explicitly not a second one — the same defect shape as a
+      mechanism gate wired to one pattern with the rest carried as debt.
     acceptance_criteria:
-      - every assumption string in METHODS maps to a check id or is explicitly
-        marked UNTESTABLE_HERE with a reason
-      - UNTESTED is never rendered as SUPPORTED at any surface
-      - an estimate with one VIOLATED assumption cannot reach IDENTIFIED
-      - the registry is the single definition; no surface re-derives assumption
-        state from the estimate
+      - every assumption string in METHODS either dispatches to a real check or
+        is explicitly UNTESTABLE_HERE with the reason it cannot be tested
+      - the count of assumptions with no branch is reported as a number, so the
+        debt is measured rather than described
+      - UNTESTED is never rendered as PASSED at any surface
+      - a FAILED CRITICAL assumption keeps causal_reading_allowed false
+      - check_assumptions remains the single definition; no surface re-derives
+        assumption state from the estimate
     tests: tests/test_market_causal_assumptions.py
     minimum_data: none
     vertical:
       producer: intent_engine.market.causal_assumptions.evaluate
       persistence: assumptions block inside the causal_estimate row
       reload: assumption states reconstructed and re-checked on load
-      consumer: standing_wall ceiling for causal claims
+      consumer: economic_method.interpret and the standing_wall causal ceiling
       surface: report.py, proof package, Executive X-Ray causal row
-      telemetry: count of estimates by weakest-assumption state
-      failure_states: SUPPORTED, VIOLATED, UNTESTED, UNTESTABLE_HERE
+      telemetry: assumptions by result, and the count with no branch
+      failure_states: PASSED, FAILED, UNTESTED, UNTESTABLE_HERE
       live_proof: a cycle report showing at least one UNTESTED assumption
         travelling with an estimate
       adversarial_proof: a test asserting a VIOLATED assumption cannot be

@@ -35,17 +35,82 @@ def test_every_declared_method_states_its_assumptions_and_failures():
 
 
 def test_the_summary_separates_implemented_from_declared():
+    """Three forecasters plus one effect estimator.
+
+    The count moved from three to four when A-SCM-001 gave SYNTHETIC_CONTROL a
+    real estimator. Kept as a literal rather than derived from the registry:
+    the number is here to catch a method quietly acquiring or losing an
+    implementation, and a count computed from the same registry it is checking
+    cannot do that.
+    """
     got = EM.summarise()
-    assert got["implemented"] == 3
-    assert got["declared_only"] == len(EM.METHODS) - 3
+    assert got["implemented"] == 4
+    assert got["declared_only"] == len(EM.METHODS) - 4
+
+
+def test_a_method_can_be_implemented_for_effects_and_not_for_forecasts():
+    """Implemented is not one property. SYNTHETIC_CONTROL answers one job."""
+    scm = EM.METHODS[EM.SYNTHETIC_CONTROL]
+    assert scm.implemented
+    assert scm.estimates_effects
+    assert not scm.forecasts
 
 
 def test_eligible_reports_appropriate_methods_that_are_unavailable():
     """'Right method, not built' differs from 'wrong method'."""
     got = EM.eligible(EM.EFFECT_OF_POLICY, 100)
-    assert {m.name for m in got} >= {EM.DIFFERENCE_IN_DIFFERENCES,
-                                     EM.SYNTHETIC_CONTROL}
-    assert all(not m.implemented for m in got)
+    names = {m.name for m in got}
+    assert names >= {EM.DIFFERENCE_IN_DIFFERENCES, EM.SYNTHETIC_CONTROL}
+    # DiD remains declared-only, and `eligible` still surfaces it: a caller
+    # must be able to see that the right method for the question exists and
+    # has not been built.
+    assert not EM.METHODS[EM.DIFFERENCE_IN_DIFFERENCES].implemented
+    assert EM.METHODS[EM.INTERRUPTED_TIME_SERIES].implemented is False
+
+
+def test_declaring_a_question_type_you_cannot_answer_is_refused(monkeypatch):
+    """The seam that made a second estimator field necessary.
+
+    No entry in the registry today declares both a forecast type and an effect
+    type, so this cannot be provoked through METHODS as it stands — testing it
+    against SYNTHETIC_CONTROL only re-tests the question-type guard, which
+    answers first. The invariant is about the NEXT method: local projection or
+    interrupted time series could each plausibly be declared for both jobs, and
+    a method that passes `require` for a job it has no estimator for hands
+    `walk_forward` a None to call, several frames from the mistake.
+    """
+    hybrid = EM.EconomicMethod(
+        name="HYBRID", question_types=(EM.FORECAST_LEVEL, EM.EFFECT_OF_POLICY),
+        minimum_sample=1, effect_estimator=lambda *a, **k: 1.0,
+        assumptions=("declared for two jobs, built for one",),
+        failure_modes=("asked for the job it cannot do",))
+    monkeypatch.setitem(EM.METHODS, "HYBRID", hybrid)
+
+    assert EM.require("HYBRID", EM.EFFECT_OF_POLICY, 10) is hybrid
+    with pytest.raises(EM.MethodRefused) as caught:
+        EM.require("HYBRID", EM.FORECAST_LEVEL, 10)
+    assert "not forecasts" in str(caught.value)
+
+
+def test_the_reverse_direction_is_refused_too(monkeypatch):
+    hybrid = EM.EconomicMethod(
+        name="HYBRID2",
+        question_types=(EM.FORECAST_LEVEL, EM.EFFECT_OF_POLICY),
+        minimum_sample=1, estimator=lambda history: history[-1],
+        assumptions=("declared for two jobs, built for the other one",),
+        failure_modes=("asked for the job it cannot do",))
+    monkeypatch.setitem(EM.METHODS, "HYBRID2", hybrid)
+
+    assert EM.require("HYBRID2", EM.FORECAST_LEVEL, 10) is hybrid
+    with pytest.raises(EM.MethodRefused) as caught:
+        EM.require("HYBRID2", EM.EFFECT_OF_POLICY, 10)
+    assert "no effect estimator" in str(caught.value)
+
+
+def test_an_effect_method_still_refuses_a_forecast_at_the_question_guard():
+    with pytest.raises(EM.MethodRefused) as caught:
+        EM.require(EM.SYNTHETIC_CONTROL, EM.FORECAST_LEVEL, 100)
+    assert "answers ['EFFECT_OF_POLICY']" in str(caught.value)
 
 
 # --- walk-forward is enforced, not requested ---------------------------------

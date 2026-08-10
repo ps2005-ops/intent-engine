@@ -79,18 +79,38 @@ class EconomicMethod:
     output: str = "point forecast"
     failure_modes: Tuple[str, ...] = ()
     #: None means DECLARED BUT NOT IMPLEMENTED. Reported, never silently
-    #: substituted with something simpler.
+    #: substituted with something simpler. Takes one history and returns the
+    #: next value; this is the FORECASTING signature and `walk_forward` calls
+    #: it directly.
     estimator: Optional[Callable] = None
+    #: The EFFECT signature, which is a different function of different
+    #: arguments: a treated unit, a comparison set, and a treatment time. Kept
+    #: as a separate field rather than overloading `estimator` because
+    #: `walk_forward` calls `estimator(history)` positionally, so a synthetic
+    #: control bound there would satisfy `implemented`, pass `require`, and
+    #: then raise inside the scorer — a method reported as available that
+    #: cannot be run is worse than one honestly reported as declared-only.
+    effect_estimator: Optional[Callable] = None
     is_baseline: bool = False
 
     @property
     def implemented(self) -> bool:
+        return self.estimator is not None or self.effect_estimator is not None
+
+    @property
+    def forecasts(self) -> bool:
         return self.estimator is not None
+
+    @property
+    def estimates_effects(self) -> bool:
+        return self.effect_estimator is not None
 
     def as_dict(self) -> dict:
         out = {k: v for k, v in dataclasses.asdict(self).items()
-               if k != "estimator"}
-        out.update(contract=CONTRACT, implemented=self.implemented)
+               if k not in ("estimator", "effect_estimator")}
+        out.update(contract=CONTRACT, implemented=self.implemented,
+                   forecasts=self.forecasts,
+                   estimates_effects=self.estimates_effects)
         return out
 
 
@@ -142,6 +162,22 @@ def _ar1(history: Sequence[float]) -> float:
         return float(history[-1])
     alpha, beta = fit
     return float(alpha + beta * history[-1])
+
+
+# --- the effect estimators, implemented elsewhere ------------------------------
+#
+# Imported inside the function rather than at module scope because
+# `synthetic_control` names this module's method constants and importing it up
+# here would close the loop. The indirection is one line and it keeps the
+# dependency pointing one way: the registry knows about the estimator, the
+# estimator does not know about the registry.
+
+def _synthetic_control_estimator(treated, donors, *, treatment_index,
+                                 **kwargs) -> Optional[float]:
+    from . import synthetic_control
+
+    return synthetic_control.estimator(
+        treated, donors, treatment_index=treatment_index, **kwargs)
 
 
 METHODS: Dict[str, EconomicMethod] = {
@@ -205,6 +241,7 @@ METHODS: Dict[str, EconomicMethod] = {
             minimum_sample=40,
             inputs=("a treated unit", "a donor pool"),
             output="treated minus synthetic path",
+            effect_estimator=_synthetic_control_estimator,
             assumptions=("the donor pool can reproduce the pre-period",
                          "no donor is itself affected by the treatment"),
             failure_modes=("overfitting the pre-period with a large pool",)),
@@ -244,6 +281,20 @@ def require(name: str, question_type: str, sample: int) -> EconomicMethod:
         raise MethodRefused(
             f"{name} is declared but not implemented here; substituting a "
             "simpler method under its name would misreport what was run")
+    # IMPLEMENTED FOR WHICH JOB. A method can now carry a forecaster, an
+    # effect estimator, or both, and the question type decides which one is
+    # being asked for. Without this, SYNTHETIC_CONTROL — implemented for
+    # EFFECT_OF_POLICY only — would pass `require` for a forecast and hand
+    # `walk_forward` a None to call.
+    forecasting = question_type in (FORECAST_LEVEL, FORECAST_CHANGE)
+    if forecasting and not method.forecasts:
+        raise MethodRefused(
+            f"{name} estimates effects, not forecasts; it has no estimator "
+            f"that could answer {question_type!r} from one series")
+    if not forecasting and not method.estimates_effects:
+        raise MethodRefused(
+            f"{name} forecasts a series and has no effect estimator; "
+            f"{question_type!r} needs a treated unit and a comparison set")
     return method
 
 
