@@ -1,10 +1,10 @@
 {
-  "measured_at": "2026-08-10T16:37:19.275310+00:00",
+  "measured_at": "2026-08-10T17:57:47.517948+00:00",
   "metrics": {
-    "evidence_rows": 407,
-    "knowledge_effects": 561,
+    "evidence_rows": 416,
+    "knowledge_effects": 583,
     "logged_exploration_events": 0,
-    "macro_observations": 2344,
+    "macro_observations": 2347,
     "macro_retrieval_months": 1,
     "named_supplier_edges": 0,
     "prospective_decisions": 32,

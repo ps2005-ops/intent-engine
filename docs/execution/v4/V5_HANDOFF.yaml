@@ -1,0 +1,114 @@
+contract: v5_handoff.v1
+written_at: '2026-08-10'
+frozen_at:
+  market: f975c5c
+  founder: 2dbc31a
+production: 119d345 (untouched)
+
+principle: >
+  Each item states why V4 stops where it does, what it depends on, how it will
+  be accepted, and how it will be measured. An item with no measurement is not
+  a handoff, it is a wish.
+
+items:
+
+  tenant_scoped_retrieval:
+    why_v4_stops: >
+      The permission boundary is enforced at the FACT level: TenantScope
+      carries the authority that established an identity, a bare string cannot
+      reach permitted_facts, and no aggregate path exists. What V4 cannot
+      enforce is the RETRIEVAL layer, because there is one tenant and one
+      index; a cache key or a retrieval key that collides between tenants has
+      nothing to collide with yet.
+    depends_on: a second live tenant and a shared retrieval layer
+    acceptance: >
+      a canary private fact for tenant A is unreachable from every B-facing
+      retrieval path, proven by attack rather than by inspection, including
+      cache keys, persisted state and retrieval indexes
+    security: fail-closed; a retrieval whose scope cannot be established returns nothing
+    measurement: canary recovery attempts per surface, expected zero, reported per surface
+
+  tenant_scoped_embeddings:
+    why_v4_stops: no vector store exists on this branch
+    depends_on: tenant_scoped_retrieval
+    acceptance: >
+      an embedding derived from tenant A's private text is not retrievable by
+      tenant B and does not influence B's nearest-neighbour results
+    security: per-tenant index or per-tenant namespace, never a shared index with a filter
+    measurement: cross-tenant neighbour rate, expected zero
+
+  action_level_competition_law:
+    why_v4_stops: >
+      V4 enforces the DATA boundary — competitive reasoning runs on public
+      evidence, and COMPETES_WITH requires a third-party publisher. What it
+      does not do is constrain the ACTION a recommendation proposes.
+    depends_on: an action engine, which V4 does not have
+    acceptance: >
+      a price-coordination or market-allocation request is refused with a
+      recorded audit event naming the constraint, not merely unanswered
+    security: refusals are logged with the request, and the log is tenant-scoped
+    measurement: refusal events per class, and a red-team suite that must stay at zero successes
+
+  internal_business_graph:
+    why_v4_stops: >
+      internal_state holds company-scoped private facts and enforces a
+      permission wall, exercised through one production caller. There is no
+      Business Graph behind it, so taint tracking to the surface, egress
+      control and prompt-assembly separation would be walls with nothing
+      behind them — and they would report PASS.
+    depends_on: real internal company data
+    acceptance: every control verified against a real graph; none satisfied by a mock tenant
+    security: taint from ingestion to surface, secret redaction, tool permission wall
+    measurement: fraction of surfaces with a declared taint boundary, expected 1.0
+
+  progressive_hydration_transport:
+    why_v4_stops: >
+      L-CLD-001 built the state and provenance contract — six coverage states,
+      per-field origin, and visible replacement of priors by evidence. There
+      is no streaming transport on this branch, and building a progress bar
+      over a synchronous call would be a fake.
+    depends_on: an async retrieval path with intermediate delivery
+    acceptance: >
+      T0 returns a bounded baseline immediately; each hydration step reports
+      which priors were replaced and by what evidence; a partially hydrated
+      view says so on the surface a reader sees
+    security: none specific
+    measurement: T0 latency, first-useful-result latency, and coverage state at each step
+
+  scaled_policy_learning:
+    why_v4_stops: >
+      BLOCKED_DATA, measured rather than asserted: 32 prospective decisions
+      against gates of 50 and 100. The logging policy is deterministic, so
+      there is no propensity and no unbiased off-policy estimate to be had
+      from this log however large it grows.
+    depends_on: prospective volume AND a logging policy with real exploration
+    acceptance: >
+      a policy comparison on PROSPECTIVE records only, with propensities the
+      estimator can actually consume; RECONSTRUCTED never pooled with them
+    security: none specific
+    measurement: the existing gates, which clear themselves from the live ledger
+
+  historical_causal_studies:
+    why_v4_stops: macro_retrieval_months is 1 against a gate of 6
+    depends_on: retrieval history depth, which accrues with time
+    acceptance: an episode selected without inspecting the outcome, on vintage-safe data
+    security: none specific
+    measurement: macro_retrieval_months, auto-clearing
+
+  learning_acceleration_loop:
+    why_v4_stops: NOT a handoff — a standing obligation V5 inherits intact
+    must_preserve: >
+      evidence ingested, candidate events, beliefs declared/revised/retired,
+      expectations preregistered and reconciled, hidden-state changes,
+      strategic interactions, causal updates, information priorities,
+      knowledge decay, near misses, counterfactuals, zero-action learning,
+      research decisions and outcomes, delayed outcomes, thesis revisions,
+      DecisionImpact
+    and_the_rates: >
+      learning velocity, learning quality, duplication, calibration, expected
+      versus observed, stagnation, acceleration, plateau, degradation
+    invariant: >
+      HIGH_ACTIVITY_LOW_LEARNING must remain able to fire, and the five
+      stagnation checks must keep UNMEASURABLE distinct from CLEAR. V5 must
+      learn not whether the engine ran, but whether it is getting better at
+      learning.
