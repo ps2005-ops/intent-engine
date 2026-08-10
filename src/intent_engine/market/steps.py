@@ -1635,6 +1635,22 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
                             for d, t in zip(decks, theses)],
             "decks": [d.as_dict() for d in decks[:3]],
         }
+
+        # HOW EACH THESIS FAILS WHILE STILL LOOKING RIGHT. Built from the
+        # alternatives the engine could not exclude, because each of those IS
+        # an assumption the leading reading relies on without saying so. Every
+        # case here will be SPECULATIVE — a press-release corpus carries no
+        # evidence of a counterparty's means or motive — and that is reported
+        # rather than dressed up, since a speculative case is worth reading
+        # and is not actionable.
+        from . import adversary_case as ADV
+
+        cases = [c for t in theses for c in ADV.from_alternatives(
+            t, as_of=ctx.as_of)]
+        payload["adversary"] = {
+            **ADV.summarise(cases),
+            "cases": [c.as_dict() for c in cases[:3]],
+        }
     except Exception as exc:  # noqa: BLE001
         payload["company_exposure"] = {"error": f"{type(exc).__name__}: {exc}"}
         payload.setdefault("transmission",

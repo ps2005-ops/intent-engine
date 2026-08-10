@@ -664,8 +664,27 @@ tasks:
     program: J
     title: Adversarial suite extension
     dependencies: [A-RD-008]
-    status: DERIVED
+    status: COMPLETE
     priority: 3
+    tests: tests/test_market_v4_research_adversarial.py
+    maturity_required: EVALUATED
+    completion_evidence: >
+      25 attacks in nine families, against the layer that measures the ENGINE
+      rather than the economy — the log of what was chosen, what came back and
+      what it was worth. The 27 prior attacks are retained and green.
+
+      The families: an empty result recorded as a success; a choice set
+      rebuilt after the outcome; an invented propensity; the volume hack; the
+      expensive source that answers nothing; the easy source that only
+      confirms; a KnowledgeEffect attributed to an object the evidence was
+      merely ABOUT; synthetic and live data sharing one briefing; and trading
+      P&L validating a mechanism.
+
+      What unites them is worth stating, because it is why this layer needs
+      attacks of its own: every one makes the engine look BETTER than it was,
+      and every one does so by REMOVING information rather than by adding a
+      false claim. A rate computed over a log with the failures missing is not
+      a slightly optimistic rate — it is a rate about a different population.
     acceptance_criteria:
       - retains all 27 prior attacks
       - adds no-result omitted; choice set reconstructed after outcome;
@@ -951,9 +970,40 @@ tasks:
     program: L
     title: AdversaryCase — a bounded failure path, not a competitor's mind
     dependencies: [G-THE-003]
-    status: DERIVED
+    status: COMPLETE
     priority: 3
     severity: MATERIAL_DEFECT
+    completion_evidence: >
+      CONNECTED TO THE CYCLE, not only built. `steps.py` constructs one case
+      per thesis alternative beside the deck it already builds, so the object
+      reaches a run report rather than sitting in a module with no caller —
+      which is the state two other pillars on this branch were found in during
+      the same run.
+
+      THE STANDING IS THE PRODUCT. Four response standings — HYPOTHESIZED,
+      CAPABILITY, INCENTIVE, OBSERVED_ACTION — and a response may not exceed
+      HYPOTHESIZED unless evidence names the means, the motive or the act.
+      `from_rival_existence` is a named constructor that RAISES, kept as a
+      function so the next person to write "iterate the rivals, attach the
+      obvious move" finds a refusal instead of writing it again.
+
+      NOTHING IS COMPOSED. The production constructor reads the thesis's own
+      alternatives: a rival reading the engine could not exclude IS an
+      assumption the leading reading relies on without saying so. Early
+      warnings and the kill condition are the thesis's falsifiers, not a
+      fresh list — composing one would be writing rather than reading, and
+      the two would drift.
+
+      EVERY LIVE CASE IS SPECULATIVE and says so, because a press-release
+      corpus carries no evidence of a counterparty's means or motive. A
+      speculative case is worth reading and is not actionable; `standing`
+      carries which, and `actionable` is false. Cases are ranked by how well
+      the ATTACK is evidenced, never by how bad the outcome would be —
+      ranking by severity puts a speculative catastrophe above an observed
+      erosion, and the speculative one is the one nobody can act on.
+
+      31 tests including all three representations (object, persisted dict,
+      alternatives-as-strings), break proofs 12/12.
     expected_value: >
       The thesis layer states what the engine believes and what would falsify
       it. Nothing states how it FAILS while remaining superficially intact —
