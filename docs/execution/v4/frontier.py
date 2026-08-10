@@ -62,6 +62,35 @@ def load_graph(path=GRAPH):
     return yaml.safe_load(path.read_text(encoding="utf-8"))["tasks"]
 
 
+def _duplicate_keys(text):
+    """Keys repeated inside one node, read from the text rather than the tree.
+
+    A YAML loader resolves a repeated key by keeping the last one, so the
+    earlier value is gone before any caller sees the document. The only place
+    the duplication is still observable is the source.
+    """
+    import re
+
+    out, node, keys = [], None, collections.Counter()
+
+    def flush():
+        repeated = {k: n for k, n in keys.items() if n > 1}
+        if node and repeated:
+            out.append((node, repeated))
+
+    for line in text.splitlines():
+        header = re.match(r"^  - id: (\S+)", line)
+        if header:
+            flush()
+            node, keys = header.group(1), collections.Counter()
+            continue
+        field = re.match(r"^    ([a-z_]+):", line)
+        if field:
+            keys[field.group(1)] += 1
+    flush()
+    return out
+
+
 def load_metrics():
     sys.path.insert(0, str(HERE))
     import metrics as M
@@ -149,6 +178,25 @@ def main(argv):
             print(f"  {tid} appears {seen[tid]} times")
         return 1
 
+    # THE SAME LOSS, ONE LEVEL DOWN. A repeated KEY inside a node is collapsed
+    # by any YAML loader with the last occurrence winning, and it is invisible
+    # to every reader afterwards. E-DEM-001 carried three `completion_evidence`
+    # keys: a 1,757-character live record written by the session that closed
+    # the node, and a trailing `completion_evidence: null` appended later. The
+    # graph reported that node as having no evidence at all. Eight other nodes
+    # carried the same trailing null.
+    #
+    # This has to be read from the TEXT: by the time yaml.safe_load returns,
+    # the duplicate is already gone and there is nothing left to detect.
+    repeated = _duplicate_keys(GRAPH.read_text(encoding="utf-8"))
+    if repeated:
+        print("DUPLICATE KEYS WITHIN A NODE — the last one silently wins and "
+              "the earlier value is unreachable:")
+        for tid, keys in repeated:
+            for key, count in sorted(keys.items()):
+                print(f"  {tid:<14} {key} appears {count} times")
+        return 1
+
     if "--check" in argv:
         # DERIVED is the marker meaning "this node's state is computed, and is
         # deliberately not stored". Drift is a node whose graph entry names a
@@ -167,7 +215,42 @@ def main(argv):
             print("\nFix: remove the declared status from TASK_GRAPH for these "
                   "nodes. Derived states must not be stored.")
             return 1
-        print(f"no drift; {len(tasks)} nodes")
+        # INTEGRITY, beyond drift. Each of these is a way the graph can lie
+        # about itself while every individual entry looks reasonable, and
+        # each has actually happened to this graph at least once.
+        problems = []
+        for task in tasks:
+            tid = task["id"]
+            declared = task.get("status")
+            if declared == "COMPLETE" and not str(
+                    task.get("completion_evidence") or "").strip():
+                # A node marked done by hand, with nothing naming what was
+                # built or where it ran.
+                problems.append(f"{tid}: COMPLETE with no completion_evidence")
+            if declared == "NOT_APPLICABLE" and not str(
+                    task.get("blocked_reason") or "").strip():
+                problems.append(
+                    f"{tid}: NOT_APPLICABLE with no reason — two of these "
+                    "turned out to rest on claims that were false")
+            for dependency in (task.get("dependencies") or ()):
+                if dependency not in seen:
+                    problems.append(
+                        f"{tid}: depends on {dependency}, which is not a node")
+            gate = task.get("minimum_data")
+            if isinstance(gate, dict):
+                unmeasured = [k for k in gate if k not in measured]
+                if unmeasured:
+                    # A gate nothing measures never clears and never blocks;
+                    # it just sits there looking like a plan.
+                    problems.append(
+                        f"{tid}: gate on unmeasured metric(s) "
+                        f"{', '.join(sorted(unmeasured))}")
+        if problems:
+            print("GRAPH INTEGRITY — the graph is inconsistent with itself:")
+            for line in problems:
+                print(f"  {line}")
+            return 1
+        print(f"no drift; {len(tasks)} nodes; integrity checks passed")
         return 0
 
     if "--all" in argv:

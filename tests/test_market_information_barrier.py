@@ -106,19 +106,26 @@ def production_callers() -> list:
                   and _imports_internal_state(p))
 
 
-def test_the_permission_wall_has_no_production_caller_and_that_is_recorded():
-    """MEASURED, NOT ASSERTED, and deliberately allowed to be non-empty.
+def test_the_permission_wall_is_reached_only_through_a_named_authority():
+    """RE-SCORED 2026-08-10, by the test that was written to force it.
 
-    The barrier is enforced where it is called and called nowhere, so the
-    pillar is a component rather than a system. This test fails the day that
-    changes — not because a caller is wrong, but because the pillar's status
-    would then be wrong, and a status nobody revisits is how a capability gets
-    marked complete on the strength of a class existing.
+    The previous version asserted `production_callers() == []` and said so:
+    the wall was enforced where it was called and called nowhere, so the
+    pillar was a component rather than a system, and the test was set to fail
+    the day that changed so the status would be revisited rather than left.
+
+    It changed. `tenant_scope` is now a production caller, and it is the ONLY
+    one — every other module reaches internal facts through it, which is the
+    point: `permitted_facts` takes a `TenantScope` and a bare string cannot
+    reach it. What the wall checked was never weak; the type it checked was,
+    in an engine whose most plentiful strings are company names parsed out of
+    documents.
     """
     callers = production_callers()
-    assert callers == [], (
-        "internal_state now has production callers; the information-barrier "
-        f"pillar must be re-scored rather than left as a component: {callers}")
+    assert callers == ["market/tenant_scope.py"], (
+        "the set of modules reaching internal facts has changed; each new one "
+        "is a new place a company identity could arrive from a document, and "
+        f"the pillar must be re-scored rather than left as it was: {callers}")
 
 
 def test_any_future_reader_must_go_through_the_permission_wall():

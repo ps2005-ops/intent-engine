@@ -247,7 +247,6 @@ tasks:
       - immediate and delayed reward both reported
     minimum_data:
       prospective_decisions: 100
-    completion_evidence: null
 
   - id: B-VOI-002
     program: B
@@ -261,7 +260,6 @@ tasks:
       - reports where VOI is miscalibrated, by question type and source family
     minimum_data:
       prospective_decisions: 50
-    completion_evidence: null
 
   - id: B-HACK-001
     program: B
@@ -281,7 +279,6 @@ tasks:
       - a low-change window reports UNRESOLVED rather than a smoothed pass
     minimum_data:
       prospective_decisions: 100
-    completion_evidence: null
 
   - id: B-BANDIT-001
     program: B
@@ -299,7 +296,6 @@ tasks:
       satisfy a checklist.
     minimum_data:
       logged_exploration_events: 200
-    completion_evidence: null
 
   - id: B-POL-003
     program: B
@@ -366,7 +362,6 @@ tasks:
         assumption status, alternative interpretation, standing
     minimum_data:
       macro_observations: 24
-    completion_evidence: null
 
   # ---- PROGRAM D: HISTORICAL SCIENTIFIC VALIDATION ----------------------
 
@@ -420,7 +415,6 @@ tasks:
         UNRESOLVED
       - feeds mechanism calibration; unrelated mechanisms are not pooled
     minimum_data: none
-    completion_evidence: null
 
   # ---- PROGRAM E: WORLD MODEL -------------------------------------------
 
@@ -442,7 +436,6 @@ tasks:
     tests: tests/test_market_demand_extraction.py tests/test_market_filing_prose_survives_parsing.py tests/demand_corpus.py
     minimum_data: none
     completion_evidence: "LIVE at runtime_git_sha cef65d3, night cycle 2026-08-09, dry_run false. Closed in two halves, and the first was three layers upstream: company_ingestion.parsing discarded 79% of every SEC filing because text was buffered only inside a block whitelist with no <div>, so on Caterpillar's Q2 exhibit 13,462 of 64,547 characters survived and every sentence of narrative did not. Repaired at 69a2438 and confirmed live: candidates 1281 -> 1815, evidence 105 -> 134, navigation 9 -> 11 (no leak). The second half is demand_extraction: the phrase list it replaces scored PRECISION 0.50 on a labelled corpus written BEFORE the detector, its ten false positives being four distinct mistakes (company buying, rival's demand, expectation, another domain); the four-question reader scores 1.00/1.00 with refusal reasons agreeing with the labels. LIVE: DEMAND_SIGNAL 21 rows admitted, coverage 18 -> 23 cells, ORDERS 1 -> 2 companies, CUSTOMER_INTENT and COMMITTED_DEMAND populated for the first time. CONSUMED downstream: the dated report carries demand_chain with 23 states measured and a real contradiction found, infosys REVENUE->GUIDANCE. The single no_commercial_event bucket (1,256 a cycle) is gone, decomposed into demand_no_commercial_object 1125 / no_direction 21 / generic_language 7 / speculative 3. Economic learning moved 29/402 (7.2%) -> 47/492 (9.55%) and HIGH_ACTIVITY_LOW_LEARNING correctly still fires. BOOKINGS, BACKLOG, CANCELLATIONS, SHIPMENTS and END_DEMAND remain at ZERO companies: that is the CORPUS, not the capability — the same reader extracts BACKLOG/UP/OBSERVED from a real Caterpillar filing end to end, and these 27 companies' fetched sources do not state those figures. Suite 5217. Break proofs v4j 7/7, v4k 12/12, 2 recorded NOT_BUILT."
-    completion_evidence: null
 
   - id: E-DEM-002
     program: E
@@ -455,7 +448,6 @@ tasks:
         up with shipments constrained are all representable
       - never flattened to "demand strong"
     minimum_data: none
-    completion_evidence: null
 
   # ---- PROGRAM F/G/H/I: parked behind their prerequisites ---------------
   # Encoded so the frontier algorithm can see them, not yet elaborated. Each
@@ -804,6 +796,28 @@ tasks:
     tests: tests/test_market_research_decision.py tests/test_market_thesis_history_wiring.py
     minimum_data: none
     severity: RELEASE_BLOCKER
+    completion_evidence: >
+      RESTORED 2026-08-10 from the ledger. This node's only
+      `completion_evidence` was a bare `null` appended after the fact, so the
+      graph reported a RELEASE_BLOCKER node as complete with nothing behind
+      it. The record below was in the ledger the whole time.
+
+      A-RD-009 had never executed. `knowledge_step` called
+      `RD.credit_revisions(...)` while `RD` was bound as a local inside four
+      OTHER functions in steps.py and never inside `knowledge_step`, so every
+      cycle raised NameError; the surrounding bare `except Exception` wrote it
+      into the delayed-reward block as an error string nobody read. The node
+      looked COMPLETE, the code read correctly in review, and the capability
+      had never run once — the "a caller is not a call" pattern.
+
+      LIVE after the repair at runtime_git_sha 0602ecc: delayed_reward runs
+      with no error key, revisions_considered 18, delayed_outcomes_written 0,
+      untraceable_revisions 0, actions_with_produced_evidence 8 (from 6). The
+      zero is honest and `why_zero` names it — all 18 revisions are first
+      statements, which name no cause because they are not consequences of any
+      action. That is the third acceptance clause, not a shortfall against it.
+      Guarded by a wiring test asserting no knowledge block reports an error
+      on ordinary data, and by break proofs v4f-20 and v4f-21.
     reopened: >
       2026-08-09. Marked COMPLETE and it had never executed. `knowledge_step`
       called `RD.credit_revisions(...)` while `RD` was bound as a local inside
@@ -819,7 +833,6 @@ tasks:
       projecting a count before believing a capability: the projection was
       added as instrumentation and immediately falsified the node it was
       instrumenting.
-    completion_evidence: null
 
   - id: C-MET-004
     program: C
@@ -1063,7 +1076,6 @@ tasks:
     maturity_required: EVALUATED
     tests: tests/test_market_external_text_is_data.py
     minimum_data: none
-    maturity_required: EVALUATED
     completion_evidence: >
       SCOPED TO WHAT THIS BRANCH CAN VERIFY, and the founder obligation is
       recorded as a cross-repo prerequisite rather than assumed closed.
@@ -1132,6 +1144,67 @@ tasks:
     maturity_required: EVALUATED
     tests: (founder repo)
     minimum_data: none
+
+  - id: L-TEN-001
+    program: L
+    title: The permission key may not come from a document
+    dependencies: []
+    status: COMPLETE
+    priority: 2
+    severity: RELEASE_BLOCKER
+    maturity_required: EVALUATED
+    tests: tests/test_market_tenant_isolation.py tests/test_market_information_barrier.py
+    minimum_data: none
+    expected_value: >
+      OPENED 2026-08-10 from a real finding, and deliberately NOT folded into
+      L-BAR-001 or L-ANT-001: those two require a real internal Business Graph
+      and a second live tenant, and neither exists here. This node is the part
+      of the boundary that WAS buildable on this branch, so that "the rest
+      needs infrastructure we do not have" stops covering for work that did
+      not.
+
+      internal_state.readable was never weak about what it checked. It was
+      weak about the TYPE it checked: a bare string, in an engine whose most
+      plentiful strings are company names parsed out of filings, headlines and
+      competitor pages. `readable(facts, for_company=evidence.actor)` raises
+      nothing, logs nothing, and lets a document choose whose private records
+      are opened. That is indirect prompt injection without needing a model —
+      only a string travelling from an untrusted parser into a trusted
+      parameter, which is one plausible line.
+    acceptance_criteria:
+      - a company identity used for permission carries the authority that
+        established it, and evidence is not one of them
+      - the constructor a future caller would reach for exists and REFUSES,
+        with the retrieval/permission distinction in the message
+      - a bare string cannot reach the permitted-facts path at all
+      - a join that mixes two companies' records is refused, in object and in
+        persisted-row shape
+      - the demonstration company cannot pose as a configured tenant
+    completion_evidence: >
+      TenantScope carries company_id plus the authority that established it —
+      CONFIGURED, OPERATOR or DEMONSTRATION. `from_evidence` exists and raises,
+      because the obvious line lands on a refusal that explains itself rather
+      than on a missing helper somebody writes in thirty seconds. The refusal
+      names the distinction it protects: a document naming a company is a
+      RETRIEVAL decision, never a PERMISSION decision.
+
+      Enforced by type rather than by check. `permitted_facts` accepts nothing
+      but a TenantScope, so the wall is kept by the signature instead of by
+      every call site remembering it.
+
+      CONNECTED: tenant_scope is now the ONE production caller of
+      internal_state, and the barrier test that previously asserted zero
+      callers — written to fail the day that changed so the pillar would be
+      re-scored rather than left — now asserts exactly that set.
+
+      Seven injected identity shapes (wildcard, separator, second line,
+      traversal, SQL-ish, empty, the victim's own name) each either refuse or
+      read only records they own; none widens a read. A canary private fact
+      for TENANT_A is unreachable for TENANT_B through permitted_facts and
+      through the join guard, while TENANT_A still reads its own — a wall that
+      blocks everybody is an outage, not a wall.
+
+      26 tests, break proofs 11/11.
 
   - id: L-BAR-001
     program: L
