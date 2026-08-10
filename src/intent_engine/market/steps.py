@@ -1737,8 +1737,16 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
         theses_block = payload.get("economic_thesis") or {}
         impacts_seen = _decision_impacts(ctx)
         payload["stagnation"] = STG.summarise(STG.evaluate(
-            evidence_rows=sum(1 for r in rows if r.get("record") == "evidence"),
-            knowledge_effects=effects.get("effects"),
+            # A FRACTION OF EVIDENCE, NOT EFFECTS PER ROW. The first live run
+            # reported 442 effects over 416 evidence rows — 106% against a 5%
+            # floor. Both numbers are right and the ratio is meaningless: one
+            # evidence row can strengthen a belief AND resolve an expectation,
+            # so effects-per-row exceeds 1.0 routinely and can never fall
+            # below a floor expressed as a share of evidence. The question is
+            # how much evidence changed NOTHING, so the numerator is the
+            # evidence that changed something.
+            evidence_rows=effects.get("evidence_attributed"),
+            knowledge_effects=effects.get("evidence_that_changed_something"),
             theses=theses_block.get("theses"),
             theses_resolved=theses_block.get("tested"),
             discoveries=(payload.get("unsupervised") or {}).get("clusters"),
