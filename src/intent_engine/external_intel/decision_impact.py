@@ -199,6 +199,31 @@ class DecisionImpact:
     reason: str
     provenance: Tuple[str, ...] = ()
     created_at: str = ""
+    #: THE EVIDENCE EACH SIDE COULD SEE. Empty means it was not recorded,
+    #: which is a third state and not a claim that the windows matched.
+    #: Without these, a change between two revisions is attributed to the
+    #: engine's reasoning when the available explanation is that the later
+    #: run simply had three more weeks of filings. That confound cannot be
+    #: detected after the fact, so it is represented before the first real
+    #: pair exists rather than after.
+    before_known_at: str = ""
+    after_known_at: str = ""
+    prior_revision_id: str = ""
+    current_revision_id: str = ""
+
+    @property
+    def comparability(self) -> str:
+        """Whether a difference here can be attributed to reasoning at all."""
+        if not self.before_known_at or not self.after_known_at:
+            return UNKNOWN_WINDOW
+        if self.before_known_at == self.after_known_at:
+            return SAME_WINDOW
+        return WIDER_WINDOW
+
+    @property
+    def attributable(self) -> bool:
+        """Whether this row may enter a rate about the engine's value."""
+        return self.comparability == SAME_WINDOW
 
     @property
     def decision_impact_id(self) -> str:
@@ -228,6 +253,12 @@ class DecisionImpact:
             "reason": self.reason,
             "provenance": list(self.provenance),
             "created_at": self.created_at,
+            "before_known_at": self.before_known_at,
+            "after_known_at": self.after_known_at,
+            "prior_revision_id": self.prior_revision_id,
+            "current_revision_id": self.current_revision_id,
+            "comparability": self.comparability,
+            "attributable": self.attributable,
         }
 
 
@@ -374,6 +405,16 @@ def evidence_of(context) -> List[str]:
 # dossier appends nothing and a genuinely new revision is a second row.
 
 FIRST_OBSERVATION = "FIRST_OBSERVATION"
+
+# --- whether a difference can be attributed to reasoning at all -------------
+#
+# Three states, never two. A comparison whose evidence windows were not
+# recorded is not a comparison whose windows matched, and pooling the two is
+# how "the engine changed its mind" comes to mean "the engine saw more".
+SAME_WINDOW = "SAME_EVIDENCE_WINDOW"      # a clean comparison
+WIDER_WINDOW = "WIDER_EVIDENCE_WINDOW"    # the later side saw more
+UNKNOWN_WINDOW = "UNKNOWN_EVIDENCE_WINDOW"  # not recorded; not a match
+COMPARABILITY = (SAME_WINDOW, WIDER_WINDOW, UNKNOWN_WINDOW)
 
 #: Outcomes that make no claim about impact and must never enter an impact
 #: rate's numerator OR its denominator.
