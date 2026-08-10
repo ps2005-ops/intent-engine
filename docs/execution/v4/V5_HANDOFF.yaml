@@ -1,8 +1,8 @@
 contract: v5_handoff.v1
 written_at: '2026-08-10'
 frozen_at:
-  market: f975c5c
-  founder: 2dbc31a
+  market: ea8d35b
+  founder: 66ce3eb
 production: 119d345 (untouched)
 
 principle: >
@@ -112,3 +112,31 @@ items:
       stagnation checks must keep UNMEASURABLE distinct from CLEAR. V5 must
       learn not whether the engine ran, but whether it is getting better at
       learning.
+
+  founder_decision_impact_empirical:
+    why_v4_stops: >
+      The instrument is finished and every negative control passes; the corpus
+      holds 25 graded rows and all 25 are FIRST_OBSERVATION, so comparable
+      pairs are zero. No pair was manufactured. The comparability wall was
+      closed while pairs were still zero — evidence windows cannot be
+      back-filled onto records that never carried them, and a difference
+      across two windows is the calendar rather than the reasoning.
+    depends_on: a real second revision of any dossier
+    acceptance: >
+      one graded prior-vs-current pair at SAME_EVIDENCE_WINDOW, scored NONE /
+      MINOR / MEANINGFUL / DECISION_CHANGING, with a NONE recorded as NONE
+    security: none specific
+    measurement: comparable_founder_revision_pairs, gate 1, self-clearing
+
+  historical_causal_estimate:
+    why_v4_stops: >
+      Re-gated after its old gate was found to measure volume rather than
+      vintage safety. published_at spans 26 months and retrieved_at spans one;
+      with a single retrieval month there is no past instant to stand at, so
+      any episode chosen today is chosen from figures held only in revised
+      form. The architecture — registry, assumption ledger, vintage wall,
+      replay, baseline — is complete.
+    depends_on: elapsed retrieval history, which accrues without intervention
+    acceptance: an episode selected without inspecting the outcome, on vintage-safe data
+    security: published_at may never substitute for retrieved_at
+    measurement: macro_retrieval_months, gate 6, self-clearing

@@ -3,10 +3,10 @@ recomputed_at: '2026-08-10'
 axes:
   LEARNING_ACCELERATION:
     status: PARTIAL
-    note: 'I-ACC-001 live. I-STA-001 adds five independent stagnation questions with three outcomes each,
-      where UNMEASURABLE is projected beside FIRING rather than folded in with CLEAR. INSTRUMENTED and
-      projected, NOT yet live-verified: the cycle in flight was launched from the previous commit, and
-      that is recorded rather than claimed.
+    note: 'I-ACC-001 live. I-STA-001''s five stagnation checks are connected and projected; a field-name
+      defect in the wiring (impact instead of materiality) was found and fixed — it left FIRST_OBSERVATION
+      in the denominator and would have fired against 25 dossiers with no prior revision. Live proof pending
+      the cycle from ea8d35b.
 
       '
   SOURCE_HEALTH:
@@ -132,8 +132,16 @@ axes:
       (519 points, skill 0.0043) is refused on a fitted coefficient of 0.9854. STILL PARTIAL: only the
       three baselines are implemented and no formal causal method has been run (C-MET-003).'
   CAUSAL_INFERENCE:
-    status: PARTIAL
-    note: no formal historical study run yet
+    status: BLOCKED_DATA
+    note: 'C-MET-003 re-gated 2026-08-10 after its old gate was found to measure the wrong thing: macro_observations
+      >= 24 (satisfied 2347 times) is volume, while the acceptance asks for vintage safety. published_at
+      spans 26 distinct months; retrieved_at spans ONE. With one retrieval month there is no past t0,
+      so any episode selected today is selected from figures held only in revised form — outcome inspection
+      by construction. Architecture complete: method registry, assumption ledger (60 live rows, 3 critical
+      failures refusing the causal reading), vintage wall with five leak attacks refused. Gate macro_retrieval_months
+      >= 6, accruing on its own.
+
+      '
   THESIS_REPLAY:
     status: BLOCKED_DATA
     note: 'D-REP-002. Capability built, tested (19) and leak-proofed (13 mutation proofs, all held first
@@ -190,7 +198,15 @@ axes:
       '
   DECISION_IMPACT:
     status: PARTIAL
-    note: not sufficiently proven on a real company
+    note: 'SPLIT, because the instrument and the result are different questions. CAPABILITY: PASS — graded
+      before/after with every negative control passing (identical grades NONE, wording-only is not MEANINGFUL,
+      new assumption is MEANINGFUL, changed recommendation is DECISION_CHANGING, unprovenanced gets no
+      credit, another company''s prior is not a prior), 39 tests. The comparability wall is now closed:
+      three evidence-window states with only SAME_EVIDENCE_WINDOW attributable, unrecorded never read
+      as matching, and attribution independent of change size. EMPIRICAL: BLOCKED_DATA — 25 rows, all
+      FIRST_OBSERVATION, comparable pairs 0. Gate comparable_founder_revision_pairs >= 1, self-clearing.
+
+      '
   TRADING_ECONOMIC_SEPARATION:
     status: PARTIAL
   RETENTION:
