@@ -361,6 +361,34 @@ tasks:
       - result stores estimand, sample, period, effect, uncertainty,
         assumption status, alternative interpretation, standing
     minimum_data:
+      macro_retrieval_months: 6
+    completion_evidence: >
+      RE-GATED 2026-08-10, and the old gate is the finding. C-MET-003 was
+      READY on `macro_observations: 24`, satisfied 2347 times over — a VOLUME
+      gate. Its second acceptance criterion asks for VINTAGE-SAFE data, which
+      is a question about our OBSERVATION history, not about how many rows we
+      hold.
+
+      Measured: `published_at` spans 26 distinct months, 2024-07 to 2026-08.
+      `retrieved_at` spans ONE. The first is the statistical agency's
+      publication calendar and is a property of the data; the second is when
+      this engine could actually have seen it. With one retrieval month there
+      is no past t0 to stand on, so any episode selected today is selected
+      using figures we have only ever held in their current, revised form —
+      which is outcome inspection by construction, not by carelessness.
+
+      Building the study anyway would require reading `published_at` as though
+      it were `retrieved_at`. That substitution is the one this program
+      already refused once, and it would have admitted 1,572 rows the engine
+      had never seen at the instant it claims to be standing at.
+
+      ARCHITECTURE IS COMPLETE AND THE ESTIMATE IS NOT. C-MET-001 (method
+      registry), C-MET-002 (assumption ledger, 60 rows live with 3 critical
+      failures refusing the causal reading) and D-REP-001 (the vintage wall,
+      with five leak attacks refused) are all COMPLETE and live-verified. What
+      is missing is elapsed time, and it accrues on its own: the gate is
+      `macro_retrieval_months >= 6`, measured from distinct retrieval months
+      in the live ledger, and it clears without anybody editing this node.
       macro_observations: 24
 
   # ---- PROGRAM D: HISTORICAL SCIENTIFIC VALIDATION ----------------------
@@ -635,12 +663,52 @@ tasks:
     title: Founder DecisionImpact, real company first
     dependencies: [H-CON-001]
     status: DERIVED
+    minimum_data:
+      comparable_founder_revision_pairs: 1
+    tests: (founder) tests/test_founder_impact_comparability.py tests/test_decision_impact_prior_revision.py
+    completion_evidence: >
+      CAPABILITY COMPLETE, EMPIRICAL VALUE DATA-GATED. The two are recorded
+      separately on purpose: the instrument is finished and the corpus cannot
+      yet exercise it, and collapsing those would either claim a result that
+      does not exist or hide an instrument that does.
+
+      CAPABILITY. Graded before/after comparison with every negative control
+      passing: an identical dossier grades NONE, a wording-only change is not
+      MEANINGFUL, a new assumption is MEANINGFUL, a changed recommendation is
+      DECISION_CHANGING, an unprovenanced change gets no credit, another
+      company's prior is not a prior, and a dossier with no prior revision is
+      FIRST_OBSERVATION — neither an impact nor a failure to have one. 39
+      tests. The metric can report the negative, which is why it is trusted.
+
+      EMPIRICAL. Measured on the live file: 25 rows, all FIRST_OBSERVATION,
+      all `changed: false`, one revision date and one analysis id. Comparable
+      pairs = 0. No pair was manufactured.
+
+      THE COMPARABILITY WALL WAS MISSING AND IS NOW CLOSED, while pairs are
+      still zero and it can still be done honestly. DecisionImpact had no
+      representation of what evidence each side could see, so a difference
+      between a revision and its predecessor would have been attributed to the
+      engine's reasoning when the available explanation is that the later run
+      saw three more weeks of filings — a confound undetectable after the
+      fact. `before_known_at`, `after_known_at`, `prior_revision_id` and
+      `current_revision_id` now travel with the row, and `comparability` has
+      three states: SAME_EVIDENCE_WINDOW, WIDER_EVIDENCE_WINDOW and
+      UNKNOWN_EVIDENCE_WINDOW. Only the first is `attributable`. Unrecorded is
+      not treated as matching, and attributability is independent of how large
+      the change was — a DECISION_CHANGING difference across two windows is
+      still not evidence about the engine.
+
+      All 25 persisted rows read as UNKNOWN_EVIDENCE_WINDOW, which is what
+      they are; a test asserts it against the file rather than a fixture.
+
+      GATE: comparable_founder_revision_pairs >= 1, measured by metrics.py
+      from the Founder's own persisted file, clearing itself the first time a
+      real second revision lands.
     priority: 4
     acceptance_criteria:
       - deterministic Founder-without-V4 vs Founder-with-V4 on the same company
       - scored NONE / PRESENTATIONAL / MEANINGFUL / DECISION_CHANGING
       - a NONE result is recorded as NONE, and the missing evidence identified
-    minimum_data: none
 
   - id: I-ACC-001
     program: I

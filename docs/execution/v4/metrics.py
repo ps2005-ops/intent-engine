@@ -51,6 +51,25 @@ def _rows(path):
     return out
 
 
+def _comparable_pairs(ledger) -> int:
+    """DecisionImpact rows that graded a real prior-vs-current comparison.
+
+    Sits beside the ledger rather than in it: the Founder surface writes
+    `decision_impact.jsonl` next to the learning ledger. A row counts only if
+    it graded an actual pair, so FIRST_OBSERVATION — a dossier with no prior
+    revision — is excluded. It is neither an impact nor a failure to have
+    one, and counting it would clear this gate with rows that cannot answer
+    the question the gate is asking.
+    """
+    path = pathlib.Path(ledger).parent / "decision_impact.jsonl"
+    rows = _rows(path)
+    if not rows:
+        return 0
+    return sum(1 for r in rows
+               if str(r.get("materiality") or r.get("impact") or "")
+               not in ("", "FIRST_OBSERVATION"))
+
+
 def measure(ledger=RUNTIME_LEDGER) -> dict:
     rows = _rows(pathlib.Path(ledger))
     now = _dt.datetime.now(_dt.timezone.utc).isoformat()
@@ -86,6 +105,14 @@ def measure(ledger=RUNTIME_LEDGER) -> dict:
             1 for d in prospective
             if d.get("selection_probability_status") == "KNOWN"),
         "named_supplier_edges": len(supplier),
+        # COMPARABLE FOUNDER REVISION PAIRS. The gate H-IMP-001's empirical
+        # half waits on. A DecisionImpact row counts only if it graded an
+        # actual comparison — FIRST_OBSERVATION is a dossier with no prior
+        # revision, so it is neither an impact nor a failure to have one, and
+        # counting it would clear the gate with rows that cannot answer the
+        # question. Measured from the Founder's own persisted file so the
+        # gate clears itself the first time a real second revision lands.
+        "comparable_founder_revision_pairs": _comparable_pairs(ledger),
         "macro_observations": sum(1 for r in rows
                                   if r.get("record") == "macro_observation"),
         # HOW MUCH OBSERVATION HISTORY EXISTS, which is a different quantity

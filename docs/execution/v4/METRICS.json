@@ -1,6 +1,7 @@
 {
-  "measured_at": "2026-08-10T17:57:47.517948+00:00",
+  "measured_at": "2026-08-10T18:13:39.453629+00:00",
   "metrics": {
+    "comparable_founder_revision_pairs": 0,
     "evidence_rows": 416,
     "knowledge_effects": 583,
     "logged_exploration_events": 0,

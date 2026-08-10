@@ -1744,16 +1744,47 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             discoveries=(payload.get("unsupervised") or {}).get("clusters"),
             discoveries_validated=(payload.get("unsupervised") or {}).get(
                 "validated"),
-            analyses=len(impacts_seen) or None,
-            decision_impacts=sum(
-                1 for i in impacts_seen
-                if str(i.get("impact") or "") not in ("", "NONE",
-                                                      "FIRST_OBSERVATION"))
-            if impacts_seen else None,
+            # `materiality` IS THE FIELD; `impact` was a guess and no row has
+            # it. Every grade read as empty, the numerator was 0, and all 25
+            # FIRST_OBSERVATION rows stayed in the DENOMINATOR — so the check
+            # fired "analyses are produced and none changes a decision"
+            # against 25 dossiers that had no prior revision for anything to
+            # change against. Read the way learning_acceleration reads it.
+            #
+            # FIRST_OBSERVATION LEAVES BOTH SIDES. A dossier with no prior
+            # revision has not failed to change a decision; there was no
+            # decision to change, and counting it as a denominator would make
+            # a growing corpus look like worsening stagnation.
+            analyses=(_impact_denominator(impacts_seen) or None),
+            decision_impacts=(
+                sum(1 for g in _impact_grades(impacts_seen)
+                    if g not in ("", "NONE", "FIRST_OBSERVATION"))
+                if _impact_denominator(impacts_seen) else None),
         ))
     except Exception as exc:  # noqa: BLE001
         payload["stagnation"] = {"error": str(exc)}
     return payload
+
+
+def _impact_grades(records: Sequence[dict]) -> List[str]:
+    """The materiality of each graded comparison, read the way LA reads it.
+
+    `materiality` first, `impact` as the legacy alias. Both are tried because
+    two writers have existed; neither is guessed.
+    """
+    return [str(r.get("materiality") or r.get("impact") or "")
+            for r in records or ()]
+
+
+def _impact_denominator(records: Sequence[dict]) -> int:
+    """Comparisons that COULD have shown an impact.
+
+    FIRST_OBSERVATION is excluded from both sides of the rate: a dossier with
+    no prior revision did not fail to change a decision, and counting it as a
+    denominator makes a growing corpus look like worsening stagnation.
+    """
+    return sum(1 for g in _impact_grades(records)
+               if g and g != "FIRST_OBSERVATION")
 
 
 def _decision_impacts(ctx) -> List[dict]:
