@@ -1608,6 +1608,15 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             "chains": [c.as_dict() for c in chains if c.known_states],
         }
 
+        # TWO FIGURES THAT DISAGREE WITHOUT BEING ADJACENT. The chain compares
+        # neighbours and reads "both moved UP" as agreement, which is right
+        # for every state except CANCELLATIONS — where a rise is committed
+        # demand leaving. Backlog up with cancellations up is the clearest
+        # disagreement in the vocabulary and the chain cannot express it.
+        from . import demand_tension as DTN
+
+        payload["demand_tension"] = DTN.summarise(chains)
+
         quantities, refused_q = [], {}
         for row in rows:
             if row.get("record") != "evidence":

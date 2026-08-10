@@ -37,6 +37,12 @@ REQUIRED = {
         "series_scored", "evaluations", "leader", "by_standing",
         "assumption_failures_critical", "performance_records_written",
     ),
+    "demand_tension": (
+        # E-DEM-002. `by_pair` is the one that matters: a total flattens
+        # backlog-with-cancellations and bookings-with-revenue into one
+        # number, which is the same loss the module exists to prevent.
+        "tensions", "by_pair", "companies_with_a_tension", "rules_available",
+    ),
     "adversary": (
         # L-ADV-001. `by_standing` is the one that matters: every live case is
         # SPECULATIVE while the corpus carries no evidence of a counterparty's

@@ -896,6 +896,15 @@ def _knowledge_summary(knowledge: dict) -> dict:
             for k in ("decks", "subjects", "all_carry_alternatives",
                       "empty_sections", "error")
             if (knowledge.get("presentation") or {}).get(k) is not None},
+        # DEMAND FIGURES THAT DISAGREE. `by_pair` rather than a total, because
+        # backlog-with-cancellations and bookings-with-revenue are different
+        # findings and a count of "3 tensions" is the flattening this layer
+        # exists to prevent.
+        "demand_tension": {
+            k: (knowledge.get("demand_tension") or {}).get(k)
+            for k in ("tensions", "by_pair", "companies_with_a_tension",
+                      "found", "rules_available", "error")
+            if (knowledge.get("demand_tension") or {}).get(k) is not None},
         # HOW EACH THESIS FAILS. `by_standing` is the field to read: every
         # live case is SPECULATIVE while the corpus carries no evidence of a
         # counterparty's means or motive, and a report that showed the cases

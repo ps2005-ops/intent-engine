@@ -441,7 +441,46 @@ tasks:
     program: E
     title: Demand-state contradiction handling
     dependencies: [E-DEM-001]
-    status: DERIVED
+    status: COMPLETE
+    tests: tests/test_market_demand_tension.py
+    maturity_required: EVALUATED
+    completion_evidence: >
+      TWO GAPS, BOTH NAMED BY THE ACCEPTANCE CRITERIA. demand_chain compares
+      ADJACENT states and marks a link CONTRADICTED when the ends moved in
+      opposite directions — the right rule for the path it models.
+
+      POLARITY. That rule reads "both moved UP" as agreement, which holds only
+      if every state means more demand when it rises. CANCELLATIONS does not:
+      a rise is committed demand leaving. Backlog up WITH cancellations up is
+      the clearest disagreement in the vocabulary and the chain cannot express
+      it — CANCELLATIONS is deliberately kept off the main path as a leak
+      rather than a step, which is correct and left it compared to nothing.
+
+      DISTANCE. Bookings and revenue are four links apart, and in this corpus
+      every intermediate state is unmeasured, so all four links read UNKNOWN.
+      A company whose new bookings fall while recognised revenue rises is
+      describing revenue as the past arriving, and the chain sees nothing.
+
+      Modelled as TENSIONS rather than as new links, because a link asserts a
+      causal step and these are not steps: the bookings/revenue relationship
+      is an accounting one over a lag nobody here has established. A tension
+      claims only that two measured figures need an explanation, and each
+      carries the benign reading as well — for every pair there IS one, and
+      reporting only the alarming reading is the mirror image of flattening.
+
+      NEVER FLATTENED: there is no overall verdict field, and a test asserts
+      none appears. Both ends of both figures must be MEASURED; one measured
+      figure cannot disagree with an absent one.
+
+      CONNECTED and PROJECTED in the same change — steps.py fills it and
+      report.py projects it, with the projection guard extended, because the
+      previous node in this program shipped a block the report silently
+      dropped.
+
+      A break proof deleted code rather than protecting it: a `known` check
+      here was unreachable, since `unknown()` always sets FLAT and the
+      direction guard drops it first. The guard was removed instead of kept
+      with a test naming it. 20 tests, break proofs 9/9.
     priority: 4
     acceptance_criteria:
       - backlog up with cancellations up, revenue up with bookings down, orders
@@ -1118,7 +1157,46 @@ tasks:
     program: L
     title: Cold start — a prior presented as a prior, never as an observation
     dependencies: []
-    status: DERIVED
+    status: COMPLETE
+    completion_evidence: >
+      Founder 2dbc31a. MEASURED FIRST: at T0 the CEO surface answered every
+      question about an unanalysed company with one sentence, and said the
+      same thing about a company nobody had looked at and a company whose
+      sources had gone dark — a research task and a risk, indistinguishable.
+
+      Six coverage states, each with its own sentence and its own
+      must-not-conclude; NEVER_ANALYSED, PRIOR_ONLY, HYDRATING,
+      PARTIALLY_OBSERVED, OBSERVED, DEGRADED. Every state short of OBSERVED
+      is ASSERT_NONE. DEGRADED is checked BEFORE the positive states, because
+      a dossier still carrying yesterday's thesis while today's source is dark
+      reads as OBSERVED and is not.
+
+      Every value carries its origin. COMPANY_OBSERVATION is the only origin
+      speakable in the indicative about the company and must cite evidence —
+      an observation with no evidence id is indistinguishable from a prior
+      somebody relabelled. A prior carrying evidence ids is refused outright.
+      refuse_prior_as_observation raises rather than returning a flag, because
+      the renderer it guards against is one that reads the value and not the
+      origin.
+
+      Hydration is visible or it did not happen: replacements() reports which
+      priors evidence displaced.
+
+      A break proof found a wiring defect in this work: the coverage state was
+      computed while the plan's ceiling was a constant beside it, correct for
+      every state by coincidence rather than by wiring. The ceiling now
+      returns with the sentence.
+
+      LIVE on the 25 published dossiers: 3 OBSERVED at ASSERT_LEADING, 22
+      PARTIALLY_OBSERVED at ASSERT_NONE. Those 22 previously read as though
+      nothing had been done for them. 30 tests, break proofs 16/16.
+
+      NOT BUILT, and recorded rather than implied: there is no streaming
+      transport on this branch, so hydration is a state and provenance
+      contract rather than a progressive delivery path. PRIOR_ONLY is
+      reachable and unused — nothing on this branch yet publishes sector
+      priors, and inventing some to populate it would be the exact failure
+      the module prevents.
     priority: 4
     severity: MATERIAL_DEFECT
     repository: founder
