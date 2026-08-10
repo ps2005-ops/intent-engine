@@ -40,6 +40,7 @@ first is evidence. Neither makes a node runnable.
 from __future__ import annotations
 
 import collections
+import importlib.util
 import pathlib
 import sys
 
@@ -57,9 +58,37 @@ SATISFIES = {"COMPLETE"}
 TERMINAL = {"COMPLETE", "INVALIDATED", "BLOCKED_DATA", "BLOCKED_EXTERNAL",
             "BLOCKED_OWNER", "NOT_APPLICABLE"}
 
+#: The ten questions a node must answer BEFORE it is implemented. Named here
+#: rather than in prose because every one of them corresponds to a way this
+#: program has previously shipped something that looked finished: a module
+#: with no caller, a caller with no persistence, persistence with no reload,
+#: an export field no producer supplies, a consumer reading the wrong shape,
+#: a surface that renders without changing the decision, and a metric that
+#: cannot report a negative. A graph that sets `requires_vertical: true` is
+#: refused by --check unless every node answers all ten.
+VERTICAL_KEYS = ("producer", "persistence", "reload", "consumer", "surface",
+                 "telemetry", "failure_states", "live_proof",
+                 "adversarial_proof", "mutation_target")
+
+
+def program_dir(argv):
+    """Which program's planner directory to read.
+
+    Defaults to this file's own directory, so the V4 invocation is unchanged.
+    `--dir` lets one engine drive several programs, which is the alternative
+    to a second copy of this file drifting away from the first.
+    """
+    if "--dir" in argv:
+        return pathlib.Path(argv[argv.index("--dir") + 1]).resolve()
+    return HERE
+
 
 def load_graph(path=GRAPH):
     return yaml.safe_load(path.read_text(encoding="utf-8"))["tasks"]
+
+
+def load_document(path=GRAPH):
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
 def _duplicate_keys(text):
@@ -91,11 +120,19 @@ def _duplicate_keys(text):
     return out
 
 
-def load_metrics():
-    sys.path.insert(0, str(HERE))
-    import metrics as M
+def load_metrics(here=None):
+    """Load the metrics module that sits beside the graph being read.
 
-    return M.load().get("metrics", {}) or {}
+    By path rather than by name: `import metrics` resolves once per process
+    and caches, so a second program reading its own gates would silently get
+    the first program's numbers.
+    """
+    here = pathlib.Path(here or HERE)
+    spec = importlib.util.spec_from_file_location(
+        f"_metrics_{here.name}", here / "metrics.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.load().get("metrics", {}) or {}
 
 
 def gate_report(task, measured):
@@ -154,8 +191,11 @@ def unblocks(tasks):
 
 
 def main(argv):
-    tasks = load_graph()
-    measured = load_metrics()
+    here = program_dir(argv)
+    graph_path = here / "TASK_GRAPH.yaml"
+    document = load_document(graph_path)
+    tasks = document["tasks"]
+    measured = load_metrics(here)
     status = effective(tasks, measured)
     reach = unblocks(tasks)
     by_id = {t["id"]: t for t in tasks}
@@ -188,7 +228,7 @@ def main(argv):
     #
     # This has to be read from the TEXT: by the time yaml.safe_load returns,
     # the duplicate is already gone and there is nothing left to detect.
-    repeated = _duplicate_keys(GRAPH.read_text(encoding="utf-8"))
+    repeated = _duplicate_keys(graph_path.read_text(encoding="utf-8"))
     if repeated:
         print("DUPLICATE KEYS WITHIN A NODE — the last one silently wins and "
               "the earlier value is unreachable:")
@@ -203,10 +243,18 @@ def main(argv):
         # CONCRETE derivable state — READY, WAITING_DEPENDENCY, BLOCKED_DATA —
         # because that is a fact written in two places, which is how
         # TASK_GRAPH and BLOCKERS came to disagree.
-        drift = [(tid, by_id[tid].get("status"), got)
+        # ABSENT IS DERIVED. The V4 graph writes `status: DERIVED` explicitly
+        # on every computed node; the V5 graph omits the key entirely, which
+        # says the same thing more strongly — there is no field to drift. Both
+        # are correct and neither is drift. Without this the report also
+        # crashed formatting the None it had just decided to complain about.
+        def declared_status(tid):
+            return str(by_id[tid].get("status") or "DERIVED")
+
+        drift = [(tid, declared_status(tid), got)
                  for tid, (got, _) in status.items()
-                 if by_id[tid].get("status") not in DECLARED
-                 and by_id[tid].get("status") != "DERIVED"]
+                 if declared_status(tid) not in DECLARED
+                 and declared_status(tid) != "DERIVED"]
         if drift:
             print("STATUS DRIFT — TASK_GRAPH declares a derivable state that "
                   "does not match the measurement:")
@@ -245,6 +293,25 @@ def main(argv):
                     problems.append(
                         f"{tid}: gate on unmeasured metric(s) "
                         f"{', '.join(sorted(unmeasured))}")
+            # THE VERTICAL SLICE, CHECKED RATHER THAN ASKED FOR. Every prior
+            # program stated the ten questions in its protocol document and
+            # every prior program still shipped nodes that could not answer
+            # them, because prose is not a gate. A node that cannot name its
+            # consumer before implementation is not ready to implement, and a
+            # planner that cannot say so is only a document.
+            if document.get("requires_vertical") and declared != "NOT_APPLICABLE":
+                vertical = task.get("vertical")
+                if not isinstance(vertical, dict):
+                    problems.append(
+                        f"{tid}: no vertical slice declared — name producer "
+                        "through mutation_target before implementing")
+                else:
+                    missing = [k for k in VERTICAL_KEYS
+                               if not str(vertical.get(k) or "").strip()]
+                    if missing:
+                        problems.append(
+                            f"{tid}: vertical slice missing "
+                            f"{', '.join(missing)}")
         if problems:
             print("GRAPH INTEGRITY — the graph is inconsistent with itself:")
             for line in problems:

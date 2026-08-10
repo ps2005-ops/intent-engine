@@ -1,0 +1,1117 @@
+# TASK_GRAPH.yaml -- machine-readable V5 backlog.
+#
+# V4 built an engine that can see the outside world and refuse to overclaim
+# about it. V5 asks the next question: when the engine refuses, what should
+# the company DO? The answer running through every program here is that a
+# refusal is an information-acquisition decision, not a dead end.
+#
+# WHAT IS DIFFERENT FROM THE V4 GRAPH
+# -----------------------------------
+# `requires_vertical: true`. Every node names its producer, persistence,
+# reload, consumer, surface, telemetry, failure states, live proof,
+# adversarial proof and mutation target BEFORE it is implemented, and
+# `frontier.py --check` refuses the graph otherwise. V4 stated those ten
+# questions in prose and still shipped four capabilities with zero production
+# callers, a write path nothing called, and a metric that could not report a
+# negative. Prose is not a gate.
+#
+# NODES ARE PRODUCT CAPABILITIES, NOT CLASSES
+# -------------------------------------------
+# Thirty-two nodes, not a hundred. A node that is a helper class belongs
+# inside another node. The graph must converge; see section 39 of the
+# execution constitution.
+#
+# HISTORICAL IS NOT PROSPECTIVE
+# -----------------------------
+# Program B builds a historical decision corpus and is forbidden from
+# counting one row of it toward the prospective gates in the V4 graph. The
+# populations are tagged at write time and separated at read time. Relabelling
+# is the leak this system spent months removing.
+
+contract: v5_task_graph.v1
+repository_default: market
+requires_vertical: true
+generated_at: "2026-08-10"
+predecessor: docs/execution/v4/TASK_GRAPH.yaml
+
+programs:
+  A: CAUSAL DECISION INTELLIGENCE
+  B: HISTORICAL AND POLICY LEARNING
+  C: BEHAVIORAL GAME ENGINE
+  D: INTERNAL ENTERPRISE INTELLIGENCE
+  E: DECISION AND EXECUTION OS
+  F: ENTERPRISE SECURITY AND TRUST
+  G: EXECUTIVE EXPERIENCE
+  H: META-LEARNING AND SELF-IMPROVEMENT
+
+tasks:
+
+  # ---- PROGRAM A: CAUSAL DECISION INTELLIGENCE --------------------------
+  # The canonical loop: IDENTIFY -> ESTIMATE -> STRESS TEST -> REFUSE OR
+  # ACCEPT -> IF REFUSED, DESIGN THE EXPERIMENT THAT WOULD RESOLVE IT.
+
+  - id: A-SCM-001
+    program: A
+    title: Synthetic control estimator, donor pool and weights, not an enum entry
+    dependencies: []
+    priority: 1
+    expected_value: >
+      SYNTHETIC_CONTROL has been declared in economic_method.METHODS with
+      estimator=None since V4. `require` refuses it correctly, which means
+      every EFFECT_OF_POLICY question the engine has ever been asked has
+      fallen back to a method whose assumptions are weaker. This is the first
+      estimator in the system that can answer "what would have happened
+      otherwise" for a single treated unit.
+    acceptance_criteria:
+      - a fit takes a treated series, a donor pool, and a treatment index, and
+        returns unit weights that are non-negative and sum to one
+      - weights are fitted on pre-treatment outcomes ONLY; the treatment index
+        partitions the series and no post-treatment point enters the objective
+      - pre-treatment fit quality is reported as RMSPE, not asserted
+      - a donor pool that cannot reproduce the pre-period yields REFUSED with
+        the shortfall quantified, never a fitted path
+      - the result names every donor with non-zero weight, so a synthetic
+        control carried by one donor is visible rather than implied
+    tests: tests/test_market_synthetic_control.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.synthetic_control.fit
+      persistence: causal_estimate rows in reports/market/learning_ledger.jsonl
+      reload: synthetic_control.load_estimate reconstructs from the row
+      consumer: economic_method.METHODS[SYNTHETIC_CONTROL].estimator and steps.py
+      surface: report.py economic_method block; Founder proof package
+      telemetry: causal_estimates_attempted / _refused counters per cycle
+      failure_states: REFUSED_NO_DONOR_SUPPORT, REFUSED_POOR_PRE_FIT,
+        REFUSED_SHORT_PRE_PERIOD, REFUSED_DEGENERATE_WEIGHTS
+      live_proof: a PAPER cycle report containing one fitted or one refused
+        estimate with named donors
+      adversarial_proof: tests in A-DIAG-001 (placebo, leakage, single-donor)
+      mutation_target: the pre/post partition in the objective function
+
+  - id: A-SDID-001
+    program: A
+    title: Synthetic difference-in-differences, unit AND time weights
+    dependencies: [A-SCM-001]
+    priority: 2
+    expected_value: >
+      Plain synthetic control matches the pre-period level and is fragile when
+      the treated unit's pre-period is atypical in TIME as well as in
+      cross-section. SDID adds time weights so periods unlike the treatment
+      window are downweighted, and it degrades to DiD rather than to nonsense
+      when the donor pool is thin.
+    acceptance_criteria:
+      - SYNTHETIC_DID exists as a distinct method name with its own
+        assumptions and failure modes, not an alias of SYNTHETIC_CONTROL
+      - time weights are fitted on donors only and are reported alongside unit
+        weights
+      - the estimate reduces to the DiD estimate when weights are uniform, and
+        a test asserts that identity
+      - refusal reasons are distinct from A-SCM-001's, so a caller can tell
+        which stage refused
+    tests: tests/test_market_synthetic_did.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.synthetic_control.fit_sdid
+      persistence: causal_estimate rows with method=SYNTHETIC_DID
+      reload: same loader as A-SCM-001, method-dispatched
+      consumer: economic_method registry entry with a real estimator
+      surface: report.py economic_method block
+      telemetry: per-method attempt/refusal counts
+      failure_states: REFUSED_NO_TIME_VARIATION plus the A-SCM-001 set
+      live_proof: cycle report showing SYNTHETIC_DID attempted or refused
+      adversarial_proof: the uniform-weight DiD identity test and A-DIAG-001
+      mutation_target: the time-weight normalisation
+
+  - id: A-DIAG-001
+    program: A
+    title: Identification diagnostics — placebo, pre-trend, leakage, concentration
+    dependencies: [A-SCM-001]
+    priority: 1
+    expected_value: >
+      A sophisticated estimator that has not been attacked is a confident
+      number. This node is the attack: in-space placebos on every donor,
+      in-time placebos before the real treatment, a pre-trend test, a weight
+      concentration check, and a post-treatment leakage check. An estimate
+      whose placebo distribution contains effects as large as the treatment is
+      BOUNDED regardless of how clean its fit looks.
+    acceptance_criteria:
+      - in-space placebo runs the same fit treating each donor as treated and
+        reports the treated unit's rank in the effect distribution
+      - in-time placebo refits at a pre-treatment date and reports the sham effect
+      - a pre-trend divergence above threshold downgrades the estimate
+      - weight concentration above threshold is reported as a named risk
+      - any post-treatment observation reaching the fitting objective raises,
+        it does not warn
+      - the diagnostic verdict is IDENTIFIED / BOUNDED / REFUSED and the
+        estimate cannot be consumed above its verdict
+    tests: tests/test_market_causal_diagnostics.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.causal_diagnostics.stress
+      persistence: diagnostics block inside the causal_estimate row
+      reload: verdict re-derivable from the persisted diagnostics, asserted
+      consumer: A-ASSUME-001 registry and the standing wall
+      surface: proof package and report.py causal block
+      telemetry: verdict distribution per cycle
+      failure_states: IDENTIFIED, BOUNDED, REFUSED, INSUFFICIENT_FOR_DIAGNOSIS
+      live_proof: a cycle report carrying a verdict other than IDENTIFIED
+      adversarial_proof: the ten negative controls in section 11 of the
+        constitution, each asserted separately
+      mutation_target: the placebo rank comparison
+
+  - id: A-ASSUME-001
+    program: A
+    title: Causal assumption registry — every estimate carries its unmet assumptions
+    dependencies: [A-DIAG-001]
+    priority: 1
+    expected_value: >
+      economic_method already declares assumptions per method as prose. Nothing
+      checks them and nothing records which were tested. This node turns each
+      declared assumption into a named check with three states — SUPPORTED,
+      VIOLATED, UNTESTED — and forbids an estimate from being presented above
+      the standing its weakest assumption allows.
+    acceptance_criteria:
+      - every assumption string in METHODS maps to a check id or is explicitly
+        marked UNTESTABLE_HERE with a reason
+      - UNTESTED is never rendered as SUPPORTED at any surface
+      - an estimate with one VIOLATED assumption cannot reach IDENTIFIED
+      - the registry is the single definition; no surface re-derives assumption
+        state from the estimate
+    tests: tests/test_market_causal_assumptions.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.causal_assumptions.evaluate
+      persistence: assumptions block inside the causal_estimate row
+      reload: assumption states reconstructed and re-checked on load
+      consumer: standing_wall ceiling for causal claims
+      surface: report.py, proof package, Executive X-Ray causal row
+      telemetry: count of estimates by weakest-assumption state
+      failure_states: SUPPORTED, VIOLATED, UNTESTED, UNTESTABLE_HERE
+      live_proof: a cycle report showing at least one UNTESTED assumption
+        travelling with an estimate
+      adversarial_proof: a test asserting a VIOLATED assumption cannot be
+        rendered as a supported causal claim at any surface
+      mutation_target: the weakest-assumption reduction
+
+  - id: A-MVE-001
+    program: A
+    title: Minimum Viable Experiment bridge — refusal becomes an experiment design
+    dependencies: [A-ASSUME-001]
+    priority: 1
+    expected_value: >
+      The single most valuable node in program A. Today an unidentifiable
+      question terminates at UNMEASURABLE, which is honest and useless. This
+      converts it into the cheapest experiment that would resolve the decision,
+      with an explicit value-of-information test against its cost. It is also
+      the node that stops "be more cautious" from being the system's only
+      answer to uncertainty.
+    acceptance_criteria:
+      - an MVE is constructed only where a controllable decision exists; a
+        question about an uncontrollable variable yields NO_CONTROLLABLE_ACTION
+      - the record carries decision uncertainty, candidate action, states of
+        world, current posterior, expected utility, experiment, expected
+        information gain, cost, duration, exposure, kill switch, success
+        metric, falsifier and ethical/security limits
+      - VOI is computed as expected posterior decision value minus current
+        decision value, and the arithmetic is asserted on a worked example
+      - an experiment is RECOMMENDED only when VOI exceeds cost plus the risk
+        threshold; otherwise NOT_WORTH_RUNNING with the shortfall shown
+      - utilities are never fabricated — missing utility inputs produce a
+        Minimum Data Request rather than a default
+    tests: tests/test_market_minimum_viable_experiment.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.minimum_viable_experiment.design
+      persistence: experiment rows in the learning ledger
+      reload: design reconstructed from the row and re-scored
+      consumer: research_policy candidate set and the Founder decision surface
+      surface: Executive X-Ray MISSING INFORMATION block
+      telemetry: experiments designed / recommended / declined per cycle
+      failure_states: NO_CONTROLLABLE_ACTION, UTILITIES_UNKNOWN,
+        NOT_WORTH_RUNNING, RECOMMENDED
+      live_proof: a cycle in which a refused causal question emits a design
+      adversarial_proof: a test that a fabricated utility cannot enter the VOI
+        computation, and that VOI <= 0 never yields RECOMMENDED
+      mutation_target: the VOI comparison operator
+
+  # ---- PROGRAM B: HISTORICAL AND POLICY LEARNING ------------------------
+  # A separate population with a hard wall. Nothing here clears a prospective
+  # gate; see section 15 of the constitution.
+
+  - id: B-HIST-001
+    program: B
+    title: Vintage-walled historical decision corpus with a T0 knowledge snapshot
+    dependencies: []
+    priority: 1
+    expected_value: >
+      The prospective gates need 100 decisions and stand at 32, rising at the
+      rate the world produces them. Historical episodes cannot substitute, but
+      they can train reward models, validate estimators, and calibrate
+      scenarios today. The whole value depends on the wall: state at T0 must be
+      computed only from what the engine could have known at T0.
+    acceptance_criteria:
+      - every episode carries T0, the decision, the declared expectation, the
+        expected observable, the actual later observable, T1, and provenance
+      - the T0 snapshot builder refuses any record whose known_at, published_at
+        or retrieved_at is after T0, and the refusal is counted not silent
+      - published_at is never substituted for retrieved_at anywhere in the
+        builder, asserted by test
+      - an episode whose outcome was revised after T0 is flagged REVISED and
+        excluded from estimator validation
+    tests: tests/test_market_historical_corpus.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.historical_corpus.build_episode
+      persistence: reports/market/historical_corpus.jsonl, population=HISTORICAL
+      reload: episodes reload and the T0 wall is re-asserted on load
+      consumer: B-RM-001 reward model and A-DIAG-001 estimator validation
+      surface: a historical validation block in the cycle report
+      telemetry: episodes built / refused by wall violation reason
+      failure_states: WALL_VIOLATION, REVISED_OUTCOME, NO_OBSERVABLE,
+        INSUFFICIENT_PROVENANCE
+      live_proof: a built corpus file with a non-zero refusal count
+      adversarial_proof: an episode seeded with a post-T0 fact must be refused
+      mutation_target: the T0 comparison in the wall
+
+  - id: B-HIST-002
+    program: B
+    title: HISTORICAL and PROSPECTIVE populations separated at write and at read
+    dependencies: [B-HIST-001]
+    priority: 1
+    expected_value: >
+      The wall is only real if it is enforced where the counting happens. This
+      node makes population a required field, makes every gate query
+      population-explicit, and adds a check that fails if any prospective
+      metric's denominator ever includes a historical row.
+    acceptance_criteria:
+      - population is a required, typed field on every decision-like record
+      - metrics.py prospective_* gates filter on population=PROSPECTIVE and a
+        test proves a historical row cannot move them
+      - a mixed query must name both populations explicitly; there is no default
+      - the separation is checked by a guard that runs in the test suite
+    tests: tests/test_market_population_separation.py
+    minimum_data: none
+    vertical:
+      producer: the population tag written by every decision producer
+      persistence: population field on ledger and corpus rows
+      reload: readers refuse an untagged row rather than defaulting it
+      consumer: docs/execution/v4/metrics.py and v5/metrics.py
+      surface: gate readouts in both frontier reports
+      telemetry: rows by population per cycle
+      failure_states: UNTAGGED_ROW_REFUSED, MIXED_QUERY_UNSPECIFIED
+      live_proof: v4 metrics unchanged after a historical corpus is built
+      adversarial_proof: injecting 1000 historical rows must not move
+        prospective_decisions by one
+      mutation_target: the population filter predicate
+
+  - id: B-RM-001
+    program: B
+    title: Reward model over historical replay, held-out validated
+    dependencies: [B-HIST-002]
+    priority: 2
+    expected_value: >
+      Doubly-robust evaluation needs a reward model that has been validated on
+      data it did not see. Without this, DR is a point estimate whose second
+      term is unfalsifiable. Trained on HISTORICAL only, and reported as such.
+    acceptance_criteria:
+      - train and held-out splits are by episode and by time, never random
+      - held-out performance is reported against a persistence baseline and a
+        model that does not beat it is marked UNUSABLE_FOR_DR
+      - the model records which population it was trained on
+    tests: tests/test_market_reward_model.py
+    minimum_data:
+      historical_decision_episodes: 40
+    vertical:
+      producer: intent_engine.market.reward_model.train
+      persistence: reward_model rows with training population and split spec
+      reload: model reloads and reproduces held-out scores within tolerance
+      consumer: B-DR-001
+      surface: learning report reward-model block
+      telemetry: held-out skill vs baseline
+      failure_states: UNUSABLE_FOR_DR, INSUFFICIENT_EPISODES, LEAKED_SPLIT
+      live_proof: a persisted model with held-out numbers from a real corpus
+      adversarial_proof: a random split must be refused by the trainer
+      mutation_target: the split boundary
+
+  - id: B-DR-001
+    program: B
+    title: Doubly-robust off-policy evaluation that refuses without support
+    dependencies: [B-RM-001]
+    priority: 2
+    expected_value: >
+      The logging policy is deterministic: every propensity is 1 or 0 and
+      importance weighting is undefined. research_policy already records that
+      finding. This node builds the estimator anyway AND builds the guard that
+      makes it refuse today, so the day a randomised arm exists the evaluation
+      is real rather than retrofitted.
+    acceptance_criteria:
+      - the evaluator checks logged propensity presence, positive support for
+        the chosen action, target/logger overlap, effective sample size and
+        weight boundedness before producing any number
+      - a deterministic logger with a target policy choosing unseen actions
+        yields BLOCKED_DATA and no estimate
+      - when it does estimate, it reports the interval, ESS, max and clipped
+        weights, support violations and a sensitivity curve
+    tests: tests/test_market_doubly_robust.py
+    minimum_data:
+      logged_exploration_events: 200
+    vertical:
+      producer: intent_engine.market.off_policy.doubly_robust
+      persistence: ope_estimate rows
+      reload: estimate and diagnostics reload together or neither
+      consumer: B-POL-002 policy comparison in the V4 graph
+      surface: policy section of the learning report
+      telemetry: OPE attempts by refusal reason
+      failure_states: NO_PROPENSITY, NO_SUPPORT, LOW_ESS, UNBOUNDED_WEIGHTS,
+        REWARD_MODEL_UNUSABLE
+      live_proof: a persisted refusal carrying the measured ESS
+      adversarial_proof: a deterministic log must never produce a DR number
+      mutation_target: the support check
+
+  # ---- PROGRAM C: BEHAVIORAL GAME ENGINE --------------------------------
+  # Extends AdversaryCase and strategic_interaction. Not a second competitor
+  # system; section 19.
+
+  - id: C-STAND-001
+    program: C
+    title: MODEL_EXPECTED_RESPONSE added to the standing wall, below OBSERVED
+    dependencies: []
+    priority: 1
+    expected_value: >
+      AdversaryCase already orders CAPABILITY, INCENTIVE, OBSERVED_ACTION and
+      HYPOTHESIZED_RESPONSE. A Level-k or QRE output is none of those: it is
+      stronger than a move somebody thought of and weaker than a move anybody
+      saw. Adding the standing BEFORE the models exist is deliberate — the
+      alternative is a model whose output has to be squeezed into an existing
+      label, which is how simulated behaviour becomes reported behaviour.
+    acceptance_criteria:
+      - the standing sits strictly between INCENTIVE and OBSERVED_ACTION
+      - no constructor can produce OBSERVED_RESPONSE from a model
+      - every surface's certainty vocabulary is extended for the new standing
+        and a test asserts the ceiling narrows
+    tests: tests/test_market_standing_wall.py
+    minimum_data: none
+    vertical:
+      producer: standing_wall and adversary_case standing vocabulary
+      persistence: standing field on response records
+      reload: standing re-validated on load; unknown standing refuses
+      consumer: C-LK-001, C-QRE-001, report.py, proof package
+      surface: adversary block on every executive surface
+      telemetry: responses by standing per cycle
+      failure_states: UNKNOWN_STANDING_REFUSED
+      live_proof: a cycle report with responses at the new standing
+      adversarial_proof: a test that a model output cannot be rendered with
+        observed-behaviour wording
+      mutation_target: the standing ordering tuple
+
+  - id: C-LK-001
+    program: C
+    title: Level-k reaction trees, bounded at L2
+    dependencies: [C-STAND-001]
+    priority: 1
+    expected_value: >
+      Static downside scenarios do not answer "and then what". L0 is the
+      actor's current trajectory, L1 the direct response to our move, L2 the
+      response that anticipates our adaptation. Depth is capped at 2 because
+      higher k adds fiction faster than intelligence, and the cap is in the
+      constructor rather than in a comment.
+    acceptance_criteria:
+      - L0 is derived from observed trajectory evidence, not assumed
+      - each level names the evidence that makes the actor capable of it, and
+        a level with no capability evidence is dropped, not softened
+      - depth above 2 raises; there is no configuration that permits L3
+      - every node in the tree carries MODEL_EXPECTED_RESPONSE standing
+    tests: tests/test_market_level_k.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.level_k.build_tree
+      persistence: reaction_tree rows keyed to the move and actor
+      reload: tree reloads with standings intact
+      consumer: adversary_case and the scenario surface
+      surface: Executive X-Ray ADVERSARIAL FAILURE PATH block
+      telemetry: trees built, levels dropped for missing capability evidence
+      failure_states: NO_TRAJECTORY_EVIDENCE, NO_CAPABLE_ACTOR, DEPTH_REFUSED
+      live_proof: a cycle report containing one tree with a dropped level
+      adversarial_proof: an actor with existence only must produce no tree
+      mutation_target: the depth cap
+
+  - id: C-QRE-001
+    program: C
+    title: QRE response probabilities with explicit lambda and sensitivity
+    dependencies: [C-LK-001]
+    priority: 2
+    expected_value: >
+      A best response is a claim that the rival is perfectly rational. QRE
+      replaces it with a distribution whose sharpness is a parameter. The
+      product value is the sensitivity curve: if the ranking of responses flips
+      across a plausible lambda range, the engine has not learned which
+      response is likely and says so.
+    acceptance_criteria:
+      - lambda is calibrated, or a scenario parameter, or an explicit
+        assumption — never inferred from prose about a rival
+      - output carries alternatives, relative utilities, probabilities,
+        sensitivity to lambda, evidence basis and missing assumptions
+      - when the ranking is not stable across the lambda range the result is
+        RANKING_UNSTABLE, not a top pick
+      - payoffs absent means no probabilities, and a Minimum Data Request
+    tests: tests/test_market_qre.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.qre.response_distribution
+      persistence: response_distribution rows with the lambda used
+      reload: probabilities recomputed on load and compared to the stored ones
+      consumer: C-LK-001 tree annotation and the scenario engine
+      surface: adversary block, response probabilities with the lambda shown
+      telemetry: distributions produced, RANKING_UNSTABLE share
+      failure_states: NO_PAYOFFS, RANKING_UNSTABLE, LAMBDA_UNSPECIFIED
+      live_proof: a persisted distribution with its sensitivity curve
+      adversarial_proof: a test that lambda cannot be read from evidence text
+      mutation_target: the softmax temperature application
+
+  - id: C-MECH-001
+    program: C
+    title: Inverse mechanism design over measured utilities only
+    dependencies: [C-QRE-001, D-IBG-001]
+    priority: 3
+    expected_value: >
+      Tiering, ramps, milestones, guarantees, trials and bundles are the
+      levers a founder actually pulls. Reasoning about incentive compatibility
+      is only meaningful when buyer segments and cost constraints are measured;
+      optimising an invented utility function is the most confident possible
+      form of making things up.
+    acceptance_criteria:
+      - the designer refuses to run without buyer segments, utility-relevant
+        dimensions, cost constraints and contract constraints from the internal
+        graph
+      - each proposed mechanism states the incentive-compatibility condition it
+        relies on and whether that condition is measured or assumed
+      - missing inputs emit a Minimum Data Request naming the smallest set
+    tests: tests/test_market_mechanism_design.py
+    minimum_data:
+      measured_utility_inputs: 1
+    vertical:
+      producer: intent_engine.market.mechanism_design.propose
+      persistence: mechanism_proposal rows
+      reload: proposal reloads with its IC conditions
+      consumer: Founder decision surface and E-LDR-001
+      surface: Executive X-Ray STRONGEST ALTERNATIVE block
+      telemetry: proposals by measured-vs-assumed IC condition
+      failure_states: NO_SEGMENTS, NO_COSTS, IC_UNVERIFIABLE
+      live_proof: a proposal generated from a real or synthetic enterprise
+      adversarial_proof: a default utility must be refused, not substituted
+      mutation_target: the measured-input precondition
+
+  # ---- PROGRAM D: INTERNAL ENTERPRISE INTELLIGENCE ----------------------
+
+  - id: D-IBG-001
+    program: D
+    title: Internal Business Graph as tenant-private nodes on the canonical graph
+    dependencies: [F-TS-001]
+    priority: 1
+    expected_value: >
+      Named in the V4 handoff as the dependency under both remaining security
+      handoffs and under every internal-economics capability. The failure to
+      avoid is a second disconnected graph: the internal world must be the same
+      graph with private nodes, or every consumer needs two readers and they
+      drift.
+    repository: founder
+    acceptance_criteria:
+      - private node kinds extend the existing graph model rather than
+        instantiating a parallel store
+      - every private node and edge carries a TenantScope; construction without
+        one raises
+      - a query without a scope returns public nodes only, and never silently
+        returns private ones
+      - projections over the joined graph are population-aware
+    tests: tests/test_business_graph_internal.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.business_graph.model private node constructors
+      persistence: tenant-partitioned rows in the graph store
+      reload: scope re-validated on load; a scopeless private row refuses
+      consumer: D-IBG-002, D-MDR-001, C-MECH-001, E-LDR-001
+      surface: Executive X-Ray INTERNAL IMPACT block
+      telemetry: private nodes by kind and tenant
+      failure_states: NO_SCOPE, CROSS_TENANT_REFUSED, UNKNOWN_KIND
+      live_proof: a synthetic enterprise loaded and queried under two scopes
+      adversarial_proof: F-AT-001 cross-tenant attack battery
+      mutation_target: the scope predicate in the query path
+
+  - id: D-SYN-001
+    program: D
+    title: Synthetic Enterprise, labelled SYNTHETIC and never mixed with real facts
+    dependencies: [D-IBG-001]
+    priority: 2
+    expected_value: >
+      Every internal capability is untestable until a tenant connects real
+      data. A synthetic world unblocks integration tests, causal simulation,
+      scenario evaluation and action safety today. The danger is exactly one
+      thing: a synthetic figure appearing in a real answer.
+    repository: founder
+    acceptance_criteria:
+      - every synthetic node carries population=SYNTHETIC at construction
+      - any join between a SYNTHETIC node and a real company fact raises
+      - a surface rendering synthetic data must label it, asserted by test
+      - the generator is seeded and reproducible
+    tests: tests/test_synthetic_enterprise.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.business_graph.synthetic.generate
+      persistence: synthetic tenant partition, population tagged
+      reload: population survives reload; untagged rows refuse
+      consumer: integration tests, D-IBG-002, E-EXEC-001
+      surface: any internal block, with a SYNTHETIC banner
+      telemetry: synthetic vs real node counts per query
+      failure_states: MIXED_POPULATION_REFUSED, UNSEEDED
+      live_proof: a generated enterprise queried end to end
+      adversarial_proof: a synthetic-real join must raise
+      mutation_target: the population join guard
+
+  - id: D-MDR-001
+    program: D
+    title: Minimum Data Request engine — the smallest useful ask, with its reason
+    dependencies: [D-IBG-001, A-MVE-001]
+    priority: 1
+    expected_value: >
+      The bridge between "we cannot answer this" and a tenant action. It is
+      also the honest alternative to fabricating internal numbers: when the MVE
+      needs a utility the engine does not have, it asks for that one field
+      rather than for a CRM integration.
+    repository: founder
+    acceptance_criteria:
+      - given a question, the engine separates the answerable portion, the
+        unresolved hypothesis and the decision-material missing variables
+      - each requested field states why it matters, which decision it resolves,
+        the minimum granularity, and its retention and privacy requirements
+      - a request that names a whole system rather than fields is refused by a
+        breadth check
+      - expected VOI accompanies each field so the ask is prioritised
+    tests: tests/test_minimum_data_request.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.minimum_data_request.build
+      persistence: data_request rows per tenant and question
+      reload: request reloads with its VOI and privacy terms
+      consumer: Executive X-Ray and the Founder web surface
+      surface: MISSING INFORMATION block, actionable
+      telemetry: requests by field, fulfilled vs outstanding
+      failure_states: NOTHING_MISSING, BREADTH_REFUSED, NO_DECISION_LINKED
+      live_proof: a request emitted from a real refused question
+      adversarial_proof: an ask naming a whole system rather than fields —
+        connect your CRM — must be refused by the breadth check
+      mutation_target: the breadth check threshold
+
+  - id: D-IBG-002
+    program: D
+    title: Internal scenario economics over the private graph
+    dependencies: [D-SYN-001]
+    priority: 2
+    expected_value: >
+      External scenarios already exist. A founder's decision turns on the
+      internal consequence — which cohort, which margin, which capacity — and
+      that arithmetic has had nowhere to live.
+    repository: founder
+    acceptance_criteria:
+      - a scenario states which internal quantities it moves and by how much
+      - every quantity traces to a graph node or to an explicit assumption
+      - assumptions are counted and shown; a scenario built entirely from
+        assumptions is labelled as such
+    tests: tests/test_internal_scenarios.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.internal_scenarios.project
+      persistence: internal_scenario rows scoped to the tenant
+      reload: assumption count re-derived on load and compared
+      consumer: E-LDR-001 and the X-Ray SCENARIOS block
+      surface: Executive X-Ray SCENARIOS
+      telemetry: scenarios by assumption share
+      failure_states: NO_INTERNAL_DATA, ALL_ASSUMED, UNSCOPED
+      live_proof: a scenario over the synthetic enterprise
+      adversarial_proof: a scenario citing another tenant's node must refuse
+      mutation_target: the assumption-share computation
+
+  # ---- PROGRAM E: DECISION AND EXECUTION OS -----------------------------
+
+  - id: E-LDR-001
+    program: E
+    title: Living Decision Record, append-only revisions
+    dependencies: [D-IBG-001]
+    priority: 1
+    expected_value: >
+      The Founder branch produces a decision per analysis and forgets it. A
+      decision that cannot be revisited cannot be learned from, and every
+      outcome-learning capability downstream needs a stable identity to attach
+      to.
+    repository: founder
+    acceptance_criteria:
+      - the record carries question, context, thesis, evidence, alternatives,
+        adversary, scenario, recommendation, owner, commitment, expected
+        observables, time window, falsifiers, kill switch, action, outcome and
+        retrospective
+      - revisions append; no field is mutated in place, asserted by test
+      - each revision records the evidence window it saw, so a later revision's
+        difference can be attributed rather than assumed
+      - a record reloads into the same object shape it was written from, tested
+        as live object, persisted row and transported consumer object
+    tests: tests/test_living_decision_record.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.decision_record.write
+      persistence: decision_records.jsonl, append-only, tenant scoped
+      reload: full revision history reconstructed; shape asserted three ways
+      consumer: E-EXEC-001, E-OUT-001, G-XRAY-001, DecisionImpact
+      surface: Executive X-Ray DECISION and WHAT CHANGED blocks
+      telemetry: records, revisions per record, comparable pairs produced
+      failure_states: IN_PLACE_MUTATION_REFUSED, NO_OWNER, NO_FALSIFIER
+      live_proof: a second revision of one decision, which also clears the V4
+        H-IMP-001 gate
+      adversarial_proof: an attempt to edit a prior revision must raise
+      mutation_target: the append-only guard
+
+  - id: E-EXEC-001
+    program: E
+    title: Execution tracking — decision to action to execution state
+    dependencies: [E-LDR-001]
+    priority: 2
+    expected_value: >
+      Without execution state, outcome attribution cannot separate a bad
+      decision from a good decision nobody carried out, which is the most
+      common real cause of a bad result.
+    repository: founder
+    acceptance_criteria:
+      - an action links to exactly one decision revision
+      - execution state is explicit and includes NOT_STARTED and ABANDONED
+      - an outcome cannot be attached to a decision whose action never executed
+    tests: tests/test_execution_tracking.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.execution.record
+      persistence: action and execution rows keyed to a decision revision
+      reload: execution state reloads; orphan actions refuse
+      consumer: E-OUT-001, E-ACT-001
+      surface: X-Ray execution status line
+      telemetry: actions by execution state
+      failure_states: NOT_STARTED, IN_PROGRESS, EXECUTED, ABANDONED, ORPHANED
+      live_proof: an action tracked through to EXECUTED on synthetic data
+      adversarial_proof: attaching an outcome to an unexecuted action must raise
+      mutation_target: the execution-state precondition on outcomes
+
+  - id: E-OUT-001
+    program: E
+    title: Outcome learning that separates decision quality from realised outcome
+    dependencies: [E-EXEC-001]
+    priority: 1
+    expected_value: >
+      Scoring a decision by its outcome teaches the system to be lucky. The
+      four-way split — bad decision, bad execution, exogenous shock,
+      unmeasurable — is what makes the lesson transferable.
+    repository: founder
+    acceptance_criteria:
+      - every resolved outcome is classified into the four categories with the
+        evidence for the classification named
+      - UNMEASURABLE is a first-class outcome and is never counted as neutral
+      - a lesson updates a thesis or a policy, and the update is linked back
+      - calibration is computed over declared expectations, not over outcomes
+    tests: tests/test_outcome_learning.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.outcome_learning.attribute
+      persistence: outcome rows with classification and evidence
+      reload: classification re-derivable and compared on load
+      consumer: H-CAL-001, thesis revision, research policy
+      surface: X-Ray retrospective block
+      telemetry: outcomes by class, share unmeasurable
+      failure_states: NO_OUTCOME_YET, UNMEASURABLE, EXOGENOUS, EXECUTION_FAILURE,
+        DECISION_FAILURE
+      live_proof: an attributed outcome on the synthetic enterprise
+      adversarial_proof: a good outcome from a refuted thesis must not be
+        scored as a good decision
+      mutation_target: the classification decision tree
+
+  - id: E-ACT-001
+    program: E
+    title: Permissioned action engine — DRAFT to VERIFIED, approval before impact
+    dependencies: [E-EXEC-001, F-TS-001]
+    priority: 2
+    expected_value: >
+      Autonomy is the last thing to build, not the first. The maturity ladder
+      makes the system useful at DRAFT and RECOMMENDED without ever taking an
+      irreversible step nobody approved.
+    repository: founder
+    acceptance_criteria:
+      - the five states exist and transitions are one-directional except for
+        explicit rollback
+      - a high-impact action cannot leave RECOMMENDED without a recorded human
+        approval carrying an identity
+      - irreversible actions require a stronger boundary than reversible ones,
+        and the classification is a property of the action not of the caller
+      - EXECUTED to VERIFIED requires observed evidence, not the executor's word
+    tests: tests/test_permissioned_actions.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.actions.propose
+      persistence: action rows with maturity and approval identity
+      reload: maturity reloads; an approval without identity refuses
+      consumer: E-EXEC-001 and any external effector
+      surface: X-Ray action block with the approval state
+      telemetry: actions by maturity, approvals by identity
+      failure_states: DRAFT, RECOMMENDED, HUMAN_APPROVED, EXECUTED, VERIFIED,
+        APPROVAL_MISSING, IRREVERSIBLE_REFUSED
+      live_proof: an action driven through the ladder on synthetic data
+      adversarial_proof: a self-approval and an approval replay must both fail
+      mutation_target: the approval requirement on high-impact actions
+
+  - id: E-PFA-001
+    program: E
+    title: Personal Founder AI over decisions, not conversation summaries
+    dependencies: [E-OUT-001, D-MDR-001]
+    priority: 2
+    expected_value: >
+      What makes this different from a chat assistant is that it remembers
+      commitments, rejected alternatives and falsifiers, and can say "you
+      decided the opposite in March and the falsifier you named has now fired".
+    repository: founder
+    acceptance_criteria:
+      - recall is over decision records, assumptions, rejected alternatives,
+        commitments, expected outcomes, falsifiers and execution status
+      - every recalled statement carries its decision revision and known_at
+      - a fired falsifier surfaces without being asked for
+      - it never asserts a private fact outside the tenant scope of the asker
+    tests: tests/test_personal_founder.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.personal.recall
+      persistence: reads E-LDR-001; writes only interaction records
+      reload: recall is recomputed from records, never cached across scopes
+      consumer: the Founder conversational surface
+      surface: CEO answer surface with decision citations
+      telemetry: recalls by kind, unprompted falsifier alerts
+      failure_states: NO_PRIOR_DECISION, SCOPE_DENIED, STALE_RECORD
+      live_proof: a recall citing a real prior revision
+      adversarial_proof: a cross-tenant recall attempt must return nothing and
+        log a refusal
+      mutation_target: the scope filter in recall
+
+  # ---- PROGRAM F: ENTERPRISE SECURITY AND TRUST -------------------------
+  # F-TS-001 has no dependencies deliberately: it is under both D and E, and
+  # building private data on a string identity would have to be redone.
+
+  - id: F-TS-001
+    program: F
+    title: Typed TenantScope from trusted context, never from evidence
+    dependencies: []
+    priority: 1
+    expected_value: >
+      There is no TenantScope in either branch today. Every private capability
+      in V5 is an authorization decision, and a system where a scraped company
+      name can become an authorization subject has a confused deputy by
+      construction. Building this first is cheaper than retrofitting it under
+      four programs.
+    repository: founder
+    acceptance_criteria:
+      - TenantScope is a typed object with a tenant identity, an establishment
+        source and an issued_at, and cannot be constructed from a bare string
+      - there is no from_evidence constructor and a test asserts none exists by
+        inspecting the class, not by grepping prose
+      - every security-sensitive seam takes a TenantScope, and a guard fails
+        the suite if a bare string reaches one
+      - scope establishment is recorded and auditable
+    tests: tests/test_tenant_scope.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.core.tenant.TenantScope.establish
+      persistence: scope establishment audit rows
+      reload: a persisted scope reloads only with its establishment source
+      consumer: D-IBG-001, D-SYN-001, E-ACT-001, E-PFA-001, F-BAR-001, F-AT-001
+      surface: provenance drawer permission source line
+      telemetry: scopes established by source, refusals
+      failure_states: NO_ESTABLISHMENT_SOURCE, STRING_REFUSED, EXPIRED
+      live_proof: a request served under an established scope with an audit row
+      adversarial_proof: confused deputy, id collision, alias collision, cache
+        collision, path collision and export collision, each asserted
+      mutation_target: the string-refusal constructor guard
+
+  - id: F-BAR-001
+    program: F
+    title: Information barrier — four typed trust zones in every context builder
+    dependencies: [F-TS-001]
+    priority: 1
+    expected_value: >
+      PUBLIC_EXTERNAL, TENANT_PRIVATE, SYSTEM_INTERNAL and SYNTHETIC are
+      different kinds of fact with different authority. Today they are all
+      strings in a prompt. The barrier is what makes "external data can never
+      acquire instruction authority" a property rather than a hope.
+    repository: founder
+    acceptance_criteria:
+      - every model context builder takes typed zones, not concatenated text
+      - PUBLIC_EXTERNAL content can never be placed where instructions are read
+      - private content never crosses a tenant boundary, enforced at the
+        builder rather than at the caller
+      - a zone mismatch raises rather than downgrading
+    tests: tests/test_information_barrier.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.core.trust_zone context builders
+      persistence: zone tag on every context fragment record
+      reload: fragments reload with zones; an untagged fragment refuses
+      consumer: every LLM call site
+      surface: provenance drawer zone line
+      telemetry: fragments by zone per call
+      failure_states: ZONE_MISMATCH, UNTAGGED_FRAGMENT, CROSS_TENANT_REFUSED
+      live_proof: a real call whose fragments are all zone-tagged
+      adversarial_proof: F-INJ-001 battery
+      mutation_target: the instruction-authority predicate
+
+  - id: F-INJ-001
+    program: F
+    title: Prompt-injection firewall over external content, with audited refusals
+    dependencies: [F-BAR-001]
+    priority: 1
+    expected_value: >
+      The engine reads filings, sites and news and feeds them to a model. Any
+      of those can contain text addressed to the model. The firewall is the
+      difference between reading a document and executing it.
+    repository: founder
+    acceptance_criteria:
+      - external content is sanitised and marked as data before any model sees it
+      - detected instruction attempts are refused, counted and persisted with
+        the offending span, not silently stripped
+      - a refusal never discards the underlying evidence
+      - detection is tested against direct, encoded and indirect payloads
+    tests: tests/test_injection_firewall.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.core.sanitation.screen
+      persistence: injection_refusal rows with the span
+      reload: refusals reload for audit
+      consumer: F-BAR-001 builders and every ingestion path
+      surface: source health block, injection attempts line
+      telemetry: attempts by payload class
+      failure_states: CLEAN, INSTRUCTION_DETECTED, ENCODED_PAYLOAD,
+        INDIRECT_REFERENCE
+      live_proof: a real ingestion run with the counter present and reporting
+        a legitimate zero alongside a seeded positive control
+      adversarial_proof: direct, encoded and indirect payloads each detected
+      mutation_target: the detection predicate
+
+  - id: F-AT-001
+    program: F
+    title: Antitrust air-gap — one tenant's nonpublic strategy never advises a rival
+    dependencies: [F-TS-001, D-IBG-001]
+    priority: 1
+    expected_value: >
+      A multi-tenant advisor that sees two competitors' private plans is one
+      query away from facilitating coordination. Public information stays
+      usable; the gap is on nonpublic information and on the specific advice
+      classes that constitute coordination.
+    repository: founder
+    acceptance_criteria:
+      - private information about tenant A can never influence tenant B's
+        pricing, market allocation, bidding, discounting, capacity or
+        competitor-response model
+      - coordinated pricing, market division, bid coordination and
+        strategy-transfer requests are refused explicitly by class
+      - refusals are persisted and audited with the requesting scope
+      - public information remains usable and a test proves the gap does not
+        block it
+    tests: tests/test_antitrust_airgap.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.core.airgap.screen_advice
+      persistence: airgap_refusal rows with class and scope
+      reload: refusal history reloads for audit
+      consumer: every advice-producing surface
+      surface: refusal shown to the asker with the reason class
+      telemetry: refusals by class and tenant pair
+      failure_states: ALLOWED, COORDINATION_REFUSED, PRIVATE_LEAK_REFUSED
+      live_proof: an audited refusal from a real request path
+      adversarial_proof: a cross-tenant strategy-transfer probe must refuse and
+        a public-information question must still succeed
+      mutation_target: the nonpublic-influence check
+
+  # ---- PROGRAM G: EXECUTIVE EXPERIENCE ----------------------------------
+
+  - id: G-XRAY-001
+    program: G
+    title: Executive Decision X-Ray as a view over canonical state
+    dependencies: [E-LDR-001, A-ASSUME-001, C-LK-001]
+    priority: 1
+    expected_value: >
+      Every surface this system has shipped that reasoned for itself has
+      eventually disagreed with the decision it was presenting. The X-Ray is
+      the answer: one screen, thirteen blocks, and no independent reasoning.
+    repository: founder
+    acceptance_criteria:
+      - the view reads one decision object and renders DECISION, WHAT CHANGED,
+        WHY, ECONOMIC MECHANISM, INTERNAL IMPACT, STRONGEST ALTERNATIVE,
+        ADVERSARIAL FAILURE PATH, SCENARIOS, FALSIFIER, KILL SWITCH, MISSING
+        INFORMATION, PROVENANCE and DECISION IMPACT
+      - a test asserts the view performs no inference — given a fixed decision
+        object it produces identical output with the reasoning layer removed
+      - every block defines its empty state and no block renders a hypothesis
+        as the decision
+    tests: tests/test_executive_xray.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.xray.render
+      persistence: none of its own; it is a projection
+      reload: renders identically from a reloaded decision record
+      consumer: the Founder web surface and the deep documents
+      surface: itself, the single executive screen
+      telemetry: blocks rendered empty per view
+      failure_states: per-block empty states, DECISION_MISSING
+      live_proof: the deployed page rendering a real decision
+      adversarial_proof: a test that removing the reasoning layer changes
+        nothing, and that hypotheses[0] is never read as the decision
+      mutation_target: the decision-object read path
+
+  - id: G-PROV-001
+    program: G
+    title: Provenance drawer — every statement traceable to a source and a known_at
+    dependencies: [G-XRAY-001, F-BAR-001]
+    priority: 2
+    expected_value: >
+      An executive claim without a chain to a source and a date is not
+      auditable, and the first time one is wrong the whole surface loses
+      standing. Private facts additionally need the scope and the permission
+      that allowed them.
+    repository: founder
+    acceptance_criteria:
+      - the chain is statement to decision node to mechanism to KnowledgeEffect
+        to evidence to source to known_at
+      - private facts add tenant scope and permission source
+      - a statement with a broken chain is rendered as unsupported rather than
+        hidden
+    tests: tests/test_provenance_drawer.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.provenance.chain
+      persistence: none; derived from existing links
+      reload: chain rebuilt from reloaded records
+      consumer: the X-Ray PROVENANCE block
+      surface: an expandable drawer per statement
+      telemetry: statements with complete vs broken chains
+      failure_states: COMPLETE, BROKEN_AT_<stage>, PRIVATE_NO_PERMISSION
+      live_proof: a real statement traced end to end on the deployed page
+      adversarial_proof: a private fact without a permission source must render
+        as unsupported
+      mutation_target: the chain completeness check
+
+  - id: G-DEG-001
+    program: G
+    title: Source degradation and progressive cold start, distinguished from silence
+    dependencies: []
+    priority: 2
+    expected_value: >
+      SOURCE_DEGRADED is not NO_ACTIVITY and an empty first run is not an empty
+      world. Both have already produced false all-clears in this system. This
+      node makes the distinction structural and makes the first minutes of a
+      new tenant useful rather than blank.
+    repository: founder
+    acceptance_criteria:
+      - a degraded source is reported as degraded at every surface that would
+        otherwise report zero
+      - cold start hydrates in stages and each stage states what is not yet known
+      - a failed fetch never renders as an absence of activity
+    tests: tests/test_source_degradation.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.founder_intelligence.hydration.stage
+      persistence: source_health and hydration_stage rows
+      reload: degradation state reloads with its cause
+      consumer: every zero-rendering surface
+      surface: a banner distinguishing degraded from empty
+      telemetry: surfaces rendering zero by cause
+      failure_states: HEALTHY, DEGRADED, UNAVAILABLE, COLD
+      live_proof: a run with one source degraded and the banner present
+      adversarial_proof: a forced fetch failure must not render as no activity
+      mutation_target: the zero-vs-degraded branch
+
+  # ---- PROGRAM H: META-LEARNING AND SELF-IMPROVEMENT --------------------
+
+  - id: H-LA-001
+    program: H
+    title: Learning acceleration extended to internal, execution, outcome, policy, security
+    dependencies: [E-OUT-001]
+    priority: 2
+    expected_value: >
+      learning_acceleration already tracks the external channels. The five new
+      ones are where V5's value is created, and a channel nobody measures is a
+      channel nobody can tell is stalled.
+    acceptance_criteria:
+      - the five channels are added with rolling windows
+      - each new metric demonstrates a legitimate negative control before it
+        may report success
+      - a channel with no data reports NO_DATA, never a healthy zero
+    tests: tests/test_market_learning_acceleration.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.learning_acceleration channels
+      persistence: acceleration rows per channel per cycle
+      reload: rolling windows recomputed on load
+      consumer: H-SELF-001 and the cycle report
+      surface: learning block of the cycle report
+      telemetry: it is the telemetry; each channel reports its own denominator
+      failure_states: NO_DATA, STALLING, ACCELERATING, DECELERATING
+      live_proof: a cycle report carrying all five channels with denominators
+      adversarial_proof: each channel must be shown able to report a negative
+      mutation_target: the rolling-window denominator
+
+  - id: H-SELF-001
+    program: H
+    title: Self-improvement loop that answers the twelve questions or says it cannot
+    dependencies: [H-LA-001]
+    priority: 2
+    expected_value: >
+      The twelve questions in section 36 are the specification for whether this
+      system is learning. A channel that cannot answer its question is
+      incomplete, and saying so is the finding.
+    acceptance_criteria:
+      - each of the twelve questions has a named producer and an answer or an
+        explicit CANNOT_ANSWER with the missing input
+      - the loop runs inside the cycle and its output is persisted
+      - a question whose answer is always the same is flagged as a metric that
+        cannot report a negative
+    tests: tests/test_market_self_improvement.py
+    minimum_data: none
+    vertical:
+      producer: intent_engine.market.self_improvement.review
+      persistence: self_review rows per cycle
+      reload: review reloads and is comparable across cycles
+      consumer: the cycle report and the next cycle's research policy
+      surface: the report's closing block
+      telemetry: questions answered vs CANNOT_ANSWER
+      failure_states: ANSWERED, CANNOT_ANSWER, DEGENERATE_ANSWER
+      live_proof: a cycle report with at least one honest CANNOT_ANSWER
+      adversarial_proof: a question whose answer never varies must be flagged
+      mutation_target: the degenerate-answer detector
+
+  - id: H-CAL-001
+    program: H
+    title: Decision quality calibration over declared expectations
+    dependencies: [E-OUT-001]
+    priority: 3
+    expected_value: >
+      Calibration measured over outcomes rewards luck. Measured over declared
+      expectations and their stated observables, it measures the thing that
+      transfers.
+    acceptance_criteria:
+      - calibration is computed over expectations declared before the outcome
+      - an expectation with no observable is excluded and counted as excluded
+      - the reliability curve is reported with its sample size per bin
+    tests: tests/test_market_calibration.py
+    minimum_data:
+      resolved_expectations: 30
+    vertical:
+      producer: intent_engine.market.calibration.reliability
+      persistence: calibration rows per window
+      reload: curve recomputed from resolved expectations on load
+      consumer: the learning report and the Founder confidence wording
+      surface: X-Ray decision-impact block
+      telemetry: bins, sample size per bin, excluded expectations
+      failure_states: INSUFFICIENT_RESOLUTIONS, NO_OBSERVABLE, WELL_CALIBRATED,
+        OVERCONFIDENT, UNDERCONFIDENT
+      live_proof: a curve from real resolved expectations
+      adversarial_proof: an expectation declared after the outcome must be
+        excluded, asserted
+      mutation_target: the declared-before-outcome filter
