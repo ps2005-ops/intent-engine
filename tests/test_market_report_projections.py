@@ -37,6 +37,15 @@ REQUIRED = {
         "series_scored", "evaluations", "leader", "by_standing",
         "assumption_failures_critical", "performance_records_written",
     ),
+    "adversary": (
+        # L-ADV-001. `by_standing` is the one that matters: every live case is
+        # SPECULATIVE while the corpus carries no evidence of a counterparty's
+        # means or motive, and cases shown without it would read in the same
+        # voice as an observed move. Caught on the first live cycle after the
+        # step was wired — steps.py filled the payload and this projection had
+        # no entry for it, so the block existed and reached no artifact.
+        "cases", "by_standing", "actionable", "strongest",
+    ),
 }
 
 

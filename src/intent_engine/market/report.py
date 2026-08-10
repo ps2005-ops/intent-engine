@@ -896,6 +896,16 @@ def _knowledge_summary(knowledge: dict) -> dict:
             for k in ("decks", "subjects", "all_carry_alternatives",
                       "empty_sections", "error")
             if (knowledge.get("presentation") or {}).get(k) is not None},
+        # HOW EACH THESIS FAILS. `by_standing` is the field to read: every
+        # live case is SPECULATIVE while the corpus carries no evidence of a
+        # counterparty's means or motive, and a report that showed the cases
+        # without the standing would present a list of thought-up moves in
+        # the same voice as an observed one.
+        "adversary": {
+            k: (knowledge.get("adversary") or {}).get(k)
+            for k in ("cases", "by_standing", "actionable", "strongest",
+                      "error")
+            if (knowledge.get("adversary") or {}).get(k) is not None},
         "note": ("bounded projection; the append-only ledger is the record "
                  "and every figure here is recomputable from it"),
     }
