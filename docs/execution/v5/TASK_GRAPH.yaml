@@ -95,7 +95,20 @@ tasks:
   - id: A-WIRE-001
     program: A
     status: COMPLETE
-    verification: CAPABILITY_VERIFIED
+    verification: LIVE_VERIFIED
+    live_evidence: >
+      PAPER night cycle 2026-08-10:night:America/Toronto, runtime pinned at
+      market 2b10c0c, exit 0, all 15 steps ok. The cycle report carries
+      causal_resolution with questions 25, estimated 0, by_state
+      PANEL_UNAVAILABLE 25, by_missing_prerequisite
+      NO_OUTCOME_SERIES_FOR_TREATED_UNIT 25, and named information
+      requirements. 25 causal_estimate rows on the live learning ledger, 25
+      distinct resolution_ids, all question_origin EVENT_DERIVED. The fold the
+      planner reads moved: causal_estimates_attempted 0 -> 25.
+      THE FIRST CYCLE DID NOT EARN THIS. It rendered the same 25 refusals and
+      wrote nothing, so the metric still read 0 -- the number it shows when the
+      capability has never run. That gap was found by the live run, not by the
+      suite, and closed in 2b10c0c.
     completion_evidence: >
       7745c95 — `grep -n causal_question src/intent_engine/market/steps.py`
       returns a production caller, which is the whole node: A-SCM-001 and
