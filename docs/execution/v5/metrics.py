@@ -125,6 +125,20 @@ def measure(ledger=RUNTIME_LEDGER) -> dict:
                    if d.get("provenance") == "PROSPECTIVE"]
 
     metrics = {
+        # --- A: causal decision intelligence -----------------------------
+        # THE LIVE-PROOF GATE, AND WHY IT IS A METRIC RATHER THAN A PROMISE.
+        # A-SCM-001 and A-DIAG-001 are complete as capabilities: adversarially
+        # tested, negative-controlled, 54 tests. Neither has ever run in a
+        # cycle. `grep -n synthetic_control src/intent_engine/market/steps.py`
+        # returns nothing, which is the exact shape this program has recorded
+        # four times — a built and guarded capability with zero production
+        # callers, reported as done because the tests were green.
+        #
+        # Counting the rows the cycle actually persists makes the gap a
+        # measurement instead of a claim, and it clears itself the first time
+        # a real cycle attempts an estimate.
+        "causal_estimates_attempted": sum(
+            1 for r in rows if r.get("record") == "causal_estimate"),
         # --- B: historical and policy learning ---------------------------
         "historical_decision_episodes": _historical_episodes(),
         # Carried over from V4 deliberately. B-DR-001 waits on the same fact

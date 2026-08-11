@@ -54,7 +54,7 @@ tasks:
     program: A
     status: COMPLETE
     completion_evidence: >
-      aff8888 (merge of 64d6d14) — simplex active-set solver, six named refusals, 29 tests. Three descent solvers were written and measured first and each returned the WRONG DONORS on a nearly-collinear pool; the shipped solver recovers 0.5/0.3/0.2 exactly. Live: SYNTHETIC_CONTROL now carries a real effect_estimator in economic_method.METHODS and `require` refuses it for a forecast.
+      aff8888 (merge of 64d6d14) — simplex active-set solver, six named refusals, 29 tests. Three descent solvers were written and measured first and each returned the WRONG DONORS on a nearly-collinear pool; the shipped solver recovers 0.5/0.3/0.2 exactly. Live: SYNTHETIC_CONTROL now carries a real effect_estimator in economic_method.METHODS and `require` refuses it for a forecast. CAPABILITY-COMPLETE AND NOT LIVE-VERIFIED — no cycle has called it and `grep -n synthetic_control src/intent_engine/market/steps.py` returns nothing; A-WIRE-001 is the open node that closes that, and until it closes this node may not be read as running in production.
     title: Synthetic control estimator, donor pool and weights, not an enum entry
     dependencies: []
     priority: 1
@@ -90,6 +90,62 @@ tasks:
         estimate with named donors
       adversarial_proof: tests in A-DIAG-001 (placebo, leakage, single-donor)
       mutation_target: the pre/post partition in the objective function
+
+  - id: A-WIRE-001
+    program: A
+    title: The cycle attempts a causal estimate and persists it
+    dependencies: [A-DIAG-001]
+    priority: 1
+    expected_value: >
+      A-SCM-001 and A-DIAG-001 are complete as capabilities and have never run.
+      `grep -n synthetic_control src/intent_engine/market/steps.py` returns
+      nothing. That is the shape this program has recorded four separate times
+      — a built, tested, adversarially proven capability with zero production
+      callers, reported as finished because the suite was green — and it was
+      about to be recorded a fifth time under a COMPLETE status this session
+      wrote by hand.
+
+      Opening it as its own node rather than widening A-SCM-001 is deliberate.
+      The work is not more estimator: it is finding a question the engine
+      actually holds that names a treated unit, a donor pool and a treatment
+      date, deciding which it may refuse, and persisting the refusal as
+      carefully as the estimate. That is a different job from fitting.
+    acceptance_criteria:
+      - a cycle step selects candidate panels from state the engine already
+        holds; a cycle with no eligible panel writes NO_ELIGIBLE_PANEL and is
+        not an error
+      - every attempt persists a causal_estimate row, fitted or refused, so a
+        refusal is as durable as a result
+      - the treatment date comes from a dated event already on the ledger and
+        is never chosen by scanning for the largest gap
+      - report.py renders the block, and renders it distinguishably when the
+        attempt was refused
+      - a reloaded row reproduces the same diagnostics verdict
+    tests: tests/test_market_causal_wiring.py
+    # NO DATA GATE, DELIBERATELY. The first draft of this node gated it on
+    # `causal_estimates_attempted >= 1` — the very row it exists to produce —
+    # so it could never become runnable. A gate belongs on a node that CONSUMES
+    # a measurement, never on the one that creates it. What holds the causal
+    # foundation honest is not a gate here but the existence of this node
+    # unfinished: A-SCM-001 and A-DIAG-001 cannot be read as live while it is
+    # open. `causal_estimates_attempted` is still measured, and it is what this
+    # node's completion evidence must show as non-zero.
+    minimum_data: none
+    vertical:
+      producer: a steps.py step calling synthetic_control.fit then
+        causal_diagnostics.stress
+      persistence: causal_estimate rows on the learning ledger
+      reload: load_estimate plus a re-derived verdict, compared
+      consumer: report.py and the Founder proof package
+      surface: the cycle report's causal block
+      telemetry: attempts, fits and refusals by reason per cycle
+      failure_states: NO_ELIGIBLE_PANEL, NO_DATED_EVENT, plus every
+        synthetic_control refusal
+      live_proof: a PAPER cycle report carrying a causal_estimate row with
+        named donors or a named refusal
+      adversarial_proof: a panel whose treatment date was chosen by scanning
+        for the largest gap must be refused, not fitted
+      mutation_target: the treatment-date selection
 
   - id: A-SDID-001
     program: A
@@ -129,7 +185,7 @@ tasks:
     program: A
     status: COMPLETE
     completion_evidence: >
-      aff8888 — five attacks plus two assumptions no series can settle, 25 tests, each failing case paired with a passing one. The standing comes from the existing economic_method.interpret, so there is no second vocabulary. Found two defects in A-SCM-001 committed hours earlier: an absolute epsilon that turned solver noise into a ratio of a thousand, and a placebo reporting FAILED when the panel was too small to reach its threshold.
+      aff8888 — five attacks plus two assumptions no series can settle, 25 tests, each failing case paired with a passing one. The standing comes from the existing economic_method.interpret, so there is no second vocabulary. Found two defects in A-SCM-001 committed hours earlier: an absolute epsilon that turned solver noise into a ratio of a thousand, and a placebo reporting FAILED when the panel was too small to reach its threshold. CAPABILITY-COMPLETE AND NOT LIVE-VERIFIED, on the same terms as A-SCM-001 and behind the same open node.
     title: Identification diagnostics — placebo, pre-trend, leakage, concentration
     dependencies: [A-SCM-001]
     priority: 1
