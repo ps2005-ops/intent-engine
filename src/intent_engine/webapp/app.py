@@ -734,6 +734,12 @@ class WebApp:
             return self._internal_impact(session, environ)
         if path == "/decisions" and method == "GET":
             return self._decisions(session, environ)
+        if path == "/demo-dossiers/telemetry" and method == "GET":
+            return self._ok_json(self._demo_telemetry.as_dict())
+        if path == "/demo-dossiers" and method == "GET":
+            return self._demo_dossier_index()
+        if path.startswith("/demo-dossiers/") and method == "GET":
+            return self._demo_dossier_detail(path[len("/demo-dossiers/"):])
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
         if path == "/onboarding/dismiss" and method == "POST":
@@ -3502,6 +3508,47 @@ class WebApp:
         return self._html(self._page(
             "Decisions", body, session,
             self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
+
+    def _demo_dossier_store(self):
+        from intent_engine.demo_dossier.store import DossierStore
+        return DossierStore(self._runtime_root)
+
+    def _demo_dossier_index(self):
+        """Every dossier this deployment has assembled, as an index.
+
+        Deliberately unscoped and deliberately harmless: `views.index_row`
+        emits states, availabilities and runtime SHAs, and no reference ids
+        at all. There is nothing here to partition by tenant because there is
+        nothing here that belongs to one.
+        """
+        from intent_engine.demo_dossier import views
+        store = self._demo_dossier_store()
+        rows = [d for d in (store.latest(c) for c in store.companies())
+                if d is not None]
+        return self._ok_json(views.index(rows))
+
+    def _demo_dossier_detail(self, company_id: str):
+        """One dossier, with tenant-partitioned reference ids withheld.
+
+        The withholding is unconditional — see `views` for why that is
+        stronger than a scope check here, and why a missing company is a
+        stated reading rather than a bare 404.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.demo_dossier import views
+        from intent_engine.demo_dossier.store import company_key
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            # 404 for the caller, but with a BODY that says which absence
+            # this is. A bare status code cannot distinguish "never analysed
+            # here" from "analysed and refused", and at 100 companies that
+            # difference is the whole signal.
+            return ("404 Not Found",
+                    [("Content-Type", "application/json")],
+                    json.dumps(views.not_found(company_id)))
+        return self._ok_json(views.detail(dossier))
 
     def _runtime_sha(self) -> str:
         from intent_engine._version import version_info

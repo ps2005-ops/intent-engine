@@ -39,6 +39,7 @@ TESTS = ROOT / "tests"
 JOIN = "tests/test_a_company_dossier_joins_two_systems.py"
 NEUTRAL = "tests/test_the_dossier_seam_stays_neutral.py"
 REAL = "tests/test_the_dossier_survives_real_companies.py"
+SURFACE = "tests/test_the_dossier_is_reachable_by_a_human.py"
 
 #: (name, file, find, replace, test node that must go RED)
 MUTATIONS = [
@@ -160,6 +161,47 @@ MUTATIONS = [
      "        self._publish_demo_dossier(run_id, stamped)",
      "        pass  # producer call removed",
      f"{REAL}::test_a_real_web_analysis_publishes_a_dossier_by_itself"),
+
+    # --- the inspection surface -------------------------------------------
+    ("the inspection surface publishes private reference ids",
+     SRC / "demo_dossier/views.py",
+     "    out[\"ids\"] = []\n    out[\"ids_redacted\"] = True",
+     "    out[\"ids_redacted\"] = True",
+     f"{SURFACE}::test_private_reference_ids_are_never_published"),
+
+    ("redaction is applied but reads as absence",
+     SRC / "demo_dossier/views.py",
+     '    out = dict(block)\n    out["ids"] = []',
+     '    out = {"ids": []}',
+     f"{SURFACE}::test_private_reference_ids_are_never_published"),
+
+    ("the detail route skips redaction entirely",
+     SRC / "demo_dossier/views.py",
+     "        if name in blocks:\n            blocks[name] = _redact("
+     "blocks[name])",
+     "        if False:\n            blocks[name] = _redact(blocks[name])",
+     f"{SURFACE}::test_private_reference_ids_are_never_published"),
+
+    ("an unanalysed company returns a bare 404 with no stated reason",
+     SRC / "demo_dossier/views.py",
+     '        "state": V.NOT_STARTED,',
+     '        "state": "UNKNOWN",',
+     f"{SURFACE}::test_an_unknown_company_is_a_stated_absence_not_a_bare_404"),
+
+    ("the telemetry route is shadowed by the detail route",
+     SRC / "webapp/app.py",
+     '        if path == "/demo-dossiers/telemetry" and method == "GET":\n'
+     "            return self._ok_json(self._demo_telemetry.as_dict())\n",
+     "",
+     f"{SURFACE}::test_the_telemetry_route_is_not_shadowed_by_the_"
+     f"detail_route"),
+
+    ("the index dumps whole blocks instead of indexing",
+     SRC / "demo_dossier/views.py",
+     '        "generated_at": dossier.generated_at,\n    }',
+     '        "generated_at": dossier.generated_at,\n'
+     '        "market_block": dossier.market_block,\n    }',
+     f"{SURFACE}::test_the_index_is_an_index_and_carries_no_reference_ids"),
 
     ("the depth scan for forbidden names is disabled entirely",
      SRC / "demo_dossier/contracts.py",
