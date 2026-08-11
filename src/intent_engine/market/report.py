@@ -871,8 +871,13 @@ def _knowledge_summary(knowledge: dict) -> dict:
         # could not tell a reader that none were mixed in.
         "causal_resolution": {
             k: (knowledge.get("causal_resolution") or {}).get(k)
+            # `persisted` is here because the live cycle proved the gap it
+            # measures: 25 refusals rendered, 0 rows written, and the metric
+            # the planner reads still folded to zero. A counter that exists in
+            # the payload and not on the surface cannot report a silent write
+            # failure, which was the entire reason for adding it.
             for k in ("questions", "estimated", "synthetic_excluded",
-                      "by_state", "by_missing_prerequisite",
+                      "persisted", "by_state", "by_missing_prerequisite",
                       "information_requirements", "error")
             if (knowledge.get("causal_resolution") or {}).get(k) is not None},
         "economic_thesis": {

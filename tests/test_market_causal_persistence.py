@@ -190,3 +190,38 @@ def test_the_step_wires_the_write_into_its_payload():
         "knowledge_step never calls record_causal_estimate; the resolutions "
         "reach the report and the ledger stays empty, so the fold the planner "
         "reads cannot tell 25 refusals from a node that never ran")
+
+
+def test_the_report_surface_carries_the_persisted_count():
+    """A counter in the payload and not on the surface cannot report a silent
+    write failure — which was the entire reason for adding it.
+
+    Calls the real projection rather than asserting on a hand-built dict.
+    """
+    from intent_engine.market import causal_question as CQ
+    from intent_engine.market import report
+
+    question = CQ.questions_from_events([_event()], as_of="2026-08")[0]
+    resolutions = [CQ.resolve(question, [])]
+    knowledge = {"causal_resolution": {
+        **CQ.summarise(resolutions), "persisted": 1,
+        "resolutions": [r.as_dict() for r in resolutions]}}
+    block = report._knowledge_summary(knowledge)["causal_resolution"]
+    assert block["persisted"] == 1
+
+
+def test_a_zero_persisted_count_still_reaches_the_surface():
+    """The NEGATIVE CONTROL, and the case that matters: 0 new rows on a re-run
+    of an unchanged ledger is correct, and 0 because the write broke is not.
+    Both must be visible; a counter rendered only when non-zero shows neither.
+    """
+    from intent_engine.market import causal_question as CQ
+    from intent_engine.market import report
+
+    question = CQ.questions_from_events([_event()], as_of="2026-08")[0]
+    resolutions = [CQ.resolve(question, [])]
+    knowledge = {"causal_resolution": {
+        **CQ.summarise(resolutions), "persisted": 0,
+        "resolutions": [r.as_dict() for r in resolutions]}}
+    block = report._knowledge_summary(knowledge)["causal_resolution"]
+    assert "persisted" in block and block["persisted"] == 0
