@@ -50,6 +50,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from intent_engine.business_graph import synthetic_enterprise as SE  # noqa: E402
 from intent_engine.webapp.app import WebApp  # noqa: E402
 from intent_engine.webapp.config import AppConfig  # noqa: E402
+from intent_engine.executive import living_decision as LDR  # noqa: E402
 from intent_engine.webapp.tenancy import scope_for_session  # noqa: E402
 
 ALPHA = {"user_id": "usr_alpha_live", "email": "founder@alpha.test"}
@@ -189,6 +190,49 @@ def main() -> int:
         if not beta_metrics or (alpha_metrics & beta_metrics):
             failures.append("the two tenants did not get disjoint rows")
 
+        # -- E-LDR-001: a decision lifecycle, over the same HTTP path -------
+        store = LDR.LivingDecisionStore(state)
+        rec = LDR.open_decision(
+            scope=alpha, company_id="acme",
+            question="Should we hold the enterprise discount floor?",
+            owner="ceo", data_population="SYNTHETIC_ENTERPRISE",
+            runtime_sha=sha)
+        rec = LDR.revise(rec, scope=alpha, status=LDR.RECOMMENDATION_READY,
+                         recommendation="Hold the floor",
+                         information_gaps=("segment elasticity",),
+                         alternatives=("Cut the floor to 12%",),
+                         falsifiers=("two enterprise losses citing price",),
+                         reason="thesis formed")
+        store.append(rec, scope=alpha)
+
+        _, body = _get(port, "/decisions?format=json", sessions["alpha"])
+        decisions = json.loads(body)
+        if decisions.get("state") != "OPEN_DECISIONS":
+            failures.append("the decision did not reach the request path")
+        if not decisions["open"] or \
+                not decisions["open"][0]["is_recommendation_only"]:
+            failures.append("a recommendation was not marked as undecided")
+        if decisions.get("awaiting_information") != [rec.decision_id]:
+            failures.append("the information gap did not surface")
+
+        # A second tenant must see NO decisions, and a scopeless reader must be
+        # told UNAVAILABLE rather than shown an empty list.
+        _, body = _get(port, "/decisions?format=json", sessions["beta"])
+        beta_dec = json.loads(body)
+        if beta_dec["open"] or "discount floor" in body:
+            failures.append("a decision leaked across tenants")
+        _, body = _get(port, "/decisions?format=json", anon_sid)
+        anon_dec = json.loads(body)
+        if anon_dec.get("state") != "DECISIONS_UNAVAILABLE":
+            failures.append("a scopeless reader was shown a decision list")
+
+        # The engine may not execute what no human chose -- over the real path.
+        try:
+            LDR.revise(rec, scope=alpha, status=LDR.EXECUTING, reason="skip")
+            failures.append("a recommendation executed without a human")
+        except LDR.DecisionRefused:
+            pass
+
         # -- the receipts ---------------------------------------------------
         receipts = app._tenant_receipts.all()
         scoped = [r for r in receipts
@@ -223,6 +267,15 @@ def main() -> int:
             "receipts_written": len(receipts),
             "receipts_scoped": len(scoped),
             "receipts_refused": len(refused),
+            "decision_id": rec.decision_id,
+            "decision_state": decisions.get("state"),
+            "decision_is_recommendation_only":
+                decisions["open"][0]["is_recommendation_only"]
+                if decisions.get("open") else None,
+            "decision_awaiting_information": decisions.get(
+                "awaiting_information"),
+            "decision_cross_tenant_visible": bool(beta_dec.get("open")),
+            "decision_scopeless_state": anon_dec.get("state"),
             "minimum_data_requests": sum(
                 1 for a in answers.values()
                 if a.get("minimum_data_request")),
