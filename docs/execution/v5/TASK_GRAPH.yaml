@@ -810,6 +810,35 @@ tasks:
 
   - id: E-LDR-001
     program: E
+    status: COMPLETE
+    verification: LIVE_VERIFIED
+    live_evidence: >
+      Founder live proof at runtime SHA bc03be0 (record landed at
+      8fec4dd), real HTTP to wsgiref serving the real WebApp --
+      `PYTHONPATH=src python3 scripts/live_proof_internal_impact.py`,
+      artifact reports/live_proof_internal_impact.json, verdict PASS.
+      Observed over the wire: OPEN_DECISIONS reached under an
+      established scope; is_recommendation_only TRUE, so the engine's
+      conclusion is rendered as undecided rather than as a decision; the
+      information gap surfaced by decision id; a second tenant saw no
+      decisions and no leaked text; a scopeless reader was told
+      DECISIONS_UNAVAILABLE rather than shown an empty list; and an
+      attempt to execute what no human had chosen was refused.
+    completion_evidence: >
+      founder 8fec4dd. The append-only spine from evidence to
+      retrospective, built on the tenant-scoped substrate D-IBG-001 and
+      F-TS-001 proved live, and REFERENCING the private graph's decision,
+      action and outcome nodes rather than restating them -- two stores
+      that both claim to know what was decided will disagree.
+      The transition table refuses RECOMMENDATION_READY -> EXECUTING and
+      a decided record must name the human who chose. Five independent
+      retrospective axes; `learnable()` reads decision_quality and
+      refuses an exogenous shock or an unmeasured outcome, because a
+      system that learns from realized outcomes learns to take the lucky
+      bet. An identical re-derivation is refused on a content digest.
+      Consumers are projections: `what_changed` diffs stored revisions
+      and cannot narrate a change that did not happen.
+      29 tests; 11/11 break proofs.
     title: Living Decision Record, append-only revisions
     dependencies: [D-IBG-001]
     priority: 1
