@@ -467,6 +467,12 @@ class WebApp:
             MDRTelemetry as _MDRTelemetry,
         )
         self._mdr_telemetry = _MDRTelemetry()
+        # The 100-company program's first telemetry substrate. Counts what the
+        # Market/Founder join actually did, and keeps "the producer never
+        # published" separate from "this side refused it" -- the two numbers
+        # whose conflation hid 22 silently refused dossiers.
+        from intent_engine.demo_dossier.telemetry import DossierTelemetry
+        self._demo_telemetry = DossierTelemetry()
         self.fi = FounderIntelligenceService(config.fi_store_path)
         # THE REASONING BACKEND WAS NEVER WIRED IN.
         #
@@ -4991,7 +4997,77 @@ class WebApp:
             self._external_context(run_id, allow_fetch=True)
         except Exception:  # noqa: BLE001 - context must never lose a run
             _LOG.warning("external context refresh failed for %s", run_id)
+        self._publish_demo_dossier(run_id, stamped)
         return stamped
+
+    def _publish_demo_dossier(self, run_id, result):
+        """Emit this run's founder snapshot and assemble its demo dossier.
+
+        THE REAL PATH, not a demo-only one: every composed analysis passes
+        through here, so the 100-company runner gets a comparable versioned
+        record for free rather than another ad hoc report (§12).
+
+        The market side may be absent — usually is, since it publishes from a
+        different process on its own schedule — and that is a stated product
+        state, not a failure. `FOUNDER_AVAILABLE_MARKET_UNAVAILABLE` is a
+        valid dossier.
+
+        Every failure inside is swallowed. A read-model write that can fail an
+        analysis is a worse defect than the missing record it was added to
+        produce; the same judgement the consumption receipt above is built on.
+        """
+        try:
+            from intent_engine.demo_dossier import (assemble,
+                                                    read_founder_snapshot,
+                                                    read_market_snapshot)
+            from intent_engine.demo_dossier import transport as dt
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            from intent_engine.external_intel import founder_demo_snapshot \
+                as fds
+
+            meta = self.ci.run_meta(run_id) or {}
+            report = (result or {}).get("strategic_report")
+            name = str(meta.get("company_name") or "")
+            key = company_key(name or meta.get("domain") or run_id)
+            context = self._external_cache.get(run_id)
+
+            founder = read_founder_snapshot(fds.build_payload(
+                run_id=run_id, company_id=key, canonical_name=name,
+                domain=str(meta.get("domain") or ""), report=report,
+                context=context, scope=None))
+
+            # The market snapshot, if this deployment shares a transport with
+            # a market engine. Absent is the normal case and reads as such.
+            market_payload = dt.payload_from_file(
+                dt.market_snapshot_path(self._runtime_root, key))
+            market = (read_market_snapshot(market_payload,
+                                           expected_company=key)
+                      if market_payload is not None else None)
+            if market is None:
+                from intent_engine.demo_dossier import market_unavailable
+                market = market_unavailable(
+                    "No market demo snapshot has been published for this "
+                    "company in this deployment. The market blocks are "
+                    "unavailable; nothing about the market was measured.",
+                    company_id=key)
+
+            store = DossierStore(self._runtime_root)
+            previous = store.latest(key)
+            dossier = assemble(market, founder, cohort="",
+                               now=__import__("datetime").date.today()
+                               .isoformat(), previous=previous)
+            stored = store.save(dossier)
+            self._demo_telemetry.snapshot_read(founder)
+            self._demo_telemetry.snapshot_read(market)
+            self._demo_telemetry.assembled(stored)
+            self._demo_telemetry.persisted(
+                created=previous is None
+                or previous.content_key() != stored.content_key())
+            from intent_engine.demo_dossier.diff import compare
+            self._demo_telemetry.differed(compare(previous, stored).state)
+        except Exception:  # noqa: BLE001 - see docstring
+            _LOG.warning("demo dossier not published for %s", run_id)
 
     def _ready(self):
         try:
