@@ -615,7 +615,22 @@ tasks:
   - id: D-IBG-001
     program: D
     status: COMPLETE
-    verification: CAPABILITY_VERIFIED
+    verification: LIVE_VERIFIED
+    live_evidence: >
+      Founder live proof at runtime SHA 2c59460, real HTTP to wsgiref serving
+      the real WebApp -- `PYTHONPATH=src python3
+      scripts/live_proof_internal_impact.py`, artifact
+      reports/live_proof_internal_impact.json, verdict PASS. The script holds a
+      URL and a cookie and nothing else, so the request travels the same
+      routing, session, scope-establishment, load, read, render and receipt
+      path a deployed request does.
+      Observed: synthetic world syn_498dc030ba37dca0 (seed 7), 42 nodes and 33
+      edges installed and reconciling; four DISTINCT answers over HTTP
+      (IMPACT_IDENTIFIED, NO_INTERNAL_IMPACT, LINK_WITHOUT_METRIC, and
+      DATA_UNAVAILABLE/SCOPELESS_READ for an anonymous session); 9 isolation
+      attempts on Alpha's canary from Beta's session with 0 leaks; 15 receipts
+      of which 1 refused; is_real_data_claim false throughout; 1 minimum data
+      request emitted from the instrumentation gap.
     completion_evidence: >
       founder c9d8f28 (foundation) and 1a9675f (consumer). Private nodes are
       Nodes on the SAME BusinessGraph read through the SAME read(), with a
@@ -669,6 +684,37 @@ tasks:
 
   - id: D-SYN-001
     program: D
+    status: COMPLETE
+    verification: LIVE_VERIFIED
+    live_evidence: >
+      Founder live proof at runtime SHA 2c59460, real HTTP to wsgiref serving
+      the real WebApp -- `PYTHONPATH=src python3
+      scripts/live_proof_internal_impact.py`, artifact
+      reports/live_proof_internal_impact.json, verdict PASS. The script holds a
+      URL and a cookie and nothing else, so the request travels the same
+      routing, session, scope-establishment, load, read, render and receipt
+      path a deployed request does.
+      Observed: synthetic world syn_498dc030ba37dca0 (seed 7), 42 nodes and 33
+      edges installed and reconciling; four DISTINCT answers over HTTP
+      (IMPACT_IDENTIFIED, NO_INTERNAL_IMPACT, LINK_WITHOUT_METRIC, and
+      DATA_UNAVAILABLE/SCOPELESS_READ for an anonymous session); 9 isolation
+      attempts on Alpha's canary from Beta's session with 0 leaks; 15 receipts
+      of which 1 refused; is_real_data_claim false throughout; 1 minimum data
+      request emitted from the instrumentation gap.
+    completion_evidence: >
+      founder 2c59460. A deterministic, arithmetically reconciling
+      enterprise: segment ARR sums to company ARR, contracts cannot book
+      more than their segment holds, and pipeline states the multiple it
+      is a multiple of; `reconcile()` returns findings so the suite proves
+      it can report a discrepancy. Built around four subjects so all four
+      reader answers are reachable from ONE world, including a measured
+      negative, an instrumentation gap, a stale metric dated rather than
+      flagged, and an action that moved nothing.
+      Acceptance 2 -- a join between a synthetic node and a real fact
+      RAISES -- was missing and is now `MixedPopulation`, refused where
+      the join happens rather than downgraded to a caveat.
+      26 tests; 13/13 break proofs including relabelling a synthetic row
+      as real.
     title: Synthetic Enterprise, labelled SYNTHETIC and never mixed with real facts
     dependencies: [D-IBG-001]
     priority: 2
@@ -929,7 +975,22 @@ tasks:
   - id: F-TS-001
     program: F
     status: COMPLETE
-    verification: CAPABILITY_VERIFIED
+    verification: LIVE_VERIFIED
+    live_evidence: >
+      Founder live proof at runtime SHA 2c59460, real HTTP to wsgiref serving
+      the real WebApp -- `PYTHONPATH=src python3
+      scripts/live_proof_internal_impact.py`, artifact
+      reports/live_proof_internal_impact.json, verdict PASS. The script holds a
+      URL and a cookie and nothing else, so the request travels the same
+      routing, session, scope-establishment, load, read, render and receipt
+      path a deployed request does.
+      Observed: synthetic world syn_498dc030ba37dca0 (seed 7), 42 nodes and 33
+      edges installed and reconciling; four DISTINCT answers over HTTP
+      (IMPACT_IDENTIFIED, NO_INTERNAL_IMPACT, LINK_WITHOUT_METRIC, and
+      DATA_UNAVAILABLE/SCOPELESS_READ for an anonymous session); 9 isolation
+      attempts on Alpha's canary from Beta's session with 0 leaks; 15 receipts
+      of which 1 refused; is_real_data_claim false throughout; 1 minimum data
+      request emitted from the instrumentation gap.
     completion_evidence: >
       founder 497a483 — TenantScope as a typed frozen object with no from_evidence constructor, proven by ASSERTING THE EXACT ATTRIBUTE SET of the class rather than by grepping source — and with a test that adds such a method to prove the guard can go red. A second net reads declared return annotations so a rename does not help. Six adversarial tests: confused deputy, id, alias (Linear vs Linear Minerals Corp), cache, file-path and export collision. 38 tests; founder suite 4834 passed, 16 skipped.
     title: Typed TenantScope from trusted context, never from evidence
