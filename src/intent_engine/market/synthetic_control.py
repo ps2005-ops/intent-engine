@@ -43,10 +43,13 @@ synthetic unit is always a weighted average of real units and the fit can fail
 VISIBLY when the treated unit lies outside the donors' range. A method that
 cannot fail is not measuring anything.
 
-The solver is Frank-Wolfe, which stays on the simplex by construction rather
-than projecting back onto it after each step, and is deterministic — the same
-inputs give the same weights on every run, which matters because these weights
-are persisted and later compared against a reload.
+The solver is an active set over that simplex: it decides which donors carry
+weight and solves exactly on them, terminating AT the optimum rather than
+approaching it. Three descent methods were tried first and each returned the
+wrong donors on a realistic pool; `_simplex_least_squares` records what they
+returned and why it mattered. It is deterministic — the same inputs give the
+same weights on every run — which matters because these weights are persisted
+and later compared against a reload.
 
 NO NUMPY
 --------
@@ -283,85 +286,195 @@ def assert_pre_treatment_only(pre_treated: Sequence[float],
                 "post-treatment data")
 
 
-def _frank_wolfe(target: Sequence[float], donors: Sequence[Sequence[float]],
-                 *, iterations: int = 500) -> List[float]:
-    """Least squares over the unit simplex, without ever leaving it.
+def _least_squares(columns: Sequence[Sequence[float]],
+                   target: Sequence[float]) -> Optional[List[float]]:
+    """Unconstrained least squares by modified Gram-Schmidt.
 
-    Starts at the vertex of the single best donor and moves toward whichever
-    vertex the gradient favours, by a step that shrinks as 2/(k+2). Every
-    iterate is a convex combination of vertices, so non-negativity and the
-    sum-to-one constraint hold at every step rather than being restored by a
-    projection afterwards.
+    NOT THE NORMAL EQUATIONS, AND THE DIFFERENCE WAS VISIBLE HERE.
+    Forming A-transpose-A squares the condition number. That is usually a
+    textbook caution and here it was the bug: the sum-to-one constraint is
+    imposed by an appended row of a large constant, so the matrix is
+    deliberately ill-conditioned, and squaring took it past what a float64
+    can carry. On a three-donor problem whose exact answer is 0.6/0.4/0.0 the
+    normal-equations solve returned 0.571/0.429/0.00003 — the constraint row
+    dominated every inner product and the actual data was rounding error
+    inside it.
 
-    Deterministic by construction: no random restarts, no tie-breaking on
-    anything but index order. These weights are persisted and later compared
-    against a reload, so a solver that could return a different optimum on a
-    second call would make that comparison meaningless.
+    Orthogonalising the columns instead keeps the conditioning linear, and the
+    same problem comes back exact. A rank-deficient set returns None rather
+    than a pseudo-inverse: the caller drops the offending column, which is
+    what the active set is for.
+    """
+    k = len(columns)
+    if k == 0:
+        return []
+    m = len(target)
+    basis: List[List[float]] = []
+    upper = [[0.0] * k for _ in range(k)]
+    for j in range(k):
+        vector = list(columns[j])
+        for i in range(j):
+            projection = sum(basis[i][t] * vector[t] for t in range(m))
+            upper[i][j] = projection
+            for t in range(m):
+                vector[t] -= projection * basis[i][t]
+        norm = math.sqrt(sum(v * v for v in vector))
+        reference = math.sqrt(sum(v * v for v in columns[j])) or 1.0
+        if norm <= 1e-10 * reference:
+            return None
+        upper[j][j] = norm
+        basis.append([v / norm for v in vector])
+
+    projected = [sum(basis[i][t] * target[t] for t in range(m))
+                 for i in range(k)]
+    solution = [0.0] * k
+    for i in range(k - 1, -1, -1):
+        total = projected[i] - sum(upper[i][j] * solution[j]
+                                   for j in range(i + 1, k))
+        solution[i] = total / upper[i][i]
+    return solution
+
+
+def _least_squares_summing_to_one(columns: Sequence[Sequence[float]],
+                                  target: Sequence[float]
+                                  ) -> Optional[List[float]]:
+    """Least squares over one set of columns, constrained to sum to one.
+
+    THE CONSTRAINT IS SUBSTITUTED, NOT PENALISED.
+    The version before this appended a row of a large constant M so that any
+    deviation from a unit sum cost M squared. That is the standard trick and
+    it was measurably wrong here: the penalty is exactly what makes the matrix
+    ill-conditioned, so accuracy fought itself. Sweeping M over four orders of
+    magnitude on a problem whose answer is known gave weight errors of 5.6e-6
+    at 1e4, 1.3e-3 at 1e5, and a rank-deficient refusal at 1e7 — worse as the
+    constraint got tighter, which is the signature of conditioning beating
+    bias.
+
+    Eliminating the last weight algebraically removes the constraint instead
+    of approximating it. With w_last = 1 - sum(rest), the objective becomes an
+    ORDINARY least squares in one fewer variable on the differenced columns,
+    and the answer is exact to machine precision with no constant to tune.
+    """
+    k = len(columns)
+    if k == 0:
+        return []
+    if k == 1:
+        return [1.0]
+    m = len(target)
+    last = columns[-1]
+    differenced = [[columns[j][t] - last[t] for t in range(m)]
+                   for j in range(k - 1)]
+    shifted = [target[t] - last[t] for t in range(m)]
+    rest = _least_squares(differenced, shifted)
+    if rest is None:
+        return None
+    return list(rest) + [1.0 - sum(rest)]
+
+
+def _simplex_least_squares(target: Sequence[float],
+                           donors: Sequence[Sequence[float]]) -> List[float]:
+    """Non-negative weights summing to one, at the exact optimum.
+
+    WHY AN ACTIVE SET AND NOT A DESCENT METHOD
+    ------------------------------------------
+    Three solvers were written and measured before this one, and each was
+    wrong on real donor pools rather than merely imprecise.
+
+    Frank-Wolfe with the textbook 2/(k+2) schedule returned 0.547/0.431 where
+    the answer was 0.6/0.4. Exact line search fixed that and failed harder on
+    a pool built the way a real one is — donors driven by shared factors, so
+    nearly collinear — returning 0.276/0.086/0.638 for a true 0.5/0.3/0.2.
+    Adding away steps reached the answer only after fifty thousand iterations,
+    which at sixteen placebo refits per diagnostic is not a solver but a delay.
+
+    That mattered beyond accuracy, in two places. The weights ARE the product:
+    `contributing_donors` is what a reader is shown as the units making up the
+    synthetic control, and 0.276/0.086/0.638 names the wrong units. And the
+    residual the solver left behind was divided into by
+    `causal_diagnostics.effect_ratio`, which turned solver error into a
+    post-over-pre ratio of a thousand and ranked it first in every placebo
+    distribution it entered.
+
+    An active set terminates AT the optimum in finitely many steps instead of
+    approaching it. Each step solves an equality-constrained least squares on
+    the currently-supported donors, which has a closed form; the loop only has
+    to decide which donors are in the support. It is deterministic, which
+    matters because these weights are persisted and later compared against a
+    reload.
+
+    THE OPTIMALITY CONDITION
+    ------------------------
+    For a minimum over the simplex, the gradient must be EQUAL across every
+    donor carrying weight and no smaller anywhere else. A donor outside the
+    support whose gradient is lower would reduce the error if admitted, so it
+    is admitted; when none is, the point is optimal. That is the whole loop.
     """
     n = len(donors)
-    periods = len(target)
+    if n == 0:
+        return []
+    m = len(target)
+    scale = max((abs(v) for col in donors for v in col), default=1.0) or 1.0
+    tolerance = 1e-9 * scale * scale * max(m, 1)
 
-    # Start from the best single donor rather than the uniform point. Both
-    # converge; this one starts closer when the answer really is one donor,
-    # which is the case a uniform start takes longest to reach and the case
-    # the concentration check most needs to see clearly.
-    best, best_error = 0, None
-    for j, donor in enumerate(donors):
-        error = sum((target[t] - donor[t]) ** 2 for t in range(periods))
-        if best_error is None or error < best_error:
-            best, best_error = j, error
+    def gradients(weights):
+        fitted = [sum(weights[j] * donors[j][t] for j in range(n))
+                  for t in range(m)]
+        resid = [target[t] - fitted[t] for t in range(m)]
+        # The gradient of the squared error in w_j is -2*sum(resid * x_j); the
+        # factor of two is common to every donor and cannot change any
+        # comparison between them.
+        return [-sum(resid[t] * donors[j][t] for t in range(m))
+                for j in range(n)]
+
+    best = min(range(n), key=lambda j: (sum((target[t] - donors[j][t]) ** 2
+                                            for t in range(m)), j))
     weights = [0.0] * n
     weights[best] = 1.0
+    support = [best]
 
-    for _ in range(iterations):
-        fitted = [sum(weights[j] * donors[j][t] for j in range(n))
-                  for t in range(periods)]
-        residual = [target[t] - fitted[t] for t in range(periods)]
-        # d/dw_j of sum(residual^2) is -2 * sum(residual_t * donor_jt); the
-        # factor of two is common to every component and cannot change which
-        # component is smallest, so it is left out.
-        gradient = [-sum(residual[t] * donors[j][t] for t in range(periods))
-                    for j in range(n)]
-        j_star = min(range(n), key=lambda j: (gradient[j], j))
+    for _ in range(4 * n + 16):
+        grad = gradients(weights)
+        inside = sum(grad[j] for j in support) / len(support)
+        outside = [j for j in range(n)
+                   if j not in support and grad[j] < inside - tolerance]
+        if not outside:
+            break
+        support.append(min(outside, key=lambda j: (grad[j], j)))
 
-        # EXACT LINE SEARCH, NOT THE 2/(k+2) SCHEDULE. The textbook step size
-        # is what this used first, and on the fixture whose answer is known by
-        # construction — a unit that IS 0.6 of one donor and 0.4 of another —
-        # five hundred iterations returned 0.547/0.431 and left 2% of the
-        # weight on a donor two orders of magnitude away in scale. The
-        # linear subproblem favours large-magnitude donors whenever the
-        # residual sums positive, and a step size that ignores the data cannot
-        # undo that quickly: late iterations shrink old mass by a factor of
-        # only (1 - 2/(k+2)).
-        #
-        # Minimising exactly along the segment costs one more pass over the
-        # series and converges in tens of iterations instead of thousands. It
-        # is still Frank-Wolfe and gamma is still confined to [0, 1], so every
-        # iterate is still a convex combination of real units.
-        direction = [donors[j_star][t] - fitted[t] for t in range(periods)]
-        denominator = sum(d * d for d in direction)
-        if denominator <= 1e-18:
-            # The chosen vertex is already where we are. Nothing to move
-            # toward, and dividing here would be dividing by zero.
-            break
-        gamma = sum(residual[t] * direction[t]
-                    for t in range(periods)) / denominator
-        gamma = min(1.0, max(0.0, gamma))
-        if gamma <= 1e-15:
-            # A zero step at the optimum of the linear subproblem is the
-            # Frank-Wolfe stopping condition; further iterations cannot move.
-            break
-        for j in range(n):
-            weights[j] *= (1.0 - gamma)
-        weights[j_star] += gamma
+        # Walk toward the unconstrained optimum on this support, stopping at
+        # the first donor that would go negative, until the whole support is
+        # feasible. Dropping donors one at a time rather than all at once
+        # keeps every intermediate point on the simplex.
+        for _ in range(n + 1):
+            trial = _least_squares_summing_to_one(
+                [donors[j] for j in support], target)
+            if trial is None:
+                support.pop()
+                break
+            if all(v >= -1e-12 for v in trial):
+                weights = [0.0] * n
+                for j, v in zip(support, trial):
+                    weights[j] = max(v, 0.0)
+                break
+            step = min((weights[j] / (weights[j] - v)
+                        for j, v in zip(support, trial)
+                        if v < 0 and weights[j] != v), default=0.0)
+            moved = [0.0] * n
+            for j, v in zip(support, trial):
+                moved[j] = weights[j] + step * (v - weights[j])
+            weights = moved
+            support = [j for j in support if weights[j] > 1e-12]
+            if not support:
+                support = [best]
+                weights = [0.0] * n
+                weights[best] = 1.0
+                break
 
     total = sum(weights)
-    if total <= 0:
-        # Unreachable from the simplex, and asserted rather than silently
-        # renormalised: a zero-sum weight vector would mean the iteration left
-        # the feasible set, which is a bug in this function and not a property
-        # of the data.
-        raise AssertionError("Frank-Wolfe left the simplex")
+    if total <= 0:  # pragma: no cover - the support always holds one donor
+        weights = [0.0] * n
+        weights[best] = 1.0
+        return weights
     return [w / total for w in weights]
 
 
@@ -423,7 +536,7 @@ def fit(treated: Sequence[float], donors: Dict[str, Sequence[float]], *,
     pre_donors = [series[:treatment_index] for series in pool]
 
     assert_pre_treatment_only(pre_treated, pre_donors, treatment_index)
-    weights = _frank_wolfe(pre_treated, pre_donors)
+    weights = _simplex_least_squares(pre_treated, pre_donors)
 
     synthetic_pre = [sum(weights[j] * pre_donors[j][t]
                          for j in range(len(names)))

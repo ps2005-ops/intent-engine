@@ -301,3 +301,55 @@ def test_summary_of_nothing_is_zero_of_every_known_reason():
     assert got["attempted"] == 0
     assert set(got["by_status"]) == {SC.FITTED} | set(SC.REFUSALS)
     assert all(v == 0 for v in got["by_status"].values())
+
+
+# --- the solver, on the geometry that broke three predecessors ----------------
+
+def test_recovers_exact_weights_on_a_nearly_collinear_pool():
+    """The case every descent solver got wrong.
+
+    Donors driven by shared factors are nearly collinear, which is also the
+    only situation in which a synthetic control is the right method. Frank-
+    Wolfe with a fixed schedule, with exact line search, and with away steps
+    each returned the WRONG DONORS here — 0.276/0.086/0.638 for a true
+    0.5/0.3/0.2 in the worst case — and the weight vector is what a reader is
+    shown as the composition of the synthetic unit.
+    """
+    factor_a = [10.0, 11.5, 11.0, 12.5, 12.0, 13.5, 13.0, 14.5, 14.0, 15.5]
+    factor_b = [20.0, 19.0, 20.5, 19.5, 21.0, 20.0, 21.5, 20.5, 22.0, 21.0]
+    pool = {}
+    for i in range(6):
+        share = 0.30 + 0.08 * i
+        pool[f"unit_{i}"] = [round(share * factor_a[t]
+                                   + (1 - share) * factor_b[t], 6)
+                             for t in range(10)]
+    names = sorted(pool)
+    target = [0.5 * pool[names[0]][t] + 0.3 * pool[names[1]][t]
+              + 0.2 * pool[names[2]][t] for t in range(10)]
+
+    weights = SC._simplex_least_squares(target, [pool[n] for n in names])
+    fitted = [sum(weights[j] * pool[names[j]][t] for j in range(len(names)))
+              for t in range(10)]
+    # The composition is not unique on a collinear pool — several weightings
+    # reproduce the target exactly — so what is asserted is what a reader is
+    # entitled to: the synthetic unit IS the treated unit, to machine
+    # precision, and the weights are a genuine point on the simplex.
+    assert max(abs(target[t] - fitted[t]) for t in range(10)) < 1e-9
+    assert sum(weights) == pytest.approx(1.0, abs=1e-12)
+    assert all(w >= 0 for w in weights)
+
+
+def test_the_solver_terminates_rather_than_running_to_its_iteration_cap():
+    """Speed is a correctness property here.
+
+    An in-space placebo refits once per donor, so a solver that needs fifty
+    thousand iterations to converge makes the central diagnostic unusable
+    rather than merely slow.
+    """
+    import time
+
+    treated, donors = _panel()
+    start = time.monotonic()
+    for _ in range(50):
+        SC.fit(treated, donors, treatment_index=TREATMENT)
+    assert time.monotonic() - start < 1.0

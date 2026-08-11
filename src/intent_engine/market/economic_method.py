@@ -242,9 +242,25 @@ METHODS: Dict[str, EconomicMethod] = {
             inputs=("a treated unit", "a donor pool"),
             output="treated minus synthetic path",
             effect_estimator=_synthetic_control_estimator,
-            assumptions=("the donor pool can reproduce the pre-period",
-                         "no donor is itself affected by the treatment"),
-            failure_modes=("overfitting the pre-period with a large pool",)),
+            # SEVEN ASSUMPTIONS, NOT TWO. The original pair described the
+            # method; these describe what `causal_diagnostics` can actually
+            # test, plus the two things it cannot. Declaring only the
+            # testable ones would have made the untestable ones invisible,
+            # which is the failure the assumption ledger exists to prevent:
+            # an assumption nobody wrote down is not an assumption that holds.
+            assumptions=(
+                "the donor pool can reproduce the pre-period",
+                "no donor is itself affected by the treatment",
+                "the treated unit's departure exceeds what this method "
+                "produces for untreated units",
+                "the treatment date is not merely the date the gap was "
+                "noticed",
+                "no single donor carries the synthetic unit",
+                "the treatment date was chosen before the effect was seen",
+                "the outcome was not revised after the analysis date"),
+            failure_modes=("overfitting the pre-period with a large pool",
+                           "a placebo distribution as wide as the effect",
+                           "a pre-period trend the post-period continues")),
         EconomicMethod(
             name=LOCAL_PROJECTION, question_types=(EFFECT_OF_EVENT,),
             minimum_sample=60, output="impulse response by horizon",
