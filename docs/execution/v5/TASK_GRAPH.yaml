@@ -53,6 +53,7 @@ tasks:
   - id: A-SCM-001
     program: A
     status: COMPLETE
+    verification: CAPABILITY_VERIFIED
     completion_evidence: >
       aff8888 (merge of 64d6d14) — simplex active-set solver, six named refusals, 29 tests. Three descent solvers were written and measured first and each returned the WRONG DONORS on a nearly-collinear pool; the shipped solver recovers 0.5/0.3/0.2 exactly. Live: SYNTHETIC_CONTROL now carries a real effect_estimator in economic_method.METHODS and `require` refuses it for a forecast. CAPABILITY-COMPLETE AND NOT LIVE-VERIFIED — no cycle has called it and `grep -n synthetic_control src/intent_engine/market/steps.py` returns nothing; A-WIRE-001 is the open node that closes that, and until it closes this node may not be read as running in production.
     title: Synthetic control estimator, donor pool and weights, not an enum entry
@@ -93,6 +94,18 @@ tasks:
 
   - id: A-WIRE-001
     program: A
+    status: COMPLETE
+    verification: CAPABILITY_VERIFIED
+    completion_evidence: >
+      7745c95 — `grep -n causal_question src/intent_engine/market/steps.py`
+      returns a production caller, which is the whole node: A-SCM-001 and
+      A-DIAG-001 were adversarially proven and had none. Against the LIVE
+      ledger (4,249 rows) the path formulates 25 EVENT_DERIVED questions from
+      real dated events and resolves all 25 to PANEL_UNAVAILABLE /
+      NO_OUTCOME_SERIES_FOR_TREATED_UNIT, each naming the one input that would
+      change it. No treatment was invented and no date was chosen by scanning
+      for the largest gap. 8/8 break proofs caught, including the removal of
+      the production caller itself.
     title: The cycle attempts a causal estimate and persists it
     dependencies: [A-DIAG-001]
     priority: 1
@@ -184,6 +197,7 @@ tasks:
   - id: A-DIAG-001
     program: A
     status: COMPLETE
+    verification: CAPABILITY_VERIFIED
     completion_evidence: >
       aff8888 — five attacks plus two assumptions no series can settle, 25 tests, each failing case paired with a passing one. The standing comes from the existing economic_method.interpret, so there is no second vocabulary. Found two defects in A-SCM-001 committed hours earlier: an absolute epsilon that turned solver noise into a ratio of a thousand, and a placebo reporting FAILED when the panel was too small to reach its threshold. CAPABILITY-COMPLETE AND NOT LIVE-VERIFIED, on the same terms as A-SCM-001 and behind the same open node.
     title: Identification diagnostics — placebo, pre-trend, leakage, concentration
@@ -315,6 +329,7 @@ tasks:
   - id: B-HIST-001
     program: B
     status: COMPLETE
+    verification: CAPABILITY_VERIFIED
     completion_evidence: >
       1d84cee, merged at aff8888 — T0 wall refusing out loud with a counted reason vocabulary; 554 lines of tests including the assertion that published_at is never substituted for retrieved_at. The corpus file does not exist in the live runtime yet, so historical_decision_episodes reads UNMEASURED rather than 0 and B-RM-001 stays blocked — which is the gate working.
     title: Vintage-walled historical decision corpus with a T0 knowledge snapshot
@@ -353,6 +368,7 @@ tasks:
   - id: B-HIST-002
     program: B
     status: COMPLETE
+    verification: CAPABILITY_VERIFIED
     completion_evidence: >
       af37ba8, merged at aff8888 — positive population filter at the gate arithmetic. Found a live defect: prospective_outcomes counted EVERY research_outcome row with no filter of any kind, so 1,000 imported historical rows would have moved it by 1,000. Measured on the live ledger the repair moves nothing today (35/35 before and after, 0 untagged), which is what a latent defect looks like before it fires.
     title: HISTORICAL and PROSPECTIVE populations separated at write and at read
@@ -585,6 +601,27 @@ tasks:
 
   - id: D-IBG-001
     program: D
+    status: COMPLETE
+    verification: CAPABILITY_VERIFIED
+    completion_evidence: >
+      founder c9d8f28 (foundation) and 1a9675f (consumer). Private nodes are
+      Nodes on the SAME BusinessGraph read through the SAME read(), with a
+      disjoint `private.` kind vocabulary, a typed TenantId on every row and a
+      `<tenant>::<local id>` namespace; one `read_decision` predicate is the
+      only filter, so export cannot disagree with traversal. Default-deny:
+      scope defaults to None on every reader, and an untagged tenant-owned row
+      is REFUSED rather than shown.
+      NOT CLOSED ON PERSISTENCE. The consumer is
+      external_intel.internal_impact, which answers "which of my internal
+      metrics does this external thesis reach?" from graph state and separates
+      INTERNAL_DATA_UNAVAILABLE from a MEASURED NO_INTERNAL_IMPACT on different
+      branches — the empty case is decided before any metric search runs. The
+      subject bridge is an exact declared attribute, never a substring.
+      74 tests; 11/11 break proofs caught, five of them attacking the
+      missing-versus-zero distinction rather than the boundary. Founder suite
+      4908 passed, 6 skipped.
+      NOT LIVE_VERIFIED: its live proof needs a Founder runtime surface that
+      consumes the graph, and no such request path exists yet.
     title: Internal Business Graph as tenant-private nodes on the canonical graph
     dependencies: [F-TS-001]
     priority: 1
@@ -879,6 +916,7 @@ tasks:
   - id: F-TS-001
     program: F
     status: COMPLETE
+    verification: CAPABILITY_VERIFIED
     completion_evidence: >
       founder 497a483 — TenantScope as a typed frozen object with no from_evidence constructor, proven by ASSERTING THE EXACT ATTRIBUTE SET of the class rather than by grepping source — and with a test that adds such a method to prove the guard can go red. A second net reads declared return annotations so a rename does not help. Six adversarial tests: confused deputy, id, alias (Linear vs Linear Minerals Corp), cache, file-path and export collision. 38 tests; founder suite 4834 passed, 16 skipped.
     title: Typed TenantScope from trusted context, never from evidence
