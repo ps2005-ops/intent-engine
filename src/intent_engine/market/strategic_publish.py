@@ -44,9 +44,28 @@ import pathlib
 import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from . import demo_snapshot_export as DSE
 from . import strategic_export as SE
 
 EXPORT_DIR = "reports/market/strategic"
+
+
+def _runtime_sha() -> str:
+    """The market runtime's provenance, for the neutral read model.
+
+    A dossier assembled from two sides must record which code produced each,
+    or a change of behaviour between versions looks like a change in the
+    company.
+    """
+    try:
+        from .runtime_provenance import provenance
+        # `runtime_git_sha` is the field name `runtime_provenance` actually
+        # emits. Getting it wrong is invisible: the snapshot publishes an
+        # empty sha, the dossier records "no market runtime", and nothing
+        # anywhere raises. A test pins the two together.
+        return str((provenance() or {}).get("runtime_git_sha") or "")
+    except Exception:  # noqa: BLE001 - provenance must never fail a publish
+        return ""
 
 
 def company_key(subject: str) -> str:
@@ -202,6 +221,8 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
     published: List[str] = []
     refused: List[dict] = []
     unnamed: List[str] = []
+    snapshots: List[str] = []
+    snapshot_refused: List[dict] = []
     for key, bundle in grouped.items():
         subject_id = bundle["subject"]
         display, aliases = _identity_for(subject_id, identities)
@@ -250,6 +271,38 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             refused.append({"company_id": file_key, "reason": str(exc)})
             continue
         published.append(file_key)
+        # The neutral read model's market leg, emitted from the SAME bundle
+        # rather than from a demo-only path (§12). It carries ids and states
+        # only; blocks this cycle did not compute are passed as None and
+        # serialize as UNAVAILABLE, never as an empty list.
+        try:
+            DSE.write_snapshot(DSE.build_snapshot(
+                company_id=file_key, as_of=result.as_of,
+                canonical_name=display or file_key, subject_names=aliases,
+                market_run_id=str(getattr(result, "run_id", "") or ""),
+                runtime_sha=_runtime_sha(),
+                beliefs=bundle["beliefs"],
+                theses=[t for t in economic_theses
+                        if _belongs(t, subject_id)],
+                thesis_revisions=_revisions_for(
+                    thesis_revisions,
+                    [t for t in economic_theses if _belongs(t, subject_id)]),
+                reconciliations=bundle["reconciliations"],
+                expectations=bundle["information_priorities"],
+                evidence_rows=evidence_rows,
+                # Deliberately NOT passed: this cycle does not compute them,
+                # and `None` is the honest statement of that. Passing `()`
+                # here would publish "we looked and found no causal result",
+                # which is a finding nobody made.
+                causal_questions=None, causal_results=None,
+                replay_episodes=None, adversary_cases=None,
+                demand_states=None, contradictions=None,
+                economic_states=None,
+            ), root=root)
+            snapshots.append(file_key)
+        except DSE.SnapshotLeak as exc:
+            snapshot_refused.append({"company_id": file_key,
+                                     "reason": str(exc)})
     return {
         "contract": SE.EXPORT_VERSION,
         "as_of": result.as_of,
@@ -257,6 +310,8 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
         "published": sorted(published),
         "refused": refused,
         "unnamed": sorted(unnamed),
+        "demo_snapshots": sorted(snapshots),
+        "demo_snapshots_refused": snapshot_refused,
         "directory": str(pathlib.Path(root) / EXPORT_DIR),
         "note": ("a company with no belief, posture move, mismatch or "
                  "information priority is not given an empty dossier"),
