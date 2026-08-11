@@ -80,6 +80,10 @@ either side of it, which is a different measurement.
 
 ## Terminal gates, preserved
 
+Measured at the freeze. They are counters and they move: `prospective_decisions`
+read 35 within hours, because the cycle that proved the freeze also added to it.
+Read them from `metrics.py`, never from here.
+
     H-IMP-001   comparable_founder_revision_pairs   0 / 1
     C-MET-003   macro_retrieval_months              1 / 6
     D-REP-002   macro_retrieval_months              1 / 6
