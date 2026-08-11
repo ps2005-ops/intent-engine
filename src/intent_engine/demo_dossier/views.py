@@ -73,6 +73,7 @@ def index_row(dossier: CompanyDemoDossier) -> Dict[str, Any]:
         "canonical_name": dossier.canonical_name,
         "domain": dossier.domain,
         "cohort": dossier.cohort,
+        "manifest_version": dossier.manifest_version,
         "dossier_id": dossier.dossier_id,
         "dossier_version": dossier.dossier_version,
         "readiness": dossier.readiness,

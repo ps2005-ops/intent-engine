@@ -250,7 +250,7 @@ def _effective_cutoff(market: MarketDemoSnapshot,
 
 
 def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
-             now: str = "", cohort: str = "",
+             now: str = "", cohort: str = "", manifest_version: str = "",
              previous: Optional[CompanyDemoDossier] = None
              ) -> CompanyDemoDossier:
     """Join two snapshots into one materialized view. Deterministic.
@@ -354,6 +354,7 @@ def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
         company_id=company_id, canonical_name=name,
         domain=founder.domain, ticker=founder.ticker,
         cohort=cohort or V.FIELD_UNAVAILABLE,
+        manifest_version=manifest_version,
         coverage_class=(founder.coverage_state if founder.has_content
                         else market.coverage_state),
         generated_at=now,

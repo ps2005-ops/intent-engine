@@ -50,6 +50,13 @@ class CompanyDemoDossier:
     ticker: str = ""
 
     cohort: str = V.FIELD_UNAVAILABLE
+    #: The manifest version this dossier's cohort was read from. Recorded
+    #: rather than assumed: a second pass compared against a manifest that
+    #: has since changed is comparing two different populations, and the
+    #: symptom is a metric that moved for no reason anybody can find. Empty
+    #: means the company is not in the validation universe at all, which is
+    #: a legitimate state and not the same as an unknown cohort.
+    manifest_version: str = ""
     coverage_class: str = V.FIELD_UNAVAILABLE
 
     generated_at: str = ""
@@ -101,6 +108,10 @@ class CompanyDemoDossier:
         """
         payload = {
             "company_id": self.company_id,
+            "cohort": self.cohort,
+            # A cohort move or a manifest revision makes this a different
+            # observation even when every reference is identical.
+            "manifest_version": self.manifest_version,
             "market_snapshot_id": self.market_snapshot_id,
             "founder_snapshot_id": self.founder_snapshot_id,
             "market_runtime_sha": self.market_runtime_sha,

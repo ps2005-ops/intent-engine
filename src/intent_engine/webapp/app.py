@@ -3509,6 +3509,25 @@ class WebApp:
             "Decisions", body, session,
             self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
 
+    def _manifest_placement(self, company_id: str):
+        """This company's cohort and the manifest version it came from.
+
+        Read-only, and read from the canonical manifest rather than from
+        anything the analysis produced: nothing observed at runtime may place
+        a company in a cohort (§27). A company that is not in the validation
+        universe returns no cohort and no version, which is a different state
+        from a company whose cohort is unknown.
+        """
+        try:
+            from intent_engine.validation import load
+            manifest = load()
+            company = manifest.by_id(company_id)
+            return ((company.cohort, manifest.version) if company
+                    else ("", ""))
+        except Exception:  # noqa: BLE001 - the manifest must never fail a run
+            _LOG.warning("validation manifest unavailable for %s", company_id)
+            return "", ""
+
     def _demo_dossier_store(self):
         from intent_engine.demo_dossier.store import DossierStore
         return DossierStore(self._runtime_root)
@@ -5099,9 +5118,17 @@ class WebApp:
                     "unavailable; nothing about the market was measured.",
                     company_id=key)
 
+            # The validation universe, BY REFERENCE. Only the cohort and the
+            # manifest version cross into the dossier; copying the rest would
+            # make every dossier version a snapshot of the manifest and the
+            # two would drift. A company absent from the manifest is a
+            # legitimate state — it simply is not part of the 100 — and is
+            # left as FIELD_UNAVAILABLE rather than invented.
+            cohort, manifest_version = self._manifest_placement(key)
             store = DossierStore(self._runtime_root)
             previous = store.latest(key)
-            dossier = assemble(market, founder, cohort="",
+            dossier = assemble(market, founder, cohort=cohort,
+                               manifest_version=manifest_version,
                                now=__import__("datetime").date.today()
                                .isoformat(), previous=previous)
             stored = store.save(dossier)

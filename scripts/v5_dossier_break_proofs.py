@@ -40,6 +40,7 @@ JOIN = "tests/test_a_company_dossier_joins_two_systems.py"
 NEUTRAL = "tests/test_the_dossier_seam_stays_neutral.py"
 REAL = "tests/test_the_dossier_survives_real_companies.py"
 SURFACE = "tests/test_the_dossier_is_reachable_by_a_human.py"
+UNIVERSE = "tests/test_the_validation_universe_is_locked.py"
 
 #: (name, file, find, replace, test node that must go RED)
 MUTATIONS = [
@@ -202,6 +203,102 @@ MUTATIONS = [
      '        "generated_at": dossier.generated_at,\n'
      '        "market_block": dossier.market_block,\n    }',
      f"{SURFACE}::test_the_index_is_an_index_and_carries_no_reference_ids"),
+
+    # --- the validation universe (Batch 9) --------------------------------
+    ("the exactly-one-hundred guard is removed",
+     SRC / "validation/manifest.py",
+     "    if len(cs) != TOTAL:",
+     "    if False:",
+     f"{UNIVERSE}::test_a_hundred_and_first_company_fails"),
+
+    ("the unique company-id guard is removed",
+     SRC / "validation/manifest.py",
+     '        problems.append(f"duplicate company_id: {sorted(dupes)}")',
+     "        pass",
+     f"{UNIVERSE}::test_a_duplicate_company_id_fails"),
+
+    ("a duplicate canonical entity is accepted",
+     SRC / "validation/manifest.py",
+     '        problems.append(f"duplicate canonical_name: '
+     '{sorted(dupe_names)}")',
+     "        pass",
+     f"{UNIVERSE}::test_a_duplicate_canonical_name_fails"),
+
+    ("an undeclared shared domain is accepted",
+     SRC / "validation/manifest.py",
+     "        if len(rows) > 1 and not any(r.parent_company_id "
+     "for r in rows):",
+     "        if False:",
+     f"{UNIVERSE}::test_an_undeclared_duplicate_domain_fails"),
+
+    ("the North American scope guard is removed",
+     SRC / "validation/manifest.py",
+     "    outside = sorted({c.country for c in cs} - NORTH_AMERICA)",
+     "    outside = []",
+     f"{UNIVERSE}::test_a_company_outside_north_america_fails"),
+
+    ("the heterogeneity gate is removed",
+     SRC / "validation/manifest.py",
+     "    for sector, minimum in sorted(SECTOR_MINIMUMS.items()):",
+     "    for sector, minimum in []:",
+     f"{UNIVERSE}::test_gutting_a_sector_fails"),
+
+    ("the holdout lock is removed",
+     SRC / "validation/manifest.py",
+     '        problems.append(f"blind holdout not locked: '
+     '{sorted(unlocked)}")',
+     "        pass",
+     f"{UNIVERSE}::test_an_unlocked_holdout_fails"),
+
+    ("a cohort may be hand-edited away from the documented rule",
+     SRC / "validation/manifest.py",
+     "        derived = derive_cohorts(cs)",
+     "        derived = {c.company_id: c.cohort for c in cs}",
+     f"{UNIVERSE}::test_moving_a_company_between_cohorts_fails"),
+
+    ("the breaker selector stops preferring unseen shapes",
+     SRC / "validation/manifest.py",
+     "        pick = min(matches, key=lambda c: (\n"
+     "            (c.sector, c.country) in seen_pairs,\n"
+     "            c.sector in seen_sectors,\n"
+     "            c.company_id))",
+     "        pick = min(matches, key=lambda c: c.company_id)",
+     f"{UNIVERSE}::test_the_breaker_ten_does_not_spend_two_slots_on_one_"
+     f"shape"),
+
+    ("a holdout company can reach the breaker wave",
+     SRC / "validation/manifest.py",
+     '    pool = sorted(manifest.cohort("DEVELOPMENT"), '
+     "key=lambda c: c.company_id)",
+     "    pool = sorted(manifest.companies, key=lambda c: c.company_id)",
+     f"{UNIVERSE}::test_no_holdout_company_can_reach_the_breaker_wave"),
+
+    ("runtime data can mutate a manifest record",
+     SRC / "validation/manifest.py",
+     "@dataclass(frozen=True)\nclass Company:",
+     "@dataclass\nclass Company:",
+     f"{UNIVERSE}::test_analysed_web_content_cannot_move_a_company_"
+     f"between_cohorts"),
+
+    ("a manifest row may encode an expected answer",
+     SRC / "validation/manifest.py",
+     "        if low in FORBIDDEN_FIELDS or any(low.startswith(p)",
+     "        if False or any(low.startswith('__never__')",
+     f"{UNIVERSE}::test_a_row_carrying_an_expected_answer_is_refused"),
+
+    ("the dossier drops the manifest version from its identity",
+     SRC / "demo_dossier/dossier.py",
+     '            "manifest_version": self.manifest_version,',
+     "",
+     f"{UNIVERSE}::test_a_dossier_records_the_exact_manifest_version_"
+     f"it_used"),
+
+    ("the real analysis path stops stamping the cohort",
+     SRC / "webapp/app.py",
+     "            cohort, manifest_version = self._manifest_placement(key)",
+     '            cohort, manifest_version = "", ""',
+     f"{UNIVERSE}::test_the_real_analysis_path_stamps_the_cohort_onto_"
+     f"the_dossier"),
 
     ("the depth scan for forbidden names is disabled entirely",
      SRC / "demo_dossier/contracts.py",

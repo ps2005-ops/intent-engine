@@ -40,6 +40,15 @@ dependencies = [
     "pydantic==2.13.4",
     "anthropic==0.116.0",
     "python-dotenv==1.2.1",
+    # PyYAML reads the 100-company validation manifest, which the analysis
+    # path consults on EVERY run to stamp a dossier's cohort. It was a test
+    # -only dependency until the manifest reached production code, and the
+    # failure mode is the quiet one this file keeps having to warn about:
+    # `_manifest_placement` swallows the ImportError, every dossier is
+    # stamped with no cohort and no manifest version, and that is
+    # indistinguishable from a company legitimately outside the universe.
+    # Nothing would raise and the 100-company program would measure nothing.
+    "PyYAML==6.0.3",
 ]
 
 [project.scripts]
