@@ -1315,6 +1315,7 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     # same input.
     try:
         from . import causal_question as CQ
+        from intent_engine.market import learning_store as LS
 
         observations = [r for r in rows
                         if r.get("record") == "macro_observation"]
@@ -1327,8 +1328,22 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
             as_of=ctx.as_of, limit=25)
         resolutions = [CQ.resolve(q, observations, as_of=ctx.as_of)
                        for q in questions]
+        # PERSISTED, not merely rendered. The first live cycle proved the gap:
+        # 25 questions asked, 25 refused for a named prerequisite, the block
+        # rendered in the report — and `causal_estimates_attempted` still folded
+        # to 0, because nothing reached the ledger. That is the same number the
+        # metric reads when this capability has never run, so the planner could
+        # not tell a live refusal from a dead node. Report is a surface; the
+        # ledger is the memory.
+        store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
+        persisted = sum(1 for r in resolutions
+                        if store.record_causal_estimate(r))
         payload["causal_resolution"] = {
             **CQ.summarise(resolutions),
+            # Both numbers. `persisted` is new rows and is 0 on a re-run of an
+            # unchanged ledger, which is correct and is NOT the same as having
+            # attempted nothing -- `questions` carries that.
+            "persisted": persisted,
             # The rows themselves, so a refusal is as durable as an estimate
             # would have been. A cycle that persisted only successes would
             # make the engine's research history a success log, which is the

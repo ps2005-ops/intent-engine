@@ -140,6 +140,23 @@ METHOD_PERFORMANCE = "method_performance"
 #: read together or the win reads as an identification.
 METHOD_ASSUMPTION_CHECK = "method_assumption_check"
 
+#: One causal question the engine ASKED, with what it concluded — including,
+#: and especially, a refusal.
+#:
+#: A-WIRE-001's first live cycle formulated 25 real questions, refused all 25
+#: for a named missing prerequisite, rendered that in the cycle report, and
+#: appended NOTHING here. So `causal_estimates_attempted` still folded to 0 —
+#: the same number it reads when the capability has never run at all. A metric
+#: that cannot tell "asked 25 and refused 25" from "never asked" is the
+#: missing-versus-zero collapse one layer above the estimator, and it is the
+#: layer the planner reads.
+#:
+#: A refusal is therefore as durable as an estimate would have been. That is
+#: not generosity toward failure: the refusals ARE the finding right now, and
+#: an engine that persisted only its successes would have a research history
+#: that is a success log.
+CAUSAL_ESTIMATE = "causal_estimate"
+
 RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           RECONCILIATION, EVIDENCE, CYCLE, LIFECYCLE,
                           EVIDENCE_SEEN, RELATIONSHIP, RELATIONSHIP_SUPPORT,
@@ -153,7 +170,8 @@ RECORD_KINDS = frozenset({BELIEF, BELIEF_UPDATE, EXPECTATION,
                           THESIS_REVISION, THESIS_SNAPSHOT,
                           METHOD_PERFORMANCE, METHOD_ASSUMPTION_CHECK,
                           STRATEGIC_INTERACTION, ACTOR_RESPONSE_EPISODE,
-                          MACRO_OBSERVATION, SOURCE_HEALTH})
+                          MACRO_OBSERVATION, SOURCE_HEALTH,
+                          CAUSAL_ESTIMATE})
 
 # What a session actually produced. Recorded as a class, not as a count,
 # because "3 things happened" is the sentence this project keeps having to
@@ -238,6 +256,31 @@ class LearningStore:
         payload = update.as_dict()
         payload["belief_id"] = belief_id
         self._append(BELIEF_UPDATE, payload)
+
+    def record_causal_estimate(self, resolution) -> bool:
+        """Persist one causal resolution, FITTED OR REFUSED. Idempotent.
+
+        Keyed on `resolution_id`, which is derived from the question and the
+        as-of date, so a nightly cycle that re-derives the same 25 refusals from
+        the same unchanged events appends them once. Without that this row grows
+        by 25 every night forever while the fold shows a constant number — the
+        combination that hides its own growth, which this ledger has already
+        paid for once with duplicate belief declarations.
+        """
+        payload = resolution.as_dict() if hasattr(resolution, "as_dict") \
+            else dict(resolution)
+        rid = payload.get("resolution_id")
+        if not rid:
+            raise ValueError("a causal estimate row needs a resolution_id")
+        if rid in self.causal_estimate_ids():
+            return False
+        self._append(CAUSAL_ESTIMATE, payload)
+        return True
+
+    def causal_estimate_ids(self) -> frozenset:
+        return frozenset(r.get("resolution_id") for r in self._rows()
+                         if r.get("record") == CAUSAL_ESTIMATE
+                         and r.get("resolution_id"))
 
     def record_expectation(self, e: EXP.ExpectedObservation) -> bool:
         """Preregister once. A re-registered expectation is not a new test."""

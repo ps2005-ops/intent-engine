@@ -29,6 +29,24 @@ PYTHON = os.environ.get(
 
 #: (name, file, find, replace, tests, why it must go red)
 PROOFS = [
+    ("a causal refusal is rendered but never persisted",
+     "src/intent_engine/market/steps.py",
+     "        persisted = sum(1 for r in resolutions\n"
+     "                        if store.record_causal_estimate(r))",
+     "        persisted = 0",
+     "tests/test_market_causal_persistence.py::test_the_step_wires_the_write_into_its_payload",
+     "a cycle that renders 25 refusals and writes none leaves "
+     "causal_estimates_attempted at 0 -- the number the metric reads when the "
+     "capability has never run at all"),
+
+    ("the estimate row stops being idempotent",
+     "src/intent_engine/market/learning_store.py",
+     "        if rid in self.causal_estimate_ids():\n            return False",
+     "        if False:\n            return False",
+     "tests/test_market_causal_persistence.py::test_a_nightly_rerun_of_unchanged_questions_appends_nothing",
+     "25 rows a night forever while the fold shows a constant number is the "
+     "combination that hides its own growth"),
+
     ("causal production caller removed",
      "src/intent_engine/market/steps.py",
      "        from . import causal_question as CQ\n",
