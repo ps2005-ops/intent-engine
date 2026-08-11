@@ -459,6 +459,14 @@ class WebApp:
         self._private_graph = PrivateGraphStore(_state)
         self._scope_audit = ScopeAuditLog(_state / "tenant_scope_audit.jsonl")
         self._tenant_receipts = TenantReceiptLog(_state / "tenant_receipts.jsonl")
+        # Bounded counters for D-MDR-001. Deliberately in memory and
+        # deliberately nameless: a stream recording WHICH private columns a
+        # tenant was asked for is itself a private dataset, so this one counts
+        # and never names.
+        from intent_engine.external_intel.minimum_data_request import (
+            MDRTelemetry as _MDRTelemetry,
+        )
+        self._mdr_telemetry = _MDRTelemetry()
         self.fi = FounderIntelligenceService(config.fi_store_path)
         # THE REASONING BACKEND WAS NEVER WIRED IN.
         #
@@ -3365,17 +3373,30 @@ class WebApp:
         if not subject:
             return self._error_page(
                 400, "an internal-impact question needs a subject")
+        from intent_engine.executive import living_decision as LDR
+        from intent_engine.external_intel import minimum_data_request as MDRM
+
+        root = self.config.web_store_path.parent
         ans = internal_view.answer(
             session=session, subject_id=subject,
             decision=(query.get("decision")
                       or "what this external subject changes internally"),
             directory=self._tenant_directory, store=self._private_graph,
-            audit=self._scope_audit, runtime_sha=self._runtime_sha())
+            audit=self._scope_audit,
+            requests=MDRM.DataRequestStore(root),
+            decisions=LDR.LivingDecisionStore(root),
+            decision_id=(query.get("decision_id") or "").strip(),
+            runtime_sha=self._runtime_sha())
         # The receipt is written for a scopeless request too: the requests an
         # auditor came for are the refused ones.
         self._tenant_receipts.append(ans.receipt)
+        # SYSTEM learning, kept apart from anything economic: these counters
+        # describe this engine's restraint, never a market.
+        self._mdr_telemetry = self._mdr_telemetry.merged(ans.telemetry)
         if query.get("format") == "json":
-            return self._ok_json(ans.as_dict())
+            payload = ans.as_dict()
+            payload["telemetry_cumulative"] = self._mdr_telemetry.as_dict()
+            return self._ok_json(payload)
         return self._html(self._page(
             "Internal impact", internal_view.render(ans), session,
             self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
@@ -3411,7 +3432,8 @@ class WebApp:
                 denial_reason="SCOPELESS_READ",
                 runtime_sha=self._runtime_sha()))
         else:
-            store = LDR.LivingDecisionStore(self.config.web_store_path.parent)
+            root = self.config.web_store_path.parent
+            store = LDR.LivingDecisionStore(root)
             open_rows = LDR.open_decisions(store, scope=scope)
             payload = {
                 "contract": "living_decisions_view.v1", "scoped": True,
@@ -3425,6 +3447,25 @@ class WebApp:
                     r["decision_id"]
                     for r in LDR.awaiting_outcome(store, scope=scope)],
             }
+            # "What are we waiting for, and why?" answered from the canonical
+            # request rows rather than from a copy inside the decision. The
+            # decision holds IDS; dereferencing them here is what keeps one
+            # decision history instead of two.
+            from intent_engine.external_intel import minimum_data_request as MDRM
+
+            _requests = MDRM.DataRequestStore(root)
+            awaiting_ids = {
+                rid for r in LDR.awaiting_information(store, scope=scope)
+                for rid in (r.get("minimum_data_requests") or ())}
+            awaiting_mves = {
+                mid for r in LDR.awaiting_information(store, scope=scope)
+                for mid in (r.get("mve_refs") or ())}
+            payload["minimum_data_requests"] = [
+                q.as_dict() for q in _requests.requests(scope=scope)
+                if q.request_id in awaiting_ids]
+            payload["minimum_viable_experiments"] = [
+                x.as_dict() for x in _requests.experiments(scope=scope)
+                if x.experiment_id in awaiting_mves]
             if query.get("decision"):
                 payload["changed"] = list(LDR.what_changed(
                     store, query["decision"], scope=scope))

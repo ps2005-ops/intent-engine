@@ -307,12 +307,19 @@ def test_a_gap_produces_a_bounded_data_request_on_the_surface(world):
     got = _json(world.app, SE.SUBJECT_LINK_NO_METRIC, session=ALPHA)
     req = got["minimum_data_request"]
     assert req is not None
-    assert req["fields"] and req["window_days"] > 0
+    assert req["fields"]
+    # MIGRATED BY INTENT. `window_days > 0` asserted that we ask for HISTORY,
+    # which under v1 was a fixed 90 days nothing used. Every field here is
+    # point-in-time, so the honest window is zero and a positive one would now
+    # be the defect. What must hold is that the window never exceeds what the
+    # requested fields themselves declare.
+    assert req["window_days"] == max(
+        (f["time_window_days"] for f in req["requested_fields"]), default=0)
     assert "Salesforce" not in json.dumps(req)
     assert "CRM" not in json.dumps(req)
     _, html = _get(world.app, "/internal-impact", session=ALPHA,
                    query=f"subject={SE.SUBJECT_LINK_NO_METRIC}")
-    assert "Smallest thing that would answer this" in html
+    assert "Missing information" in html
 
 
 def test_a_measured_negative_asks_for_nothing(world):

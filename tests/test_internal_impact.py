@@ -414,7 +414,14 @@ def test_an_unavailable_world_produces_a_bounded_request(audit):
     assert req is not None
     assert req.reason == MDR_NO_INTERNAL_WORLD
     assert req.decision == DECISION_ASKED
-    assert req.fields and req.window_days == 90
+    assert req.fields
+    # MIGRATED BY INTENT. This asserted `window_days == 90`, which was the v1
+    # constant asking for a quarter of history it had no use for -- the
+    # over-broad ask this node exists to remove. The invariant that actually
+    # matters is that the window is no wider than the fields need, and every
+    # field here is point-in-time.
+    assert req.window_days == max(
+        (f.time_window_days for f in req.requested_fields), default=0)
     # Bounded: named columns, not a system.
     assert "CRM" not in " ".join(req.fields)
 
@@ -431,15 +438,28 @@ def test_a_missing_metric_produces_a_request_naming_the_declared_node(audit):
     assert got.declared_links[0] in req.missing
 
 
+def _typed_field(name="a"):
+    from intent_engine.external_intel.minimum_data_request import (
+        ALTERS_STANDING,
+        RequestedField,
+        VOI_MEDIUM,
+    )
+    return RequestedField(
+        field_name=name, decision_question="does it move?",
+        expected_decision_effect="could change the standing",
+        alters=(ALTERS_STANDING,), voi_band=VOI_MEDIUM)
+
+
 def test_a_request_without_a_decision_is_refused(audit):
     from intent_engine.external_intel.internal_impact import MinimumDataRequest
     with pytest.raises(GraphError):
-        MinimumDataRequest(decision="", fields=("a",),
+        MinimumDataRequest(decision="",
+                           requested_fields=(_typed_field(),),
                            reason=MDR_NO_INTERNAL_WORLD)
 
 
 def test_a_request_without_fields_is_refused():
     from intent_engine.external_intel.internal_impact import MinimumDataRequest
     with pytest.raises(GraphError):
-        MinimumDataRequest(decision=DECISION_ASKED, fields=(),
+        MinimumDataRequest(decision=DECISION_ASKED, requested_fields=(),
                            reason=MDR_NO_INTERNAL_WORLD)

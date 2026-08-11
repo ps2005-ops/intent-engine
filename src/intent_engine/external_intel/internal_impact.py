@@ -81,7 +81,7 @@ from intent_engine.business_graph.model import (
     GraphError,
     read_scope,
 )
-from intent_engine.core.tenant import TenantScope
+from intent_engine.core.tenant import TenantScope, scope_cache_key
 
 CONTRACT = "internal_impact.v1"
 
@@ -382,83 +382,175 @@ def assess_internal_impact(graph: BusinessGraph, *, subject_id: str,
 
 
 # =============================================================================
-# Minimum Data Request -- the bounded foundation
+# Minimum Data Request -- the bridge from a non-answer to a bounded ask
 # =============================================================================
-#: What a request is FOR. A request that cannot name the decision it serves is
-#: a data grab, and this is the seam where "give us CRM access" gets born.
-MDR_CONTRACT = "minimum_data_request.v1"
+# WHAT CHANGED, AND WHY IT HAD TO
+# -------------------------------
+# This section used to hold the whole request: two hard-coded field lists, a
+# breadth check that existed only in a docstring, and a "minimum" that did not
+# vary with anything. That is the shape this program has learned to distrust --
+# a named heuristic that is really a constant passes every minimisation test
+# because it ignores the input it claims to minimise over.
+#
+# The canon now lives in `minimum_data_request.py`: typed fields, decision-bound
+# VOI, mechanical breadth minimisation, privacy and retention, and the
+# experiment bridge. THIS module keeps exactly the part it is the authority on
+# -- which parameters an internal-impact answer leaves unresolved, and which
+# fields the tenant has declared it could supply -- and delegates the rest.
+# There is one MDR system; this is its input side.
+from intent_engine.external_intel import minimum_data_request as MDR
 
-MDR_NO_INTERNAL_WORLD = "NO_INTERNAL_WORLD"
-MDR_METRIC_NOT_WIRED = "METRIC_NOT_WIRED"
-MDR_REASONS = frozenset({MDR_NO_INTERNAL_WORLD, MDR_METRIC_NOT_WIRED})
+MDR_CONTRACT = MDR.CONTRACT
+MDR_NO_INTERNAL_WORLD = MDR.MDR_NO_INTERNAL_WORLD
+MDR_METRIC_NOT_WIRED = MDR.MDR_METRIC_NOT_WIRED
+MDR_REASONS = MDR.MDR_REASONS
+MinimumDataRequest = MDR.MinimumDataRequest
+RequestedField = MDR.RequestedField
+CandidateField = MDR.CandidateField
+
+#: The attribute a tenant sets on a private node to say "I could supply this
+#: column". The ONLY way a candidate beyond the baseline enters the catalogue:
+#: an external document may make us NOTICE a gap and may never add a field to
+#: the list of things we ask this tenant for.
+OFFERABLE_FIELD_KEY = "offerable_field"
+
+#: Which parameters each non-answer leaves open. A table rather than branching
+#: prose, so a new answer state cannot silently inherit another's ask.
+_UNRESOLVED_BY_STATE = {
+    INTERNAL_IMPACT_IDENTIFIED: (),
+    NO_INTERNAL_IMPACT: (),
+    INTERNAL_DATA_UNAVAILABLE: (MDR.PARAM_METRIC_EXISTENCE,
+                                MDR.PARAM_METRIC_LINKAGE),
+    # EXPOSURE_SIZE is here because the live proof found it unreachable: no
+    # state opened it, so a tenant's declared exposure candidates were always
+    # declined as resolving nothing and the privacy-substitute path could not
+    # run in production. A dependency with no metric wired to it genuinely
+    # leaves "how much of the business sits behind this" open.
+    INTERNAL_LINK_WITHOUT_METRIC: (MDR.PARAM_METRIC_LINKAGE,
+                                   MDR.PARAM_METRIC_LEVEL,
+                                   MDR.PARAM_EXPOSURE_SIZE),
+}
+
+_REASON_BY_STATE = {
+    INTERNAL_DATA_UNAVAILABLE: MDR_NO_INTERNAL_WORLD,
+    INTERNAL_LINK_WITHOUT_METRIC: MDR_METRIC_NOT_WIRED,
+}
+
+#: What any tenant with an internal graph can produce without integrating
+#: anything. Deliberately three narrow columns and not one system: the whole
+#: module exists to keep "connect your CRM" off this list.
+BASELINE_CANDIDATES = (
+    MDR.CandidateField(
+        field_name="internal metric inventory",
+        semantic_definition="the names of the metrics you already track, and "
+                            "nothing else about them",
+        resolves=(MDR.PARAM_METRIC_EXISTENCE,),
+        grain=MDR.GRAIN_AGGREGATE, privacy_class=MDR.PRIVACY_INTERNAL),
+    MDR.CandidateField(
+        field_name="metric-to-initiative linkage",
+        semantic_definition="which initiative or action each metric moves with",
+        resolves=(MDR.PARAM_METRIC_LINKAGE,),
+        grain=MDR.GRAIN_AGGREGATE, privacy_class=MDR.PRIVACY_INTERNAL),
+    MDR.CandidateField(
+        field_name="current metric value",
+        semantic_definition="the present level of one named metric",
+        resolves=(MDR.PARAM_METRIC_LEVEL,),
+        grain=MDR.GRAIN_AGGREGATE, privacy_class=MDR.PRIVACY_CONFIDENTIAL),
+)
 
 
-@dataclass(frozen=True)
-class MinimumDataRequest:
-    """The smallest ask that would resolve one specific unanswered question.
+def unresolved_parameters(impact: InternalImpact) -> Tuple[str, ...]:
+    """What this answer leaves open. Empty for BOTH answered states.
 
-    BOUNDED BY CONSTRUCTION: `fields` and `window_days` are required and the
-    constructor refuses a request that names no decision. The alternative --
-    asking for a system rather than for the columns that resolve an uncertainty
-    -- is both a worse security posture and an admission that we do not know
-    what we would do with the data.
+    A measured negative resolves the question, so it leaves nothing open --
+    asking for more data to confirm a negative already measured is precisely
+    how a request becomes unbounded, and it is refused here rather than by a
+    downstream reviewer noticing.
     """
-
-    request_id: str = ""
-    decision: str = ""
-    missing: str = ""
-    fields: Tuple[str, ...] = ()
-    window_days: int = 0
-    reason: str = ""
-    subject_id: str = ""
-
-    def __post_init__(self):
-        if not self.decision:
-            raise GraphError(
-                "a minimum data request must name the decision it serves; a "
-                "request without one is a data grab")
-        if not self.fields:
-            raise GraphError("a minimum data request must name its fields")
-        if self.reason not in MDR_REASONS:
-            raise GraphError(f"unknown request reason {self.reason!r}")
-
-    def as_dict(self) -> dict:
-        return {
-            "contract": MDR_CONTRACT,
-            "request_id": self.request_id,
-            "decision": self.decision,
-            "missing": self.missing,
-            "fields": list(self.fields),
-            "window_days": self.window_days,
-            "reason": self.reason,
-            "subject_id": self.subject_id,
-        }
+    return _UNRESOLVED_BY_STATE[impact.state]
 
 
-def minimum_data_request(impact: InternalImpact, *, decision: str
-                         ) -> Optional[MinimumDataRequest]:
+def candidate_fields(graph: Optional[BusinessGraph] = None, *,
+                     scope: Optional[TenantScope] = None
+                     ) -> Tuple["MDR.CandidateField", ...]:
+    """The baseline, plus whatever THIS tenant declared it could supply.
+
+    Read through the scoped reader, so a candidate belonging to another tenant
+    is not merely filtered out downstream -- it is never seen. A malformed
+    declaration is skipped rather than raised on: a typo in one node's
+    attribute must not make the whole request unanswerable.
+    """
+    extra = []
+    if graph is not None and scope is not None:
+        for node in graph.read(scope=scope).nodes:
+            if node.kind not in PRIVATE_NODE_KINDS:
+                continue
+            spec = (getattr(node, "attrs", None) or {}).get(OFFERABLE_FIELD_KEY)
+            if not isinstance(spec, Mapping) or not spec.get("field_name"):
+                continue
+            try:
+                extra.append(MDR.CandidateField(
+                    field_name=str(spec["field_name"]),
+                    semantic_definition=str(spec.get("semantic_definition",
+                                                     "")),
+                    resolves=tuple(spec.get("resolves") or ()),
+                    grain=str(spec.get("grain") or MDR.GRAIN_AGGREGATE),
+                    privacy_class=str(spec.get("privacy_class")
+                                      or MDR.PRIVACY_RESTRICTED),
+                    aggregates_to=str(spec.get("aggregates_to", "")),
+                    time_window_days=int(spec.get("time_window_days") or 0),
+                    minimum_coverage=str(spec.get("minimum_coverage", "")),
+                    available=bool(spec.get("available", True)),
+                    source_system=str(spec.get("source_system", ""))))
+            except (GraphError, TypeError, ValueError):
+                continue
+    return tuple(BASELINE_CANDIDATES) + tuple(extra)
+
+
+def request_outcome(impact: InternalImpact, *, decision: str,
+                    candidates: Optional[Sequence["MDR.CandidateField"]] = None,
+                    decision_id: str = "", scope: Optional[TenantScope] = None,
+                    now: str = "") -> "MDR.RequestOutcome":
+    """The full ladder for one internal-impact answer.
+
+    Returns a routing outcome, not just a request: the four ways of NOT asking
+    are different products, and a caller that only ever sees `None` cannot tell
+    "you already have this" from "no field can produce it".
+    """
+    unresolved = unresolved_parameters(impact)
+    population = (SYNTHETIC_ENTERPRISE
+                  if not impact.is_real_data_claim() and impact.populations
+                  else (impact.populations[0] if impact.populations else ""))
+    return MDR.route(
+        decision=decision, unresolved=unresolved,
+        candidates=list(candidates if candidates is not None
+                        else BASELINE_CANDIDATES),
+        subject_id=impact.subject_id, decision_id=decision_id,
+        tenant_scope_id=(scope.scope_id if scope is not None else ""),
+        tenant_key=(scope_cache_key(scope) if scope is not None else ""),
+        reason=_REASON_BY_STATE.get(impact.state, MDR.MDR_PARAMETER_UNRESOLVED),
+        missing=_missing_sentence(impact), data_population=population,
+        provenance=f"internal impact: {impact.state}", now=now)
+
+
+def _missing_sentence(impact: InternalImpact) -> str:
+    if impact.state == INTERNAL_DATA_UNAVAILABLE:
+        return "any internal metric this thesis could move"
+    if impact.state == INTERNAL_LINK_WITHOUT_METRIC:
+        return "a metric wired to " + ", ".join(impact.declared_links)
+    return ""
+
+
+def minimum_data_request(impact: InternalImpact, *, decision: str,
+                         candidates: Optional[Sequence] = None
+                         ) -> Optional["MDR.MinimumDataRequest"]:
     """The request that would turn this non-answer into an answer, or None.
 
-    None for both ANSWERED states, and the reason differs: an identified impact
-    needs nothing, and a MEASURED NEGATIVE needs nothing either -- asking for
-    more data to confirm a negative we already measured is how a data request
-    becomes unbounded.
+    Kept at its original name and signature because it is the live seam, and a
+    rename would have been a second system wearing a migration. None for both
+    ANSWERED states, and now also None when the ladder ends somewhere other
+    than a request -- callers that need to tell those apart ask
+    `request_outcome()` instead.
     """
-    if impact.state not in NOT_A_NEGATIVE:
-        return None
-    if impact.state == INTERNAL_DATA_UNAVAILABLE:
-        return MinimumDataRequest(
-            request_id=f"mdr-{impact.subject_id}-world",
-            decision=decision,
-            missing="any internal metric this thesis could move",
-            fields=("metric name", "owning initiative",
-                    "the external subject it depends on"),
-            window_days=90, reason=MDR_NO_INTERNAL_WORLD,
-            subject_id=impact.subject_id)
-    return MinimumDataRequest(
-        request_id=f"mdr-{impact.subject_id}-metric",
-        decision=decision,
-        missing=("a metric wired to " + ", ".join(impact.declared_links)),
-        fields=("metric name", "current value", "the initiative that moves it"),
-        window_days=90, reason=MDR_METRIC_NOT_WIRED,
-        subject_id=impact.subject_id)
+    return request_outcome(impact, decision=decision,
+                           candidates=candidates).request
