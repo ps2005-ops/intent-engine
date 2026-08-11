@@ -446,6 +446,19 @@ class WebApp:
         config.validate()
         self.config = config
         self.web_store = WebStore(config.web_store_path)
+        # THE TENANCY SEAM. Sited beside the other stores rather than built
+        # per request: the directory must be reload-stable, because the private
+        # graph partition is keyed on the tenant id and a re-minted id would
+        # silently show a founder an empty business instead of an error.
+        from intent_engine.core.tenant import ScopeAuditLog
+        from intent_engine.business_graph.private_store import PrivateGraphStore
+        from intent_engine.webapp.tenancy import TenantDirectory, TenantReceiptLog
+
+        _state = config.web_store_path.parent
+        self._tenant_directory = TenantDirectory(_state / "tenant_directory.jsonl")
+        self._private_graph = PrivateGraphStore(_state)
+        self._scope_audit = ScopeAuditLog(_state / "tenant_scope_audit.jsonl")
+        self._tenant_receipts = TenantReceiptLog(_state / "tenant_receipts.jsonl")
         self.fi = FounderIntelligenceService(config.fi_store_path)
         # THE REASONING BACKEND WAS NEVER WIRED IN.
         #
@@ -703,6 +716,8 @@ class WebApp:
             return self._ok_json(version_info())
         if path == "/internal/acceptance" and method == "POST":
             return self._acceptance(environ)
+        if path == "/internal-impact" and method == "GET":
+            return self._internal_impact(session, environ)
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
         if path == "/onboarding/dismiss" and method == "POST":
@@ -3329,6 +3344,45 @@ class WebApp:
         return self._html(self._page(
             f'{report.get("company_name", "")} — presentation', body, session,
             csrf))
+
+    # -- INTERNAL IMPACT ---------------------------------------------------
+    # D-IBG-001 / D-SYN-001 / F-TS-001 all had live proofs that required a
+    # request to reach them, and no Founder request path established a
+    # TenantScope, so all three sat at CAPABILITY_VERIFIED. This route is that
+    # path. It parses the query and calls `internal_view.answer`, and does
+    # NOTHING ELSE -- so a controlled local invocation of `answer()` executes
+    # exactly the code an HTTP request executes, with no helper bypass.
+    def _internal_impact(self, session, environ):
+        from urllib.parse import parse_qs
+
+        from intent_engine.webapp import internal_view
+
+        query = {k: v[0] for k, v in
+                 parse_qs(environ.get("QUERY_STRING", "")).items()}
+        subject = (query.get("subject") or "").strip()
+        if not subject:
+            return self._error_page(
+                400, "an internal-impact question needs a subject")
+        ans = internal_view.answer(
+            session=session, subject_id=subject,
+            decision=(query.get("decision")
+                      or "what this external subject changes internally"),
+            directory=self._tenant_directory, store=self._private_graph,
+            audit=self._scope_audit, runtime_sha=self._runtime_sha())
+        # The receipt is written for a scopeless request too: the requests an
+        # auditor came for are the refused ones.
+        self._tenant_receipts.append(ans.receipt)
+        if query.get("format") == "json":
+            return self._ok_json(ans.as_dict())
+        return self._html(self._page(
+            "Internal impact", internal_view.render(ans), session,
+            self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
+
+    def _runtime_sha(self) -> str:
+        from intent_engine._version import version_info
+
+        info = version_info()
+        return str(info.get("git_sha") or info.get("app_version") or "")
 
     def _page(self, title, body, session, csrf):
         return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'

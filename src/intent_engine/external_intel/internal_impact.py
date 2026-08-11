@@ -227,6 +227,32 @@ class InternalImpact:
         }
 
 
+class MixedPopulation(GraphError):
+    """A single answer drew on both a synthetic and a real row.
+
+    Raised rather than flagged. `is_real_data_claim()` already returns False
+    for a mixed answer, which is the SAFE reading -- but safe is not the same
+    as correct, and a mixed answer is not a weaker finding, it is an
+    incoherent one: half of it describes a fixture and half describes a
+    business, and no reader can tell which half moved the conclusion.
+
+    D-SYN-001 states this as "any join between a SYNTHETIC node and a real
+    company fact raises", and it is stated that way because the alternative --
+    quietly downgrading the confidence of the whole answer -- is how a fixture
+    ends up inside a real recommendation with a caveat nobody reads.
+    """
+
+
+def refuse_mixed_population(populations) -> None:
+    """The guard. Exported so the suite can prove it fires."""
+    got = set(populations or ())
+    if SYNTHETIC_ENTERPRISE in got and REAL_ENTERPRISE in got:
+        raise MixedPopulation(
+            "this answer joins SYNTHETIC_ENTERPRISE rows to REAL_ENTERPRISE "
+            "rows; a synthetic world may prove capability and may never "
+            "contribute to a claim about a real business")
+
+
 def _population_of(node) -> str:
     """A row that does not say which population it belongs to is SYNTHETIC.
 
@@ -336,6 +362,9 @@ def assess_internal_impact(graph: BusinessGraph, *, subject_id: str,
     contributors = list(linked) + [by_id[m.metric_id] for m in metrics
                                    if m.metric_id in by_id]
     populations = tuple(sorted({_population_of(n) for n in contributors}))
+    # Refuse the mixture here, where the join actually happens, rather than
+    # letting a half-synthetic answer reach a surface with a caveat.
+    refuse_mixed_population(populations)
     declared = tuple(sorted(n.node_id for n in linked))
 
     if not metrics:
