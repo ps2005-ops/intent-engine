@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 
@@ -36,8 +37,37 @@ from intent_engine.market import session as S
 from intent_engine.market import steps as STEPS
 
 
+#: Env var naming the canonical runtime tree, for operators who are not
+#: launchd. `--root` still wins; this only replaces the relative default.
+ROOT_ENV = "MARKET_ROOT"
+
+#: The old default. Relative, so it resolved against whatever directory the
+#: operator happened to be standing in.
+FALLBACK_ROOT = "data"
+
+
+def resolve_root(value) -> pathlib.Path:
+    """The tree an operator command is actually reading, absolute.
+
+    THE DEFECT THIS CLOSES. `--root` defaulted to the relative string `data`,
+    while launchd passes `/Users/.../intent-engine-market`. So
+    `python -m intent_engine.market runs` typed from anywhere else resolved to
+    an empty `./data` and printed "no cycle has run yet" -- which is the same
+    sentence a genuinely idle engine prints, and there was no way to tell the
+    two apart. An operator checking whether the night cycle ran got a confident
+    "no" about a directory they never meant to ask about.
+
+    Absolute now, and the reading commands PRINT the root they resolved, so the
+    answer always names the tree it is about. That is the same discipline the
+    rest of this program applies to every other empty result: an absence has to
+    say what it is an absence of.
+    """
+    return pathlib.Path(
+        value or os.environ.get(ROOT_ENV) or FALLBACK_ROOT).expanduser().resolve()
+
+
 def _root(args) -> pathlib.Path:
-    root = pathlib.Path(args.root)
+    root = resolve_root(getattr(args, "root", None))
     return root / "dryrun" if getattr(args, "dry_run", False) else root
 
 
@@ -85,7 +115,7 @@ def cmd_cycle(name: str, args) -> int:
 
 
 def cmd_status(args) -> int:
-    root = pathlib.Path(args.root)
+    root = resolve_root(args.root)
     health = H.check(root)
     if args.json:
         print(json.dumps(health.as_dict(), indent=1, sort_keys=True,
@@ -96,9 +126,14 @@ def cmd_status(args) -> int:
 
 
 def cmd_runs(args) -> int:
-    rows = C.RunStore(pathlib.Path(args.root)).all()[-args.limit:]
+    root = resolve_root(args.root)
+    rows = C.RunStore(root).all()[-args.limit:]
+    # Named on both branches. An empty answer that does not say which tree it
+    # read is indistinguishable from a wrong-tree answer, which is exactly how
+    # this command reported an idle engine that had run all week.
+    print(f"root: {root}")
     if not rows:
-        print("no cycle has run yet")
+        print("no cycle has run yet under this root")
         return 0
     print(f"{'run id':<44}{'status':<32}{'steps':>6}")
     for row in rows:
@@ -121,7 +156,9 @@ def build_parser() -> argparse.ArgumentParser:
         p = sub.add_parser(name, help=f"run the {name} cycle "
                                       f"({hour:02d}:{minute:02d} "
                                       f"{S.TIMEZONE})")
-        p.add_argument("--root", default="data")
+        p.add_argument("--root", default=None,
+                       help=f"runtime tree (default: ${ROOT_ENV}, else "
+                            f"./{FALLBACK_ROOT})")
         p.add_argument("--as-of", default=None,
                        help="operating day (default: today in "
                             f"{S.TIMEZONE})")
@@ -139,11 +176,15 @@ def build_parser() -> argparse.ArgumentParser:
                             "window (used by launchd; guards DST)")
 
     p = sub.add_parser("status", help="operational health, one screen")
-    p.add_argument("--root", default="data")
+    p.add_argument("--root", default=None,
+                   help=f"runtime tree (default: ${ROOT_ENV}, else "
+                        f"./{FALLBACK_ROOT})")
     p.add_argument("--json", action="store_true")
 
     p = sub.add_parser("runs", help="recent cycle records")
-    p.add_argument("--root", default="data")
+    p.add_argument("--root", default=None,
+                   help=f"runtime tree (default: ${ROOT_ENV}, else "
+                        f"./{FALLBACK_ROOT})")
     p.add_argument("--limit", type=int, default=20)
     return parser
 
