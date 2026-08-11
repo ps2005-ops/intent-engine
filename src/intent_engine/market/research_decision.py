@@ -67,6 +67,28 @@ PROSPECTIVE = "PROSPECTIVE"
 RECONSTRUCTED = "RECONSTRUCTED"
 PROVENANCES = (PROSPECTIVE, RECONSTRUCTED)
 
+# --- population ---------------------------------------------------------------
+#
+# A SECOND WALL, AT RIGHT ANGLES TO THE FIRST. `provenance` asks how the ROW was
+# produced: written before the call, or inferred afterwards from a document that
+# survived. `population` asks which WORLD the decision belongs to: the engine
+# running forward with the answer unavailable, or a past assembled after the
+# answer was on record.
+#
+# Neither implies the other, which is why both are checked wherever a
+# prospective gate is counted. A reconstructed row is not a historical episode
+# — it is a live decision whose record was rebuilt — and a historical episode is
+# not a prospective row however carefully it was built. B-HIST-002 exists
+# because `prospective_outcomes` counted every outcome row on the ledger with no
+# filter of either kind, so 1,000 imported historical rows would have moved it
+# by 1,000.
+#
+# PROSPECTIVE is spelled the same on both axes and means the same thing on
+# both, so it is reused rather than duplicated under a second name that would
+# have to be kept equal to it.
+HISTORICAL = "HISTORICAL"
+POPULATIONS = (PROSPECTIVE, HISTORICAL)
+
 # --- how the choice was made --------------------------------------------------
 #: The policy randomised and the probability is recorded. Only this status may
 #: carry a number.
@@ -211,6 +233,17 @@ class ResearchDecision:
     selection_probability_status: str = DETERMINISTIC
     chosen_at: str = ""
     provenance: str = PROSPECTIVE
+    #: WHICH POPULATION THIS DECISION BELONGS TO. Typed and validated, and
+    #: written into every row so the gate that counts it never has to infer.
+    #:
+    #: It defaults to PROSPECTIVE because the only producer that constructs
+    #: this class is the live cycle, and the live cycle's population is a fact
+    #: about where the code runs rather than a guess. The refusal that matters
+    #: is on the READ side: a persisted row that declares no population is
+    #: refused by `historical_corpus.require_population` rather than defaulted,
+    #: because the row that reaches a prospective count wrongly will always be
+    #: the one nobody set.
+    population: str = PROSPECTIVE
     #: TWO VOCABULARIES, KEPT APART. `chosen_action` is the thing actually
     #: chosen — an acquisition family like `customer_case_study`, which is
     #: what the cycle iterates. `research_policy` reasons over EVIDENCE source
@@ -224,6 +257,24 @@ class ResearchDecision:
     def __post_init__(self) -> None:
         if self.provenance not in PROVENANCES:
             raise DecisionRejected(f"unknown provenance {self.provenance!r}")
+        if self.population not in POPULATIONS:
+            raise DecisionRejected(
+                f"unknown population {self.population!r}; a decision-like row "
+                f"must declare one of {list(POPULATIONS)} rather than leave a "
+                "gate to work it out")
+        # THE COHERENCE LOCK. A historical episode's decision was assembled
+        # from a past whose answer is on record, which is what RECONSTRUCTED
+        # means. HISTORICAL beside PROSPECTIVE claims the live engine made a
+        # decision inside a world it was reconstructing, and it is the exact
+        # shape a row would take if somebody relabelled an imported episode to
+        # get it past a prospective filter.
+        if self.population == HISTORICAL and self.provenance != RECONSTRUCTED:
+            raise DecisionRejected(
+                f"population {HISTORICAL} with provenance {self.provenance}: a "
+                "historical episode was assembled after its own outcome was "
+                f"known, so its decision row is {RECONSTRUCTED} by "
+                "construction; this combination is what a relabelled import "
+                "looks like")
         status = self.selection_probability_status
         if status not in PROBABILITY_STATUSES:
             raise DecisionRejected(
@@ -308,6 +359,7 @@ class ResearchDecision:
             "selection_probability": self.selection_probability,
             "selection_probability_status": self.selection_probability_status,
             "chosen_at": self.chosen_at, "provenance": self.provenance,
+            "population": self.population,
             "policy_family": self.policy_family,
             "eligible_families": list(self.eligible_families),
             "forgone": list(self.forgone),
