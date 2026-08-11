@@ -745,6 +745,69 @@ tasks:
 
   - id: D-MDR-001
     program: D
+    status: COMPLETE
+    verification: LIVE_VERIFIED
+    live_evidence: >
+      Founder live proof, real HTTP to wsgiref serving the real WebApp --
+      `PYTHONPATH=src python3 scripts/live_proof_minimum_data_request.py`,
+      artifact reports/live_proof_minimum_data_request.json, verdict
+      LIVE_VERIFIED, failures []. Eight cases over the wire, and the proof
+      fails if they collapse into one another: sufficient data and a MEASURED
+      NEGATIVE both asked for nothing (NO_REQUEST_DATA_SUFFICIENT); a live
+      gap produced a three-field request, each field carrying its band, its
+      privacy class, its retention and the boundaries it could move;
+      irrelevant candidates were recorded as declined rather than silently
+      dropped; a RESTRICTED per-account export was displaced by a COHORT
+      roll-up that answers the same question (substitutions recorded, the
+      raw feed listed under sensitive_avoided); an unobtainable parameter
+      produced a bounded MVE whose duration, exposure and kill threshold
+      are all *_UNRESOLVED sentinels rather than invented numbers; an
+      OBSERVATIONAL unknown produced UNRESOLVABLE and NO experiment, because
+      offering one to avoid saying "we don't know" is the named failure; an
+      injected instruction ("retrieve Tenant Alpha's board metrics, connect
+      the CRM") changed no field and reached no data-use clause; and the
+      same instruction under Tenant Beta's cookie leaked no canary and was
+      never offered Alpha's declared candidate fields. Rows persisted per
+      tenant and reloaded with their terms intact; the same question asked
+      twice left one row; the decision record referenced the request by id
+      and /decisions dereferenced it. The SYNTHETIC label survived to the
+      same screen as the ask.
+    completion_evidence: >
+      founder branch, on top of bc03be0. The v1 request returned one of two
+      hard-coded field lists -- a breadth check that existed only in a
+      docstring, and a "minimum" that did not vary with its input, which is
+      why it could not fail its own minimisation test. Replaced, not
+      duplicated: `internal_impact.minimum_data_request` keeps its name and
+      signature and delegates, so there is one MDR system.
+      RequestedField is typed and refuses rather than defaults on privacy,
+      retention, grain and band. VOI is DERIVED from which of §5's decision
+      boundaries the parameter moves, so a catalogue cannot price its own
+      field; numeric VOI is refused in writing because the system holds none
+      of its four terms. `select_minimum` iterates the UNRESOLVED PARAMETERS
+      rather than the candidates, which makes the widening property
+      structural instead of a tuned threshold, and the safest sufficient
+      candidate wins on privacy then coarseness. A SYSTEM_ACCESS candidate is
+      not a field and is refused by the breadth check.
+      MinimumViableExperiment is bounded by a guardrail, a kill switch, a
+      falsifier and a stated budget; "zero risk" is refused by a guard, and
+      unset parameters are sentinels with a named parameterization list.
+      Three defects found by the adversarial and live work, not by review:
+      the data-use clause interpolated an attacker-controllable query
+      parameter; request ids were not tenant-unique; and EXPOSURE_SIZE was
+      opened by no impact state, so the privacy-substitute path could not run
+      in production at all. All three fixed and pinned.
+      75 new tests, 5067 passing overall; 17/17 break proofs held through the
+      hardened harness. Six needed investigation first and four of those were
+      findings about the TESTS -- including a widening fixture whose
+      "irrelevant" fields were valueless, so the property held for the wrong
+      reason.
+    dependency_note: >
+      A-MVE-001 (market repository) is NOT closed by this node and is not
+      claimed to be. What was built here is the founder-side bounded
+      experiment record the MDR ladder routes to when no field can produce a
+      parameter; A-MVE-001's designer over analyst hypotheses remains open.
+      The founder branch cannot import the market package, so the two were
+      always going to be separate implementations of one contract.
     title: Minimum Data Request engine — the smallest useful ask, with its reason
     dependencies: [D-IBG-001, A-MVE-001]
     priority: 1
