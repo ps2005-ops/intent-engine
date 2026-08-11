@@ -395,3 +395,28 @@ def test_summary_of_nothing_is_zero_of_every_standing():
     got = CD.summarise([])
     assert got["diagnosed"] == 0
     assert all(v == 0 for v in got["by_standing"].values())
+
+
+def test_a_pool_too_small_to_reach_the_threshold_is_untested_not_failed():
+    """The branch a break proof found untested.
+
+    With n fitted placebos the most extreme achievable rank is 1/(n+1), so a
+    pool of four cannot reach a 10% threshold for ANY unit — including one
+    with a thirty-fold effect. Reporting FAILED there reads as "the effect is
+    not unusual" when what happened is that the panel cannot demonstrate it
+    either way. This branch shipped in the same commit that added it and no
+    test exercised it; disabling it left the suite green.
+    """
+    donors = _pool(5)
+    treated = _jitter(_treated_from(
+        donors, {"donor_0": 0.5, "donor_1": 0.3, "donor_2": 0.2},
+        effect=40.0))
+    fit = SC.fit(treated, donors, treatment_index=TREATMENT)
+    assert fit.fitted, fit.refusal_detail
+    got = CD.in_space_placebo(treated, donors, treatment_index=TREATMENT,
+                              fit=fit)
+    assert got.result == EM.UNTESTED, got.evidence
+    assert "cannot demonstrate the effect either way" in got.evidence
+    # ... and the effect really is large, which is what makes UNTESTED the
+    # interesting answer rather than a technicality.
+    assert abs(fit.average_effect) > 10

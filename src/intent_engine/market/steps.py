@@ -1294,6 +1294,50 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
         payload["macro_state"] = {"error": f"{type(exc).__name__}: {exc}"}
 
+    # A-WIRE-001. THE CAUSAL QUESTION, ASKED OF WHAT THE ENGINE ACTUALLY HOLDS.
+    #
+    # synthetic_control and causal_diagnostics were built, adversarially
+    # tested, and had zero production callers — `grep -n synthetic_control
+    # steps.py` returned nothing, which is the shape this program has recorded
+    # five times. This is the caller.
+    #
+    # WHAT IT WILL SAY, AND WHY THAT IS THE POINT. The ledger holds 423 dated
+    # company events and not one numeric value attached to a company, so a
+    # question derived from a real LAYOFF or GUIDANCE_REVISION resolves to
+    # PANEL_UNAVAILABLE naming NO_OUTCOME_SERIES_FOR_TREATED_UNIT. That is the
+    # honest answer and it is a decision: it names the one input that would
+    # change it. A capability whose live output is a precise refusal is worth
+    # more than one that quietly never runs, which is what this was.
+    #
+    # A FOLD, like everything else in this step. Questions come from evidence
+    # rows already on the ledger and panels from macro observations already on
+    # it; nothing here fetches, so the step gives the same answer twice on the
+    # same input.
+    try:
+        from . import causal_question as CQ
+
+        observations = [r for r in rows
+                        if r.get("record") == "macro_observation"]
+        # Bounded deliberately. Every dated event is a candidate and there are
+        # hundreds; resolving all of them would spend a cycle re-deriving the
+        # same refusal. The cap is on questions ASKED, never on which ones —
+        # the events are taken in ledger order, not chosen.
+        questions = CQ.questions_from_events(
+            [r for r in rows if r.get("record") == "evidence"],
+            as_of=ctx.as_of, limit=25)
+        resolutions = [CQ.resolve(q, observations, as_of=ctx.as_of)
+                       for q in questions]
+        payload["causal_resolution"] = {
+            **CQ.summarise(resolutions),
+            # The rows themselves, so a refusal is as durable as an estimate
+            # would have been. A cycle that persisted only successes would
+            # make the engine's research history a success log, which is the
+            # defect PROGRAM A of V4 exists to have fixed.
+            "resolutions": [r.as_dict() for r in resolutions[:5]],
+        }
+    except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
+        payload["causal_resolution"] = {"error": f"{type(exc).__name__}: {exc}"}
+
     # WHAT MAKES A MACRO STATE MEAN SOMETHING DIFFERENT PER COMPANY.
     # Without it the transmission is a template: the same story fits a
     # capital-intensive manufacturer refinancing debt and a software company

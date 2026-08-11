@@ -856,6 +856,25 @@ def _knowledge_summary(knowledge: dict) -> dict:
                       "assumption_checks_written", "performances_held",
                       "assumption_checks_held", "error")
             if (knowledge.get("economic_method") or {}).get(k) is not None},
+        # A-WIRE-001. THE CAUSAL QUESTIONS THE CYCLE ASKED, AND WHY IT REFUSED.
+        #
+        # `by_state` and `by_missing_prerequisite` are carried whole rather
+        # than reduced to a headline count, because the headline for this
+        # capability is currently zero estimates and that number on its own is
+        # indistinguishable from the capability not running. What makes the
+        # refusal a finding is WHICH prerequisite was missing on how many
+        # questions, and `information_requirements` names what would change it.
+        #
+        # `synthetic_excluded` is rendered even when it is zero. It is the
+        # count of questions built to exercise the machinery rather than to
+        # describe the world, and a surface that showed it only when non-zero
+        # could not tell a reader that none were mixed in.
+        "causal_resolution": {
+            k: (knowledge.get("causal_resolution") or {}).get(k)
+            for k in ("questions", "estimated", "synthetic_excluded",
+                      "by_state", "by_missing_prerequisite",
+                      "information_requirements", "error")
+            if (knowledge.get("causal_resolution") or {}).get(k) is not None},
         "economic_thesis": {
             k: (knowledge.get("economic_thesis") or {}).get(k)
             for k in ("theses", "by_standing", "assertable",
