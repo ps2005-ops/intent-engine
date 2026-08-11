@@ -718,6 +718,8 @@ class WebApp:
             return self._acceptance(environ)
         if path == "/internal-impact" and method == "GET":
             return self._internal_impact(session, environ)
+        if path == "/decisions" and method == "GET":
+            return self._decisions(session, environ)
         if path == "/onboarding" and method == "GET":
             return self._onboarding(session)
         if path == "/onboarding/dismiss" and method == "POST":
@@ -3376,6 +3378,82 @@ class WebApp:
             return self._ok_json(ans.as_dict())
         return self._html(self._page(
             "Internal impact", internal_view.render(ans), session,
+            self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
+
+    # -- LIVING DECISION RECORDS (E-LDR-001) -------------------------------
+    # A projection, never a generator. Every answer below is computed from
+    # stored revisions, so "what changed your mind?" is auditable rather than
+    # narrated -- which is the difference between a decision record and a chat
+    # transcript.
+    def _decisions(self, session, environ):
+        import html as _html
+        from urllib.parse import parse_qs
+
+        from intent_engine.executive import living_decision as LDR
+        from intent_engine.webapp.tenancy import receipt_for, scope_for_session
+
+        query = {k: v[0] for k, v in
+                 parse_qs(environ.get("QUERY_STRING", "")).items()}
+        scope = scope_for_session(session, directory=self._tenant_directory,
+                                  audit=self._scope_audit)
+        request_id = "dreq_" + (self._runtime_sha() or "0")[:12]
+
+        if scope is None:
+            # A scopeless reader is not shown an empty decision list, because
+            # an empty list reads as "you have no open decisions". It is told
+            # that it holds no authority.
+            payload = {"contract": "living_decisions_view.v1", "scoped": False,
+                       "state": "DECISIONS_UNAVAILABLE",
+                       "reason": "SCOPELESS_READ", "open": [], "awaiting": []}
+            self._tenant_receipts.append(receipt_for(
+                request_id=request_id, scope=None,
+                company_id=query.get("company", ""), operation="decisions.read",
+                denial_reason="SCOPELESS_READ",
+                runtime_sha=self._runtime_sha()))
+        else:
+            store = LDR.LivingDecisionStore(self.config.web_store_path.parent)
+            open_rows = LDR.open_decisions(store, scope=scope)
+            payload = {
+                "contract": "living_decisions_view.v1", "scoped": True,
+                "state": ("NO_OPEN_DECISIONS" if not open_rows
+                          else "OPEN_DECISIONS"),
+                "open": [dict(r, what_would_change_this=None) for r in open_rows],
+                "awaiting_information": [
+                    r["decision_id"]
+                    for r in LDR.awaiting_information(store, scope=scope)],
+                "awaiting_outcome": [
+                    r["decision_id"]
+                    for r in LDR.awaiting_outcome(store, scope=scope)],
+            }
+            if query.get("decision"):
+                payload["changed"] = list(LDR.what_changed(
+                    store, query["decision"], scope=scope))
+            self._tenant_receipts.append(receipt_for(
+                request_id=request_id, scope=scope,
+                company_id=query.get("company", ""), operation="decisions.read",
+                requested=len(open_rows), allowed=len(open_rows),
+                runtime_sha=self._runtime_sha()))
+
+        if query.get("format") == "json":
+            return self._ok_json(payload)
+        rows = "".join(
+            f"<li data-status=\"{_html.escape(r['status'])}\">"
+            f"<strong>{_html.escape(r['decision_question'])}</strong>"
+            f"<span class=\"status\">{_html.escape(r['status'])}</span>"
+            + ("<span class=\"not-decided\">recommendation only — "
+               "no human has chosen</span>"
+               if r.get("is_recommendation_only") else
+               f"<span class=\"decided-by\">decided by "
+               f"{_html.escape(r.get('decided_by', ''))}</span>")
+            + "</li>"
+            for r in payload.get("open", []))
+        body = (f"<section id=\"decisions\" data-state=\""
+                f"{_html.escape(payload['state'])}\"><h2>Open decisions</h2>"
+                + (f"<ul>{rows}</ul>" if rows else
+                   "<p>No decision records are visible to this reader.</p>")
+                + "</section>")
+        return self._html(self._page(
+            "Decisions", body, session,
             self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
 
     def _runtime_sha(self) -> str:
