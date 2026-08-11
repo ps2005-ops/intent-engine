@@ -552,3 +552,115 @@ def test_an_empty_corpus_is_reported_as_empty_not_seeded():
     assert summary["episodes"] == 0
     assert summary["counts_toward_prospective_gate"] == 0
     assert summary["population"] == HC.HISTORICAL
+
+
+# --- B-HIST-001 instrumented: the engine's own resolved past -------------------
+
+def _expectation(eid="exp1", subject="acme", at="2026-03-01",
+                 metric="demand", direction="UP"):
+    return {"record": "expectation", "expectation_id": eid, "subject": subject,
+            "preregistered_at": at, "metric": metric,
+            "expected_direction": direction, "evidence_basis": ["ev_prior"],
+            "falsifier": "the programme is cancelled"}
+
+
+def _reconciliation(eid="exp1", subject="acme", at="2026-05-01",
+                    observed="DOWN"):
+    return {"record": "reconciliation", "expectation_id": eid,
+            "subject": subject, "evaluated_at": at,
+            "observed_direction": observed, "outcome": "CONTRADICTED",
+            "evidence_ids": ["ev_after"]}
+
+
+def test_a_preregistered_expectation_and_its_resolution_make_an_episode():
+    from intent_engine.market import historical_corpus as HC
+
+    got = HC.candidates_from_reconciliations(
+        [_expectation(), _reconciliation()])
+    assert len(got) == 1
+    assert got[0]["t0"] == "2026-03-01"
+    assert got[0]["t1"] == "2026-05-01"
+    assert got[0]["expected_observable"] == "demand"
+    assert got[0]["actual_observable"] == "DOWN"
+
+
+def test_provenance_is_the_t0_basis_and_never_the_resolution():
+    """`reconciliation.evidence_ids` postdates T0 by construction.
+
+    Citing it would cite exactly what the wall refused, which turns the wall
+    into a formality.
+    """
+    from intent_engine.market import historical_corpus as HC
+
+    got = HC.candidates_from_reconciliations(
+        [_expectation(), _reconciliation()])[0]
+    assert got["provenance"] == ("ev_prior",)
+    assert "ev_after" not in got["provenance"]
+
+
+def test_a_resolution_naming_no_expectation_has_no_t0_to_stand_at():
+    from intent_engine.market import historical_corpus as HC
+
+    assert HC.candidates_from_reconciliations([_reconciliation()]) == []
+
+
+def test_a_resolution_at_or_before_t0_is_not_an_outcome():
+    from intent_engine.market import historical_corpus as HC
+
+    assert HC.candidates_from_reconciliations(
+        [_expectation(at="2026-05-01"),
+         _reconciliation(at="2026-05-01")]) == []
+    assert HC.candidates_from_reconciliations(
+        [_expectation(at="2026-05-02"),
+         _reconciliation(at="2026-05-01")]) == []
+
+
+def test_the_wall_refuses_rows_dated_after_t0():
+    """The negative control for the wall itself.
+
+    An episode built from a snapshot that refused nothing is an episode whose
+    wall was never tested.
+    """
+    from intent_engine.market import historical_corpus as HC
+
+    rows = [_expectation(), _reconciliation()]
+    rows += [{"record": "evidence", "evidence_id": f"late{i}",
+              "subject_company": "acme", "observed_at": "2026-04-15",
+              "available_at": "2026-04-15"} for i in range(5)]
+    candidates = HC.candidates_from_reconciliations(rows)
+    corpus = HC.build_corpus(candidates,
+                             rows_for={"acme": rows}, built_at="2026-08")
+    assert corpus.episodes
+    assert corpus.episodes[0].t0_rows_refused >= 5
+
+
+def test_the_selection_rule_is_recorded_and_is_not_outcome_based():
+    from intent_engine.market import historical_corpus as HC
+
+    got = HC.candidates_from_reconciliations(
+        [_expectation(), _reconciliation()])[0]
+    assert "ledger order" in got["selection_rule"]
+    assert "outcome turned out" in got["selection_rule"]
+
+
+def test_the_cycle_step_actually_builds_the_corpus():
+    """AST, not a source grep. See test_market_causal_wiring for why."""
+    import ast
+    import pathlib as _pathlib
+
+    from intent_engine.market import steps
+
+    tree = ast.parse(_pathlib.Path(steps.__file__).read_text(encoding="utf-8"))
+    function = next(n for n in ast.walk(tree)
+                    if isinstance(n, ast.FunctionDef)
+                    and n.name == "knowledge_step")
+    calls = [n for n in ast.walk(function) if isinstance(n, ast.Call)
+             and isinstance(n.func, ast.Attribute)
+             and isinstance(n.func.value, ast.Name)
+             and n.func.value.id == "HC"]
+    assert {c.func.attr for c in calls} >= {"candidates_from_reconciliations",
+                                            "build_corpus"}
+    written = [n for n in ast.walk(function) if isinstance(n, ast.Subscript)
+               and isinstance(n.slice, ast.Constant)
+               and n.slice.value == "historical_corpus"]
+    assert written

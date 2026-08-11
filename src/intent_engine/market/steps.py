@@ -1338,6 +1338,56 @@ def knowledge_step(ctx: C.CycleContext) -> dict:
     except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
         payload["causal_resolution"] = {"error": f"{type(exc).__name__}: {exc}"}
 
+    # B-HIST-001 INSTRUMENTED. The corpus machinery was built and had no
+    # caller, so `historical_decision_episodes` read UNMEASURED — which blocked
+    # B-RM-001 on an instrumentation gap rather than on a fact about the world.
+    # UNMEASURED and 0 are different claims and only the second is a
+    # measurement.
+    #
+    # THE EPISODES ARE THE ENGINE'S OWN RESOLVED PAST. An expectation names a
+    # metric, a direction and a falsifier at a stated instant; a reconciliation
+    # resolves it later against evidence. That pair is a decision at T0 with an
+    # observable at T1, which is what a historical episode IS. Nothing is
+    # relabelled: these rows land in a separate file and B-HIST-002's guard
+    # asserts a historical row cannot move a prospective gate.
+    try:
+        from . import historical_corpus as HC
+
+        candidates = HC.candidates_from_reconciliations(rows)
+        corpus = HC.build_corpus(
+            candidates, rows_for={c["subject"]: rows for c in candidates},
+            built_at=ctx.as_of)
+        written = 0
+        if not ctx.dry_run:
+            store_ = HC.HistoricalCorpusStore(
+                ctx.root / HC.DEFAULT_PATH)
+            written = sum(1 for e in corpus.episodes
+                          if store_.record_episode(e))
+        usable, excluded = HC.for_estimator_validation(corpus.episodes)
+        payload["historical_corpus"] = {
+            "reconciliations_seen": sum(1 for r in rows
+                                        if r.get("record") == "reconciliation"),
+            "candidates": len(candidates),
+            "episodes": len(corpus.episodes),
+            # A builder that silently skipped would report a clean corpus of
+            # three out of a hundred and nothing would say so.
+            "refused": len(corpus.refusals),
+            "refusals_by_reason": dict(collections.Counter(
+                r.reason for r in corpus.refusals)),
+            "episodes_written": written,
+            "usable_for_estimator_validation": len(usable),
+            "excluded_as_revised": len(excluded),
+            # The wall's own work, carried so a reader can see it was not
+            # vacuous: an episode built from a snapshot that refused nothing
+            # is an episode whose wall was never tested.
+            "t0_rows_admitted": sum(e.t0_rows_admitted
+                                    for e in corpus.episodes),
+            "t0_rows_refused": sum(e.t0_rows_refused
+                                   for e in corpus.episodes),
+        }
+    except Exception as exc:  # noqa: BLE001 - a fold must not fail a cycle
+        payload["historical_corpus"] = {"error": f"{type(exc).__name__}: {exc}"}
+
     # WHAT MAKES A MACRO STATE MEAN SOMETHING DIFFERENT PER COMPANY.
     # Without it the transmission is a template: the same story fits a
     # capital-intensive manufacturer refinancing debt and a software company

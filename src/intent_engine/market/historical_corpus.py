@@ -1007,3 +1007,66 @@ def census(rows: Sequence[dict]) -> Dict[str, int]:
     """Rows by population, with the untagged counted rather than assigned."""
     _, counts = select(rows, populations=list(POPULATIONS))
     return counts
+
+
+# --- deriving candidates from the engine's own resolved past --------------------
+
+def candidates_from_reconciliations(rows: Sequence[dict]) -> List[dict]:
+    """Episodes the engine already lived through, as `build_episode` kwargs.
+
+    WHY THIS IS LEGITIMATE HISTORY AND NOT A RELABELLED PROSPECTIVE ROW.
+    An `expectation` is preregistered — it names a metric, a direction and a
+    falsifier at a stated instant, BEFORE the outcome. A `reconciliation`
+    resolves it later against evidence. That pair is exactly a historical
+    decision episode: a decision at T0, a declared expectation, an observable,
+    and what the observable turned out to be at T1.
+
+    It does not move one row into the prospective count. The prospective gates
+    read `research_decision` rows on the learning ledger and filter on
+    population; these candidates produce rows in a different file, and
+    B-HIST-002's guard asserts a historical row cannot move a prospective gate.
+
+    PROVENANCE IS THE T0 BASIS, NEVER THE RESOLUTION.
+    `expectation.evidence_basis` is what was known when the expectation was
+    written; `reconciliation.evidence_ids` is what resolved it, and every one
+    of those postdates T0 by construction. Citing them would be citing exactly
+    what the wall refused, and `build_episode` rejects an episode whose stated
+    basis includes a record the snapshot excluded. Passing them would turn a
+    wall into a formality.
+    """
+    expectations = {str(r.get("expectation_id") or ""): r
+                    for r in rows if r.get("record") == "expectation"}
+    out: List[dict] = []
+    for row in rows:
+        if row.get("record") != "reconciliation":
+            continue
+        expectation = expectations.get(str(row.get("expectation_id") or ""))
+        if expectation is None:
+            # A resolution naming no expectation on the ledger cannot be
+            # walled: there is no T0 to stand at. Skipped here and visible as
+            # the gap between reconciliations and candidates.
+            continue
+        t0 = _stamp(expectation.get("preregistered_at"))
+        t1 = _stamp(row.get("evaluated_at"))
+        if not t0 or not t1 or t1 <= t0:
+            # A resolution at or before the instant the expectation was
+            # written is not an outcome, whatever the dates say.
+            continue
+        observed = row.get("observed_direction") or row.get("observed_value")
+        out.append({
+            "subject": str(expectation.get("subject") or ""),
+            "t0": t0,
+            "t1": t1,
+            "decision": (f"preregister {expectation.get('metric')} "
+                         f"{expectation.get('expected_direction')}"),
+            "declared_expectation": str(expectation.get("expected_direction")
+                                        or ""),
+            "expected_observable": str(expectation.get("metric") or ""),
+            "actual_observable": None if observed is None else str(observed),
+            "provenance": tuple(expectation.get("evidence_basis") or ()),
+            "selection_rule": ("every reconciliation on the ledger that names "
+                               "an expectation, in ledger order; nothing is "
+                               "chosen by what its outcome turned out to be"),
+            "note": str(row.get("outcome") or ""),
+        })
+    return out
