@@ -160,17 +160,33 @@ def _identity(result, meta, company) -> dict:
 
 
 def _source_health(result, outcome) -> dict:
+    """Source outcomes, read under the names the PRODUCER actually uses.
+
+    An earlier version of this reader asked for `reason`/`error` and
+    `families_present`, got neither, and reported "unknown" failures and zero
+    evidence families for all ten companies — two convincing product defects
+    that were entirely defects in this function. The producer writes
+    `failure_type` / `safe_message` (see `service._fail`) and `families` (see
+    `coverage.assess`). A measurement instrument that names its fields wrongly
+    manufactures findings, which is worse than measuring nothing.
+    """
     coverage = result.get("coverage") or {}
+    failures = outcome.get("failed", []) or []
+    from collections import Counter
+    kinds = Counter(str(f.get("failure_type") or "unrecorded")
+                    for f in failures)
     return {
-        "attempted": len(outcome.get("ok", [])) + len(
-            outcome.get("failed", [])),
+        "attempted": len(outcome.get("ok", [])) + len(failures),
         "ok": len(outcome.get("ok", [])),
-        "failed": len(outcome.get("failed", [])),
+        "failed": len(failures),
         "fetch_status": outcome.get("status", ""),
-        "failure_reasons": sorted({
-            str(f.get("reason") or f.get("error") or "unknown")
-            for f in outcome.get("failed", [])}),
-        "families_present": coverage.get("families_present", []),
+        "failure_types": dict(sorted(kinds.items())),
+        "failure_messages": sorted({str(f.get("safe_message") or "")[:160]
+                                    for f in failures if f.get("safe_message")
+                                    })[:6],
+        "retryable_failures": sum(1 for f in failures if f.get("retryable")),
+        "families": coverage.get("families", []),
+        "family_counts": coverage.get("family_counts", {}),
         "missing_core": coverage.get("missing_core", []),
         "evidence_report_state": coverage.get("state", ""),
     }
