@@ -20,6 +20,8 @@ editing history, which is precisely what an append-only log exists to prevent.
 """
 from __future__ import annotations
 
+import datetime as _dt
+
 import json
 import pathlib
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -274,6 +276,15 @@ class LearningStore:
             raise ValueError("a causal estimate row needs a resolution_id")
         if rid in self.causal_estimate_ids():
             return False
+        # WHEN this estimate was made. Every causal row written before
+        # 2026-08-12 carried no timestamp of any kind — only a state such as
+        # PANEL_UNAVAILABLE — so the whole causal channel was invisible to
+        # every reporting window. That was a producer gap, not a reader gap:
+        # no priority of field names can date a row that was never stamped.
+        # Historical rows stay unstamped and report LEGACY_UNDATABLE; they are
+        # not back-filled, because inventing a date for a past estimate is
+        # exactly the kind of fabrication this ledger refuses.
+        payload.setdefault("estimated_at", _dt.date.today().isoformat())
         self._append(CAUSAL_ESTIMATE, payload)
         return True
 

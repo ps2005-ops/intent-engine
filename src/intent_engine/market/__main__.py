@@ -35,6 +35,7 @@ import sys
 from intent_engine.market import cycle as C
 from intent_engine.market import health as H
 from intent_engine.market import learning_status as LS
+from intent_engine.market import learning_report as LR
 from intent_engine.market import learning_watchdog as LW
 from intent_engine.market import session as S
 from intent_engine.market import steps as STEPS
@@ -165,6 +166,23 @@ def cmd_learning_status(args) -> int:
     return 0 if status["system_of_record"]["ledger_exists"] else 1
 
 
+def cmd_learning_report(args) -> int:
+    """Generate and persist a canonical learning report.
+
+    The JSON artifact is authoritative; the printed view is a projection of
+    it, so an operator and a later weekly synthesis read the same numbers.
+    """
+    root = _root(args)
+    report = LR.build(args.period, root=root)
+    path = LR.persist(report, root=root)
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=False))
+    else:
+        print(LR.render(report))
+        print(f"\nwrote {path}")
+    return 0
+
+
 def cmd_watchdog(args) -> int:
     """Is the system still LEARNING — not merely still running.
 
@@ -232,6 +250,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # The answer to "what has this system learned?", so that question never
     # again has to be answered by whichever store an explorer finds first.
+    p = sub.add_parser("learning-report",
+                       help="daily/weekly/monthly canonical learning report")
+    p.add_argument("--root", default=None)
+    p.add_argument("--period", default="day", choices=list(LR.PERIODS))
+    p.add_argument("--json", action="store_true")
+
     p = sub.add_parser("watchdog",
                        help="is the system still learning (typed alerts)")
     p.add_argument("--root", default=None)
@@ -262,6 +286,8 @@ def main(argv=None) -> int:
         return cmd_learning_status(args)
     if args.command == "watchdog":
         return cmd_watchdog(args)
+    if args.command == "learning-report":
+        return cmd_learning_report(args)
     return 2  # pragma: no cover - argparse rejects unknown commands
 
 

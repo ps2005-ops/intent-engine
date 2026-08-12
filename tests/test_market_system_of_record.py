@@ -127,9 +127,43 @@ def test_rows_that_cannot_be_dated_are_not_reported_as_no_change(tmp_path):
         encoding="utf-8")
     status = LS.collect(root=str(root), window="7d")
     channel = status["channels"]["expectations"]
-    assert channel["status"] == LS.UNDATABLE
+    # LEGACY_UNDATABLE, not UNDATABLE_BY_READER: `expectation` and
+    # `reconciliation` ARE kinds this reader knows how to date (via
+    # `preregistered_at` / `evaluated_at`), so rows lacking the stamp are
+    # history rather than a live blind spot. Either way it is NOT a measured
+    # zero, which is the property this test exists for.
+    assert channel["status"] == LS.LEGACY_UNDATABLE
     assert channel["all_time"] == 2
     assert "NOT a measured zero" in channel["reason"]
+
+
+def test_a_kind_this_reader_cannot_date_at_all_is_undatable_by_reader(
+        tmp_path):
+    """The other arm: an unknown kind is a READER gap, not legacy history."""
+    root = tmp_path / "runtime"
+    (root / "reports" / "market").mkdir(parents=True)
+    (root / "reports" / "market" / "learning_ledger.jsonl").write_text(
+        json.dumps({"record": "expectation", "expectation_id": "x"}),
+        encoding="utf-8")
+    channel = LS.collect(root=str(root), window="7d")["channels"][
+        "expectations"]
+    assert channel["status"] == LS.LEGACY_UNDATABLE
+
+
+def test_dated_expectations_are_placed_in_the_window(tmp_path):
+    """The repair itself: a stamped expectation must land in its window."""
+    root = tmp_path / "runtime"
+    (root / "reports" / "market").mkdir(parents=True)
+    (root / "reports" / "market" / "learning_ledger.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in [
+            {"record": "expectation", "preregistered_at": "2026-08-12",
+             "expectation_id": "x"},
+            {"record": "reconciliation", "evaluated_at": "2026-08-12",
+             "expectation_id": "x"}]), encoding="utf-8")
+    channel = LS.collect(root=str(root), window="all")["channels"][
+        "expectations"]
+    assert channel["status"] == LS.RUNNING
+    assert channel["in_window"] == 2
 
 
 def test_zero_effects_reports_unmeasurable_share_not_zero(tmp_path):

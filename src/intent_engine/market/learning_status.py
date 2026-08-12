@@ -48,6 +48,11 @@ NO_PRODUCER = "NO_PRODUCER"
 #: be counted but not placed in a window. Reporting these as RAN_NO_CHANGE
 #: would understate the system in exactly the way the original incident did.
 UNDATABLE = "UNDATABLE_BY_READER"
+#: The rows predate their producer being taught to stamp a time. They are NOT
+#: back-filled — inventing a date for a past estimate is the fabrication an
+#: append-only ledger exists to prevent — so they stay countable and
+#: unplaceable, and NEW rows of the same kind date normally.
+LEGACY_UNDATABLE = "LEGACY_UNDATABLE"
 #: Rows written before the acquisition counters were repaired.
 #: Their `documents_attempted` counted SUBJECTS, so no
 #: document-level yield can be computed from them.
@@ -94,15 +99,51 @@ _LEARNED_AT_FIELDS = ("recorded_at", "created_at", "retrieved_at",
                       "detected_at", "completed_at", "last_updated", "as_of",
                       "snapshot_as_of", "available_at")
 
+#: PER RECORD KIND, using the producer's own vocabulary. A single global list
+#: was wrong in a way that mattered: eight record kinds fell through it and
+#: were reported UNDATABLE, which made expectations, reconciliation, belief
+#: updates, re-observations, method performance, research decisions and thesis
+#: revisions invisible to every window — while seven of the eight were in fact
+#: stamped, under names nobody had looked up.
+#:
+#: Each entry answers "when did the SYSTEM learn this", not "when did the world
+#: do it". `preregistered_at` is when we committed to a prediction;
+#: `evaluated_at` is when we judged it; `seen_at` is when we re-observed
+#: evidence (NOT `occurrence_first_seen`, which is the original sighting and
+#: would date a re-observation to the past).
+_RECORD_TEMPORAL_FIELDS = {
+    "expectation": ("preregistered_at",),
+    "reconciliation": ("evaluated_at",),
+    "belief_update": ("at",),
+    "evidence_seen": ("seen_at",),
+    "method_performance": ("measured_as_of",),
+    "research_decision": ("chosen_at",),
+    "thesis_revision": ("changed_at",),
+    "research_outcome": ("completed_at", "started_at"),
+    "knowledge_effect": ("created_at", "occurred_at"),
+    "macro_observation": ("retrieved_at",),
+    "source_health": ("detected_at",),
+    "belief": ("last_updated",),
+    "evidence": ("available_at", "observed_at"),
+    # Stamped from 2026-08-12. Rows written before that carry nothing and
+    # report LEGACY_UNDATABLE rather than being back-filled.
+    "causal_estimate": ("estimated_at",),
+}
+
 
 def _learned_at(row: dict) -> tuple:
     """(date, field_used). Returns the FIELD so the instrument can audit itself.
 
     Field-by-field guessing is how this reader was wrong twice in one sitting.
     Returning the name that was used lets `date_field_coverage` show an
-    operator exactly which record types fell through to undated, instead of
+    operator exactly which record kinds fell through to undated, instead of
     letting them vanish quietly into a smaller window count.
     """
+    kind = str(row.get("record") or "")
+    for field in _RECORD_TEMPORAL_FIELDS.get(kind, ()):
+        value = row.get(field)
+        if value:
+            return str(value)[:10], field
     for field in _LEARNED_AT_FIELDS:
         value = row.get(field)
         if value:
@@ -189,7 +230,10 @@ def _channel(rows_by_type, declared_types, window_rows_by_type,
                   for field, n in (cov.get(t) or {}).items()
                   if field != "UNDATED")
     if present and not datable:
-        return {"status": UNDATABLE, "all_time": all_time, "in_window": 0,
+        # A kind this reader KNOWS how to date, whose every row predates the
+        # stamp, is legacy history rather than a live blind spot.
+        known = any(t in _RECORD_TEMPORAL_FIELDS for t in present)
+        return {"status": LEGACY_UNDATABLE if known else UNDATABLE, "all_time": all_time, "in_window": 0,
                 "by_record": {t: len(rows_by_type.get(t, ()))
                               for t in present},
                 "reason": (f"{all_time} row(s) exist but carry no timestamp "

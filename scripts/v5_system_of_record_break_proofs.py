@@ -28,6 +28,8 @@ DOCS = ROOT / "docs" / "execution"
 SOR = "tests/test_market_system_of_record.py"
 WD = "tests/test_market_learning_watchdog.py"
 PROD = "tests/test_market_acquisition_counter_populations.py"
+REP = "tests/test_market_learning_report.py"
+MTX = "tests/test_market_matrix.py"
 
 MUTATIONS = [
     ("the legacy prediction pipeline is declared CANONICAL",
@@ -85,6 +87,72 @@ MUTATIONS = [
      '            "changing_share": (round(len(changed) / len(effects), 4)\n'
      '                               if effects else 0.0),',
      f"{SOR}::test_zero_effects_reports_unmeasurable_share_not_zero"),
+
+    # --- reporting and temporal observability -----------------------------
+    ("a row dated after the period still enters the report",
+     SRC / "market/learning_report.py",
+     "        if stamp and start.isoformat() <= stamp <= end.isoformat():",
+     "        if stamp:",
+     f"{REP}::test_a_row_after_the_period_cannot_enter_the_report"),
+
+    # The month branch specifically. `_bounds` returns the same expression
+    # for week and month, so a bare replace(…, 1) mutated the WEEK branch and
+    # the month test correctly kept passing — a mutation-targeting defect,
+    # not a missing guard.
+    ("an incomplete month is presented as a finished one",
+     SRC / "market/learning_report.py",
+     "    nxt = (start + datetime.timedelta(days=32)).replace(day=1)\n"
+     "    end = nxt - datetime.timedelta(days=1)\n"
+     "    return start, end, end > as_of",
+     "    nxt = (start + datetime.timedelta(days=32)).replace(day=1)\n"
+     "    end = nxt - datetime.timedelta(days=1)\n"
+     "    return start, end, False",
+     f"{REP}::test_an_incomplete_month_is_marked_partial"),
+
+    ("an incomplete week is presented as a finished one",
+     SRC / "market/learning_report.py",
+     "        end = start + datetime.timedelta(days=6)\n"
+     "        return start, end, end > as_of",
+     "        end = start + datetime.timedelta(days=6)\n"
+     "        return start, end, False",
+     f"{REP}::test_an_incomplete_week_is_marked_partial"),
+
+    ("duplicate effects on one evidence row count as several learnings",
+     SRC / "market/learning_report.py",
+     '        "evidence_that_changed_something": len(changing_ids),',
+     '        "evidence_that_changed_something": len(changed),',
+     f"{REP}::test_the_same_evidence_changing_twice_is_one_changed_row"),
+
+    ("a re-observation is counted as new information",
+     SRC / "market/learning_report.py",
+     '        "new_information_share": _ratio(len(fresh), len(fresh) + len(seen)),',
+     '        "new_information_share": _ratio(len(fresh), len(fresh)),',
+     f"{REP}::test_a_re_observation_is_not_new_information"),
+
+    ("independent evidence is reported as zero instead of unavailable",
+     SRC / "market/learning_report.py",
+     '        "independent_evidence_rows": UNAVAILABLE,',
+     '        "independent_evidence_rows": 0,',
+     f"{REP}::test_independent_evidence_is_unavailable_not_zero"),
+
+    ("the expectation temporal mapping is removed",
+     SRC / "market/learning_status.py",
+     '    "expectation": ("preregistered_at",),',
+     '    "expectation": (),',
+     f"{REP}::test_preregistered_and_never_reconciled_is_a_reconciliation_"
+     f"bottleneck"),
+
+    ("the matrix stops being able to count itself",
+     ROOT / "scripts/market_matrix.py",
+     '    return {"axes": len(axes),',
+     '    return {"axes": len(axes) + 1,',
+     f"{MTX}::test_capability_counts_equal_the_number_of_axes"),
+
+    ("an honest maturity gate is counted as a blocker",
+     ROOT / "scripts/market_matrix.py",
+     '            if a["capability"] in ("PARTIAL", "NOT_BUILT", "UNMEASURED")]',
+     '            if a["capability"] != "PASS"]',
+     f"{MTX}::test_blocking_excludes_honest_maturity_gates"),
 
     # --- the always-on system (Batch A closure) ---------------------------
     ("the watchdog ignores a stale cycle",
