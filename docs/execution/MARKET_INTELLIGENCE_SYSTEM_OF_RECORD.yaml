@@ -1,0 +1,118 @@
+# THE MARKET INTELLIGENCE SYSTEM OF RECORD
+#
+# There is exactly one. This file is the machine-readable answer to
+# "which pipeline represents current market learning?", and it exists because
+# that question was once answered wrongly with severe consequences.
+#
+# THE INCIDENT (2026-08-12)
+# --------------------------
+# A repository exploration answering "what has the market intelligence system
+# learned this week?" selected `scripts/daily_market_predictions.py` and
+# `data/prediction_ledger.db`, and concluded "the learning system learned
+# nothing; formal learning modules are dormant".
+#
+# At that moment the canonical ledger held 4,921 rows, 935 of them from the
+# preceding seven days, and the canonical cycle had COMPLETED that same
+# morning. The legacy ledger it read had last been written on 2026-07-20,
+# twenty-three days earlier.
+#
+# Nothing was broken. The wrong store was read. That is a
+# FALSE_SYSTEM_OF_RECORD defect and it is release-severity, because an
+# operator, an agent or a monitor must never have to guess.
+#
+# This file is consumed by code (see `intent_engine.market.system_of_record`),
+# not merely published. A pipeline that is not declared CANONICAL here may not
+# describe itself as the market intelligence system.
+
+contract: market_intelligence_system_of_record.v1
+declared_at: "2026-08-12"
+
+system_of_record:
+  id: market_intelligence_learning_engine
+  status: CANONICAL
+
+  # What the scheduler calls and what a human types. Identical on purpose:
+  # an operator reproducing an incident must not be running a different path
+  # from the one that produced it.
+  entrypoint: "python -m intent_engine.market"
+  cycles: [day, night]
+  operator_commands:
+    health: "python -m intent_engine.market status"
+    recent_cycles: "python -m intent_engine.market runs"
+    what_was_learned: "python -m intent_engine.market learning-status --window 7d"
+
+  scheduler:
+    kind: launchd
+    jobs:
+      - com.intentengine.market.day
+      - com.intentengine.market.night
+      - com.intentengine.market.health
+    runtime_root: /Users/prathamsharma/intent-engine-market
+    trading_mode: PAPER
+
+  # Canonical stores, relative to the runtime root. These are the ONLY
+  # authorities on what the system has learned.
+  stores:
+    learning_ledger: reports/market/learning_ledger.jsonl
+    cycle_history: status/market_cycles.jsonl
+    learning_health: reports/market/learning_health_history.jsonl
+    decision_impact: reports/market/decision_impact.jsonl
+    entity_graph: data/entity_graph.db
+    founder_export: reports/market/dossier_revisions.jsonl
+
+  # The row types the learning ledger carries. Named here so a reader can tell
+  # "this channel produced nothing" from "this channel does not exist".
+  ledger_records:
+    evidence: [evidence, evidence_seen]
+    knowledge: [knowledge_effect]
+    beliefs: [belief, belief_update]
+    expectations: [expectation, reconciliation]
+    thesis: [thesis_snapshot, thesis_revision]
+    macro: [macro_observation]
+    causal: [causal_estimate]
+    method: [method_assumption_check, method_performance]
+    sources: [source_health]
+    active_learning: [research_decision, research_outcome]
+    relationships: [relationship]
+    cycles: [cycle]
+
+# ---------------------------------------------------------------------------
+# NOT the system of record. Anything listed here must say so in its own
+# output; `system_of_record.py` enforces the classification and the tests
+# refuse a legacy pipeline that claims otherwise.
+# ---------------------------------------------------------------------------
+legacy_pipelines:
+  - id: daily_market_predictions
+    status: LEGACY
+    entrypoints:
+      - scripts/daily_market_predictions.py
+      - scripts/resolve_market_predictions.py
+      - scripts/generate_weekly_regime_report.py
+    store: data/prediction_ledger.db
+    last_write: "2026-07-20"
+    scheduled: false
+    retained_because: >
+      It holds real prospective numeric predictions and their resolutions from
+      July 2026. That history is genuine and must not be deleted on the way to
+      fixing a naming problem — a resolved prediction is exactly the kind of
+      prospective record this programme is otherwise short of.
+    migration_status: RETAINED_UNMIGRATED
+    banner_required: true
+    disposition: >
+      Option B of the containment choice: retained as a clearly named auxiliary
+      subsystem. It is NOT integrated (its numeric-only FRED+SPY policy is
+      superseded by the canonical economic-state layer) and NOT deleted.
+
+# The trading agent is a CONSUMER of canonical economic intelligence and a
+# contributor of outcomes. It is deliberately not the system of record: market
+# learning must continue with zero trades, and a ledger owned by the trading
+# path would make "no position" indistinguishable from "nothing learned".
+consumers:
+  - id: paper_trading_agent
+    role: CONSUMER_AND_CO_LEARNER
+    owns_learning_ledger: false
+  - id: founder_intelligence
+    role: CONSUMER
+    transport: reports/market/dossier_revisions.jsonl
+  - id: company_demo_dossier
+    role: CONSUMER

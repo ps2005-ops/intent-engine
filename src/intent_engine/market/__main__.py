@@ -33,6 +33,7 @@ import sys
 
 from intent_engine.market import cycle as C
 from intent_engine.market import health as H
+from intent_engine.market import learning_status as LS
 from intent_engine.market import session as S
 from intent_engine.market import steps as STEPS
 
@@ -144,6 +145,24 @@ def cmd_runs(args) -> int:
     return 0
 
 
+def cmd_learning_status(args) -> int:
+    """What the SYSTEM OF RECORD has learned.
+
+    Resolves every path through the declaration, so this command cannot read
+    a legacy store even by accident — which is the whole reason it exists.
+    """
+    root = _root(args)
+    status = LS.collect(root=root, window=args.window)
+    if args.json:
+        print(json.dumps(status, indent=2, sort_keys=False))
+    else:
+        print(LS.render(status))
+    # Nonzero when the canonical ledger is absent: an operator asking what the
+    # system learned and getting a clean empty screen would read it as "it
+    # learned nothing", which is the exact failure this replaces.
+    return 0 if status["system_of_record"]["ledger_exists"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m intent_engine.market",
@@ -186,6 +205,18 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"runtime tree (default: ${ROOT_ENV}, else "
                         f"./{FALLBACK_ROOT})")
     p.add_argument("--limit", type=int, default=20)
+
+    # The answer to "what has this system learned?", so that question never
+    # again has to be answered by whichever store an explorer finds first.
+    p = sub.add_parser("learning-status",
+                       help="what the system of record has learned")
+    p.add_argument("--root", default=None,
+                   help=f"runtime tree (default: ${ROOT_ENV}, else "
+                        f"./{FALLBACK_ROOT})")
+    p.add_argument("--window", default="7d",
+                   choices=sorted(LS.WINDOWS),
+                   help="rolling window over the canonical ledger")
+    p.add_argument("--json", action="store_true")
     return parser
 
 
@@ -197,6 +228,8 @@ def main(argv=None) -> int:
         return cmd_status(args)
     if args.command == "runs":
         return cmd_runs(args)
+    if args.command == "learning-status":
+        return cmd_learning_status(args)
     return 2  # pragma: no cover - argparse rejects unknown commands
 
 

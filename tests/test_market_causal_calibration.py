@@ -192,5 +192,16 @@ def test_unresolved_expectations_are_reported_separately_from_failures():
                   for c in default_universe().prediction_companies()}
     families = CC.calibrate(rows(), industry_of=industries)
     strengthening = only(families, "demand_strengthening")
-    assert strengthening.unresolved > strengthening.tests
+    # SEPARATION, not magnitude. This asserted `unresolved > tests`, which was
+    # true of the ledger the day it was written and stopped being true the
+    # moment a live cycle resolved enough windows (10 vs 11). The ordering of
+    # the two counts was never the property — the property is that an open
+    # window is counted as unresolved and NEVER folded into the failure count.
+    assert strengthening.unresolved > 0, (
+        "no open window left; this test can no longer observe the separation "
+        "it exists to check")
     assert strengthening.contradicted == 0
+    # The load-bearing invariant: unresolved is its own channel. If open
+    # windows were merged into failures, this equality would break.
+    assert strengthening.tests == (strengthening.supported
+                                   + strengthening.contradicted)

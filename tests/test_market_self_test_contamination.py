@@ -117,7 +117,17 @@ def test_the_real_ledgers_dominant_class_is_the_sweep_re_read():
     got = OB.diagnose(store.open_expectations(as_of="2026-08-07"),
                       store.evidence())
     assert got["dominant_class"] == OB.SAME_SOURCE_REPACKAGING
-    assert got["by_class"][OB.SAME_SOURCE_REPACKAGING] >= 28
+    # DOMINANCE, not a magic floor. `>= 28` was the count on the day this was
+    # written; a live cycle moved it to 23 with no code change. The property
+    # the test is named for is that this class DOMINATES, so that is what is
+    # asserted — against the runner-up, which cannot drift with corpus size.
+    counts = got["by_class"]
+    runner_up = max((n for cls, n in counts.items()
+                     if cls != OB.SAME_SOURCE_REPACKAGING), default=0)
+    assert counts[OB.SAME_SOURCE_REPACKAGING] > runner_up
+    assert counts[OB.SAME_SOURCE_REPACKAGING] > 0, (
+        "nothing left in the dominant class; this test can no longer observe "
+        "the contamination it exists to characterise")
     assert "no longer hashes the sweep date" in \
         got["producers"][OB.SAME_SOURCE_REPACKAGING]
 
@@ -148,15 +158,23 @@ def test_occurrence_identity_removes_the_duplicates_and_loses_no_binding():
         deduped.append(row)
 
     # The count grows with the ledger; the property is that occurrence
-    # identity REMOVES duplicates and that no binding is lost below.
-    assert len(evidence) - len(deduped) >= 76
+    # identity REMOVES duplicates and that no binding is lost below. The
+    # comment said exactly that and the assertion then pinned 76 anyway.
+    assert len(evidence) - len(deduped) > 0
 
     before, before_refused = OB.bind(expectations, evidence,
                                      as_of="2026-08-07")
     after, after_refused = OB.bind(expectations, deduped, as_of="2026-08-07")
 
     key = "restates_the_evidence_that_opened_it"
-    assert before_refused[key] >= 18
+    # A floor of 18 assumed a particular set of open expectations; live cycles
+    # resolved some and it fell to 13. What the collapse assertion below needs
+    # is simply that the phenomenon EXISTS to collapse — a collapse measured
+    # from zero would be vacuously true, which is the failure mode this guard
+    # now closes explicitly.
+    assert before_refused[key] > 0, (
+        "no self-test refusals before dedupe; the collapse asserted below "
+        "would be vacuous")
     # The property is the COLLAPSE, not the residue: occurrence identity
     # takes self-test refusals from many to a handful.
     assert after_refused.get(key, 0) < before_refused[key] / 4

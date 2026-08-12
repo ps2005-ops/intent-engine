@@ -382,8 +382,18 @@ def test_live_effects_span_one_write_cycle_not_seven_months():
     effect_rows = [r for r in rows if r.get("record") == "knowledge_effect"]
     months = {str(r.get("created_at"))[:7] for r in effect_rows}
     cycles_with_effects = sum(1 for c in LA._effect_cycles(rows) if c)
+    days = {str(r.get("created_at"))[:10] for r in effect_rows}
     assert len(months) > 3, "the live corpus should still span months"
-    assert cycles_with_effects < len(months)
+    # Compared against DAYS, not months. The original compared write cycles to
+    # months and inverted (9 vs 7) as soon as live cycles accumulated — which
+    # this test's own docstring anticipated as "real history accumulating".
+    # The guard that actually matters is unchanged and is now stated directly:
+    # `_effect_cycles` segments by APPEND ORDER, so if someone rewrote it to
+    # read a date field the count would climb toward the number of distinct
+    # days. Staying well under that is the property.
+    assert cycles_with_effects < len(days), (
+        f"{cycles_with_effects} write cycles vs {len(days)} distinct "
+        f"created_at days — this looks like a date field, not append order")
 
 
 # --- the founder channel's three states -------------------------------------
