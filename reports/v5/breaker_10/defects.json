@@ -1,0 +1,143 @@
+{
+  "contract": "breaker_wave_defects.v1",
+  "wave": "BREAKER_10",
+  "baseline": "reports/v5/breaker_10/baseline_95d322f85535.json",
+  "runtime_sha": "95d322f85535",
+  "manifest_version": "1.0.0",
+  "analyst_available": false,
+  "analyst_note": "Anthropic credit balance exhausted; no strategic conclusion was produced for any company. Intelligence-layer clusters are UNMEASURED.",
+  "defects": [
+    {
+      "defect_id": "BW10-001",
+      "class": "B",
+      "severity": "SEV-1",
+      "root_cluster": "IDENTITY",
+      "title": "Manifest join dead for every real company",
+      "affected_companies": [
+        "ALL_TEN"
+      ],
+      "first_observed_company": "cloudflare",
+      "observed_state": "Analysis resolves the LEGAL name ('Cloudflare, Inc.') -> key 'cloudflare-inc', which matches no manifest id. Dossier filed under an unfindable key with cohort='' and manifest_version=''.",
+      "expected_invariant": "A company in the validation universe is filed under its manifest company_id and carries its cohort and manifest version.",
+      "evidence": "wave smoke run: dossier built=true, telemetry dossiers_persisted=1, but DossierStore.latest('cloudflare') was None.",
+      "why_invisible": "Empty cohort is indistinguishable from a company legitimately outside the universe; nothing raises. Batch 9's join test passed only because its fixture name was bare 'Shopify'.",
+      "status": "FIXED",
+      "fix_commit": "d41f6aa",
+      "rerun_results": "10/10 dossiers now carry cohort=DEVELOPMENT, manifest_version=1.0.0"
+    },
+    {
+      "defect_id": "BW10-002",
+      "class": "B",
+      "severity": "SEV-1",
+      "root_cluster": "GENERIC_REASONING",
+      "title": "An infrastructure failure is explained to the founder as thin evidence",
+      "affected_companies": [
+        "cloudflare",
+        "boeing",
+        "bank-of-america",
+        "bce",
+        "stripe",
+        "johnson-and-johnson"
+      ],
+      "first_observed_company": "cloudflare",
+      "observed_state": "ResultState.FAILED (exhausted API balance) rendered as 'every source here is the company's own account. Independent reporting would strengthen this.'",
+      "expected_invariant": "Only states the EVIDENCE caused may be explained in terms of evidence. FAILED and RETRIEVAL_BLOCKED are about us.",
+      "evidence": "baseline wave: 6/10 companies reached FAILED; result_state_detail blamed source composition in every case.",
+      "why_invisible": "The text is plausible and specific, so a founder acts on it by collecting more sources, which cannot help.",
+      "status": "FIXED",
+      "fix_commit": "d41f6aa",
+      "rerun_results": "FAILED now keeps ResultState.EXPLANATION[FAILED]; AST test pins the call-site gate"
+    },
+    {
+      "defect_id": "BW10-003",
+      "class": "C",
+      "severity": "SEV-2",
+      "root_cluster": "PROVENANCE",
+      "title": "Analyst logged the exception type only, discarding the diagnosis",
+      "affected_companies": [
+        "ALL_TEN"
+      ],
+      "first_observed_company": "cloudflare",
+      "observed_state": "'analyst call failed: BadRequestError' - identical output for exhausted credit, unknown model, oversized request, malformed schema.",
+      "expected_invariant": "A failure a wave hits on every company must say why from its own output.",
+      "evidence": "smoke run produced two BadRequestError lines with no message; the real cause (credit balance) needed a separate manual probe.",
+      "status": "FIXED",
+      "fix_commit": "d41f6aa",
+      "rerun_results": "provider message now captured per company in record.diagnostics"
+    },
+    {
+      "defect_id": "BW10-004",
+      "class": "D",
+      "severity": "SEV-2",
+      "root_cluster": "SOURCE_COVERAGE",
+      "title": "Redirect policy refuses same-company subdomains that candidate approval accepts",
+      "affected_companies": [
+        "cloudflare",
+        "stripe"
+      ],
+      "first_observed_company": "cloudflare",
+      "observed_state": "validation.redirect_allowed permits the same registrable domain (line 79) then requires exact host equality (line 83), so cloudflare.com -> blog.cloudflare.com and stripe.com -> docs.stripe.com fail as 'unsafe_redirect'. same_domain(), used to APPROVE candidates, accepts those same hosts.",
+      "expected_invariant": "Approval and redirect-following agree on what counts as the same company.",
+      "evidence": "baseline: 2 unsafe_redirect failures, both same-company subdomains; 'strategy' family missing for 8/10 companies and blog/docs are where strategy content lives.",
+      "status": "OPEN",
+      "fix_commit": null,
+      "rerun_results": null,
+      "note": "Not fixed in this batch: Class D, and the fix touches an SSRF-adjacent guard that deserves its own security review."
+    },
+    {
+      "defect_id": "BW10-005",
+      "class": "D",
+      "severity": "SEV-2",
+      "root_cluster": "PERFORMANCE",
+      "title": "Fetch timeouts drive p95 to ~10x p50",
+      "affected_companies": [
+        "advanced-micro-devices",
+        "mckinsey"
+      ],
+      "first_observed_company": "advanced-micro-devices",
+      "observed_state": "All 20 cohort timeouts fall on two companies (10 each). Those two are the only runs over 150s; p50=18.5s, p95=178.9s.",
+      "expected_invariant": "A refused or dead source should cost a bounded, small amount of wall time.",
+      "evidence": "baseline: amd fetch 83s/compose 67s with 11 failures; mckinsey fetch 82s/compose 51s with 13 failures; every other company <30s total.",
+      "status": "OPEN",
+      "fix_commit": null,
+      "rerun_results": null
+    },
+    {
+      "defect_id": "BW10-006",
+      "class": "D",
+      "severity": "SEV-3",
+      "root_cluster": "SOURCE_COVERAGE",
+      "title": "Strategy and customer evidence is systematically not retrieved",
+      "affected_companies": [
+        "8 of 10 missing strategy",
+        "6 of 10 missing customers"
+      ],
+      "first_observed_company": "boeing",
+      "observed_state": "Overall fetch yield 54/140 = 39%. missing_core: strategy 8/10, customers 6/10, product 4/10, identity 3/10, investor 3/10.",
+      "expected_invariant": "A large listed company should yield more than 4 of 14 approved sources.",
+      "evidence": "baseline source_health across the cohort; 62 http_status (mostly 403/404) and 20 timeouts out of 86 failures.",
+      "status": "OPEN",
+      "fix_commit": null,
+      "rerun_results": null,
+      "note": "Likely compounded by BW10-004. Do not treat as one defect until the redirect policy is fixed and the wave rerun."
+    },
+    {
+      "defect_id": "BW10-007",
+      "class": "E",
+      "severity": "SEV-3",
+      "root_cluster": "TRANSPORT",
+      "title": "An absent market snapshot counts as a contract mismatch in telemetry",
+      "affected_companies": [
+        "ALL_TEN"
+      ],
+      "first_observed_company": "cloudflare",
+      "observed_state": "telemetry contract_mismatch=1 per company because market_unavailable() carries the default contract_state CONTRACT_INCOMPATIBLE.",
+      "expected_invariant": "A snapshot that was never published is UNAVAILABLE, not incompatible.",
+      "evidence": "baseline telemetry: contract_mismatch=1 for every company though no market snapshot exists in this deployment.",
+      "status": "OPEN",
+      "fix_commit": null,
+      "rerun_results": null,
+      "note": "Cosmetic today; would misreport bridge health once a market engine publishes."
+    }
+  ]
+}
