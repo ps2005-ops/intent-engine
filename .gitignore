@@ -96,4 +96,11 @@ uiproof/
 .claude/launch.json
 
 # Live-preview validation artifacts (screenshots, matrices). Never committed.
-validation/
+# ANCHORED to the repo root on purpose. Unanchored, `validation/` matches a
+# directory at ANY depth, and it silently swallowed
+# `src/intent_engine/validation/` — the canonical 100-company manifest and the
+# Breaker-10 cohort selector. `git status` stayed clean, the tracked tests and
+# break proofs that import it could not run from a fresh checkout of the frozen
+# SHA, and for a while the only copy of that module in existence was an
+# untracked file in one ephemeral scratchpad worktree.
+/validation/
