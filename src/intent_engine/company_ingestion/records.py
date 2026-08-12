@@ -54,7 +54,15 @@ FAILURE_TYPES = ("timeout", "connection", "http_status", "too_large",
                  # "blocked" told the reader the address failed a safety check,
                  # which is a different and more alarming thing than "we read
                  # this page and chose not to keep it".
-                 "content_rejected")
+                 "content_rejected",
+                 # The host had ALREADY refused to answer earlier in this run,
+                 # so this candidate was never dialled. Distinct from
+                 # "timeout" on purpose: a timeout is a thing that happened to
+                 # this URL, this is a decision we made about the host, and
+                 # the reader must be able to tell "we waited and nobody
+                 # answered" from "we stopped waiting". Retryable, and never a
+                 # finding about the company.
+                 "host_unreachable")
 
 PRIVACY_CLASSES = ("public", "user_public_excerpt", "user_internal")
 

@@ -317,7 +317,38 @@ class CompanyIngestionService:
     # Failure types that mean "this host will not serve us", as opposed to
     # "this particular page is missing". A 404 says nothing about the host.
     _HOST_REFUSAL_FAILURES = ("http_status", "connection", "timeout",
-                              "blocked")
+                              "blocked", "host_unreachable")
+
+    #: Failures that are about the HOST rather than the path. A 404 says this
+    #: page is missing; a read timeout says nobody is answering, and the next
+    #: nine URLs on that host will each pay the full timeout to learn the
+    #: same thing.
+    _HOST_LEVEL_FAILURES = ("connection", "timeout")
+
+    #: How many host-level failures before this run stops dialling a host.
+    #: Two, not one: a single read timeout can be transient, and paying it
+    #: twice is cheap insurance against suppressing a host that would have
+    #: answered. Measured on the breaker cohort, where AMD and McKinsey each
+    #: took ten timeouts at CONNECT_TIMEOUT_S=8 -- about eighty seconds per
+    #: pass, three passes deep, and they were the only two runs over 150s.
+    _DEAD_HOST_AFTER = 2
+
+    def _host_failure_counts(self, run_id: str, candidates: dict) -> dict:
+        """How many HOST-LEVEL failures each host has produced in this run.
+
+        Counts only `connection` and `timeout` — a 404 or a 403 is about the
+        path or the request, and one missing page must never take a whole
+        host out of the run.
+        """
+        counts: dict = {}
+        for failure in self.store.failures(run_id):
+            if failure.get("failure_type") not in self._HOST_LEVEL_FAILURES:
+                continue
+            candidate = candidates.get(failure.get("candidate_id")) or {}
+            host = urlparse(candidate.get("url") or "").hostname
+            if host:
+                counts[host] = counts.get(host, 0) + 1
+        return counts
 
     def refusing_hosts(self, run_id: str) -> set:
         """Hosts this run has ALREADY watched refuse us.
@@ -415,10 +446,26 @@ class CompanyIngestionService:
             raise IngestionError(f"cannot fetch unknown candidates: {unknown}")
         already = {r["source_id"]: r for r in self.store.retrieved(run_id)}
         total_bytes = sum(r.get("byte_count", 0) for r in already.values())
+        # THE DEAD-HOST BREAKER. Seeded from the DURABLE failure store, not a
+        # local set, so it also covers the bounded rediscovery passes
+        # `compose_with_quality` runs afterwards -- which is where the same
+        # dead host was being dialled a second and third time.
+        host_failures = self._host_failure_counts(run_id, candidates)
         ok, failed = [], []
         for candidate_id in targets:
             candidate = candidates[candidate_id]
             source_id = f"src-{candidate_id[5:]}"
+            host = urlparse(candidate.get("url") or "").hostname
+            if host and host_failures.get(host, 0) >= self._DEAD_HOST_AFTER \
+                    and source_id not in already:
+                # Not a finding about the company: a host that has already
+                # refused to answer twice in this run is recorded as
+                # unreachable rather than dialled again for eight seconds.
+                failed.append(self._fail(
+                    run_id, domain, candidate_id, "host_unreachable",
+                    f"{host} failed {host_failures[host]} times earlier in "
+                    f"this run; not dialled again", True))
+                continue
             if source_id in already:
                 ok.append(already[source_id])
                 continue
@@ -453,6 +500,11 @@ class CompanyIngestionService:
                 failed.append(self._fail(
                     run_id, domain, candidate_id, result["failure_type"],
                     result["safe_message"], result.get("retryable", False)))
+                # Count it immediately so the breaker trips WITHIN this pass.
+                # Seeding from the store alone would only help the next pass,
+                # and the ten timeouts that motivated this were all in one.
+                if host and result["failure_type"] in self._HOST_LEVEL_FAILURES:
+                    host_failures[host] = host_failures.get(host, 0) + 1
                 continue
             self._transition(run_id, domain, "PARSING_SOURCES")
             body = result["body"]
