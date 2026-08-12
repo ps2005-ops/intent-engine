@@ -48,6 +48,10 @@ NO_PRODUCER = "NO_PRODUCER"
 #: be counted but not placed in a window. Reporting these as RAN_NO_CHANGE
 #: would understate the system in exactly the way the original incident did.
 UNDATABLE = "UNDATABLE_BY_READER"
+#: Rows written before the acquisition counters were repaired.
+#: Their `documents_attempted` counted SUBJECTS, so no
+#: document-level yield can be computed from them.
+LEGACY_INCOMPATIBLE_POPULATION = "LEGACY_INCOMPATIBLE_POPULATION"
 
 #: Effect types that represent the model actually moving. NO_CHANGE is
 #: deliberately excluded and deliberately reported: most evidence SHOULD change
@@ -111,35 +115,50 @@ def _as_of(row: dict) -> str:
 
 
 def _counter_integrity(outcomes) -> dict:
-    """Are `documents_attempted` and `documents_retrieved` the same population?
+    """Do the acquisition counters share a population — per SCHEMA ERA.
 
-    They are not. `counterparty_sources.acquire` increments
-    `documents_attempted` once per SUBJECT and `documents_retrieved` once per
-    DOCUMENT, so one subject returning three documents produces 1 and 3. Their
-    ratio is documents-per-subject, is not bounded by 1, and is not a
-    retrieval yield — measured on the live ledger, retrieved EXCEEDS attempted
-    in more than half of all rows.
+    Until 2026-08-12 `counterparty_sources.acquire` incremented
+    `documents_attempted` once per SUBJECT while `documents_retrieved`
+    incremented once per DOCUMENT, so their ratio was documents-per-subject
+    and exceeded 1.0 in 22 of 40 rows. The producer now writes
+    `subjects_attempted` (subjects) alongside `documents_attempted`
+    (document fetch attempts), and the presence of `subjects_attempted` is
+    what marks a row as repaired.
 
-    This function exists so that no consumer computes that ratio by accident.
-    It reports the inversion rather than repairing the counter, because the
-    field is persisted and renaming it is a migration, not a patch.
+    Legacy rows are NOT rewritten — the ledger is append-only and history is
+    not edited to make a metric look better. They are reported as
+    LEGACY_INCOMPATIBLE_POPULATION and excluded from any yield.
     """
     if not outcomes:
         return {"state": "NO_DATA"}
-    inverted = [o for o in outcomes
+    legacy = [o for o in outcomes if "subjects_attempted" not in o]
+    repaired = [o for o in outcomes if "subjects_attempted" in o]
+    inverted = [o for o in repaired
                 if int(o.get("documents_retrieved") or 0)
                 > int(o.get("documents_attempted") or 0)]
+    if inverted:
+        state = "POPULATION_MISMATCH"
+    elif legacy and not repaired:
+        state = LEGACY_INCOMPATIBLE_POPULATION
+    elif legacy:
+        state = "MIXED_SCHEMA"
+    else:
+        state = "CONSISTENT"
     return {
-        "state": "POPULATION_MISMATCH" if inverted else "CONSISTENT",
+        "state": state,
         "rows": len(outcomes),
+        "legacy_rows": len(legacy),
+        "repaired_rows": len(repaired),
         "rows_where_retrieved_exceeds_attempted": len(inverted),
-        "safe_to_compute_yield": not inverted,
+        # A yield may be computed over REPAIRED rows only, and only when none
+        # of them inverts.
+        "safe_to_compute_yield": bool(repaired) and not inverted,
+        "yield_population": ("documents_retrieved / documents_attempted over "
+                             "repaired rows only"),
         "detail": (
-            "`documents_attempted` counts SUBJECTS "
-            "(counterparty_sources.acquire:284) and `documents_retrieved` "
-            "counts DOCUMENTS (:291). Do not divide them — the result is "
-            "documents-per-subject, not a yield."
-            if inverted else ""),
+            "legacy rows counted SUBJECTS in `documents_attempted`; they are "
+            "excluded from any yield rather than rewritten"
+            if legacy else ""),
     }
 
 

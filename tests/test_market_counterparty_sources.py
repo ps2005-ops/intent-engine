@@ -327,9 +327,10 @@ def test_errors_with_no_documents_read_unreachable_not_rejected():
 
 def test_yield_is_per_document_not_per_request():
     """A thousand documents with one edge is worse than three with one."""
-    many = CS.Yield(family="x", documents_attempted=1,
+    many = CS.Yield(family="x", subjects_attempted=1, document_attempts=1000,
                     documents_retrieved=1000, relationships_accepted=1)
-    few = CS.Yield(family="y", documents_attempted=1, documents_retrieved=3,
+    few = CS.Yield(family="y", subjects_attempted=1, document_attempts=3,
+                   documents_retrieved=3,
                    relationships_accepted=1)
     assert few.yield_per_document > many.yield_per_document
 

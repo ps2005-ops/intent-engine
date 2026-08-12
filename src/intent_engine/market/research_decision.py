@@ -383,6 +383,12 @@ class DecisionOutcome:
     status: str
     started_at: str = ""
     completed_at: str = ""
+    #: SUBJECTS asked about. Absent on rows written before 2026-08-12, which
+    #: is exactly how a reader tells a repaired row from a legacy one.
+    subjects_attempted: int = 0
+    #: DOCUMENT fetch attempts — the denominator a document yield needs. On
+    #: legacy rows this field carried the SUBJECT count, so a ratio built from
+    #: it was not a yield.
     documents_attempted: int = 0
     documents_retrieved: int = 0
     accepted_evidence: int = 0

@@ -853,7 +853,8 @@ def source_acquisition_step(ctx: C.CycleContext) -> dict:
             status=_acquisition_status(report, integrated=integrated),
             started_at=started,
             completed_at=_dt.datetime.now(_dt.timezone.utc).isoformat(),
-            documents_attempted=report.documents_attempted,
+            subjects_attempted=report.subjects_attempted,
+            documents_attempted=report.document_attempts,
             documents_retrieved=report.documents_retrieved,
             accepted_evidence=(report.relationships_accepted if integrated
                                else 0),
@@ -963,6 +964,7 @@ def _rehydrate_outcome(row: dict):
             status=str(row.get("status") or ""),
             started_at=str(row.get("started_at") or ""),
             completed_at=str(row.get("completed_at") or ""),
+            subjects_attempted=int(row.get("subjects_attempted") or 0),
             documents_attempted=int(row.get("documents_attempted") or 0),
             documents_retrieved=int(row.get("documents_retrieved") or 0),
             accepted_evidence=int(row.get("accepted_evidence") or 0),

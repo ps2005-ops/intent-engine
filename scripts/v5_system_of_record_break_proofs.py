@@ -26,6 +26,8 @@ SRC = ROOT / "src" / "intent_engine"
 DOCS = ROOT / "docs" / "execution"
 
 SOR = "tests/test_market_system_of_record.py"
+WD = "tests/test_market_learning_watchdog.py"
+PROD = "tests/test_market_acquisition_counter_populations.py"
 
 MUTATIONS = [
     ("the legacy prediction pipeline is declared CANONICAL",
@@ -84,12 +86,59 @@ MUTATIONS = [
      '                               if effects else 0.0),',
      f"{SOR}::test_zero_effects_reports_unmeasurable_share_not_zero"),
 
-    ("mismatched acquisition counters are declared safe to divide",
+    # --- the always-on system (Batch A closure) ---------------------------
+    ("the watchdog ignores a stale cycle",
+     SRC / "market/learning_watchdog.py",
+     "    if age is not None and age > STALE_CYCLE_HOURS:",
+     "    if False:",
+     f"{WD}::test_a_stale_cycle_is_critical"),
+
+    ("the watchdog alerts during a healthy quiet week",
+     SRC / "market/learning_watchdog.py",
+     "    return {\"state\": NOTHING_NEW_IN_WORLD,",
+     "    return {\"state\": SUBSYSTEM_NOT_RUNNING,",
+     f"{WD}::test_no_new_evidence_after_a_normal_cycle_is_not_an_outage"),
+
+    ("a success-only RL dataset stops being flagged",
+     SRC / "market/learning_watchdog.py",
+     '    if not active.get("zero_result_captured"):',
+     "    if False:",
+     f"{WD}::test_a_success_only_policy_dataset_is_flagged"),
+
+    ("a scheduled legacy pipeline stops being critical",
+     SRC / "market/learning_watchdog.py",
+     '        if legacy.get("scheduled"):',
+     "        if False:",
+     f"{WD}::test_a_scheduled_legacy_pipeline_is_critical"),
+
+    ("an absent ledger still yields downstream learning verdicts",
+     SRC / "market/learning_watchdog.py",
+     '        return _wrap(alerts, status, {"state": SUBSYSTEM_NOT_RUNNING,\n'
+     '                                      "reason": "no canonical ledger"})',
+     "        pass",
+     f"{WD}::test_a_missing_ledger_is_critical_and_stops_downstream_verdicts"),
+
+    ("legacy acquisition rows are treated as a computable yield",
      SRC / "market/learning_status.py",
-     '        "safe_to_compute_yield": not inverted,',
+     '        "safe_to_compute_yield": bool(repaired) and not inverted,',
      '        "safe_to_compute_yield": True,',
-     f"{SOR}::test_a_yield_is_refused_when_the_counters_are_"
-     f"different_populations"),
+     f"{SOR}::test_legacy_rows_are_excluded_from_a_yield_rather_than_rewritten"),
+
+    ("a post-repair inversion hides behind the legacy label",
+     SRC / "market/learning_status.py",
+     "    if inverted:\n        state = \"POPULATION_MISMATCH\"",
+     "    if False:\n        state = \"POPULATION_MISMATCH\"",
+     f"{SOR}::test_a_repaired_row_that_still_inverts_is_a_regression_not_legacy"),
+
+    ("the acquisition producer counts subjects as document attempts again",
+     SRC / "market/counterparty_sources.py",
+     "            report.document_attempts += len(documents)",
+     "            report.document_attempts += 1",
+     # REPOINTED after NOT_CAUGHT. Every test pointed here wrote a ledger
+     # row by hand, so `measure()` — the only place the two populations are
+     # established — had no coverage. A contract fixture cannot catch a
+     # producer that miscounts.
+     f"{PROD}::test_one_subject_returning_three_documents_counts_one_subject"),
 
     ("a legacy pipeline is marked as scheduled alongside the canonical jobs",
      DOCS / "MARKET_INTELLIGENCE_SYSTEM_OF_RECORD.yaml",

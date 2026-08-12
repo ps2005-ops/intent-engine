@@ -26,6 +26,7 @@ after the fact, and this project's measurements are the only thing it has.
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import json
 import os
 import pathlib
@@ -34,6 +35,7 @@ import sys
 from intent_engine.market import cycle as C
 from intent_engine.market import health as H
 from intent_engine.market import learning_status as LS
+from intent_engine.market import learning_watchdog as LW
 from intent_engine.market import session as S
 from intent_engine.market import steps as STEPS
 
@@ -163,6 +165,28 @@ def cmd_learning_status(args) -> int:
     return 0 if status["system_of_record"]["ledger_exists"] else 1
 
 
+def cmd_watchdog(args) -> int:
+    """Is the system still LEARNING — not merely still running.
+
+    Exit status is the alerting channel, as everywhere else in this CLI: 2 on
+    CRITICAL, 1 on WARNING, 0 on OK, so launchd records a watchdog finding
+    without any external monitoring service.
+    """
+    root = _root(args)
+    founder = root / "reports" / "market" / "dossier_revisions.jsonl"
+    last_write = ""
+    if founder.exists():
+        last_write = _dt.datetime.fromtimestamp(
+            founder.stat().st_mtime, _dt.timezone.utc).isoformat()
+    report = LW.evaluate(root=root, window=args.window,
+                         founder_last_write=last_write)
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=False))
+    else:
+        print(LW.render(report))
+    return {LW.CRITICAL: 2, LW.WARNING: 1}.get(report["status"], 0)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m intent_engine.market",
@@ -208,6 +232,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # The answer to "what has this system learned?", so that question never
     # again has to be answered by whichever store an explorer finds first.
+    p = sub.add_parser("watchdog",
+                       help="is the system still learning (typed alerts)")
+    p.add_argument("--root", default=None)
+    p.add_argument("--window", default="7d", choices=sorted(LS.WINDOWS))
+    p.add_argument("--json", action="store_true")
+
     p = sub.add_parser("learning-status",
                        help="what the system of record has learned")
     p.add_argument("--root", default=None,
@@ -230,6 +260,8 @@ def main(argv=None) -> int:
         return cmd_runs(args)
     if args.command == "learning-status":
         return cmd_learning_status(args)
+    if args.command == "watchdog":
+        return cmd_watchdog(args)
     return 2  # pragma: no cover - argparse rejects unknown commands
 
 

@@ -110,7 +110,15 @@ class Yield:
     resolver.
     """
     family: str
-    documents_attempted: int = 0
+    #: SUBJECTS asked about — one per company in the sweep. Named for the
+    #: population it counts. It was called `documents_attempted`, which made
+    #: `documents_retrieved / documents_attempted` look like a retrieval
+    #: yield; it is not, and it exceeded 1.0 in 22 of 40 live rows because one
+    #: subject routinely returns several documents.
+    subjects_attempted: int = 0
+    #: DOCUMENT fetch attempts. This is the denominator a document-level yield
+    #: actually needs, and it did not exist before.
+    document_attempts: int = 0
     documents_retrieved: int = 0
     named_actor_mentions: int = 0
     relationship_candidates: int = 0
@@ -164,7 +172,8 @@ class Yield:
         verdict, why = self.verdict()
         return {
             "contract": CONTRACT, "family": self.family,
-            "documents_attempted": self.documents_attempted,
+            "subjects_attempted": self.subjects_attempted,
+            "document_attempts": self.document_attempts,
             "documents_retrieved": self.documents_retrieved,
             "named_actor_mentions": self.named_actor_mentions,
             "relationship_candidates": self.relationship_candidates,
@@ -281,9 +290,10 @@ def measure(family: str, *, subjects: Sequence[Tuple[str, Sequence[str]]],
     seen: set = set()
 
     for subject, aliases in subjects:
-        report.documents_attempted += 1
+        report.subjects_attempted += 1
         try:
             documents = list(fetch(subject, aliases, as_of))
+            report.document_attempts += len(documents)
         except Exception as exc:  # noqa: BLE001 - one subject, not the sweep
             report.errors.append(f"{subject}: {type(exc).__name__}: {exc}")
             continue

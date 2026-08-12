@@ -210,15 +210,11 @@ def test_the_declared_scheduler_targets_the_canonical_entrypoint():
 
 
 # --- population mismatch in the acquisition counters -------------------------
-def test_a_yield_is_refused_when_the_counters_are_different_populations(
+def test_legacy_rows_are_excluded_from_a_yield_rather_than_rewritten(
         tmp_path):
-    """`documents_attempted` counts subjects; `documents_retrieved` counts
-    documents. Their ratio is not a yield and must not be offered as one.
-
-    Found in live data: retrieved exceeds attempted in 22 of 40 rows, which is
-    impossible for a yield and immediately visible once the two counters are
-    compared.
-    """
+    """Rows written before the counter repair carried SUBJECTS in
+    `documents_attempted`. They are append-only history: excluded from any
+    yield, never edited to make the metric look better."""
     root = tmp_path / "runtime"
     (root / "reports" / "market").mkdir(parents=True)
     (root / "reports" / "market" / "learning_ledger.jsonl").write_text(
@@ -228,19 +224,37 @@ def test_a_yield_is_refused_when_the_counters_are_different_populations(
         encoding="utf-8")
     integrity = LS.collect(root=str(root), window="all")[
         "active_learning"]["acquisition_counter_integrity"]
-    assert integrity["state"] == "POPULATION_MISMATCH"
+    assert integrity["state"] == LS.LEGACY_INCOMPATIBLE_POPULATION
+    assert integrity["legacy_rows"] == 1
     assert integrity["safe_to_compute_yield"] is False
 
 
-def test_consistent_counters_are_reported_as_safe(tmp_path):
+def test_a_repaired_row_carries_both_populations_and_permits_a_yield(tmp_path):
     root = tmp_path / "runtime"
     (root / "reports" / "market").mkdir(parents=True)
     (root / "reports" / "market" / "learning_ledger.jsonl").write_text(
         json.dumps({"record": "research_outcome", "status": "SUCCESS",
-                    "completed_at": "2026-08-12",
+                    "completed_at": "2026-08-12", "subjects_attempted": 7,
                     "documents_attempted": 64, "documents_retrieved": 28}),
         encoding="utf-8")
     integrity = LS.collect(root=str(root), window="all")[
         "active_learning"]["acquisition_counter_integrity"]
     assert integrity["state"] == "CONSISTENT"
+    assert integrity["repaired_rows"] == 1
     assert integrity["safe_to_compute_yield"] is True
+
+
+def test_a_repaired_row_that_still_inverts_is_a_regression_not_legacy(tmp_path):
+    """If the producer ever regresses after the repair, that is a NEW defect
+    and must not hide behind the legacy label."""
+    root = tmp_path / "runtime"
+    (root / "reports" / "market").mkdir(parents=True)
+    (root / "reports" / "market" / "learning_ledger.jsonl").write_text(
+        json.dumps({"record": "research_outcome", "status": "SUCCESS",
+                    "completed_at": "2026-08-12", "subjects_attempted": 7,
+                    "documents_attempted": 28, "documents_retrieved": 64}),
+        encoding="utf-8")
+    integrity = LS.collect(root=str(root), window="all")[
+        "active_learning"]["acquisition_counter_integrity"]
+    assert integrity["state"] == "POPULATION_MISMATCH"
+    assert integrity["safe_to_compute_yield"] is False
