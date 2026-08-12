@@ -4342,7 +4342,32 @@ class WebApp:
                 return 1
             if _on_refusing_host(candidate):
                 return 9
-            return 2 if "sitemap" in why else 3
+            if "sitemap" in why:
+                return 2
+            # ATTESTED beats GUESSED, and until Batch 12 these tied.
+            #
+            # A `homepage_link` is a URL the company itself rendered on its
+            # own page, so the publisher has asserted it exists. A
+            # `known_path` is one of ~44 paths this system GUESSES at every
+            # company (/about, /pricing, /newsroom, ...). Both scored 3, so a
+            # guess could take one of the 14 approved-source slots ahead of a
+            # link the site actually published.
+            #
+            # Measured on the frozen ten (b12_before, 6c3370d): 38 of 62
+            # http_status failures were 404 — the largest single failure class
+            # in the wave, larger than 403 (24), and every 404 is a slot spent
+            # discovering that a guessed path does not exist. The slot is the
+            # scarce resource, not the request: a run gets 14 of them.
+            #
+            # This changes ORDER ONLY. No candidate becomes eligible that was
+            # not eligible before, no host, scheme or redirect rule moves, and
+            # guesses still fill the leftover budget below. It is also
+            # company-agnostic: no rule here can name a company, and a site
+            # with no usable homepage links (the Sony case, where the homepage
+            # 403s) has no attested links to promote and is unaffected.
+            if method == "homepage_link":
+                return 3
+            return 4
 
         # Per-family quotas. Coverage across families is what stops a report
         # resting on three filings and nothing else, but one page per family is

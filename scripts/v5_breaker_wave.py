@@ -205,17 +205,34 @@ def _source_health(result, outcome) -> dict:
 def _evidence(result, ci, run_id) -> dict:
     documents = ci.store.retrieved(run_id)
     library = result.get("evidence_library") or {}
+    observations = result.get("observations") or []
+
+    # Independence, from the canonical producer. Until Batch 12 this field
+    # read UNAVAILABLE because no producer existed; the distinction between
+    # "measured, and it is zero" and "nothing measured it" is preserved by
+    # `state`, which the producer sets and this reader never invents.
+    from intent_engine.company_ingestion import independence as IND
+    try:
+        assessed = IND.assess(documents)
+    except Exception as exc:  # noqa: BLE001
+        # A broad except that reports the failure. Swallowing it into a zero
+        # is the exact defect this program has found repeatedly: a silent
+        # zero is indistinguishable from a measured absence of independence.
+        assessed = {"state": "PRODUCER_FAILED",
+                    "detail": f"{type(exc).__name__}: {str(exc)[:160]}"}
+
     return {
         "documents_retrieved": len(documents),
         "evidence_library_entries": (len(library) if isinstance(library, list)
                                      else len(library or {})),
-        "observations": len(result.get("observations") or []),
-        # NOT an independence measurement, and deliberately not named like
-        # one: this is a ROW COUNT. Independence has no producer yet.
+        "observations": len(observations),
+        # A ROW COUNT, kept under a name that cannot be mistaken for
+        # corroboration. It sits next to the independence block on purpose:
+        # the pair is what stops "12 documents" reading as "12 signals".
         "raw_document_count": len(documents),
-        "evidence_independence_state": "UNAVAILABLE",
-        "independence_note": ("no independence producer exists; a raw "
-                              "document count is not corroboration"),
+        "evidence_independence_state": assessed.get("state", "UNAVAILABLE"),
+        "independence": {k: v for k, v in assessed.items() if k != "rows"},
+        "independence_rows": assessed.get("rows", []),
     }
 
 
@@ -398,6 +415,187 @@ def run_company(company, *, root: pathlib.Path, frozen: dict) -> dict:
     return record
 
 
+#: Returned instead of a number when a ratio has no denominator. NEVER 0, and
+#: never an epsilon in the denominator to force a number out: "we divided by
+#: nothing" and "the answer is zero" are different facts, and only one of them
+#: is a finding about the system.
+UNMEASURABLE = "UNMEASURABLE"
+#: Returned when no producer for a quantity exists at all. Distinct from
+#: UNMEASURABLE, which means the producer ran and the denominator was empty.
+UNAVAILABLE = "UNAVAILABLE"
+
+
+def _ratio(numerator, denominator):
+    return (round(numerator / denominator, 4) if denominator
+            else UNMEASURABLE)
+
+
+def _cohort_summary(records: list) -> dict:
+    """The retrieval → evidence → independence chain, over the whole cohort.
+
+    Every ratio here is named for the POPULATIONS it divides. That is not
+    pedantry: this program has already shipped a "per-evidence" rate whose
+    numerator counted effects (many per row) against a denominator counting
+    rows, which is not a fraction and cannot be read as one. Where the two
+    populations would differ, the name says so (`observations_per_document`
+    is a RATE and may exceed 1; `independent_document_share` is a SHARE and
+    cannot).
+    """
+    attempted = sum(_dig(r, "source_health", "attempted", default=0)
+                    for r in records)
+    ok = sum(_dig(r, "source_health", "ok", default=0) for r in records)
+    documents = sum(_dig(r, "evidence", "documents_retrieved", default=0)
+                    for r in records)
+    observations = sum(_dig(r, "evidence", "observations", default=0)
+                       for r in records)
+    fetch_seconds = sum(float(r.get("fetch_seconds") or 0) for r in records)
+
+    measured = [r for r in records
+                if _dig(r, "evidence", "evidence_independence_state")
+                == "MEASURED"]
+    independent = sum(
+        _dig(r, "evidence", "independence", "independent_evidence_count",
+             default=0) for r in measured)
+    duplicates = sum(
+        _dig(r, "evidence", "independence", "duplicate_document_count",
+             default=0) for r in measured)
+    republications = sum(
+        _dig(r, "evidence", "independence", "republication_count", default=0)
+        for r in measured)
+    self_reports = sum(
+        _dig(r, "evidence", "independence", "company_self_report_count",
+             default=0) for r in measured)
+    unknown = sum(
+        _dig(r, "evidence", "independence", "unknown_lineage_count",
+             default=0) for r in measured)
+    concentrations = [
+        _dig(r, "evidence", "independence", "concentration_ratio")
+        for r in measured]
+    concentrations = [c for c in concentrations if isinstance(c, (int, float))]
+
+    failure_types: dict = {}
+    http_statuses: dict = {}
+    for record in records:
+        for key, value in (_dig(record, "source_health", "failure_types",
+                                default={}) or {}).items():
+            failure_types[key] = failure_types.get(key, 0) + value
+        for key, value in (_dig(record, "source_health",
+                                "http_status_counts", default={}) or {}).items():
+            http_statuses[key] = http_statuses.get(key, 0) + value
+
+    return {
+        "companies": len(records),
+        "independence_measured_for": len(measured),
+        "retrieval": {
+            "attempted": attempted, "successful_documents": ok,
+            "retrieval_yield": _ratio(ok, attempted),
+            "failure_types": dict(sorted(failure_types.items())),
+            "http_status_counts": dict(sorted(http_statuses.items())),
+            "fetch_seconds": round(fetch_seconds, 1),
+        },
+        "evidence": {
+            "documents": documents,
+            "observations": observations,
+            # A RATE, not a share: one document can carry many observations,
+            # so this is not bounded by 1 and must never be read as a yield.
+            "observations_per_document": _ratio(observations, documents),
+        },
+        "independence": {
+            "independent_documents": independent,
+            "duplicate_documents": duplicates,
+            "republications": republications,
+            "company_self_reports": self_reports,
+            "unknown_lineage": unknown,
+            # Both populations are DOCUMENTS, so this is a true share.
+            "independent_document_share": _ratio(independent, documents),
+            "mean_source_concentration": (
+                round(sum(concentrations) / len(concentrations), 4)
+                if concentrations else UNMEASURABLE),
+            "seconds_per_independent_document": _ratio(
+                round(fetch_seconds, 1), independent),
+        },
+        # §12.3/§12.4/§12.5 and §12.7's "that changed something" numerator all
+        # require a PER-ROW attribution from an evidence row to a belief
+        # movement. No such producer exists on the founder path: the strategic
+        # report names hypotheses and shifts, but nothing maps an individual
+        # evidence row to a state change, and a citation is not an effect.
+        # Reporting these as 0 would assert that retrieval taught the system
+        # nothing, which is a much stronger claim than "nothing measured it".
+        "learning_conversion": {
+            "state": UNAVAILABLE,
+            "reason": ("no per-row evidence→belief attribution exists on the "
+                       "founder path; the market branch owns the "
+                       "knowledge_effect ledger and the founder branch "
+                       "cannot import it"),
+            "evidence_that_changed_something": UNAVAILABLE,
+            "independent_evidence_that_changed_something": UNAVAILABLE,
+            "zero_effect_evidence": UNAVAILABLE,
+            "learning_conversion": UNAVAILABLE,
+            "useful_evidence_latency": UNAVAILABLE,
+        },
+        "high_activity_low_learning": _high_activity_low_learning(
+            documents, independent, duplicates, republications, len(measured)),
+    }
+
+
+#: Below this share of documents carrying an independent vantage point, volume
+#: is being produced without new information. Not a quality bar on the
+#: COMPANY — a sparse private company legitimately has little outside
+#: coverage — which is why the verdict needs the volume floor too.
+LOW_INDEPENDENCE_SHARE = 0.20
+MIN_DOCUMENTS_FOR_VERDICT = 20
+
+
+def _high_activity_low_learning(documents, independent, duplicates,
+                                republications, measured_companies) -> dict:
+    """Busy, and not learning — named in those words, with the counts.
+
+    Mirrors the vocabulary of `market.learning_acceleration`, which owns the
+    canonical detector. It is restated rather than imported because the
+    founder branch structurally cannot import the market package; the states
+    are kept identical so the two can be read side by side.
+
+    This arm sees the RETRIEVAL half of the condition only. The belief half —
+    "independent evidence rose but nothing moved" — needs the effect ledger
+    and is reported UNMEASURABLE rather than assumed satisfied.
+    """
+    if not measured_companies or documents < MIN_DOCUMENTS_FOR_VERDICT:
+        return {"detected": False, "status": UNMEASURABLE,
+                "reason": (f"{documents} document(s) across "
+                           f"{measured_companies} measured compan(ies) is "
+                           f"too little volume for the share to mean "
+                           f"anything"),
+                "belief_arm": UNMEASURABLE}
+    share = round(independent / documents, 4) if documents else 0.0
+    detected = share < LOW_INDEPENDENCE_SHARE
+    return {
+        "detected": bool(detected),
+        "status": "DEGRADING" if detected else "STABLE",
+        "documents": documents,
+        "independent_documents": independent,
+        "independent_document_share": share,
+        "duplicate_documents": duplicates,
+        "republications": republications,
+        "which_conversion_failed": (
+            "documents → independent evidence" if detected else "none"),
+        "reason": (
+            f"{documents} documents produced {independent} independent "
+            f"vantage point(s) ({share:.1%}), below the "
+            f"{LOW_INDEPENDENCE_SHARE:.0%} floor; retrieval is producing "
+            f"volume that is not new information"
+            if detected else
+            f"{independent} of {documents} documents carry an independent "
+            f"vantage point ({share:.1%}), at or above the "
+            f"{LOW_INDEPENDENCE_SHARE:.0%} floor"),
+        # The second arm of §14 needs belief movement, which has no producer
+        # here. Saying STABLE for it would claim the system IS learning.
+        "belief_arm": UNMEASURABLE,
+        "belief_arm_reason": ("independent evidence → belief movement needs "
+                              "the effect ledger, which the founder path "
+                              "does not produce"),
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="reports/v5/breaker_10")
@@ -471,6 +669,7 @@ def main() -> int:
 
     frozen["finished_at"] = _utc()
     payload = {"frozen": frozen, "runtime_root": str(root),
+               "cohort_summary": _cohort_summary(records),
                "results": records}
     out_dir = pathlib.Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
