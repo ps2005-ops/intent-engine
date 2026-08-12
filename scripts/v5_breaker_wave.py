@@ -430,6 +430,32 @@ def _ratio(numerator, denominator):
             else UNMEASURABLE)
 
 
+def _observations_state(records: list) -> dict:
+    """Whether a zero observation count is about evidence or about the backend.
+
+    A strategic report that is ABSENT, or PRESENT with a FAILED result state,
+    means the reasoning layer never delivered. Observations are downstream of
+    it, so their count says nothing about the documents in that case.
+    """
+    usable = 0
+    for record in records:
+        intel = record.get("intelligence") or {}
+        if (intel.get("strategic_report") == "PRESENT"
+                and str(intel.get("result_state") or "") not in
+                ("FAILED", "")):
+            usable += 1
+    if usable:
+        return {"state": "MEASURED", "companies_with_usable_report": usable,
+                "of": len(records)}
+    return {
+        "state": "BLOCKED_EXTERNAL_CREDITS",
+        "companies_with_usable_report": 0, "of": len(records),
+        "reason": ("no company reached a usable strategic report, so the "
+                   "observation count is downstream of the reasoning "
+                   "backend and is NOT a measurement of the evidence"),
+    }
+
+
 def _cohort_summary(records: list) -> dict:
     """The retrieval → evidence → independence chain, over the whole cohort.
 
@@ -499,6 +525,13 @@ def _cohort_summary(records: list) -> dict:
             # A RATE, not a share: one document can carry many observations,
             # so this is not bounded by 1 and must never be read as a yield.
             "observations_per_document": _ratio(observations, documents),
+            # WHY the rate is what it is. Observations are produced downstream
+            # of the strategic layer, so when no company reached a usable
+            # strategic report the rate is a fact about the BACKEND, not about
+            # retrieval. Reported next to the number because 0.0 read alone
+            # says "the documents carried nothing", which would be a finding
+            # about the evidence and is not what happened.
+            "observations_state": _observations_state(records),
         },
         "independence": {
             "independent_documents": independent,

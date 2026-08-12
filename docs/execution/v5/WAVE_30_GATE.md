@@ -7,76 +7,120 @@ adversarial proof and mutation target before implementation, and
 `frontier.py --check` refuses anything less. A validation *programme* is not
 that shape — it is a loop that runs over the whole product.
 
-So it is recorded here as an **explicit non-node invariant**, which is what the
-Batch 11 instruction allows when something load-bearing is not a node. Its
-durable state lives in:
+So it is recorded here as an **explicit non-node invariant**. Its durable
+state lives in:
 
 | what | where |
 |---|---|
 | population | `docs/execution/v5/COMPANY_VALIDATION_MANIFEST.yaml` (v1.0.0, 100 companies) |
 | cohort selection | `intent_engine.validation.breaker_ten()` — deterministic |
 | wave runner | `scripts/v5_breaker_wave.py` |
+| independence | `intent_engine.company_ingestion.independence` (`evidence_independence.v1`) |
 | results | `reports/v5/breaker_10/*.json` |
-| defects | `reports/v5/breaker_10/defects.json` |
+| break proofs | `scripts/v5_independence_break_proofs.py` |
 | this gate | this file |
 
 ## External gate
 
 `BACKEND_CREDITS` — **BLOCKING the intelligence baseline.** Preflight in
-Batch 11 returned `CREDITS_EXHAUSTED` (valid key, exhausted balance). This is
-not a product defect and no amount of engineering clears it. Everything below
-the line "requires reasoning" is `BLOCKED_EXTERNAL_CREDITS`, **not FAILED**.
+Batches 11 and 12 returned `CREDITS_EXHAUSTED` (valid key, exhausted balance).
+No amount of engineering clears it. Everything below the line "requires
+reasoning" is `BLOCKED_EXTERNAL_CREDITS`, **not FAILED**.
 
-## Wave-30 gate — current status
+In the b12_after wave this shows up as `observations = 0` for all ten. That
+zero is downstream of the backend, not a property of the evidence, and the
+runner now says so in `cohort_summary.evidence.observations_state`.
 
-Wave 30 opens only when every row is satisfied. It is not "the runner works".
+## The gate is now the CHAIN, not the yield
 
-| criterion | status |
+Wave 30 does not open because a document-yield percentage moved. It opens when
+retrieval → valid evidence → **independent** evidence → learning → decision
+value can each be read.
+
+| # | criterion | status |
+|---|---|---|
+| 1 | 10/10 attempted, no substitution | **MET** — the frozen ten, four waves |
+| 2 | no security regression | **MET** — 56 security tests green; the ordering change moves no eligibility rule; break proof 10 drives the reachability demotion |
+| 3 | no catastrophic latency tail | **MET** — max 47.0s, p50 19.4s, cohort wall 226.6s |
+| 4 | failure reasons measured | **MET** — `http_status_counts` populated: 404 = 28, 403 = 25 |
+| 5 | Evidence Independence producer operational | **MET** — `evidence_independence.v1`, 10/10 companies `MEASURED` |
+| 6 | duplicate inflation blocked | **MET** — proven by metamorphic tests and 10/10 break proofs; **0 duplicates and 0 republications actually observed**, so the guard is unexercised in production |
+| 7 | missing vs zero states explicit | **MET** — `UNMEASURABLE` / `UNAVAILABLE` / `BLOCKED_EXTERNAL_CREDITS` distinguished and tested |
+| 8 | independent evidence measured for all companies | **MET** — 10/10 |
+| 9 | HIGH_ACTIVITY_LOW_LEARNING detector operational | **MET** — and it is **FIRING** (see below) |
+| 10 | learning conversion measured | **NOT MET** — `UNAVAILABLE`: no per-row evidence→belief attribution exists on the founder path |
+| 11 | credit-blocked components separated from engineering failures | **MET** |
+| 12 | no known SEV-1 false completion | **MET for this batch** — one was found and fixed (below) |
+| 13 | artifacts reproducible from frozen SHA + manifest version | **MET** — and it was **FALSE until this batch** |
+| 14 | source concentration visible | **MET** — mean 0.82 |
+| 15 | useful-evidence latency visible | **PARTIAL** — `seconds_per_independent_document` = 9.6s; the "that changed something" form needs criterion 10 |
+
+**Verdict: Wave 30 is CLOSED.** Criteria 10 and 15 are not met, and criterion
+9 is met by a detector that is reporting a problem.
+
+## Why criterion 13 was false, and why that matters most
+
+`.gitignore` carried an unanchored `validation/`, intended for live-preview
+screenshots. Unanchored, it matched a directory at any depth and silently
+swallowed `src/intent_engine/validation/` — the manifest loader, the cohort
+deriver, and `breaker_ten()` itself.
+
+Nothing complained. `git status` read clean in every worktree that happened to
+have the file. But at a fresh checkout of the frozen SHA the wave could not
+start, two tracked test modules failed at collection (80 assertions that had
+never run there), and ten of the dossier break proofs mutated a file that did
+not exist. When it was found, the only copy in existence was an untracked file
+in one ephemeral `/private/tmp` scratchpad.
+
+Criterion 13 had been reported MET while it was structurally impossible.
+
+## What the b12 waves established
+
+Retrieval got better and the system did **not** learn more, and that is the
+finding.
+
+| | before | after |
+|---|---|---|
+| document yield | 40.0% | **46.4%** |
+| successful documents | 56 | **65** |
+| HTTP 404 | 38 | **28** |
+| HTTP 403 | 24 | 25 |
+| documents retrieved | 64 | **72** |
+| companies losing documents | — | **0** |
+| independent documents | UNAVAILABLE | **9** |
+| independent document share | UNAVAILABLE | **12.5%** |
+
+The 404 fix worked: **52 of 52 404s came from guessed `known_path` probes and
+zero from publisher-rendered `homepage_link`s.** Ranking attested URLs above
+guesses removed 10 of 38, with no company losing a document.
+
+But the lineage breakdown of all 72 documents is:
+
+| lineage | n |
 |---|---|
-| identity joins correct 10/10 | **MET** — 10/10 stamped `DEVELOPMENT` / `1.0.0` after BW10-001 |
-| no substitutions | **MET** — the frozen ten, twice |
-| no crashes | **MET** — 10/10 completed in both waves |
-| typed failure funnel | **PARTIAL** — types are typed; counts land next wave (BW10-008) |
-| same-company subdomain policy coherent and security-tested | **MET** — BW10-004, 42 adversarial cases, 35 negative controls pre-verified against the old code |
-| timeout tail understood and materially improved | **MET** — BW10-005, cohort wall 467s→221s, max 178.9s→45.8s, no evidence lost |
-| evidence-family coverage measured | **MET** — measured; `strategy` still missing 7/10 |
-| independence measured | **NOT MET** — `EVIDENCE_INDEPENDENCE_UNAVAILABLE`; no producer exists |
-| dossier states truthful | **MET** — partial/unavailable/first-observation all correct |
-| no retrieval failure shown as company inactivity | **MET** — `host_unreachable` is retryable and about us |
-| no backend outage shown as evidence weakness | **MET** — BW10-002 |
-| no unresolved false completion at a load-bearing seam | **MET** for this batch |
-| intelligence specialization measured | **BLOCKED_EXTERNAL_CREDITS** |
-| evidence independence measured | **BLOCKED_EXTERNAL_CREDITS** |
-| causal / refusal behaviour measured | **BLOCKED_EXTERNAL_CREDITS** |
-| adversarial behaviour measured | **BLOCKED_EXTERNAL_CREDITS** |
-| no universal-template collapse | **BLOCKED_EXTERNAL_CREDITS** |
+| `SAME_ORIGIN` | 56 |
+| `REGULATOR_OR_PRIMARY_FILING` | 9 |
+| `COMPANY_SELF_REPORT` | 7 |
+| `INDEPENDENT_EXTERNAL_SOURCE` | **0** |
 
-**Verdict: Wave 30 is CLOSED.** Five criteria are blocked externally and one
-(independence) has no producer. Retrieval is materially healthier; the
-intelligence instrument has still never been read.
+**Zero independent external sources across the entire cohort.** Every
+independent observation the system has is a regulatory filing. Nine of ten
+companies are `PARTIALLY_INDEPENDENT` — exactly one outside vantage point,
+their own filing. Alimentation Couche-Tard is `SINGLE_SOURCE`: it has none.
 
-## What the two waves actually established
-
-Retrieval convergence is real but **narrower than hoped**, and that is the
-useful finding:
-
-- The redirect policy was a genuine defect and recovered exactly the two
-  refused subdomain redirects (+2 documents cohort-wide, 39%→40%). It was
-  **not** the main cause of missing strategy evidence — that moved 8→7 of 10.
-- The timeout tail was a genuine defect and is largely gone: 20 timeouts→4,
-  cohort wall halved, and critically **no evidence was lost** (AMD 3→3 docs,
-  McKinsey 1→1). That negative control held in production, not just in a test.
-- **The yield story is HTTP 403/404 — 62 of 86 failures, unchanged by either
-  fix.** Every one of the ten hits at least one 403; six also hit 404s. The
-  403:404 split is not yet counted (BW10-008, counter now shipped).
-
-403 and 404 are different defects. 403 is *we are being refused* — user-agent,
-robots, bot defences. 404 is *we asked for the wrong URL* — a discovery
-defect. Merging them would produce a fix aimed at neither.
+So the extra documents this batch bought were 56 more pages of the companies'
+own websites. `HIGH_ACTIVITY_LOW_LEARNING` is **DETECTED / DEGRADING**, and it
+names the stage: *documents → independent evidence*.
 
 ## First next task
 
-Populate `http_status_counts` on a rerun, split 403 from 404, and attack
-whichever dominates. Do not scale to 30, and do not treat 40% as the target —
-the target is decision-relevant independent evidence per unit of latency, and
-independence still has no producer at all.
+Not more yield. The measured bottleneck is that **discovery only ever proposes
+the company's own domain plus filings**, so independence is structurally
+capped near 12% no matter how well retrieval performs. Either off-domain
+discovery becomes real, or the honest position is that this system reports what
+companies say about themselves.
+
+Second, criterion 10: independence is now measurable but nothing consumes it.
+`evidence_independence` is not in `demo_dossier.contracts.FOUNDER_ALLOWED`, so
+a founder block carrying it would have the field silently dropped into
+`unknown_fields` — the "bridge never opened" failure, one line away.

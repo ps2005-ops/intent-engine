@@ -80,6 +80,35 @@ def test_learning_conversion_is_unavailable_with_a_reason_not_zero():
     assert conversion["reason"]
 
 
+def test_zero_observations_under_a_dead_backend_is_not_an_evidence_finding():
+    """0.0 observations per document must not read as "documents were empty".
+
+    Every company in the b12_after wave returned 0 observations because the
+    reasoning backend was credit-exhausted, not because the retrieved pages
+    carried nothing. The rate is still reported; what this pins is that the
+    rate never travels without the state that explains it.
+    """
+    dead = [dict(record(observations=0),
+                 intelligence={"strategic_report": "PRESENT",
+                               "result_state": "FAILED"}),
+            dict(record(observations=0),
+                 intelligence={"strategic_report": "ABSENT"})]
+    out = wave._cohort_summary(dead)
+    assert out["evidence"]["observations_per_document"] == 0.0
+    state = out["evidence"]["observations_state"]
+    assert state["state"] == "BLOCKED_EXTERNAL_CREDITS"
+    assert state["companies_with_usable_report"] == 0
+
+
+def test_a_usable_report_makes_the_observation_count_a_real_measurement():
+    live = [dict(record(observations=4),
+                 intelligence={"strategic_report": "PRESENT",
+                               "result_state": "COMPLETE"})]
+    state = wave._cohort_summary(live)["evidence"]["observations_state"]
+    assert state["state"] == "MEASURED"
+    assert state["companies_with_usable_report"] == 1
+
+
 # --- the detector ------------------------------------------------------------
 def test_low_volume_cannot_produce_a_verdict():
     out = wave._high_activity_low_learning(
