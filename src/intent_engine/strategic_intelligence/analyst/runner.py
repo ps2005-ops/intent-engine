@@ -291,10 +291,20 @@ def analyse(company_name, observations, *, client=None, cache=None,
             # Truncation is deterministic: the same prompt will truncate the
             # same way, so retrying only spends a second call to fail again.
             truncated = "max_tokens" in str(exc)
-            log.warning("analyst call failed (attempt %d/%d): %s%s",
+            # THE MESSAGE, NOT ONLY THE TYPE. Logging `BadRequestError` alone
+            # made an exhausted credit balance, an unknown model id, an
+            # oversized request and a malformed schema indistinguishable —
+            # four different fixes behind one word. A ten-company wave hit
+            # this on every company and could not say why from its own output.
+            # The provider's message is the only information there is, so it
+            # is kept; it carries no evidence about the company.
+            log.warning("analyst call failed (attempt %d/%d): %s: %s%s",
                         attempt, MAX_ATTEMPTS, type(exc).__name__,
+                        str(exc)[:400],
                         " (truncated - not retrying)" if truncated else "")
             if truncated or attempt == MAX_ATTEMPTS:
+                log.error("analyst gave up after %d attempt(s): %s: %s",
+                          attempt, type(exc).__name__, str(exc)[:400])
                 return (None, ResultState.FAILED, [])
 
     if raw is None:                                  # pragma: no cover

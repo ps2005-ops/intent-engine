@@ -3509,24 +3509,35 @@ class WebApp:
             "Decisions", body, session,
             self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
 
-    def _manifest_placement(self, company_id: str):
-        """This company's cohort and the manifest version it came from.
+    def _manifest_placement(self, company_id: str, *, name: str = "",
+                            domain: str = ""):
+        """This company's manifest id, cohort, and the manifest version.
 
         Read-only, and read from the canonical manifest rather than from
         anything the analysis produced: nothing observed at runtime may place
-        a company in a cohort (§27). A company that is not in the validation
-        universe returns no cohort and no version, which is a different state
-        from a company whose cohort is unknown.
+        a company in a cohort.
+
+        RESOLVES ON DOMAIN AND NAME, NOT ONLY ON A NORMALISED ID. The analysis
+        resolves companies to their LEGAL name, so "Cloudflare, Inc." became
+        the key `cloudflare-inc` and matched no manifest entry — every real
+        company's dossier was stamped with no cohort and no manifest version,
+        which reads exactly like a company outside the universe. Found by the
+        first breaker run; it would have made the whole 100-company
+        measurement read zero without anything raising.
+
+        Returns the MANIFEST id when the company is in the universe, so the
+        dossier is stored where the programme can find it again.
         """
         try:
             from intent_engine.validation import load
             manifest = load()
-            company = manifest.by_id(company_id)
-            return ((company.cohort, manifest.version) if company
-                    else ("", ""))
+            company = manifest.resolve(domain=domain, name=name,
+                                       company_id=company_id)
+            return ((company.company_id, company.cohort, manifest.version)
+                    if company else (company_id, "", ""))
         except Exception:  # noqa: BLE001 - the manifest must never fail a run
             _LOG.warning("validation manifest unavailable for %s", company_id)
-            return "", ""
+            return company_id, "", ""
 
     def _demo_dossier_store(self):
         from intent_engine.demo_dossier.store import DossierStore
@@ -5095,7 +5106,14 @@ class WebApp:
             meta = self.ci.run_meta(run_id) or {}
             report = (result or {}).get("strategic_report")
             name = str(meta.get("company_name") or "")
-            key = company_key(name or meta.get("domain") or run_id)
+            domain = str(meta.get("domain") or "")
+            # IDENTITY IS SETTLED BEFORE ANYTHING IS BUILT. Both snapshots,
+            # the market lookup and the store key must agree on who this
+            # company is; resolving afterwards would file the dossier under
+            # one identity while its contents claimed another.
+            key, cohort, manifest_version = self._manifest_placement(
+                company_key(name or domain or run_id), name=name,
+                domain=domain)
             context = self._external_cache.get(run_id)
 
             founder = read_founder_snapshot(fds.build_payload(
@@ -5118,13 +5136,12 @@ class WebApp:
                     "unavailable; nothing about the market was measured.",
                     company_id=key)
 
-            # The validation universe, BY REFERENCE. Only the cohort and the
-            # manifest version cross into the dossier; copying the rest would
-            # make every dossier version a snapshot of the manifest and the
-            # two would drift. A company absent from the manifest is a
-            # legitimate state — it simply is not part of the 100 — and is
-            # left as FIELD_UNAVAILABLE rather than invented.
-            cohort, manifest_version = self._manifest_placement(key)
+            # The validation universe reaches the dossier BY REFERENCE: only
+            # the cohort and the manifest version cross, because copying the
+            # rest would make every dossier version a snapshot of the
+            # manifest and the two would drift. A company absent from the
+            # manifest keeps its derived key and no cohort — it simply is not
+            # part of the 100, which is a legitimate state, not an unknown.
             store = DossierStore(self._runtime_root)
             previous = store.latest(key)
             dossier = assemble(market, founder, cohort=cohort,

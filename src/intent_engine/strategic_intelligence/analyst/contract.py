@@ -62,6 +62,19 @@ class ResultState:
     #: states in which a strategic presentation/brief may be shown
     PRESENTABLE = (COMPLETE,)
 
+    #: States whose cause is THE EVIDENCE, and which may therefore be
+    #: explained in terms of what was retrieved.
+    #:
+    #: The distinction is load-bearing. A caller was rendering the
+    #: evidence-shortfall explanation for every non-COMPLETE state, so an
+    #: analyst that never ran — an exhausted API balance, in the run that
+    #: found this — was reported to the founder as "every source here is the
+    #: company's own account". That reader goes and collects more sources,
+    #: which cannot possibly help. FAILED and RETRIEVAL_BLOCKED are about US,
+    #: not about the company's evidence, and they already carry honest text
+    #: in EXPLANATION; ENTITY_AMBIGUOUS is about identity, not volume.
+    EVIDENCE_EXPLAINED = (EVIDENCE_LIMITED, STRATEGICALLY_INSUFFICIENT)
+
     EXPLANATION = {
         COMPLETE:
             "Enough independent evidence was retrieved to support a strategic "

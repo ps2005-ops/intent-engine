@@ -521,6 +521,63 @@ def test_the_real_analysis_path_stamps_the_cohort_onto_the_dossier(
     assert dossier.manifest_version == manifest.version
 
 
+# --- the identity join, found broken by the first breaker run --------------
+
+def test_a_legal_name_still_finds_its_manifest_entry(manifest):
+    """FOUND BY THE FIRST BREAKER RUN, and it had zeroed the whole programme.
+
+    The pipeline resolves a company to its LEGAL name, so "Cloudflare, Inc."
+    normalised to `cloudflare-inc` and matched no manifest id. Every real
+    company's dossier was therefore stamped with no cohort and no manifest
+    version — indistinguishable from a company legitimately outside the
+    universe, and nothing raised.
+
+    Generalized deliberately: this asserts the SUFFIX RULE over every company
+    in the manifest, not the one that exposed it.
+    """
+    for company in manifest.companies:
+        for suffix in ("Inc.", "Corporation", "Limited", "Company"):
+            probe = f"{company.canonical_name.rstrip('.')} {suffix}"
+            found = manifest.resolve(name=probe)
+            assert found is not None, probe
+            assert found.company_id == company.company_id, probe
+
+
+def test_every_manifest_company_resolves_from_its_own_domain(manifest):
+    for company in manifest.companies:
+        found = manifest.resolve(domain=company.domain)
+        assert found is not None, company.company_id
+        assert found.company_id == company.company_id, company.company_id
+
+
+def test_a_www_or_subdomain_still_resolves(manifest):
+    company = manifest.companies[0]
+    for probe in (f"www.{company.domain}", f"ir.{company.domain}"):
+        found = manifest.resolve(domain=probe)
+        assert found is not None, probe
+        assert found.company_id == company.company_id, probe
+
+
+def test_a_company_outside_the_universe_does_not_resolve(manifest):
+    """The complement. A resolver that matched everything would put
+    unrelated companies into cohorts and silently enlarge the population."""
+    for probe in ("Some Random Startup Inc.", "Totally Unrelated Co",
+                  "Acme Holdings Limited"):
+        assert manifest.resolve(name=probe,
+                                domain="notinmanifest.example") is None, probe
+
+
+def test_resolution_does_not_collapse_a_declared_parent_and_child(manifest):
+    """Brookfield Corporation and Brookfield Asset Management share a brand
+    and a parent domain. Suffix-stripping must not merge them."""
+    pair = [c for c in manifest.companies
+            if c.company_id.startswith("brookfield")]
+    assert len(pair) == 2
+    for company in pair:
+        found = manifest.resolve(name=company.canonical_name)
+        assert found is not None and found.company_id == company.company_id
+
+
 def test_a_dossier_records_the_exact_manifest_version_it_used(manifest):
     """§28. A second pass compared against a manifest that has since moved
     is comparing two populations, and the symptom is a metric that changed

@@ -1089,7 +1089,12 @@ class CompanyIngestionService:
         # rather than strategic", which was measurably not the reason on these
         # runs -- they were refused for reaching after figures the sources did
         # not contain. A founder told the wrong reason acts on the wrong thing.
-        if state != ResultState.COMPLETE:
+        # ONLY the states the EVIDENCE caused. This was `!= COMPLETE`, which
+        # meant an analyst that never ran was explained as an evidence
+        # shortfall -- found live when an exhausted API balance produced
+        # FAILED and the reader was told every source was the company's own.
+        # That founder collects more sources and nothing improves.
+        if state in ResultState.EVIDENCE_EXPLAINED:
             from intent_engine.strategic_intelligence.numeric_ledger import (
                 build_ledger,
             )
