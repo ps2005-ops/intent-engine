@@ -16,7 +16,7 @@
 
 contract: market_learning_os_matrix.v1
 as_of: "2026-08-12"
-market_sha: "PENDING"
+market_sha: "67c1397"
 
 capability_states: [PASS, PARTIAL, NOT_BUILT, BLOCKED_DATA, BLOCKED_EXTERNAL,
                     NOT_APPLICABLE, UNMEASURED]
