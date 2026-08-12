@@ -181,6 +181,16 @@ def _source_health(result, outcome) -> dict:
         "failed": len(failures),
         "fetch_status": outcome.get("status", ""),
         "failure_types": dict(sorted(kinds.items())),
+        # COUNTED, not just listed. `failure_messages` below is a deduped SET,
+        # which answers "which statuses occurred" and not "how many of each" —
+        # so the 62 http_status failures in the first wave could not be split
+        # into 403 (we are being blocked) and 404 (we asked for the wrong
+        # URL). Those are different defects with different fixes, and the
+        # deduped set silently could not tell them apart.
+        "http_status_counts": dict(sorted(Counter(
+            str(f.get("safe_message") or "").strip()
+            for f in failures
+            if f.get("failure_type") == "http_status").items())),
         "failure_messages": sorted({str(f.get("safe_message") or "")[:160]
                                     for f in failures if f.get("safe_message")
                                     })[:6],

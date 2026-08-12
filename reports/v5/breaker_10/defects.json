@@ -5,7 +5,7 @@
   "runtime_sha": "95d322f85535",
   "manifest_version": "1.0.0",
   "analyst_available": false,
-  "analyst_note": "Anthropic credit balance exhausted; no strategic conclusion was produced for any company. Intelligence-layer clusters are UNMEASURED.",
+  "analyst_note": "BACKEND_PREFLIGHT=CREDITS_EXHAUSTED (Batch 11, one-shot). Intelligence layer remains UNMEASURED.",
   "defects": [
     {
       "defect_id": "BW10-001",
@@ -79,9 +79,9 @@
       "observed_state": "validation.redirect_allowed permits the same registrable domain (line 79) then requires exact host equality (line 83), so cloudflare.com -> blog.cloudflare.com and stripe.com -> docs.stripe.com fail as 'unsafe_redirect'. same_domain(), used to APPROVE candidates, accepts those same hosts.",
       "expected_invariant": "Approval and redirect-following agree on what counts as the same company.",
       "evidence": "baseline: 2 unsafe_redirect failures, both same-company subdomains; 'strategy' family missing for 8/10 companies and blog/docs are where strategy content lives.",
-      "status": "OPEN",
-      "fix_commit": null,
-      "rerun_results": null,
+      "status": "FIXED",
+      "fix_commit": "5c019b1",
+      "rerun_results": "unsafe_redirect 2->0; cloudflare 9->10 docs (6->7 families), stripe 7->8, bank-of-america 3->4 families. Cohort yield 39%->40%. HONEST SCOPE: recovered exactly the two refused subdomain redirects. It was NOT the main cause of missing strategy evidence (8->7 of 10).",
       "note": "Not fixed in this batch: Class D, and the fix touches an SSRF-adjacent guard that deserves its own security review."
     },
     {
@@ -98,9 +98,9 @@
       "observed_state": "All 20 cohort timeouts fall on two companies (10 each). Those two are the only runs over 150s; p50=18.5s, p95=178.9s.",
       "expected_invariant": "A refused or dead source should cost a bounded, small amount of wall time.",
       "evidence": "baseline: amd fetch 83s/compose 67s with 11 failures; mckinsey fetch 82s/compose 51s with 13 failures; every other company <30s total.",
-      "status": "OPEN",
-      "fix_commit": null,
-      "rerun_results": null
+      "status": "FIXED",
+      "fix_commit": "5c019b1",
+      "rerun_results": "timeouts 20->4 (16 became cheap host_unreachable). AMD 178.9s->45.8s, McKinsey 160.3s->44.7s. Cohort wall 467s->221s (-53%), max 178.9->45.8. p50 18.5->19.1 (unchanged, correct: the breaker only affects dead hosts). NO EVIDENCE LOST: AMD 3->3 docs, McKinsey 1->1."
     },
     {
       "defect_id": "BW10-006",
@@ -113,13 +113,13 @@
         "6 of 10 missing customers"
       ],
       "first_observed_company": "boeing",
-      "observed_state": "Overall fetch yield 54/140 = 39%. missing_core: strategy 8/10, customers 6/10, product 4/10, identity 3/10, investor 3/10.",
+      "observed_state": "After BW10-004/005 the cohort yield is 40% (56/140). Failures are dominated by http_status=62, UNCHANGED by either fix. Redirect policy accounted for 2 and timeouts cost latency, not documents.",
       "expected_invariant": "A large listed company should yield more than 4 of 14 approved sources.",
       "evidence": "baseline source_health across the cohort; 62 http_status (mostly 403/404) and 20 timeouts out of 86 failures.",
-      "status": "OPEN",
+      "status": "OPEN_REFINED",
       "fix_commit": null,
       "rerun_results": null,
-      "note": "Likely compounded by BW10-004. Do not treat as one defect until the redirect policy is fixed and the wave rerun."
+      "note": "THE YIELD STORY IS HTTP 403/404, not redirects and not timeouts. Every one of the ten hits at least one 403; 6 of 10 also hit 404s. The exact 403:404 split is NOT YET MEASURED \u2014 the wave recorded a deduped message SET, so 'which' was visible and 'how many' was not. A counter now ships in the runner; Batch 12's rerun populates it. 403 (we are blocked: user-agent/robots) and 404 (we asked for the wrong URL: discovery) are different defects with different fixes and must not be merged."
     },
     {
       "defect_id": "BW10-007",
@@ -137,7 +137,25 @@
       "status": "OPEN",
       "fix_commit": null,
       "rerun_results": null,
-      "note": "Cosmetic today; would misreport bridge health once a market engine publishes."
+      "note": "Cosmetic today; would misreport bridge health once a market engine publishes. Still open; unchanged this batch."
+    },
+    {
+      "defect_id": "BW10-008",
+      "class": "E",
+      "severity": "SEV-3",
+      "root_cluster": "PROVENANCE",
+      "title": "The wave recorded failure messages as a deduped set, hiding counts",
+      "affected_companies": [
+        "ALL_TEN"
+      ],
+      "first_observed_company": "cloudflare",
+      "observed_state": "source_health.failure_messages is a set capped at 6, so 62 http_status failures could not be split into 403 vs 404.",
+      "expected_invariant": "A failure taxonomy used to choose the next repair must carry counts, not just membership.",
+      "evidence": "Batch 11 analysis could name which statuses occurred and not how many; the 403/404 split determines whether the next fix is bot-blocking or discovery.",
+      "status": "FIXED",
+      "fix_commit": "pending",
+      "rerun_results": "http_status_counts ships in the runner; populated by the next wave."
     }
-  ]
+  ],
+  "after": "reports/v5/breaker_10/after_5c019b1b6b05.json"
 }
