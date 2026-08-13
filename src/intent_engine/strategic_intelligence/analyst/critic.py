@@ -69,9 +69,25 @@ _NUM_RE = re.compile(r"""
   | (?P<big>\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d{4,})
 """, re.I | re.X)
 
-_INDEPENDENT_CLASSES = frozenset(
-    {"independent_reporting", "customer_voice", "competitor",
-     "investor_material"})
+#: READ FROM THE CANONICAL SET, NOT RESTATED.
+#:
+#: This module kept its own copy, and the copy had drifted WIDER: it counted
+#: `investor_material` as an outside vantage point. Investor material is the
+#: company addressing its investors — `independence._vantage` classifies it
+#: COMPANY_SELF_REPORT — so an insight citing nothing but the company's own
+#: IR pages could claim high confidence, and the check whose whole purpose is
+#: "one vantage point cannot corroborate itself" did not fire.
+#:
+#: Two definitions of "independent" in one system is the defect; the looser
+#: one being on the path that gates what a founder is told is what made it
+#: matter. There is now one definition and this reads it.
+from intent_engine.company_ingestion.records import (  # noqa: E402
+    INDEPENDENT_CLASSES as _INDEPENDENT_CLASSES,
+)
+from intent_engine.company_ingestion.independence import (  # noqa: E402
+    MIN_INDEPENDENT_FOR_CORROBORATION as _MIN_INDEPENDENT_FOR_CORROBORATION,
+    origin_family as _origin_family,
+)
 
 
 @dataclass
@@ -311,14 +327,33 @@ def verify_analysis(analysis: dict, *, observations, company_name: str) -> list:
     # --- 5. confidence may not exceed the evidence ---------------------------
     for i, ins in enumerate(insights):
         cited = [by_id[c] for c in (ins.get("citations") or []) if c in by_id]
-        classes = {getattr(o, "source_class", "") for o in cited}
-        independent = classes & _INDEPENDENT_CLASSES
+        # ORIGINS, NOT CLASSES. Counting distinct source CLASSES cannot see
+        # syndication: nine copies of one wire story are nine documents, one
+        # class and ONE vantage point, and the class test passed all nine.
+        # The observation already carries the URL it came from, and
+        # `origin_family` is the canonical grouping — the same one the
+        # dossier and the wave read — so the fact was available all along
+        # and simply never reached the check that needed it.
+        independent_origins = {
+            _origin_family(getattr(o, "origin", "") or "")
+            for o in cited
+            if getattr(o, "source_class", "") in _INDEPENDENT_CLASSES}
+        independent_origins.discard("")
         conf = (ins.get("confidence") or "").lower()
-        if conf == "high" and not independent:
+        if conf == "high" and \
+                len(independent_origins) < _MIN_INDEPENDENT_FOR_CORROBORATION:
+            # The threshold is the canonical one, not a number invented here:
+            # one outside vantage point is PARTIALLY_INDEPENDENT, and "high"
+            # is a corroboration claim. Moderate confidence remains available
+            # on a single independent origin.
+            held = (f"{len(independent_origins)} independent origin(s)"
+                    if independent_origins else "company-published sources "
+                    "only")
             findings.append(CriticFinding(
                 "confidence_exceeds_evidence",
-                f"insight {i} claims high confidence from company-owned "
-                "sources only; one vantage point cannot corroborate itself",
+                f"insight {i} claims high confidence from {held}; one vantage "
+                "point cannot corroborate itself, and copies of one account "
+                "are not separate accounts",
                 where=f"insights[{i}].confidence"))
         rationale = (ins.get("confidence_rationale") or "").strip()
         if len(rationale.split()) < 5:

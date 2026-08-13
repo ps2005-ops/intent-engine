@@ -237,3 +237,78 @@ them, because the analyst is credit-blocked.
 of this fix — a 10-K is front-loaded, so truncation is survivable where
 rejection is not — but changing a retrieval rule after the SHA was frozen
 would have invalidated the comparison this batch exists to make.
+
+---
+
+# Batch 14 — mechanical re-evaluation
+
+Backend preflight through the canonical analyst path
+(`strategic_intelligence.analyst.runner.default_client`, model
+`claude-sonnet-5`): **`CREDITS_EXHAUSTED`**. One probe, recorded once.
+
+## Both gates
+
+* **`WAVE_30_ENGINEERING_GATE` = PASS**, and it did not regress. Two live
+  reasoning-gate defects were found and closed, 29/29 break proofs CAUGHT
+  across three suites, 195 security tests green.
+* **`WAVE_30_INTELLIGENCE_GATE` = BLOCKED_EXTERNAL_CREDITS + MISSING_PRODUCER.**
+
+The second half of that verdict is new, and it corrects Batch 13.
+
+## Criterion 10, restated honestly
+
+Batch 13 recorded criterion 10 as MET-as-`BLOCKED_EXTERNAL_CREDITS`. That
+reads as "credits are the only barrier", and tracing seam L shows they are
+not. Nothing in `src/` constructs a `KnowledgeEffect` — the only occurrence of
+`effect_type` is the dataclass field declaration — and both call sites of
+`conversion(...)` pass `effects=()` as a literal.
+
+So criterion 10 is:
+
+**MET as architecture · UNMEASURED as fact · and blocked by TWO things, of
+which credits are only the second.**
+
+Restoring credits alone moves the funnel wall from
+`ELIGIBLE_COMPANIES → ANALYZED` (BLOCKED_EXTERNAL) to
+`ANALYZED → BELIEF_ELIGIBLE` (**NO_PRODUCER**). The one company in the
+b13_after wave that did reach a usable report already sits at exactly that
+wall.
+
+## What Batch 14 closed
+
+| # | criterion | change |
+|---|---|---|
+| 2 | no security regression | **held** — 195 green; the critic change tightens a gate, widens nothing |
+| 5 | independence producer operational | **now reaches reasoning.** It previously reached selection, the dossier and the wave — never the analyst |
+| 7 | missing vs zero states explicit | **strengthened** — the funnel separates `LOSS` / `BLOCKED_EXTERNAL` / `NO_PRODUCER`, which were previously one "zero" |
+| 9 | HIGH_ACTIVITY_LOW_LEARNING | unchanged (`STABLE`) |
+| 10 | learning conversion measured | **cause corrected** — see above |
+| 15 | useful-evidence latency | unchanged (PARTIAL) |
+
+## Two live defects found in the confidence gate
+
+Both were running at `46027cc`, both silent, both on the path that decides
+what a founder is told with **high confidence**, and both now break-proofed by
+mutations that restore the exact shipped code:
+
+1. **Origin never reached the gate.** The critic decided independence from
+   per-document source CLASSES, which cannot see syndication. Nine copies of
+   one wire story satisfied its own stated rule that "one vantage point cannot
+   corroborate itself".
+2. **A private, wider definition.** The critic's own copy of the
+   independent-class set counted `investor_material` — the company addressing
+   its investors, which the canonical model classifies `COMPANY_SELF_REPORT`.
+   An insight citing nothing but the company's IR pages could claim high
+   confidence. There is now one definition, imported.
+
+## Wave 30
+
+**Still CLOSED, and for a sharper reason than before.** The instrument is
+sound and the chain is measured to the point where it stops. What has never
+happened — with or without credits — is a single evidence row changing a
+single knowledge object, because nothing writes one.
+
+**Do not scale to 30.** The next batch is the effect producer at the dossier
+revision seam (`external_intel.decision_impact` already provides before/after
+over semantic fields), and it should be built BEFORE credits are restored so
+that the first paid run measures something.

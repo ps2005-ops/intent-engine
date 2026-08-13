@@ -1,0 +1,41 @@
+{
+  "company_ids": [
+    "cloudflare",
+    "advanced-micro-devices",
+    "boeing",
+    "bank-of-america",
+    "alimentation-couche-tard",
+    "agnico-eagle-mines",
+    "bce",
+    "stripe",
+    "mckinsey",
+    "johnson-and-johnson"
+  ],
+  "contract": "intelligence_baseline_identity.v1",
+  "document_size_policy": {
+    "note": "UNCHANGED. too_large rose 2 -> 11 in Batch 13 and is the next retrieval lever; changing it before the intelligence baseline would contaminate the comparison this identity exists to protect."
+  },
+  "manifest_version": "1.0.0",
+  "ranking": {
+    "note": "Batch-13 ordering, unchanged in Batch 14 by design (\u00a718/\u00a70).",
+    "tiers": {
+      "external_proposed": 5,
+      "homepage_link/entered": 3,
+      "known_path": 4,
+      "official_fallback": 0,
+      "refusing_host": 9,
+      "sec_edgar": 1,
+      "sitemap": 2,
+      "third_party_filing": 1
+    }
+  },
+  "retrieval": {
+    "max_approved_sources": 14,
+    "max_candidates_shown": 32,
+    "max_homepage_links": 20,
+    "max_known_paths": 28,
+    "user_agent": "FounderIntelligenceBot/1.1 (outside-in company analysis; approved-source retrieval)"
+  },
+  "runtime_sha": "46027cc72d7c07fed287beaa26cdf5c748279eaa",
+  "why": "Frozen so a later change in learning conversion is attributable to intelligence, not to a changed retrieval population. Any difference in these fields invalidates a before/after comparison."
+}
