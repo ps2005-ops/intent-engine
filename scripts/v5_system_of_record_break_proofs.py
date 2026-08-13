@@ -31,6 +31,7 @@ PROD = "tests/test_market_acquisition_counter_populations.py"
 REP = "tests/test_market_learning_report.py"
 MTX = "tests/test_market_matrix.py"
 IND = "tests/test_market_evidence_independence.py"
+FF = "tests/test_market_founder_freshness.py"
 
 MUTATIONS = [
     ("the legacy prediction pipeline is declared CANONICAL",
@@ -88,6 +89,49 @@ MUTATIONS = [
      '            "changing_share": (round(len(changed) / len(effects), 4)\n'
      '                               if effects else 0.0),',
      f"{SOR}::test_zero_effects_reports_unmeasurable_share_not_zero"),
+
+    # --- founder freshness (§28) ------------------------------------------
+    ("a stale export is reported CURRENT",
+     SRC / "market/founder_freshness.py",
+     "    if consumed_digest == export[\"semantic_digest\"]:",
+     "    if True:",
+     f"{FF}::test_a_changed_export_is_stale_until_consumed"),
+
+    ("a received-but-unconsumed export counts as current",
+     SRC / "market/founder_freshness.py",
+     '        return {"state": NOT_CONSUMED,',
+     '        return {"state": CURRENT_NO_NEW_REVISION_REQUIRED,',
+     f"{FF}::test_an_export_nobody_consumed_is_not_consumed_not_current"),
+
+    ("a revision with no digest is assumed to match",
+     SRC / "market/founder_freshness.py",
+     '        return {"state": STALE_MARKET_INTELLIGENCE,\n'
+     '                "reason": ("the Founder revision records no semantic '
+     'digest, "',
+     '        return {"state": CURRENT_NO_NEW_REVISION_REQUIRED,\n'
+     '                "reason": ("the Founder revision records no semantic '
+     'digest, "',
+     f"{FF}::test_a_revision_without_a_digest_cannot_be_proven_current"),
+
+    ("the semantic digest includes the generation timestamp",
+     SRC / "market/founder_freshness.py",
+     '_NON_SEMANTIC = frozenset({"generated_at", "freshness", "as_of",',
+     '_NON_SEMANTIC = frozenset({"freshness", "as_of",',
+     f"{FF}::test_a_regenerated_identical_export_has_the_same_digest"),
+
+    ("a missing export is treated as an export that was not needed",
+     SRC / "market/founder_freshness.py",
+     '        return {"state": EXPORT_NOT_CHECKED,',
+     '        return {"state": EXPORT_NOT_NEEDED,',
+     f"{FF}::test_a_company_with_no_export_is_unchecked_not_up_to_date"),
+
+    ("an empty runtime reports a 0% current share instead of none",
+     SRC / "market/founder_freshness.py",
+     '        "current_share": (round(current / len(companies), 4)\n'
+     '                          if companies else None),',
+     '        "current_share": (round(current / len(companies), 4)\n'
+     '                          if companies else 0.0),',
+     f"{FF}::test_an_empty_runtime_reports_no_share_rather_than_zero"),
 
     # --- evidence independence (§36) --------------------------------------
     ("syndicated copies are counted as independent sources",

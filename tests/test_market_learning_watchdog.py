@@ -213,3 +213,38 @@ def test_every_severity_and_silence_state_is_closed():
     assert report["silence"]["state"] in W.SILENCE_STATES
     for alert in report["alerts"]:
         assert alert["severity"] in W.SEVERITIES
+
+
+# --- founder freshness arm ----------------------------------------------------
+def test_a_fully_current_founder_pipe_raises_nothing():
+    """The calm case. EXPORT_NOT_NEEDED + CURRENT must never alert.
+
+    A watchdog that complains when the system correctly declines to append an
+    empty revision teaches its operator to ignore it.
+    """
+    report = W.evaluate(status=status(), now=NOW, freshness={
+        "companies": 3, "current": 3, "by_state": {}, "exports": 3,
+        "companies_with_consumption": 3, "transport": "HTTP",
+        "market_last_export_at": "", "founder_last_consumed_at": ""})
+    assert W.FOUNDER_NOT_CONSUMING not in ids(report)
+    assert report["status"] == "OK"
+
+
+def test_an_unconsumed_founder_pipe_is_flagged():
+    report = W.evaluate(status=status(), now=NOW, freshness={
+        "companies": 60, "current": 0,
+        "by_state": {"NOT_CONSUMED": 35, "STALE_MARKET_INTELLIGENCE": 25},
+        "exports": 60, "companies_with_consumption": 25,
+        "transport": "TRANSPORT_NOT_CONFIGURED",
+        "market_last_export_at": "2026-08-12", "founder_last_consumed_at": "2026-08-09"})
+    assert W.FOUNDER_NOT_CONSUMING in ids(report)
+
+
+def test_the_watchdog_does_not_touch_the_filesystem_without_a_root():
+    """Isolation, pinned.
+
+    Reading the live runtime under an injected scenario made three negative
+    controls depend on whatever the real Founder pipe was doing that day.
+    """
+    report = W.evaluate(status=status(), now=NOW)
+    assert W.FOUNDER_NOT_CONSUMING not in ids(report)

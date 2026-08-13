@@ -22,7 +22,7 @@ capability_states: [PASS, PARTIAL, NOT_BUILT, BLOCKED_DATA, BLOCKED_EXTERNAL,
                     NOT_APPLICABLE, UNMEASURED]
 empirical_states: [MEASURED, RAN_NO_CHANGE, SPARSE, BLOCKED_DATA,
                    BLOCKED_EXTERNAL, LEGACY_UNDATABLE, NOT_APPLICABLE,
-                   UNMEASURED, RAN_NO_ELIGIBLE_ITEM]
+                   UNMEASURED, RAN_NO_ELIGIBLE_ITEM, NOT_CONSUMED]
 
 axes:
   - id: SYSTEM_OF_RECORD
@@ -118,10 +118,15 @@ axes:
     empirical: NOT_APPLICABLE
     evidence: "declared a consumer; learning proven with zero trades"
   - id: FOUNDER_CONSUMPTION
-    capability: PARTIAL
-    empirical: UNMEASURED
-    evidence: "freshness telemetry states not implemented; export last written
-      2026-08-09"
+    capability: PASS
+    empirical: NOT_CONSUMED
+    evidence: "market/founder_freshness.py: a semantic-digest state machine
+      that mechanically separates CURRENT from merely-untouched. 31 tests,
+      both arms, 6 break proofs. LIVE: 0 of 60 companies current - 35
+      NOT_CONSUMED, 25 whose revisions predate digest recording and therefore
+      cannot be PROVEN current. The capability closed; the empirical state is
+      bad and is now visible instead of silent. No Founder consumer runs
+      against this data root and transport is TRANSPORT_NOT_CONFIGURED."
   - id: COMPANY_DEMO_DOSSIER
     capability: PASS
     empirical: RAN_NO_CHANGE

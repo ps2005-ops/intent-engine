@@ -37,6 +37,7 @@ import pathlib
 from typing import Dict, List, Optional
 
 from . import evidence_independence as EI
+from . import founder_freshness as FF
 from . import knowledge_decay as KD
 from . import learning_status as LS
 from . import learning_watchdog as LW
@@ -442,6 +443,8 @@ def build(period: str = DAY, *, root=None, as_of=None) -> dict:
             beliefs_due_subjects={a.subject for a in
                                   KD.assess(ledger, as_of=end.isoformat())
                                   if a.eligible}),
+        # Did the learning reach the product, or was no refresh required?
+        "founder_freshness": FF.assess(root),
         "knowledge_decay": KD.summarise(
             KD.assess(ledger, as_of=end.isoformat())),
     }

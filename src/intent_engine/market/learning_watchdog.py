@@ -36,6 +36,7 @@ import dataclasses
 import datetime
 from typing import Dict, List, Optional
 
+from . import founder_freshness as FF
 from . import learning_status as LS
 from . import system_of_record as SOR
 
@@ -77,6 +78,7 @@ PROSPECTIVE_RL_NOT_RUNNING = "PROSPECTIVE_RL_NOT_RUNNING"
 RL_DATA_NOT_ACCUMULATING = "RL_DATA_NOT_ACCUMULATING"
 BELIEF_REVISION_STALE = "BELIEF_REVISION_STALE"
 FOUNDER_CONSUMPTION_STALE = "FOUNDER_CONSUMPTION_STALE"
+FOUNDER_NOT_CONSUMING = "FOUNDER_NOT_CONSUMING"
 POPULATION_MISMATCH = "POPULATION_MISMATCH"
 UNDATABLE_BY_READER = "UNDATABLE_BY_READER"
 LEGACY_PIPELINE_ACTIVE_AS_CANONICAL = "LEGACY_PIPELINE_ACTIVE_AS_CANONICAL"
@@ -173,7 +175,8 @@ def _silence(status: dict) -> dict:
 
 
 def evaluate(root=None, window: str = "7d", *, status=None,
-             founder_last_write: str = "", now=None) -> dict:
+             founder_last_write: str = "", freshness=None,
+             now=None) -> dict:
     """Typed alerts over the canonical learning picture.
 
     `status` may be injected so the negative controls can drive exact states
@@ -339,6 +342,39 @@ def evaluate(root=None, window: str = "7d", *, status=None,
                                        "nothing eligible, or founder not "
                                        "reading — do not touch the file"),
                 evidence={"founder_last_write": founder_last_write})
+
+    # Founder freshness, from the canonical state machine. A calm
+    # EXPORT_NOT_NEEDED / CURRENT state must NOT alert — that is the system
+    # correctly declining to append an empty revision.
+    # Only reach the filesystem when a root was given. An injected `status`
+    # means a caller is driving an exact scenario, and silently reading the
+    # live runtime underneath it made three negative controls depend on
+    # whatever the real Founder pipe happened to be doing.
+    fresh = freshness
+    if fresh is None and root is not None:
+        try:
+            fresh = FF.assess(root)
+        except Exception:                          # noqa: BLE001
+            fresh = None
+    if fresh and fresh["companies"]:
+        not_current = fresh["companies"] - fresh["current"]
+        if not_current:
+            add(alert_id=FOUNDER_NOT_CONSUMING, severity=WARNING,
+                subsystem="founder_transport",
+                observed=f"{not_current} of {fresh['companies']} companies "
+                         f"are not current "
+                         f"({fresh['by_state']})",
+                expected="every exported company is consumed, or its export "
+                         "is semantically identical to the consumed one",
+                suggested_next_action=(
+                    "check whether a Founder consumer runs against this data "
+                    "root; transport is "
+                    + str(fresh["transport"])),
+                evidence={k: fresh[k] for k in
+                          ("exports", "companies_with_consumption",
+                           "current", "transport",
+                           "market_last_export_at",
+                           "founder_last_consumed_at")})
 
     return _wrap(alerts, status, _silence(status))
 
