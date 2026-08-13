@@ -115,15 +115,15 @@ MUTATIONS = [
      f"{WAVE}::test_a_company_whose_producer_did_not_run_is_excluded_"
      f"not_counted_zero"),
 
-    # 9. the belief arm claims health it never measured
+    # 9. the belief arm claims health it never measured.
+    #    RETARGETED IN BATCH 13: the arm used to be a literal UNMEASURABLE and
+    #    is now the attribution state, so the mutation that would reintroduce
+    #    the defect is a hardcoded STABLE in its place. The invariant under
+    #    proof is unchanged — this arm may never assert the system learned.
     ("the unmeasured belief arm reports STABLE",
      ROOT / "scripts/v5_breaker_wave.py",
-     '        "belief_arm": UNMEASURABLE,\n'
-     '        "belief_arm_reason": ("independent evidence → belief movement '
-     'needs "',
-     '        "belief_arm": "STABLE",\n'
-     '        "belief_arm_reason": ("independent evidence → belief movement '
-     'needs "',
+     '        "belief_arm": str((learning or {}).get("state") or UNAVAILABLE),',
+     '        "belief_arm": "STABLE",',
      f"{WAVE}::test_the_belief_arm_is_never_claimed_stable"),
 
     # 10. the retrieval repair widened past the security boundary

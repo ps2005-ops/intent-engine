@@ -160,6 +160,24 @@ def test_attested_filing_takes_the_independent_slot_over_a_guess():
     assert picked[0] == "ual"
 
 
+def test_filing_outranks_an_equally_attested_independent_peer():
+    """ISOLATES THE PROMOTION from the demotion beside it.
+
+    The review-guess test above is defended twice — the filing is promoted to
+    the attested tier AND the guess is demoted below on-domain paths — so it
+    passes even if the promotion is removed. Here the peer is `user_pasted`:
+    attested, undemoted, and in the same one-slot family. Only the promotion
+    decides this, which is what makes it a proof of the promotion.
+    """
+    candidates = [
+        _candidate("pasted", "user_pasted", "customer_voice",
+                   "https://reviews.example/acme"),
+        _candidate("filing", "third_party_filing", "competitor",
+                   "https://www.sec.gov/Archives/edgar/data/1/f.htm"),
+    ]
+    assert WebApp._recommended_candidate_ids(candidates)[0] == "filing"
+
+
 def test_independent_candidate_not_crowded_out_by_many_company_pages():
     """§13 METAMORPHIC. 20 company-owned + regulator + customer + independent.
 
