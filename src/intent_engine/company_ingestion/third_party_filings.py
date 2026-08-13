@@ -92,6 +92,39 @@ def _normalise_cik(value) -> str:
     return str(value or "").strip().lstrip("0")
 
 
+#: Legal-form words that differ between how a registrant signs a filing and
+#: how the manifest spells the company. Stripped from both sides before
+#: comparison; never used to match on their own.
+_LEGAL_FORMS = frozenset({
+    "inc", "incorporated", "corp", "corporation", "co", "company", "ltd",
+    "limited", "llc", "lp", "llp", "plc", "sa", "nv", "ag", "se", "gmbh",
+    "holdings", "holding", "group", "the",
+})
+
+
+def _core_name(value: str) -> str:
+    """A company name reduced to its distinguishing words.
+
+    EXACT, NOT FUZZY, AND DELIBERATELY SO. A containment test here would be
+    the same bug this codebase has already shipped once: "Linear" matched
+    "Linear Minerals Corp.", a different company, and the fix that widened
+    matching was worse than the defect. Over-matching does not merely lose a
+    candidate, it DELETES a true independent observation — so the comparison
+    is equality between normalised cores, and anything less certain is
+    allowed through as independent and adjudicated downstream.
+    """
+    cleaned = re.sub(r"\((?:CIK|[A-Z.]{1,6})[^)]*\)", " ", value or "")
+    words = re.findall(r"[a-z0-9]+", cleaned.lower())
+    kept = [w for w in words if w not in _LEGAL_FORMS]
+    return " ".join(kept or words)
+
+
+def _same_organisation(filer: str, company_name: str) -> bool:
+    """Whether a filer name denotes the subject company itself."""
+    left, right = _core_name(filer), _core_name(company_name)
+    return bool(left) and left == right
+
+
 def _filing_url(accession_with_doc: str, cik: str) -> str:
     """EDGAR archive URL for a full-text-search hit id."""
     accession, _, document = (accession_with_doc or "").partition(":")
@@ -165,6 +198,19 @@ def propose_third_party_filings(*, company_name: str, subject_cik: str = "",
         names = source.get("display_names") or []
         filer = (names[0] if names else "").strip()
         if not filer:
+            continue
+        # SECOND LOCK ON THE SAME DOOR, BY NAME.
+        #
+        # `subject_cik` is resolved best-effort by the caller and its failure
+        # is swallowed, so a resolver outage silently empties the CIK filter
+        # above — and every candidate this module emits is stamped
+        # INDEPENDENT_OF_SUBJECT. The failure would therefore not look like a
+        # failure: it would look like the company corroborating itself, which
+        # is the one output this module exists to prevent.
+        #
+        # Verified against the live index with the CIK filter off: Cloudflare's
+        # own 10-K is returned as the first hit for "Cloudflare, Inc.".
+        if _same_organisation(filer, company_name):
             continue
         form = str(source.get("file_type") or "")
         if _too_old(source.get("file_date", ""), today=today):

@@ -4340,6 +4340,33 @@ class WebApp:
                 return 0
             if "SEC EDGAR" in why:
                 return 1
+            # ATTESTED BEATS GUESSED — INSIDE THE INDEPENDENT FAMILY TOO.
+            #
+            # Batch 12 established this for the company's own domain (an
+            # attested `homepage_link` over a guessed `known_path`) and the
+            # same defect survived one bucket over, where it was costing far
+            # more.
+            #
+            # A `third_party_filing` is a filing by a DIFFERENT registrant that
+            # an EDGAR full-text query just returned: the accession exists, the
+            # filer is named, the date is exact, and the regulator serves it as
+            # plain HTML. An `external_proposed` review-site URL is built by
+            # slugifying the company name into a template and is marked
+            # UNVERIFIED by its own producer — a guess, and one that is only
+            # ever plausible for consumer software.
+            #
+            # Both scored 4, and the `independent` family takes ONE candidate,
+            # so insertion order decided it. Measured on the frozen ten
+            # (b13_discovery_before, 6645a4f): 39 third-party filings were
+            # discovered and 38 discarded, while 10 of 10 companies spent
+            # their single independent slot on a guessed g2.com URL — for a
+            # bank, a miner, an airframer and a pharmaceutical company alike.
+            # That is the whole of "zero independent external sources".
+            #
+            # ORDER ONLY. Nothing here makes a candidate eligible that was not
+            # already eligible, and no host, scheme or redirect rule moves.
+            if method == "third_party_filing":
+                return 1
             if _on_refusing_host(candidate):
                 return 9
             if "sitemap" in why:
@@ -4365,8 +4392,28 @@ class WebApp:
             # company-agnostic: no rule here can name a company, and a site
             # with no usable homepage links (the Sony case, where the homepage
             # 403s) has no attested links to promote and is unaffected.
-            if method == "homepage_link":
+            if method in ("homepage_link", "entered"):
+                # `entered` is the URL the founder typed. It is the most
+                # strongly attested URL in the run and the company's own
+                # homepage is the single densest identity document there is;
+                # leaving it tied with the guesses let a diversity tie-break
+                # promote a slug-built review URL over it (measured on the
+                # `non_english` fixture: the homepage dropped out of the run).
                 return 3
+            # A TEMPLATE GUESS, AND ITS OWN PRODUCER MARKS IT UNVERIFIED.
+            #
+            # `external_proposed` builds review-site URLs by slugifying the
+            # company name. It ranks below a guessed path on the company's own
+            # domain because it is measured to be worse: across the frozen ten
+            # every one of these that took a slot answered 403, for a bank, a
+            # miner, an airframer and a pharmaceutical company alike — none of
+            # which a software review site has ever covered.
+            #
+            # DEMOTED, NOT EXCLUDED. For a consumer-software company these are
+            # exactly the right sources, so they still take leftover budget;
+            # they simply no longer outrank evidence that exists.
+            if method == "external_proposed":
+                return 5
             return 4
 
         # Per-family quotas. Coverage across families is what stops a report
@@ -4388,18 +4435,50 @@ class WebApp:
             group.sort(key=_relevance_first)
             claimed.update(c["candidate_id"] for c in group)
             buckets.append((name, group))
-        picked, depth = [], 0
+        # AMONG EQUALLY USEFUL CANDIDATES, PREFER AN ORIGIN WE DO NOT HAVE.
+        #
+        # Information value stays primary and this can never override it: the
+        # preference applies ONLY inside one relevance tier of one family, so
+        # a more relevant candidate is never displaced by a fresher origin.
+        # That restriction is the point — a diversity rule that outranked
+        # relevance would trade real evidence for variety, and several of the
+        # frozen ten genuinely publish everything useful on one host.
+        #
+        # It binds here rather than in the leftover fill below because this
+        # loop is where most slots are spent: `product` alone takes five, and
+        # taking five pages from one host is how a cohort reaches a mean
+        # origin concentration of 0.82 (b13_before) while other origins sit
+        # unapproved.
+        from intent_engine.company_ingestion.independence import origin_family
+
+        pools = {name: list(group) for name, group in buckets}
+        used = {name: 0 for name, _group in buckets}
+        picked, seen_origins = [], set()
         while len(picked) < MAX_APPROVED_SOURCES:
             progressed = False
-            for name, group in buckets:
-                if depth >= _QUOTAS.get(name, 1):
+            for name, _group in buckets:
+                if len(picked) >= MAX_APPROVED_SOURCES:
+                    break
+                if used[name] >= _QUOTAS.get(name, 1):
                     continue
-                if depth < len(group) and len(picked) < MAX_APPROVED_SOURCES:
-                    picked.append(group[depth]["candidate_id"])
-                    progressed = True
+                pool = pools[name]
+                if not pool:
+                    continue
+                # `pool` is already sorted by relevance, so its head defines
+                # the best tier available in this family right now.
+                best_tier = _relevance_first(pool[0])
+                choice = next(
+                    (c for c in pool
+                     if _relevance_first(c) == best_tier
+                     and origin_family(c.get("url", "")) not in seen_origins),
+                    pool[0])
+                pool.remove(choice)
+                picked.append(choice["candidate_id"])
+                seen_origins.add(origin_family(choice.get("url", "")))
+                used[name] += 1
+                progressed = True
             if not progressed:
                 break
-            depth += 1
         # Budget left over because some families had no candidates at all (the
         # Sony case: nothing on the company's own domain can be retrieved). Fill
         # it from the best remaining evidence rather than returning a short list
@@ -4416,10 +4495,25 @@ class WebApp:
             remaining = [c for _name, group in buckets for c in group
                          if c["candidate_id"] not in taken]
             remaining.sort(key=_relevance_first)
+            # Same tie-break as above, over what the quotas left behind, and
+            # carrying the SAME `seen_origins` — otherwise the leftover budget
+            # would happily refill the origin the quota loop just avoided.
+            tiers: dict = {}
             for candidate in remaining:
+                tiers.setdefault(_relevance_first(candidate),
+                                 []).append(candidate)
+            for tier in sorted(tiers):
+                pool = tiers[tier]
+                while pool and len(picked) < MAX_APPROVED_SOURCES:
+                    choice = next(
+                        (c for c in pool
+                         if origin_family(c.get("url", "")) not in seen_origins),
+                        pool[0])
+                    pool.remove(choice)
+                    picked.append(choice["candidate_id"])
+                    seen_origins.add(origin_family(choice.get("url", "")))
                 if len(picked) >= MAX_APPROVED_SOURCES:
                     break
-                picked.append(candidate["candidate_id"])
         return picked
 
     # --- asynchronous analysis ------------------------------------------

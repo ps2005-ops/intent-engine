@@ -106,15 +106,55 @@ def _host(url: str) -> str:
         return ""
 
 
+#: An EDGAR archive path names the FILER in it:
+#: /Archives/edgar/data/<cik>/<accession>/<document>
+_EDGAR_FILER = re.compile(r"/archives/edgar/data/(\d+)/", re.I)
+
+
+def filing_author(url: str) -> str:
+    """The registrant who WROTE a filing, when the URL names them.
+
+    Returns "" when the URL is not a filing archive path, so a caller can
+    fall back to the host without having to know EDGAR's layout.
+    """
+    try:
+        parsed = urlparse(url or "")
+    except ValueError:
+        return ""
+    host = (parsed.hostname or "").lower().lstrip(".")
+    if not (host == "sec.gov" or host.endswith(".sec.gov")):
+        return ""
+    found = _EDGAR_FILER.search(parsed.path or "")
+    return found.group(1).lstrip("0") if found else ""
+
+
 def origin_family(url: str) -> str:
-    """The publishing origin, as the last two labels of the host.
+    """The publishing origin: WHO PRODUCED THIS TEXT, not who hosts it.
 
     Coarse on purpose and NEVER used for a security decision — this decides
     whether two documents corroborate each other, not whether a URL may be
     fetched. `blog.acme.com` and `www.acme.com` are the same publisher for
     corroboration purposes, which is exactly the collapse we want here and
     exactly the collapse that would be a vulnerability in a redirect check.
+
+    A REGULATOR IS A VENUE, NOT AN AUTHOR
+    --------------------------------------
+    Reading the host alone made every document filed with the SEC one origin.
+    Measured on the frozen ten: United Airlines' own 10-K describing Boeing —
+    a different company, writing under regulatory obligation, with its own
+    interests — was labelled SAME_ORIGIN as Boeing's 10-K and dropped from the
+    independent count, because both are served from sec.gov. Three distinct
+    authors collapsed into one observation.
+
+    That is the wrong axis. Syndication is "the same words from the same
+    author reprinted elsewhere"; two registrants filing separately are two
+    observations however they are served. So an EDGAR archive URL takes its
+    origin from the FILER named in the path, and everything else — where no
+    author is derivable from the URL — keeps host-based grouping unchanged.
     """
+    author = filing_author(url)
+    if author:
+        return f"sec.gov/filer/{author}"
     host = _host(url)
     if not host:
         return ""
@@ -157,9 +197,24 @@ def _is_primary_filing(document: dict) -> bool:
 
 def _vantage(document: dict) -> str:
     """The lineage this document would carry if nothing preceded it."""
-    if _is_primary_filing(document):
-        return REGULATOR_OR_PRIMARY_FILING
     source_class = str(document.get("source_class") or "").strip()
+    if _is_primary_filing(document):
+        # A FILING BY SOMEONE ELSE IS AN OUTSIDE VANTAGE POINT.
+        #
+        # Both facts about a competitor's 10-K are true — an independent
+        # registrant wrote it, and the regulator published it — but only one
+        # of them answers the question this vocabulary asks, which is whose
+        # account of the company this is. Checking the venue first made the
+        # subject's own 10-K and a customer's 10-K the same lineage, so a
+        # dossier could not tell a founder which one it had.
+        #
+        # The independent count does NOT move here: both lineages are already
+        # INDEPENDENCE_BEARING. What moves is what the founder is told (§47).
+        # The gate is the vantage class, so the subject's own filing — always
+        # company-published — can never reach this branch.
+        if source_class in _INDEPENDENT_VANTAGE:
+            return INDEPENDENT_EXTERNAL_SOURCE
+        return REGULATOR_OR_PRIMARY_FILING
     if not source_class:
         # No vantage recorded is not "company owned by default". A missing
         # input is reported as missing; guessing here is how an unknown
