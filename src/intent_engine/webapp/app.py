@@ -5235,10 +5235,43 @@ class WebApp:
                 domain=domain)
             context = self._external_cache.get(run_id)
 
+            # EVIDENCE INDEPENDENCE AND LEARNING, MEASURED HERE RATHER THAN
+            # DESCRIBED AS UNAVAILABLE.
+            #
+            # The producer for both already exists; until now the dossier
+            # hardcoded `INDEPENDENCE_UNAVAILABLE` and emitted no learning
+            # summary at all, so a founder reading a dossier could not tell
+            # nine copies of one release from nine separate accounts.
+            #
+            # Both are computed defensively and their FAILURE IS A STATE, not
+            # a zero: `assess` raising must not turn into "no independent
+            # sources", which is a claim about the company.
+            from intent_engine.company_ingestion import independence as _IND
+            from intent_engine.company_ingestion import (
+                learning_attribution as _LA,
+            )
+            try:
+                _assessed = _IND.assess(self.ci.store.retrieved(run_id))
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _assessed = None
+            # No strategic report means the reasoning layer produced no
+            # knowledge state, so no evidence row could have moved one. That
+            # is BLOCKED, never a measured zero (§21).
+            _learning = _LA.conversion(
+                evidence_rows=(_assessed or {}).get("rows", ()),
+                effects=(),
+                independence_rows=(_assessed or {}).get("rows", ()),
+                knowledge_layer_ran=isinstance(report, dict),
+                blocked_reason=(
+                    "" if isinstance(report, dict) else
+                    "no strategic report was produced for this run, so no "
+                    "knowledge state existed for evidence to change"))
+
             founder = read_founder_snapshot(fds.build_payload(
                 run_id=run_id, company_id=key, canonical_name=name,
                 domain=str(meta.get("domain") or ""), report=report,
-                context=context, scope=None))
+                context=context, scope=None,
+                independence=_assessed, learning=_learning))
 
             # The market snapshot, if this deployment shares a transport with
             # a market engine. Absent is the normal case and reads as such.

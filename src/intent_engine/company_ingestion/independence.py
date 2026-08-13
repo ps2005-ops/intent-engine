@@ -328,6 +328,51 @@ def _corroboration(independent: int, distinct: int, rows: int,
             f"not an outside vantage point")
 
 
+#: Written out because a CEO reads "9" and hears nine opinions.
+_WORDS = ("no", "one", "two", "three", "four", "five", "six", "seven",
+          "eight", "nine", "ten")
+
+
+def _count_word(value: int) -> str:
+    return _WORDS[value] if 0 <= value < len(_WORDS) else str(value)
+
+
+def describe(assessment: dict) -> str:
+    """One deterministic sentence a founder can act on.
+
+    THE SENTENCE THIS EXISTS TO MAKE UNSAYABLE: "nine sources confirm this".
+    Nine documents that are eight republications of one release is one
+    account, and a reader who is told the row count will price it as nine.
+    So the document count is never stated without the origin count beside it.
+
+    Deterministic and template-based, never generated: this is the one
+    sentence in the product whose job is to stop a number being overstated,
+    and a model rephrasing it could restore the overstatement.
+    """
+    rows = int(assessment.get("evidence_count") or 0)
+    if not rows:
+        return "No evidence rows were assessed for independence."
+    independent = int(assessment.get("independent_evidence_count") or 0)
+    unknown = int(assessment.get("unknown_lineage_count") or 0)
+    if unknown == rows:
+        # SAY SO (§25). Unknown lineage rendered as independence is the
+        # single cheapest way to manufacture corroboration.
+        return (f"{_count_word(rows).capitalize()} document(s) support this "
+                "view, and their lineage could not be established, so whether "
+                "they are separate accounts is unknown.")
+    documents = f"{_count_word(rows).capitalize()} document(s)"
+    if independent == 0:
+        return (f"{documents} support this view, none of them from a vantage "
+                "point outside the company.")
+    origins = (f"{_count_word(independent)} independent origin(s)"
+               if independent != 1 else "one independent origin")
+    sentence = f"{documents} support this view, representing {origins}."
+    if unknown:
+        sentence += (f" {_count_word(unknown).capitalize()} of them carry no "
+                     "lineage signal and are not counted as independent.")
+    return sentence
+
+
 def assess(documents: Sequence[dict], *,
            contradicting_ids: Sequence[str] = ()) -> dict:
     """Independence for one company's evidence set.
@@ -394,6 +439,13 @@ def assess(documents: Sequence[dict], *,
         "distinct_observation_count": distinct_observations,
         "corroboration_state": state,
         "corroboration_reason": reason,
+        # The one sentence a founder-facing surface may render verbatim. Held
+        # next to the counts it is derived from so a reviewer can check it
+        # against them without re-deriving anything.
+        "plain_statement": describe({
+            "evidence_count": len(rows),
+            "independent_evidence_count": independent_count,
+            "unknown_lineage_count": lineage_counts.get(UNKNOWN_LINEAGE, 0)}),
         "independent_origins": independent_origins,
         "source_families": families,
         "contradicting_evidence_ids": list(contradicting_ids),

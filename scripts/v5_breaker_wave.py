@@ -32,6 +32,7 @@ is looking at, something upstream is wrong.
 from __future__ import annotations
 
 import argparse
+import collections
 import datetime
 import json
 import os
@@ -236,6 +237,28 @@ def _evidence(result, ci, run_id) -> dict:
     }
 
 
+def _learning(result, assessed_rows) -> dict:
+    """Per-company evidence→knowledge attribution, or the reason there is none.
+
+    The founder path records no effects yet, so on a run that DID reach a
+    strategic report this reports NOT_ATTEMPTED — the seam exists and nothing
+    was written through it — which is deliberately distinct from a run whose
+    reasoning layer never produced a knowledge state at all.
+    """
+    from intent_engine.company_ingestion import learning_attribution as LA
+
+    report = result.get("strategic_report")
+    usable = (isinstance(report, dict)
+              and str(report.get("result_state") or "") not in ("FAILED", ""))
+    return LA.conversion(
+        evidence_rows=assessed_rows, effects=(),
+        independence_rows=assessed_rows,
+        knowledge_layer_ran=usable,
+        blocked_reason="" if usable else (
+            "the run reached no usable strategic report, so no knowledge "
+            "state existed for an evidence row to change"))
+
+
 def _intelligence(result) -> dict:
     """Strategic layer states. Every field is a STATE, never a judgement."""
     report = result.get("strategic_report")
@@ -398,6 +421,8 @@ def run_company(company, *, root: pathlib.Path, frozen: dict) -> dict:
         record["identity"] = _identity(result, meta, company)
         record["source_health"] = _source_health(result, outcome)
         record["evidence"] = _evidence(result, app.ci, run_id)
+        record["learning"] = _learning(
+            result, record["evidence"].get("independence_rows") or [])
         record["intelligence"] = _intelligence(result)
         record["dossier"] = _dossier_record(
             DossierStore(store_dir).latest(company.company_id))
@@ -453,6 +478,67 @@ def _observations_state(records: list) -> dict:
         "reason": ("no company reached a usable strategic report, so the "
                    "observation count is downstream of the reasoning "
                    "backend and is NOT a measurement of the evidence"),
+    }
+
+
+def _learning_conversion(records: list) -> dict:
+    """Did the evidence change anything — or why can that not be said?
+
+    THE POPULATIONS ARE ROWS ON BOTH SIDES (§22). One evidence row can produce
+    several effects, so the numerator counts ROWS THAT PRODUCED AN EFFECT and
+    never the effects themselves. A rate built the other way can exceed 1 and
+    has, in this programme, before.
+
+    A company whose reasoning layer never ran contributes to NEITHER side.
+    Folding it in as a zero-effect row would let an unpaid API bill read as
+    evidence that taught the system nothing.
+    """
+    states = collections.Counter(
+        str(_dig(r, "learning", "attribution_state") or "ABSENT")
+        for r in records)
+    eligible = [r for r in records
+                if _dig(r, "learning", "attribution_state") == "MEASURED"]
+    blocked = [r for r in records
+               if _dig(r, "learning", "attribution_state")
+               == "BLOCKED_EXTERNAL_CREDITS"]
+    if not eligible:
+        return {
+            "state": "BLOCKED_EXTERNAL_CREDITS" if blocked else UNAVAILABLE,
+            "reason": (
+                f"{len(blocked)} of {len(records)} compan(ies) produced no "
+                "knowledge state for evidence to change, so learning "
+                "conversion is downstream of the reasoning backend and is "
+                "NOT a measurement of the evidence"
+                if blocked else
+                "no company reported an attribution state"),
+            "attribution_states": dict(sorted(states.items())),
+            "companies_measured": 0,
+            "of": len(records),
+            "evidence_rows": UNAVAILABLE,
+            "effect_producing_evidence_rows": UNAVAILABLE,
+            "independent_effect_producing_evidence_rows": UNAVAILABLE,
+            "zero_effect_evidence_rows": UNAVAILABLE,
+            "learning_conversion": UNAVAILABLE,
+        }
+    rows = sum(_dig(r, "learning", "eligible_evidence_rows", default=0)
+               for r in eligible)
+    producing = sum(
+        _dig(r, "learning", "effect_producing_evidence_rows", default=0)
+        for r in eligible)
+    independent = sum(
+        _dig(r, "learning", "independent_effect_producing_evidence_rows",
+             default=0) for r in eligible)
+    return {
+        "state": "MEASURED",
+        "reason": "",
+        "attribution_states": dict(sorted(states.items())),
+        "companies_measured": len(eligible),
+        "of": len(records),
+        "evidence_rows": rows,
+        "effect_producing_evidence_rows": producing,
+        "independent_effect_producing_evidence_rows": independent,
+        "zero_effect_evidence_rows": rows - producing,
+        "learning_conversion": _ratio(producing, rows),
     }
 
 
@@ -547,27 +633,20 @@ def _cohort_summary(records: list) -> dict:
             "seconds_per_independent_document": _ratio(
                 round(fetch_seconds, 1), independent),
         },
-        # §12.3/§12.4/§12.5 and §12.7's "that changed something" numerator all
-        # require a PER-ROW attribution from an evidence row to a belief
-        # movement. No such producer exists on the founder path: the strategic
-        # report names hypotheses and shifts, but nothing maps an individual
-        # evidence row to a state change, and a citation is not an effect.
-        # Reporting these as 0 would assert that retrieval taught the system
-        # nothing, which is a much stronger claim than "nothing measured it".
-        "learning_conversion": {
-            "state": UNAVAILABLE,
-            "reason": ("no per-row evidence→belief attribution exists on the "
-                       "founder path; the market branch owns the "
-                       "knowledge_effect ledger and the founder branch "
-                       "cannot import it"),
-            "evidence_that_changed_something": UNAVAILABLE,
-            "independent_evidence_that_changed_something": UNAVAILABLE,
-            "zero_effect_evidence": UNAVAILABLE,
-            "learning_conversion": UNAVAILABLE,
-            "useful_evidence_latency": UNAVAILABLE,
-        },
+        # THE SEAM NOW EXISTS, so this reports a STATE from the producer
+        # rather than the absence of a producer.
+        #
+        # Batch 12 reported UNAVAILABLE here because nothing on the founder
+        # path mapped an evidence row to a state change; that is now
+        # `company_ingestion.learning_attribution`, which mirrors the market
+        # ledger's vocabulary. What it reports on THIS cohort is still not a
+        # number, because no company reached a strategic report — but the
+        # reason is now BLOCKED_EXTERNAL_CREDITS, a fact about the backend,
+        # rather than an architectural absence.
+        "learning_conversion": _learning_conversion(records),
         "high_activity_low_learning": _high_activity_low_learning(
-            documents, independent, duplicates, republications, len(measured)),
+            documents, independent, duplicates, republications, len(measured),
+            learning=_learning_conversion(records)),
     }
 
 
@@ -579,8 +658,35 @@ LOW_INDEPENDENCE_SHARE = 0.20
 MIN_DOCUMENTS_FOR_VERDICT = 20
 
 
+def _first_starved_conversion(documents, independent, learning) -> str:
+    """The FIRST conversion in the chain that is starved (§27).
+
+    documents → independent evidence → effect-producing evidence → decision.
+
+    Naming the first one matters more than naming them all: fixing a later
+    stage while an earlier one is starved moves nothing, and this programme
+    has repeatedly found the real zero one layer below where it was reported.
+    """
+    if not documents:
+        return "retrieval → documents"
+    share = independent / documents
+    if share < LOW_INDEPENDENCE_SHARE:
+        return "documents → independent evidence"
+    state = str((learning or {}).get("state") or "")
+    if state != "MEASURED":
+        # NOT a starved conversion — an unmeasured one. Saying "independent
+        # evidence → learning is starved" here would blame the evidence for
+        # an unpaid API bill.
+        return f"independent evidence → learning: {state or UNAVAILABLE}"
+    producing = (learning or {}).get("effect_producing_evidence_rows") or 0
+    if not producing:
+        return "independent evidence → effect-producing evidence"
+    return "none"
+
+
 def _high_activity_low_learning(documents, independent, duplicates,
-                                republications, measured_companies) -> dict:
+                                republications, measured_companies,
+                                learning=None) -> dict:
     """Busy, and not learning — named in those words, with the counts.
 
     Mirrors the vocabulary of `market.learning_acceleration`, which owns the
@@ -620,12 +726,16 @@ def _high_activity_low_learning(documents, independent, duplicates,
             f"{independent} of {documents} documents carry an independent "
             f"vantage point ({share:.1%}), at or above the "
             f"{LOW_INDEPENDENCE_SHARE:.0%} floor"),
-        # The second arm of §14 needs belief movement, which has no producer
-        # here. Saying STABLE for it would claim the system IS learning.
-        "belief_arm": UNMEASURABLE,
-        "belief_arm_reason": ("independent evidence → belief movement needs "
-                              "the effect ledger, which the founder path "
-                              "does not produce"),
+        # The second arm needs belief movement. The ledger now exists, so
+        # this reports the attribution STATE rather than the absence of a
+        # producer — and still never says STABLE, which would claim the
+        # system IS learning when nothing measured whether it did.
+        "belief_arm": str((learning or {}).get("state") or UNAVAILABLE),
+        "belief_arm_reason": str(
+            (learning or {}).get("reason")
+            or "learning attribution reported no state"),
+        "first_starved_conversion": _first_starved_conversion(
+            documents, independent, learning),
     }
 
 

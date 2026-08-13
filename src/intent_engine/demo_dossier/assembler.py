@@ -311,6 +311,10 @@ def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
         "internal_impact_state": founder.internal_impact_state,
         "internal_graph_availability": founder.internal_graph_availability,
         "evidence_independence_state": founder.evidence_independence_state,
+        # The counts and origins behind the state, so a surface can say "two
+        # independent origins" rather than "nine sources" (§24, §25). Absent
+        # from an older producer, and absent is not zero.
+        "evidence_independence": founder.evidence_independence,
         "learning": founder.learning_summary,
         "provenance": founder.provenance_summary,
         "blocks": _block_view(founder, _FOUNDER_VIEW),

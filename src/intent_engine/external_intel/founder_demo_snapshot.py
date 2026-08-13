@@ -110,6 +110,8 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
                   internal_impact_state: str = "",
                   decision_impact_state: str = "",
                   evidence_ids: Sequence[str] = (),
+                  independence: Any = None,
+                  learning: Any = None,
                   data_population: str = "",
                   evidence_cutoff: str = "", known_at: str = "",
                   generated_at: str = "") -> dict:
@@ -186,11 +188,15 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
                                    if evidence_ids else
                                    _ref("NOT_ATTEMPTED", (),
                                         "no evidence ids were collected")),
-        # NOT BUILT IN THIS VERTICAL, and never faked from a source count.
+        # BUILT NOW, and still never faked from a source count.
         # `len(evidence_ids)` is a row count; independent support is a
         # different number and this program has already shipped the version
-        # that confused them (§26).
-        "evidence_independence_state": V.INDEPENDENCE_UNAVAILABLE,
+        # that confused them (§26). What crosses is the canonical assessment's
+        # own counts, or UNAVAILABLE when the producer did not run — the two
+        # are never merged, because "no independent origins" is a finding
+        # about the company and "not measured" is a fact about us.
+        "evidence_independence_state": _independence_state(independence),
+        "evidence_independence": _independence_block(independence),
         # A backend cannot see its own rendering. Permanently UNMEASURED
         # from here (§27); only an exercised UI proof may say otherwise.
         "product_surfaces": {name: V.UNMEASURED
@@ -199,6 +205,88 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
                                "value": _runtime_sha(),
                                "as_of": generated_at,
                                "note": "runtime provenance of the analysis"},
+        "learning_summary": _learning_summary(learning, generated_at),
+    }
+
+
+def _independence_state(independence: Any) -> str:
+    """AVAILABLE only when the producer actually ran."""
+    if isinstance(independence, dict) and \
+            str(independence.get("state") or "") == "MEASURED":
+        return V.INDEPENDENCE_AVAILABLE
+    return V.INDEPENDENCE_UNAVAILABLE
+
+
+def _independence_block(independence: Any) -> dict:
+    """The founder-facing projection of the canonical assessment.
+
+    A PROJECTION, NOT A SECOND OPINION. Every number is copied from the
+    assessment; nothing is recomputed here, so this surface cannot drift from
+    the producer and disagree with the drill-down beneath it.
+    """
+    if not isinstance(independence, dict) or \
+            str(independence.get("state") or "") != "MEASURED":
+        return {"state": V.INDEPENDENCE_UNAVAILABLE,
+                "documents": V.FIELD_UNAVAILABLE,
+                # LISTS, NOT TUPLES. This block is persisted as JSON and
+                # reloaded, and a tuple comes back a list — so a snapshot
+                # would not equal itself after a round trip.
+                "independent_origins": [],
+                "independent_origin_count": V.FIELD_UNAVAILABLE,
+                "source_families": [],
+                "corroboration_state": V.FIELD_UNAVAILABLE,
+                "corroboration_reason": "",
+                "concentration_ratio": V.FIELD_UNAVAILABLE,
+                "unknown_lineage": V.FIELD_UNAVAILABLE,
+                "duplicate_documents": V.FIELD_UNAVAILABLE,
+                "republications": V.FIELD_UNAVAILABLE,
+                "contradiction_refs": _unavailable_ref(
+                    "independence was not measured"),
+                "plain_statement": ""}
+    contradicting = list(independence.get("contradicting_evidence_ids") or ())
+    return {
+        "state": V.INDEPENDENCE_AVAILABLE,
+        "documents": independence.get("evidence_count"),
+        "independent_origins": list(
+            independence.get("independent_origins") or ()),
+        "independent_origin_count":
+            independence.get("independent_evidence_count"),
+        "source_families": list(independence.get("source_families") or ()),
+        "corroboration_state": independence.get("corroboration_state"),
+        "corroboration_reason": independence.get("corroboration_reason", ""),
+        "concentration_ratio": independence.get("concentration_ratio"),
+        "unknown_lineage": independence.get("unknown_lineage_count"),
+        "duplicate_documents": independence.get("duplicate_document_count"),
+        "republications": independence.get("republication_count"),
+        "contradiction_refs": _ref("AVAILABLE", contradicting, "")
+        if contradicting else _ref("NOT_ATTEMPTED", (),
+                                   "no contradictions were recorded"),
+        "plain_statement": independence.get("plain_statement", ""),
+    }
+
+
+def _learning_summary(learning: Any, as_of: str) -> dict:
+    """Whether the evidence changed anything — or why that cannot be said.
+
+    The `value` is the conversion when it exists and the ATTRIBUTION STATE
+    when it does not, so a reader never sees a bare number whose denominator
+    was empty (§21).
+    """
+    if not isinstance(learning, dict):
+        return {"state": V.UNAVAILABLE, "value": "",
+                "as_of": as_of,
+                "note": "learning attribution was not run for this analysis"}
+    state = str(learning.get("attribution_state") or "")
+    conversion = learning.get("learning_conversion")
+    if state != "MEASURED" or conversion == "UNAVAILABLE":
+        return {"state": V.UNAVAILABLE, "value": state or V.UNAVAILABLE,
+                "as_of": as_of,
+                "note": str(learning.get("attribution_reason") or "")}
+    return {
+        "state": V.AVAILABLE, "value": conversion, "as_of": as_of,
+        "note": (f"{learning.get('effect_producing_evidence_rows')} of "
+                 f"{learning.get('eligible_evidence_rows')} evidence row(s) "
+                 f"changed at least one knowledge object"),
     }
 
 

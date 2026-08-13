@@ -145,6 +145,23 @@ def _empty_ref(note: str) -> RefBlock:
 # --- the allowlists --------------------------------------------------------
 _SUMMARY = {"state": ..., "note": ..., "value": ..., "as_of": ...}
 
+#: Evidence independence, as a founder-facing projection (§24). Every field is
+#: a COUNT or a STATE that the producer measured; none of it is a judgement,
+#: and there is deliberately no confidence number — how much to believe a
+#: claim needs to see the claim, and a number derived from these counts would
+#: launder a row count into an authority it has not earned.
+_INDEPENDENCE_BLOCK = {
+    "state": ..., "documents": ..., "independent_origins": ...,
+    "independent_origin_count": ..., "source_families": ...,
+    "corroboration_state": ..., "corroboration_reason": ...,
+    "concentration_ratio": ..., "unknown_lineage": ...,
+    "duplicate_documents": ..., "republications": ...,
+    "contradiction_refs": _REF_BLOCK,
+    # The sentence a surface may render verbatim. Carried rather than
+    # rebuilt, so the wording wall cannot be re-implemented per surface.
+    "plain_statement": ...,
+}
+
 MARKET_ALLOWED: Dict[str, Any] = {
     "contract_version": ..., "snapshot_id": ...,
     "company_id": ..., "canonical_name": ..., "subject_names": ...,
@@ -196,6 +213,12 @@ FOUNDER_ALLOWED: Dict[str, Any] = {
     "internal_graph_availability": ...,
     "evidence_reference_ids": _REF_BLOCK,
     "evidence_independence_state": ...,
+    # THE STRUCTURE BEHIND THE STATE (§24). The scalar above says whether
+    # independence was measured; it cannot say what a founder needs next,
+    # which is how many separate accounts there are and whose. Carried as a
+    # projection of the canonical assessment — counts, origins and the
+    # deterministic sentence — and never as a re-derivation of it.
+    "evidence_independence": _INDEPENDENCE_BLOCK,
     "product_surfaces": {name: ... for name in V.PRODUCT_SURFACES},
     "provenance_summary": _SUMMARY,
     "learning_summary": _SUMMARY,
@@ -216,6 +239,7 @@ MARKET_ADDITIVE = frozenset({"evidence_independence_state", "learning_summary",
                              "provenance_summary", "reconciliation_refs",
                              "contradiction_refs"})
 FOUNDER_ADDITIVE = frozenset({"evidence_independence_state",
+                              "evidence_independence",
                               "learning_summary", "provenance_summary",
                               "what_changed_your_mind_ref"})
 
@@ -382,6 +406,9 @@ class FounderDemoSnapshot(_Snapshot):
     product_surfaces: Dict[str, str] = field(default_factory=dict)
     learning_summary: Optional[dict] = None
     provenance_summary: Optional[dict] = None
+    #: The structure behind `evidence_independence_state` (§24). None when the
+    #: producer sent none — an older producer is OLDER_SUPPORTED, not wrong.
+    evidence_independence: Optional[dict] = None
     blocks: Dict[str, RefBlock] = field(default_factory=dict)
 
     def block(self, name: str) -> RefBlock:
@@ -588,6 +615,10 @@ def read_founder_snapshot(payload: Any, *, expected_company: str = "",
         coverage_state=str(payload.get("coverage_state")
                            or V.FIELD_UNAVAILABLE),
         evidence_independence_state=independence,
+        evidence_independence=(payload.get("evidence_independence")
+                               if isinstance(
+                                   payload.get("evidence_independence"), dict)
+                               else None),
         ceo_answer_coverage=_summary(payload.get("ceo_answer_coverage")),
         recommendation_ref=str(payload.get("recommendation_ref") or ""),
         recommendation_standing=str(payload.get("recommendation_standing")

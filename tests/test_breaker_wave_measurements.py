@@ -72,12 +72,49 @@ def test_a_company_whose_producer_did_not_run_is_excluded_not_counted_zero():
 
 
 def test_learning_conversion_is_unavailable_with_a_reason_not_zero():
+    """A record carrying no attribution at all still never reports zero.
+
+    Batch 13 gave this metric a producer, so the field names now match the
+    populations they divide. What the test protects is unchanged and is the
+    only thing that mattered: the absence is stated, with a reason, and never
+    as a number.
+    """
     out = wave._cohort_summary([record()])
     conversion = out["learning_conversion"]
     assert conversion["state"] == wave.UNAVAILABLE
-    assert conversion["evidence_that_changed_something"] == wave.UNAVAILABLE
-    assert conversion["zero_effect_evidence"] == wave.UNAVAILABLE
+    assert conversion["effect_producing_evidence_rows"] == wave.UNAVAILABLE
+    assert conversion["zero_effect_evidence_rows"] == wave.UNAVAILABLE
+    assert conversion["learning_conversion"] == wave.UNAVAILABLE
     assert conversion["reason"]
+
+
+def test_a_dead_backend_reports_blocked_not_unavailable():
+    """The seam now exists, so the reason is nameable.
+
+    "UNAVAILABLE" was the honest answer while nothing could attribute at all.
+    Now that something can, a cohort whose reasoning layer never ran is
+    BLOCKED_EXTERNAL_CREDITS — a fact about the backend — and that is a
+    different report from "we have no way to measure this".
+    """
+    blocked = dict(record(),
+                   learning={"attribution_state": "BLOCKED_EXTERNAL_CREDITS",
+                             "evidence_rows": 7})
+    conversion = wave._cohort_summary([blocked])["learning_conversion"]
+    assert conversion["state"] == "BLOCKED_EXTERNAL_CREDITS"
+    assert conversion["learning_conversion"] == wave.UNAVAILABLE
+    assert conversion["companies_measured"] == 0
+
+
+def test_measured_attribution_divides_rows_by_rows():
+    measured = dict(record(),
+                    learning={"attribution_state": "MEASURED",
+                              "eligible_evidence_rows": 4,
+                              "effect_producing_evidence_rows": 1,
+                              "independent_effect_producing_evidence_rows": 1})
+    conversion = wave._cohort_summary([measured])["learning_conversion"]
+    assert conversion["state"] == "MEASURED"
+    assert conversion["learning_conversion"] == 0.25
+    assert conversion["zero_effect_evidence_rows"] == 3
 
 
 def test_zero_observations_under_a_dead_backend_is_not_an_evidence_finding():
@@ -136,16 +173,39 @@ def test_healthy_independence_is_not_flagged():
 
 
 def test_the_belief_arm_is_never_claimed_stable():
-    """The half of §14 that needs the effect ledger must stay UNMEASURABLE.
+    """The half that needs the effect ledger must never assert learning.
 
-    Reporting STABLE here would assert the system IS learning, on the basis
-    of a measurement nothing performed.
+    Reporting STABLE here would say the system IS learning on the basis of a
+    measurement nothing performed. Batch 13 gave the arm a producer, so the
+    value is now the attribution STATE rather than a fixed UNMEASURABLE — and
+    the invariant is what it always was: without a measured attribution, this
+    arm never claims the system learned anything.
     """
     for documents, independent in ((100, 40), (100, 1), (5, 0)):
         out = wave._high_activity_low_learning(
             documents=documents, independent=independent, duplicates=0,
             republications=0, measured_companies=10)
-        assert out["belief_arm"] == wave.UNMEASURABLE
+        assert out["belief_arm"] != "STABLE"
+        assert out["belief_arm"] in (wave.UNMEASURABLE, wave.UNAVAILABLE)
+
+
+def test_a_blocked_backend_names_itself_in_the_belief_arm():
+    out = wave._high_activity_low_learning(
+        documents=100, independent=40, duplicates=0, republications=0,
+        measured_companies=10,
+        learning={"state": "BLOCKED_EXTERNAL_CREDITS",
+                  "reason": "no knowledge state was produced"})
+    assert out["belief_arm"] == "BLOCKED_EXTERNAL_CREDITS"
+    # and the chain names the unmeasured step rather than blaming evidence
+    assert "BLOCKED_EXTERNAL_CREDITS" in out["first_starved_conversion"]
+
+
+def test_the_first_starved_conversion_is_the_earliest_one():
+    """Retrieval starvation outranks a later unmeasured stage."""
+    starved = wave._first_starved_conversion(
+        documents=100, independent=1,
+        learning={"state": "BLOCKED_EXTERNAL_CREDITS"})
+    assert starved == "documents → independent evidence"
 
 
 # --- population compatibility ------------------------------------------------
