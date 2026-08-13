@@ -30,6 +30,7 @@ WD = "tests/test_market_learning_watchdog.py"
 PROD = "tests/test_market_acquisition_counter_populations.py"
 REP = "tests/test_market_learning_report.py"
 MTX = "tests/test_market_matrix.py"
+IND = "tests/test_market_evidence_independence.py"
 
 MUTATIONS = [
     ("the legacy prediction pipeline is declared CANONICAL",
@@ -88,6 +89,42 @@ MUTATIONS = [
      '                               if effects else 0.0),',
      f"{SOR}::test_zero_effects_reports_unmeasurable_share_not_zero"),
 
+    # --- evidence independence (§36) --------------------------------------
+    ("syndicated copies are counted as independent sources",
+     SRC / "market/evidence_independence.py",
+     "        elif claim and claim in claim_first:",
+     "        elif False:",
+     f"{IND}::test_ten_syndicated_copies_do_not_become_ten_confirmations"),
+
+    ("a different URL is treated as a different origin",
+     SRC / "market/evidence_independence.py",
+     '        return ".".join(labels[-2:]) if len(labels) > 2 else ".".join(labels)',
+     "        return str(row.get('source') or '')",
+     # REPOINTED: the role-source test never runs the URL branch.
+     f"{IND}::test_many_urls_on_one_host_are_one_origin"),
+
+    ("UNKNOWN origin is promoted to independent",
+     SRC / "market/evidence_independence.py",
+     '            "counts_as_independent": state == INDEPENDENT,',
+     '            "counts_as_independent": state != SAME_ORIGIN,',
+     # REPOINTED after NOT_CAUGHT. An UNKNOWN row has no origin_id, so the
+     # origin filter in assess() already excludes it — defence in depth.
+     # A DERIVED row DOES have an origin, so it is where widening
+     # `counts_as_independent` actually becomes visible.
+     f"{IND}::test_a_syndicated_claim_is_derived_not_a_second_source"),
+
+    ("company-authored material becomes an outside vantage point",
+     SRC / "market/evidence_independence.py",
+     "        outside = vantage >= OUTSIDE_VANTAGE_FLOOR and not _self_authored(row)",
+     "        outside = True",
+     f"{IND}::test_company_owned_material_is_never_an_outside_vantage_point"),
+
+    ("a long-dated expectation makes every re-read look purposeful",
+     SRC / "market/evidence_independence.py",
+     "        if subject and days is not None and days <= MONITORING_HORIZON_DAYS:",
+     "        if subject:",
+     f"{IND}::test_no_testable_expectation_makes_the_value_unmeasurable"),
+
     # --- reporting and temporal observability -----------------------------
     ("a row dated after the period still enters the report",
      SRC / "market/learning_report.py",
@@ -128,12 +165,6 @@ MUTATIONS = [
      '        "new_information_share": _ratio(len(fresh), len(fresh) + len(seen)),',
      '        "new_information_share": _ratio(len(fresh), len(fresh)),',
      f"{REP}::test_a_re_observation_is_not_new_information"),
-
-    ("independent evidence is reported as zero instead of unavailable",
-     SRC / "market/learning_report.py",
-     '        "independent_evidence_rows": UNAVAILABLE,',
-     '        "independent_evidence_rows": 0,',
-     f"{REP}::test_independent_evidence_is_unavailable_not_zero"),
 
     ("the expectation temporal mapping is removed",
      SRC / "market/learning_status.py",

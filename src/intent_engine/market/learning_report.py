@@ -36,6 +36,8 @@ import json
 import pathlib
 from typing import Dict, List, Optional
 
+from . import evidence_independence as EI
+from . import knowledge_decay as KD
 from . import learning_status as LS
 from . import learning_watchdog as LW
 from . import system_of_record as SOR
@@ -121,15 +123,11 @@ def _evidence_block(kind: Dict[str, List[dict]]) -> dict:
         "effects_by_type": dict(sorted(collections.Counter(
             str(e.get("effect_type") or "?") for e in effects).items())),
         "changing_effect_share": _ratio(len(changed), len(effects)),
-        # No independence producer exists on the market branch; the founder
-        # branch owns `company_ingestion.independence`. Reporting 0 here would
-        # assert that no evidence was independent, which is a much stronger
-        # claim than "nothing measured it".
-        "independent_evidence_rows": UNAVAILABLE,
-        "independent_evidence_note": (
-            "evidence independence is produced on the founder branch "
-            "(company_ingestion.independence); the market ledger carries no "
-            "independence column"),
+        # Market-native independence, from `evidence_independence`. It reuses
+        # the existing per-role vantage weight and adds the ORIGIN axis the
+        # scalar cannot express — two independent_reporting rows can still be
+        # one wire story.
+        "independence": EI.assess(fresh),
     }
 
 
@@ -434,6 +432,18 @@ def build(period: str = DAY, *, root=None, as_of=None) -> dict:
         "method": _method_block(kind),
         "sources": _sources_block(kind),
         "macro": _macro_block(kind),
+        # What the repeats were FOR. The raw repeat share is not the defect;
+        # the low-value share is, and it is UNMEASURABLE when nothing the
+        # engine holds could have been tested by a re-read.
+        "reobservation": EI.classify_reobservations(
+            kind.get("evidence_seen", []), as_of=end.isoformat(),
+            open_expectations=[r for r in ledger
+                               if r.get("record") == "expectation"],
+            beliefs_due_subjects={a.subject for a in
+                                  KD.assess(ledger, as_of=end.isoformat())
+                                  if a.eligible}),
+        "knowledge_decay": KD.summarise(
+            KD.assess(ledger, as_of=end.isoformat())),
     }
     bottleneck = _bottleneck(blocks)
 

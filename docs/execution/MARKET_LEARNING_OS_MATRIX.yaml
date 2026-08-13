@@ -16,13 +16,13 @@
 
 contract: market_learning_os_matrix.v1
 as_of: "2026-08-12"
-market_sha: "67c1397"
+market_sha: "pending-commit"
 
 capability_states: [PASS, PARTIAL, NOT_BUILT, BLOCKED_DATA, BLOCKED_EXTERNAL,
                     NOT_APPLICABLE, UNMEASURED]
 empirical_states: [MEASURED, RAN_NO_CHANGE, SPARSE, BLOCKED_DATA,
                    BLOCKED_EXTERNAL, LEGACY_UNDATABLE, NOT_APPLICABLE,
-                   UNMEASURED]
+                   UNMEASURED, RAN_NO_ELIGIBLE_ITEM]
 
 axes:
   - id: SYSTEM_OF_RECORD
@@ -42,10 +42,12 @@ axes:
     empirical: MEASURED
     evidence: "763 rows; 646 datable in 7d"
   - id: EVIDENCE_INDEPENDENCE
-    capability: NOT_BUILT
-    empirical: UNMEASURED
-    evidence: "producer exists on the founder branch only; the market ledger
-      has no independence column and the report says UNAVAILABLE, not 0"
+    capability: PASS
+    empirical: MEASURED
+    evidence: "market/evidence_independence.py adds the ORIGIN axis over the
+      existing per-role vantage weight; live week: 41 rows, 3 origins, 1
+      independent group, PARTIALLY_INDEPENDENT. 19 tests incl. the ten-
+      syndicated-copies metamorphic case"
   - id: ECONOMIC_STATE
     capability: PASS
     empirical: MEASURED
@@ -78,10 +80,13 @@ axes:
     evidence: "25 estimates; producer now stamps estimated_at, historical rows
       deliberately not back-filled"
   - id: SUPERVISED_PREDICTIVE
-    capability: NOT_BUILT
-    empirical: UNMEASURED
-    evidence: "inventory not performed; method_performance(207) and
-      method_assumption_check(276) run but no component is classified"
+    capability: PASS
+    empirical: MEASURED
+    evidence: "SUPERVISED_PREDICTIVE_INVENTORY.yaml: 9 components classified.
+      2 fit parameters (macro AR1, synthetic control), 2 are deliberately
+      unlearnable baselines, 4 evaluation-only, 1 legacy. The prospective
+      chain forecast()->reconcile()->backtest() was running all along; what
+      was missing was the honest classification"
   - id: UNSUPERVISED
     capability: PASS
     empirical: SPARSE
@@ -147,9 +152,14 @@ axes:
     empirical: MEASURED
     evidence: "6 families tracked; bureau_of_labor_statistics UNCLASSIFIED"
   - id: KNOWLEDGE_DECAY
-    capability: PARTIAL
-    empirical: UNMEASURED
-    evidence: "belief_lifecycle record kind exists; no scheduled review window"
+    capability: PASS
+    empirical: RAN_NO_ELIGIBLE_ITEM
+    evidence: "the previous matrix was WRONG: knowledge_decay.summarise emits
+      next_decay_window=2026-12-03 and three distinct cadences (120/180/365d)
+      are in use, so the review window exists and is per-belief. 73 beliefs
+      assessed, 0 eligible because the oldest is 8 days old; 58 WINDOW_OPEN,
+      15 TESTED. It separates STALE (time passing) from WEAKENING (evidence
+      arguing against), so age alone never means false"
   - id: BOTTLENECK_TO_RESEARCH
     capability: PASS
     empirical: MEASURED

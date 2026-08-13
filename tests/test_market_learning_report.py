@@ -138,17 +138,22 @@ def test_an_empty_period_reports_unmeasurable_not_zero(tmp_path):
     assert evidence["changing_effect_share"] == LR.UNMEASURABLE
 
 
-def test_independent_evidence_is_unavailable_not_zero(tmp_path):
-    """The market ledger has no independence column.
+def test_independence_is_measured_by_the_canonical_producer(tmp_path):
+    """Superseded: this asserted UNAVAILABLE before the producer existed.
 
-    Reporting 0 would assert that no evidence was independent — a far
-    stronger claim than "nothing measured it".
+    Market now has `evidence_independence`, so the report carries a real
+    assessment. What still must hold is that an empty or unattributable set
+    never reads as corroborated.
     """
     root = ledger(tmp_path, [effect("2026-08-12")])
-    evidence = LR.build(LR.DAY, root=str(root),
-                        as_of=AUG12)["channels"]["evidence"]
-    assert evidence["independent_evidence_rows"] == LR.UNAVAILABLE
-    assert evidence["independent_evidence_note"]
+    independence = LR.build(LR.DAY, root=str(root),
+                            as_of=AUG12)["channels"]["evidence"][
+                                "independence"]
+    assert independence["state"] == "MEASURED"
+    # No evidence rows in this fixture — only an effect — so there is nothing
+    # to corroborate and the producer must say so rather than claim zero
+    # independent sources as a finding.
+    assert independence["corroboration_state"] == "UNAVAILABLE"
 
 
 # --- the bottleneck must be computed, and must name its cause ----------------
