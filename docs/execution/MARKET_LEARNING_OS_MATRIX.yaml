@@ -16,7 +16,7 @@
 
 contract: market_learning_os_matrix.v1
 as_of: "2026-08-12"
-market_sha: "pending-commit"
+market_sha: "ec9d630"
 
 capability_states: [PASS, PARTIAL, NOT_BUILT, BLOCKED_DATA, BLOCKED_EXTERNAL,
                     NOT_APPLICABLE, UNMEASURED]
