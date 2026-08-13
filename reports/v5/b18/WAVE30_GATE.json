@@ -1,0 +1,103 @@
+{
+  "closed_reason": "the paid backend cannot run, so the criteria that require real intelligence are unevaluated",
+  "contract": "wave_30_intelligence_gate.v1",
+  "counts": {
+    "blocked_external": 6,
+    "fail": 0,
+    "pass": 12
+  },
+  "criteria": [
+    {
+      "criterion": "2. all 10 identities preserved",
+      "detail": "the frozen ten, in order, no substitutions",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "3. no company substituted",
+      "detail": "the frozen ten, in order, no substitutions",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "4. no NO_PRODUCER state remains",
+      "detail": "all 7 temporal-seam functions called in production",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "5. KnowledgeEffect production is non-vacuous (deterministic)",
+      "detail": "live proof passes: first observation, confirmation, wording-only, material change, refusals, replay, restart",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "6. effect inflation invariant holds",
+      "detail": "1 component moved -> 1 effect",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "7. origin independence enforced",
+      "detail": "origin axis enforced; self-report is not independent",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "8. self-report is not independent corroboration",
+      "detail": "origin axis enforced; self-report is not independent",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "9. provenance exists for learning claims",
+      "detail": "no call site passes an empty effects literal",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "10. no security canary regressed",
+      "detail": "Alphabet admitted; trading alpha still refused",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "11. population-compatible metrics used",
+      "detail": "NO_CHANGE / FIRST_OBSERVATION / UNMEASURABLE / REFUSED are mechanically distinct and none counts as a change",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "12. failures are explicit",
+      "detail": "NO_CHANGE / FIRST_OBSERVATION / UNMEASURABLE / REFUSED are mechanically distinct and none counts as a change",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "17. no known SEV-1 learning-integrity defect remains",
+      "detail": "40/40 mutations CAUGHT across 4 suites",
+      "verdict": "PASS"
+    },
+    {
+      "criterion": "1. Breaker-10 ran through the real backend",
+      "detail": "the canonical analyst backend is CREDITS_EXHAUSTED; this criterion cannot be evaluated and is NOT counted as met. Its producer (scripts/v5_breaker_wave.py) EXISTS, so restoring credit is sufficient to evaluate it",
+      "verdict": "BLOCKED_EXTERNAL"
+    },
+    {
+      "criterion": "5. KnowledgeEffect production is non-vacuous ON REAL INTELLIGENCE",
+      "detail": "the canonical analyst backend is CREDITS_EXHAUSTED; this criterion cannot be evaluated and is NOT counted as met. Its producer (external_intel.effect_producer.load_effects) EXISTS, so restoring credit is sufficient to evaluate it",
+      "verdict": "BLOCKED_EXTERNAL"
+    },
+    {
+      "criterion": "13. Founder consumption state measured on a real wave",
+      "detail": "the canonical analyst backend is CREDITS_EXHAUSTED; this criterion cannot be evaluated and is NOT counted as met. Its producer (demo_dossier.assembler.assemble) EXISTS, so restoring credit is sufficient to evaluate it",
+      "verdict": "BLOCKED_EXTERNAL"
+    },
+    {
+      "criterion": "14. re-observation value measured on a real wave",
+      "detail": "the canonical analyst backend is CREDITS_EXHAUSTED; this criterion cannot be evaluated and is NOT counted as met. Its producer (a rerunnable state root in scripts/v5_breaker_wave.py (--root)) EXISTS, so restoring credit is sufficient to evaluate it",
+      "verdict": "BLOCKED_EXTERNAL"
+    },
+    {
+      "criterion": "15. learning-quality classification produced from a real wave",
+      "detail": "the canonical analyst backend is CREDITS_EXHAUSTED; this criterion cannot be evaluated and is NOT counted as met. Its producer (company_ingestion.learning_attribution) EXISTS, so restoring credit is sufficient to evaluate it",
+      "verdict": "BLOCKED_EXTERNAL"
+    },
+    {
+      "criterion": "16. first-starved conversion measured on a real wave",
+      "detail": "the canonical analyst backend is CREDITS_EXHAUSTED; this criterion cannot be evaluated and is NOT counted as met. Its producer (scripts/v5_learning_funnel.py) EXISTS, so restoring credit is sufficient to evaluate it",
+      "verdict": "BLOCKED_EXTERNAL"
+    }
+  ],
+  "wave_30": "CLOSED",
+  "wave_30_intelligence_gate": "BLOCKED_EXTERNAL"
+}
