@@ -2994,11 +2994,74 @@ class WebApp:
                 has_strategic=context.has_strategic, analysis_as_of=today,
                 rendered_blocks=rendered, surface="analysis",
                 decision_impact=impact.as_dict() if impact.changed else None)
+            # THE TEMPORAL COMPARISON, WHICH IS THE ONE LEARNING NEEDS.
+            #
+            # The grading above asks "was the market dossier decision-
+            # relevant" by running the same analysis with and without it.
+            # That is a real question and it stays. It cannot answer "did we
+            # learn anything", and `decision_impact`'s own docstring says
+            # why: the without-dossier side is empty on every field, so every
+            # field reads empty -> populated, nothing can grade NONE, and the
+            # number is 100% by construction.
+            #
+            # Learning needs the BEFORE to be what the founder saw LAST TIME.
+            # `assess_against_prior`, `record_revision` and `record_impact`
+            # were built for exactly this and had ZERO production call sites,
+            # which is why no KnowledgeEffect could exist: the prior state was
+            # never written, so no second run could ever compare against a
+            # first.
+            self._record_learning(
+                run_id=run_id, company_id=_sc.company_key(name),
+                context=context, dossier_revision=str(
+                    getattr(strategic, "as_of", "") or ""))
         except Exception:  # noqa: BLE001 - see above
             _LOG.warning("consumption receipt not written for %s", run_id)
 
         self._external_cache[run_id] = context
         return context
+
+    def _record_learning(self, *, run_id: str, company_id: str, context,
+                         dossier_revision: str = "") -> dict:
+        """Compare this analysis with the last one, and record what changed.
+
+        ORDER MATTERS AND IS NOT OBVIOUS. The comparison must run against the
+        prior revision BEFORE this one is recorded, or every run compares
+        against itself and nothing ever changes.
+
+        Every failure is swallowed and reported as a state. A learning ledger
+        that can fail an analysis is a worse defect than the missing rows it
+        was added to produce — the same judgement the consumption receipt
+        beside it is built on.
+        """
+        from intent_engine.external_intel import decision_impact as _di
+        from intent_engine.external_intel import effect_producer as _ep
+
+        try:
+            after = _di.semantic_state(context)
+            prior = _di.load_revisions(self._runtime_root).get(company_id)
+            impact = _di.assess_against_prior(
+                self._runtime_root, analysis_id=run_id,
+                company_id=company_id, after=after,
+                provenance=_di.evidence_of(context),
+                dossier_revision=dossier_revision)
+            effects = _ep.effects_from_impact(
+                impact, evidence_ids=_di.evidence_of(context),
+                prior_company_id=str((prior or {}).get("company_id") or ""))
+            written = _ep.record_effects(self._runtime_root, effects)
+            # Recorded AFTER the comparison, and idempotent by content: an
+            # unchanged dossier appends nothing, so the file does not grow by
+            # a row per company per cycle.
+            _di.record_revision(self._runtime_root, company_id=company_id,
+                                state=after,
+                                dossier_revision=dossier_revision)
+            _di.record_impact(self._runtime_root, impact=impact)
+            return {"state": "RECORDED", "effects": len(effects),
+                    "new_effects": written,
+                    "materiality": getattr(impact, "materiality", "")}
+        except Exception as exc:  # noqa: BLE001 - never fail an analysis
+            _LOG.warning("learning not recorded for %s: %s", run_id, exc)
+            return {"state": "PRODUCER_FAILED",
+                    "detail": f"{type(exc).__name__}: {str(exc)[:160]}"}
 
     def _market_snapshot(self, run_id: str):
         """The founder-facing market context, in the shape the layers read.
@@ -5257,9 +5320,19 @@ class WebApp:
             # No strategic report means the reasoning layer produced no
             # knowledge state, so no evidence row could have moved one. That
             # is BLOCKED, never a measured zero (§21).
+            # THE EFFECTS ARE READ FROM THE LEDGER, not passed as an empty
+            # literal. `effects=()` was hard-coded here and in the wave, which
+            # is why learning conversion could only ever report NOT_ATTEMPTED
+            # however well retrieval performed.
+            from intent_engine.external_intel import effect_producer as _EP
+            try:
+                _effects = _EP.load_effects(self._runtime_root,
+                                            company_id=key)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _effects = []
             _learning = _LA.conversion(
                 evidence_rows=(_assessed or {}).get("rows", ()),
-                effects=(),
+                effects=_effects,
                 independence_rows=(_assessed or {}).get("rows", ()),
                 knowledge_layer_ran=isinstance(report, dict),
                 blocked_reason=(

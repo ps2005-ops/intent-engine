@@ -312,3 +312,56 @@ single knowledge object, because nothing writes one.
 revision seam (`external_intel.decision_impact` already provides before/after
 over semantic fields), and it should be built BEFORE credits are restored so
 that the first paid run measures something.
+
+---
+
+# Batch 15 — the producer exists
+
+Backend preflight: **`CREDITS_EXHAUSTED`** (canonical analyst path, one probe).
+
+## `ANALYZED → BELIEF_ELIGIBLE` is no longer `NO_PRODUCER`
+
+Batch 14 named the wall. The cause was one layer below where it was found:
+`decision_impact`'s whole temporal comparison — `record_revision`,
+`load_revisions`, `assess_against_prior`, `record_impact` — had **zero
+production call sites**, so the prior state a learning event compares against
+was never written. The missing `KnowledgeEffect` writer was the symptom.
+
+Production now records a revision, compares the next analysis against it,
+projects the semantic deltas into effects through a single eligibility gate,
+persists them append-only, reloads them, and feeds them to `conversion` — the
+`effects=()` literal is gone from both call sites.
+
+## Gates
+
+* **`WAVE_30_ENGINEERING_GATE` = PASS.** 40/40 break proofs across four
+  suites, 196 security tests green, full suite green.
+* **`WAVE_30_INTELLIGENCE_GATE` = BLOCKED_EXTERNAL_CREDITS.** The
+  `MISSING_PRODUCER` half is closed. What remains is the paid backend, and
+  only it.
+
+That is a real change in kind: Batch 14 could not have been unblocked by
+paying the bill, and Batch 15 can be.
+
+## Criterion 10
+
+**MET as architecture, proven deterministically, UNMEASURED on live
+intelligence.** The producer is exercised end to end on the production path
+with synthetic evidence, including first observation, confirmation,
+wording-only, material change, non-testable re-read, incomparable window,
+cross-company refusal, duplicate replay and process restart. No live analysis
+has produced an effect, because no live analysis can run.
+
+## Wave 30
+
+**CLOSED**, on external credits alone.
+
+The next step is no longer architecture. Restore credits, run the frozen ten,
+and read the funnel: `ANALYZED` should now flow into `BELIEF_ELIGIBLE`, and
+whatever it reports — changed, confirmed, or unmeasurable — is a measurement
+rather than a missing part.
+
+**Do not treat a high effect count as success.** The producer was one edit
+away from emitting twelve effects per company per cycle, and it would have
+looked like excellent learning velocity. Suspiciously high conversion is a
+defect candidate first.

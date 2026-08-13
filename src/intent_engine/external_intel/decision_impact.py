@@ -102,7 +102,22 @@ _GENERIC = re.compile(
 
 
 def _norm(text: object) -> str:
-    return " ".join(str(text or "").lower().split())
+    """Normalised for SEMANTIC comparison, not for display.
+
+    Surrounding punctuation is stripped because this module's contract is that
+    two renderings of the same content compare UNCHANGED, and it was not true:
+    "Hold capacity." and "hold capacity" differ by a full stop and graded
+    REVERSED — the strongest change signal there is, from a keystroke.
+
+    That mattered the moment anything downstream turned a comparison into a
+    durable learning event: a model that rephrases with a trailing period on
+    one run would manufacture a CONTRADICTED effect on every rerun, and the
+    learning ledger would fill with movements nobody made. Internal
+    punctuation is left alone — only the ends are trimmed, so "profit, then
+    scale" keeps its comma and stays distinct from "profit then scale".
+    """
+    return " ".join(str(text or "").lower().split()).strip(
+        " \t\n\r.,;:!?\"'()[]{}")
 
 
 def _is_generic(text: str) -> bool:

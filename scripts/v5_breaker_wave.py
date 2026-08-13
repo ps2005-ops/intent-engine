@@ -237,21 +237,29 @@ def _evidence(result, ci, run_id) -> dict:
     }
 
 
-def _learning(result, assessed_rows) -> dict:
-    """Per-company evidence→knowledge attribution, or the reason there is none.
+def _learning(result, assessed_rows, *, root=None, company_id="") -> dict:
+    """Per-company evidence→knowledge attribution, read from the LEDGER.
 
-    The founder path records no effects yet, so on a run that DID reach a
-    strategic report this reports NOT_ATTEMPTED — the seam exists and nothing
-    was written through it — which is deliberately distinct from a run whose
-    reasoning layer never produced a knowledge state at all.
+    `effects=()` was hard-coded here, which is why this could only ever report
+    NOT_ATTEMPTED however well retrieval performed. The effects are now read
+    from the file the production producer writes, so a run that changed
+    something reports it and a run that changed nothing still reports why.
     """
     from intent_engine.company_ingestion import learning_attribution as LA
+
+    effects = ()
+    if root is not None:
+        try:
+            from intent_engine.external_intel import effect_producer as EP
+            effects = EP.load_effects(root, company_id=company_id)
+        except Exception:  # noqa: BLE001 - a reader may not break the wave
+            effects = ()
 
     report = result.get("strategic_report")
     usable = (isinstance(report, dict)
               and str(report.get("result_state") or "") not in ("FAILED", ""))
     return LA.conversion(
-        evidence_rows=assessed_rows, effects=(),
+        evidence_rows=assessed_rows, effects=effects,
         independence_rows=assessed_rows,
         knowledge_layer_ran=usable,
         blocked_reason="" if usable else (
@@ -422,7 +430,8 @@ def run_company(company, *, root: pathlib.Path, frozen: dict) -> dict:
         record["source_health"] = _source_health(result, outcome)
         record["evidence"] = _evidence(result, app.ci, run_id)
         record["learning"] = _learning(
-            result, record["evidence"].get("independence_rows") or [])
+            result, record["evidence"].get("independence_rows") or [],
+            root=app._runtime_root, company_id=company.company_id)
         record["intelligence"] = _intelligence(result)
         record["dossier"] = _dossier_record(
             DossierStore(store_dir).latest(company.company_id))

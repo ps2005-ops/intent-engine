@@ -75,13 +75,42 @@ CONTRADICTED = "CONTRADICTED"
 REVISED = "REVISED"
 RESOLVED = "RESOLVED"
 RETIRED = "RETIRED"
+#: TESTED AND UNCHANGED. This is a real learning event: evidence capable of
+#: moving the state arrived and did not move it. It is NOT the label for a
+#: re-read that could not have tested anything — that is UNMEASURABLE, and
+#: collapsing the two is how a confirmation rate is farmed by re-fetching.
 NO_CHANGE = "NO_CHANGE"
+#: No prior state existed, so there was nothing for this evidence to change.
+#: Neither an effect nor the absence of one: a baseline. Counting it as
+#: improvement is the defect `decision_impact` already documents, where every
+#: field went empty -> populated and the metric read 100% forever.
+FIRST_OBSERVATION = "FIRST_OBSERVATION"
+#: The comparison could not be made — an incomparable evidence window, an
+#: absent before, a state this evidence could not bear on. NOT "no effect".
+UNMEASURABLE = "UNMEASURABLE"
+#: Eligibility refused the attribution: wrong company, missing provenance,
+#: unresolved scope. NOT "no effect", and never silently dropped.
+REFUSED = "REFUSED"
 
 EFFECT_TYPES = (CREATED, SUPPORTED, WEAKENED, CONTRADICTED, REVISED, RESOLVED,
-                RETIRED, NO_CHANGE)
+                RETIRED, NO_CHANGE, FIRST_OBSERVATION, UNMEASURABLE, REFUSED)
 
-#: Every one of these must be able to show a before and an after that differ.
-CHANGING = frozenset(EFFECT_TYPES) - {NO_CHANGE}
+#: Effects that ASSERT the knowledge state is different than it was. Every one
+#: must be able to show a before and an after that differ.
+#:
+#: The four excluded states are excluded for four different reasons and are
+#: kept mechanically distinct because they license different actions: a
+#: confirmation says the model survived a test, a first observation says a
+#: test is now possible, an unmeasurable says the test could not be run, and a
+#: refusal says it should not have been. A system that folds them into one
+#: "no" cannot tell a healthy model from an unexercised one.
+NON_CHANGING = frozenset({NO_CHANGE, FIRST_OBSERVATION, UNMEASURABLE, REFUSED})
+CHANGING = frozenset(EFFECT_TYPES) - NON_CHANGING
+
+#: Effects that count as the system having LEARNED, for a conversion whose
+#: numerator is "evidence that changed something". A confirmation is valuable
+#: and is deliberately NOT here: it did not change the model.
+MEANINGFUL = CHANGING
 
 # --- how well the attribution itself is known -------------------------------
 DIRECT = "DIRECT"
