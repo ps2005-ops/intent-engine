@@ -225,3 +225,118 @@ def test_http_statuses_are_summed_as_counts_not_collapsed_to_a_set(statuses):
                                 record(http_statuses=statuses)])
     assert out["retrieval"]["http_status_counts"] == {"HTTP 403": 6,
                                                       "HTTP 404": 14}
+
+
+# --- Batch 17: the second iteration must meet the first one's priors --------
+#
+# The runtime root was ALWAYS a fresh mkdtemp. A rerun therefore met its own
+# priors as absent, every company reported FIRST_OBSERVATION again, and the
+# temporal machinery could never be exercised on real intelligence. Credit
+# does not buy a second observation of a store that was discarded.
+
+def _wave_module():
+    import importlib.util
+    import pathlib
+    spec = importlib.util.spec_from_file_location(
+        "v5_breaker_wave",
+        pathlib.Path(__file__).resolve().parent.parent
+        / "scripts" / "v5_breaker_wave.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_no_root_gives_a_fresh_temp_root_and_carries_nothing():
+    """Pass one is a FIRST observation of everything, and says so."""
+    root, carried = _wave_module().resolve_runtime_root("")
+    assert root.is_dir()
+    assert carried == []
+
+
+def test_a_reused_root_carries_the_previous_passes_company_stores(tmp_path):
+    """This is what makes pass two a SECOND observation."""
+    for company in ("boeing", "stripe"):
+        (tmp_path / company).mkdir()
+    root, carried = _wave_module().resolve_runtime_root(str(tmp_path))
+    assert root == tmp_path.resolve()
+    assert carried == ["boeing", "stripe"]
+
+
+def test_a_missing_root_is_refused_rather_than_created(tmp_path):
+    """THE DEFECT THIS PINS.
+
+    Creating the root would hand back an empty store, every company would
+    report FIRST_OBSERVATION again, and a rerun proving nothing would look
+    exactly like a rerun that passed.
+    """
+    import pytest as _pytest
+    missing = tmp_path / "never-written"
+    with _pytest.raises(NotADirectoryError):
+        _wave_module().resolve_runtime_root(str(missing))
+    assert not missing.exists(), "the runner created the root it should refuse"
+
+
+def test_an_empty_reused_root_is_carried_as_empty_not_as_priors(tmp_path):
+    """Absent priors must read as absent, never as a satisfied second pass."""
+    root, carried = _wave_module().resolve_runtime_root(str(tmp_path))
+    assert carried == []
+
+
+def test_a_reused_root_reloads_the_previous_passes_run_from_disk(tmp_path):
+    """PRIOR PERSISTED, PRIOR RELOADED — in a second process's app instance.
+
+    --root is only worth having if reopening the same store actually surfaces
+    what the previous pass wrote. Proven here without a backend: a run created
+    by one WebApp must be visible to a second WebApp opened on the same paths,
+    which is the mechanism the §12 second iteration rests on.
+    """
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+
+    store_dir = tmp_path / "boeing"
+    store_dir.mkdir()
+
+    def _app():
+        return WebApp(AppConfig(
+            env="development", secret="s" * 40, demo_mode=True,
+            web_store_path=store_dir / "web.jsonl",
+            fi_store_path=store_dir / "fi.jsonl",
+            ci_store_path=store_dir / "ci.jsonl"),
+            transport=None, resolver=False)
+
+    first = _app()
+    created = first.ci.create_run(
+        company_name="Boeing", website="https://boeing.com",
+        user_id="breaker-wave", as_of="2026-08-13T00:00:00+00:00")
+    run_id = created["run_id"]
+
+    # A separate instance, as a second pass would build.
+    second = _app()
+    assert second.ci.run_meta(run_id), \
+        "the second pass could not see the run the first pass persisted, so " \
+        "a reused root would still be a FIRST observation"
+
+
+def test_a_fresh_root_does_not_see_another_roots_run(tmp_path):
+    """NEGATIVE CONTROL: the reload above must be the store, not a global.
+
+    Without this, the test above would pass just as well if runs were kept in
+    process-wide state, and would prove nothing about persistence.
+    """
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+
+    def _app(name):
+        d = tmp_path / name
+        d.mkdir()
+        return WebApp(AppConfig(
+            env="development", secret="s" * 40, demo_mode=True,
+            web_store_path=d / "web.jsonl", fi_store_path=d / "fi.jsonl",
+            ci_store_path=d / "ci.jsonl"), transport=None, resolver=False)
+
+    created = _app("first").ci.create_run(
+        company_name="Boeing", website="https://boeing.com",
+        user_id="breaker-wave", as_of="2026-08-13T00:00:00+00:00")
+    assert not _app("other").ci.run_meta(created["run_id"]), \
+        "a different root saw another root's run; the store is not the " \
+        "boundary and --root would carry nothing"

@@ -748,12 +748,46 @@ def _high_activity_low_learning(documents, independent, duplicates,
     }
 
 
+def resolve_runtime_root(requested):
+    """Return (root, carried_company_ids) for this pass.
+
+    An absent `requested` means a fresh temp root: pass one is a FIRST
+    observation of everything, correctly. A `requested` root is a SECOND
+    iteration, and it must be a root a previous pass actually wrote — so a
+    missing directory raises rather than being created. Creating it would
+    hand back an empty store, every company would report FIRST_OBSERVATION
+    again, and the rerun would look like it passed while proving nothing.
+    """
+    if not requested:
+        return pathlib.Path(tempfile.mkdtemp(prefix="breaker-wave-")), []
+    root = pathlib.Path(requested).expanduser().resolve()
+    if not root.is_dir():
+        raise NotADirectoryError(
+            f"--root {root} does not exist. A second iteration must reuse a "
+            "root a previous run actually wrote; creating an empty one would "
+            "silently reproduce FIRST_OBSERVATION and look like a passing "
+            "rerun.")
+    return root, sorted(p.name for p in root.iterdir() if p.is_dir())
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="reports/v5/breaker_10")
     ap.add_argument("--only", default="",
                     help="comma-separated company_ids, for a rerun")
     ap.add_argument("--label", default="baseline")
+    # WHY THIS FLAG EXISTS. The runtime root was ALWAYS a fresh mkdtemp, so
+    # every run met its own priors as absent: a second pass over the same ten
+    # could only ever report FIRST_OBSERVATION again, and the temporal
+    # machinery -- prior persisted, prior reloaded, comparison run -- had no
+    # way to be exercised on real intelligence. That is not something credit
+    # buys; a discarded store stays discarded at any price. Passing --root
+    # with a previous run's root is what makes the second iteration a second
+    # OBSERVATION rather than a first one repeated.
+    ap.add_argument("--root", default="",
+                    help="reuse a previous run's runtime root, so this pass "
+                         "meets the priors that pass persisted (§12 second "
+                         "iteration). Default: a fresh temp root.")
     ap.add_argument("--env-file", default="",
                     help="path to a .env supplying ANTHROPIC_API_KEY")
     args = ap.parse_args()
@@ -803,7 +837,19 @@ def main() -> int:
 
     wanted = ([x.strip() for x in args.only.split(",") if x.strip()]
               if args.only else list(selected))
-    root = pathlib.Path(tempfile.mkdtemp(prefix="breaker-wave-"))
+    try:
+        root, carried = resolve_runtime_root(args.root)
+    except NotADirectoryError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+    if args.root:
+        print(f"REUSING runtime root: {root}\n"
+              f"  {len(carried)} company store(s) carried forward: "
+              f"{', '.join(carried) or 'NONE'}")
+        if not carried:
+            print("  !! the root holds no company stores, so this pass will "
+                  "still be a FIRST observation for every company.",
+                  file=sys.stderr)
     print(f"runtime root: {root}\n")
 
     records = []

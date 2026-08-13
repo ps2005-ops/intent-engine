@@ -220,13 +220,63 @@ def _cohort_unchanged():
 
 
 # --- criteria requiring the paid backend ------------------------------------
+#
+# WHY EACH ONE NAMES A PRODUCER
+# ------------------------------
+# These six were a bare list of titles, emitted as BLOCKED_EXTERNAL without
+# anything being checked. That asserts a claim the gate never tested: that
+# restoring credits is SUFFICIENT to evaluate them. It is not sufficient for a
+# criterion whose producer does not exist, and the gate could not tell the two
+# apart -- which is criterion 10's history repeating in a new place.
+#
+# So a backend criterion now names the deterministic artefact that would
+# evaluate it. Missing producer is a FAIL, never a BLOCK: a block says "the
+# money is the only thing missing", and for a criterion nothing can compute,
+# that sentence is false. FAIL routes it to engineering, where it belongs.
+def _script(name):
+    return lambda: (ROOT / "scripts" / name).is_file()
+
+
+def _importable(module, attr):
+    def probe():
+        import importlib
+        try:
+            return hasattr(importlib.import_module(module), attr)
+        except ImportError:
+            return False
+    return probe
+
+
+def _wave_runner_can_reuse_state():
+    """§12 needs a SECOND pass over state the first pass persisted.
+
+    The runner rooted every run at a fresh mkdtemp, so a rerun met its own
+    priors as absent and every company reported FIRST_OBSERVATION for ever. No
+    amount of credit buys a second observation of a store that was discarded.
+    """
+    src = (ROOT / "scripts" / "v5_breaker_wave.py").read_text(encoding="utf-8")
+    return "--root" in src
+
+
 _BACKEND = (
-    (1, "Breaker-10 ran through the real backend"),
-    (5, "KnowledgeEffect production is non-vacuous ON REAL INTELLIGENCE"),
-    (13, "Founder consumption state measured on a real wave"),
-    (14, "re-observation value measured on a real wave"),
-    (15, "learning-quality classification produced from a real wave"),
-    (16, "first-starved conversion measured on a real wave"),
+    (1, "Breaker-10 ran through the real backend",
+     _script("v5_breaker_wave.py"), "scripts/v5_breaker_wave.py"),
+    (5, "KnowledgeEffect production is non-vacuous ON REAL INTELLIGENCE",
+     _importable("intent_engine.external_intel.effect_producer",
+                 "load_effects"),
+     "external_intel.effect_producer.load_effects"),
+    (13, "Founder consumption state measured on a real wave",
+     _importable("intent_engine.demo_dossier.assembler", "assemble"),
+     "demo_dossier.assembler.assemble"),
+    (14, "re-observation value measured on a real wave",
+     _wave_runner_can_reuse_state,
+     "a rerunnable state root in scripts/v5_breaker_wave.py (--root)"),
+    (15, "learning-quality classification produced from a real wave",
+     _importable("intent_engine.company_ingestion.learning_attribution",
+                 "FIRST_OBSERVATION"),
+     "company_ingestion.learning_attribution"),
+    (16, "first-starved conversion measured on a real wave",
+     _script("v5_learning_funnel.py"), "scripts/v5_learning_funnel.py"),
 )
 
 _CHECKS = (
@@ -260,11 +310,24 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001 - a broken check is a FAIL
             verdict, detail = FAIL, f"{type(exc).__name__}: {exc}"
         results.append(_result(f"{number}. {name}", verdict, detail))
-    for number, name in _BACKEND:
-        results.append(_result(
-            f"{number}. {name}", BLOCKED,
-            "the canonical analyst backend is CREDITS_EXHAUSTED; this "
-            "criterion cannot be evaluated and is NOT counted as met"))
+    for number, name, producer, producer_name in _BACKEND:
+        try:
+            present = bool(producer())
+        except Exception as exc:  # noqa: BLE001 - a broken probe is a FAIL
+            present, producer_name = False, f"{producer_name} ({exc})"
+        if present:
+            results.append(_result(
+                f"{number}. {name}", BLOCKED,
+                "the canonical analyst backend is CREDITS_EXHAUSTED; this "
+                "criterion cannot be evaluated and is NOT counted as met. Its "
+                f"producer ({producer_name}) EXISTS, so restoring credit is "
+                "sufficient to evaluate it"))
+        else:
+            results.append(_result(
+                f"{number}. {name}", FAIL,
+                f"NO PRODUCER: {producer_name} does not exist, so this "
+                "criterion cannot be evaluated even with credit restored. "
+                "This is an engineering defect, not an external block"))
 
     passed = [r for r in results if r["verdict"] == PASS]
     failed = [r for r in results if r["verdict"] == FAIL]

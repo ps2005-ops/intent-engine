@@ -95,3 +95,84 @@ def test_the_four_non_changing_states_stay_distinct(state):
     from intent_engine.company_ingestion import learning_attribution as la
     assert getattr(la, state) in la.NON_CHANGING
     assert getattr(la, state) not in la.CHANGING
+
+
+# --- Batch 17: a block must be a CHECKED claim, not an assertion -------------
+#
+# The six backend criteria were a static tuple of titles emitted as
+# BLOCKED_EXTERNAL unconditionally. That asserts something the gate never
+# tested: that money is the ONLY thing missing. For a criterion whose producer
+# does not exist, that sentence is false, and it is false in the most
+# expensive direction — it sends someone to buy credit for a wave that will
+# still not run. This is criterion 10's history, in a new place.
+
+def test_every_backend_criterion_names_a_producer():
+    """A title alone cannot be adjudicated; the tuple must carry a probe."""
+    assert gate._BACKEND, "the backend criteria disappeared"
+    for entry in gate._BACKEND:
+        number, name, producer, producer_name = entry
+        assert callable(producer), f"criterion {number} has no producer probe"
+        assert producer_name, f"criterion {number} does not name its producer"
+
+
+def test_a_backend_criterion_whose_producer_exists_is_blocked_not_failed():
+    """Credit really is the only thing missing — so BLOCK is the honest word."""
+    verdicts = _run_backend([(99, "present", lambda: True, "p")])
+    assert verdicts == [gate.BLOCKED]
+
+
+def test_a_backend_criterion_with_no_producer_fails_and_never_blocks():
+    """THE DEFECT THIS PINS.
+
+    BLOCKED_EXTERNAL means 'restore credit and this becomes evaluable'. When
+    nothing can compute the criterion, restoring credit changes nothing, and
+    calling it external routes an ENGINEERING defect to the billing page.
+    """
+    verdicts = _run_backend([(99, "absent", lambda: False, "nothing")])
+    assert verdicts == [gate.FAIL]
+
+
+def test_a_producer_probe_that_raises_fails_rather_than_blocking():
+    """A probe nobody can run is not evidence that money is the blocker."""
+    def boom():
+        raise RuntimeError("probe exploded")
+    assert _run_backend([(99, "broken", boom, "p")]) == [gate.FAIL]
+
+
+def _run_backend(entries, monkeypatch=None):
+    """Drive the gate's real backend loop over `entries`, return the verdicts.
+
+    Calls main() with _BACKEND and _CHECKS swapped so the loop under test is
+    the shipped one, not a copy of it.
+    """
+    import io
+    import sys
+    import contextlib
+    original_backend, original_checks = gate._BACKEND, gate._CHECKS
+    original_argv = sys.argv
+    gate._BACKEND, gate._CHECKS = tuple(entries), ()
+    sys.argv = ["v5_wave30_gate.py"]     # main() parses argv; pytest's is not it
+    try:
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            gate.main()
+        out = buf.getvalue()
+    finally:
+        gate._BACKEND, gate._CHECKS = original_backend, original_checks
+        sys.argv = original_argv
+    return [gate.FAIL if "NO PRODUCER" in line or line.startswith(gate.FAIL)
+            else gate.BLOCKED
+            for line in out.splitlines() if line.startswith((gate.FAIL,
+                                                             gate.BLOCKED))]
+
+
+def test_the_second_iteration_producer_is_the_rerunnable_root():
+    """§12 needs a pass that meets priors a previous pass persisted.
+
+    The runner rooted every run at a fresh mkdtemp, so a rerun met its own
+    priors as absent and reported FIRST_OBSERVATION for ever. No amount of
+    credit buys a second observation of a store that was discarded.
+    """
+    assert gate._wave_runner_can_reuse_state(), \
+        "v5_breaker_wave.py cannot reuse a runtime root, so re-observation " \
+        "value is unmeasurable at any credit balance"
