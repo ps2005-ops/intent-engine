@@ -166,15 +166,17 @@ axes:
     evidence: "daily report computes bottleneck and next_research_priority;
       not yet consumed by the next cycle's decision step"
   - id: SECURITY_CANARIES
-    capability: UNMEASURED
-    empirical: UNMEASURED
-    evidence: "not re-run this session"
+    capability: PASS
+    empirical: MEASURED
+    evidence: "7 injection canaries + the two-sided requirement (attack authority removed AND benign content preserved). Found and fixed a SEV: 'alpha' matched as a bare substring refused 'Alphabet Inc.' entirely"
   - id: CROSS_TENANT_ISOLATION
-    capability: UNMEASURED
-    empirical: UNMEASURED
+    capability: PASS
+    empirical: MEASURED
+    evidence: "driven through real InternalFact/tenant_scope, symmetric both directions, and each tenant still reads its own canary so the test cannot pass by filtering everything"
   - id: ANTITRUST_AIR_GAP
-    capability: UNMEASURED
-    empirical: UNMEASURED
+    capability: PASS
+    empirical: MEASURED
+    evidence: "InternalFact IS the private partition - there is no public provenance for one, which is the architectural reason the gap holds; the metamorphic half proves the boundary is the record class, not the words"
   - id: SCHEDULER
     capability: PASS
     empirical: MEASURED
