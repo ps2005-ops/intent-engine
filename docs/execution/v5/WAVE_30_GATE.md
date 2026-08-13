@@ -365,3 +365,52 @@ rather than a missing part.
 away from emitting twelve effects per company per cycle, and it would have
 looked like excellent learning velocity. Suspiciously high conversion is a
 defect candidate first.
+
+---
+
+# Batch 16 — the gate is now code
+
+Backend preflight: **`CREDITS_EXHAUSTED`** (canonical analyst path, one probe).
+`INTELLIGENCE_BASELINE = BLOCKED_EXTERNAL_CREDITS`; the frozen ten were not
+run, and no analysis was fabricated to stand in for them.
+
+## The verdict is derived, not written
+
+`scripts/v5_wave30_gate.py` adjudicates all 17 criteria mechanically and emits
+`reports/v5/b16/WAVE_30_INTELLIGENCE_GATE.json`. Every prior verdict in this
+programme was hand-maintained, and one was wrong for two batches: criterion 10
+read MET-as-`BLOCKED_EXTERNAL_CREDITS` while the producer it depended on did
+not exist, so "restore credits and it passes" was false.
+
+Three verdicts, never two: `PASS` / `FAIL` / `BLOCKED_EXTERNAL`. **A block is
+never a pass** — the criterion nobody could evaluate is the one most likely to
+be assumed — and a FAIL outranks a BLOCK.
+
+**Result: PASS 12 · FAIL 0 · BLOCKED_EXTERNAL 6 → `WAVE_30: CLOSED`.**
+
+Closed on unevaluated criteria, not on defects. The six blocked all require
+the paid backend: the real wave, real-intelligence non-vacuity, Founder
+consumption, re-observation value, learning quality and first-starved
+conversion.
+
+## SEV defect found: the trading wall refused Alphabet Inc.
+
+`_BANNED_SUBSTRINGS` was scanned with `in`, so "alpha" inside "Alphabet"
+refused the whole snapshot — total, not redacted. Alphabet is one of the
+largest public companies in the world and squarely inside the validation
+universe. Both copies of the list (they cannot import each other) now match on
+word boundaries.
+
+The wall is not relaxed: "generated alpha of 3%", "ALPHA was 2.1",
+"alpha-generating", "win rate", "sharpe", "price target" all still refuse.
+What stops matching is a term buried inside a longer word.
+
+## A test that could not fail
+
+The gate's own tests reimplemented its verdict rule instead of calling it, so
+mutating the gate could not fail them — protecting the decision that opens a
+wave with a test incapable of noticing. The rule is now one function,
+`adjudicate`, that both the gate and its tests call, and two mutations attack
+it directly.
+
+45/45 break proofs CAUGHT across five suites.

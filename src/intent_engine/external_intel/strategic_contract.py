@@ -293,14 +293,23 @@ def _validate(node: Any, spec: Any, path: str) -> None:
     raise StrategicLeak(f"{path}: malformed schema")  # pragma: no cover
 
 
+#: MATCHED ON WORD BOUNDARIES, NOT AS RAW SUBSTRINGS. See the twin comment in
+#: `demo_dossier.contracts`: a plain substring scan refused every text naming
+#: "Alphabet Inc." because "alpha" is inside it, and the refusal was total.
+#: The wall is unchanged for trading language — "generated alpha of 3%" still
+#: matches, because there the term stands as its own word.
+_BANNED_PATTERN = re.compile(
+    r"(?<![0-9a-z])(?:%s)(?![0-9a-z])"
+    % "|".join(re.escape(term) for term in _BANNED_SUBSTRINGS), re.I)
+
+
 def _scan_text(node: Any, path: str = "") -> None:
     if isinstance(node, str):
-        low = node.lower()
-        for banned in _BANNED_SUBSTRINGS:
-            if banned in low:
-                raise StrategicLeak(
-                    f"{path}: text contains {banned!r}, a trading internal "
-                    f"that may not reach a founder surface")
+        found = _BANNED_PATTERN.search(node)
+        if found:
+            raise StrategicLeak(
+                f"{path}: text contains {found.group(0).lower()!r}, a trading "
+                f"internal that may not reach a founder surface")
     elif isinstance(node, dict):
         for key, value in node.items():
             _scan_text(value, f"{path}.{key}" if path else str(key))

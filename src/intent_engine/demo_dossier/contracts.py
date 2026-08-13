@@ -267,6 +267,22 @@ _BANNED_SUBSTRINGS = (
     "long position", "short position", "price target", "target price",
 )
 
+#: MATCHED ON WORD BOUNDARIES, NOT AS RAW SUBSTRINGS.
+#:
+#: "alpha" inside "Alphabet Inc." is not a trading internal, and a plain
+#: substring scan refused every founder-facing text that named one of the
+#: largest public companies in the world — a company squarely inside the
+#: validation universe this programme is built around. The refusal was total:
+#: one word in one sentence rejected the whole snapshot.
+#:
+#: The wall itself is not relaxed. "generated alpha of 3%" still matches,
+#: because there the term stands as its own word; only "alphabet", "alphas"
+#: and their like stop matching. Multi-word phrases keep their internal
+#: spacing and are anchored the same way.
+_BANNED_PATTERN = re.compile(
+    r"(?<![0-9a-z])(?:%s)(?![0-9a-z])"
+    % "|".join(re.escape(term) for term in _BANNED_SUBSTRINGS), re.I)
+
 
 def is_security_sensitive(name: str) -> bool:
     """Whether an unrecognised field name must fail closed rather than be
@@ -277,12 +293,11 @@ def is_security_sensitive(name: str) -> bool:
 
 def _scan_text(node: Any, path: str = "") -> None:
     if isinstance(node, str):
-        low = node.lower()
-        for banned in _BANNED_SUBSTRINGS:
-            if banned in low:
-                raise SnapshotRefused(
-                    f"{path or 'root'}: text contains {banned!r}, a trading "
-                    f"internal that may not reach a founder surface")
+        found = _BANNED_PATTERN.search(node)
+        if found:
+            raise SnapshotRefused(
+                f"{path or 'root'}: text contains {found.group(0).lower()!r}, "
+                f"a trading internal that may not reach a founder surface")
     elif isinstance(node, Mapping):
         for key, value in node.items():
             _scan_text(value, f"{path}.{key}" if path else str(key))
