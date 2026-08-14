@@ -12,6 +12,7 @@ from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import layers as L
 from intent_engine.founder_brief import render as R
+from tests import canonical_market as CM
 from tests.test_founder_brief_v3 import (
     _absent_market_context, _cited_report, _market_context, _rich, _sparse,
     rendered,
@@ -211,7 +212,7 @@ def test_the_timeline_is_deduplicated():
     assert len({r["value"] for r in rows}) == len(rows)
 
 
-def test_no_control_performance_reaches_the_dashboard():
+def test_no_control_performance_reaches_the_dashboard(tmp_path):
     html = R.render_dashboard(L.build_dashboard(
         _rich(market=_market_context())))
     for banned in ("win rate", "sharpe", "alpha", "expectancy",
@@ -844,7 +845,7 @@ def test_an_absent_card_still_says_why_it_matters_and_what_would_settle_it():
             assert module.what_to_watch, module.key
 
 
-def test_the_dashboard_never_prints_the_same_row_twice():
+def test_the_dashboard_never_prints_the_same_row_twice(tmp_path):
     """MEASURED: business momentum and the strategic timeline printed the same
     dated developments, and the market card repeated its own headline in its
     rows -- Shopify showed one price sentence three times on one screen."""
@@ -858,7 +859,8 @@ def test_the_dashboard_never_prints_the_same_row_twice():
                 seen.add(key)
 
 
-def test_an_available_card_keeps_its_interpretation_after_deduplication():
+def test_an_available_card_keeps_its_interpretation_after_deduplication(
+        tmp_path):
     """Deduplication may not buy a clean screen by emptying a card: the
     release gate fails a module shown without an interpretation."""
     modules = L.build_dashboard(_rich(market=_market_context()))

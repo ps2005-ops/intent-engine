@@ -186,6 +186,29 @@ class ExternalContext:
                     and factor.observation.prior_value is not None):
                 add(factor.observation.current_value
                     - factor.observation.prior_value)
+        # A belief's confidence and a posture's weight are figures the
+        # strategic dossier PUBLISHES, exactly as the price payload publishes
+        # a period return. They are stored as probabilities and rendered as
+        # percentages, so both forms are grounded — otherwise the gate would
+        # flag "62% confidence" as an invented number and the honest way to
+        # satisfy it would be to stop stating the confidence at all, which is
+        # the opposite of what the gate is for.
+        if self.strategic and self.strategic.available:
+            def add_probability(value):
+                add(value)
+                try:
+                    add(round(float(value) * 100))
+                except (TypeError, ValueError):
+                    return
+            for belief in self.strategic.beliefs:
+                add_probability(belief.get("confidence"))
+            for posture in self.strategic.postures:
+                add_probability(posture.get("leading_probability"))
+                for alt in (posture.get("alternatives") or ()):
+                    add_probability(alt.get("probability"))
+                for moved in (posture.get("moved") or ()):
+                    add_probability(moved.get("from"))
+                    add_probability(moved.get("to"))
         return out
 
     def ungrounded_numbers(self, text: str) -> List[str]:
@@ -317,6 +340,15 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
         company_id=intel.company_id, company_label=intel.company_id,
         beliefs=beliefs, as_of=intel.as_of, dossier_revision=intel.as_of)
 
+    # The raw rows, indexed both ways the graph can name a belief: by the
+    # proposition it became a node label from, and by its ledger id.
+    _rows = {}
+    for _row in beliefs:
+        if _row.get("proposition"):
+            _rows[str(_row["proposition"])] = _row
+        if _row.get("belief_id"):
+            _rows[str(_row["belief_id"])] = _row
+
     out: List[dict] = []
     for node in graph.of_kind(HYPOTHESIS):
         if node.attrs.get("origin") != "market_learning_engine":
@@ -364,11 +396,36 @@ def _belief_blocks(intel: "StrategicIntel") -> List[dict]:
         if note:
             facts.append(note)
 
+        # A PRIOR AND A POSTERIOR MUST NOT READ THE SAME.
+        #
+        # DECLARED means the belief was opened by the evidence above and has
+        # never been moved by anything since, so its standing is an OPENING
+        # POSITION. Printed beside a belief that has survived three
+        # contradictions with no distinction, it invites the reader to credit
+        # an untested position with a track record. They are different claims.
+        #
+        # The row is looked up rather than read off the node because the graph
+        # projection carries the reading, not its revision history.
+        row = _rows.get(node.label) or _rows.get(
+            str(node.attrs.get("belief_id") or "")) or {}
+        declared = (str(row.get("update_method") or "").upper() == "DECLARED"
+                    or not row.get("direction_of_last_change"))
+
         limitations = list(node.attrs.get("limitations") or ())
         # Standing-specific, so evidence that was examined and found thin does
         # not get the same sentence as evidence nobody examined.
         if node.attrs.get("trust_limitation"):
             limitations.append(str(node.attrs["trust_limitation"]))
+        if declared:
+            facts.append("This belief was opened by the evidence above and "
+                         "has not yet been revised by anything since.")
+            limitations.append(
+                "The confidence is an opening position, not a tested one: no "
+                "later observation has moved it up or down.")
+        else:
+            facts.append(
+                f"Last revised {row.get('direction_of_last_change')} by "
+                f"{str(row.get('update_method') or '').lower()}.")
         limitations.append(
             "This is a reading the market-learning engine holds, not an "
             "established fact about the company, and it does not by itself "
@@ -416,6 +473,16 @@ def _strategic_blocks(intel: "StrategicIntel") -> List[dict]:
     explanations, so an inferred objective cannot be printed as a known
     motive — that is the difference between "Company B matched the price" and
     "Company B is buying share", and only the first one was observed.
+
+    BELIEFS WERE THE MISSING KIND, AND THEY ARE THE ONLY ONE PRODUCED
+    ----------------------------------------------------------------
+    Every kind above was rendered before beliefs were, and beliefs are what
+    the market engine actually emits: on the first real dossiers to cross this
+    boundary — Microsoft, Caterpillar, Shopify — `strategic_beliefs` was
+    populated and every other list was empty. So `has_strategic` reported True,
+    the section was declared relevant, and this function returned zero blocks.
+    A context that announces itself and then says nothing is worse than one
+    that stays silent, because the silence at least reads as absence.
     """
     out: List[dict] = _belief_blocks(intel)
     for row in intel.interactions:

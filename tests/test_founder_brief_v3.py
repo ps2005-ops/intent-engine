@@ -11,6 +11,7 @@ from intent_engine.founder_brief import build as B
 from intent_engine.founder_brief import contract as C
 from intent_engine.founder_brief import gate as G
 from intent_engine.founder_brief import render as R
+from tests import canonical_market as CM
 
 
 def _insight(**kw):

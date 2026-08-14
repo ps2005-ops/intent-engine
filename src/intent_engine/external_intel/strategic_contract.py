@@ -47,7 +47,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from intent_engine.external_intel import standing_ceiling as SC
 
@@ -324,12 +324,130 @@ def validate(payload: dict) -> None:
     _scan_text(payload)
 
 
+# --- belief maturity --------------------------------------------------------
+#
+# WHY A FOUNDER MAY NOT BE SHOWN "62% CONFIDENCE"
+# -----------------------------------------------
+# The producer is explicit that `update_method` is "never decorative": only
+# EMPIRICAL_BAYES derives likelihoods from measured base rates. A
+# CALIBRATED_HEURISTIC is "a bounded step scaled by evidence quality, honest
+# about being a heuristic", and DECLARED means the belief was OPENED by its
+# evidence and never revised since.
+#
+# 0.618 from an opening heuristic and 0.618 from a posterior that survived
+# three contradictions are different claims about the world, and printing both
+# as "62% confidence" makes the weaker one unfalsifiable-sounding. A reader who
+# sees two decimal places reasonably infers something was measured.
+#
+# So maturity is derived HERE, once, from the fields the producer actually
+# publishes, and every founder surface reads it from this function. A surface
+# computing its own would be the mechanism by which the narrative and the
+# dashboard come to disagree about the same belief.
+NEWLY_DECLARED = "NEWLY_DECLARED"
+REVISED = "REVISED"
+TESTED = "TESTED"
+REPEATEDLY_SUPPORTED = "REPEATEDLY_SUPPORTED"
+UNDER_REVIEW = "UNDER_REVIEW"
+WEAKENED = "WEAKENED"
+RETIRED = "RETIRED"
+
+MATURITIES = frozenset({NEWLY_DECLARED, REVISED, TESTED, REPEATEDLY_SUPPORTED,
+                        UNDER_REVIEW, WEAKENED, RETIRED})
+
+#: The only update method whose number is a measurement rather than a step
+#: size. Deliberately a whitelist: a method added upstream must be classified
+#: here before its figure can reach a founder as a percentage.
+NUMERIC_METHODS = frozenset({"EMPIRICAL_BAYES"})
+
+#: Words for a heuristic reading. The bands are wide on purpose -- narrow ones
+#: would reintroduce the precision the words exist to avoid.
+_PLAUSIBILITY = ((0.75, "well supported by the current evidence"),
+                 (0.60, "moderately plausible"),
+                 (0.45, "roughly balanced against the alternatives"),
+                 (0.0, "weakly supported"))
+
+
+def belief_maturity(belief: dict) -> str:
+    """How much this belief has been through, from what the producer states.
+
+    Conservative by construction: anything unrecognised reads as newly
+    declared, because treating an unknown method as tested is the failure that
+    matters. The reverse understates a belief and costs nothing.
+    """
+    method = str(belief.get("update_method") or "").upper()
+    direction = belief.get("direction_of_last_change")
+    if belief.get("retired"):
+        return RETIRED
+    if method == "DECAY":
+        # Absence moved it toward uncertainty; no new evidence arrived.
+        return UNDER_REVIEW
+    if not direction:
+        return TESTED if method in NUMERIC_METHODS else NEWLY_DECLARED
+    lowered = str(direction).lower()
+    if lowered in ("down", "weaker", "negative", "-"):
+        return WEAKENED
+    if method in NUMERIC_METHODS:
+        return REPEATEDLY_SUPPORTED
+    return REVISED
+
+
+def confidence_is_numeric(belief: dict) -> bool:
+    """Whether this belief's figure may be printed as a percentage."""
+    return str(belief.get("update_method") or "").upper() in NUMERIC_METHODS
+
+
+def confidence_language(belief: dict) -> str:
+    """A phrase a founder can act on, matched to what the number can bear.
+
+    Not a reflexive removal of every number: an EMPIRICAL_BAYES posterior IS a
+    measurement and says so. What is refused is a heuristic step presented in
+    the same grammar as a measured one.
+    """
+    try:
+        value = float(belief.get("confidence") or 0)
+    except (TypeError, ValueError):
+        value = 0.0
+    if confidence_is_numeric(belief):
+        return f"held at {value:.0%} confidence, from measured base rates"
+    for floor, words in _PLAUSIBILITY:
+        if value >= floor:
+            return f"the current evidence makes this {words}"
+    return "the current evidence is not strong enough to lean on"
+
+
+#: What each maturity means, in a founder's terms rather than the engine's.
+MATURITY_WORDS = {
+    NEWLY_DECLARED: ("a newly formed reading, not a tested conclusion"),
+    REVISED: ("revised since it was opened, as later evidence arrived"),
+    TESTED: ("tested against measured base rates rather than assumed"),
+    REPEATEDLY_SUPPORTED: ("supported again by evidence arriving after it "
+                           "was opened"),
+    UNDER_REVIEW: ("drifting toward uncertainty because no new evidence has "
+                   "arrived"),
+    WEAKENED: ("weaker than when it was opened, after contrary evidence"),
+    RETIRED: ("withdrawn, and kept only as a record"),
+}
+
+
+def maturity_sentence(belief: dict) -> str:
+    return MATURITY_WORDS.get(belief_maturity(belief),
+                              MATURITY_WORDS[NEWLY_DECLARED])
+
+
 @dataclass(frozen=True)
 class StrategicIntel:
     """The founder-facing view of one company's strategic dossier."""
     available: bool
     reason: str = ""
     company_id: str = ""
+    #: The producer's own display name for the subject, when it stated one.
+    #: Preferred over `company_id` wherever a founder can see it: `company_id`
+    #: is a slug, and "microsoft is seeing demand strengthen" is a sentence
+    #: about a key, not about a company.
+    display_name: str = ""
+    #: Every name the producer says this dossier is about. Used to find the
+    #: dossier, never rendered.
+    subject_names: Tuple[str, ...] = ()
     as_of: str = ""
     age_days: Optional[int] = None
     stale: bool = False
@@ -375,9 +493,17 @@ class StrategicIntel:
                     or self.mismatches or self.reactions or self.pathways
                     or self.priorities or self.market_structure)
 
+    @property
+    def subject(self) -> str:
+        """The name to put in front of a founder. Never the slug if avoidable."""
+        return self.display_name or self.company_id
+
     def as_dict(self) -> dict:
         return {"available": self.available, "reason": self.reason,
-                "company_id": self.company_id, "as_of": self.as_of,
+                "company_id": self.company_id,
+                "display_name": self.display_name,
+                "subject_names": list(self.subject_names),
+                "as_of": self.as_of,
                 "age_days": self.age_days, "stale": self.stale,
                 "beliefs": list(self.beliefs), "postures": list(self.postures),
                 "interactions": list(self.interactions),
@@ -484,7 +610,11 @@ def consume(payload: dict, *, expected_company: str = "",
                      if isinstance(r, dict))
 
     return StrategicIntel(
-        available=True, company_id=company, as_of=as_of, age_days=age,
+        available=True, company_id=company,
+        display_name=str(payload.get("company_display_name") or ""),
+        subject_names=tuple(str(x) for x in
+                            (payload.get("subject_names") or ())),
+        as_of=as_of, age_days=age,
         stale=False,
         beliefs=_rows("strategic_beliefs"),
         postures=_rows("hidden_states"),
@@ -509,6 +639,138 @@ def consume(payload: dict, *, expected_company: str = "",
         disclaimer=str(payload.get("disclaimer") or DISCLAIMER))
 
 
+#: A universe of a few dozen companies publishes a few dozen dossiers. The cap
+#: exists so a directory that has grown unexpectedly degrades into a miss
+#: rather than into a slow page.
+MAX_DOSSIERS_SCANNED = 512
+
+NO_DOSSIER = (
+    "No strategic reading has been published for this company. Strategic "
+    "posture, competitor reactions and preregistered expectations are not "
+    "part of this analysis.")
+
+
+def _read(path) -> Optional[dict]:
+    """One dossier as a plain object, or None if it cannot be read at all."""
+    import json
+
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _declared_keys(payload: dict) -> set:
+    """Every key this dossier claims to answer to, normalised.
+
+    `company_id` is included because a producer that has not yet learned to
+    state `subject_names` still answers to its own key, and this side must
+    keep reading the dossiers that already exist.
+    """
+    names = [payload.get("company_id") or "",
+             payload.get("company_display_name") or ""]
+    names += [str(n) for n in (payload.get("subject_names") or ())
+              if isinstance(n, (str, int, float))]
+    return {k for k in (company_key(str(n)) for n in names) if k}
+
+
+def resolve(directory, *, names: Sequence[str],
+            today: str = "") -> StrategicIntel:
+    """Find the dossier for a company known by any of `names`.
+
+    WHY THIS EXISTS AND `load` WAS NOT ENOUGH
+    -----------------------------------------
+    `load` takes a path, and the caller built that path from `company_key` of
+    the one name it happened to hold. Measured against the first real dossiers
+    the market engine ever wrote, that join NEVER MATCHED: the producer files
+    under its internal universe id (`microsoft.json`) and this side asks for
+    the name a founder typed (`microsoft-corporation.json`). Both sides ran
+    exactly as designed, both were tested, and the bridge carried nothing —
+    silently, because "no dossier published" is a legitimate answer and so
+    nothing raised.
+
+    Two names for the same company is the normal case, not the edge case, so
+    the fix is not a better convention. It is to stop inferring identity from
+    a filename: a dossier is accepted when it NAMES the company it is about,
+    and the filename is only a hint about where to look first.
+
+    AMBIGUITY IS REFUSED, NOT RESOLVED
+    ----------------------------------
+    If two dossiers claim the same company, one of them is wrong and picking
+    either would attribute half the evidence to the wrong subject — the same
+    failure the market side already paid for when a mis-resolved registrant
+    produced perfectly-classified events about the wrong company. Both are
+    refused, with the reason.
+
+    A FILE AT THE EXPECTED NAME WINS, AND WINS BEFORE THE SCAN
+    ----------------------------------------------------------
+    The scan exists to find a dossier filed under a name we did not guess; it
+    is not a second opinion about one we did. So a file sitting at exactly
+    `company_key(name).json` is taken, and a rival claim elsewhere in the
+    directory does not make it ambiguous — the filename is the strongest
+    identity assertion available, not the weakest. The consequence worth
+    knowing is that ambiguity is detected among CLAIMS, not against the
+    canonical file: `microsoft-corporation.json` is read even if some other
+    dossier also lists "Microsoft Corporation" among its subjects.
+    """
+    import pathlib
+
+    root = pathlib.Path(directory)
+    keys, seen = [], set()
+    for name in names:
+        key = company_key(str(name or ""))
+        if key and key not in seen:
+            seen.add(key)
+            keys.append(key)
+    if not keys:
+        return unavailable(
+            "This analysis has no company name to look a strategic dossier "
+            "up by, so none was read.")
+
+    # Fast path: the producer's filename already agrees with a name we hold.
+    for key in keys:
+        candidate = root / f"{key}.json"
+        if candidate.exists():
+            return load(candidate, expected_company=key, today=today)
+
+    if not root.is_dir():
+        return unavailable(NO_DOSSIER, company_id=keys[0])
+
+    wanted = set(keys)
+    matches: List[Tuple[Any, dict]] = []
+    renamed = 0
+    for path in sorted(root.glob("*.json"))[:MAX_DOSSIERS_SCANNED]:
+        payload = _read(path)
+        if payload is None:
+            continue
+        # The producer writes `<company_id>.json`. A file whose declared id
+        # disagrees with its own name has been moved or hand-edited, and a
+        # dossier that two lookups would answer differently is not one this
+        # side will render.
+        if company_key(str(payload.get("company_id") or "")) != path.stem:
+            renamed += 1
+            continue
+        if _declared_keys(payload) & wanted:
+            matches.append((path, payload))
+
+    if len(matches) > 1:
+        return unavailable(
+            f"{len(matches)} strategic dossiers claim to be about this "
+            f"company ({', '.join(sorted(p.stem for p, _ in matches))}). "
+            f"That is an upstream identity error, and choosing one of them "
+            f"would attach the wrong company's evidence to this analysis, so "
+            f"none was rendered.", company_id=keys[0])
+    if not matches:
+        extra = (f" {renamed} dossier(s) were skipped because their declared "
+                 f"company did not match their filename." if renamed else "")
+        return unavailable(NO_DOSSIER + extra, company_id=keys[0])
+
+    path, payload = matches[0]
+    return consume(payload, expected_company=str(payload.get("company_id")
+                                                 or ""), today=today)
+
+
 def load(path, *, expected_company: str = "",
          today: str = "") -> StrategicIntel:
     """Read a dossier from disk. A missing file is a reason, not an error."""
@@ -517,11 +779,7 @@ def load(path, *, expected_company: str = "",
 
     p = pathlib.Path(path)
     if not p.exists():
-        return unavailable(
-            "No strategic reading has been published for this company. "
-            "Strategic posture, competitor reactions and preregistered "
-            "expectations are not part of this analysis.",
-            company_id=expected_company)
+        return unavailable(NO_DOSSIER, company_id=expected_company)
     try:
         payload = json.loads(p.read_text())
     except (OSError, ValueError) as exc:
