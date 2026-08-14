@@ -241,6 +241,13 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             #: behaviour; passing them is what stops a refusal being
             #: published as "this subsystem did not run".
             causal_resolutions: Optional[Sequence[Any]] = None,
+            #: Measured economic conditions, and the RAW ledger rows the
+            #: exposure reader needs. Both or neither: an economy with no
+            #: exposure profile is a story that applies to every company
+            #: equally, which is the one thing `company_exposure` exists to
+            #: refuse. None keeps the previous behaviour exactly.
+            economic_states: Optional[Sequence[Any]] = None,
+            exposure_rows: Optional[Sequence[Any]] = None,
             history_available: bool = True,
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
@@ -271,6 +278,45 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
     grouped = bundles(result, market_structures=market_structures,
                       pricing_actions=pricing_actions,
                       causal_pathways=causal_pathways)
+    # WHICH ECONOMY REACHES WHICH COMPANY.
+    #
+    # Publishing the measured economy to every company would put the same
+    # sixteen conditions on twenty-six dossiers -- a macro dashboard, which is
+    # exactly what §4 asks this NOT to be. A condition crosses only where this
+    # company's own evidence establishes an exposure that transmits it, which
+    # is `company_exposure.conditions_transmission`, unchanged.
+    #
+    # 266 of 270 dimensions are UNKNOWN in the live corpus and that is the
+    # honest reading: an exposure model with every dimension populated is one
+    # that has been guessing from a sector table.
+    _economy = list(economic_states or ())
+    _profiles: Dict[str, Any] = {}
+    if economic_states is not None and exposure_rows:
+        from . import company_exposure as _CX
+        for _subject in sorted({str(r.get("subject_company") or "")
+                                for r in exposure_rows
+                                if isinstance(r, dict)
+                                and r.get("record") == "evidence"
+                                and r.get("subject_company")}):
+            _profiles[_subject] = _CX.profile(exposure_rows,
+                                              company_id=_subject)
+
+    def _economy_for(subject_id: str):
+        """The conditions that reach THIS company, or a stated absence.
+
+        Returns None when no economy was supplied at all -- which must stay
+        distinguishable from "the economy is measured and none of it reaches
+        this company", the answer for 23 of 27 live companies.
+        """
+        if economic_states is None:
+            return None
+        from . import company_exposure as _CX
+        profile = _profiles.get(subject_id) or {}
+        if not profile:
+            return []
+        return [s for s in _economy
+                if any(_CX.conditions_transmission(profile.get(d), s)
+                       for d in _CX.DIMENSIONS)]
     identities = identities or {}
     published: List[str] = []
     refused: List[dict] = []
@@ -372,7 +418,12 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
                                 if causal_resolutions is not None else None),
                 replay_episodes=None, adversary_cases=None,
                 demand_states=None, contradictions=None,
-                economic_states=None,
+                # THE ECONOMY THIS COMPANY IS ACTUALLY EXPOSED TO. `None` was
+                # passed here unconditionally, so `ECONOMIC_STATE_NOT_RUN` was
+                # a wiring artefact: the macro layer holds 2,466 observations
+                # and 16 anchored conditions, and the cycle already computes
+                # both the states and the exposure profiles.
+                economic_states=_economy_for(subject_id),
             ), root=root)
             snapshots.append(file_key)
         except DSE.SnapshotLeak as exc:

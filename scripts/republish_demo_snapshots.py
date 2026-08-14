@@ -172,9 +172,31 @@ def main() -> int:
               f"{' ...' if len(keys) > 6 else ''}")
         return 0
 
+    # THE ECONOMY, AND THE ROWS THAT SAY WHO IS EXPOSED TO IT. Read from the
+    # ledger file directly because the exposure reader filters on `record`,
+    # which the typed rows' `as_dict()` does not carry -- reading it the other
+    # way silently matches nothing and reports every company unexposed.
+    import json as _json
+    raw_rows = []
+    ledger = root / LS.DEFAULT_PATH
+    if ledger.exists():
+        for line in ledger.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                try:
+                    raw_rows.append(_json.loads(line))
+                except ValueError:
+                    continue
+    from intent_engine.market import macro_state as MS
+    history = [MS.from_dict(r) for r in raw_rows
+               if r.get("record") == "macro_observation"]
+    econ = list(MS.all_states(history, as_of=as_of)) if history else []
+    anchored = [s for s in econ if s.anchors]
+    print(f"economic     {len(econ)} state(s), {len(anchored)} anchored")
+
     report = SEP.publish(
         view, root=str(root), identities=identities,
         evidence_rows=evidence,
+        economic_states=anchored, exposure_rows=raw_rows,
         economic_theses=store.thesis_snapshots(),
         thesis_revisions=store.thesis_revisions(),
         expectations=store.expectations(),

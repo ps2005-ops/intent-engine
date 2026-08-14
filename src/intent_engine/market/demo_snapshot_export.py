@@ -392,6 +392,48 @@ def _evidence_block(rows: Optional[Sequence[Any]], cited: set) -> dict:
             "count": len(matched), "note": note}
 
 
+def _economic_block(rows: Optional[Sequence[Any]]) -> dict:
+    """The economy THIS company is exposed to, named by condition.
+
+    A state is identified by its kind and area -- MARKET_RATE in US is not
+    MARKET_RATE in EU -- so the ref is the pair, not an invented id.
+
+    THE ZERO HERE IS THE COMMON ANSWER AND IT IS NOT AN ABSENCE. 266 of 270
+    exposure dimensions in the live corpus are UNKNOWN, so for most companies
+    the measured economy reaches nothing. Publishing that as UNAVAILABLE would
+    say the macro layer did not run, when in fact it ran, is anchored on real
+    observations, and simply does not transmit to this company. The two need
+    opposite repairs: one is a scheduling problem, the other is a retrieval
+    problem about this company's own documents.
+    """
+    if rows is None:
+        return {"state": REF_UNAVAILABLE, "ids": [], "count": 0,
+                "note": ("no economic state was supplied for this snapshot; "
+                         "the macro layer did not run for it")}
+    ids = []
+    for row in rows:
+        kind = (row.get("state_kind") if isinstance(row, Mapping)
+                else getattr(row, "state_kind", "")) or ""
+        area = (row.get("area") if isinstance(row, Mapping)
+                else getattr(row, "area", "")) or ""
+        if kind:
+            ids.append(f"{area}:{kind}" if area else str(kind))
+    rows = list(rows)
+    if rows and not ids:
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "note": (f"{len(rows)} economic state(s) present and none "
+                         f"carried a state kind; this is a wiring defect, "
+                         f"not an absence of exposure")}
+    if not rows:
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "note": ("the economy is measured and none of it reaches "
+                         "this company: no exposure this company's own "
+                         "evidence establishes transmits a measured "
+                         "condition")}
+    return {"state": REF_AVAILABLE, "ids": ids[:MAX_REFS], "count": len(ids),
+            "note": ""}
+
+
 def _causal_block(rows: Optional[Sequence[Any]]) -> dict:
     """The causal block, with the resolution STATES stated on the block.
 
@@ -493,8 +535,7 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
         # FILTERED TO WHAT THIS COMPANY'S OWN BLOCKS CITE. Passing the shared
         # ledger straight through made every company's evidence identical.
         "evidence_reference_ids": _evidence_block(evidence_rows, _cited),
-        "economic_state_refs": _block(economic_states, "state_id", "id",
-                                      "area"),
+        "economic_state_refs": _economic_block(economic_states),
         "demand_state_refs": _block(demand_states, "id", "state_id"),
         "belief_refs": _block(beliefs, "belief_id", "id", "proposition"),
         # A hidden state carries no id; its identity IS the posture,
