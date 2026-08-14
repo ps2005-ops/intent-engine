@@ -1105,6 +1105,16 @@ class LearningStore:
         return tuple(r for r in self._rows()
                      if r.get("record") == RECONCILIATION)
 
+    def causal_estimates(self) -> Tuple[dict, ...]:
+        """Every causal resolution, including the refusals.
+
+        A refusal is the commonest outcome and the most important one to
+        publish: it says the engine ASKED and could not identify, which is
+        different in kind from never having asked.
+        """
+        return tuple(r for r in self._rows()
+                     if r.get("record") == CAUSAL_ESTIMATE)
+
     def expectations(self) -> Tuple[dict, ...]:
         """Every preregistered expectation, for the publisher to filter.
 

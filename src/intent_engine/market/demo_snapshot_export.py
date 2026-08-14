@@ -136,6 +136,28 @@ def _block(rows: Optional[Sequence[Any]], *names: str,
             "note": ""}
 
 
+def _causal_block(rows: Optional[Sequence[Any]]) -> dict:
+    """The causal block, with the resolution STATES stated on the block.
+
+    Publishing only ids would leave a surface unable to tell an estimate from
+    a refusal without dereferencing every one, and the refusal is the case a
+    CEO surface most needs to render honestly: the engine asked, and the data
+    could not answer. That is not "this subsystem did not run".
+    """
+    block = _block(rows, "resolution_id", "result_id", "id")
+    if rows is None or not rows:
+        return block
+    states: Dict[str, int] = {}
+    for row in rows:
+        state = (row.get("state") if isinstance(row, dict)
+                 else getattr(row, "state", "")) or "UNKNOWN"
+        states[str(state)] = states.get(str(state), 0) + 1
+    block["states"] = states
+    block["note"] = ("the causal router ran; " + ", ".join(
+        f"{n} {s}" for s, n in sorted(states.items())))
+    return block
+
+
 def _not_attempted(note: str) -> dict:
     return {"state": REF_NOT_ATTEMPTED, "ids": [], "count": 0, "note": note}
 
@@ -218,8 +240,12 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
         "reconciliation_refs": _block(reconciliations, "reconciliation_id",
                                       "id"),
         "contradiction_refs": _block(contradictions, "contradiction_id", "id"),
-        "causal_question_refs": _block(causal_questions, "question_id", "id"),
-        "causal_result_refs": _block(causal_results, "result_id", "id"),
+        "causal_question_refs": _block(causal_questions, "causal_question_id",
+                                      "question_id", "id"),
+        # `resolution_id` is what the resolver actually writes. A refusal
+        # carries one exactly like an estimate does, because the engine ran
+        # either way -- which is the whole point of publishing these.
+        "causal_result_refs": _causal_block(causal_results),
         "replay_refs": _block(replay_episodes, "episode_id", "id"),
         "adversary_refs": _block(adversary_cases, "case_id", "id"),
         "learning_summary": learning_summary or {

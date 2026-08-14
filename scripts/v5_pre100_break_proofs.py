@@ -66,6 +66,26 @@ MUTATIONS = [
      "            out.append(e)",
      "        out.append(e)",
      f"{T}::test_expectations_are_filtered_to_their_own_subject"),
+
+    # THE SEV-2 TRUTH DEFECT: a refusal republished as an absence.
+    ("a causal refusal is published as did-not-run again",
+     SRC / "demo_snapshot_export.py",
+     '        "causal_result_refs": _causal_block(causal_results),',
+     '        "causal_result_refs": _block(None),',
+     f"{T}::test_a_refusal_is_published_as_the_router_having_run"),
+
+    ("the causal block hides which states it found",
+     SRC / "demo_snapshot_export.py",
+     "    block[\"states\"] = states",
+     "    block[\"states\"] = {}",
+     f"{T}::test_mixed_states_are_all_reported_not_just_the_good_ones"),
+
+    ("causal resolutions leak across companies",
+     SRC / "strategic_publish.py",
+     "        if str(company or \"\") == str(subject_id):\n"
+     "            out.append(r)",
+     "        out.append(r)",
+     f"{T}::test_causal_resolutions_are_filtered_to_their_own_company"),
 ]
 
 

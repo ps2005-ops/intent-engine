@@ -146,6 +146,35 @@ def bundles(result, *, market_structures: Sequence[Any] = (),
     return out
 
 
+def _causal_for(resolutions: Sequence[Any], subject_id: str) -> list:
+    """This subject's causal resolutions, refusals included."""
+    out = []
+    for r in resolutions or ():
+        question = (r.get("question") if isinstance(r, dict)
+                    else getattr(r, "question", None)) or {}
+        company = (question.get("company_id") if isinstance(question, dict)
+                   else getattr(question, "company_id", ""))
+        if str(company or "") == str(subject_id):
+            out.append(r)
+    return out
+
+
+def _causal_questions_for(resolutions: Sequence[Any], subject_id: str) -> list:
+    """The questions behind this subject's resolutions.
+
+    Read off the resolutions rather than collected separately: a question
+    published without its resolution would say the engine asked and leave the
+    answer -- including the refusal -- invisible.
+    """
+    out = []
+    for r in _causal_for(resolutions, subject_id):
+        question = (r.get("question") if isinstance(r, dict)
+                    else getattr(r, "question", None))
+        if question:
+            out.append(question)
+    return out
+
+
 def _expectations_for(expectations: Sequence[Any], subject_id: str) -> list:
     """This subject's expectations only.
 
@@ -208,6 +237,10 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             #: previous behaviour exactly, so a caller that does not pass them
             #: is unchanged rather than silently publishing an empty block.
             expectations: Optional[Sequence[Any]] = None,
+            #: Causal resolutions, refusals included. None keeps the old
+            #: behaviour; passing them is what stops a refusal being
+            #: published as "this subsystem did not run".
+            causal_resolutions: Optional[Sequence[Any]] = None,
             history_available: bool = True,
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
@@ -327,7 +360,16 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
                 # and `None` is the honest statement of that. Passing `()`
                 # here would publish "we looked and found no causal result",
                 # which is a finding nobody made.
-                causal_questions=None, causal_results=None,
+                # THE CAUSAL TRUTH LEG. The router asked real questions and
+                # refused them for a named missing prerequisite. Publishing
+                # None said "did not run", which is a different claim and a
+                # false one -- and it is the claim that made the product look
+                # like it has no causal capability at all.
+                causal_questions=(_causal_questions_for(causal_resolutions,
+                                                        subject_id)
+                                  if causal_resolutions is not None else None),
+                causal_results=(_causal_for(causal_resolutions, subject_id)
+                                if causal_resolutions is not None else None),
                 replay_episodes=None, adversary_cases=None,
                 demand_states=None, contradictions=None,
                 economic_states=None,

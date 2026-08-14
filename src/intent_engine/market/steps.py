@@ -656,6 +656,10 @@ def learning_step(ctx: C.CycleContext) -> dict:
             # expectations. Zero expectations was a wiring artefact, not a
             # finding about the companies.
             expectations=store.expectations(),
+            # THE CAUSAL TRUTH LEG: 25 real resolutions, every one a refusal
+            # naming its missing prerequisite. Withholding them published
+            # "did not run", which is false.
+            causal_resolutions=store.causal_estimates(),
             history_available=True)
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}

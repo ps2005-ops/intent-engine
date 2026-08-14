@@ -89,3 +89,74 @@ def test_the_store_can_hand_back_the_expectations_themselves(tmp_path):
     store = LS.LearningStore(tmp_path / "ledger.jsonl")
     assert hasattr(store, "expectations")
     assert store.expectations() == ()
+
+
+# --- the causal truth repair ------------------------------------------------
+#
+# 25 resolutions sat in the live ledger, every one PANEL_UNAVAILABLE: the
+# router ASKED about real companies and refused for a named missing
+# prerequisite. The snapshot published "this subsystem did not run", which is
+# a different claim and a false one -- and it is the claim that made the
+# product look like it has no causal capability at all.
+
+def _resolution(company="duolingo", state="PANEL_UNAVAILABLE"):
+    return {"resolution_id": f"cres_{company}_{state}", "state": state,
+            "missing_prerequisite": "NO_OUTCOME_SERIES_FOR_TREATED_UNIT",
+            "question": {"causal_question_id": f"cq_{company}",
+                         "company_id": company,
+                         "outcome_variable": "weekly_active_users"}}
+
+
+def test_a_refusal_is_published_as_the_router_having_run():
+    snap = DSE.build_snapshot(company_id="duolingo", as_of="2026-08-14",
+                              causal_results=[_resolution()])
+    block = snap["causal_result_refs"]
+    assert block["state"] == DSE.REF_AVAILABLE
+    assert block["count"] == 1
+    assert block["states"] == {"PANEL_UNAVAILABLE": 1}
+    assert "the causal router ran" in block["note"]
+
+
+def test_a_refusal_never_reads_as_did_not_run():
+    """THE SEV-2 TRUTH DEFECT THIS PINS."""
+    snap = DSE.build_snapshot(company_id="duolingo", as_of="2026-08-14",
+                              causal_results=[_resolution()])
+    assert "did not run" not in snap["causal_result_refs"]["note"]
+
+
+def test_not_passing_causal_still_means_did_not_run():
+    """NEGATIVE CONTROL: the honest absence must survive the repair."""
+    snap = DSE.build_snapshot(company_id="duolingo", as_of="2026-08-14")
+    block = snap["causal_result_refs"]
+    assert block["state"] == DSE.REF_UNAVAILABLE
+    assert "did not run" in block["note"]
+    assert "states" not in block
+
+
+def test_causal_questions_are_named_by_their_own_id():
+    snap = DSE.build_snapshot(
+        company_id="duolingo", as_of="2026-08-14",
+        causal_questions=[_resolution()["question"]])
+    assert snap["causal_question_refs"]["ids"] == ["cq_duolingo"]
+
+
+def test_causal_resolutions_are_filtered_to_their_own_company():
+    rows = [_resolution("duolingo"), _resolution("stripe")]
+    got = SP._causal_for(rows, "duolingo")
+    assert [r["question"]["company_id"] for r in got] == ["duolingo"]
+
+
+def test_questions_are_read_off_the_resolutions_not_collected_apart():
+    """A question without its resolution hides the refusal."""
+    rows = [_resolution("duolingo"), _resolution("stripe")]
+    assert [q["causal_question_id"]
+            for q in SP._causal_questions_for(rows, "stripe")] == ["cq_stripe"]
+
+
+def test_mixed_states_are_all_reported_not_just_the_good_ones():
+    snap = DSE.build_snapshot(
+        company_id="duolingo", as_of="2026-08-14",
+        causal_results=[_resolution(state="PANEL_UNAVAILABLE"),
+                        _resolution(state="ESTIMATED")])
+    assert snap["causal_result_refs"]["states"] == {
+        "PANEL_UNAVAILABLE": 1, "ESTIMATED": 1}
