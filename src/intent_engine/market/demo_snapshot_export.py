@@ -37,6 +37,7 @@ import hashlib
 import json
 import pathlib
 from datetime import date
+from collections.abc import Mapping
 from typing import Any, Dict, Optional, Sequence
 
 SNAPSHOT_VERSION = "market_demo_snapshot.v1"
@@ -136,6 +137,91 @@ def _block(rows: Optional[Sequence[Any]], *names: str,
             "note": ""}
 
 
+def _collect_evidence_ids(node: Any, into: set, depth: int = 0) -> None:
+    """Every evidence id cited anywhere inside one company's own rows.
+
+    Mirrors `strategic_export._collect_ids`, but walks RAW ROWS rather than a
+    built payload, so it has to descend through objects as well as mappings.
+    Depth is capped because a cycle in a row graph must not hang a publish.
+    """
+    if depth > 6 or node is None:
+        return
+    if isinstance(node, str):
+        return
+    if isinstance(node, Mapping):
+        for key, value in node.items():
+            if key == "evidence_ids" and isinstance(value, (list, tuple, set)):
+                into.update(str(v) for v in value if v)
+            else:
+                _collect_evidence_ids(value, into, depth + 1)
+        return
+    if isinstance(node, (list, tuple, set)):
+        for item in node:
+            _collect_evidence_ids(item, into, depth + 1)
+        return
+    cited = getattr(node, "evidence_ids", None)
+    if isinstance(cited, (list, tuple, set)):
+        into.update(str(v) for v in cited if v)
+    fields = getattr(node, "__dict__", None)
+    if isinstance(fields, Mapping):
+        for key, value in fields.items():
+            if key != "evidence_ids":
+                _collect_evidence_ids(value, into, depth + 1)
+
+
+def _evidence_block(rows: Optional[Sequence[Any]], cited: set) -> dict:
+    """THIS COMPANY'S evidence, not the ledger.
+
+    THE DEFECT THIS REPLACES
+    ------------------------
+    This block was `_block(evidence_rows, ...)` over the WHOLE market ledger,
+    and the ledger is shared by every subject. So all 26 published snapshots
+    carried the same 474-row count and the same first 64 ids: Johnson &
+    Johnson's dossier cited Cloudflare's sources. A founder clicking "show me
+    the source" was shown another company's evidence, which is false
+    intelligence rather than a display bug.
+
+    The strategic export never had this problem because it collects the ids
+    its own payload cites (`_collect_ids`). This does the same thing one step
+    earlier, over the rows themselves.
+
+    The three outcomes are kept apart on purpose:
+
+    - rows is None      -> the ledger was not supplied; nothing was measured.
+    - nothing cited     -> a real zero. This company's blocks cite no evidence.
+    - cited, none found -> a WIRING DEFECT, named as one. Citing ids the
+      ledger cannot resolve is not the same as citing nothing, and reporting
+      it as count 0 is exactly the silent zero the other guards exist to stop.
+    """
+    if rows is None:
+        return {"state": REF_UNAVAILABLE, "ids": [], "count": 0,
+                "note": "this subsystem did not run for this snapshot"}
+    by_id: Dict[str, Any] = {}
+    for row in rows:
+        key = _id_of(row, "evidence_id", "id")
+        if key:
+            by_id.setdefault(key, row)
+    if not cited:
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "note": ("no block published for this company cites an "
+                         "evidence row; this is a measured zero, not an "
+                         "absent ledger")}
+    matched = sorted(i for i in cited if i in by_id)
+    if not matched:
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "note": (f"{len(cited)} evidence id(s) are cited by this "
+                         f"company's blocks and none resolves against the "
+                         f"{len(by_id)} identified ledger row(s); this is a "
+                         f"wiring defect, not an absence of evidence")}
+    note = ""
+    unresolved = len(cited) - len(matched)
+    if unresolved:
+        note = (f"{unresolved} cited evidence id(s) do not resolve against "
+                f"the supplied ledger and are not counted")
+    return {"state": REF_AVAILABLE, "ids": matched[:MAX_REFS],
+            "count": len(matched), "note": note}
+
+
 def _causal_block(rows: Optional[Sequence[Any]]) -> dict:
     """The causal block, with the resolution STATES stated on the block.
 
@@ -196,6 +282,15 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
                    ) -> dict:
     """Build one company's demo snapshot. Returns a plain serializable dict."""
     known_at = known_at or as_of
+    # WHICH EVIDENCE IS THIS COMPANY'S. Collected from the company-scoped rows
+    # only -- every group below is already filtered to this subject by the
+    # caller, which is what makes the result a per-company set.
+    _cited: set = set()
+    for _group in (beliefs, hidden_states, theses, thesis_revisions,
+                   expectations, reconciliations, contradictions,
+                   causal_questions, causal_results, replay_episodes,
+                   adversary_cases, economic_states, demand_states):
+        _collect_evidence_ids(_group, _cited)
     payload: Dict[str, Any] = {
         "contract_version": SNAPSHOT_VERSION,
         "snapshot_id": _snapshot_id(company_id, as_of, market_run_id),
@@ -225,7 +320,9 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
         # count is not an independence count: three sites carrying one press
         # release are one account, and the founder-side contract pins this.
         "evidence_independence_state": "UNAVAILABLE",
-        "evidence_reference_ids": _block(evidence_rows, "evidence_id", "id"),
+        # FILTERED TO WHAT THIS COMPANY'S OWN BLOCKS CITE. Passing the shared
+        # ledger straight through made every company's evidence identical.
+        "evidence_reference_ids": _evidence_block(evidence_rows, _cited),
         "economic_state_refs": _block(economic_states, "state_id", "id",
                                       "area"),
         "demand_state_refs": _block(demand_states, "id", "state_id"),

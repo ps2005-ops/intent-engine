@@ -54,18 +54,26 @@ def test_references_are_ids_and_never_bodies():
 
 
 def test_a_bounded_reference_list_still_reports_its_true_size():
-    rows = [{"evidence_id": f"e{i}"} for i in range(D.MAX_REFS + 25)]
-    payload = D.build_snapshot(company_id="acme", as_of="2026-08-11",
-                               evidence_rows=rows)
+    # The rows must be CITED to count: the evidence block is this company's
+    # evidence, not the ledger. The cap and the true size are what is under
+    # test, so the belief cites every row.
+    n = D.MAX_REFS + 25
+    rows = [{"evidence_id": f"e{i}"} for i in range(n)]
+    payload = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11", evidence_rows=rows,
+        beliefs=[{"belief_id": "b1",
+                  "evidence_ids": [f"e{i}" for i in range(n)]}])
     block = payload["evidence_reference_ids"]
     assert len(block["ids"]) == D.MAX_REFS
-    assert block["count"] == D.MAX_REFS + 25
+    assert block["count"] == n
 
 
 def test_independence_is_never_derived_from_the_row_count():
     payload = D.build_snapshot(
         company_id="acme", as_of="2026-08-11",
-        evidence_rows=[{"evidence_id": f"e{i}"} for i in range(9)])
+        evidence_rows=[{"evidence_id": f"e{i}"} for i in range(9)],
+        beliefs=[{"belief_id": "b1",
+                  "evidence_ids": [f"e{i}" for i in range(9)]}])
     assert payload["evidence_independence_state"] == "UNAVAILABLE"
 
 
@@ -111,3 +119,79 @@ def test_a_snapshot_is_written_where_the_founder_side_looks(tmp_path):
     path = D.write_snapshot(payload, root=tmp_path)
     assert path == tmp_path / D.EXPORT_DIR / "acme-corp.json"
     assert json.loads(path.read_text())["company_id"] == "acme-corp"
+
+
+# ---------------------------------------------------------------------------
+# THE EVIDENCE BLOCK IS THIS COMPANY'S EVIDENCE.
+#
+# Live defect, found by reading 26 published snapshots: every one carried the
+# same 474 count and the same first 64 ids, because the shared ledger was
+# passed through unfiltered. Johnson & Johnson cited Cloudflare's sources.
+# ---------------------------------------------------------------------------
+
+_LEDGER = [{"evidence_id": "e_cf1"}, {"evidence_id": "e_cf2"},
+           {"evidence_id": "e_jnj1"}, {"evidence_id": "e_unrelated"}]
+
+
+def test_two_companies_sharing_one_ledger_do_not_share_evidence():
+    cloudflare = D.build_snapshot(
+        company_id="cloudflare-inc", as_of="2026-08-11", evidence_rows=_LEDGER,
+        beliefs=[{"belief_id": "b1", "evidence_ids": ["e_cf1", "e_cf2"]}])
+    jnj = D.build_snapshot(
+        company_id="johnson-johnson", as_of="2026-08-11", evidence_rows=_LEDGER,
+        beliefs=[{"belief_id": "b2", "evidence_ids": ["e_jnj1"]}])
+    cf_ids = cloudflare["evidence_reference_ids"]["ids"]
+    jnj_ids = jnj["evidence_reference_ids"]["ids"]
+    assert cf_ids == ["e_cf1", "e_cf2"]
+    assert jnj_ids == ["e_jnj1"]
+    assert not set(cf_ids) & set(jnj_ids)
+    # The row nobody cited never crosses to anybody.
+    assert "e_unrelated" not in cf_ids + jnj_ids
+
+
+def test_evidence_is_collected_from_every_block_not_only_beliefs():
+    payload = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11", evidence_rows=_LEDGER,
+        beliefs=[{"belief_id": "b1", "evidence_ids": ["e_cf1"]}],
+        hidden_states=[{"leading_state": "PLATFORM_EXPANDING",
+                        "evidence_ids": ["e_cf2"]}],
+        expectations=[{"expectation_id": "x1", "evidence_ids": ["e_jnj1"]}])
+    assert payload["evidence_reference_ids"]["ids"] == ["e_cf1", "e_cf2",
+                                                        "e_jnj1"]
+
+
+def test_a_company_citing_nothing_is_a_zero_not_an_absence():
+    payload = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                               evidence_rows=_LEDGER)
+    block = payload["evidence_reference_ids"]
+    assert block["state"] == "AVAILABLE"
+    assert block["count"] == 0
+    assert "measured zero" in block["note"]
+
+
+def test_an_absent_ledger_is_not_a_zero():
+    block = D.build_snapshot(company_id="acme",
+                             as_of="2026-08-11")["evidence_reference_ids"]
+    assert block["state"] == "UNAVAILABLE"
+    assert block["count"] == 0
+
+
+def test_citing_ids_the_ledger_cannot_resolve_is_named_a_wiring_defect():
+    # The silent zero this repair could otherwise have introduced: blocks that
+    # cite evidence under a different id scheme would read as "found nothing".
+    payload = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11", evidence_rows=_LEDGER,
+        beliefs=[{"belief_id": "b1", "evidence_ids": ["other_scheme_1"]}])
+    block = payload["evidence_reference_ids"]
+    assert block["count"] == 0
+    assert "wiring defect" in block["note"]
+
+
+def test_partially_resolvable_citations_report_what_was_dropped():
+    payload = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11", evidence_rows=_LEDGER,
+        beliefs=[{"belief_id": "b1", "evidence_ids": ["e_cf1", "ghost"]}])
+    block = payload["evidence_reference_ids"]
+    assert block["ids"] == ["e_cf1"]
+    assert block["count"] == 1
+    assert "1 cited evidence id(s) do not resolve" in block["note"]
