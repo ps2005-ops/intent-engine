@@ -246,3 +246,57 @@ def test_an_answered_causal_question_still_needs_a_belief_to_be_supported():
                                          states={"ESTIMATE_SUPPORTED": 2}))
     assert d.standing == DS.BOUNDED
     assert "supports" not in d.current_read
+
+
+# --- economic state: four answers, and the common one is a finding ----------
+
+def test_a_transmitted_condition_is_named_on_the_read():
+    d = _compose(evidence_reference_ids=_ref(4, ["e1"]),
+                 belief_refs=_ref(2, ["b1"]),
+                 economic_state_refs=_ref(1, ["GLOBAL:CURRENCY"]))
+    assert d.economic_state == DS.ECONOMIC_AVAILABLE
+    assert d.economic_context == ("GLOBAL:CURRENCY",)
+    assert "GLOBAL:CURRENCY" in d.current_read
+
+
+def test_a_measured_economy_that_reaches_nobody_is_a_finding_not_a_gap():
+    # The live answer for 22 of 26 companies. It must not read as NOT_RUN:
+    # one sends you to the scheduler, the other to this company's documents.
+    d = _compose(evidence_reference_ids=_ref(4, ["e1"]),
+                 belief_refs=_ref(2, ["b1"]),
+                 economic_state_refs=_ref(0))
+    assert d.economic_state == DS.ECONOMIC_NO_EXPOSURE
+    assert "none of it reaches this company" in d.current_read
+
+
+def test_an_economy_that_never_ran_is_not_a_no_exposure_finding():
+    d = _compose(evidence_reference_ids=_ref(4, ["e1"]),
+                 belief_refs=_ref(2, ["b1"]),
+                 economic_state_refs=_ref(0, state="UNAVAILABLE"))
+    assert d.economic_state == DS.ECONOMIC_NOT_RUN
+    assert "none of it reaches" not in d.current_read
+
+
+def test_unreadable_economic_rows_are_unmeasurable_not_no_exposure():
+    d = _compose(evidence_reference_ids=_ref(4, ["e1"]),
+                 belief_refs=_ref(2, ["b1"]),
+                 economic_state_refs={"state": "AVAILABLE", "ids": [],
+                                      "count": 0,
+                                      "note": "3 economic state(s) present "
+                                              "and none carried a state "
+                                              "kind; this is a wiring "
+                                              "defect, not an absence"})
+    assert d.economic_state == DS.ECONOMIC_UNMEASURABLE
+
+
+def test_two_companies_do_not_share_an_economic_exposure_by_default():
+    # The sector-table failure: the same macro line on every dossier. Only a
+    # company whose own evidence establishes an exposure gets a condition.
+    exposed = _compose(evidence_reference_ids=_ref(4, ["e1"]),
+                       belief_refs=_ref(2, ["b1"]),
+                       economic_state_refs=_ref(1, ["GLOBAL:CURRENCY"]))
+    other = _compose(evidence_reference_ids=_ref(4, ["e2"]),
+                     belief_refs=_ref(2, ["b2"]),
+                     economic_state_refs=_ref(0))
+    assert exposed.economic_context and not other.economic_context
+    assert exposed.current_read != other.current_read

@@ -148,6 +148,37 @@ def _causal_status(dossier):
         f"{', '.join(f'{n} {s}' for s, n in sorted(states.items()))}.")
 
 
+ECONOMIC_AVAILABLE = "ECONOMIC_STATE_AVAILABLE"
+ECONOMIC_NO_EXPOSURE = "ECONOMIC_STATE_NO_RELEVANT_EXPOSURE"
+ECONOMIC_UNMEASURABLE = "ECONOMIC_STATE_UNMEASURABLE"
+ECONOMIC_NOT_RUN = "ECONOMIC_STATE_NOT_RUN"
+
+
+def _economic(dossier):
+    """(state, conditions). Four answers that are not interchangeable.
+
+    The one a generic macro dashboard cannot give is NO_RELEVANT_EXPOSURE:
+    the economy IS measured, and none of it reaches this company, because
+    nothing in this company's own evidence establishes an exposure that
+    transmits a measured condition. That is the live answer for 22 of 26
+    companies, and it is a finding -- not a gap in the macro layer.
+
+    UNMEASURABLE is its opposite: rows arrived that this side could not read.
+    Reporting either as NOT_RUN would send someone to fix the scheduler when
+    the actual repair is retrieval on this company's documents.
+    """
+    block = _block(dossier, "economic_state")
+    if block.get("state") != "AVAILABLE":
+        return ECONOMIC_NOT_RUN, ()
+    ids = tuple(block.get("ids") or ())
+    if ids:
+        return ECONOMIC_AVAILABLE, ids
+    note = str(block.get("note") or "")
+    if "wiring defect" in note:
+        return ECONOMIC_UNMEASURABLE, ()
+    return ECONOMIC_NO_EXPOSURE, ()
+
+
 def _hidden_state(dossier) -> str:
     block = _block(dossier, "hidden_states")
     if block.get("state") != "AVAILABLE":
@@ -203,7 +234,27 @@ def _route_refusal(dossier, causal_status: str):
 
 # --- the read ---------------------------------------------------------------
 
-def _current_read(company: str, standing: str, dossier, hidden: str) -> str:
+def _economic_sentence(state: str, conditions) -> str:
+    """The economy, only where it reaches this company.
+
+    A generic macro line is worse than none: it reads as specific, applies to
+    everyone, and so carries the least information of anything on the page.
+    """
+    if state == ECONOMIC_AVAILABLE and conditions:
+        named = ", ".join(str(c) for c in conditions[:4])
+        return (f" Measured economic conditions reach it through its own "
+                f"established exposures: {named}.")
+    if state == ECONOMIC_NO_EXPOSURE:
+        return (" The economy is measured, and none of it reaches this "
+                "company through an exposure its own evidence establishes.")
+    if state == ECONOMIC_UNMEASURABLE:
+        return (" Economic conditions were published for this company and "
+                "could not be read.")
+    return ""
+
+
+def _current_read(company: str, standing: str, dossier, hidden: str,
+                  economic_state: str = "", economic_context=()) -> str:
     """One sentence, in the wording this standing permits."""
     verb = verb_for(standing)
     evidence, beliefs = _count(dossier, "evidence"), _count(dossier, "beliefs")
@@ -223,7 +274,8 @@ def _current_read(company: str, standing: str, dossier, hidden: str) -> str:
         tail = f" Its leading operating posture reads {hidden}."
     return _assert_clean(
         f"The published market record for {company} — {subject} — {verb} the "
-        f"reading below.{tail}")
+        f"reading below.{tail}"
+        f"{_economic_sentence(economic_state, economic_context)}")
 
 
 def _what_changed(dossier, previous) -> tuple:
@@ -256,6 +308,7 @@ def compose(dossier, *, previous: Optional[Any] = None,
     standing = _standing_of(dossier)
     hidden = _hidden_state(dossier)
     causal_status, causal_note = _causal_status(dossier)
+    economic_state, economic_context = _economic(dossier)
     gaps, mdrs, vois, guardrails = _route_refusal(dossier, causal_status)
 
     evidence_block = _block(dossier, "evidence")
@@ -281,7 +334,8 @@ def compose(dossier, *, previous: Optional[Any] = None,
         decision_question=(
             f"What should be concluded about {company} from the published "
             f"market record, and what would change it?"),
-        current_read=_current_read(company, standing, dossier, hidden),
+        current_read=_current_read(company, standing, dossier, hidden,
+                                   economic_state, economic_context),
         standing=standing,
         readiness=readiness,
         supporting_evidence_ids=tuple(evidence_block.get("ids") or ()),
@@ -295,9 +349,8 @@ def compose(dossier, *, previous: Optional[Any] = None,
         guardrails=guardrails,
         monitoring=tuple(monitoring),
         what_changed=_what_changed(dossier, previous),
-        economic_state=("ECONOMIC_STATE_NOT_RUN"
-                        if not _ran(dossier, "economic_state")
-                        else "ECONOMIC_STATE_AVAILABLE"),
+        economic_state=economic_state,
+        economic_context=economic_context,
         provenance=(f"market snapshot {dossier.market_snapshot_id}",
                     f"market runtime {dossier.market_runtime_sha[:12]}",
                     f"evidence cutoff {dossier.effective_evidence_cutoff}"),

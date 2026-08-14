@@ -3706,9 +3706,32 @@ class WebApp:
             return ("404 Not Found",
                     [("Content-Type", "application/json")],
                     json.dumps(views.not_found(company_id)))
-        return self._ok_json(
-            views.with_executive_read(views.detail(dossier),
-                                      self._executive_read(dossier)))
+        payload = views.with_executive_read(views.detail(dossier),
+                                            self._executive_read(dossier))
+        # THE CEO'S QUESTIONS, ON THE SAME PAYLOAD AS THE READ THEY PROJECT.
+        # A separate endpoint would let a surface pair an answer with a
+        # decision from a different assembly, which is the one thing the
+        # single-decision design exists to prevent.
+        payload["ceo_questions"] = self._ceo_questions(dossier)
+        return self._ok_json(payload)
+
+    def _ceo_questions(self, dossier) -> dict:
+        """Every required CEO question, answered by projecting the decision.
+
+        A failure is a STATE. An empty list would read as "this company has
+        no answers", which is a claim about the company rather than about
+        the composer.
+        """
+        try:
+            from intent_engine.executive import ceo_questions as _Q
+            from intent_engine.executive.decision_synthesis import compose
+            decision = compose(dossier)
+            return {"contract": _Q.CONTRACT,
+                    "answers": [_Q.answer(q, decision).as_dict()
+                                for q in _Q.REQUIRED_QUESTIONS]}
+        except Exception as exc:                            # noqa: BLE001
+            return {"state": "CEO_QUESTIONS_UNAVAILABLE",
+                    "reason": f"the answers could not be composed: {exc}"}
 
     def _executive_read(self, dossier):
         """Compose the FounderDecision for one dossier. No model call.

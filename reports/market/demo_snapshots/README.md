@@ -22,6 +22,6 @@ so.
 TO REFRESH: run `scripts/republish_demo_snapshots.py --root <market runtime>`
 in the market repo, then copy the output here.
 
-    market runtime SHA at bundling: 38ac8f81b12f24a7ace49921f2a6d490f6d342e5
+    market runtime SHA at bundling: 9b01ff1 (economic state included)
     evidence cutoff:                2026-08-13
     companies:                      26
