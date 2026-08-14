@@ -1,0 +1,113 @@
+contract: pre100_producer_map.v1
+measured_at: "2026-08-14"
+method: >-
+  Read-only census of the LIVE market learning ledger
+  (reports/market/learning_ledger.jsonl, 5290 rows, last written 2026-08-13
+  20:48) plus the 60 strategic exports and 26 demo snapshots the runtime
+  published. Anthropic was exhausted throughout, so every row here is
+  zero-Anthropic output.
+warning: >-
+  Do NOT wire these blindly. The previous run established that producers
+  exist; this run establishes what they actually PRODUCE. Three different
+  answers, needing three different repairs.
+
+# The chain of omission, now traced end to end:
+#   steps.py:637 does not pass pricing_actions / causal_pathways /
+#   market_structures  ->  publish() defaults them to ()
+#   ->  bundle carries empty lists
+#   ->  build_snapshot receives None
+#   ->  founder dossier reads UNAVAILABLE
+#   ->  the CEO sees nothing.
+
+blocks:
+
+  causal_results:
+    classification: HONEST_NEGATIVE_MISREPORTED_AS_DID_NOT_RUN
+    persisted_rows: 25
+    real_companies: [duolingo, stripe, caterpillar, "+22 more"]
+    every_row_state: PANEL_UNAVAILABLE
+    reading: >-
+      The causal router RAN, asked real questions about real companies, and
+      correctly refused for want of a comparable panel. That is the system
+      working. But the snapshot publishes UNAVAILABLE with the note "this
+      subsystem did not run for this snapshot", which is FALSE and is the
+      missing-vs-zero confusion running backwards: a determinate refusal
+      reported as an absence.
+    repair: >-
+      Publish the resolutions with their real state. A refusal that names its
+      missing prerequisite is CEO-facing intelligence and routes to MDR/MVE.
+    severity: SEV-2 (truthfulness of a stated capability)
+
+  expectations:
+    classification: BROKEN_INPUT_SEAM
+    persisted_rows: 76
+    row_fields: [expectation_id, expected_event, expected_direction,
+                 expected_range, falsifier, evaluation_window_ends,
+                 preregistered_at, metric, subject, relevant_actors]
+    published_count: 0/26
+    reading: >-
+      build_snapshot is passed `expectations=bundle["information_priorities"]`.
+      information_priorities is empty in 26/26 exports, while 76 genuine
+      preregistered expectations sit in the ledger under a different record
+      type. The snapshot reads the wrong field.
+    repair: thread the real expectation records through; do not rename anything.
+    severity: SEV-2
+
+  economic_state:
+    classification: REAL_OUTPUT_NEVER_PASSED
+    persisted_rows: 2466
+    kinds: {MARKET_RATE: 1096, POLICY_RATE: 524, CURRENCY: 524, WAGES: 55,
+            EMPLOYMENT: 54, INFLATION: 54, COMMODITY_PRICE: 32,
+            ENERGY_PRICE: 31}
+    published_count: 0/26
+    repair: pass economic states built from these observations.
+    severity: SEV-2
+
+  reconciliations: {classification: REAL_OUTPUT_PARTIALLY_PASSED,
+                    persisted_rows: 15, published_count: 0/26}
+  beliefs: {classification: WORKING, persisted_rows: 76, published_count: 25/26}
+  hidden_states:
+    classification: REAL_OUTPUT_NEVER_REACHES_SNAPSHOT
+    published_in_strategic_export: 22/26
+    published_in_demo_snapshot: not_a_field
+    reading: >-
+      Produced and exported for 22 of 26 companies, but the demo snapshot has
+      no field for it, so the founder product cannot show it. Pure wiring, and
+      the cheapest real CEO win available.
+
+  adversary:
+    classification: BLOCKED_BY_UPSTREAM
+    reading: >-
+      adversary_case.from_alternatives requires a THESIS with live
+      alternatives. Only 4/26 companies have a thesis, so adversary cannot
+      produce for 22 of them regardless of wiring. Fix theses first.
+    do_not: wire before the thesis population improves.
+
+  demand: {classification: UNPROVEN, published_count: 0/26,
+           note: "demand_tension.find needs a demand chain; no chain rows in the ledger"}
+  pricing_actions: {classification: UNPROVEN, published_count: 0/26,
+                    note: "publish() parameter, defaulted to () by steps.py:637"}
+  interactions: {classification: UNPROVEN, published_count: 0/26,
+                 note: "read from result.interactions_seen; the cycle produces none"}
+  causal_pathways: {classification: UNPROVEN, published_count: 0/26,
+                    note: "publish() parameter, defaulted to () by steps.py:637"}
+  replay: {classification: UNVERIFIED, note: "not driven this run"}
+  contradictions: {classification: UNVERIFIED, note: "no market module by that name"}
+
+recommended_wiring_order:
+  1: hidden_states        # real output, 22/26, needs only a snapshot field
+  2: expectations         # 76 real rows, wrong field read today
+  3: economic_state       # 2466 real observations
+  4: causal_results       # 25 real resolutions; stop calling a refusal "did not run"
+  5: reconciliations      # 15 real rows
+  6: theses               # raise 4/26 before adversary can mean anything
+  7: adversary            # only after theses
+  defer: [demand, pricing_actions, interactions, causal_pathways, replay,
+          contradictions]   # produce nothing today; diagnose before wiring
+
+invariant_to_preserve: >-
+  Passing () where a subsystem did not run would publish "we looked and found
+  nothing", a finding nobody made. The repairs above are the opposite case:
+  the subsystem DID run, or the rows DO exist, and the honest state is being
+  withheld. Keep the None-means-did-not-run rule; stop applying it to results
+  that exist.
