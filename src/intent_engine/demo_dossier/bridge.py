@@ -229,9 +229,42 @@ def _age_days(stamp: str, today: str) -> Optional[int]:
 
 
 def for_company(company_key: str, *, root=None, env=None, config_root=None,
-                today: str = "") -> BridgeAssessment:
-    """Assess the bridge for one company. The reading a dossier build uses."""
+                aliases=(), today: str = "") -> BridgeAssessment:
+    """Assess the bridge for one company. The reading a dossier build uses.
+
+    THE TWO SIDES KEY THE SAME COMPANY DIFFERENTLY, and this is where that
+    was found: the founder files a dossier under its manifest id
+    (`cloudflare`), and the market publishes under the key derived from the
+    legal name (`cloudflare-inc`). Live, that produced
+    FOUNDER_AVAILABLE_MARKET_UNAVAILABLE for a company whose market snapshot
+    was sitting on disk -- the exact failure `strategic_publish.publish`
+    documents as having carried zero dossiers with a full suite passing.
+
+    `aliases` are the OTHER keys this company is legitimately known by, tried
+    in the order given. Each candidate is still checked against the snapshot
+    filed under THAT key, so trying more keys can never attribute one
+    company's intelligence to another -- the identity check is per-candidate,
+    not relaxed.
+
+    A MISSING result on the primary key is not returned until every alias has
+    been tried, and the reason names the primary, because that is the key an
+    operator will look for on disk.
+    """
     today = today or date.today().isoformat()
+    if aliases:
+        first = None
+        for candidate in (company_key, *aliases):
+            if not candidate:
+                continue
+            found = for_company(candidate, root=root, env=env,
+                                config_root=config_root, today=today)
+            if found.usable:
+                return found
+            if first is None:
+                first = found
+        return first if first is not None else for_company(
+            company_key, root=root, env=env, config_root=config_root,
+            today=today)
     resolved = (configured_root(env, config_root) if root is None
                 else pathlib.Path(root))
     if resolved is None:

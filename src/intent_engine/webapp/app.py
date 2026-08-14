@@ -5575,7 +5575,15 @@ class WebApp:
             # is a true sentence about the wrong directory and therefore
             # raised nothing for months.
             from intent_engine.demo_dossier import bridge as _bridge
-            assessment = _bridge.for_company(key)
+            # THE OTHER KEYS THIS COMPANY IS KNOWN BY. `key` is the manifest
+            # id (`cloudflare`); the market publishes under the key derived
+            # from the legal name (`cloudflare-inc`). Live, that produced
+            # FOUNDER_AVAILABLE_MARKET_UNAVAILABLE for a company whose
+            # snapshot was on disk. Each candidate is still identity-checked
+            # against the snapshot filed under it.
+            _aliases = [k for k in (company_key(name), company_key(domain))
+                        if k and k != key]
+            assessment = _bridge.for_company(key, aliases=_aliases)
             self._market_bridge_last = assessment.as_dict()
             market = assessment.snapshot if assessment.usable else None
             if market is None:

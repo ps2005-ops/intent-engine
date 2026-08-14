@@ -454,3 +454,46 @@ def test_the_shipped_declaration_makes_the_bridge_current():
     assert s["config_source"] == B.SOURCE_PREVIEW_CONFIG
     assert s["snapshot_count"] >= 26
     assert s["invalid_files"] == 0
+
+
+# ---------------------------------------------------------------------------
+# THE TWO SIDES KEY THE SAME COMPANY DIFFERENTLY.
+#
+# Found live: the founder files a dossier under its manifest id
+# (`cloudflare`); the market publishes under the legal-name key
+# (`cloudflare-inc`). The dossier read FOUNDER_AVAILABLE_MARKET_UNAVAILABLE
+# for a company whose snapshot was on disk.
+# ---------------------------------------------------------------------------
+
+def test_an_alias_key_finds_the_snapshot_the_primary_key_misses(tmp_path):
+    _publish(tmp_path, _snapshot("cloudflare-inc"))
+    missed = B.for_company("cloudflare", root=tmp_path, today="2026-08-14")
+    assert missed.state == B.MISSING
+    found = B.for_company("cloudflare", root=tmp_path,
+                          aliases=["cloudflare-inc"], today="2026-08-14")
+    assert found.state == B.CURRENT
+    assert found.snapshot.company_id == "cloudflare-inc"
+
+
+def test_trying_more_keys_never_joins_another_company(tmp_path):
+    # The identity check is PER CANDIDATE, not relaxed. An alias that names a
+    # different company's file must not attribute its intelligence here.
+    _publish(tmp_path, _snapshot("globex-inc"), name="acme-alias")
+    a = B.for_company("acme-corp", root=tmp_path, aliases=["acme-alias"],
+                      today="2026-08-14")
+    assert not a.usable
+
+
+def test_the_primary_key_wins_when_both_exist(tmp_path):
+    _publish(tmp_path, _snapshot("acme-corp", cutoff="2026-08-13"))
+    _publish(tmp_path, _snapshot("acme-inc", cutoff="2026-08-13"))
+    a = B.for_company("acme-corp", root=tmp_path, aliases=["acme-inc"],
+                      today="2026-08-14")
+    assert a.snapshot.company_id == "acme-corp"
+
+
+def test_no_alias_matching_still_reports_the_primary_key(tmp_path):
+    a = B.for_company("acme-corp", root=tmp_path, aliases=["acme-inc"],
+                      today="2026-08-14")
+    assert a.state == B.MISSING
+    assert "acme-corp" in a.reason
