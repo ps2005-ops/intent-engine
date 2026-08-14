@@ -3885,6 +3885,49 @@ class WebApp:
                        ("Presentation", f"{base}/deck")])
         return self._html(self._page(company, body, None, ""))
 
+    def _registrant(self, dossier) -> dict:
+        """The SEC's classification of this filer, or {}.
+
+        WHY IT IS RESOLVED HERE. `compose` is deterministic and makes no
+        network call, so the one classification lookup a company outside the
+        validation manifest needs has to happen at the request layer. It is
+        skipped entirely for the 100 manifest companies, which are already
+        classified by hand -- so the common path costs nothing.
+
+        Cached per company for the process lifetime: the SIC code of a
+        registrant does not change between two page loads, and the SEC
+        rate-limits.
+        """
+        cid = getattr(dossier, "company_id", "") or ""
+        name = getattr(dossier, "canonical_name", "") or cid
+        if not cid and not name:
+            return {}
+        cache = getattr(self, "_registrant_cache", None)
+        if cache is None:
+            cache = self._registrant_cache = {}
+        if cid in cache:
+            return cache[cid]
+        out = {}
+        try:
+            from intent_engine.executive.company_profile import profile_for
+            from intent_engine.validation import load as _load_manifest
+            if profile_for(cid, name=name,
+                           manifest=_load_manifest()).known:
+                cache[cid] = out          # in the manifest; no lookup needed
+                return out
+        except Exception:                                   # noqa: BLE001
+            pass
+        try:
+            from intent_engine.company_ingestion.edgar import (
+                registrant_classification, resolve_cik)
+            resolved = resolve_cik(name)
+            if resolved:
+                out = registrant_classification(resolved) or {}
+        except Exception:                                   # noqa: BLE001
+            out = {}
+        cache[cid] = out
+        return out
+
     def _ceo_questions(self, dossier) -> dict:
         """Every required CEO question, answered by projecting the decision.
 
@@ -3895,7 +3938,7 @@ class WebApp:
         try:
             from intent_engine.executive import ceo_questions as _Q
             from intent_engine.executive.decision_synthesis import compose
-            decision = compose(dossier)
+            decision = compose(dossier, registrant=self._registrant(dossier))
             return {"contract": _Q.CONTRACT,
                     "answers": [_Q.answer(q, decision).as_dict()
                                 for q in _Q.REQUIRED_QUESTIONS]}
@@ -3922,7 +3965,8 @@ class WebApp:
             previous = self._demo_dossier_store().previous(
                 dossier.company_id, before=dossier.dossier_version) \
                 if hasattr(self._demo_dossier_store(), "previous") else None
-            return compose(dossier, previous=previous).as_dict()
+            return compose(dossier, previous=previous,
+                           registrant=self._registrant(dossier)).as_dict()
         except Exception:                                   # noqa: BLE001
             _LOG.warning("executive read not composed for %s",
                          dossier.company_id)

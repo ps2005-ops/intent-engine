@@ -158,6 +158,12 @@ def full_analysis(decision: dict, *, company: str = "", stamp: str = "",
             _p(profile.get("regulatory_exposure")) +
             "<h3>Exposure to the cycle</h3>" +
             _p(profile.get("cyclical_exposure")) +
+            # Several of the paragraphs above are empty for a company
+            # classified from its regulator filing rather than by hand. The
+            # limitation says which and why, so a shorter section reads as
+            # less classified rather than as less interesting.
+            f'<p class="none">'
+            f'{_e(profile.get("profile_limitation", ""))}</p>'
             f'<p class="none">{_e(profile.get("basis", ""))}</p>'))
     else:
         body.append(_maybe(

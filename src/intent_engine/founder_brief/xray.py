@@ -352,7 +352,13 @@ def _profile_body(d: dict) -> str:
         tail += ("<h2>Revenue moves with</h2>" + _bullets(drivers, ""))
     if costs:
         tail += ("<h2>Cost moves with</h2>" + _bullets(costs, ""))
-    return (f'<ul class="rowlist">{items}</ul>{tail}'
+    # A PARTIAL profile shows fewer rows above, because the fields the
+    # manifest would have added are genuinely absent. Without this note the
+    # reader sees a shorter list and no reason for it, which reads as the
+    # company being less interesting rather than less classified.
+    limitation = str(profile.get("profile_limitation") or "")
+    note = f'<p class="none">{_e(limitation)}</p>' if limitation else ""
+    return (f'<ul class="rowlist">{items}</ul>{tail}{note}'
             f'<p class="none">{_e(profile.get("basis", ""))}</p>')
 
 

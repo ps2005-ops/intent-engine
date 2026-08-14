@@ -393,18 +393,24 @@ def _facts(dossier, hidden: str):
             "AVAILABLE", "STALE"))
 
 
-def _select(dossier, hidden: str):
+def _select(dossier, hidden: str, registrant=None):
     """This company's analysis selection, or None if it cannot be made.
 
     Never raises into `compose`: a missing manifest must degrade the reading,
     not fail it. The generic path is still reachable and still honest -- it
     simply cannot say what kind of business this is.
+
+    `registrant` is the SEC's classification of this filer, resolved by the
+    caller because THIS function makes no network call. It is what lets a
+    company outside the validation manifest still be classified instead of
+    falling to an implicit unknown.
     """
     try:
         from intent_engine.executive import analysis_selection as AS
         return AS.select(dossier.company_id,
                          name=dossier.canonical_name or "",
-                         facts=_facts(dossier, hidden))
+                         facts=_facts(dossier, hidden),
+                         registrant=registrant)
     except Exception:                                       # noqa: BLE001
         return None
 
@@ -502,7 +508,8 @@ def _recommendation(standing: str, selection, facts) -> tuple:
 
 
 def compose(dossier, *, previous: Optional[Any] = None,
-            prior_decision: Optional[Any] = None) -> FounderDecision:
+            prior_decision: Optional[Any] = None,
+            registrant: Optional[dict] = None) -> FounderDecision:
     """Build one FounderDecision from one company demo dossier.
 
     ZERO MODEL CALLS. Verified by a break proof, not by intent.
@@ -521,7 +528,7 @@ def compose(dossier, *, previous: Optional[Any] = None,
     causal_status, causal_note = _causal_status(dossier)
     economic_state, economic_context = _economic(dossier)
     gaps, mdrs, vois, guardrails = _route_refusal(dossier, causal_status)
-    selection = _select(dossier, hidden)
+    selection = _select(dossier, hidden, registrant)
 
     evidence_block = _block(dossier, "evidence")
     monitoring = []

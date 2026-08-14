@@ -71,6 +71,177 @@ MODEL_CLASSES = (
     "REGULATED_PRODUCT_OR_PROVIDER",
 )
 
+# --- how well this company is classified, stated rather than implied --------
+#
+# The manifest is a VALIDATION universe, not a knowledge base. Treating
+# membership in it as the precondition for knowing what kind of business a
+# company is meant that 16 of 26 companies with live market snapshots --
+# Toyota, Vale, ASML among them -- read as UNKNOWN. Not "sparsely covered":
+# unknown, as though the company had never been identified. It had been.
+#
+# So profile quality is now a stated three-value fact with a named source,
+# and there is no fourth state reached by a failed join.
+
+#: Classified by the validation manifest: authored, reviewed, per-company.
+PROFILE_AVAILABLE = "PROFILE_AVAILABLE"
+#: Classified by the registrant's own regulator-assigned SIC code. Correct
+#: but coarser -- one code covers a major group, so the model class is right
+#: and the within-class detail the manifest would have added is absent.
+PROFILE_PARTIAL = "PROFILE_PARTIAL"
+#: Not classified by either source. An explicit state that names what is
+#: missing and what would resolve it -- never a silent fallback.
+PROFILE_SPARSE = "PROFILE_SPARSE"
+
+PROFILE_STATES = (PROFILE_AVAILABLE, PROFILE_PARTIAL, PROFILE_SPARSE)
+
+
+#: SIC major group -> (business model class, sector). Keyed on the first two
+#: digits, which is the division the SEC actually assigns; four-digit
+#: overrides below handle the groups that genuinely contain two different
+#: businesses (pharmaceutical preparations inside chemicals, construction
+#: machinery inside industrial machinery).
+#:
+#: Codes whose definition is a residual -- "not elsewhere classified" -- are
+#: deliberately ABSENT rather than guessed. 7389 covers Etsy, a marketplace,
+#: and a payroll bureau equally well; inferring a business model from a
+#: category defined by what it is not is the inference this whole module
+#: exists to refuse. Those companies land on PROFILE_SPARSE and say so.
+_SIC_MAJOR_GROUP = {
+    "01": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "02": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "08": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "09": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "10": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "12": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "13": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "14": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "15": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "16": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "17": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "20": ("BRANDED_CONSUMER", "CONSUMER"),
+    "21": ("BRANDED_CONSUMER", "CONSUMER"),
+    "22": ("BRANDED_CONSUMER", "CONSUMER"),
+    "23": ("BRANDED_CONSUMER", "CONSUMER"),
+    "24": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "25": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "26": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "27": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "28": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "29": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "30": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "31": ("BRANDED_CONSUMER", "CONSUMER"),
+    "32": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "33": ("COMMODITY_PRODUCER", "MATERIALS_ENERGY"),
+    "34": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "35": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "36": ("DESIGN_AND_MANUFACTURE", "SEMICONDUCTOR"),
+    "37": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "38": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "39": ("DESIGN_AND_MANUFACTURE", "INDUSTRIAL"),
+    "40": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "41": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "42": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "44": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "45": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "46": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "47": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "48": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "49": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "50": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "51": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "52": ("BRANDED_CONSUMER", "CONSUMER"),
+    "53": ("BRANDED_CONSUMER", "CONSUMER"),
+    "54": ("BRANDED_CONSUMER", "CONSUMER"),
+    "55": ("BRANDED_CONSUMER", "CONSUMER"),
+    "56": ("BRANDED_CONSUMER", "CONSUMER"),
+    "57": ("BRANDED_CONSUMER", "CONSUMER"),
+    "58": ("BRANDED_CONSUMER", "CONSUMER"),
+    "59": ("BRANDED_CONSUMER", "CONSUMER"),
+    "60": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "61": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "62": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "63": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "64": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "65": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
+    "67": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
+    "70": ("BRANDED_CONSUMER", "CONSUMER"),
+    "72": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "73": ("SUBSCRIPTION_SOFTWARE", "SOFTWARE_PLATFORM"),
+    "75": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "76": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "78": ("BRANDED_CONSUMER", "CONSUMER"),
+    "79": ("BRANDED_CONSUMER", "CONSUMER"),
+    "80": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "81": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "82": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "83": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "87": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+}
+
+#: Four-digit codes whose major group would classify them wrongly. Each is
+#: here because the group contains two economically different businesses,
+#: not to tune one company's answer.
+_SIC_EXACT = {
+    # Pharmaceuticals and biologics sit inside "chemicals", but they sell an
+    # approved product under a regulator's licence, not a commodity.
+    "2833": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "2834": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "2835": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "2836": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    # Medical devices sit inside "instruments" and are licensed the same way.
+    "3841": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "3842": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    "3845": ("REGULATED_PRODUCT_OR_PROVIDER", "HEALTHCARE"),
+    # Heavy machinery is sold once and serviced for decades; the aftermarket
+    # is the business, which is not true of industrial machinery generally.
+    "3531": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "3532": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "3533": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    "3537": ("MANUFACTURE_AND_AFTERMARKET", "INDUSTRIAL"),
+    # Semiconductors and their equipment are design-led, not aftermarket-led.
+    "3674": ("DESIGN_AND_MANUFACTURE", "SEMICONDUCTOR"),
+    "3559": ("DESIGN_AND_MANUFACTURE", "SEMICONDUCTOR"),
+    # Custom programming and systems integration is a people business: it
+    # bills for delivered hours, and has none of the renewal economics that
+    # make packaged software a subscription.
+    "7371": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "7373": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "7374": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+    "7363": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
+}
+
+#: Residual SIC codes -- the ones whose official name ends "not elsewhere
+#: classified" or "miscellaneous". Named explicitly so the refusal to
+#: classify is a decision on the record rather than a table lookup that
+#: happened to miss.
+_SIC_RESIDUAL = frozenset({
+    "7389",     # Services-Business Services, NEC
+    "7380",     # Services-Miscellaneous Business Services
+    "3990",     # Manufacturing Industries, NEC
+    "5990",     # Retail Stores, NEC
+    "8888",     # Foreign governments / unclassifiable filers
+    "6770",     # Blank Checks
+    "9995",     # Non-operating establishments
+})
+
+
+def classify_sic(sic: str) -> Optional[Tuple[str, str]]:
+    """(business model class, sector) for a SIC code, or None.
+
+    None means "this code does not determine a business model", which is a
+    real answer for a residual category and is reported as PROFILE_SPARSE
+    rather than filled in.
+    """
+    code = str(sic or "").strip()
+    if not code:
+        return None
+    code = code.zfill(4) if code.isdigit() and len(code) < 4 else code
+    if code in _SIC_RESIDUAL:
+        return None
+    if code in _SIC_EXACT:
+        return _SIC_EXACT[code]
+    return _SIC_MAJOR_GROUP.get(code[:2])
+
 
 # --- the structural economics of each model class ---------------------------
 #
@@ -592,6 +763,15 @@ class CompanyIntelligenceProfile:
     company_name: str
     known: bool = False
     basis: str = ""                     #: what this was derived from
+    #: PROFILE_AVAILABLE | PROFILE_PARTIAL | PROFILE_SPARSE. Always one of
+    #: the three -- there is no state reached by a join quietly failing.
+    profile_state: str = PROFILE_SPARSE
+    #: Which classifier supplied it: VALIDATION_MANIFEST, SEC_SIC, or NONE.
+    profile_source: str = "NONE"
+    #: What is missing and what would resolve it. Non-empty whenever the
+    #: state is not PROFILE_AVAILABLE, so no surface has to invent the
+    #: caveat for itself.
+    profile_limitation: str = ""
     sector: str = UNKNOWN
     business_model_class: str = UNKNOWN
     business_model: str = UNKNOWN
@@ -936,14 +1116,47 @@ def _causal_questions(model: str, archetypes) -> Tuple[str, ...]:
     return tuple(out)
 
 
-def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
-                manifest=None) -> CompanyIntelligenceProfile:
-    """The profile for one company, or an honest UNKNOWN one.
+@dataclasses.dataclass(frozen=True)
+class _Classified:
+    """A company classified by the regulator rather than by the manifest.
 
-    Never raises: a manifest that cannot be loaded produces an unknown
-    profile, and the layer above degrades to the generic reading and says
-    so. Failing the analysis because a classification file is missing would
-    be worse than analysing without it.
+    Carries exactly the fields the tables below key on, so the SIC-derived
+    path runs the SAME selection code as a manifest company instead of a
+    parallel one that could drift. The fields the manifest would have added
+    per company -- capital intensity, cyclicality, regulatory class -- stay
+    UNKNOWN, which is why the state is PARTIAL.
+    """
+    company_id: str
+    canonical_name: str
+    sector: str
+    business_model_class: str
+    parent_company_id: Optional[str] = None
+    primary_geography: str = UNKNOWN
+    company_size_class: str = UNKNOWN
+    capital_intensity_class: str = UNKNOWN
+    cyclicality_class: str = UNKNOWN
+    regulatory_class: str = UNKNOWN
+    public_private: str = UNKNOWN
+    multi_segment: bool = False
+
+
+def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
+                manifest=None, registrant=None) -> CompanyIntelligenceProfile:
+    """The profile for one company, with its quality stated.
+
+    Three outcomes, always one of them explicitly:
+
+      * in the validation manifest -> PROFILE_AVAILABLE;
+      * not in it, but the SEC has classified the registrant -> the model
+        class the regulator's SIC code implies, PROFILE_PARTIAL;
+      * neither -> PROFILE_SPARSE, naming what is missing.
+
+    `registrant` is `edgar.registrant_classification()`'s result, passed in
+    rather than fetched here so this module makes no network call.
+
+    Never raises: a manifest that cannot be loaded produces a sparse
+    profile. Failing the analysis because a classification file is missing
+    would be worse than analysing without it.
     """
     company = None
     if manifest is None:
@@ -959,17 +1172,60 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
         except Exception:                                   # noqa: BLE001
             company = None
     display = name or company_id
+    state = PROFILE_AVAILABLE
+    source = "VALIDATION_MANIFEST"
+    limitation = ""
     if company is None:
-        return CompanyIntelligenceProfile(
-            company_id=company_id, company_name=display, known=False,
-            basis=("not in the validation manifest: this company's business "
-                   "model has not been classified, so the analysis below is "
-                   "selected from the published record alone"))
+        # The manifest does not contain this company. That is a statement
+        # about the manifest -- a curated 100-company validation universe --
+        # and not about whether the company is known.
+        sic = str((registrant or {}).get("sic") or "").strip()
+        sic_text = str((registrant or {}).get("sic_description") or "").strip()
+        derived = classify_sic(sic)
+        if derived is None:
+            why = (f"the regulator's industry code for this filer "
+                   f"({sic} {sic_text}) is a residual category that does not "
+                   f"determine a business model"
+                   if sic else
+                   "this company is not in the validation manifest and no "
+                   "regulator industry classification was found for it")
+            return CompanyIntelligenceProfile(
+                company_id=company_id, company_name=display, known=False,
+                profile_state=PROFILE_SPARSE, profile_source="NONE",
+                profile_limitation=(
+                    f"What kind of business this is has not been "
+                    f"established: {why}. The analysis below is selected "
+                    f"from the published record alone, so it does not use "
+                    f"this company's business model to decide what is worth "
+                    f"asking. Adding this company to the validation manifest "
+                    f"would resolve it."),
+                basis=(f"business model not classified -- {why}"))
+        model, sector = derived
+        company = _Classified(
+            company_id=company_id or display, canonical_name=display,
+            sector=sector, business_model_class=model)
+        state = PROFILE_PARTIAL
+        source = "SEC_SIC"
+        cited = f"{sic} {sic_text}".strip()
+        limitation = (
+            f"Classified from the regulator's own industry code for this "
+            f"filer ({cited}) rather than from the validation "
+            f"manifest. The business model is therefore established and the "
+            f"analysis is selected for it; what is not established is the "
+            f"within-industry detail the manifest records per company -- "
+            f"capital intensity, demand cyclicality and regulatory regime "
+            f"are not used below, and are shown as not established.")
     econ = _ECONOMICS.get(company.business_model_class)
     if econ is None:
         return CompanyIntelligenceProfile(
             company_id=company.company_id, company_name=company.canonical_name,
             known=False, sector=company.sector,
+            profile_state=PROFILE_SPARSE, profile_source="NONE",
+            profile_limitation=(
+                f"This company is classified as "
+                f"{_pretty(company.business_model_class)}, which this build "
+                f"has no economic profile for, so the analysis below does "
+                f"not use its business model."),
             business_model_class=company.business_model_class,
             basis=(f"business model class {company.business_model_class!r} "
                    f"has no economic profile in this build"))
@@ -980,12 +1236,19 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
         company_id=company.company_id,
         company_name=company.canonical_name,
         known=True,
+        profile_state=state,
+        profile_source=source,
+        profile_limitation=limitation,
         basis=(f"derived from the validation manifest classification: "
                f"{_pretty(company.sector)} sector, "
                f"{_pretty(company.business_model_class)} business model, "
                f"{_pretty(company.capital_intensity_class)} capital "
                f"intensity, {_pretty(company.cyclicality_class)} demand, "
-               f"{_pretty(company.regulatory_class)}"),
+               f"{_pretty(company.regulatory_class)}"
+               if state == PROFILE_AVAILABLE else
+               f"derived from the industry classification the regulator "
+               f"assigns this filer: {_pretty(company.sector)} sector, "
+               f"{_pretty(company.business_model_class)} business model"),
         sector=company.sector,
         business_model_class=company.business_model_class,
         business_model=econ["business_model"],

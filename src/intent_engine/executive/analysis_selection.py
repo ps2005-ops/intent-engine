@@ -268,6 +268,99 @@ def _channel_of(economic_id: str) -> str:
     return (text.split(":", 1)[1] if ":" in text else text).upper()
 
 
+#: Which decision an identified operating posture is a decision ABOUT.
+#:
+#: WHY THIS TABLE EXISTS. The market engine identifies which of seventeen
+#: postures a company is in, and this layer used to collapse every one of
+#: them to a single "+3 to pricing and competitive response" -- so a company
+#: cutting cost and a company preparing an acquisition were steered to the
+#: same decision, and the engine's most specific output was discarded at the
+#: moment it should have been used.
+#:
+#: The effect of discarding it was measurable and large: the decision
+#: question is a function of (business model, archetype), so within a model
+#: class the archetype decided everything, and 21 of the 100 manifest
+#: companies share SUBSCRIPTION_SOFTWARE. Every one of them got the pricing
+#: question. That is the original template collapse one layer down, and it
+#: was invisible to the cross-industry measurement that closed the first one.
+#:
+#: Each row is definitional: a company that is cutting cost is by definition
+#: deciding about its cost structure. None of it claims the posture is
+#: correct -- that is the market engine's belief with its own standing, and
+#: an archetype that wins on a wrong posture is still the right decision to
+#: have asked about given what was believed.
+_POSTURE_FAVOURS = {
+    "GROWING": ("CAPACITY", "SALES_MOTION", "CUSTOMER_SEGMENT"),
+    "DEFENDING": ("COMPETITIVE_RESPONSE", "RETENTION"),
+    "EXPANDING": ("MARKET_ENTRY", "CAPACITY"),
+    "COST_CUTTING": ("COST_STRUCTURE",),
+    "CAPITAL_CONSTRAINED": ("CAPITAL_ALLOCATION",),
+    "PREPARING_ACQUISITION": ("M&A",),
+    "PREPARING_DIVESTITURE": ("CAPITAL_ALLOCATION", "M&A"),
+    "PRICE_AGGRESSIVE": ("PRICING", "COMPETITIVE_RESPONSE"),
+    "CAPACITY_CONSTRAINED": ("CAPACITY", "SUPPLY_CHAIN"),
+    "EXPERIMENTING": ("PRODUCTIZATION",),
+    "REGULATORY_DEFENSIVE": ("REGULATORY_RESPONSE",),
+    "PLATFORM_EXPANDING": ("PRODUCTIZATION", "MARKET_ENTRY"),
+    "SERVICES_DEPENDENT": ("PRODUCTIZATION",),
+    "PRODUCTIZING": ("PRODUCTIZATION",),
+    "MARKET_SHARE_SEEKING": ("PRICING", "SALES_MOTION"),
+    "MARGIN_PROTECTING": ("PRICING", "COST_STRUCTURE"),
+    # WAITING is deliberately empty: a company that is waiting has not
+    # committed to a decision, so nothing may be inferred about which one it
+    # faces. It falls through to the standing menu order.
+    "WAITING": (),
+}
+
+_POSTURE_ENGLISH = {
+    "GROWING": "growing the business",
+    "DEFENDING": "defending a position",
+    "EXPANDING": "expanding into new ground",
+    "COST_CUTTING": "cutting cost",
+    "CAPITAL_CONSTRAINED": "constrained on capital",
+    "PREPARING_ACQUISITION": "preparing an acquisition",
+    "PREPARING_DIVESTITURE": "preparing a divestiture",
+    "PRICE_AGGRESSIVE": "pricing aggressively",
+    "CAPACITY_CONSTRAINED": "constrained on capacity",
+    "EXPERIMENTING": "experimenting",
+    "REGULATORY_DEFENSIVE": "defending a regulatory position",
+    "PLATFORM_EXPANDING": "expanding a platform",
+    "SERVICES_DEPENDENT": "dependent on services revenue",
+    "PRODUCTIZING": "turning services into product",
+    "MARKET_SHARE_SEEKING": "seeking market share",
+    "MARGIN_PROTECTING": "protecting margin",
+    "WAITING": "waiting",
+}
+
+#: States that mean "no posture was identified". These are STATUSES of the
+#: market engine's run, not postures, and must never select a decision.
+_NO_POSTURE = frozenset({
+    "TRACKED_NO_IDENTIFIED_STATE", "HIDDEN_STATE_NOT_RUN",
+    "HIDDEN_STATE_NONE_TRACKED", "", "UNKNOWN",
+})
+
+
+def _posture(hidden_state: str) -> str:
+    """The identified operating posture, or "" when none was identified."""
+    text = str(hidden_state or "").strip().upper()
+    return "" if text in _NO_POSTURE else text
+
+
+#: An OBSERVATION of this company outranks a PRIOR about its business model.
+#:
+#: The base score is the model class's standing order -- a prior, identical
+#: for every company sharing the model, and at most `len(menu)` (six). The
+#: posture is a belief the market engine formed about THIS company from THIS
+#: company's record. Scoring the observation below the prior meant the prior
+#: always won: a software company observed cutting cost still got the
+#: pricing question, because pricing leads the software menu.
+#:
+#: Set above the largest possible base so an identified posture decides the
+#: archetype, and left as one named constant so the ordering is a stated
+#: policy rather than an accident of two literals.
+_POSTURE_WEIGHT = 8
+
+
 def _score_archetypes(profile, facts: RecordFacts):
     """Rank this business's decision archetypes against what is known.
 
@@ -278,27 +371,63 @@ def _score_archetypes(profile, facts: RecordFacts):
     """
     live_channels = {_channel_of(i) for i in facts.economic_ids}
     rows = []
-    menu = profile.decision_archetypes or ()
+    standing = tuple(profile.decision_archetypes or ())
+    # THE MENU IS EXTENDED BY WHAT WAS OBSERVED, not only by the model.
+    #
+    # The standing menu is what this KIND of business normally decides. A
+    # software company does not normally face a cost-structure decision, so
+    # COST_STRUCTURE is not on its menu -- and a software company OBSERVED
+    # cutting cost was therefore steered back to the pricing question,
+    # because the posture had nothing to land on. The most informative
+    # observation the market engine can make, a company facing a decision
+    # its business model does not standardly face, was the one case the
+    # menu could not represent.
+    #
+    # Posture-added archetypes enter BELOW every standing one (score 0 before
+    # the posture bonus), so they win only on the strength of the observation
+    # and never merely by being unusual.
+    posture = _posture(facts.hidden_state)
+    added = tuple(a for a in _POSTURE_FAVOURS.get(posture, ())
+                  if a not in standing and a in _ARCHETYPE_SUBJECT)
+    menu = standing + added
     for position, archetype in enumerate(menu):
         # BASE: the model class's own ordering. For a commodity producer
         # capital allocation leads; for a software company pricing does.
-        score = len(menu) - position
-        reasons = [f"{_ARCHETYPE_SUBJECT.get(archetype, archetype)} is a "
-                   f"standing decision for this business model"]
+        score = (len(standing) - position) if position < len(standing) else 0
+        if archetype in added:
+            reasons_extra = (
+                f"this is not a standing decision for a "
+                f"{profile.business_model_class.replace('_', ' ').lower()} "
+                f"business, and is on the list only because the record shows "
+                f"the company facing it")
+        else:
+            reasons_extra = ""
+        reasons = [reasons_extra or
+                   (f"{_ARCHETYPE_SUBJECT.get(archetype, archetype)} is a "
+                    f"standing decision for this business model")]
         for channel in sorted(live_channels):
             if archetype in _CHANNEL_FAVOURS.get(channel, ()):
                 score += 4
                 reasons.append(
                     f"measured {channel.replace('_', ' ').lower()} conditions "
                     f"reach this business and bear directly on it")
-        if facts.hidden_state and facts.hidden_state not in (
-                "TRACKED_NO_IDENTIFIED_STATE", "HIDDEN_STATE_NOT_RUN",
-                "HIDDEN_STATE_NONE_TRACKED"):
-            if archetype in ("COMPETITIVE_RESPONSE", "PRICING"):
-                score += 3
+        if posture:
+            if archetype in _POSTURE_FAVOURS.get(posture, ()):
+                score += _POSTURE_WEIGHT
+                english = _POSTURE_ENGLISH.get(
+                    posture, "in an identified operating posture")
                 reasons.append(
-                    "the operating posture has been identified, which is what "
-                    "a response would be responding to")
+                    f"the company is {english}, which is decided by "
+                    f"{_ARCHETYPE_SUBJECT.get(archetype, archetype)}")
+            elif not _POSTURE_FAVOURS.get(posture):
+                # An identified posture this build has no decision mapping
+                # for still means SOMETHING was identified, so the standing
+                # response decisions rise -- the pre-posture behaviour.
+                if archetype in ("COMPETITIVE_RESPONSE", "PRICING"):
+                    score += 3
+                    reasons.append(
+                        "the operating posture has been identified, which is "
+                        "what a response would be responding to")
         if facts.contradictions and archetype in ("COMPETITIVE_RESPONSE",
                                                   "REGULATORY_RESPONSE"):
             score += 2
@@ -624,18 +753,23 @@ def _scenarios(profile, archetype: str, facts: RecordFacts,
 def select(company_id: str = "", *, name: str = "", domain: str = "",
            facts: Optional[RecordFacts] = None,
            profile: Optional[CompanyIntelligenceProfile] = None,
-           manifest=None) -> AnalysisSelection:
-    """Choose this company's analysis. Deterministic, no model call."""
+           manifest=None, registrant=None) -> AnalysisSelection:
+    """Choose this company's analysis. Deterministic, no model call.
+
+    `registrant` is the SEC's classification of this filer, used only when
+    the company is outside the validation manifest -- see `profile_for`.
+    """
     facts = facts or RecordFacts()
     if profile is None:
         profile = profile_for(company_id, name=name, domain=domain,
-                              manifest=manifest)
+                              manifest=manifest, registrant=registrant)
     considered = _score_archetypes(profile, facts) if profile.known else ()
     archetype = considered[0]["archetype"] if considered else UNKNOWN
     why = (considered[0]["why"] if considered else
-           "this company's business model is not classified in the "
-           "validation manifest, so the analysis is selected from the "
-           "published record alone and is not specific to its economics")
+           (profile.profile_limitation or
+            "this company's business model is not classified, so the "
+            "analysis is selected from the published record alone and is "
+            "not specific to its economics"))
     if considered and len(considered) > 1:
         # Ends with a full stop: this string is rendered on its own in the
         # X-Ray's "Why this decision" panel, where the missing one showed.

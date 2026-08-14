@@ -213,4 +213,10 @@ def test_an_unknown_company_still_gets_an_honest_decision_question():
     assert sel.decision_question
     assert sel.signals == ()
     assert sel.scenarios == ()
-    assert "not classified" in sel.why_this_question
+    # The reason must say the business model was never established, and say
+    # what would resolve it. This assertion used to pin one phrasing ("not
+    # classified"); the profile layer now carries a fuller statement of the
+    # same fact, so the intent is asserted rather than the old wording.
+    why = sel.why_this_question.lower()
+    assert "has not been established" in why or "not classified" in why
+    assert "manifest" in why

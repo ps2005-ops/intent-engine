@@ -1,0 +1,257 @@
+{
+  "contract": "universe_reconciliation.v1",
+  "generated_at": "2026-08-14",
+  "manifest_version": "1.0.1",
+  "counts": {
+    "market_snapshot_companies": 26,
+    "manifest_companies": 100,
+    "intersection": 10,
+    "market_only": 16,
+    "manifest_only": 90,
+    "identity_alias_matches": 8,
+    "unresolved_identity_matches": 0
+  },
+  "classification_tally": {
+    "A_DUPLICATE_UNDER_OTHER_ID": 0,
+    "B_SHOULD_ENTER_MANIFEST": 0,
+    "C_OUTSIDE_INTENDED_PROGRAM": 16,
+    "D_IDENTITY_DEFECT": 0
+  },
+  "finding": "No Class A, B or D. Every one of the 16 market-only companies is a correctly identified real company that the manifest does not contain, and none duplicates a manifest entry. The mismatch is therefore NOT an identity defect and NOT a manifest omission: the market runtime publishes a global universe while the validation manifest is a curated North-America-plus-Mexico 100. The defect is that the PRODUCT treated manifest membership as a precondition for knowing what kind of business a company is, so a correctly identified company fell to an implicit UNKNOWN. The manifest is a validation universe, not a knowledge base.",
+  "policy": "Manifest membership is unchanged: 100 companies, version 1.0.1, no additions, no cohort moves. Profile derivation gains a second, explicitly-labelled source -- the SEC registrant's own SIC classification -- which is authored and regulator-assigned, the same epistemic class as the manifest's business_model_class and equally not an empirical claim. 15 of the 16 carry one.",
+  "intersection_rows": [
+    {
+      "market_company_id": "america-movil",
+      "market_name": "America Movil",
+      "canonical_company_id": "america-movil",
+      "match": "EXACT_ID",
+      "business_model_class": "CONTRACTED_OR_RATE_BASE_ASSETS"
+    },
+    {
+      "market_company_id": "canadian-national-railway",
+      "market_name": "Canadian National Railway",
+      "canonical_company_id": "canadian-national-railway",
+      "match": "EXACT_ID",
+      "business_model_class": "CONTRACTED_OR_RATE_BASE_ASSETS"
+    },
+    {
+      "market_company_id": "caterpillar-inc",
+      "market_name": "Caterpillar Inc.",
+      "canonical_company_id": "caterpillar",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "MANUFACTURE_AND_AFTERMARKET"
+    },
+    {
+      "market_company_id": "cloudflare-inc",
+      "market_name": "Cloudflare, Inc.",
+      "canonical_company_id": "cloudflare",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "SUBSCRIPTION_SOFTWARE"
+    },
+    {
+      "market_company_id": "johnson-johnson",
+      "market_name": "Johnson & Johnson",
+      "canonical_company_id": "johnson-and-johnson",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "REGULATED_PRODUCT_OR_PROVIDER"
+    },
+    {
+      "market_company_id": "jpmorgan-chase-co",
+      "market_name": "JPMorgan Chase & Co.",
+      "canonical_company_id": "jpmorgan-chase",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "BALANCE_SHEET_OR_NETWORK"
+    },
+    {
+      "market_company_id": "nextera-energy-inc",
+      "market_name": "NextEra Energy, Inc.",
+      "canonical_company_id": "nextera-energy",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "CONTRACTED_OR_RATE_BASE_ASSETS"
+    },
+    {
+      "market_company_id": "shopify-inc",
+      "market_name": "Shopify Inc.",
+      "canonical_company_id": "shopify",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "SUBSCRIPTION_SOFTWARE"
+    },
+    {
+      "market_company_id": "stripe-inc",
+      "market_name": "Stripe, Inc.",
+      "canonical_company_id": "stripe",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "BALANCE_SHEET_OR_NETWORK"
+    },
+    {
+      "market_company_id": "the-procter-gamble-company",
+      "market_name": "The Procter & Gamble Company",
+      "canonical_company_id": "procter-and-gamble",
+      "match": "NAME_RESOLVED",
+      "business_model_class": "BRANDED_CONSUMER"
+    }
+  ],
+  "market_only_rows": [
+    {
+      "market_company_id": "asml-holding-n-v",
+      "market_name": "ASML Holding N.V.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "3559",
+      "sic_description": "Special Industry Machinery, NEC"
+    },
+    {
+      "market_company_id": "bhp-group-limited",
+      "market_name": "BHP Group Limited",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "1000",
+      "sic_description": "Metal Mining"
+    },
+    {
+      "market_company_id": "check-point-software",
+      "market_name": "Check Point Software",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "7372",
+      "sic_description": "Services-Prepackaged Software"
+    },
+    {
+      "market_company_id": "duolingo-inc",
+      "market_name": "Duolingo, Inc.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "7372",
+      "sic_description": "Services-Prepackaged Software"
+    },
+    {
+      "market_company_id": "etsy-inc",
+      "market_name": "Etsy, Inc.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "7389",
+      "sic_description": "Services-Business Services, NEC"
+    },
+    {
+      "market_company_id": "grifols-s-a",
+      "market_name": "Grifols S.A.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "2834",
+      "sic_description": "Pharmaceutical Preparations"
+    },
+    {
+      "market_company_id": "hdfc-bank-limited",
+      "market_name": "HDFC Bank Limited",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "6029",
+      "sic_description": "Commercial Banks, NEC"
+    },
+    {
+      "market_company_id": "honda-motor-co-ltd",
+      "market_name": "Honda Motor Co., Ltd.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "3711",
+      "sic_description": "Motor Vehicles & Passenger Car Bodies"
+    },
+    {
+      "market_company_id": "infosys-limited",
+      "market_name": "Infosys Limited",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "7371",
+      "sic_description": "Services-Computer Programming Services"
+    },
+    {
+      "market_company_id": "linde-plc",
+      "market_name": "Linde plc",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "2810",
+      "sic_description": "Industrial Inorganic Chemicals"
+    },
+    {
+      "market_company_id": "mercadolibre-inc",
+      "market_name": "MercadoLibre, Inc.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "7389",
+      "sic_description": "Services-Business Services, NEC"
+    },
+    {
+      "market_company_id": "olo-inc",
+      "market_name": "Olo Inc.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": false,
+      "sic": "",
+      "sic_description": ""
+    },
+    {
+      "market_company_id": "sasol-limited",
+      "market_name": "Sasol Limited",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "1311",
+      "sic_description": "Crude Petroleum & Natural Gas"
+    },
+    {
+      "market_company_id": "sea-limited",
+      "market_name": "Sea Limited",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "7380",
+      "sic_description": "Services-Miscellaneous Business Services"
+    },
+    {
+      "market_company_id": "toyota-motor-corporation",
+      "market_name": "Toyota Motor Corporation",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "3711",
+      "sic_description": "Motor Vehicles & Passenger Car Bodies"
+    },
+    {
+      "market_company_id": "vale-s-a",
+      "market_name": "Vale S.A.",
+      "classification": "C_OUTSIDE_INTENDED_PROGRAM",
+      "why": "a real company, correctly identified, that the validation manifest does not contain; the manifest universe is deliberately North America + Mexico and this is not a duplicate of any of its 100 entries",
+      "duplicate_of": null,
+      "sec_registrant": true,
+      "sic": "1000",
+      "sic_description": "Metal Mining"
+    }
+  ],
+  "manifest_only_count": 90
+}

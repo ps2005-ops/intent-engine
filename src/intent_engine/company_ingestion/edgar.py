@@ -304,6 +304,43 @@ def _spread_by_family(order, forms, dates=(), today="") -> list:
     return out + stale
 
 
+def registrant_classification(resolved, *, transport=None,
+                              resolver=None) -> dict:
+    """The SIC classification the SEC assigns this registrant.
+
+    WHY THIS IS ALLOWED TO CLASSIFY A BUSINESS. The validation manifest
+    classifies 100 companies by hand, and a company outside it used to fall
+    to an implicit UNKNOWN -- which read to a customer as "we know nothing
+    about Toyota". That was never true: Toyota is a registrant and the
+    regulator has already classified it.
+
+    A SIC code is the same KIND of fact as the manifest's
+    business_model_class: authored, reviewed, assigned by a third party, and
+    definitional rather than empirical. It says which industry the filer was
+    placed in; it says nothing about what the company did last quarter. So
+    it may seed a business-model profile and it may never seed a finding.
+
+    It is strictly coarser than the manifest -- one code covers a whole
+    major group -- which is why a profile derived from it is labelled
+    PARTIAL and never AVAILABLE.
+
+    Returns {"sic", "sic_description", "cik"} or {}. Never raises.
+    """
+    try:
+        raw = _fetch_bytes(
+            SUBMISSIONS_URL.format(cik10=resolved["cik10"]),
+            transport=transport, resolver=resolver)
+        payload = json.loads(raw.decode("utf-8", "replace"))
+    except Exception:                                       # noqa: BLE001
+        return {}
+    sic = str(payload.get("sic") or "").strip()
+    if not sic:
+        return {}
+    return {"sic": sic,
+            "sic_description": str(payload.get("sicDescription") or "").strip(),
+            "cik": str(resolved.get("cik") or "")}
+
+
 def filing_candidates(resolved, *, transport=None, resolver=None,
                       limit=MAX_EDGAR_CANDIDATES) -> list:
     """Propose recent filing primary-document candidates for a resolved CIK.
