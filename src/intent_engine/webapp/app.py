@@ -1434,6 +1434,11 @@ class WebApp:
             return limited
         company_name = form.get("company_name", "")[:120].strip()
         website = (form.get("website") or "").strip()
+        #: Set only when the company was identified as an SEC filer with no
+        #: domain on record. It is what lets the run open at all, and it must
+        #: never be filled in from anywhere else -- a CIK guessed from a name
+        #: attributes one company's filings to another.
+        filer_cik = ""
 
         # THE NAME IS ENOUGH.
         #
@@ -1462,6 +1467,15 @@ class WebApp:
             if entry.resolved:
                 company_name = entry.company_name
                 website = entry.website
+            elif entry.state == _NE.IDENTIFIED_NO_DOMAIN:
+                # A FILER IS ANALYSABLE WITHOUT A WEBSITE. The regulator
+                # records no domain, and guessing one would send retrieval at
+                # whatever sits on it. What it does record is every filing
+                # this company has made, which is more authoritative than the
+                # marketing site would have been. The run is opened on the
+                # CIK and the acquisition path is EDGAR-first.
+                company_name = entry.company_name
+                filer_cik = entry.company_id
             else:
                 # NOT A BAD REQUEST. The user did nothing wrong: this is a
                 # company the registry does not carry. Say so, and offer the
@@ -1469,7 +1483,7 @@ class WebApp:
                 # 400 the user cannot act on.
                 return self._company_not_found_page(session, company_name,
                                                     entry)
-        if not website:
+        if not website and not filer_cik:
             website = f"https://{DEMO_DOMAIN}"
         # WHICH company? A name like "Sony" denotes a parent, a games
         # subsidiary, an electronics subsidiary and more. Picking one for the
@@ -1483,7 +1497,11 @@ class WebApp:
             if picked.resolved:
                 company_name = picked.profile.legal_name
                 website = f"https://{picked.profile.primary_domain}"
-        if DEMO_DOMAIN not in website:
+        # A domainless filer skips this block entirely: every branch inside
+        # it resolves or names the company FROM its website, and there isn't
+        # one. Its name came from the regulator, which is a better source
+        # than a domain would have been.
+        if website and DEMO_DOMAIN not in website:
             if not chosen:
                 resolution = resolve_entity(company_name=company_name,
                                             website=website)
@@ -1505,7 +1523,8 @@ class WebApp:
             try:
                 run = self.ci.create_run(
                     company_name=company_name or "(unnamed company)",
-                    website=website, user_id=session["user_id"],
+                    website=website, cik=filer_cik,
+                    user_id=session["user_id"],
                     as_of=__import__("datetime").datetime.now(
                         __import__("datetime").timezone.utc
                     ).strftime("%Y-%m-%dT00:00:00+00:00"))

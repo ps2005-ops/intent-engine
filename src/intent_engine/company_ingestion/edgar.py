@@ -415,13 +415,25 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
 
 
 def propose_edgar_candidates(*, company_name, ticker=None, transport=None,
-                             resolver=None) -> list:
+                             resolver=None, cik="") -> list:
     """Resolve the company and return authoritative SEC filing candidates.
     Fully defensive: returns [] if the company can't be resolved or SEC is
-    unreachable — discovery must never fail because of this adapter."""
+    unreachable — discovery must never fail because of this adapter.
+
+    `cik` short-circuits the name lookup. A run opened on a CIK already knows
+    exactly which filer it is about, and re-deriving that from the typed name
+    can only lose: name matching is fuzzy, and a second resolution that lands
+    on a different registrant would attribute one company's filings to
+    another.
+    """
     try:
-        resolved = resolve_cik(company_name, ticker=ticker,
-                               transport=transport, resolver=resolver)
+        if cik:
+            digits = str(cik).strip().lstrip("0") or "0"
+            resolved = {"cik": int(digits), "cik10": f"{int(digits):010d}",
+                        "title": company_name, "ticker": ticker or ""}
+        else:
+            resolved = resolve_cik(company_name, ticker=ticker,
+                                   transport=transport, resolver=resolver)
         if not resolved:
             return []
         return filing_candidates(resolved, transport=transport,

@@ -75,20 +75,48 @@ class CompanyIngestionService:
 
     # --- run lifecycle -----------------------------------------------------------
     def create_run(self, *, company_name: str, website: str,
-                   user_id: str, as_of: str) -> dict:
-        website = validate_candidate_url(website)
+                   user_id: str, as_of: str, cik: str = "") -> dict:
+        """Open a run. A website is optional when a CIK identifies the filer.
+
+        WHY A RUN MAY HAVE NO WEBSITE. Typed entry resolves any SEC
+        registrant, but the regulator records no web domain -- so Toyota and
+        Vale were identified and then could not be analysed. Guessing
+        `toyota.com` would send retrieval at whatever sits there; the
+        authoritative material is the company's own filings, which are
+        reachable from the CIK alone.
+
+        THE DOMAIN STAYS EMPTY, deliberately. Substituting `sec.gov` would
+        make the REGULATOR the company's website: filings would group as
+        company-published material from the sec.gov origin, and the
+        independence count would read one origin for every filer on earth.
+        The domain is what the company publishes on, and this company
+        publishes nowhere we know of.
+        """
+        website = validate_candidate_url(website) if website else ""
         assert_no_secret(company_name, where="company name")
-        domain = canonical_domain(website)
-        stable_key = f"ci-run:{domain}:{user_id}:{as_of}"
+        domain = canonical_domain(website) if website else ""
+        cik = str(cik or "").strip()
+        if not domain and not cik:
+            raise IngestionError(
+                "a run needs either a website or the CIK of a filer; with "
+                "neither there is no subject to retrieve")
+        # The run's identity anchor. Keyed on the CIK when there is no
+        # domain -- keying on the empty string would give every domainless
+        # company the same run id on a given day and silently merge two
+        # companies' evidence into one run.
+        subject_key = domain or f"sec-cik:{cik}"
+        stable_key = f"ci-run:{subject_key}:{user_id}:{as_of}"
         run_id = _kernel_stable_id(self.store, stable_key)
         self._append("ci.run_created", run_id=run_id, domain=domain,
                      actor_type="human", actor_id=user_id,
                      subject_type="run", subject_id=run_id,
                      payload={"company_name": company_name,
                               "website": website, "user_id": user_id,
-                              "as_of": as_of},
+                              "as_of": as_of, "cik": cik,
+                              "subject_key": subject_key},
                      idempotency_key=stable_key)
-        return {"run_id": run_id, "domain": domain, "website": website}
+        return {"run_id": run_id, "domain": domain, "website": website,
+                "cik": cik, "subject_key": subject_key}
 
     def run_meta(self, run_id: str):
         for row in self.store.for_run(run_id):
@@ -122,14 +150,22 @@ class CompanyIngestionService:
         if resolution.resolved:
             payload.update(entity_identity_facts(resolution.profile))
             payload["entity_id"] = resolution.profile.entity_id
-        elif meta.get("company_name") and meta["domain"]:
+        elif meta.get("company_name") and (meta["domain"] or meta.get("cik")):
             # The registry is small by design, so "not in the registry" is the
             # normal case, not a failure. A name plus a domain that validated
             # still names a subject well enough to analyse — what is NOT
             # acceptable is having neither, which is the only case the
             # readiness gate treats as an unresolved identity.
+            #
+            # A CIK counts, and counts for MORE than a domain: a domain is
+            # bought and resold, while a CIK is assigned by the regulator to
+            # one filer and identifies exactly the entity whose filings are
+            # about to be read. Without this branch a domainless filer was
+            # identified at the door and then declared unidentified here.
             payload["fallback_subject"] = meta["company_name"]
             payload["fallback_domain"] = meta["domain"]
+            if meta.get("cik"):
+                payload["fallback_cik"] = str(meta["cik"])
         self._append("ci.entity_identified", run_id=run_id,
                      domain=meta["domain"], subject_type="identity",
                      subject_id=payload.get("entity_id", "unresolved"),
@@ -208,23 +244,37 @@ class CompanyIngestionService:
             raise IngestionError(f"no such run {run_id!r}")
         domain = meta["domain"]
         self._transition(run_id, domain, "DISCOVERING_SOURCES")
-        result = safe_fetch(meta["website"], transport=self.transport,
-                            resolver=self.resolver)
-        links = []
-        if result["ok"]:
-            links = parse_html(result["body"])["links"]
-        candidates = discover_candidates(company_url=meta["website"],
-                                         homepage_links=links)
-        # Sitemap/robots discovery: the publisher's OWN list of real, canonical
-        # URLs. Guessed known-paths mostly 403/404; sitemap URLs exist by
-        # construction, and this works even when the homepage is JavaScript-
-        # rendered and exposes no links. robots.txt Disallow is honoured.
-        candidates = candidates + self._sitemap_candidates(meta["website"])
-        # Bounded external-source proposals (customer voice etc.) broaden the
-        # evidence beyond company-owned pages. Off-domain, UNVERIFIED, and
-        # (like every candidate) fetched only after explicit approval.
-        candidates = candidates + propose_external_candidates(
-            company_name=meta.get("company_name", ""), domain=domain)
+        candidates = []
+        # A run with no website made no homepage request, so there is no
+        # homepage outcome. `ok` rather than a failure: recording a homepage
+        # RETRIEVAL FAILURE for a company we never claimed had a homepage
+        # would put a fabricated failure in the run's own record and count
+        # against its source health.
+        result = {"ok": True, "failure_type": "", "safe_message": ""}
+        # EVERY DISCOVERY PATH BELOW STARTS FROM A DOMAIN. A run opened on a
+        # CIK alone has none, and each of these would either fetch the empty
+        # string or propose candidates on a guessed host. They are skipped
+        # rather than fed a placeholder: the EDGAR path further down needs no
+        # domain, and for a filer it is the authoritative source anyway.
+        if meta.get("website"):
+            result = safe_fetch(meta["website"], transport=self.transport,
+                                resolver=self.resolver)
+            links = []
+            if result["ok"]:
+                links = parse_html(result["body"])["links"]
+            candidates = discover_candidates(company_url=meta["website"],
+                                             homepage_links=links)
+            # Sitemap/robots discovery: the publisher's OWN list of real,
+            # canonical URLs. Guessed known-paths mostly 403/404; sitemap URLs
+            # exist by construction, and this works even when the homepage is
+            # JavaScript-rendered and exposes no links. robots.txt Disallow is
+            # honoured.
+            candidates = candidates + self._sitemap_candidates(meta["website"])
+            # Bounded external-source proposals (customer voice etc.) broaden
+            # the evidence beyond company-owned pages. Off-domain, UNVERIFIED,
+            # and (like every candidate) fetched only after explicit approval.
+            candidates = candidates + propose_external_candidates(
+                company_name=meta.get("company_name", ""), domain=domain)
         # Authoritative structured fallback: for public companies, official SEC
         # EDGAR filings are permitted, server-rendered (non-JavaScript) HTML —
         # so a run is not at the mercy of a JavaScript-only marketing site.
@@ -232,6 +282,7 @@ class CompanyIngestionService:
         # a filer or SEC is unreachable, so discovery is never broken by it.
         candidates = candidates + propose_edgar_candidates(
             company_name=meta.get("company_name", ""),
+            cik=str(meta.get("cik") or ""),
             transport=self.transport, resolver=self.resolver)
         # THE ONLY INDEPENDENT VANTAGE POINT WE CAN ACTUALLY REACH.
         #
@@ -1181,14 +1232,19 @@ class CompanyIngestionService:
         if self.transport is not None:
             return []
         company_name = meta.get("company_name", "")
-        subject_cik = ""
-        try:
-            from intent_engine.company_ingestion.edgar import resolve_cik
-            resolved = resolve_cik(company_name, transport=self.transport,
-                                   resolver=self.resolver)
-            subject_cik = str((resolved or {}).get("cik") or "")
-        except Exception:  # noqa: BLE001 - the subject filter is best-effort
-            subject_cik = ""
+        # The run may already know the filer. Re-resolving by name is fuzzy
+        # and could return a DIFFERENT registrant, whose filings would then
+        # be excluded as "the subject's own" while the real subject's were
+        # kept as third-party -- the attribution error inverted.
+        subject_cik = str(meta.get("cik") or "")
+        if not subject_cik:
+            try:
+                from intent_engine.company_ingestion.edgar import resolve_cik
+                resolved = resolve_cik(company_name, transport=self.transport,
+                                       resolver=self.resolver)
+                subject_cik = str((resolved or {}).get("cik") or "")
+            except Exception:  # noqa: BLE001 - subject filter is best-effort
+                subject_cik = ""
         try:
             return propose_third_party_filings(
                 company_name=company_name, subject_cik=subject_cik)
