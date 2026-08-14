@@ -1,0 +1,157 @@
+{
+  "adversary_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "analysis_id": "republish-2026-08-13",
+  "availability": "AVAILABLE",
+  "belief_refs": {
+    "count": 4,
+    "ids": [
+      "bel_009efe9d41a6ea1d",
+      "bel_b5a10dbff6cef51c",
+      "bel_af0fea3cd5de9e3b",
+      "bel_bfac2182faa079e2"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "canonical_name": "Duolingo, Inc.",
+  "causal_question_refs": {
+    "count": 5,
+    "ids": [
+      "cq_414b6dbf4c811a33",
+      "cq_d0b2182742331c35",
+      "cq_39f820c2b9f82230",
+      "cq_7022dd31a0f76617",
+      "cq_85245e31eefcd8c9"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "causal_result_refs": {
+    "count": 5,
+    "ids": [
+      "cres_72434d3af308ff39",
+      "cres_4093516c02628e9a",
+      "cres_6d32702e0efbb947",
+      "cres_b4f98d3e35017fa9",
+      "cres_905f560c619c64ce"
+    ],
+    "note": "the causal router ran; 5 PANEL_UNAVAILABLE",
+    "state": "AVAILABLE",
+    "states": {
+      "PANEL_UNAVAILABLE": 5
+    }
+  },
+  "company_id": "duolingo-inc",
+  "contract_version": "market_demo_snapshot.v1",
+  "contradiction_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "coverage_state": "FIELD_UNAVAILABLE",
+  "demand_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "economic_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "evidence_cutoff": "2026-08-13",
+  "evidence_independence_state": "UNAVAILABLE",
+  "evidence_reference_ids": {
+    "count": 6,
+    "ids": [
+      "ev_2ad0a855fff3e5e5",
+      "ev_2d4e26c7e577f24c",
+      "ev_386a2a6da667ff17",
+      "ev_5be30f953d8dda1f",
+      "ev_5d30e4e6f4844ed1",
+      "ev_e1abe8c7e35fc89e"
+    ],
+    "note": "2 cited evidence id(s) do not resolve against the supplied ledger and are not counted",
+    "state": "AVAILABLE"
+  },
+  "evidence_summary": {
+    "note": "evidence was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "expectation_refs": {
+    "count": 4,
+    "ids": [
+      "exp_60553b5353f33eb7",
+      "exp_d5c8cb6f415ba22f",
+      "exp_bd98c22a5053105c",
+      "exp_2df6bc565a6ce98f"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "generated_at": "2026-08-14",
+  "hidden_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "1 hidden state(s) were tracked and none is identified: the posterior is uniform, so no posture is distinguishable from the prior. The subsystem ran and observed nothing that moved it",
+    "state": "AVAILABLE",
+    "unidentified": 1
+  },
+  "known_at": "2026-08-13",
+  "learning_summary": {
+    "note": "learning health was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "market_population": "REAL_MARKET",
+  "market_run_id": "republish-2026-08-13",
+  "provenance_summary": {
+    "as_of": "2026-08-13",
+    "note": "market runtime provenance",
+    "state": "AVAILABLE",
+    "value": "38ac8f81b12f24a7ace49921f2a6d490f6d342e5"
+  },
+  "reconciliation_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "replay_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "runtime_sha": "38ac8f81b12f24a7ace49921f2a6d490f6d342e5",
+  "snapshot_id": "ms-34b4ef210cd6e03b8b66",
+  "source_health_summary": {
+    "note": "source health was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "subject_names": [
+    "Duolingo",
+    "Duolingo, Inc.",
+    "duolingo"
+  ],
+  "thesis_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "thesis_revision_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "unavailable_reason": ""
+}

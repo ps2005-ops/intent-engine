@@ -1,0 +1,141 @@
+{
+  "adversary_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "analysis_id": "republish-2026-08-13",
+  "availability": "AVAILABLE",
+  "belief_refs": {
+    "count": 3,
+    "ids": [
+      "bel_751bc8d0d344a30c",
+      "bel_e69cdefde5c1165d",
+      "bel_35837d83091d41ec"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "canonical_name": "Toyota Motor Corporation",
+  "causal_question_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "causal_result_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "company_id": "toyota-motor-corporation",
+  "contract_version": "market_demo_snapshot.v1",
+  "contradiction_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "coverage_state": "FIELD_UNAVAILABLE",
+  "demand_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "economic_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "evidence_cutoff": "2026-08-13",
+  "evidence_independence_state": "UNAVAILABLE",
+  "evidence_reference_ids": {
+    "count": 7,
+    "ids": [
+      "ev_1c3a3429fa34fdd6",
+      "ev_325f0b61a1f82580",
+      "ev_40ac09ca2ab6d3e3",
+      "ev_739f621d372b3e55",
+      "ev_8e74df7675be1931",
+      "ev_8edea3fb4e32a5e7",
+      "ev_f80b09c765c260a2"
+    ],
+    "note": "1 cited evidence id(s) do not resolve against the supplied ledger and are not counted",
+    "state": "AVAILABLE"
+  },
+  "evidence_summary": {
+    "note": "evidence was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "expectation_refs": {
+    "count": 3,
+    "ids": [
+      "exp_935102d78d49fad0",
+      "exp_24abd1ae49b65e98",
+      "exp_4b9160c452c99482"
+    ],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "generated_at": "2026-08-14",
+  "hidden_state_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "1 hidden state(s) were tracked and none is identified: the posterior is uniform, so no posture is distinguishable from the prior. The subsystem ran and observed nothing that moved it",
+    "state": "AVAILABLE",
+    "unidentified": 1
+  },
+  "known_at": "2026-08-13",
+  "learning_summary": {
+    "note": "learning health was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "market_population": "REAL_MARKET",
+  "market_run_id": "republish-2026-08-13",
+  "provenance_summary": {
+    "as_of": "2026-08-13",
+    "note": "market runtime provenance",
+    "state": "AVAILABLE",
+    "value": "38ac8f81b12f24a7ace49921f2a6d490f6d342e5"
+  },
+  "reconciliation_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "replay_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "this subsystem did not run for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "runtime_sha": "38ac8f81b12f24a7ace49921f2a6d490f6d342e5",
+  "snapshot_id": "ms-40a684f27c2b7daf54f4",
+  "source_health_summary": {
+    "note": "source health was not summarised for this snapshot",
+    "state": "UNAVAILABLE"
+  },
+  "subject_names": [
+    "Toyota Motor",
+    "Toyota Motor Corporation",
+    "toyota"
+  ],
+  "thesis_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "thesis_revision_refs": {
+    "count": 0,
+    "ids": [],
+    "note": "",
+    "state": "AVAILABLE"
+  },
+  "unavailable_reason": ""
+}
