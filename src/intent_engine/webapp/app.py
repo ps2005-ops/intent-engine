@@ -1424,8 +1424,38 @@ class WebApp:
         limited = None if smoke else self._demo_rate_limited(session, remote)
         if limited is not None:
             return limited
-        website = form.get("website", f"https://{DEMO_DOMAIN}")
-        company_name = form.get("company_name", "")[:120]
+        company_name = form.get("company_name", "")[:120].strip()
+        website = (form.get("website") or "").strip()
+
+        # THE NAME IS ENOUGH.
+        #
+        # `website` used to default to the demo domain when absent, and the
+        # branch below reads that default as "run the canned demo". So once
+        # the form stopped requiring a URL, typing "Cloudflare" would have
+        # analysed the sample company instead -- a confident report about
+        # somebody else, which is the worst failure this product has.
+        #
+        # A typed name is resolved against the entity registry, which is the
+        # component that exists for exactly this and was previously only
+        # consulted when a website had already been supplied.
+        if company_name and not website and not form.get("entity_id"):
+            from intent_engine.company_ingestion import name_entry as _NE
+            entry = _NE.resolve(company_name=company_name)
+            if entry.state == _NE.AMBIGUOUS_COMPANY:
+                # Two real companies share this name. Asking is strictly
+                # better than picking, and it is asked once, before any work.
+                return self._name_choice_page(session, entry, form)
+            if entry.resolved:
+                company_name = entry.company_name
+                website = entry.website
+            else:
+                # NOT A BAD REQUEST. The user did nothing wrong: this is a
+                # company the registry does not carry. Say so, and offer the
+                # one input that would resolve it, rather than returning a
+                # 400 the user cannot act on.
+                return self._company_not_found_page(session, company_name)
+        if not website:
+            website = f"https://{DEMO_DOMAIN}"
         # WHICH company? A name like "Sony" denotes a parent, a games
         # subsidiary, an electronics subsidiary and more. Picking one for the
         # user produces a confident report about the wrong company — strictly
@@ -1514,6 +1544,81 @@ class WebApp:
             # deterministic demo produces one run id; never reassign it
             return self._error_page(403, "this run belongs to another account")
         return self._redirect(f"/runs/{run_id}/progress")
+
+    def _name_choice_page(self, session, entry, form):
+        """One name, several real companies. Ask, once, before any work.
+
+        The choices carry a NAME, not an entity id the user could not have
+        meant anything by: a business reader tells companies apart by legal
+        name, sector and country. Each card posts the resolved legal name so
+        the next request resolves exactly, without this page having to know
+        which registry the candidate came from.
+        """
+        csrf = session["csrf"] if session else ""
+        cards = "".join(
+            f'<form action="/analyze" method="post" class="choice">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="consent" value="1">'
+            f'<input type="hidden" name="company_name" '
+            f'value="{_e(c["legal_name"])}">'
+            f'<input type="hidden" name="business_question" '
+            f'value="{_e(form.get("business_question", ""))}">'
+            f'<h3>{_e(c["legal_name"])}</h3>'
+            f'<p class="state">{_e(c.get("describe", ""))}</p>'
+            f'<p class="why">{_e(c.get("note", ""))}</p>'
+            f'<button type="submit">Analyse {_e(c["legal_name"])}</button>'
+            f'</form>' for c in entry.choices)
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Which company do you mean?</title>'
+            f'</head><body>{self._nav(session, csrf)}<main>'
+            f'<h1>Which company do you mean?</h1>'
+            f'<p>{_e(entry.reason)}. These are different companies with '
+            f'different products, results and risks, so the answer depends '
+            f'on which one you want.</p>{cards}'
+            f'<p><a href="/">Start over with a different company</a></p>'
+            f'</main></body></html>')
+        return self._html(body)
+
+    def _company_not_found_page(self, session, company_name):
+        """COMPANY_NOT_FOUND, as a state the user can act on.
+
+        This replaces a 400. A name the registry does not carry is not a
+        malformed request -- it is the ordinary case of a private company, a
+        misspelling, or a firm nobody has analysed here yet, and all three
+        are answered by the same thing: the website, which is the strongest
+        identity signal a person can give.
+
+        The form comes back with the name still in it. Making the user retype
+        what they already typed is how a recoverable state becomes a dead end.
+        """
+        csrf = session["csrf"] if session else ""
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1"><title>Company not found</title>'
+            f'</head><body>{self._nav(session, csrf)}'
+            f'<main class="notice"><h1>We could not identify '
+            f'&ldquo;{_e(company_name)}&rdquo;</h1>'
+            f'<p>No company by that name is in our register. That usually '
+            f'means one of three things: it is privately held, the name is '
+            f'spelled differently in its filings, or nobody has analysed it '
+            f'here yet. None of them is a problem with what you typed.</p>'
+            f'<p>Its website settles it — a domain names exactly one '
+            f'company.</p>'
+            f'<form action="/analyze" method="post" class="analyze">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="consent" value="1">'
+            f'<p><label for="company_name">Company name</label> '
+            f'<input id="company_name" name="company_name" '
+            f'value="{_e(company_name)}" required></p>'
+            f'<p><label for="website">Website</label> '
+            f'<input id="website" name="website" type="url" '
+            f'placeholder="https://www.example.com" autofocus required></p>'
+            f'<button type="submit">Analyse company</button></form>'
+            f'<p><a href="/">Start over</a></p></main></body></html>')
+        return self._html(body)
 
     def _disambiguation_page(self, session, resolution, form):
         """Ask which company was meant, once, before any analysis runs.

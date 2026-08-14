@@ -69,7 +69,12 @@ def test_a_first_time_guest_meets_the_product_not_the_methodology(guest):
     # ONE primary call to action. The old page rendered six identical
     # "Got it - start an analysis" buttons because the explainer injection
     # used str.replace on '</section>' with no count.
-    assert page.count("Read this company") == 1
+    # The LABEL is not the invariant -- the COUNT is. The button now reads
+    # "Analyse company" because the form takes a company name and no longer
+    # demands a website. Pinning the old wording would fail this test for a
+    # copy change while still passing if six of the new buttons appeared,
+    # which is the defect the assertion was written to catch.
+    assert page.count("Analyse company") == 1
     assert 'href="/onboarding"' in page             # still reachable
 
 

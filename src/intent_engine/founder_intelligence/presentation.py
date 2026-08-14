@@ -338,27 +338,46 @@ def render_landing_html() -> str:
         'what the business model says about why, and what the market may be '
         'missing.</p>'
         # 2. The input. One job on this screen.
+        # THE NAME IS THE ONLY REQUIRED FIELD.
+        #
+        # Website used to be `required`, and asking for it is asking the user
+        # to do the identity resolution this product already does: the entity
+        # registry resolves a typed name to a legal name, domain and ticker,
+        # and says AMBIGUOUS with a chooser when a name genuinely names two
+        # companies. Demanding the URL up front converted that capability
+        # into homework, and a form the user can fail.
+        #
+        # It survives as a RECOVERY input under the optional section, where
+        # it is worth something: a domain is the strongest signal a user can
+        # give, because they had to have the specific entity in mind to type
+        # it.
         '<form action="/analyze" method="post" aria-label="Analyze a company" '
         'class="analyze">'
         '<div class="field-row">'
-        '<span class="field"><label for="company_name">Company</label>'
+        '<span class="field grow"><label for="company_name">Company name'
+        '</label>'
         '<input id="company_name" name="company_name" '
-        'placeholder="Cloudflare" required></span>'
-        '<span class="field"><label for="website">Website</label>'
-        '<input id="website" name="website" type="url" '
-        'placeholder="https://www.cloudflare.com" required></span>'
+        'placeholder="Cloudflare" autofocus required></span>'
         '</div>'
-        '<details class="opt"><summary>Add context (optional)</summary>'
-        '<p><label for="role">Your role</label>'
+        '<details class="opt"><summary>Optional — website, your role, what '
+        'you want to work out</summary>'
+        '<p><label for="website">Website</label> '
+        '<input id="website" name="website" type="url" '
+        'placeholder="https://www.cloudflare.com"> '
+        '<span class="hint">Only needed if the name is ambiguous or we '
+        'cannot find the company.</span></p>'
+        '<p><label for="role">Your role</label> '
         '<input id="role" name="requester_role" '
-        'placeholder="founder, investor, product lead"></label></p>'
-        '<p><label for="q">What are you trying to work out?</label>'
+        'placeholder="founder, investor, product lead"></p>'
+        '<p><label for="q">What are you trying to work out?</label> '
         '<input id="q" name="business_question" '
         'placeholder="are they moving upmarket?"></p></details>'
+        # The consent stays -- it is a real statement about what runs -- but
+        # it is a sentence, not a gate the user can trip over.
         '<p class="consent"><label><input type="checkbox" name="consent" '
-        'required> Analyse this company from public and official sources.'
+        'checked> Analyse this company from public and official sources.'
         '</label></p>'
-        '<button type="submit">Read this company</button></form>'
+        '<button type="submit">Analyse company</button></form>'
         # 3. What the result actually looks like. Concrete, not adjectives.
         '<section class="sample" aria-label="What you get back">'
         '<h2>What comes back</h2>'
