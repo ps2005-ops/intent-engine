@@ -178,6 +178,7 @@ MARKET_ALLOWED: Dict[str, Any] = {
     "economic_state_refs": _REF_BLOCK,
     "demand_state_refs": _REF_BLOCK,
     "belief_refs": _REF_BLOCK,
+    "hidden_state_refs": _REF_BLOCK,
     "thesis_refs": _REF_BLOCK,
     "thesis_revision_refs": _REF_BLOCK,
     "expectation_refs": _REF_BLOCK,
@@ -460,7 +461,8 @@ def _age_days(a: str, b: str) -> Optional[int]:
 
 
 _MARKET_BLOCKS = ("evidence_reference_ids", "economic_state_refs",
-                  "demand_state_refs", "belief_refs", "thesis_refs",
+                  "demand_state_refs", "belief_refs", "hidden_state_refs",
+                  "thesis_refs",
                   "thesis_revision_refs", "expectation_refs",
                   "reconciliation_refs", "contradiction_refs",
                   "causal_question_refs", "causal_result_refs",

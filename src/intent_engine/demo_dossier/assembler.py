@@ -41,6 +41,7 @@ _MARKET_VIEW = (
     ("economic_state", "economic_state_refs"),
     ("demand", "demand_state_refs"),
     ("beliefs", "belief_refs"),
+    ("hidden_states", "hidden_state_refs"),
     ("theses", "thesis_refs"),
     ("thesis_history", "thesis_revision_refs"),
     ("expectations", "expectation_refs"),
