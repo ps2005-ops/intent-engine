@@ -72,9 +72,15 @@ def test_a_recommendation_never_exceeds_the_decision_standing():
     # authorise a commitment. The recommendation is now composed from the
     # standing and names the decision, so the sentence changed and the rule
     # did not.
-    assert "Do not commit" in a.answer
+    # Asserted as the RULE, not as a sentence: a BOUNDED reading may not
+    # authorise a commitment, however the recommendation is worded. Pinning
+    # the literal string is what made this test fail twice on rewording that
+    # never touched the rule.
+    low = a.answer.lower()
+    assert any(hold in low for hold in
+               ("do not commit", "hold this decision", "not commit")), a.answer
     assert "supports" not in a.answer
-    assert "proceed" not in a.answer.lower()
+    assert "proceed" not in low
 
 
 def test_a_supported_reading_may_recommend():

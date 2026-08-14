@@ -149,15 +149,21 @@ def _causal_status(dossier):
         return "CAUSAL_NO_QUESTION", ("The causal router ran and raised no "
                                       "question for this company.")
     if block.get("is_refusal"):
-        named = ", ".join(f"{n} {s}" for s, n in sorted(states.items()))
+        # THE REASON, NOT THE TOKEN. This read "(1 PANEL_UNAVAILABLE)" and
+        # shipped that to a live CEO answer -- a raw enum on a customer
+        # surface, past a test that asserted there were none because its
+        # detector did not strip the bracket. Each refusal state names a
+        # different missing thing, so they are translated rather than
+        # collapsed to "no result".
+        from intent_engine.founder_brief.plain import refusal
+        named = "; ".join(refusal(s) for s, _ in sorted(states.items()))
         return "CAUSAL_UNMEASURABLE", (
             f"The causal router asked {block.get('count', 0)} question(s) and "
-            f"could not answer any of them from the public record ({named}). "
+            f"could not answer any of them from the public record: {named}. "
             f"That is a limit of the available data, not a finding that the "
             f"effect is absent.")
     return "CAUSAL_ESTIMATED", (
-        f"The causal router resolved {block.get('count', 0)} question(s): "
-        f"{', '.join(f'{n} {s}' for s, n in sorted(states.items()))}.")
+        f"The causal router resolved {block.get('count', 0)} question(s).")
 
 
 ECONOMIC_AVAILABLE = "ECONOMIC_STATE_AVAILABLE"
@@ -475,8 +481,13 @@ def _recommendation(standing: str, selection, facts) -> tuple:
                 "size.",
                 "The expected movement failing to appear by the next review.",
                 "")
-    return (f"Do not commit on {subject} yet. Run the smallest test that "
-            f"would settle it, and hold the position in the meantime.",
+    # "Do not commit on how much capacity to commit, and when yet" -- the
+    # subject phrase already contains the verb for several archetypes, so
+    # gluing it after "commit on" produced a sentence a reader stumbles on.
+    # The decision is named as a noun phrase instead.
+    return (f"Hold this decision — {subject} — open for now. Run the "
+            f"smallest test that would settle it, and keep the current "
+            f"position in the meantime.",
             f"The direction is better supported than the magnitude: the "
             f"engine holds a position on this company but the causal "
             f"question behind {subject} is not resolved from the public "

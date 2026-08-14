@@ -147,14 +147,49 @@ def label(state: str) -> str:
     return row[0] if row else (str(state or "").replace("_", " ").capitalize())
 
 
+#: Why a causal question could not be answered, in English. The router's
+#: refusal states are the most useful thing on a causal section and the least
+#: readable: each names a DIFFERENT missing thing, so they cannot be
+#: collapsed, and they must not be shown raw.
+CAUSAL_REFUSAL = {
+    "PANEL_UNAVAILABLE":
+        "no comparable group of companies was observed over the same window",
+    "NO_CONTROL":
+        "nothing comparable was left untreated to measure against",
+    "NO_PRETREATMENT":
+        "the outcome was not observed for long enough before the change",
+    "INSUFFICIENT_PERIODS":
+        "too few periods were observed to separate the effect from noise",
+    "TREATMENT_UNDATED":
+        "the change could not be dated precisely enough to measure around",
+    "CONFOUNDED":
+        "another change happened in the same window and cannot be separated "
+        "from this one",
+    "OUTCOME_UNAVAILABLE":
+        "the outcome this question turns on is not published",
+}
+
+
+def refusal(state: str) -> str:
+    """One causal refusal, as a reason. Unknown states keep their words."""
+    return CAUSAL_REFUSAL.get(str(state or ""), "") or humanise(state)
+
+
 def enum_free(text: str) -> bool:
     """Would this string put a raw enum in front of a reader?
 
     Used by the tests that pin §17. An ALL_CAPS_TOKEN with an underscore is
     the shape that has actually reached a page here.
+
+    THE STRIP SET IS THE WHOLE TEST. It used to strip only `.,:;"'`, so a
+    token inside brackets -- "(1 PANEL_UNAVAILABLE)" -- kept its closing
+    paren, failed `isalpha`, and passed. That is exactly how it appeared, in
+    a live CEO answer, while the test asserting no answer contains a raw
+    enum was green. A guard that cannot fail on the real shape of the defect
+    is not a guard.
     """
-    for word in str(text or "").replace("(", " ").replace(")", " ").split():
-        bare = word.strip(".,:;\"'")
+    for word in str(text or "").split():
+        bare = word.strip(".,:;\"'()[]{}<>-—…!?/\\")
         if "_" in bare and bare.replace("_", "").isalpha() and bare.isupper():
             return False
     return True

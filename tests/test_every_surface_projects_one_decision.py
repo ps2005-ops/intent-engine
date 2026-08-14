@@ -105,6 +105,20 @@ def test_the_presentation_may_simplify_but_never_strengthen(surfaces):
             f"the deck used {phrase!r} on a {standing} reading")
 
 
+def test_the_enum_detector_catches_a_token_inside_brackets():
+    """The guard's own hole, pinned.
+
+    `enum_free` stripped only `.,:;"'`, so "(1 PANEL_UNAVAILABLE)" kept its
+    closing paren, failed `isalpha` and passed -- and that exact string
+    reached a live CEO answer while the test below was green.
+    """
+    assert not P.enum_free("could not answer (1 PANEL_UNAVAILABLE).")
+    assert not P.enum_free("state: MARKET_BRIDGE_MISSING")
+    assert not P.enum_free("[CAUSAL_NOT_RUN]")
+    assert P.enum_free("no comparable group was observed over the window.")
+    assert P.enum_free("Cloudflare, Inc. earns a per-seat subscription.")
+
+
 def test_no_surface_puts_a_raw_enum_in_front_of_a_reader(surfaces):
     for name in ("xray", "full", "deck"):
         for word in _text(surfaces[name]).split():
