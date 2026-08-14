@@ -224,11 +224,33 @@ def _route_refusal(dossier, causal_status: str):
                 "beliefs above already speak to.")
         else:
             gaps.append(f"{n} causal question(s) ended in {state}.")
-    guardrails = (
-        "Act on the direction the evidence supports, not on a magnitude: no "
-        "effect size has been identified, so any commitment should be sized "
-        "to survive the effect being smaller than expected.",
-    ) if gaps else ()
+    # THE GUARDRAIL NAMES THIS COMPANY'S OWN UNRESOLVED QUESTION.
+    #
+    # It used to be one fixed sentence, and across eight companies it
+    # produced two distinct answers to "what is the biggest risk" -- six of
+    # them word-for-word identical. A risk that reads the same for a bank and
+    # a mining company is not a risk assessment, and adding the company's
+    # name to it would be worse: the same generic claim wearing a label.
+    #
+    # So it is built from what is actually different here: how many questions
+    # went unanswered, on how much evidence, and what the company is exposed
+    # to. Where those are genuinely the same, the sentence is genuinely the
+    # same -- the fix is not to manufacture variety the evidence lacks.
+    guardrails = ()
+    if gaps:
+        unanswered = sum(states.values())
+        evidence = _count(dossier, "evidence")
+        beliefs = _count(dossier, "beliefs")
+        exposure = tuple(_block(dossier, "economic_state").get("ids") or ())
+        where = (f" while it stays exposed to {', '.join(exposure[:3])}"
+                 if exposure else "")
+        guardrails = (
+            f"Size any commitment to survive the effect being smaller than "
+            f"expected{where}: {unanswered} causal question(s) are open and "
+            f"the reading rests on {evidence} evidence row(s) under "
+            f"{beliefs} belief(s), so the direction is better supported than "
+            f"the magnitude.",
+        )
     return tuple(gaps), tuple(mdrs), tuple(vois), guardrails
 
 
