@@ -237,3 +237,54 @@ def test_an_invalid_snapshot_never_reaches_a_dossier(tmp_path):
     _publish(tmp_path, _snapshot("globex-inc"), name="acme-corp")
     a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
     assert a.snapshot is None or not a.usable
+
+
+# ---------------------------------------------------------------------------
+# THE OPERATOR SURFACE. A bridge state nobody can see is a bridge state
+# nobody will fix -- "no snapshot for this company" is the same sentence
+# whether the root is wrong, unset, or genuinely empty.
+# ---------------------------------------------------------------------------
+
+def _webapp(tmp_path):
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    config = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                       web_store_path=tmp_path / "web.jsonl",
+                       fi_store_path=tmp_path / "fi.jsonl",
+                       ci_store_path=tmp_path / "ci.jsonl")
+    return WebApp(config, transport=lambda *a, **k: None, resolver=False)
+
+
+def test_readyz_states_the_market_bridge(tmp_path, monkeypatch):
+    market = tmp_path / "market"
+    _publish(market, _snapshot("acme-corp"))
+    monkeypatch.setenv(B.ENV_VAR, str(market))
+    state = _webapp(tmp_path)._market_bridge_state()
+    assert state["state"] in (B.CURRENT, B.STALE)
+    assert state["snapshot_count"] == 1
+    assert state["configured"] is True
+
+
+def test_readyz_says_when_no_market_engine_is_configured(tmp_path,
+                                                         monkeypatch):
+    monkeypatch.delenv(B.ENV_VAR, raising=False)
+    state = _webapp(tmp_path)._market_bridge_state()
+    assert state["state"] == B.MISSING
+    assert state["configured"] is False
+
+
+def test_a_failure_to_assess_is_not_reported_as_no_market_data(tmp_path,
+                                                               monkeypatch):
+    # MISSING is a claim about the market engine. A probe that could not run
+    # has made no such claim, and saying it had would send an operator to
+    # look at the wrong system.
+    app = _webapp(tmp_path)
+    import intent_engine.demo_dossier.bridge as _b
+
+    def _boom(**_kw):
+        raise RuntimeError("disk went away")
+    monkeypatch.setattr(_b, "assess", _boom)
+    state = app._market_bridge_state()
+    assert state["state"] == "MARKET_BRIDGE_UNASSESSED"
+    assert state["state"] != B.MISSING
+    assert "disk went away" in state["reason"]
