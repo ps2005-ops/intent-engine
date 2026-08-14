@@ -1105,6 +1105,17 @@ class LearningStore:
         return tuple(r for r in self._rows()
                      if r.get("record") == RECONCILIATION)
 
+    def expectations(self) -> Tuple[dict, ...]:
+        """Every preregistered expectation, for the publisher to filter.
+
+        `expectation_ids` existed and this did not, so a caller wanting the
+        expectations themselves had nothing to call -- which is why the demo
+        snapshot was handed `information_priorities` instead and published
+        zero expectations for every company while 76 sat in the ledger.
+        """
+        return tuple(r for r in self._rows()
+                     if r.get("record") == EXPECTATION)
+
     def health(self) -> dict:
         rows = self._rows()
         counts: Dict[str, int] = {}

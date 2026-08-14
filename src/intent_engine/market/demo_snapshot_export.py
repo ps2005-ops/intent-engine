@@ -122,6 +122,16 @@ def _block(rows: Optional[Sequence[Any]], *names: str,
                 "note": missing_note or ("this subsystem did not run for "
                                          "this snapshot")}
     ids = [i for i in (_id_of(r, *names) for r in rows) if i]
+    rows = list(rows)
+    if rows and not ids:
+        # ROWS EXIST AND NONE COULD BE NAMED. Returning count 0 here would be
+        # indistinguishable from "the subsystem ran and found nothing" -- the
+        # same missing-vs-zero confusion this block's None branch exists to
+        # avoid, arriving through the other door. Say so instead.
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "note": f"{len(rows)} row(s) present but none carried any of "
+                        f"the identifying fields {names}; this is a wiring "
+                        f"defect, not an absence of findings"}
     return {"state": REF_AVAILABLE, "ids": ids[:MAX_REFS], "count": len(ids),
             "note": ""}
 
@@ -147,6 +157,11 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
                    economic_states: Optional[Sequence[Any]] = None,
                    demand_states: Optional[Sequence[Any]] = None,
                    beliefs: Optional[Sequence[Any]] = None,
+                   # Produced for 22 of 26 companies and already carried by
+                   # the strategic export, but this contract had no field for
+                   # it, so the founder product could not show a hidden state
+                   # the engine had already inferred.
+                   hidden_states: Optional[Sequence[Any]] = None,
                    theses: Optional[Sequence[Any]] = None,
                    thesis_revisions: Optional[Sequence[Any]] = None,
                    expectations: Optional[Sequence[Any]] = None,
@@ -193,6 +208,10 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
                                       "area"),
         "demand_state_refs": _block(demand_states, "id", "state_id"),
         "belief_refs": _block(beliefs, "belief_id", "id", "proposition"),
+        # A hidden state carries no id; its identity IS the posture,
+        # which is also the only part a CEO surface can use.
+        "hidden_state_refs": _block(hidden_states, "leading_state",
+                                    "hidden_state_id", "id"),
         "thesis_refs": _block(theses, "thesis_id", "id"),
         "thesis_revision_refs": _block(thesis_revisions, "revision_id", "id"),
         "expectation_refs": _block(expectations, "expectation_id", "id"),

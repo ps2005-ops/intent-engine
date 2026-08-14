@@ -146,6 +146,23 @@ def bundles(result, *, market_structures: Sequence[Any] = (),
     return out
 
 
+def _expectations_for(expectations: Sequence[Any], subject_id: str) -> list:
+    """This subject's expectations only.
+
+    An expectation belongs to whoever it is about. Publishing the whole
+    ledger under one company would attribute another company's preregistered
+    test to this one, which is the cross-subject contamination the export
+    wall exists to prevent.
+    """
+    out = []
+    for e in expectations or ():
+        subject = (e.get("subject") if isinstance(e, dict)
+                   else getattr(e, "subject", ""))
+        if str(subject or "") == str(subject_id):
+            out.append(e)
+    return out
+
+
 def _belongs(thesis: Any, subject_id: str) -> bool:
     """Whether this thesis is about this subject, by id and never by text."""
     if isinstance(thesis, dict):
@@ -187,6 +204,10 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
             evidence_rows: Sequence[Any] = (),
             economic_theses: Sequence[Any] = (),
             thesis_revisions: Sequence[Any] = (),
+            #: Real preregistered expectations. None (the default) keeps the
+            #: previous behaviour exactly, so a caller that does not pass them
+            #: is unchanged rather than silently publishing an empty block.
+            expectations: Optional[Sequence[Any]] = None,
             history_available: bool = True,
             limitations: Sequence[str] = ()) -> dict:
     """Write one sanitized export per company with something to say.
@@ -282,13 +303,25 @@ def publish(result, *, root=".", market_structures: Sequence[Any] = (),
                 market_run_id=str(getattr(result, "run_id", "") or ""),
                 runtime_sha=_runtime_sha(),
                 beliefs=bundle["beliefs"],
+                # ALREADY IN THE BUNDLE, and already shipped to the strategic
+                # export for 22 of 26 companies. The demo contract simply had
+                # no field for it, so the product showed nothing.
+                hidden_states=bundle["hidden_states"],
                 theses=[t for t in economic_theses
                         if _belongs(t, subject_id)],
                 thesis_revisions=_revisions_for(
                     thesis_revisions,
                     [t for t in economic_theses if _belongs(t, subject_id)]),
                 reconciliations=bundle["reconciliations"],
-                expectations=bundle["information_priorities"],
+                # `information_priorities` was passed here as the expectation
+                # block. It is a DIFFERENT thing, and it is empty in 26/26
+                # exports, while the ledger holds real preregistered
+                # expectations with falsifiers and evaluation windows. The
+                # snapshot was reading the wrong field, so "no expectations"
+                # was a wiring artefact and not a finding.
+                expectations=(_expectations_for(expectations, subject_id)
+                              if expectations is not None
+                              else bundle["information_priorities"]),
                 evidence_rows=evidence_rows,
                 # Deliberately NOT passed: this cycle does not compute them,
                 # and `None` is the honest statement of that. Passing `()`

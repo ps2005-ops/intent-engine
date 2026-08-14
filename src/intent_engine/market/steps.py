@@ -650,6 +650,12 @@ def learning_step(ctx: C.CycleContext) -> dict:
             # answers to "what changed your mind".
             economic_theses=store.thesis_snapshots(),
             thesis_revisions=store.thesis_revisions(),
+            # THE EXPECTATION LEG. The snapshot was handed
+            # `information_priorities` -- a different thing, empty in 26/26
+            # exports -- while the ledger held real preregistered
+            # expectations. Zero expectations was a wiring artefact, not a
+            # finding about the companies.
+            expectations=store.expectations(),
             history_available=True)
     except Exception as exc:  # noqa: BLE001 - see above
         payload["strategic_export"] = {"error": str(exc), "published": []}
