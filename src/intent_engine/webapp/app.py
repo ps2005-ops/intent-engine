@@ -5673,7 +5673,12 @@ class WebApp:
             # part of the 100, which is a legitimate state, not an unknown.
             store = DossierStore(self._runtime_root)
             previous = store.latest(key)
+            # The keys this company is legitimately known by, carried
+            # into the join. Without them the assembler compares the
+            # two sides' ids as strings and quarantines every real
+            # company as WRONG_COMPANY_EVIDENCE -- found live.
             dossier = assemble(market, founder, cohort=cohort,
+                               known_as=tuple([key, *_aliases]),
                                manifest_version=manifest_version,
                                now=__import__("datetime").date.today()
                                .isoformat(), previous=previous)

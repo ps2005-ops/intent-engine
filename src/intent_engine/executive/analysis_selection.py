@@ -637,9 +637,11 @@ def select(company_id: str = "", *, name: str = "", domain: str = "",
            "validation manifest, so the analysis is selected from the "
            "published record alone and is not specific to its economics")
     if considered and len(considered) > 1:
+        # Ends with a full stop: this string is rendered on its own in the
+        # X-Ray's "Why this decision" panel, where the missing one showed.
         why = (f"{why}. It was ranked above "
-               f"{considered[1]['archetype'].replace('_', ' ').lower()} "
-               f"on the same evidence")
+               f"{considered[1]['archetype'].replace('_', ' ').lower()} on "
+               f"the same evidence.")
     transmission, no_exposure = _transmission(profile, facts, archetype)
     causal_question, why_causal = _causal(profile, archetype, facts)
     return AnalysisSelection(

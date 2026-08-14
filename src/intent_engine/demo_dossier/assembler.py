@@ -147,12 +147,40 @@ def _tenant_leak(market: MarketDemoSnapshot,
 
 
 def _quarantine(market: MarketDemoSnapshot, founder: FounderDemoSnapshot,
-                temporal: str, population: str) -> Tuple[str, ...]:
-    """Every condition that disqualifies this dossier from being shown."""
+                temporal: str, population: str,
+                known_as: Tuple[str, ...] = ()) -> Tuple[str, ...]:
+    """Every condition that disqualifies this dossier from being shown.
+
+    `known_as` is the set of keys the CALLER has already established this
+    company is legitimately known by -- the manifest id, the key derived
+    from the legal name, the key derived from the domain.
+
+    WHY THIS PARAMETER EXISTS. The two sides key the same company
+    differently: the founder files under the manifest id (`cloudflare`), the
+    market publishes under the key from the legal name (`cloudflare-inc`).
+    `bridge.for_company` was taught to try both, and each candidate is still
+    identity-checked against the snapshot filed under that key -- so by the
+    time a snapshot reaches here, its identity has been verified. This
+    function then compared the two ids as STRINGS and stamped every real
+    company WRONG_COMPANY_EVIDENCE. Live on Render, Cloudflare's dossier
+    joined both sides correctly and was quarantined for carrying another
+    company's evidence, which was the third door the same collision has come
+    through.
+
+    THE CHECK IS NOT WEAKENED. With no `known_as` the rule is exactly what
+    it was, so nothing gets looser by default; and an id that is not in the
+    caller's own verified alias set still quarantines. The property that
+    matters -- one company's intelligence can never appear under another's
+    name -- is unchanged, because membership of `known_as` is established by
+    resolving THIS company, never by comparing it to the snapshot.
+    """
     reasons = []
+    identities = {k for k in known_as if k}
+    if founder.company_id:
+        identities.add(founder.company_id)
     if (market.has_content and founder.has_content and market.company_id
             and founder.company_id
-            and market.company_id != founder.company_id):
+            and market.company_id not in identities):
         reasons.append(V.WRONG_COMPANY_EVIDENCE)
     if _tenant_leak(market, founder):
         reasons.append(V.TENANT_LEAK)
@@ -261,8 +289,8 @@ def _effective_cutoff(market: MarketDemoSnapshot,
 
 def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
              now: str = "", cohort: str = "", manifest_version: str = "",
-             previous: Optional[CompanyDemoDossier] = None
-             ) -> CompanyDemoDossier:
+             previous: Optional[CompanyDemoDossier] = None,
+             known_as: Tuple[str, ...] = ()) -> CompanyDemoDossier:
     """Join two snapshots into one materialized view. Deterministic.
 
     Either side may be unavailable. Neither absence is an error, and neither
@@ -271,7 +299,8 @@ def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
     """
     temporal = temporal_compatibility(market, founder)
     population = population_compatibility(market, founder)
-    reasons = _quarantine(market, founder, temporal, population)
+    reasons = _quarantine(market, founder, temporal, population,
+                          known_as=tuple(known_as))
     quarantined = bool(reasons)
 
     surfaces = {name: founder.product_surfaces.get(name, V.UNMEASURED)

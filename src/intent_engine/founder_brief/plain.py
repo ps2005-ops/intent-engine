@@ -165,6 +165,21 @@ def humanise(text: str) -> str:
     return str(text or "").replace("_", " ").lower()
 
 
+def _sentence(text: str) -> str:
+    """A stored fragment, as a sentence: capitalised, and stopped.
+
+    The composed fields are written as clauses so they can be joined into
+    larger sentences upstream. Where a surface shows one on its own it needs
+    both ends, and doing that at each call site is how one of them ends up
+    without it -- which is what shipped to the live Key risk panel.
+    """
+    text = str(text or "").strip()
+    if not text:
+        return ""
+    text = text[0].upper() + text[1:]
+    return text if text[-1] in ".?!" else text + "."
+
+
 def _get(decision, name, default=None):
     """Read a field off a FounderDecision or off its serialised dict."""
     if isinstance(decision, dict):
@@ -192,10 +207,15 @@ def key_risk(decision) -> str:
     for scenario in (_get(decision, "scenarios", ()) or ()):
         row = scenario if isinstance(scenario, dict) else {}
         if row.get("name") == "ADVERSARIAL":
-            second = row.get("second_order", "")
-            stop = row.get("kill_switch", "")
+            second = str(row.get("second_order", "") or "")
+            stop = str(row.get("kill_switch", "") or "")
             if second:
-                return (f"{second}. {stop}" if stop else str(second))
+                # Both fragments are stored lowercase, so joining them
+                # produced "...stays committed. withdraw rather than
+                # escalate:" on the live page -- a sentence starting in
+                # lower case, mid-paragraph.
+                return (f"{_sentence(second)} {_sentence(stop)}" if stop
+                        else _sentence(second))
     falsifier = str(_get(decision, "falsifier", "") or "")
     return falsifier
 
