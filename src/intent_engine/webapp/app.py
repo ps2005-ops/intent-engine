@@ -473,6 +473,9 @@ class WebApp:
         # whose conflation hid 22 silently refused dossiers.
         from intent_engine.demo_dossier.telemetry import DossierTelemetry
         self._demo_telemetry = DossierTelemetry()
+        #: The last per-company bridge reading, for the operator surface. Not
+        #: a cache: the dossier build always re-assesses.
+        self._market_bridge_last: dict = {}
         self.fi = FounderIntelligenceService(config.fi_store_path)
         # THE REASONING BACKEND WAS NEVER WIRED IN.
         #
@@ -5346,16 +5349,27 @@ class WebApp:
                 context=context, scope=None,
                 independence=_assessed, learning=_learning))
 
-            # The market snapshot, if this deployment shares a transport with
-            # a market engine. Absent is the normal case and reads as such.
-            market_payload = dt.payload_from_file(
-                dt.market_snapshot_path(self._runtime_root, key))
-            market = (read_market_snapshot(market_payload,
-                                           expected_company=key)
-                      if market_payload is not None else None)
+            # The market snapshot, through the CONFIGURED bridge.
+            #
+            # This read used `self._runtime_root` -- the founder's own
+            # persistent disk. The market engine publishes under its own root,
+            # so the two never met: 26 real snapshots sat on disk while every
+            # dossier reported "no market snapshot has been published", which
+            # is a true sentence about the wrong directory and therefore
+            # raised nothing for months.
+            from intent_engine.demo_dossier import bridge as _bridge
+            assessment = _bridge.for_company(key)
+            self._market_bridge_last = assessment.as_dict()
+            market = assessment.snapshot if assessment.usable else None
             if market is None:
                 from intent_engine.demo_dossier import market_unavailable
+                # The bridge's own reason, which names WHICH of the four
+                # states this is. "Nothing was published" and "the root is
+                # not configured" and "the bytes could not be read" are
+                # different repairs, and the founder surface said the same
+                # sentence for all three.
                 market = market_unavailable(
+                    assessment.reason or
                     "No market demo snapshot has been published for this "
                     "company in this deployment. The market blocks are "
                     "unavailable; nothing about the market was measured.",
@@ -5426,6 +5440,13 @@ class WebApp:
                                       "boot_count": self._storage["boot_count"],
                                       "accepting_feedback":
                                           self.feedback_available()},
+                       # THE MARKET BRIDGE, STATED AT STARTUP. Whether this
+                       # deployment can read the market engine's output is
+                       # not discoverable from a dossier that correctly
+                       # reports "nothing published for this company" -- that
+                       # sentence is identical whether the root is wrong,
+                       # unset, or genuinely empty.
+                       "market_bridge": self._market_bridge_state(),
                        "capabilities": self._capability_state()}
             if degraded:
                 payload["degraded_reason"] = (
@@ -5438,6 +5459,25 @@ class WebApp:
             return ("503 Service Unavailable",
                     [("Content-Type", "application/json")],
                     json.dumps({"status": "not ready", "reason": str(exc)}))
+
+    def _market_bridge_state(self) -> dict:
+        """The configured market bridge, assessed now rather than at boot.
+
+        Assessed per request because the market engine writes on its own
+        schedule from another process: a value cached at boot would report
+        MISSING for the whole life of a web service that started before the
+        first market cycle of the day.
+
+        A failure to assess is its own state. Returning MISSING here would
+        claim the market engine published nothing, which is a statement about
+        the market and not about this probe.
+        """
+        from intent_engine.demo_dossier import bridge as _bridge
+        try:
+            return _bridge.assess()
+        except Exception as exc:                                # noqa: BLE001
+            return {"state": "MARKET_BRIDGE_UNASSESSED",
+                    "reason": f"the bridge could not be assessed: {exc}"}
 
     def _capability_state(self) -> dict:
         """Sanitized, OBSERVED runtime capability state — never a restatement

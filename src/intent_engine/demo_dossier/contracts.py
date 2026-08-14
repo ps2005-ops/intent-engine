@@ -178,7 +178,12 @@ MARKET_ALLOWED: Dict[str, Any] = {
     "economic_state_refs": _REF_BLOCK,
     "demand_state_refs": _REF_BLOCK,
     "belief_refs": _REF_BLOCK,
-    "hidden_state_refs": _REF_BLOCK,
+    # `unidentified` counts hidden states the market engine TRACKED and could
+    # not identify, because their posterior is uniform. It is not a ref and
+    # not a zero: without it, "no posture" and "a posture nobody could
+    # distinguish from the prior" are the same bytes on this side, and the
+    # market engine currently reports the latter for 22 of 26 companies.
+    "hidden_state_refs": dict(_REF_BLOCK, unidentified=...),
     "thesis_refs": _REF_BLOCK,
     "thesis_revision_refs": _REF_BLOCK,
     "expectation_refs": _REF_BLOCK,
