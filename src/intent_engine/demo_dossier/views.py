@@ -143,6 +143,32 @@ def detail(dossier: CompanyDemoDossier) -> Dict[str, Any]:
     return payload
 
 
+def with_executive_read(payload: Dict[str, Any],
+                        read: Any) -> Dict[str, Any]:
+    """Attach a composed executive read to a detail payload.
+
+    THE COMPOSITION HAPPENS IN THE CALLER, NOT HERE. The synthesis is
+    founder-side reasoning and this package is the neutral seam; importing
+    it — even inside a function — puts founder logic in the seam's import
+    graph, and the structural guard tokenizes the source rather than reading
+    the comment above it, so it catches exactly that. It caught this.
+
+    What this function owns is the SHAPE: the read travels on the same
+    payload as the blocks it was computed from, so a surface cannot pair a
+    recommendation with evidence from a different assembly.
+
+    `read` of None is a STATE, not an omission: "the read could not be
+    built" must not be indistinguishable from "this company has no read".
+    """
+    out = dict(payload)
+    out["executive_read"] = read if read is not None else {
+        "state": "EXECUTIVE_READ_UNAVAILABLE",
+        "reason": ("no executive read was composed for this dossier in this "
+                   "deployment; this is a statement about the composer, not "
+                   "about the company")}
+    return out
+
+
 def not_found(company_id: str) -> Dict[str, Any]:
     """A company with no dossier is a STATE, not an error page.
 

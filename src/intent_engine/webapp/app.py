@@ -3644,7 +3644,34 @@ class WebApp:
             return ("404 Not Found",
                     [("Content-Type", "application/json")],
                     json.dumps(views.not_found(company_id)))
-        return self._ok_json(views.detail(dossier))
+        return self._ok_json(
+            views.with_executive_read(views.detail(dossier),
+                                      self._executive_read(dossier)))
+
+    def _executive_read(self, dossier):
+        """Compose the FounderDecision for one dossier. No model call.
+
+        Composed HERE rather than inside `demo_dossier.views` because the
+        synthesis is founder-side reasoning and that package is the neutral
+        seam — the structural guard tokenizes its imports and rejects one,
+        which is how this ended up in the right place.
+
+        The previous version is passed so `what_changed` compares against a
+        real earlier reading rather than announcing a change on every page
+        load. A composer failure returns None, which the view renders as a
+        stated absence: "could not be composed" is about the composer, and
+        must never read as "this company has no decision".
+        """
+        try:
+            from intent_engine.executive.decision_synthesis import compose
+            previous = self._demo_dossier_store().previous(
+                dossier.company_id, before=dossier.dossier_version) \
+                if hasattr(self._demo_dossier_store(), "previous") else None
+            return compose(dossier, previous=previous).as_dict()
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("executive read not composed for %s",
+                         dossier.company_id)
+            return None
 
     def _runtime_sha(self) -> str:
         from intent_engine._version import version_info

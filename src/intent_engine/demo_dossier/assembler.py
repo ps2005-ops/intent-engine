@@ -236,6 +236,15 @@ def _block_view(snapshot, view) -> dict:
         out[name] = {"state": blk.state, "ids": list(blk.ids),
                      "count": blk.count, "note": blk.note,
                      "is_measured_zero": blk.is_zero}
+        # The producer's outcome histogram, projected TYPED rather than left
+        # in the note. Every live causal block is a refusal, and a surface
+        # that has to parse prose to tell a refusal from an estimate will
+        # eventually render one as the other.
+        if blk.states:
+            out[name]["states"] = dict(blk.states)
+            out[name]["is_refusal"] = blk.is_refusal
+        if blk.unidentified:
+            out[name]["unidentified"] = blk.unidentified
     return out
 
 

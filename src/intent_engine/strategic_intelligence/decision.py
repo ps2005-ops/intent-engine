@@ -338,6 +338,59 @@ class FounderDecision:
     #: how the options were derived -- "topic" or "alternative". Internal.
     basis: str = ""
 
+    # --- the canonical market reading -------------------------------------
+    #
+    # ADDITIVE, AND DELIBERATELY ON THIS OBJECT RATHER THAN A SECOND ONE.
+    # There is one decision per company. A `FounderDecisionV2` beside this
+    # would give two surfaces two answers to "what do you recommend", and
+    # the whole point of the object is that they cannot disagree.
+    #
+    # Every field below is computable with ZERO model calls, from the market
+    # dossier. They default empty, so the existing report-derived
+    # construction is unchanged by their presence.
+    company: str = ""
+    decision_question: str = ""
+    current_read: str = ""
+    #: SUPPORTED / BOUNDED / UNMEASURABLE / REFUSED. Governs the WORDING the
+    #: executive read is allowed to use -- see `decision_synthesis`.
+    standing: str = ""
+    supporting_evidence_ids: tuple = ()
+    contradicting_evidence_ids: tuple = ()
+    #: Distinct ORIGINS, not documents. Fifteen syndicated copies of one
+    #: press release are one account, and a count that conflates them is the
+    #: single most misleading number an executive surface can show.
+    independent_origins: int = 0
+    economic_context: tuple = ()
+    economic_state: str = ""
+    hidden_state: str = ""
+    expectations: tuple = ()
+    reconciliations: tuple = ()
+    #: The causal state as the engine reported it -- an ESTIMATE state or a
+    #: named refusal. Never collapsed to "no effect".
+    causal_status: str = ""
+    causal_note: str = ""
+    historical_status: str = ""
+    thesis: str = ""
+    thesis_history: tuple = ()
+    adversary: tuple = ()
+    scenarios: tuple = ()
+    assumptions: tuple = ()
+    information_gaps: tuple = ()
+    minimum_data_requests: tuple = ()
+    minimum_viable_experiments: tuple = ()
+    value_of_information: tuple = ()
+    guardrails: tuple = ()
+    kill_switches: tuple = ()
+    monitoring: tuple = ()
+    next_review: str = ""
+    what_changed: tuple = ()
+    what_changed_mind: tuple = ()
+    provenance: tuple = ()
+    #: Where this decision came from: the market dossier, the strategic
+    #: report, or both. An executive surface may show it; the point is that
+    #: "computed with no model call" is a fact about the answer, not a mode.
+    derived_from: str = ""
+
     @property
     def is_ready(self) -> bool:
         return self.readiness == DECISION_READY
@@ -408,6 +461,46 @@ class FounderDecision:
             # derived, so a renderer never has to re-derive them and drift
             "headline": self.headline,
             "undecided_question": self.undecided_question,
+            # --- the market reading -------------------------------------
+            # EMITTED UNCONDITIONALLY, including when empty. A field that
+            # appears only once it is populated cannot be told apart, on the
+            # wire, from a producer too old to send it -- and a surface then
+            # has to guess which. Emitting the empty value states "computed,
+            # and there is nothing here".
+            "company": self.company,
+            "decision_question": self.decision_question,
+            "current_read": self.current_read,
+            "standing": self.standing,
+            "supporting_evidence_ids": list(self.supporting_evidence_ids),
+            "contradicting_evidence_ids": list(
+                self.contradicting_evidence_ids),
+            "independent_origins": self.independent_origins,
+            "economic_context": list(self.economic_context),
+            "economic_state": self.economic_state,
+            "hidden_state": self.hidden_state,
+            "expectations": list(self.expectations),
+            "reconciliations": list(self.reconciliations),
+            "causal_status": self.causal_status,
+            "causal_note": self.causal_note,
+            "historical_status": self.historical_status,
+            "thesis": self.thesis,
+            "thesis_history": list(self.thesis_history),
+            "adversary": list(self.adversary),
+            "scenarios": list(self.scenarios),
+            "assumptions": list(self.assumptions),
+            "information_gaps": list(self.information_gaps),
+            "minimum_data_requests": list(self.minimum_data_requests),
+            "minimum_viable_experiments": list(
+                self.minimum_viable_experiments),
+            "value_of_information": list(self.value_of_information),
+            "guardrails": list(self.guardrails),
+            "kill_switches": list(self.kill_switches),
+            "monitoring": list(self.monitoring),
+            "next_review": self.next_review,
+            "what_changed": list(self.what_changed),
+            "what_changed_mind": list(self.what_changed_mind),
+            "provenance": list(self.provenance),
+            "derived_from": self.derived_from,
         }
 
 

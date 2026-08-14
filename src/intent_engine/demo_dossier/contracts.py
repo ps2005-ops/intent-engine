@@ -97,6 +97,15 @@ class RefBlock:
     #: otherwise silently restate itself as a smaller population.
     count: int = 0
     note: str = ""
+    #: The producer's own outcome histogram, when it publishes one, e.g.
+    #: `{"PANEL_UNAVAILABLE": 5}`. TYPED, because the alternative is parsing
+    #: the note: every live causal block is a refusal, and a surface that
+    #: cannot tell a refusal from an estimate without reading prose will
+    #: eventually render one as the other.
+    states: Mapping = field(default_factory=dict)
+    #: Rows the producer tracked and could not identify -- a hidden state
+    #: whose posterior is uniform. Neither a finding nor an absence.
+    unidentified: int = 0
 
     @property
     def available(self) -> bool:
@@ -110,9 +119,26 @@ class RefBlock:
         """
         return self.state == REF_AVAILABLE and self.count == 0
 
+    @property
+    def is_refusal(self) -> bool:
+        """The producer ran, produced rows, and every one declines to answer.
+
+        This is NOT `is_zero`: a refusal has rows, each naming the
+        prerequisite it lacked. The two need opposite treatment downstream --
+        a zero ends an enquiry, a refusal starts one (what would resolve it,
+        what is that worth).
+        """
+        return bool(self.states) and all(
+            V.is_causal_refusal(s) for s in self.states)
+
     def as_dict(self) -> dict:
-        return {"state": self.state, "ids": list(self.ids),
-                "count": self.count, "note": self.note}
+        out = {"state": self.state, "ids": list(self.ids),
+               "count": self.count, "note": self.note}
+        if self.states:
+            out["states"] = dict(self.states)
+        if self.unidentified:
+            out["unidentified"] = self.unidentified
+        return out
 
 
 #: A reference list is bounded. A dossier that carried every evidence id for
@@ -134,8 +160,16 @@ def _ref_block(node: Any) -> RefBlock:
     raw_count = node.get("count")
     count = raw_count if isinstance(raw_count, int) and raw_count >= 0 \
         else len(ids)
+    raw_states = node.get("states")
+    states = ({str(k): int(v) for k, v in raw_states.items()
+               if isinstance(v, int)}
+              if isinstance(raw_states, Mapping) else {})
+    raw_unidentified = node.get("unidentified")
     return RefBlock(state=state, ids=ids, count=count,
-                    note=str(node.get("note") or ""))
+                    note=str(node.get("note") or ""), states=states,
+                    unidentified=(raw_unidentified
+                                  if isinstance(raw_unidentified, int)
+                                  and raw_unidentified >= 0 else 0))
 
 
 def _empty_ref(note: str) -> RefBlock:
@@ -190,7 +224,12 @@ MARKET_ALLOWED: Dict[str, Any] = {
     "reconciliation_refs": _REF_BLOCK,
     "contradiction_refs": _REF_BLOCK,
     "causal_question_refs": _REF_BLOCK,
-    "causal_result_refs": _REF_BLOCK,
+    # `states` carries the resolution-state histogram, e.g.
+    # {"PANEL_UNAVAILABLE": 5}. Without it a surface cannot tell an estimate
+    # from a refusal without dereferencing every id -- and the refusal is the
+    # case a CEO screen most needs to render honestly, because "the engine
+    # asked and the data could not answer" is a finding, not an absence.
+    "causal_result_refs": dict(_REF_BLOCK, states=...),
     "replay_refs": _REF_BLOCK,
     "adversary_refs": _REF_BLOCK,
     "learning_summary": _SUMMARY,

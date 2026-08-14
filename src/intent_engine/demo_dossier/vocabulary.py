@@ -263,3 +263,30 @@ SURFACE_STATES = (UNMEASURED, "PRESENT", "ABSENT")
 PRODUCT_SURFACES = ("analysis_surface", "provenance_surface", "thesis_surface",
                     "causal_surface", "replay_surface", "adversary_surface",
                     "decision_surface", "mdr_mve_surface")
+
+
+# --- causal resolution states -------------------------------------------------
+#
+# DECLARED TWICE ON PURPOSE, and this is the second copy. The market engine
+# owns `causal_question.STATES`; this seam may not import the market package
+# (see the ADR and the structural guard), so the two ends necessarily restate
+# it. Only the ESTIMATE states are listed, because that is the short list and
+# the safe direction: a state this side does not recognise is NOT read as an
+# estimate, so a new refusal added upstream degrades to "no effect was
+# estimated" rather than to a fabricated effect.
+
+#: The only states in which an effect was actually estimated.
+CAUSAL_ESTIMATE_STATES = frozenset({"ESTIMATE_BOUNDED", "ESTIMATE_SUPPORTED"})
+
+
+def is_causal_estimate(state: str) -> bool:
+    return str(state) in CAUSAL_ESTIMATE_STATES
+
+
+def is_causal_refusal(state: str) -> bool:
+    """Anything that is not an estimate. The engine ran and declined.
+
+    Never read as "no effect": `NOT_AN_ESTIMATE` upstream exists to prevent
+    exactly that reading, and this is its counterpart on the consuming side.
+    """
+    return not is_causal_estimate(state)

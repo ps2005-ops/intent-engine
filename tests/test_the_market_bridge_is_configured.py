@@ -288,3 +288,77 @@ def test_a_failure_to_assess_is_not_reported_as_no_market_data(tmp_path,
     assert state["state"] == "MARKET_BRIDGE_UNASSESSED"
     assert state["state"] != B.MISSING
     assert "disk went away" in state["reason"]
+
+
+# ---------------------------------------------------------------------------
+# A REFUSAL IS NOT A ZERO, AND IT MUST CROSS TYPED.
+#
+# Every live causal block is PANEL_UNAVAILABLE. A surface that has to parse
+# the note to tell a refusal from an estimate will eventually render one as
+# the other.
+# ---------------------------------------------------------------------------
+
+def _dossier(tmp_path, **blocks):
+    from intent_engine.demo_dossier import assemble, founder_unavailable
+    _publish(tmp_path, _snapshot(**blocks))
+    a = B.for_company("acme-corp", root=tmp_path, today="2026-08-14")
+    assert a.state == B.CURRENT
+    return assemble(a.snapshot,
+                    founder_unavailable("no founder run",
+                                        company_id="acme-corp"),
+                    cohort="", manifest_version="", now="2026-08-14",
+                    previous=None)
+
+
+def test_a_causal_refusal_crosses_with_its_state_histogram(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1", "r2"], "count": 2, "note": "",
+        "states": {"PANEL_UNAVAILABLE": 2}})
+    block = d.market_block["blocks"]["causal_results"]
+    assert block["states"] == {"PANEL_UNAVAILABLE": 2}
+    assert block["is_refusal"] is True
+    # It RAN and produced rows. Calling this a measured zero would say the
+    # engine looked and found no effect, which is a different claim.
+    assert block["is_measured_zero"] is False
+    assert d.quality_block["unknown_fields"] == []
+
+
+def test_an_estimate_is_not_read_as_a_refusal(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1"], "count": 1, "note": "",
+        "states": {"ESTIMATE_SUPPORTED": 1}})
+    assert d.market_block["blocks"]["causal_results"]["is_refusal"] is False
+
+
+def test_a_mixed_block_is_not_wholly_a_refusal(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1", "r2"], "count": 2, "note": "",
+        "states": {"ESTIMATE_BOUNDED": 1, "PANEL_UNAVAILABLE": 1}})
+    assert d.market_block["blocks"]["causal_results"]["is_refusal"] is False
+
+
+def test_an_unrecognised_state_degrades_to_refusal_never_to_an_estimate(
+        tmp_path):
+    # The safe direction. A refusal state added upstream that this side has
+    # never heard of must read as "no effect was estimated", never as one.
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": ["r1"], "count": 1, "note": "",
+        "states": {"SOME_NEW_UPSTREAM_REFUSAL": 1}})
+    assert d.market_block["blocks"]["causal_results"]["is_refusal"] is True
+
+
+def test_an_unidentified_hidden_state_crosses_its_count(tmp_path):
+    d = _dossier(tmp_path, hidden_state_refs={
+        "state": "AVAILABLE", "ids": [], "count": 0, "unidentified": 3,
+        "note": "3 tracked, none identified: the posterior is uniform"})
+    block = d.market_block["blocks"]["hidden_states"]
+    assert block["unidentified"] == 3
+    assert block["is_measured_zero"] is True
+    assert d.quality_block["unknown_fields"] == []
+
+
+def test_a_block_without_a_histogram_does_not_invent_one(tmp_path):
+    d = _dossier(tmp_path, causal_result_refs={
+        "state": "AVAILABLE", "ids": [], "count": 0, "note": ""})
+    block = d.market_block["blocks"]["causal_results"]
+    assert "states" not in block and "is_refusal" not in block
