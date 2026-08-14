@@ -123,3 +123,28 @@ def test_posture_cannot_specialise_an_unclassified_company():
                     facts=F(evidence=20, hidden_state="COST_CUTTING"))
     assert sel.archetype == "UNKNOWN"
     assert sel.signals == ()
+
+
+# --- the question must be grammatical for every driver it names ------------
+
+def test_the_question_agrees_with_a_plural_driver():
+    """The driver and cost slots hold noun phrases that may be singular
+    ("customer count") or plural ("orders and backlog"), and no single
+    conjugation is correct for both. "supply chain and component availability
+    IS committed before the orders and backlog it is meant to serve ARRIVES"
+    reached a customer, so the tails put the slot where it governs no verb.
+    """
+    from intent_engine.validation import load as load_manifest
+    manifest = load_manifest()
+    bad = ("serve arrives", "availability is committed", "backlog is known",
+           "availability sets")
+    for company in manifest.companies:
+        for posture in ("", "CAPACITY_CONSTRAINED", "GROWING", "COST_CUTTING"):
+            question = AS.select(
+                company.company_id, name=company.canonical_name,
+                manifest=manifest,
+                facts=F(evidence=20, hidden_state=posture)).decision_question
+            for phrase in bad:
+                assert phrase not in question, (
+                    f"{company.company_id}/{posture or 'no posture'}: "
+                    f"{question}")

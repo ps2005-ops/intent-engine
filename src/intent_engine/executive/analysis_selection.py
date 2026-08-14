@@ -464,14 +464,20 @@ def _decision_question(profile, archetype: str, facts: RecordFacts) -> str:
     cost = costs[0] if costs else "the cost base"
     tail = {
         "PRICING": f"without losing more {driver} than the price gains",
-        "CAPACITY": f"given that {cost} is committed before the {driver} it "
-                    f"is meant to serve arrives",
+        # PHRASED TO AVOID SUBJECT-VERB AGREEMENT. The driver and cost slots
+        # hold noun phrases that may be singular ("customer count") or plural
+        # ("orders and backlog"), and no single conjugation is correct for
+        # both -- "supply chain and component availability IS committed
+        # before the orders and backlog it is meant to serve ARRIVES" reached
+        # a customer. Every tail below therefore puts the slot in a position
+        # where it governs no verb.
+        "CAPACITY": f"given that the commitment to {cost} is made before the "
+                    f"{driver} it is meant to serve",
         "CAPITAL_ALLOCATION": f"given what the same capital would earn "
                               f"against {driver} elsewhere",
         "COST_STRUCTURE": f"without cutting into the {driver} the cost base "
                           f"exists to produce",
-        "SUPPLY_CHAIN": f"given that {cost} sets what can actually be "
-                        f"delivered",
+        "SUPPLY_CHAIN": f"given what {cost} allows to be delivered",
         "R&D_ROADMAP": f"given how long it takes a programme to reach "
                        f"{driver}",
         "REGULATORY_RESPONSE": f"before the decision changes what may be "
@@ -484,8 +490,8 @@ def _decision_question(profile, archetype: str, facts: RecordFacts) -> str:
         "PRODUCTIZATION": f"given what it displaces in the existing {driver}",
         "MARKET_ENTRY": f"given what the established markets return on the "
                         f"same {cost}",
-        "INVENTORY": f"given that the position is set before {driver} is "
-                     f"known",
+        "INVENTORY": f"given that the position is set before {driver} can be "
+                     f"observed",
         "COMPETITIVE_RESPONSE": f"before the move reaches {driver}",
         "M&A": f"measured against building the same {driver} internally",
     }.get(archetype, "")
