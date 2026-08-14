@@ -271,10 +271,11 @@ def resolve(company_name: str = "", website: str = "") -> NameEntry:
     filer = _registrant(company_name)
     if filer:
         # EDGAR titles carry filing-index artifacts -- "TOYOTA MOTOR CORP/"
-        # ends in a slash because the index path did. Strip the punctuation
-        # the registrant did not put in its own name; leave the casing, which
-        # is how the registrant is actually recorded.
-        title = str(filer.get("title") or "").strip().rstrip("/ .,-").strip()
+        # ends in a slash because the index path did. Strip ONLY the slash:
+        # a first pass also stripped trailing periods and turned "Vale S.A."
+        # into "Vale S.A", which reached the live page. A period at the end
+        # of a legal name is usually part of it.
+        title = str(filer.get("title") or "").strip().rstrip("/").strip()
         return NameEntry(
             IDENTIFIED_NO_DOMAIN, company_name=title or company_name,
             ticker=filer.get("ticker") or "",

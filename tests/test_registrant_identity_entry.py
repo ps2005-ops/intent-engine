@@ -54,6 +54,13 @@ def test_the_filing_index_artifact_never_reaches_a_reader(registrant):
     assert entry.company_name == "TOYOTA MOTOR CORP"
 
 
+def test_a_legal_name_keeps_its_own_punctuation(registrant):
+    """Stripping the index artifact must not eat the name. A first pass
+    stripped trailing periods too and put "Vale S.A" on the live page."""
+    entry = NE.resolve(company_name="Vale S.A.")
+    assert entry.company_name == "Vale S.A."
+
+
 def test_identified_is_not_resolved(registrant):
     """`resolved` means "we can start the analysis", and we cannot: there is
     no domain. Conflating the two would send retrieval at the demo site."""
