@@ -756,6 +756,14 @@ class WebApp:
             return self._ok_json(self._demo_telemetry.as_dict())
         if path == "/demo-dossiers" and method == "GET":
             return self._demo_dossier_index()
+        # THE RENDERED SCREENS, BEFORE THE JSON PREFIX MATCH.
+        #
+        # `/demo-dossiers/<c>` is a prefix match, so it would swallow
+        # `/demo-dossiers/<c>/xray` and hand "cloudflare/xray" to the store
+        # as a company id -- a 404 that reads like the company is missing.
+        if route == ("GET", "demo-dossiers", 3) and parts[2] in (
+                "xray", "full", "deck"):
+            return self._decision_screen(parts[1], parts[2])
         if path.startswith("/demo-dossiers/") and method == "GET":
             return self._demo_dossier_detail(path[len("/demo-dossiers/"):])
         if path == "/onboarding" and method == "GET":
@@ -3819,6 +3827,63 @@ class WebApp:
         # single-decision design exists to prevent.
         payload["ceo_questions"] = self._ceo_questions(dossier)
         return self._ok_json(payload)
+
+    def _decision_screen(self, company_id: str, which: str):
+        """The X-Ray, the full analysis or the presentation, rendered.
+
+        THREE ROUTES, ONE DECISION. All three compose the same
+        `FounderDecision` from the same dossier and then project it; none of
+        them reasons. That is what makes the cross-surface consistency check
+        a property of the code rather than a thing to keep re-verifying: a
+        difference between these pages could only come from a rendering bug,
+        never from two answers.
+
+        Open to anyone who can reach the dossier index, like the JSON detail
+        beside it -- these carry no reference ids and nothing tenant-scoped,
+        which is the same reason `views` withholds unconditionally.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.demo_dossier.store import company_key
+        from intent_engine.founder_brief import deep, xray
+
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            # WHICH ABSENCE. A bare 404 cannot tell "never analysed here"
+            # from "analysed and refused", and at 100 companies that is the
+            # whole signal.
+            return self._error_page(
+                404, f"No analysis is stored here for {company_id!r}. That "
+                     f"means this deployment has not run it — not that the "
+                     f"company was analysed and found empty.")
+        decision = self._executive_read(dossier)
+        if decision is None:
+            return self._error_page(
+                500, "The decision for this company could not be composed. "
+                     "That is a fault on this side, not a finding about the "
+                     "company.")
+        stamp = (f"Market snapshot {dossier.market_snapshot_id} · evidence "
+                 f"cutoff {dossier.effective_evidence_cutoff}")
+        base = f"/demo-dossiers/{company_id}"
+        company = dossier.canonical_name or company_id
+        if which == "full":
+            body = deep.full_analysis(
+                decision, company=company, stamp=stamp,
+                links=[("Executive X-Ray", f"{base}/xray"),
+                       ("Presentation", f"{base}/deck")])
+        elif which == "deck":
+            body = deep.presentation(
+                decision, company=company, stamp=stamp,
+                links=[("Executive X-Ray", f"{base}/xray"),
+                       ("Full analysis", f"{base}/full")])
+        else:
+            body = xray.render(
+                decision, company=company, stamp=stamp,
+                crossing=str(getattr(dossier, "crossing", "") or ""),
+                links=[("Full analysis", f"{base}/full"),
+                       ("Presentation", f"{base}/deck")])
+        return self._html(self._page(company, body, None, ""))
 
     def _ceo_questions(self, dossier) -> dict:
         """Every required CEO question, answered by projecting the decision.

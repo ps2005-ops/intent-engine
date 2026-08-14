@@ -75,6 +75,18 @@ class SynthesisRefused(ValueError):
     """The composed text broke a wall. Never rendered, never softened."""
 
 
+def _prose(text: str) -> str:
+    """Source punctuation, as a reader expects to see it.
+
+    The economics tables are written in this repository's comment style, so
+    they carry `--` as an aside. That is correct in a source file and wrong
+    on a customer screen, where it renders as two hyphens mid-sentence.
+    Converted once, here, rather than in each of the five surfaces that read
+    these strings.
+    """
+    return str(text or "").replace(" -- ", " — ")
+
+
 def _assert_clean(text: str) -> str:
     low = str(text).lower()
     for phrase in FORBIDDEN:
@@ -256,12 +268,25 @@ def _route_refusal(dossier, causal_status: str):
 
 # --- the read ---------------------------------------------------------------
 
-def _economic_sentence(state: str, conditions) -> str:
+def _economic_sentence(state: str, conditions, selection=None) -> str:
     """The economy, only where it reaches this company.
 
     A generic macro line is worse than none: it reads as specific, applies to
     everyone, and so carries the least information of anything on the page.
+
+    NAMES THE MECHANISM WHERE ONE IS ESTABLISHED. Listing the exposure ids
+    ("US:MARKET_RATE") told a reader which feed fired, not what it does to
+    the business, and the same list read identically for a bank and a
+    utility -- for whom a rate move means two entirely different things.
     """
+    rows = tuple(getattr(selection, "transmission", ()) or ())
+    if state == ECONOMIC_AVAILABLE and rows:
+        first = rows[0]
+        extra = (f" ({len(rows) - 1} further channel(s) also transmit.)"
+                 if len(rows) > 1 else "")
+        return (f" Measured economic conditions reach it through an exposure "
+                f"its business model establishes: {first.mechanism}, which "
+                f"shows up in {first.business_variable}.{extra}")
     if state == ECONOMIC_AVAILABLE and conditions:
         named = ", ".join(str(c) for c in conditions[:4])
         return (f" Measured economic conditions reach it through its own "
@@ -276,8 +301,18 @@ def _economic_sentence(state: str, conditions) -> str:
 
 
 def _current_read(company: str, standing: str, dossier, hidden: str,
-                  economic_state: str = "", economic_context=()) -> str:
-    """One sentence, in the wording this standing permits."""
+                  economic_state: str = "", economic_context=(),
+                  selection=None) -> str:
+    """One sentence, in the wording this standing permits.
+
+    THE SUBJECT OF THE SENTENCE CHANGED. It used to be the counts -- "N
+    evidence rows and M beliefs support the reading below" -- which is a
+    sentence about the pipeline, identical for every company that happens to
+    have similar counts. It now leads with what this business turns on and
+    what decision is in front of it, and the counts follow as the support
+    they are. That is the difference between describing the record and
+    reading it.
+    """
     verb = verb_for(standing)
     evidence, beliefs = _count(dossier, "evidence"), _count(dossier, "beliefs")
     if standing == REFUSED:
@@ -288,6 +323,17 @@ def _current_read(company: str, standing: str, dossier, hidden: str,
                 f"evidence this company's blocks cite has been published.")
     subject = (f"{evidence} evidence row(s) and {beliefs} belief(s)"
                if beliefs else f"{evidence} evidence row(s) and no belief")
+    lead = ""
+    profile = getattr(selection, "profile", None)
+    if profile is not None and profile.known:
+        drivers = profile.primary_revenue_drivers or ()
+        named = ", ".join(drivers[:2]) if drivers else ""
+        # "{company} is a business whose {model}" produced "is a business
+        # whose earnings from a balance sheet" -- the model strings are noun
+        # phrases, not relative clauses. Stated as its own clause instead.
+        model = _prose(profile.business_model)
+        lead = (f"{company} — {model}. What it earns moves with {named}. "
+                if named else f"{company} — {model}. ")
     tail = ""
     if hidden == "TRACKED_NO_IDENTIFIED_STATE":
         tail = (" Its operating posture is tracked and not yet "
@@ -295,9 +341,9 @@ def _current_read(company: str, standing: str, dossier, hidden: str,
     elif hidden not in ("HIDDEN_STATE_NOT_RUN", "HIDDEN_STATE_NONE_TRACKED"):
         tail = f" Its leading operating posture reads {hidden}."
     return _assert_clean(
-        f"The published market record for {company} — {subject} — {verb} the "
+        f"{lead}The published market record — {subject} — {verb} the "
         f"reading below.{tail}"
-        f"{_economic_sentence(economic_state, economic_context)}")
+        f"{_economic_sentence(economic_state, economic_context, selection)}")
 
 
 def _what_changed(dossier, previous) -> tuple:
@@ -320,11 +366,143 @@ def _what_changed(dossier, previous) -> tuple:
     return tuple(changes)
 
 
+def _facts(dossier, hidden: str):
+    """What the published record contains, as the selection layer reads it."""
+    from intent_engine.executive.analysis_selection import RecordFacts
+
+    causal = _block(dossier, "causal_results")
+    return RecordFacts(
+        evidence=_count(dossier, "evidence"),
+        beliefs=_count(dossier, "beliefs"),
+        expectations=_count(dossier, "expectations"),
+        contradictions=_count(dossier, "contradictions"),
+        theses=_count(dossier, "thesis"),
+        causal_questions=_count(dossier, "causal_questions"),
+        causal_resolved=(0 if causal.get("is_refusal")
+                         else int(causal.get("count") or 0)),
+        causal_refused=bool(causal.get("is_refusal")),
+        economic_ids=tuple(_block(dossier, "economic_state").get("ids") or ()),
+        hidden_state=hidden,
+        available=(dossier.market_block or {}).get("availability") in (
+            "AVAILABLE", "STALE"))
+
+
+def _select(dossier, hidden: str):
+    """This company's analysis selection, or None if it cannot be made.
+
+    Never raises into `compose`: a missing manifest must degrade the reading,
+    not fail it. The generic path is still reachable and still honest -- it
+    simply cannot say what kind of business this is.
+    """
+    try:
+        from intent_engine.executive import analysis_selection as AS
+        return AS.select(dossier.company_id,
+                         name=dossier.canonical_name or "",
+                         facts=_facts(dossier, hidden))
+    except Exception:                                       # noqa: BLE001
+        return None
+
+
+def _recommendation(standing: str, selection, facts) -> tuple:
+    """(action, reason, falsifier, experiment). One source for every surface.
+
+    Composed HERE and not on any page. Five surfaces each deriving their own
+    "what should I do" is five chances to disagree about the same decision,
+    which is the failure the single-decision object exists to prevent -- so
+    the X-Ray, the full analysis, the presentation, the Q&A and the personal
+    assistant all read these fields rather than reasoning again.
+
+    The action is a function of STANDING, because what you are entitled to do
+    is a function of how well the reading is supported. Nothing here reaches
+    "commit" while the causal question is open.
+    """
+    archetype = getattr(selection, "archetype", "") or ""
+    profile = getattr(selection, "profile", None)
+    subject = ""
+    if selection is not None:
+        from intent_engine.executive.analysis_selection import (
+            _ARCHETYPE_LEVER, _ARCHETYPE_SUBJECT)
+        subject = _ARCHETYPE_SUBJECT.get(archetype, "")
+        lever = _ARCHETYPE_LEVER.get(archetype, "")
+    else:
+        lever = ""
+    signal = ""
+    if profile is not None and profile.known and profile.relevant_evidence_types:
+        signal = profile.relevant_evidence_types[0]
+
+    if standing == REFUSED:
+        return ("Do not act on this reading. Re-run once the market engine "
+                "publishes a snapshot this side will read.",
+                "The published snapshot was not in a readable state, so there "
+                "is no reading to act on -- which is different from a reading "
+                "that says do nothing.", "", "")
+    if standing == UNMEASURABLE:
+        return ("Establish coverage before committing anything to this "
+                "question.",
+                "No evidence has been published for this company, so any "
+                "action would be resting on the absence of information "
+                "rather than on information.",
+                "Coverage arriving and still showing nothing would mean the "
+                "quiet is real rather than a retrieval gap.",
+                "Retrieve and classify this company's own disclosures, then "
+                "re-read.")
+    if standing == SUPPORTED and subject:
+        return (f"Proceed on {subject}, sized so the commitment survives the "
+                f"adversarial branch below.",
+                f"The reading rests on beliefs the engine holds and on a "
+                f"causal question it was able to resolve, which is the only "
+                f"standing at which this product recommends acting.",
+                f"A matching move by the nearest competitor appearing in "
+                f"{signal} before the position is established." if signal
+                else "The nearest competitor matching the move first.",
+                f"Run {lever} at the smallest scale that would still show the "
+                f"effect, and measure it against the comparison group named "
+                f"in the causal question." if lever else "")
+    # NOT CLASSIFIED IS A LIMITATION, NOT AN EXEMPTION FROM THE STANDING
+    # RULE. The first version returned the "establish what kind of business
+    # this is" answer for any unclassified company, whatever its standing --
+    # so a BOUNDED reading lost the one thing the standing entitles it to
+    # say, which is DO NOT COMMIT YET. The standing governs first; the
+    # missing classification is added to it.
+    if not subject:
+        return ("Do not commit on this reading yet. Establish what kind of "
+                "business this is, then run the smallest test that would "
+                "settle the question it faces.",
+                "Two things are missing at once: this company is not "
+                "classified in the validation universe, so the decision in "
+                "front of it could not be selected from its economics; and "
+                "the reading itself is supported in direction rather than in "
+                "size.",
+                "The expected movement failing to appear by the next review.",
+                "")
+    return (f"Do not commit on {subject} yet. Run the smallest test that "
+            f"would settle it, and hold the position in the meantime.",
+            f"The direction is better supported than the magnitude: the "
+            f"engine holds a position on this company but the causal "
+            f"question behind {subject} is not resolved from the public "
+            f"record, so a commitment sized to the expected effect is sized "
+            f"to a number nobody has measured.",
+            f"The expected movement failing to appear in {signal} by the "
+            f"next review." if signal else
+            "The expected movement failing to appear by the next review.",
+            f"Run {lever} at the smallest scale that would still show the "
+            f"effect, against a comparison group chosen before the result is "
+            f"known." if lever else "")
+
+
 def compose(dossier, *, previous: Optional[Any] = None,
             prior_decision: Optional[Any] = None) -> FounderDecision:
     """Build one FounderDecision from one company demo dossier.
 
     ZERO MODEL CALLS. Verified by a break proof, not by intent.
+
+    THE ANALYSIS IS SELECTED BEFORE IT IS COMPOSED. `analysis_selection`
+    decides which decision this company is facing, which variables it turns
+    on, which economic channels reach it and which causal question would
+    change the answer. This function then states that selection under the
+    standing the evidence permits. The order matters: composing first and
+    varying afterwards is how the same reading came out for a payments
+    network, a vaccine maker and a hosting provider.
     """
     company = dossier.canonical_name or dossier.company_id
     standing = _standing_of(dossier)
@@ -332,6 +510,7 @@ def compose(dossier, *, previous: Optional[Any] = None,
     causal_status, causal_note = _causal_status(dossier)
     economic_state, economic_context = _economic(dossier)
     gaps, mdrs, vois, guardrails = _route_refusal(dossier, causal_status)
+    selection = _select(dossier, hidden)
 
     evidence_block = _block(dossier, "evidence")
     monitoring = []
@@ -351,13 +530,74 @@ def compose(dossier, *, previous: Optional[Any] = None,
                  else DECISION_READY if standing == SUPPORTED
                  else INVESTIGATION_REQUIRED)
 
+    # THE ECONOMIC STATE IS RE-READ AGAINST THE MECHANISM.
+    #
+    # The market engine reports a channel as an exposure whenever it is
+    # published for the company. Whether it actually REACHES the business is
+    # a question about the business model, and this is where that is known.
+    # A channel with no mechanism into this kind of company is not an
+    # exposure, and saying so is the answer a macro dashboard cannot give.
+    #
+    # ONLY WHEN THE BUSINESS MODEL IS KNOWN. The first version of this rule
+    # downgraded on an empty transmission list however it got to be empty --
+    # so an unclassified company, about which nothing can be said either way,
+    # was reported as having NO RELEVANT EXPOSURE. That is ignorance
+    # published as a finding, which is the one thing this whole layer is
+    # built not to do. Caught by two existing tests.
+    if (selection is not None and selection.profile is not None
+            and selection.profile.known
+            and economic_state == ECONOMIC_AVAILABLE
+            and not selection.transmission):
+        economic_state = ECONOMIC_NO_EXPOSURE
+        economic_context = ()
+
+    action, action_reason, falsifier, experiment = _recommendation(
+        standing, selection, None)
+
+    if selection is not None and selection.scenarios:
+        # A kill switch is a decision commitment, so it comes from the
+        # scenario that would trigger it rather than from a fixed list.
+        kill_switches = tuple(
+            f"{s.name.title()}: {s.kill_switch}" for s in selection.scenarios)
+    else:
+        kill_switches = ()
+
     decision = FounderDecision(
         company=company,
         decision_question=(
+            selection.decision_question if selection
+            and selection.decision_question else
             f"What should be concluded about {company} from the published "
             f"market record, and what would change it?"),
+        why_this_question=getattr(selection, "why_this_question", ""),
+        decision_archetype=getattr(selection, "archetype", ""),
+        archetypes_considered=tuple(
+            getattr(selection, "considered", ()) or ()),
+        company_profile=(selection.profile.as_dict()
+                         if selection and selection.profile else None),
+        signals=tuple(s.as_dict() for s in getattr(selection, "signals", ())),
+        economic_transmission=tuple(
+            t.as_dict() for t in getattr(selection, "transmission", ())),
+        competitors=tuple(
+            c.as_dict() for c in (selection.profile.strategic_competitors
+                                  if selection and selection.profile else ())),
+        causal_question=getattr(selection, "causal_question", ""),
+        why_this_causal_question=getattr(selection, "why_this_causal_question",
+                                         ""),
+        historical_dimensions=tuple(
+            getattr(selection, "historical_dimensions", ()) or ()),
+        adversary=tuple(a.as_dict()
+                        for a in getattr(selection, "adversary", ())),
+        scenarios=tuple(s.as_dict()
+                        for s in getattr(selection, "scenarios", ())),
+        kill_switches=kill_switches,
+        recommended_next_move=action,
+        recommendation_reason=action_reason,
+        falsifier=falsifier,
+        minimum_viable_experiments=(experiment,) if experiment else (),
         current_read=_current_read(company, standing, dossier, hidden,
-                                   economic_state, economic_context),
+                                   economic_state, economic_context,
+                                   selection),
         standing=standing,
         readiness=readiness,
         supporting_evidence_ids=tuple(evidence_block.get("ids") or ()),

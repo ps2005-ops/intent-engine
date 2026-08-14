@@ -163,17 +163,43 @@ def answer(question: str, decision: Any,
             "cannot be measured, and what to test or monitor.",
             supported=False, standing=standing, provenance=prov)
 
+    # §18: DIRECT ANSWER, then WHY, then the UNCERTAINTY, then the
+    # IMPLICATION. The old answers led with the current read -- a paragraph
+    # of context before the answer -- so a CEO who asked "what do you
+    # recommend" was told what the record contains and had to infer the rest.
+    # The recommendation now exists on the decision itself, so these project
+    # it rather than re-deriving one.
+    move = str(getattr(decision, "recommended_next_move", "") or "")
+    reason = str(getattr(decision, "recommendation_reason", "") or "")
+    experiments = tuple(getattr(decision, "minimum_viable_experiments", ())
+                        or ())
+
     if cls == RECOMMEND:
-        if standing == DS.SUPPORTED:
-            return _a(f"{decision.current_read} On that standing the evidence "
-                      f"{verb} acting on the reading above.")
-        return _a(
-            f"No action is recommended on this evidence. {decision.current_read}"
-            f" The reading {verb} the position above and no more, so the next "
-            f"move is to resolve what is missing rather than to commit.")
+        if not move:
+            return _a("No recommendation has been composed for this company.",
+                      supported=False)
+        tail = (f" The smallest thing that would settle it: {experiments[0]}"
+                if experiments else "")
+        return _a(f"{move} {reason}{tail}".strip(),
+                  supported=standing in (DS.SUPPORTED, DS.BOUNDED))
 
     if cls == WHY:
-        return _a(f"{decision.current_read} {decision.causal_note}".strip())
+        # The question behind the question: why THIS decision, on what, with
+        # what limit. Three sentences from three different fields, so the
+        # answer is a chain rather than a restatement.
+        parts = [reason or str(getattr(decision, "current_read", "") or "")]
+        why_q = str(getattr(decision, "why_this_question", "") or "")
+        if why_q:
+            parts.append(f"This is the decision in front of you because "
+                         f"{why_q[0].lower()}{why_q[1:]}.")
+        rows = tuple(getattr(decision, "economic_transmission", ()) or ())
+        if rows:
+            parts.append(f"The wider conditions reach it because "
+                         f"{rows[0].get('mechanism', '')}.")
+        note = str(getattr(decision, "causal_note", "") or "")
+        if note:
+            parts.append(note)
+        return _a(" ".join(p for p in parts if p).strip())
 
     if cls == STRONGEST_EVIDENCE:
         if not ev:
@@ -216,11 +242,27 @@ def answer(question: str, decision: Any,
 
     if cls == ALTERNATIVES:
         alts = tuple(getattr(decision, "alternatives", ()) or ())
-        if not alts:
-            return _a("No alternative course has been composed for this "
-                      "company: the reading is not yet strong enough to be "
-                      "weighed against one.", supported=False)
-        return _a(_joined(alts, ""))
+        if alts:
+            return _a(_joined(alts, ""))
+        # THE DECISIONS NOT SELECTED ARE THE ALTERNATIVES, and they exist:
+        # the selection layer ranks every archetype this business model
+        # supports and keeps the ones it passed over. Answering "no
+        # alternative has been composed" while holding a ranked list of them
+        # was a surface not reading a field its own producer populates.
+        considered = tuple(getattr(decision, "archetypes_considered", ())
+                           or ())
+        if len(considered) > 1:
+            named = "; ".join(
+                f"{str(r.get('subject') or r.get('archetype', ''))} "
+                f"(ranked below because {r.get('why', '')})"
+                for r in considered[1:4])
+            return _a(f"The decision selected was "
+                      f"{considered[0].get('subject', '')}. The others this "
+                      f"business faces, in the order they ranked: {named}.")
+        return _a("No alternative course has been composed for this "
+                  "company: its business model is not classified here, so "
+                  "the decisions it faces were never enumerated.",
+                  supported=False)
 
     if cls == BIGGEST_RISK:
         # THE GUARDRAIL LEADS, not the gap. "What is the biggest risk" and
@@ -228,9 +270,14 @@ def answer(question: str, decision: Any,
         # question, and answering them with the same sentence makes the
         # product look like it has one thought. The risk answer is about
         # ACTING under the gap; the falsifier answer is about resolving it.
-        rails = tuple(getattr(decision, "guardrails", ()) or ())
-        if rails:
-            return _a(_joined(rails, ""))
+        # ONE SOURCE with the screens. This used to read only `guardrails`,
+        # so for a company whose causal question was never asked it answered
+        # "no risk has been recorded" while the X-Ray beside it displayed the
+        # adversarial branch. `plain.key_risk` is now the single chain.
+        from intent_engine.founder_brief.plain import key_risk
+        risk = key_risk(decision)
+        if risk:
+            return _a(risk)
         if gaps:
             return _a(f"The reading rests on a question that is not settled: "
                       f"{gaps[0]}")
@@ -240,10 +287,33 @@ def answer(question: str, decision: Any,
     if cls == COMPETITOR:
         adv = tuple(getattr(decision, "adversary", ()) or ())
         if not adv:
+            # Was "THESIS_NOT_FORMED" -- a raw enum, in the answer text, on a
+            # customer-facing surface. §17.
             return _a("No competitor response has been modelled for this "
-                      "company: THESIS_NOT_FORMED, so there is no strategic "
-                      "position for a rival to respond to.", supported=False)
-        return _a(_joined(adv, ""))
+                      "company. Its business model is not classified here, so "
+                      "no peer set could be selected and there is nothing for "
+                      "a rival response to be modelled against.",
+                      supported=False)
+        # The adversary rows are structured records, not sentences. Joining
+        # them printed dict reprs into the answer.
+        lines = []
+        for move in adv:
+            if not isinstance(move, dict):
+                lines.append(str(move))
+                continue
+            counter = str(move.get("countermeasure", "") or "")
+            # "We would none required." -- the L0 branch's countermeasure is
+            # the absence of one, and gluing it after "We would" produced a
+            # sentence a reader would stop at.
+            response = ("No response is required on this branch."
+                        if counter.strip().lower().startswith("none")
+                        else f"We would {counter}." if counter else "")
+            lines.append(
+                f"{move.get('actor', '')} {move.get('action', '')}: "
+                f"{move.get('impact', '')}. {response} "
+                f"Watch for {move.get('observable_signal', '')}.".replace(
+                    ".. ", ". "))
+        return _a(" ".join(line.strip() for line in lines).strip())
 
     if cls == CANNOT_MEASURE:
         return _a(_joined(
@@ -267,8 +337,10 @@ def answer(question: str, decision: Any,
         if prior is None:
             # NO_DECISION_RECORDED, not an invented history.
             return Answer(question, cls,
-                          "NO_DECISION_RECORDED. No earlier decision has been "
-                          "recorded for this company in this deployment.",
+                          "No earlier decision has been recorded for this "
+                          "company in this deployment, so there is nothing to "
+                          "compare today's reading against. That is a gap in "
+                          "our history, not a sign that nothing was decided.",
                           supported=False, standing=standing, provenance=prov)
         return _a(f"The previous recorded decision was: "
                   f"{getattr(prior, 'recommendation', '') or 'no recommendation'}"

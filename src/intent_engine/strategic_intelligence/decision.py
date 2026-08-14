@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import asdict, dataclass, field
+from typing import Optional
 
 from intent_engine.strategic_intelligence import filing_hygiene as FH
 from intent_engine.strategic_intelligence.concrete import reads_as_taxonomy
@@ -350,6 +351,34 @@ class FounderDecision:
     # construction is unchanged by their presence.
     company: str = ""
     decision_question: str = ""
+    #: WHY THIS QUESTION AND NOT ANOTHER. Added because the question used to
+    #: be a constant with a company name in it, so every company received the
+    #: same analysis and the reads came back 0.94-0.96 similar. A selected
+    #: question that cannot say why it was selected is indistinguishable from
+    #: a constant, so the reason travels with it.
+    why_this_question: str = ""
+    #: The decision archetype chosen (PRICING, CAPACITY, ...) and every
+    #: archetype considered with its score. Internal ordering, shown as
+    #: English on the surfaces.
+    decision_archetype: str = ""
+    archetypes_considered: tuple = ()
+    #: What kind of business this is -- `company_profile.as_dict()`, or None
+    #: when the company is not classified. Everything else on this object was
+    #: selected using it.
+    company_profile: Optional[dict] = None
+    #: The variables this business turns on, ranked, each with its reason.
+    signals: tuple = ()
+    #: economic factor -> mechanism -> business variable -> implication.
+    #: Only channels with an established mechanism into THIS business model.
+    economic_transmission: tuple = ()
+    #: Peers selected by business model and sector, each stating its basis.
+    competitors: tuple = ()
+    #: The one causal question this decision turns on, and why that one.
+    causal_question: str = ""
+    why_this_causal_question: str = ""
+    #: Historical regimes worth replaying for a business of this kind.
+    historical_dimensions: tuple = ()
+    historical_playback: tuple = ()
     current_read: str = ""
     #: SUPPORTED / BOUNDED / UNMEASURABLE / REFUSED. Governs the WORDING the
     #: executive read is allowed to use -- see `decision_synthesis`.
@@ -469,6 +498,17 @@ class FounderDecision:
             # and there is nothing here".
             "company": self.company,
             "decision_question": self.decision_question,
+            "why_this_question": self.why_this_question,
+            "decision_archetype": self.decision_archetype,
+            "archetypes_considered": list(self.archetypes_considered),
+            "company_profile": self.company_profile,
+            "signals": list(self.signals),
+            "economic_transmission": list(self.economic_transmission),
+            "competitors": list(self.competitors),
+            "causal_question": self.causal_question,
+            "why_this_causal_question": self.why_this_causal_question,
+            "historical_dimensions": list(self.historical_dimensions),
+            "historical_playback": list(self.historical_playback),
             "current_read": self.current_read,
             "standing": self.standing,
             "supporting_evidence_ids": list(self.supporting_evidence_ids),
@@ -579,7 +619,63 @@ def decision_from_dict(data) -> FounderDecision:
         # Rehydration filters too: a decision serialised before this rule
         # existed still carries the cover page in its stored `verified`.
         verified=tuple(FH.executive_safe(data.get("verified") or ())),
-        basis=data.get("basis", ""))
+        basis=data.get("basis", ""),
+        # THE MARKET READING SURVIVES THE ROUND TRIP.
+        #
+        # It did not before: a decision serialised and rebuilt came back with
+        # no company, no question and no read, because this constructor was
+        # written before those fields existed and was never extended. Any
+        # surface reading a STORED decision therefore saw an empty market
+        # block and could only render the report-derived half -- the same
+        # class of defect as `stance`, immediately above, which reached a
+        # served page. Restored field by field, defaults unchanged, so a dict
+        # written by an older producer rebuilds exactly as it did.
+        company=data.get("company", ""),
+        decision_question=data.get("decision_question", ""),
+        why_this_question=data.get("why_this_question", ""),
+        decision_archetype=data.get("decision_archetype", ""),
+        archetypes_considered=tuple(data.get("archetypes_considered") or ()),
+        company_profile=data.get("company_profile"),
+        signals=tuple(data.get("signals") or ()),
+        economic_transmission=tuple(data.get("economic_transmission") or ()),
+        competitors=tuple(data.get("competitors") or ()),
+        causal_question=data.get("causal_question", ""),
+        why_this_causal_question=data.get("why_this_causal_question", ""),
+        historical_dimensions=tuple(data.get("historical_dimensions") or ()),
+        historical_playback=tuple(data.get("historical_playback") or ()),
+        current_read=data.get("current_read", ""),
+        standing=data.get("standing", ""),
+        supporting_evidence_ids=tuple(data.get("supporting_evidence_ids")
+                                      or ()),
+        contradicting_evidence_ids=tuple(
+            data.get("contradicting_evidence_ids") or ()),
+        independent_origins=int(data.get("independent_origins") or 0),
+        economic_context=tuple(data.get("economic_context") or ()),
+        economic_state=data.get("economic_state", ""),
+        hidden_state=data.get("hidden_state", ""),
+        expectations=tuple(data.get("expectations") or ()),
+        reconciliations=tuple(data.get("reconciliations") or ()),
+        causal_status=data.get("causal_status", ""),
+        causal_note=data.get("causal_note", ""),
+        historical_status=data.get("historical_status", ""),
+        thesis=data.get("thesis", ""),
+        thesis_history=tuple(data.get("thesis_history") or ()),
+        adversary=tuple(data.get("adversary") or ()),
+        scenarios=tuple(data.get("scenarios") or ()),
+        assumptions=tuple(data.get("assumptions") or ()),
+        information_gaps=tuple(data.get("information_gaps") or ()),
+        minimum_data_requests=tuple(data.get("minimum_data_requests") or ()),
+        minimum_viable_experiments=tuple(
+            data.get("minimum_viable_experiments") or ()),
+        value_of_information=tuple(data.get("value_of_information") or ()),
+        guardrails=tuple(data.get("guardrails") or ()),
+        kill_switches=tuple(data.get("kill_switches") or ()),
+        monitoring=tuple(data.get("monitoring") or ()),
+        next_review=data.get("next_review", ""),
+        what_changed=tuple(data.get("what_changed") or ()),
+        what_changed_mind=tuple(data.get("what_changed_mind") or ()),
+        provenance=tuple(data.get("provenance") or ()),
+        derived_from=data.get("derived_from", ""))
 
 
 # --- composition --------------------------------------------------------------

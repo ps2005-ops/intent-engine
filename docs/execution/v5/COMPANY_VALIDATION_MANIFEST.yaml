@@ -1,5 +1,5 @@
 contract: company_validation_manifest.v1
-manifest_version: 1.0.0
+manifest_version: 1.0.1
 created_at: '2026-08-11'
 governing_plan_version: V5_BATCH_9
 total_active: 100
@@ -40,6 +40,18 @@ not_an_answer_key: This manifest records WHY a company is useful to test. It mus
   never record an expected recommendation, thesis, causal effect, confidence or
   adversary output.
 change_history:
+- manifest_version: 1.0.1
+  at: '2026-08-14'
+  change: >-
+    stripe business_model_class corrected SUBSCRIPTION_SOFTWARE ->
+    BALANCE_SHEET_OR_NETWORK. A payment network earns a take rate on
+    intermediated volume, which is how visa and mastercard are already
+    classified here; the old value made the executive read describe
+    subscription revenue Stripe does not have. Sector left unchanged because
+    cohorts derive from it.
+  companies_added: 0
+  companies_removed: 0
+  cohort_moves: 0
 - manifest_version: 1.0.0
   at: '2026-08-11'
   change: initial manifest authored in V5 Batch 9
@@ -2584,7 +2596,19 @@ companies:
   parent_company_id: null
   sector: SOFTWARE_PLATFORM
   industry: UNKNOWN
-  business_model_class: SUBSCRIPTION_SOFTWARE
+  # Corrected in 1.0.1. Stripe earns a take rate on payment volume it
+  # intermediates -- the economics this manifest already assigns to Visa and
+  # Mastercard -- not a per-seat subscription that renews. Left as
+  # SUBSCRIPTION_SOFTWARE it produced an executive read describing "recurring
+  # software subscription" revenue and asking a seat-pricing question, which
+  # is wrong on its face to anyone who knows the company.
+  #
+  # SECTOR IS DELIBERATELY UNCHANGED. Cohorts are derived by sorting on
+  # sector, so moving Stripe out of SOFTWARE_PLATFORM reshuffles 42 of 100
+  # cohort assignments and silently invalidates the locked validation
+  # universe. `business_model_class` is read by no validator rule and by no
+  # cohort derivation, so correcting it alone moves nothing -- verified.
+  business_model_class: BALANCE_SHEET_OR_NETWORK
   regulatory_class: LIGHTLY_REGULATED
   capital_intensity_class: LOW
   cyclicality_class: SECULAR

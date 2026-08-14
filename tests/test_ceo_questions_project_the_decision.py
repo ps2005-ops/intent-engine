@@ -67,8 +67,14 @@ def test_a_recommendation_never_exceeds_the_decision_standing():
     a = Q.answer("What do you recommend?", d)
     assert d.standing == DS.BOUNDED
     assert a.standing == DS.BOUNDED
-    assert "No action is recommended" in a.answer
+    # MIGRATED BY INTENT. The assertion was the exact sentence "No action is
+    # recommended"; the requirement is that a BOUNDED reading must not
+    # authorise a commitment. The recommendation is now composed from the
+    # standing and names the decision, so the sentence changed and the rule
+    # did not.
+    assert "Do not commit" in a.answer
     assert "supports" not in a.answer
+    assert "proceed" not in a.answer.lower()
 
 
 def test_a_supported_reading_may_recommend():
@@ -90,10 +96,17 @@ def test_changed_your_mind_is_never_inferred_from_the_current_view():
 
 
 def test_no_prior_decision_is_named_not_invented():
+    # MIGRATED BY INTENT. This asserted the literal token
+    # "NO_DECISION_RECORDED" -- which is exactly the raw enum §17 forbids on
+    # a customer surface, so the test was pinning the defect. The
+    # requirement is that the absence is STATED and not filled in.
     d = _decision(evidence_reference_ids=_ref(4, ["e1"]))
     a = Q.answer("What did we decide before?", d)
-    assert "NO_DECISION_RECORDED" in a.answer
     assert a.supported is False
+    assert "No earlier decision has been recorded" in a.answer
+    assert "gap in our history" in a.answer
+    from intent_engine.founder_brief import plain as P
+    assert P.enum_free(a.answer)
 
 
 def test_risk_and_falsifier_do_not_return_the_same_sentence():
@@ -116,12 +129,18 @@ def test_every_answer_carries_standing_and_provenance():
         assert a.provenance, question
 
 
-def test_an_absent_competitor_model_says_thesis_not_formed():
+def test_an_absent_competitor_model_names_the_reason_in_english():
+    # MIGRATED BY INTENT, and renamed: the old name and assertion both
+    # required the raw token "THESIS_NOT_FORMED" to reach the reader. The
+    # requirement is that the absence is explained -- an unclassified
+    # business model means no peer set could be selected.
     d = _decision(evidence_reference_ids=_ref(4, ["e1"]),
                   belief_refs=_ref(2, ["b1"]))
     a = Q.answer("What could a competitor do?", d)
-    assert "THESIS_NOT_FORMED" in a.answer
     assert a.supported is False
+    assert "no peer set could be selected" in a.answer
+    from intent_engine.founder_brief import plain as P
+    assert P.enum_free(a.answer)
 
 
 def test_answers_come_from_the_decision_not_a_second_reading():
