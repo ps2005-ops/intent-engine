@@ -56,6 +56,30 @@ from intent_engine.demo_dossier.contracts import read_market_snapshot
 #: The ONE setting. Absent means no market engine feeds this deployment.
 ENV_VAR = "MARKET_SNAPSHOT_ROOT"
 
+#: A DECLARED, version-controlled deployment setting. Not a search path.
+#:
+#: WHY THIS EXISTS AND WHY IT IS NOT A FALLBACK
+#: --------------------------------------------
+#: `MARKET_SNAPSHOT_ROOT` carries no credential -- its value is a directory --
+#: and the preview service is dashboard-configured rather than Blueprint-
+#: managed, so the value could only be set by hand. A deployment blocked on a
+#: human retyping a non-secret literal is a deployment that stays blocked.
+#:
+#: The distinction that matters: this file is READ AT A FIXED PATH and states
+#: one value. Nothing here searches the working directory, walks parents, or
+#: picks a plausible-looking directory -- those are the behaviours the bridge
+#: refuses, and they are refused because a guessed root silently serves
+#: somebody else's intelligence. A checked-in declaration is reviewable,
+#: diffable, and wrong in exactly one visible place if it is wrong.
+PREVIEW_CONFIG = ("config", "preview.yaml")
+PREVIEW_KEY = "market_snapshot_root"
+
+#: Where the setting came from. On `/readyz`, so an operator can tell a
+#: dashboard value from a checked-in one without reading either.
+SOURCE_ENV = "ENV"
+SOURCE_PREVIEW_CONFIG = "PREVIEW_CONFIG"
+SOURCE_MISSING = "MISSING"
+
 CURRENT = "MARKET_BRIDGE_CURRENT"
 MISSING = "MARKET_BRIDGE_MISSING"
 STALE = "MARKET_BRIDGE_STALE"
@@ -106,16 +130,80 @@ class BridgeAssessment:
                 "freshness_days": self.freshness_days}
 
 
-def configured_root(env=None) -> Optional[pathlib.Path]:
-    """The configured market snapshot root, or None.
+def _repo_root() -> pathlib.Path:
+    """The directory the checked-in config belongs to.
 
-    NO CWD GUESSING. A relative path is honoured exactly as written because
-    an operator who sets one means it; what is refused is inventing one when
-    the setting is absent.
+    Derived from THIS FILE's location, not from the working directory: the
+    package lives at `<root>/src/intent_engine/demo_dossier/bridge.py`, so the
+    root is four parents up. A process started from anywhere resolves the
+    same path, which is the property a cwd-relative read does not have.
+    """
+    return pathlib.Path(__file__).resolve().parents[3]
+
+
+def _preview_config_root(root: Optional[pathlib.Path] = None):
+    """The declared preview root, or None. Reads ONE file at ONE path.
+
+    A relative value is resolved against the repo root rather than the
+    working directory. `market_snapshot_root: "."` therefore means "the
+    checkout", wherever the service happens to be started from -- on Render
+    that is `/opt/render/project/src`, and nothing here needs to know that.
+
+    Parsed with a two-line reader rather than a YAML dependency: the contract
+    is one scalar, and adding a package to production for it would be a
+    heavier change than the setting it carries.
+    """
+    path = (root or _repo_root()).joinpath(*PREVIEW_CONFIG)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    for line in text.splitlines():
+        line = line.split("#", 1)[0].strip()
+        if not line.startswith(PREVIEW_KEY):
+            continue
+        _, _, value = line.partition(":")
+        value = value.strip().strip('"').strip("'")
+        if not value:
+            return None
+        declared = pathlib.Path(value).expanduser()
+        if declared.is_absolute():
+            return declared
+        return ((root or _repo_root()) / declared).resolve()
+    return None
+
+
+def configured_root(env=None, config_root=None) -> Optional[pathlib.Path]:
+    """The configured market snapshot root, or None. Precedence is strict.
+
+        environment variable  ->  declared preview config  ->  None
+
+    NO CWD GUESSING, NO SEARCH. The environment wins because an operator
+    setting it means it; the checked-in declaration is consulted only when
+    the environment is silent; and when neither speaks the answer is None,
+    which reads as MISSING rather than as a directory somebody guessed.
     """
     env = os.environ if env is None else env
     raw = str(env.get(ENV_VAR) or "").strip()
-    return pathlib.Path(raw).expanduser() if raw else None
+    if raw:
+        return pathlib.Path(raw).expanduser()
+    return _preview_config_root(config_root)
+
+
+def config_source(env=None, config_root=None) -> str:
+    """Which of the two declarations supplied the root.
+
+    `config_root` exists so a caller can ask what happens when NEITHER
+    source speaks -- the state an operator sees on a deployment that ships
+    no declaration. Without it that branch is unreachable from a checkout
+    that does ship one, and an unreachable branch is an untested one.
+    """
+    env = os.environ if env is None else env
+    if str(env.get(ENV_VAR) or "").strip():
+        return SOURCE_ENV
+    return (SOURCE_PREVIEW_CONFIG
+            if _preview_config_root(config_root) is not None
+            else SOURCE_MISSING)
 
 
 def _digest(payload: Any) -> str:
@@ -140,11 +228,12 @@ def _age_days(stamp: str, today: str) -> Optional[int]:
     return (b - a).days
 
 
-def for_company(company_key: str, *, root=None, env=None,
+def for_company(company_key: str, *, root=None, env=None, config_root=None,
                 today: str = "") -> BridgeAssessment:
     """Assess the bridge for one company. The reading a dossier build uses."""
     today = today or date.today().isoformat()
-    resolved = configured_root(env) if root is None else pathlib.Path(root)
+    resolved = (configured_root(env, config_root) if root is None
+                else pathlib.Path(root))
     if resolved is None:
         return BridgeAssessment(
             MISSING, configured=False,
@@ -199,7 +288,7 @@ def for_company(company_key: str, *, root=None, env=None,
     return BridgeAssessment(CURRENT, "", snapshot=snapshot, **common)
 
 
-def assess(*, root=None, env=None, today: str = "") -> dict:
+def assess(*, root=None, env=None, config_root=None, today: str = "") -> dict:
     """The STARTUP reading: is this deployment wired to a market engine.
 
     Deliberately cheap -- it counts files and reads one -- because a startup
@@ -207,16 +296,21 @@ def assess(*, root=None, env=None, today: str = "") -> dict:
     many companies the market engine has ever published.
     """
     today = today or date.today().isoformat()
-    resolved = configured_root(env) if root is None else pathlib.Path(root)
+    resolved = (configured_root(env, config_root) if root is None
+                else pathlib.Path(root))
+    source = config_source(env, config_root) if root is None else "EXPLICIT"
     if resolved is None:
         return {"state": MISSING, "configured": False, "root": "",
-                "snapshot_count": 0,
-                "reason": (f"{ENV_VAR} is not set. This deployment reads no "
-                           f"market intelligence; the founder side runs "
-                           f"alone, which is a supported configuration.")}
+                "config_source": source, "snapshot_count": 0,
+                "reason": (f"Neither {ENV_VAR} nor "
+                           f"{'/'.join(PREVIEW_CONFIG)} declares a market "
+                           f"snapshot root. This deployment reads no market "
+                           f"intelligence; the founder side runs alone, "
+                           f"which is a supported configuration.")}
     directory = pathlib.Path(resolved).joinpath(*_T.MARKET_SNAPSHOT_DIR)
     if not directory.is_dir():
         return {"state": MISSING, "configured": True, "root": str(resolved),
+                "config_source": source,
                 "snapshot_count": 0, "directory": str(directory),
                 "reason": (f"{ENV_VAR} is set to {resolved} but no snapshot "
                            f"directory exists under it. Either the market "
@@ -225,6 +319,7 @@ def assess(*, root=None, env=None, today: str = "") -> dict:
     files = sorted(p for p in directory.glob("*.json") if p.is_file())
     if not files:
         return {"state": MISSING, "configured": True, "root": str(resolved),
+                "config_source": source,
                 "snapshot_count": 0, "directory": str(directory),
                 "reason": ("The configured snapshot directory exists and is "
                            "empty. The market engine has published nothing "
@@ -244,6 +339,7 @@ def assess(*, root=None, env=None, today: str = "") -> dict:
             newest, newest_stamp = payload, stamp
     if newest is None:
         return {"state": INVALID, "configured": True, "root": str(resolved),
+                "config_source": source,
                 "snapshot_count": len(files), "directory": str(directory),
                 "invalid_files": invalid,
                 "reason": (f"{len(files)} file(s) are published here and none "
@@ -254,6 +350,7 @@ def assess(*, root=None, env=None, today: str = "") -> dict:
              else CURRENT)
     return {
         "state": state, "configured": True, "root": str(resolved),
+        "config_source": source,
         "directory": str(directory), "snapshot_count": len(files),
         "invalid_files": invalid,
         "schema": str(newest.get("contract_version") or ""),

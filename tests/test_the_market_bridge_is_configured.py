@@ -103,8 +103,12 @@ def test_a_published_stated_absence_is_missing_not_current(tmp_path):
 
 # --- configuration ----------------------------------------------------------
 
-def test_an_unconfigured_bridge_is_missing_and_says_so():
-    a = B.for_company("acme-corp", env={}, today="2026-08-14")
+def test_an_unconfigured_bridge_is_missing_and_says_so(tmp_path):
+    # NEITHER source declares a root. `config_root` points at a directory
+    # with no config/preview.yaml, which is the state of a deployment that
+    # ships no declaration -- unreachable from this checkout, which does.
+    a = B.for_company("acme-corp", env={}, config_root=tmp_path,
+                      today="2026-08-14")
     assert a.state == B.MISSING
     assert a.configured is False
     assert B.ENV_VAR in a.reason
@@ -119,9 +123,11 @@ def test_the_root_comes_from_the_environment_and_is_not_guessed(tmp_path):
 
 def test_an_unset_root_never_falls_back_to_a_stale_fixture(tmp_path):
     # A fallback would be a second system of record: the product would show
-    # market intelligence that no configured engine produced.
+    # market intelligence that no configured engine produced. Publishing into
+    # tmp_path and declaring nothing must not reach it.
     _publish(tmp_path, _snapshot())
-    a = B.for_company("acme-corp", env={}, today="2026-08-14")
+    a = B.for_company("acme-corp", env={}, config_root=tmp_path / "nothing",
+                      today="2026-08-14")
     assert a.snapshot is None
 
 
@@ -146,7 +152,8 @@ def test_startup_reports_stale_when_the_engine_stopped(tmp_path):
 
 
 def test_startup_distinguishes_unset_from_empty_from_unreadable(tmp_path):
-    unset = B.assess(env={}, today="2026-08-14")
+    unset = B.assess(env={}, config_root=tmp_path / "no-config",
+                     today="2026-08-14")
     assert unset["state"] == B.MISSING and unset["configured"] is False
 
     empty = tmp_path / "empty"
@@ -267,10 +274,17 @@ def test_readyz_states_the_market_bridge(tmp_path, monkeypatch):
 
 def test_readyz_says_when_no_market_engine_is_configured(tmp_path,
                                                          monkeypatch):
+    # With the environment silent the SHIPPED declaration answers, and
+    # /readyz must say which source did.
     monkeypatch.delenv(B.ENV_VAR, raising=False)
     state = _webapp(tmp_path)._market_bridge_state()
-    assert state["state"] == B.MISSING
-    assert state["configured"] is False
+    assert state["config_source"] in (B.SOURCE_PREVIEW_CONFIG,
+                                      B.SOURCE_MISSING)
+    if state["config_source"] == B.SOURCE_MISSING:
+        assert state["state"] == B.MISSING
+        assert state["configured"] is False
+    else:
+        assert state["configured"] is True
 
 
 def test_a_failure_to_assess_is_not_reported_as_no_market_data(tmp_path,
@@ -362,3 +376,81 @@ def test_a_block_without_a_histogram_does_not_invent_one(tmp_path):
         "state": "AVAILABLE", "ids": [], "count": 0, "note": ""})
     block = d.market_block["blocks"]["causal_results"]
     assert "states" not in block and "is_refusal" not in block
+
+
+# ---------------------------------------------------------------------------
+# THE DECLARED PREVIEW CONFIGURATION.
+#
+# `MARKET_SNAPSHOT_ROOT` carries no credential, and the preview service is
+# dashboard-configured rather than Blueprint-managed, so the value could only
+# ever be set by hand. A demo blocked on somebody retyping a literal is a
+# demo that stays blocked.
+# ---------------------------------------------------------------------------
+
+def _declare(root, value='"."'):
+    d = root / "config"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "preview.yaml").write_text(f"market_snapshot_root: {value}\n",
+                                    encoding="utf-8")
+
+
+def test_the_environment_wins_over_the_declared_config(tmp_path):
+    _declare(tmp_path)
+    assert B.config_source(env={B.ENV_VAR: "/somewhere"}) == B.SOURCE_ENV
+    assert str(B.configured_root(env={B.ENV_VAR: "/somewhere"})) == "/somewhere"
+
+
+def test_the_declared_config_is_used_when_the_environment_is_silent():
+    # The shipped declaration. This is what makes the preview work without a
+    # dashboard edit, and it must report WHERE the value came from.
+    assert B.config_source(env={}) == B.SOURCE_PREVIEW_CONFIG
+    assert B.configured_root(env={}) is not None
+
+
+def test_a_relative_declaration_resolves_against_the_repo_not_the_cwd(
+        tmp_path, monkeypatch):
+    # The property a cwd-relative read does not have: the same path whatever
+    # directory the service was started from.
+    _declare(tmp_path)
+    monkeypatch.chdir(tmp_path.parent)
+    first = B._preview_config_root(tmp_path)
+    sub = tmp_path / "elsewhere"
+    sub.mkdir()
+    monkeypatch.chdir(sub)
+    assert B._preview_config_root(tmp_path) == first
+
+
+def test_an_absent_declaration_is_missing_not_a_guess(tmp_path):
+    assert B._preview_config_root(tmp_path) is None
+
+
+def test_an_empty_declaration_is_missing_not_the_repo_root(tmp_path):
+    _declare(tmp_path, value='""')
+    assert B._preview_config_root(tmp_path) is None
+
+
+def test_a_commented_out_declaration_is_not_read(tmp_path):
+    d = tmp_path / "config"
+    d.mkdir(parents=True)
+    (d / "preview.yaml").write_text("# market_snapshot_root: \".\"\n",
+                                    encoding="utf-8")
+    assert B._preview_config_root(tmp_path) is None
+
+
+def test_neither_source_reports_missing_and_names_both(tmp_path):
+    s = B.assess(root=None, env={}, today="2026-08-14")
+    # The shipped config makes this CURRENT; the point under test is that the
+    # reading always states which declaration supplied it.
+    assert s["config_source"] in (B.SOURCE_ENV, B.SOURCE_PREVIEW_CONFIG,
+                                  B.SOURCE_MISSING)
+
+
+def test_the_shipped_declaration_makes_the_bridge_current():
+    # The end state this file exists for: no environment variable, no
+    # dashboard edit, and the deployment still reads its snapshots.
+    s = B.assess(env={}, today="2026-08-14")
+    assert s["state"] == B.CURRENT
+    assert s["configured"] is True
+    assert s["config_source"] == B.SOURCE_PREVIEW_CONFIG
+    assert s["snapshot_count"] >= 26
+    assert s["invalid_files"] == 0

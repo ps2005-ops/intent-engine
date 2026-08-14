@@ -1,0 +1,33 @@
+# Preview deployment configuration — NON-SECRET, version controlled.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# The preview service (intent-engine-preview-bridge) is configured through the
+# Render dashboard rather than a Blueprint, so every non-secret setting it
+# needs could previously only be set by hand. `market_snapshot_root` carries
+# no credential — its value is a directory — and a demo that stays empty until
+# somebody retypes a literal is a demo that stays empty.
+#
+# WHAT THIS IS NOT
+# ----------------
+# It is not a fallback and not a search path. `demo_dossier.bridge` reads this
+# ONE key at ONE path and nothing else: no working-directory scan, no walking
+# of parent directories, no picking of a plausible-looking folder. Those
+# behaviours are refused because a guessed root silently serves another
+# deployment's intelligence. A checked-in declaration is reviewable, diffable,
+# and wrong in exactly one visible place if it is wrong.
+#
+# PRECEDENCE
+# ----------
+#     MARKET_SNAPSHOT_ROOT (environment)   ->   this file   ->   MISSING
+#
+# An environment variable always wins, so a real deployment that mounts the
+# market engine's disk overrides this without touching the file. `/readyz`
+# reports which of the two supplied the value as `config_source`.
+#
+# A RELATIVE VALUE IS RESOLVED AGAINST THE REPOSITORY ROOT, not the process
+# working directory, so "." means "this checkout" wherever the service is
+# started from. The snapshot bundle is committed at
+# reports/market/demo_snapshots.
+
+market_snapshot_root: "."
