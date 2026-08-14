@@ -1448,6 +1448,12 @@ class WebApp:
         # consulted when a website had already been supplied.
         if company_name and not website and not form.get("entity_id"):
             from intent_engine.company_ingestion import name_entry as _NE
+            # The SEC registrant source is off by default so that no offline
+            # run or test suite makes an outbound call by surprise. A live
+            # request is exactly the context where it should be on: without
+            # it the register is ~105 companies and every other real firm
+            # comes back "not found".
+            _NE.enable_registrant_lookup(True)
             entry = _NE.resolve(company_name=company_name)
             if entry.state == _NE.AMBIGUOUS_COMPANY:
                 # Two real companies share this name. Asking is strictly
@@ -1461,7 +1467,8 @@ class WebApp:
                 # company the registry does not carry. Say so, and offer the
                 # one input that would resolve it, rather than returning a
                 # 400 the user cannot act on.
-                return self._company_not_found_page(session, company_name)
+                return self._company_not_found_page(session, company_name,
+                                                    entry)
         if not website:
             website = f"https://{DEMO_DOMAIN}"
         # WHICH company? A name like "Sony" denotes a parent, a games
@@ -1589,7 +1596,7 @@ class WebApp:
             f'</main></body></html>')
         return self._html(body)
 
-    def _company_not_found_page(self, session, company_name):
+    def _company_not_found_page(self, session, company_name, entry=None):
         """COMPANY_NOT_FOUND, as a state the user can act on.
 
         This replaces a 400. A name the registry does not carry is not a
@@ -1600,19 +1607,41 @@ class WebApp:
 
         The form comes back with the name still in it. Making the user retype
         what they already typed is how a recoverable state becomes a dead end.
+
+        TWO DIFFERENT STATES SHARE THIS FORM, and they must not share its
+        words. When the SEC names the company as a registrant we know exactly
+        who it is and lack only its domain, and telling that user "we could
+        not identify Toyota Motor Corporation" is simply false. The form is
+        the same because the next step is the same; the heading is not.
         """
         csrf = session["csrf"] if session else ""
+        identified = entry is not None and getattr(entry, "state", "") == \
+            "IDENTIFIED_NO_DOMAIN"
+        if identified:
+            ticker = getattr(entry, "ticker", "") or ""
+            heading = (f'We found &ldquo;{_e(entry.company_name)}&rdquo;'
+                       f'{f" ({_e(ticker)})" if ticker else ""}')
+            explain = (
+                f'<p>It is a filing registrant with the SEC, so its identity '
+                f'is not in doubt. What the regulator does not record is a '
+                f'web address, and we will not guess one — a guessed domain '
+                f'sends the analysis at somebody else&rsquo;s company.</p>')
+        else:
+            heading = f'We could not identify &ldquo;{_e(company_name)}&rdquo;'
+            explain = (
+                '<p>No company by that name is in our register. That usually '
+                'means one of three things: it is privately held, the name is '
+                'spelled differently in its filings, or nobody has analysed '
+                'it here yet. None of them is a problem with what you '
+                'typed.</p>')
+        title = "Company identified" if identified else "Company not found"
         body = (
             f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f'<meta name="viewport" content="width=device-width,'
-            f'initial-scale=1"><title>Company not found</title>'
+            f'initial-scale=1"><title>{title}</title>'
             f'</head><body>{self._nav(session, csrf)}'
-            f'<main class="notice"><h1>We could not identify '
-            f'&ldquo;{_e(company_name)}&rdquo;</h1>'
-            f'<p>No company by that name is in our register. That usually '
-            f'means one of three things: it is privately held, the name is '
-            f'spelled differently in its filings, or nobody has analysed it '
-            f'here yet. None of them is a problem with what you typed.</p>'
+            f'<main class="notice"><h1>{heading}</h1>'
+            f'{explain}'
             f'<p>Its website settles it — a domain names exactly one '
             f'company.</p>'
             f'<form action="/analyze" method="post" class="analyze">'

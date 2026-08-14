@@ -41,9 +41,19 @@ CONTRACT = "company_name_entry.v1"
 EXACT_MATCH = "EXACT_MATCH"
 HIGH_CONFIDENCE_MATCH = "HIGH_CONFIDENCE_MATCH"
 AMBIGUOUS_COMPANY = "AMBIGUOUS_COMPANY"
+#: The company was identified with certainty -- it is a filing registrant and
+#: the regulator names it -- but no source here carries its web domain.
+#:
+#: This exists because the alternative states are both lies. COMPANY_NOT_FOUND
+#: told a customer typing "Toyota Motor Corporation" that we could not
+#: identify it, which is false: it is one of the most heavily documented
+#: registrants there is. And resolving it with a guessed domain would send
+#: retrieval at somebody else's website. So the truthful state is "we know
+#: exactly who this is, and we need the one thing we do not have".
+IDENTIFIED_NO_DOMAIN = "IDENTIFIED_NO_DOMAIN"
 COMPANY_NOT_FOUND = "COMPANY_NOT_FOUND"
 STATES = (EXACT_MATCH, HIGH_CONFIDENCE_MATCH, AMBIGUOUS_COMPANY,
-          COMPANY_NOT_FOUND)
+          IDENTIFIED_NO_DOMAIN, COMPANY_NOT_FOUND)
 
 
 class NameEntry:
@@ -149,6 +159,40 @@ def _manifest():
         return None
 
 
+#: The SEC lookup is the only source here that touches the network, so it is
+#: OFF unless a deployment turns it on. A resolver that silently makes an
+#: outbound call every time an unrecognised name is typed is not something a
+#: test suite or an offline run should discover by getting slower.
+_REGISTRANT_LOOKUP_ENABLED = False
+
+#: Resolved names, so a repeated entry costs nothing. The SEC's ticker table
+#: is one ~1MB fetch and a registrant's identity does not change between two
+#: page loads.
+_REGISTRANT_CACHE: dict = {}
+
+
+def enable_registrant_lookup(enabled: bool = True) -> None:
+    """Turn the SEC registrant source on. Called by the web app at startup."""
+    global _REGISTRANT_LOOKUP_ENABLED
+    _REGISTRANT_LOOKUP_ENABLED = bool(enabled)
+
+
+def _registrant(company_name: str):
+    """{cik, title, ticker} for a filer of this name, or None. Never raises."""
+    if not _REGISTRANT_LOOKUP_ENABLED or not company_name:
+        return None
+    key = company_name.strip().lower()
+    if key in _REGISTRANT_CACHE:
+        return _REGISTRANT_CACHE[key]
+    try:
+        from intent_engine.company_ingestion.edgar import resolve_cik
+        found = resolve_cik(company_name)
+    except Exception:                                       # noqa: BLE001
+        found = None
+    _REGISTRANT_CACHE[key] = found
+    return found
+
+
 def resolve(company_name: str = "", website: str = "") -> NameEntry:
     """Resolve typed entry. Never raises, never invents a domain."""
     company_name = " ".join(str(company_name or "").split())
@@ -213,6 +257,32 @@ def resolve(company_name: str = "", website: str = "") -> NameEntry:
             sector=row.sector or "", public_private=row.public_private or "",
             reason="matched the company validation manifest",
             source="validation manifest")
+
+    # 4. The SEC registrant table -- every filer, not a curated hundred.
+    #
+    # WHY IT IS LAST AND WHY IT IS HERE AT ALL. The three sources above carry
+    # about 105 companies between them, so every other real company on earth
+    # came back COMPANY_NOT_FOUND. Sixteen of the twenty-six companies the
+    # market engine publishes live intelligence for -- Toyota, Vale, ASML,
+    # Infosys -- could not be typed into the product that was analysing them.
+    #
+    # It is last because it can say neither AMBIGUOUS nor a domain, and both
+    # of those are worth more than breadth when a source has them.
+    filer = _registrant(company_name)
+    if filer:
+        # EDGAR titles carry filing-index artifacts -- "TOYOTA MOTOR CORP/"
+        # ends in a slash because the index path did. Strip the punctuation
+        # the registrant did not put in its own name; leave the casing, which
+        # is how the registrant is actually recorded.
+        title = str(filer.get("title") or "").strip().rstrip("/ .,-").strip()
+        return NameEntry(
+            IDENTIFIED_NO_DOMAIN, company_name=title or company_name,
+            ticker=filer.get("ticker") or "",
+            company_id=str(filer.get("cik") or ""),
+            reason=("identified as a filing registrant with the SEC, which "
+                    "records no web domain; supplying the website is what "
+                    "lets the analysis read the company's own material"),
+            source="SEC registrant table")
 
     return NameEntry(
         COMPANY_NOT_FOUND, company_name=company_name,
