@@ -137,6 +137,35 @@ def _block(rows: Optional[Sequence[Any]], *names: str,
             "note": ""}
 
 
+def _is_evidence_field(key: str) -> bool:
+    """Does this field hold evidence ids?
+
+    NOT just `evidence_ids`. That was the first version of this collector, and
+    against the real ledger it found nothing: a `StrategicBelief` cites
+    `supporting_evidence_ids`, `contradicting_evidence_ids` and
+    `applied_evidence_ids`; an expectation cites `evidence_basis`; a thesis
+    cites `supporting_evidence` and `contradicting_evidence`. Zero of 76 real
+    beliefs carry a field called `evidence_ids`.
+
+    So the rule is the shape, not one name: any field whose name mentions
+    evidence and whose value is a list of strings. A narrower rule is a list
+    of field names that goes stale silently the next time a producer adds one.
+    """
+    return "evidence" in key.lower()
+
+
+def _add_ids(value: Any, into: set) -> bool:
+    """Take a list-of-strings as ids. Returns whether it was one -- a nested
+    structure under an evidence-ish name still needs descending into."""
+    if not isinstance(value, (list, tuple, set)):
+        return False
+    items = [v for v in value if v]
+    if items and all(isinstance(v, str) for v in items):
+        into.update(items)
+        return True
+    return not items
+
+
 def _collect_evidence_ids(node: Any, into: set, depth: int = 0) -> None:
     """Every evidence id cited anywhere inside one company's own rows.
 
@@ -144,29 +173,170 @@ def _collect_evidence_ids(node: Any, into: set, depth: int = 0) -> None:
     built payload, so it has to descend through objects as well as mappings.
     Depth is capped because a cycle in a row graph must not hang a publish.
     """
-    if depth > 6 or node is None:
-        return
-    if isinstance(node, str):
+    if depth > 6 or node is None or isinstance(node, str):
         return
     if isinstance(node, Mapping):
         for key, value in node.items():
-            if key == "evidence_ids" and isinstance(value, (list, tuple, set)):
-                into.update(str(v) for v in value if v)
-            else:
-                _collect_evidence_ids(value, into, depth + 1)
+            if _is_evidence_field(str(key)) and _add_ids(value, into):
+                continue
+            _collect_evidence_ids(value, into, depth + 1)
         return
     if isinstance(node, (list, tuple, set)):
         for item in node:
             _collect_evidence_ids(item, into, depth + 1)
         return
-    cited = getattr(node, "evidence_ids", None)
-    if isinstance(cited, (list, tuple, set)):
-        into.update(str(v) for v in cited if v)
+    # Evidence-bearing attributes are read by NAME rather than only out of
+    # `__dict__`: a `__slots__` row has no instance dict at all, and one whose
+    # ids live on the class would silently contribute nothing.
+    for name in dir(node):
+        if name.startswith("_") or not _is_evidence_field(name):
+            continue
+        try:
+            value = getattr(node, name)
+        except Exception:  # noqa: BLE001 - a property must not fail a publish
+            continue
+        if not _add_ids(value, into):
+            _collect_evidence_ids(value, into, depth + 1)
     fields = getattr(node, "__dict__", None)
     if isinstance(fields, Mapping):
         for key, value in fields.items():
-            if key != "evidence_ids":
+            if not _is_evidence_field(str(key)):
                 _collect_evidence_ids(value, into, depth + 1)
+
+
+def _posture_of(row: Any) -> str:
+    """A hidden state's identity IS its leading posture. Read it whichever
+    way the row carries one.
+
+    THE SEAM THIS CROSSES
+    ---------------------
+    `HiddenStateBelief` exposes `.leading` -- a `(posture, probability)`
+    tuple -- and only its `as_dict()` produces `leading_state`. The block was
+    wired to `leading_state` alone, so against the real objects production
+    passes it named nothing at all, and 22 computed hidden states published
+    as a wiring-defect note. The dict form is what the tests used, which is
+    why the seam held in test and failed live.
+    """
+    for name in ("leading_state", "hidden_state_id", "id"):
+        value = (row.get(name) if isinstance(row, Mapping)
+                 else getattr(row, name, None))
+        if value:
+            return str(value)
+    leading = (row.get("leading") if isinstance(row, Mapping)
+               else getattr(row, "leading", None))
+    if isinstance(leading, (list, tuple)) and leading:
+        return str(leading[0])
+    return str(leading) if leading else ""
+
+
+#: A distribution field is present and this side cannot read it. Distinct
+#: from "there is no distribution", because the two have opposite safe
+#: defaults: absent means trust the stated posture, unreadable means do not.
+UNREADABLE = "UNREADABLE"
+
+
+def _distribution_of(row: Any):
+    """The posterior as {posture: probability}, or None if there is none.
+
+    BOTH SHAPES. `HiddenStateBelief.distribution` is a TUPLE OF PAIRS, and
+    only its `as_dict()` form is a mapping. Reading the mapping alone made
+    every real posterior unreadable, and an unreadable posterior is precisely
+    the case that must not fall through to "identified".
+    """
+    value = (row.get("distribution") if isinstance(row, Mapping)
+             else getattr(row, "distribution", None))
+    if value is None:
+        return None
+    if isinstance(value, Mapping):
+        try:
+            return {str(k): float(v) for k, v in value.items()}
+        except (TypeError, ValueError):
+            return UNREADABLE
+    if isinstance(value, (list, tuple)):
+        out = {}
+        for pair in value:
+            if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+                return UNREADABLE
+            try:
+                out[str(pair[0])] = float(pair[1])
+            except (TypeError, ValueError):
+                return UNREADABLE
+        return out
+    return UNREADABLE
+
+
+def _posture_identified(row: Any) -> bool:
+    """Has a posture actually been inferred, or is this the prior?
+
+    THE DEFECT THIS EXISTS TO STOP
+    ------------------------------
+    All 22 hidden states in the live ledger are UNIFORM: twelve postures at
+    0.0833 each, entropy 3.585, which is exactly log2(12) -- the maximum. The
+    engine had observed nothing that moved any of them.
+
+    `leading` still returns a posture, because something has to sort first,
+    and 22 of 26 companies published `GROWING`. A CEO reading that is told
+    the system infers the company is growing. The system inferred nothing;
+    `GROWING` was the first key of a twelve-way tie. That is not a display
+    bug, it is a fabricated finding, and it is worse than showing nothing.
+
+    So a posture counts as identified only when it is strictly ahead of the
+    runner-up AND ahead of the uniform baseline. A distribution nobody can
+    read is not evidence of a posture -- it is evidence of no observation.
+    """
+    dist = _distribution_of(row)
+    if dist is None:
+        # No distribution to judge. A row that names a posture without one is
+        # taken at its word: this guard exists to catch uniform posteriors,
+        # not to refuse producers that publish a settled posture directly.
+        return True
+    if dist is UNREADABLE or not dist:
+        # A posterior this side cannot read is not a posture it may publish.
+        # The permissive default here is what let a tuple-shaped distribution
+        # ship 22 fabricated postures.
+        return False
+    values = sorted(dist.values(), reverse=True)
+    if len(values) < 2:
+        return True
+    leading, runner_up = values[0], values[1]
+    uniform = 1.0 / len(values)
+    return leading > runner_up + 1e-9 and leading > uniform + 1e-9
+
+
+def _hidden_state_block(rows: Optional[Sequence[Any]]) -> dict:
+    """The hidden-state block, named by posture across both representations.
+
+    Three outcomes, kept apart: the subsystem did not run; it ran and could
+    not identify a posture; it ran and identified one.
+    """
+    if rows is None:
+        return {"state": REF_UNAVAILABLE, "ids": [], "count": 0,
+                "note": "this subsystem did not run for this snapshot"}
+    rows = list(rows)
+    identified = [r for r in rows if _posture_identified(r)]
+    ids = [p for p in (_posture_of(r) for r in identified) if p]
+    if rows and not identified:
+        # RAN, AND IDENTIFIED NOTHING. A real measured zero with a reason --
+        # not an absence, and emphatically not a posture.
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "unidentified": len(rows),
+                "note": (f"{len(rows)} hidden state(s) were tracked and none "
+                         f"is identified: the posterior is uniform, so no "
+                         f"posture is distinguishable from the prior. The "
+                         f"subsystem ran and observed nothing that moved it")}
+    if rows and not ids:
+        return {"state": REF_AVAILABLE, "ids": [], "count": 0,
+                "note": f"{len(rows)} hidden state(s) present and none "
+                        f"carried a leading posture; this is a wiring "
+                        f"defect, not an absence of findings"}
+    block = {"state": REF_AVAILABLE, "ids": ids[:MAX_REFS], "count": len(ids),
+             "note": ""}
+    dropped = len(rows) - len(identified)
+    if dropped:
+        block["unidentified"] = dropped
+        block["note"] = (f"{dropped} further hidden state(s) are tracked and "
+                         f"not identified; their posteriors are uniform")
+    return block
 
 
 def _evidence_block(rows: Optional[Sequence[Any]], cited: set) -> dict:
@@ -329,8 +499,7 @@ def build_snapshot(*, company_id: str, as_of: str, canonical_name: str = "",
         "belief_refs": _block(beliefs, "belief_id", "id", "proposition"),
         # A hidden state carries no id; its identity IS the posture,
         # which is also the only part a CEO surface can use.
-        "hidden_state_refs": _block(hidden_states, "leading_state",
-                                    "hidden_state_id", "id"),
+        "hidden_state_refs": _hidden_state_block(hidden_states),
         "thesis_refs": _block(theses, "thesis_id", "id"),
         "thesis_revision_refs": _block(thesis_revisions, "revision_id", "id"),
         "expectation_refs": _block(expectations, "expectation_id", "id"),

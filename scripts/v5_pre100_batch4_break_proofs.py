@@ -60,14 +60,18 @@ MUTATIONS = [
 
     # An absent ledger becomes a measured zero: "we looked and this company
     # has no evidence" when in fact nothing was supplied to look at.
+    # The `by_id` line is what makes this target unique to `_evidence_block`:
+    # the same three lines open `_block` and `_hidden_state_block`, and an
+    # earlier version of this proof silently mutated the wrong one and read
+    # NOT_CAUGHT.
     ("an absent ledger is published as a measured zero",
      SRC / "demo_snapshot_export.py",
-     '    if rows is None:\n'
      '        return {"state": REF_UNAVAILABLE, "ids": [], "count": 0,\n'
-     '                "note": "this subsystem did not run for this snapshot"}',
-     '    if rows is None:\n'
+     '                "note": "this subsystem did not run for this snapshot"}\n'
+     '    by_id: Dict[str, Any] = {}',
      '        return {"state": REF_AVAILABLE, "ids": [], "count": 0,\n'
-     '                "note": "this subsystem did not run for this snapshot"}',
+     '                "note": "this subsystem did not run for this snapshot"}\n'
+     '    by_id: Dict[str, Any] = {}',
      f"{T}::test_an_absent_ledger_is_not_a_zero"),
 
     # The negative control: dropping evidence that was genuinely dropped must
@@ -77,6 +81,40 @@ MUTATIONS = [
      "    unresolved = len(cited) - len(matched)",
      "    unresolved = 0",
      f"{T}::test_partially_resolvable_citations_report_what_was_dropped"),
+
+    # SEV1 #2: a uniform posterior publishes a posture again. 22 of 26
+    # companies shipped "GROWING" off a twelve-way tie.
+    ("a uniform posterior is published as an identified posture",
+     SRC / "demo_snapshot_export.py",
+     "    return leading > runner_up + 1e-9 and leading > uniform + 1e-9",
+     "    return True",
+     f"{T}::test_a_uniform_posterior_publishes_no_posture"),
+
+    # The permissive default that let the tuple-shaped posterior through.
+    ("an unreadable posterior falls through to identified",
+     SRC / "demo_snapshot_export.py",
+     "    if dist is UNREADABLE or not dist:\n"
+     "        # A posterior this side cannot read is not a posture it may "
+     "publish.",
+     "    if False:\n"
+     "        # A posterior this side cannot read is not a posture it may "
+     "publish.",
+     f"{T}::test_a_posterior_this_side_cannot_read_publishes_no_posture"),
+
+    # The negative control: the guard must not refuse REAL findings. A weak
+    # but genuine lead is intelligence the CEO is entitled to.
+    ("the uniformity guard swallows a real weak lead",
+     SRC / "demo_snapshot_export.py",
+     "    return leading > runner_up + 1e-9 and leading > uniform + 1e-9",
+     "    return leading > runner_up + 0.5",
+     f"{T}::test_a_barely_leading_posture_still_counts"),
+
+    # The live field-name seam: real beliefs carry no `evidence_ids` at all.
+    ("only a field literally named evidence_ids is collected",
+     SRC / "demo_snapshot_export.py",
+     '    return "evidence" in key.lower()',
+     '    return key == "evidence_ids"',
+     f"{T}::test_evidence_is_collected_from_the_real_belief_field_names"),
 ]
 
 PY = sys.executable

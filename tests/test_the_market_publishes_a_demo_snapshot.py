@@ -195,3 +195,135 @@ def test_partially_resolvable_citations_report_what_was_dropped():
     assert block["ids"] == ["e_cf1"]
     assert block["count"] == 1
     assert "1 cited evidence id(s) do not resolve" in block["note"]
+
+
+# ---------------------------------------------------------------------------
+# A UNIFORM POSTERIOR IS NOT A POSTURE.
+#
+# Live defect: all 22 hidden states in the ledger were uniform over 12
+# postures (entropy 3.585 = log2(12)). `leading` still returned something, so
+# 22 of 26 companies published "GROWING" -- a fabricated finding, not a
+# display bug.
+# ---------------------------------------------------------------------------
+
+def _uniform(n=12):
+    return {"subject": "acme", "leading_state": "GROWING",
+            "distribution": {f"S{i}": 1.0 / n for i in range(n)}}
+
+
+def _informative():
+    return {"subject": "acme", "leading_state": "PLATFORM_EXPANDING",
+            "distribution": {"PLATFORM_EXPANDING": 0.6, "GROWING": 0.3,
+                             "SHRINKING": 0.1}}
+
+
+def test_a_uniform_posterior_publishes_no_posture():
+    block = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                             hidden_states=[_uniform()])["hidden_state_refs"]
+    assert block["ids"] == []
+    assert block["count"] == 0
+    assert block["state"] == "AVAILABLE"       # it RAN. That is not absence.
+    assert "uniform" in block["note"]
+    assert block["unidentified"] == 1
+
+
+def test_an_identified_posture_is_published():
+    block = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11",
+        hidden_states=[_informative()])["hidden_state_refs"]
+    assert block["ids"] == ["PLATFORM_EXPANDING"]
+    assert block["count"] == 1
+
+
+def test_uniform_and_identified_states_do_not_hide_each_other():
+    block = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11",
+        hidden_states=[_informative(), _uniform()])["hidden_state_refs"]
+    assert block["ids"] == ["PLATFORM_EXPANDING"]
+    assert block["unidentified"] == 1
+
+
+def test_a_barely_leading_posture_still_counts():
+    # The guard refuses UNIFORM posteriors, not weak ones. A real but small
+    # lead is a finding the CEO is entitled to see, with its own confidence.
+    block = D.build_snapshot(
+        company_id="acme", as_of="2026-08-11",
+        hidden_states=[{"leading_state": "A",
+                        "distribution": {"A": 0.34, "B": 0.33, "C": 0.33}}]
+    )["hidden_state_refs"]
+    assert block["ids"] == ["A"]
+
+
+def test_a_hidden_state_that_never_ran_is_not_a_uniform_zero():
+    block = D.build_snapshot(company_id="acme",
+                             as_of="2026-08-11")["hidden_state_refs"]
+    assert block["state"] == "UNAVAILABLE"
+
+
+def test_the_real_object_shape_is_named_by_its_leading_tuple():
+    # `HiddenStateBelief` exposes `.leading` as (posture, probability) and has
+    # no `leading_state` attribute; only its `as_dict()` does. Wiring the
+    # block to `leading_state` alone named nothing in production while every
+    # dict-based test passed.
+    class Belief:
+        subject = "acme"
+        leading = ("PLATFORM_EXPANDING", 0.6)
+        distribution = {"PLATFORM_EXPANDING": 0.6, "GROWING": 0.4}
+    block = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                             hidden_states=[Belief()])["hidden_state_refs"]
+    assert block["ids"] == ["PLATFORM_EXPANDING"]
+
+
+def test_evidence_is_collected_from_the_real_belief_field_names():
+    # Zero of 76 real beliefs carry a field called `evidence_ids`; they carry
+    # `supporting_evidence_ids` and `contradicting_evidence_ids`. Collecting
+    # only `evidence_ids` found nothing on live data.
+    class Belief:
+        subject = "acme"
+        belief_id = "b1"
+        supporting_evidence_ids = ["e_cf1"]
+        contradicting_evidence_ids = ["e_cf2"]
+        applied_evidence_ids = ["e_jnj1"]
+    payload = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                               evidence_rows=_LEDGER, beliefs=[Belief()])
+    assert payload["evidence_reference_ids"]["ids"] == ["e_cf1", "e_cf2",
+                                                        "e_jnj1"]
+
+
+def test_a_posterior_this_side_cannot_read_publishes_no_posture():
+    # The exact live shape: `HiddenStateBelief.distribution` is a tuple of
+    # (posture, probability) pairs. Reading only the mapping form made every
+    # real posterior unreadable, and the permissive default then published a
+    # posture off a distribution nothing had examined.
+    class Opaque:
+        subject = "acme"
+        leading_state = "GROWING"
+        distribution = object()
+    block = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                             hidden_states=[Opaque()])["hidden_state_refs"]
+    assert block["ids"] == []
+    assert block["count"] == 0
+    assert block["unidentified"] == 1
+
+
+def test_the_tuple_shaped_posterior_is_read_not_refused():
+    # The other half: a readable tuple posterior with a real lead must still
+    # publish. A guard that refuses BOTH shapes would look identical here.
+    class Real:
+        subject = "acme"
+        leading = ("PLATFORM_EXPANDING", 0.6)
+        distribution = (("PLATFORM_EXPANDING", 0.6), ("GROWING", 0.4))
+    block = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                             hidden_states=[Real()])["hidden_state_refs"]
+    assert block["ids"] == ["PLATFORM_EXPANDING"]
+
+
+def test_a_uniform_tuple_posterior_is_the_live_case_and_publishes_nothing():
+    class Uniform:
+        subject = "acme"
+        leading = ("GROWING", 0.083333)
+        distribution = tuple((f"S{i}", 1 / 12) for i in range(12))
+    block = D.build_snapshot(company_id="acme", as_of="2026-08-11",
+                             hidden_states=[Uniform()])["hidden_state_refs"]
+    assert block["ids"] == []
+    assert "uniform" in block["note"]
