@@ -46,6 +46,9 @@ DEPLOYMENT_VERSION_MISMATCH = "DEPLOYMENT_VERSION_MISMATCH"
 AWAITING_SOURCE_APPROVAL = "AWAITING_SOURCE_APPROVAL"
 SHARE_LINK_UNAVAILABLE = "SHARE_LINK_UNAVAILABLE"
 NOT_FOUND = "NOT_FOUND"
+#: The reader left something out and can fix it themselves. Distinct from every
+#: other category here, all of which are faults on OUR side.
+INPUT_INCOMPLETE = "INPUT_INCOMPLETE"
 INTERNAL_FAILURE = "INTERNAL_FAILURE"
 
 CATEGORIES = (
@@ -54,7 +57,7 @@ CATEGORIES = (
     ANALYSIS_INTERRUPTED, EVIDENCE_INSUFFICIENT, REASONING_WITHHELD,
     MALFORMED_REASONING, RENDERING_FAILED, PERSISTENCE_FAILED,
     DEPLOYMENT_VERSION_MISMATCH, AWAITING_SOURCE_APPROVAL,
-    SHARE_LINK_UNAVAILABLE, NOT_FOUND,
+    SHARE_LINK_UNAVAILABLE, NOT_FOUND, INPUT_INCOMPLETE,
     INTERNAL_FAILURE,
 )
 
@@ -62,6 +65,19 @@ CATEGORIES = (
 #: `what_worked` is supplied per-call, because it is the only part that depends
 #: on the particular run rather than on the kind of failure.
 _COPY = {
+    # MEASURED LIVE. Submitting the form without ticking consent produced
+    # "Something went wrong on our side ... This is a fault in the product,
+    # not in what you entered" -- which is the exact opposite of the truth,
+    # and leaves the reader with nothing to do but retry the same mistake.
+    # An unrecognised message defaults to INTERNAL_FAILURE, correctly; the
+    # repair is to recognise this one, not to soften the default.
+    INPUT_INCOMPLETE: (
+        "One thing is still needed",
+        "The analysis was not started.",
+        "Analysing a company reads its public sources on your behalf, so we "
+        "ask you to confirm that before anything is fetched.",
+        "Tick the confirmation under the company name and submit again.",
+        True),
     AWAITING_SOURCE_APPROVAL: (
         "This analysis is waiting for you",
         "The reading has not been built yet.",
@@ -195,6 +211,7 @@ _COPY = {
 #: default is INTERNAL_FAILURE so an unmapped cause is never silently dressed
 #: up as an explained one.
 _SIGNATURES = (
+    ("consent is required", INPUT_INCOMPLETE),
     ("approve at least one source", AWAITING_SOURCE_APPROVAL),
     ("no approval recorded", AWAITING_SOURCE_APPROVAL),
     ("cannot fetch unknown candidates", INTERNAL_FAILURE),
@@ -224,6 +241,8 @@ def classify(message: str) -> str:
 #: had no company entered, so "the company you entered was recorded" is exactly
 #: the kind of statement-not-in-evidence this module exists to stop.
 _WHAT_WORKED = {
+    INPUT_INCOMPLETE: "Nothing was fetched and nothing was charged against "
+                      "your session.",
     NOT_FOUND: "Your session is active, and nothing you have already run was "
                "affected.",
     SHARE_LINK_UNAVAILABLE: "The link was received and checked.",

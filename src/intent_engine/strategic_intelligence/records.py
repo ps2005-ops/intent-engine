@@ -359,6 +359,10 @@ class StrategicReport:
     decision_implications: list        # [{decision, options, evidence, watch}]
     observations: list                 # [StrategicObservation]
     source_class_coverage: dict = field(default_factory=dict)
+    #: HOW HARD THE INDEPENDENT-CHANNEL SEARCH WORKED, beside what it found.
+    #: Empty means no discovery producer ran, which every surface must read as
+    #: DISCOVERY_NOT_RUN -- never as "this company has no outside coverage".
+    discovery_coverage: dict = field(default_factory=dict)
     quality_findings: list = field(default_factory=list)
     limited_scope_accepted: bool = False
     evidence_graph: dict = field(default_factory=dict)
@@ -407,6 +411,7 @@ class StrategicReport:
             "decision_implications": list(self.decision_implications),
             "observations": [o.as_dict() for o in self.observations],
             "source_class_coverage": self.source_class_coverage,
+            "discovery_coverage": self.discovery_coverage,
             "quality_findings": list(self.quality_findings),
             "limited_scope_accepted": self.limited_scope_accepted,
             "evidence_graph": self.evidence_graph,

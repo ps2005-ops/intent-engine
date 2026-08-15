@@ -775,7 +775,7 @@ class CompanyIngestionService:
         if readiness["may_synthesize"]:
             result["strategic_report"] = self._strategic_report(
                 meta["company_name"], documents, extra_observations,
-                previous_model=previous_model)
+                previous_model=previous_model, run_id=run_id)
             self._record_reasoning(run_id, domain, documents,
                                    result["strategic_report"])
         else:
@@ -1097,7 +1097,7 @@ class CompanyIngestionService:
                 "runs": runs[-50:]}
 
     def _strategic_report(self, company_name, documents, extra_observations,
-                          previous_model=None):
+                          previous_model=None, run_id=""):
         from intent_engine.strategic_intelligence.observations import (
             derive_analyst_evidence, derive_observations,
         )
@@ -1121,9 +1121,14 @@ class CompanyIngestionService:
             observations = derive_analyst_evidence(documents, company_name)
             if not observations:
                 return None
-        report = build_strategic_report(company_name=company_name,
-                                        observations=observations,
-                                        previous_model=previous_model)
+        report = build_strategic_report(
+            company_name=company_name, observations=observations,
+            previous_model=previous_model,
+            # WHAT THE SEARCH DID, carried to the surface a reader sees. The
+            # brief rendered "Another registrant's filing - none" as a bare
+            # zero because this never crossed; only the provenance drawer had
+            # it, and the drawer is not what a chief executive opens first.
+            discovery_coverage=self.discovery_report(run_id))
         payload = report.as_dict()
 
         # --- the reasoning layer ------------------------------------------

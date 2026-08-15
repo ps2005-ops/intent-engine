@@ -36,13 +36,46 @@ def _submit(app, company="Acme"):
 
 
 def test_submission_returns_immediately_and_work_continues(tmp_path):
+    """The handler must return WHILE the analysis is still running.
+
+    This asserted `elapsed < 2.0`, which is a proxy for the property and a
+    wall-clock bound on a shared machine: it failed once inside a 6000-test
+    guard run while passing 3/3 alone, on a change that could not reach this
+    path at all. A timing threshold cannot tell a blocking handler from a busy
+    laptop.
+
+    The property itself is an ORDER, so it is asserted as one. The worker is
+    held on a latch that this test controls; if the POST carried the analysis
+    it could not return until the latch was released, and the latch is only
+    released after the response has been asserted. No duration is measured,
+    and the test is not slower for being correct.
+    """
+    import threading
+
     app = _async_app(tmp_path)
-    c, status, headers, elapsed = _submit(app)
+    holding = threading.Event()
+    released = threading.Event()
+    real = app._run_analysis
+
+    def _held(user_id, run_id):
+        holding.set()
+        # Bounded so a genuine regression fails the test instead of hanging
+        # the suite. The bound is a deadlock escape, never the assertion.
+        released.wait(timeout=30)
+        return real(user_id, run_id)
+
+    app._run_analysis = _held
+    c, status, headers, _ = _submit(app)
+
     assert status.startswith("303")
     assert headers["Location"].endswith("/progress")
-    # The request must not carry the analysis. This is the regression that
-    # would catch a return to the blocking POST.
-    assert elapsed < 2.0, f"submission blocked for {elapsed:.1f}s"
+    # THE REGRESSION THIS CATCHES: a return to the blocking POST. The worker
+    # has started and has NOT been allowed to finish, yet the handler already
+    # answered -- which a synchronous handler cannot do.
+    assert holding.wait(timeout=30), "the worker never started"
+    assert not released.is_set()
+
+    released.set()
     assert app.wait_for_analysis(headers["Location"].split("/runs/")[1]
                                  .split("/")[0], timeout=30)
 

@@ -273,13 +273,46 @@ def evidence_families(report: dict) -> tuple:
     the inventory and the evidence actually used cannot disagree.
     """
     coverage = report.get("source_class_coverage") or {}
+    # HOW HARD WE LOOKED, beside WHAT WE FOUND.
+    #
+    # THE DEFECT THIS CLOSES, found by driving the deployed product. This
+    # section rendered "Another registrant's filing — none": a bare zero, on
+    # the surface a chief executive actually reads. The measured coverage
+    # state existed and reached only the provenance drawer, so the one
+    # sentence that makes the zero readable was missing from the brief. This
+    # module's own renderer says it: a reader who cannot tell "no competitor
+    # said this" from "no competitor was asked" cannot judge the analysis.
+    discovery = report.get("discovery_coverage")
+    discovery = discovery if isinstance(discovery, dict) else {}
     out = []
     for key, label, consequence in _FAMILIES:
         count = int(coverage.get(key) or 0)
-        out.append({"key": key, "label": label, "count": count,
-                    "present": count > 0,
-                    "consequence": "" if count else consequence})
+        entry = {"key": key, "label": label, "count": count,
+                 "present": count > 0,
+                 "consequence": "" if count else consequence}
+        if not count and key == "competitor":
+            entry["consequence"] = _search_sentence(discovery, consequence)
+        out.append(entry)
     return tuple(out)
+
+
+def _search_sentence(discovery: dict, consequence: str) -> str:
+    """The absence, plus whether we are entitled to call it a finding.
+
+    Only a search that read everything it considered may say the company has
+    no outside coverage. Everything else -- including no producer at all --
+    is a fact about our retrieval, and saying the stronger thing is the
+    flattering error this whole vocabulary exists to prevent.
+    """
+    from intent_engine.company_ingestion import relevance as _REL
+    reading = _REL.zero_reading(
+        independent_relevant=0,
+        coverage=str(discovery.get("coverage") or _REL.DISCOVERY_NOT_RUN))
+    considered = int(discovery.get("candidates_considered") or 0)
+    read = int(discovery.get("candidates_fetched") or 0)
+    effort = (f" We looked at {considered} filing(s) by other registrants and "
+              f"read {read} in full." if considered else "")
+    return f"{consequence} {reading['statement']}{effort}".strip()
 
 
 # --- passage builders ---------------------------------------------------------
