@@ -76,6 +76,28 @@ def test_a_third_partys_filing_keeps_its_independence():
     assert rec["author"] == f"SEC filer {OTHER_CIK.lstrip('0')}"
 
 
+def test_a_third_partys_filing_is_called_a_filing_not_reporting():
+    """MEASURED ON THE LIVE PAYLOAD. EVENTIKO's 10-K rendered as "Third-party
+    reporting" because its LINEAGE is INDEPENDENT_EXTERNAL_SOURCE. Lineage
+    answers whether a document adds an independent observation; it does not
+    answer what the document IS. A sworn annual report is not journalism."""
+    rec = _by_digest(P.project(ALL, **SUBJECT))[THIRD_FILING["final_url"]]
+    plain = rec["plain_statement"].lower()
+    assert "filing" in plain
+    assert "reporting" not in plain
+    assert "another company" in plain
+    assert rec["independence_bearing"] is True     # still independent
+
+
+def test_a_genuine_article_is_still_called_reporting():
+    """The control: the filing branch must not swallow real journalism."""
+    article = _doc("https://www.reuters.com/tech/story", "independent_reporting",
+                   digest="z", desc="a reporter describes the market shift")
+    rec = _by_digest(P.project([article], **SUBJECT))[article["final_url"]]
+    assert "reporting" in rec["plain_statement"].lower()
+    assert "filing" not in rec["plain_statement"].lower()
+
+
 def test_the_author_is_never_just_the_host():
     for rec in P.project(ALL, **SUBJECT)["records"]:
         if rec["host"]:

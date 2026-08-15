@@ -106,11 +106,24 @@ def _passage(document: dict) -> str:
 
 
 def _plain_label(row: dict, *, self_authored: bool, host: str) -> str:
-    if self_authored and row.get("is_filing"):
+    """What kind of source this is, in a sentence a CEO can act on.
+
+    THE FILING BRANCHES COME FIRST, both of them. Lineage answers "does this
+    add an independent observation"; it does not answer "what IS this". Live
+    output labelled a third party's 10-K "Third-party reporting", because its
+    lineage is INDEPENDENT_EXTERNAL_SOURCE and that is the phrase mapped to
+    it -- but a sworn annual report is not journalism, and a buyer weighing
+    the evidence needs the difference.
+    """
+    if row.get("is_filing"):
         regulator = next(
             (name for suffix, name in _SELF_FILING_HOSTS.items()
              if host == suffix or host.endswith("." + suffix)), "the regulator")
-        return _SELF_FILING_PLAIN + regulator
+        if self_authored:
+            return _SELF_FILING_PLAIN + regulator
+        return f"A regulatory filing written by another company, hosted by " \
+               f"the {regulator}" if regulator != "the regulator" else \
+               "A regulatory filing written by another company"
     return _PLAIN.get(row.get("lineage", ""), "A source of unstated kind")
 
 
