@@ -174,3 +174,22 @@ def test_awaiting_says_so_when_nothing_is_open():
     out = PA.answer("What are we waiting to learn?", record=_record())
     assert out.supported is False
     assert "nothing is on the record as awaited" in out.answer.lower()
+
+
+# --- the live surface ------------------------------------------------------
+
+def test_the_memory_screen_never_reads_a_decision_without_a_scope(tmp_path):
+    """A decision history is not evidence about a company -- it is what a
+    named person chose to do. The public screen has no scope, so it reads
+    nothing, exactly as the decisions JSON view refuses a SCOPELESS_READ."""
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    from intent_engine.webapp.storage_state import record_boot
+
+    config = AppConfig(env="test", secret="s" * 40,
+                       web_store_path=tmp_path / "w.jsonl",
+                       fi_store_path=tmp_path / "f.jsonl",
+                       ci_store_path=tmp_path / "c.jsonl", demo_mode=True)
+    record_boot(tmp_path, boot_id="prev")
+    app = WebApp(config, transport=lambda u, t: None, resolver=False)
+    assert app._living_record_for("cloudflare", scope=None) is None

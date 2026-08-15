@@ -770,6 +770,8 @@ class WebApp:
         if route == ("GET", "demo-dossiers", 3) and parts[2] in (
                 "xray", "full", "deck"):
             return self._decision_screen(parts[1], parts[2])
+        if route == ("GET", "demo-dossiers", 3) and parts[2] == "memory":
+            return self._memory_screen(parts[1])
         if path.startswith("/demo-dossiers/") and method == "GET":
             return self._demo_dossier_detail(path[len("/demo-dossiers/"):])
         if path == "/onboarding" and method == "GET":
@@ -3968,6 +3970,86 @@ class WebApp:
                 links=[("Full analysis", f"{base}/full"),
                        ("Presentation", f"{base}/deck")])
         return self._html(self._page(company, body, None, ""))
+
+    def _memory_screen(self, company_id: str):
+        """What we decided, what we did, and what came of it.
+
+        THE FOURTH PROJECTION of the same decision, beside the X-Ray, the
+        full analysis and the presentation -- except that the questions here
+        are about the PAST, and the past lives in `LivingDecisionRecord`
+        rather than in the composed `FounderDecision`.
+
+        Every stage that has not happened is shown as not having happened.
+        The point of the screen is that a reader can see the difference
+        between what the engine recommended, what a person chose, what the
+        company did, and what followed -- because a product that blurs them
+        will eventually tell somebody "we expanded and it worked" about a
+        decision nobody executed.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.demo_dossier.store import company_key
+        from intent_engine.executive import personal_ai as PA
+
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            return self._error_page(
+                404, f"No analysis is stored here for {company_id!r}, so "
+                     f"there is no decision history to show.")
+        company = getattr(dossier, "canonical_name", "") or company_id
+        # No scope on this public page, so no decision history is read.
+        # The questions still render, each stating that nothing is recorded,
+        # which is the truthful answer for a visitor who has decided nothing.
+        record = self._living_record_for(company_id, scope=None)
+        decision = self._executive_read(dossier)
+        rows = []
+        for question in PA.MEMORY_QUESTIONS:
+            out = PA.answer(question, record=record, decision=decision)
+            state = "" if out.supported else (
+                f'<p class="none">Not established: '
+                f'{_e(out.information_gap or "nothing on the record")}</p>')
+            rows.append(
+                f'<section class="card"><h2>{_e(question)}</h2>'
+                f'<p>{_e(out.answer)}</p>{state}</section>')
+        base = f"/demo-dossiers/{company_id}"
+        body = (
+            f'<p class="eyebrow">Decision history</p><h1>{_e(company)}</h1>'
+            f'<p class="none">The engine&rsquo;s reading is on the '
+            f'<a href="{base}/xray">X-Ray</a>. This page is the record of '
+            f'what was decided and done, which is a different thing: a '
+            f'recommendation is not a decision, and a decision is not an '
+            f'act.</p>' + "".join(rows))
+        return self._html(self._page(company, body, None, ""))
+
+    def _living_record_for(self, company_id: str, scope=None):
+        """This company's latest living decision, or None. Never raises.
+
+        A DECISION HISTORY IS TENANT-SCOPED, always. Without a scope this
+        returns None rather than reading the store unscoped -- the decisions
+        JSON view beside it refuses the same read as SCOPELESS_READ, and a
+        public page that showed one tenant's decisions to another visitor
+        would be the worst kind of leak: it is not evidence about a company,
+        it is what a named person chose to do.
+        """
+        if scope is None:
+            return None
+        try:
+            from intent_engine.executive import living_decision as LDR
+            store = LDR.LivingDecisionStore(self.config.web_store_path.parent)
+            rows = [r for r in store.all(scope=scope)
+                    if str(r.get("company_id") or "") == company_id]
+            if not rows:
+                return None
+            latest = sorted(rows, key=lambda r: r.get("revision", 0))[-1]
+            return LDR.LivingDecisionRecord(**{
+                k: v for k, v in latest.items()
+                if k in LDR.LivingDecisionRecord.__dataclass_fields__})
+        except Exception:                                   # noqa: BLE001
+            # A memory that cannot be read is not a memory that is empty,
+            # but the screen degrades to "nothing recorded" either way and
+            # says so per question rather than failing the page.
+            return None
 
     def _learning_acceleration(self, environ):
         """What the engine learned, over three windows.
