@@ -561,7 +561,17 @@ def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
         # "Approved strategic evidence" and "defensible outside-in view" are
         # the pipeline's words for its own steps. The reader needs the fact,
         # which is that the public record did not carry enough to read from.
-        return {"view": f"What {company_name} has published is not enough to "
+        # NEVER A NAMELESS SENTENCE. Measured live on Caterpillar, whose
+        # brief opened "what has published is not enough to read a strategy
+        # from" -- the single most-read line in the product, ungrammatical,
+        # because `company_name` arrived empty on the domainless path while
+        # the page title resolved the name from elsewhere.
+        #
+        # This degrades the wording; it does not repair the emptiness, which
+        # is a separate upstream defect and is recorded as one. A subject
+        # that cannot be named still must not be printed as a hole.
+        subject = str(company_name or "").strip() or "this company"
+        return {"view": f"What {subject} has published is not enough to "
                         f"read a strategy from, so none is put forward here.",
                 "transition": "", "tension": "", "why_care": "",
                 "view_withheld": True,

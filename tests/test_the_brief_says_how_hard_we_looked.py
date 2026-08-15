@@ -112,3 +112,29 @@ def test_an_unrecognised_message_still_defaults_to_our_fault():
     otherwise, and that default is load-bearing."""
     from intent_engine.webapp import failures as F
     assert F.classify("some unrecognised explosion") == F.INTERNAL_FAILURE
+
+
+# --- D6: the most-read sentence must never render as a hole -------------------
+
+
+def test_a_withheld_view_never_prints_a_nameless_sentence():
+    """MEASURED LIVE ON CATERPILLAR. The brief opened with "what has published
+    is not enough to read a strategy from" -- the product's single most-read
+    line, ungrammatical, because the company name arrived empty."""
+    from intent_engine.strategic_intelligence import reasoning as R
+    for name in ("", "   ", None):
+        report = R.build_strategic_report(company_name=name, observations=[])
+        text = " ".join(
+            str(v) for v in (report.thesis or {}).values() if isinstance(v, str))
+        assert "What  has published" not in text
+        assert "what has published" not in text.lower()
+
+
+def test_a_named_company_still_appears_in_the_withheld_sentence():
+    """NEGATIVE CONTROL: the fallback must not swallow a real name."""
+    from intent_engine.strategic_intelligence import reasoning as R
+    report = R.build_strategic_report(company_name="Cloudflare, Inc.",
+                                      observations=[])
+    text = " ".join(
+        str(v) for v in (report.thesis or {}).values() if isinstance(v, str))
+    assert "Cloudflare, Inc." in text
