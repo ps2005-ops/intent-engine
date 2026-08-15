@@ -284,15 +284,18 @@ def assess_filing_mention(*, html: str, company_name: str,
     # this company's supposed independent support.
     verdict = _REL.adjudicate({"text_content": text}, subject_name=company_name,
                               author_name=author_name)
+    # THE EXCERPT IS THE SPAN THE VERDICT WAS BUILT FROM.
+    #
+    # It used to be the first non-boilerplate mention, which is a DIFFERENT
+    # sentence from the ones that were counted. Measured live, that printed a
+    # fund's holdings row -- "Bank of America Corporation (14) 3,830,768 5.90"
+    # -- directly beside the words DIRECTLY_RELEVANT. An excerpt that did not
+    # drive the verdict cannot justify it, and showing one is how a surface
+    # starts lying with true parts.
+    counted = [str(c) for c in (verdict.get("counted_spans") or [])]
     terms = _REL._terms(company_name, "")
     mentions = _REL._mentions(text, terms) if terms else []
-    excerpt = ""
-    for sentence in mentions:                     # first NON-boilerplate span
-        if not _REL._BOILERPLATE.search(sentence):
-            excerpt = " ".join(sentence.split())[:600]
-            break
-    if not excerpt and mentions:
-        excerpt = " ".join(mentions[0].split())[:600]
+    excerpt = " ".join(counted[0].split())[:600] if counted else ""
     return {
         "relevance": verdict["state"],
         "reason": verdict["reason"],

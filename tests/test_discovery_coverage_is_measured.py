@@ -294,3 +294,75 @@ def test_a_different_business_sharing_a_leading_word_is_not_an_affiliate():
         today=TODAY)
     assert [c["third_party_filer"] for c in got["candidates"]] == [
         "Linear Minerals Corp."]
+
+
+# --- what the second live sweep found (J&J, BoA, Toyota, Vale) ----------------
+
+
+def test_a_generic_leading_word_is_not_an_identity():
+    """SEV1-CLASS, MEASURED LIVE. `_terms` emitted the bare leading word so
+    that filings saying "Cloudflare" match "Cloudflare, Inc." -- but "Bank of
+    America Corporation" leads with "Bank", so every sentence containing the
+    word `bank` counted as a mention. All four of Bank of America's
+    "independent relevant origins" were documents that never named it.
+    """
+    from intent_engine.company_ingestion import relevance as R
+    assert R._terms("Bank of America Corporation", "") == [
+        "Bank of America Corporation"]
+    # Recall for a distinctive name is untouched -- this deletes collisions,
+    # not observations.
+    assert "Cloudflare" in R._terms("Cloudflare, Inc.", "")
+    assert "Toyota" in R._terms("Toyota Motor Corporation", "")
+
+    verdict = R.adjudicate(
+        {"text_content": "Assets were held in segregated bank accounts to the "
+                         "extent required by CFTC regulations. The fund keeps "
+                         "several bank relationships open at all times."},
+        subject_name="Bank of America Corporation")
+    assert verdict["state"] == R.IRRELEVANT
+    assert "never names the company" in verdict["reason"]
+
+
+def test_a_holdings_table_row_is_not_a_claim():
+    """MEASURED LIVE ON TWO SECTORS. Bank of America's strongest evidence was a
+    fund's holdings row and Toyota's was a customer-concentration row. Both are
+    independent, both name the company, neither asserts anything."""
+    from intent_engine.company_ingestion import relevance as R
+    filler = "This section describes the portfolio in detail. " * 12
+    verdict = R.adjudicate(
+        {"text_content": filler +
+         "$ 1,500,000 3/11/27 Bank of America Corporation 1.66 % $ 1,497,566 "
+         "2.16 %. Toyota Motor Corporation 12.2% 12.5% 11.5%."},
+        subject_name="Bank of America Corporation")
+    assert verdict["state"] == R.IRRELEVANT
+    assert "tables" in verdict["reason"]
+
+
+def test_a_short_excerpt_is_never_refused_for_its_shape():
+    """OVER-REFUSAL CONTROL for the rule above. A span from a SHORT input is
+    short because of our excerpting, not because the filing is a table."""
+    from intent_engine.company_ingestion import relevance as R
+    verdict = R.adjudicate({"text_content": "...Cloudflare..."},
+                           subject_name="Cloudflare, Inc.")
+    assert verdict["supports_corroboration"] is True
+
+
+def test_the_excerpt_is_the_span_the_verdict_was_built_from():
+    """MEASURED LIVE. The drawer printed a holdings row -- "Bank of America
+    Corporation (14) 3,830,768 5.90" -- directly beside DIRECTLY_RELEVANT,
+    because the excerpt was the first mention and the verdict came from
+    different sentences entirely."""
+    filler = "Portfolio detail follows for each position held. " * 12
+    got = TPF.discover_third_party_filings(
+        company_name="Cloudflare", subject_cik="0001477333",
+        transport=_transport([_hit("0001086222", "Akamai Technologies, Inc.")]),
+        fetcher=lambda url: (
+            "<html><body><p>" + filler +
+            "Cloudflare, Inc. 1.66 % $ 1,497,566 2.16 %. "
+            "Akamai competes directly with Cloudflare for enterprise CDN "
+            "contracts. Cloudflare's pricing pressured our renewal revenue."
+            "</p></body></html>"),
+        today=TODAY)
+    excerpt = got["candidates"][0]["mention_excerpt"]
+    assert "competes" in excerpt or "pricing" in excerpt
+    assert "1,497,566" not in excerpt

@@ -93,9 +93,17 @@ _AUTHOR_VOICE = re.compile(
 #: listing in Coursera's. Both name the company in a sentence whose subject is
 #: an individual. Read as corroboration they say a company we have never
 #: checked employs someone, which bears on nothing a reader is deciding.
+#: Measured again on Toyota: Tesla's proxy says "Denholm also SERVED AT Toyota
+#: Motor Corporation Australia for seven years", which the as/on form missed.
+#: The preposition is not the signal -- a career verb pointed at the company is.
 _BIOGRAPHICAL = re.compile(
-    r"\b(serve[sd]?\s+(?:as|on)|served\s+(?:as|on)|prior\s+to\s+joining|"
-    r"before\s+joining|from\s+\d{4}\s+(?:to|until)\s+(?:\d{4}|present)|"
+    r"\b(serve[sd]?\s+(?:as|at|on|with)|"
+    r"work(?:s|ed)?\s+(?:as|at|for)|"
+    r"(?:prior|previous(?:ly)?)\s+to\s+joining|before\s+joining|"
+    r"joined\s+(?:the\s+)?(?:company|firm|board)|"
+    r"was\s+appointed|has\s+held\s+(?:various|senior)|"
+    r"from\s+\d{4}\s+(?:to|until)\s+(?:\d{4}|present)|"
+    r"age\s+\d{2}\b|"
     r"he\s+(?:is|was|has)|she\s+(?:is|was|has)|they\s+(?:are|were|have)|"
     r"holds?\s+a\s+(?:B\.?[AS]|M\.?[BAS]|Ph\.?D)|"
     r"(?:board|director|officer|chair)\s+of)\b", re.I)
@@ -118,11 +126,91 @@ _SUPPLY_DISCLOSURE = re.compile(
     r"depend(?:s|ed)?\s+on|host(?:ed|s)?\s+(?:by|on|with)|"
     r"operated\s+by|provided\s+by|served\s+by|behind)\b", re.I)
 
+#: A LEGAL CAPTION IS A CITATION, NOT A CLAIM. "Bank of America Corporation,
+#: et al." names the company as a party to a case; it asserts nothing about
+#: the business that a reader could act on.
+_CAPTION = re.compile(r"\b(et\s+al\.?|v\.\s+[A-Z]|,\s+No\.\s+\d)", re.I)
+
+#: A list bullet, not a sentence.
+_BULLET_LEAD = re.compile(r"^\s*[•·▪●‣\-\*]\s*")
+
+#: Tokens that are quantities rather than words.
+_NUMERIC_TOKEN = re.compile(r"^[\$\(\)\[\]<>=~\-–—%,.:/\d]+$")
+
+#: Above this share of quantity-tokens, a span is a TABLE ROW.
+#:
+#: MEASURED LIVE ON THREE SECTORS AT ONCE. Bank of America's strongest
+#: "evidence" was a fund's holdings row -- "$ 1,500,000 3/11/27 Bank of
+#: America Corporation 1.66 % $ 1,497,566 2.16 %" -- and Toyota's was a
+#: customer-concentration row, "Toyota Motor Corporation 12.2% 12.5% 11.5%".
+#: Both are genuinely independent, genuinely about the company, and assert
+#: nothing. Sentence splitting cannot tell a row from a claim, so the shape
+#: of the span has to.
+_TABLE_ROW_RATIO = 0.25
+
+#: Below this many word-tokens there is not enough sentence to carry a claim.
+_MIN_PROSE_WORDS = 5
+
+#: Below this much text we are holding an EXCERPT, not a filing, and the shape
+#: of a span says nothing about the document it came from.
+_FULL_TEXT_CHARS = 400
+
+
+def _is_prose(span: str) -> bool:
+    """Whether this span is a sentence at all, as opposed to a row or a label.
+
+    A POSITIVE FINDING OF NON-PROSE, like every other demotion here. The
+    default stays permissive because deleting a real observation is worse
+    than carrying a weak one -- this only refuses spans whose SHAPE shows
+    they were never prose.
+    """
+    if _BULLET_LEAD.match(span or ""):
+        return False
+    if _CAPTION.search(span or ""):
+        return False
+    tokens = [t for t in re.split(r"\s+", (span or "").strip()) if t]
+    if not tokens:
+        return False
+    words = [t for t in tokens if re.search(r"[A-Za-z]{2}", t)]
+    if len(words) < _MIN_PROSE_WORDS:
+        return False
+    numeric = sum(1 for t in tokens if _NUMERIC_TOKEN.match(t))
+    return (numeric / len(tokens)) < _TABLE_ROW_RATIO
+
+
 _SENTENCE = re.compile(r"(?<=[.;!?])\s+")
 
 
 def _sentences(text: str):
     return [s for s in _SENTENCE.split(text or "") if s.strip()]
+
+
+#: LEADING WORDS THAT ARE NOT AN IDENTITY.
+#:
+#: MEASURED LIVE, AND THE WORST FALSE-EVIDENCE DEFECT FOUND SO FAR. The bare
+#: leading word is added because filings say "Cloudflare", not "Cloudflare,
+#: Inc." -- but "Bank of America Corporation" leads with "Bank", so every
+#: sentence containing the word `bank` counted as a mention of the company.
+#: Bank of America's four "independent relevant origins" were a futures fund
+#: describing "segregated bank accounts" and a director biography at Virginia
+#: National Bank. The company was never named in any of them.
+#:
+#: A word here is refused as a STANDALONE term only. The full name still
+#: matches, so recall for the real company is untouched -- this deletes
+#: collisions, not observations. Common to bank, insurance and utility names,
+#: which is exactly where the collision is dense.
+_GENERIC_LEAD = frozenset({
+    "bank", "banks", "banking", "first", "national", "general", "american",
+    "america", "united", "standard", "global", "international", "federal",
+    "capital", "central", "pacific", "atlantic", "western", "eastern",
+    "northern", "southern", "security", "trust", "republic", "community",
+    "commerce", "commercial", "industrial", "universal", "allied", "premier",
+    "superior", "continental", "empire", "liberty", "pioneer", "summit",
+    "heritage", "alliance", "peoples", "citizens", "farmers", "merchants",
+    "home", "public", "union", "state", "city", "county", "north", "south",
+    "east", "west", "new", "great", "royal", "crown", "prime", "core",
+    "united's", "advance", "advanced", "applied", "integrated", "unified",
+})
 
 
 def _terms(subject_name: str, subject_domain: str,
@@ -140,7 +228,8 @@ def _terms(subject_name: str, subject_domain: str,
         out.append(name)
         lead = re.split(r"[,\s]+", name)[0].strip()
         # Two characters is not an identity; it is a collision waiting.
-        if len(lead) > 3 and lead.lower() not in ("the", "inc"):
+        if (len(lead) > 3 and lead.lower() not in ("the", "inc")
+                and lead.lower() not in _GENERIC_LEAD):
             out.append(lead)
     host = (subject_domain or "").strip().lower()
     if host:
@@ -233,8 +322,28 @@ def adjudicate(document: dict, *, subject_name: str = "",
     substantive = 0
     incidental = 0
     biographical = 0
+    tabular = 0
+    #: THE SPANS THAT ACTUALLY DROVE THE VERDICT. A surface that shows the
+    #: first mention instead will print a holdings row beside the word
+    #: DIRECTLY_RELEVANT -- measured live on Bank of America and Cloudflare,
+    #: where the excerpt and the reason came from different sentences.
+    counted = []
+    #: A whole filing, or an excerpt of one? Sentence SHAPE is only evidence
+    #: when the sentence boundaries are the document's own.
+    reading_full_text = len(text.strip()) >= _FULL_TEXT_CHARS
     for sentence in mentions:
         if _BOILERPLATE.search(sentence):
+            continue
+        # IS THIS A SENTENCE? A holdings row, a bullet or a case caption names
+        # the company and claims nothing. Counted separately so a zero can say
+        # which kind of nothing it found.
+        #
+        # ONLY WHEN WE HOLD THE WHOLE DOCUMENT. A span from a short input is
+        # short because of OUR excerpting, and refusing it would demote a real
+        # filing for a fact about our snippet -- the exact over-refusal this
+        # module's docstring forbids.
+        if reading_full_text and not _is_prose(sentence):
+            tabular += 1
             continue
         # WHOSE BEHAVIOUR IS THIS? A first-person sentence listing the
         # subject among suppliers is the AUTHOR describing itself.
@@ -258,21 +367,30 @@ def adjudicate(document: dict, *, subject_name: str = "",
             continue
         if _SUBSTANTIVE.search(sentence):
             substantive += 1
+            counted.append(sentence)
         elif listed:
             incidental += 1
         else:
             substantive += 1
+            counted.append(sentence)
 
     if substantive >= 2:
         return _verdict(DIRECTLY_RELEVANT,
                         f"{substantive} passage(s) discuss the company",
-                        substantive, incidental)
+                        substantive, incidental, counted)
     if substantive == 1:
         return _verdict(CONTEXTUALLY_RELEVANT,
-                        "one passage discusses the company", 1, incidental)
+                        "one passage discusses the company", 1, incidental,
+                        counted)
     # THREE DISTINCT REASONS, because they are three distinct facts about the
     # document and a reader acts differently on each. A single merged sentence
     # would be shorter and would stop saying which one happened.
+    if tabular and not (incidental or biographical):
+        return _verdict(
+            IRRELEVANT,
+            f"the company appears {tabular} time(s), only in tables, lists or "
+            f"case captions rather than in a statement about it",
+            0, tabular)
     if biographical and not incidental:
         return _verdict(
             IRRELEVANT,
@@ -285,21 +403,24 @@ def adjudicate(document: dict, *, subject_name: str = "",
             f"the company is named {incidental} time(s), only as an example "
             f"in the author's account of its own arrangements",
             0, incidental)
-    if incidental or biographical:
+    if incidental or biographical or tabular:
+        total = incidental + biographical + tabular
         return _verdict(
             IRRELEVANT,
-            f"the company is named {incidental + biographical} time(s), only "
-            f"in the author's account of its own arrangements or its people",
-            0, incidental + biographical)
+            f"the company is named {total} time(s), only in the author's "
+            f"account of its own arrangements, its people, or its tables",
+            0, total)
     return _verdict(IRRELEVANT,
                     "the company is named only in boilerplate", 0, 0)
 
 
 def _verdict(state: str, reason: str, substantive: int,
-             incidental: int) -> Dict[str, object]:
+             incidental: int, counted: Sequence[str] = ()) -> Dict[str, object]:
     return {"contract": CONTRACT, "state": state, "reason": reason,
             "substantive_mentions": substantive,
             "incidental_mentions": incidental,
+            # The sentences the verdict was actually built from, in order.
+            "counted_spans": [str(c) for c in counted],
             "supports_corroboration": state in SUPPORTS_CORROBORATION}
 
 
