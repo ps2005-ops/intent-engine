@@ -124,9 +124,15 @@ BOTH = "both"
 # what its ABSENCE costs, because "no competitor source" is only useful when a
 # reader is told what that stops the analysis doing.
 _FAMILIES = (
+    # EVERY SENTENCE HERE RENDERS WHEN THE FAMILY IS *ABSENT*, and this one
+    # described the opposite situation -- "everything here is the company
+    # describing itself" -- so it only became visible the first time a run had
+    # NO company pages at all. Measured live on Caterpillar, whose site
+    # answers 403 to automated requests: the brief asserted that everything
+    # present was company-authored while nothing was present.
     ("company_owned", "The company's own pages",
-     "Everything here is the company describing itself, so nothing has been "
-     "checked against an outside account of it."),
+     "We could not read anything the company publishes about itself, so its "
+     "own account of its strategy is missing from this reading."),
     ("executive_statement", "Executive statements",
      "Leadership commentary is a claim about intent, not evidence of result."),
     ("investor_material", "Filings and investor material",
@@ -284,6 +290,15 @@ def evidence_families(report: dict) -> tuple:
     # said this" from "no competitor was asked" cannot judge the analysis.
     discovery = report.get("discovery_coverage")
     discovery = discovery if isinstance(discovery, dict) else {}
+    # WHY the families are empty, when the reason is that retrieval FAILED.
+    # Measured live: Caterpillar showed six empty families and no reason for
+    # any of them, while the run had recorded that caterpillar.com answers
+    # 403 to automated requests. Silence there reads as "this company has
+    # published nothing", which is a claim about the company rather than
+    # about our access to it -- the same error as a bare zero, one layer up.
+    failures = report.get("retrieval_failures")
+    failures = failures if isinstance(failures, dict) else {}
+    blocked = _blocked_sentence(failures)
     out = []
     for key, label, consequence in _FAMILIES:
         count = int(coverage.get(key) or 0)
@@ -292,8 +307,39 @@ def evidence_families(report: dict) -> tuple:
                  "consequence": "" if count else consequence}
         if not count and key == "competitor":
             entry["consequence"] = _search_sentence(discovery, consequence)
+        elif not count and blocked and key in _FIRST_PARTY_FAMILIES:
+            entry["consequence"] = f"{consequence} {blocked}"
         out.append(entry)
     return tuple(out)
+
+
+#: Families that come from the COMPANY'S OWN publishing. A site that refuses
+#: automated access explains these and nothing else -- a competitor's filing
+#: is not missing because the subject's website said no.
+_FIRST_PARTY_FAMILIES = frozenset({"company_owned", "executive_statement"})
+
+#: Failure types that mean "the door was shut", as opposed to a slow or
+#: malformed page. Only these license the sentence.
+_ACCESS_DENIED = ("http_status", "blocked", "unsafe_redirect",
+                  "javascript_only")
+
+
+def _blocked_sentence(failures: dict) -> str:
+    """The access failure, in the reader's terms. Empty when none was recorded.
+
+    Deliberately does not quote a status code: a chief executive needs to know
+    the site refused us, not which number it refused us with, and the evidence
+    library already carries the per-source detail.
+    """
+    denied = sum(int(failures.get(k) or 0) for k in _ACCESS_DENIED)
+    if not denied:
+        return ""
+    if failures.get("javascript_only"):
+        return ("The company's site returns its content only to a full "
+                "browser, so an automated read retrieves nothing.")
+    return (f"This is not an absence of publishing: {denied} of the company's "
+            f"own addresses refused automated access, so the material may "
+            f"exist and be unreadable to us.")
 
 
 def _search_sentence(discovery: dict, consequence: str) -> str:

@@ -540,7 +540,7 @@ def _build_questions(hypotheses, observations):
 
 
 def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
-                  evidence_gaps=()):
+                  evidence_gaps=(), economic_history=None):
     from intent_engine.strategic_intelligence.decision import (
         compose_decision, decide_across,
     )
@@ -571,14 +571,19 @@ def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
         # is a separate upstream defect and is recorded as one. A subject
         # that cannot be named still must not be printed as a hole.
         subject = str(company_name or "").strip() or "this company"
+        # THE ONE DECISION OBJECT, built once and carrying the measured
+        # history state. Composing it twice was how the surfaces and the
+        # withheld sentence started describing different runs.
+        _withheld = compose_decision(
+            company_name, None, blind_spots, evidence_gaps=evidence_gaps,
+            verified=verified)
+        if isinstance(economic_history, dict) and economic_history:
+            _withheld.economic_history = dict(economic_history)
         return {"view": f"What {subject} has published is not enough to "
                         f"read a strategy from, so none is put forward here.",
                 "transition": "", "tension": "", "why_care": "",
                 "view_withheld": True,
-                "decision": compose_decision(
-                    company_name, None, blind_spots,
-                    evidence_gaps=evidence_gaps,
-                    verified=verified).as_dict()}
+                "decision": _withheld.as_dict()}
     top = hypotheses[0]
     # NO FABRICATED TENSION.
     #
@@ -885,7 +890,9 @@ def build_strategic_report(*, company_name, observations,
                            patterns=None, scaffolds=None,
                            user_accepts_limited_scope=False,
                            previous_model=None, now=None,
-                           discovery_coverage=None) -> StrategicReport:
+                           discovery_coverage=None,
+                           retrieval_failures=None,
+                           economic_history=None) -> StrategicReport:
     """Compose a StrategicReport from structured observations. Status is left
     to the quality gate (:func:`quality.evaluate_report`), which the caller
     should apply; this function sets a provisional status of the gate result."""
@@ -1007,7 +1014,8 @@ def build_strategic_report(*, company_name, observations,
     # see.
     thesis = _build_thesis(company_name, hypotheses, blind_spots,
                            observations=observations,
-                           evidence_gaps=evidence_gaps)
+                           evidence_gaps=evidence_gaps,
+                           economic_history=economic_history)
 
     graph = _build_evidence_graph(company_name, observations, hypotheses,
                                   used_patterns, blind_spots, questions)
@@ -1052,6 +1060,8 @@ def build_strategic_report(*, company_name, observations,
         # has no standing to say how hard the search for it worked.
         discovery_coverage=(discovery_coverage
                             if isinstance(discovery_coverage, dict) else {}),
+        retrieval_failures=(retrieval_failures
+                            if isinstance(retrieval_failures, dict) else {}),
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,
         timeline=timeline, agenda=agenda, source_library=source_library,
         mental_model=model.as_dict(), surprises=surprises,

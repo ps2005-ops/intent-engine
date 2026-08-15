@@ -1128,7 +1128,9 @@ class CompanyIngestionService:
             # brief rendered "Another registrant's filing - none" as a bare
             # zero because this never crossed; only the provenance drawer had
             # it, and the drawer is not what a chief executive opens first.
-            discovery_coverage=self.discovery_report(run_id))
+            discovery_coverage=self.discovery_report(run_id),
+            retrieval_failures=self.failure_summary(run_id),
+            economic_history=self.archive_depth(run_id))
         payload = report.as_dict()
 
         # --- the reasoning layer ------------------------------------------
@@ -1256,6 +1258,42 @@ class CompanyIngestionService:
             return str((resolved or {}).get("cik") or "")
         except Exception:  # noqa: BLE001 - subject identification is best-effort
             return ""
+
+    def archive_depth(self, run_id: str) -> dict:
+        """How far back OUR OWN observations go, for the history assessment.
+
+        Measured from `retrieved_at` -- when we actually read the document --
+        never from a date printed inside it. A filing covering 2019 that we
+        first read last week was not available at a 2019 decision point, and
+        using the document's own date would admit exactly the hindsight that
+        makes a replay worthless.
+        """
+        from intent_engine.strategic_intelligence import economic_history as EH
+        try:
+            rows = [{"observed_at": r.get("retrieved_at")}
+                    for r in self.store.retrieved(run_id)]
+        except Exception:  # noqa: BLE001 - a read model may not fail a run
+            return {}
+        return EH.assess(observations=rows)
+
+    def failure_summary(self, run_id: str) -> dict:
+        """Counts by failure type for this run. Never URLs.
+
+        WHY A SURFACE NEEDS THIS. Caterpillar's brief showed six empty
+        evidence families and no reason for any of them. The reason existed:
+        caterpillar.com answers 403 to automated requests, and the run
+        recorded that. Without it the page reads as though the company has
+        published nothing, which is a claim about the company rather than
+        about our access to it.
+        """
+        counts = {}
+        try:
+            for row in self.store.failures(run_id):
+                key = str((row or {}).get("failure_type") or "unknown")
+                counts[key] = counts.get(key, 0) + 1
+        except Exception:  # noqa: BLE001 - a read model may not fail a run
+            return {}
+        return counts
 
     def discovery_report(self, run_id: str) -> dict:
         """What the independent-channel search DID for this run.

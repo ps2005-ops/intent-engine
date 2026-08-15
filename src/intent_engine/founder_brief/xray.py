@@ -287,6 +287,29 @@ def _history_body(d: dict) -> str:
                 f'<li><p class="h">{_e(ep.get("episode_date", ""))}</p>'
                 f'<p class="m">{_e(ep.get("what_happened", ""))}</p></li>')
         return f'<ul class="rowlist">{"".join(items)}</ul>'
+    # THE MEASURED STATE, not a constant. This paragraph was hardcoded and
+    # therefore said the same thing whatever the archive held -- prose
+    # asserting a fact about a producer that did not exist. When the run
+    # carries an assessment, the surface renders WHAT WAS MEASURED and can
+    # tell a blocked archive from a describable period.
+    history = d.get("economic_history")
+    history = history if isinstance(history, dict) else {}
+    if history:
+        from intent_engine.strategic_intelligence import economic_history as EH
+        label = {EH.HISTORICAL_REPLAY_BLOCKED_DATA: "Replay not yet valid",
+                 EH.DESCRIPTIVE_HISTORY_ONLY: "Descriptive history",
+                 EH.HISTORICAL_REPLAY_AVAILABLE: "Historical replay"}.get(
+                     str(history.get("state") or ""), "Replay not yet valid")
+        return (f'<p class="none">{_e(label)}</p>'
+                f'<p>{_e(EH.plain_statement(history))}</p>'
+                f'<p class="none">We hold '
+                f'{int(history.get("retrieval_months") or 0)} month(s) of our '
+                f'own observations; a replay needs '
+                f'{int(history.get("required_months") or 0)}.'
+                + (f' That clears on '
+                   f'{_e(str(history.get("next_eligible_date")))}.'
+                   if history.get("next_eligible_date") else "")
+                + '</p>')
     parts = [
         '<p>No historical episode is replayed for this company. Replay '
         'requires the company\'s own observations as they stood at an '

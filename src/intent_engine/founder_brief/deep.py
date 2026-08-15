@@ -295,12 +295,20 @@ def presentation(decision: dict, *, company: str = "", stamp: str = "",
     else:
         add("The economic environment",
             P.say(d.get("economic_state"), P.ECONOMIC))
-    add("What history would say",
-        ("No historical episode is replayed: replay needs this company's own "
-         "observations as they stood at an earlier date, and the published "
-         "snapshot carries only the current reading."
-         if not d.get("historical_playback") else ""),
-        *(d.get("historical_dimensions") or ())[:2])
+    # The slide says which of the three history states this is, from the
+    # measurement -- never the one hardcoded sentence it used to carry.
+    _hist = d.get("economic_history")
+    _hist = _hist if isinstance(_hist, dict) else {}
+    if _hist and not d.get("historical_playback"):
+        from intent_engine.strategic_intelligence import economic_history as EH
+        add("What history would say", EH.plain_statement(_hist))
+    else:
+        add("What history would say",
+            ("No historical episode is replayed: replay needs this company's "
+             "own observations as they stood at an earlier date, and the "
+             "published snapshot carries only the current reading."
+             if not d.get("historical_playback") else ""),
+            *(d.get("historical_dimensions") or ())[:2])
     add("What we could establish, and what we could not",
         P.say(d.get("causal_status"), P.CAUSAL),
         d.get("causal_question", ""))

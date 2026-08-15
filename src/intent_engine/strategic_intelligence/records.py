@@ -363,6 +363,10 @@ class StrategicReport:
     #: Empty means no discovery producer ran, which every surface must read as
     #: DISCOVERY_NOT_RUN -- never as "this company has no outside coverage".
     discovery_coverage: dict = field(default_factory=dict)
+    #: WHY a source family is empty, when the reason is that retrieval failed
+    #: rather than that nothing was attempted. Counts by failure type only --
+    #: never URLs, which are already carried by the evidence library.
+    retrieval_failures: dict = field(default_factory=dict)
     quality_findings: list = field(default_factory=list)
     limited_scope_accepted: bool = False
     evidence_graph: dict = field(default_factory=dict)
@@ -412,6 +416,7 @@ class StrategicReport:
             "observations": [o.as_dict() for o in self.observations],
             "source_class_coverage": self.source_class_coverage,
             "discovery_coverage": self.discovery_coverage,
+            "retrieval_failures": self.retrieval_failures,
             "quality_findings": list(self.quality_findings),
             "limited_scope_accepted": self.limited_scope_accepted,
             "evidence_graph": self.evidence_graph,

@@ -379,6 +379,10 @@ class FounderDecision:
     #: Historical regimes worth replaying for a business of this kind.
     historical_dimensions: tuple = ()
     historical_playback: tuple = ()
+    #: WHICH OF THE THREE HISTORY STATES this company is in, measured from the
+    #: archive. Empty means no assessment ran, and the surfaces then fall back
+    #: to their prior wording rather than inventing a state.
+    economic_history: dict = field(default_factory=dict)
     current_read: str = ""
     #: SUPPORTED / BOUNDED / UNMEASURABLE / REFUSED. Governs the WORDING the
     #: executive read is allowed to use -- see `decision_synthesis`.
@@ -509,6 +513,7 @@ class FounderDecision:
             "why_this_causal_question": self.why_this_causal_question,
             "historical_dimensions": list(self.historical_dimensions),
             "historical_playback": list(self.historical_playback),
+            "economic_history": dict(self.economic_history or {}),
             "current_read": self.current_read,
             "standing": self.standing,
             "supporting_evidence_ids": list(self.supporting_evidence_ids),
@@ -643,6 +648,7 @@ def decision_from_dict(data) -> FounderDecision:
         why_this_causal_question=data.get("why_this_causal_question", ""),
         historical_dimensions=tuple(data.get("historical_dimensions") or ()),
         historical_playback=tuple(data.get("historical_playback") or ()),
+        economic_history=dict(data.get("economic_history") or {}),
         current_read=data.get("current_read", ""),
         standing=data.get("standing", ""),
         supporting_evidence_ids=tuple(data.get("supporting_evidence_ids")
@@ -852,6 +858,28 @@ def decide_across(company_name, hypotheses, blind_spots=(),
     return first
 
 
+#: What to call a subject whose name did not arrive. Never an empty string.
+SUBJECT_UNNAMED = "this company"
+
+
+def canonical_subject(company_name) -> str:
+    """The name every decision sentence uses, normalised ONCE.
+
+    THE CANONICAL CHOKEPOINT, and the reason this is here rather than at each
+    surface. Measured on the deployed product: Caterpillar's executive brief
+    opened "what has published is not enough to read a strategy from" -- the
+    single most-read line in the product, with a hole where the subject
+    belongs -- because an empty name reached the withheld sentence. Patching
+    that sentence would leave every other surface free to print the same hole
+    from the same input.
+
+    `compose_decision` builds the one decision object the X-Ray, the brief,
+    the deck and the Q&A all render, so normalising the subject here fixes all
+    of them at once and keeps a blank from ever becoming customer-visible.
+    """
+    return str(company_name or "").strip() or SUBJECT_UNNAMED
+
+
 def compose_decision(company_name, hypothesis, blind_spots=(),
                      evidence_gaps=(), verified=()) -> FounderDecision:
     """The one decision object every surface renders.
@@ -868,6 +896,7 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
     # change, which is why this is filtered where every surface converges.
     verified = tuple(FH.executive_safe(
         _flat(v) for v in (verified or ()) if _flat(v)))
+    company_name = canonical_subject(company_name)
 
     if hypothesis is None:
         return FounderDecision(
