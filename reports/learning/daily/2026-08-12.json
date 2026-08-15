@@ -1,0 +1,153 @@
+{
+  "contract": "market_learning_report.v1",
+  "report_version": 1,
+  "period": "day",
+  "start": "2026-08-12",
+  "end": "2026-08-12",
+  "partial_period": false,
+  "partial_month": false,
+  "generated_at": "2026-08-12T23:02:57.254408+00:00",
+  "system_of_record": "market_intelligence_learning_engine",
+  "data_root": "/Users/prathamsharma/intent-engine-market/reports/market/learning_ledger.jsonl",
+  "runtime_sha": "",
+  "rows": {
+    "in_period": 314,
+    "ledger_all_time": 4960,
+    "undatable_all_time": 25,
+    "undatable_by_kind": {
+      "causal_estimate": 25
+    },
+    "date_field_used": {
+      "as_of": 90,
+      "available_at": 6,
+      "chosen_at": 3,
+      "completed_at": 3,
+      "created_at": 55,
+      "detected_at": 12,
+      "last_updated": 3,
+      "measured_as_of": 54,
+      "preregistered_at": 3,
+      "retrieved_at": 5,
+      "seen_at": 80
+    }
+  },
+  "channels": {
+    "evidence": {
+      "evidence_rows": 6,
+      "re_observations": 80,
+      "arrivals_total": 86,
+      "new_information_share": 0.0698,
+      "knowledge_effects": 55,
+      "evidence_that_changed_something": 17,
+      "zero_effect_evidence": 0,
+      "effects_by_type": {
+        "CONTRADICTED": 4,
+        "CREATED": 6,
+        "NO_CHANGE": 19,
+        "RESOLVED": 15,
+        "SUPPORTED": 11
+      },
+      "changing_effect_share": 0.6545,
+      "independent_evidence_rows": "UNAVAILABLE",
+      "independent_evidence_note": "evidence independence is produced on the founder branch (company_ingestion.independence); the market ledger carries no independence column"
+    },
+    "beliefs": {
+      "beliefs_declared": 3,
+      "beliefs_updated": 0,
+      "distinct_beliefs_touched": 3,
+      "transitions": {}
+    },
+    "expectations": {
+      "preregistered": 3,
+      "reconciled": 0,
+      "outcomes": {},
+      "open_after_period": 3
+    },
+    "thesis": {
+      "snapshots": 16,
+      "revisions": 0,
+      "distinct_theses_revised": 0,
+      "transitions": {}
+    },
+    "research": {
+      "decisions": 3,
+      "outcomes": 3,
+      "by_status": {
+        "FAILED": 1,
+        "NO_RESULT": 1,
+        "SUCCESS": 1
+      },
+      "zero_result_captured": true
+    },
+    "method": {
+      "performance_rows": 54,
+      "beat_baseline": 11,
+      "beat_baseline_share": 0.2037,
+      "assumption_checks": 72,
+      "assumptions_held": 0,
+      "assumptions_held_share": 0.0
+    },
+    "sources": {
+      "observations": 12,
+      "families_tracked": 6,
+      "by_state": {
+        "HEALTHY": 11,
+        "UNCLASSIFIED": 1
+      },
+      "degraded_families": [
+        "bureau_of_labor_statistics"
+      ],
+      "fallbacks_active": [],
+      "longest_failure_streak": 1,
+      "affected_intelligence": [],
+      "note": "a degraded source reduces observability; it is never evidence that a company did nothing"
+    },
+    "macro": {
+      "observations": 5,
+      "distinct_conditions": 4,
+      "by_condition": {
+        "CURRENCY": 1,
+        "INFLATION": 1,
+        "MARKET_RATE": 2,
+        "POLICY_RATE": 1
+      }
+    }
+  },
+  "bottleneck": {
+    "bottleneck": "RECONCILIATION",
+    "severity": 0.0,
+    "reason": "3 expectation(s) preregistered and none reconciled in this period",
+    "runners_up": [
+      "EVIDENCE_INDEPENDENCE"
+    ]
+  },
+  "next_research_priority": {
+    "bottleneck": "RECONCILIATION",
+    "missing_fact": "predictions are being made and never judged",
+    "suggested_action": "reconcile the oldest open expectations whose windows have closed",
+    "why_now": "3 expectation(s) preregistered and none reconciled in this period",
+    "forbidden_shape": "a query that names its desired conclusion is refused; the action must be able to fail"
+  },
+  "executive_summary": {
+    "top_learnings": [
+      "17 evidence row(s) changed the model",
+      "4 contradicted effect(s)",
+      "6 created effect(s)",
+      "15 resolved effect(s)",
+      "11 supported effect(s)"
+    ],
+    "top_contradictions": [
+      "4 contradicting effect(s)"
+    ],
+    "top_revalidations": [
+      "19 observation(s) confirmed existing knowledge"
+    ],
+    "top_degradations": [
+      "bureau_of_labor_statistics"
+    ],
+    "top_information_gaps": [
+      "3 expectation(s) preregistered and none reconciled in this period"
+    ],
+    "material_change": true
+  }
+}

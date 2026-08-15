@@ -752,6 +752,12 @@ class WebApp:
             return self._internal_impact(session, environ)
         if path == "/decisions" and method == "GET":
             return self._decisions(session, environ)
+        # NOT "/learning": that path is the operations dashboard and is
+        # login-gated. Mounting an unauthenticated page there shadowed it and
+        # let a demo guest read the operations view -- caught by
+        # test_a_demo_guest_cannot_read_the_operations_dashboard.
+        if path == "/learning-acceleration" and method == "GET":
+            return self._learning_acceleration(environ)
         if path == "/demo-dossiers/telemetry" and method == "GET":
             return self._ok_json(self._demo_telemetry.as_dict())
         if path == "/demo-dossiers" and method == "GET":
@@ -3962,6 +3968,75 @@ class WebApp:
                 links=[("Full analysis", f"{base}/full"),
                        ("Presentation", f"{base}/deck")])
         return self._html(self._page(company, body, None, ""))
+
+    def _learning_acceleration(self, environ):
+        """What the engine learned, over three windows.
+
+        RENDERS THE MARKET ENGINE'S OWN REPORT and computes no metric of its
+        own. Two definitions of "novel evidence" is how a dashboard starts
+        disagreeing with the engine it describes.
+
+        The headline is deliberately NOT the arrival count. A cycle that
+        re-reads eighty pages and changes nothing has been busy, not
+        productive, and putting 86 at the top of the page teaches a reader to
+        mistake the first for the second.
+        """
+        from intent_engine.demo_dossier import learning_bridge as LB
+        windows = []
+        for period, label in (("day", "Today"), ("week", "Last 7 days"),
+                              ("month", "Last 30 days")):
+            report = LB.load(period)
+            reading = LB.activity_versus_learning(report)
+            if not report.available:
+                windows.append(
+                    f'<section class="card"><h2>{_e(label)}</h2>'
+                    f'<p class="none">{_e(report.reason)}</p></section>')
+                continue
+            payload = report.payload
+            bottleneck = payload.get("bottleneck") or {}
+            nxt = payload.get("next_research_priority") or {}
+            summary = payload.get("executive_summary") or {}
+            learned = "".join(
+                f"<li>{_e(x)}</li>"
+                for x in (summary.get("top_learnings") or ())[:5])
+            windows.append(
+                f'<section class="card"><h2>{_e(label)}</h2>'
+                f'<p class="verdict"><strong>{_e(reading["verdict"])}</strong>'
+                f' — {_e(reading["why"])}</p>'
+                f'<ul class="counts">'
+                f'<li>{_e(str(reading["arrivals"]))} observations arrived</li>'
+                f'<li>{_e(str(reading["novel"]))} were new; '
+                f'{_e(str(reading["re_observed"]))} had been seen before</li>'
+                f'<li>{_e(str(reading["changed_the_model"]))} changed the model</li>'
+                f'<li>{_e(str(reading["tested_and_unchanged"]))} were tested and '
+                f'held — a result, not an idle period</li></ul>'
+                + (f"<h3>What it learned</h3><ul>{learned}</ul>"
+                   if learned else "")
+                + (f'<h3>What is holding learning back</h3>'
+                   f'<p>{_e(bottleneck.get("bottleneck", ""))}: '
+                   f'{_e(bottleneck.get("reason", ""))}</p>'
+                   if bottleneck else "")
+                + (f'<h3>What it will look at next</h3>'
+                   f'<p>{_e(nxt.get("suggested_action", ""))}</p>'
+                   f'<p class="none">{_e(nxt.get("why_now", ""))}</p>'
+                   if nxt else "")
+                + '</section>')
+        body = (
+            '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,'
+            'initial-scale=1"><title>What the engine learned</title>'
+            '<style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
+            'max-width:820px;margin:0 auto;padding:2rem;color:#1a1a2e;'
+            'line-height:1.55}.card{border:1px solid #e6e6ef;border-radius:10px;'
+            'padding:1rem 1.2rem;margin:1rem 0}.none{color:#666;'
+            'font-style:italic}.verdict{font-size:1.05rem}'
+            'h3{margin-top:1.2rem;font-size:.95rem}</style></head><body>'
+            '<main><h1>What the engine learned</h1>'
+            '<p class="none">Read from the market engine&rsquo;s own learning '
+            'record. Activity and learning are shown separately: reading more '
+            'is not the same as knowing more.</p>'
+            + "".join(windows) + '</main></body></html>')
+        return self._html(body)
 
     def _registrant(self, dossier) -> dict:
         """The SEC's classification of this filer, or {}.
