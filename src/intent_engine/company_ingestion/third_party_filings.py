@@ -135,14 +135,41 @@ def _filing_url(accession_with_doc: str, cik: str) -> str:
             f"{nodash}/{doc}")
 
 
-def classify_mention(*, snippet: str, form: str) -> dict:
-    """Is this a substantive statement about the subject, or a list entry?"""
+def classify_mention(*, snippet: str, form: str,
+                     company_name: str = "") -> dict:
+    """Is this a substantive statement about the subject, or a list entry?
+
+    THE SAME RELEVANCE RULE THE MEASUREMENT STAGE USES, APPLIED EARLIER.
+    `_INCIDENTAL` only catches STRUCTURE -- tables of contents, exhibit
+    indexes, signature pages. EVENTIKO INC.'s 10-K passed it and spent one of
+    four candidate slots, because its snippet is ordinary prose:
+
+        "...engaged via reputable companies such as Namecheap, Godaddy and
+         Cloudflare."
+
+    That filing was retrieved, stored, and then correctly refused downstream
+    as IRRELEVANT -- so the slot bought nothing. Asking the question here
+    instead means the slot goes to a filing that will survive the wall.
+
+    This does NOT weaken either wall: it is the identical adjudication, and a
+    snippet it cannot judge stays usable, because discarding a candidate on a
+    truncated snippet would lose real evidence for a reason about our
+    excerpt rather than about the filing.
+    """
+    from intent_engine.company_ingestion import relevance as _REL
+
     text = snippet or ""
     incidental = bool(_INCIDENTAL.search(text))
     substantive_form = any(form.upper().startswith(f) for f in SUBSTANTIVE_FORMS)
+    verdict = _REL.adjudicate({"text_content": text},
+                              subject_name=company_name)
+    off_topic = str(verdict["state"]) == _REL.IRRELEVANT and bool(
+        verdict["incidental_mentions"])
     return {"substantive_form": substantive_form,
             "incidental_context": incidental,
-            "usable": substantive_form and not incidental}
+            "relevance": verdict["state"],
+            "off_topic_mention": off_topic,
+            "usable": substantive_form and not incidental and not off_topic}
 
 
 def _too_old(file_date: str, *, today=None) -> bool:
@@ -217,7 +244,7 @@ def propose_third_party_filings(*, company_name: str, subject_cik: str = "",
             continue
         verdict = classify_mention(
             snippet=" ".join(str(x) for x in (source.get("_snippet") or "")),
-            form=form)
+            form=form, company_name=company_name)
         if not verdict["usable"]:
             continue
         seen_filers.add(filer_cik)

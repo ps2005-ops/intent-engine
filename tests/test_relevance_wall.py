@@ -200,3 +200,55 @@ def test_with_no_subject_identification_at_all_the_gate_does_not_demote():
     assert blind["independent_evidence_count"] == 1
     rows = IND.classify(docs)
     assert all(r["relevance"] == R.UNMEASURABLE for r in rows)
+
+
+# --- the same rule, one stage earlier ----------------------------------------
+
+def test_discovery_does_not_spend_a_slot_on_an_off_topic_filing():
+    """EVENTIKO passed discovery, was fetched and stored, and was then
+    correctly refused as IRRELEVANT -- so the candidate slot bought nothing.
+    Only four slots exist. Asking the same question at discovery means the
+    slot goes to a filing that will survive the wall."""
+    from intent_engine.company_ingestion.third_party_filings import (
+        classify_mention)
+
+    off = classify_mention(snippet=EVENTIKO, form="10-K",
+                           company_name="Cloudflare, Inc.")
+    assert off["usable"] is False
+    assert off["off_topic_mention"] is True
+
+    real = classify_mention(snippet=RIVAL, form="10-K",
+                            company_name="Cloudflare, Inc.")
+    assert real["usable"] is True
+
+
+def test_a_truncated_snippet_is_not_discarded():
+    """OVER-REFUSAL CONTROL. A snippet too short to judge must stay usable:
+    discarding a candidate for a fact about our excerpt, rather than about
+    the filing, loses real independent evidence."""
+    from intent_engine.company_ingestion.third_party_filings import (
+        classify_mention)
+
+    for snip in ("...Cloudflare...", "", "Cloudflare"):
+        got = classify_mention(snippet=snip, form="10-K",
+                               company_name="Cloudflare, Inc.")
+        assert got["usable"] is True, snip
+
+
+def test_discovery_still_refuses_structural_boilerplate():
+    """The original rule survives beside the new one."""
+    from intent_engine.company_ingestion.third_party_filings import (
+        classify_mention)
+
+    got = classify_mention(snippet="Exhibit Index ... Cloudflare ...",
+                           form="10-K", company_name="Cloudflare, Inc.")
+    assert got["usable"] is False
+
+
+def test_discovery_still_refuses_a_non_substantive_form():
+    from intent_engine.company_ingestion.third_party_filings import (
+        classify_mention)
+
+    got = classify_mention(snippet=RIVAL, form="8-K",
+                           company_name="Cloudflare, Inc.")
+    assert got["usable"] is False
