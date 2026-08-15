@@ -777,6 +777,8 @@ class WebApp:
             return self._decision_screen(parts[1], parts[2])
         if route == ("GET", "demo-dossiers", 3) and parts[2] == "memory":
             return self._memory_screen(parts[1])
+        if route == ("GET", "demo-dossiers", 3) and parts[2] == "evidence":
+            return self._evidence_screen(parts[1])
         if path.startswith("/demo-dossiers/") and method == "GET":
             return self._demo_dossier_detail(path[len("/demo-dossiers/"):])
         if path == "/onboarding" and method == "GET":
@@ -4050,18 +4052,153 @@ class WebApp:
             body = deep.full_analysis(
                 decision, company=company, stamp=stamp,
                 links=[("Executive X-Ray", f"{base}/xray"),
-                       ("Presentation", f"{base}/deck")])
+                       ("Presentation", f"{base}/deck"),
+                       ("Why this reading exists", f"{base}/evidence")])
         elif which == "deck":
             body = deep.presentation(
                 decision, company=company, stamp=stamp,
                 links=[("Executive X-Ray", f"{base}/xray"),
-                       ("Full analysis", f"{base}/full")])
+                       ("Full analysis", f"{base}/full"),
+                       ("Why this reading exists", f"{base}/evidence")])
         else:
             body = xray.render(
                 decision, company=company, stamp=stamp,
                 crossing=str(getattr(dossier, "crossing", "") or ""),
                 links=[("Full analysis", f"{base}/full"),
-                       ("Presentation", f"{base}/deck")])
+                       ("Presentation", f"{base}/deck"),
+                       ("Why this reading exists", f"{base}/evidence")])
+        return self._html(self._page(company, body, None, ""))
+
+    def _evidence_screen(self, company_id: str):
+        """Why this reading exists: every source, and what it is worth.
+
+        THE FIFTH PROJECTION, beside the X-Ray, the full analysis, the
+        presentation and the decision history. It renders the sanitized
+        records that already cross the bridge -- it computes nothing, and
+        deliberately does not re-decide independence or relevance, because
+        two opinions about one document is how the drawer and the count
+        start disagreeing.
+
+        The sources are grouped by WHAT THEY ARE WORTH rather than listed
+        flat, because the interesting fact about this company's evidence is
+        not that there are eleven documents. It is that none of them is an
+        outside voice with anything to say -- and a flat bibliography hides
+        exactly that.
+        """
+        from urllib.parse import unquote
+
+        from intent_engine.company_ingestion import relevance as REL
+        from intent_engine.demo_dossier.store import company_key
+
+        company_id = company_key(unquote(company_id or ""))
+        dossier = self._demo_dossier_store().latest(company_id)
+        if dossier is None:
+            return self._error_page(
+                404, f"No analysis is stored here for {company_id!r}, so "
+                     f"there are no sources to show.")
+        company = getattr(dossier, "canonical_name", "") or company_id
+        founder = getattr(dossier, "founder_block", {}) or {}
+        provenance = founder.get("claim_provenance") or {}
+        base = f"/demo-dossiers/{company_id}"
+        nav = (f'<p class="none"><a href="{base}/xray">X-Ray</a> · '
+               f'<a href="{base}/full">Full analysis</a> · '
+               f'<a href="{base}/deck">Presentation</a> · '
+               f'<a href="{base}/memory">Decision history</a></p>')
+
+        state = str(provenance.get("state") or "")
+        records = provenance.get("records") or []
+        if not records:
+            # An absent projection is a fact about us. Saying "no sources"
+            # would be a claim about the company.
+            reason = str(provenance.get("reason") or
+                         "This analysis carries no source projection.")
+            return self._html(self._page(company, (
+                f'<p class="eyebrow">Why this reading exists</p>'
+                f'<h1>{_e(company)}</h1>{nav}'
+                f'<section class="card"><h2>No sources are attached</h2>'
+                f'<p>{_e(reason)}</p>'
+                f'<p class="none">State: '
+                f'{_e(state or "PROVENANCE_UNAVAILABLE")}'
+                f'</p></section>'), None, ""))
+
+        supporting = [r for r in records if r.get("independence_bearing")]
+        set_aside = [r for r in records
+                     if r.get("independent_voice")
+                     and not r.get("independence_bearing")]
+        own = [r for r in records if not r.get("independent_voice")]
+
+        # WHAT A ZERO LICENCES US TO SAY. Discovery coverage is not measured
+        # yet, so this reads FAILED_TO_FIND -- a limit of our retrieval, not
+        # a finding about the company. Saying the stronger thing would be the
+        # flattering error.
+        reading = REL.zero_reading(
+            independent_relevant=len(supporting),
+            coverage=str(founder.get("discovery_coverage")
+                         or REL.DISCOVERY_NOT_RUN))
+        headline = (
+            f'<section class="card"><h2>Independent support</h2>'
+            f'<p><strong>{len(supporting)}</strong> of {len(records)} '
+            f'source(s) are both independent of {_e(company)} and say enough '
+            f'about it to support the reading.</p>'
+            + (f'<p>{_e(reading["statement"])}</p>' if reading["statement"]
+               else "")
+            + f'<p class="none">Search coverage: '
+              f'{_e(reading["coverage"])} · reading: {_e(reading["reading"])}'
+              f'</p></section>')
+
+        def _card(rec):
+            bits = []
+            for label, key in (("Author", "author"), ("Host", "host"),
+                               ("Subject", "subject"),
+                               ("Published", "published_at"),
+                               ("Retrieved", "retrieved_at"),
+                               ("Freshness", "freshness")):
+                value = str(rec.get(key) or "")
+                if value:
+                    bits.append(f"<dt>{label}</dt><dd>{_e(value)}</dd>")
+            url = str(rec.get("url") or "")
+            link = (f'<p><a href="{_e(url)}" rel="nofollow noopener" '
+                    f'target="_blank">{_e(url[:90])}</a></p>' if url else
+                    '<p class="none">This source is not publicly linkable.</p>')
+            passage = str(rec.get("passage") or "")
+            return (
+                f'<section class="card">'
+                f'<h3>{_e(rec.get("title") or "Untitled source")}</h3>'
+                f'<p><strong>{_e(rec.get("plain_statement") or "")}</strong></p>'
+                f'<p>{_e(rec.get("relevance_statement") or "")}</p>'
+                + (f'<blockquote>{_e(passage)}</blockquote>' if passage else "")
+                + link
+                + f'<dl>{"".join(bits)}</dl>'
+                + f'<p class="none">Independent voice: '
+                  f'{"yes" if rec.get("independent_voice") else "no"} · '
+                  f'Relevance: {_e(rec.get("relevance") or "")} · '
+                  f'Counts as corroboration: '
+                  f'{"yes" if rec.get("independence_bearing") else "no"}</p>'
+                + (f'<p class="none">{_e(rec.get("relevance_reason") or "")}'
+                   f'</p>' if rec.get("relevance_reason") else "")
+                + '</section>')
+
+        sections = [headline]
+        for title, note, group in (
+            ("Independent and relevant",
+             "Outside voices that discuss this company. These are what the "
+             "reading rests on.", supporting),
+            ("Independent, but not relevant here",
+             "Written by somebody else, and they do not say enough about "
+             "this company to support the reading. Shown because a source "
+             "set aside is more informative than a source hidden.", set_aside),
+            ("Written by the company itself",
+             "Useful evidence, and often the best there is — but the company "
+             "speaking about itself cannot corroborate itself.", own),
+        ):
+            if not group:
+                continue
+            sections.append(f'<h2>{title} ({len(group)})</h2>'
+                            f'<p class="none">{note}</p>'
+                            + "".join(_card(r) for r in group))
+
+        body = (f'<p class="eyebrow">Why this reading exists</p>'
+                f'<h1>{_e(company)}</h1>{nav}' + "".join(sections))
         return self._html(self._page(company, body, None, ""))
 
     def _memory_screen(self, company_id: str):

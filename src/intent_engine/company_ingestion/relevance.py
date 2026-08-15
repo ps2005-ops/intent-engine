@@ -223,3 +223,72 @@ def plain_statement(verdict: Dict[str, object]) -> str:
     if state == WEAKLY_RELEVANT:
         return "Mentions the company only in passing"
     return "Set aside"
+
+
+# =============================================================================
+# DISCOVERY COVERAGE -- "we found none" is not "we did not look"
+# =============================================================================
+#
+# The relevance wall took Cloudflare's independent origins to zero, which is
+# honest about the evidence in the dossier and says NOTHING about the world.
+# A dossier reporting zero can mean two opposite things:
+#
+#     FOUND_NONE       we searched adequately and no independent relevant
+#                      source exists to be found
+#     FAILED_TO_FIND   we did not search the places where it would be
+#
+# The product could state the first only if it could measure the second, and
+# it cannot yet. Reporting a bare zero lets a reader infer the stronger,
+# flattering claim -- that the company genuinely has no outside coverage --
+# from what is actually a fact about our retrieval.
+#
+# This is the same class as the lineage vocabulary: an absence needs a state,
+# and the state has to say whose absence it is.
+
+DISCOVERY_NOT_RUN = "DISCOVERY_NOT_RUN"
+DISCOVERY_PARTIAL = "DISCOVERY_PARTIAL"
+DISCOVERY_ADEQUATE = "DISCOVERY_ADEQUATE"
+DISCOVERY_EXHAUSTED = "DISCOVERY_EXHAUSTED"
+DISCOVERY_BLOCKED = "DISCOVERY_BLOCKED"
+
+DISCOVERY_STATES = (DISCOVERY_NOT_RUN, DISCOVERY_PARTIAL, DISCOVERY_ADEQUATE,
+                    DISCOVERY_EXHAUSTED, DISCOVERY_BLOCKED)
+
+#: Only from these may "none exists" be said. Everything else means the zero
+#: is a fact about the search, not about the company.
+SUPPORTS_FOUND_NONE = frozenset({DISCOVERY_ADEQUATE, DISCOVERY_EXHAUSTED})
+
+FOUND_NONE = "FOUND_NONE"
+FAILED_TO_FIND = "FAILED_TO_FIND"
+HAVE_INDEPENDENT = "HAVE_INDEPENDENT"
+
+
+def zero_reading(*, independent_relevant: int, coverage: str,
+                 channels_attempted: int = 0,
+                 channels_successful: int = 0) -> dict:
+    """What a zero independent-origin count actually licenses us to say.
+
+    Returns the reading AND the sentence, because the whole failure this
+    prevents is a surface rendering its own gloss on a number.
+    """
+    coverage = coverage if coverage in DISCOVERY_STATES else DISCOVERY_NOT_RUN
+    if independent_relevant > 0:
+        return {"reading": HAVE_INDEPENDENT, "coverage": coverage,
+                "channels_attempted": channels_attempted,
+                "channels_successful": channels_successful,
+                "statement": ""}
+    if coverage in SUPPORTS_FOUND_NONE:
+        return {"reading": FOUND_NONE, "coverage": coverage,
+                "channels_attempted": channels_attempted,
+                "channels_successful": channels_successful,
+                "statement": (
+                    "We searched for independent coverage of this company and "
+                    "found none that bears on this question. That is a "
+                    "finding about the company.")}
+    return {"reading": FAILED_TO_FIND, "coverage": coverage,
+            "channels_attempted": channels_attempted,
+            "channels_successful": channels_successful,
+            "statement": (
+                "No independent source in this dossier supports the reading. "
+                "That is a limit of what we retrieved, not evidence that no "
+                "independent coverage exists.")}
