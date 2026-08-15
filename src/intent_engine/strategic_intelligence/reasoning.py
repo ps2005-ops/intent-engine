@@ -892,7 +892,8 @@ def build_strategic_report(*, company_name, observations,
                            previous_model=None, now=None,
                            discovery_coverage=None,
                            retrieval_failures=None,
-                           economic_history=None) -> StrategicReport:
+                           economic_history=None,
+                           source_coverage=None) -> StrategicReport:
     """Compose a StrategicReport from structured observations. Status is left
     to the quality gate (:func:`quality.evaluate_report`), which the caller
     should apply; this function sets a provisional status of the gate result."""
@@ -1062,6 +1063,8 @@ def build_strategic_report(*, company_name, observations,
                             if isinstance(discovery_coverage, dict) else {}),
         retrieval_failures=(retrieval_failures
                             if isinstance(retrieval_failures, dict) else {}),
+        source_coverage=(source_coverage
+                         if isinstance(source_coverage, dict) else {}),
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,
         timeline=timeline, agenda=agenda, source_library=source_library,
         mental_model=model.as_dict(), surprises=surprises,

@@ -367,6 +367,11 @@ class StrategicReport:
     #: rather than that nothing was attempted. Counts by failure type only --
     #: never URLs, which are already carried by the evidence library.
     retrieval_failures: dict = field(default_factory=dict)
+    #: The TYPED account of what each evidence family did (source_coverage.v2).
+    #: `source_class_coverage` above counts observations only, so it cannot
+    #: distinguish "we read a filing and got nothing from it" from "there is
+    #: no filing" -- which is how one page came to contradict itself.
+    source_coverage: dict = field(default_factory=dict)
     quality_findings: list = field(default_factory=list)
     limited_scope_accepted: bool = False
     evidence_graph: dict = field(default_factory=dict)
@@ -417,6 +422,7 @@ class StrategicReport:
             "source_class_coverage": self.source_class_coverage,
             "discovery_coverage": self.discovery_coverage,
             "retrieval_failures": self.retrieval_failures,
+            "source_coverage": self.source_coverage,
             "quality_findings": list(self.quality_findings),
             "limited_scope_accepted": self.limited_scope_accepted,
             "evidence_graph": self.evidence_graph,

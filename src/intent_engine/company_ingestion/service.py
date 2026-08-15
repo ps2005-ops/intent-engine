@@ -26,6 +26,7 @@ from intent_engine.company_ingestion.filing_text import (
 )
 from intent_engine.company_ingestion.parsing import parse_html, readable_title
 from intent_engine.company_ingestion.pasted import pasted_source
+from intent_engine.company_ingestion import source_coverage as _SC
 from intent_engine.company_ingestion.readiness import (
     assess_readiness, explain as explain_readiness,
 )
@@ -1130,7 +1131,15 @@ class CompanyIngestionService:
             # it, and the drawer is not what a chief executive opens first.
             discovery_coverage=self.discovery_report(run_id),
             retrieval_failures=self.failure_summary(run_id),
-            economic_history=self.archive_depth(run_id))
+            economic_history=self.archive_depth(run_id),
+            # THE ONE ACCOUNT OF WHAT EACH FAMILY DID. Built from documents
+            # AND observations, because the gap between them is exactly what
+            # the old observation-only count could not express.
+            source_coverage=_SC.assess(
+                documents=documents,
+                observations=[{"source_class": getattr(o, "source_class", "")}
+                              for o in (observations or ())],
+                failures=self.failure_summary(run_id)))
         payload = report.as_dict()
 
         # --- the reasoning layer ------------------------------------------

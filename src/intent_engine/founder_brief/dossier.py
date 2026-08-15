@@ -299,15 +299,33 @@ def evidence_families(report: dict) -> tuple:
     failures = report.get("retrieval_failures")
     failures = failures if isinstance(failures, dict) else {}
     blocked = _blocked_sentence(failures)
+    # THE TYPED ACCOUNT, when the run produced one. `source_class_coverage`
+    # counts observations only, so a filing we read and could not extract from
+    # disappeared from this inventory while staying in the bibliography -- one
+    # page of one analysis contradicting itself.
+    typed = ((report.get("source_coverage") or {}).get("families")
+             if isinstance(report.get("source_coverage"), dict) else None)
+    typed = typed if isinstance(typed, dict) else {}
     out = []
     for key, label, consequence in _FAMILIES:
         count = int(coverage.get(key) or 0)
-        entry = {"key": key, "label": label, "count": count,
-                 "present": count > 0,
-                 "consequence": "" if count else consequence}
-        if not count and key == "competitor":
+        row = typed.get(key) or {}
+        state = str(row.get("state") or "")
+        docs = int(row.get("documents") or 0)
+        # A family holding documents is never "none", whatever the
+        # observation count says.
+        present = bool(count) or bool(row.get("supports_analysis")) or docs > 0
+        entry = {"key": key, "label": label, "count": count or docs,
+                 "state": state, "documents": docs,
+                 "present": present,
+                 "consequence": "" if present else consequence}
+        if not present and row.get("reason"):
+            entry["consequence"] = f"{consequence} {row['reason']}"
+        if docs and not count:
+            entry["consequence"] = str(row.get("reason") or "")
+        if not present and key == "competitor":
             entry["consequence"] = _search_sentence(discovery, consequence)
-        elif not count and blocked and key in _FIRST_PARTY_FAMILIES:
+        elif not present and blocked and key in _FIRST_PARTY_FAMILIES:
             entry["consequence"] = f"{consequence} {blocked}"
         out.append(entry)
     return tuple(out)
