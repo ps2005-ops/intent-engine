@@ -120,3 +120,30 @@ def test_the_legacy_count_shape_is_unchanged_for_old_consumers():
                          observations=[_doc("company_owned"),
                                        _doc("company_owned")])
     assert SC.legacy_counts(coverage) == {"company_owned": 2}
+
+
+def test_the_inventory_is_derived_from_the_very_documents_it_lists():
+    """THE FIX SHIPPED INERT THE FIRST TIME.
+
+    The typed object was built in the service and the deployed brief still
+    showed "SEC 10-K (2026-02-13)" beside "Filings and investor material —
+    none", because the dict the brief renders from is not the one the service
+    built. `build_dossier` already receives the retrieved documents in order
+    to print the source list, so the inventory is derived from exactly those
+    documents when the report does not carry the object. The two sections
+    then cannot disagree, whichever path produced the report.
+    """
+    docs = [{"source_class": "investor_material"},
+            {"source_class": "investor_material"}]
+    rows = evidence_families({"source_class_coverage": {}}, docs)
+    filings = [r for r in rows if r["key"] == "investor_material"][0]
+    assert filings["present"] is True
+    assert filings["count"] == 2
+
+
+def test_deriving_from_documents_never_invents_a_family_with_none():
+    """NEGATIVE CONTROL: families with no document stay absent."""
+    rows = evidence_families({"source_class_coverage": {}},
+                             [{"source_class": "investor_material"}])
+    for key in ("company_owned", "competitor", "customer_voice"):
+        assert [r for r in rows if r["key"] == key][0]["present"] is False

@@ -272,7 +272,7 @@ def _readable_reason(text) -> str:
     return "" if len(out.split()) < 5 else out[:1].upper() + out[1:]
 
 
-def evidence_families(report: dict) -> tuple:
+def evidence_families(report: dict, documents=()) -> tuple:
     """What was read, what was not, and what each absence costs.
 
     Built from `source_class_coverage`, which the pipeline already computes, so
@@ -306,6 +306,20 @@ def evidence_families(report: dict) -> tuple:
     typed = ((report.get("source_coverage") or {}).get("families")
              if isinstance(report.get("source_coverage"), dict) else None)
     typed = typed if isinstance(typed, dict) else {}
+    # THE BIBLIOGRAPHY IS RIGHT HERE. `build_dossier` already receives the
+    # retrieved documents to render the source list, and the whole defect was
+    # that this inventory counted something else. When the report did not
+    # carry the typed object -- an older run, or a path that rebuilt the
+    # payload -- derive it from the same documents the page is about to list,
+    # so the two sections cannot disagree.
+    if not typed and documents:
+        from intent_engine.company_ingestion import source_coverage as _SC
+        typed = _SC.assess(
+            documents=[d for d in documents if isinstance(d, dict)],
+            observations=[{"source_class": o.get("source_class")}
+                          for o in (report.get("observations") or ())
+                          if isinstance(o, dict)],
+            failures=failures)["families"]
     out = []
     for key, label, consequence in _FAMILIES:
         count = int(coverage.get(key) or 0)
@@ -1052,7 +1066,7 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
                   for h in (report.get("hypotheses") or ())]
     hypotheses = [h for h in hypotheses if isinstance(h, dict)]
     index = _evidence_index(_observation_dicts(report))
-    families = evidence_families(report)
+    families = evidence_families(report, documents or ())
 
     # SEEDED WITH WHAT THE PRIMARY SCREEN ALREADY SAID.
     #
