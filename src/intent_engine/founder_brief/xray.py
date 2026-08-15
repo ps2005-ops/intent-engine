@@ -324,6 +324,60 @@ def _history_body(d: dict) -> str:
     return "".join(parts)
 
 
+#: How each second-iteration state reads to a chief executive. The enum is a
+#: diagnostic; this is the sentence. Held deliberately in one place so the
+#: X-Ray, the deck and the Q&A cannot each invent their own translation --
+#: which is exactly how two hardcoded history paragraphs drifted apart.
+_ITERATION_COPY = {
+    "FIRST_OBSERVATION":
+        "This is the baseline reading. There is no earlier view to compare "
+        "it against yet.",
+    "NEW_INFORMATION_CHANGED_VIEW":
+        "New evidence arrived and it changed the view.",
+    "NEW_INFORMATION_CONFIRMED_VIEW":
+        "New evidence arrived, tested the view, and it held. A position that "
+        "has survived new evidence is stronger than one nothing has "
+        "challenged.",
+    "NEW_INFORMATION_NOT_DECISION_RELEVANT":
+        "New information arrived and none of it bore on this decision.",
+    "REOBSERVATION_TESTED_AND_HELD":
+        "We re-read what we already had, tested the view against it, and it "
+        "held.",
+    "NO_NEW_INFORMATION":
+        "Nothing arrived that we did not already hold, so no new learning "
+        "was recorded.",
+    "INCOMPARABLE":
+        "These two readings cannot be compared, so any difference between "
+        "them is not a change of mind.",
+}
+
+
+def _second_iteration_body(d: dict) -> str:
+    """What the second look changed, and what it merely confirmed.
+
+    Renders the canonical delta -- it recomputes nothing. Absent when no
+    comparison ran, because an empty card here would imply a comparison that
+    found nothing, which is the opposite of not having looked.
+    """
+    delta = d.get("second_iteration")
+    if not isinstance(delta, dict) or not delta:
+        return ""
+    from intent_engine.strategic_intelligence import second_iteration as SI
+    card = SI.hero(delta)
+    state = str(card.get("state") or "")
+    rows = [("New information", card.get("new_information", "")),
+            ("What it tested", card.get("what_it_tested", "")),
+            ("What held", card.get("what_held", "")),
+            ("What changed", card.get("what_changed", "")),
+            ("Effect on the decision", card.get("decision_effect", ""))]
+    body = "".join(f"<dt>{_e(k)}</dt><dd>{_e(v)}</dd>"
+                   for k, v in rows if str(v).strip())
+    said = _ITERATION_COPY.get(state, card.get("statement", ""))
+    gain = "" if state in SI.REPRESENTS_LEARNING else (
+        '<p class="none">This did not add to what the system knows.</p>')
+    return f'<p>{_e(said)}</p><dl class="kv">{body}</dl>{gain}'
+
+
 def _beliefs_body(d: dict) -> str:
     parts = [f'<p>{_e(P.say(d.get("hidden_state"), P.HIDDEN, default=""))}</p>'
              if str(d.get("hidden_state") or "") in P.HIDDEN else
@@ -476,6 +530,8 @@ def render(decision: dict, *, company: str = "", stamp: str = "",
         _section("What we could and could not establish",
                  "the causal question", _causal_body(d)),
         _section("What history says", "comparable periods", _history_body(d)),
+        _section("What changed since last time", "the second look",
+                 _second_iteration_body(d)),
         _section("Competitors, and what they would do",
                  f'{len(d.get("competitors") or ())} selected',
                  _competitor_body(d)),

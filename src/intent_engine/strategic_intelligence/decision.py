@@ -318,6 +318,17 @@ class DecisionOption:
         return out
 
 
+#: What to call a subject whose name did not arrive. Never an empty string.
+SUBJECT_UNNAMED = "this company"
+
+#: Whether the decision knows who it is about. A surface may render the
+#: fallback wording, but it must be able to tell that it is a fallback --
+#: otherwise "this company" is indistinguishable from a company actually
+#: called that, and the gap stops being visible to anyone.
+IDENTITY_CANONICAL = "IDENTITY_CANONICAL"
+IDENTITY_MISSING = "IDENTITY_MISSING"
+
+
 @dataclass
 class FounderDecision:
     """What the analysis says a founder should do about what it found."""
@@ -383,6 +394,12 @@ class FounderDecision:
     #: archive. Empty means no assessment ran, and the surfaces then fall back
     #: to their prior wording rather than inventing a state.
     economic_history: dict = field(default_factory=dict)
+    #: WHO THIS DECISION IS ABOUT, carried on the object rather than baked
+    #: into one sentence at compose time. It was only ever a local argument
+    #: used to build the withheld line, so a decision rebuilt from its own
+    #: serialised form had no subject at all and every surface had to guess.
+    company_name: str = ""
+    identity_state: str = IDENTITY_MISSING
     current_read: str = ""
     #: SUPPORTED / BOUNDED / UNMEASURABLE / REFUSED. Governs the WORDING the
     #: executive read is allowed to use -- see `decision_synthesis`.
@@ -514,6 +531,8 @@ class FounderDecision:
             "historical_dimensions": list(self.historical_dimensions),
             "historical_playback": list(self.historical_playback),
             "economic_history": dict(self.economic_history or {}),
+            "company_name": self.company_name,
+            "identity_state": self.identity_state,
             "current_read": self.current_read,
             "standing": self.standing,
             "supporting_evidence_ids": list(self.supporting_evidence_ids),
@@ -649,6 +668,8 @@ def decision_from_dict(data) -> FounderDecision:
         historical_dimensions=tuple(data.get("historical_dimensions") or ()),
         historical_playback=tuple(data.get("historical_playback") or ()),
         economic_history=dict(data.get("economic_history") or {}),
+        company_name=str(data.get("company_name") or ""),
+        identity_state=str(data.get("identity_state") or IDENTITY_MISSING),
         current_read=data.get("current_read", ""),
         standing=data.get("standing", ""),
         supporting_evidence_ids=tuple(data.get("supporting_evidence_ids")
@@ -858,10 +879,6 @@ def decide_across(company_name, hypotheses, blind_spots=(),
     return first
 
 
-#: What to call a subject whose name did not arrive. Never an empty string.
-SUBJECT_UNNAMED = "this company"
-
-
 def canonical_subject(company_name) -> str:
     """The name every decision sentence uses, normalised ONCE.
 
@@ -896,11 +913,14 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
     # change, which is why this is filtered where every surface converges.
     verified = tuple(FH.executive_safe(
         _flat(v) for v in (verified or ()) if _flat(v)))
+    named = bool(str(company_name or "").strip())
     company_name = canonical_subject(company_name)
+    identity = IDENTITY_CANONICAL if named else IDENTITY_MISSING
 
     if hypothesis is None:
         return FounderDecision(
             readiness=WITHHELD, verified=verified,
+            company_name=company_name, identity_state=identity,
             limitation=_flat(gaps[0]) if gaps else "",
             unsafe_because=(f"What {company_name} has published is not enough "
                             f"to read a strategy from."),

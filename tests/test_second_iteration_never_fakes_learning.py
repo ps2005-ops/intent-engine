@@ -158,3 +158,44 @@ def test_the_hero_card_never_claims_a_test_that_did_not_happen():
         previous_documents=_docs("a"), current_documents=_docs("a")))
     assert card["what_held"] == ""
     assert card["what_it_tested"] == "nothing that bore on the decision"
+
+
+# --- the surface, which is where a customer meets this -------------------------
+
+
+def test_the_xray_says_no_new_learning_on_an_exact_replay():
+    """RUN 3, in the customer's words. Not "+0.0%", not a smaller delta, not
+    another changed-mind event."""
+    from intent_engine.founder_brief import xray as X
+    body = X._second_iteration_body({"second_iteration": SI.compare(
+        previous_decision=_decision(), current_decision=_decision(),
+        previous_documents=_docs("a"), current_documents=_docs("a"))})
+    assert "no new learning was recorded" in body
+    assert "did not add to what the system knows" in body
+
+
+def test_the_xray_reports_a_held_belief_as_a_gain():
+    from intent_engine.founder_brief import xray as X
+    body = X._second_iteration_body({"second_iteration": SI.compare(
+        previous_decision=_decision(), current_decision=_decision(),
+        previous_documents=_docs("a"), current_documents=_docs("a", "new"),
+        tested_claims=["pricing power is intact"])})
+    assert "tested the view, and it held" in body
+    assert "did not add to what the system knows" not in body
+    assert "pricing power is intact" in body
+
+
+def test_no_comparison_renders_no_card_at_all():
+    """NEGATIVE CONTROL. An empty card implies a comparison that found
+    nothing, which is the opposite of never having looked."""
+    from intent_engine.founder_brief import xray as X
+    assert X._second_iteration_body({}) == ""
+
+
+def test_every_iteration_state_has_a_customer_sentence():
+    """A missing translation would surface the raw enum to a chief
+    executive."""
+    from intent_engine.founder_brief.xray import _ITERATION_COPY
+    assert set(SI.ITERATION_STATES) == set(_ITERATION_COPY)
+    for said in _ITERATION_COPY.values():
+        assert "_" not in said and said[0].isupper()
