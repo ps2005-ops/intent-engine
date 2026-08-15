@@ -195,9 +195,56 @@ def _is_primary_filing(document: dict) -> bool:
                for h in _PRIMARY_FILING_HOSTS)
 
 
-def _vantage(document: dict) -> str:
+def _normalise_cik(value) -> str:
+    """The same normalisation `third_party_filings` uses. Shared spelling on
+    purpose: two ways to write "is this the subject" is how one of them ends
+    up not being applied."""
+    return str(value or "").strip().lstrip("0")
+
+
+def subject_authored(document: dict, *, subject_filers=(),
+                     subject_domain: str = "") -> bool:
+    """Whether the SUBJECT of the analysis wrote this document.
+
+    Positive identification only. An unrecognised filer is NOT treated as the
+    subject, because demoting a genuine outside filing deletes a real
+    independent observation -- and that is a worse failure here than the one
+    below, which at least leaves the count honest about being unverified.
+    """
+    url = document.get("final_url") or document.get("original_url") or ""
+    filers = {_normalise_cik(c) for c in (subject_filers or ()) if str(c or "")}
+    if filers and _normalise_cik(filing_author(url)) in filers:
+        return True
+    domain = str(subject_domain or "").strip().lower().lstrip(".")
+    if domain:
+        host = _host(url)
+        if host == domain or host.endswith("." + domain):
+            return True
+    return False
+
+
+def _vantage(document: dict, *, subject_filers=(),
+             subject_domain: str = "") -> str:
     """The lineage this document would carry if nothing preceded it."""
     source_class = str(document.get("source_class") or "").strip()
+    # THE SUBJECT'S OWN FILING IS THE SUBJECT SPEAKING ABOUT ITSELF.
+    #
+    # Checked BEFORE the venue, because the venue used to win: a company's
+    # own 10-K is hosted by the SEC, so `_is_primary_filing` matched and the
+    # document became REGULATOR_OR_PRIMARY_FILING -- which is
+    # independence-bearing. Cloudflare's live dossier therefore published
+    # "two independent origins" and INDEPENDENTLY_CORROBORATED when one of
+    # the two origins was CIK 1477333, Cloudflare itself.
+    #
+    # That contradicted this module's own stated rule: a company self-report
+    # is the subject speaking about itself, so it can never corroborate
+    # itself. A 10-K is audited, regulated and legally binding, and it is
+    # still the subject's own account. `third_party_filings` already refuses
+    # the subject's filings at DISCOVERY time for exactly this reason; the
+    # measurement stage was never given the subject to compare against.
+    if subject_authored(document, subject_filers=subject_filers,
+                        subject_domain=subject_domain):
+        return COMPANY_SELF_REPORT
     if _is_primary_filing(document):
         # A FILING BY SOMEONE ELSE IS AN OUTSIDE VANTAGE POINT.
         #
@@ -225,8 +272,15 @@ def _vantage(document: dict) -> str:
     return COMPANY_SELF_REPORT
 
 
-def classify(documents: Sequence[dict]) -> List[dict]:
+def classify(documents: Sequence[dict], *, subject_filers=(),
+             subject_domain: str = "") -> List[dict]:
     """Label every row with its lineage, in retrieval order.
+
+    `subject_filers` and `subject_domain` identify the company being analysed,
+    so a filing it wrote itself is labelled a self-report rather than an
+    outside vantage point. Both default to empty, which preserves the previous
+    behaviour for callers that cannot say who the subject is -- an unverified
+    count, not a silently wrong one.
 
     The FIRST row to establish an origin anchors it; later rows from that
     origin are SAME_ORIGIN. That makes the result depend on order, which is
@@ -268,7 +322,8 @@ def classify(documents: Sequence[dict]) -> List[dict]:
                     break
 
         if lineage is None:
-            lineage = _vantage(document)
+            lineage = _vantage(document, subject_filers=subject_filers,
+                               subject_domain=subject_domain)
             if family:
                 anchored_origins[family] = index
         if content_hash and content_hash not in seen_hashes:
@@ -373,7 +428,8 @@ def describe(assessment: dict) -> str:
     return sentence
 
 
-def assess(documents: Sequence[dict], *,
+def assess(documents: Sequence[dict], *, subject_filers=(),
+           subject_domain: str = "",
            contradicting_ids: Sequence[str] = ()) -> dict:
     """Independence for one company's evidence set.
 
@@ -384,7 +440,8 @@ def assess(documents: Sequence[dict], *,
     independently corroborated claim that is also contradicted is not the
     same as an uncontested one, and a single state cannot say both.
     """
-    rows = classify(documents)
+    rows = classify(documents, subject_filers=subject_filers,
+                    subject_domain=subject_domain)
     lineage_counts = Counter(row["lineage"] for row in rows)
     families = sorted({row["origin_family"] for row in rows
                        if row["origin_family"]})

@@ -5971,7 +5971,17 @@ class WebApp:
                 learning_attribution as _LA,
             )
             try:
-                _assessed = _IND.assess(self.ci.store.retrieved(run_id))
+                # THE SUBJECT IS PASSED IN, or its own filings corroborate it.
+                # A company's 10-K is hosted by the SEC, so without this the
+                # venue check made the subject's own annual report an
+                # "independent origin" -- Cloudflare's dossier published
+                # INDEPENDENTLY_CORROBORATED off two origins, one of which was
+                # Cloudflare. `meta` already carries the CIK the ingestion run
+                # resolved, so nothing new is fetched here.
+                _assessed = _IND.assess(
+                    self.ci.store.retrieved(run_id),
+                    subject_filers=(str(meta.get("cik") or ""),),
+                    subject_domain=str(meta.get("domain") or ""))
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 _assessed = None
             # No strategic report means the reasoning layer produced no
