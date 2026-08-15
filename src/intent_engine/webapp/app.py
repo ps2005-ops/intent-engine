@@ -752,6 +752,11 @@ class WebApp:
             return self._internal_impact(session, environ)
         if path == "/decisions" and method == "GET":
             return self._decisions(session, environ)
+        # The write path. POST-only and NOT in `post_exempt`, so it carries
+        # the ordinary session + CSRF gate above: recording what a person
+        # chose is the most forgeable thing in the product.
+        if path == "/decisions/record" and method == "POST":
+            return self._record_decision(session, form, environ)
         # NOT "/learning": that path is the operations dashboard and is
         # login-gated. Mounting an unauthenticated page there shadowed it and
         # let a demo guest read the operations view -- caught by
@@ -3835,6 +3840,94 @@ class WebApp:
         return self._html(self._page(
             "Decisions", body, session,
             self.auth.csrf_token(self._cookie(environ, "sid") or "") or ""))
+
+    def _record_decision(self, session, form, environ):
+        """A named person records what they chose. The only write path.
+
+        THE WRITE THIS EXISTS TO MAKE POSSIBLE, AND THE ONE IT REFUSES. The
+        product could not previously record that a human decided anything --
+        so every memory screen truthfully said nothing had been decided, and
+        the five stages, while correctly modelled, had no way to be exercised
+        past the first one.
+
+        It refuses, in this order and for different reasons:
+
+          no scope    a decision belongs to a named tenant; there is no such
+                      thing as an unscoped decision, and a public visitor
+                      recording one against a company would be writing into
+                      somebody else's history;
+          no actor    `record_human_decision` refuses it, because a decision
+                      nobody made is a recommendation;
+          no choice   likewise -- "somebody decided" is not a decision.
+
+        The actor is taken from the SESSION, never from the form. A caller
+        who could name the decider could attribute their own choice to
+        somebody else, and the record's whole audit value is that it says who
+        chose.
+        """
+        from intent_engine.core.tenant import ScopeRefused
+        from intent_engine.executive import living_decision as LDR
+        from intent_engine.webapp.tenancy import receipt_for, scope_for_session
+
+        scope = scope_for_session(session, directory=self._tenant_directory,
+                                  audit=self._scope_audit)
+        request_id = "dwri_" + (self._runtime_sha() or "0")[:12]
+        company = str(form.get("company", "") or "").strip()
+        choice = str(form.get("choice", "") or "").strip()
+        rationale = str(form.get("rationale", "") or "").strip()
+        # WHO IS ASKING, not who the form says chose.
+        actor = str((session or {}).get("email", "")
+                    or (session or {}).get("user", "") or "").strip()
+
+        if scope is None:
+            self._tenant_receipts.append(receipt_for(
+                request_id=request_id, scope=None, company_id=company,
+                operation="decisions.write", denial_reason="SCOPELESS_WRITE",
+                runtime_sha=self._runtime_sha()))
+            return self._error_page(
+                403, "Recording a decision requires an account. A decision "
+                     "record says what a named person in a named organisation "
+                     "chose, so there is nowhere to put an anonymous one.")
+        if not actor:
+            return self._error_page(
+                403, "This session does not identify who is deciding, and a "
+                     "decision that cannot name its decider cannot be audited.")
+
+        root = self.config.web_store_path.parent
+        store = LDR.LivingDecisionStore(root)
+        record = self._living_record_for(company, scope=scope)
+        try:
+            if record is None:
+                # No open decision for this company yet: open one, then
+                # decide it. Opening is not deciding -- the record passes
+                # through RECOMMENDATION_READY so the transition table sees
+                # the same move it would see for an engine-opened decision.
+                question = (str(form.get("question", "") or "").strip()
+                            or f"What should we do about {company}?")
+                record = LDR.open_decision(
+                    scope=scope, company_id=company, question=question,
+                    owner=actor, runtime_sha=self._runtime_sha())
+                record = LDR.revise(
+                    record, scope=scope, status=LDR.RECOMMENDATION_READY,
+                    recommendation=str(form.get("recommendation", "") or ""),
+                    reason="opened for a human decision")
+                store.append(record, scope=scope)
+            decided = LDR.record_human_decision(
+                record, scope=scope, choice=choice, actor=actor,
+                rationale=rationale)
+            store.append(decided, scope=scope)
+        except LDR.DecisionRefused as exc:
+            # The refusal states are the product's discipline, so the reader
+            # is told which one refused rather than shown a generic failure.
+            return self._error_page(400, f"{exc.failure_state}: {exc}")
+        except ScopeRefused as exc:
+            return self._error_page(403, str(exc))
+
+        self._tenant_receipts.append(receipt_for(
+            request_id=request_id, scope=scope, company_id=company,
+            operation="decisions.write", requested=1, allowed=1,
+            runtime_sha=self._runtime_sha()))
+        return self._redirect(f"/decisions?company={company}")
 
     def _manifest_placement(self, company_id: str, *, name: str = "",
                             domain: str = ""):

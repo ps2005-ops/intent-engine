@@ -85,6 +85,48 @@ NO_ACTION_RECORDED = "NO_ACTION_RECORDED"
 NO_OUTCOME_RECORDED = "NO_OUTCOME_RECORDED"
 NO_LEARNING_RECORDED = "NO_LEARNING_RECORDED"
 
+#: WITH NO RECORD AT ALL, EACH QUESTION STILL HAS ITS OWN ANSWER.
+#:
+#: The state is the same for all five -- nothing is recorded -- but the
+#: questions are not, and answering them with one shared paragraph spends a
+#: whole screen repeating a single sentence. That is the duplicated-caveat
+#: failure: it reads as a broken page rather than an empty history, and it
+#: buries the one thing the reader does need to know, which is that the
+#: reading on the page is the engine's and nobody has acted on it.
+#:
+#: These say strictly what an absent record supports and nothing more. The
+#: chain is the point: with no decision there can have been no action, with
+#: no action there is no result to judge, and with no result there is no
+#: lesson. Each answer states its own stage and names the missing stage
+#: BEFORE it -- which is a fact about the record, not an inference about
+#: the company.
+_NO_RECORD = {
+    WHAT_WE_DECIDED: (
+        "No decision has been recorded for this company. The reading on "
+        "this page is the engine's recommendation; no person has chosen "
+        "it, and a recommendation nobody has accepted is not a decision.",
+        NO_DECISION_RECORDED),
+    WHAT_WE_DID: (
+        "No action has been recorded. Nothing has been decided either, so "
+        "there is nothing on file that could have been carried out.",
+        NO_ACTION_RECORDED),
+    WHAT_HAPPENED: (
+        "No outcome has been recorded, so whether it worked is not "
+        "something this record can answer. Nothing was decided or done "
+        "here, so there is nothing yet whose result could be judged.",
+        NO_OUTCOME_RECORDED),
+    WHAT_WE_LEARNED: (
+        "Nothing has been learned from this company's decision history, "
+        "because there is no history yet. A lesson needs an outcome to "
+        "compare against what was expected, and neither is on the record.",
+        NO_LEARNING_RECORDED),
+    AWAITING: (
+        "Nothing is on the record as awaited. Expectations are registered "
+        "when a decision is taken, and no decision has been recorded here, "
+        "so there is nothing outstanding to reconcile.",
+        NO_DECISION_RECORDED),
+}
+
 
 def classify(question: str) -> str:
     """Which memory question this is, or DELEGATED.
@@ -118,6 +160,12 @@ def _states(record) -> dict:
     # recommendation-only has no human decision, whatever else it carries.
     decided = not bool(getattr(record, "is_recommendation_only", True))
     decided_by = str(getattr(record, "decided_by", "") or "")
+    # WHAT THE PERSON CHOSE, WHICH THE ENGINE'S RECOMMENDATION IS NOT.
+    # Read as its own field so that a founder who overruled the engine is
+    # reported as having overruled it, rather than as having been advised
+    # to do what they in fact chose against.
+    human_choice = str(getattr(record, "human_choice", "") or "")
+    followed = getattr(record, "followed_recommendation", None)
     action_status = str(getattr(record, "action_status", "") or "")
     execution = tuple(getattr(record, "execution_refs", ()) or ())
     status = str(getattr(record, "status", "") or "").upper()
@@ -141,7 +189,8 @@ def _states(record) -> dict:
         learning = str(getattr(retro, "lesson", "") or
                        getattr(retro, "summary", "") or "")
     return {"recommendation": recommendation, "decided": decided,
-            "decided_by": decided_by, "acted": acted,
+            "decided_by": decided_by, "human_choice": human_choice,
+            "followed": followed, "acted": acted,
             "action_status": action_status, "outcome": outcome,
             "learned": learned, "learning": learning}
 
@@ -177,12 +226,11 @@ def answer(question: str, *, record=None, decision: Any = None,
 
     if record is None:
         # No record at all is a different state from a record with nothing
-        # in it, and the reader is told which.
-        return Answer(question, cls,
-                      "No decision has been recorded for this company yet. "
-                      "The reading on this page is the engine's conclusion; "
-                      "nothing has been decided, acted on, or reviewed.",
-                      supported=False, information_gap=NO_DECISION_RECORDED)
+        # in it, and the reader is told which -- per question, because five
+        # questions answered with one paragraph is a page that looks broken.
+        text, gap = _NO_RECORD[cls]
+        return Answer(question, cls, text,
+                      supported=False, information_gap=gap)
 
     if cls == WHAT_WE_DECIDED:
         if not state["decided"]:
@@ -197,9 +245,21 @@ def answer(question: str, *, record=None, decision: Any = None,
                 supported=False, standing=getattr(record, "standing", ""),
                 provenance=prov, information_gap=NO_DECISION_RECORDED)
         who = state["decided_by"] or "an unnamed owner"
-        what = state["recommendation"] or (
+        # The choice, if one was recorded as distinct from the engine's
+        # advice; otherwise the recommendation the person accepted.
+        what = state["human_choice"] or state["recommendation"] or (
             "the decision is recorded without a stated recommendation")
-        return Answer(question, cls, f"{who} decided: {what}.",
+        # WHETHER THE ENGINE WAS FOLLOWED IS PART OF THE ANSWER. A record
+        # that says only "they decided X" hides the more useful fact that X
+        # was not what the engine advised -- and that is precisely the case
+        # a reader coming back later needs to see.
+        note = ""
+        if state["followed"] is False and state["recommendation"]:
+            note = (f" That went against the engine's recommendation, which "
+                    f"was: {state['recommendation']}.")
+        elif state["followed"] is True and not state["human_choice"]:
+            note = " That was the engine's recommendation, accepted as it stood."
+        return Answer(question, cls, f"{who} decided: {what}.{note}",
                       standing=getattr(record, "standing", ""),
                       provenance=prov)
 

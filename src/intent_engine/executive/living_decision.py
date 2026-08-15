@@ -208,6 +208,19 @@ class LivingDecisionRecord:
     mve_refs: Tuple[str, ...] = ()
 
     decided_by: str = ""
+    #: WHAT THE PERSON CHOSE, WHICH IS NOT WHAT THE ENGINE RECOMMENDED.
+    #:
+    #: Kept apart from `recommendation` because the interesting case is the
+    #: one where they differ: the engine said expand, the founder chose to
+    #: hold. With a single field a write path has no choice but to overwrite
+    #: the recommendation with the choice, and the record can then no longer
+    #: say what was overruled -- so "did we follow the engine?" and "what
+    #: changed your mind?" both become unanswerable, silently.
+    #:
+    #: Empty on a decided record means the person accepted the
+    #: recommendation as it stood, which is a different fact from choosing
+    #: something else and is reported as such.
+    human_choice: str = ""
     action_status: str = ""
     execution_refs: Tuple[str, ...] = ()
     outcome_refs: Tuple[str, ...] = ()
@@ -250,6 +263,25 @@ class LivingDecisionRecord:
         """
         return self.status in NOT_YET_DECIDED
 
+    @property
+    def followed_recommendation(self) -> Optional[bool]:
+        """Did the person do what the engine advised? None while unanswerable.
+
+        Three states, not two. `None` means nobody has decided yet, or the
+        engine never stated a recommendation to follow -- and neither is a
+        "no". Reporting an undecided record as "did not follow" would make
+        the engine look overruled by silence.
+        """
+        if self.is_recommendation_only:
+            return None
+        if not self.recommendation:
+            return None
+        if not self.human_choice:
+            # Deciding without naming a different choice is acceptance.
+            return True
+        return self.human_choice.strip().lower() == \
+            self.recommendation.strip().lower()
+
     def what_would_change_this(self) -> dict:
         """§7, read off the record. The renderer invents nothing.
 
@@ -277,7 +309,9 @@ class LivingDecisionRecord:
             "decision_question": self.decision_question, "owner": self.owner,
             "status": self.status, "current_thesis_id": self.current_thesis_id,
             "recommendation": self.recommendation, "standing": self.standing,
-            "decided_by": self.decided_by, "action_status": self.action_status,
+            "decided_by": self.decided_by, "human_choice": self.human_choice,
+            "action_status": self.action_status,
+            "followed_recommendation": self.followed_recommendation,
             "data_population": self.data_population,
             "created_at": self.created_at, "known_at": self.known_at,
             "updated_at": self.updated_at, "revision": self.revision,
@@ -302,7 +336,8 @@ class LivingDecisionRecord:
         say the same thing, so a re-derivation is not a revision."""
         payload = {k: v for k, v in self.as_dict().items()
                    if k not in ("updated_at", "revision", "runtime_sha",
-                                "contract", "is_recommendation_only")}
+                                "contract", "is_recommendation_only",
+                                "followed_recommendation")}
         return hashlib.sha256(
             json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
         ).hexdigest()
@@ -379,6 +414,50 @@ def revise(record: LivingDecisionRecord, *, scope: TenantScope,
             "turns the decision's history into a heartbeat")
     return replace(candidate, revision=record.revision + 1, updated_at=when,
                    provenance=reason or candidate.provenance)
+
+
+def record_human_decision(record: LivingDecisionRecord, *, scope: TenantScope,
+                          choice: str, actor: str, rationale: str = "",
+                          now: str = "") -> LivingDecisionRecord:
+    """A named person chose. This is the ONLY way a record becomes DECIDED.
+
+    THE CONVERSION THIS REFUSES. Everything else in the system can compute a
+    recommendation; nothing else may promote one into a decision. If a caller
+    could pass the engine's recommendation back in as the choice with no
+    actor, the record would say a human decided when none did, and every
+    downstream reader -- the memory screen most of all -- would repeat it.
+
+    So:
+      * `actor` is required. The record's own `__post_init__` refuses a
+        decided record with no `decided_by`, and this refuses earlier, with a
+        message about the caller rather than about the dataclass.
+      * `choice` is required, and is written to `human_choice`, NEVER over
+        `recommendation`. The engine's conclusion survives the decision that
+        overruled it -- that is the whole point of keeping the two fields.
+      * the transition is the table's, not this function's. A record that
+        cannot legally reach HUMAN_DECIDED is refused there.
+    """
+    if not isinstance(scope, TenantScope):
+        raise ScopeRefused(
+            NO_ESTABLISHMENT_SOURCE,
+            "recording a decision requires an established scope; a decision "
+            "is what a named person in a named tenant chose")
+    actor = str(actor or "").strip()
+    if not actor:
+        raise DecisionRefused(
+            "NO_DECIDER",
+            "a decision must name the person who made it; an unattributed "
+            "decision cannot be audited and is indistinguishable from the "
+            "engine's own recommendation")
+    choice = str(choice or "").strip()
+    if not choice:
+        raise DecisionRefused(
+            "NO_CHOICE",
+            "a decision must say what was chosen; recording only that "
+            "somebody decided is not a decision record")
+    return revise(record, scope=scope, status=HUMAN_DECIDED,
+                  decided_by=actor, human_choice=choice, now=now,
+                  reason=rationale or f"human decision recorded by {actor}")
 
 
 @requires_tenant_scope

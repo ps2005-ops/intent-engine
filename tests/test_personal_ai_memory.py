@@ -115,6 +115,50 @@ def test_no_record_is_distinguished_from_an_empty_record():
     assert "no decision has been recorded" in out.answer.lower()
 
 
+def test_no_record_still_answers_each_question_in_its_own_words():
+    """The state is shared; the questions are not.
+
+    This was a live defect: with no record every question short-circuited to
+    one paragraph, so the memory screen rendered the same sentence five
+    times. It reads as a broken page rather than an empty history. The five
+    answers must be distinct, and each must be about the stage it was asked
+    about -- while all five stay unsupported, because nothing is recorded.
+    """
+    answers = [PA.answer(q, record=None) for q in PA.MEMORY_QUESTIONS]
+    texts = [a.answer for a in answers]
+
+    assert len(set(texts)) == len(texts), "no-record answers are duplicated"
+    for a in answers:
+        assert a.supported is False, a.question_class
+
+    by_class = {a.question_class: a.answer.lower() for a in answers}
+    # each answer names its OWN stage, not just the missing decision
+    assert "no decision has been recorded" in by_class[PA.WHAT_WE_DECIDED]
+    assert "no action has been recorded" in by_class[PA.WHAT_WE_DID]
+    assert "no outcome has been recorded" in by_class[PA.WHAT_HAPPENED]
+    assert "nothing has been learned" in by_class[PA.WHAT_WE_LEARNED]
+
+
+def test_no_record_gaps_name_the_stage_that_is_missing():
+    """A caller keying off `information_gap` must be able to tell the five
+    apart too -- otherwise the collapse simply moves from the prose into the
+    machine-readable field."""
+    gaps = {PA.classify(q): PA.answer(q, record=None).information_gap
+            for q in PA.MEMORY_QUESTIONS}
+    assert gaps[PA.WHAT_WE_DECIDED] == PA.NO_DECISION_RECORDED
+    assert gaps[PA.WHAT_WE_DID] == PA.NO_ACTION_RECORDED
+    assert gaps[PA.WHAT_HAPPENED] == PA.NO_OUTCOME_RECORDED
+    assert gaps[PA.WHAT_WE_LEARNED] == PA.NO_LEARNING_RECORDED
+
+
+def test_every_memory_question_class_has_a_no_record_answer():
+    """A new question class added to the router without its own no-record
+    answer is the defect coming back. Fail here rather than at request time."""
+    routed = {name for name, _ in PA._PATTERNS}
+    missing = routed - set(PA._NO_RECORD)
+    assert not missing, f"no no-record answer for: {sorted(missing)}"
+
+
 def test_did_it_work_notes_there_was_nothing_to_judge():
     """With no action, "did it work" is not merely unanswered -- the reader
     should know there is nothing whose result could be judged."""

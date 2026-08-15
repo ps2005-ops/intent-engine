@@ -262,7 +262,13 @@ def _attach_to_decision(decisions, *, scope, decision_id: str,
 #: The stored keys that are not constructor arguments. Listed rather than
 #: filtered by `hasattr`, so a field added to the record without a decision
 #: about this seam is a TypeError here instead of a silently dropped column.
-_DERIVED_KEYS = ("contract", "is_recommendation_only", "retrospective")
+#: `followed_recommendation` is computed from `human_choice`, `recommendation`
+#: and the status, so it is recomputed on rehydration and must not be passed
+#: back in. `human_choice` itself is deliberately NOT here: it is what the
+#: person actually chose, and dropping it on the way through this seam would
+#: silently reset an overruled recommendation to an accepted one.
+_DERIVED_KEYS = ("contract", "is_recommendation_only", "retrospective",
+                 "followed_recommendation")
 
 
 def _record_kwargs(row: dict) -> dict:
