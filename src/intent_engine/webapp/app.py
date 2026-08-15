@@ -5987,7 +5987,8 @@ class WebApp:
                 _assessed = _IND.assess(
                     self.ci.store.retrieved(run_id),
                     subject_filers=(self.ci.subject_cik(meta),),
-                    subject_domain=str(meta.get("domain") or ""))
+                    subject_domain=str(meta.get("domain") or ""),
+                    subject_name=name)
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 _assessed = None
             # THE SAME SUBJECT, THE SAME DOCUMENTS, ONE MORE PROJECTION.

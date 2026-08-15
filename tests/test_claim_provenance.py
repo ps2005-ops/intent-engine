@@ -21,11 +21,18 @@ SUBJECT = dict(subject_filers=(SUBJECT_CIK,), subject_domain=DOMAIN,
 
 
 def _doc(url, source_class, *, title="t", digest="h", filing=False,
-         desc="a reasonably long description of the document body here"):
+         desc="a reasonably long description of the document body here",
+         about_subject=True):
+    # Relevance is a second axis now: a third-party document whose body never
+    # discusses Cloudflare is correctly IRRELEVANT and does not count.
+    body = (desc + ". ") * 8
+    if about_subject:
+        body += ("We compete with Cloudflare for edge security customers and "
+                 "pricing pressure from Cloudflare cut our renewal revenue. ") * 4
     return {"final_url": url, "source_class": source_class, "title": title,
             "content_hash": digest, "filing": filing,
             "source_id": "src_PRIVATE_INTERNAL_ID",
-            "meta_description": desc, "text_content": desc * 30}
+            "meta_description": desc, "text_content": body}
 
 
 # Each document needs DISTINCT text. Identical bodies are correctly labelled

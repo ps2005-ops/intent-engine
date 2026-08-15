@@ -250,6 +250,10 @@ _PROVENANCE_RECORD = {
     "source_class": ..., "evidence_type": ...,
     "published_at": ..., "retrieved_at": ..., "freshness": ...,
     "lineage": ..., "independence_bearing": ..., "origin_group": ...,
+    # Two axes, never one number. A source can be an independent voice and
+    # still say nothing about the company.
+    "independent_voice": ..., "relevance": ..., "relevance_reason": ...,
+    "relevance_statement": ...,
     "passage": ..., "plain_statement": ..., "visibility": ...,
 }
 

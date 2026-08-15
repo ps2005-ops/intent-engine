@@ -42,9 +42,16 @@ def _edgar(cik, name="doc"):
 
 
 def _doc(url, source_class, words, digest):
+    # THE TEXT MATTERS NOW. Independence says whose voice this is; relevance
+    # says whether the voice discussed Cloudflare. A fixture whose body never
+    # names the company is correctly IRRELEVANT and would not be counted, so
+    # these bodies say something about the subject on purpose.
+    body = (f"{words}. We compete with Cloudflare for edge security customers, "
+            f"and pricing pressure from Cloudflare affected our renewal "
+            f"revenue this year. ") * 8
     return {"final_url": url, "source_class": source_class,
             "filing": "sec.gov" in url, "content_hash": digest,
-            "text_content": (words + " ") * 30}
+            "text_content": body}
 
 
 SUBJECT_SITE = _doc(f"https://www.{SUBJECT_DOMAIN}/pricing",
@@ -93,6 +100,7 @@ def test_a_different_registrants_filing_is_still_independent():
             classify([SUBJECT_FILING, OTHER_FILING], **SUBJECT)}
     other = rows[f"sec.gov/filer/{OTHER_CIK.lstrip('0')}"]
     assert other["lineage"] == INDEPENDENT_EXTERNAL_SOURCE
+    assert other["independent_voice"] is True
     assert other["independence_bearing"] is True
 
 
@@ -119,7 +127,9 @@ def test_an_unknown_filer_is_not_assumed_to_be_the_subject():
     unknown = _doc(_edgar("0000999999", "x"), "competitor",
                    "some other registrant entirely", "e")
     rows = {r["origin_family"]: r for r in classify([unknown], **SUBJECT)}
-    assert rows[f"sec.gov/filer/999999"]["independence_bearing"] is True
+    # ITS VOICE is independent -- that is what this test is about. Whether it
+    # also COUNTS now depends on relevance, which is a different axis.
+    assert rows["sec.gov/filer/999999"]["independent_voice"] is True
 
 
 # --- identification ----------------------------------------------------------

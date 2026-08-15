@@ -37,6 +37,7 @@ from collections import Counter
 from typing import Dict, List, Sequence
 from urllib.parse import urlparse
 
+from intent_engine.company_ingestion import relevance as _RELEVANCE
 from intent_engine.company_ingestion.records import INDEPENDENT_CLASSES
 
 CONTRACT = "evidence_independence.v1"
@@ -273,7 +274,8 @@ def _vantage(document: dict, *, subject_filers=(),
 
 
 def classify(documents: Sequence[dict], *, subject_filers=(),
-             subject_domain: str = "") -> List[dict]:
+             subject_domain: str = "", subject_name: str = "",
+             aliases: Sequence[str] = ()) -> List[dict]:
     """Label every row with its lineage, in retrieval order.
 
     `subject_filers` and `subject_domain` identify the company being analysed,
@@ -329,6 +331,25 @@ def classify(documents: Sequence[dict], *, subject_filers=(),
         if content_hash and content_hash not in seen_hashes:
             seen_hashes[content_hash] = index
 
+        # RELEVANCE IS A SECOND AXIS, ADJUDICATED HERE SO IT REACHES THE
+        # COUNT. Independence asks whose voice this is; relevance asks
+        # whether the voice said anything about the subject. A stranger
+        # saying nothing is independent and worthless, and counting it made
+        # Cloudflare read PARTIALLY_INDEPENDENT off a filing that named it
+        # once, in a list of the author's own hosting suppliers.
+        #
+        # Only a POSITIVE finding of irrelevance removes the row from the
+        # count. UNMEASURABLE never does: deleting a real independent
+        # observation is the worse error on this side.
+        verdict = _RELEVANCE.adjudicate(
+            document, subject_name=subject_name,
+            subject_domain=subject_domain, aliases=aliases,
+            self_authored=subject_authored(
+                document, subject_filers=subject_filers,
+                subject_domain=subject_domain))
+        bearing = lineage in INDEPENDENCE_BEARING and bool(
+            verdict["supports_corroboration"])
+
         out.append({
             "index": index,
             "source_id": document.get("source_id", ""),
@@ -337,7 +358,13 @@ def classify(documents: Sequence[dict], *, subject_filers=(),
             "source_class": document.get("source_class") or "",
             "lineage": lineage,
             "anchor_index": anchor,
-            "independence_bearing": lineage in INDEPENDENCE_BEARING,
+            "independence_bearing": bearing,
+            # Kept beside the verdict rather than folded into it: a reader
+            # who is told a source was set aside must be able to see that it
+            # WAS independent, and why it still did not count.
+            "independent_voice": lineage in INDEPENDENCE_BEARING,
+            "relevance": verdict["state"],
+            "relevance_reason": verdict["reason"],
         })
     return out
 
@@ -429,7 +456,8 @@ def describe(assessment: dict) -> str:
 
 
 def assess(documents: Sequence[dict], *, subject_filers=(),
-           subject_domain: str = "",
+           subject_domain: str = "", subject_name: str = "",
+           aliases: Sequence[str] = (),
            contradicting_ids: Sequence[str] = ()) -> dict:
     """Independence for one company's evidence set.
 
@@ -441,7 +469,8 @@ def assess(documents: Sequence[dict], *, subject_filers=(),
     same as an uncontested one, and a single state cannot say both.
     """
     rows = classify(documents, subject_filers=subject_filers,
-                    subject_domain=subject_domain)
+                    subject_domain=subject_domain, subject_name=subject_name,
+                    aliases=aliases)
     lineage_counts = Counter(row["lineage"] for row in rows)
     families = sorted({row["origin_family"] for row in rows
                        if row["origin_family"]})

@@ -39,6 +39,7 @@ import hashlib
 from typing import Any, Dict, List, Sequence
 
 from intent_engine.company_ingestion import independence as IND
+from intent_engine.company_ingestion import relevance as _REL
 
 CONTRACT = "claim_provenance.v1"
 
@@ -142,7 +143,8 @@ def project(documents: Sequence[dict], *, subject_filers=(),
                 "records": []}
 
     rows = IND.classify(documents, subject_filers=subject_filers,
-                        subject_domain=subject_domain)
+                        subject_domain=subject_domain,
+                        subject_name=subject_name)
     records: List[dict] = []
     for row, document in zip(rows, documents):
         url = str(row.get("url") or "")
@@ -179,6 +181,14 @@ def project(documents: Sequence[dict], *, subject_filers=(),
             "freshness": str(document.get("freshness") or ""),
             "lineage": row.get("lineage", ""),
             "independence_bearing": bool(row.get("independence_bearing")),
+            # INDEPENDENCE AND RELEVANCE ARE REPORTED SEPARATELY. A reader
+            # told a source was set aside must be able to see that it WAS an
+            # independent voice, and why it still did not count.
+            "independent_voice": bool(row.get("independent_voice")),
+            "relevance": row.get("relevance", ""),
+            "relevance_reason": row.get("relevance_reason", ""),
+            "relevance_statement": _REL.plain_statement(
+                {"state": row.get("relevance", "")}),
             "origin_group": row.get("origin_family", ""),
             "passage": _passage(document),
             "plain_statement": _plain_label(
