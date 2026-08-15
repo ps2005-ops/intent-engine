@@ -5990,6 +5990,22 @@ class WebApp:
                     subject_domain=str(meta.get("domain") or ""))
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 _assessed = None
+            # THE SAME SUBJECT, THE SAME DOCUMENTS, ONE MORE PROJECTION.
+            # Built from `independence.classify` rather than beside it, so
+            # the drawer and the independence count can never disagree about
+            # whether a document is the company's own.
+            try:
+                from intent_engine.company_ingestion import provenance as _PRV
+                _provenance = _PRV.project(
+                    self.ci.store.retrieved(run_id),
+                    subject_filers=(self.ci.subject_cik(meta),),
+                    subject_domain=str(meta.get("domain") or ""),
+                    subject_name=name)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                # A projection that could not be built is UNAVAILABLE, which
+                # is a fact about us. An empty record list would read as "this
+                # company has no sources", which is a claim about the company.
+                _provenance = None
             # No strategic report means the reasoning layer produced no
             # knowledge state, so no evidence row could have moved one. That
             # is BLOCKED, never a measured zero (§21).
@@ -6017,7 +6033,8 @@ class WebApp:
                 run_id=run_id, company_id=key, canonical_name=name,
                 domain=str(meta.get("domain") or ""), report=report,
                 context=context, scope=None,
-                independence=_assessed, learning=_learning))
+                independence=_assessed, claim_provenance=_provenance,
+                learning=_learning))
 
             # The market snapshot, through the CONFIGURED bridge.
             #

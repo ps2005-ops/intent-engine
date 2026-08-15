@@ -356,6 +356,10 @@ def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
         "evidence_independence": founder.evidence_independence,
         "learning": founder.learning_summary,
         "provenance": founder.provenance_summary,
+        # Where each claim's facts came from, sanitized upstream. Carried
+        # through untouched: this seam decides what CROSSES, never what a
+        # document means.
+        "claim_provenance": founder.claim_provenance,
         "blocks": _block_view(founder, _FOUNDER_VIEW),
     }
     product_block = {

@@ -236,6 +236,29 @@ MARKET_ALLOWED: Dict[str, Any] = {
     "provenance_summary": _SUMMARY,
 }
 
+#: One sanitized provenance record (§12). Every field here is publicly
+#: checkable: a title, a URL, who wrote it, who served it, who it is about.
+#: There is deliberately NO source_id, run id or graph node id — those are
+#: storage identity, and exporting one under a friendlier name is the leak
+#: this block exists to make impossible to write by accident.
+_PROVENANCE_RECORD = {
+    "provenance_id": ..., "title": ..., "url": ...,
+    # The three that must not collapse: who WROTE it, who SERVED it, who it
+    # is ABOUT. Reading the host as the author is what made a company's own
+    # 10-K look like independent government confirmation.
+    "author": ..., "host": ..., "subject": ..., "self_authored": ...,
+    "source_class": ..., "evidence_type": ...,
+    "published_at": ..., "retrieved_at": ..., "freshness": ...,
+    "lineage": ..., "independence_bearing": ..., "origin_group": ...,
+    "passage": ..., "plain_statement": ..., "visibility": ...,
+}
+
+#: Absence is a STATE here, never an empty list (§13).
+_PROVENANCE_BLOCK = {
+    "contract": ..., "state": ..., "reason": ...,
+    "records": [_PROVENANCE_RECORD],
+}
+
 FOUNDER_ALLOWED: Dict[str, Any] = {
     "contract_version": ..., "snapshot_id": ...,
     "company_id": ..., "canonical_name": ..., "domain": ..., "ticker": ...,
@@ -266,6 +289,10 @@ FOUNDER_ALLOWED: Dict[str, Any] = {
     "evidence_independence": _INDEPENDENCE_BLOCK,
     "product_surfaces": {name: ... for name in V.PRODUCT_SURFACES},
     "provenance_summary": _SUMMARY,
+    # THE CLAIM-LEVEL PROJECTION, beside the runtime summary above. The
+    # summary says which build produced the analysis; this says where the
+    # analysis got its facts, which is the question a buyer actually asks.
+    "claim_provenance": _PROVENANCE_BLOCK,
     "learning_summary": _SUMMARY,
 }
 
@@ -286,6 +313,7 @@ MARKET_ADDITIVE = frozenset({"evidence_independence_state", "learning_summary",
 FOUNDER_ADDITIVE = frozenset({"evidence_independence_state",
                               "evidence_independence",
                               "learning_summary", "provenance_summary",
+                              "claim_provenance",
                               "what_changed_your_mind_ref"})
 
 #: An unknown field whose NAME implies authority, identity partitioning,
@@ -466,6 +494,10 @@ class FounderDemoSnapshot(_Snapshot):
     product_surfaces: Dict[str, str] = field(default_factory=dict)
     learning_summary: Optional[dict] = None
     provenance_summary: Optional[dict] = None
+    #: The claim-level projection. None when the producer did not run, which
+    #: is a fact about us; an empty `records` list carrying a STATE is a fact
+    #: about the company. The two are never merged.
+    claim_provenance: Optional[dict] = None
     #: The structure behind `evidence_independence_state` (§24). None when the
     #: producer sent none — an older producer is OLDER_SUPPORTED, not wrong.
     evidence_independence: Optional[dict] = None
@@ -696,6 +728,9 @@ def read_founder_snapshot(payload: Any, *, expected_company: str = "",
         product_surfaces=surfaces,
         learning_summary=_summary(payload.get("learning_summary")),
         provenance_summary=_summary(payload.get("provenance_summary")),
+        claim_provenance=(payload.get("claim_provenance")
+                          if isinstance(payload.get("claim_provenance"), dict)
+                          else None),
         blocks={name: _ref_block(payload.get(name))
                 for name in _FOUNDER_BLOCKS},
         unknown_fields=tuple(unknown), missing_fields=missing)

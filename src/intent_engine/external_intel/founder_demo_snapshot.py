@@ -111,6 +111,7 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
                   decision_impact_state: str = "",
                   evidence_ids: Sequence[str] = (),
                   independence: Any = None,
+                  claim_provenance: Any = None,
                   learning: Any = None,
                   data_population: str = "",
                   evidence_cutoff: str = "", known_at: str = "",
@@ -201,6 +202,12 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
         # from here (§27); only an exercised UI proof may say otherwise.
         "product_surfaces": {name: V.UNMEASURED
                              for name in V.PRODUCT_SURFACES},
+        # THE CLAIM-LEVEL PROJECTION. Passed through exactly as the producer
+        # built it: this module must not re-derive lineage or re-decide what
+        # is independent, because a second opinion here is how the dossier
+        # and the engine start disagreeing about the same document.
+        "claim_provenance": (claim_provenance
+                             if isinstance(claim_provenance, dict) else None),
         "provenance_summary": {"state": V.AVAILABLE,
                                "value": _runtime_sha(),
                                "as_of": generated_at,
