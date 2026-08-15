@@ -112,6 +112,7 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
                   evidence_ids: Sequence[str] = (),
                   independence: Any = None,
                   claim_provenance: Any = None,
+                  discovery: Any = None,
                   learning: Any = None,
                   data_population: str = "",
                   evidence_cutoff: str = "", known_at: str = "",
@@ -208,11 +209,45 @@ def build_payload(*, run_id: str, company_id: str, canonical_name: str = "",
         # and the engine start disagreeing about the same document.
         "claim_provenance": (claim_provenance
                              if isinstance(claim_provenance, dict) else None),
+        # WHAT THE SEARCH DID. None when discovery did not run -- the drawer
+        # then reads DISCOVERY_NOT_RUN, which is the honest reading, and the
+        # one state that never licenses "this company has no coverage".
+        "discovery_coverage": _discovery_block(discovery),
         "provenance_summary": {"state": V.AVAILABLE,
                                "value": _runtime_sha(),
                                "as_of": generated_at,
                                "note": "runtime provenance of the analysis"},
         "learning_summary": _learning_summary(learning, generated_at),
+    }
+
+
+def _discovery_block(discovery: Any) -> Any:
+    """The discovery report, projected. Counts and states only.
+
+    Rejected ROWS are deliberately dropped here and only their reason counts
+    cross: a rejection row names a third-party filer we chose not to carry,
+    and a bridge that ships an unselected company's name is publishing a fact
+    about someone who is not the subject.
+    """
+    if not isinstance(discovery, dict) or not discovery:
+        return None
+    reasons = discovery.get("rejection_reasons")
+    return {
+        "contract": str(discovery.get("contract") or "third_party_discovery.v1"),
+        "coverage": str(discovery.get("coverage") or ""),
+        "channels_attempted": [str(c) for c in
+                               (discovery.get("channels_attempted") or [])],
+        "channels_successful": [str(c) for c in
+                                (discovery.get("channels_successful") or [])],
+        "hits_total": int(discovery.get("hits_total") or 0),
+        "candidates_considered": int(discovery.get("candidates_considered") or 0),
+        "candidates_fetched": int(discovery.get("candidates_fetched") or 0),
+        "rejection_reasons": ({str(k): int(v) for k, v in reasons.items()}
+                              if isinstance(reasons, dict) else {}),
+        "independent_relevant_origins": int(
+            discovery.get("independent_relevant_origins") or 0),
+        "budget_exhausted": bool(discovery.get("budget_exhausted")),
+        "searched_on": str(discovery.get("searched_on") or ""),
     }
 
 

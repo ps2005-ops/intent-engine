@@ -4069,6 +4069,38 @@ class WebApp:
                        ("Why this reading exists", f"{base}/evidence")])
         return self._html(self._page(company, body, None, ""))
 
+    @staticmethod
+    def _discovery_detail(discovery: dict) -> str:
+        """How hard we looked, in the buyer's words rather than ours.
+
+        A hostile buyer's second question after "is it independent?" is "how
+        hard did you try?", and a coverage enum alone does not answer it. This
+        renders the WORK: channels tried, candidates considered, documents
+        actually read. Absent when no producer ran -- inventing a number here
+        would be worse than the silence it replaces.
+        """
+        if not discovery:
+            return ('<p class="none">No discovery run is recorded for this '
+                    'analysis, so how hard we searched is unknown.</p>')
+        considered = int(discovery.get("candidates_considered") or 0)
+        fetched = int(discovery.get("candidates_fetched") or 0)
+        hits = int(discovery.get("hits_total") or 0)
+        channels = discovery.get("channels_successful") or []
+        bits = [f'<p class="none">We searched {len(channels) or 0} '
+                f'independent channel(s), found {hits} filing(s) naming this '
+                f'company, judged {considered} of them worth reading, and '
+                f'read {fetched} in full.</p>']
+        if discovery.get("budget_exhausted"):
+            bits.append('<p class="none">We stopped at our reading budget, so '
+                        'candidates remain that we have not assessed.</p>')
+        reasons = discovery.get("rejection_reasons") or {}
+        if isinstance(reasons, dict) and reasons:
+            listed = " · ".join(
+                f"{_e(str(k).replace('_', ' ').lower())}: {int(v)}"
+                for k, v in sorted(reasons.items())[:8])
+            bits.append(f'<p class="none">Set aside — {listed}</p>')
+        return "".join(bits)
+
     def _evidence_screen(self, company_id: str):
         """Why this reading exists: every source, and what it is worth.
 
@@ -4127,14 +4159,18 @@ class WebApp:
                      and not r.get("independence_bearing")]
         own = [r for r in records if not r.get("independent_voice")]
 
-        # WHAT A ZERO LICENCES US TO SAY. Discovery coverage is not measured
-        # yet, so this reads FAILED_TO_FIND -- a limit of our retrieval, not
-        # a finding about the company. Saying the stronger thing would be the
-        # flattering error.
+        # WHAT A ZERO LICENCES US TO SAY. The coverage state is MEASURED by
+        # the discovery run -- how many candidates it considered, how many
+        # documents it actually read, whether it ran out of budget or ran out
+        # of candidates. An absent block means no producer ran, which reads
+        # DISCOVERY_NOT_RUN and never licenses "this company has no coverage".
+        discovery = founder.get("discovery_coverage")
+        discovery = discovery if isinstance(discovery, dict) else {}
         reading = REL.zero_reading(
             independent_relevant=len(supporting),
-            coverage=str(founder.get("discovery_coverage")
-                         or REL.DISCOVERY_NOT_RUN))
+            coverage=str(discovery.get("coverage") or REL.DISCOVERY_NOT_RUN),
+            channels_attempted=len(discovery.get("channels_attempted") or []),
+            channels_successful=len(discovery.get("channels_successful") or []))
         headline = (
             f'<section class="card"><h2>Independent support</h2>'
             f'<p><strong>{len(supporting)}</strong> of {len(records)} '
@@ -4144,7 +4180,9 @@ class WebApp:
                else "")
             + f'<p class="none">Search coverage: '
               f'{_e(reading["coverage"])} · reading: {_e(reading["reading"])}'
-              f'</p></section>')
+              f'</p>'
+            + self._discovery_detail(discovery)
+            + '</section>')
 
         def _card(rec):
             bits = []
@@ -6167,12 +6205,21 @@ class WebApp:
                     "no strategic report was produced for this run, so no "
                     "knowledge state existed for evidence to change"))
 
+            # HOW HARD THE SEARCH WORKED. Read from the run that just ran,
+            # never defaulted: an absent report crosses as None and the drawer
+            # reads DISCOVERY_NOT_RUN, which is the only honest reading when
+            # nothing searched.
+            try:
+                _discovery = self.ci.discovery_report(run_id)
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _discovery = {}
+
             founder = read_founder_snapshot(fds.build_payload(
                 run_id=run_id, company_id=key, canonical_name=name,
                 domain=str(meta.get("domain") or ""), report=report,
                 context=context, scope=None,
                 independence=_assessed, claim_provenance=_provenance,
-                learning=_learning))
+                discovery=_discovery, learning=_learning))
 
             # The market snapshot, through the CONFIGURED bridge.
             #

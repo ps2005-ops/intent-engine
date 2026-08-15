@@ -85,6 +85,39 @@ _SUBSTANTIVE = re.compile(
 _AUTHOR_VOICE = re.compile(
     r"\b(we|our|us|the company'?s?|registrant)\b", re.I)
 
+#: A PERSON'S CAREER, not a company's business.
+#:
+#: Measured live: of four "independent relevant origins" retrieved for
+#: Cloudflare, two were executive biographies -- "Garfield served as the Vice
+#: President of Finance of Cloudflare, Inc." in Adobe's proxy, and a director
+#: listing in Coursera's. Both name the company in a sentence whose subject is
+#: an individual. Read as corroboration they say a company we have never
+#: checked employs someone, which bears on nothing a reader is deciding.
+_BIOGRAPHICAL = re.compile(
+    r"\b(serve[sd]?\s+(?:as|on)|served\s+(?:as|on)|prior\s+to\s+joining|"
+    r"before\s+joining|from\s+\d{4}\s+(?:to|until)\s+(?:\d{4}|present)|"
+    r"he\s+(?:is|was|has)|she\s+(?:is|was|has)|they\s+(?:are|were|have)|"
+    r"holds?\s+a\s+(?:B\.?[AS]|M\.?[BAS]|Ph\.?D)|"
+    r"(?:board|director|officer|chair)\s+of)\b", re.I)
+
+#: THE AUTHOR'S OWN ARRANGEMENTS, in the supply direction.
+#:
+#: The enumeration rule below already catches "vendors such as X". It does not
+#: catch the same disclosure written as a plain sentence -- "The Company
+#: purchases cloud operations services from Cloudflare Inc." -- and both of
+#: those forms are the author describing ITSELF. Measured live, that shape was
+#: the other half of Cloudflare's four origins.
+#:
+#: This is not a claim that the fact is worthless: a customer disclosure is
+#: real evidence that the subject has customers. It is a claim about WHOSE
+#: account it is, and an account of the author's own supply chain cannot
+#: corroborate a strategic reading of the supplier.
+_SUPPLY_DISCLOSURE = re.compile(
+    r"\b(purchas(?:e|es|ed|ing)|procur(?:e|es|ed)|licen[cs](?:e|es|ed)|"
+    r"subscrib(?:e|es|ed)|us(?:e|es|ed)|utiliz(?:e|es|ed)|rel(?:y|ies|ied)\s+on|"
+    r"depend(?:s|ed)?\s+on|host(?:ed|s)?\s+(?:by|on|with)|"
+    r"operated\s+by|provided\s+by|served\s+by|behind)\b", re.I)
+
 _SENTENCE = re.compile(r"(?<=[.;!?])\s+")
 
 
@@ -132,8 +165,40 @@ def _mentions(text: str, terms: Sequence[str]) -> list:
     return [s for s in _sentences(text) if pattern.search(s)]
 
 
+def _author_pattern(author_name: str):
+    """The author naming ITSELF. None when we do not know who wrote this.
+
+    AUTHOR VOICE IS NOT ONLY PRONOUNS. Measured live: ChargePoint's 10-K says
+    "ChargePoint's primary environments are behind the Content Delivery
+    Network operated by Cloudflare, Inc." -- a first-person rule sees no "we"
+    there and reads a supplier disclosure as an independent account of the
+    supplier. The nearest governing subject decides ownership, and here it is
+    the filer's own name.
+
+    Only the leading distinguishing word, matched on word boundaries: the same
+    discipline the subject terms use, for the same reason -- "alpha" must not
+    match inside "Alphabet". A sentence where the author names BOTH itself and
+    the subject is left alone by this, because it is demoted only in
+    combination with a supply verb.
+    """
+    cleaned = re.sub(r"\((?:CIK|[A-Z.]{1,6})[^)]*\)", " ", author_name or "")
+    words = [w for w in re.findall(r"[A-Za-z0-9]+", cleaned)
+             if w.lower() not in _AUTHOR_LEGAL_FORMS]
+    if not words or len(words[0]) <= 3:
+        return None
+    return re.compile(r"\b" + re.escape(words[0]) + r"(?:'s|’s)?\b", re.I)
+
+
+_AUTHOR_LEGAL_FORMS = frozenset({
+    "inc", "incorporated", "corp", "corporation", "co", "company", "ltd",
+    "limited", "llc", "lp", "llp", "plc", "sa", "nv", "ag", "se", "gmbh",
+    "holdings", "holding", "group", "the",
+})
+
+
 def adjudicate(document: dict, *, subject_name: str = "",
                subject_domain: str = "", aliases: Sequence[str] = (),
+               author_name: str = "",
                self_authored: bool = False) -> Dict[str, object]:
     """How much this document bears on a claim about the subject.
 
@@ -157,6 +222,7 @@ def adjudicate(document: dict, *, subject_name: str = "",
         return _verdict(UNMEASURABLE,
                         "no readable text was retained for this document", 0, 0)
 
+    author = _author_pattern(author_name)
     mentions = _mentions(text, terms)
     if not mentions:
         return _verdict(
@@ -166,14 +232,28 @@ def adjudicate(document: dict, *, subject_name: str = "",
 
     substantive = 0
     incidental = 0
+    biographical = 0
     for sentence in mentions:
         if _BOILERPLATE.search(sentence):
             continue
         # WHOSE BEHAVIOUR IS THIS? A first-person sentence listing the
         # subject among suppliers is the AUTHOR describing itself.
         listed = bool(_ENUMERATION.search(sentence))
-        author_voice = bool(_AUTHOR_VOICE.search(sentence))
+        author_voice = bool(_AUTHOR_VOICE.search(sentence)) or bool(
+            author and author.search(sentence))
         if listed and author_voice:
+            incidental += 1
+            continue
+        # WHOSE LIFE IS THIS? A sentence whose subject is a person, that
+        # happens to name a company, is about the person.
+        if _BIOGRAPHICAL.search(sentence):
+            biographical += 1
+            continue
+        # THE SAME AUTHOR-VOICE RULE, WRITTEN AS A PLAIN SENTENCE. Demoted on
+        # a POSITIVE finding -- author voice AND a supply verb -- never by
+        # flipping the default, because a wall that demotes on absence
+        # shreds true evidence for a reason about our patterns.
+        if author_voice and _SUPPLY_DISCLOSURE.search(sentence):
             incidental += 1
             continue
         if _SUBSTANTIVE.search(sentence):
@@ -190,12 +270,27 @@ def adjudicate(document: dict, *, subject_name: str = "",
     if substantive == 1:
         return _verdict(CONTEXTUALLY_RELEVANT,
                         "one passage discusses the company", 1, incidental)
-    if incidental:
+    # THREE DISTINCT REASONS, because they are three distinct facts about the
+    # document and a reader acts differently on each. A single merged sentence
+    # would be shorter and would stop saying which one happened.
+    if biographical and not incidental:
+        return _verdict(
+            IRRELEVANT,
+            f"the company is named {biographical} time(s), only in the career "
+            f"history of an individual",
+            0, biographical)
+    if incidental and not biographical:
         return _verdict(
             IRRELEVANT,
             f"the company is named {incidental} time(s), only as an example "
             f"in the author's account of its own arrangements",
             0, incidental)
+    if incidental or biographical:
+        return _verdict(
+            IRRELEVANT,
+            f"the company is named {incidental + biographical} time(s), only "
+            f"in the author's account of its own arrangements or its people",
+            0, incidental + biographical)
     return _verdict(IRRELEVANT,
                     "the company is named only in boilerplate", 0, 0)
 

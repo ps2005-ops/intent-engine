@@ -360,6 +360,9 @@ def assemble(market: MarketDemoSnapshot, founder: FounderDemoSnapshot, *,
         # through untouched: this seam decides what CROSSES, never what a
         # document means.
         "claim_provenance": founder.claim_provenance,
+        # How hard the search worked, beside what it returned. A surface that
+        # sees only the count cannot tell a finding from a retrieval gap.
+        "discovery_coverage": founder.discovery_coverage,
         "blocks": _block_view(founder, _FOUNDER_VIEW),
     }
     product_block = {

@@ -293,7 +293,8 @@ class CompanyIngestionService:
         # public is EDGAR full-text search, where a COMPETITOR'S OWN 10-K names
         # this company. Different author, regulatory venue, exact date,
         # permanent citation.
-        candidates = candidates + self._third_party_filing_candidates(meta)
+        candidates = candidates + self._third_party_filing_candidates(
+            meta, run_id=run_id)
         # Curated official sources for a KNOWN entity. This is what stops a
         # multinational whose primary domain refuses automated access from
         # collapsing into whatever single filing happened to be reachable:
@@ -1251,10 +1252,18 @@ class CompanyIngestionService:
         except Exception:  # noqa: BLE001 - subject identification is best-effort
             return ""
 
-    def _third_party_filing_candidates(self, meta) -> list:
+    def discovery_report(self, run_id: str) -> dict:
+        """What the independent-channel search DID for this run.
+
+        Empty when discovery never ran, which every consumer must read as
+        DISCOVERY_NOT_RUN. An empty dict is not a measured zero.
+        """
+        return dict(getattr(self, "_discovery_reports", {}).get(run_id) or {})
+
+    def _third_party_filing_candidates(self, meta, run_id: str = "") -> list:
         """Filings by OTHER registrants naming this company. Never raises."""
         from intent_engine.company_ingestion.third_party_filings import (
-            propose_third_party_filings,
+            discover_third_party_filings,
         )
         # An injected transport means a test double or a replay, and the
         # full-text index is not part of it. Reaching the live endpoint from a
@@ -1265,10 +1274,19 @@ class CompanyIngestionService:
         company_name = meta.get("company_name", "")
         subject_cik = self.subject_cik(meta)
         try:
-            return propose_third_party_filings(
+            report = discover_third_party_filings(
                 company_name=company_name, subject_cik=subject_cik)
         except Exception:  # noqa: BLE001 - discovery must never break
             return []
+        # RETAINED, NOT JUST RETURNED. The candidates flow onward as sources;
+        # the SEARCH ITSELF -- what it tried, read and rejected -- has no other
+        # route to the dossier, and without it the drawer cannot tell a
+        # finding about the company from a limit of our retrieval.
+        if not hasattr(self, "_discovery_reports"):
+            self._discovery_reports = {}
+        if run_id:
+            self._discovery_reports[run_id] = report
+        return report.get("candidates") or []
 
     @staticmethod
     def _entity_hint(company_name, documents):

@@ -263,6 +263,20 @@ _PROVENANCE_BLOCK = {
     "records": [_PROVENANCE_RECORD],
 }
 
+#: HOW HARD WE LOOKED, as distinct from what we found (§8). Without this a
+#: zero independent-origin count is unreadable: the surface cannot tell whether
+#: the company has no outside coverage or whether we did not search. Every
+#: field is something the discovery run DID -- channels it tried, candidates it
+#: considered, documents it actually read, why each rejection happened -- so a
+#: coverage state can never be asserted where it was not earned.
+_DISCOVERY_BLOCK = {
+    "contract": ..., "coverage": ..., "channels_attempted": ...,
+    "channels_successful": ..., "hits_total": ...,
+    "candidates_considered": ..., "candidates_fetched": ...,
+    "rejection_reasons": ..., "independent_relevant_origins": ...,
+    "budget_exhausted": ..., "searched_on": ...,
+}
+
 FOUNDER_ALLOWED: Dict[str, Any] = {
     "contract_version": ..., "snapshot_id": ...,
     "company_id": ..., "canonical_name": ..., "domain": ..., "ticker": ...,
@@ -297,6 +311,10 @@ FOUNDER_ALLOWED: Dict[str, Any] = {
     # summary says which build produced the analysis; this says where the
     # analysis got its facts, which is the question a buyer actually asks.
     "claim_provenance": _PROVENANCE_BLOCK,
+    # What the search DID, beside what it returned. The drawer refuses to say
+    # "none exists" without it, and until a producer sent one the drawer had
+    # no choice but to read DISCOVERY_NOT_RUN forever.
+    "discovery_coverage": _DISCOVERY_BLOCK,
     "learning_summary": _SUMMARY,
 }
 
@@ -317,7 +335,7 @@ MARKET_ADDITIVE = frozenset({"evidence_independence_state", "learning_summary",
 FOUNDER_ADDITIVE = frozenset({"evidence_independence_state",
                               "evidence_independence",
                               "learning_summary", "provenance_summary",
-                              "claim_provenance",
+                              "claim_provenance", "discovery_coverage",
                               "what_changed_your_mind_ref"})
 
 #: An unknown field whose NAME implies authority, identity partitioning,
@@ -502,6 +520,10 @@ class FounderDemoSnapshot(_Snapshot):
     #: is a fact about us; an empty `records` list carrying a STATE is a fact
     #: about the company. The two are never merged.
     claim_provenance: Optional[dict] = None
+    #: What the discovery run actually did. None means no producer ran, which
+    #: the drawer must read as DISCOVERY_NOT_RUN -- never as "we searched and
+    #: there was nothing", which is the flattering direction of the same error.
+    discovery_coverage: Optional[dict] = None
     #: The structure behind `evidence_independence_state` (§24). None when the
     #: producer sent none — an older producer is OLDER_SUPPORTED, not wrong.
     evidence_independence: Optional[dict] = None
@@ -735,6 +757,9 @@ def read_founder_snapshot(payload: Any, *, expected_company: str = "",
         claim_provenance=(payload.get("claim_provenance")
                           if isinstance(payload.get("claim_provenance"), dict)
                           else None),
+        discovery_coverage=(
+            payload.get("discovery_coverage")
+            if isinstance(payload.get("discovery_coverage"), dict) else None),
         blocks={name: _ref_block(payload.get(name))
                 for name in _FOUNDER_BLOCKS},
         unknown_fields=tuple(unknown), missing_fields=missing)
