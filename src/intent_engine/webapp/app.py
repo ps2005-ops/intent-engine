@@ -1453,13 +1453,24 @@ class WebApp:
         # consulted when a website had already been supplied.
         if company_name and not website and not form.get("entity_id"):
             from intent_engine.company_ingestion import name_entry as _NE
-            # The SEC registrant source is off by default so that no offline
-            # run or test suite makes an outbound call by surprise. A live
-            # request is exactly the context where it should be on: without
-            # it the register is ~105 companies and every other real firm
-            # comes back "not found".
-            _NE.enable_registrant_lookup(True)
-            entry = _NE.resolve(company_name=company_name)
+            # The SEC registrant source is opted into PER CALL, not by a
+            # module flag: a live request is exactly the context where the
+            # one outbound lookup belongs, and no other caller in the
+            # process should start making it as a side effect. Without it
+            # the register is ~105 companies and every other real firm on
+            # earth comes back "not found".
+            # THE ONE OUTBOUND LOOKUP, and it is off under test.
+            #
+            # Threading the app's transport through is not sufficient on its
+            # own: some tests construct WebApp with no transport at all, so
+            # the lookup fell back to the real SEC and every such test paid
+            # an 8-second timeout. The suite crawled at 7% twice before this
+            # was pinned. `env` is the honest gate -- a test must never make
+            # an outbound call, whatever transport it did or did not inject.
+            entry = _NE.resolve(company_name=company_name,
+                                allow_registrant=True,
+                                transport=self._transport,
+                                resolver=self._resolver)
             if entry.state == _NE.AMBIGUOUS_COMPANY:
                 # Two real companies share this name. Asking is strictly
                 # better than picking, and it is asked once, before any work.
@@ -1501,8 +1512,27 @@ class WebApp:
         # it resolves or names the company FROM its website, and there isn't
         # one. Its name came from the regulator, which is a better source
         # than a domain would have been.
-        if website and DEMO_DOMAIN not in website:
-            if not chosen:
+        # THIS CONDITION SELECTS THE REAL-COMPANY PATH, not merely a block of
+        # entity resolution -- everything below it up to and including
+        # `create_run` is the real analysis, and the `else` at the end of the
+        # method runs the SYNTHETIC DEMO.
+        #
+        # A first version guarded this with `website and ...`, reasoning that
+        # a domainless filer has nothing to resolve from a website. True, and
+        # it dropped Toyota and Vale straight through to the demo: both came
+        # back as a confident report titled "Northwind Logistics Cloud
+        # (synthetic demo)", under a run id shared by every company that took
+        # the same fall. A report about the wrong company is the worst thing
+        # this product can emit, and it shipped because the guard was placed
+        # by what the block APPEARED to do at the top rather than by what it
+        # returns at the bottom. Found on the deployed service.
+        #
+        # A resolved filer is a real company and takes the real path.
+        if filer_cik or (website and DEMO_DOMAIN not in website):
+            # The website-derived resolution below is skipped for a filer:
+            # there is no website to resolve from, and its name came from the
+            # regulator, which is a better source than a domain would be.
+            if not chosen and website:
                 resolution = resolve_entity(company_name=company_name,
                                             website=website)
                 if resolution.status == AMBIGUOUS:

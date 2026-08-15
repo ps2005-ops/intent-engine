@@ -159,42 +159,48 @@ def _manifest():
         return None
 
 
-#: The SEC lookup is the only source here that touches the network, so it is
-#: OFF unless a deployment turns it on. A resolver that silently makes an
-#: outbound call every time an unrecognised name is typed is not something a
-#: test suite or an offline run should discover by getting slower.
-_REGISTRANT_LOOKUP_ENABLED = False
-
 #: Resolved names, so a repeated entry costs nothing. The SEC's ticker table
 #: is one ~1MB fetch and a registrant's identity does not change between two
 #: page loads.
 _REGISTRANT_CACHE: dict = {}
 
 
-def enable_registrant_lookup(enabled: bool = True) -> None:
-    """Turn the SEC registrant source on. Called by the web app at startup."""
-    global _REGISTRANT_LOOKUP_ENABLED
-    _REGISTRANT_LOOKUP_ENABLED = bool(enabled)
+def _registrant(company_name: str, enabled: bool = False,
+                transport=None, resolver=None):
+    """{cik, title, ticker} for a filer of this name, or None. Never raises.
 
-
-def _registrant(company_name: str):
-    """{cik, title, ticker} for a filer of this name, or None. Never raises."""
-    if not _REGISTRANT_LOOKUP_ENABLED or not company_name:
+    THE NETWORK IS OFF BY DEFAULT AND TURNED ON PER CALL. A first version
+    used a module-level flag flipped by the request handler, which is a
+    global mutated by a request: once any webapp test posted to /analyze the
+    flag stayed on for the rest of the process, and every later resolve of an
+    unrecognised name made an 8-second SEC call. The suite went from five
+    minutes to crawling, which is how the design announced itself.
+    """
+    if not enabled or not company_name:
         return None
     key = company_name.strip().lower()
     if key in _REGISTRANT_CACHE:
         return _REGISTRANT_CACHE[key]
     try:
         from intent_engine.company_ingestion.edgar import resolve_cik
-        found = resolve_cik(company_name)
+        found = resolve_cik(company_name, transport=transport,
+                            resolver=resolver)
     except Exception:                                       # noqa: BLE001
         found = None
     _REGISTRANT_CACHE[key] = found
     return found
 
 
-def resolve(company_name: str = "", website: str = "") -> NameEntry:
-    """Resolve typed entry. Never raises, never invents a domain."""
+def resolve(company_name: str = "", website: str = "", *,
+            allow_registrant: bool = False, transport=None,
+            resolver=None) -> NameEntry:
+    """Resolve typed entry. Never raises, never invents a domain.
+
+    `allow_registrant` opts in to the SEC lookup, which is the only source
+    here that touches the network. Passed per call rather than held as
+    module state so that one caller enabling it cannot change what every
+    later caller in the process does.
+    """
     company_name = " ".join(str(company_name or "").split())
     website = str(website or "").strip()
 
@@ -268,7 +274,8 @@ def resolve(company_name: str = "", website: str = "") -> NameEntry:
     #
     # It is last because it can say neither AMBIGUOUS nor a domain, and both
     # of those are worth more than breadth when a source has them.
-    filer = _registrant(company_name)
+    filer = _registrant(company_name, allow_registrant,
+                        transport=transport, resolver=resolver)
     if filer:
         # EDGAR titles carry filing-index artifacts -- "TOYOTA MOTOR CORP/"
         # ends in a slash because the index path did. Strip ONLY the slash:
