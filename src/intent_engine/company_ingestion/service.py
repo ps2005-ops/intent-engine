@@ -1220,6 +1220,37 @@ class CompanyIngestionService:
             payload["result_state_detail"] = WX.render_text(explanation)
         return payload
 
+    def subject_cik(self, meta) -> str:
+        """The CIK of the company this run is about, or "".
+
+        ONE SPELLING, TWO STAGES. Filing DISCOVERY uses this to refuse the
+        subject's own filings as third-party candidates; independence
+        MEASUREMENT uses it to refuse them as independent corroboration.
+        They are the same question, and when only discovery could answer it
+        the measurement stage silently counted a company's own 10-K as an
+        outside vantage point -- which shipped, and was visible on the live
+        preview as "two independent origins" for Cloudflare, one of them
+        Cloudflare.
+
+        A run started from a website carries no CIK, which is the ordinary
+        case and the reason the fallback exists. Re-resolving by name is
+        fuzzy and could return a DIFFERENT registrant, whose filings would
+        then be excluded as "the subject's own" while the real subject's
+        were kept as third-party -- the attribution error inverted. That is
+        why the run's own CIK is preferred and the lookup never overrides it.
+        """
+        recorded = str((meta or {}).get("cik") or "").strip()
+        if recorded:
+            return recorded
+        try:
+            from intent_engine.company_ingestion.edgar import resolve_cik
+            resolved = resolve_cik((meta or {}).get("company_name", ""),
+                                   transport=self.transport,
+                                   resolver=self.resolver)
+            return str((resolved or {}).get("cik") or "")
+        except Exception:  # noqa: BLE001 - subject identification is best-effort
+            return ""
+
     def _third_party_filing_candidates(self, meta) -> list:
         """Filings by OTHER registrants naming this company. Never raises."""
         from intent_engine.company_ingestion.third_party_filings import (
@@ -1232,19 +1263,7 @@ class CompanyIngestionService:
         if self.transport is not None:
             return []
         company_name = meta.get("company_name", "")
-        # The run may already know the filer. Re-resolving by name is fuzzy
-        # and could return a DIFFERENT registrant, whose filings would then
-        # be excluded as "the subject's own" while the real subject's were
-        # kept as third-party -- the attribution error inverted.
-        subject_cik = str(meta.get("cik") or "")
-        if not subject_cik:
-            try:
-                from intent_engine.company_ingestion.edgar import resolve_cik
-                resolved = resolve_cik(company_name, transport=self.transport,
-                                       resolver=self.resolver)
-                subject_cik = str((resolved or {}).get("cik") or "")
-            except Exception:  # noqa: BLE001 - subject filter is best-effort
-                subject_cik = ""
+        subject_cik = self.subject_cik(meta)
         try:
             return propose_third_party_filings(
                 company_name=company_name, subject_cik=subject_cik)

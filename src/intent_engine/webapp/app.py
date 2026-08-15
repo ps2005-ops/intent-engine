@@ -5976,11 +5976,17 @@ class WebApp:
                 # venue check made the subject's own annual report an
                 # "independent origin" -- Cloudflare's dossier published
                 # INDEPENDENTLY_CORROBORATED off two origins, one of which was
-                # Cloudflare. `meta` already carries the CIK the ingestion run
-                # resolved, so nothing new is fetched here.
+                # Cloudflare.
+                #
+                # RESOLVED THROUGH `subject_cik`, NOT read off `meta`. Reading
+                # `meta["cik"]` directly was the first repair and it shipped
+                # doing nothing: a run started from a WEBSITE carries no CIK,
+                # which is the ordinary case, so the filter received an empty
+                # subject and the live claim never changed. Filing discovery
+                # had the fallback all along; this is the same one.
                 _assessed = _IND.assess(
                     self.ci.store.retrieved(run_id),
-                    subject_filers=(str(meta.get("cik") or ""),),
+                    subject_filers=(self.ci.subject_cik(meta),),
                     subject_domain=str(meta.get("domain") or ""))
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 _assessed = None

@@ -155,6 +155,74 @@ def test_self_report_is_never_independence_bearing():
     assert COMPANY_SELF_REPORT not in INDEPENDENCE_BEARING
 
 
+# --- the transport, which is where the first repair actually failed ----------
+
+def test_an_empty_subject_is_a_no_op_which_is_how_the_first_repair_shipped():
+    """THE REGRESSION THIS FILE NOW EXISTS FOR, SECOND TIME.
+
+    The first repair read `meta["cik"]` directly. A run started from a
+    WEBSITE carries no CIK -- the ordinary case -- so the filter received
+    `("",)`, identified nothing, and the live claim did not change even
+    though the deployed build contained the fix and every unit test passed.
+
+    This pins the no-op explicitly, so the fact that an empty subject
+    changes nothing is a stated property rather than a silent one.
+    """
+    docs = [SUBJECT_SITE, SUBJECT_FILING, OTHER_FILING]
+    empty = assess(docs, subject_filers=("",), subject_domain="")
+    assert empty["corroboration_state"] == INDEPENDENTLY_CORROBORATED
+    assert empty["independent_evidence_count"] == 2
+
+
+def test_a_website_run_still_identifies_the_subject(monkeypatch):
+    """PRODUCER -> TRANSPORT -> MEASUREMENT, over the shape production uses.
+
+    `run_meta` for a website entry has a company name and no CIK. The
+    service must still produce a subject, by the same fallback filing
+    discovery has always used.
+    """
+    from intent_engine.company_ingestion import service as svc
+
+    resolver = svc.CompanyIngestionService.subject_cik
+    meta = {"company_name": "Cloudflare", "domain": SUBJECT_DOMAIN, "cik": ""}
+
+    monkeypatch.setattr(
+        "intent_engine.company_ingestion.edgar.resolve_cik",
+        lambda name, **kw: {"cik": SUBJECT_CIK} if "cloudflare" in
+        str(name).lower() else None)
+
+    class _Svc:
+        transport = None
+        resolver = None
+    got = resolver(_Svc(), meta)
+    assert got == SUBJECT_CIK
+
+    # and that subject, fed forward, is what demotes the filing
+    out = assess([SUBJECT_SITE, SUBJECT_FILING, OTHER_FILING],
+                 subject_filers=(got,), subject_domain=meta["domain"])
+    assert out["corroboration_state"] == PARTIALLY_INDEPENDENT
+
+
+def test_a_recorded_cik_is_preferred_over_a_fuzzy_name_lookup(monkeypatch):
+    """Re-resolving by name could return a DIFFERENT registrant, which would
+    exclude that company's filings as "the subject's own" and keep the real
+    subject's as third-party -- the attribution error inverted."""
+    from intent_engine.company_ingestion import service as svc
+
+    called = []
+    monkeypatch.setattr(
+        "intent_engine.company_ingestion.edgar.resolve_cik",
+        lambda name, **kw: called.append(name) or {"cik": "0000000001"})
+
+    class _Svc:
+        transport = None
+        resolver = None
+    got = svc.CompanyIngestionService.subject_cik(
+        _Svc(), {"company_name": "Cloudflare", "cik": SUBJECT_CIK})
+    assert got == SUBJECT_CIK
+    assert not called, "a recorded CIK must not trigger a name lookup"
+
+
 # --- the call site -----------------------------------------------------------
 
 def test_production_actually_passes_the_subject_to_assess():
@@ -205,3 +273,17 @@ def test_production_actually_passes_the_subject_to_assess():
         assert "subject_filers" in passed and "subject_domain" in passed, (
             "an independence assessment in the webapp does not identify the "
             "subject, so the company's own filings will corroborate it")
+        # AND IT MUST RESOLVE, NOT JUST READ. Passing `meta.get("cik")`
+        # satisfies the check above and identifies nothing on a website run,
+        # which is exactly how the first repair shipped inert.
+        filers = next(kw.value for kw in call.keywords
+                      if kw.arg == "subject_filers")
+        resolved = any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "subject_cik"
+            for node in ast.walk(filers))
+        assert resolved, (
+            "subject_filers is not resolved through `subject_cik`; a run "
+            "started from a website carries no CIK and the filter will be "
+            "empty")
