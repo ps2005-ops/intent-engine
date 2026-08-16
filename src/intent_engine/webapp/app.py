@@ -3648,41 +3648,71 @@ class WebApp:
         renderers onto that surface and reported "UI live proof outstanding"
         without noticing that the proof could not arrive from there.
 
-        This projects the run's OWN decision -- `decision_of(report)`, the
-        same object `/brief`, `/full` and `/story` read -- rather than
-        composing a second one from the demo dossier. Both are real
-        FounderDecisions, and picking the dossier's would have given this page
-        a different answer from every other page about the same run, which is
-        precisely the second state system §5 forbids and what
-        cross-surface consistency would then have reported as a defect in the
-        product rather than in the routing.
+        WHICH DECISION THIS PROJECTS, measured rather than reasoned about.
+        The first version rendered the run's own `decision_of(report)` on the
+        argument that `/brief`, `/full` and `/story` read it, so anything else
+        would be a second state system. That argument was sound and the result
+        was empty: live on 9a42372 this page said "this company is not
+        classified here", "Nothing changed", "No action is put forward", 0
+        evidence rows and 0 channels, while `/demo-dossiers/cloudflare/xray`
+        rendered "Supported in direction, not in size", a pricing decision,
+        six evidence rows and five beliefs FOR THE SAME COMPANY.
+
+        `xray.render` reads the fields `executive.decision_synthesis.compose`
+        populates -- archetype, selection, transmission, competitors,
+        scenarios, standing. The reasoning path's decision simply does not
+        have them, so the renderer found nothing and said so honestly about a
+        run that had plenty.
+
+        This is not a second reasoning. The dossier is a MATERIALIZED VIEW of
+        this very run -- `_publish_demo_dossier` wrote it from this run's
+        founder snapshot as the run completed -- so composing from it is the
+        executive projection of the same evidence, which is exactly what the
+        demo route does. The two things `compose` does not produce are carried
+        across from the run's own decision below rather than left empty.
         """
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
         avail = self._availability(run_id)
         if avail["in_flight"]:
             return self._redirect(f"/runs/{run_id}/progress")
+        from intent_engine.demo_dossier.store import DossierStore, company_key
         from intent_engine.founder_brief import xray
         from intent_engine.strategic_intelligence.decision import decision_of
         _, report, name = self._founder_layers(run_id)
-        decision = decision_of(report)
+        meta = self.ci.run_meta(run_id) or {}
+        # The SAME key derivation the publisher used, so this reads the record
+        # that run wrote rather than a near-miss under a different key.
+        key, _cohort, _mv = self._manifest_placement(
+            company_key(name or str(meta.get("domain") or "") or run_id),
+            name=name, domain=str(meta.get("domain") or ""))
+        dossier = DossierStore(self._runtime_root).latest(key)
+        decision = self._executive_read(dossier) if dossier is not None \
+            else None
         if decision is None:
             return self._error_page(
-                500, "The decision for this run could not be composed. That "
-                     "is a fault on this side, not a finding about the "
+                500, "The executive read for this run could not be composed. "
+                     "That is a fault on this side, not a finding about the "
                      "company.")
-        # The delta is attached to the decision rather than passed beside it,
-        # so it reaches the renderer through the same object every other
-        # surface reads -- and survives being serialised on the way.
-        decision.second_iteration = self._second_iteration_delta(
-            session, run_id, decision)
+        # THE TWO FIELDS `compose` DOES NOT PRODUCE, carried from the run's
+        # own decision. `economic_history` is measured by the archive during
+        # the run and has never been on the dossier at all; the delta is
+        # computed here. Both are attached to the decision rather than passed
+        # beside it, so they reach the renderer through the same object and
+        # survive being serialised on the way.
+        own = decision_of(report)
+        if own is not None and getattr(own, "economic_history", None):
+            decision["economic_history"] = dict(own.economic_history)
+        decision["second_iteration"] = self._second_iteration_delta(
+            session, run_id, own if own is not None else decision)
         listing = self._listing_for(run_id)
         stamp = " · ".join(bit for bit in (
             f"Analysis {run_id[:8]}",
             f"Ticker {listing.ticker}" if listing.ticker else "",
-            (self.ci.run_meta(run_id) or {}).get("as_of", "")[:10]) if bit)
+            str(meta.get("as_of", ""))[:10]) if bit)
         body = xray.render(
-            decision.as_dict(), company=name, stamp=stamp,
+            decision, company=name, stamp=stamp,
+            crossing=str(getattr(dossier, "crossing", "") or ""),
             links=[("Full analysis", f"/runs/{run_id}/full"),
                    ("Presentation", f"/runs/{run_id}/slides"),
                    ("Evidence and sources", f"/runs/{run_id}/sources"),
