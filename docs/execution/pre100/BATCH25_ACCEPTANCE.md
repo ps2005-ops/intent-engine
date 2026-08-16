@@ -93,7 +93,7 @@ answers on two clicks.
 | STRIPE_JOURNEY | PASS (partial) | 8f2ea0c | Stripe, Inc. | /xray | — | private/sparse handled: "earnings from a balance sheet or from a transaction network — spread and fees on volume the firm intermediates". No fabricated filings observed. MDR/MVE/VOI/kill-switch not individually re-read this batch. |
 | VALE_JOURNEY | FAIL | 8f2ea0c | Vale | /sources, /xray | **D24** | run stalled at "Step 2 of 2 · Review sources" instead of auto-running, and that page reads "We found candidate evidence for ." — **empty company name**. /xray showed the product-fault page because the run was not terminal, so D20's guard did not apply. |
 | CEO_QA | PASS | a7f60cd | Cloudflare + BoA | POST /conversation | D25 CLOSED | Cloudflare: "A supported reading of Cloudflare, Inc. exists and is set out on the Executive X-Ray… This run did not add enough independent evidence." BoA control: still refuses, agreeing with a Withheld X-Ray. One question exercised of the 22-question matrix. |
-| PROVENANCE_LIVE | NOT_RUN | — | — | — | — | not opened in detail this batch |
+| PROVENANCE_LIVE | PARTIAL | 5e2b625 | Cloudflare | /sources | — | page renders (4.2k chars) with source excerpt and coverage prose, but on a market-backed/bounded run it exposes **no per-source detail links**, so author/host/subject/independence/relevance could not be inspected per source. Not a contradiction — a coverage gap in what this run retrieved. Needs a run with real claims to exercise fully. |
 | LEARNING_LIVE | NOT_RUN | — | — | — | — | — |
 | ECONOMIC_HISTORY_LIVE | BLOCKED_DATA (honest) | a7f60cd | Cloudflare | /xray | — | re-verified: "Replay not yet valid. We hold 0 month(s)… clears on 2027-02-16" plus why today's revised data cannot be substituted into a historical T0. Correct state, useful while blocked. Caterpillar/BoA not read for this row. |
 | PRESENTATION_SLIDES | FAIL | fbb62ff | Cloudflare | /slides | D17 | deck renders 7 slides and does not fabricate unsupported ones, but slide 1 asserts "not enough to read a strategy from" while the X-Ray asserts a supported pricing decision — the deck is downstream of D17, so this row cannot pass until D17 does. |
@@ -223,3 +223,58 @@ run), D24 (Vale), D23 (specialization census: 4 of 6 companies land on
 = capacity and J&J = development roadmap. Whether that is collapse or correct
 is not yet adjudicated), PROVENANCE_LIVE, LEARNING_LIVE, HOSTILE_BUYER,
 CUSTOMER_ACCEPTANCE.
+
+
+## BATCH 30 OUTCOME
+
+### Closed
+
+- **D27 — within-page contradiction. CLOSED, live-verified on `a28549c`.**
+  The sources page led with "A supported reading of Cloudflare, Inc. exists"
+  and then said "No decision is put forward" and "No options are put forward".
+  Those are claims about the SYSTEM made by objects that only know what one
+  run retrieved. Reworded to "This run puts no decision/options forward" —
+  true in both worlds, so no contract threading was needed in every section.
+  Applied to both readiness branches, not only the one that was caught.
+  Verified live across six surfaces: zero unscoped denials.
+
+- **D28(a) — Q&A contradicted the contract. CLOSED, live-verified on
+  `5e2b625`.** D25 had fixed only the `_STRATEGIC_INTENT` branch — the case
+  that had a test. Every other question fell through to the general fallback.
+
+### Classified
+
+- **D19 — Toyota: BLOCKED_DATA.** Identity resolves correctly ("TOYOTA MOTOR
+  CORP", no contamination), 3 sources read, none carrying dated checkable
+  material. Copy is honest and does not blame the user: "read that as a limit
+  on this analysis and not as a finding about the company." Not a regression —
+  the 20-F hypothesis was disproved in batch 29, and Caterpillar/BoA retrieve
+  filings from the same name-only path.
+
+- **D24 — Vale: BLOCKED_EXTERNAL.** "Every approved source failed to retrieve
+  (too large)" — a real byte-budget limit, correctly caveated ("a failed
+  retrieval is not evidence of real-world absence"). The Review-Sources stall
+  with the empty company name did **not** reproduce; that was an in-flight
+  page read mid-run, not a defect state.
+
+- **D23 — specialization: NOT a template collapse.** Six-company census:
+  Cloudflare / Shopify / Stripe / BoA lead with a *pricing* decision;
+  Caterpillar with *capacity*; J&J with *development roadmap*. The pricing
+  four are not interchangeable — the mechanisms differ ("customer count",
+  "spread on assets and liabilities", "spread and fees on volume the firm
+  intermediates"). Pricing is a legitimate shared decision family across
+  network software, commerce, payments and banking. **Shopify remains the one
+  weak case** (typed as recurring subscription, so merchant/GMV economics do
+  not surface) — recorded as SEV3, below the §20 confirmation bar for
+  reopening the selector.
+
+### OPEN — demo-blocking
+
+- **D28(b) — Q&A answer collapse. SEV2, OPEN.** Live on `5e2b625`, "Biggest
+  risk?", "What proves this wrong?" and "Show me the source. Is it
+  independent?" return the *identical* paragraph. The contradiction is gone;
+  the collapse is not. On a bounded run there is no key insight and no engine
+  answer, so every intent lands on one sentence. The fix is to route
+  per-intent answers at the composed executive decision, which already holds
+  risk, falsifier and evidence — the X-Ray renders them. That is a real change
+  and was not attempted with the context remaining.
