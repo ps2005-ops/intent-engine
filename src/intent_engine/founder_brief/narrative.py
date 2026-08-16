@@ -709,9 +709,9 @@ def _options(company, decision, said) -> Section:
                        kind="options", options=options)
     paras = []
     if decision.readiness == INVESTIGATION_REQUIRED:
-        paras.append("No options are put forward, because a choice between "
-                     "one supported course of action and a blank is not a "
-                     "choice. What is missing is named below.")
+        paras.append("This run puts no options forward, because a choice "
+                     "between one supported course of action and a blank is "
+                     "not a choice. What is missing is named below.")
         gap = _flat(decision.evidence_required[0]) \
             if decision.evidence_required else ""
         # "What to do next" states this gap when no falsification check exists,
@@ -724,10 +724,12 @@ def _options(company, decision, said) -> Section:
                 f"{as_clause(gap, company)}"))
             said.remember(gap)
     elif decision.readiness == WITHHELD:
-        paras.append("No options are put forward. Nothing was established "
-                     "firmly enough for one course of action to be weighed "
-                     "against another, and options built on that would be "
-                     "the product inventing a choice.")
+        # D27, same scoping. "No options are put forward" read as a verdict
+        # on the company beside a lead that asserted a supported reading.
+        paras.append("This run puts no options forward. It established "
+                     "nothing firmly enough for one course of action to be "
+                     "weighed against another, and options built on that "
+                     "would be the product inventing a choice.")
         if decision.evidence_required:
             paras.append(end_sentence(
                 f"The minimum needed before any of this becomes decidable: "

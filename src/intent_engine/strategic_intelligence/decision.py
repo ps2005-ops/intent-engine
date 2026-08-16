@@ -473,8 +473,23 @@ class FounderDecision:
     def headline(self) -> str:
         """One sentence stating the decision. Never the topic."""
         if self.readiness == WITHHELD:
-            return ("No decision is put forward: the public record did not "
-                    "carry enough to read one from.")
+            # D27. SCOPED TO THIS RUN, because that is all this object knows.
+            #
+            # "No decision is put forward" is a claim about the SYSTEM, and
+            # this object only measures what one run retrieved. Live on
+            # 60397d8 the sources page led with "A supported reading of
+            # Cloudflare, Inc. exists and is set out on the Executive X-Ray"
+            # and then, six lines lower, "No decision is put forward: the
+            # public record did not carry enough to read one from" -- one page
+            # contradicting itself, because the lead consults the contract and
+            # this property cannot.
+            #
+            # Rewording rather than threading the contract into every section:
+            # this sentence is TRUE in both worlds. When nothing exists
+            # anywhere it still says the run put nothing forward; when a
+            # reading does exist it no longer denies it.
+            return ("This run puts no decision forward: what it retrieved did "
+                    "not carry enough to read one from.")
         # "versus", not "and". The founder-brief contract requires a decision
         # to name its alternative -- without one it is an instruction -- and
         # "the choice is between A and B" reads as a single compound thing.
