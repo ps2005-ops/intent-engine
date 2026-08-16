@@ -866,7 +866,27 @@ class WebApp:
         # deployed commit, scheduler job state and status.json. None of that is
         # a product surface, and a visitor evaluating the product should never
         # be looking at its plumbing.
-        if parts and parts[0] in ("learning", "dashboard", "assistant"):
+        # D29. `/status.json` and `/feedback` were left out of this list.
+        #
+        # Measured live on 2cce6d9 as an anonymous demo guest: /dashboard,
+        # /learning and /assistant all answered 404, and /status.json answered
+        # 200 with the deployed commit, the market engine's portfolio value
+        # and paper P&L, prediction counts and scheduler job state. The
+        # comment below describes exactly this defect being closed for the
+        # console; the JSON behind the console kept serving it.
+        #
+        # The gate is a list, so the fix is to the list -- guarding
+        # /status.json alone would leave /feedback, which exports the same
+        # operator material one route over.
+        # SCOPED TO WHAT WAS PROVEN. The first version added /feedback and
+        # /feedback.jsonl too, on the reasoning that they export the same
+        # operator material. They do -- but the operator sessions that read
+        # them are themselves anonymous-flagged in this build, so the wider
+        # gate 404'd legitimate operator access and turned an information
+        # leak into a lockout. /feedback's exposure is recorded as unverified
+        # rather than guessed at; /status.json is what was measured leaking.
+        if parts and parts[0] in ("learning", "dashboard", "assistant",
+                                  "status.json"):
             if session is None:
                 return self._redirect("/login")
             if session.get("anonymous"):

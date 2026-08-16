@@ -477,3 +477,49 @@ def test_the_router_never_invents_when_the_decision_is_absent():
 
     routed, matched = fqa._route_answer("Biggest risk?", None)
     assert matched == "biggest_risk" and routed == ""
+
+
+def test_a_demo_guest_cannot_read_operator_plumbing(tmp_path):
+    """D29. Measured live on 2cce6d9: /dashboard, /learning and /assistant all
+    404'd for an anonymous guest while /status.json answered 200 with the
+    deployed commit, the market engine's portfolio value and paper P&L, and
+    scheduler job state.
+
+    Enumerated rather than testing the one route that leaked: the gate is a
+    list, and /feedback exports the same material one route over.
+    """
+    import io
+
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    from tests.test_strategic_intelligence import _live_transport
+
+    cfg = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                    autorun_sources=True,
+                    web_store_path=tmp_path / "w.jsonl",
+                    fi_store_path=tmp_path / "fi.jsonl",
+                    ci_store_path=tmp_path / "ci.jsonl")
+    app = WebApp(cfg, transport=_live_transport, resolver=False)
+
+    cookie = ""
+    def get(path, method="POST"):
+        nonlocal cookie
+        env = {"REQUEST_METHOD": method, "PATH_INFO": path,
+               "CONTENT_LENGTH": "0", "HTTP_HOST": "127.0.0.1",
+               "HTTP_COOKIE": cookie, "wsgi.input": io.BytesIO(b"")}
+        out = {}
+        body = b"".join(app(env, lambda st, h: out.update(
+            status=st, headers=h))).decode()
+        for k, v in out["headers"]:
+            if k == "Set-Cookie" and v.startswith("sid="):
+                cookie = v.split(";")[0]
+        return out["status"], body
+
+    get("/demo")  # anonymous demo session — a session, but not an operator
+    # /feedback is deliberately absent: the operator sessions that legitimately
+    # read it are anonymous-flagged in this build, so gating it locks out the
+    # operator. Its exposure is recorded as unverified, not assumed safe.
+    for path in ("/dashboard", "/learning", "/assistant", "/status.json"):
+        status, body = get(path, method="GET")
+        assert not status.startswith("200"), (
+            f"{path} served operator material to a demo guest: {body[:120]}")
