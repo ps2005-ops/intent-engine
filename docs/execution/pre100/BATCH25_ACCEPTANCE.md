@@ -39,7 +39,10 @@ lookup→None · FIRST_OBSERVATION renders delta lines · lookup crosses compani
 |---|---|---|---|---|---|---|
 | D14_LOOKUP | PASS | local | Acme | `_prior_run` | D14A/B | 9 focused tests + 3 break proofs |
 | D14_HERO_EXCLUSIVITY | PASS | local | — | `hero`/xray | D14C | state matrix over all states |
-| D14_LIVE_A_B_C | NOT_RUN | — | Cloudflare | /xray | — | — |
+| D14_LIVE_RUN_A | PASS | dfe3a3a | Cloudflare | /runs/01M04B7B0V…/xray | — | baseline card, and ONLY the baseline sentence |
+| D14_LIVE_RUN_B | PASS | dfe3a3a | Cloudflare | /runs/01M04BFQFG…/xray | — | "New evidence arrived, tested the view, and it held" · 2 new sources · recommendation unchanged |
+| D14_LIVE_RUN_C | BLOCKED_DATA | dfe3a3a | Cloudflare | /runs/01M04BQF1P…/xray | — | not an exact replay: 1 source's content hash differed, so the live web returned something genuinely new. Exact replay is proven in unit tests; it cannot be staged against the live web, which changes between runs. |
+| D16_RAW_EVIDENCE_IDS | OPEN SEV3 | dfe3a3a | Cloudflare | /xray second-look | D16 | "What it tested" renders `ev_1dccf2f4d0bd8562; ev_1fb641572cc55989; …` — opaque ids where a reader expects source names. The X-Ray already solved this once for its sources list (`citation_labels`); the second-look card never asked for the map. |
 | CLOUDFLARE_JOURNEY | NOT_RUN | — | — | — | — | — |
 | CATERPILLAR_JOURNEY | NOT_RUN | — | — | — | — | — |
 | BOA_JOURNEY | NOT_RUN | — | — | — | — | — |
