@@ -839,6 +839,8 @@ class WebApp:
             return self._intelligence_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "brief":
             return self._executive_brief_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "xray":
+            return self._run_xray(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "slides":
             return self._slides_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "full":
@@ -1868,8 +1870,18 @@ class WebApp:
             # THE STAGE, THE ELAPSED TIME, AND WHERE TO FIND THIS LATER.
             # No percentage and no countdown: there is no honest denominator
             # for either, and a fake one is worse than none.
+            # THE CANONICAL HYDRATION PROJECTION, not a generic stage line.
+            # `hydration.assess` was built, unit-proven and called by nothing
+            # on the customer path, so the page a reader actually watches
+            # still showed one lifecycle-derived sentence. Its `current_step`
+            # is the same sentence the tier table is derived from, so the
+            # headline and the detail cannot disagree.
+            hyd = self._hydration_state(run_id, terminal=terminal)
+            step = (hyd.get("current_step") or "").strip() \
+                or self._stage_line(status)
             tail = (f'<p role="status" aria-live="polite">'
-                    f'<strong>{_e(self._stage_line(status))}.</strong></p>'
+                    f'<strong>{_e(step)}.</strong></p>'
+                    f'{self._hydration_body(hyd)}'
                     f'<p>{_e(self._elapsed_line(run_id))}</p>'
                     f'<p>You can safely leave this page — the analysis keeps '
                     f'running, and it will be waiting under '
@@ -1878,6 +1890,70 @@ class WebApp:
                     f'so a restart can interrupt one. If that happens the page '
                     f'says so rather than waiting forever.</p>')
         return self._html(head + tail + '</main></body></html>')
+
+    def _hydration_state(self, run_id, *, terminal=False):
+        """What this run can already show, measured from its own outputs.
+
+        Every argument is read from a PRODUCER, never from elapsed time. That
+        is the whole contract: a tier is READY because something produced its
+        output, so a slow run reports honestly instead of a fast one lying.
+        A read that fails costs the reader the tier table, never the page.
+        """
+        try:
+            from intent_engine.founder_brief import hydration
+            meta = self.ci.run_meta(run_id) or {}
+            avail = self._availability(run_id)
+            result = self._results.get(run_id) or {}
+            report = result.get("strategic_report") \
+                if isinstance(result, dict) else None
+            decision = {}
+            if isinstance(report, dict):
+                from intent_engine.strategic_intelligence.decision import \
+                    decision_of
+                composed = decision_of(report)
+                decision = composed.as_dict() if composed is not None else {}
+            try:
+                discovery = self.ci.discovery_report(run_id)
+            except Exception:                               # noqa: BLE001
+                discovery = None
+            return hydration.assess(
+                identity=str(meta.get("company_name") or "") or None,
+                previous_decision=None,
+                market_snapshot=self._market_snapshot(run_id)
+                if self._listing_for(run_id).ticker else None,
+                source_coverage=(result.get("coverage")
+                                 if isinstance(result, dict) else None),
+                discovery_coverage=discovery,
+                decision=decision,
+                economic_history=decision.get("economic_history") or None,
+                second_iteration=decision.get("second_iteration") or None,
+                blocked=bool(avail.get("blocked")),
+                finished=bool(terminal))
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("hydration not assessed for %s", run_id)
+            return {}
+
+    @staticmethod
+    def _hydration_body(hyd) -> str:
+        """The tier table, in the reader's words.
+
+        Ordered by what a reader can ACT on rather than by pipeline order,
+        which is what lets this page be worth reading before it finishes. The
+        raw state never reaches the sentence: PENDING/RUNNING/READY are
+        machine words, and a customer watching an analysis should be told what
+        is known, not which enum a producer landed in.
+        """
+        if not hyd or not hyd.get("tiers"):
+            return ""
+        from intent_engine.founder_brief import hydration as H
+        said = {H.READY: "done", H.BOUNDED: "partial",
+                H.DEGRADED: "limited", H.RUNNING: "working",
+                H.PENDING: "waiting"}
+        rows = "".join(
+            f'<li>{_e(H.TIER_COPY.get(tier, tier))} — '
+            f'{_e(said.get(hyd["tiers"].get(tier), "unknown"))}</li>'
+            for tier in H.TIERS)
+        return f'<ul class="hydration">{rows}</ul>'
 
     def _coverage_note(self, run_id, real):
         """A specific, non-technical statement of WHICH kinds of evidence the
@@ -3473,6 +3549,147 @@ class WebApp:
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))
 
+    def _prior_run(self, session, run_id):
+        """The newest earlier run of the SAME company owned by this reader.
+
+        §16 asks for a prior-run lookup and §17 for a comparability wall. Both
+        are answered from the index that already exists -- `runs_owned_by`
+        plus `run_meta` -- because a second history store would immediately
+        disagree with the first about what has been analysed.
+
+        THE WALL IS APPLIED HERE, not inside `compare`. Four conditions, and
+        each one is a way this has actually gone wrong somewhere in this
+        codebase: the canonical company must match (a name-shaped key matched
+        a different registrant once), the prior must be strictly earlier in
+        the owner's own ordering (a run compared against itself reports every
+        field unchanged, which reads as stability), the prior must have
+        produced a report (comparing against a failure is comparing against
+        nothing), and the prior must belong to this reader (a cross-tenant
+        prior is a leak wearing a delta).
+
+        Returns (run_id, report) or (None, None). No exception escapes: a
+        comparison is an enrichment, and a lookup that fails must cost the
+        reader the delta, never the page.
+        """
+        try:
+            owner = (session or {}).get("user_id")
+            if not owner:
+                return None, None
+            from intent_engine.demo_dossier.store import company_key
+            here = self.ci.run_meta(run_id) or {}
+            mine = company_key(str(here.get("company_name") or ""))
+            if not mine:
+                return None, None
+            ordered = list(self.web_store.runs_owned_by(owner))
+            if run_id not in ordered:
+                return None, None
+            # Strictly EARLIER in the owner's ordering. Slicing at the current
+            # run rather than filtering by timestamp keeps this correct when
+            # two runs share an `as_of` date, which they routinely do.
+            for rid in reversed(ordered[:ordered.index(run_id)]):
+                meta = self.ci.run_meta(rid) or {}
+                if company_key(str(meta.get("company_name") or "")) != mine:
+                    continue
+                _, report, _ = self._founder_layers(rid)
+                if isinstance(report, dict) and report:
+                    return rid, report
+            return None, None
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("prior run not resolved for %s", run_id)
+            return None, None
+
+    def _second_iteration_delta(self, session, run_id, decision):
+        """What this run learned against the last reading of the same company.
+
+        Composed on the LIVE run path. `second_iteration.compare` existed with
+        no production caller at all, so `second_iteration` was never written
+        onto any decision and every surface that reads it rendered the absent
+        state -- on the demo dossier as well as here. A projection whose
+        producer is never called is indistinguishable from a company that has
+        only ever been read once.
+        """
+        try:
+            from intent_engine.strategic_intelligence import second_iteration \
+                as si
+            from intent_engine.strategic_intelligence.decision import \
+                decision_of
+            prior_id, prior_report = self._prior_run(session, run_id)
+            current = decision.as_dict() if hasattr(decision, "as_dict") \
+                else dict(decision or {})
+            if prior_id is None:
+                # FIRST OBSERVATION IS A STATE, NOT A GAP. `compare` says so
+                # itself when handed no prior, so it is still called rather
+                # than short-circuited: the card must say "this is the
+                # baseline" in the same words whichever way it got there.
+                return si.compare(previous_decision=None,
+                                  current_decision=current,
+                                  current_documents=self._retrieved_documents(
+                                      run_id))
+            prior = decision_of(prior_report)
+            return si.compare(
+                previous_decision=prior.as_dict() if prior is not None
+                else None,
+                current_decision=current,
+                previous_documents=self._retrieved_documents(prior_id),
+                current_documents=self._retrieved_documents(run_id),
+                tested_claims=tuple(current.get("supporting_evidence_ids")
+                                    or ())[:12])
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("second iteration not composed for %s", run_id)
+            return {}
+
+    def _run_xray(self, session, run_id):
+        """The Executive X-Ray for a LIVE run — the customer's decision home.
+
+        THE ROUTE THAT DID NOT EXIST. The X-Ray, the economic-history state
+        and the second-iteration card were all built, unit-proven and wired to
+        `/demo-dossiers/<company>/xray`, which no live run ever links to and
+        no customer ever reaches. Three consecutive batches shipped correct
+        renderers onto that surface and reported "UI live proof outstanding"
+        without noticing that the proof could not arrive from there.
+
+        This projects the run's OWN decision -- `decision_of(report)`, the
+        same object `/brief`, `/full` and `/story` read -- rather than
+        composing a second one from the demo dossier. Both are real
+        FounderDecisions, and picking the dossier's would have given this page
+        a different answer from every other page about the same run, which is
+        precisely the second state system §5 forbids and what
+        cross-surface consistency would then have reported as a defect in the
+        product rather than in the routing.
+        """
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        avail = self._availability(run_id)
+        if avail["in_flight"]:
+            return self._redirect(f"/runs/{run_id}/progress")
+        from intent_engine.founder_brief import xray
+        from intent_engine.strategic_intelligence.decision import decision_of
+        _, report, name = self._founder_layers(run_id)
+        decision = decision_of(report)
+        if decision is None:
+            return self._error_page(
+                500, "The decision for this run could not be composed. That "
+                     "is a fault on this side, not a finding about the "
+                     "company.")
+        # The delta is attached to the decision rather than passed beside it,
+        # so it reaches the renderer through the same object every other
+        # surface reads -- and survives being serialised on the way.
+        decision.second_iteration = self._second_iteration_delta(
+            session, run_id, decision)
+        listing = self._listing_for(run_id)
+        stamp = " · ".join(bit for bit in (
+            f"Analysis {run_id[:8]}",
+            f"Ticker {listing.ticker}" if listing.ticker else "",
+            (self.ci.run_meta(run_id) or {}).get("as_of", "")[:10]) if bit)
+        body = xray.render(
+            decision.as_dict(), company=name, stamp=stamp,
+            links=[("Full analysis", f"/runs/{run_id}/full"),
+                   ("Presentation", f"/runs/{run_id}/slides"),
+                   ("Evidence and sources", f"/runs/{run_id}/sources"),
+                   ("Executive brief", f"/runs/{run_id}/brief")])
+        return self._html(self._page(f"{name} — executive X-Ray", body,
+                                     session, session.get("csrf", "")))
+
     def _intelligence_page(self, session, run_id):
         """The executive INTELLIGENCE dashboard for one company.
 
@@ -4465,9 +4682,14 @@ class WebApp:
         """
         try:
             from intent_engine.executive.decision_synthesis import compose
+            # CALLED, NOT PROBED. This read `if hasattr(store, "previous")`
+            # against a store that had no such method, so the expression was
+            # None on every request and "what changed" reported a first
+            # reading for every company forever. A capability test that can
+            # only ever answer False is not a guard, it is a switched-off
+            # feature -- and it stayed green because None is a legal value.
             previous = self._demo_dossier_store().previous(
-                dossier.company_id, before=dossier.dossier_version) \
-                if hasattr(self._demo_dossier_store(), "previous") else None
+                dossier.company_id, before=dossier.dossier_version)
             return compose(dossier, previous=previous,
                            registrant=self._registrant(dossier)).as_dict()
         except Exception:                                   # noqa: BLE001

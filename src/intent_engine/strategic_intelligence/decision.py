@@ -394,6 +394,16 @@ class FounderDecision:
     #: archive. Empty means no assessment ran, and the surfaces then fall back
     #: to their prior wording rather than inventing a state.
     economic_history: dict = field(default_factory=dict)
+    #: WHAT THIS READING LEARNED AGAINST THE LAST ONE, as
+    #: `second_iteration.compare` measured it. Empty means no comparison was
+    #: attempted -- which is the honest state for a first analysis and for a
+    #: prior that failed the comparability wall. It is a FIELD rather than a
+    #: compose-time local for the same reason `company_name` is: the surfaces
+    #: read a decision rebuilt from its serialised form, and a delta that
+    #: lives only in a local argument cannot survive that trip, so every
+    #: surface would render "baseline" no matter how many times a company had
+    #: been read.
+    second_iteration: dict = field(default_factory=dict)
     #: WHO THIS DECISION IS ABOUT, carried on the object rather than baked
     #: into one sentence at compose time. It was only ever a local argument
     #: used to build the withheld line, so a decision rebuilt from its own
@@ -531,6 +541,7 @@ class FounderDecision:
             "historical_dimensions": list(self.historical_dimensions),
             "historical_playback": list(self.historical_playback),
             "economic_history": dict(self.economic_history or {}),
+            "second_iteration": dict(self.second_iteration or {}),
             "company_name": self.company_name,
             "identity_state": self.identity_state,
             "current_read": self.current_read,
@@ -668,6 +679,7 @@ def decision_from_dict(data) -> FounderDecision:
         historical_dimensions=tuple(data.get("historical_dimensions") or ()),
         historical_playback=tuple(data.get("historical_playback") or ()),
         economic_history=dict(data.get("economic_history") or {}),
+        second_iteration=dict(data.get("second_iteration") or {}),
         company_name=str(data.get("company_name") or ""),
         identity_state=str(data.get("identity_state") or IDENTITY_MISSING),
         current_read=data.get("current_read", ""),

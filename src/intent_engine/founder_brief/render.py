@@ -153,6 +153,12 @@ def _deeper(run_id: str) -> str:
     # its only link orphaned it. Depth is offered, never required.
     return (
         '<nav class="deeper" aria-label="More depth">'
+        # THE X-RAY LEADS. It is the decision view, and for three batches it
+        # was reachable only at /demo-dossiers/<company>/xray -- a route no
+        # run links to and no customer can guess. A renderer with no link
+        # into it is not a feature of the product, it is a feature of the
+        # codebase.
+        f'<a href="/runs/{rid}/xray">Executive X-Ray</a>'
         f'<a href="/runs/{rid}/story">The full story</a>'
         f'<a href="/runs/{rid}/dashboard">Intelligence</a>'
         f'<a href="/runs/{rid}/brief">Executive brief</a>'

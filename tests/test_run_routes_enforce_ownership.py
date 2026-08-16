@@ -26,7 +26,7 @@ from tests.test_strategic_intelligence import _live_transport
 
 # Every GET route under /runs/{id} that renders analysis content.
 LAYERS = ["", "/brief", "/dashboard", "/story", "/slides", "/full",
-          "/sources", "/report"]
+          "/sources", "/report", "/xray"]
 
 
 class _Client:

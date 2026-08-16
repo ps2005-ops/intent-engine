@@ -379,7 +379,18 @@ def test_gate_c_a_terminal_run_never_shows_an_active_stage(tmp_path):
     """
     app = _async_app(tmp_path)
     c, run_id, body = _in_flight_progress(app)
-    assert "Reading the most relevant material" in body     # active, polling
+    # ACTIVE, POLLING -- asserted against the canonical hydration vocabulary
+    # rather than one frozen sentence. This read "Reading the most relevant
+    # material", which was the generic lifecycle stage line the progress page
+    # showed before `hydration.assess` was wired to it. The intent of the gate
+    # is that an unfinished run shows an active stage and a finished one does
+    # not; which words say so is the product's business, and pinning the old
+    # sentence would have made this gate fail for a page that got better.
+    from intent_engine.founder_brief import hydration as _H
+    active = list(_H.TIER_COPY.values()) + ["Reading the most relevant "
+                                            "material"]
+    assert any(line in body for line in active), (
+        "the in-flight progress page shows no active stage at all")
     assert 'http-equiv="refresh"' in body
 
     meta = app.ci.run_meta(run_id)

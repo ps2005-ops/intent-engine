@@ -77,6 +77,32 @@ class DossierStore:
         versions = self.all_versions(company_id)
         return versions[-1] if versions else None
 
+    def previous(self, company_id: str,
+                 *, before: int) -> Optional[CompanyDemoDossier]:
+        """The newest stored version strictly older than `before`.
+
+        THIS METHOD DID NOT EXIST, and its absence was invisible. Its only
+        caller guarded the call with `hasattr(store, "previous")`, so the
+        guard answered False on every request and `previous` was always None
+        -- which meant `_what_changed` took its "no earlier reading" branch
+        for every company forever, including companies with a dozen stored
+        versions. A page that says "this is the first reading" about the
+        twelfth is not a missing feature, it is a false statement, and the
+        `hasattr` is what kept it quiet.
+
+        Ordering is by `dossier_version`, never by file position: versions are
+        appended, but a comparison that trusts append order would silently
+        compare the wrong pair the first time a line is rewritten or a file is
+        merged. `before` is exclusive, so passing the current version returns
+        the one genuinely before it rather than itself.
+        """
+        older = [d for d in self.all_versions(company_id)
+                 if int(getattr(d, "dossier_version", 0) or 0) < int(before)]
+        if not older:
+            return None
+        return max(older, key=lambda d: int(getattr(d, "dossier_version", 0)
+                                            or 0))
+
     def save(self, dossier: CompanyDemoDossier) -> CompanyDemoDossier:
         """Persist, versioning on change and doing nothing on a repeat.
 
