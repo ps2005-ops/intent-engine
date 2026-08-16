@@ -33,7 +33,7 @@ and were found by reproducing it locally rather than by reasoning about it.
 Break proofs (all RED for the stated reason, then restored):
 lookup→None · FIRST_OBSERVATION renders delta lines · lookup crosses companies.
 
-## D17 — SEV2, DEMO-BLOCKING, NARROWED (2 of 3 controls PASS)
+## D17 — CLOSED (with D22), live-verified on `8f2ea0c`
 
 **The third instance of one defect class**, and the reason to stop patching it
 locally. Same run `01M04D14B2JBT7J3HET3BZ5NBE`, same company, same moment:
@@ -142,3 +142,28 @@ only by re-reading the live page: the deck guard asked "is the thesis view
 empty?" when the refusal *is* the view, and an earlier break proof silently
 failed to apply until hash-verified. Both are the same lesson — a green test
 plus a landed deploy is not evidence.
+
+
+## D17 + D22 — CLOSED on `8f2ea0c`
+
+D22 was the fourth instance of one class, and the sweep changed the fix. Three
+routes funnel into `_insufficient_evidence_page`, so patching `/slides` — the
+route that was caught — would have produced a fifth instance elsewhere. Fixed
+once, at the sink. `docs/execution/pre100/EXECUTIVE_VERDICT_SITES.md` now
+registers every site that decides this, MIGRATED or JUSTIFIED, with the sweep
+terms to re-run.
+
+| Control | X-Ray | Brief | Slides | Verdict |
+|---|---|---|---|---|
+| Cloudflare | Supported · Pricing decision | asserts the reading | "A supported reading of Cloudflare, Inc. exists…" | **PASS** |
+| Caterpillar | Supported · Capacity decision | asserts the reading | "A supported reading of Caterpillar Inc. exists…" | **PASS** |
+| Bank of America (control) | **Withheld** | denies | "not enough to read a strategy from" | **PASS** — no inherited reading |
+
+Two of my own fixes shipped inert before working, both caught only by
+re-reading the live page or by hash-verifying a mutation: the deck guard asked
+"is the thesis view empty?" when the refusal *is* the view, and the first D22
+test asserted on the contract object rather than the page and stayed green
+when the page was mutated to ignore it. Live-payload fixtures, not authored
+ones, is the rule that follows.
+
+FEATURE_FREEZE = TRUE from this point.
