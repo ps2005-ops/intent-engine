@@ -92,17 +92,17 @@ answers on two clicks.
 | JNJ_JOURNEY | PASS | 8f2ea0c | Johnson & Johnson | /xray | — | "Development roadmap decision — which programmes to fund and which to stop, given how long it takes a programme to reach approved products and indications"; model class = regulator-gated product. Genuine segment/regulatory specialization. |
 | STRIPE_JOURNEY | PASS (partial) | 8f2ea0c | Stripe, Inc. | /xray | — | private/sparse handled: "earnings from a balance sheet or from a transaction network — spread and fees on volume the firm intermediates". No fabricated filings observed. MDR/MVE/VOI/kill-switch not individually re-read this batch. |
 | VALE_JOURNEY | FAIL | 8f2ea0c | Vale | /sources, /xray | **D24** | run stalled at "Step 2 of 2 · Review sources" instead of auto-running, and that page reads "We found candidate evidence for ." — **empty company name**. /xray showed the product-fault page because the run was not terminal, so D20's guard did not apply. |
-| CEO_QA | FAIL | 8f2ea0c | Cloudflare | POST /conversation | **D25** | Q&A answers, but contradicts the contract: "I am not going to give you a strategic read on this company" while X-Ray and brief assert a supported pricing decision. Fifth verdict site — `founder_brief/qa.py::answer` gates on `brief.withheld`. |
-| PROVENANCE_LIVE | NOT_RUN | — | — | — | — | — |
+| CEO_QA | PASS | a7f60cd | Cloudflare + BoA | POST /conversation | D25 CLOSED | Cloudflare: "A supported reading of Cloudflare, Inc. exists and is set out on the Executive X-Ray… This run did not add enough independent evidence." BoA control: still refuses, agreeing with a Withheld X-Ray. One question exercised of the 22-question matrix. |
+| PROVENANCE_LIVE | NOT_RUN | — | — | — | — | not opened in detail this batch |
 | LEARNING_LIVE | NOT_RUN | — | — | — | — | — |
-| ECONOMIC_HISTORY_LIVE | BLOCKED_DATA (honest) | dfe3a3a | Cloudflare | /xray | — | "Replay not yet valid. We hold 0 month(s) of our own observations and a replay needs 6. That clears on 2027-02-16." plus why today's revised data cannot be substituted into a historical T0. Blocked state, still useful — §20 satisfied. Caterpillar/BoA not yet read for this row. |
+| ECONOMIC_HISTORY_LIVE | BLOCKED_DATA (honest) | a7f60cd | Cloudflare | /xray | — | re-verified: "Replay not yet valid. We hold 0 month(s)… clears on 2027-02-16" plus why today's revised data cannot be substituted into a historical T0. Correct state, useful while blocked. Caterpillar/BoA not read for this row. |
 | PRESENTATION_SLIDES | FAIL | fbb62ff | Cloudflare | /slides | D17 | deck renders 7 slides and does not fabricate unsupported ones, but slide 1 asserts "not enough to read a strategy from" while the X-Ray asserts a supported pricing decision — the deck is downstream of D17, so this row cannot pass until D17 does. |
 | TEMPLATE_SPECIALIZATION | PASS (partial scope) | fbb62ff | Cloudflare vs Caterpillar | /xray | — | genuinely different canonical state, not reworded prose: Cloudflare = *pricing* decision, "what to charge, and for what, without losing more customer count than the price gains", recurring-subscription model; Caterpillar = *capacity* decision, "how much capacity to commit, and when", long-lived manufactured product + parts/service stream. 2 of 6 companies, so scope is partial. |
 | HOSTILE_BUYER | NOT_RUN | — | — | — | — | — |
 | CUSTOMER_ACCEPTANCE | NOT_RUN | — | — | — | — | — |
 | PROCESS_RESTART | EXPECTED_EPHEMERAL_LOSS | fbb62ff | Cloudflare | /runs/<id>/brief | — | preview restarted mid-session; run ownership and session were lost. This is DESIGNED ephemerality and it is disclosed to the reader on the progress page ("This preview stores runs in memory, so a restart can interrupt one") and on /analyses. Not classified as data loss. Durable persistence remains unproven here. |
-| SECURITY | NOT_RUN | — | — | — | — | — |
-| ZERO_ANTHROPIC | NOT_RUN | — | — | — | — | — |
+| SECURITY | PASS (suite scope) | a7f60cd | — | — | — | 157 passed across tenant scope, event-consumer isolation, redirect-may-not-leave-approved-host, ingestion validation (SSRF/URL), run-route ownership, demo-mode gating. Adversarial live probes (prompt injection via filing, poisoned company name) NOT separately run. |
+| ZERO_ANTHROPIC | PARTIAL | a7f60cd | — | — | — | `test_composition_makes_no_model_call` passes; `executive/contract.py` has zero HTTP/anthropic imports by construction. Full deployed-flow log inspection with the key removed was NOT run, so REQUIRED_ANTHROPIC_CALLS is proven 0 only for the executive composition path. |
 | FINAL_SHA_SMOKE | NOT_RUN | — | — | — | — | — |
 
 
@@ -183,3 +183,43 @@ entered the same name-only way on the same SHA and both retrieved filings, so
 the domainless path works in general and this is Toyota-specific. Still
 unclassified between PRODUCT_REGRESSION and BLOCKED_EXTERNAL; needs the CIK →
 candidate → fetch-status trace, which is one bounded run with logging.
+
+
+## BATCH 29 OUTCOME
+
+**D25 CLOSED, live-verified on `a7f60cd`.** Q&A was the fifth surface deciding
+for itself whether a reading exists. It now consumes the contract and keeps
+everything else it does — explanation, citations, counter-evidence.
+
+**The process fix is the durable part.** The hand-written register did not
+prevent D25: Q&A was inside the sweep's search scope and never given a row, so
+it was looked at and not written down.
+`test_every_strategic_surface_is_declared_in_the_verdict_register` now walks
+the dispatch table and fails when a strategic surface has no declaration. On
+its first run it named five undeclared surfaces and surfaced two more
+candidate gaps (`/story`, `/dashboard`) — found by a test, before deploy,
+rather than by a customer reading a live page as the first five were.
+
+**D26 disproved by measurement.** `/story` and `/dashboard` render through
+`layers.py`, whose withheld branch gates on the same `brief.key_insight` — so
+they looked like sites six and seven. Measured live on `a7f60cd`: neither
+denies. The branch is not reached on a market-backed run. Fixing them would
+have been wasted work, and this is the second time this batch that measuring
+first saved a change (the Toyota 20-F hypothesis was the first).
+
+| Row | Result on `a7f60cd` |
+|---|---|
+| CROSS_SURFACE_CONSISTENCY | **PASS** — Cloudflare: X-Ray, brief, full, slides, sources and Q&A all assert the same supported reading; BoA control: all withhold together |
+| ACCESSIBILITY | **PASS** (structural, 6 surfaces) — one h1 each, no heading skips, one `main`, no raw JSON, zero unlabelled controls |
+| RESPONSIVE | **PASS** at 375 — `/xray`, `/full`, `/slides`: scrollWidth == clientWidth, zero overflowing elements |
+| DARK_LIGHT | **PASS** — effective bg `rgb(15,20,28)`, body text `rgb(243,244,246)`, ~16.8:1 |
+| PRESENTATION | **PASS** — 7 slides, none fabricated, slide 1 now carries the contract |
+| SECURITY | **PASS** (suite scope) — 157 tests |
+| ZERO_ANTHROPIC | **PARTIAL** — composition proven no-model; deployed-flow log inspection not run |
+
+**Still open:** D19 (Toyota retrieval, unclassified — the bounded trace was not
+run), D24 (Vale), D23 (specialization census: 4 of 6 companies land on
+"Pricing decision"; Cloudflare/Shopify/Stripe/BoA share it while Caterpillar
+= capacity and J&J = development roadmap. Whether that is collapse or correct
+is not yet adjudicated), PROVENANCE_LIVE, LEARNING_LIVE, HOSTILE_BUYER,
+CUSTOMER_ACCEPTANCE.
