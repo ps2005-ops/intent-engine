@@ -351,3 +351,37 @@ def test_every_strategic_surface_is_declared_in_the_verdict_register():
         "are not declared in EXECUTIVE_VERDICT_SITES.md: "
         + ", ".join(undeclared)
         + " — declare where each one's executive verdict comes from")
+
+
+def test_qa_does_not_collapse_every_question_into_one_refusal():
+    """D28. Live on a28549c four different hostile questions returned the
+    identical sentence "There is not enough public evidence to answer that
+    confidently." on a run whose X-Ray asserted a supported pricing decision.
+
+    D25 fixed only the _STRATEGIC_INTENT branch -- the case that was tested.
+    Everything else fell through to the general fallback and still
+    contradicted the contract. This asserts the fallback, not the branch.
+    """
+    from intent_engine.founder_brief import build as fb
+    from intent_engine.founder_brief import qa as fqa
+
+    brief = fb.build(company="Cloudflare, Inc.", mode=fb.classify_mode(
+        is_public=True, evidence_count=0, independent_sources=0,
+        has_thesis=False), report={}, observations=[])
+    supported = ec.decide(company="Cloudflare, Inc.", run_decision=_run(False),
+                          market_decision=_market(True))
+
+    hostile = ["Biggest risk?", "What proves this wrong?",
+               "Did you find none or fail to find it?"]
+    answers = [fqa.answer(q, brief, contract=supported).direct_answer
+               for q in hostile]
+    for a in answers:
+        assert "not enough public evidence to answer that confidently" not in a, (
+            "Q&A still contradicts the contract on a non-strategic question")
+        assert "A supported reading of Cloudflare, Inc. exists" in a
+
+    # CONTROL: with no reading anywhere, the honest refusal must survive.
+    refused = ec.decide(company="Nowhere", run_decision=_run(False),
+                        market_decision=None)
+    a = fqa.answer("Biggest risk?", brief, contract=refused).direct_answer
+    assert "not enough public evidence" in a

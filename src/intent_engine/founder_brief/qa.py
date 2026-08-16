@@ -160,9 +160,30 @@ def answer(question: str, brief, *, engine_answer: str = "",
     if withheld and _looks_strategic(engine_answer):
         engine_answer = ""
 
-    out.direct_answer = _plain(engine_answer) or (
-        k.fact if k else "There is not enough public evidence to answer that "
-                         "confidently.")
+    # D28. THE FALLBACK WAS ONE SENTENCE FOR EVERY QUESTION.
+    #
+    # Measured live on a28549c: "Biggest risk?", "What proves this wrong?",
+    # "Did you find none or fail to find it?" and "Show me the source. Is it
+    # independent?" all returned "There is not enough public evidence to
+    # answer that confidently." Four different questions, one canned answer,
+    # on a run whose X-Ray asserted a supported pricing decision.
+    #
+    # D25 fixed only the branch gated on _STRATEGIC_INTENT -- the case that
+    # was tested. Everything that did not match that pattern fell through to
+    # here and still contradicted the contract. Same defect, one branch over.
+    _fallback = "There is not enough public evidence to answer that confidently."
+    if k is None and contract is not None and getattr(
+            contract, "reading_exists", False):
+        _fallback = (
+            f"A supported reading of "
+            f"{getattr(contract, 'company', '') or 'this company'} exists and "
+            f"is set out on the Executive X-Ray. "
+            + (getattr(contract, "run_contribution", "") or
+               "This run did not add enough independent evidence to "
+               "strengthen it.")
+            + " This particular question is not answerable from what this run "
+              "retrieved.")
+    out.direct_answer = _plain(engine_answer) or (k.fact if k else _fallback)
 
     if k:
         out.so_what = k.so_what
