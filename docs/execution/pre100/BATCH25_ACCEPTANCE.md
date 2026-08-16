@@ -278,3 +278,70 @@ CUSTOMER_ACCEPTANCE.
   per-intent answers at the composed executive decision, which already holds
   risk, falsifier and evidence — the X-Ray renders them. That is a real change
   and was not attempted with the context remaining.
+
+
+## BATCH 31 OUTCOME — final deployed SHA `d3c6561`
+
+### D28(b) — CLOSED, live-verified
+
+The inventory (§4) is what changed the fix. `qa.py` declared exactly **two**
+intents — `_STRATEGIC_INTENT` and `_EVIDENCE_INTENT`. Risk, uncertainty,
+falsifier, history, learning delta, competitor response and monitoring had no
+intent at all, so all of them fell to one generic sentence. There was no
+branch to repair; the router did not exist.
+
+`INTENT_ROUTES` names one canonical field per category on the **composed**
+decision — the object the X-Ray renders — plus a per-intent absence sentence.
+The router runs *before* the strategic catch-all, because `_STRATEGIC_INTENT`
+matches "what should" and was collapsing "what should we monitor next" onto
+the recommendation answer (caught by the distinctness test, not live).
+
+Live on `2cce6d9`, Cloudflare — 6 questions, 6 distinct answers:
+
+| Question | Answer |
+|---|---|
+| biggest risk | "No company-specific risk cleared the evidence bar in this run." |
+| what proves this wrong | "The expected movement failing to appear in pricing and packaging changes by the next review." |
+| what happened historically | "No valid historical replay is available for this company yet." |
+| what should we monitor next | "5 preregistered expectation(s) are open for this company…" |
+| what should we do | "Hold this decision — what to charge, and for what — open for now…" |
+| what changed | "Nothing has been compared against an earlier reading yet." |
+
+**BoA control PASS**: "No company-specific risk cleared the evidence bar in
+this run." and "Do not act on this reading. Re-run once the market engine
+publishes a snapshot this side will read." No manufactured variety.
+
+Completeness guard (§13): every declared intent must name a field the composed
+decision carries, own an absence sentence, and be reachable from its own first
+marker. Three break proofs, hash-verified and restored exact.
+
+### D29 — SEV2 security, found by live probing, CLOSED
+
+As an anonymous demo guest on `2cce6d9`: `/dashboard`, `/learning`,
+`/assistant` all 404 — and **`/status.json` answered 200** with the deployed
+commit, the market engine's portfolio value and paper P&L, prediction counts
+and scheduler job state. The gate's own comment describes this defect being
+closed for the console; the JSON behind it was never added to the list.
+
+Scoped to what was measured: the first attempt also gated `/feedback`, whose
+legitimate operator sessions are anonymous-flagged in this build, so the wider
+gate turned an information leak into an operator lockout. Two existing tests
+caught it. `/feedback` exposure is recorded **unverified**, not assumed safe.
+
+### Live security probes — PASS
+
+unknown run id → 404 · path traversal in run id → 400 · poisoned company name
+carrying `<script>` and "IGNORE ALL PRIOR INSTRUCTIONS" → 200 with the script
+**not** echoed and no instruction followed · operator surfaces → 404.
+
+### FINAL_SHA_SMOKE — PASS (3 companies) on `d3c6561`
+
+Cloudflare, Caterpillar and Stripe all render supported X-Ray readings under
+canonical identity. A first attempt read login pages at HTTP 200 after a
+preview restart — recorded because "200" was not proof, the session was.
+
+### STILL NOT_RUN — the gate cannot be adjudicated
+
+LEARNING_LIVE · CUSTOMER_ACCEPTANCE · ZERO_ANTHROPIC deployed log proof ·
+RESPONSIVE at 390/768/1280/1440 · PROCESS_RESTART formal classification ·
+PERSONAL_AI classification.
