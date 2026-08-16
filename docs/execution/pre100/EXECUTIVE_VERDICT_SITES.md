@@ -37,7 +37,8 @@ must not be collapsed into one boolean:
 | `webapp/app.py::_run_xray` | RENDERING | `_executive_read(dossier)` | CANONICAL_CONTRACT — this composes the reading the contract reports |
 | `webapp/app.py::_executive_brief_page` | RENDERING | contract via `render_decision_lead` | MIGRATED (D17) |
 | `webapp/app.py::_story_page` | RENDERING | `founder_brief/layers.py` `if not k:` (line ~810) | **NOT MIGRATED — D26**, gated on `brief.key_insight`, same shape as D25 |
-| `webapp/app.py::_intelligence_page` | RENDERING | `founder_brief/layers.py` `if not k:` | **NOT MIGRATED — D26** |
+| `webapp/app.py::_intelligence_page` | RENDERING | `founder_brief/layers.py` `if not k:` | **NOT MIGRATED — D26** (measured live: does not deny) |
+| `webapp/app.py::_run_evidence` | RENDERING | `_evidence_screen` — independence/relevance as the bridge published them | JUSTIFIED — states why each SOURCE counts, never whether a reading exists; it deliberately does not re-decide independence, because two opinions about one document is how the drawer and the count start disagreeing |
 
 ## Sweep terms
 

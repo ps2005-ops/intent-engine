@@ -164,6 +164,11 @@ def _deeper(run_id: str) -> str:
         f'<a href="/runs/{rid}/brief">Executive brief</a>'
         f'<a href="/runs/{rid}/slides">Presentation</a>'
         f'<a href="/runs/{rid}/sources">Evidence and sources</a>'
+        # D30. The provenance drawer -- author, host, subject, independence,
+        # relevance, why a source was set aside -- existed in full and was
+        # reachable only at /demo-dossiers/<company>/evidence. A run offered
+        # no way into it.
+        f'<a href="/runs/{rid}/evidence">Why this reading exists</a>'
         f'<a href="/runs/{rid}/full">Full analysis</a>'
         "</nav>")
 

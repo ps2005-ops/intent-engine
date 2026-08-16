@@ -841,6 +841,8 @@ class WebApp:
             return self._executive_brief_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "xray":
             return self._run_xray(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "evidence":
+            return self._run_evidence(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "slides":
             return self._slides_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "full":
@@ -3171,6 +3173,29 @@ class WebApp:
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
+
+    def _run_evidence(self, session, run_id):
+        """The provenance drawer for a LIVE run — D30.
+
+        `/demo-dossiers/<company>/evidence` renders every source with its
+        author, host, subject, independence, relevance and the reason it was
+        or was not counted, plus the discovery coverage behind it. On a live
+        run that drawer was unreachable: `/runs/<id>/sources` listed what was
+        read and offered no way into any of it.
+
+        This is D9's shape exactly -- a correct, complete surface wired only
+        to the demo-dossier path -- and it is fixed the same way, by routing
+        rather than by building a second drawer. The renderer is untouched.
+        """
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        from intent_engine.demo_dossier.store import company_key
+        meta = self.ci.run_meta(run_id) or {}
+        name = str(meta.get("company_name") or "")
+        key, _c, _m = self._manifest_placement(
+            company_key(name or str(meta.get("domain") or "") or run_id),
+            name=name, domain=str(meta.get("domain") or ""))
+        return self._evidence_screen(key)
 
     def _composed_decision(self, run_id):
         """The composed executive decision as a dict — what the X-Ray renders.
