@@ -33,7 +33,7 @@ and were found by reproducing it locally rather than by reasoning about it.
 Break proofs (all RED for the stated reason, then restored):
 lookup→None · FIRST_OBSERVATION renders delta lines · lookup crosses companies.
 
-## D17 — SEV2, DEMO-BLOCKING, OPEN
+## D17 — SEV2, DEMO-BLOCKING, NARROWED (2 of 3 controls PASS)
 
 **The third instance of one defect class**, and the reason to stop patching it
 locally. Same run `01M04D14B2JBT7J3HET3BZ5NBE`, same company, same moment:
@@ -104,3 +104,41 @@ answers on two clicks.
 | SECURITY | NOT_RUN | — | — | — | — | — |
 | ZERO_ANTHROPIC | NOT_RUN | — | — | — | — | — |
 | FINAL_SHA_SMOKE | NOT_RUN | — | — | — | — | — |
+
+
+## D17 — BATCH 27 OUTCOME
+
+**Fixed with a contract, not by normalising the objects.**
+`src/intent_engine/executive/contract.py` settles one question — *does a
+supported reading of this company exist* — with named merge states
+(`CURRENT_RUN_SUPPORTED`, `MARKET_SUPPORTED`, `BOTH_SUPPORTED`,
+`MARKET_STALE`, `MARKET_INVALID`, `MARKET_UNAVAILABLE`,
+`NO_SUPPORTED_READING`). Surfaces keep their own prose and depth; none of them
+recomputes that verdict. The asymmetry is deliberate: a market reading can
+rescue a run that retrieved little, never manufacture support the run
+contradicts, and a stale or unidentified snapshot contributes nothing.
+
+Wired: primary screen, executive brief, full analysis, deck. 13 focused tests.
+Four break proofs, hash-verified and restored byte-exact.
+
+**Live on `ff92005`:**
+
+| Control | Result |
+|---|---|
+| Cloudflare | **PASS** — X-Ray "Supported in direction, not in size · Pricing decision"; deck now reads "A supported reading of Cloudflare, Inc. exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it." |
+| Bank of America (control) | **PASS** — X-Ray "Withheld" and deck "not enough to read a strategy from" **agree**. The fix did not make a market-unavailable company inherit a reading. |
+| Caterpillar | **FAIL** — a fourth surface |
+
+**D22 — the fourth site, SEV2, OPEN.** Caterpillar's `/slides` does not render a
+deck at all: the route serves the insufficient-evidence page, which asserts
+"There is not enough public evidence to build a briefing on this company"
+while the X-Ray for the same run says "Supported in direction, not in size ·
+Capacity decision". The contract fixed the surfaces that *render* a verdict;
+this one **routes** on its own verdict before any renderer is reached, so
+wiring the renderers could not reach it. Same class, one layer earlier.
+
+**Two of my own fixes this batch shipped inert before working**, both found
+only by re-reading the live page: the deck guard asked "is the thesis view
+empty?" when the refusal *is* the view, and an earlier break proof silently
+failed to apply until hash-verified. Both are the same lesson — a green test
+plus a landed deploy is not evidence.
