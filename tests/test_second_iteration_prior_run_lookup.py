@@ -176,7 +176,10 @@ def test_the_second_run_is_not_reported_as_a_first_observation(app, two_runs):
     session = app.auth.session(c.sid())
     from intent_engine.strategic_intelligence.decision import decision_of
     _, report, _ = app._founder_layers(second)
-    delta = app._second_iteration_delta(session, second, decision_of(report))
+    delta = app._second_iteration_delta_composed(
+        session, second,
+        current=(decision_of(report).as_dict() if decision_of(report) else {}),
+        previous={"decision_question": "q", "recommended_next_move": "hold"})
     assert delta, "no delta was composed at all"
     assert delta.get("state") != SI.FIRST_OBSERVATION, (
         "the second run of the same company reports FIRST_OBSERVATION; the "

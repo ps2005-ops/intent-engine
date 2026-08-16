@@ -3636,6 +3636,40 @@ class WebApp:
             _LOG.warning("prior run not resolved for %s", run_id)
             return None, None
 
+    def _second_iteration_delta_composed(self, session, run_id, *,
+                                         current, previous):
+        """The delta between two COMPOSED executive readings of one company.
+
+        The first version compared the two runs' `decision_of(report)`
+        objects, which is the same seam that made the X-Ray render empty: the
+        reasoning path does not populate `decision_question`, and `compare`
+        opens by requiring both sides to answer the same question. With the
+        field blank on both, every second reading came back INCOMPARABLE --
+        "these two readings cannot be compared" -- for a company analysed
+        twice from the same evidence. Measured live on ad1de5f.
+
+        So the comparison now reads the decisions the X-Ray actually renders,
+        which are also the ones `what_changed` is computed from. Evidence
+        identity still comes from the RUNS' retrieved documents, keyed by
+        content hash: what a reader means by "new information" is a document
+        we had not held, not a field that moved.
+        """
+        try:
+            from intent_engine.strategic_intelligence import second_iteration \
+                as si
+            prior_id, _prior_report = self._prior_run(session, run_id)
+            return si.compare(
+                previous_decision=previous,
+                current_decision=current,
+                previous_documents=(self._retrieved_documents(prior_id)
+                                    if prior_id else ()),
+                current_documents=self._retrieved_documents(run_id),
+                tested_claims=tuple((current or {}).get(
+                    "supporting_evidence_ids") or ())[:12])
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("second iteration not composed for %s", run_id)
+            return {}
+
     def _second_iteration_delta(self, session, run_id, decision):
         """What this run learned against the last reading of the same company.
 
@@ -3741,8 +3775,15 @@ class WebApp:
         own = decision_of(report)
         if own is not None and getattr(own, "economic_history", None):
             decision["economic_history"] = dict(own.economic_history)
-        decision["second_iteration"] = self._second_iteration_delta(
-            session, run_id, own if own is not None else decision)
+        # The PREVIOUS composed reading of this company, from the dossier
+        # version before this one -- the same prior `what_changed` uses, so
+        # the two cannot describe one pair of runs differently.
+        prior_dossier = DossierStore(self._runtime_root).previous(
+            key, before=getattr(dossier, "dossier_version", 0))
+        decision["second_iteration"] = self._second_iteration_delta_composed(
+            session, run_id, current=decision,
+            previous=(self._executive_read(prior_dossier)
+                      if prior_dossier is not None else None))
         listing = self._listing_for(run_id)
         stamp = " · ".join(bit for bit in (
             f"Analysis {run_id[:8]}",
