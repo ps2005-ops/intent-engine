@@ -268,3 +268,86 @@ def test_the_verdict_site_register_lists_the_migrated_sites():
                  "_insufficient_evidence_page"):
         assert site in text, f"{site} is not in the verdict-site register"
     assert "MIGRATED" in text and "JUSTIFIED" in text
+
+
+# --- D25 and the process fix ----------------------------------------------
+
+def test_qa_does_not_deny_a_reading_the_contract_asserts():
+    """D25, the fifth site. Q&A answered "I am not going to give you a
+    strategic read on this company, because the public evidence does not
+    support one -- the same reason the summary above withheld it" while the
+    X-Ray gave a supported pricing decision. The trailing clause is the tell:
+    it cited a refusal the summary had stopped making."""
+    from intent_engine.founder_brief import build as fb
+    from intent_engine.founder_brief import qa as fqa
+
+    brief = fb.build(company="Cloudflare, Inc.", mode=fb.classify_mode(
+        is_public=True, evidence_count=0, independent_sources=0,
+        has_thesis=False), report={}, observations=[])
+    assert brief.key_insight is None, "fixture no longer exercises D25"
+
+    supported = ec.decide(company="Cloudflare, Inc.", run_decision=_run(False),
+                          market_decision=_market(True))
+    ans = fqa.answer("What should we do?", brief, contract=supported)
+    assert "not going to give you a strategic read" not in ans.direct_answer, (
+        "Q&A denies a reading the contract asserts")
+    assert "A supported reading of Cloudflare, Inc. exists" in ans.direct_answer
+    assert "did not add enough independent evidence" in (ans.so_what or "")
+
+    # CONTROL: no market reading -> Q&A must still refuse.
+    refused = ec.decide(company="Nowhere", run_decision=_run(False),
+                        market_decision=None)
+    ans2 = fqa.answer("What should we do?", brief, contract=refused)
+    assert "not going to give you a strategic read" in ans2.direct_answer, (
+        "Q&A stopped refusing for a company with nothing behind it")
+
+    # CONTROL: no contract at all -> unchanged behaviour, never a blank.
+    ans3 = fqa.answer("What should we do?", brief)
+    assert ans3.direct_answer
+
+
+def test_every_strategic_surface_is_declared_in_the_verdict_register():
+    """THE PROCESS FIX, not another row.
+
+    The same defect class has now been found five times: X-Ray/brief (D13,
+    D17), the deck (D17), the insufficient-evidence routing sink (D22) and
+    CEO Q&A (D25). The register written in batch 28 did not prevent D25 --
+    Q&A was inside the sweep's SEARCH SCOPE but was never given a row, so it
+    was looked at and not recorded.
+
+    A human-maintained list is not enough. This walks the actual dispatch
+    table and requires every customer-facing strategic surface to be declared,
+    so adding one without saying where its executive verdict comes from is a
+    test failure rather than a live contradiction found by a customer.
+    """
+    import inspect
+    import pathlib
+    import re
+
+    from intent_engine.webapp.app import WebApp
+
+    register = pathlib.Path(
+        "docs/execution/pre100/EXECUTIVE_VERDICT_SITES.md").read_text()
+
+    source = inspect.getsource(WebApp._route)
+    handlers = set(re.findall(
+        r'\("GET", "runs", \d+\)[^\n]*\n\s*return self\.(_[a-z_]+)\(', source))
+    handlers |= set(re.findall(
+        r'\("POST", "runs", \d+\)[^\n]*\n\s*return self\.(_[a-z_]+)\(', source))
+    assert handlers, "route table shape changed; this gate is not looking at it"
+
+    # Surfaces that state a strategic conclusion. Anything here must appear in
+    # the register; anything genuinely non-strategic is declared below and the
+    # declaration is itself reviewed when this list changes.
+    NON_STRATEGIC = {
+        "_sources_page", "_source_detail", "_evidence", "_progress",
+        "_share_create", "_share_revoke", "_feedback", "_retry_evidence",
+        "_fresh_analysis", "_sources_approve", "_report",
+    }
+    undeclared = [h for h in sorted(handlers)
+                  if h not in NON_STRATEGIC and h not in register]
+    assert not undeclared, (
+        "these customer-facing run surfaces state a strategic conclusion and "
+        "are not declared in EXECUTIVE_VERDICT_SITES.md: "
+        + ", ".join(undeclared)
+        + " — declare where each one's executive verdict comes from")

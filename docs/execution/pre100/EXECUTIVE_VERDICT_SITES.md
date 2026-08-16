@@ -33,7 +33,11 @@ must not be collapsed into one boolean:
 | `webapp/app.py::_failed_run_page` | ROUTING | `run_state` terminal + no report | JUSTIFIED — a run that retrieved nothing is a different fact from a run with no reading |
 | `founder_brief/build.py::classify_mode` | RENDERING | evidence counts | JUSTIFIED — selects depth of prose, not whether a reading exists |
 | `slides.py::deck_is_presentable` | RENDERING | per-slide bullet support | JUSTIFIED — §5, a slide-level question |
-| `founder_brief/qa.py::answer` (line ~108) | RENDERING | `brief.withheld` | **NOT MIGRATED — D25**, found live on `8f2ea0c` |
+| `founder_brief/qa.py::answer` → `_converse` | RENDERING | contract | MIGRATED (D25) |
+| `webapp/app.py::_run_xray` | RENDERING | `_executive_read(dossier)` | CANONICAL_CONTRACT — this composes the reading the contract reports |
+| `webapp/app.py::_executive_brief_page` | RENDERING | contract via `render_decision_lead` | MIGRATED (D17) |
+| `webapp/app.py::_story_page` | RENDERING | `founder_brief/layers.py` `if not k:` (line ~810) | **NOT MIGRATED — D26**, gated on `brief.key_insight`, same shape as D25 |
+| `webapp/app.py::_intelligence_page` | RENDERING | `founder_brief/layers.py` `if not k:` | **NOT MIGRATED — D26** |
 
 ## Sweep terms
 
@@ -70,3 +74,23 @@ Fix (next batch, bounded): pass the contract into `qa.answer` and gate the
 refusal on `contract.reading_exists` rather than `brief.withheld`, exactly as
 `render_decision_lead` now does. The Q&A may still explain what this run could
 not establish.
+
+
+## D26 — sites six and seven, found by the completeness gate
+
+`test_every_strategic_surface_is_declared_in_the_verdict_register` walks the
+dispatch table and demands a register row per strategic surface. On its FIRST
+run it named five undeclared surfaces, two of which are genuine gaps:
+`_story_page` and `_intelligence_page` both render through
+`founder_brief/layers.py`, whose withheld branch gates on `brief.key_insight`
+— the same field Q&A used, and the same shape as D25.
+
+This is the gate working as intended. Five instances of this class were found
+by customers reading live pages; the sixth and seventh were found by a test,
+before deploy, in the first minute it existed.
+
+Their customer-visible wording is softer than Q&A's ("The public evidence
+describes what this company does, but none of it supports a strategic view"),
+so whether it reads as a contradiction is being verified live rather than
+assumed. Status is recorded as NOT MIGRATED either way, because the verdict is
+demonstrably not contract-owned.

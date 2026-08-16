@@ -85,7 +85,7 @@ def _intent(question: str, markers) -> bool:
 
 def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
-           trust=None) -> FounderAnswer:
+           trust=None, contract=None) -> FounderAnswer:
     """Frame an answer using the shared object. Never invents a conclusion.
 
     `trust` is the CANONICAL standing produced by the market side, not a
@@ -95,7 +95,26 @@ def answer(question: str, brief, *, engine_answer: str = "",
     observations = list(observations or ())
     trust = trust if trust is not None else _ET.UNRATED
     k = brief.key_insight
+    # D25. WHETHER A READING EXISTS IS NOT DECIDED HERE.
+    #
+    # `brief.key_insight is None` measures what THIS RUN could establish, and
+    # Q&A used it to refuse outright: live on 8f2ea0c it answered "I am not
+    # going to give you a strategic read on this company, because the public
+    # evidence does not support one -- the same reason the summary above
+    # withheld it" while the X-Ray gave a supported pricing decision and the
+    # summary above had stopped withholding. That trailing clause is the
+    # tell: it cited a refusal no longer being made.
+    #
+    # Q&A was the FIFTH surface found deciding this for itself. It keeps
+    # everything else it does -- the explanation, the citations, the
+    # counter-evidence -- and gives up only the verdict.
     withheld = k is None
+    if (contract is not None and getattr(contract, "reading_exists", False)
+            and withheld):
+        withheld = False
+        out_contribution = getattr(contract, "run_contribution", "")
+    else:
+        out_contribution = ""
 
     out = FounderAnswer(question=question, direct_answer="",
                         confidence=brief.confidence,
@@ -103,6 +122,16 @@ def answer(question: str, brief, *, engine_answer: str = "",
                         withheld=withheld)
 
     # --- the refusal path ---------------------------------------------------
+    if out_contribution and _intent(question, _STRATEGIC_INTENT):
+        # The contract holds a reading this run did not strengthen. Say both
+        # facts; refusing would contradict the X-Ray, and claiming this run
+        # established it would be the opposite lie.
+        out.direct_answer = (
+            f"A supported reading of "
+            f"{getattr(contract, 'company', '') or 'this company'} exists and "
+            f"is set out on the Executive X-Ray.")
+        out.so_what = out_contribution
+        return out
     if withheld and _intent(question, _STRATEGIC_INTENT):
         out.direct_answer = (
             "I am not going to give you a strategic read on this company, "

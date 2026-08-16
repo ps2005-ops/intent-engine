@@ -5133,6 +5133,7 @@ class WebApp:
         except Exception:  # noqa: BLE001 - a question must still be answerable
             _LOG.warning("trust standing unavailable for %s", run_id)
         founder_answer = fqa.answer(question, brief,
+                                    contract=self._executive_contract(run_id),
                                     engine_answer=engine_text,
                                     observations=observations,
                                     trust=_trust)
