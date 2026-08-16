@@ -88,11 +88,11 @@ answers on two clicks.
 | RESPONSIVE | PASS (partial scope) | fbb62ff | Cloudflare | /xray | — | 375px: scrollWidth==clientWidth, zero overflowing elements |
 | DARK_LIGHT | PASS (partial scope) | fbb62ff | Cloudflare | /xray | — | dark: effective bg rgb(15,20,28), text rgb(243,244,246), ~16.8:1; secondary rgb(195,202,214) also AA |
 | ACCESSIBILITY | PASS (partial scope) | fbb62ff | Cloudflare | /xray | D21 | one h1, no heading skips, nav+main landmarks, no raw JSON, details natively keyboard-operable · 1 unlabelled control (D21, SEV3) |
-| SHOPIFY_JOURNEY | NOT_RUN | — | — | — | — | — |
-| JNJ_JOURNEY | NOT_RUN | — | — | — | — | — |
-| STRIPE_JOURNEY | NOT_RUN | — | — | — | — | — |
-| VALE_JOURNEY | NOT_RUN | — | — | — | — | — |
-| CEO_QA | NOT_RUN | — | Cloudflare | POST /conversation | — | attempted; the preview restarted mid-attempt and the session no longer owned the run (403 invalid CSRF, then "That analysis is not available here"). Not a Q&A finding — retry on a fresh run. |
+| SHOPIFY_JOURNEY | PASS (with D23) | 8f2ea0c | Shopify Inc. | /xray | D23 | "Supported in direction, not in size · Pricing decision"; identity canonical. **D23 (SEV3)**: classified "recurring software subscription" — same model class as Cloudflare — so merchant/GMV/take-rate economics never surface. A business_model_class selection gap, not prose. |
+| JNJ_JOURNEY | PASS | 8f2ea0c | Johnson & Johnson | /xray | — | "Development roadmap decision — which programmes to fund and which to stop, given how long it takes a programme to reach approved products and indications"; model class = regulator-gated product. Genuine segment/regulatory specialization. |
+| STRIPE_JOURNEY | PASS (partial) | 8f2ea0c | Stripe, Inc. | /xray | — | private/sparse handled: "earnings from a balance sheet or from a transaction network — spread and fees on volume the firm intermediates". No fabricated filings observed. MDR/MVE/VOI/kill-switch not individually re-read this batch. |
+| VALE_JOURNEY | FAIL | 8f2ea0c | Vale | /sources, /xray | **D24** | run stalled at "Step 2 of 2 · Review sources" instead of auto-running, and that page reads "We found candidate evidence for ." — **empty company name**. /xray showed the product-fault page because the run was not terminal, so D20's guard did not apply. |
+| CEO_QA | FAIL | 8f2ea0c | Cloudflare | POST /conversation | **D25** | Q&A answers, but contradicts the contract: "I am not going to give you a strategic read on this company" while X-Ray and brief assert a supported pricing decision. Fifth verdict site — `founder_brief/qa.py::answer` gates on `brief.withheld`. |
 | PROVENANCE_LIVE | NOT_RUN | — | — | — | — | — |
 | LEARNING_LIVE | NOT_RUN | — | — | — | — | — |
 | ECONOMIC_HISTORY_LIVE | BLOCKED_DATA (honest) | dfe3a3a | Cloudflare | /xray | — | "Replay not yet valid. We hold 0 month(s) of our own observations and a replay needs 6. That clears on 2027-02-16." plus why today's revised data cannot be substituted into a historical T0. Blocked state, still useful — §20 satisfied. Caterpillar/BoA not yet read for this row. |
@@ -167,3 +167,19 @@ when the page was mutated to ignore it. Live-payload fixtures, not authored
 ones, is the rule that follows.
 
 FEATURE_FREEZE = TRUE from this point.
+
+
+## D19 — Toyota, narrowed not closed
+
+`/xray` now shows the honest failed-run page (D20's fix working live): "did not
+produce a report: not enough of what it needed could be retrieved, so no
+reading is asserted here — we do not invent…". Retrieval itself still returns
+nothing.
+
+Tested and **disproved**: the "foreign private issuer files 20-F, not 10-K"
+hypothesis — `20-F` is already in `_PERIODIC_FORM_PREFIXES`, `SUBSTANTIVE_FORMS`,
+`_FORM_SCORE` and `_PREFERRED_FORMS`. Caterpillar and Bank of America were
+entered the same name-only way on the same SHA and both retrieved filings, so
+the domainless path works in general and this is Toyota-specific. Still
+unclassified between PRODUCT_REGRESSION and BLOCKED_EXTERNAL; needs the CIK →
+candidate → fetch-status trace, which is one bounded run with logging.

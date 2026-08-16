@@ -33,6 +33,7 @@ must not be collapsed into one boolean:
 | `webapp/app.py::_failed_run_page` | ROUTING | `run_state` terminal + no report | JUSTIFIED — a run that retrieved nothing is a different fact from a run with no reading |
 | `founder_brief/build.py::classify_mode` | RENDERING | evidence counts | JUSTIFIED — selects depth of prose, not whether a reading exists |
 | `slides.py::deck_is_presentable` | RENDERING | per-slide bullet support | JUSTIFIED — §5, a slide-level question |
+| `founder_brief/qa.py::answer` (line ~108) | RENDERING | `brief.withheld` | **NOT MIGRATED — D25**, found live on `8f2ea0c` |
 
 ## Sweep terms
 
@@ -43,3 +44,29 @@ readiness  WITHHELD  sufficient  insufficien  evidence_bar
 "enough public evidence"  "enough evidence"  view_withheld
 "no strategic reading"  should_render  renderable  "supported reading"
 ```
+
+
+## D25 — the fifth site, found live after this register was written
+
+CEO Q&A on run `01M04MYF6XCFAC7C2SM1QK9YVB` (Cloudflare, `8f2ea0c`):
+
+- X-Ray: "Supported in direction, not in size · Pricing decision"
+- Brief: "A supported reading of Cloudflare, Inc. exists…"
+- **Q&A: "I am not going to give you a strategic read on this company,
+  because the public evidence does not support one — the same reason the
+  summary above withheld it."**
+
+The last clause is the tell: it cites a refusal the summary no longer makes.
+`founder_brief/qa.py::answer` gates on `brief.withheld`, which is derived from
+the run's own evidence, not from the contract.
+
+**This register did not prevent it, and that is the lesson.** Q&A was named in
+the sweep's search scope but never given a row, so it was searched for and not
+recorded — the register only protects sites it lists. Any future sweep must
+end by enumerating rows against the route table, not against memory of what
+was looked at.
+
+Fix (next batch, bounded): pass the contract into `qa.answer` and gate the
+refusal on `contract.reading_exists` rather than `brief.withheld`, exactly as
+`render_decision_lead` now does. The Q&A may still explain what this run could
+not establish.
