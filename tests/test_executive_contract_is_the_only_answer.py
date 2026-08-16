@@ -385,3 +385,95 @@ def test_qa_does_not_collapse_every_question_into_one_refusal():
                         market_decision=None)
     a = fqa.answer("Biggest risk?", brief, contract=refused).direct_answer
     assert "not enough public evidence" in a
+
+
+# --- D28(b): the behaviour class, not the example -------------------------
+
+def _composed(**over):
+    """A composed decision shaped like the live one the X-Ray renders."""
+    base = {"key_risk": "Renewal concentration in the enterprise base.",
+            "falsifier": "A quarter where net retention falls below 100%.",
+            "information_gaps": ["No independent pricing account exists."],
+            "economic_history": {"statement": "Replay is not yet valid here."},
+            "second_iteration": {"statement": "Nothing new arrived."},
+            "competitors": ["Akamai", "Fastly"],
+            "monitoring": ["Enterprise renewal disclosures."],
+            "recommended_next_move": "Hold price and instrument churn."}
+    base.update(over)
+    return base
+
+
+def test_every_declared_intent_routes_to_a_canonical_field():
+    """§13. The completeness property, so a new intent cannot ship unrouted.
+
+    This is the Q&A twin of the verdict-site register test. D28(b) existed
+    because Q&A had exactly TWO intents and every other category fell to one
+    generic sentence; a router that silently grows a marker set without a
+    field is the same defect returning.
+    """
+    from intent_engine.founder_brief import qa as fqa
+
+    decision = _composed()
+    for name, markers, field, absent in fqa.INTENT_ROUTES:
+        assert markers, f"{name} declares no markers"
+        assert absent, f"{name} has no absence sentence"
+        assert field in decision, (
+            f"{name} routes to {field!r}, which the composed decision does "
+            f"not carry — the router would answer from nothing")
+        # every declared intent must actually be reachable from its markers
+        assert fqa.intent_of(markers[0]) == name, (
+            f"{name} is declared but its own first marker does not reach it")
+
+
+def test_risk_uncertainty_falsifier_and_history_do_not_collapse():
+    """D28(b). Live on 5e2b625 three different questions returned the same
+    paragraph, because there was no router at all."""
+    from intent_engine.founder_brief import build as fb
+    from intent_engine.founder_brief import qa as fqa
+
+    brief = fb.build(company="Cloudflare, Inc.", mode=fb.classify_mode(
+        is_public=True, evidence_count=0, independent_sources=0,
+        has_thesis=False), report={}, observations=[])
+    contract = ec.decide(company="Cloudflare, Inc.", run_decision=_run(False),
+                         market_decision=_market(True))
+    decision = _composed()
+
+    asked = {q: fqa.answer(q, brief, contract=contract,
+                           decision=decision).direct_answer
+             for q in ("What is the biggest risk?",
+                       "What is the biggest uncertainty?",
+                       "What proves this wrong?",
+                       "What happened historically?",
+                       "What should we monitor next?",
+                       "What should we do?")}
+    assert len(set(asked.values())) == len(asked), (
+        "semantically different questions collapsed onto one answer:\n"
+        + "\n".join(f"  {q!r} -> {a!r}" for q, a in asked.items()))
+    assert "Renewal concentration" in asked["What is the biggest risk?"]
+    assert "net retention" in asked["What proves this wrong?"]
+
+
+def test_an_empty_category_says_which_category_is_empty():
+    """Absence for ONE intent may not become the universal canned paragraph."""
+    from intent_engine.founder_brief import build as fb
+    from intent_engine.founder_brief import qa as fqa
+
+    brief = fb.build(company="Acme", mode=fb.classify_mode(
+        is_public=False, evidence_count=0, independent_sources=0,
+        has_thesis=False), report={}, observations=[])
+    bare = {k: ("" if not isinstance(v, (list, dict)) else type(v)())
+            for k, v in _composed().items()}
+
+    risk = fqa.answer("Biggest risk?", brief, decision=bare).direct_answer
+    falsifier = fqa.answer("What proves this wrong?", brief,
+                           decision=bare).direct_answer
+    assert risk != falsifier, "two empty categories gave the same sentence"
+    assert "risk" in risk.lower() and "falsifier" in falsifier.lower()
+
+
+def test_the_router_never_invents_when_the_decision_is_absent():
+    """No composed decision -> no routed answer, never a fabricated one."""
+    from intent_engine.founder_brief import qa as fqa
+
+    routed, matched = fqa._route_answer("Biggest risk?", None)
+    assert matched == "biggest_risk" and routed == ""

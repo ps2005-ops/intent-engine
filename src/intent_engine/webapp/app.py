@@ -3152,6 +3152,29 @@ class WebApp:
                          observations=observations, market=market)
         return brief, report, name
 
+    def _composed_decision(self, run_id):
+        """The composed executive decision as a dict — what the X-Ray renders.
+
+        Q&A routes its per-intent answers at THIS object rather than at the
+        run's reasoning decision, for the same reason the X-Ray does: the
+        reasoning path does not populate `key_risk`, `falsifier`,
+        `economic_history` or `competitors`, and a router pointed at it would
+        answer "no risk recorded" for a company whose X-Ray displays one.
+        """
+        try:
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            meta = self.ci.run_meta(run_id) or {}
+            name = str(meta.get("company_name") or "")
+            key, _c, _m = self._manifest_placement(
+                company_key(name or str(meta.get("domain") or "") or run_id),
+                name=name, domain=str(meta.get("domain") or ""))
+            dossier = DossierStore(self._runtime_root).latest(key)
+            return self._executive_read(dossier) if dossier is not None else {}
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("composed decision not read for %s", run_id)
+            return {}
+
     def _executive_contract(self, run_id):
         """The one answer to "does a supported reading of this company exist".
 
@@ -5134,6 +5157,7 @@ class WebApp:
             _LOG.warning("trust standing unavailable for %s", run_id)
         founder_answer = fqa.answer(question, brief,
                                     contract=self._executive_contract(run_id),
+                                    decision=self._composed_decision(run_id),
                                     engine_answer=engine_text,
                                     observations=observations,
                                     trust=_trust)

@@ -48,6 +48,114 @@ _EVIDENCE_INTENT = ("what evidence", "what is this based on", "strongest",
                     "verified fact or", "fact or interpretation")
 
 
+# ===========================================================================
+# THE INTENT ROUTER — D28(b)
+#
+# Q&A had exactly TWO intents: _STRATEGIC_INTENT and _EVIDENCE_INTENT. Risk,
+# uncertainty, falsifier, provenance, independence, search coverage, history,
+# competitor response and monitoring had no intent at all, so every one of
+# them fell to a single generic fallback. That is why, live on 5e2b625,
+# "Biggest risk?", "What proves this wrong?" and "Show me the source. Is it
+# independent?" returned the identical paragraph: not a branch to repair, a
+# router that did not exist.
+#
+# Each row names ONE canonical field on the composed decision -- the same
+# object the X-Ray renders -- and ONE sentence for when that field is empty.
+# Q&A is a projection: it may explain at more length than the X-Ray, and it
+# may not reach a different answer.
+#
+# THE ABSENCE COPY IS PER-INTENT ON PURPOSE. A universal "there is not enough
+# public evidence" is what made three different questions indistinguishable;
+# "no falsifier has been recorded" and "no source supports that" are different
+# facts and a reader is entitled to know which one they hit.
+# ===========================================================================
+INTENT_ROUTES = (
+    ("biggest_risk",
+     ("biggest risk", "main risk", "what is the risk", "what's the risk",
+      "greatest risk", "key risk"),
+     "key_risk",
+     "No company-specific risk cleared the evidence bar in this run."),
+    ("biggest_uncertainty",
+     ("biggest uncertainty", "most uncertain", "what is uncertain",
+      "greatest uncertainty", "cannot measure", "can you not measure",
+      "can't you measure"),
+     "information_gaps",
+     "No open uncertainty has been recorded for this company."),
+    ("falsifier",
+     ("proves this wrong", "prove you wrong", "proves you wrong",
+      "falsif", "what would change your mind", "kill switch"),
+     "falsifier",
+     "No falsifier has been established for this reading yet."),
+    ("history",
+     ("historically", "history", "past", "replay", "hindsight"),
+     "economic_history",
+     "No valid historical replay is available for this company yet."),
+    ("what_changed",
+     ("what changed", "changed your mind", "what held", "since last",
+      "did you learn", "what did the system learn"),
+     "second_iteration",
+     "Nothing has been compared against an earlier reading yet."),
+    ("competitor",
+     ("competitor", "rival", "competition", "what could they do"),
+     "competitors",
+     "No competitor has been selected for this company from the evidence."),
+    ("monitoring",
+     ("monitor next", "what should we monitor", "watch next",
+      "check next", "monday"),
+     "monitoring",
+     "Nothing is currently preregistered to watch for this company."),
+    ("recommendation",
+     ("what should we do", "what should i do", "recommend", "next move"),
+     "recommended_next_move",
+     "No action is put forward for this company from this run."),
+)
+
+
+def intent_of(question: str) -> str:
+    """Which canonical category this question asks for, or "".
+
+    Ordered, first match wins, because "what should we monitor next" contains
+    both a monitoring marker and a recommendation marker and the specific one
+    is listed first.
+    """
+    low = (question or "").lower()
+    for name, markers, _field, _absent in INTENT_ROUTES:
+        if any(m in low for m in markers):
+            return name
+    return ""
+
+
+def _route_answer(question: str, decision) -> tuple:
+    """(answer, matched_intent). Reads the composed decision, never invents.
+
+    `decision` is the composed FounderDecision as a dict -- the object the
+    X-Ray renders. A missing decision returns no match, so the caller keeps
+    its existing behaviour rather than getting a blank.
+    """
+    name = intent_of(question)
+    if not name or not isinstance(decision, dict):
+        return "", name
+    for row_name, _markers, field, absent in INTENT_ROUTES:
+        if row_name != name:
+            continue
+        value = decision.get(field)
+        if isinstance(value, dict):
+            # economic_history / second_iteration carry their own sentence.
+            said = value.get("statement") or value.get("plain") or ""
+            return (str(said) or absent), name
+        if isinstance(value, (list, tuple)):
+            items = [str(v) for v in value if str(v or "").strip()]
+            if not items:
+                return absent, name
+            if isinstance(value, (list, tuple)) and items and \
+                    isinstance(value[0], dict):
+                return absent, name
+            return "; ".join(items[:3]), name
+        text = str(value or "").strip()
+        return (text or absent), name
+    return "", name
+
+
 @dataclass
 class FounderAnswer:
     """One answer, in the same shape as every other founder-facing surface."""
@@ -85,7 +193,7 @@ def _intent(question: str, markers) -> bool:
 
 def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
-           trust=None, contract=None) -> FounderAnswer:
+           trust=None, contract=None, decision=None) -> FounderAnswer:
     """Frame an answer using the shared object. Never invents a conclusion.
 
     `trust` is the CANONICAL standing produced by the market side, not a
@@ -122,6 +230,19 @@ def answer(question: str, brief, *, engine_answer: str = "",
                         withheld=withheld)
 
     # --- the refusal path ---------------------------------------------------
+    # THE SPECIFIC CATEGORY WINS OVER THE CATCH-ALL.
+    #
+    # _STRATEGIC_INTENT matches on "what should", which catches "what should
+    # we do" and "what should we monitor next" alike -- so running it first
+    # collapsed a monitoring question onto the recommendation answer. Caught by
+    # the distinctness test rather than live, which is the point of having it.
+    _routed, _matched = _route_answer(question, decision)
+    if _routed:
+        out.direct_answer = _routed
+        if contract is not None and getattr(contract, "run_contribution", ""):
+            out.so_what = contract.run_contribution
+        return out
+
     if out_contribution and _intent(question, _STRATEGIC_INTENT):
         # The contract holds a reading this run did not strengthen. Say both
         # facts; refusing would contradict the X-Ray, and claiming this run
