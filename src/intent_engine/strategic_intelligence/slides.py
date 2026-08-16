@@ -1035,9 +1035,15 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # fact and the deck is entitled to say it. What changes is that the
     # sentence is scoped to this run rather than presented as the state of
     # the world.
+    # GATED ON THE REFUSAL FLAG, NOT ON EMPTINESS. The first version of this
+    # asked whether the thesis had no concrete view -- and the refusal
+    # sentence IS the view ("What Cloudflare, Inc. has published is not enough
+    # to read a strategy from"), so `_concrete` was true, the guard never
+    # fired, and the deck kept denying a reading the X-Ray asserted. The
+    # producer already flags this case; asking it is what the fix should have
+    # done in the first place.
     if (contract is not None and getattr(contract, "reading_exists", False)
-            and not any(_concrete(thesis.get(k))
-                        for k in ("view", "transition"))):
+            and thesis.get("view_withheld")):
         view_bullets = [_bullet(
             f"A supported reading of {company} exists and is set out on the "
             f"Executive X-Ray."),

@@ -158,7 +158,13 @@ def test_the_deck_does_not_deny_a_reading_the_contract_asserts():
     """
     from intent_engine.strategic_intelligence.slides import build_slides
 
-    report = {"company_name": "Cloudflare, Inc.", "thesis": {}}
+    # The thesis carries the refusal AS its view -- which is exactly why a
+    # guard that asked "is the view empty?" never fired live.
+    report = {"company_name": "Cloudflare, Inc.",
+              "thesis": {"view": "What Cloudflare, Inc. has published is not "
+                                 "enough to read a strategy from, so none is "
+                                 "put forward here.",
+                         "view_withheld": True}}
     contract = ec.decide(company="Cloudflare, Inc.",
                          run_decision=_run(False),
                          market_decision=_market(True))
