@@ -2746,6 +2746,38 @@ class WebApp:
         #
         # "Limited analysis" states the situation without accusing anyone, and
         # the body then says exactly what is missing and what to do about it.
+        # D22. THE LAST SITE THAT DECIDED THIS FOR ITSELF, and the one every
+        # refusing ROUTE funnels into. D17 was fixed at the surfaces that
+        # RENDER a verdict; Caterpillar then failed anyway, because /slides
+        # redirects here when the deck is not ready and this page asserts
+        # "There is not enough public evidence to build a briefing on this
+        # company" while the X-Ray for the same run gives a supported capacity
+        # decision.
+        #
+        # Fixed HERE rather than at /slides deliberately. Three routes reach
+        # this page and patching the one that was caught would have produced
+        # the fifth instance of this defect somewhere else -- the sweep that
+        # found this site is the reason it is being fixed once.
+        #
+        # What was READ is unchanged: this page's whole job is to say what it
+        # found and what is missing, and that is still true and still useful.
+        # What it may no longer do is conclude, from this run alone, that the
+        # system has nothing to say about the company.
+        _contract = self._executive_contract(run_id)
+        if _contract is not None and getattr(_contract, "reading_exists",
+                                             False):
+            # The CONTRACT's name, which is the canonical one resolved for the
+            # dossier. `company` here is whatever the run metadata recorded,
+            # which is what the founder typed -- "Caterpillar" rather than
+            # "Caterpillar Inc.", and "this company" when the run has no
+            # metadata at all.
+            company = getattr(_contract, "company", "") or company
+            reason = (
+                f"A supported reading of {company} exists and is set out on "
+                f"the Executive X-Ray. "
+                + (getattr(_contract, "run_contribution", "") or
+                   "This run did not add enough independent evidence to "
+                   "strengthen it."))
         heading = f'Limited analysis of {_e(company)}'
         body = (
             f'<!doctype html><html lang="en"><head><meta charset="utf-8">'

@@ -190,3 +190,81 @@ def test_the_deck_still_refuses_when_the_contract_refuses():
     assert "Executive X-Ray" not in text, (
         "a company with nothing behind it was pointed at a reading that does "
         "not exist")
+
+
+# --- D22: the ROUTING sink, not just the renderers -------------------------
+
+def test_the_insufficient_evidence_page_defers_to_the_contract(tmp_path):
+    """D22. Every refusing ROUTE funnels into this one page.
+
+    Caterpillar live: /slides redirects here when the deck is not ready, and
+    this page said "There is not enough public evidence to build a briefing on
+    this company" while the X-Ray for the same run gave a supported capacity
+    decision. D17 was fixed at the surfaces that RENDER a verdict; this one
+    decides before any renderer is reached.
+
+    Fixed at the sink rather than at /slides on purpose: three routes reach it,
+    and patching the caught one would have produced a fifth instance. This
+    test therefore RENDERS THE PAGE -- an earlier version asserted on the
+    contract object instead and stayed green when the page was mutated to
+    ignore it.
+    """
+    import io
+
+    from intent_engine.webapp.app import WebApp
+    from intent_engine.webapp.config import AppConfig
+    from tests.test_strategic_intelligence import _live_transport
+
+    cfg = AppConfig(env="test", secret="s" * 40, demo_mode=True,
+                    autorun_sources=True,
+                    web_store_path=tmp_path / "w.jsonl",
+                    fi_store_path=tmp_path / "fi.jsonl",
+                    ci_store_path=tmp_path / "ci.jsonl")
+    app = WebApp(cfg, transport=_live_transport, resolver=False)
+
+    env = {"REQUEST_METHOD": "POST", "PATH_INFO": "/demo", "CONTENT_LENGTH": "0",
+           "HTTP_HOST": "127.0.0.1", "HTTP_COOKIE": "",
+           "wsgi.input": io.BytesIO(b"")}
+    out = {}
+    b"".join(app(env, lambda st, h: out.update(status=st, headers=h)))
+    sid = [v.split("=", 1)[1].split(";")[0]
+           for k, v in out["headers"] if k == "Set-Cookie"][0]
+    session = app.auth.session(sid)
+
+    result = {"status": "PARTIAL", "sections": [],
+              "company": "Caterpillar Inc."}
+
+    supported = ec.decide(company="Caterpillar Inc.", run_decision=_run(False),
+                          market_decision=_market(True))
+    app._executive_contract = lambda run_id: supported
+    _s, _h, body = app._insufficient_evidence_page(
+        session, "r1", result,
+        reason="The pages that could be read describe what the company "
+               "offers, but none carried the dated, checkable material.")
+    assert "A supported reading of Caterpillar Inc. exists" in body, (
+        "the refusing route still asserts there is nothing to say about a "
+        "company the contract has a supported reading for")
+    assert "did not add enough independent evidence" in body
+
+    # CONTROL: when the contract refuses, this page must keep refusing.
+    refused = ec.decide(company="Nowhere", run_decision=_run(False),
+                        market_decision=None)
+    app._executive_contract = lambda run_id: refused
+    _s, _h, body2 = app._insufficient_evidence_page(
+        session, "r1", result, reason="nothing checkable was retrieved.")
+    assert "A supported reading" not in body2, (
+        "a company with nothing behind it was pointed at a reading that does "
+        "not exist")
+
+
+def test_the_verdict_site_register_lists_the_migrated_sites():
+    """The register is the anti-D23 device; an empty one is worse than none."""
+    import pathlib
+
+    doc = pathlib.Path("docs/execution/pre100/EXECUTIVE_VERDICT_SITES.md")
+    assert doc.exists(), "the verdict-site register is missing"
+    text = doc.read_text()
+    for site in ("render_decision_lead", "_executive_answer", "build_slides",
+                 "_insufficient_evidence_page"):
+        assert site in text, f"{site} is not in the verdict-site register"
+    assert "MIGRATED" in text and "JUSTIFIED" in text
