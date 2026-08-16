@@ -1443,7 +1443,8 @@ class WebApp:
         sid = self.auth.login(form.get("email", ""), form.get("password", ""))
         return self._redirect("/", set_sid=sid)
 
-    def _analyze(self, session, form, remote="unknown", *, smoke=False):
+    def _analyze(self, session, form, remote="unknown", *, smoke=False,
+                 fresh=False):
         if form.get("consent") is None:
             return self._error_page(400, "consent is required")
         limited = None if smoke else self._demo_rate_limited(session, remote)
@@ -1572,9 +1573,7 @@ class WebApp:
                     company_name=company_name or "(unnamed company)",
                     website=website, cik=filer_cik,
                     user_id=session["user_id"],
-                    as_of=__import__("datetime").datetime.now(
-                        __import__("datetime").timezone.utc
-                    ).strftime("%Y-%m-%dT00:00:00+00:00"))
+                    as_of=self._as_of(fresh=fresh))
             except (IngestionError, ValueError) as exc:
                 return self._error_page(400, str(exc))
             run_id = run["run_id"]
@@ -3012,6 +3011,31 @@ class WebApp:
             f'reusing what was already read.</span>'
             f'</form>')
 
+    @staticmethod
+    def _as_of(*, fresh: bool = False) -> str:
+        """The run's as-of stamp, and therefore half of its identity.
+
+        A run's id is `ci-run:{subject}:{user}:{as_of}`, and this was always
+        truncated to `T00:00:00` -- so the SAME company analysed twice by the
+        same person on the same day is one run, not two. That is the right
+        default: it is what stops a double-submit or a refresh paying for the
+        analysis twice.
+
+        It also made a second iteration structurally unreachable. There is no
+        way, within a day, for a reader to produce the earlier-and-later pair
+        the whole learning surface is built on, which is why the live card
+        reported a baseline for what looked like a second Cloudflare run.
+
+        An EXPLICIT request for a fresh analysis is the one case where the
+        reader has said they want another one, so it keeps full precision and
+        gets its own run. Everything else still dedupes by day.
+        """
+        import datetime as _dt
+
+        now = _dt.datetime.now(_dt.timezone.utc)
+        return (now.strftime("%Y-%m-%dT%H:%M:%S+00:00") if fresh
+                else now.strftime("%Y-%m-%dT00:00:00+00:00"))
+
     def _fresh_analysis(self, session, run_id):
         """Deliberately bypass the compatible-result cache.
 
@@ -3019,14 +3043,28 @@ class WebApp:
         judgement about whether the cached run is still good. A stale
         low-quality report must never be able to trap someone with no way out
         of it.
+
+        IT HAD TO BYPASS THE RUN ID TOO. Clearing `_results` and re-entering
+        `_analyze` rebuilt the same `ci-run:{subject}:{user}:{date}` key, so
+        this returned the SAME run every time -- a button whose whole purpose
+        is "give me another one" that could not give you another one. Passing
+        `fresh` keeps the full timestamp in the as-of, so the reader's
+        explicit request gets its own run and becomes the second observation
+        the learning surface can actually compare against.
         """
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
             return self._error_page(404, "no such run for this account")
         meta = self.ci.run_meta(run_id) or {}
-        self._results.pop(run_id, None)
+        # THE OLD RUN'S RESULT IS KEPT. This popped it, which was correct only
+        # while a fresh analysis reused the same run id -- clearing the cache
+        # was then the sole way to force recomputation. Now that the fresh run
+        # gets its own id, popping the old one destroys the very reading the
+        # new run is about to be compared against: the prior vanished at the
+        # moment the second observation was created, so the second iteration
+        # reported a baseline forever.
         form = {"consent": "1", "company_name": meta.get("company_name", ""),
                 "website": meta.get("website", ""), "csrf": session["csrf"]}
-        return self._analyze(session, form)
+        return self._analyze(session, form, fresh=True)
 
     def _founder_layers(self, run_id):
         """Everything the deeper layers need, built from ONE brief.

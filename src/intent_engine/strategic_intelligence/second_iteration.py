@@ -177,19 +177,37 @@ def hero(delta: Dict[str, object]) -> Dict[str, str]:
     d = delta or {}
     state = str(d.get("state") or "")
     tested = d.get("tested_claims") or []
+
+    # STATE EXCLUSIVITY. Every line below is a claim ABOUT A PRIOR, and a
+    # state with no prior cannot license any of them. This rendered all seven
+    # unconditionally, so a first reading of Cloudflare said, on one card:
+    # "This is the baseline reading. There is no earlier view to compare it
+    # against yet." then "10 source(s) we had not seen before" then "This did
+    # not add to what the system knows." Each line was separately true of some
+    # quantity in the delta; together they describe three different worlds.
+    #
+    # "Not seen before" is measured against the previous run's documents, and
+    # on a baseline that set is empty -- so the count is the whole corpus and
+    # the sentence is an artefact of comparing against nothing. Suppressed
+    # rather than reworded: there is no honest phrasing of novelty relative to
+    # a prior that does not exist.
+    comparative = state not in (FIRST_OBSERVATION, INCOMPARABLE)
     return {
         "state": state,
         "new_information": (f"{d.get('new_evidence', 0)} source(s) we had not "
-                            f"seen before"),
-        "what_it_tested": ("; ".join(str(t) for t in tested[:3]) if tested
-                           else "nothing that bore on the decision"),
+                            f"seen before") if comparative else "",
+        "what_it_tested": (("; ".join(str(t) for t in tested[:3]) if tested
+                            else "nothing that bore on the decision")
+                           if comparative else ""),
         "what_held": ("the reading" if state in (
             NEW_INFORMATION_CONFIRMED_VIEW, REOBSERVATION_TESTED_AND_HELD)
             else ""),
-        "what_changed": ", ".join(str(f).replace("_", " ")
-                                  for f in (d.get("changed_fields") or [])),
-        "decision_effect": ("the recommendation changed"
-                            if d.get("recommendation_changed") else
-                            "the recommendation is unchanged"),
+        "what_changed": (", ".join(str(f).replace("_", " ")
+                                   for f in (d.get("changed_fields") or []))
+                         if comparative else ""),
+        "decision_effect": (("the recommendation changed"
+                             if d.get("recommendation_changed") else
+                             "the recommendation is unchanged")
+                            if comparative else ""),
         "statement": str(d.get("statement") or ""),
     }

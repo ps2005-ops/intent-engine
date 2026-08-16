@@ -373,7 +373,13 @@ def _second_iteration_body(d: dict) -> str:
     body = "".join(f"<dt>{_e(k)}</dt><dd>{_e(v)}</dd>"
                    for k, v in rows if str(v).strip())
     said = _ITERATION_COPY.get(state, card.get("statement", ""))
-    gain = "" if state in SI.REPRESENTS_LEARNING else (
+    # "DID NOT ADD" IS ITSELF A COMPARATIVE CLAIM. It belongs to a reading
+    # that had something to add to; on a baseline there is no stock of
+    # knowledge this run failed to increase, and rendering it there put a
+    # third contradictory sentence on a card that already said "this is the
+    # baseline" and "10 source(s) we had not seen before".
+    gain = "" if (state in SI.REPRESENTS_LEARNING
+                  or state in (SI.FIRST_OBSERVATION, SI.INCOMPARABLE)) else (
         '<p class="none">This did not add to what the system knows.</p>')
     return f'<p>{_e(said)}</p><dl class="kv">{body}</dl>{gain}'
 
