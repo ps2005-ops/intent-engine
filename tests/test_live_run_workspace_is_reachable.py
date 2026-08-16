@@ -170,3 +170,25 @@ def test_the_xray_carries_the_second_iteration_state(run):
     assert ("first reading" in lowered or "baseline" in lowered
             or "nothing yet to compare" in lowered), (
         "the X-Ray does not state the second-iteration state for a first run")
+
+
+def test_a_failed_run_gets_the_honest_page_not_a_product_fault(app):
+    """D20. Measured live on Toyota: /sources said "no approved source could
+    be retrieved" while /xray said "Something went wrong on our side ... a
+    fault in the product". One failure, two incompatible descriptions.
+    """
+    owner = _Client(app)
+    owner.request("POST", "/demo")
+    status, headers, _ = owner.request(
+        "POST", "/analyze",
+        f"consent=on&csrf={owner.csrf()}&company_name=Nowhere"
+        f"&website=https://nowhere.invalid")
+    if not status.startswith("303"):
+        pytest.skip("this build refused the run before it could fail")
+    run_id = headers["Location"].split("/runs/")[1].split("/")[0]
+    owner.request("GET", f"/runs/{run_id}")
+    if app.ci.store.run_state(run_id) not in app.TERMINAL_STATES:
+        pytest.skip("the run did not reach a terminal state here")
+    _, _, body = owner.request("GET", f"/runs/{run_id}/xray")
+    assert "fault in the product" not in body, (
+        "a run that could not retrieve is reported as a product fault")

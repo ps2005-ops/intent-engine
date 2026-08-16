@@ -352,7 +352,48 @@ _ITERATION_COPY = {
 }
 
 
-def _second_iteration_body(d: dict) -> str:
+def _named(ids, labels) -> str:
+    """Sources by the name of the page they cite, never by an internal id.
+
+    D16. This card rendered "ev_1dccf2f4d0bd8562; ev_1fb641572cc55989" under
+    "What it tested" -- opaque strings where a reader expects to see what was
+    read. The map that turns those into readable titles already existed and
+    already served the sources list on this same screen; this card simply
+    never asked for it.
+
+    AN ID WITH NO LABEL IS NOT GUESSED AT. Falling back to the raw id is the
+    defect, and inventing a name for it would be worse: an unnamed source is
+    counted and described as unnamed, which is true and leaks nothing.
+    """
+    labels = labels or {}
+    seen = list(dict.fromkeys(str(i) for i in (ids or ()) if str(i or "").strip()))
+    if not seen:
+        return ""
+
+    # PROSE IS NOT AN ID. `tested_claims` carries BOTH: sometimes evidence
+    # ids, sometimes the claim itself in words ("pricing power is intact").
+    # The first version of this ran every entry through the label map and
+    # replaced the readable ones with "3 source(s) we cannot name" -- turning
+    # a sentence a reader understood into a count, which is a worse defect
+    # than the raw ids it was written to remove. A value with whitespace in it
+    # was written to be read; it is passed through untouched.
+    prose = [s for s in seen if " " in s.strip()]
+    opaque = [s for s in seen if " " not in s.strip()]
+    if prose and not opaque:
+        return "; ".join(prose[:3])
+
+    named = prose[:] + [labels[i] for i in opaque if labels.get(i)]
+    unnamed = len(opaque) - sum(1 for i in opaque if labels.get(i))
+    if named and not unnamed:
+        return "; ".join(named[:3])
+    if named:
+        return (f"{'; '.join(named[:3])} and {unnamed} further source(s) we "
+                f"cannot name on this card")
+    return (f"{len(seen)} source(s) we already held, which this card cannot "
+            f"name")
+
+
+def _second_iteration_body(d: dict, *, labels=None) -> str:
     """What the second look changed, and what it merely confirmed.
 
     Renders the canonical delta -- it recomputes nothing. Absent when no
@@ -365,8 +406,10 @@ def _second_iteration_body(d: dict) -> str:
     from intent_engine.strategic_intelligence import second_iteration as SI
     card = SI.hero(delta)
     state = str(card.get("state") or "")
+    tested = _named(delta.get("tested_claims") or (), labels)
     rows = [("New information", card.get("new_information", "")),
-            ("What it tested", card.get("what_it_tested", "")),
+            ("What it tested",
+             tested if tested else card.get("what_it_tested", "")),
             ("What held", card.get("what_held", "")),
             ("What changed", card.get("what_changed", "")),
             ("Effect on the decision", card.get("decision_effect", ""))]
@@ -467,7 +510,7 @@ def _provenance_body(d: dict) -> str:
 # --- the screen -------------------------------------------------------------
 
 def render(decision: dict, *, company: str = "", stamp: str = "",
-           crossing: str = "", links=None) -> str:
+           crossing: str = "", links=None, labels=None) -> str:
     """One decision, as the screen an executive reads. Returns a body."""
     d = decision or {}
     company = company or str(d.get("company") or "")
@@ -537,7 +580,7 @@ def render(decision: dict, *, company: str = "", stamp: str = "",
                  "the causal question", _causal_body(d)),
         _section("What history says", "comparable periods", _history_body(d)),
         _section("What changed since last time", "the second look",
-                 _second_iteration_body(d)),
+                 _second_iteration_body(d, labels=labels)),
         _section("Competitors, and what they would do",
                  f'{len(d.get("competitors") or ())} selected',
                  _competitor_body(d)),

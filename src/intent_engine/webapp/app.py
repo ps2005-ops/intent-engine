@@ -3762,6 +3762,15 @@ class WebApp:
         decision = self._executive_read(dossier) if dossier is not None \
             else None
         if decision is None:
+            # A RUN THAT RETRIEVED NOTHING IS NOT A FAULT IN THE PRODUCT.
+            # This answered "Something went wrong on our side ... This is a
+            # fault in the product" for Toyota, whose run simply could not
+            # retrieve an approved source -- while `/sources`, on the same
+            # run, said so plainly. Two surfaces describing one failure in
+            # incompatible terms is the same defect class as D17, and the
+            # honest page for this already exists.
+            if self.ci.store.run_state(run_id) in self.TERMINAL_STATES:
+                return self._failed_run_page(session, run_id)
             return self._error_page(
                 500, "The executive read for this run could not be composed. "
                      "That is a fault on this side, not a finding about the "
@@ -3791,6 +3800,7 @@ class WebApp:
             str(meta.get("as_of", ""))[:10]) if bit)
         body = xray.render(
             decision, company=name, stamp=stamp,
+            labels=self._citation_labels(run_id),
             crossing=str(getattr(dossier, "crossing", "") or ""),
             links=[("Full analysis", f"/runs/{run_id}/full"),
                    ("Presentation", f"/runs/{run_id}/slides"),

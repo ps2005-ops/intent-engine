@@ -229,3 +229,56 @@ def test_a_comparative_state_still_says_everything_it_should():
     assert "3 source(s)" in card["new_information"]
     assert card["what_changed"]
     assert card["decision_effect"] == "the recommendation changed"
+
+
+def test_the_second_look_card_never_shows_an_internal_id():
+    """D16, with its negative control.
+
+    The card rendered `ev_1dccf2f4d0bd8562; ev_1fb641572cc55989` under "What
+    it tested". The label map already existed and already served the sources
+    list on the same screen.
+    """
+    from intent_engine.founder_brief import xray
+
+    delta = {"state": SI.NEW_INFORMATION_CONFIRMED_VIEW, "new_evidence": 2,
+             "tested_claims": ["ev_aaa", "ev_bbb"], "changed_fields": [],
+             "statement": "s"}
+
+    named = xray._second_iteration_body(
+        {"second_iteration": delta},
+        labels={"ev_aaa": "Cloudflare 10-K", "ev_bbb": "About Cloudflare"})
+    assert "Cloudflare 10-K" in named
+    assert "ev_aaa" not in named, "an internal id reached the customer"
+
+    # NEGATIVE CONTROL: an unknown id must stay unknown, never be mapped to
+    # some other source and never fall back to printing itself.
+    unknown = xray._second_iteration_body({"second_iteration": delta},
+                                          labels={})
+    assert "ev_aaa" not in unknown and "ev_bbb" not in unknown
+    assert "cannot name" in unknown
+
+    # PARTIAL: one known, one not. The known one is named and the remainder
+    # is counted rather than silently dropped.
+    partial = xray._second_iteration_body(
+        {"second_iteration": delta}, labels={"ev_aaa": "Cloudflare 10-K"})
+    assert "Cloudflare 10-K" in partial and "ev_bbb" not in partial
+    assert "1 further source" in partial
+
+
+def test_a_claim_written_in_words_is_never_replaced_by_a_count():
+    """The regression the first D16 fix introduced.
+
+    `tested_claims` carries both evidence ids and the claim itself in prose.
+    Running every entry through the label map turned "pricing power is intact"
+    into "1 source(s) we already held, which this card cannot name" -- a
+    sentence the reader understood, replaced by a count. Worse than the raw
+    ids it was written to remove.
+    """
+    from intent_engine.founder_brief import xray
+
+    delta = {"state": SI.NEW_INFORMATION_CONFIRMED_VIEW, "new_evidence": 1,
+             "tested_claims": ["pricing power is intact"],
+             "changed_fields": [], "statement": "s"}
+    body = xray._second_iteration_body({"second_iteration": delta}, labels={})
+    assert "pricing power is intact" in body
+    assert "cannot name" not in body
