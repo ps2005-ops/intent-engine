@@ -2880,7 +2880,8 @@ class WebApp:
         _decision = decision_of(report)
         _external = self._external_context(run_id)
         _story = fn.build_narrative(company=_name, brief=_brief, report=report,
-                                    decision=_decision, external=_external)
+                                    decision=_decision, external=_external,
+                                    contract=self._executive_contract(run_id))
         _book = fd.build_dossier(company=_name, report=report,
                                  decision=_decision, narrative=_story,
                                  documents=self._retrieved_documents(run_id),
@@ -3118,6 +3119,49 @@ class WebApp:
         brief = fb.build(company=name, mode=mode, report=report,
                          observations=observations, market=market)
         return brief, report, name
+
+    def _executive_contract(self, run_id):
+        """The one answer to "does a supported reading of this company exist".
+
+        D17. Every executive surface used to decide this for itself, from
+        whichever decision object it happened to consume, and on a company
+        with a published market reading they reached opposite answers on the
+        same run. This is the single place that question is settled; the
+        surfaces keep their own prose and their own depth.
+
+        Returns None on any failure, and every consumer treats None as "ask
+        the old way" -- a contract that could fail a page is worse than the
+        contradiction it removes.
+        """
+        try:
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            from intent_engine.executive import contract as ec
+            from intent_engine.strategic_intelligence.decision import \
+                decision_of
+
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+            meta = self.ci.run_meta(run_id) or {}
+            name = str(meta.get("company_name") or "")
+            key, _c, _m = self._manifest_placement(
+                company_key(name or str(meta.get("domain") or "") or run_id),
+                name=name, domain=str(meta.get("domain") or ""))
+            dossier = DossierStore(self._runtime_root).latest(key)
+            market = self._executive_read(dossier) if dossier is not None \
+                else None
+            # The bridge already decided whether this snapshot is for the
+            # right company and recent enough. Asking again here would be a
+            # second freshness contract, and two of those is how the first
+            # one stops being believed.
+            usable = dossier is not None
+            return ec.decide(
+                company=(getattr(dossier, "canonical_name", "") or name),
+                run_decision=decision_of(report), market_decision=market,
+                market_usable=usable)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("executive contract not composed for %s", run_id)
+            return None
 
     def _retrieved_documents(self, run_id):
         """The run's retrieved documents, or () when the store has no rows.
@@ -3570,7 +3614,8 @@ class WebApp:
         decision = decision_of(report)
         external = self._external_context(run_id)
         story = fn.build_narrative(company=name, brief=brief, report=report,
-                                   decision=decision, external=external)
+                                   decision=decision, external=external,
+                                   contract=self._executive_contract(run_id))
         book = fd.build_dossier(company=name, report=report,
                                 decision=decision, narrative=story,
                                 documents=self._retrieved_documents(run_id),
@@ -3582,8 +3627,9 @@ class WebApp:
                 book, depth=fd.BRIEF, run_id=run_id,
                 citation_labels=self._citation_labels(run_id),
                 charts=_external_charts(external),
-                lead=fd.render_decision_lead(decision, name, depth=fd.BRIEF,
-                                             run_id=run_id))
+                lead=fd.render_decision_lead(
+                    decision, name, depth=fd.BRIEF, run_id=run_id,
+                    contract=self._executive_contract(run_id)))
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))
 
@@ -3949,7 +3995,8 @@ class WebApp:
             company=name, brief=brief, report=report,
             observations=observations, decision=decision_of(report),
             actions=build_actions(brief),
-            external=self._external_context(run_id))
+            external=self._external_context(run_id),
+            contract=self._executive_contract(run_id))
         # The assistant belongs ON the default screen. Dropping it was a real
         # regression: a founder who has just read a 60-second answer is exactly
         # the person with a follow-up question, and making them navigate first

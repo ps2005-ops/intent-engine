@@ -423,7 +423,7 @@ def _trim_option(option):
     return replace(option, key_assumption=pointer)
 
 def _executive_answer(company, decision, brief, consequence, supporting,
-                      said) -> Section:
+                      said, contract=None) -> Section:
     """Two to four complete sentences: what appears to be happening, why it
     matters, and the most important uncertainty.
 
@@ -440,10 +440,28 @@ def _executive_answer(company, decision, brief, consequence, supporting,
         getattr(brief, "biggest_risk", "")) or _flat(decision.limitation)
 
     if decision.readiness == WITHHELD:
-        paras.append(f"No strategic reading of {company} cleared the evidence "
-                     f"bar, so none is asserted here.")
         reason = _flat(decision.unsafe_because) or _flat(
             getattr(brief, "withheld_reason", ""))
+        # D17. Whether a reading EXISTS is one fact, decided once, in
+        # `executive.contract`. This screen used to decide it from this run
+        # alone and announce "none is asserted here" about a company the
+        # X-Ray was, on the next click, giving a supported pricing decision
+        # for.
+        if contract is not None and getattr(contract, "reading_exists", False):
+            paras.append(f"A supported reading of {company} exists and is set "
+                         f"out on the Executive X-Ray.")
+            paras.append(getattr(contract, "run_contribution", "") or
+                         "This run did not add enough independent evidence "
+                         "to strengthen it.")
+            if reason:
+                paras.append(end_sentence(
+                    f"What this run could not establish on its own: "
+                    f"{as_clause(reason, company)}"))
+                said.remember(reason)
+            return Section(EXECUTIVE_ANSWER, "The answer",
+                           paragraphs=tuple(paras))
+        paras.append(f"No strategic reading of {company} cleared the evidence "
+                     f"bar, so none is asserted here.")
         if reason:
             paras.append(end_sentence(
                 f"That absence is itself the finding: "
@@ -1096,7 +1114,8 @@ def _outside_conditions(external, said) -> Section:
 
 def build_narrative(*, company: str, brief, report: Optional[dict] = None,
                     observations: Optional[Sequence[dict]] = None,
-                    decision=None, actions=(), external=None) -> Narrative:
+                    decision=None, actions=(), external=None,
+                    contract=None) -> Narrative:
     """The whole default screen, from the one decision and the one brief.
 
     `decision` is accepted so a caller that already resolved it does not
@@ -1189,7 +1208,7 @@ def build_narrative(*, company: str, brief, report: Optional[dict] = None,
     said = SaidOnce()
     built = [
         _executive_answer(company, decision, brief, consequence,
-                          statements, said),
+                          statements, said, contract),
         _why_now(company, decision, brief, obs, said),
         _what_changed(company, brief, obs, said),
         _business_consequence(company, decision, brief, consequence,

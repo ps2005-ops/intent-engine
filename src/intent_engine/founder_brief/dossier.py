@@ -1255,7 +1255,7 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
 
 
 def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
-                         run_id: str = "") -> str:
+                         run_id: str = "", contract=None) -> str:
     """The decision, rendered identically at both depths.
 
     The ANSWER is the same object the 60-second screen renders, so a reader
@@ -1269,12 +1269,37 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
     said = SaidOnce()
     out = ['<section id="executive_answer" class="lead"><h2>The answer</h2>']
     if decision.readiness == WITHHELD:
-        out.append(_p(f"No strategic reading of {company} cleared the "
-                      f"evidence bar, so none is asserted here."))
-        if decision.unsafe_because:
-            out.append(_p(end_sentence(
-                f"That absence is itself the finding: "
-                f"{as_clause(decision.unsafe_because, company)}")))
+        # D17. "THIS RUN FOUND NOTHING" IS NOT "THERE IS NOTHING".
+        #
+        # This asserted the second because it could only see the first. On a
+        # company the market engine has a published reading for, the X-Ray
+        # said "Supported in direction, not in size · Pricing decision" while
+        # this line said no reading had cleared the bar -- one product, two
+        # opposite answers, two clicks apart.
+        #
+        # The refusal is still rendered when it is TRUE. What changed is that
+        # whether a reading exists is no longer decided here; it is read from
+        # the one contract every executive surface consults. The reasoning
+        # prose below is untouched, because the brief's job is still to
+        # explain what THIS run could and could not establish.
+        if contract is not None and getattr(contract, "reading_exists", False):
+            out.append(_p(
+                f"A supported reading of {company} exists and is set out on "
+                f"the Executive X-Ray."))
+            out.append(_p(getattr(contract, "run_contribution", "") or
+                          "This run did not add enough independent evidence "
+                          "to strengthen it."))
+            if decision.unsafe_because:
+                out.append(_p(end_sentence(
+                    f"What this run could not establish on its own: "
+                    f"{as_clause(decision.unsafe_because, company)}")))
+        else:
+            out.append(_p(f"No strategic reading of {company} cleared the "
+                          f"evidence bar, so none is asserted here."))
+            if decision.unsafe_because:
+                out.append(_p(end_sentence(
+                    f"That absence is itself the finding: "
+                    f"{as_clause(decision.unsafe_because, company)}")))
     else:
         if decision.mechanism:
             out.append(_p(end_sentence(
