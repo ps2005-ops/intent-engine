@@ -92,15 +92,15 @@ answers on two clicks.
 | JNJ_JOURNEY | NOT_RUN | — | — | — | — | — |
 | STRIPE_JOURNEY | NOT_RUN | — | — | — | — | — |
 | VALE_JOURNEY | NOT_RUN | — | — | — | — | — |
-| CEO_QA | NOT_RUN | — | — | — | — | — |
+| CEO_QA | NOT_RUN | — | Cloudflare | POST /conversation | — | attempted; the preview restarted mid-attempt and the session no longer owned the run (403 invalid CSRF, then "That analysis is not available here"). Not a Q&A finding — retry on a fresh run. |
 | PROVENANCE_LIVE | NOT_RUN | — | — | — | — | — |
 | LEARNING_LIVE | NOT_RUN | — | — | — | — | — |
-| ECONOMIC_HISTORY_LIVE | NOT_RUN | — | — | — | — | — |
-| PRESENTATION_SLIDES | NOT_RUN | — | — | — | — | — |
-| TEMPLATE_SPECIALIZATION | NOT_RUN | — | — | — | — | — |
+| ECONOMIC_HISTORY_LIVE | BLOCKED_DATA (honest) | dfe3a3a | Cloudflare | /xray | — | "Replay not yet valid. We hold 0 month(s) of our own observations and a replay needs 6. That clears on 2027-02-16." plus why today's revised data cannot be substituted into a historical T0. Blocked state, still useful — §20 satisfied. Caterpillar/BoA not yet read for this row. |
+| PRESENTATION_SLIDES | FAIL | fbb62ff | Cloudflare | /slides | D17 | deck renders 7 slides and does not fabricate unsupported ones, but slide 1 asserts "not enough to read a strategy from" while the X-Ray asserts a supported pricing decision — the deck is downstream of D17, so this row cannot pass until D17 does. |
+| TEMPLATE_SPECIALIZATION | PASS (partial scope) | fbb62ff | Cloudflare vs Caterpillar | /xray | — | genuinely different canonical state, not reworded prose: Cloudflare = *pricing* decision, "what to charge, and for what, without losing more customer count than the price gains", recurring-subscription model; Caterpillar = *capacity* decision, "how much capacity to commit, and when", long-lived manufactured product + parts/service stream. 2 of 6 companies, so scope is partial. |
 | HOSTILE_BUYER | NOT_RUN | — | — | — | — | — |
 | CUSTOMER_ACCEPTANCE | NOT_RUN | — | — | — | — | — |
-| PROCESS_RESTART | NOT_RUN | — | — | — | — | — |
+| PROCESS_RESTART | EXPECTED_EPHEMERAL_LOSS | fbb62ff | Cloudflare | /runs/<id>/brief | — | preview restarted mid-session; run ownership and session were lost. This is DESIGNED ephemerality and it is disclosed to the reader on the progress page ("This preview stores runs in memory, so a restart can interrupt one") and on /analyses. Not classified as data loss. Durable persistence remains unproven here. |
 | SECURITY | NOT_RUN | — | — | — | — | — |
 | ZERO_ANTHROPIC | NOT_RUN | — | — | — | — | — |
 | FINAL_SHA_SMOKE | NOT_RUN | — | — | — | — | — |
