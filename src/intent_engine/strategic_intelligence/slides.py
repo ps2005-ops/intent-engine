@@ -917,7 +917,7 @@ def build_founder_slides(analysis, *, company="") -> list:
 
 
 def build_slides(report, *, as_of: str = "", analysis_version: str = "",
-                 brief=None, documents=()) -> list:
+                 brief=None, documents=(), contract=None) -> list:
     """The deck, in narrative order, with every empty slide omitted.
 
     `documents` are the run's retrieved sources. When supplied, the factual
@@ -1022,6 +1022,28 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # investing in depth or in adjacency" was the product restating the
     # question as though it were the point. The composed decision goes on its
     # own screens below, where it has room to say what the options are.
+    # D17. THE DECK MAY NOT REACH ITS OWN VERDICT ON WHETHER A READING EXISTS.
+    #
+    # Live on 929a4b9, after the brief and the primary screen had been wired
+    # to the contract, this slide still headed itself "The central strategic
+    # view" over "What Cloudflare, Inc. has published is not enough to read a
+    # strategy from" -- for a run whose X-Ray was, on the next click, giving a
+    # supported pricing decision. The deck was the last surface still
+    # deciding this for itself.
+    #
+    # The bullets are NOT rewritten: what this run could establish is a real
+    # fact and the deck is entitled to say it. What changes is that the
+    # sentence is scoped to this run rather than presented as the state of
+    # the world.
+    if (contract is not None and getattr(contract, "reading_exists", False)
+            and not any(_concrete(thesis.get(k))
+                        for k in ("view", "transition"))):
+        view_bullets = [_bullet(
+            f"A supported reading of {company} exists and is set out on the "
+            f"Executive X-Ray."),
+            _bullet(getattr(contract, "run_contribution", "") or
+                    "This run did not add enough independent evidence to "
+                    "strengthen it.")]
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
 

@@ -147,3 +147,40 @@ def test_the_narrative_and_the_brief_reach_the_same_verdict(supported):
         f"the brief and the primary screen disagree about whether a reading "
         f"exists (brief denies={denies_lead}, screen denies={denies_story})")
     assert denies_lead is not supported
+
+
+def test_the_deck_does_not_deny_a_reading_the_contract_asserts():
+    """The deck was the last surface still deciding this for itself.
+
+    Live on 929a4b9, after the brief and primary screen were wired, slide 1
+    still headed itself "The central strategic view" over "not enough to read
+    a strategy from" for a run whose X-Ray gave a supported pricing decision.
+    """
+    from intent_engine.strategic_intelligence.slides import build_slides
+
+    report = {"company_name": "Cloudflare, Inc.", "thesis": {}}
+    contract = ec.decide(company="Cloudflare, Inc.",
+                         run_decision=_run(False),
+                         market_decision=_market(True))
+    text = " ".join(
+        str(b) for s in build_slides(report, contract=contract)
+        for b in (getattr(s, "bullets", None) or s.get("bullets", []) if
+                  isinstance(s, dict) else getattr(s, "bullets", [])))
+    assert "not enough to read a strategy from" not in text, (
+        "the deck denies a reading the contract asserts")
+    assert "Executive X-Ray" in text
+
+
+def test_the_deck_still_refuses_when_the_contract_refuses():
+    from intent_engine.strategic_intelligence.slides import build_slides
+
+    report = {"company_name": "Nowhere", "thesis": {}}
+    contract = ec.decide(company="Nowhere", run_decision=_run(False),
+                         market_decision=None)
+    text = " ".join(
+        str(b) for s in build_slides(report, contract=contract)
+        for b in (getattr(s, "bullets", None) or s.get("bullets", []) if
+                  isinstance(s, dict) else getattr(s, "bullets", [])))
+    assert "Executive X-Ray" not in text, (
+        "a company with nothing behind it was pointed at a reading that does "
+        "not exist")
