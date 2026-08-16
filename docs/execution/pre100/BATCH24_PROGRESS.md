@@ -91,6 +91,51 @@ Operator-only, login-gated, 404 for a demo guest: `/learning`, `/dashboard`,
   assertion. Recorded because it is the same class of defect the file exists to
   catch: a test that cannot fail.
 
+### D13 — SEV2, demo-blocking — CLOSED, live-verified
+
+- **Screen:** `/runs/<id>/xray` on `9a42372`, Cloudflare.
+- **Customer-visible:** "The decision was not selected from this company's
+  economics, because this company is not classified here." / "Nothing changed."
+  / "No action is put forward for this company." / 0 evidence rows / 0 channels
+  — while `/demo-dossiers/cloudflare/xray`, same company, same evidence, said
+  "Supported in direction, not in size", a pricing decision, 6 evidence rows
+  and 5 beliefs.
+- **Root cause:** the route was right and the object was wrong. `xray.render`
+  reads what `decision_synthesis.compose` populates; the reasoning path's
+  `decision_of(report)` has none of those fields, so an honest renderer
+  reported emptiness about a run that had plenty. Choosing it was a §5
+  argument (one canonical state per run) applied to the wrong seam: the
+  dossier is a materialized view **of this run**, not a second state system.
+- **Fix:** `_run_xray` composes via `_executive_read` off the dossier this run
+  published, carrying `economic_history` and `second_iteration` across.
+- **Regression:** compares the live and dossier X-Rays' decision question.
+  Asserting HTTP 200, or the words "Executive X-Ray", passes on an empty page.
+- **Live proof on `554e317`:** full reading, 6 rows, 5 competitors, 4 branches.
+
+### D14 — SEV2 — OPEN
+
+- **Screen:** `/runs/<id>/xray`, "What changed since last time", live on
+  `554e317`, second Cloudflare run of the same session.
+- **Customer-visible, all three on one card:** "This is the baseline reading.
+  There is no earlier view to compare it against yet." · "New information —
+  10 source(s) we had not seen before" · "This did not add to what the system
+  knows."
+- **Two defects, not one.**
+  1. `second_iteration.hero` renders all seven lines in every state. On
+     `FIRST_OBSERVATION` the new-evidence count is the whole corpus (10 vs an
+     empty prior), so a baseline card advertises ten new sources and then says
+     nothing was learned. The lines are individually true and jointly
+     incoherent; a baseline should render the baseline sentence alone.
+  2. The state should probably not have been `FIRST_OBSERVATION` at all — this
+     was the **second** Cloudflare run owned by the same session, so
+     `_prior_run` returned nothing where a prior exists. Not yet diagnosed;
+     candidates are the ownership index ordering and the `_founder_layers`
+     non-empty-report condition inside the lookup.
+- **Not fixed here:** found past the §72 88% mark, and it is SEV2, not SEV1.
+  Diagnosing (2) before touching (1) matters — fixing the card's wording while
+  the lookup is silently failing would hide the larger defect behind better
+  copy, which is the exact shape of the last three batches.
+
 ## §7 HYDRATION — wired to the live progress page
 
 `hydration.assess` was built, proven and called by nothing on the customer
