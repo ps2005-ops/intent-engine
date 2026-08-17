@@ -125,20 +125,73 @@ def intent_of(question: str) -> str:
     return ""
 
 
-def _route_answer(question: str, decision) -> tuple:
+#: Where the canonical bounded read answers each intent. Consulted only when
+#: the run's own decision has nothing in the field -- see `_route_answer`.
+_READ_FALLBACK = {
+    "falsifier": ("level6_action", "falsifier"),
+    "recommendation": ("level6_action", "action_now"),
+    "biggest_uncertainty": ("level6_action", "what_remains_unknown"),
+    "biggest_risk": ("level6_action", "what_remains_unknown"),
+    "monitoring": ("level7_monitoring", ""),
+    "competitor": ("level4_competition", ""),
+}
+
+
+def _from_read(name: str, read) -> str:
+    """This intent's answer, off the canonical read.
+
+    D31. Measured live: the hostile executive question "What should we
+    actually do, and what proves this wrong?" was answered "No falsifier has
+    been established for this reading yet." on a run whose own step 1 carried
+    a falsifier, an action, an experiment and a kill switch. Q&A was reading
+    the RUN's decision, which had established nothing, while every other
+    surface had moved to the read composed from the classification and the
+    published record.
+
+    That is the same seam that produced D13, D17, D22, D25 and D30, found for
+    the sixth time. Q&A still does not decide anything: it projects, and this
+    is the object it projects from when the run's own decision is silent.
+    """
+    if read is None or not getattr(read, "puts_a_strategy_forward", False):
+        return ""
+    where = _READ_FALLBACK.get(name)
+    if where is None:
+        return ""
+    holder, field = where
+    value = getattr(read, holder, None)
+    if field:
+        return str(getattr(value, field, "") or "")
+    if holder == "level7_monitoring":
+        return "; ".join(s.text for s in (value or ())[:3])
+    if holder == "level4_competition":
+        return "; ".join(
+            f"{c.name}: {c.likely_response} Watch {c.signal_to_watch}"
+            for c in (value or ())[:2])
+    return ""
+
+
+def _route_answer(question: str, decision, read=None) -> tuple:
     """(answer, matched_intent). Reads the composed decision, never invents.
 
     `decision` is the composed FounderDecision as a dict -- the object the
-    X-Ray renders. A missing decision returns no match, so the caller keeps
-    its existing behaviour rather than getting a blank.
+    X-Ray renders. `read` is the canonical bounded read, consulted ONLY where
+    the decision is silent, so a run that concluded nothing of its own cannot
+    make Q&A deny what the rest of the product asserts.
     """
     name = intent_of(question)
-    if not name or not isinstance(decision, dict):
+    if not name:
         return "", name
+    if not isinstance(decision, dict):
+        return _from_read(name, read), name
     for row_name, _markers, field, absent in INTENT_ROUTES:
         if row_name != name:
             continue
         value = decision.get(field)
+        if not value or (isinstance(value, (list, tuple, dict))
+                         and not any(value)):
+            fallback = _from_read(row_name, read)
+            if fallback:
+                return fallback, name
         if isinstance(value, dict):
             # economic_history / second_iteration carry their own sentence.
             said = value.get("statement") or value.get("plain") or ""
@@ -193,7 +246,8 @@ def _intent(question: str, markers) -> bool:
 
 def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
-           trust=None, contract=None, decision=None) -> FounderAnswer:
+           trust=None, contract=None, decision=None,
+           read=None) -> FounderAnswer:
     """Frame an answer using the shared object. Never invents a conclusion.
 
     `trust` is the CANONICAL standing produced by the market side, not a
@@ -236,7 +290,7 @@ def answer(question: str, brief, *, engine_answer: str = "",
     # we do" and "what should we monitor next" alike -- so running it first
     # collapsed a monitoring question onto the recommendation answer. Caught by
     # the distinctness test rather than live, which is the point of having it.
-    _routed, _matched = _route_answer(question, decision)
+    _routed, _matched = _route_answer(question, decision, read)
     if _routed:
         out.direct_answer = _routed
         if contract is not None and getattr(contract, "run_contribution", ""):

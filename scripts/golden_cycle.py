@@ -29,6 +29,7 @@ import pathlib
 import re
 import sys
 import time
+import urllib.parse
 import urllib.request
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -148,10 +149,17 @@ class LiveClient:
 
 def start_run(client, company, website, wait):
     client.request("POST", "/demo")
-    body = (f"consent=on&csrf={client.csrf()}"
-            f"&company_name={company.replace(' ', '+')}")
+    # PROPERLY ENCODED. "Johnson & Johnson" with a bare ampersand ends the
+    # company_name parameter at "Johnson", so the run analysed a company that
+    # does not exist, failed to classify it, and was handed the whole pattern
+    # library -- which then described a pharmaceutical company in take-or-pay
+    # and order-book language. A browser form encodes this; this harness did
+    # not, and the defect it produced looked exactly like a product defect.
+    body = ("consent=on"
+            f"&csrf={urllib.parse.quote_plus(client.csrf())}"
+            f"&company_name={urllib.parse.quote_plus(company)}")
     if website:
-        body += f"&website={website}"
+        body += f"&website={urllib.parse.quote_plus(website)}"
     status, headers, payload = client.request("POST", "/analyze", body)
     if status != 303 or "Location" not in headers:
         print(f"  analyze -> {status}: {visible(payload)[:300]}")
@@ -289,5 +297,4 @@ class _EmptyRead:
 
 
 if __name__ == "__main__":
-    import urllib.parse                                     # noqa: E402
     raise SystemExit(main())

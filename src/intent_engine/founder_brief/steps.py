@@ -227,6 +227,11 @@ def _read_word(standing: str) -> str:
             READ_UNIDENTIFIED: "Not established"}.get(standing, "Bounded")
 
 
+def _capitalise(text: str) -> str:
+    flat = str(text or "").strip()
+    return flat[:1].upper() + flat[1:] if flat else ""
+
+
 def _lower(text: str) -> str:
     flat = str(text or "").strip()
     if not flat:
@@ -270,7 +275,12 @@ def render_history(timeline, *, run_id: str, company: str) -> str:
     out.append(f'<style>{_rail_css(len(timeline.vintages))}</style>')
     out.append('<div class="rail" role="group" aria-label="Choose a date">')
     for index, vintage in enumerate(timeline.vintages):
-        out.append(f'<label for="rw{index}"><b>{_e(vintage.date[:7])}</b>'
+        # THE MONTH IS NOT ALWAYS UNIQUE. Two 8-Ks three weeks apart both
+        # read "2026-06", so the rail offered two identical-looking dates and
+        # a reader could not tell which one they were on.
+        label = (vintage.date if _ambiguous(timeline, vintage)
+                 else vintage.date[:7])
+        out.append(f'<label for="rw{index}"><b>{_e(label)}</b>'
                    f'{_e(_short_state(vintage.state))}</label>')
     out.append('</div>')
     for index, vintage in enumerate(timeline.vintages):
@@ -292,6 +302,11 @@ def render_history(timeline, *, run_id: str, company: str) -> str:
     out.append(flow.nav(run_id, "history"))
     out.append('</main>')
     return "".join(out)
+
+
+def _ambiguous(timeline, vintage) -> bool:
+    months = [v.date[:7] for v in timeline.vintages]
+    return months.count(vintage.date[:7]) > 1
 
 
 def _short_state(state: str) -> str:
@@ -383,7 +398,7 @@ def render_connect(read, *, run_id: str, company: str) -> str:
     out.append('<div class="readbox"><h2>Public intelligence — what it '
                'could establish</h2>')
     out.append(f'<p>{_e(read.identity)}</p>')
-    out.append(f'<p>{_e(read.standing_reason)}</p>')
+    out.append(f'<p>{_e(_capitalise(read.standing_reason))}</p>')
     if read.evidence_note:
         out.append(f'<p>{_e(read.evidence_note)}</p>')
     out.append('</div>')
@@ -587,42 +602,66 @@ def _arc(timeline, company: str) -> str:
 def render_learning(report, reading) -> str:
     """§54. What was new, what was already known, and what to learn next.
 
-    ACTIVITY IS NOT LEARNING, and the distinction is the whole point: a cycle
-    that re-read eighty pages and changed nothing has been busy. The headline
-    is therefore what CHANGED, never what arrived.
+    ACTIVITY IS NOT LEARNING, and the distinction is the headline: a cycle
+    that re-read eighty pages and changed nothing has been busy. So the first
+    number shown is what CHANGED THE MODEL, never what arrived.
 
-    Renders nothing at all when no report is available. An empty learning
-    panel teaches a reader that the system does not learn, which is the
-    opposite of true and worse than silence.
+    FIELD NAMES ARE READ OFF THE PRODUCER, NOT GUESSED. The first version of
+    this asked for `beliefs_changed` and `novel_evidence`, which the learning
+    report has never emitted -- so it rendered nothing at all, on every page,
+    while a full report sat one call away. A consumer that names its
+    producer's fields wrongly reports a uniform absence and looks exactly
+    like a producer that is not running.
+
+    Renders nothing when no report is available. An empty learning panel
+    teaches a reader that the system does not learn, which is the opposite of
+    true and worse than silence.
     """
     if report is None or not getattr(report, "available", False):
+        return ""
+    reading = reading or {}
+    if str(reading.get("state") or "") != "LEARNING_AVAILABLE":
         return ""
     payload = getattr(report, "payload", None) or {}
     summary = payload.get("executive_summary") or {}
     bottleneck = payload.get("bottleneck") or {}
     nxt = payload.get("next_research_priority") or {}
+
     rows = []
-    for label, value in (
-            ("What changed the model", summary.get("beliefs_changed")),
-            ("What was genuinely new", summary.get("novel_evidence")),
-            ("What was already known", summary.get("re_observations")),
-            ("What is still unresolved", summary.get("open_questions"))):
-        if value not in (None, "", 0):
-            rows.append(f'<li><span class="st">{_e(label)}</span><br>'
-                        f'{_e(value)}</li>')
-    headline = _e(getattr(reading, "headline", "") or
-                  summary.get("headline") or "")
-    if not rows and not headline:
+    for label, key, gloss in (
+            ("Changed the model", "changed_the_model",
+             "beliefs this system revised because of what it read"),
+            ("Genuinely new", "novel",
+             "arrivals that were not already in the record"),
+            ("Already known", "re_observed",
+             "arrivals that confirmed what was already held"),
+            ("Tested and held", "tested_and_unchanged",
+             "beliefs checked against new evidence and left standing")):
+        value = reading.get(key)
+        if value in (None, ""):
+            continue
+        rows.append(f'<li><span class="st">{_e(label)} — {_e(value)}</span>'
+                    f'<br>{_e(gloss)}</li>')
+    if not rows:
         return ""
+
     out = ['<h2>What the system learned since last time</h2>']
-    if headline:
-        out.append(f'<p>{headline}</p>')
-    if rows:
-        out.append(f'<ul class="chain">{"".join(rows)}</ul>')
-    priority = _e(nxt.get("question") or nxt.get("why") or "")
-    limit = _e(bottleneck.get("explanation") or "")
-    if limit:
-        out.append(f'<p>{limit}</p>')
-    if priority:
-        out.append(f'<p><strong>What to learn next:</strong> {priority}</p>')
+    verdict = str(reading.get("verdict") or "").lower()
+    why = str(reading.get("why") or "")
+    if verdict:
+        out.append(f'<p>Learning is <strong>{_e(verdict)}</strong>'
+                   + (f' — {_e(why)}' if why else '') + '. Reading more is '
+                   'not the same as knowing more, so this counts what '
+                   'changed rather than what arrived.</p>')
+    out.append(f'<ul class="chain">{"".join(rows)}</ul>')
+
+    for item in (summary.get("top_learnings") or ())[:2]:
+        out.append(f'<p>{_e(item)}</p>')
+    reason = str(bottleneck.get("reason") or "")
+    if reason:
+        out.append(f'<p><strong>What is holding it back:</strong> '
+                   f'{_e(reason)}</p>')
+    action = str(nxt.get("suggested_action") or "")
+    if action:
+        out.append(f'<p><strong>What to learn next:</strong> {_e(action)}.</p>')
     return "".join(out)

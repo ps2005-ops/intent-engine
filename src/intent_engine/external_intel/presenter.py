@@ -247,8 +247,12 @@ def competitor_blocks(context: ExternalContext) -> List[Block]:
                                                                 "evidence",
         freshness=(f"stated in a source dated {d['date']}" if d["date"]
                    else ""),
+        # THE ALT TEXT IS READ ALOUD, so it may not carry an enum. It said
+        # "Closest: Alstom SA (DIRECT_COMPETITOR)." -- the machine token in
+        # the one place a sighted reader never checks. The MEANING is already
+        # composed above and is what a person would say.
         text_alternative=(f"Alternatives named: {names}. Closest: "
-                          f"{d['name']} ({d['relationship']})."),
+                          f"{d['name']} — {d['relationship_meaning']}."),
         evidence_ids=tuple(d["evidence_ids"]),
         chart="competitor_positioning")]
 

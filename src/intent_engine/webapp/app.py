@@ -2964,7 +2964,8 @@ class WebApp:
                                  documents=self._retrieved_documents(run_id),
                                  external=_external,
                                  market=self._market_snapshot(run_id)
-                                 if self._listing_for(run_id).ticker else None)
+                                 if self._listing_for(run_id).ticker else None,
+                                 read=self._strategic_read(run_id, _name))
         strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS
                  + fd.render_dossier(
                      _book, depth=fd.FULL, run_id=run_id, wrap=False,
@@ -3640,11 +3641,29 @@ class WebApp:
             return {"available": False, "modules": {}, "limitations": [],
                     "reason": "The market snapshot could not be read."}
 
+    def _run_company(self, run_id) -> str:
+        """The company this run is about, for surfaces that show only an
+        answer. Never raises and never returns a placeholder that could be
+        mistaken for a name."""
+        try:
+            _brief, _report, name = self._founder_layers(run_id)
+            if name:
+                return name
+        except Exception:                                   # noqa: BLE001
+            pass
+        meta = self.ci.run_meta(run_id) or {}
+        return str(meta.get("company_name") or meta.get("domain") or "")
+
     def _founder_answer_page(self, session, run_id, answer):
         """One answer, in the same shape as every other founder surface."""
         from intent_engine.founder_brief import render as fr
         a = answer
         parts = [f'{fr.BRIEF_CSS}<main class="fb">',
+                 # THE COMPANY IS NAMED ON THE PAGE THAT ANSWERS ABOUT IT.
+                 # A reader who lands here from a shared link, or scrolls
+                 # back to it later, was shown a question and an answer with
+                 # no indication which company either concerned.
+                 f'<p class="kicker">{_e(self._run_company(run_id))}</p>',
                  f'<h1>{_e(a.question[:120])}</h1>',
                  f'<div class="card headline"><p>{_e(a.direct_answer)}</p>']
         if a.so_what:
@@ -3746,7 +3765,8 @@ class WebApp:
                                 documents=self._retrieved_documents(run_id),
                                 external=external,
                                 market=self._market_snapshot(run_id)
-                                if self._listing_for(run_id).ticker else None)
+                                if self._listing_for(run_id).ticker else None,
+                                read=self._strategic_read(run_id, name))
         body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + \
             fd.render_dossier(
                 book, depth=fd.BRIEF, run_id=run_id,
@@ -5478,7 +5498,10 @@ class WebApp:
                                     decision=self._composed_decision(run_id),
                                     engine_answer=engine_text,
                                     observations=observations,
-                                    trust=_trust)
+                                    trust=_trust,
+                                    # D31: the canonical read, so Q&A cannot
+                                    # deny a falsifier step 1 is showing.
+                                    read=self._strategic_read(run_id))
         return self._founder_answer_page(session, run_id, founder_answer)
         flat_claims = self._run_claims(run_id)
         # The previous turn's subject, so "Why?" and "Explain that" resolve

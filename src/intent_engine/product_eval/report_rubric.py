@@ -312,9 +312,17 @@ def score(*, read, pages: Dict[str, str], timeline=None,
         if prov >= 9 else "provenance is not reachable from this step")
 
     # --- specificity --------------------------------------------------------
+    # WHERE THE FAILURE IS DECIDES WHAT IT COSTS. A step of the story that
+    # never names the company is a product defect; a secondary drawer that
+    # does not is a smaller one, and flooring the whole dimension to 3.0 for
+    # it hid three genuinely good analyses behind one missing heading.
+    primary = {"intro", "slides", "full", "story", "history", "connect"}
+    generic_on = {f.surface for f in findings if f.code == "GENERIC_STRATEGY"}
     spec = 10.0
-    if "GENERIC_STRATEGY" in codes:
+    if generic_on & primary:
         spec = 3.0
+    elif generic_on:
+        spec = 6.5
     if "TEMPLATE_COLLAPSE" in codes:
         spec = min(spec, 3.0)
     if rivals and not named_rivals:

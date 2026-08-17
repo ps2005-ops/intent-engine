@@ -215,7 +215,11 @@ def macro_exposure(factor: dict, *, headline: str, so_what: str,
     # one visual that carries the macro reasoning printed four sentences that
     # all trailed off. SVG does not wrap, so the wrapping is done here: two
     # lines per step, and the box grows to fit them.
-    lines = [(label, _lines(text, 74, 2)) for label, text in steps]
+    # THREE LINES, NOT TWO. A transmission step is a full causal sentence and
+    # measured live they run 140-190 characters, so a two-line box at 74
+    # ellipsized every one of the four steps -- the single visual that carries
+    # the macro reasoning, trailing off four times.
+    lines = [(label, _lines(text, 74, 3)) for label, text in steps]
     height = 46 + 17 * max(len(v) for _k, v in lines)
     total = len(lines) * height + 10
     body = []

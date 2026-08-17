@@ -503,8 +503,30 @@ def _customer_demand(company, report, index, said) -> Passage:
                    evidence_ids=tuple(i.evidence_id for i in items[:6]))
 
 
+def _structural_competition(read, company) -> list:
+    """What can be said about the competitive structure without a rival page.
+
+    Composed from the canonical read, which derives it from the business
+    model and from any rival THIS company named in its own filing. Empty when
+    the read has nothing -- an empty list is honest, a manufactured rival is
+    not.
+    """
+    rows = tuple(getattr(read, "level4_competition", ()) or ())
+    if not rows:
+        return []
+    out = []
+    for row in rows[:2]:
+        out.append(end_sentence(
+            f"{row.name}: {lower_first(row.why_a_rival)} "
+            f"{row.likely_response} The response likelihood is "
+            f"{row.response_likelihood.lower()}, the counter available here "
+            f"is {lower_first(row.counter_move)} and the signal that would "
+            f"show it first is {lower_first(row.signal_to_watch)}"))
+    return out
+
+
 def _competitive(company, report, decision, hypotheses, families,
-                 said, external=None) -> Passage:
+                 said, external=None, read=None) -> Passage:
     """Relative position, or a stated reason there is nothing to say.
 
     A generic competitor list is worse than none: it is the same paragraph for
@@ -578,12 +600,23 @@ def _competitive(company, report, decision, hypotheses, families,
         absent = next((f for f in families
                        if f["key"] == "competitor" and not f["present"]), None)
         if absent:
+            # §13. A COMPETITIVE READ IS A STATEMENT ABOUT MARKET STRUCTURE.
+            #
+            # This used to open "No competitor's own account was retrieved for
+            # this run" -- a fact about retrieval, in the section a reader
+            # opens to find out who they are competing with. Structure is
+            # established by what kind of business this is, not by whether a
+            # rival's page happened to be in the fetch set; what retrieval
+            # decides is the STANDING, which is still said, second.
+            supported = _structural_competition(read, company)
+            if supported:
+                paras.extend(supported)
             paras.append(
-                "No competitor's own account was retrieved for this run, so "
-                "nothing here corrects for how this company frames its own "
-                "market. Treat the positioning below as self-described, and "
-                "read the decision knowing that a competitor moving first is "
-                "the risk the evidence cannot price.")
+                "No competitor's own account was retrieved in this run, so "
+                "nothing above corrects for how this company frames its own "
+                "market. Read the positioning as self-described, and treat a "
+                "competitor moving first as the risk the evidence cannot "
+                "price.")
     return Passage("competitive", "Where this sits against the alternatives",
                    depth=BOTH, kind="evidence", paragraphs=tuple(paras),
                    items=tuple(items[:4]),
@@ -1048,7 +1081,7 @@ def _evidence_appendix(report, index) -> Passage:
 
 def build_dossier(*, company: str, report: Optional[dict] = None,
                   decision=None, market=None, narrative=None,
-                  documents=(), external=None) -> Dossier:
+                  documents=(), external=None, read=None) -> Dossier:
     """The canonical deep material, assembled once for both deep surfaces.
 
     `narrative` is the already-built primary screen. It is passed in so the
@@ -1092,7 +1125,7 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
         _what_changed(company, report, said),
         _customer_demand(company, report, index, said),
         _competitive(company, report, decision, hypotheses, families, said,
-                     external),
+                     external, read=read),
         _market(company, market, said, external),
         _macro(company, report, decision, said, external),
         _analogs(company, report, decision, hypotheses, said),

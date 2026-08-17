@@ -911,16 +911,26 @@ def _standing(profile, selection, observations, documents, run_decision):
             "regulatory disclosure and by how this kind of business works; "
             "its size is not established, because no independent source "
             "measured it")
+    # THE REASON MUST AGREE WITH THE COUNT PRINTED BESIDE IT.
+    #
+    # Measured on the live Caterpillar Connect page, one paragraph said both
+    # "no independent source corroborated it in this run" and "1 of the
+    # passages read came from a source the company does not control." Both
+    # sentences came from this module. The count is the fact; the reason has
+    # to be written from it rather than from the branch that produced it.
+    corroboration = (
+        f"{independent} source(s) outside the company's control were read, "
+        f"which is not enough to size the effect"
+        if independent else
+        "no source outside the company's control was read in this run")
     if profile.profile_state == PROFILE_AVAILABLE:
         return READ_BOUNDED, _sentence(
-            "the reading follows from an established classification of this "
-            "business and from what the company publishes about itself; no "
-            "independent source corroborated it in this run, so it is held "
-            "in direction only")
+            f"the reading follows from an established classification of this "
+            f"business and from what the company publishes about itself; "
+            f"{corroboration}, so it is held in direction only")
     return READ_BOUNDED, _sentence(
-        "the reading follows from how this kind of business works; the "
-        "record read here neither confirmed nor contradicted it, so it is "
-        "held in direction only")
+        f"the reading follows from how this kind of business works; "
+        f"{corroboration}, so it is held in direction only")
 
 
 # --- the hero (§24) ---------------------------------------------------------

@@ -99,7 +99,12 @@ def _shorten(text: str) -> str:
     if len(words) <= MAX_WORDS_PER_BULLET:
         return text
     head = " ".join(words[:MAX_WORDS_PER_BULLET])
-    for stop in (". ", "; ", " -- ", ", "):
+    # THE TYPOGRAPHIC DASHES AND THE COLON WERE MISSING. Composed prose uses
+    # "—" and ":" where retrieved page text used "--", so the one clause break
+    # in a sentence like "...a transaction network — spread and fees on volume
+    # the firm intermediates" was invisible here and the bullet fell through
+    # to the word cut, ending "...on volume the…" on slide 2 of the deck.
+    for stop in (". ", "; ", " — ", " – ", " -- ", ": ", ", "):
         cut = head.rfind(stop)
         # only worth it if a useful amount of the bullet survives
         if cut > len(head) * 0.5:
@@ -1028,7 +1033,11 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # instead, and the company's own copy stays underneath it as context,
     # which is the order §22 asks for and the order a reader needs.
     if read is not None and getattr(read, "identity", ""):
-        identity_bullets = ([_bullet(read.identity)]
+        # `full=True`: this line is composed rather than retrieved, and it is
+        # one sentence chosen to be the thing a reader remembers. Trimming it
+        # to the bullet budget deletes the half that says what the business
+        # runs on.
+        identity_bullets = ([_bullet(read.identity, full=True)]
                             + [b for b in identity_bullets
                                if not _ASPIRATIONAL.search(b.get("text", ""))])
         note = ("The first line is this analysis's reading; the rest is the "

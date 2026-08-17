@@ -395,8 +395,9 @@ def _market_expected(profile, before, when) -> str:
                 "avoid.")
     return _stop(
         f"No estimate or share-price series was retrieved, so what the market "
-        f"expected is not measured here. What it would have been WATCHING is "
-        f"determined by the business model: {_join([_lower(d) for d in drivers[:3]])}")
+        f"expected is not measured here. What it would have been watching is "
+        f"determined by the business model: "
+        f"{_join([_lower(d) for d in drivers[:3]])}")
 
 
 def _knowable(before, when) -> str:
