@@ -515,3 +515,18 @@ def test_a_filing_heading_is_not_a_sentence_about_competing(heading):
 def test_a_real_competition_sentence_still_counts(sentence):
     from intent_engine.external_intel.competitor_finder import names_a_contest
     assert names_a_contest(sentence)
+
+
+@pytest.mark.parametrize("acronym", ["SaaS", "PaaS", "API", "CDN", "CRM",
+                                     "SASE", "IoT"])
+def test_a_category_acronym_is_not_a_company(acronym):
+    """"SaaS" survived the grammatical rule -- it is a single mixed-case token
+    and it appears in sentences that genuinely say "compete" -- and reached
+    the deployed introduction as one of Cloudflare's three named
+    competitors."""
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    names = candidate_names(
+        f"We compete with other {acronym} providers and with Akamai "
+        f"Technologies.", subject="Cloudflare, Inc.")
+    assert acronym not in names, names
+    assert "Akamai Technologies" in names, names

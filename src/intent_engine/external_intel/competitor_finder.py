@@ -213,8 +213,18 @@ _NOT_A_VENDOR = frozenset({
 #: Standard and programme acronyms that are single tokens and therefore slip
 #: past the head-noun test above.
 _NOT_A_VENDOR_EXACT = frozenset({
+    # standards, regulations and certification schemes
     "fedramp", "gdpr", "hipaa", "soc", "pci", "pci-dss", "iso", "nist",
     "ccpa", "sox", "dora", "mifid", "basel", "ifrs", "gaap", "esg",
+    # CATEGORY ACRONYMS. Structurally identical to the schemes above: a
+    # capitalised token, mixed case, in a sentence that genuinely says
+    # "compete" -- "we compete with other SaaS providers" -- and not a
+    # company anyone can buy from. "SaaS" survived the grammatical rule and
+    # reached the deployed introduction as one of Cloudflare's three named
+    # competitors.
+    "saas", "paas", "iaas", "api", "apis", "cdn", "vpn", "sase", "ai", "ml",
+    "llm", "crm", "erp", "sdk", "cms", "b2b", "b2c", "sme", "smb", "it",
+    "iot", "saas/paas", "devops", "mlops", "byod", "sso", "mfa",
 })
 
 
@@ -270,7 +280,7 @@ def candidate_names(passage: str, *, subject: str = "") -> List[str]:
         # A programme, a standard or a regulator is not an alternative a
         # buyer weighs. It cannot be sold to, bought from, or competed with.
         tokens = [w.lower().strip(".") for w in name.split()]
-        if lowered.replace(" ", "") in _NOT_A_VENDOR_EXACT:
+        if lowered.replace(" ", "").strip(".") in _NOT_A_VENDOR_EXACT:
             continue
         if tokens and tokens[-1] in _NOT_A_VENDOR:
             continue
