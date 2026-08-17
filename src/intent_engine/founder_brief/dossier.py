@@ -521,6 +521,11 @@ def _customer_demand(company, report, index, said) -> Passage:
                    evidence_ids=tuple(i.evidence_id for i in items[:6]))
 
 
+def _capitalise_first(text: str) -> str:
+    text = (text or "").strip()
+    return text[:1].upper() + text[1:] if text else text
+
+
 def _structural_competition(read, company) -> list:
     """What can be said about the competitive structure without a rival page.
 
@@ -534,12 +539,17 @@ def _structural_competition(read, company) -> list:
         return []
     out = []
     for row in rows[:2]:
+        # THE FIELDS ARE ALREADY SENTENCES. Wrapping them in lead-ins
+        # produced "the counter available here is the available counter-move
+        # is pricing of assets and liabilities" on the deployed page — a
+        # stutter caused by two layers each supplying the same framing.
+        # Rendered as sentences, with the label carried by the field itself.
         out.append(end_sentence(
-            f"{row.name}: {row.why_a_rival} "
-            f"{row.likely_response} The response likelihood is "
-            f"{row.response_likelihood.lower()}, the counter available here "
-            f"is {lower_first(row.counter_move)} and the signal that would "
-            f"show it first is {lower_first(row.signal_to_watch)}"))
+            f"{row.name}: {row.why_a_rival} {row.likely_response} "
+            f"Response likelihood: {row.response_likelihood.lower().rstrip('.')}. "
+            f"{_capitalise_first(row.counter_move)} "
+            f"The signal that would show it first is "
+            f"{lower_first(row.signal_to_watch)}"))
     return out
 
 

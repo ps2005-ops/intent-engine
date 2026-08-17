@@ -207,6 +207,44 @@ be built and measured across a wider set before it can be claimed.
 
 ---
 
+## 6b. What the DEPLOYED page found that the wave could not
+
+The wave scored `competition` and `competitive_specificity` at 10.0 for Bank
+of America. The deployed Full analysis carried **no competitive section at
+all**.
+
+`_competitive` renders the structural read only when the coverage family
+"competitor" is marked ABSENT. This run had retrieved three documents classed
+`competitor` — third-party 10-Ks mentioning the subject in passing — so the
+family read PRESENT and the branch never ran. `items` was empty anyway,
+because none of those documents says anything about this company. **Present
+but useless is the state the gate could not express.**
+
+The family flag describes RETRIEVAL. The section describes the MARKET. A rule
+that keeps failing live is reading a field that means something else.
+
+And the rubric scored it 10.0 throughout, because **the rubric reads the
+object and the customer reads the page**. That gap is the inert-repair
+signature this programme keeps re-learning, and it is the reason the live
+walkthrough is not optional.
+
+Two more prose defects were then read off the repaired page and fixed:
+
+* *"the counter available here is the available counter-move is pricing of
+  assets and liabilities"* — two layers each supplying the same lead-in;
+* *"banks defends flow with distribution"* — a contested category is plural
+  and the class default is authored for a single named firm. The ladder
+  builds its reaction from the KIND, which knows the difference, so the
+  projection now prefers it.
+
+Verified live at `160b3cc`: the section renders, headed "Where this sits
+against the alternatives", carrying Bank of America's own *banks* and
+*thrifts*. The two prose repairs above are committed at `%%SHA%%` and were
+**not** re-read on the deployed page — context ended first, and that is
+recorded rather than assumed.
+
+---
+
 ## 7. Known and non-blocking
 
 * `macroeconomics` 6.0 — unchanged, and correct when no macro channel has a

@@ -1240,14 +1240,23 @@ def _from_ground(name, profile, selection, ground) -> Tuple[CompetitorRead, ...]
             why_a_rival=_sentence(why),
             exposure=_sentence(getattr(move, "impact", "")
                                or _capitalise(rival.why_it_matters)),
+            # THE LADDER'S OWN REACTION WINS over the class default. The
+            # default is authored for a single named firm and produced "banks
+            # defends flow with distribution" on the deployed page, because a
+            # contested category is plural and the class default cannot know
+            # that. The ladder builds its sentence from the KIND, which does.
             likely_response=_sentence(
                 _clean(getattr(move, "action", ""))
+                or rival.likely_response
                 or _default_response(profile.business_model_class,
                                      rival.identity)),
-            response_likelihood=_likelihood(profile, move),
+            response_likelihood=(_clean(rival.response_likelihood)
+                                 or _likelihood(profile, move)),
             counter_move=_sentence(getattr(move, "countermeasure", "")
+                                   or _capitalise(rival.counter_move)
                                    or _default_counter(profile)),
             signal_to_watch=_sentence(getattr(move, "observable_signal", "")
+                                      or _capitalise(rival.signal_to_watch)
                                       or _capitalise(rival.disproof)),
             level=str(getattr(move, "level", "") or "L1")))
     return tuple(out[:6])

@@ -378,6 +378,24 @@ def _independence(rung: str, company: str) -> str:
     return "read from the business model, not retrieved"
 
 
+#: A CATEGORY IS PLURAL AND A FIRM IS SINGULAR. "banks defends flow with
+#: distribution" reached the deployed page because the reaction sentence
+#: assumed one firm. The reaction verbs are authored in the third person
+#: singular, so a plural subject gets a frame instead of a bare verb.
+_PLURAL_KINDS = frozenset({MANUAL_WORKFLOW, DO_NOTHING, BEHAVIOUR_SHIFT,
+                           AI_REPLACEMENT, OPEN_SOURCE})
+
+
+def _reaction_sentence(identity: str, kind: str, response: str) -> str:
+    if kind in _PLURAL_KINDS:
+        return f"This {response}"
+    if identity[:1].isupper() and not identity.endswith("s"):
+        return f"{identity} {response}"
+    # A category, or a plural noun: frame it so the singular verb still reads.
+    return (f"A supplier in this category {response}"
+            if identity[:1].islower() else f"{identity} — this category {response}")
+
+
 def _make(identity, kind, rung, company, evidence="") -> Optional[Rival]:
     response, counter, signal = _REACTION.get(kind, _REACTION[DIRECT])
     try:
@@ -394,10 +412,7 @@ def _make(identity, kind, rung, company, evidence="") -> Optional[Rival]:
             # itself did not, which is how a detector reading the ladder
             # reported that no rival carried a response while the page showed
             # one.
-            likely_response=f"{identity} {response}"
-            if kind not in (MANUAL_WORKFLOW, DO_NOTHING, BEHAVIOUR_SHIFT,
-                            AI_REPLACEMENT, OPEN_SOURCE)
-            else f"This {response}",
+            likely_response=_reaction_sentence(identity, kind, response),
             counter_move=counter,
             signal_to_watch=signal,
             response_likelihood=_LIKELIHOOD.get(kind, _LIKELIHOOD[DIRECT]),
