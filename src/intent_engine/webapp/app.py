@@ -2031,7 +2031,12 @@ class WebApp:
             tail = (f'<p role="status" aria-live="polite">'
                     f'<strong>{_e(step)}.</strong></p>'
                     f'{self._identity_confirmation(run_id)}'
-                    f'{self._hydration_body(hyd)}'
+                    # ONE LIST, NOT TWO. The tier table and the stage ladder
+                    # are derived from the same producers and were rendered
+                    # one above the other, so the deployed page said
+                    # "Loading what we already know - partial" and "Loading
+                    # prior intelligence - DONE" four lines apart. Two
+                    # vocabularies for one state reads as a malfunction.
                     f'{self._stage_ladder(hyd, status)}'
                     f'<p>{_e(self._elapsed_line(run_id))}</p>'
                     f'<p>This page moves to the analysis by itself as soon as '

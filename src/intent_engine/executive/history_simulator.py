@@ -690,13 +690,32 @@ STATE_ALTERNATIVE = {
 
 def alternative_for(model_class: str, selection=None,
                     state: Optional[Tuple[str, str]] = None) -> Alternative:
-    """The alternative, preferring one this run actually reasoned about.
+    """The alternative: what kind of business it is, and where it currently is.
 
-    A scenario the strategic read produced is specific to THIS company and
-    beats everything below, which is why it is consulted first. Failing that,
-    the class supplies the mechanism and the observed state supplies the
-    lever — so two companies of one class at different points in their own
-    history are offered different decisions, which is what they face.
+    AN ALTERNATIVE IS A QUADRUPLE, AND IT IS AUTHORED AS ONE.
+
+    A first version preferred a scenario the run had produced, on the
+    reasoning that a company-specific fragment beats a class default. What
+    reached the deployed page was:
+
+        BETTER ALTERNATIVE       A pricing action.
+        WHY IT MIGHT HAVE WORKED Operating leverage reads HIGH, so more of
+                                 the gain reaches margin than revenue.
+        WHAT COULD HAVE INVALIDATED IT
+                                 Cutting into a cyclical trough removes the
+                                 capacity needed to serve the recovery.
+
+    The lever is about price, the risk is about capacity, and the mechanism
+    prints an internal enum. Each field was individually defensible and the
+    three together argue about different decisions — because they came from
+    different producers and nothing required them to agree.
+
+    So the quadruple is taken WHOLE. The class supplies the mechanism, which
+    is its economics; the observed trajectory supplies the lever, the
+    assumption and the risk, which is where the company actually is. Both
+    are general rules and neither names a company. A run scenario is a
+    fragment and the product shows it elsewhere, in a section built for
+    fragments.
     """
     base = CLASS_ALTERNATIVE.get(str(model_class or ""),
                                  _UNCLASSIFIED_ALTERNATIVE)
@@ -705,21 +724,7 @@ def alternative_for(model_class: str, selection=None,
         base = dataclasses.replace(
             base, lever=lever, assumption=assumption, risk=risk,
             magnitude=round(base.magnitude * weight, 4))
-    scenarios = tuple(getattr(selection, "scenarios", ()) or ())
-    alt = next((s for s in scenarios
-                if str(getattr(s, "name", "")).upper() not in ("BASE", "")),
-               None)
-    if alt is None:
-        return base
-    lever = " ".join(str(getattr(alt, "lever", "") or "").split())
-    mechanism = " ".join(str(getattr(alt, "second_order", "") or "").split())
-    first = " ".join(str(getattr(alt, "first_order", "") or "").split())
-    if not lever:
-        return base
-    return Alternative(
-        lever=lever, mechanism=mechanism or base.mechanism,
-        assumption=base.assumption, benefit=first or base.benefit,
-        risk=base.risk, magnitude=base.magnitude)
+    return base
 
 
 def counterfactual_path(expectation: Optional[Path], alternative: Alternative,
