@@ -216,6 +216,33 @@ DETECTORS: Tuple[Detector, ...] = (
              "a step in the flow renders almost nothing"),
     Detector("PROVENANCE_UNREACHABLE", SEV2, REPAIR_ROUTING,
              "the evidence drawer exists and no page links to it"),
+    # --- §88. The classes this convergence run added -----------------------
+    #
+    # Each is a defect that was OBSERVED on the deployed product or is the
+    # direct failure mode of something this run built. A detector for a
+    # defect nobody has seen is a guess with a test attached.
+    Detector("CUSTOMER_ABSENCE_COPY", SEV2, REPAIR_COMPOSITION,
+             "an absence is stated to a customer with nothing to do about it"),
+    Detector("HISTORY_TEXT_ONLY", SEV2, REPAIR_COMPOSITION,
+             "the history step carries no chart, only prose",
+             surfaces=("history",)),
+    Detector("MISSING_MARKET_EXPECTATION", SEV2, REPAIR_COMPOSITION,
+             "the history chart has no expectation series",
+             surfaces=("history",)),
+    Detector("UNLABELED_MODELED_EXPECTATION", SEV1, REPAIR_COMPOSITION,
+             "a modelled expectation is shown without saying it is modelled",
+             surfaces=("history",)),
+    Detector("COUNTERFACTUAL_PRESENTED_AS_FACT", SEV1, REPAIR_COMPOSITION,
+             "an alternative path is stated as what would have happened"),
+    Detector("HISTORY_TEMPLATE_COLLAPSE", SEV1, REPAIR_SELECTION,
+             "the historical explanation would fit a different company",
+             surfaces=("history",)),
+    Detector("PROGRESS_DEAD_END", SEV2, REPAIR_ROUTING,
+             "the progress page tells the reader to navigate away"),
+    Detector("FEEDBACK_MISSING", SEV2, REPAIR_ROUTING,
+             "the last step collects no feedback", surfaces=("connect",)),
+    Detector("ENTITY_AMBIGUITY_UNRESOLVED", SEV1, REPAIR_SELECTION,
+             "two companies could answer to the identity that was analysed"),
 )
 
 BY_CODE = {d.code: d for d in DETECTORS}
@@ -259,6 +286,22 @@ _MODEL_FOREIGN = {
     "PEOPLE_OR_ROUTE_BASED_SERVICES": (
         "net revenue retention", "wafer", "ore body", "net interest margin"),
 }
+
+
+#: §19. A counterfactual asserted as history. "Would have grown 20%" is a
+#: claim about a world that did not happen, stated in the grammar of one that
+#: did — the single most dangerous sentence this page can produce.
+_CF_AS_FACT = re.compile(
+    r"\bwould have (?:grown|reached|earned|delivered|produced|been worth|"
+    r"outperformed|avoided|prevented)\b"
+    r"|\bthe company would have\b(?!.{0,40}\bplausibl)"
+    r"|\bwas always going to\b"
+    r"|\bwould definitely have\b", re.I)
+
+#: A modelled figure presented as a retrieved one.
+_FAKE_CONSENSUS = re.compile(
+    r"\b(?:wall street|analysts?|the street|consensus) (?:expected|"
+    r"forecast|predicted|estimated)\b", re.I)
 
 
 def _quote(text: str, match: re.Match, width: int = 90) -> str:
@@ -365,10 +408,156 @@ def scan(text: str, *, surface: str = "", company: str = "",
                 f"{model_class}")
             break
 
+    # --- §19/§24. The two ways a bounded claim becomes an unbounded one ----
+    found = _CF_AS_FACT.search(prose)
+    if found:
+        add("COUNTERFACTUAL_PRESENTED_AS_FACT", _quote(prose, found),
+            "an alternative path is stated in the grammar of history")
+    found = _FAKE_CONSENSUS.search(prose)
+    if found:
+        add("UNLABELED_MODELED_EXPECTATION", _quote(prose, found),
+            "a modelled expectation is attributed to analysts who were never "
+            "retrieved")
+
+    # --- §14/§42. Absence that terminates ----------------------------------
+    #
+    # Delegated rather than reimplemented: `founder_brief.absence` owns the
+    # adjudication and is what the customer-copy sweep runs, and two copies
+    # of a phrase list drift apart within a cycle.
+    try:
+        from intent_engine.founder_brief import absence as _AB
+        for dead in _AB.adjudicate(text)[:3]:
+            add("CUSTOMER_ABSENCE_COPY", dead.sentence[:180],
+                f"{dead.phrase!r} with nothing the reader can do about it")
+    except Exception:                                       # noqa: BLE001
+        pass
+
     if len(text) < min_chars:
         add("EMPTY_SURFACE", text[:120],
             f"{len(text)} characters of visible text")
     return out
+
+
+# ===========================================================================
+# §76, §89 — the history chart's own gate
+# ===========================================================================
+#: Each series must be identifiable in the RENDERED page by the name the
+#: simulator gives it AND by the badge that says what kind of claim it is.
+#: Checking the SVG alone would pass a chart whose legend lies; checking the
+#: legend alone would pass a legend with no chart under it.
+_SERIES_MARKERS = {
+    "MISSING_ACTUAL": ("Actual path", "ln-actual"),
+    "MISSING_MARKET_EXPECTATION": ("Market expectation", "ln-expect"),
+    "MISSING_COUNTERFACTUAL": ("Better strategy", "ln-counter"),
+}
+
+
+def scan_history_chart(html: str, *, surface: str = "history"
+                       ) -> List[Finding]:
+    """Whether the history page actually carries a three-line simulator.
+
+    Runs on HTML rather than on visible text, deliberately and unusually: the
+    thing being asserted is that a CHART exists, and a chart is markup. Every
+    other detector in this module reads prose because every other defect was
+    a sentence; this one is checking for a drawing.
+    """
+    html = str(html or "")
+    out: List[Finding] = []
+
+    def add(code, evidence, detail=""):
+        detector = BY_CODE.get(code)
+        if detector is None:
+            return
+        out.append(Finding(code=code, severity=detector.severity,
+                           surface=surface, evidence=evidence[:200],
+                           repair_class=detector.repair_class, detail=detail))
+
+    if "<svg" not in html or "ln-actual" not in html:
+        # A page with no chart is only a defect when a chart was possible.
+        # The bounded fallback names what it would take to draw one, which is
+        # the correct behaviour for a company with no filed series — so it is
+        # recognised here rather than punished.
+        if "What would draw this chart" in html:
+            return out
+        add("HISTORY_TEXT_ONLY", html[:160],
+            "no chart markup and no bounded explanation of its absence")
+        return out
+    for code, (title, css_class) in _SERIES_MARKERS.items():
+        if css_class in html and title in html:
+            continue
+        if code == "MISSING_MARKET_EXPECTATION":
+            add(code, title, f"{title!r} is not drawn or not labelled")
+    if "Modelled" not in html:
+        add("UNLABELED_MODELED_EXPECTATION", "legend",
+            "the expectation series carries no MODELLED badge")
+    if "ln-counter" in html and "Counterfactual" not in html:
+        add("COUNTERFACTUAL_PRESENTED_AS_FACT", "legend",
+            "the alternative series carries no COUNTERFACTUAL badge")
+    return out
+
+
+def history_is_templated(pages: Dict[str, str], *, threshold: float = 0.6
+                         ) -> List[Tuple[str, str, float]]:
+    """§78. Pairs of companies whose history reads the same. Empty is a pass.
+
+    TWO THINGS HAD TO BE MEASURED CORRECTLY BEFORE THIS SAID ANYTHING.
+
+    WHAT is compared: the DATE PANELS, not the page. Most of a history page
+    is the legend, the axis definition and the explanation of what a
+    counterfactual is — text that MUST be identical on every company. Whole-
+    page comparison scored every pair high and told us nothing.
+
+    HOW it is compared: the share of IDENTICAL SENTENCES, not character
+    similarity. Two panels built from one template with different numbers in
+    it score 0.94 on characters and are not templated — they say different
+    things about different companies in a shared voice, which is what a
+    product voice IS. What a template looks like is whole sentences repeated
+    verbatim, and counting those says exactly how much of the argument was
+    reused rather than reasoned.
+    """
+    keys = sorted(pages)
+    panels = {k: _panel_sentences(pages[k]) for k in keys}
+    out = []
+    for i, left in enumerate(keys):
+        for right in keys[i + 1:]:
+            a, b = panels[left], panels[right]
+            if not a or not b:
+                continue
+            shared = len(a & b) / max(len(a | b), 1)
+            if shared >= threshold:
+                out.append((left, right, round(shared, 3)))
+    return out
+
+
+def _panel_sentences(page: str) -> set:
+    """The date-panel sentences of a history page, as a set."""
+    panel = _date_panels(page)
+    return {s.strip() for s in re.split(r"(?<=[.!?])\s+", panel)
+            if len(s.strip()) > 40}
+
+
+#: The date panel starts here and ends here. Everything outside is the
+#: product's own voice — legend, axis definition, method note — and is
+#: SUPPOSED to be identical on every company's page.
+_PANEL_START = "What was true then"
+_PANEL_END = "The same figures as a table"
+
+
+def _date_panels(page: str) -> str:
+    """The part of a history page that is about THIS company.
+
+    Comparing whole pages scored Cloudflare and Shopify at 0.92 and would
+    have scored any two companies that high, because most of a history page
+    is the legend, the axis definition and the explanation of what a
+    counterfactual is — text that must be identical everywhere. What has to
+    differ is the six cards, and they are what is compared.
+    """
+    text = " ".join(str(page or "").split())
+    start = text.find(_PANEL_START)
+    if start < 0:
+        return ""
+    end = text.find(_PANEL_END, start)
+    return text[start:end if end > start else len(text)]
 
 
 def worst(findings: Sequence[Finding]) -> str:

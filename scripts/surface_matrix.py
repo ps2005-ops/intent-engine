@@ -26,12 +26,18 @@ from __future__ import annotations
 
 import argparse
 import io
+import os
 import pathlib
 import re
 import sys
 import time
 import urllib.parse
 import urllib.request
+
+# This harness drives the REAL customer journey against REAL sources,
+# which is the whole point of it, so it opts into the outbound
+# financial-series lookup the suite has switched off.
+os.environ.setdefault("INTENT_ENGINE_ALLOW_XBRL", "1")
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "src"))
@@ -60,9 +66,17 @@ def check(html: str) -> dict:
     out["img_without_alt"] = len(
         [m for m in re.findall(r"<img\b[^>]*>", html, re.I)
          if not re.search(r'\balt\s*=', m, re.I)])
+    # A DECORATIVE SVG IS CORRECTLY UNLABELLED, AND SAYS SO.
+    #
+    # `aria-hidden="true"` is the standard way to tell assistive technology
+    # that a graphic carries no information — the legend's three line
+    # swatches repeat, in ink, what the text beside them already says, and
+    # announcing them would read the legend twice. Requiring a label on them
+    # would push an author to invent one, which is worse than none.
     out["svg_without_label"] = len(
         [m for m in re.findall(r"<svg\b[^>]*>", html, re.I)
-         if not re.search(r'\brole\s*=|\baria-label', m, re.I)])
+         if not re.search(r'\brole\s*=|\baria-label|aria-hidden\s*=\s*"true"',
+                          m, re.I)])
     controls = re.findall(r'<(input|select|textarea)\b[^>]*>', html, re.I)
     unlabelled = 0
     for control in re.findall(r'<input\b[^>]*>', html, re.I):
@@ -76,6 +90,18 @@ def check(html: str) -> dict:
         has_label = bool(ident) and f'for="{ident.group(1)}"' in html
         if not has_label and not re.search(r'aria-label', control, re.I):
             unlabelled += 1
+    # A WRAPPED CONTROL IS A LABELLED CONTROL.
+    #
+    # `<label><input type="checkbox" value="x"> Too generic</label>` is the
+    # implicit-label form and every screen reader announces it. The checker
+    # only knew the explicit `for=`/`aria-label` forms, so the ten feedback
+    # tags read as ten unlabelled controls on a form where each one is
+    # wrapped in its own label. Counting a correct page as a failure is the
+    # same defect as missing a broken one, in the direction that wastes a
+    # cycle chasing nothing.
+    wrapped = len(re.findall(
+        r'<label\b[^>]*>\s*<input\b[^>]*>', html, re.I))
+    unlabelled = max(0, unlabelled - wrapped)
     out["unlabelled_controls"] = unlabelled
     out["controls"] = len(controls)
     # A fixed width wider than the narrowest viewport is a horizontal

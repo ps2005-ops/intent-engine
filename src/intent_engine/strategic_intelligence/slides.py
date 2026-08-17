@@ -168,7 +168,55 @@ def _slide(slide_id, title, bullets, *, kind="content", note=""):
             "kind": kind, "note": note}
 
 
-def _document_bullets(documents, families, *, limit=3):
+#: A first-person clause. In a document the SUBJECT published, "we" is the
+#: subject. In anyone else's, "we" is somebody else entirely.
+_FIRST_PERSON = re.compile(r"\b(?:we|our|us|the company)\b", re.I)
+
+
+def _speaks_for(document, subject: str) -> bool:
+    """Whether this document's first-person voice IS the subject's.
+
+    THE DEFECT. Slide 4 of the deployed Cloudflare deck read:
+
+        "We are an emerging financial technology platform company that offers
+         proprietary research analytics."
+
+    That is Aether Holdings describing ITSELF, in a 10-K that happens to
+    mention Cloudflare once as a vendor. The document was correctly
+    retrieved, correctly classified as an independent source, correctly
+    cited — and its first-person sentence was pasted onto a slide about a
+    different company, where it reads as Cloudflare's own description of
+    Cloudflare.
+
+    A claim belongs to whoever made it. A third party's filing is evidence
+    ABOUT the subject only in the sentences that NAME the subject; its
+    first-person sentences are about the filer and can never be about anyone
+    else.
+    """
+    if not subject:
+        return True
+    source_class = str(document.get("source_class") or "")
+    if source_class in ("company_owned", "executive_statement",
+                        "investor_material"):
+        return True
+    url = str(document.get("final_url") or document.get("url") or "").lower()
+    head = subject.split(",")[0].split(" Inc")[0].strip().lower()
+    if head and head.replace(" ", "") in url.replace("-", ""):
+        return True
+    return False
+
+
+def _about_subject(sentence: str, subject: str, speaks: bool) -> bool:
+    """May this sentence be shown as a statement about the subject?"""
+    if speaks:
+        return True
+    if not _FIRST_PERSON.search(sentence):
+        return True
+    head = subject.split(",")[0].split(" Inc")[0].strip()
+    return bool(head) and re.search(re.escape(head), sentence, re.I) is not None
+
+
+def _document_bullets(documents, families, *, limit=3, subject: str = ""):
     """Bullets drawn from retrieved documents, classified exactly as the
     readiness gate classified them.
 
@@ -186,7 +234,7 @@ def _document_bullets(documents, families, *, limit=3):
             continue
         if family_of(document) not in families:
             continue
-        text = _readable_excerpt(document)
+        text = _readable_excerpt(document, subject=subject)
         if not text:
             continue
         out.append(_bullet(text, date=document.get("date", "")))
@@ -242,7 +290,37 @@ _UNEARNED_SELF_CLAIM = (
 )
 
 
-def _readable_excerpt(document, *, budget=260) -> str:
+def _looks_like_a_filing(document) -> bool:
+    """Whether this document is a regulatory filing.
+
+    THE SCOPE THE UNIFICATION WAS MISSING. `filing_hygiene` refuses short
+    runs of capitalised words, because on a 10-K cover page that is
+    "Delaware. 27-2825503. (State or other jurisdiction)". On a PRODUCT PAGE
+    the same shape is "Foundry. Gotham. Apollo. AIP." — the one place
+    Palantir's products are named, and the one line the deck most needs.
+    Applying a filing rule to a marketing page cost exactly that heading.
+
+    Filing furniture is furniture in FILINGS. Everywhere else the page's own
+    furniture list applies, which is what it was written for.
+    """
+    url = str(document.get("final_url") or document.get("url") or "").lower()
+    if "sec.gov" in url:
+        return True
+    return bool(document.get("filing")) or str(
+        document.get("source_class") or "") == "investor_material"
+
+
+def _is_filing_furniture(sentence: str) -> bool:
+    """Delegate to the one hardened filing filter. Never raises."""
+    try:
+        from intent_engine.strategic_intelligence.filing_hygiene import (
+            is_filing_furniture)
+        return is_filing_furniture(sentence)
+    except Exception:                                       # noqa: BLE001
+        return False
+
+
+def _readable_excerpt(document, *, budget=260, subject: str = "") -> str:
     """Prose from a page, rather than whatever the extraction caught first.
 
     A deck is the surface where this shows most. Live on Airbnb, three of
@@ -266,6 +344,8 @@ def _readable_excerpt(document, *, budget=260) -> str:
     # Co has the highest market share... and no meaningful competitors" into
     # the bullet budget: the sentence had always been in the document, and
     # only the truncation point had been keeping it off the slide.
+    speaks = _speaks_for(document, subject)
+    filing = _looks_like_a_filing(document)
     reject = tuple(_PAGE_FURNITURE) + tuple(_ADDRESSED_TO_THE_MACHINE)
     if document.get("source_class") in (None, "", "company_owned",
                                         "executive_statement",
@@ -280,6 +360,20 @@ def _readable_excerpt(document, *, budget=260) -> str:
         for sentence in sentences:
             low = sentence.lower()
             if any(marker in low for marker in reject):
+                continue
+            # THE ONE FILING FILTER, NOT A SECOND COPY OF IT.
+            #
+            # `_PAGE_FURNITURE` above and `filing_hygiene` were two lists
+            # doing the same job, and hardening one never reached the other:
+            # the contents-page run that opened slide 4 live
+            # ("UNITED STATES. Management's Discussion and Analysis ... 64.
+            # Changes in and Disagreements with Accountants ... 76.") was
+            # refused by `filing_hygiene` the day it was added and still
+            # reached the deck, because the deck asked a different filter.
+            # A defect that survives its own fix is a seam, not a gap.
+            if filing and _is_filing_furniture(sentence):
+                continue
+            if not _about_subject(sentence, subject, speaks):
                 continue
             words = sentence.split()
             if len(words) < 10:
@@ -301,6 +395,7 @@ def _readable_excerpt(document, *, budget=260) -> str:
         lead = sentences[0] if sentences else ""
         lead_words = lead.split()
         if (lead and lead not in kept and 2 <= len(lead_words) <= 12
+                and not (filing and _is_filing_furniture(lead))
                 and not any(m in lead.lower() for m in _PAGE_FURNITURE)
                 and sum(1 for w in lead_words[1:] if w[:1].isupper()) >= 1):
             kept.insert(0, lead if lead[-1:] in ".!?" else lead + ".")
@@ -1020,7 +1115,8 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     slides = []
 
     # 1. Company in one minute
-    identity_bullets = _document_bullets(documents, {IDENTITY})
+    identity_bullets = _document_bullets(documents, {IDENTITY},
+                                         subject=company)
     for observation in meaningful_items(r.get("observations", []),
                                         key="excerpt"):
         if observation.get("source_class") == "company_owned":
@@ -1137,6 +1233,37 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
 
+    # THE MOVE, THE GUARDRAIL, THE STOPPING RULE AND THE SIGNAL — ON A SLIDE.
+    #
+    # Measured on the deployed deck for three companies: it went central view
+    # -> in one minute -> what changed -> products -> what was published ->
+    # questions for leadership -> evidence, and NOWHERE named a recommended
+    # action, a risk to it, or anything to watch. Every one of those existed
+    # in the canonical read and was on the Full Analysis two clicks away. A
+    # private-equity operating partner who reads the deck and nothing else —
+    # which is what a deck is for — left with a thesis and no decision.
+    #
+    # Placed second deliberately: after the view it argues for, before the
+    # context that supports it. A recommendation at slide seven is a
+    # recommendation nobody in the room has heard.
+    action = getattr(read, "level6_action", None) if read is not None else None
+    if action is not None and getattr(action, "action_now", ""):
+        move_bullets = [_bullet(f"The move: {action.action_now}", full=True)]
+        for label, value in (("Guardrail", getattr(action, "guardrail", "")),
+                             ("Stopping rule",
+                              getattr(action, "kill_switch", "")),
+                             ("What to watch",
+                              getattr(action, "falsifier", "")),
+                             ("The risk if it is wrong",
+                              getattr(action, "what_remains_unknown", ""))):
+            if value:
+                move_bullets.append(_bullet(f"{label}: {value}", full=True))
+        slides.append(_slide("move", "What we recommend", move_bullets,
+                             kind="thesis",
+                             note="Bounded in size and reversible by design; "
+                                  "the stopping rule is part of the "
+                                  "recommendation, not a caveat on it."))
+
     # THE DECISION, AND THE SPARSE CASE THIS DECK EXISTS FOR.
     #
     # Measured on the Sentry-shaped fallback: with the library's sentences
@@ -1196,7 +1323,8 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # 4. Products, customers and market — the slide a reader most often wants
     #    first, and the one that must actually name the products.
     market_bullets = _document_bullets(
-        documents, {PRODUCT, CUSTOMERS, COMMERCIAL, INDEPENDENT}, limit=4)
+        documents, {PRODUCT, CUSTOMERS, COMMERCIAL, INDEPENDENT}, limit=4,
+        subject=company)
     for observation in meaningful_items(r.get("observations", []),
                                         key="excerpt"):
         if observation.get("source_class") in ("customer_voice",
@@ -1226,7 +1354,9 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         for s in meaningful_items(r.get("surprises", []), key="finding")
         if _concrete(s.get("finding", ""))]
     if not signal_bullets:
-        signal_bullets = _document_bullets(documents, {INVESTOR, STRATEGY})
+        signal_bullets = _document_bullets(documents,
+                                           {INVESTOR, STRATEGY},
+                                           subject=company)
     # "Key strategic signals" is analyst vocabulary for a reader who never
     # asked for a signal. What they are looking at is published evidence.
     slides.append(_slide("signals", "What the company has published",

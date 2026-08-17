@@ -50,6 +50,9 @@ DIMENSIONS = (
     "history", "learning", "provenance", "company_specificity",
     "presentation_quality", "full_analysis_quality", "story_quality",
     "qa_quality",
+    # --- §91. What this convergence run made the product responsible for ---
+    "data_resolution", "history_expectation", "history_counterfactual",
+    "history_economics", "feedback_loop", "flow_quality",
 )
 
 #: §63. The gate. A surface may not freeze below these.
@@ -132,11 +135,18 @@ def _ratio(have: int, want: int) -> float:
 
 def score(*, read, pages: Dict[str, str], timeline=None,
           company: str = "", model_class: str = "",
-          other_companies: Sequence[str] = ()) -> RubricResult:
+          other_companies: Sequence[str] = (), simulation=None,
+          html: Optional[Dict[str, str]] = None) -> RubricResult:
     """Score one company's whole product output.
 
     `pages` maps a step key ("intro", "slides", "full", "story", "history",
     "connect", and optionally "qa") to that page's VISIBLE TEXT.
+
+    `html` carries the same surfaces UNSTRIPPED, for the dimensions that are
+    about a drawing rather than about prose. It is optional so that every
+    existing caller keeps working; the chart dimensions score as unmeasured
+    rather than as failed when it is absent, because "we did not look" and
+    "it is not there" are different findings.
     """
     company = company or getattr(read, "company", "")
     model_class = model_class or _model_of(read)
@@ -279,14 +289,114 @@ def score(*, read, pages: Dict[str, str], timeline=None,
         "an experiment, a value band and a stopping rule"
         if mve else "no experiment is proposed")
 
-    # --- history ------------------------------------------------------------
-    vintages = tuple(getattr(timeline, "vintages", ()) or ())
-    history = _ratio(len(vintages), 4)
+    # --- history: the simulator, not the timeline ---------------------------
+    #
+    # The old dimension counted VINTAGES and scored 10 for a page made
+    # entirely of prose, which is how a text-only history rewind passed a
+    # 9.78 rubric while the screenshots showed it was not the product. What
+    # is scored now is what the page has to carry: three series, each
+    # labelled with the kind of claim it is, over enough dates to compare.
+    history_html = (html or {}).get("history", "")
+    chart_findings = (DT.scan_history_chart(history_html)
+                      if history_html else [])
+    chart_codes = {f.code for f in chart_findings}
+    sim_vintages = tuple(getattr(simulation, "vintages", ()) or ())
+    legacy_vintages = tuple(getattr(timeline, "vintages", ()) or ())
+    if sim_vintages:
+        history = _ratio(len(sim_vintages), 3)
+        why = (f"{len(sim_vintages)} selectable date(s), three series, "
+               f"vintage-walled")
+    elif getattr(simulation, "fallback", None) is not None:
+        # A company with no filed series cannot have a chart. The bounded
+        # fallback is the CORRECT product behaviour and is scored as such —
+        # capped below full marks, because a bounded answer is worth less to
+        # a reader than a measured one and pretending otherwise would remove
+        # the incentive to widen retrieval.
+        history, why = 8.0, ("no filed series exists, and the page states "
+                             "what would draw the chart")
+    else:
+        history = _ratio(len(legacy_vintages), 4)
+        why = f"{len(legacy_vintages)} vintage(s) behind a wall, prose only"
     if "HINDSIGHT_LEAK" in codes or "FAKE_REPLAY" in codes:
-        history = min(history, 2.0)
-    put("history", history,
-        f"{len(vintages)} vintage(s) behind a wall"
-        if history >= 8 else "the timeline is thin or leaks hindsight")
+        history, why = min(history, 2.0), "the timeline leaks hindsight"
+    if "HISTORY_TEXT_ONLY" in chart_codes:
+        history, why = min(history, 3.0), "the history step carries no chart"
+    put("history", history, why)
+
+    # --- the three series, scored separately ---------------------------------
+    #
+    # Separately because they fail separately and for different reasons: an
+    # expectation can be absent while a counterfactual is fine, and a single
+    # "history" number would average one away.
+    expectation = next((v.expectation for v in sim_vintages
+                        if v.expectation is not None), None)
+    counter = next((v.counterfactual for v in sim_vintages
+                    if v.counterfactual is not None), None)
+    if expectation is not None:
+        labelled = (not history_html) or "Modelled" in history_html
+        drivers = len(expectation.drivers or ())
+        put("history_expectation",
+            _ratio(drivers, 3) if labelled else 3.0,
+            f"{drivers} named driver(s), declared as modelled" if labelled
+            else "the expectation is drawn without a modelled label")
+    else:
+        put("history_expectation",
+            8.0 if getattr(simulation, "fallback", None) is not None else 4.0,
+            "no expectation series; the page says what would produce one"
+            if getattr(simulation, "fallback", None) is not None
+            else "no expectation series and no explanation")
+    if counter is not None:
+        parts = len(counter.drivers or ())
+        as_fact = "COUNTERFACTUAL_PRESENTED_AS_FACT" in codes
+        put("history_counterfactual", 2.0 if as_fact else _ratio(parts, 4),
+            "an alternative stated as what would have happened" if as_fact
+            else f"mechanism, assumption, benefit and risk in {parts} part(s)")
+    else:
+        put("history_counterfactual",
+            8.0 if getattr(simulation, "fallback", None) is not None else 4.0,
+            "no counterfactual; the page says what would produce one"
+            if getattr(simulation, "fallback", None) is not None
+            else "no counterfactual path")
+    index = getattr(simulation, "index", None)
+    econ_points = len(getattr(index, "points", ()) or ())
+    put("history_economics",
+        _ratio(econ_points, 5) if econ_points else
+        (8.0 if getattr(simulation, "fallback", None) is not None else 4.0),
+        f"{econ_points} filed financial year(s) behind the index"
+        if econ_points else "the index rests on no filed series")
+
+    # --- data resolution (§38) ----------------------------------------------
+    #
+    # How far up the ladder this run got, measured on the page rather than on
+    # the producer: the badges a reader can see ARE the resolution.
+    from intent_engine.executive import resolution as _R
+    shown = [label for label in (_R.LABEL[_R.OBSERVED], _R.LABEL[_R.MODELED],
+                                 _R.LABEL[_R.BENCHMARK], _R.LABEL[_R.BOUNDED],
+                                 _R.LABEL[_R.COUNTERFACTUAL])
+             if label.lower() in joined.lower()]
+    absence_hits = sum(1 for f in findings
+                       if f.code == "CUSTOMER_ABSENCE_COPY")
+    resolution_score = _ratio(len(shown), 3)
+    if absence_hits:
+        resolution_score = min(resolution_score, 10.0 - 2.0 * absence_hits)
+    put("data_resolution", resolution_score,
+        f"{len(shown)} resolution state(s) are visible to the reader"
+        + (f", but {absence_hits} absence(s) terminate" if absence_hits
+           else ""))
+
+    # --- feedback + flow (§46, §61) ------------------------------------------
+    connect = (pages or {}).get("connect", "")
+    feedback_bits = sum(1 for w in ("how useful was this analysis",
+                                    "what was missing", "what looked wrong",
+                                    "what decision would you use this for")
+                        if w in connect.lower())
+    put("feedback_loop", _ratio(feedback_bits, 3),
+        f"{feedback_bits} of the four feedback questions are asked"
+        if feedback_bits else "the last step collects no feedback")
+    present = [k for k in ("intro", "slides", "full", "story", "history",
+                           "connect") if (pages or {}).get(k)]
+    put("flow_quality", _ratio(len(present), 6),
+        f"{len(present)} of six steps render")
 
     # --- learning -----------------------------------------------------------
     learning_words = ("what was new", "already known", "re-observation",

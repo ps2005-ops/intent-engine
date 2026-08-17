@@ -32,6 +32,11 @@ import time
 import urllib.parse
 import urllib.request
 
+# This harness drives the REAL customer journey against REAL sources,
+# which is the whole point of it, so it opts into the outbound
+# financial-series lookup the suite has switched off.
+os.environ.setdefault("INTENT_ENGINE_ALLOW_XBRL", "1")
+
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT / "src"))
@@ -232,11 +237,16 @@ def main() -> int:
         return 1
     print(f"  run {run_id}")
 
-    pages, chains = {}, {}
+    pages, chains, raw = {}, {}, {}
     for step in flow.STEPS:
         status, html, chain = fetch(client, run_id, step.suffix)
         text = visible(html)
         pages[step.key] = text
+        # The chart dimensions are about a DRAWING, so they need the markup.
+        # Kept beside the visible text rather than instead of it: every prose
+        # detector must keep seeing prose, and a detector handed HTML fires on
+        # class names, which was a real defect in this module's first draft.
+        raw[step.key] = html
         chains[step.key] = chain
         (out / f"{step.key}.txt").write_text(text)
         (out / f"{step.key}.html").write_text(html)
@@ -252,11 +262,13 @@ def main() -> int:
         pages["qa"] = ask(client, run_id, args.ask)
         (out / "qa.txt").write_text(pages["qa"])
 
-    read = timeline = None
+    read = timeline = simulation = None
     if not args.live:
         try:
             read = client.app._strategic_read(run_id)
             timeline = client.app._history_timeline(
+                run_id, read.company if read else args.company)
+            simulation = client.app._history_simulation(
                 run_id, read.company if read else args.company)
         except Exception as error:                          # noqa: BLE001
             print(f"  read/timeline unavailable: {error}")
@@ -275,7 +287,8 @@ def main() -> int:
     scored = {k: v for k, v in pages.items() if not k.startswith("_")}
     result = RR.score(read=read or _EmptyRead(args.company), pages=scored,
                       timeline=timeline, company=args.company,
-                      model_class=model_class)
+                      model_class=model_class, simulation=simulation,
+                      html=raw)
     payload = result.as_dict()
     payload["run_id"] = run_id
     payload["chains"] = chains

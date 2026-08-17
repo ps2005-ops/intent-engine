@@ -135,18 +135,36 @@ _FAMILIES = (
      "own account of its strategy is missing from this reading."),
     ("executive_statement", "Executive statements",
      "Leadership commentary is a claim about intent, not evidence of result."),
+    # EACH CONSEQUENCE NAMES WHAT WOULD CLOSE IT (§16, §38).
+    #
+    # These sentences used to stop at the consequence: "No competitor's own
+    # account was read, so relative position rests on this company's framing
+    # of its market." True, and it leaves a reader holding a limitation with
+    # no way to act on it — which is the customer-facing dead end §14
+    # removes. The consequence is still first, because it is what the reader
+    # needs; the measurement follows it, because a gap a reader can close is
+    # a task and a gap they cannot is a complaint.
     ("investor_material", "Filings and investor material",
      "Without a filing there is no audited figure behind any economic "
-     "statement, so revenue mix, margin and concentration stay unverifiable."),
+     "statement, so revenue mix, margin and concentration stay unverifiable. "
+     "What would settle it: one annual report or investor deck, which turns "
+     "every bounded magnitude here into a measured one."),
     ("customer_voice", "Customer evidence",
      "Nothing here reports what buying and using this actually costs a "
-     "customer, so adoption and retention claims cannot be tested."),
+     "customer, so adoption and retention claims cannot be tested. What "
+     "would settle it: a handful of named customer accounts, reviews or "
+     "case studies — enough to see whether the value claimed is the value "
+     "bought."),
     ("competitor", "Another registrant's filing",
      "No competitor's own account was read, so relative position rests on "
-     "this company's framing of its market."),
+     "this company's framing of its market. What would settle it: one "
+     "rival's annual filing, where a competitor describes the same contest "
+     "in its own words and is under obligation to be accurate about it."),
     ("independent_reporting", "Independent reporting",
      "No outside party has reported on this, so nothing corrects for what the "
-     "company chooses to emphasise."),
+     "company chooses to emphasise. What would settle it: any source the "
+     "company does not control that discusses the same decision — trade "
+     "press, a regulator, or an analyst note."),
 )
 
 
@@ -631,32 +649,93 @@ def _competitive(company, report, decision, hypotheses, families,
                    evidence_ids=tuple(i.evidence_id for i in items[:4]))
 
 
-def _market(company, market, said, external=None) -> Passage:
-    """Market expectations in business language, or a stated limitation.
+def _the_bridge(company, read, said) -> Passage:
+    """The decision bridge, on the deepest surface. §44.
+
+    THE DEFECT. The Full Analysis is the flagship document and, measured
+    across the golden six, it did not reliably contain the recommendation.
+    Caterpillar's carried no mechanism, no confidence, no guardrail and no
+    falsifier — all four existed in the canonical read, and all four appeared
+    on the introduction and on the deck, which are the SHALLOWER surfaces.
+    A reader who went deeper got less.
+
+    That is the architecture's own contract failing at one site rather than a
+    missing feature: one decision object, projected by every surface. This
+    passage is that projection, and it leads the document because a board
+    memo that reaches its recommendation on page four has buried it.
+    """
+    action = getattr(read, "level6_action", None) if read is not None else None
+    if action is None or not getattr(action, "action_now", ""):
+        return Passage("bridge", "The recommendation", depth=BOTH)
+    paras = [end_sentence(f"What to do now: {action.action_now}")]
+    for label, value in (
+            ("Why it matters", getattr(action, "why_it_matters", "")),
+            ("The mechanism this rests on",
+             getattr(action, "what_is_known", "")),
+            ("Confidence", getattr(action, "causal_confidence", "")),
+            ("Guardrail", getattr(action, "guardrail", "")),
+            ("Stopping rule", getattr(action, "kill_switch", "")),
+            ("How to test it",
+             getattr(action, "minimum_viable_experiment", "")),
+            ("What would change this view", getattr(action, "falsifier", "")),
+            ("What remains open",
+             getattr(action, "what_remains_unknown", ""))):
+        if value and not said.has(value):
+            said.remember(value)
+            paras.append(end_sentence(f"{label}: {value}"))
+    return Passage("bridge", "The recommendation", depth=BOTH,
+                   paragraphs=tuple(paras))
+
+
+def _market(company, market, said, external=None, modeled=None) -> Passage:
+    """Market expectations in business language, or the next rung of the ladder.
 
     Never a strategy name, a win rate, a Sharpe ratio or a recommendation --
     those are the trading system talking about itself. And never a zero: an
     absent series is an absent series.
+
+    WHAT CHANGED, AND WHAT DID NOT. A missing price feed used to end this
+    passage: "there is no read on what investors currently expect". A reader
+    asked what the market expects and was told which of our integrations is
+    switched off. `modeled` is the next rung -- an expectation built from the
+    company's OWN filed results, which exist for every registrant whether or
+    not a price series was retrieved.
+
+    What did not change is the epistemic accounting. A modelled expectation is
+    labelled MODELLED in its own sentence, it is never called a consensus, and
+    when there is no filed series either the passage still says so. The rule
+    is exhaust the ladder, not fill the space.
     """
     ctx = market if isinstance(market, dict) else (
         market.as_dict() if market is not None else None)
-    if not ctx:
+    if not ctx or not ctx.get("available"):
+        why = (end_sentence(
+            f"Not established — {as_clause(ctx.get('reason', ''), company)}")
+            if ctx else
+            f"No published price or estimate series was retrieved for "
+            f"{company} in this run.")
+        if modeled is not None:
+            return Passage(
+                "market", "What the market appears to expect", depth=BOTH,
+                paragraphs=(
+                    f"MODELLED MARKET EXPECTATION. {modeled.statement}",
+                    f"Built from {modeled.derivation}. {why} What is above "
+                    f"stands in its place and is a weaker claim than a "
+                    f"retrieved series would have been: it says what the "
+                    f"published record implies, not what any investor has "
+                    f"said."),
+                note=_flat((ctx or {}).get("disclaimer")))
         return Passage(
             "market", "What the market appears to expect", depth=BOTH,
-            paragraphs=("No market snapshot has been published for this "
-                        "company, so there is no read on what investors "
-                        "currently expect. That is a gap in this analysis, not "
-                        "a finding: it means the decision below is argued from "
-                        "the business alone, with no check on whether the "
-                        "market already believes it.",))
-    if not ctx.get("available"):
-        return Passage(
-            "market", "What the market appears to expect", depth=BOTH,
-            paragraphs=(end_sentence(
-                f"Not established — {as_clause(ctx.get('reason', ''), company)}"),
-                "Nothing is inferred from the absence. A missing price series "
-                "is not a flat one."),
-            note=_flat(ctx.get("disclaimer")))
+            paragraphs=(
+                why,
+                "Nothing is inferred from the absence. A missing price "
+                "series is not a flat one. Nothing is modelled in its "
+                "place either, because this company has no multi-year filed "
+                "result series to model from. What would resolve it: three "
+                "or more years of reported results, or a market identifier "
+                "that resolves to a published price history.",),
+            note=_flat((ctx or {}).get("disclaimer")))
     # WHAT CHANGED HERE. The old version printed each module's fact and its
     # "why this matters" and stopped, so a reader learned what the shares did
     # and never which choice it bore on. Every block now carries its decision
@@ -1089,7 +1168,8 @@ def _evidence_appendix(report, index) -> Passage:
 
 def build_dossier(*, company: str, report: Optional[dict] = None,
                   decision=None, market=None, narrative=None,
-                  documents=(), external=None, read=None) -> Dossier:
+                  documents=(), external=None, read=None,
+                  modeled_market=None) -> Dossier:
     """The canonical deep material, assembled once for both deep surfaces.
 
     `narrative` is the already-built primary screen. It is passed in so the
@@ -1128,13 +1208,14 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
                     said.remember(item.text)
 
     built = [
+        _the_bridge(company, read, said),
         _operating_model(company, report, said),
         _what_was_read(company, documents, _observation_dicts(report), said),
         _what_changed(company, report, said),
         _customer_demand(company, report, index, said),
         _competitive(company, report, decision, hypotheses, families, said,
                      external, read=read),
-        _market(company, market, said, external),
+        _market(company, market, said, external, modeled_market),
         _macro(company, report, decision, said, external),
         _analogs(company, report, decision, hypotheses, said),
         _opportunity(company, report, said),
@@ -1272,8 +1353,21 @@ def render_dossier(dossier, *, depth: str, run_id: str = "",
                 out.append('<div class="an">')
                 out.append(_p(item["text"]))
                 if item.get("breaks"):
+                    # THE LIMIT OF AN ANALOGY IS A TEST, NOT A DISCLAIMER.
+                    #
+                    # This printed the pattern's `when_it_does_not_apply`
+                    # clause verbatim — "Only one buyer group is ever
+                    # described, or the second is an aspiration with no
+                    # evidence" — which reads to a customer as a complaint
+                    # and leaves them nothing to do. It is in fact the exact
+                    # condition that would break the comparison, so it is
+                    # framed as the thing to check.
                     out.append(f'<p class="brk">Where the comparison stops: '
-                               f'{escape(item["breaks"])}</p>')
+                               f'{escape(item["breaks"])} '
+                               f'Check that against the company before '
+                               f'relying on the analogy — it is the one '
+                               f'condition that would make it the wrong '
+                               f'comparison.</p>')
                 if item.get("cases"):
                     out.append(f'<p class="cases">Seen at: '
                                f'{escape(item["cases"])}</p>')

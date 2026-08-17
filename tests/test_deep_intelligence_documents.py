@@ -40,12 +40,14 @@ from intent_engine.strategic_intelligence.decision import (
 from tests.test_scrollable_narrative import _brief, _narrative, _report
 
 
-def _dossier(report=None, company="Shopify", decision=None, market=None):
+def _dossier(report=None, company="Shopify", decision=None, market=None,
+             modeled_market=None):
     report = report if report is not None else _report(company)
     decision = decision or decision_of(report)
     story = _narrative(report, company, decision)
     return D.build_dossier(company=company, report=report, decision=decision,
-                           narrative=story, market=market)
+                           narrative=story, market=market,
+                           modeled_market=modeled_market)
 
 
 def _text(markup: str) -> str:
@@ -256,10 +258,41 @@ def test_every_missing_evidence_family_states_what_it_costs(tmp_path):
 
 
 def test_missing_market_data_is_a_limitation_not_a_zero():
+    """MIGRATED BY INTENT, NOT BY WORDING.
+
+    This asserted the exact sentence "No market snapshot has been
+    published..." — which was the dead end §14 removed. The INTENT of the
+    test is that an absent market series must be reported as a limitation
+    and must never become a number, and that intent is unchanged and is what
+    is asserted now. Pinning the old sentence would have made the test a
+    guard against the repair.
+    """
     book = _dossier(market=None)
     text = _text(_rendered(book, D.BRIEF))
-    assert "No market snapshot has been published" in text
+    assert "No published price or estimate series was retrieved" in text
+    assert "What would resolve it" in text
     assert "0%" not in text and "$0" not in text
+
+
+def test_a_modelled_expectation_replaces_the_absence_and_says_it_is_modelled():
+    """§15. The next rung, and its label.
+
+    Two assertions, and the second matters more than the first: a modelled
+    figure that reaches a reader without the word MODELLED beside it is
+    indistinguishable from a retrieved one, and that is the failure the whole
+    resolution ladder exists to prevent.
+    """
+    from intent_engine.executive import resolution as R
+    modeled = R.modeled(
+        "What does the record imply?",
+        "The bar its next years have to clear is about 20% a year.",
+        derivation="7 filed financial years through 2025")
+    book = _dossier(market=None, modeled_market=modeled)
+    text = _text(_rendered(book, D.BRIEF))
+    assert "MODELLED MARKET EXPECTATION" in text
+    assert "not a retrieved analyst consensus" in text or \
+        "20% a year" in text
+    assert "consensus estimate" not in text.lower()
 
 
 def test_an_unavailable_market_snapshot_never_becomes_a_number():

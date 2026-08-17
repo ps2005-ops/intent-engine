@@ -16,6 +16,7 @@ import html as _html
 import json
 import pathlib
 import logging
+import os
 import re
 from dataclasses import asdict
 import time
@@ -46,6 +47,7 @@ from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
 from intent_engine.strategic_intelligence import evidence_classes as _EC
 from intent_engine.webapp import acceptance as _acc
+from intent_engine.webapp import autocomplete as _AC
 from intent_engine.webapp import failures as _failures
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
 from intent_engine.webapp.records import WebAppError, WebEvent
@@ -100,6 +102,34 @@ def central_view_after_headline(thesis: str, headline_view: str) -> str:
         return thesis[len(lead):].strip()
     return thesis
 
+
+#: The progress page's own furniture: who is being analysed, what is being
+#: assembled, and the preview note demoted to a footnote. Kept beside the
+#: page it styles rather than in the shared sheet, because none of it appears
+#: anywhere else and a shared rule nobody can find is how stylesheets rot.
+_PROGRESS_CSS = """
+<style>
+.analysing{border:1px solid var(--line,#d1d5db);border-left:3px solid
+var(--accent,#1d4ed8);border-radius:8px;padding:.6rem .8rem;margin:.8rem 0;
+background:var(--panel,#f8fafc);font-size:.95rem}
+.analysing b{font-size:1.02rem}
+.analysing .idbits{color:var(--muted,#4b5563);font-size:.85rem;
+margin-left:.5rem}
+.stages{list-style:none;counter-reset:s;margin:1rem 0;padding:0;
+display:grid;gap:.28rem;max-width:34rem}
+.stages li{display:flex;justify-content:space-between;gap:1rem;
+align-items:baseline;padding:.32rem .6rem;border-radius:7px;
+border:1px solid transparent;font-size:.93rem}
+.stages li.done{color:var(--muted,#4b5563)}
+.stages li.now{border-color:var(--accent,#1d4ed8);font-weight:650;
+background:var(--panel,#f8fafc)}
+.stages li.wait{color:var(--muted,#4b5563);opacity:.62}
+.stages .st{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;
+color:var(--muted,#4b5563);white-space:nowrap}
+.fineprint{font-size:.8rem;color:var(--muted,#4b5563);margin-top:1.6rem;
+border-top:1px solid var(--line,#d1d5db);padding-top:.6rem;max-width:34rem}
+</style>
+"""
 
 _BRIEF_CSS = """
 <style>
@@ -763,6 +793,14 @@ class WebApp:
         # test_a_demo_guest_cannot_read_the_operations_dashboard.
         if path == "/learning-acceleration" and method == "GET":
             return self._learning_acceleration(environ)
+        # THE SUGGESTION ENDPOINT. Public registries only (§82) — it reaches
+        # the curated entity registry, the validation manifest and the SEC's
+        # public ticker table, and nothing that holds tenant state. Session-
+        # free by design: a visitor typing a company name has not logged in
+        # yet, and requiring a session to spell a company would put the login
+        # wall back in front of the first useful thing the product does.
+        if path == "/api/companies" and method == "GET":
+            return self._company_suggestions(environ)
         if path == "/demo-dossiers/telemetry" and method == "GET":
             return self._ok_json(self._demo_telemetry.as_dict())
         if path == "/demo-dossiers" and method == "GET":
@@ -951,7 +989,14 @@ class WebApp:
         except ValueError:
             size = 0
         body = environ["wsgi.input"].read(min(size, 1_000_000)).decode()
-        return {k: (",".join(v) if k == "cand" else v[0])
+        # A REPEATED FIELD IS A LIST, AND TWO FIELDS ARE REPEATED.
+        #
+        # `cand` (source approval) and `tag` (feedback) both post one value
+        # per checked box. Taking `v[0]` kept the first and silently dropped
+        # every other selection, so a reader who ticked four feedback tags had
+        # three of them discarded with no error anywhere.
+        multi = ("cand", "tag")
+        return {k: (",".join(v) if k in multi else v[0])
                 for k, v in parse_qs(body).items()}
 
     def _client_ip(self, environ) -> str:
@@ -1272,8 +1317,34 @@ class WebApp:
         return self._results.get(run_id)
 
     # --- pages ----------------------------------------------------------------
+    def _company_suggestions(self, environ):
+        """Companies matching what the customer has typed. Never raises.
+
+        The SEC ticker table behind the third source is one ~1MB fetch per
+        process; every later keystroke is served from memory. Under test the
+        outbound call is off, and the two curated sources still answer — so
+        the feature degrades to the hundred companies the suite knows about
+        rather than to an error.
+        """
+        from urllib.parse import parse_qs
+
+        from intent_engine.company_ingestion import suggest as CS
+        query = parse_qs(environ.get("QUERY_STRING", "")).get("q", [""])[0]
+        try:
+            rows = CS.suggest(query[:120], limit=8,
+                              allow_registrant=(self.config.env
+                                                != "test"),
+                              transport=self._transport,
+                              resolver=self._resolver)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("company suggestions failed")
+            rows = ()
+        return self._ok_json({"contract": CS.CONTRACT,
+                              "query": query[:120],
+                              "companies": [r.as_dict() for r in rows]})
+
     def _landing(self, session):
-        page = render_landing_html()
+        page = _AC.inject(render_landing_html())
         csrf = session["csrf"] if session else ""
         if session:
             # the analyze form needs the CSRF token; inject it once
@@ -1506,7 +1577,36 @@ class WebApp:
         # A typed name is resolved against the entity registry, which is the
         # component that exists for exactly this and was previously only
         # consulted when a website had already been supplied.
-        if company_name and not website and not form.get("entity_id"):
+        # A CONFIRMED PICK IS AN ANSWER, NOT A HINT.
+        #
+        # The customer chose one row out of a list that showed its legal name,
+        # ticker, country and domain. Re-resolving that name from scratch can
+        # only do one of two things: agree, or disagree with the customer
+        # about which company they meant — and the second is the wrong-company
+        # failure arriving through the one door where the user had already
+        # been explicit. So a confirmed pick sets identity directly.
+        #
+        # The confirmation is checked against the typed name rather than
+        # trusted blind: the hidden fields are client-supplied, and a form
+        # replayed with a mismatched pair must fall through to ordinary
+        # server-side resolution rather than analyse whatever was posted.
+        confirmed = (form.get("suggest_confirmed") or "").strip()
+        if confirmed and confirmed == company_name:
+            picked_domain = (form.get("suggest_domain") or "").strip()
+            picked_cik = "".join(ch for ch in
+                                 (form.get("suggest_cik") or "")
+                                 if ch.isdigit())
+            if picked_domain and "://" not in picked_domain:
+                picked_domain = f"https://{picked_domain}"
+            if picked_domain:
+                website = website or picked_domain
+            elif picked_cik:
+                # A filer with no domain on record. Same state the name-entry
+                # path calls IDENTIFIED_NO_DOMAIN: analysable, EDGAR-first,
+                # and never given a guessed website.
+                filer_cik = picked_cik
+        if company_name and not website and not filer_cik \
+                and not form.get("entity_id"):
             from intent_engine.company_ingestion import name_entry as _NE
             # The SEC registrant source is opted into PER CALL, not by a
             # module flag: a live request is exactly the context where the
@@ -1889,7 +1989,7 @@ class WebApp:
             "REJECTED": "This analysis was not accepted",
         }.get(status, "Reading the public evidence…")
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                f'{refresh}<title>{_e(heading)}</title></head>'
+                f'{refresh}<title>{_e(heading)}</title>{_PROGRESS_CSS}</head>'
                 f'<body>'
                 f'{self._nav(session, session["csrf"])}<main>'
                 f'<h1>{_e(heading)}</h1>')
@@ -1915,17 +2015,105 @@ class WebApp:
             hyd = self._hydration_state(run_id, terminal=terminal)
             step = (hyd.get("current_step") or "").strip() \
                 or self._stage_line(status)
+            # THIS PAGE CARRIES THE CUSTOMER; IT DOES NOT PARK THEM.
+            #
+            # The old copy led with "You can safely leave this page — it will
+            # be waiting under your analyses", which is true and is advice for
+            # the wrong journey: it told a first-time visitor that the normal
+            # way to reach their result was to navigate somewhere else and
+            # find it. The page already redirects into step 1 the moment the
+            # run is readable, so what it should say is that.
+            #
+            # The preview's in-memory storage is still disclosed, because it
+            # is a real limit a tester can hit. It is a footnote now rather
+            # than a boxed warning above the fold — infrastructure limits are
+            # not what a demo is about.
             tail = (f'<p role="status" aria-live="polite">'
                     f'<strong>{_e(step)}.</strong></p>'
+                    f'{self._identity_confirmation(run_id)}'
                     f'{self._hydration_body(hyd)}'
+                    f'{self._stage_ladder(hyd, status)}'
                     f'<p>{_e(self._elapsed_line(run_id))}</p>'
-                    f'<p>You can safely leave this page — the analysis keeps '
-                    f'running, and it will be waiting under '
-                    f'<a href="/analyses">your analyses</a>.</p>'
-                    f'<p class="coverage">This preview stores runs in memory, '
-                    f'so a restart can interrupt one. If that happens the page '
-                    f'says so rather than waiting forever.</p>')
+                    f'<p>This page moves to the analysis by itself as soon as '
+                    f'there is something worth reading — no need to click '
+                    f'anything or come back later.</p>'
+                    f'<p class="fineprint">Preview note: runs are held in '
+                    f'memory, so a restart can interrupt one. If that '
+                    f'happens this page says so rather than waiting forever. '
+                    f'Anything already finished stays under '
+                    f'<a href="/analyses">your analyses</a>.</p>')
         return self._html(head + tail + '</main></body></html>')
+
+    #: §11. What is being assembled, in the order a person would build it.
+    #: Named for the WORK rather than for the lifecycle, because "VALIDATING
+    #: _COMPANY" tells a customer nothing and "Identifying the company" tells
+    #: them exactly what is happening to their request.
+    _STAGE_LADDER = (
+        ("identity", "Identifying the company"),
+        ("prior", "Loading prior intelligence"),
+        ("evidence", "Reading current company evidence"),
+        ("macro", "Connecting macro and industry conditions"),
+        ("competitors", "Mapping competitors"),
+        ("stress", "Stress-testing the strategic read"),
+        ("story", "Building the executive story"),
+        ("ready", "Preparing the analysis"),
+    )
+
+    #: Which hydration tier proves each rung is done.
+    #:
+    #: FOUR TIERS ARE MEASURED AND EIGHT RUNGS ARE NAMED, so several rungs
+    #: share a tier and therefore flip together. That is deliberate: the
+    #: alternative is eight independently-animating rows whose states are
+    #: invented, which is a progress bar that lies. A rung is marked from a
+    #: PRODUCER's output and never from elapsed time — the contract
+    #: `_hydration_state` already keeps.
+    _STAGE_TIER = {
+        "identity": "T0", "prior": "T1", "evidence": "T2", "macro": "T2",
+        "competitors": "T3", "stress": "T3", "story": "T3", "ready": "T3",
+    }
+
+    def _stage_ladder(self, hyd, status) -> str:
+        """The assembly, as a list a customer can watch fill in."""
+        tiers = (hyd or {}).get("tiers") or {}
+        if not tiers:
+            return ""
+        from intent_engine.founder_brief import hydration as H
+        done_states = (H.READY, H.BOUNDED, H.DEGRADED)
+        rows, reached = [], True
+        for key, label in self._STAGE_LADDER:
+            state = tiers.get(self._STAGE_TIER.get(key, ""), H.PENDING)
+            if state in done_states and key != "ready":
+                mark, cls = "done", "done"
+            elif reached:
+                mark, cls, reached = "working", "now", False
+            else:
+                mark, cls = "to come", "wait"
+            rows.append(f'<li class="{cls}">{_e(label)}'
+                        f'<span class="st">{mark}</span></li>')
+        return (f'<ol class="stages" aria-label="What is being assembled">'
+                f'{"".join(rows)}</ol>')
+
+    def _identity_confirmation(self, run_id) -> str:
+        """§7. Who is being analysed, shown before the answer arrives.
+
+        Not a confirmation STEP — an interstitial the customer has to
+        acknowledge is a click between them and the thing they asked for.
+        The identity is stated where they are already looking, with the
+        correction available beside it, so a wrong company is caught in the
+        first four seconds instead of on the report.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        name = str(meta.get("company_name") or "").strip()
+        if not name:
+            return ""
+        listing = self._listing_for(run_id)
+        bits = [b for b in (getattr(listing, "ticker", ""),
+                            str(meta.get("country") or ""),
+                            str(meta.get("domain") or "")) if b]
+        detail = (f'<span class="idbits">{_e(" · ".join(bits))}</span>'
+                  if bits else "")
+        return (f'<p class="analysing">Analysing <b>{_e(name)}</b>{detail}'
+                f' — <a href="/">not this company?</a></p>')
 
     def _hydration_state(self, run_id, *, terminal=False):
         """What this run can already show, measured from its own outputs.
@@ -2965,6 +3153,8 @@ class WebApp:
                                  external=_external,
                                  market=self._market_snapshot(run_id)
                                  if self._listing_for(run_id).ticker else None,
+                                 modeled_market=self._modeled_expectation(
+                                     run_id, _name),
                                  read=self._strategic_read(run_id, _name))
         strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS
                  + fd.render_dossier(
@@ -3766,6 +3956,8 @@ class WebApp:
                                 external=external,
                                 market=self._market_snapshot(run_id)
                                 if self._listing_for(run_id).ticker else None,
+                                modeled_market=self._modeled_expectation(
+                                    run_id, name),
                                 read=self._strategic_read(run_id, name))
         body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + \
             fd.render_dossier(
@@ -4188,7 +4380,8 @@ class WebApp:
         read = self._strategic_read(run_id, name)
         company = read.company or name
         body = steps.render_intro(read, run_id=run_id, company=company,
-                                  learning=self._learning_block())
+                                  learning=self._learning_block(),
+                                  identity=self._subject_line(run_id, company))
         return self._html(self._page(f"{company} — introduction", body,
                                      session, session.get("csrf", "")))
 
@@ -4200,10 +4393,208 @@ class WebApp:
         from intent_engine.founder_brief import steps
         _brief, _report, name = self._founder_layers(run_id)
         timeline = self._history_timeline(run_id, name)
-        body = steps.render_history(timeline, run_id=run_id,
+        sim = self._history_simulation(run_id, name)
+        body = steps.render_history(sim, timeline, run_id=run_id,
                                     company=timeline.company or name)
         return self._html(self._page(f"{name} — history rewind", body,
                                      session, session.get("csrf", "")))
+
+    def _subject_line(self, run_id, company) -> str:
+        """§7, §58. Which company this is, in one line a reader can check.
+
+        Only fields a source carries. A country or a ticker that no source
+        recorded is absent from the line rather than filled in — the whole
+        value of a confirmation line is that everything on it was looked up.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        listing = self._listing_for(run_id)
+        legal = str(meta.get("company_name") or company or "").strip()
+        ticker = getattr(listing, "ticker", "") or ""
+        country = str(meta.get("country") or "")
+        # THE REGISTRY KNOWS WHAT THE RUN DID NOT ASK.
+        #
+        # A run opened from a typed name carries a name and a domain; the
+        # ticker and the country were never part of what it needed, so the
+        # confirmation line read "Cloudflare · cloudflare.com" — which does
+        # not let a reader confirm anything they did not already type. The
+        # suggestion registry holds both and is the same source the entry
+        # combobox showed them, so the line they confirm at the end matches
+        # the row they chose at the start.
+        if not (ticker and country):
+            try:
+                from intent_engine.company_ingestion import suggest as CS
+                match = next(iter(CS.suggest(legal or company, limit=1,
+                                             allow_registrant=False)), None)
+                if match is not None:
+                    ticker = ticker or match.ticker
+                    country = country or match.country
+                    legal = match.legal_name or legal
+            except Exception:                               # noqa: BLE001
+                pass
+        bits = [b for b in (
+            legal if legal and legal != company else "",
+            ticker, country,
+            str(meta.get("domain") or "").replace("https://", "").replace(
+                "http://", "").strip("/"),
+            (f"SEC CIK {meta['cik']}" if meta.get("cik") else ""),
+        ) if b]
+        return " · ".join(dict.fromkeys(bits))
+
+    def _history_simulation(self, run_id, name):
+        """The three-line simulation for this run, cached for the process.
+
+        Deliberately built HERE rather than during the analysis: the XBRL
+        concept calls are two to four round trips to the regulator, and
+        putting them on the critical path of every run would slow the first
+        useful screen for the sake of the fifth. Cached because a reader
+        moving the date control must never re-dial the SEC, and defensive
+        because a chart that raises is worse than one that says what it holds.
+        """
+        from intent_engine.executive import history_simulator as HS
+        cached = getattr(self, "_simulations", None)
+        if cached is None:
+            cached = self._simulations = {}
+        if run_id in cached:
+            return cached[run_id]
+        profile = selection = None
+        try:
+            from intent_engine.executive.analysis_selection import select
+            meta = self.ci.run_meta(run_id) or {}
+            selection = select(name=name, domain=str(meta.get("domain") or ""))
+            profile = selection.profile
+        except Exception:                                   # noqa: BLE001
+            pass
+        # THE OUTBOUND CALL IS OFF UNDER TEST, AND OPTED INTO EXPLICITLY.
+        #
+        # The financial series is two to four requests to the regulator. Left
+        # ungated, every webapp test that renders a history page made them —
+        # the suite went from ten minutes to over an hour, which is how the
+        # omission announced itself. `env == "test"` is the honest gate: a
+        # test must never make an outbound call whatever transport it was or
+        # was not given.
+        #
+        # The local product harnesses are a real exception rather than a
+        # loophole: they drive the whole customer journey against live
+        # sources on purpose, and they set the variable to say so.
+        cik = self._filer_cik(run_id, name) if self._xbrl_allowed() else ""
+        try:
+            sim = HS.build(company=name, cik=cik, profile=profile,
+                           selection=selection, transport=self._transport,
+                           resolver=self._resolver)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("history simulation not built for %s", run_id)
+            sim = HS.Simulation(company=name, coverage=(
+                "The dated financial record could not be read on this "
+                "request."))
+        cached[run_id] = sim
+        return sim
+
+    def _modeled_expectation(self, run_id, name):
+        """§15. The expectation the published record implies, or None.
+
+        None is a real answer and reaches a passage that says so: a company
+        with no multi-year filed series has nothing to model from, and
+        producing a number anyway is the one thing the whole resolution
+        ladder exists to forbid.
+        """
+        from intent_engine.executive import history_simulator as HS
+        try:
+            return HS.present_expectation(
+                self._history_simulation(run_id, name), company=name)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("modelled expectation not built for %s", run_id)
+            return None
+
+    #: Set by the product harnesses (`golden_cycle`, `golden_wave`,
+    #: `surface_matrix`), which drive the real journey against real sources.
+    XBRL_OPT_IN = "INTENT_ENGINE_ALLOW_XBRL"
+
+    def _xbrl_allowed(self) -> bool:
+        if self.config.env != "test":
+            return True
+        return os.environ.get(self.XBRL_OPT_IN, "").strip() == "1"
+
+    def _filer_cik(self, run_id, name="") -> str:
+        """The CIK OF THE SUBJECT, or nothing.
+
+        THE DEFECT THIS REPLACES, WHICH WAS THE WORST ONE IN THE CYCLE.
+        The first version took the CIK out of any SEC URL the run had
+        fetched. That is safe only if every SEC document a run holds was
+        filed BY the subject, and it is not: a third party's 10-K that
+        mentions the subject once as a vendor is legitimate independent
+        evidence and is retrieved on purpose. For Stripe — a private company
+        that files no annual report — the run held exactly such a filing, and
+        the history chart drew SOMEBODY ELSE'S nine-year revenue history
+        under the heading "Stripe — the strategy simulator". Index 22, then
+        2301, then 306. A chart of the wrong company is the worst thing this
+        product can emit, and it arrived through a URL.
+
+        So identity is now asserted from a source that is ABOUT the subject:
+
+          1. the CIK the run was OPENED on, which the regulator gave us for
+             this company by name;
+          2. failing that, the registrant table, and only when the filer it
+             returns carries the subject's name.
+
+        There is no third rung. A company with no verified CIK gets no chart
+        and the bounded fallback instead, which for a private company is the
+        correct and honest answer rather than a degraded one.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        recorded = "".join(ch for ch in str(meta.get("cik") or "")
+                           if ch.isdigit())
+        if recorded:
+            return recorded
+        subject = str(name or meta.get("company_name") or "").strip()
+        # 2. A SEC URL from a document that is the SUBJECT'S OWN FILING.
+        #
+        # The discriminator the first version was missing, and it was already
+        # in the data: `propose_edgar_candidates` resolves the CIK from the
+        # company's NAME and marks what it retrieves `investor_material`,
+        # while `third_party_filings` — the path that found the Aether 10-K
+        # mentioning Stripe — marks its results `competitor`. Same host, same
+        # URL shape, opposite meaning. Reading the class instead of the URL
+        # is what separates "this company's own annual report" from "somebody
+        # else's annual report that says this company's name once".
+        own = {"investor_material", "company_owned", "executive_statement"}
+        from intent_engine.executive import history_rewind as HR
+        mine = [str(d.get("final_url") or d.get("original_url") or "")
+                for d in self._retrieved_documents(run_id)
+                if isinstance(d, dict)
+                and str(d.get("source_class") or "") in own]
+        harvested = HR.cik_from_urls(mine)
+        if harvested:
+            return harvested
+        # THE SAME PREDICATE AS THE SERIES ITSELF, NOT A SECOND ONE.
+        #
+        # This rung was gated on `env == "test"` while the series it feeds
+        # was gated on `_xbrl_allowed()`. The local product harness opts into
+        # the outbound call and is still env="test", so it passed the second
+        # gate and failed the first: Palantir, which has nine years of filed
+        # results, drew no chart because this run happened to hold none of
+        # its own SEC filings. Two gates for one decision is how a capability
+        # ends up switched half on.
+        if not subject or not self._xbrl_allowed():
+            return ""
+        try:
+            from intent_engine.company_ingestion.edgar import resolve_cik
+            found = resolve_cik(subject, transport=self._transport,
+                                resolver=self._resolver)
+        except Exception:                                   # noqa: BLE001
+            return ""
+        if not found:
+            return ""
+        # The registrant table matches on token containment, which is right
+        # for finding a filer and not sufficient for trusting one. The filer
+        # must carry the subject's leading word, or this is a different
+        # company with an overlapping name.
+        head = subject.split(",")[0].split(" Inc")[0].strip().lower()
+        title = str(found.get("title") or "").lower()
+        if head and head.split()[0] not in title:
+            _LOG.warning("registrant %r does not match subject %r; no "
+                         "financial series will be drawn", title, subject)
+            return ""
+        return str(found.get("cik") or "")
 
     def _history_timeline(self, run_id, name):
         """The dated record for this company, cached for the process.
@@ -4222,9 +4613,16 @@ class WebApp:
             return cached[run_id]
         documents = list(self._retrieved_documents(run_id))
         filings = ()
-        cik = HR.cik_from_urls(
-            [str(d.get("final_url") or d.get("original_url") or "")
-             for d in documents if isinstance(d, dict)])
+        # THE SAME IDENTITY RULE AS THE CHART, FOR THE SAME REASON.
+        #
+        # `cik_from_urls` reads a CIK out of whatever SEC URL the run holds,
+        # and a run legitimately holds third-party filings that merely
+        # mention the subject. That put another filer's dated history under
+        # this company's timeline exactly as it put another filer's revenue
+        # under its chart — one bug, two surfaces, and only the chart made it
+        # obvious because a wrong number looks wrong and a wrong date does
+        # not.
+        cik = self._filer_cik(run_id, name)
         if cik:
             try:
                 from intent_engine.company_ingestion.edgar import submissions
@@ -4258,7 +4656,11 @@ class WebApp:
         _brief, _report, name = self._founder_layers(run_id)
         read = self._strategic_read(run_id, name)
         company = read.company or name
-        body = steps.render_connect(read, run_id=run_id, company=company)
+        csrf = session.get("csrf", "")
+        sent = self._has_feedback(run_id)
+        body = steps.render_connect(
+            read, run_id=run_id, company=company,
+            feedback=self._full_feedback_form(run_id, csrf, sent=sent))
         return self._html(self._page(f"{company} — connect your company",
                                      body, session, session.get("csrf", "")))
 
@@ -5730,6 +6132,98 @@ class WebApp:
             f'<input id="fbnote" name="note" maxlength="4000">'
             f'<button type="submit">Send feedback</button></form>')
 
+    def _has_feedback(self, run_id) -> bool:
+        """Whether THIS run already carries feedback. Never raises.
+
+        Scoped to the run, which is scoped to the session that owns it — the
+        confirmation must not be derivable from anyone else's submission
+        (§49, §82). A read that fails costs the confirmation line, never the
+        page.
+        """
+        try:
+            return bool(self.feedback_log.find(run_id=run_id))
+        except Exception:                                   # noqa: BLE001
+            return False
+
+    def _full_feedback_form(self, run_id, csrf, *, sent=False) -> str:
+        """§46-§49. The whole workflow, on the step that closes the demo.
+
+        Deliberately more than a rating. A three-value "was this useful?" tells
+        an operator that something was wrong and nothing about what, which is
+        why the tags exist and why each one maps to a defect class the repair
+        loop already clusters on — a customer saying "too generic" and the
+        machine rubric finding TEMPLATE_COLLAPSE are the same defect from two
+        sides.
+
+        Every field except the score is optional. A form that demands five
+        answers collects none.
+        """
+        from intent_engine.webapp.feedback import TAGS
+        if not self.feedback_available():
+            return (
+                '<section class="fbx" aria-labelledby="fbh">'
+                '<h2 id="fbh">Tell us what this was worth</h2>'
+                '<p>Feedback is switched off on this deployment — we could '
+                'not promise to keep what you sent, and asking anyway would '
+                'be worse than not asking. Nothing you typed here would '
+                'survive the next restart, so the form is not shown rather '
+                'than shown and quietly discarded.</p></section>')
+        thanks = ('<p class="fb-ok" role="status">Recorded — and read. '
+                  'It is kept against this analysis so the next version of '
+                  'it can be measured against what you said.</p>'
+                  ) if sent else ''
+        tags = "".join(
+            f'<label class="tag"><input type="checkbox" name="tag" '
+            f'value="{_e(key)}" aria-label="{_e(label)}"> {_e(label)}'
+            f'</label>' for key, label in TAGS)
+        # Each control announces its MEANING, not its number. "5" read aloud
+        # on its own tells a screen-reader user nothing about which end of
+        # the scale they are on.
+        meaning = {1: "not useful at all", 2: "slightly useful",
+                   3: "somewhat useful", 4: "useful",
+                   5: "useful enough to act on"}
+        scores = "".join(
+            f'<label class="sc"><input type="radio" name="score" '
+            f'value="{n}" required aria-label="{n} — {meaning[n]}"> {n}'
+            f'</label>' for n in range(1, 6))
+        return (
+            f'<section class="fbx" aria-labelledby="fbh"><h2 id="fbh">'
+            f'Tell us what this was worth</h2>{thanks}'
+            f'<form action="/runs/{_e(run_id)}/feedback" method="post">'
+            f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+            f'<input type="hidden" name="page" value="connect">'
+            f'<fieldset><legend>How useful was this analysis?</legend>'
+            f'<p class="scale"><span>Not useful</span>{scores}'
+            f'<span>Would act on it</span></p>'
+            f'<input type="hidden" name="useful" value="partly"></fieldset>'
+            f'<fieldset><legend>What describes it? (optional)</legend>'
+            f'<div class="tags">{tags}</div></fieldset>'
+            f'<p><label for="fb_useful">What was most useful?</label>'
+            f'<input id="fb_useful" name="most_useful" maxlength="2000"></p>'
+            f'<p><label for="fb_missing">What was missing?</label>'
+            f'<input id="fb_missing" name="what_was_missing" '
+            f'maxlength="2000"></p>'
+            f'<p><label for="fb_wrong">What looked wrong?</label>'
+            f'<input id="fb_wrong" name="what_looked_wrong" '
+            f'maxlength="2000"></p>'
+            f'<p><label for="fb_decision">What decision would you use this '
+            f'for?</label><input id="fb_decision" name="decision_use" '
+            f'maxlength="2000"></p>'
+            f'<fieldset><legend>Would you connect your own internal '
+            f'context?</legend>'
+            f'<label><input type="radio" name="would_connect" value="yes"> '
+            f'Yes</label> <label><input type="radio" name="would_connect" '
+            f'value="maybe"> Maybe</label> '
+            f'<label><input type="radio" name="would_connect" value="no"> '
+            f'No</label></fieldset>'
+            f'<p><label for="fb_note">Anything else</label>'
+            f'<input id="fb_note" name="note" maxlength="4000"></p>'
+            f'<button type="submit">Send feedback</button>'
+            f'<p class="fb-priv">Your feedback is tied to this session and '
+            f'this analysis. It is not shown to other visitors, and sending '
+            f'it is not permission to quote you.</p>'
+            f'</form></section>')
+
     def _feedback(self, session, run_id, form):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
@@ -5754,7 +6248,17 @@ class WebApp:
                 deployed_commit=info.get("commit", ""),
                 analysis_version=info.get("app_version", ""),
                 category=form.get("category", ""),
-                user_id=session["user_id"])
+                user_id=session["user_id"],
+                # `cand` is the only key `_form` joins on commas, so a
+                # multi-checkbox field arrives as its first value only. The
+                # tag list is posted under a name the parser splits itself.
+                score=(form.get("score") or "")[:1],
+                tags=[t for t in (form.get("tag") or "").split(",") if t],
+                most_useful=form.get("most_useful", ""),
+                what_was_missing=form.get("what_was_missing", ""),
+                what_looked_wrong=form.get("what_looked_wrong", ""),
+                decision_use=form.get("decision_use", ""),
+                would_connect=form.get("would_connect", ""))
         except (FeedbackNotDurable, ValueError) as exc:
             # No success page. The whole defect being fixed is a page that said
             # "recorded" because the code reached the next line.

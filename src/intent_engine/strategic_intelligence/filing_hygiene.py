@@ -147,6 +147,83 @@ _FURNITURE = tuple(re.compile(p, re.I) for p in (
 _EIN = re.compile(r"\b\d{2}-\d{7}\b")
 _CIK = re.compile(r"\bcik\s*[#:]?\s*\d{6,10}\b", re.I)
 
+# THE TABLE OF CONTENTS. Measured live on the Cloudflare deck, slide 4
+# ("Products, customers and market"), which opened with:
+#
+#     "UNITED STATES. Management's Discussion and Analysis of Financial
+#      Condition and Results of Operations 64. Changes in and Disagreements
+#      with Accountants on Accounting and Financial Disclosure 76. Transpar…"
+#
+# The cover-page patterns above did not see it, because a contents page is
+# not a cover page: it contains no checkbox, no EIN, no "indicate by check
+# mark". What it contains is a run of ITEM HEADINGS EACH FOLLOWED BY A PAGE
+# NUMBER, and that shape is the same in every filing by every filer.
+#
+# Matched structurally rather than by heading text. A phrase list would have
+# to enumerate the twenty-odd standard items, would miss the non-standard
+# ones, and would refuse a real sentence that happened to quote one — this
+# fires only on the repetition, which prose does not produce.
+_CONTENTS_RUN = re.compile(
+    r"(?:[A-Z][A-Za-z',\- ]{12,90}?\s+\d{1,3}\s*\.\s*){2,}")
+
+# ONE contents entry, on its own.
+#
+# The run above catches a contents page arriving whole. It does not catch one
+# arriving a line at a time, and that is how it actually arrives: the caller
+# splits on sentence boundaries first, so
+#
+#     "Management's Discussion and Analysis ... Operations 64."
+#     "Changes in and Disagreements with Accountants ... Disclosure 76."
+#
+# are two separate fragments with one page number each, and the {2,} never
+# fires. Both patterns are kept — a whole contents page is still refused in
+# one match, and the caller's split order is no longer load-bearing.
+#
+# The shape is a title-cased noun phrase, no digits inside it, terminated by
+# a bare page number. Real prose does not end that way: a sentence with a
+# number in it has the number in a clause ("revenue rose to 2.17 billion"),
+# and the character class before the number admits no digits at all, so
+# every such sentence is excluded by construction rather than by luck.
+_CONTENTS_ENTRY = re.compile(
+    r"^[A-Z][A-Za-z'’,\-]*(?:\s+[A-Za-z'’,\-]+){2,20}"
+    r"\s+\d{1,3}\s*\.?\s*$")
+
+#: Words a heading does not capitalise. Everything else in a contents entry
+#: is a content word and IS capitalised, which is the signature.
+_MINOR = frozenset({
+    "a", "an", "the", "and", "or", "of", "in", "on", "to", "for", "with",
+    "at", "by", "from", "as", "about", "into", "over", "after", "is", "are",
+})
+
+
+def _is_contents_entry(text: str) -> bool:
+    """One line of a filing's contents page: a heading and a page number.
+
+    THE NUMBER ALONE IS NOT ENOUGH. "Our network spans one hundred and twenty
+    countries and is growing 20." ends in a bare number too, and it is a real
+    sentence — refusing it would be the over-refusal that every previous
+    attempt at this filter died of. What separates them is TITLE CASE: a
+    contents entry capitalises its content words because it is a heading, and
+    a sentence capitalises only its first word. That is a property of the
+    shape rather than of the wording, so it holds across filers and does not
+    need a list of item names.
+    """
+    if not _CONTENTS_ENTRY.match(text):
+        return False
+    words = [w for w in text.split()[:-1] if w.strip(".,")]
+    content = [w for w in words if w.strip(".,'’").lower() not in _MINOR]
+    if len(content) < 2:
+        return False
+    capitalised = sum(1 for w in content if w[:1].isupper())
+    return capitalised >= max(2, int(len(content) * 0.7))
+
+# The statutory heading of every filing, left behind when the cover page is
+# split at a sentence boundary: "UNITED STATES SECURITIES AND EXCHANGE
+# COMMISSION" becomes "UNITED STATES." at the head of the next fragment.
+_FILING_HEADER = re.compile(
+    r"^\s*(?:UNITED STATES|SECURITIES AND EXCHANGE COMMISSION|"
+    r"WASHINGTON,?\s*D\.?\s*C\.?(?:\s*20549)?)\s*[.,]", re.I)
+
 
 def strip_checkboxes(text: str) -> str:
     """Remove filing-status glyphs and the empty punctuation they leave."""
@@ -169,6 +246,10 @@ def is_filing_furniture(text: str) -> bool:
     if any(p.search(stripped) for p in _FURNITURE):
         return True
     if _EIN.search(stripped) or _CIK.search(stripped):
+        return True
+    if (_CONTENTS_RUN.search(stripped)
+            or _is_contents_entry(stripped)
+            or _FILING_HEADER.search(stripped)):
         return True
     # A cover page is a list of noun phrases. Real prose has a verb; requiring
     # one would over-refuse, so this only fires on very short fragments that

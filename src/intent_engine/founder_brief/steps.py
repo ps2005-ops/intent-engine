@@ -41,6 +41,7 @@ from intent_engine.executive.strategic_read import (BOUNDED_INFERENCE,
                                                     STRONGLY_INFERRED,
                                                     UNMEASURED)
 from intent_engine.founder_brief import flow
+from intent_engine.founder_brief import history_chart as HC
 
 
 def _e(text) -> str:
@@ -55,12 +56,17 @@ color:var(--muted);font-weight:700;margin:0 0 .3rem}
 .step h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15;margin:0 0 .6rem}
 .step .lede{font-size:clamp(1.02rem,2.2vw,1.18rem);line-height:1.55;
 margin:0 0 1rem}
+.step .subject{font-size:.86rem;color:var(--muted);margin:-.3rem 0 .9rem;
+letter-spacing:.01em}
 .readbox{border:1px solid var(--line);border-left:4px solid var(--accent);
 border-radius:12px;background:var(--card);padding:1.1rem 1.2rem;margin:1.4rem 0}
 .readbox h2{margin:0 0 .5rem;font-size:.74rem;text-transform:uppercase;
 letter-spacing:.09em;color:var(--muted)}
 .readbox p{margin:.45rem 0}
 .readbox .q{font-size:1.06rem;font-weight:600}
+.readbox.rec{border-left-color:var(--ok,#1a6b47)}
+.readbox.rec .n{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+color:var(--muted);font-weight:700;margin-right:.35rem}
 .stand{display:inline-block;font-size:.68rem;text-transform:uppercase;
 letter-spacing:.06em;border:1px solid var(--line);border-radius:999px;
 padding:.08rem .5rem;color:var(--muted);margin-left:.4rem;white-space:nowrap}
@@ -76,6 +82,34 @@ margin:1.2rem 0;color:var(--muted);font-style:italic}
 .chapters section{padding:1.1rem 0;border-top:1px solid var(--line)}
 .chapters h3{margin:0 0 .35rem;font-size:1.02rem}
 .chapters p{margin:0}
+/* --- step 6 feedback ---------------------------------------------------- */
+.fbx{border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;
+margin:1.6rem 0;background:var(--card)}
+.fbx h2{margin:0 0 .6rem;font-size:1.05rem;text-transform:none;
+letter-spacing:0;color:var(--fg)}
+.fbx fieldset{border:0;padding:0;margin:0 0 .9rem}
+.fbx legend{font-size:.8rem;color:var(--muted);font-weight:700;padding:0;
+margin-bottom:.35rem}
+.fbx .scale{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+margin:0;font-size:.8rem;color:var(--muted)}
+.fbx .sc{display:inline-flex;align-items:center;gap:.25rem;
+border:1px solid var(--line);border-radius:8px;padding:.3rem .6rem;
+cursor:pointer;font-size:.95rem;color:var(--fg)}
+.fbx .tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.fbx .tag{display:inline-flex;align-items:center;gap:.3rem;
+border:1px solid var(--line);border-radius:999px;padding:.24rem .7rem;
+font-size:.83rem;cursor:pointer}
+.fbx label[for]{display:block;font-size:.83rem;color:var(--muted);
+margin-bottom:.2rem}
+.fbx input[type=text],.fbx input:not([type]){width:100%;box-sizing:border-box;
+padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;
+font:inherit;background:var(--bg,#fff);color:var(--fg)}
+.fbx button{padding:.55rem 1.1rem;border-radius:9px;border:0;
+background:var(--accent);color:#fff;font-weight:650;cursor:pointer;
+font-size:.95rem}
+.fbx .fb-priv{font-size:.78rem;color:var(--muted);margin:.7rem 0 0}
+.fbx .fb-ok{border-left:3px solid var(--accent);padding-left:.7rem;
+margin:0 0 .9rem}
 /* --- history slider, JS-free ------------------------------------------- */
 .rewind input[type=radio]{position:absolute;opacity:0;pointer-events:none}
 .rail{display:flex;gap:.25rem;align-items:flex-end;margin:1.1rem 0 .3rem;
@@ -140,11 +174,21 @@ def _badge(standing: str) -> str:
 # STEP 1 — INTRODUCTION
 # ===========================================================================
 def render_intro(read, *, run_id: str, company: str,
-                 learning: str = "") -> str:
-    """§21–§25. Compelling immediately, synthesized, no truncated copy."""
+                 learning: str = "", identity: str = "") -> str:
+    """§21–§25. Compelling immediately, synthesized, no truncated copy.
+
+    `identity` is the canonical subject line — legal name, ticker, country,
+    domain. It is passed in rather than derived because the renderer has no
+    session and no registry, and it is REQUIRED reading rather than a nicety:
+    the persona pass found a chief executive who could not confirm, from the
+    first screen, which company this analysis was about. The page said
+    "Cloudflare" six times and never "Cloudflare, Inc. · NET".
+    """
     out = [STEP_CSS, '<main class="step">',
            '<p class="kicker">Introduction</p>',
            f'<h1>{_e(company)}</h1>']
+    if identity:
+        out.append(f'<p class="subject">{_e(identity)}</p>')
 
     # ONE opening line. `economic_role` and `strategic_position` say what the
     # story chapters below say, and printing both put the same two sentences
@@ -172,6 +216,34 @@ def render_intro(read, *, run_id: str, company: str,
                    f'{_e(_read_word(read.standing))} — '
                    f'{_e(read.standing_reason)}</p>')
     out.append('</div>')
+
+    # THE RECOMMENDATION, ON THE FIRST SCREEN (§43, §70).
+    #
+    # The bridge always carried an action, a guardrail and a kill switch, and
+    # the introduction never named any of them: the move appeared as an
+    # unlabelled imperative in item 02 of "What matters now", and the
+    # stopping rule appeared three pages later. A chief executive reading
+    # only this screen could not have said what was being recommended or
+    # when to stop — which is what the persona pass measured and what a
+    # reader would have felt without being able to name.
+    bridge = getattr(read, "level6_action", None)
+    if bridge is not None and getattr(bridge, "action_now", ""):
+        out.append('<div class="readbox rec"><h2>What we recommend</h2>')
+        out.append(f'<p class="q">{_e(_capitalise(bridge.action_now))}</p>')
+        # NOUN-PHRASE LABELS, NOT SENTENCE STEMS. "Stop if" + a kill switch
+        # that already begins "if the direction is not visible" rendered
+        # "Stop if if the direction is not visible" — a label that completes
+        # into its value only works when every value has the same grammar,
+        # and these come from four different producers.
+        for label, value in (("Guardrail", bridge.guardrail),
+                             ("Stopping rule", bridge.kill_switch),
+                             ("How to test it",
+                              bridge.minimum_viable_experiment),
+                             ("What would change this view", bridge.falsifier)):
+            if value:
+                out.append(f'<p><span class="n">{_e(label)}</span> '
+                           f'{_e(_capitalise(value))}</p>')
+        out.append('</div>')
 
     if read.what_matters_now:
         out.append('<h2>What matters now</h2><ul class="matters">')
@@ -245,58 +317,72 @@ def _lower(text: str) -> str:
 # ===========================================================================
 # STEP 5 — HISTORY REWIND
 # ===========================================================================
-def render_history(timeline, *, run_id: str, company: str) -> str:
-    """§41–§48. A slider across dates, with the vintage wall visible."""
-    out = [STEP_CSS, '<main class="step">',
-           '<p class="kicker">History rewind</p>',
-           f'<h1>{_e(company)} — rewind the record</h1>']
-    out.append('<p class="lede">Move to a date and see only what the record '
-               'showed then. What happened afterward is kept in one panel of '
-               'its own, so nothing on this page reasons from an outcome it '
-               'could not have known.</p>')
+def render_history(sim, timeline=None, *, run_id: str, company: str) -> str:
+    """§17-§36. A strategy simulator, chart first.
 
-    if not timeline.available:
-        out.append(f'<div class="readbox"><h2>No dated record</h2>'
-                   f'<p>{_e(timeline.coverage_note)}</p></div>')
+    The old version of this surface changed BLOCKS OF PROSE when you moved the
+    slider. It was correct about the vintage wall and it did not answer the
+    question an executive asks about the past, which is comparative: where did
+    this go, where was it expected to go, and where could it have gone. Those
+    are three lines on one axis, so that is what opens the page now.
+
+    `timeline` (the dated filing record) is optional and secondary: it is the
+    provenance of the dates, shown under the chart rather than instead of it.
+    """
+    out = [STEP_CSS, HC.CHART_CSS, '<main class="step">',
+           '<p class="kicker">History rewind</p>',
+           f'<h1>{_e(company)} — the strategy simulator</h1>']
+    out.append('<p class="lede">Pick a year. The chart holds the path the '
+               'company actually took, what the record published by then '
+               'implied about where it was going, and where a named '
+               'alternative available on the same information could have led. '
+               'Nothing modelled at a date can see a filing made after it.</p>')
+
+    if sim is None or not sim.available:
+        out.append(_history_fallback(sim, timeline, company))
         out.append(flow.drawer(run_id, ("sources",),
                                title="What was retrieved"))
         out.append(flow.nav(run_id, "history"))
         out.append('</main>')
         return "".join(out)
 
-    out.append(f'<p>{_e(timeline.coverage_note)}</p>')
-    out.append('<div class="rewind">')
-    # The radios come FIRST and the panels after, because `:checked ~` only
-    # reaches later siblings.
-    default = len(timeline.vintages) - 1
-    for index, vintage in enumerate(timeline.vintages):
+    out.append('<div class="hrewind">')
+    # Radios first: `:checked ~` reaches later siblings only.
+    #
+    # THE DEFAULT IS NOT THE LATEST DATE. The most recent vintage has almost
+    # no hindsight after it, so it opens on a chart where the expectation and
+    # the outcome are the same point and the page teaches nothing. The
+    # default is the vintage about two-thirds along: late enough to have a
+    # real trailing record, early enough that what followed is visible.
+    default = max(0, min(len(sim.vintages) - 1,
+                         int(len(sim.vintages) * 0.62)))
+    for index in range(len(sim.vintages)):
         checked = ' checked' if index == default else ''
-        out.append(f'<input type="radio" name="rw" id="rw{index}"{checked}>')
-    out.append(f'<style>{_rail_css(len(timeline.vintages))}</style>')
-    out.append('<div class="rail" role="group" aria-label="Choose a date">')
-    for index, vintage in enumerate(timeline.vintages):
-        # THE MONTH IS NOT ALWAYS UNIQUE. Two 8-Ks three weeks apart both
-        # read "2026-06", so the rail offered two identical-looking dates and
-        # a reader could not tell which one they were on.
-        label = (vintage.date if _ambiguous(timeline, vintage)
-                 else vintage.date[:7])
-        out.append(f'<label for="rw{index}"><b>{_e(label)}</b>'
-                   f'{_e(_short_state(vintage.state))}</label>')
+        out.append(f'<input type="radio" name="hv" id="hv{index}"{checked} '
+                   f'aria-label="Rewind to {sim.vintages[index].year}">')
+    out.append(f'<style>{HC.rail_css(len(sim.vintages))}</style>')
+    out.append('<div class="hrail" role="group" '
+               'aria-label="Choose the year to rewind to">')
+    for index, vintage in enumerate(sim.vintages):
+        out.append(f'<label for="hv{index}"><b>{vintage.year}</b>'
+                   f'{_e(_knowable_note(vintage))}</label>')
     out.append('</div>')
-    for index, vintage in enumerate(timeline.vintages):
-        out.append(f'<div class="vint" id="v{index}">')
+    for index, vintage in enumerate(sim.vintages):
+        out.append(f'<div class="hpanel hpanel{index}">')
+        out.append('<div class="hsim">')
+        out.append(HC.chart_svg(sim, vintage))
+        out.append(HC.legend(sim, vintage))
+        out.append(f'<p class="hsim-axis-note">{_e(sim.index.definition)}</p>')
+        out.append('</div>')
         out.append(f'<h2>{_e(vintage.label)}</h2>')
-        out.append(f'<p class="vwall">{_e(vintage.state_prose)}</p>')
-        out.append('<div class="panels">')
-        for panel in vintage.panels:
-            cls = ' class="after"' if panel.after_the_wall else ''
-            out.append(f'<div{cls}><h3>{_e(panel.title)}</h3>'
-                       f'<p>{_e(panel.body)}</p></div>')
-        out.append('</div>')
-        if vintage.counterfactual is not None:
-            out.append(_counterfactual(vintage.counterfactual))
+        out.append(HC.cards(vintage))
+        out.append(HC.drivers(vintage))
+        out.append(HC.data_table(sim, vintage))
         out.append('</div>')
     out.append('</div>')
+    out.append(f'<p class="hsim-axis-note">{_e(sim.coverage)}</p>')
+    if timeline is not None and timeline.available:
+        out.append(_filing_provenance(timeline))
     out.append(flow.drawer(run_id, ("evidence", "sources"),
                            title="The filings behind this timeline"))
     out.append(flow.nav(run_id, "history"))
@@ -304,35 +390,91 @@ def render_history(timeline, *, run_id: str, company: str) -> str:
     return "".join(out)
 
 
-def _ambiguous(timeline, vintage) -> bool:
-    months = [v.date[:7] for v in timeline.vintages]
-    return months.count(vintage.date[:7]) > 1
+def _knowable_note(vintage) -> str:
+    """The rail's second line: where the index stood at that date.
 
-
-def _short_state(state: str) -> str:
-    return {HR.HISTORICAL_REPLAY: "testable",
-            HR.DESCRIPTIVE_HISTORY: "not yet tested",
-            HR.REPLAY_NOT_YET_VALID: "no record"}.get(state, "")
-
-
-def _rail_css(count: int) -> str:
-    """One rule per date: check radio N, show panel N and mark tab N.
-
-    Generated rather than written because the number of dates is decided by
-    the record, not by the design.
+    "Tested against what followed" was the first version and it was identical
+    on every tab — a label that cannot vary is not a label, it is decoration
+    on a control the reader is trying to choose with. The index at the date
+    differs on every tab and is the number the tab is about.
     """
-    rules = []
-    for index in range(count):
-        rules.append(
-            f'.rewind input#rw{index}:checked ~ .rail label[for="rw{index}"]'
-            '{border-color:var(--accent);color:var(--fg);'
-            'background:var(--soft)}')
-        rules.append(
-            f'.rewind input#rw{index}:checked ~ #v{index}{{display:block}}')
-        rules.append(
-            f'.rewind input#rw{index}:focus ~ .rail label[for="rw{index}"]'
-            '{outline:2px solid var(--accent);outline-offset:2px}')
-    return "".join(rules)
+    point = next((p for p in vintage.actual.points if p.year == vintage.year),
+                 None)
+    return f"index {point.value:.0f}" if point is not None else "as filed"
+
+
+def _history_fallback(sim, timeline, company: str) -> str:
+    """No chart — and still not an empty page (§16 rung D, §38).
+
+    Reached by a company with no multi-year filed series: a private company,
+    a foreign issuer filing in another taxonomy, or one too young to have
+    three years. The page states what that means for a decision and what
+    single input would produce the chart, because "no history exists" is a
+    sentence about our retrieval that reads to a customer as a sentence about
+    their company.
+    """
+    fallback = getattr(sim, "fallback", None) if sim is not None else None
+    out = ['<div class="readbox"><h2>What can be said about the path so far'
+           '</h2>']
+    if fallback is not None:
+        out.append(f'<p class="q">{_e(fallback.statement)}</p>')
+        if fallback.next_measurement:
+            out.append(f'<p><strong>What would draw this chart:</strong> '
+                       f'{_e(fallback.next_measurement)}.</p>')
+        if fallback.decision_relevance:
+            out.append(f'<p><strong>Why it matters:</strong> this bears on '
+                       f'{_e(fallback.decision_relevance)}.</p>')
+    else:
+        out.append(f'<p class="q">No multi-year financial series has been '
+                   f'retrieved for {_e(company)}, so the three-line '
+                   f'comparison cannot be drawn from measured points.</p>')
+        out.append('<p><strong>What would draw this chart:</strong> three or '
+                   'more years of reported revenue and operating result.</p>')
+    out.append('</div>')
+    bounded = tuple(getattr(sim, "bounded_cards", ()) or ())
+    if bounded:
+        out.append('<p>The chart needs a filed series and this company has '
+                   'none. The strategic question it would have framed does '
+                   'not need one, so it is argued here directly — as an '
+                   'argument, with no path drawn under it.</p>')
+        out.append('<div class="hcards">')
+        for card in bounded:
+            style = {"OBSERVED": "obs", "MODELED": "mod",
+                     "COUNTERFACTUAL": "cf"}.get(card.basis, "obs")
+            out.append(f'<article class="{style}"><h3>{_e(card.title)}'
+                       f'<span class="basis">{_e(card.label)}</span></h3>'
+                       f'<p>{_e(card.body)}</p></article>')
+        out.append('</div>')
+    if timeline is not None and timeline.available:
+        out.append('<p>The dated record that <em>was</em> retrieved is below: '
+                   'it establishes when this company said what, which is the '
+                   'sequence a strategy has to be judged in even without the '
+                   'figures.</p>')
+        out.append(_filing_provenance(timeline))
+        latest = timeline.vintages[-1]
+        out.append('<div class="hcards">')
+        for panel in latest.panels:
+            out.append(f'<article class="obs"><h3>{_e(panel.title)}</h3>'
+                       f'<p>{_e(panel.body)}</p></article>')
+        out.append('</div>')
+    return "".join(out)
+
+
+def _filing_provenance(timeline) -> str:
+    """The dated filings the vintages are anchored on."""
+    rows = "".join(
+        f'<tr><th scope="row">{_e(f.get("date"))}</th>'
+        f'<td>{_e(f.get("form"))}</td></tr>'
+        for f in list(timeline.filings)[-14:])
+    if not rows:
+        return ""
+    return (f'<details class="hsim-alt"><summary>The dated filings behind '
+            f'these vintages ({len(timeline.filings)} retrieved)</summary>'
+            f'<div class="scroll"><table><thead><tr>'
+            f'<th scope="col">Filed</th><th scope="col">Form</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table></div>'
+            f'<p class="hsim-axis-note">{_e(timeline.coverage_note)}</p>'
+            f'</details>')
 
 
 def _counterfactual(cf) -> str:
@@ -384,8 +526,14 @@ _TAG_WORD = {"ACTIVE": "Connected now",
              "COMING": "On the roadmap"}
 
 
-def render_connect(read, *, run_id: str, company: str) -> str:
-    """§49–§52. What changes when the system knows the company's own numbers."""
+def render_connect(read, *, run_id: str, company: str,
+                   feedback: str = "") -> str:
+    """§49–§52. What changes when the system knows the company's own numbers.
+
+    `feedback` is the step-6 workflow, injected rather than built here: it
+    needs a CSRF token and a durability check, and neither belongs in a
+    renderer that has no session and no storage.
+    """
     unmeasured = [m for m in (read.metrics or ()) if m.state == UNMEASURED]
     out = [STEP_CSS, '<main class="step">',
            '<p class="kicker">Connect your company</p>',
@@ -448,6 +596,16 @@ def render_connect(read, *, run_id: str, company: str) -> str:
         out.append(f'<li><span class="st">{_e(label)}</span><br>'
                    f'{_e(text)}</li>')
     out.append('</ul>')
+
+    # §52. FEEDBACK SITS BETWEEN THE DEMO AND THE ASK, NOT AFTER IT.
+    #
+    # Below the CTA it is a form nobody reaches, because a reader who has
+    # decided either way has already left. Between them it is the natural
+    # next thing: you have just been shown what was bounded and what would
+    # unbound it, and the question "was this worth anything?" follows from
+    # that rather than interrupting it.
+    if feedback:
+        out.append(feedback)
 
     out.append('<p><a class="cta" href="/signup">Start private company '
                'intelligence</a></p>')

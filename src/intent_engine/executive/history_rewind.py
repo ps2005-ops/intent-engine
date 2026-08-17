@@ -387,17 +387,29 @@ def _market_expected(profile, before, when) -> str:
     if not before:
         return ("With nothing filed by this date in hand, what the market "
                 "expected cannot be read from the record.")
+    # WHAT IT WAS WATCHING IS A REAL ANSWER; A RETRIEVAL REPORT IS NOT.
+    #
+    # This panel used to open "No estimate or share-price series was
+    # retrieved, so what the market expected is not measured here" — a true
+    # sentence about our feed, offered to someone who asked a question about
+    # a company, with nothing after it. The business model determines what a
+    # market watches for this kind of business, which is knowable without any
+    # price series at all, and it is stated first. The limit is still stated;
+    # it is no longer the headline, and it now says what would remove it.
     drivers = tuple(getattr(profile, "primary_revenue_drivers", ()) or ())
     if not drivers:
-        return ("What the market expected is not established. No share-price "
-                "or estimate series was retrieved, and inferring expectation "
-                "from a later outcome is the error this page exists to "
-                "avoid.")
+        return ("What a market watches for this kind of business is not "
+                "established here, because the business was not classified "
+                "in this run. What would settle it: any filing or investor "
+                "page that describes how the company earns its revenue.")
     return _stop(
-        f"No estimate or share-price series was retrieved, so what the market "
-        f"expected is not measured here. What it would have been watching is "
-        f"determined by the business model: "
-        f"{_join([_lower(d) for d in drivers[:3]])}")
+        f"What a market watches for a business of this kind is set by how it "
+        f"earns money: {_join([_lower(d) for d in drivers[:3]])}. Those are "
+        f"the measures a reader at this date would have been tracking. No "
+        f"contemporaneous price or estimate series was retrieved to check "
+        f"the level against, so the direction here carries no magnitude — "
+        f"what would settle that is a published price history for this "
+        f"company covering the vintage")
 
 
 def _knowable(before, when) -> str:
