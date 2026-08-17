@@ -294,8 +294,15 @@ def test_competitor_absence_explains_what_it_costs_the_decision():
                                 if o.get("source_class") == "company_owned"])
     book = _dossier(report=report)
     text = _text(_rendered(book, D.BRIEF))
-    assert "No competitor's own account was retrieved" in text
-    assert "the risk the evidence cannot price" in text
+    # WHAT IT COSTS THE DECISION IS STILL SAID -- and it is now said as what
+    # is MISSING from the read rather than as what the fetcher did. §13
+    # forbids "No competitor's own account was retrieved for this run" on a
+    # primary surface: it answers a question about retrieval in the section a
+    # reader opened to learn about their market.
+    assert "no rival's own account to check it against" in text
+    assert "the risk this evidence cannot price" in text
+    assert "What would improve it" in text
+    assert "was retrieved for this run" not in text
 
 
 # --- 5. the machinery never reaches the reader --------------------------------

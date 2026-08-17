@@ -45,7 +45,18 @@ EXTRA = ("xray", "evidence", "sources", "brief", "dashboard")
 
 
 def visible(html: str) -> str:
+    """What a reader SEES, including the quote marks a browser draws.
+
+    `<q>` is rendered by every user agent with typographic quotes around it,
+    so an evidence excerpt is visibly a quotation on the page. Stripping the
+    tag without adding them made a quoted 10-K sentence read as the product's
+    own prose, and the marketing-copy detector was right to object to what it
+    was shown -- it was shown the wrong thing.
+    """
     text = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", html)
+    text = re.sub(r"(?is)<q\b[^>]*>(.*?)</q>", "“" + r"\1" + "”", text)
+    text = re.sub(r"(?is)<blockquote\b[^>]*>(.*?)</blockquote>",
+                  "“" + r"\1" + "”", text)
     text = re.sub(r"(?s)<[^>]+>", " ", text)
     for a, b in (("&mdash;", "—"), ("&amp;", "&"), ("&#39;", "'"),
                  ("&#x27;", "'"), ("&quot;", '"'), ("&lt;", "<"),

@@ -375,3 +375,52 @@ def test_a_macro_channel_with_no_transmission_is_removed():
     corrected = SC.correct(polluted)
     assert corrected.read.macro == ()
     assert any("macro" in r for r in corrected.repairs)
+
+
+# ===========================================================================
+# §15 — a rival must be a company a buyer could choose instead
+# ===========================================================================
+def test_a_programme_or_a_standard_is_never_a_competitor():
+    """MEASURED LIVE on the deployed introduction, one line under the company
+    name: "Its position is contested most directly by Authorization Management
+    Program, Cloudflare Workers and FedRAMP." Two of those are fragments of a
+    US government certification scheme and the third is Cloudflare's own
+    product."""
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    passage = (
+        "We compete with Akamai Technologies and other vendors. Cloudflare "
+        "Workers competes with serverless offerings. The Federal Risk and "
+        "Authorization Management Program (FedRAMP) authorizes our service, "
+        "and the General Services Administration lists us.")
+    names = candidate_names(passage, subject="Cloudflare, Inc.")
+    lowered = " ".join(names).lower()
+    assert "fedramp" not in lowered
+    assert "authorization management program" not in lowered
+    assert "cloudflare" not in lowered, names
+    assert any("Akamai" in n for n in names), names
+
+
+def test_the_subject_is_never_its_own_rival_however_it_is_written():
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    for subject, product in (("Cloudflare, Inc.", "Cloudflare Workers"),
+                             ("Shopify Inc.", "Shopify Payments"),
+                             ("Stripe, Inc.", "Stripe Terminal")):
+        passage = f"We compete with Rivalcorp Holdings. {product} is ours."
+        names = candidate_names(passage, subject=subject)
+        assert product not in names, (subject, names)
+
+
+def test_a_word_boundary_not_a_substring():
+    """"alpha" inside "Alphabet Inc." must not refuse a real company."""
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    names = candidate_names("We compete with Alphabet Inc. in search.",
+                            subject="Alpha Industries")
+    assert any("Alphabet" in n for n in names), names
+
+
+@pytest.mark.parametrize("company,domain", GOLDEN)
+def test_no_rival_on_the_read_is_the_company_itself(company, domain):
+    read = SR.compose(company=company, domain=domain)
+    head = company.split(",")[0].split(" Inc")[0].strip().lower()
+    for rival in read.level4_competition:
+        assert head not in rival.name.lower(), (company, rival.name)

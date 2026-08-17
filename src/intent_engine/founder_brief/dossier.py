@@ -611,12 +611,20 @@ def _competitive(company, report, decision, hypotheses, families,
             supported = _structural_competition(read, company)
             if supported:
                 paras.extend(supported)
+            # §13 FORBIDS THE RETRIEVAL REPORT ON A PRIMARY SURFACE, and it
+            # is right to: "No competitor's own account was retrieved for
+            # this run" answers a question about the fetcher in the section a
+            # reader opened to learn about their market. The LIMITATION is
+            # real and stays; what changes is that it is stated as what is
+            # missing from the read rather than as what the run failed to do.
             paras.append(
-                "No competitor's own account was retrieved in this run, so "
-                "nothing above corrects for how this company frames its own "
-                "market. Read the positioning as self-described, and treat a "
-                "competitor moving first as the risk the evidence cannot "
-                "price.")
+                "Confidence in the above is bounded: it rests on this "
+                "company's own account of its market and on how businesses "
+                "of this kind compete, with no rival's own account to check "
+                "it against. What would improve it is a competitor's "
+                "published positioning or pricing on the same buyer — until "
+                "then, treat a competitor moving first as the risk this "
+                "evidence cannot price.")
     return Passage("competitive", "Where this sits against the alternatives",
                    depth=BOTH, kind="evidence", paragraphs=tuple(paras),
                    items=tuple(items[:4]),

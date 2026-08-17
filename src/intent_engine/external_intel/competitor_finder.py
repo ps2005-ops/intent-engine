@@ -152,6 +152,52 @@ def competition_passages(text: str, *, window: int = 3) -> List[str]:
     return out
 
 
+#: Head nouns that make a capitalised span an institution, a standard or a
+#: programme rather than a company you could buy from instead. Measured live
+#: on Cloudflare, whose competitors came back as "FedRAMP" and "Authorization
+#: Management Program" -- both fragments of "Federal Risk and Authorization
+#: Management Program", a US government certification scheme, presented to a
+#: chief executive as firms contesting their market.
+_NOT_A_VENDOR = frozenset({
+    "program", "programme", "act", "framework", "standard", "standards",
+    "regulation", "regulations", "directive", "initiative", "alliance",
+    "association", "foundation", "institute", "consortium", "committee",
+    "authority", "commission", "agency", "department", "ministry",
+    "administration", "bureau", "council", "board", "office", "treaty",
+    "convention", "protocol", "certification", "accreditation", "scheme",
+    "guidelines", "rule", "rules", "law", "code",
+})
+
+#: Standard and programme acronyms that are single tokens and therefore slip
+#: past the head-noun test above.
+_NOT_A_VENDOR_EXACT = frozenset({
+    "fedramp", "gdpr", "hipaa", "soc", "pci", "pci-dss", "iso", "nist",
+    "ccpa", "sox", "dora", "mifid", "basel", "ifrs", "gaap", "esg",
+})
+
+
+def _is_the_subject(name: str, subject: str) -> bool:
+    """Is this candidate the subject, or something the subject owns?
+
+    "Cloudflare Workers" is Cloudflare's own product and was returned as
+    Cloudflare's competitor and rendered on the introduction, one line under
+    the company's name. The old test asked whether the CANDIDATE was inside
+    the SUBJECT, which is the wrong direction for a product name.
+
+    Word boundaries throughout: a substring test refuses "Alphabet Inc." for
+    containing "alpha", which is the opposite mistake and has been made here
+    before.
+    """
+    subject_tokens = [w.lower() for w in re.split(r"\W+", subject or "") if w]
+    generic = {"inc", "corp", "corporation", "company", "co", "ltd",
+               "limited", "plc", "holdings", "group", "the", "and", "sa",
+               "nv", "ag", "llc", "lp"}
+    distinctive = [t for t in subject_tokens
+                   if t not in generic and len(t) > 2]
+    candidate = {w.lower() for w in re.split(r"\W+", name) if w}
+    return any(token in candidate for token in distinctive)
+
+
 def candidate_names(passage: str, *, subject: str = "") -> List[str]:
     """Capitalised spans that plausibly name an organisation."""
     subject_words = {w.lower() for w in re.split(r"\W+", subject or "") if w}
@@ -161,9 +207,20 @@ def candidate_names(passage: str, *, subject: str = "") -> List[str]:
         lowered = name.lower()
         if len(name) < 3 or lowered in _STOPLIST:
             continue
-        # The subject is not its own competitor.
+        # The subject is not its own competitor, and neither is anything the
+        # subject makes.
         if subject and (lowered in (subject or "").lower()
-                        or lowered in subject_words):
+                        or lowered in subject_words
+                        or _is_the_subject(name, subject)):
+            continue
+        # A programme, a standard or a regulator is not an alternative a
+        # buyer weighs. It cannot be sold to, bought from, or competed with.
+        tokens = [w.lower().strip(".") for w in name.split()]
+        if lowered.replace(" ", "") in _NOT_A_VENDOR_EXACT:
+            continue
+        if tokens and tokens[-1] in _NOT_A_VENDOR:
+            continue
+        if any(t in _NOT_A_VENDOR for t in tokens):
             continue
         words = lowered.split()
         if len(words) == 1:

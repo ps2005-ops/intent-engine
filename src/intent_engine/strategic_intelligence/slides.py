@@ -114,7 +114,19 @@ def _shorten(text: str) -> str:
             if kept.count("(") != kept.count(")"):
                 continue
             return kept if kept.endswith(".") else kept + "."
-    return head + "…"
+    # NO CLAUSE BOUNDARY FITS. Ellipsizing here is what put "...er publicly
+    # available documents…" on slide 5 of a live deck. §23: product prose may
+    # not stop because a budget did.
+    #
+    # The first complete sentence is preferred even when it runs a little
+    # over -- a slightly long line reads as a line, and a truncated one reads
+    # as a fault. If even that is far over budget the bullet is DROPPED by
+    # returning "", because a slide with three good bullets beats one with
+    # four where the fourth trails off.
+    first = re.split(r"(?<=[.!?])\s+", text.strip())[0].strip()
+    if first and len(first.split()) <= MAX_WORDS_PER_BULLET * 3 // 2:
+        return first
+    return ""
 
 
 def _cap(bullets):
@@ -124,6 +136,7 @@ def _cap(bullets):
     bullet is the product speaking, and a quotation is indistinguishable from
     an assertion once it is on a slide in front of a room.
     """
+    bullets = [b for b in (bullets or ()) if (b or {}).get("text", "").strip()]
     kept = deduplicate(meaningful_items(bullets, key="text"), key="text")
     kept = [b for b in kept if not addresses_the_system(b.get("text", ""))]
     out, spent = [], 0
@@ -1105,15 +1118,22 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
         # The canonical bounded read is composed from the established
         # classification, the published record and this run's evidence. It
         # asserts no magnitude, and every line carries its standing.
+        # `full=True` on every line. These are composed sentences, each one
+        # chosen to be the thing a room remembers, and the bullet budget cut
+        # them mid-clause: slide 1 read "...did not verify that it holds the
+        # authoritative record rather than a copy of it,…". A slide that
+        # trails off in front of a board is worse than a slide with one fewer
+        # line on it.
         action = getattr(read, "level6_action", None)
-        view_bullets = [_bullet(read.level5_decision.text)]
+        view_bullets = [_bullet(read.level5_decision.text, full=True)]
         if action is not None:
             view_bullets.append(_bullet(
-                f"Confidence: {action.causal_confidence}"))
+                f"Confidence: {action.causal_confidence}", full=True))
             view_bullets.append(_bullet(
-                f"What is still open: {action.what_remains_unknown}"))
+                f"What is still open: {action.what_remains_unknown}",
+                full=True))
             view_bullets.append(_bullet(
-                f"What to do now: {action.action_now}"))
+                f"What to do now: {action.action_now}", full=True))
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
 
