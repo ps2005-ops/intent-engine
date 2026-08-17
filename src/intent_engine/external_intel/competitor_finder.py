@@ -76,10 +76,52 @@ _CLAUSE_WORDS = {
 }
 
 #: Suffixes that confirm a span is an organisation rather than a phrase.
-_CORPORATE = ("inc", "inc.", "corp", "corp.", "corporation", "company",
-              "co.", "ltd", "ltd.", "llc", "plc", "sa", "ag", "nv",
-              "technologies", "systems", "software", "labs", "group",
-              "holdings", "solutions", "networks", "platforms")
+#: A LEGAL FORM IS PROOF. Nothing else in a filing wears one.
+_LEGAL_FORM = ("inc", "inc.", "corp", "corp.", "corporation", "company",
+               "co.", "ltd", "ltd.", "llc", "plc", "sa", "ag", "nv", "gmbh",
+               "ab", "oyj", "pte", "bv", "spa", "a/s", "kk", "lp", "llp",
+               "s.a.", "n.v.", "s.p.a.", "pty")
+
+#: A TRADE WORD IS EVIDENCE, NOT PROOF. "Akamai Technologies" is a company;
+#: "Online Platforms" is a category, and it reached a live introduction as
+#: one of Cloudflare's three named competitors because "platforms" was in
+#: this list and nothing asked what came before it.
+_TRADE_WORD = ("technologies", "systems", "software", "labs", "group",
+               "holdings", "solutions", "networks", "platforms", "partners",
+               "industries", "enterprises", "communications", "services")
+
+_CORPORATE = _LEGAL_FORM + _TRADE_WORD
+
+#: Ordinary English that starts a noun phrase. A trade word behind one of
+#: these is a category, not a firm. Measured live: "Federal Risk",
+#: "Intuitive User Experience" and "Online Platforms" were all presented as
+#: companies contesting Cloudflare's market.
+_COMMON_ENGLISH = frozenset({
+    "online", "federal", "national", "international", "global", "digital",
+    "intuitive", "modern", "leading", "major", "large", "small", "public",
+    "private", "certain", "other", "various", "multiple", "several", "many",
+    "new", "existing", "traditional", "legacy", "open", "closed", "free",
+    "paid", "enterprise", "consumer", "commercial", "financial", "general",
+    "regional", "local", "primary", "secondary", "third", "cloud", "data",
+    "security", "network", "internet", "web", "mobile", "social", "smart",
+    "advanced", "integrated", "managed", "professional", "technical", "user",
+    # ...and the ordinary nouns and verbs that turn a capitalised span into a
+    # phrase. Every entry here was measured producing a false competitor or
+    # is the kind of word that would.
+    "experience", "risk", "risks", "platform", "product", "products",
+    "service", "solution", "customer", "customers", "market", "markets",
+    "business", "businesses", "company", "companies", "industry", "vendor",
+    "vendors", "provider", "providers", "competitor", "competitors",
+    "alternative", "alternatives", "offering", "offerings", "capability",
+    "capabilities", "technology", "tools", "tool", "software", "hardware",
+    "management", "program", "programme", "quality", "value", "cost",
+    "price", "pricing", "growth", "revenue", "demand", "supply", "support",
+    "development", "research", "operations", "performance", "innovation",
+    "experiences", "access", "content", "design", "delivery", "scale",
+    "trust", "safety", "privacy", "compliance", "governance", "strategy",
+    "team", "teams", "people", "region", "regions", "state", "states",
+    "government", "agency", "agencies", "authorization", "certification",
+})
 
 _NAME = re.compile(
     r"\b([A-Z][A-Za-z0-9&.\-]*(?:\s+[A-Z][A-Za-z0-9&.\-]*){0,3})\b")
@@ -203,6 +245,18 @@ def candidate_names(passage: str, *, subject: str = "") -> List[str]:
     subject_words = {w.lower() for w in re.split(r"\W+", subject or "") if w}
     found: List[str] = []
     for raw in _NAME.findall(passage or ""):
+        # A NAME MAY NOT SPAN A SENTENCE. `_NAME` allows "." inside a token so
+        # that "Inc." and "Co." survive, and the cost is that "…Alphabet Inc.
+        # The Federal…" matched as ONE span and reached the page as a company
+        # called "Alphabet Inc. The Federal". A token ending in a full stop is
+        # where the span ends -- that is true both when the stop closes an
+        # abbreviation and when it closes a sentence.
+        pieces = raw.split()
+        for index, piece in enumerate(pieces):
+            if piece.endswith(".") and index < len(pieces) - 1:
+                pieces = pieces[:index + 1]
+                break
+        raw = " ".join(pieces)
         name = raw.strip(" .,;:")
         lowered = name.lower()
         if len(name) < 3 or lowered in _STOPLIST:
@@ -229,7 +283,35 @@ def candidate_names(passage: str, *, subject: str = "") -> List[str]:
             # word, a digit, or an ampersand.
             if not re.search(r"[a-z][A-Z]|[0-9&]", name):
                 continue
-        elif not any(w.strip(".") in _CORPORATE for w in words):
+        # A MULTI-WORD SPAN NEEDS POSITIVE EVIDENCE THAT IT IS AN
+        # ORGANISATION. Three consecutive live runs put a certification
+        # scheme, a marketing noun phrase and a product category on the
+        # introduction as named competitors. A missed rival is a quiet
+        # omission and the read still shows classified peers; a fabricated
+        # one tells a chief executive to worry about a company that does not
+        # exist in their market.
+        elif len(words) > 1:
+            tokens_clean = [w.strip(".") for w in words]
+            has_legal = any(t in _LEGAL_FORM for t in tokens_clean)
+            has_trade = any(t in _TRADE_WORD for t in tokens_clean)
+            if has_legal:
+                pass                        # a legal form is proof
+            elif has_trade:
+                # "Akamai Technologies" is a company; "Online Platforms" is a
+                # category. What separates them is the word in front.
+                if tokens_clean[0] in _COMMON_ENGLISH:
+                    continue
+            else:
+                # NO CORPORATE MARKER AT ALL. "Booz Allen Hamilton" is three
+                # surnames and is a real firm; "Intuitive User Experience" is
+                # three ordinary English words and is a marketing phrase.
+                # Requiring that NONE of the tokens is ordinary vocabulary
+                # keeps the first and refuses the second, which is exactly
+                # the line the live fabrications fell on.
+                if any(t in _COMMON_ENGLISH for t in tokens_clean):
+                    continue
+        if len(words) > 1 and not any(
+                w.strip(".") in _CORPORATE for w in words):
             # A multi-word span with no corporate suffix has to look like a
             # name rather than a clause: every word capitalised and none of
             # them ordinary vocabulary. This is what lets "Booz Allen

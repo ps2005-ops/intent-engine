@@ -424,3 +424,59 @@ def test_no_rival_on_the_read_is_the_company_itself(company, domain):
     head = company.split(",")[0].split(" Inc")[0].strip().lower()
     for rival in read.level4_competition:
         assert head not in rival.name.lower(), (company, rival.name)
+
+
+def test_a_category_is_never_a_competitor():
+    """Three consecutive live runs named something that is not a company.
+
+    Run 1: "Authorization Management Program, Cloudflare Workers and
+    FedRAMP".  Run 2, after the first repair: "Federal Risk, Intuitive User
+    Experience and Online Platforms". Each was the first competitive
+    statement a chief executive read.
+
+    A multi-word span now needs POSITIVE evidence that it is an organisation:
+    a legal form, or a trade word that is not preceded by ordinary English.
+    That drops real single-word brands too, which is the trade this module
+    documents and accepts -- a missed rival is a quiet omission and the read
+    still shows classified peers, while a fabricated one sends someone to a
+    board meeting worried about a company that does not exist.
+    """
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    passage = (
+        "We compete with Akamai Technologies and Alphabet Inc. The Federal "
+        "Risk and Authorization Management Program applies to us. Online "
+        "Platforms and Intuitive User Experience are what buyers want. "
+        "Cloudflare Workers is our own product.")
+    names = candidate_names(passage, subject="Cloudflare, Inc.")
+    assert "Akamai Technologies" in names, names
+    for fabricated in ("Federal Risk", "Online Platforms",
+                       "Intuitive User Experience", "Cloudflare Workers",
+                       "Authorization Management Program"):
+        assert fabricated not in names, (fabricated, names)
+
+
+def test_a_real_firm_without_a_legal_form_survives():
+    """The tightening must not cost a real company.
+
+    "Booz Allen Hamilton" is three surnames and no corporate suffix, so a
+    rule that demanded a legal form or a trade word dropped it. What
+    separates it from "Intuitive User Experience" is that none of its tokens
+    is ordinary English.
+    """
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    names = candidate_names(
+        "Competitors include Databricks Inc, Snowflake Inc and consultancies "
+        "such as Booz Allen Hamilton.", subject="Palantir Technologies")
+    assert "Booz Allen Hamilton" in names, names
+
+
+def test_a_name_never_spans_a_sentence_boundary():
+    """`_NAME` allows "." inside a token so "Inc." survives; the cost was a
+    span reaching across the full stop into the next sentence and producing a
+    company called "Alphabet Inc. The Federal"."""
+    from intent_engine.external_intel.competitor_finder import candidate_names
+    names = candidate_names(
+        "We compete with Alphabet Inc. The Federal Risk programme applies.",
+        subject="Cloudflare, Inc.")
+    assert "Alphabet Inc" in names, names
+    assert not any("The Federal" in n for n in names), names

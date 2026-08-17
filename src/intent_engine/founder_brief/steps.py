@@ -86,15 +86,15 @@ padding:.5rem .35rem;background:var(--card);font-size:.78rem;color:var(--muted)}
 .rail label b{display:block;font-size:.86rem;color:var(--fg);font-weight:650}
 .vint{display:none;border:1px solid var(--line);border-radius:0 12px 12px 12px;
 padding:1.1rem 1.2rem;background:var(--card)}
-.vint h3{margin:0 0 .2rem}
+.vint h2{margin:0 0 .2rem;font-size:1.15rem}
 .vwall{font-size:.85rem;color:var(--muted);margin:.1rem 0 1rem}
 .panels{display:grid;gap:.8rem;grid-template-columns:1fr 1fr;margin:0}
 @media(max-width:720px){.panels{grid-template-columns:1fr}}
 .panels div{border:1px solid var(--line);border-radius:10px;padding:.75rem .9rem}
 .panels div.after{border-color:var(--accent);border-style:dashed;
 grid-column:1/-1}
-.panels h4{margin:0 0 .3rem;font-size:.72rem;text-transform:uppercase;
-letter-spacing:.07em;color:var(--muted)}
+.panels h3{margin:0 0 .3rem;font-size:.72rem;text-transform:uppercase;
+letter-spacing:.07em;color:var(--muted);font-weight:700}
 .panels p{margin:0;font-size:.93rem}
 .cfact{margin:1rem 0 0;border-top:1px solid var(--line);padding-top:.9rem}
 .cfact dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
@@ -105,7 +105,7 @@ color:var(--muted);font-weight:700;margin-top:.55rem}
 @media(max-width:720px){.conn{grid-template-columns:1fr}}
 .conn div{border:1px solid var(--line);border-radius:10px;padding:.8rem .95rem;
 background:var(--card)}
-.conn h4{margin:0 0 .2rem;font-size:.95rem}
+.conn h3{margin:0 0 .2rem;font-size:.95rem}
 .conn p{margin:0;font-size:.9rem;color:var(--muted)}
 .tag{display:inline-block;font-size:.66rem;text-transform:uppercase;
 letter-spacing:.07em;border-radius:999px;padding:.1rem .5rem;font-weight:700;
@@ -285,12 +285,12 @@ def render_history(timeline, *, run_id: str, company: str) -> str:
     out.append('</div>')
     for index, vintage in enumerate(timeline.vintages):
         out.append(f'<div class="vint" id="v{index}">')
-        out.append(f'<h3>{_e(vintage.label)}</h3>')
+        out.append(f'<h2>{_e(vintage.label)}</h2>')
         out.append(f'<p class="vwall">{_e(vintage.state_prose)}</p>')
         out.append('<div class="panels">')
         for panel in vintage.panels:
             cls = ' class="after"' if panel.after_the_wall else ''
-            out.append(f'<div{cls}><h4>{_e(panel.title)}</h4>'
+            out.append(f'<div{cls}><h3>{_e(panel.title)}</h3>'
                        f'<p>{_e(panel.body)}</p></div>')
         out.append('</div>')
         if vintage.counterfactual is not None:
@@ -420,7 +420,7 @@ def render_connect(read, *, run_id: str, company: str) -> str:
         cls = ' on' if state == "ACTIVE" else ''
         out.append(f'<div><span class="tag{cls}">'
                    f'{_e(_TAG_WORD.get(state, state))}</span>'
-                   f'<h4>{_e(title)}</h4><p>{_e(description)}</p></div>')
+                   f'<h3>{_e(title)}</h3><p>{_e(description)}</p></div>')
     out.append('</div>')
 
     # §51. The stages, kept apart.
@@ -520,25 +520,27 @@ def render_story(read, timeline, *, run_id: str, company: str,
     out.append(f'<p class="lede">{_e(read.identity)}</p>')
 
     out.append('<div class="chapters">')
-    # 1-3: what the business is and what it runs on, from the read's own
-    # chapters -- the same four blocks the introduction showed, in the same
-    # order, because a story a reader can retell is one they have heard once
-    # already in outline.
+    # `<h2>`, not `<h3>`. On this page the chapters sit directly under the
+    # `<h1>`, so an `<h3>` is a skipped level -- and the heading outline is
+    # how a screen-reader user navigates, so a skipped level reads as a
+    # section that is not there. (The introduction nests its chapters under
+    # an `<h2>`, which is why the same renderer takes the level as an
+    # argument rather than hard-coding one.)
     for chapter in read.story:
-        out.append(f'<section><h3>{_e(chapter.title)}</h3>'
+        out.append(f'<section><h2>{_e(chapter.title)}</h2>'
                    f'<p>{_e(chapter.body)}</p></section>')
 
     # 4: how it got here. Real dated material or nothing -- never invented.
     arc = _arc(timeline, company)
     if arc:
-        out.append(f'<section><h3>How it got to here</h3><p>{_e(arc)}</p>'
+        out.append(f'<section><h2>How it got to here</h2><p>{_e(arc)}</p>'
                    f'</section>')
 
     # 5: what management appears to be doing, and where that is exposed.
     action = read.level6_action
     if action is not None:
         out.append(
-            f'<section><h3>What the argument is actually about</h3>'
+            f'<section><h2>What the argument is actually about</h2>'
             f'<p>{_e(action.what_is_known)} '
             f'{_e(action.what_remains_unknown)} '
             f'{_e(action.why_it_matters)}</p></section>')
@@ -547,7 +549,7 @@ def render_story(read, timeline, *, run_id: str, company: str,
     if read.level4_competition:
         rival = read.level4_competition[0]
         out.append(
-            f'<section><h3>What the other side does</h3>'
+            f'<section><h2>What the other side does</h2>'
             f'<p>{_e(rival.why_a_rival)} {_e(rival.likely_response)} '
             f'The counter available here is {_e(_lower(rival.counter_move))} '
             f'and the thing to watch for is {_e(_lower(rival.signal_to_watch))}'
@@ -556,11 +558,11 @@ def render_story(read, timeline, *, run_id: str, company: str,
     # 7: what should happen next.
     if action is not None:
         out.append(
-            f'<section><h3>What should happen next</h3>'
+            f'<section><h2>What should happen next</h2>'
             f'<p>{_e(action.action_now)} {_e(action.minimum_viable_experiment)}'
             f' {_e(action.kill_switch)}</p></section>')
         out.append(
-            f'<section><h3>What would make this wrong</h3>'
+            f'<section><h2>What would make this wrong</h2>'
             f'<p>{_e(action.falsifier)} '
             f'{_e(read.evidence_note)}</p></section>')
     out.append('</div>')

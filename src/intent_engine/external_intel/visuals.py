@@ -29,6 +29,8 @@ THE RULES EVERY CHART OBEYS
 """
 from __future__ import annotations
 
+import re
+
 from html import escape as _e
 from typing import List, Optional, Sequence
 
@@ -368,9 +370,18 @@ def _headline(block) -> str:
     Not the block title: "Market expectations" over a chart tells a reader
     what topic they are looking at, which they can already see. The first
     sentence of the fact is the conclusion.
+
+    AND NOT THE SENTENCE DIRECTLY ABOVE IT. The block's `fact` is rendered as
+    the passage prose, and the chart sits immediately under that prose, so
+    taking the FIRST sentence printed "The alternatives this company's own
+    evidence names are Alstom SA, America Leasing, BNP Paribas Leasing
+    Solutions, Baker Hughes Co." twice in a row, five lines apart, on the
+    full analysis. Where the fact has a second sentence, that is the one the
+    chart carries -- it is the conclusion the list was building to, which is
+    also the better caption.
     """
     fact = (block.fact or "").strip()
-    for stop in (". ", "; "):
-        if stop in fact:
-            return fact.split(stop)[0] + "."
-    return fact
+    parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", fact) if p.strip()]
+    if len(parts) >= 2:
+        return parts[1]
+    return parts[0] if parts else fact
