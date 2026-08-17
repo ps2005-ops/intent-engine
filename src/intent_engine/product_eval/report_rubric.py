@@ -53,6 +53,9 @@ DIMENSIONS = (
     # --- §91. What this convergence run made the product responsible for ---
     "data_resolution", "history_expectation", "history_counterfactual",
     "history_economics", "feedback_loop", "flow_quality",
+    # --- §23. What the belief layer made the product responsible for -------
+    "competitive_specificity", "belief_quality", "belief_challenge",
+    "economic_reasoning",
 )
 
 #: §63. The gate. A surface may not freeze below these.
@@ -136,7 +139,8 @@ def _ratio(have: int, want: int) -> float:
 def score(*, read, pages: Dict[str, str], timeline=None,
           company: str = "", model_class: str = "",
           other_companies: Sequence[str] = (), simulation=None,
-          html: Optional[Dict[str, str]] = None) -> RubricResult:
+          html: Optional[Dict[str, str]] = None,
+          other_reads: Sequence = ()) -> RubricResult:
     """Score one company's whole product output.
 
     `pages` maps a step key ("intro", "slides", "full", "story", "history",
@@ -155,6 +159,15 @@ def score(*, read, pages: Dict[str, str], timeline=None,
         findings.extend(DT.scan(text, surface=surface, company=company,
                                 model_class=model_class,
                                 other_companies=other_companies))
+    # §21. THE BELIEF LAYER IS CHECKED AGAINST THE OBJECTS, not the prose.
+    # Wired here rather than left as a callable nobody calls: this programme
+    # has shipped three built-and-guarded capabilities with zero callers, and
+    # a detector that never runs is a comment.
+    try:
+        findings.extend(DT.scan_belief_layer(read, surface="read",
+                                             other_reads=other_reads or ()))
+    except Exception:                                       # noqa: BLE001
+        pass
     codes = {f.code for f in findings}
     sev1 = {f.code for f in findings if f.severity == DT.SEV1}
     sev2 = {f.code for f in findings if f.severity == DT.SEV2}
@@ -242,17 +255,46 @@ def score(*, read, pages: Dict[str, str], timeline=None,
 
     # --- competition + game theory -----------------------------------------
     rivals = tuple(getattr(read, "level4_competition", ()) or ())
-    named_rivals = sum(1 for r in rivals if "names it as a competitor"
-                       in (r.why_a_rival or ""))
+    ground = getattr(read, "competitive_ground", None)
+    # WHAT MAKES A COMPETITIVE READ ABOUT THIS COMPANY.
+    #
+    # The old test asked whether a FIRM had been named by the subject, and on
+    # five of seven golden companies the answer was no — not because the
+    # retrieval failed, but because a modern Competition section names
+    # CATEGORIES and declines to name firms. Cloudflare's own filing says it
+    # competes with "on-premises network hardware vendors" and "content
+    # delivery network (CDN) vendors"; Bank of America's lists banks, thrifts
+    # and credit unions. Those are the company's own account of its market,
+    # quoted and dated, and no two companies produce the same list.
+    #
+    # So what is measured is whether the competitive set rests on the
+    # company's own words or on an attributed source, against the failure
+    # state it is protecting from: a set that is entirely structural peers,
+    # which is correct by construction and wrong about the company.
+    grounded = tuple(getattr(ground, "subject_grounded", ()) or ())
+    attributed = tuple(r for r in (getattr(ground, "rivals", ()) or ())
+                       if getattr(r, "is_attributed", False))
+    own_account = len({r.identity for r in grounded + attributed})
+    kinds = len(getattr(ground, "kinds_covered", ()) or ())
     comp = _ratio(len(rivals), 3)
     if "COMPETITOR_MISSING" in codes:
         comp = min(comp, 3.0)
-    if rivals and not named_rivals:
+    if rivals and not own_account:
         # Structural peers are honest and they are not this company's rivals.
         comp = min(comp, 7.0)
+    if kinds < 2 and rivals:
+        # One kind of alternative answered four times has answered one.
+        comp = min(comp, 8.0)
     put("competition", comp,
-        f"{len(rivals)} rival(s), {named_rivals} of them named by the company "
-        f"itself")
+        f"{len(rivals)} alternative(s) across {kinds} kind(s), {own_account} "
+        f"resting on {read.company}'s own account or an attributed source")
+    put("competitive_specificity",
+        _ratio(own_account, 2) if own_account else
+        (5.0 if getattr(ground, "next_measurement", "") else 3.0),
+        f"{own_account} alternative(s) come from this company's own account "
+        f"of its market" if own_account else
+        "the competitive set is read from the business model only, and the "
+        "measurement that would ground it is named")
     complete_moves = sum(1 for r in rivals
                          if r.likely_response and r.counter_move
                          and r.signal_to_watch and r.response_likelihood)
@@ -435,13 +477,70 @@ def score(*, read, pages: Dict[str, str], timeline=None,
         spec = 6.5
     if "TEMPLATE_COLLAPSE" in codes:
         spec = min(spec, 3.0)
-    if rivals and not named_rivals:
+    if rivals and not own_account:
+        # The competitive set is entirely structural peers: the analysis
+        # would read the same for any company sharing the business model.
         spec = min(spec, 8.0)
     if not named:
         spec = min(spec, 5.0)
     put("company_specificity", spec,
         "the analysis is about this company and this business model"
         if spec >= 9 else "the analysis would read the same for a peer")
+
+    # --- §3-§7. the belief layer -------------------------------------------
+    beliefs = tuple(getattr(read, "market_beliefs", ()) or ())
+    challenges = tuple(getattr(read, "belief_challenges", ()) or ())
+    testable = sum(1 for b in beliefs
+                   if getattr(b, "implied_expectations", ())
+                   and getattr(b, "falsifiers", ()))
+    belief_score = _ratio(testable, 2)
+    if "MARKET_BELIEF_UNSUPPORTED" in codes:
+        belief_score = min(belief_score, 3.0)
+    if "MANAGEMENT_BELIEF_MISATTRIBUTED" in codes:
+        belief_score = min(belief_score, 2.0)
+    put("belief_quality", belief_score,
+        f"{testable} belief(s) state what they imply and what would break "
+        f"them" if testable else
+        "no market belief was formed, so there is nothing to challenge")
+
+    # WHAT A GOOD CHALLENGE IS. Not a contrarian one. A challenge scores when
+    # it states the best case FOR the belief, binds an alternative to this
+    # company, and names the cheapest thing that would settle it — and a
+    # belief reported as strengthened after all that is a full-marks outcome,
+    # because a conventional reading that survived attack is the one a chief
+    # executive can act on without hedging.
+    complete = sum(1 for c in challenges
+                   if getattr(c, "strongest_support", "")
+                   and getattr(c, "unconventional_hypotheses", ())
+                   and getattr(c, "cheapest_test", ""))
+    challenge_score = _ratio(complete, 2)
+    for code, ceiling in (("CONTRARIANISM_WITHOUT_EVIDENCE", 2.0),
+                          ("IMPOSSIBLE_HYPOTHESIS_UNBOUNDED", 3.0),
+                          ("IMPOSSIBLE_HYPOTHESIS_GENERIC", 6.0),
+                          ("BELIEF_CONFIRMATION_BIAS", 5.0),
+                          ("ALTERNATIVE_EXPLANATION_MISSING", 6.5),
+                          ("WEAKEST_ASSUMPTION_MISSING", 7.0)):
+        if code in codes:
+            challenge_score = min(challenge_score, ceiling)
+    put("belief_challenge", challenge_score,
+        f"{complete} belief(s) carry the case for, a bound alternative and a "
+        f"test" if complete else "no belief was attacked")
+
+    # --- §8. economic reasoning ---------------------------------------------
+    graph = getattr(read, "assumption_chain", None)
+    links = tuple(getattr(graph, "links", ()) or ())
+    reasoned = bool(links) and bool(getattr(read, "explanation_field", None))
+    economic = _ratio(len(links), 4) if links else 3.0
+    if not reasoned:
+        economic = min(economic, 6.0)
+    if "ASSUMPTION_GRAPH_BROKEN" in codes:
+        economic = min(economic, 2.0)
+    if "MACRO_MECHANISM_GENERIC" in codes:
+        economic = min(economic, 6.0)
+    put("economic_reasoning", economic,
+        f"the recommendation exposes {len(links)} step(s), each with a "
+        f"standing and a reason" if links else
+        "the recommendation does not expose what it depends on")
 
     # --- the surfaces themselves -------------------------------------------
     put("presentation_quality",

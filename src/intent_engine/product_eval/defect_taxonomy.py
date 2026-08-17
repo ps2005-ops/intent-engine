@@ -176,6 +176,47 @@ _TAB_GRID = re.compile(
 DETECTORS: Tuple[Detector, ...] = (
     Detector("STRATEGIC_REFUSAL_COLLAPSE", SEV1, REPAIR_SELECTION,
              "the product declines to put any strategy forward"),
+
+    # --- §21. The belief layer's own defects ------------------------------
+    #
+    # These are checked STRUCTURALLY, against the read, rather than by
+    # pattern over prose. A regular expression cannot tell manufactured
+    # contrarianism from the real thing; the objects can, because the engine
+    # records what moved a belief and what it was bound to.
+    Detector("MARKET_BELIEF_UNSUPPORTED", SEV1, REPAIR_EVIDENCE,
+             "a belief is asserted without naming what it was derived from"),
+    Detector("CONTRARIANISM_WITHOUT_EVIDENCE", SEV1, REPAIR_EVIDENCE,
+             "a belief is called weakened with no evidence that weakened it"),
+    Detector("BELIEF_CONFIRMATION_BIAS", SEV2, REPAIR_SELECTION,
+             "every belief survived and none was attacked with an alternative"),
+    Detector("MANAGEMENT_BELIEF_MISATTRIBUTED", SEV1, REPAIR_EVIDENCE,
+             "a claim is attributed to management that management did not make"),
+    Detector("ALTERNATIVE_EXPLANATION_MISSING", SEV2, REPAIR_SELECTION,
+             "an observation is explained one way and no rival cause is put"),
+    Detector("IMPOSSIBLE_HYPOTHESIS_GENERIC", SEV2, REPAIR_COMPOSITION,
+             "an unconventional hypothesis names no part of this company"),
+    Detector("IMPOSSIBLE_HYPOTHESIS_UNBOUNDED", SEV1, REPAIR_EVIDENCE,
+             "a hypothesis is put with nothing that would settle it"),
+    Detector("COMPETITOR_TOO_GENERIC", SEV2, REPAIR_SELECTION,
+             "the competitive set is structural peers and nothing else"),
+    Detector("SUBSTITUTE_MISSING", SEV2, REPAIR_SELECTION,
+             "every alternative is a vendor; no substitute was considered"),
+    Detector("INTERNAL_BUILD_IGNORED", SEV3, REPAIR_SELECTION,
+             "buy-versus-build is never put as an alternative"),
+    Detector("AI_DISPLACEMENT_UNTESTED", SEV3, REPAIR_SELECTION,
+             "automation is not tested as a threat or as an expansion"),
+    Detector("ASSUMPTION_GRAPH_BROKEN", SEV1, REPAIR_COMPOSITION,
+             "the argument chain has a step with no reason under it"),
+    Detector("WEAKEST_ASSUMPTION_MISSING", SEV2, REPAIR_COMPOSITION,
+             "a recommendation is given without naming its weakest support"),
+    Detector("FALSIFIER_MISSING", SEV1, REPAIR_EVIDENCE,
+             "a recommendation is made that nothing could prove wrong"),
+    Detector("MVE_MISSING", SEV2, REPAIR_COMPOSITION,
+             "uncertainty is stated with no experiment that would resolve it"),
+    Detector("LEVEL_K_REACTION_MISSING", SEV2, REPAIR_COMPOSITION,
+             "a move is recommended without asking what the other side does"),
+    Detector("CROSS_COMPANY_STRATEGY_COLLAPSE", SEV1, REPAIR_SELECTION,
+             "two companies were given the same strategic sentence"),
     Detector("WRONG_COMPANY", SEV1, REPAIR_SELECTION,
              "the page names a company other than the subject"),
     Detector("COMPETITOR_MISSING", SEV2, REPAIR_SELECTION,
@@ -573,3 +614,163 @@ def summarise(findings: Sequence[Finding]) -> Dict[str, int]:
     for finding in findings:
         counts[finding.severity] = counts.get(finding.severity, 0) + 1
     return counts
+
+
+# ===========================================================================
+# §21 — the belief layer, checked against the OBJECTS
+# ===========================================================================
+def scan_belief_layer(read, *, surface: str = "read",
+                      other_reads: Sequence = ()) -> List[Finding]:
+    """Defects in the belief layer that no regular expression could find.
+
+    WHY THIS READS OBJECTS AND NOT PROSE. Every other detector here works on
+    the visible text, because every other defect was a sentence. These are
+    not. "Manufactured contrarianism" and "a hypothesis nothing could settle"
+    are properties of how a claim was ARRIVED AT, and the page shows only the
+    claim. The engine records the derivation, so that is what is inspected.
+
+    `other_reads` enables the cross-company check: a strategic sentence is a
+    defect only when a SECOND company produced the same one, which is why it
+    cannot be found by looking at one report (§28's rule about clusters, in
+    miniature).
+
+    THE SURFACE IS "read", NOT "full". These findings are about the object,
+    not about a page's prose, and `_surface_score` charges every finding on a
+    surface against that surface's writing quality. Reporting them as "full"
+    dropped `full_analysis_quality` from 10.0 to 6.0 on two companies whose
+    full analysis was not the thing at fault -- a defect in the competitive
+    ladder being charged to the paragraph that rendered it.
+    """
+    out: List[Finding] = []
+
+    def add(code, evidence, detail=""):
+        detector = BY_CODE.get(code)
+        if detector is None:
+            return
+        out.append(Finding(code=code, severity=detector.severity,
+                           surface=surface, evidence=str(evidence)[:200],
+                           repair_class=detector.repair_class,
+                           detail=detail or detector.what))
+
+    beliefs = tuple(getattr(read, "market_beliefs", ()) or ())
+    challenges = tuple(getattr(read, "belief_challenges", ()) or ())
+    ground = getattr(read, "competitive_ground", None)
+    graph = getattr(read, "assumption_chain", None)
+    action = getattr(read, "level6_action", None)
+    company = str(getattr(read, "company", "") or "")
+
+    for belief in beliefs:
+        if getattr(belief, "source_basis", "") != "OBSERVED" \
+                and not str(getattr(belief, "basis_detail", "") or "").strip():
+            add("MARKET_BELIEF_UNSUPPORTED", belief.proposition)
+        if getattr(belief, "belief_type", "") == "MANAGEMENT" \
+                and getattr(belief, "source_basis", "") != "OBSERVED":
+            # A claim about what management believes must be quoted. Inferring
+            # it and presenting it as theirs is putting words in their mouth.
+            add("MANAGEMENT_BELIEF_MISATTRIBUTED", belief.proposition)
+
+    moved = {"WEAKENED", "REVISED", "RETIRED"}
+    attacked = 0
+    for row in challenges:
+        if getattr(row, "disposition", "") in moved \
+                and not str(getattr(row, "strongest_contradiction", "")
+                            or "").strip():
+            add("CONTRARIANISM_WITHOUT_EVIDENCE", row.belief_id)
+        if getattr(row, "alternative_explanations", ()) or \
+                getattr(row, "unconventional_hypotheses", ()):
+            attacked += 1
+        for hypothesis in getattr(row, "unconventional_hypotheses", ()) or ():
+            if not str(getattr(hypothesis, "falsifier", "") or "").strip() \
+                    or not str(getattr(hypothesis, "test", "") or "").strip():
+                add("IMPOSSIBLE_HYPOTHESIS_UNBOUNDED", hypothesis.hypothesis)
+            # A hypothesis that never names this company, or anything this run
+            # found about it, is the generic provocation §5 forbids.
+            text = f"{hypothesis.hypothesis} {hypothesis.why_plausible}"
+            if company and company.split()[0].lower() not in text.lower():
+                add("IMPOSSIBLE_HYPOTHESIS_GENERIC", hypothesis.hypothesis)
+    if challenges and not attacked:
+        add("BELIEF_CONFIRMATION_BIAS",
+            f"{len(challenges)} belief(s), none attacked with an alternative")
+
+    field = getattr(read, "explanation_field", None)
+    if field is None or len(getattr(field, "explanations", ()) or ()) < 2:
+        add("ALTERNATIVE_EXPLANATION_MISSING",
+            getattr(field, "question", "") or "no competing explanations")
+
+    if ground is not None:
+        rivals = tuple(getattr(ground, "rivals", ()) or ())
+        kinds = set(getattr(r, "kind", "") for r in rivals)
+        grounded = tuple(getattr(ground, "subject_grounded", ()) or ())
+        attributed = tuple(r for r in rivals
+                           if getattr(r, "is_attributed", False))
+        if rivals and not (grounded or attributed):
+            add("COMPETITOR_TOO_GENERIC",
+                ", ".join(r.identity for r in rivals[:3]))
+        if rivals and not (kinds - {"DIRECT", "PEER"}):
+            add("SUBSTITUTE_MISSING",
+                ", ".join(sorted(kinds)) or "no kinds recorded")
+        if rivals and "BUILD_IN_HOUSE" not in kinds:
+            add("INTERNAL_BUILD_IGNORED", ", ".join(sorted(kinds)))
+        if rivals and not ({"AI_REPLACEMENT", "AI_ENTRANT"} & kinds):
+            add("AI_DISPLACEMENT_UNTESTED", ", ".join(sorted(kinds)))
+        if rivals and not any(getattr(r, "likely_response", "")
+                              for r in rivals):
+            add("LEVEL_K_REACTION_MISSING",
+                "no rival carries a likely response")
+
+    if graph is not None:
+        for link in getattr(graph, "links", ()) or ():
+            if not str(getattr(link, "because", "") or "").strip():
+                add("ASSUMPTION_GRAPH_BROKEN", f"{link.frm} -> {link.to}")
+        if graph.links and graph.weakest_critical is None \
+                and any(getattr(l, "standing", "") in ("ASSUMED", "UNTESTED",
+                                                       "CONTRADICTED")
+                        for l in graph.links):
+            add("WEAKEST_ASSUMPTION_MISSING", graph.conclusion)
+
+    if action is not None:
+        if not str(getattr(action, "falsifier", "") or "").strip():
+            add("FALSIFIER_MISSING", getattr(action, "action_now", ""))
+        if not str(getattr(action, "minimum_viable_experiment", "")
+                   or "").strip():
+            add("MVE_MISSING", getattr(action, "action_now", ""))
+
+    # --- cross-company: a cluster needs two members ------------------------
+    mine = _strategy_signature(read)
+    for other in other_reads or ():
+        if other is read:
+            continue
+        if str(getattr(other, "company", "")) == company:
+            continue
+        theirs = _strategy_signature(other)
+        shared = mine & theirs
+        if len(shared) >= 2:
+            add("CROSS_COMPANY_STRATEGY_COLLAPSE",
+                f"{company} and {getattr(other, 'company', '?')} share "
+                f"{len(shared)} strategic sentence(s)",
+                detail=sorted(shared)[0][:160])
+            break
+    return out
+
+
+def _strategy_signature(read) -> set:
+    """The sentences that are supposed to be about ONE company.
+
+    Compared as whole sentences rather than by character overlap: two reports
+    share a great deal of scaffolding by design, and a similarity ratio over
+    the whole page is dominated by it. What matters is whether the same
+    STRATEGIC CLAIM appears twice.
+    """
+    out = set()
+    for belief in getattr(read, "market_beliefs", ()) or ():
+        out.add(str(getattr(belief, "proposition", "")).strip())
+    for row in getattr(read, "belief_challenges", ()) or ():
+        for hypothesis in getattr(row, "unconventional_hypotheses", ()) or ():
+            out.add(str(getattr(hypothesis, "hypothesis", "")).strip())
+    action = getattr(read, "level6_action", None)
+    if action is not None:
+        out.add(str(getattr(action, "action_now", "")).strip())
+    experiment = getattr(read, "belief_experiment", None)
+    if experiment is not None:
+        out.add(str(getattr(experiment, "test", "")).strip())
+    return {s for s in out if len(s) > 40}

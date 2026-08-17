@@ -1046,6 +1046,73 @@ _ASPIRATIONAL = re.compile(
     r"|\bhelp build a better\b|\bthe world'?s leading\b", re.I)
 
 
+def belief_slides(read, company: str = "") -> list:
+    """§18, slides 4/5/7/9 — what the market believes and what challenges it.
+
+    APPENDED TO WHICHEVER DECK RAN, rather than woven into one of them. There
+    are two deck builders here and both return early; adding these inside one
+    of them would have produced a presentation whose most interesting slides
+    appeared for some companies and not others, with nothing on the page
+    explaining why.
+
+    Returns [] when the run formed no belief, which is the correct output.
+    A slide headed "What the market believes" over "nothing was established"
+    is the dead end this programme spent a cycle removing.
+    """
+    if read is None:
+        return []
+    beliefs = tuple(getattr(read, "market_beliefs", ()) or ())
+    challenges = tuple(getattr(read, "belief_challenges", ()) or ())
+    if not beliefs or not challenges:
+        return []
+    by_id = {c.belief_id: c for c in challenges}
+    belief = next((b for b in beliefs if b.belief_id in by_id), None)
+    if belief is None:
+        return []
+    challenge = by_id[belief.belief_id]
+    company = company or str(getattr(read, "company", "") or "")
+    field = getattr(read, "explanation_field", None)
+    graph = getattr(read, "assumption_chain", None)
+
+    out = [
+        _slide("market_believes", "What the market believes",
+               [belief.proposition, belief.basis_detail],
+               note=f"How we know: {belief.basis_label.lower()}."),
+        _slide("evidence_challenges", "What the evidence challenges",
+               [challenge.strongest_support,
+                f"What would break it: {challenge.falsifier}"],
+               note=challenge.disposition_label),
+    ]
+    if field is not None:
+        best = field.most_dangerous or field.most_likely
+        if best is not None:
+            out.append(_slide(
+                "competing_explanation", "The strongest competing explanation",
+                [best.hypothesis, best.mechanism, best.decision_implication]))
+    hypotheses = tuple(getattr(challenge, "unconventional_hypotheses", ())
+                       or ())
+    if hypotheses:
+        first = hypotheses[0]
+        out.append(_slide(
+            "unconventional", "The unconventional possibility",
+            [first.hypothesis, first.why_plausible,
+             f"It is wrong if {first.falsifier[:1].lower()}"
+             f"{first.falsifier[1:]}"],
+            note="A question, not a finding."))
+    if graph is not None and graph.weakest_critical is not None:
+        weakest = graph.weakest_critical
+        out.append(_slide(
+            "would_prove_wrong", "What would prove us wrong",
+            [f"The weakest link in our own argument: {weakest.link.to}",
+             weakest.reason, weakest.what_would_settle_it]))
+    experiment = getattr(read, "belief_experiment", None)
+    if experiment is not None:
+        out.append(_slide(
+            "watch_next", "What to watch next",
+            [experiment.test, f"Stop rule: {experiment.stopping_rule}"]))
+    return [s for s in out if s]
+
+
 def build_slides(report, *, as_of: str = "", analysis_version: str = "",
                  brief=None, documents=(), contract=None, read=None) -> list:
     """The deck, in narrative order, with every empty slide omitted.
@@ -1067,11 +1134,13 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     analysis = r.get("strategic_analysis")
     if analysis and (analysis.get("decisions") or []):
         return meeting_quality(
-            build_founder_slides(analysis, company=company))
+            build_founder_slides(analysis, company=company)
+            + belief_slides(read, company))
     adapted = founder_view_from_report(r)
     if adapted:
         return meeting_quality(
-            build_founder_slides(adapted, company=company))
+            build_founder_slides(adapted, company=company)
+            + belief_slides(read, company))
 
     # The deck below is the fallback for a company with real evidence but no
     # concrete development to lead with. It was the LAST founder-facing surface

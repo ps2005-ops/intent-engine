@@ -1546,4 +1546,17 @@ def render_decision_lead(decision, company: str = "", *, depth: str = BRIEF,
                    f'wrong</h2>'
                    f'{_p(end_sentence(lead_in + as_clause(falsifier, company)))}'
                    "</section>")
+    # §17. THE BELIEF LAYER, IMMEDIATELY AFTER THE ANSWER.
+    #
+    # Placed here rather than at the foot of the dossier because the question
+    # it answers -- "what if the reading I have just been given is wrong?" --
+    # is the one a chief executive has WHILE reading the answer, not after
+    # thirty more paragraphs. It renders nothing at all when the run formed
+    # no belief, which is the correct output and not a gap to be filled.
+    if read is not None:
+        try:
+            from intent_engine.founder_brief import challenge_block
+            out.append(challenge_block.render(read, company=company))
+        except Exception:                                   # noqa: BLE001
+            pass
     return "".join(out)

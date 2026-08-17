@@ -325,6 +325,19 @@ class StrategicRead:
     level6_action: Optional[BoundedAction] = None
     level7_monitoring: Tuple[Statement, ...] = ()
 
+    # --- the belief layer (§3-§7) -----------------------------------------
+    #
+    # ONE OBJECT PER RUN, PROJECTED BY EVERY SURFACE. Three surfaces deriving
+    # their own competing explanations from whatever field happened to be
+    # populated is how this programme produced a page that argued with the
+    # page before it.
+    competitive_ground: Optional[object] = None
+    market_beliefs: Tuple[object, ...] = ()
+    belief_challenges: Tuple[object, ...] = ()
+    explanation_field: Optional[object] = None
+    assumption_chain: Optional[object] = None
+    belief_experiment: Optional[object] = None
+
     # --- supporting intelligence ------------------------------------------
     macro: Tuple[dict, ...] = ()            #: transmission chains (§11)
     metrics: Tuple[MetricExpectation, ...] = ()   #: §10
@@ -672,7 +685,8 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
             observations: Optional[Sequence[dict]] = None,
             documents: Optional[Sequence[dict]] = None,
             own_words: str = "", own_words_source: str = "",
-            manifest=None, registrant=None) -> StrategicRead:
+            manifest=None, registrant=None,
+            simulation=None) -> StrategicRead:
     """The bounded strategic read for one company.
 
     Never raises and never returns None: a surface that has to handle "no
@@ -719,7 +733,8 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
     level1 = _level1(name, profile, observations, documents)
     level2 = _level2(name, profile)
     level3 = _level3(model)
-    level4 = _level4(name, profile, selection, documents)
+    ground = _ground(name, profile, documents)
+    level4 = _level4(name, profile, selection, documents, ground)
     position = _position(name, profile, selection, level4)
     level5 = _level5(name, selection, run_decision, standing)
     level6 = _level6(name, profile, selection, run_decision, standing,
@@ -729,6 +744,7 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
     metrics = _metrics(model, observations, documents)
     story = _story(name, profile, selection, run_decision, observations,
                    level4)
+    belief = _belief_pass(name, profile, ground, simulation, level6)
 
     return StrategicRead(
         company=name, standing=standing, standing_reason=reason,
@@ -746,7 +762,71 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
         own_words_source=_clean(own_words_source),
         run_contribution=_run_contribution(observations, documents),
         evidence_note=_evidence_note(observations, documents),
+        competitive_ground=ground,
+        market_beliefs=belief.get("beliefs", ()),
+        belief_challenges=belief.get("challenges", ()),
+        explanation_field=belief.get("explanations"),
+        assumption_chain=belief.get("graph"),
+        belief_experiment=belief.get("experiment"),
     )
+
+
+def _ground(name, profile, documents):
+    """The competitive ladder for this run.
+
+    Never raises: a competitive read that disappears because an extractor
+    threw is the failure mode the whole competitive module exists to remove,
+    and an empty ground still renders — the surfaces handle `None`.
+    """
+    try:
+        from intent_engine.executive import competitive_ground
+        return competitive_ground.build(
+            name, profile, documents,
+            named_firms=_named_rivals(name, documents))
+    except Exception:                                       # noqa: BLE001
+        return None
+
+
+def _belief_pass(name, profile, ground, simulation, level6):
+    """Form the market's beliefs and attack them.
+
+    The conclusion handed to the assumption graph is the run's OWN action, so
+    the chain that gets audited is the chain under the recommendation the
+    reader is actually being given — not a restatement composed for the graph.
+    """
+    try:
+        import datetime as _dt
+        from intent_engine.executive import belief_engine
+        conclusion = _clean(getattr(level6, "action_now", "")) or ""
+        return belief_engine.analyse(
+            company=name, profile=profile,
+            state=observed_state_of(simulation), ground=ground,
+            as_of=_dt.date.today().isoformat(), conclusion=conclusion)
+    except Exception:                                       # noqa: BLE001
+        return {}
+
+
+def observed_state_of(simulation):
+    """(growth, margin) from an ALREADY-BUILT simulation, or None.
+
+    THE STATE IS NOT LOOKED UP HERE. Deriving it independently would mean a
+    second set of XBRL round trips to the regulator on the critical path of
+    every run — the exact omission that once took the suite from ten minutes
+    to over an hour. The webapp already builds and caches one simulation per
+    run behind the outbound-call gate; this reads that.
+
+    `None` is a real answer: a private company has no filed series, gets no
+    inferred market expectation, and is not given a fabricated one.
+    """
+    index = getattr(simulation, "index", None)
+    points = list(getattr(index, "points", ()) or ())
+    if len(points) < 3:
+        return None
+    try:
+        from intent_engine.executive import history_simulator as HS
+        return HS.observed_state(points)
+    except Exception:                                       # noqa: BLE001
+        return None
 
 
 def _has_conclusion(run_decision) -> bool:
@@ -1109,7 +1189,77 @@ def _level3(model) -> Tuple[Mechanism, ...]:
                  for n, h, d in _MECHANISMS.get(model, ()))
 
 
-def _level4(name, profile, selection, documents=()) -> Tuple[CompetitorRead, ...]:
+def _level4(name, profile, selection, documents=(), ground=None
+            ) -> Tuple[CompetitorRead, ...]:
+    """The competitive read, projected from the ladder.
+
+    WHY THIS IS A PROJECTION AND NOT A REPLACEMENT. `CompetitorRead` is what
+    six surfaces already render. Changing its shape would have meant changing
+    all of them in one commit, and the last time a producer and its consumers
+    moved together in this codebase the surfaces that had no fallback broke
+    silently. So the ladder is the producer, `CompetitorRead` stays the wire
+    format, and each row now carries the rung it came from in the sentence a
+    reader sees.
+    """
+    if ground is not None and getattr(ground, "rivals", ()):
+        return _from_ground(name, profile, selection, ground)
+    return _level4_legacy(name, profile, selection, documents)
+
+
+def _from_ground(name, profile, selection, ground) -> Tuple[CompetitorRead, ...]:
+    from intent_engine.executive.competitive_ladder import (
+        CONTESTED_CATEGORY, NAMED_BY_SUBJECT, STRUCTURAL_PEER)
+    moves = {str(getattr(m, "actor", "")).lower(): m
+             for m in (selection.adversary or ())}
+    out = []
+    for rival in ground.rivals:
+        move = moves.get(rival.identity.lower())
+        # WHY IT IS A RIVAL IS THE RUNG, STATED. A reader must be able to see
+        # the difference between "the company named this" and "we read this
+        # off the business model", because those carry different weight and
+        # the old page presented both in the same voice.
+        if rival.rung == NAMED_BY_SUBJECT:
+            why = (f"{name} names it as a competitor in its own filing — "
+                   f"{_lower_first(rival.evidence[:180])}")
+        elif rival.rung == CONTESTED_CATEGORY:
+            why = (f"{name} names this as a category it competes with, in "
+                   f"its own words. {_capitalise(rival.mechanism)}")
+        elif rival.rung == STRUCTURAL_PEER:
+            why = (f"Not named by {name} in what this run read. It is carried "
+                   f"as a structural peer rather than a stated rival: "
+                   f"{_lower_first(rival.mechanism)}")
+        elif rival.is_attributed:
+            why = (f"{_capitalise(rival.rung_label)}. "
+                   f"{_capitalise(rival.mechanism)}")
+        else:
+            why = (f"Not a company — {rival.kind_label}, read from how this "
+                   f"business model works rather than from a retrieved "
+                   f"source. {_capitalise(rival.mechanism)}")
+        out.append(CompetitorRead(
+            name=rival.identity,
+            why_a_rival=_sentence(why),
+            exposure=_sentence(getattr(move, "impact", "")
+                               or _capitalise(rival.why_it_matters)),
+            likely_response=_sentence(
+                _clean(getattr(move, "action", ""))
+                or _default_response(profile.business_model_class,
+                                     rival.identity)),
+            response_likelihood=_likelihood(profile, move),
+            counter_move=_sentence(getattr(move, "countermeasure", "")
+                                   or _default_counter(profile)),
+            signal_to_watch=_sentence(getattr(move, "observable_signal", "")
+                                      or _capitalise(rival.disproof)),
+            level=str(getattr(move, "level", "") or "L1")))
+    return tuple(out[:6])
+
+
+def _capitalise(text: str) -> str:
+    text = (text or "").strip()
+    return text[:1].upper() + text[1:] if text else text
+
+
+def _level4_legacy(name, profile, selection, documents=()
+                   ) -> Tuple[CompetitorRead, ...]:
     """§13/§14/§15. Never "no competitor's own account was retrieved".
 
     TWO SOURCES OF A RIVAL, AND THEY ARE NOT INTERCHANGEABLE.

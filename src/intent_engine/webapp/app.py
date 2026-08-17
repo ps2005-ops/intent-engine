@@ -3161,7 +3161,8 @@ class WebApp:
                                  modeled_market=self._modeled_expectation(
                                      run_id, _name),
                                  read=self._strategic_read(run_id, _name))
-        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS
+        from intent_engine.founder_brief import challenge_block as _cb
+        strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + _cb.CSS
                  + fd.render_dossier(
                      _book, depth=fd.FULL, run_id=run_id, wrap=False,
                      citation_labels=self._citation_labels(run_id),
@@ -4275,7 +4276,14 @@ class WebApp:
                 company=company, domain=domain, dossier=dossier,
                 run_decision=run_decision, observations=observations,
                 documents=documents, own_words=own_words,
-                own_words_source=own_source)
+                own_words_source=own_source,
+                # THE SIMULATION IS PASSED, NOT REBUILT. The belief layer
+                # needs the observed trajectory and the trajectory comes from
+                # the filed series; deriving it inside `compose` would put a
+                # second set of regulator round trips on the critical path of
+                # every run. This is the same cached object the history step
+                # renders, behind the same outbound-call gate.
+                simulation=self._history_simulation(run_id, company))
         except Exception:                                   # noqa: BLE001
             _LOG.exception("strategic_read_compose_failed run=%s", run_id)
             read = SR.compose(company=company, domain=domain)
