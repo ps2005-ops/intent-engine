@@ -535,7 +535,7 @@ def _structural_competition(read, company) -> list:
     out = []
     for row in rows[:2]:
         out.append(end_sentence(
-            f"{row.name}: {lower_first(row.why_a_rival)} "
+            f"{row.name}: {row.why_a_rival} "
             f"{row.likely_response} The response likelihood is "
             f"{row.response_likelihood.lower()}, the counter available here "
             f"is {lower_first(row.counter_move)} and the signal that would "
@@ -615,9 +615,29 @@ def _competitive(company, report, decision, hypotheses, families,
     # `paras`, so keying off it suppressed the notice for a company that had a
     # vulnerability and no competitor, which is exactly when it is needed.
     if not items and not named_alternatives:
+        # THE FAMILY FLAG DESCRIBES RETRIEVAL; THIS SECTION DESCRIBES THE
+        # MARKET, AND THEY ARE NOT THE SAME QUESTION.
+        #
+        # Measured on the deployed preview at 2fb958d: Bank of America's Full
+        # analysis carried NO competitive section at all. The run had
+        # retrieved three documents classed `competitor` -- third-party 10-Ks
+        # that mention the subject in passing -- so the coverage family read
+        # PRESENT, `absent` was None, and nothing was rendered. Meanwhile
+        # `items` was empty because none of those documents says anything
+        # about this company, and the ladder was carrying "banks", "thrifts"
+        # and "credit unions" out of Bank of America's own filing.
+        #
+        # So the whole competitive read, quoted from the subject and scoring
+        # 10.0 in the rubric because the rubric reads the OBJECT, was
+        # invisible to the reader. A repair that ships inert.
+        #
+        # The structural read is now rendered whenever there is nothing
+        # better, which is what the section is for. The family flag still
+        # decides the LIMITATION wording below, because that genuinely is a
+        # statement about what was retrieved.
         absent = next((f for f in families
                        if f["key"] == "competitor" and not f["present"]), None)
-        if absent:
+        if True:
             # §13. A COMPETITIVE READ IS A STATEMENT ABOUT MARKET STRUCTURE.
             #
             # This used to open "No competitor's own account was retrieved for

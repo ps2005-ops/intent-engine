@@ -176,7 +176,7 @@ _MODEL_ENGINE = {
         "a cohort that renews at a lower rate than the one before it"),
     "BALANCE_SHEET_OR_NETWORK": (
         "the spread earned on flow across a balance sheet",
-        "the spread, and the cost of the deposits funding it",
+        "the spread earned against the cost of the deposits funding it",
         "deposit costs rising faster than asset yields reprice"),
     "DESIGN_AND_MANUFACTURE": (
         "design wins converting into volume at a defended price",
