@@ -43,7 +43,11 @@ def _e(text) -> str:
 
 #: Chart geometry, in user units. The SVG scales; these never change.
 _W, _H = 1000.0, 430.0
-_PAD_L, _PAD_R, _PAD_T, _PAD_B = 62.0, 22.0, 26.0, 52.0
+# _PAD_T leaves room for the axis label ABOVE the plot area. At 26 the label
+# sat on the same baseline as the topmost gridline value and the two printed
+# over each other — measured live on Palantir, whose index reaches five
+# figures so the top tick is at its widest.
+_PAD_L, _PAD_R, _PAD_T, _PAD_B = 68.0, 22.0, 40.0, 52.0
 
 CHART_CSS = """
 <style>
@@ -243,7 +247,7 @@ def chart_svg(sim: HS.Simulation, vintage: HS.SimVintage) -> str:
         x = scale.x(year)
         out.append(f'<text class="tick" x="{x:.1f}" y="{_H - _PAD_B + 22:.0f}"'
                    f' text-anchor="middle">{year}</text>')
-    out.append(f'<text class="axlabel" x="{_PAD_L - 46}" y="{_PAD_T + 4}" '
+    out.append(f'<text class="axlabel" x="{_PAD_L - 52}" y="{_PAD_T - 16:.0f}" '
                f'text-anchor="start">Index</text>')
 
     expectation, counter = vintage.expectation, vintage.counterfactual
