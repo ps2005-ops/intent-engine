@@ -341,6 +341,28 @@ def registrant_classification(resolved, *, transport=None,
             "cik": str(resolved.get("cik") or "")}
 
 
+def submissions(cik, *, transport=None, resolver=None) -> dict:
+    """The registrant's submissions record, or {}. Never raises.
+
+    Exists so the history surface can read a company's DATED filing record
+    without re-resolving it by name. `filing_candidates` already fetches this
+    document to pick three URLs and then discards the dates, which is the
+    only per-company dated series a first run has any access to.
+
+    `cik` may be padded or bare; EDGAR wants ten digits.
+    """
+    digits = "".join(c for c in str(cik or "") if c.isdigit())
+    if not digits:
+        return {}
+    try:
+        raw = _fetch_bytes(SUBMISSIONS_URL.format(cik10=digits.zfill(10)),
+                           transport=transport, resolver=resolver)
+        payload = json.loads(raw.decode("utf-8", "replace"))
+    except Exception:                                       # noqa: BLE001
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def filing_candidates(resolved, *, transport=None, resolver=None,
                       limit=MAX_EDGAR_CANDIDATES) -> list:
     """Propose recent filing primary-document candidates for a resolved CIK.

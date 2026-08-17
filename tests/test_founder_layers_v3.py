@@ -45,7 +45,7 @@ def test_a_real_run_lands_inside_the_full_reading_budget(tmp_path):
     """
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, c, rid = _strategic_webapp_run(tmp_path)
-    _, _, body = c.request("GET", f"/runs/{rid}")
+    _, _, body = c.request("GET", f"/runs/{rid}/answer")
     main = body.split('<main class="nar">')[1]
     intelligence = L.intelligence_words(main)
     assert L.NARRATIVE_MIN <= intelligence <= L.NARRATIVE_MAX, intelligence
@@ -63,7 +63,7 @@ def test_the_answer_alone_is_still_a_sixty_second_read(tmp_path):
     """
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, c, rid = _strategic_webapp_run(tmp_path)
-    _, _, body = c.request("GET", f"/runs/{rid}")
+    _, _, body = c.request("GET", f"/runs/{rid}/answer")
     answer = re.search(r'<section id="executive_answer".*?</section>', body,
                        re.S)
     assert answer, "the default page has no executive answer section"
@@ -426,12 +426,40 @@ def test_a_withheld_run_still_answers_why_it_matters():
     assert "Why this matters" in html
 
 
-def test_the_presentation_layer_stays_reachable():
-    """Dropping its only link orphaned a working layer."""
+def test_no_layer_is_orphaned():
+    """NOTHING IS UNREACHABLE. That is what this test has always asserted.
+
+    It used to assert it by requiring one page to link to all six others,
+    which is precisely the eight-door grid §16 removed: a reader who has just
+    read a conclusion was handed a sitemap. Reachability now comes from two
+    places, and BOTH are checked here, so the guarantee is unchanged while
+    the shape is not.
+
+      * the secondary surfaces are linked from this page directly;
+      * the six story steps form a chain from step 1, and this page links
+        into step 1.
+    """
+    from intent_engine.founder_brief import flow
+
     html = rendered(_rich())
-    for href in ("/story", "/dashboard", "/brief", "/slides", "/sources",
-                 "/full"):
-        assert href in html, href
+    # Every secondary surface, directly.
+    for key in flow.SECONDARY:
+        assert f"/{key}" in html, key
+    # ...and the way back into the story.
+    assert flow.STEPS[0].suffix in html
+
+    # The chain itself: every step reachable from the one before it.
+    reached = {flow.STEPS[0].key}
+    step = flow.STEPS[0]
+    while True:
+        nav = flow.nav("r1", step.key)
+        following = flow.following(step.key)
+        if following is None:
+            break
+        assert f"/runs/r1{following.suffix}" in nav, following.key
+        reached.add(following.key)
+        step = following
+    assert reached == {s.key for s in flow.STEPS}
 
 
 def test_interface_controls_are_excluded_from_the_intelligence_budget():

@@ -55,6 +55,35 @@ SIGNAL_VOCABULARY = (
 )
 
 
+def patterns_for(model_class: str, library=None) -> list:
+    """The patterns that can be TRUE of this kind of business.
+
+    THE GATE SIGNALS COULD NOT PROVIDE. A signal records what a company's
+    pages talk about; it cannot record what kind of business is talking.
+    `capacity_ahead_of_demand` fired on Cloudflare -- whose filing genuinely
+    discusses network capacity investment and genuinely names large customers
+    -- and put "committing capital to capacity ahead of demand", "take-or-pay
+    terms" and "replacing ageing lines" on the primary screen of a company
+    that rents elastic compute.
+
+    No threshold repairs that. The signals were present; the READING was
+    about a different kind of business, and every pattern already documented
+    which kinds in `when_it_does_not_apply`. This turns that prose into a
+    filter.
+
+    An UNKNOWN or unclassified company gets the whole library, unchanged.
+    Withholding patterns from a company we could not classify would trade a
+    wrong reading for no reading, and no reading is the failure this product
+    was reopened to fix.
+    """
+    library = list(library if library is not None else PATTERN_LIBRARY)
+    model = str(model_class or "").strip().upper()
+    if not model or model == "UNKNOWN":
+        return library
+    return [p for p in library
+            if model not in tuple(getattr(p, "excluded_model_classes", ()))]
+
+
 def _p(**kw) -> ComparablePattern:
     p = ComparablePattern(**kw)
     p.validate()
@@ -94,6 +123,7 @@ PATTERN_LIBRARY = [
                                "party build-on ecosystem.",
         source_refs=[{"title": "curated pattern: product→platform",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",),
         confidence="high",
         qualifying_signals=("infrastructure_positioning", "checkout_identity_rails",
                             "product_breadth", "platform_control",
@@ -164,6 +194,8 @@ PATTERN_LIBRARY = [
                                "declines enterprise complexity.",
         source_refs=[{"title": "curated pattern: SMB→enterprise",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "REGULATED_PRODUCT_OR_PROVIDER",),
         confidence="high",
         qualifying_signals=("enterprise_expansion", "product_breadth"),
         disconfirming_signals=("smb_simplicity",),
@@ -195,6 +227,9 @@ PATTERN_LIBRARY = [
                                "surfaces with no agent endpoints.",
         source_refs=[{"title": "curated pattern: human→agent workflow",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "MANUFACTURE_AND_AFTERMARKET",
+            "DESIGN_AND_MANUFACTURE",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",),
         confidence="moderate",
         qualifying_signals=("agentic_commerce", "distribution_shift",
                             "checkout_identity_rails",
@@ -249,6 +284,7 @@ PATTERN_LIBRARY = [
                                "third-party build-on surface.",
         source_refs=[{"title": "curated pattern: product→ecosystem",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",),
         confidence="high",
         qualifying_signals=("product_breadth", "partner_ecosystem_enablement",
                             "platform_control"),
@@ -280,6 +316,8 @@ PATTERN_LIBRARY = [
                                "utility) or purely closed (fully first-party).",
         source_refs=[{"title": "curated pattern: control vs openness",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",
+            "REGULATED_PRODUCT_OR_PROVIDER",),
         confidence="moderate",
         qualifying_signals=("partner_ecosystem_enablement", "platform_control",
                             "checkout_identity_rails"),
@@ -352,6 +390,7 @@ PATTERN_LIBRARY = [
                                "engagement model shows no product surface.",
         source_refs=[{"title": "curated pattern: services→product",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "CONTRACTED_OR_RATE_BASE_ASSETS",),
         confidence="moderate",
         qualifying_signals=("services_motion", "multi_product",
                             "developer_surface", "productization"),
@@ -459,6 +498,9 @@ PATTERN_LIBRARY = [
                                "point-tool economics.",
         source_refs=[{"title": "curated pattern: tool→system of record",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("COMMODITY_PRODUCER", "MANUFACTURE_AND_AFTERMARKET",
+            "DESIGN_AND_MANUFACTURE",
+            "CONTRACTED_OR_RATE_BASE_ASSETS",),
         confidence="moderate",
         qualifying_signals=("consolidation", "multi_product",
                             "developer_surface", "system_of_record_claim",
@@ -558,6 +600,9 @@ PATTERN_LIBRARY = [
                                "spread across many independent buyers.",
         source_refs=[{"title": "curated pattern: capacity ahead of demand",
                       "origin": "strategic_pattern_library"}],
+        excluded_model_classes=("SUBSCRIPTION_SOFTWARE", "BALANCE_SHEET_OR_NETWORK",
+            "REGULATED_PRODUCT_OR_PROVIDER",
+            "PEOPLE_OR_ROUTE_BASED_SERVICES", "BRANDED_CONSUMER",),
         confidence="moderate",
         qualifying_signals=("capacity_investment", "customer_concentration",
                             "segment_reporting"),

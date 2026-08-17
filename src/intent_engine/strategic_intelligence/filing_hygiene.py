@@ -123,6 +123,23 @@ _FURNITURE = tuple(re.compile(p, re.I) for p in (
     r".{0,40}\bcontains forward-looking\b",
     # XBRL / tagging labels
     r"\bxbrl\b", r"\binline xbrl\b", r"\bus-gaap:\b",
+    # 10-K COVER PAGE. Measured live on the Cloudflare deck, slide 4
+    # ("Products, customers and market") opened with:
+    #     "UNITED STATES. Securities registered pursuant to Section 12(g) of
+    #      the Act: None. Indicate by check mark if the registrant is not
+    #      required to file reports pursuant to Section..."
+    # Every fragment of it is on the statutory cover sheet of every 10-K ever
+    # filed, so it cannot say anything about any company -- which is exactly
+    # what makes it survivable: it never trips a company-specific filter.
+    r"\bsecurities registered pursuant to section\b",
+    r"\bindicate by check mark\b",
+    r"\bregistrant(?:'s)? (?:telephone|principal executive|name as "
+    r"specified)\b",
+    r"\btitle of each class\b.{0,40}\btrading symbol\b",
+    r"\bemerging growth company\b",
+    r"\bwell-known seasoned issuer\b",
+    r"\bpursuant to section 1[235]\b",
+    r"\baggregate market value of.{0,40}\bheld by non-affiliates\b",
 ))
 
 # A fragment that is mostly a corporate identifier and no verb is metadata,

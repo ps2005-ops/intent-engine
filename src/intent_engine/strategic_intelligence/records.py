@@ -172,6 +172,28 @@ class ComparablePattern:
     #: `disconfirming_signals`, so a pattern cannot be blocked by
     #: something it never declared as arguing against it.
     blocking_signals: tuple = ()
+    #: BUSINESS MODEL CLASSES THIS READING CANNOT BE TRUE OF.
+    #:
+    #: Signals say what a company's pages TALK ABOUT. They cannot say what
+    #: kind of business it is, and that is the gap `capacity_ahead_of_demand`
+    #: walked through: Cloudflare's 10-K discusses network capacity investment
+    #: and names large customers, so `capacity_investment` and
+    #: `customer_concentration` both fired, and the primary screen told a CEO
+    #: that a global anycast network commits "fixed cost in large increments"
+    #: against "take-or-pay terms" and is "replacing ageing lines". Its own
+    #: X-Ray, two clicks away, read the same company correctly as recurring
+    #: software with HIGH operating leverage.
+    #:
+    #: No threshold fixes that, because the signals were genuinely present.
+    #: What was missing is that the reading is ABOUT a business whose capacity
+    #: is bought in indivisible physical increments, and this one's is rented
+    #: and elastic -- which `when_it_does_not_apply` already said in prose and
+    #: nothing enforced.
+    #:
+    #: Empty for every pattern that is genuinely model-neutral. A pattern
+    #: excluded from every class would be a pattern that never fires, so
+    #: `validate` refuses that.
+    excluded_model_classes: tuple = ()
     limitations: str = ""
 
     def validate(self) -> None:
@@ -190,6 +212,9 @@ class ComparablePattern:
                      f"pattern {self.pattern_id} requires one of "
                      f"{signal!r}, which is not one of its qualifying "
                      "signals")
+        _require(len(set(self.excluded_model_classes)) < 9,
+                 f"pattern {self.pattern_id} excludes every business model "
+                 "class, so it can never fire")
         for signal in self.blocking_signals:
             _require(signal in self.disconfirming_signals,
                      f"pattern {self.pattern_id} is blocked by {signal!r}, "

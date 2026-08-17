@@ -949,8 +949,16 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
             readiness=WITHHELD, verified=verified,
             company_name=company_name, identity_state=identity,
             limitation=_flat(gaps[0]) if gaps else "",
-            unsafe_because=(f"What {company_name} has published is not enough "
-                            f"to read a strategy from."),
+            # SAY WHAT THIS PASS DID, NOT WHAT THE COMPANY DISCLOSED.
+            # "What X has published is not enough to read a strategy from"
+            # attributes a twelve-entry pattern library's miss to a public
+            # company's disclosure, and it is rendered on the surfaces a CEO
+            # reads first. The reading itself is composed elsewhere and is
+            # bounded rather than absent; this line is what THIS pass could
+            # not add to it.
+            unsafe_because=(f"No curated transition pattern matched "
+                            f"{company_name} in this pass, so nothing here "
+                            f"rests on one."),
             evidence_required=tuple(_flat(g) for g in gaps[:3]))
 
     topic = _flat(_first(_get(hypothesis, "decision_implications", [])))

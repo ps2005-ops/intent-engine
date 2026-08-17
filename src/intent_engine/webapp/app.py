@@ -833,6 +833,21 @@ class WebApp:
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
             return self._report(session, parts[1])
+        # THE SIX-STEP STORY (§17). `founder_brief.flow` owns the order;
+        # these three routes are the steps the product did not have.
+        if route == ("GET", "runs", 3) and parts[2] == "intro":
+            return self._intro_page(session, parts[1])
+        # THE SCROLLABLE DECISION NARRATIVE. It was the default route until
+        # step 1 took that place, and a designed 900-word surface with no
+        # route into it is exactly the defect the verdict register exists to
+        # catch. It is now a secondary surface, reached from the step that
+        # raises the question it answers.
+        if route == ("GET", "runs", 3) and parts[2] == "answer":
+            return self._answer_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "history":
+            return self._history_page(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "connect":
+            return self._connect_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "story":
             return self._story_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "dashboard":
@@ -2492,12 +2507,20 @@ class WebApp:
             # never the problem — the default was. So the default is now the
             # brief, and the depth is one click away and still complete.
             if layer == "default":
-                # V3: the default is the 60-SECOND FOUNDER BRIEF, not the
-                # executive brief. The customer's message was that founders
-                # should not have to read everything -- and the executive
-                # brief, at 500-900 words, is still "everything" to someone
-                # with fifteen minutes. Depth is one click away and unchanged.
-                return self._founder_brief_page(session, run_id, result)
+                # THE DEMO IS A STORY, AND A STORY HAS A FIRST PAGE (§17).
+                #
+                # This used to land on the 60-second founder brief, which was
+                # right when the alternative was an eleven-section report. It
+                # is no longer the first thing a reader should meet: the brief
+                # opens on the run's own epistemic verdict, and for a company
+                # whose run retrieved little that verdict was "no strategic
+                # reading cleared the evidence bar" -- a refusal, as the
+                # product's first sentence.
+                #
+                # Step 1 is now the Introduction, which says what the company
+                # is and what the argument is about. The brief is unchanged
+                # and is still served at /brief.
+                return self._redirect(f"/runs/{run_id}/intro")
             return self._strategic_run_page(session, run_id, result,
                                             share_form, feedback_form)
 
@@ -2529,7 +2552,7 @@ class WebApp:
             # not enough here", and silently substituting a summary for it
             # would be a second, quieter dead end.
             if layer == "default":
-                return self._founder_brief_page(session, run_id, result)
+                return self._redirect(f"/runs/{run_id}/intro")
             return self._insufficient_evidence_page(
                 session, run_id, result,
                 reason="The pages that could be read describe what the "
@@ -2948,7 +2971,9 @@ class WebApp:
                      citation_labels=self._citation_labels(run_id),
                      charts=_external_charts(_external),
                      lead=fd.render_decision_lead(
-                         _decision, _name, depth=fd.FULL, run_id=run_id)))
+                         _decision, _name, depth=fd.FULL, run_id=run_id,
+                         contract=self._executive_contract(run_id),
+                         read=self._strategic_read(run_id, _name))))
         # The legacy report is NOT appended. It said the same things the
         # dossier above now says -- one decision, one evidence list, one set
         # of alternatives -- so keeping it made every sentence on the page
@@ -2998,7 +3023,7 @@ class WebApp:
                 # 38rem cap and 40px bottom padding, so on a phone the layer
                 # links sat in a stray white panel with a band of dead space
                 # under them -- the first thing below the site nav.
-                f'{self._layer_nav(run_id, "full")}'
+                f''
                 f'{strat}{actions}'
                 f'</main></body></html>')
         return self._html(_BRIEF_CSS + body)
@@ -3729,7 +3754,8 @@ class WebApp:
                 charts=_external_charts(external),
                 lead=fd.render_decision_lead(
                     decision, name, depth=fd.BRIEF, run_id=run_id,
-                    contract=self._executive_contract(run_id)))
+                    contract=self._executive_contract(run_id),
+                    read=self._strategic_read(run_id, name)))
         return self._html(self._page(f"{name} — executive brief", body,
                                      session, session.get("csrf", "")))
 
@@ -3982,6 +4008,240 @@ class WebApp:
         return self._html(self._page(f"{name} — intelligence", body, session,
                                      session.get("csrf", "")))
 
+    # =====================================================================
+    # THE SIX-STEP STORY — steps 1, 5 and 6
+    # =====================================================================
+    def _strategic_read(self, run_id, name=""):
+        """The canonical bounded read for this run (§56).
+
+        ONE object, built once per request from everything the run holds, and
+        projected by every step. The alternative -- each page composing its
+        own -- is what produced a primary screen asserting an industrial
+        capacity mechanism about a software network while the X-Ray two
+        clicks away read it correctly as subscription software.
+
+        Never raises. A step that has to handle "no read" grows its own
+        refusal, and a refusal on the first screen is the defect this whole
+        change exists to remove.
+        """
+        from intent_engine.executive import strategic_read as SR
+        from intent_engine.strategic_intelligence.decision import decision_of
+
+        result = self._result(run_id) or {}
+        report = result.get("strategic_report") or {}
+        observations = [o for o in (report.get("observations") or ())
+                        if isinstance(o, dict)]
+        meta = self.ci.run_meta(run_id) or {}
+        domain = str(meta.get("domain") or result.get("company_domain") or "")
+        company = (name or str(meta.get("company_name") or "")
+                   or str((self.ci.entity_identity(run_id) or {}).get("name")
+                          or "") or domain)
+        documents = list(self._retrieved_documents(run_id))
+        try:
+            run_decision = decision_of(report) if report else None
+        except Exception:                                   # noqa: BLE001
+            run_decision = None
+        dossier = None
+        try:
+            from intent_engine.demo_dossier.store import (DossierStore,
+                                                          company_key)
+            key, _cohort, _mv = self._manifest_placement(
+                company_key(company or domain or run_id),
+                name=company, domain=domain)
+            record = DossierStore(self._runtime_root).latest(key)
+            dossier = record if isinstance(record, dict) else None
+        except Exception:                                   # noqa: BLE001
+            dossier = None
+        own_words, own_source = self._own_words(observations, company)
+        try:
+            read = SR.compose(
+                company=company, domain=domain, dossier=dossier,
+                run_decision=run_decision, observations=observations,
+                documents=documents, own_words=own_words,
+                own_words_source=own_source)
+        except Exception:                                   # noqa: BLE001
+            _LOG.exception("strategic_read_compose_failed run=%s", run_id)
+            read = SR.compose(company=company, domain=domain)
+        # STAGES 3-6 OF §64, BEFORE ANYTHING IS RENDERED. The audit is
+        # structural and the repair is targeted; neither reads a model, and
+        # neither may add a claim. A failure here returns the unrepaired read
+        # rather than no read -- a self-correcting loop that can fail closed
+        # is a loop that can delete the product.
+        try:
+            from intent_engine.product_eval import self_correction as SC
+            corrected = SC.correct(read)
+            if corrected.repairs:
+                _LOG.info("strategic_read_repaired run=%s repairs=%s",
+                          run_id, "; ".join(corrected.repairs))
+            return corrected.read
+        except Exception:                                   # noqa: BLE001
+            _LOG.exception("strategic_read_correction_failed run=%s", run_id)
+            return read
+
+    def _own_words(self, observations, company):
+        """The company's best complete sentence about itself, and its source.
+
+        COMPLETE is the operative word (§23). The old opener took 180
+        characters and appended an ellipsis, so the product's first sentence
+        trailed off mid-clause. Here the text is cut at a SENTENCE boundary or
+        not used at all -- a quotation that stops where the company stopped is
+        a quotation; one that stops where the buffer stopped is a bug the
+        reader can see.
+        """
+        import re as _re
+        own = ("company_owned", "executive_statement", "investor_material")
+        best, source = "", ""
+        for obs in observations or ():
+            if obs.get("weak") or obs.get("source_class") not in own:
+                continue
+            text = " ".join(str(obs.get("excerpt") or "").split())
+            if len(text.split()) < 10:
+                continue
+            sentences = _re.split(r"(?<=[.!?])\s+", text)
+            kept = []
+            for sentence in sentences:
+                if not sentence.strip().endswith((".", "!", "?")):
+                    break
+                kept.append(sentence.strip())
+                if sum(len(k) for k in kept) > 240:
+                    break
+            joined = " ".join(kept).strip()
+            # A MISSION STATEMENT IS NOT AN ACCOUNT OF A BUSINESS (§22).
+            # "Cloudflare's mission is to help build a better Internet" is
+            # correctly attributed, genuinely the company's words, and tells a
+            # reader nothing. Quoting it under "in its own words" reintroduced
+            # the marketing opener one section further down the same page.
+            if _re.search(r"mission is to|our vision|we are on a mission"
+                          r"|help build a better|the world'?s leading"
+                          r"|welcome to ", joined, _re.I):
+                continue
+            if len(joined.split()) >= 10 and len(joined) > len(best):
+                best = joined
+                source = str(obs.get("source_title") or obs.get("origin") or "")
+        return best, source
+
+    def _step_guard(self, session, run_id):
+        """Ownership and readiness, shared by every step page.
+
+        Returns a response to send INSTEAD of the step, or None to proceed.
+        """
+        if not self._owned(session, run_id):
+            return self._error_page(404, "no such run for this account")
+        if self._availability(run_id).get("in_flight"):
+            return self._redirect(f"/runs/{run_id}/progress")
+        return None
+
+    def _answer_page(self, session, run_id):
+        """The sixty-second scrollable decision narrative."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        result = self._result(run_id) or {}
+        return self._founder_brief_page(session, run_id, result)
+
+    def _learning_block(self) -> str:
+        """The learning ledger, projected onto the story (§54).
+
+        The ledger has always been served in full at /learning-acceleration,
+        which is a page a customer reaches only if they already believe the
+        system learns. Projecting it into step 1 is how they find out.
+
+        Defensive: no report, no block. A learning panel that renders zeros
+        teaches the opposite of what is true.
+        """
+        try:
+            from intent_engine.demo_dossier import learning_bridge as LB
+            from intent_engine.founder_brief import steps
+            report = LB.load("week")
+            return steps.render_learning(report,
+                                         LB.activity_versus_learning(report))
+        except Exception:                                   # noqa: BLE001
+            return ""
+
+    def _intro_page(self, session, run_id):
+        """Step 1 (§21–§25). The first thing a customer reads."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        from intent_engine.founder_brief import steps
+        _brief, _report, name = self._founder_layers(run_id)
+        read = self._strategic_read(run_id, name)
+        company = read.company or name
+        body = steps.render_intro(read, run_id=run_id, company=company,
+                                  learning=self._learning_block())
+        return self._html(self._page(f"{company} — introduction", body,
+                                     session, session.get("csrf", "")))
+
+    def _history_page(self, session, run_id):
+        """Step 5 (§41–§48). The vintage-walled rewind."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        from intent_engine.founder_brief import steps
+        _brief, _report, name = self._founder_layers(run_id)
+        timeline = self._history_timeline(run_id, name)
+        body = steps.render_history(timeline, run_id=run_id,
+                                    company=timeline.company or name)
+        return self._html(self._page(f"{name} — history rewind", body,
+                                     session, session.get("csrf", "")))
+
+    def _history_timeline(self, run_id, name):
+        """The dated record for this company, cached for the process.
+
+        EDGAR's submissions document is one request and it is the only
+        per-company dated series a first run can reach. It is cached because
+        a reader moving the slider must not re-dial the SEC, and it is
+        defensive because a history page that 500s is worse than a history
+        page that says it holds nothing.
+        """
+        from intent_engine.executive import history_rewind as HR
+        cached = getattr(self, "_timelines", None)
+        if cached is None:
+            cached = self._timelines = {}
+        if run_id in cached:
+            return cached[run_id]
+        documents = list(self._retrieved_documents(run_id))
+        filings = ()
+        cik = HR.cik_from_urls(
+            [str(d.get("final_url") or d.get("original_url") or "")
+             for d in documents if isinstance(d, dict)])
+        if cik:
+            try:
+                from intent_engine.company_ingestion.edgar import submissions
+                filings = HR.filings_from_submissions(submissions(cik),
+                                                      limit=90)
+            except Exception:                               # noqa: BLE001
+                filings = ()
+        if not filings:
+            filings = HR.filings_from_documents(documents)
+        read_selection = None
+        profile = None
+        try:
+            from intent_engine.executive.analysis_selection import select
+            meta = self.ci.run_meta(run_id) or {}
+            read_selection = select(name=name,
+                                    domain=str(meta.get("domain") or ""))
+            profile = read_selection.profile
+        except Exception:                                   # noqa: BLE001
+            pass
+        timeline = HR.build(company=name, filings=filings, profile=profile,
+                            selection=read_selection)
+        cached[run_id] = timeline
+        return timeline
+
+    def _connect_page(self, session, run_id):
+        """Step 6 (§49–§52). Public demo becomes product."""
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
+        from intent_engine.founder_brief import steps
+        _brief, _report, name = self._founder_layers(run_id)
+        read = self._strategic_read(run_id, name)
+        company = read.company or name
+        body = steps.render_connect(read, run_id=run_id, company=company)
+        return self._html(self._page(f"{company} — connect your company",
+                                     body, session, session.get("csrf", "")))
+
     def _story_page(self, session, run_id):
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
@@ -4004,12 +4264,22 @@ class WebApp:
                 run_id, name,
                 self._listing_for(run_id).ticker))
         actions = fl.build_actions(brief)
-        body = (f'{fr.BRIEF_CSS}<main class="fb"><h1>{_e(name)} — the '
-                f'decision story</h1>'
-                + fr.render_story(sections, run_id=run_id)
-                + fr.render_actions(actions)
-                + fr._deeper(run_id) + "</main>")
-        return self._html(self._page(f"{name} — decision story", body,
+        # THE NARRATIVE IS COMPOSED FROM THE CANONICAL READ (§39), and the
+        # run's own sections are supporting material below it. The other way
+        # round is what produced a step-4 page whose "business story" section
+        # contained the single word "company".
+        from intent_engine.founder_brief import steps
+        read = self._strategic_read(run_id, name)
+        substantive = [s for s in sections
+                       if len(" ".join(getattr(s, "paragraphs", ()) or ())) > 80]
+        extra = (fr.render_story(substantive, run_id=run_id)
+                 + fr.render_actions(actions)) if substantive else \
+            fr.render_actions(actions)
+        body = (f'{fr.BRIEF_CSS}'
+                + steps.render_story(
+                    read, self._history_timeline(run_id, name),
+                    run_id=run_id, company=read.company or name, extra=extra))
+        return self._html(self._page(f"{name} — the full story", body,
                                      session, session.get("csrf", "")))
 
     def _founder_brief_page(self, session, run_id, result):
@@ -4159,12 +4429,14 @@ class WebApp:
         csrf = session["csrf"] if session else ""
         slides = build_slides(report, as_of=as_of, analysis_version=version,
                               contract=self._executive_contract(run_id),
-                              documents=self.ci.store.retrieved(run_id))
+                              documents=self.ci.store.retrieved(run_id),
+                              read=self._strategic_read(run_id))
         if not deck_is_presentable(slides):
             # Better to say so than to hand someone a three-slide deck in a
             # meeting after promising a presentation.
+            from intent_engine.founder_brief import flow
             body = (
-                f'<main>{self._layer_nav(run_id, "slides")}'
+                f'<main>'
                 f'<h1>Not enough for a presentation</h1>'
                 f'<p>This analysis supports '
                 f'{meaningful_slide_count(slides)} substantive slide(s), and a '
@@ -4172,7 +4444,7 @@ class WebApp:
                 f'analysis contain everything that was found.</p>'
                 f'<p><a href="/runs/{_e(run_id)}/brief">Read the executive '
                 f'brief</a> · <a href="/runs/{_e(run_id)}/full">Full '
-                f'analysis</a></p></main>')
+                f'analysis</a></p>{flow.nav(run_id, "slides")}</main>')
             return self._html(self._page("Presentation unavailable", body,
                                          session, csrf))
         deck = render_deck(slides, company=report.get("company_name", ""),
@@ -4180,7 +4452,8 @@ class WebApp:
                            run_id=run_id, csrf=csrf,
                            full_analysis_url=f"/runs/{run_id}/full",
                            cite_labels=self._citation_labels(run_id))
-        body = (f'<main>{self._layer_nav(run_id, "slides")}{deck}</main>')
+        from intent_engine.founder_brief import flow
+        body = (f'<main>{deck}{flow.nav(run_id, "slides")}</main>')
         return self._html(self._page(
             f'{report.get("company_name", "")} — presentation', body, session,
             csrf))

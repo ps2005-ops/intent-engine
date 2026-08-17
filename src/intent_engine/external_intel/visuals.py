@@ -208,19 +208,28 @@ def macro_exposure(factor: dict, *, headline: str, so_what: str,
     if len(steps) < 3:
         return ""
 
-    height = 60
-    total = len(steps) * height + 10
+    # THE CHAIN IS THE ARGUMENT, SO IT HAS TO BE READABLE (§23, §30).
+    #
+    # Each step used to be clipped to 78 characters with an ellipsis, and
+    # every step of every transmission chain is longer than that -- so the
+    # one visual that carries the macro reasoning printed four sentences that
+    # all trailed off. SVG does not wrap, so the wrapping is done here: two
+    # lines per step, and the box grows to fit them.
+    lines = [(label, _lines(text, 74, 2)) for label, text in steps]
+    height = 46 + 17 * max(len(v) for _k, v in lines)
+    total = len(lines) * height + 10
     body = []
-    for i, (label, text) in enumerate(steps):
+    for i, (label, rows) in enumerate(lines):
         y = 6 + i * height
         body.append(f'<rect x="{_PAD_L}" y="{y}" width="{_W - _PAD_L - 12}" '
                     f'height="{height - 14}" rx="6" fill="var(--soft)" '
                     f'stroke="var(--line)"/>')
         body.append(f'<text class="xc-axis" x="{_PAD_L + 10}" y="{y + 16}">'
                     f'{_e(label.upper())}</text>')
-        body.append(f'<text class="xc-lbl" x="{_PAD_L + 10}" y="{y + 33}">'
-                    f'{_e(_wrap(text, 78))}</text>')
-        if i < len(steps) - 1:
+        for j, row in enumerate(rows):
+            body.append(f'<text class="xc-lbl" x="{_PAD_L + 10}" '
+                        f'y="{y + 33 + j * 16}">{_e(row)}</text>')
+        if i < len(lines) - 1:
             mid = _PAD_L + (_W - _PAD_L) / 2
             body.append(f'<path d="M{mid} {y + height - 13} L{mid} '
                         f'{y + height - 3}" stroke="var(--muted)" '
@@ -247,6 +256,33 @@ def _wrap(text: str, limit: int) -> str:
     if len(text) <= limit:
         return text
     return text[:limit].rsplit(" ", 1)[0] + "…"
+
+
+def _lines(text: str, width: int, limit: int) -> list:
+    """`text` broken into at most `limit` lines of about `width` characters.
+
+    An ellipsis appears only when the whole passage genuinely does not fit in
+    the space allowed -- which, at two lines of 74, it almost never does.
+    """
+    words = " ".join(str(text or "").split()).split()
+    rows, current = [], ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if len(candidate) <= width:
+            current = candidate
+            continue
+        rows.append(current)
+        current = word
+        if len(rows) == limit:
+            break
+    if current and len(rows) < limit:
+        rows.append(current)
+    if not rows:
+        return [""]
+    consumed = len(" ".join(rows).split())
+    if consumed < len(words):
+        rows[-1] = rows[-1].rstrip(",;: ") + "…"
+    return rows
 
 
 def competitor_positioning(competitors: Sequence[dict], *, headline: str,

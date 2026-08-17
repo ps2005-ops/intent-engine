@@ -191,6 +191,16 @@ _PAGE_FURNITURE = (
     "securities and exchange commission", "date of report",
     "date of earliest event", "former name or former address",
     "registrant's telephone number", "principal executive offices",
+    # MEASURED on the live Cloudflare deck, slide 4 ("Products, customers and
+    # market"), which opened: "UNITED STATES. Securities registered pursuant
+    # to Section 12(g) of the Act: None. Indicate by check mark if the
+    # registrant is not required to file reports pursuant to Section..." --
+    # statutory cover-sheet text present in every 10-K ever filed, which is
+    # exactly why no company-specific filter had ever caught it.
+    "securities registered pursuant", "indicate by check mark",
+    "not required to file reports pursuant", "well-known seasoned issuer",
+    "aggregate market value", "name of each exchange on which registered",
+    "trading symbol", "par value", "shares outstanding as of",
 )
 
 # Text addressed to whatever is reading the page rather than to a person.
@@ -916,8 +926,15 @@ def build_founder_slides(analysis, *, company="") -> list:
     return [s for s in slides if s]
 
 
+#: Page furniture and mission copy that is not an account of a business.
+_ASPIRATIONAL = re.compile(
+    r"\bwelcome to\b|\bmission is to\b|\bour vision\b"
+    r"|\bpowering the next generation\b|\bwe believe that\b"
+    r"|\bhelp build a better\b|\bthe world'?s leading\b", re.I)
+
+
 def build_slides(report, *, as_of: str = "", analysis_version: str = "",
-                 brief=None, documents=(), contract=None) -> list:
+                 brief=None, documents=(), contract=None, read=None) -> list:
     """The deck, in narrative order, with every empty slide omitted.
 
     `documents` are the run's retrieved sources. When supplied, the factual
@@ -1003,9 +1020,23 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
     # deck opens on the reading and the decision, and this becomes context a
     # reader reaches once they know why it matters. It is still built here
     # because it must claim its bullets before the market slide does.
+    # WHAT THE COMPANY IS, IN THIS SYSTEM'S WORDS, FIRST (§22).
+    #
+    # Measured live: this slide opened "Welcome to Cloudflare - Powering the
+    # next generation of applications" -- a page title, promoted to the
+    # answer to "what is this company". The synthesized identity line leads
+    # instead, and the company's own copy stays underneath it as context,
+    # which is the order §22 asks for and the order a reader needs.
+    if read is not None and getattr(read, "identity", ""):
+        identity_bullets = ([_bullet(read.identity)]
+                            + [b for b in identity_bullets
+                               if not _ASPIRATIONAL.search(b.get("text", ""))])
+        note = ("The first line is this analysis's reading; the rest is the "
+                "company's own public copy.")
+    else:
+        note = "From the company's own public pages."
     identity_slide = _slide("company", f"{company} in one minute",
-                            identity_bullets[:3],
-                            note="From the company's own public pages.")
+                            identity_bullets[:3], note=note)
 
     # 2. Central strategic view. `thesis["view"]` and `thesis["transition"]`
     #    are the pattern library's own sentences with the company name
@@ -1050,6 +1081,30 @@ def build_slides(report, *, as_of: str = "", analysis_version: str = "",
             _bullet(getattr(contract, "run_contribution", "") or
                     "This run did not add enough independent evidence to "
                     "strengthen it.")]
+    elif thesis.get("view_withheld") and read is not None \
+            and getattr(read, "puts_a_strategy_forward", False):
+        # SLIDE 1 IS THE FIRST THING SHOWN IN A ROOM, AND IT WAS A REFUSAL.
+        #
+        # "What Cloudflare has published is not enough to read a strategy
+        # from" is a true statement about THIS RUN'S PATTERN MATCH and a
+        # false one about the company, and it was the opening slide of a
+        # presentation. With the pattern library gated by business model
+        # (which is what stopped a software company being handed an
+        # industrial mechanism) a clean no-match became MORE common, not
+        # less -- so the refusal had to stop being the fallback.
+        #
+        # The canonical bounded read is composed from the established
+        # classification, the published record and this run's evidence. It
+        # asserts no magnitude, and every line carries its standing.
+        action = getattr(read, "level6_action", None)
+        view_bullets = [_bullet(read.level5_decision.text)]
+        if action is not None:
+            view_bullets.append(_bullet(
+                f"Confidence: {action.causal_confidence}"))
+            view_bullets.append(_bullet(
+                f"What is still open: {action.what_remains_unknown}"))
+            view_bullets.append(_bullet(
+                f"What to do now: {action.action_now}"))
     slides.append(_slide("view", "The central strategic view", view_bullets,
                          kind="thesis"))
 

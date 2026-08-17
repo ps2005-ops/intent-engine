@@ -564,7 +564,7 @@ def _served(tmp_path, decision):
             out["strategic_report"] = report
         return out
     app._real_result = patched
-    _, _, body = client.request("GET", f"/runs/{run_id}")
+    _, _, body = client.request("GET", f"/runs/{run_id}/answer")
     return body
 
 

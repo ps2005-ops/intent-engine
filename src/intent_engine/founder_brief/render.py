@@ -146,31 +146,38 @@ def _p(text: str) -> str:
     return f"<p>{_e(text)}</p>" if text else ""
 
 
-def _deeper(run_id: str) -> str:
-    """Depth is offered, never required."""
+def _deeper(run_id: str, step: str = "", here: str = "") -> str:
+    """Navigation at the foot of a page — one of two kinds, never a grid.
+
+    THE GRID IS GONE (§16). Every page used to end with the same eight equal
+    links: X-Ray, full story, Intelligence, executive brief, Presentation,
+    evidence and sources, why this reading exists, full analysis. A reader who
+    has just finished a page does not want a sitemap, and eight equal doors is
+    what a sitemap is.
+
+    On a PRIMARY page (`step` names one of the six), this is the sequential
+    nav: Back, "Step X of 6", and one forward link carrying the next step's
+    promise. On a SECONDARY page it is a way back into the story plus the
+    other secondary surfaces — which is the correct shape there, because a
+    reader who has drilled into the evidence drawer has left the story and
+    needs to be able to rejoin it.
+
+    Nothing was removed from the product. `flow.SECONDARY` still names every
+    surface the grid named, and each is linked from inside the step that
+    raises the question it answers.
+    """
+    from intent_engine.founder_brief import flow
+    if step and flow.step_for(step) is not None:
+        return flow.nav(run_id, step)
     rid = _e(run_id)
-    # `Presentation` stays reachable: /slides is a working layer and dropping
-    # its only link orphaned it. Depth is offered, never required.
-    return (
-        '<nav class="deeper" aria-label="More depth">'
-        # THE X-RAY LEADS. It is the decision view, and for three batches it
-        # was reachable only at /demo-dossiers/<company>/xray -- a route no
-        # run links to and no customer can guess. A renderer with no link
-        # into it is not a feature of the product, it is a feature of the
-        # codebase.
-        f'<a href="/runs/{rid}/xray">Executive X-Ray</a>'
-        f'<a href="/runs/{rid}/story">The full story</a>'
-        f'<a href="/runs/{rid}/dashboard">Intelligence</a>'
-        f'<a href="/runs/{rid}/brief">Executive brief</a>'
-        f'<a href="/runs/{rid}/slides">Presentation</a>'
-        f'<a href="/runs/{rid}/sources">Evidence and sources</a>'
-        # D30. The provenance drawer -- author, host, subject, independence,
-        # relevance, why a source was set aside -- existed in full and was
-        # reachable only at /demo-dossiers/<company>/evidence. A run offered
-        # no way into it.
-        f'<a href="/runs/{rid}/evidence">Why this reading exists</a>'
-        f'<a href="/runs/{rid}/full">Full analysis</a>'
-        "</nav>")
+    links = [f'<a href="/runs/{rid}{flow.STEPS[0].suffix}">'
+             f'← Back to the analysis</a>']
+    for key, (label, _why) in flow.SECONDARY.items():
+        if key == here:
+            continue                    # a page does not link to itself
+        links.append(f'<a href="/runs/{rid}/{_e(key)}">{_e(label)}</a>')
+    return (f'{flow.FLOW_CSS}<nav class="aside" aria-label="Other views">'
+            f'<p class="lab">Other views</p>{"".join(links)}</nav>')
 
 
 # ===========================================================================

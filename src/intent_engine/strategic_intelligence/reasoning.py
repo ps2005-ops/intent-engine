@@ -579,8 +579,27 @@ def _build_thesis(company_name, hypotheses, blind_spots, observations=(),
             verified=verified)
         if isinstance(economic_history, dict) and economic_history:
             _withheld.economic_history = dict(economic_history)
-        return {"view": f"What {subject} has published is not enough to "
-                        f"read a strategy from, so none is put forward here.",
+        # THIS SENTENCE MAY DESCRIBE THIS PASS. IT MAY NOT DESCRIBE THE
+        # PRODUCT.
+        #
+        # It used to read "What X has published is not enough to read a
+        # strategy from, so none is put forward here." Both halves were
+        # wrong. The first is a claim about the company's disclosure when
+        # what actually happened is that the curated pattern library matched
+        # no transition -- a fact about a twelve-entry library, not about a
+        # public company's filings. The second became false outright once
+        # `executive.strategic_read` began composing a bounded read for every
+        # identified operating company: a strategy IS put forward, three
+        # clicks of this same product away.
+        #
+        # Gating the library by business model made this MORE frequent, not
+        # less: Cloudflare stopped being handed an industrial capacity
+        # mechanism, and a clean no-match is the correct outcome. So the
+        # sentence now says what this stage did and stops there. The strategic
+        # reading is elsewhere, and this sentence no longer denies it.
+        return {"view": f"No curated transition pattern matched {subject} in "
+                        f"this pass, so the reading below is not built from "
+                        f"one.",
                 "transition": "", "tension": "", "why_care": "",
                 "view_withheld": True,
                 "decision": _withheld.as_dict()}

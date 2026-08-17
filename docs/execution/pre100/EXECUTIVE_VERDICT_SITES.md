@@ -39,6 +39,13 @@ must not be collapsed into one boolean:
 | `webapp/app.py::_story_page` | RENDERING | `founder_brief/layers.py` `if not k:` (line ~810) | **NOT MIGRATED — D26**, gated on `brief.key_insight`, same shape as D25 |
 | `webapp/app.py::_intelligence_page` | RENDERING | `founder_brief/layers.py` `if not k:` | **NOT MIGRATED — D26** (measured live: does not deny) |
 | `webapp/app.py::_run_evidence` | RENDERING | `_evidence_screen` — independence/relevance as the bridge published them | JUSTIFIED — states why each SOURCE counts, never whether a reading exists; it deliberately does not re-decide independence, because two opinions about one document is how the drawer and the count start disagreeing |
+| `executive/strategic_read.py::compose` | CANONICAL_READ | business-model classification + published record + this run's evidence | **CANONICAL — v5.** The contract answers *does a reading exist*; this answers *what is it*. Nothing else composes a strategic read, and every step below projects this one object |
+| `webapp/app.py::_intro_page` (step 1) | RENDERING | `_strategic_read` | MIGRATED (v5) — the hero is the bounded read; the refusal that used to sit here is gone |
+| `webapp/app.py::_history_page` (step 5) | RENDERING | `executive/history_rewind.py` vintage state | JUSTIFIED — decides whether a DATE can be replayed, never whether a reading exists; the three states are about archive depth and are kept distinct from the read's standing |
+| `webapp/app.py::_connect_page` (step 6) | RENDERING | `_strategic_read` (metric gaps only) | MIGRATED (v5) — states which magnitudes are unmeasured; asserts no reading of its own |
+| `webapp/app.py::_answer_page` | ROUTING | `_founder_brief_page` → contract | inherits — the scrollable narrative, formerly the default route |
+| `founder_brief/steps.py::render_story` (step 4) | RENDERING | `_strategic_read` | MIGRATED (v5) — replaced a template whose "business story" section rendered the single word "company" |
+| `product_eval/self_correction.py::correct` | AUDIT | the read's own structure | JUSTIFIED — may remove an unsupported element or supply a missing structural one; it may never add a claim, so it cannot change whether a reading exists |
 
 ## Sweep terms
 

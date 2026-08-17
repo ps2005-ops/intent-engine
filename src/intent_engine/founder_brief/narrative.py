@@ -357,9 +357,24 @@ def _excerpt(obs: dict) -> str:
         if flat and not is_filing_furniture(flat):
             text = flat
             break
+    # A CITATION ENDS WHERE A SENTENCE ENDS.
+    #
+    # The word budget used to cut mid-clause and append "…", so a reader
+    # scanning the evidence met a column of fragments -- and the same
+    # fragment, promoted, was the first line of the whole product. Cutting at
+    # a sentence boundary keeps the quotation a quotation. The word cut
+    # survives only for a passage with no sentence end inside the budget at
+    # all, which is a genuine elision and reads as one.
     words = text.split()
     if len(words) > _EXCERPT_WORDS:
-        text = " ".join(words[:_EXCERPT_WORDS]).rstrip(",;:.") + "…"
+        budget = len(" ".join(words[:_EXCERPT_WORDS]))
+        kept = ""
+        for match in re.finditer(r"[^.!?]*[.!?]", text):
+            candidate = text[:match.end()].strip()
+            if len(candidate) > budget:
+                break
+            kept = candidate
+        text = kept or (" ".join(words[:_EXCERPT_WORDS]).rstrip(",;:.") + "…")
     return text
 
 

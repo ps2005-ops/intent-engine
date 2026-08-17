@@ -73,7 +73,8 @@ def _served(tmp_path):
     from tests.test_strategic_intelligence import _strategic_webapp_run
     app, client, run_id = _strategic_webapp_run(tmp_path)
     out = {}
-    for label, path in (("narrative", ""), ("brief", "/brief"),
+    for label, path in (("narrative", "/answer"),
+                        ("brief", "/brief"),
                         ("full", "/full")):
         _, _, body = client.request("GET", f"/runs/{run_id}{path}")
         out[label] = body
@@ -142,7 +143,9 @@ def test_no_deep_surface_reaches_its_own_conclusion(tmp_path):
     app, client, run_id = _strategic_webapp_run(tmp_path)
     report = app._real_result(run_id)["strategic_report"]
     decision = decision_of(report)
-    for path in ("", "/brief", "/full"):
+    # "" IS NO LONGER A PAGE: the default route redirects into step 1 of the
+    # six-step story. The surfaces under test are the same three documents.
+    for path in ("/intro", "/brief", "/full"):
         _, _, body = client.request("GET", f"/runs/{run_id}{path}")
         text = _text(body)
         withholding = "cleared the evidence bar" in text or \
@@ -160,7 +163,9 @@ def test_the_recommendation_is_the_same_on_every_surface(tmp_path):
     if not decision.recommended_next_move:
         pytest.skip("this run recommends no move")
     stem = decision.recommended_next_move[:40]
-    for path in ("", "/brief", "/full"):
+    # "" IS NO LONGER A PAGE: the default route redirects into step 1 of the
+    # six-step story. The surfaces under test are the same three documents.
+    for path in ("/intro", "/brief", "/full"):
         _, _, body = client.request("GET", f"/runs/{run_id}{path}")
         assert stem in _text(body), path
 
@@ -212,6 +217,11 @@ def test_the_brief_does_not_restate_the_narrative(tmp_path):
     # the answer -- that is what makes the memo readable on its own.
     below = dossier_body.split('id="operating_model"')[-1]
     below = below.split('<nav class="deeper"')[0]
+    # NAVIGATION IS CHROME, NOT ANALYSIS. The secondary nav is deliberately
+    # identical on every surface that carries it -- that is what makes it
+    # navigable -- so comparing it against itself proves nothing and fails
+    # for the one reason this test does not care about.
+    below = re.sub(r"(?s)<nav\b.*?</nav>", " ", below)
     # The approval notice is a CONSENT notice, not analysis. It belongs
     # wherever artefacts are offered, on every surface that offers them.
     echoed = [ln for ln in _text(below).splitlines()
@@ -311,7 +321,15 @@ def test_no_internal_vocabulary_or_taxonomy_in_either_document(tmp_path):
                 assert source_class not in low, (label, source_class)
         for state in (DECISION_READY, INVESTIGATION_REQUIRED, WITHHELD):
             assert state not in text, (label, state)
-        assert "→" not in text, label
+        # AN ARROW IS INTERNAL NOTATION IN PROSE AND AN AFFORDANCE IN A
+        # CONTROL. This forbids "observation → hypothesis → decision" reaching
+        # a reader, which is right; it must not forbid the "Next →" button,
+        # which is the only way through the six-step story. So the navigation
+        # is excluded and the document text is checked exactly as before.
+        prose = re.sub(r"(?s)<nav\b.*?</nav>", " ", body)
+        prose = re.sub(r"Next →|← Back|← Leave|← Previous|Next ⟶", " ",
+                       _text(prose))
+        assert "→" not in prose, label
         assert not re.search(r"qualifying signal", low), label
 
 

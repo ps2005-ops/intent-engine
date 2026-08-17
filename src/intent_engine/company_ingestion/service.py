@@ -46,6 +46,24 @@ from intent_engine.founder_intelligence.records import (
 CONSENT_VERSION = "v1.1-source-approval"
 
 
+def _patterns_for_company(company_name: str, domain: str = ""):
+    """The pattern library this company's business model can support.
+
+    Defensive by construction: a classification that cannot be resolved
+    returns the whole library, so a profile lookup failing degrades to
+    today's behaviour rather than to an empty analysis.
+    """
+    from intent_engine.strategic_intelligence.patterns import (PATTERN_LIBRARY,
+                                                               patterns_for)
+    try:
+        from intent_engine.executive.company_profile import profile_for
+        model = profile_for(name=company_name,
+                            domain=domain).business_model_class
+    except Exception:                                       # noqa: BLE001
+        return list(PATTERN_LIBRARY)
+    return patterns_for(model)
+
+
 class CompanyIngestionService:
     def __init__(self, path=DEFAULT_CI_PATH, *, transport=None,
                  resolver=None, analyst_client=None, analyst_cache=None):
@@ -1125,6 +1143,20 @@ class CompanyIngestionService:
         report = build_strategic_report(
             company_name=company_name, observations=observations,
             previous_model=previous_model,
+            # THE PATTERN LIBRARY, GATED BY WHAT KIND OF BUSINESS THIS IS.
+            #
+            # Without this the library offers every reading to every company
+            # and the signals decide. Signals record what a company's pages
+            # TALK ABOUT, which is why Cloudflare -- whose 10-K discusses
+            # network capacity and names large customers -- was handed the
+            # capacity-ahead-of-demand reading and told a CEO about
+            # "take-or-pay terms" and "replacing ageing lines".
+            #
+            # An unclassified company still gets the whole library: see
+            # `patterns_for`. Withholding readings from a company we could not
+            # classify trades a wrong answer for no answer, and no answer is
+            # the failure this product was reopened to fix.
+            patterns=_patterns_for_company(company_name),
             # WHAT THE SEARCH DID, carried to the surface a reader sees. The
             # brief rendered "Another registrant's filing - none" as a bare
             # zero because this never crossed; only the provenance drawer had
