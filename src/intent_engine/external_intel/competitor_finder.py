@@ -343,6 +343,52 @@ def _relationship(sentence: str) -> str:
     return DIRECT_COMPETITOR
 
 
+#: A sentence that is doing something, rather than labelling a section. Every
+#: filing heading is a capitalised noun phrase with no verb in it, which is
+#: exactly why three rounds of word-level stoplists could not stop them:
+#: "Competitive Landscape", "Human Capital Resources" and "Item 1A. Risk
+#: Factors" are not made of unusual words, they are made of no verbs.
+_HAS_A_VERB = re.compile(
+    r"\b(?:is|are|was|were|be|been|has|have|had|do|does|did|include|"
+    r"includes|included|compete|competes|competing|competed|offer|offers|"
+    r"provide|provides|sell|sells|serve|serves|face|faces|may|can|could|"
+    r"would|will|expect|expects|believe|believes|consider|considers|"
+    r"remain|remains|continue|continues)\b", re.I)
+
+#: An explicit statement that this is a market contest, in the candidate's own
+#: sentence. A heading three lines above one of these is not covered by it.
+_COMPETITION_IN_SENTENCE = re.compile(
+    r"\bcompet(?:e|es|ing|ed|itor|itors|itive)\b"
+    r"|\balternatives?\s+(?:to|include)\b"
+    r"|\brivals?\b|\bin[- ]house\b|\bsubstitutes?\b", re.I)
+
+
+def names_a_contest(sentence: str) -> bool:
+    """Is this a SENTENCE ABOUT COMPETING, rather than a heading?
+
+    THE THIRD LIVE FABRICATION IS WHAT FORCED THIS. Two rounds of word-level
+    filtering were each defeated within one deploy:
+
+        run 1: "Authorization Management Program, Cloudflare Workers, FedRAMP"
+        run 2: "Federal Risk, Intuitive User Experience, Online Platforms"
+        run 3: "Competitive Landscape, Human Capital Resources, SaaS"
+
+    Every entry in round three is a heading out of a 10-K. No stoplist of
+    words can separate a heading from a name, because headings are built from
+    ordinary business vocabulary -- which is what a stoplist is made of too.
+    What separates them is GRAMMAR: a heading has no verb, and it does not
+    itself say that anyone is competing.
+
+    So a candidate is kept only when its own sentence both says that a
+    contest exists and is a sentence at all. This is narrower than the
+    stoplists it replaces and it cannot be defeated by a heading nobody has
+    seen yet.
+    """
+    flat = " ".join(str(sentence or "").split())
+    return bool(_COMPETITION_IN_SENTENCE.search(flat)
+                and _HAS_A_VERB.search(flat))
+
+
 def _overlap_sentence(passage: str, name: str) -> str:
     """The sentence that actually makes the claim, so a reader can check it."""
     for sentence in _sentences(passage):
@@ -379,7 +425,7 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                 if verdict.relevance in (BARE_MENTION, "IRRELEVANT", "STALE"):
                     continue
                 overlap = _overlap_sentence(passage, name)
-                if not overlap:
+                if not overlap or not names_a_contest(overlap):
                     continue
                 relationship = _relationship(overlap)
                 existing = ranked.get(name.lower())

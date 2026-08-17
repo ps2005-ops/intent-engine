@@ -480,3 +480,38 @@ def test_a_name_never_spans_a_sentence_boundary():
         subject="Cloudflare, Inc.")
     assert "Alphabet Inc" in names, names
     assert not any("The Federal" in n for n in names), names
+
+
+@pytest.mark.parametrize("heading", [
+    "Competitive Landscape",
+    "Human Capital Resources",
+    "Item 1A. Risk Factors",
+    "Products and Services",
+    "Intellectual Property",
+])
+def test_a_filing_heading_is_not_a_sentence_about_competing(heading):
+    """THE THIRD LIVE FABRICATION, and the reason the rule became grammatical.
+
+    Two rounds of word-level filtering were each defeated within one deploy:
+
+        run 1: "Authorization Management Program, Cloudflare Workers, FedRAMP"
+        run 2: "Federal Risk, Intuitive User Experience, Online Platforms"
+        run 3: "Competitive Landscape, Human Capital Resources, SaaS"
+
+    Round three is entirely 10-K headings. No stoplist separates a heading
+    from a name, because headings are built from ordinary business words and
+    so is the stoplist. Grammar separates them: a heading has no verb and
+    does not itself say anyone is competing.
+    """
+    from intent_engine.external_intel.competitor_finder import names_a_contest
+    assert not names_a_contest(heading)
+
+
+@pytest.mark.parametrize("sentence", [
+    "We compete with Akamai Technologies and other providers.",
+    "Our principal competitors include Databricks Inc and Snowflake Inc.",
+    "Customers may build these capabilities in-house rather than buy them.",
+])
+def test_a_real_competition_sentence_still_counts(sentence):
+    from intent_engine.external_intel.competitor_finder import names_a_contest
+    assert names_a_contest(sentence)
