@@ -1051,7 +1051,19 @@ def _position(name, profile, selection, rivals_read=()) -> str:
     below it listed the rivals Cloudflare's own filing names. One page, two
     competitor sets, and the wrong one first.
     """
-    rivals = [c.name for c in (rivals_read or ())][:3]
+    # RUNG 9 IS NOT A DIRECT CONTEST. STRUCTURAL_PEER is defined as "same
+    # business model; not a stated rival" — it is the ladder's honest bottom
+    # rung, reached when nothing better was found. Letting it fill this
+    # sentence told a reader it was the company's most direct competition.
+    #
+    # MEASURED across Batch A: Meta's opening named 37signals LLC and Exxon's
+    # named Agnico Eagle Mines Limited — a project-management tool and a gold
+    # miner, both manifest sector-mates promoted into "contested most
+    # directly by". A rung the ladder itself calls weakest may not be
+    # rendered as the strongest claim on the page.
+    ranked = [c for c in (rivals_read or ())
+              if getattr(c, "rung", "") != "STRUCTURAL_PEER"]
+    rivals = [c.name for c in ranked][:3]
     # "CONTESTED MOST DIRECTLY BY" IS A STRONG CLAIM AND NEEDS A STRONG BASIS.
     #
     # With no ladder rows this fell through to the manifest's structural
