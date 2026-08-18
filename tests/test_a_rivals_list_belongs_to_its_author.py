@@ -49,8 +49,13 @@ def _capture(monkeypatch):
     """Record exactly which documents reach the extractor."""
     seen = {}
 
-    def fake_find(documents, *, subject, limit=4):
+    # **kwargs ON PURPOSE. `_named_rivals` swallows every exception, so a
+    # double whose signature has drifted from the producer's returns an
+    # empty list and this test reports the OPPOSITE defect — no documents
+    # reached the extractor — with no sign of the TypeError that caused it.
+    def fake_find(documents, *, subject, limit=4, **kwargs):
         seen["documents"] = list(documents)
+        seen["kwargs"] = kwargs
         return ()
 
     import intent_engine.external_intel.competitor_finder as CF

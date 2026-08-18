@@ -203,6 +203,28 @@ _MODEL_ALTERNATIVES = {
         ("Software removing the task from the route", AI_REPLACEMENT,
          DISPLACEMENT),
     ),
+    # THE THREE CLASSES ADDED LAST CYCLE HAD NO ENTRY HERE, so Meta's whole
+    # competitive ground was one row -- the AI question -- once the false
+    # names were removed. A class that changes the introduction and not the
+    # alternatives is wired into the description and not into the analysis.
+    "ADVERTISING_PLATFORM": (
+        ("The advertiser spending the budget on its own channels",
+         BUILD_IN_HOUSE, INTERNAL_BUILD),
+        ("Another surface holding the same attention hour", SUBSTITUTE,
+         DISPLACEMENT),
+    ),
+    "MULTI_ENGINE_PLATFORM": (
+        ("The customer going direct to the engine's own supplier",
+         CHANNEL_SHIFT, DISPLACEMENT),
+        ("A specialist doing one engine better than the bundle", ADJACENT,
+         WORKFLOW_SUBSTITUTE),
+    ),
+    "SCALE_RETAIL": (
+        ("The shopper buying the same basket somewhere cheaper", SUBSTITUTE,
+         WORKFLOW_SUBSTITUTE),
+        ("The supplier selling to the shopper directly", CHANNEL_SHIFT,
+         DISPLACEMENT),
+    ),
 }
 
 #: Every business model faces automation now. Carried separately so that a

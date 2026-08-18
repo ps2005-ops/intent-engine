@@ -791,7 +791,7 @@ def _ground(name, profile, documents):
         from intent_engine.executive import competitive_ground
         return competitive_ground.build(
             name, profile, documents,
-            named_firms=_named_rivals(name, documents))
+            named_firms=_named_rivals(name, documents, profile=profile))
     except Exception:                                       # noqa: BLE001
         return None
 
@@ -1391,7 +1391,7 @@ def _level4_legacy(name, profile, selection, documents=()
     return tuple(out[:5])
 
 
-def _named_rivals(company: str, documents) -> Tuple[dict, ...]:
+def _named_rivals(company: str, documents, profile=None) -> Tuple[dict, ...]:
     """Rivals this company named, from evidence the run already holds.
 
     Never raises: a competitive read that disappears because an extractor
@@ -1421,7 +1421,13 @@ def _named_rivals(company: str, documents) -> Tuple[dict, ...]:
     try:
         from intent_engine.external_intel.competitor_finder import (
             find_competitors)
-        found = find_competitors(own, subject=company, limit=4)
+        # §7. THE BUSINESS MODEL DECIDES WHETHER A LENDER IS A RIVAL. It is
+        # passed rather than inferred here because the qualification asks
+        # what the SUBJECT sells, and only the profile knows.
+        found = find_competitors(
+            own, subject=company, limit=4,
+            business_model=str(getattr(profile, "business_model_class", "")
+                               or ""))
     except Exception:                                       # noqa: BLE001
         return ()
     out = []

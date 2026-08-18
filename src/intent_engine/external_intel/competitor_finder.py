@@ -31,6 +31,10 @@ from __future__ import annotations
 import re
 from typing import Dict, Iterable, List, Optional, Sequence
 
+from intent_engine.executive.competitive_qualification import (
+    ADJACENT_THREAT_STATE, DIRECT_COMPETITOR, SUBSTITUTE_STATE, qualify,
+)
+
 from .competitor_contract import (
     ADJACENT_SUBSTITUTE, BARE_MENTION, CLAIM_RELEVANT, COMPETITIVE_CONTEXT,
     CONSULTING_ALTERNATIVE, DIRECT_COMPETITOR, INTERNAL_BUILD,
@@ -91,6 +95,11 @@ _TRADE_WORD = ("technologies", "systems", "software", "labs", "group",
                "industries", "enterprises", "communications", "services")
 
 _CORPORATE = _LEGAL_FORM + _TRADE_WORD
+
+#: Strongest competitive claim first. An adjacent threat is real and is not
+#: what contests the company most directly, so it sorts behind both.
+_STATE_RANK = {DIRECT_COMPETITOR: 0, SUBSTITUTE_STATE: 1,
+               ADJACENT_THREAT_STATE: 2}
 
 #: Ordinary English that starts a noun phrase. A trade word behind one of
 #: these is a category, not a firm. Measured live: "Federal Risk",
@@ -408,13 +417,27 @@ def _overlap_sentence(passage: str, name: str) -> str:
 
 
 def find_competitors(documents, *, subject: str = "", today: str = "",
-                     limit: int = 5) -> List[Competitor]:
+                     limit: int = 5, refusals: Optional[List] = None,
+                     business_model: str = "") -> List[Competitor]:
     """Competitors this run's own evidence supports, best first.
 
     `documents` are mappings with `text`, `observation_id`, `source_title`,
     `source_class` and `date` — the shape the ingestion store already emits.
+
+    Pass a list as `refusals` to receive every candidate that was NOT a
+    competitive alternative, each carrying the section it belongs under. §6:
+    the system should become smarter, not quieter.
     """
     ranked: Dict[str, Competitor] = {}
+    #: §6. WHAT WAS NOT A RIVAL, KEPT. An index, a payer programme and a
+    #: captive lender's competitors are real facts about the company. The
+    #: answer to publishing them in the wrong section is the right section,
+    #: not silence — `qualified_candidates` is how a surface reaches them.
+    refused: List = []
+    #: The order the SUBJECT names them in, which is the subject's own
+    #: ranking of its markets. Recorded at first sight because the ranking
+    #: below needs it and a dict of results has already lost it.
+    first_seen: Dict[str, int] = {}
     for document in documents or ():
         if not isinstance(document, dict):
             continue
@@ -425,6 +448,7 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
             continue
         for passage in competition_passages(text):
             for name in candidate_names(passage, subject=subject):
+                first_seen.setdefault(name.lower(), len(first_seen))
                 mention = Mention(
                     name=name, passage=passage,
                     source_title=str(document.get("source_title") or ""),
@@ -435,9 +459,34 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                 if verdict.relevance in (BARE_MENTION, "IRRELEVANT", "STALE"):
                     continue
                 overlap = _overlap_sentence(passage, name)
-                if not overlap or not names_a_contest(overlap):
+                if not overlap:
                     continue
-                relationship = _relationship(overlap)
+                # §3. THE CLAUSE THAT NAMES IT MUST BE THE CLAUSE THAT MAKES
+                # THE CLAIM, AND THE NAME MUST BE AN ECONOMIC ALTERNATIVE.
+                #
+                # `names_a_contest` reads the whole retrieved span, and a
+                # filing "sentence" is routinely a list: Meta's was 2,262
+                # characters and fifteen bullets, with "S&P" in the bullet
+                # about stock indices and "competitors" five bullets away.
+                # Asking the span whether a contest exists answered yes and
+                # said nothing about S&P. The qualification reads the clause
+                # the name is actually in.
+                qualification = qualify(
+                    candidate=name, evidence=overlap, subject=subject,
+                    business_model=business_model)
+                clause = qualification.evidence_basis or overlap
+                # BOTH TESTS, AND BOTH MUST PASS. The clause has to be a
+                # sentence that says a contest exists (`names_a_contest`,
+                # which is what keeps filing headings out), and the entity
+                # has to be something a customer could choose (the
+                # qualification, which is what keeps an index and a payer
+                # programme out). Each catches what the other cannot.
+                if not qualification.may_contest:
+                    refused.append(qualification)
+                    continue
+                if not names_a_contest(clause):
+                    continue
+                relationship = _relationship(clause)
                 existing = ranked.get(name.lower())
                 if existing and existing.relevance == CLAIM_RELEVANT \
                         and verdict.relevance != CLAIM_RELEVANT:
@@ -445,7 +494,19 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                 try:
                     ranked[name.lower()] = Competitor(
                         name=name, relationship=relationship,
-                        overlap=overlap[:400],
+                        # THE EXCERPT IS THE CLAUSE, NOT THE BLOB. Quoting
+                        # the first 400 characters of a fifteen-bullet list
+                        # put a sentence about income tax under a competitor
+                        # called S&P — an excerpt that establishes nothing
+                        # for the reader who tries to check it.
+                        overlap=clause[:400],
+                        qualification_state=qualification.qualification_state,
+                        entity_type=qualification.entity_type,
+                        contest_owner=qualification.contest_owner,
+                        focal_need=qualification.focal_need,
+                        substitution_mechanism=(
+                            qualification.substitution_mechanism),
+                        routed_section=qualification.section,
                         evidence_ids=(str(evidence_id),),
                         source_titles=(str(document.get("source_title")
                                            or ""),),
@@ -464,11 +525,25 @@ def find_competitors(documents, *, subject: str = "", today: str = "",
                             else "Based on a single retrieved source."))
                 except CompetitorRejected:
                     continue
+    if refusals is not None:
+        refusals.extend(refused)
     internal = _internal_build(documents, today=today)
     if internal is not None:
         ranked.setdefault("__internal_build__", internal)
+    # §3 OF THE MEASURED CAUSES: SELECTION WAS ALPHABETICAL.
+    #
+    # Caterpillar's filing names forty-three firms — Komatsu, Deere, Cummins,
+    # Liebherr, Sandvik, Volvo CE — and this returned Alstom, America
+    # Leasing, BNP Paribas and Baker Hughes, because it sorted by name and
+    # took four. A company's own order of mention is its own ranking of its
+    # markets, and it was being thrown away.
+    order = {name: i for i, name in enumerate(first_seen)}
     out = sorted(ranked.values(),
-                 key=lambda c: (c.relevance != CLAIM_RELEVANT, c.name))
+                 key=lambda c: (not c.may_contest,
+                                _STATE_RANK.get(c.qualification_state, 1),
+                                c.relevance != CLAIM_RELEVANT,
+                                order.get(c.name.lower(), 10_000),
+                                c.name.lower()))
     return out[:limit]
 
 
