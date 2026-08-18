@@ -122,3 +122,60 @@ and was exercised; it is retrieval that is missing, not measurement.
 
 `NEXT_NOT_RUN_COMPANY` Walmart (retrieval-blocked in the wave) ·
 `NEXT_NOT_RUN_BATCH` Batch A rescore once SEC clears, then Batch B
+
+---
+
+## What the scoring pass found: `TEMPLATE_COLLAPSE`, SEV2, open
+
+Three companies produced a readable executive surface, so the ten board
+questions (§29) were asked of all three through the product's own Q&A route.
+
+**Nine of ten answers are byte-identical across Meta, Caterpillar and Exxon**
+once the company name is masked and the page chrome after the answer is
+stripped. Only *"What would prove this wrong?"* differs.
+
+The shared answer is an industrial capacity thesis:
+
+> Yes — on balance the evidence supports that **committing capital to
+> capacity ahead of uncertain demand** …
+
+> **Utilisation, order books and take-or-pay terms are not public.**
+
+Meta is an advertising auction and Exxon is a commodity producer. Neither has
+an order book, and neither is deciding how much manufacturing capacity to
+commit. The suggested follow-ups collapse the same way — all three companies
+are offered *"How is this transition similar to Memory and sensor fabrication
+cycles?"*.
+
+**This is a selection defect, not a prose defect**, and the same shape this
+codebase has recorded before: the central decision question is collapsing to
+one template across business-model classes, and every downstream answer
+restates it. `business_model_class` is the field that should separate them
+and evidently does not reach this producer.
+
+### Measured, and deliberately not repaired here
+
+§33 says collect the distribution before clustering, and three companies is
+not a distribution — a repair aimed at three would be aimed at whichever
+template these three happen to share. It needs the paced Batch-A rescore
+first, which is also what unblocks the twenty-dimension mean.
+
+`COMPANY_SPECIFICITY` (share of executive sentences carrying a
+company-specific token or figure): Meta **0.77**, Caterpillar **0.27**, Exxon
+**0.17**. The two low ones are consistent with the collapse above rather than
+independent of it.
+
+### A second finding inside the first
+
+*"Who's the real competitor?"* answers **"No competitor has been selected for
+this company from the evidence"** — on the same Caterpillar run whose
+introduction reads *"contested directly by CNH Industrial N.V and Deere
+Construction"*. That is a cross-surface contradiction of the same class as
+the failed-run one closed this session.
+
+Narrowed but NOT concluded: `_route_answer` does fall back to
+`_from_read("competitor", read)`, the call site does pass the read, and
+`puts_a_strategy_forward` is true for a bounded read — so the remaining
+candidates are `level4_competition` being empty on the read instance Q&A
+builds, or `_ground` having thrown on that request and been swallowed. It is
+recorded at this depth rather than guessed at.
