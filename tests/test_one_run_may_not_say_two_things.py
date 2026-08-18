@@ -106,6 +106,11 @@ def test_every_step_page_goes_through_the_shared_guard():
     four; putting it in the guard is worth nothing if a page stops calling
     the guard."""
     source = inspect.getsource(APP.WebApp)
-    for page in ("_intro_page", "_history_page", "_answer_page"):
+    # ALL SIX STEPS BY NAME. The first version of this test named three,
+    # and `/story` — the one page that had kept its own ownership check
+    # instead of calling the guard — was not among them. It rendered a full
+    # narrative for a run with no evidence while the other five refused.
+    for page in ("_intro_page", "_history_page", "_answer_page",
+                 "_story_page", "_slides_page", "_connect_page"):
         body = source.split(f"def {page}(")[1].split("\n    def ")[0]
         assert "_step_guard" in body, f"{page} must go through the guard"

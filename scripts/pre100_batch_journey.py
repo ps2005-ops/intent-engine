@@ -241,6 +241,13 @@ def run_company(name: str, cik: str = "", ticker: str = "",
         texts[step] = body
         with open(os.path.join(company_dir, f"{step}.txt"), "w") as fh:
             fh.write(body)
+        # THE RAW PAGE TOO, for the full analysis. `text_of` flattens an
+        # aria-label and a chart's text alternative into the visible stream,
+        # so a sentence that appears three times in the extract may appear
+        # once on the screen. A duplication claim needs the markup.
+        if step == "full":
+            with open(os.path.join(company_dir, "full.html"), "w") as fh:
+                fh.write(raw)
         pages[step] = {"status": status, "url": surl, "chars": len(body),
                        "absence": sorted({a for a in ABSENCE
                                           if a in body.lower()})}

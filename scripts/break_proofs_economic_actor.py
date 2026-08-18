@@ -234,6 +234,18 @@ PROOFS = [
      "tests/test_one_run_may_not_say_two_things.py::"
      "test_a_failed_run_that_still_composed_a_report_is_not_refused",
      "is None"),
+    ("G3. step 4 keeps its own ownership check and skips the shared guard",
+     ROOT / "src/intent_engine/webapp/app.py",
+     "        blocked = self._step_guard(session, run_id)\n"
+     "        if blocked is not None:\n"
+     "            return blocked\n"
+     "        from intent_engine.founder_brief import layers as fl",
+     "        if not self._owned(session, run_id):\n"
+     "            return self._error_page(404, \"no such run\")\n"
+     "        from intent_engine.founder_brief import layers as fl",
+     "tests/test_one_run_may_not_say_two_things.py::"
+     "test_every_step_page_goes_through_the_shared_guard",
+     "_story_page"),
 ]
 
 

@@ -4803,8 +4803,15 @@ class WebApp:
                                      body, session, session.get("csrf", "")))
 
     def _story_page(self, session, run_id):
-        if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+        # STEP 4 WAS THE ONE THAT KEPT ITS OWN OWNERSHIP CHECK and therefore
+        # never got the readiness one. Measured live on c719979, Meta, run
+        # 01M09Z896GA620CSBXEA5847Q3: five of six steps correctly showed the
+        # failure page and `/story` rendered 5,241 characters of narrative
+        # for a run that retrieved nothing. A guard six pages share is worth
+        # nothing to the page that does not call it.
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
@@ -4959,8 +4966,12 @@ class WebApp:
             f'<p class="muted small">Suggested:</p>{suggested}</section>')
 
     def _slides_page(self, session, run_id):
-        if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+        # THE SHARED GUARD FIRST. This page had the failed-run check written
+        # into it, which is how four other steps came to be missing it; the
+        # check now lives in one place and this one calls it like the rest.
+        blocked = self._step_guard(session, run_id)
+        if blocked is not None:
+            return blocked
         # THE SAME GUARD `_run_page` HAS, WHICH THIS ROUTE NEVER GOT. A FAILED
         # run composed no report, and building a deck from one raised —
         # measured live on preview-v3 (Alphabet, https://abc.xyz, run
