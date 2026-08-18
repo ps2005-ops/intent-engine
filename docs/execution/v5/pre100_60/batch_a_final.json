@@ -7,9 +7,10 @@
     "source": "SEC EDGAR",
     "http": 429,
     "scope": "the preview's egress IP",
-    "evidence": "the same primary-document URLs with the same production User-Agent answered 200 from a laptop in the same minutes",
-    "affected": 6,
-    "retrieved": 2
+    "evidence": "the same primary-document URLs with the same production User-Agent answered 200 from a laptop in the same minutes; Meta failed inside the seven-company wave and succeeded on a single paced re-run twenty minutes later on the same deployed SHA",
+    "affected": 5,
+    "retrieved": 3,
+    "kind": "BURST_LIMIT_NOT_BAN"
   },
   "companies": [
     {
@@ -17,12 +18,12 @@
       "run_id": "01M09Z896GA620CSBXEA5847Q3",
       "seconds": 39,
       "auto_advanced": false,
-      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
-      "position_sentence": "",
-      "routed_relationships": "",
-      "business_model": "",
-      "scored": false,
-      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+      "retrieval": "OK",
+      "position_sentence": "contested less by a named firm than by the alternatives its customers already have: customers can substitute another surface holding the same attention hour and automation absorbing the task itself, and customers can internalise the work themselves \u2014 the advertiser spending the budget on its own channels",
+      "routed_relationships": "Market, index and capital-market context: S&P",
+      "business_model": "ADVERTISING_PLATFORM",
+      "scored": true,
+      "not_measured_reason": ""
     },
     {
       "company": "Amazon.com, Inc.",

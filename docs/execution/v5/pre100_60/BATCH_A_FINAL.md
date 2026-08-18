@@ -78,10 +78,13 @@ Two more defects were found by this pass and fixed:
 |---|---|---|
 | **Caterpillar** | **OK** | *"contested directly by CNH Industrial N.V and Deere Construction, and customers can substitute independent service and will-fit parts"* — and, in the Full Analysis, *"Customer financing and purchase enablement: America Leasing, Capital LLC, BNP Paribas Leasing Solutions"* |
 | **Exxon** | **OK** | Agnico Eagle gone; `COMMODITY_PRODUCER` correct |
-| Meta, Amazon, NVIDIA, JPMorgan, Walmart, Lilly | `BLOCKED_EXTERNAL` | SEC EDGAR answered **HTTP 429** to every source |
+| **Meta** | **OK** (re-run, paced) | S&P is **absent from the introduction** and appears once in the Full Analysis under *"Market, index and capital-market context: S&P"*; the model reads *"attention resold to advertisers: revenue is an auction price per impression"* |
+| Amazon, NVIDIA, JPMorgan, Walmart, Lilly | `BLOCKED_EXTERNAL` | SEC EDGAR answered **HTTP 429** to every source during the back-to-back wave |
 
 **Caterpillar is the decisive case**: it carries all three sub-defects, and
 all three are gone from the deployed page while the real rivals survive.
+**Meta closes the third target**, and closes it the way §6 asked — S&P is not
+suppressed, it is filed under capital-market context, where it is true.
 
 ## The block, and why it is not a product number
 
@@ -90,14 +93,21 @@ with the **same production User-Agent**, answered 200 from a laptop in the
 same minutes — so it is a shared cloud IP under sustained automated access,
 not a defect and not a demo-quota block.
 
-**This is the binding constraint on the 60-company programme**, not a
-nuisance: the gauntlet's own throughput is what trips the fair-access
-throttle. A 60-company run needs a retrieval cache or a backoff before it can
-be attempted live, or six of every eight companies will be unscoreable.
+**It is a BURST limit, not a ban.** Meta failed inside a seven-company wave
+and succeeded on a single paced re-run twenty minutes later, on the same
+deployed SHA. So the throttle is triggered by the gauntlet's own cadence —
+each analysis fetches three or four EDGAR documents and eight analyses
+back-to-back trip it — rather than by the product, the User-Agent or the
+demo quota.
+
+**This is the binding constraint on the 60-company programme.** The
+mitigation is pacing plus a retrieval cache keyed on (CIK, accession); a
+wave that runs companies back-to-back will keep returning six unscoreable
+companies in eight, and those zeros would be measuring the fetcher.
 
 ## Scoring
 
-`§14` forbids scoring a surface that was not read. Two of eight companies
+`§14` forbids scoring a surface that was not read. Three of eight companies
 produced a readable executive surface this pass, which is not enough to
 freeze a twenty-dimension Batch-A mean, so **no mean is reported**. The
 harness that collects the twenty dimensions and the ten board questions
@@ -107,8 +117,8 @@ and was exercised; it is retrieval that is missing, not measurement.
 ## Counts
 
 `SYSTEMIC_DEFECTS_FOUND` 4 · `FIXED` 4 · `REGRESSIONS` 0 ·
-`WRONG_COMPETITORS` 0 of 2 scoreable · `WRONG_ATTRIBUTIONS` 0 ·
+`WRONG_COMPETITORS` 0 of 3 scoreable · `WRONG_ATTRIBUTIONS` 0 ·
 `BREAK_PROOFS` 25/25 · `KNOWN_SEV1` 0 · `KNOWN_DEMO_BLOCKING_SEV2` 0
 
-`NEXT_NOT_RUN_COMPANY` Meta (retrieval-blocked) ·
+`NEXT_NOT_RUN_COMPANY` Walmart (retrieval-blocked in the wave) ·
 `NEXT_NOT_RUN_BATCH` Batch A rescore once SEC clears, then Batch B
