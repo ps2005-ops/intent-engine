@@ -4452,8 +4452,27 @@ class WebApp:
         """
         if not self._owned(session, run_id):
             return self._error_page(404, "no such run for this account")
-        if self._availability(run_id).get("in_flight"):
+        availability = self._availability(run_id)
+        if availability.get("in_flight"):
             return self._redirect(f"/runs/{run_id}/progress")
+        # ONE RUN MAY NOT SAY TWO THINGS.
+        #
+        # MEASURED LIVE on 4952649, Meta, run 01M09XM6BQDZAM2XJGE9D0K2W6: SEC
+        # EDGAR rate-limited the preview's egress, every source came back 429,
+        # and the run FAILED with no report. `/full` and `/slides` said so —
+        # they carry this check themselves — and `/intro`, `/story`,
+        # `/history` and `/connect` rendered a confident analysis anyway,
+        # including a business model ("recurring software subscription") read
+        # off the SIC code alone because the filing that would have corrected
+        # it was never retrieved.
+        #
+        # Six pages, one run, two irreconcilable answers, and the four that
+        # spoke confidently were the four a customer opens first. The check
+        # that `/slides` already had belongs to every step, which is what a
+        # SHARED guard is for.
+        if availability.get("state") == "FAILED" \
+                and not availability.get("has_report"):
+            return self._failed_run_page(session, run_id)
         return None
 
     def _answer_page(self, session, run_id):

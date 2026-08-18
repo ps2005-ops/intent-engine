@@ -165,7 +165,8 @@ def run_company(name: str, cik: str = "", ticker: str = "",
     os.makedirs(company_dir, exist_ok=True)
     out = {"company": name, "cik": cik, "ticker": ticker,
            "reliability": {"connection_reset": 0, "quota_block": False,
-                           "retry_required": 0, "manual_recovery": 0}}
+                           "retry_required": 0, "manual_recovery": 0},
+           "blocked_external": False, "blocked_sources": []}
 
     j.get("/")
     j.post("/demo", {})
@@ -218,6 +219,19 @@ def run_company(name: str, cik: str = "", ticker: str = "",
     out["landed_on"] = landed
     out["claimed_failure"] = saw_failure
     out["failure_text"] = failure_text
+    # §39/§40. A SOURCE THE PRODUCT COULD NOT REACH IS NOT A PRODUCT DEFECT.
+    #
+    # MEASURED on 4952649: SEC EDGAR answered HTTP 429 to the preview's
+    # egress for every company, while the same URLs with the same
+    # User-Agent answered 200 from a laptop. That is a shared cloud IP being
+    # throttled, and scoring it as a failed analysis would put an
+    # infrastructure limit into the product's quality numbers. It is
+    # recorded, loudly, and separately.
+    low = (failure_text or "").lower()
+    out["blocked_external"] = bool(
+        re.search(r"rate.?limit|http 429|429\b|temporarily unavailable", low))
+    out["blocked_sources"] = re.findall(
+        r"(SEC [A-Z0-9\-]+[^—]*?) — ([a-z ]+)\s*:", failure_text or "")[:6]
 
     # --- the six steps, captured whole ------------------------------------
     pages, texts = {}, {}
@@ -297,7 +311,8 @@ def main() -> int:
         results.append(row)
         print(json.dumps({k: v for k, v in row.items()
                           if k in ("run_id", "seconds", "auto_advanced",
-                                   "claimed_failure", "position_sentence",
+                                   "claimed_failure", "blocked_external",
+                                   "position_sentence",
                                    "model_sentence", "error", "reliability")},
                          indent=1)[:1400], flush=True)
         with open(os.path.join(outdir, "batch.json"), "w") as fh:

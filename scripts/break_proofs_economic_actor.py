@@ -216,6 +216,24 @@ PROOFS = [
      "    if True:\n        return []\n    by_section: dict = {}",
      f"{T}::test_the_full_analysis_renders_the_routed_relationships",
      "Medicare Part D"),
+    # --- ONE RUN MAY NOT SAY TWO THINGS ------------------------------------
+    ("G1. a failed run keeps rendering analysis on four of six steps",
+     ROOT / "src/intent_engine/webapp/app.py",
+     "        if availability.get(\"state\") == \"FAILED\" \\\n"
+     "                and not availability.get(\"has_report\"):",
+     "        if False:",
+     "tests/test_one_run_may_not_say_two_things.py::"
+     "test_a_failed_run_with_no_report_is_refused_on_every_step",
+     "failed"),
+
+    ("G2. the guard over-refuses a run that did compose a report",
+     ROOT / "src/intent_engine/webapp/app.py",
+     "        if availability.get(\"state\") == \"FAILED\" \\\n"
+     "                and not availability.get(\"has_report\"):",
+     "        if availability.get(\"state\") == \"FAILED\":",
+     "tests/test_one_run_may_not_say_two_things.py::"
+     "test_a_failed_run_that_still_composed_a_report_is_not_refused",
+     "is None"),
 ]
 
 
