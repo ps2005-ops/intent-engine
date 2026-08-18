@@ -72,3 +72,32 @@ def test_a_rival_with_no_rung_attribute_is_kept():
     sentence = _position("Testco", _Profile(), None,
                          (_Row("Realrival Inc.", "NAMED_BY_SUBJECT"),))
     assert "Realrival" in sentence
+
+
+# ===========================================================================
+# the seam that made the first attempt inert
+# ===========================================================================
+def test_the_read_carries_the_rung_from_the_ladder():
+    """PROVENANCE MUST SURVIVE THE PROJECTION.
+
+    The first version of this repair filtered on `getattr(c, "rung", "")` and
+    shipped completely inert: `_position` receives CompetitorRead, the rung
+    lived only on Rival, and the getattr default silently kept every row. The
+    deployed page was unchanged and the tests were green, because the tests
+    constructed rows that had the field.
+
+    So assert the FIELD EXISTS on the object the renderer actually sees.
+    """
+    from intent_engine.executive.strategic_read import CompetitorRead
+    assert "rung" in CompetitorRead.__dataclass_fields__
+
+
+def test_every_ladder_row_reaching_the_read_keeps_its_rung():
+    """The ladder -> read projection must not drop provenance."""
+    import inspect
+
+    from intent_engine.executive import strategic_read as SR
+    source = inspect.getsource(SR._from_ground)
+    assert "rung=rival.rung" in source, (
+        "_from_ground builds CompetitorRead without carrying the rung; the "
+        "rung-9 exclusion in _position becomes a no-op")

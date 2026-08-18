@@ -263,6 +263,14 @@ class CompetitorRead:
     counter_move: str
     signal_to_watch: str
     level: str = "L1"
+    #: WHERE THE CLAIM CAME FROM, carried from the ladder.
+    #
+    # This field did not exist, and its absence made a repair inert: the
+    # opening sentence tried to exclude rung 9 with `getattr(c, "rung", "")`
+    # and silently kept everything, because `_level4` returns CompetitorRead
+    # and the rung stopped at `Rival`. Provenance that dies at a projection
+    # boundary cannot govern how the claim is rendered.
+    rung: str = ""
 
     def as_dict(self) -> dict:
         return dataclasses.asdict(self)
@@ -1273,6 +1281,7 @@ def _from_ground(name, profile, selection, ground) -> Tuple[CompetitorRead, ...]
                    f"source. {_capitalise(rival.mechanism)}")
         out.append(CompetitorRead(
             name=rival.identity,
+            rung=rival.rung,
             why_a_rival=_sentence(why),
             exposure=_sentence(getattr(move, "impact", "")
                                or _capitalise(rival.why_it_matters)),
