@@ -110,13 +110,47 @@ paced one, so position in the wave does not predict the outcome. Three
 companies have ever retrieved; five have never retrieved in any position.
 **The correlation is with the company, not the cadence.**
 
-**This is the binding constraint on the 60-company programme**, and the next
-step is to find what separates Caterpillar and Exxon from Walmart and NVIDIA
-— the leading hypothesis is per-run request volume and document size, since
-`business_document()` makes an extra archive request per candidate and the
-companies that fail file the largest 10-Ks. That is a measurement, not a
-conclusion. A retrieval cache keyed on (CIK, accession) helps regardless,
-because it removes the repeat fetches entirely.
+**The size hypothesis is dead too.** Measured against EDGAR, bytes fetched
+per run:
+
+| company | live | candidates | total fetched |
+|---|---|---|---|
+| Caterpillar | **OK** | 4 | **13.74 MB** |
+| Exxon | **OK** | 4 | **11.58 MB** |
+| Meta | 1 of 3 | 4 | 5.73 MB |
+| Walmart | never | 4 | 9.53 MB |
+| Amazon | never | 4 | 5.56 MB |
+| Lilly | never | 4 | 5.24 MB |
+| NVIDIA | never | 4 | **4.59 MB** |
+| JPMorgan | never | **0** | — |
+
+The two companies that always retrieve fetch the **most** bytes; the one that
+never retrieves fetches the **fewest**. Request volume is identical at four
+candidates each. Neither cadence, nor volume, nor size explains it — and all
+eight URLs answer 200 from a laptop with the production User-Agent.
+
+### What does explain it, and it is in our code
+
+`fetch.py` classifies a 429 as **`retryable=True`** and then returns. Nothing
+re-attempts the URL. The flag is consumed at the webapp layer, which offers
+the **human** a retry button.
+
+So against an intermittent shared-IP throttle — roughly one attempt in three
+succeeding, which is what fifteen observed attempts show — the run makes ONE
+attempt per source, gives up, and asks a chief executive to press retry. That
+accounts for every row above without needing a story about which companies
+SEC dislikes: Caterpillar and Exxon got lucky twice, Meta once in three, and
+the rest never got a second draw.
+
+**The fix is a bounded in-run backoff for a transient status**, not pacing
+and not a cache. It is a change on the critical path of every run and it is
+deliberately not being made at the end of this session: it needs its own
+live measurement across the cohort, which is exactly what it would unblock.
+
+`JPMORGAN_ZERO_CANDIDATES` is a separate, unrelated defect found by the same
+probe: `filing_candidates` returns **0** for CIK 19617 while every other
+company returns 4. Nothing was retrieved because nothing was proposed, so
+its 429s were never even the reason.
 
 ## Scoring
 
