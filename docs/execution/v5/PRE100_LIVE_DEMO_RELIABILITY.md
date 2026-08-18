@@ -198,7 +198,32 @@ recovery loop wearing a helpful face, and `manual_recoveries` must be 0.
 
 ---
 
-## 6. Open, and honestly not closed
+## 6. Verified on the deployed service (`9d9a9c8`)
+
+Fresh guest session both times, driven in a browser (curl 403s the guest
+flow).
+
+| control | device | theme | result |
+|---|---|---|---|
+| **Meta** | phone 390 | dark | landing -> Try the demo -> `/demo` -> autocomplete resolved **META · CIK 1326801** -> progress -> **auto-advanced to step 1**. No failure message, no manual recovery. |
+| **Cloudflare** | laptop 1440 | light | same journey, **auto-advanced to step 1**. |
+
+Meta's live opening line, which on `eb18371` was *"No strategic reading …
+cleared the evidence bar"*:
+
+> Meta Platforms, Inc. is a software platform business that runs on attention
+> resold to advertisers: revenue is an auction price per impression, so
+> nothing is contracted forward and each period's revenue has to be re-earned
+> by engagement.
+
+Measured on the deployed build: `false_failure_messages = 0`,
+`manual_recoveries = 0`, `wrong_company = 0` across these journeys.
+
+No horizontal overflow at 360px on `/`, `/demo`, `/intro` or `/full`. The
+belief block ("Challenging the assumption") and the competitive section
+("Where this sits against the alternatives") both render.
+
+## 7. Open, and honestly not closed
 
 * **Competitive specificity.** Meta's live intro lists *"AT&T Inc, Alphabet
   Inc and Automation absorbing the task itself"* as its most direct
