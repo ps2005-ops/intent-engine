@@ -150,14 +150,14 @@ _SIC_MAJOR_GROUP = {
     "49": ("CONTRACTED_OR_RATE_BASE_ASSETS", "INFRASTRUCTURE"),
     "50": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
     "51": ("PEOPLE_OR_ROUTE_BASED_SERVICES", "SERVICES"),
-    "52": ("BRANDED_CONSUMER", "CONSUMER"),
-    "53": ("BRANDED_CONSUMER", "CONSUMER"),
-    "54": ("BRANDED_CONSUMER", "CONSUMER"),
-    "55": ("BRANDED_CONSUMER", "CONSUMER"),
-    "56": ("BRANDED_CONSUMER", "CONSUMER"),
-    "57": ("BRANDED_CONSUMER", "CONSUMER"),
-    "58": ("BRANDED_CONSUMER", "CONSUMER"),
-    "59": ("BRANDED_CONSUMER", "CONSUMER"),
+    "52": ("SCALE_RETAIL", "RETAIL"),
+    "53": ("SCALE_RETAIL", "RETAIL"),
+    "54": ("SCALE_RETAIL", "RETAIL"),
+    "55": ("SCALE_RETAIL", "RETAIL"),
+    "56": ("SCALE_RETAIL", "RETAIL"),
+    "57": ("SCALE_RETAIL", "RETAIL"),
+    "58": ("SCALE_RETAIL", "RETAIL"),
+    "59": ("SCALE_RETAIL", "RETAIL"),
     "60": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
     "61": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
     "62": ("BALANCE_SHEET_OR_NETWORK", "FINANCIAL_REGULATED"),
@@ -237,13 +237,65 @@ _SIC_RESIDUAL = frozenset({
 #: almost every filing, and a rule that matched it would reclassify every
 #: consumer brand on earth as an ad platform. Requiring the word "revenue" on
 #: the same clause is what separates "we sell ads" from "we buy ads".
+#: DOMINANCE IS REQUIRED, NOT PRESENCE.
+#:
+#: A first version also accepted a bare "revenue ... from ... advertising",
+#: and that reclassified MICROSOFT as an advertising platform — its filing
+#: reports "search and news advertising revenue" as one line among many.
+#: Almost every large platform earns SOME advertising revenue; the question
+#: this rule exists to answer is whether advertising is WHERE THE MONEY COMES
+#: FROM. So the sentence must carry a dominance claim ("substantially all",
+#: "majority", a percentage) in the same clause.
 _ADVERTISING_REVENUE = re.compile(
-    r"(?:substantially all|majority|most|nearly all|\d{2}(?:\.\d+)?\s*%)"
+    r"(?:substantially all|the majority|a majority|most|nearly all|"
+    r"[5-9]\d(?:\.\d+)?\s*%)"
     r"[^.;]{0,140}?revenue[^.;]{0,140}?advertis"
-    r"|revenue[^.;]{0,60}?(?:from|by)[^.;]{0,60}?"
-    r"(?:selling|sale of|delivering)?[^.;]{0,40}?advertis"
-    r"|advertising revenue[^.;]{0,60}?(?:represent|account|comprise)",
+    r"|advertising[^.;]{0,60}?(?:represent(?:ed|s)?|account(?:ed|s)?|"
+    r"comprise[sd]?)[^.;]{0,40}?"
+    r"(?:substantially all|the majority|a majority|most|[5-9]\d)",
     re.I)
+
+
+#: A filer that reports a CLOUD/INFRASTRUCTURE segment alongside a
+#: retail/marketplace one is not one business with a side line — the two have
+#: different customers, different capital intensity and different margins, and
+#: the smaller one routinely carries the profit.
+#:
+#: Both halves are required, and both must be stated as SEGMENTS. "We use
+#: cloud services" appears in every filing on earth; "our reportable segments
+#: are North America, International and AWS" does not.
+# MEASURED WHILE WRITING THIS. A first attempt matched "marketplace" and
+# "merchandise", and promptly reclassified META as multi-engine — because
+# Facebook Marketplace is a PRODUCT name, and a 10-K that mentions it says
+# nothing about segment structure. The terms below are segment and
+# revenue-category names a filer uses about its own reporting, not product
+# nouns that appear in any consumer filing.
+_CLOUD_SEGMENT = re.compile(
+    r"\b(AWS|Amazon Web Services|intelligent cloud|"
+    r"cloud (?:services|segment) (?:revenue|segment|net sales))\b", re.I)
+_COMMERCE_SEGMENT = re.compile(
+    r"\b(online stores?|third-?party seller services|physical stores?|"
+    r"retail segment|subscription services segment)\b", re.I)
+_SEGMENT_LANGUAGE = re.compile(
+    r"\breportable segments?\b|\boperating segments?\b", re.I)
+
+
+def multi_engine_hint(text: str) -> Optional[str]:
+    """Does this filer report materially different businesses as segments?
+
+    Narrow on purpose. It requires the filing to use SEGMENT language and to
+    name both a cloud/infrastructure engine and a commerce engine — the
+    combination that makes a single business-model class describe neither.
+    Anything less returns None and the industry code's answer stands.
+    """
+    if not text:
+        return None
+    head = text[:400_000]
+    if not _SEGMENT_LANGUAGE.search(head):
+        return None
+    if _CLOUD_SEGMENT.search(head) and _COMMERCE_SEGMENT.search(head):
+        return "MULTI_ENGINE_PLATFORM"
+    return None
 
 
 def revenue_model_hint(text: str) -> Optional[str]:
@@ -394,6 +446,103 @@ _ECONOMICS = {
                      "platform and privacy rule changes",
                      "advertiser demand commentary"),
         "macro": ("CONSUMER_DEMAND", "MARKET_RATE", "CURRENCY"),
+    },
+    # ADDED BY BATCH A. SIC 53 and 59 both mapped to BRANDED_CONSUMER, so
+    # Walmart was described as a business "where the brand carries pricing
+    # power the product alone would not command" — the exact inverse of what
+    # Walmart is. A scale retailer's whole model is that price is LOW and the
+    # rent comes from turns, sourcing power and traffic. Selling the reader a
+    # brand-premium story about the world's largest discounter is not a coarse
+    # class, it is a wrong one.
+    "SCALE_RETAIL": {
+        "business_model": (
+            "sale of other people's products at deliberately thin margin, "
+            "where the return comes from scale in buying and from how fast "
+            "inventory turns rather than from price premium"),
+        "industry_structure": (
+            "few operators of national scale; advantage compounds with "
+            "purchasing volume and distribution density"),
+        "revenue_drivers": ("store and site traffic", "average ticket",
+                            "comparable sales", "unit volume",
+                            "selling space and channel mix"),
+        "cost_drivers": ("cost of goods and supplier terms",
+                         "distribution and fulfilment cost per unit",
+                         "store labour", "shrink and markdowns"),
+        "demand_model": (
+            "staple and non-discretionary at the base, with trade-down INTO "
+            "the format when household budgets tighten — a recession is not "
+            "uniformly bad for it"),
+        "customer_structure": (
+            "very many small baskets; no customer concentration, and the "
+            "risk sits in traffic rather than in any account"),
+        "supplier_structure": (
+            "many suppliers facing one very large buyer, which is where the "
+            "margin is actually won"),
+        "pricing_model": (
+            "everyday low price held as a promise, with margin taken in "
+            "sourcing and mix rather than on the shelf"),
+        "operating_leverage": (
+            "MODERATE: a largely fixed store and distribution base against "
+            "thin unit margin, so small comparable-sales moves swing profit"),
+        "levers": ("sourcing and private label", "inventory and turns",
+                   "distribution density", "price investment",
+                   "traffic and format mix"),
+        "archetypes": ("PRICING", "SUPPLY_CHAIN", "INVENTORY",
+                       "CUSTOMER_SEGMENT", "PRODUCTIZATION"),
+        "evidence": ("comparable sales and traffic disclosures",
+                     "inventory and markdown commentary",
+                     "supplier and sourcing changes",
+                     "format and footprint decisions",
+                     "price investment announcements"),
+        "macro": ("CONSUMER_DEMAND", "LABOR", "MARKET_RATE"),
+    },
+    # ADDED BY BATCH A. SIC 5961 (catalog and mail-order) sent Amazon to
+    # BRANDED_CONSUMER. Amazon's profit is not a branded product: it is a
+    # marketplace take rate, a cloud utility and an ad auction, each with
+    # different economics, and the segment that carries the earnings is not
+    # the one the SIC code names. A single-engine class cannot describe it,
+    # and forcing one picks the wrong engine.
+    "MULTI_ENGINE_PLATFORM": {
+        "business_model": (
+            "several distinct businesses under one owner, where the engine "
+            "that carries the profit is not the one that carries the "
+            "revenue — so a consolidated margin describes none of them"),
+        "industry_structure": (
+            "each engine competes against a different set of firms, and few "
+            "rivals contest more than one of them at once"),
+        "revenue_drivers": ("segment mix", "take rate or attach per engine",
+                            "volume through the largest engine",
+                            "cross-engine reinforcement"),
+        "cost_drivers": ("capital committed per engine",
+                         "shared infrastructure and its allocation",
+                         "fulfilment or delivery cost in the volume engine",
+                         "engineering across engines"),
+        "demand_model": (
+            "uncorrelated by design: a downturn in one engine need not move "
+            "another, which is the point of holding them together"),
+        "customer_structure": (
+            "different customers per engine — consumers, developers and "
+            "advertisers are not one base and do not behave alike"),
+        "supplier_structure": (
+            "engine-specific, with the shared infrastructure acting as an "
+            "internal supplier to the rest"),
+        "pricing_model": (
+            "set independently per engine; a single pricing story across "
+            "them is a description of the owner, not of a market"),
+        "operating_leverage": (
+            "HIGH but uneven: the infrastructure engine carries most of the "
+            "fixed cost and most of the incremental margin"),
+        "levers": ("capital allocation between engines",
+                   "cross-engine bundling", "pricing per engine",
+                   "infrastructure investment", "segment disclosure"),
+        "archetypes": ("CAPITAL_ALLOCATION", "PRICING", "CUSTOMER_SEGMENT",
+                       "PRODUCTIZATION", "SUPPLY_CHAIN"),
+        "evidence": ("segment disclosures and their changes",
+                     "capital expenditure by engine",
+                     "pricing changes within one engine",
+                     "bundling and cross-engine launches",
+                     "reporting-structure changes"),
+        "macro": ("CONSUMER_DEMAND", "MARKET_RATE", "LABOR"),
     },
     "DESIGN_AND_MANUFACTURE": {
         "business_model": (
@@ -1333,7 +1482,11 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
         # only on an explicit first-party revenue statement. Meta and
         # Salesforce are both SIC 7370 and their economics are opposite, so
         # taking the code's word for it makes one of them wrong every time.
-        hinted = revenue_model_hint(evidence_text)
+        # Multi-engine is tested FIRST: a company that reports a cloud engine
+        # beside a commerce engine is mis-described by either single class,
+        # including the advertising one it would otherwise qualify for.
+        hinted = multi_engine_hint(evidence_text) \
+            or revenue_model_hint(evidence_text)
         if hinted and hinted != model and hinted in _ECONOMICS:
             model = hinted
             source = "SEC_SIC+FILING_REVENUE"

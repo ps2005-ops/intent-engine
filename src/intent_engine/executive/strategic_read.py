@@ -1378,10 +1378,29 @@ def _named_rivals(company: str, documents) -> Tuple[dict, ...]:
     """
     if not documents:
         return ()
+    # ONLY THE SUBJECT'S OWN DOCUMENTS MAY NAME THE SUBJECT'S RIVALS.
+    #
+    # MEASURED LIVE on ebd0a6f: Meta's introduction read "contested most
+    # directly by AT&T Inc, Alphabet Inc". Neither is in the validation
+    # manifest and neither was named by Meta. They are the FILERS of
+    # third-party filings the run retrieved because those filings mention
+    # Meta — and this extractor was handed every document in the run, so it
+    # read AT&T's own 10-K, found "AT&T Inc" written throughout it, and
+    # returned the author as the subject's competitor.
+    #
+    # A claim belongs to whoever made it. `competitive_ladder.competition_text`
+    # already documents this discriminator for the same reason — a third
+    # party's Competition section describes THEIR market — and this producer,
+    # which feeds rung 1 and therefore outranks everything, never got it.
+    own = [d for d in documents
+           if str((d or {}).get("source_class") or "")
+           in ("investor_material", "executive_statement", "company_owned")]
+    if not own:
+        return ()
     try:
         from intent_engine.external_intel.competitor_finder import (
             find_competitors)
-        found = find_competitors(list(documents), subject=company, limit=4)
+        found = find_competitors(own, subject=company, limit=4)
     except Exception:                                       # noqa: BLE001
         return ()
     out = []

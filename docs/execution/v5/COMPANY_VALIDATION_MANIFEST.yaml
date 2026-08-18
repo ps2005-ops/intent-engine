@@ -2938,7 +2938,7 @@ companies:
   parent_company_id: null
   sector: CONSUMER
   industry: UNKNOWN
-  business_model_class: BRANDED_CONSUMER
+  business_model_class: SCALE_RETAIL
   regulatory_class: LIGHTLY_REGULATED
   capital_intensity_class: HIGH
   cyclicality_class: DEFENSIVE
