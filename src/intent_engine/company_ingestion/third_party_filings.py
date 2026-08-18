@@ -35,6 +35,9 @@ import urllib.parse
 import urllib.request
 
 from intent_engine.company_ingestion import relevance as _COV
+from intent_engine.company_ingestion.edgar import (
+    MAX_FILING_BYTES, TRUNCATABLE_FORMS,
+)
 
 FTS_ENDPOINT = "https://efts.sec.gov/LATEST/search-index"
 
@@ -442,6 +445,22 @@ def _emit(candidate, *, company_name, assessment) -> dict:
         "mention_reason": assessment["reason"],
         "mention_excerpt": assessment["excerpt"],
         "substantive_mentions": assessment["substantive_mentions"],
+        # A STATUTORY FILING IS A STATUTORY FILING WHOEVER FILED IT.
+        #
+        # These candidates carried no byte budget at all, so `fetch_approved`
+        # fell back to the 2MB cap meant for an untrusted arbitrary host —
+        # and every one of these is a 10-K on sec.gov, the exact publisher
+        # whose real document sizes motivated `MAX_FILING_BYTES` in the first
+        # place. Measured live on a Meta run: all four third-party filings
+        # came back "too large" while the subject's own filings, which do
+        # carry the budget, were read without trouble.
+        #
+        # This is the whole third-party vantage point — the only source class
+        # in the product that is independent of the subject — being discarded
+        # by a default. Same publisher, same budget, same truncation rule.
+        "form": form,
+        "accept_truncated": form in TRUNCATABLE_FORMS,
+        "max_bytes": MAX_FILING_BYTES,
     }
 
 

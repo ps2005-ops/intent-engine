@@ -318,7 +318,22 @@ class CompanyInput:
     def validate(self) -> None:
         if not str(self.company_name or "").strip():
             raise FounderIntelligenceError("a company name is required")
-        validate_public_url(self.website)          # SSRF wall
+        # A WEBSITE IS NOT THE ONLY WAY TO IDENTIFY A COMPANY.
+        #
+        # MEASURED: a live "Meta" run retrieved five sources including its own
+        # 10-K and 10-Q, and then composition raised
+        #   UnsafeURLRejected: a company website URL is required
+        # because the run carries no domain. `create_run` deliberately opens a
+        # run on a CIK alone -- the regulator records no web domain, and
+        # substituting one would make the REGULATOR the company's website --
+        # so every company entered by name that resolves only to a filer hit
+        # this. Meta, Toyota and Vale all failed here, not in retrieval.
+        #
+        # The SSRF wall is not weakened: it guards URLs we FETCH, and it still
+        # runs on every one of them. A company we hold no website for is a
+        # company whose website we will not be dialling.
+        if str(self.website or "").strip():
+            validate_public_url(self.website)      # SSRF wall
         for text in (self.company_name, self.requester_role or "",
                      self.business_question or ""):
             assert_no_secret(text, where="company input")

@@ -155,7 +155,11 @@ def guest(tmp_path):
 
 
 def test_prepared_examples_are_offered_before_a_guest_has_to_guess(guest):
-    _, _, page = guest.request("GET", "/")
+    # The company form (and so the examples beside it) moved from "/" to
+    # "/demo" when the landing page became the pitch rather than the form.
+    # The invariant is unchanged: a guest is offered examples before having
+    # to invent a company name.
+    _, _, page = guest.request("GET", "/demo")
     for company in GOLDEN_COMPANIES:
         assert company["name"] in page
     # Still offered before a guest has to guess -- now as one quiet line

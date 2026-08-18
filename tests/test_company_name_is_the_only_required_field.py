@@ -92,8 +92,12 @@ def test_resolution_carries_what_a_reader_needs_to_confirm_the_company():
 # --- the entry form ---------------------------------------------------------
 
 def test_the_landing_form_requires_only_the_company_name():
+    # The form now renders on the demo's company-entry screen rather than the
+    # landing page. The rule it encodes is untouched: the NAME is required and
+    # the website is not, because resolving a name to an entity is the
+    # product's job and not the visitor's.
     from intent_engine.founder_intelligence import presentation as P
-    page = P.render_landing_html()
+    page = P.render_company_entry_html()
     company = page.split('name="company_name"')[1][:200]
     website = page.split('name="website"')[1][:200]
     assert "required" in company

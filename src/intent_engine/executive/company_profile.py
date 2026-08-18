@@ -50,6 +50,7 @@ the collapse this module exists to end.
 from __future__ import annotations
 
 import dataclasses
+import re
 from typing import Optional, Tuple
 
 CONTRACT = "company_intelligence_profile.v1"
@@ -225,6 +226,46 @@ _SIC_RESIDUAL = frozenset({
 })
 
 
+#: A filer stating, about ITSELF, that advertising is where its revenue comes
+#: from. Two shapes only, both requiring "revenue" and "advertis-" inside one
+#: clause:
+#:
+#:   1. a dominance claim   "substantially all of our revenue ... advertising"
+#:   2. a derivation claim  "we generate revenue ... from advertising"
+#:
+#: DELIBERATELY NARROW. "Advertising expense" is a COST line that appears in
+#: almost every filing, and a rule that matched it would reclassify every
+#: consumer brand on earth as an ad platform. Requiring the word "revenue" on
+#: the same clause is what separates "we sell ads" from "we buy ads".
+_ADVERTISING_REVENUE = re.compile(
+    r"(?:substantially all|majority|most|nearly all|\d{2}(?:\.\d+)?\s*%)"
+    r"[^.;]{0,140}?revenue[^.;]{0,140}?advertis"
+    r"|revenue[^.;]{0,60}?(?:from|by)[^.;]{0,60}?"
+    r"(?:selling|sale of|delivering)?[^.;]{0,40}?advertis"
+    r"|advertising revenue[^.;]{0,60}?(?:represent|account|comprise)",
+    re.I)
+
+
+def revenue_model_hint(text: str) -> Optional[str]:
+    """The model class a filer's OWN revenue sentence implies, or None.
+
+    WHY THIS EXISTS AND WHY IT IS NOT A SIC LOOKUP. SIC 7370 contains both
+    halves of a split with opposite economics — Salesforce and Meta are the
+    same code — so the regulator's classification cannot separate them and
+    must not be asked to. What CAN separate them is the sentence the filer
+    writes about where its money comes from, which is a first-party statement
+    of fact in a statutory document rather than an inference.
+
+    Returns None on anything it is not sure about. None means "the SIC code's
+    answer stands", never "unclassified" — a hint that fires only on an
+    explicit revenue statement can lose nothing that was already working.
+    """
+    if not text:
+        return None
+    return ("ADVERTISING_PLATFORM"
+            if _ADVERTISING_REVENUE.search(text[:400_000]) else None)
+
+
 def classify_sic(sic: str) -> Optional[Tuple[str, str]]:
     """(business model class, sector) for a SIC code, or None.
 
@@ -288,6 +329,71 @@ _ECONOMICS = {
                      "customer wins and losses", "partnership announcements",
                      "platform or infrastructure changes"),
         "macro": ("MARKET_RATE", "LABOR", "CURRENCY"),
+    },
+    # THE MODEL THE TAXONOMY HAD NO ROW FOR.
+    #
+    # MEASURED: an external tester typed "Meta" and got an empty analysis. The
+    # cause was not retrieval — five sources including Meta's own 10-K were
+    # read — it was that this table has nine rows and none of them is the
+    # business Meta runs. The regulator files it under SIC 73, which this
+    # module maps to SUBSCRIPTION_SOFTWARE, so the only two outcomes available
+    # were "unclassified" (what shipped) and "a subscription-software reading
+    # of an advertising company" (worse: every mechanism, metric and
+    # competitor downstream is selected by this class, so a wrong row is
+    # confidently wrong rather than incomplete).
+    #
+    # It is not a niche row. SIC 7370 covers Alphabet, Meta, Snap, Pinterest,
+    # Reddit and Trade Desk alongside Salesforce and Adobe, and the two halves
+    # have opposite economics: one sells a contracted seat that renews, the
+    # other sells an auction-priced impression that must be re-won every time
+    # a user returns. Which half a filer is in is not derivable from the SIC
+    # code — it IS derivable from the revenue sentence the filer writes about
+    # itself, which is what `revenue_model_hint` reads.
+    "ADVERTISING_PLATFORM": {
+        "business_model": (
+            "attention resold to advertisers: revenue is an auction price "
+            "per impression, so nothing is contracted forward and each "
+            "period's revenue has to be re-earned by engagement"),
+        "industry_structure": (
+            "a few platforms holding most of the inventory, competing for "
+            "advertiser budget against every other channel that can prove "
+            "return"),
+        "revenue_drivers": ("users and their engagement",
+                            "impressions or ad load per user",
+                            "price per impression",
+                            "advertiser count and budget share",
+                            "measurable return per advertiser"),
+        "cost_drivers": ("infrastructure and compute per user served",
+                         "content moderation and trust operations",
+                         "engineering headcount",
+                         "traffic acquisition or distribution payments"),
+        "demand_model": (
+            "discretionary and cyclical: advertising budget is among the "
+            "first spending cut in a downturn and among the first restored"),
+        "customer_structure": (
+            "two-sided and asymmetric -- many small advertisers with a long "
+            "tail, and a user base that pays nothing and can leave freely"),
+        "supplier_structure": (
+            "the distribution channel is the binding supplier: the operating "
+            "systems, browsers and devices that decide what can be measured"),
+        "pricing_model": (
+            "real-time auction per impression, so price is set by competing "
+            "advertisers rather than by the platform"),
+        "operating_leverage": (
+            "HIGH: serving one more impression costs almost nothing, so "
+            "incremental revenue is unusually valuable -- and the same "
+            "fixed base makes an engagement decline expensive quickly"),
+        "levers": ("engagement and time spent", "ad load and format mix",
+                   "targeting and measurement quality",
+                   "advertiser tooling", "content and creator supply"),
+        "archetypes": ("ENGAGEMENT", "MONETISATION_RATE", "PRICING",
+                       "CUSTOMER_SEGMENT", "PRODUCTIZATION"),
+        "evidence": ("engagement and user disclosures",
+                     "ad load and format changes",
+                     "targeting or measurement policy changes",
+                     "platform and privacy rule changes",
+                     "advertiser demand commentary"),
+        "macro": ("CONSUMER_DEMAND", "MARKET_RATE", "CURRENCY"),
     },
     "DESIGN_AND_MANUFACTURE": {
         "business_model": (
@@ -1141,7 +1247,8 @@ class _Classified:
 
 
 def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
-                manifest=None, registrant=None) -> CompanyIntelligenceProfile:
+                manifest=None, registrant=None,
+                evidence_text: str = "") -> CompanyIntelligenceProfile:
     """The profile for one company, with its quality stated.
 
     Three outcomes, always one of them explicitly:
@@ -1153,6 +1260,11 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
 
     `registrant` is `edgar.registrant_classification()`'s result, passed in
     rather than fetched here so this module makes no network call.
+
+    `evidence_text` is the subject's own retrieved filing text, used ONLY to
+    correct a SIC code that is known to contain two different businesses --
+    see `revenue_model_hint`. It never promotes an unclassified company and
+    never overrides the hand-written manifest.
 
     Never raises: a manifest that cannot be loaded produces a sparse
     profile. Failing the analysis because a classification file is missing
@@ -1201,12 +1313,24 @@ def profile_for(company_id: str = "", *, name: str = "", domain: str = "",
                     f"would resolve it."),
                 basis=(f"business model not classified -- {why}"))
         model, sector = derived
+        source = "SEC_SIC"
+        cited = f"{sic} {sic_text}".strip()
+        # THE FILER'S OWN SENTENCE OUTRANKS THE INDUSTRY CODE.
+        #
+        # Only where the code is known to hold two different businesses, and
+        # only on an explicit first-party revenue statement. Meta and
+        # Salesforce are both SIC 7370 and their economics are opposite, so
+        # taking the code's word for it makes one of them wrong every time.
+        hinted = revenue_model_hint(evidence_text)
+        if hinted and hinted != model and hinted in _ECONOMICS:
+            model = hinted
+            source = "SEC_SIC+FILING_REVENUE"
+            cited = (f"{cited}, corrected by this company's own statement of "
+                     f"where its revenue comes from")
         company = _Classified(
             company_id=company_id or display, canonical_name=display,
             sector=sector, business_model_class=model)
         state = PROFILE_PARTIAL
-        source = "SEC_SIC"
-        cited = f"{sic} {sic_text}".strip()
         limitation = (
             f"Classified from the regulator's own industry code for this "
             f"filer ({cited}) rather than from the validation "

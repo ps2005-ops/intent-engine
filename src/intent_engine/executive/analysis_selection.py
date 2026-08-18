@@ -759,16 +759,20 @@ def _scenarios(profile, archetype: str, facts: RecordFacts,
 def select(company_id: str = "", *, name: str = "", domain: str = "",
            facts: Optional[RecordFacts] = None,
            profile: Optional[CompanyIntelligenceProfile] = None,
-           manifest=None, registrant=None) -> AnalysisSelection:
+           manifest=None, registrant=None,
+           evidence_text: str = "") -> AnalysisSelection:
     """Choose this company's analysis. Deterministic, no model call.
 
     `registrant` is the SEC's classification of this filer, used only when
     the company is outside the validation manifest -- see `profile_for`.
+    `evidence_text` is that company's own filing text, used only to correct
+    an industry code that covers two different businesses.
     """
     facts = facts or RecordFacts()
     if profile is None:
         profile = profile_for(company_id, name=name, domain=domain,
-                              manifest=manifest, registrant=registrant)
+                              manifest=manifest, registrant=registrant,
+                              evidence_text=evidence_text)
     considered = _score_archetypes(profile, facts) if profile.known else ()
     archetype = considered[0]["archetype"] if considered else UNKNOWN
     why = (considered[0]["why"] if considered else

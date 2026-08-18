@@ -63,7 +63,10 @@ def test_a_first_time_guest_meets_the_product_not_the_methodology(guest):
     """The explainer moved OFF the landing page. A first-time visitor gets the
     promise, the input and an example of the output; the methodology is one
     click away for anyone who wants it."""
-    _, _, page = guest.request("GET", "/")
+    # The working screen is now /demo; "/" is the pitch. The invariant is the
+    # same one it always was: the screen that asks for a company shows the
+    # input, not a methodology document.
+    _, _, page = guest.request("GET", "/demo")
     assert "Before you start" not in page, "methodology is back in front of value"
     assert 'action="/analyze"' in page              # the one thing to do
     # ONE primary call to action. The old page rendered six identical
@@ -398,7 +401,7 @@ def test_the_examples_line_sits_below_the_form_not_above_the_headline(guest):
     """Seen on the deployed page: injected at '<main>', the examples footnote
     rendered above the h1, so the first thing a visitor read was a note about
     examples rather than what the product does."""
-    _, _, page = guest.request("GET", "/")
+    _, _, page = guest.request("GET", "/demo")   # the form's screen, now
     assert "Not sure where to start" in page
     assert page.index("<h1") < page.index("Not sure where to start"), \
         "the examples line renders above the headline"

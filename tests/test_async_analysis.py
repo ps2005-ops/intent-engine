@@ -771,7 +771,13 @@ def test_every_terminal_state_stops_polling_and_drops_the_active_stage(
         app.wait_for_analysis(run_id, timeout=30)
         meta = app.ci.run_meta(run_id) or {}
         app.ci._transition(run_id, meta.get("domain", ""), state)
+        # A REDIRECT BODY WOULD SATISFY BOTH ASSERTIONS VACUOUSLY. Clear the
+        # result so this run genuinely has nothing to open and the progress
+        # page must actually render — otherwise the test passes on an empty
+        # string and can no longer fail for the reason it was written.
+        app._results.pop(run_id, None)
         _, _, html = c.request("GET", f"/runs/{run_id}/progress")
+        assert html.strip(), f"{state} rendered no page to check"
         assert 'http-equiv="refresh"' not in html, (
             f"{state} keeps polling a run that will never advance")
         assert "Reading the public evidence" not in html, (
@@ -779,12 +785,23 @@ def test_every_terminal_state_stops_polling_and_drops_the_active_stage(
 
 
 def test_interrupted_says_so_rather_than_implying_work_continues(tmp_path):
+    """An interrupted run WITH NOTHING TO SHOW says it stopped.
+
+    The result must be cleared first, and that is the point rather than a
+    fixture detail: a run that was interrupted after producing something
+    readable now OPENS that result instead of reporting a stop, because a
+    customer-ready result outranks stale worker metadata. Leaving the result
+    in place made this assertion read an empty redirect body and pass for a
+    reason that had nothing to do with the wording it checks.
+    """
     app = _async_app(tmp_path)
     c, _, headers, _ = _submit(app)
     run_id = headers["Location"].split("/runs/")[1].split("/")[0]
     app.wait_for_analysis(run_id, timeout=30)
     meta = app.ci.run_meta(run_id) or {}
     app.ci._transition(run_id, meta.get("domain", ""), "INTERRUPTED")
+    app._results.pop(run_id, None)
+    assert app.result_readiness(run_id)["opens_result"] is False
     _, _, html = c.request("GET", f"/runs/{run_id}/progress")
     assert "interrupt" in html.lower() or "stopped" in html.lower()
 

@@ -685,7 +685,7 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
             observations: Optional[Sequence[dict]] = None,
             documents: Optional[Sequence[dict]] = None,
             own_words: str = "", own_words_source: str = "",
-            manifest=None, registrant=None,
+            manifest=None, registrant=None, evidence_text: str = "",
             simulation=None) -> StrategicRead:
     """The bounded strategic read for one company.
 
@@ -697,7 +697,8 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
     if selection is None:
         selection = select(company_id, name=company, domain=domain,
                            facts=_facts_from(dossier), profile=profile,
-                           manifest=manifest, registrant=registrant)
+                           manifest=manifest, registrant=registrant,
+                           evidence_text=evidence_text)
     profile = selection.profile or profile
     name = _clean(company or selection.company_name or company_id) or "This company"
 

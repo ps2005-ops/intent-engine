@@ -34,7 +34,8 @@ from intent_engine.founder_intelligence.fixtures import (
 )
 from intent_engine.founder_intelligence.presentation import (
     _BASE_CSS as _APP_CSS,
-    render_landing_html, render_report_preview, render_result_html,
+    render_company_entry_html, render_landing_html, render_report_preview,
+    render_result_html,
 )
 from intent_engine.company_ingestion.entities import (
     AMBIGUOUS, name_from_domain, resolve_choice, resolve_entity,
@@ -281,6 +282,17 @@ color:#f3f4f6;border-color:#606e88}
    Give the transparency back and keep the edge off. Both selectors outrank
    the two rules above, so this holds wherever it lands in the cascade. */
 :root nav button,:root button.linkish{background:transparent;border-width:0}
+/* ...and a PRIMARY action is not a box either. The blanket fill above outranks
+   the landing sheet's accent (both are one class + one element, and this sheet
+   is injected second), so in dark every primary submit rendered #1b2230 — the
+   same flat panel as a text input. Measured locally at 390px in dark: the
+   first screen's dominant control and an inert field were the same colour,
+   which is the whole hierarchy of that screen erased.
+   Two selectors' worth of specificity, so it holds regardless of order, and it
+   re-points to the same accent pair the dark palette already defines rather
+   than inventing a third blue. */
+:root button.primary,:root form.analyze button[type=submit]{
+background:#7aa2ff;color:#0f141c;border-width:0}
 :root .why,:root .alt,:root .q,:root .unavailable,:root .state,
 :root .limitation,:root .muted,:root .when{color:#c3cad6}
 /* Deck surfaces that hard-code a light literal rather than var(--panel), and
@@ -831,10 +843,25 @@ class WebApp:
         if path == "/signup":
             return (self._signup_page() if method == "GET"
                     else self._signup_post(form))
+        # TRY THE DEMO -> THE COMPANY QUESTION. This used to mint a session and
+        # send the visitor back to "/", which was the form; now that "/" is the
+        # pitch, returning there would loop them past the button they just
+        # pressed.
         if (path == "/demo" and method == "POST"
                 and self.config.demo_mode):
             new_sid = self.auth.create_anonymous_session()
-            return self._redirect("/", set_sid=new_sid)
+            return self._redirect("/demo", set_sid=new_sid)
+        if path == "/demo" and method == "GET":
+            # A visitor may arrive here directly (a shared link, a back
+            # button, a bookmark). Mint the guest session rather than
+            # bouncing them to a page whose only button lands right back
+            # here.
+            if session is None and self.config.demo_mode:
+                new_sid = self.auth.create_anonymous_session()
+                return self._redirect("/demo", set_sid=new_sid)
+            if session is None:
+                return self._redirect("/login")
+            return self._demo_entry(session)
         if path == "/logout" and method == "POST":
             self.auth.logout(sid)
             return self._redirect("/", clear_cookie=True)
@@ -1344,7 +1371,22 @@ class WebApp:
                               "companies": [r.as_dict() for r in rows]})
 
     def _landing(self, session):
-        page = _AC.inject(render_landing_html())
+        """The first screen: what this is, log in, try the demo. Nothing else.
+
+        The company form now lives at /demo. A visitor who already has a
+        session is NOT shortcut past this page — the landing sells the
+        product, and skipping it for returning guests would mean the one
+        screen written to explain the product is the one screen most people
+        never see.
+        """
+        csrf = session["csrf"] if session else ""
+        return self._html(_chrome(
+            render_landing_html(demo_mode=bool(self.config.demo_mode)),
+            self._nav(session, csrf)))
+
+    def _demo_entry(self, session):
+        """Company entry — the demo's first working screen."""
+        page = _AC.inject(render_company_entry_html())
         csrf = session["csrf"] if session else ""
         if session:
             # the analyze form needs the CSRF token; inject it once
@@ -1398,19 +1440,11 @@ class WebApp:
                 # visitor read was a footnote about examples.
                 page = page.replace('</form>', '</form>' + intro, 1)
         else:
+            # No session and demo mode is off: this screen cannot do its job,
+            # so say what is needed rather than rendering a form that will be
+            # refused on submit.
             note = ('<p><strong>Early access:</strong> '
                     '<a href="/login">log in</a> to run an analysis.</p>')
-            if self.config.demo_mode:
-                # Feature-flagged anonymous entry point. Absent entirely when
-                # DEMO_MODE is off, so the logged-out landing page is unchanged.
-                note += ('<form action="/demo" method="post" '
-                         'aria-label="Try the demo without logging in">'
-                         '<button type="submit">Try the demo — no login '
-                         'required</button></form>'
-                         '<p class="trust-note">Demo sessions are anonymous '
-                         'and isolated: they can analyze companies and read '
-                         'reports, but cannot see anyone else\'s data or '
-                         'create share links.</p>')
             page = page.replace('<form action="/analyze"',
                                 note + '<form action="/analyze"', 1)
         return self._html(_chrome(page, self._nav(session, csrf)))
@@ -1969,18 +2003,48 @@ class WebApp:
         #
         # So completion lands on /runs/<id>. The deck keeps its own route and
         # its place in the layer nav; it is one click away, not compulsory.
-        if status in ("COMPLETE", "PARTIAL"):
-            return self._redirect(f"/runs/{run_id}")
+        # A RESULT THAT EXISTS BEATS A STATE THAT SAYS OTHERWISE.
+        #
+        # This branch used to read `status in ("COMPLETE", "PARTIAL")`, which
+        # is the worker's opinion about its own run rather than an answer to
+        # the only question this page exists to ask. A run can compose a
+        # readable result and still transition FAILED — `_run_analysis` does
+        # exactly that on purpose, storing a bounded reading in `_results`
+        # after marking the run FAILED — and every such customer was told
+        # there was nothing to open while the analysis sat one route away.
+        #
+        # Measured live on eb18371 with "Meta": five sources retrieved, a
+        # readable result present, and this page saying "no result to open".
+        if real:
+            readiness = self.result_readiness(run_id)
+            if readiness["opens_result"]:
+                return self._redirect(f"/runs/{run_id}")
 
         # A worker that vanished must not leave this page polling forever.
         if not terminal and self._interrupted_if_stale(run_id):
             status = self.ci.store.run_state(run_id) or status
             terminal = True
+            # The worker dying does not destroy what it had already written.
+            # Re-ask: a stale marker plus a readable result is a redirect,
+            # not a dead end.
+            if real:
+                readiness = self.result_readiness(run_id)
+                if readiness["opens_result"]:
+                    return self._redirect(f"/runs/{run_id}")
+
+        if status in ("COMPLETE", "PARTIAL"):
+            return self._redirect(f"/runs/{run_id}")
         refresh = ('' if terminal
                    else '<meta http-equiv="refresh" content="4">')
         # A run that failed must say so in the heading. Softening every state
         # into "Reading the public evidence…" would hide a failure behind a
         # progress message, which is worse than the jargon it replaced.
+        # A run that is still recoverable may not be mourned. `status` alone
+        # said FAILED for runs that had another attempt available and for runs
+        # that had a result; the heading now follows readiness, which knows
+        # the difference.
+        recoverable = bool(
+            real and self.result_readiness(run_id)["retryable"])
         heading = {
             "FAILED": "This analysis could not be completed",
             # Say what happened. "Reading the public evidence..." on a run
@@ -1988,18 +2052,29 @@ class WebApp:
             "INTERRUPTED": "This analysis was interrupted",
             "REJECTED": "This analysis was not accepted",
         }.get(status, "Reading the public evidence…")
+        if recoverable:
+            heading = "This analysis stopped early"
         head = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
                 f'{refresh}<title>{_e(heading)}</title>{_PROGRESS_CSS}</head>'
                 f'<body>'
                 f'{self._nav(session, session["csrf"])}<main>'
                 f'<h1>{_e(heading)}</h1>')
-        if status == "FAILED":
+        if recoverable:
+            # BOUNDED RECOVERY, NOT A DEAD END. One clear action, offered once
+            # — `result_readiness` has already checked an attempt remains, so
+            # this can never become a loop.
+            tail = (f'<p>We stopped before there was anything worth showing '
+                    f'you. {self._failure_explanation(run_id, real)}</p>'
+                    f'{self._targeted_retry_action(session, run_id)}'
+                    f'<p><a href="/demo">Analyse a different company</a></p>')
+        elif status in ("FAILED", "INTERRUPTED", "REJECTED"):
             # Honest terminal failure: NO "Open the result" — there is no
             # result. Explain why and offer a safe start-over.
             tail = (f'<p>This analysis could not be completed, so there is no '
                     f'result to open. {self._failure_explanation(run_id, real)}'
                     f'</p><p><a href="/runs/{_e(run_id)}">See the failure '
-                    f'details</a> · <a href="/">Start a new analysis</a></p>')
+                    f'details</a> · <a href="/demo">Start a new analysis</a>'
+                    f'</p>')
         else:
             # Still in flight. Say what is happening in words a person uses,
             # not lifecycle names, and never claim a result already exists.
@@ -2039,14 +2114,21 @@ class WebApp:
                     # vocabularies for one state reads as a malfunction.
                     f'{self._stage_ladder(hyd, status)}'
                     f'<p>{_e(self._elapsed_line(run_id))}</p>'
-                    f'<p>This page moves to the analysis by itself as soon as '
-                    f'there is something worth reading — no need to click '
-                    f'anything or come back later.</p>'
+                    f'<p>We\'re building the analysis now. This page opens it '
+                    f'by itself the moment it is ready.</p>'
+                    # "YOUR ANALYSES" IS NOT A RECOVERY INSTRUCTION.
+                    #
+                    # This footnote used to end by naming /analyses as where
+                    # to find the result. That is how the first external
+                    # tester eventually got to theirs — and being told where
+                    # to go looking is precisely the journey this page exists
+                    # to make unnecessary. The storage limit is real and still
+                    # disclosed; the navigation advice is gone, because the
+                    # page redirects.
                     f'<p class="fineprint">Preview note: runs are held in '
                     f'memory, so a restart can interrupt one. If that '
-                    f'happens this page says so rather than waiting forever. '
-                    f'Anything already finished stays under '
-                    f'<a href="/analyses">your analyses</a>.</p>')
+                    f'happens this page says so rather than waiting '
+                    f'forever.</p>')
         return self._html(head + tail + '</main></body></html>')
 
     #: §11. What is being assembled, in the order a person would build it.
@@ -2293,7 +2375,19 @@ class WebApp:
             return ("No approved source could be retrieved, so there was not "
                     "enough evidence to produce a report.")
         cats = sorted({label for _, label, _, _ in rows})
-        return ("Every approved source failed to retrieve (" +
+        # "EVERY" WAS NEVER CHECKED. This sentence was printed whenever ANY
+        # source failed, so a live Meta run that had read its own 10-K and
+        # 10-Q told the customer that every approved source had failed. A
+        # count is one attribute lookup away and the claim was made without
+        # it; say what actually happened instead.
+        read = len(self._retrieved_documents(run_id))
+        if read:
+            return (f"{len(rows)} source(s) could not be retrieved ("
+                    + _e(", ".join(cats)) + f"), though {read} were read. "
+                    "Public sites can refuse automated access or require "
+                    "JavaScript; a failed retrieval is not evidence of "
+                    "real-world absence.")
+        return ("No approved source could be retrieved (" +
                 _e(", ".join(cats)) + "). Public sites can refuse automated "
                 "access or require JavaScript; a failed retrieval is not "
                 "evidence of real-world absence.")
@@ -4271,12 +4365,18 @@ class WebApp:
         except Exception:                                   # noqa: BLE001
             dossier = None
         own_words, own_source = self._own_words(observations, company)
+        # WHAT KIND OF BUSINESS THIS IS, from the two facts the run already
+        # holds. Omitting them is why a company whose 10-K had been read came
+        # back "no regulator industry classification was found for it".
+        ci_in = self.classification_inputs(run_id, company)
         try:
             read = SR.compose(
                 company=company, domain=domain, dossier=dossier,
                 run_decision=run_decision, observations=observations,
                 documents=documents, own_words=own_words,
                 own_words_source=own_source,
+                registrant=ci_in["registrant"],
+                evidence_text=ci_in["evidence_text"],
                 # THE SIMULATION IS PASSED, NOT REBUILT. The belief layer
                 # needs the observed trajectory and the trajectory comes from
                 # the filed series; deriving it inside `compose` would put a
@@ -4473,7 +4573,10 @@ class WebApp:
         try:
             from intent_engine.executive.analysis_selection import select
             meta = self.ci.run_meta(run_id) or {}
-            selection = select(name=name, domain=str(meta.get("domain") or ""))
+            ci_in = self.classification_inputs(run_id, name)
+            selection = select(name=name, domain=str(meta.get("domain") or ""),
+                               registrant=ci_in["registrant"],
+                               evidence_text=ci_in["evidence_text"])
             profile = selection.profile
         except Exception:                                   # noqa: BLE001
             pass
@@ -4650,8 +4753,11 @@ class WebApp:
         try:
             from intent_engine.executive.analysis_selection import select
             meta = self.ci.run_meta(run_id) or {}
+            ci_in = self.classification_inputs(run_id, name)
             read_selection = select(name=name,
-                                    domain=str(meta.get("domain") or ""))
+                                    domain=str(meta.get("domain") or ""),
+                                    registrant=ci_in["registrant"],
+                                    evidence_text=ci_in["evidence_text"])
             profile = read_selection.profile
         except Exception:                                   # noqa: BLE001
             pass
@@ -6749,6 +6855,183 @@ class WebApp:
     AVAIL_BOUNDED = "BOUNDED_DOSSIER_AVAILABLE"
     AVAIL_FULL = "FULL_REPORT_AVAILABLE"
     AVAIL_FAILURE = "TERMINAL_FAILURE"
+
+    # --- the canonical customer lifecycle ------------------------------------
+    #
+    # ONE ANSWER TO "IS THIS READY FOR THE CUSTOMER?", AND ONLY ONE.
+    #
+    # MEASURED LIVE, not hypothesised. A first-time visitor typed "Meta" on a
+    # phone against eb18371 and was told:
+    #
+    #     "This analysis could not be completed, so there is no result to
+    #      open. Every approved source failed to retrieve (too large)."
+    #
+    # Both halves were false. Five sources HAD been retrieved — including
+    # Meta's own SEC 10-K and 10-Q — and a readable result existed the whole
+    # time at /runs/<id>, which is where the visitor eventually found it by
+    # clicking "Your analyses". The only true statement on that page was that
+    # the run's last TRANSITION was FAILED.
+    #
+    # That is the defect in one line: `_progress` branched on the run's
+    # lifecycle STATE, while the thing the customer wanted was the RESULT.
+    # `_availability` — which already derives exactly this, and whose own
+    # docstring calls it "the single source every run route consults" — was
+    # never called by the progress page. A repair that lives in one function
+    # and is read by another is this programme's oldest failure mode.
+    #
+    # So: readiness is derived HERE, every customer-facing route asks THIS,
+    # and a state name may never again out-vote a result that exists.
+    READY_CREATED = "CREATED"
+    READY_RESOLVING = "RESOLVING_IDENTITY"
+    READY_RETRIEVING = "RETRIEVING"
+    READY_ANALYSING = "ANALYSING"
+    READY_COMPOSING = "COMPOSING"
+    READY_RESULT = "RESULT_READY"
+    READY_DEGRADED = "DEGRADED_RESULT_READY"
+    READY_BLOCKED = "BLOCKED_RECOVERABLE"
+    READY_FAILED = "FAILED_FINAL"
+
+    #: The ONLY two states that open the analysis, and the ONLY state that may
+    #: show a customer a final failure. Anything else is still in motion.
+    READY_OPENS_RESULT = (READY_RESULT, READY_DEGRADED)
+
+    #: Internal pipeline state -> the phase a customer is in. Deliberately
+    #: many-to-few: a reader does not need eight nouns for "we are working".
+    _READY_PHASE = {
+        "VALIDATING_COMPANY": READY_RESOLVING,
+        "DISCOVERING_SOURCES": READY_RETRIEVING,
+        "AWAITING_SOURCE_APPROVAL": READY_RETRIEVING,
+        "FETCHING_APPROVED_SOURCES": READY_RETRIEVING,
+        "PARSING_SOURCES": READY_RETRIEVING,
+        "BUILDING_SOURCE_ARTIFACTS": READY_ANALYSING,
+        "ASSEMBLING_COMPANY_UNDERSTANDING": READY_ANALYSING,
+        "ASSEMBLING_REPORT": READY_COMPOSING,
+    }
+
+    def classification_inputs(self, run_id, name: str = "") -> dict:
+        """What this run knows about WHAT KIND OF BUSINESS its subject is.
+
+        Two facts, both already in hand, neither previously reaching the
+        classifier:
+
+          * the regulator's industry code for THIS filer, resolved from the
+            run's own CIK rather than by re-resolving the typed name (a
+            second name resolution can only land on a different registrant);
+          * the subject's own filing text, which is what separates the two
+            different businesses SIC 7370 contains.
+
+        MEASURED: without these, Meta — a company whose 10-K this run had
+        already read — came back "not in the validation manifest and no
+        regulator industry classification was found", and every downstream
+        mechanism, metric and competitor was therefore selected from nothing.
+
+        Cached per run; makes at most one SEC call, and none under test.
+        """
+        cache = getattr(self, "_classification_cache", None)
+        if cache is None:
+            cache = self._classification_cache = {}
+        if run_id in cache:
+            return cache[run_id]
+        out = {"registrant": {}, "evidence_text": ""}
+        meta = self.ci.run_meta(run_id) or {}
+        # A manifest company is classified by hand already: no call, no text.
+        try:
+            from intent_engine.executive.company_profile import profile_for
+            if profile_for(name=name or str(meta.get("company_name") or ""),
+                           domain=str(meta.get("domain") or "")).known:
+                cache[run_id] = out
+                return out
+        except Exception:                                     # noqa: BLE001
+            pass
+        cik = str(meta.get("cik") or "").strip()
+        if cik and self.config.env != "test":
+            try:
+                from intent_engine.company_ingestion.edgar import (
+                    registrant_classification,
+                )
+                digits = cik.lstrip("0") or "0"
+                out["registrant"] = registrant_classification(
+                    {"cik": int(digits), "cik10": f"{int(digits):010d}"}) or {}
+            except Exception:                                 # noqa: BLE001
+                out["registrant"] = {}
+        # The SUBJECT'S OWN documents only. A competitor's filing describing
+        # its advertising revenue must never classify this company.
+        try:
+            subject_cik = cik.lstrip("0")
+            texts = []
+            for doc in self._retrieved_documents(run_id):
+                url = str(doc.get("final_url") or "")
+                if subject_cik and "/data/" in url and \
+                        f"/data/{subject_cik}/" not in url:
+                    continue
+                if str(doc.get("source_class") or "") == "competitor":
+                    continue
+                texts.append(str(doc.get("text_content") or ""))
+            out["evidence_text"] = "\n".join(texts)[:400_000]
+        except Exception:                                     # noqa: BLE001
+            out["evidence_text"] = ""
+        cache[run_id] = out
+        return out
+
+    def result_readiness(self, run_id) -> dict:
+        """Is there something this customer may be shown, and what is it?
+
+        READ-ONLY. Composes nothing, approves nothing, fetches nothing — a
+        page a reader refreshes must never be the thing that mutates the run.
+
+        The contract every caller may rely on:
+
+          * ``opens_result`` is True IF AND ONLY IF a customer-readable result
+            exists. When it is True the customer goes to the analysis, whatever
+            the worker's metadata says.
+          * ``FAILED_FINAL`` is the only state that may show a final failure,
+            and it requires that NO readable result exists.
+        """
+        avail = self._availability(run_id)
+        state = avail["state"] or "VALIDATING_COMPANY"
+        # A readable result is a composed report, or a bounded reading built
+        # from documents that were actually retrieved. The second is not a
+        # consolation prize: it is what the run established, and it is strictly
+        # more than a page saying nothing was established.
+        readable = bool(avail["has_report"]
+                        or (avail["has_result"] and avail["documents"]))
+        if readable:
+            phase = (self.READY_RESULT if avail["has_report"]
+                     else self.READY_DEGRADED)
+            return {"state": phase, "opens_result": True,
+                    "terminal": True, "in_flight": avail["in_flight"],
+                    "documents": avail["documents"],
+                    "degraded": phase == self.READY_DEGRADED,
+                    "retryable": False, "availability": avail}
+        if avail["in_flight"] or state not in self.TERMINAL_STATES:
+            phase = self._READY_PHASE.get(state, self.READY_ANALYSING)
+            return {"state": phase, "opens_result": False,
+                    "terminal": False, "in_flight": avail["in_flight"],
+                    "documents": avail["documents"], "degraded": False,
+                    "retryable": False, "availability": avail}
+        # Terminal, and nothing readable. A run whose worker vanished is NOT a
+        # final failure — telling a customer their analysis is dead when one
+        # more attempt would actually run is the same lie in a quieter voice.
+        #
+        # BUT "RETRYABLE" IS NOT "STATE == FAILED". Every FAILED run passing
+        # this test would put a retry button in front of someone whose sources
+        # all answered 403 — the button dials the same refusing hosts and
+        # fails again, which is a manual-recovery loop wearing a helpful face.
+        # The retrieval layer already grades each failure: 429 and 5xx are
+        # marked retryable, 403/404/unsafe-redirect are not. Ask it.
+        attempts_left = self.attempt_count(run_id) < self.MAX_ANALYSIS_ATTEMPTS
+        try:
+            transient = any(row.get("retryable")
+                            for row in self.ci.store.failures(run_id))
+        except Exception:                                     # noqa: BLE001
+            transient = False
+        retryable = attempts_left and (state == "INTERRUPTED" or transient)
+        return {"state": (self.READY_BLOCKED if retryable
+                          else self.READY_FAILED),
+                "opens_result": False, "terminal": True,
+                "in_flight": False, "documents": avail["documents"],
+                "degraded": False, "retryable": retryable,
+                "availability": avail}
 
     def _analysis_in_flight(self, run_id) -> bool:
         with self._analysis_lock:
