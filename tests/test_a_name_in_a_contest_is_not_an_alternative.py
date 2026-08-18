@@ -472,3 +472,20 @@ def test_nothing_is_rendered_when_nothing_was_routed():
         competitive_ground = None
 
     assert dossier._other_relationships(_Read()) == []
+
+
+def test_the_frame_verb_is_not_repeated_by_the_identity():
+    """MEASURED LIVE on c719979, Exxon: "customers can substitute substitute
+    materials at the customer's plant". The frame supplies the verb; when the
+    ladder's identity opens with the same word, two layers write it."""
+    joined = " ".join(SR._by_alternative_kind([
+        _row("Substitute materials at the customer's plant", "SUBSTITUTE")]))
+    assert "substitute substitute" not in joined.lower(), joined
+    assert "substitute materials at the customer's plant" in joined
+
+
+def test_an_identity_that_merely_starts_differently_is_untouched():
+    joined = " ".join(SR._by_alternative_kind([
+        _row("Rental and used equipment in place of a new purchase",
+             "SUBSTITUTE")]))
+    assert "rental and used equipment" in joined

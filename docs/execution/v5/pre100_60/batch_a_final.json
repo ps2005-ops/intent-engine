@@ -1,0 +1,112 @@
+{
+  "contract": "batch_a_final.v1",
+  "deployed_sha": "c719979",
+  "final_sha": "pending",
+  "status": "BLOCKED_EXTERNAL",
+  "block": {
+    "source": "SEC EDGAR",
+    "http": 429,
+    "scope": "the preview's egress IP",
+    "evidence": "the same primary-document URLs with the same production User-Agent answered 200 from a laptop in the same minutes",
+    "affected": 6,
+    "retrieved": 2
+  },
+  "companies": [
+    {
+      "company": "Meta Platforms, Inc.",
+      "run_id": "01M09Z896GA620CSBXEA5847Q3",
+      "seconds": 39,
+      "auto_advanced": false,
+      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
+      "position_sentence": "",
+      "routed_relationships": "",
+      "business_model": "",
+      "scored": false,
+      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+    },
+    {
+      "company": "Amazon.com, Inc.",
+      "run_id": "01M09ZM4E2F51C5G766TQWKB0R",
+      "seconds": 13,
+      "auto_advanced": false,
+      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
+      "position_sentence": "",
+      "routed_relationships": "",
+      "business_model": "",
+      "scored": false,
+      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+    },
+    {
+      "company": "NVIDIA Corporation",
+      "run_id": "01M09ZGJA801G532NZ7SAA262T",
+      "seconds": 13,
+      "auto_advanced": false,
+      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
+      "position_sentence": "",
+      "routed_relationships": "",
+      "business_model": "",
+      "scored": false,
+      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+    },
+    {
+      "company": "JPMorgan Chase & Co.",
+      "run_id": "01M09ZQT7W00QMD75P21TYP08P",
+      "seconds": 502,
+      "auto_advanced": false,
+      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
+      "position_sentence": "",
+      "routed_relationships": "",
+      "business_model": "",
+      "scored": false,
+      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+    },
+    {
+      "company": "Walmart Inc.",
+      "run_id": "01M09ZDBGWRH9J59788MJB69DZ",
+      "seconds": 9,
+      "auto_advanced": false,
+      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
+      "position_sentence": "",
+      "routed_relationships": "",
+      "business_model": "",
+      "scored": false,
+      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "run_id": "",
+      "seconds": null,
+      "auto_advanced": null,
+      "retrieval": "BLOCKED_EXTERNAL_SEC_429",
+      "position_sentence": "",
+      "routed_relationships": "",
+      "business_model": "",
+      "scored": false,
+      "not_measured_reason": "no approved source retrieved; \u00a714 forbids scoring a surface that was not read"
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "run_id": "",
+      "seconds": null,
+      "auto_advanced": null,
+      "retrieval": "OK",
+      "position_sentence": "contested directly by CNH Industrial N.V and Deere Construction, and customers can substitute independent service and will-fit parts",
+      "routed_relationships": "Customer financing and purchase enablement: America Leasing, Capital LLC, BNP Paribas Leasing Solutions",
+      "business_model": "MANUFACTURE_AND_AFTERMARKET",
+      "scored": true,
+      "not_measured_reason": ""
+    },
+    {
+      "company": "Exxon Mobil Corporation",
+      "run_id": "01M0A0D95793WTRRJD82B687VH",
+      "seconds": 187,
+      "auto_advanced": true,
+      "retrieval": "OK",
+      "position_sentence": "contested less by a named firm than by the alternatives its customers already have: customers can substitute substitute materials at the customer's plant and automation absorbing the task itself",
+      "routed_relationships": "",
+      "business_model": "COMMODITY_PRODUCER",
+      "scored": true,
+      "not_measured_reason": ""
+    }
+  ]
+}

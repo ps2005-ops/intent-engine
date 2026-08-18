@@ -1163,11 +1163,23 @@ _ATTRIBUTED_RUNGS = ("NAMED_BY_SUBJECT", "NAMED_BY_CUSTOMER",
                      "NAMED_BY_RIVAL", "NAMED_BY_ANALYST")
 
 
-def _identity_in_sentence(row) -> str:
+def _identity_in_sentence(row, frame_verb: str = "") -> str:
+    """The alternative's name as it reads inside the clause.
+
+    MEASURED LIVE on c719979, Exxon: "customers can substitute substitute
+    materials at the customer's plant". The frame supplies the verb and the
+    ladder's identity begins with the same word, and two layers each writing
+    it produces the stutter this codebase has produced before with lead-ins.
+    """
     name = str(getattr(row, "name", "") or "")
     if str(getattr(row, "rung", "") or "") in _ATTRIBUTED_RUNGS:
         return name
-    return _lower_first(name)
+    name = _lower_first(name)
+    first = name.split(" ", 1)
+    if frame_verb and first[0].rstrip("s") == frame_verb.rstrip("s") \
+            and len(first) > 1:
+        name = first[1]
+    return name
 
 
 def _by_alternative_kind(rows) -> list:
@@ -1181,15 +1193,17 @@ def _by_alternative_kind(rows) -> list:
     buckets = {"direct": [], "substitute": [], "build": [], "inertia": []}
     for row in rows:
         kind = str(getattr(row, "kind", "") or "")
-        identity = _identity_in_sentence(row)
         if kind in _DIRECT_KINDS or not kind:
-            buckets["direct"].append(identity)
+            buckets["direct"].append(_identity_in_sentence(row))
         elif kind in _BUILD_KINDS:
-            buckets["build"].append(identity)
+            buckets["build"].append(_identity_in_sentence(row))
         elif kind in _INERTIA_KINDS:
-            buckets["inertia"].append(identity)
+            buckets["inertia"].append(_identity_in_sentence(row))
         else:
-            buckets["substitute"].append(identity)
+            # The substitute clause's verb is "substitute"; an identity that
+            # opens with the same word must not repeat it.
+            buckets["substitute"].append(
+                _identity_in_sentence(row, frame_verb="substitute"))
     lead_taken = bool(buckets["direct"])
     out, budget = [], 3
     for key, frame in (

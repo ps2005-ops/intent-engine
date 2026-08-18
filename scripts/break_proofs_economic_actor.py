@@ -189,8 +189,8 @@ PROOFS = [
 
     ("E4. a phrase read off the model is capitalised like a company",
      ROOT / "src/intent_engine/executive/strategic_read.py",
-     "    return _lower_first(name)",
-     "    return name",
+     "    name = _lower_first(name)",
+     "    name = name",
      f"{T}::"
      "test_a_retrieved_firm_keeps_its_capital_and_a_read_phrase_does_not",
      "another surface"),
@@ -246,6 +246,13 @@ PROOFS = [
      "tests/test_one_run_may_not_say_two_things.py::"
      "test_every_step_page_goes_through_the_shared_guard",
      "_story_page"),
+    ("H1. the frame verb is repeated by the identity",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "            buckets[\"substitute\"].append(\n"
+     "                _identity_in_sentence(row, frame_verb=\"substitute\"))",
+     "            buckets[\"substitute\"].append(_identity_in_sentence(row))",
+     f"{T}::test_the_frame_verb_is_not_repeated_by_the_identity",
+     "substitute substitute"),
 ]
 
 
