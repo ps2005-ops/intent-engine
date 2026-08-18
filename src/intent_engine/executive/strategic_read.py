@@ -1052,11 +1052,34 @@ def _position(name, profile, selection, rivals_read=()) -> str:
     competitor sets, and the wrong one first.
     """
     rivals = [c.name for c in (rivals_read or ())][:3]
+    # "CONTESTED MOST DIRECTLY BY" IS A STRONG CLAIM AND NEEDS A STRONG BASIS.
+    #
+    # With no ladder rows this fell through to the manifest's structural
+    # peers — INCLUDING the weak ones, whose own stated basis is "same sector
+    # but a different business model: it competes for the same end demand
+    # WITHOUT THE SAME ECONOMICS". The sentence promoted that to the most
+    # direct contest in the company's opening paragraph. Measured live on
+    # Meta, whose model class has no manifest peer at all: "contested most
+    # directly by AT&T Inc, Alphabet Inc and Automation absorbing the task
+    # itself". One of those three was right.
+    #
+    # A same-model peer still earns the strong sentence. A sector-mate gets a
+    # sentence that says what it actually is.
+    hedged = False
     if not rivals:
-        rivals = [c.name for c in (profile.strategic_competitors or ())][:3]
+        peers = list(profile.strategic_competitors or ())
+        strong = [c for c in peers
+                  if getattr(c, "basis", "") == "SAME_MODEL_AND_SECTOR"]
+        rivals = [c.name for c in (strong or peers)][:3]
+        hedged = not strong
     leverage = _enum_word(profile.operating_leverage)
     bits = []
-    if rivals:
+    if rivals and hedged:
+        bits.append("It sits in the same sector as "
+                    + _join(rivals)
+                    + ", which earn differently and so are a weaker "
+                      "comparison than a direct rival")
+    elif rivals:
         bits.append("Its position is contested most directly by "
                     + _join(rivals))
     if leverage:

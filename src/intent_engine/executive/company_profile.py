@@ -1193,7 +1193,19 @@ def _competitors(company, manifest) -> Tuple[Competitor, ...]:
                     else 1, other.canonical_name)
             strong.append((rank, row))
         elif same_sector:
-            weak.append(((0, 0, other.canonical_name), Competitor(
+            # ALPHABETICAL ORDER IS NOT ECONOMIC RELEVANCE. This key was
+            # (0, 0, name), so the sector's membership was presented to the
+            # reader in dictionary order: Meta's three closest rivals came
+            # back as 37signals, Adobe and AgileBits, and on the deployed
+            # page AT&T Inc led the list. Rank on the same two economic
+            # facts the strong branch uses — a peer of the same size in the
+            # same geography overlaps more than one that merely shares a
+            # sector — and keep the name only as a deterministic tie-break.
+            weak.append(((
+                0 if other.primary_geography == company.primary_geography
+                else 1,
+                0 if other.company_size_class == company.company_size_class
+                else 1, other.canonical_name), Competitor(
                 name=other.canonical_name,
                 why=(f"same sector ({_pretty(company.sector)}) but a "
                      f"different business model "

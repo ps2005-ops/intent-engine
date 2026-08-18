@@ -307,6 +307,18 @@ def assess_filing_mention(*, html: str, company_name: str,
         "supports_corroboration": verdict["supports_corroboration"],
         "mention_count": len(mentions),
         "excerpt": excerpt,
+        # EVERY span the verdict was built from, not just the first.
+        #
+        # The excerpt is one span, cut to 600 characters, and the clause that
+        # GOVERNS a mention is often outside it: RingCentral's filing lists
+        # "(Google G-Suite and Meet), Meta Platforms, Inc., Microsoft Teams,
+        # Slack" — a competitor list whose verb, "we compete with", sits
+        # before the cut. Relationship classification read that as UNKNOWN
+        # and correctly refused it, losing the one genuine rival in the set.
+        # Classification gets the whole counted set; display still gets the
+        # single span that drove the verdict.
+        "counted_spans": [" ".join(str(span).split())[:800]
+                          for span in counted[:8]],
         "extracted_chars": len(text),
         "parse_error": extracted.get("parse_error", ""),
     }
@@ -418,6 +430,29 @@ def _structural_candidates(payload, *, company_name, subject_cik, today,
 
 def _emit(candidate, *, company_name, assessment) -> dict:
     form, short = candidate["form"], candidate["filer"]
+    # A MENTION IS NOT A RELATIONSHIP.
+    #
+    # `source_class` was the constant "competitor" for every filing that
+    # named the subject, which is a claim this adapter has no evidence for.
+    # Measured for Meta: Oklo had a PREPAYMENT AGREEMENT with it (a
+    # customer), Network-1 had a CASE AGAINST it (a litigant), Enbridge's
+    # selected excerpt never mentioned it at all — and all three arrived
+    # graded DIRECTLY_RELEVANT, because relevance counted passages instead
+    # of reading them. Only RingCentral, which lists it among the products it
+    # competes with, was actually a rival.
+    #
+    # The class is now READ from the excerpt. Everything that is not a
+    # competitive relationship stays in the run as independent third-party
+    # evidence — which is what it is, and often the more useful fact.
+    from intent_engine.executive.relationship import (
+        classify_relationship, source_class_for,
+    )
+    spans = assessment.get("counted_spans") or []
+    relationship = classify_relationship(
+        subject=company_name, counterparty=short,
+        text="\n".join(str(s) for s in spans)
+             or str(assessment.get("excerpt") or ""),
+        date=candidate.get("file_date", ""), source=candidate["url"])
     return {
         "url": candidate["url"],
         "source_type": "external_approved",
@@ -426,7 +461,10 @@ def _emit(candidate, *, company_name, assessment) -> dict:
         # A different registrant writing about the subject. Not the
         # subject's own investor material -- that distinction is the
         # entire contribution of this adapter.
-        "source_class": "competitor",
+        "source_class": source_class_for(relationship.relationship_type),
+        "relationship_type": relationship.relationship_type,
+        "relationship_evidence": relationship.evidence,
+        "relationship_confidence": relationship.confidence,
         "why_useful": f"{short} describes {company_name} in its own "
                       f"{form} filing",
         "why_relevant": "an independent registrant's account of this "
