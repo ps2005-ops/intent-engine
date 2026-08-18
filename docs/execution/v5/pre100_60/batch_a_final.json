@@ -10,7 +10,21 @@
     "evidence": "the same primary-document URLs with the same production User-Agent answered 200 from a laptop in the same minutes; Meta failed inside the seven-company wave and succeeded on a single paced re-run twenty minutes later on the same deployed SHA",
     "affected": 5,
     "retrieved": 3,
-    "kind": "BURST_LIMIT_NOT_BAN"
+    "kind": "COMPANY_CORRELATED_NOT_CADENCE",
+    "falsified_hypothesis": "BURST_LIMIT \u2014 a 6-minute-paced wave still 429'd on its FIRST company (Walmart), and Exxon succeeded as the LAST company of an unpaced seven-company wave",
+    "ever_retrieved": [
+      "Caterpillar Inc.",
+      "Exxon Mobil Corporation",
+      "Meta Platforms, Inc."
+    ],
+    "never_retrieved": [
+      "Walmart Inc.",
+      "NVIDIA Corporation",
+      "Amazon.com, Inc.",
+      "JPMorgan Chase & Co.",
+      "Eli Lilly and Company"
+    ],
+    "next_measurement": "what separates the companies that retrieve from those that never do; leading hypothesis is per-run request volume and filing size, not cadence"
   },
   "companies": [
     {

@@ -93,17 +93,30 @@ with the **same production User-Agent**, answered 200 from a laptop in the
 same minutes — so it is a shared cloud IP under sustained automated access,
 not a defect and not a demo-quota block.
 
-**It is a BURST limit, not a ban.** Meta failed inside a seven-company wave
-and succeeded on a single paced re-run twenty minutes later, on the same
-deployed SHA. So the throttle is triggered by the gauntlet's own cadence —
-each analysis fetches three or four EDGAR documents and eight analyses
-back-to-back trip it — rather than by the product, the User-Agent or the
-demo quota.
+**It is NOT a cadence limit.** That was this session's first conclusion and
+a paced wave falsified it. Every outcome observed, by position:
 
-**This is the binding constraint on the 60-company programme.** The
-mitigation is pacing plus a retrieval cache keyed on (CIK, accession); a
-wave that runs companies back-to-back will keep returning six unscoreable
-companies in eight, and those zeros would be measuring the fetcher.
+| company | position | result |
+|---|---|---|
+| Caterpillar | single, and 1st of a 7-company wave | **OK** (2/2) |
+| Exxon | **7th and last** of the 7-company wave | **OK** |
+| Meta | 1st of two waves / single paced | 429, 429, **OK** |
+| Walmart | 2nd of two waves / **1st of a 6-minute-paced wave** | 429 ×3 |
+| NVIDIA | single / 3rd of a wave / **2nd of a paced wave** | 429 ×3 |
+| Amazon, JPMorgan, Lilly | 4th–6th of the wave | 429 |
+
+Exxon succeeded **last** in an unpaced wave and Walmart failed **first** in a
+paced one, so position in the wave does not predict the outcome. Three
+companies have ever retrieved; five have never retrieved in any position.
+**The correlation is with the company, not the cadence.**
+
+**This is the binding constraint on the 60-company programme**, and the next
+step is to find what separates Caterpillar and Exxon from Walmart and NVIDIA
+— the leading hypothesis is per-run request volume and document size, since
+`business_document()` makes an extra archive request per candidate and the
+companies that fail file the largest 10-Ks. That is a measurement, not a
+conclusion. A retrieval cache keyed on (CIK, accession) helps regardless,
+because it removes the repeat fetches entirely.
 
 ## Scoring
 
