@@ -165,6 +165,57 @@ PROOFS = [
      "                                c.name.lower()))",
      f"{T}::test_selection_is_not_alphabetical",
      "Wabtec"),
+    # --- §8 THE SENTENCE CONTRACT ------------------------------------------
+    ("E1. the kind dies at the projection and every row reads as direct",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "            kind=rival.kind,",
+     "            kind=\"\",",
+     f"{T}::test_the_kind_survives_the_projection_into_the_read",
+     "kind"),
+
+    ("E2. an in-house build is announced as a direct contest",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "_BUILD_KINDS = (\"BUILD_IN_HOUSE\",)",
+     "_BUILD_KINDS = ()",
+     f"{T}::test_an_in_house_build_is_not_described_as_a_direct_contest",
+     "internalise the work"),
+
+    ("E3. doing nothing is announced as a rival",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "_INERTIA_KINDS = (\"MANUAL_WORKFLOW\", \"DO_NOTHING\")",
+     "_INERTIA_KINDS = ()",
+     f"{T}::test_doing_nothing_is_described_as_delay_not_as_a_rival",
+     "delaying the purchase"),
+
+    ("E4. a phrase read off the model is capitalised like a company",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "    return _lower_first(name)",
+     "    return name",
+     f"{T}::"
+     "test_a_retrieved_firm_keeps_its_capital_and_a_read_phrase_does_not",
+     "another surface"),
+    # --- §6 THE ROUTING REACHES A READER -----------------------------------
+    ("F1. the run stops collecting the refusals",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "        named = _named_rivals(name, documents, profile=profile,\n"
+     "                              refusals=refused)",
+     "        named = _named_rivals(name, documents, profile=profile)",
+     f"{T}::test_the_run_collects_the_refusals_rather_than_discarding_them",
+     "refusals"),
+
+    ("F2. the ground stops carrying what was routed",
+     ROOT / "src/intent_engine/executive/strategic_read.py",
+     "            other_relationships=_routed(refused))",
+     "            other_relationships=())",
+     f"{T}::test_the_run_collects_the_refusals_rather_than_discarding_them",
+     "other_relationships"),
+
+    ("F3. the full analysis stops rendering them",
+     ROOT / "src/intent_engine/founder_brief/dossier.py",
+     "    if not rows:\n        return []\n    by_section: dict = {}",
+     "    if True:\n        return []\n    by_section: dict = {}",
+     f"{T}::test_the_full_analysis_renders_the_routed_relationships",
+     "Medicare Part D"),
 ]
 
 

@@ -32,6 +32,7 @@ destroy.
 from __future__ import annotations
 
 import dataclasses
+import inspect
 
 import pytest
 
@@ -359,3 +360,115 @@ def test_the_ranking_puts_a_direct_rival_above_an_adjacent_threat():
     # behind the direct rival
     assert [q.candidate for q in Q.rank([(adjacent, 0), (direct, 5)])] == \
         ["CNH Industrial N.V", "Some Unit"]
+
+
+# ===========================================================================
+# §8. THE SENTENCE CONTRACT. The wording must match the state behind it.
+# ===========================================================================
+from intent_engine.executive import strategic_read as SR      # noqa: E402
+
+
+def _row(name, kind, rung="DISPLACEMENT"):
+    return SR.CompetitorRead(
+        name=name, why_a_rival="", exposure="", likely_response="",
+        response_likelihood="", counter_move="", signal_to_watch="",
+        rung=rung, kind=kind)
+
+
+def test_the_kind_survives_the_projection_into_the_read():
+    """THE SEAM THE LAST REPAIR IN THIS AREA DIED AT. `rung` did not exist on
+    `CompetitorRead` and a filter reading it silently kept everything; `kind`
+    is the same shape of field and gets the same proof."""
+    assert "kind" in {f.name for f in dataclasses.fields(SR.CompetitorRead)}
+    source = inspect.getsource(SR._from_ground)
+    assert "kind=rival.kind" in source, \
+        "the ladder's kind must be carried into the row the renderer reads"
+
+
+def test_an_in_house_build_is_not_described_as_a_direct_contest():
+    clauses = SR._by_alternative_kind([
+        _row("The advertiser spending the budget on its own channels",
+             "BUILD_IN_HOUSE", "INTERNAL_BUILD")])
+    joined = " ".join(clauses)
+    assert "internalise the work" in joined
+    assert "contested directly by" not in joined
+
+
+def test_a_substitute_is_not_described_as_a_direct_contest():
+    joined = " ".join(SR._by_alternative_kind([
+        _row("Another surface holding the same attention hour", "SUBSTITUTE")]))
+    assert "customers can substitute" in joined
+    assert "contested directly by" not in joined
+
+
+def test_doing_nothing_is_described_as_delay_not_as_a_rival():
+    joined = " ".join(SR._by_alternative_kind([
+        _row("Deferring replacement and rebuilding instead", "DO_NOTHING",
+             "WORKFLOW_SUBSTITUTE")]))
+    assert "delaying the purchase" in joined
+
+
+def test_a_named_firm_still_earns_the_direct_sentence():
+    joined = " ".join(SR._by_alternative_kind([
+        _row("CNH Industrial N.V", "DIRECT", "NAMED_BY_SUBJECT")]))
+    assert "contested directly by CNH Industrial N.V" in joined
+
+
+def test_a_retrieved_firm_keeps_its_capital_and_a_read_phrase_does_not():
+    named = " ".join(SR._by_alternative_kind([
+        _row("Komatsu Ltd", "DIRECT", "NAMED_BY_SUBJECT")]))
+    read = " ".join(SR._by_alternative_kind([
+        _row("Another surface holding the same attention hour", "SUBSTITUTE")]))
+    assert "Komatsu Ltd" in named
+    assert "another surface holding" in read
+
+
+# ===========================================================================
+# §6. THE ROUTING MUST REACH A READER. A classification with no caller and no
+# surface is a capability that reads as done and shows nobody anything.
+# ===========================================================================
+def test_the_run_collects_the_refusals_rather_than_discarding_them():
+    source = inspect.getsource(SR._ground)
+    assert "refusals=refused" in source or "refusals=refused" in \
+        inspect.getsource(SR._named_rivals), \
+        "the production call site must ask for the refusals"
+    # NOT merely that the keyword is passed: that it is passed THE REFUSALS.
+    # `other_relationships=()` satisfies a substring test and routes nothing,
+    # which is exactly the shape of inert repair this area keeps shipping.
+    assert "other_relationships=_routed(refused)" in source, \
+        "the refusals themselves must reach the ground the surfaces read"
+
+
+def test_the_ground_carries_the_routed_relationships():
+    from intent_engine.executive.competitive_ladder import CompetitiveGround
+    ground = CompetitiveGround(
+        company="Walmart Inc.",
+        other_relationships=(("Regulation and payer economics",
+                              "Medicare Part D", "a programme"),))
+    assert ground.as_dict()["other_relationships"] == [
+        ["Regulation and payer economics", "Medicare Part D", "a programme"]]
+
+
+def test_the_full_analysis_renders_the_routed_relationships():
+    from intent_engine.founder_brief import dossier
+
+    class _Ground:
+        other_relationships = (
+            ("Regulation and payer economics", "Medicare Part D",
+             "a programme or policy whose terms move this business"),)
+
+    class _Read:
+        competitive_ground = _Ground()
+
+    paras = dossier._other_relationships(_Read())
+    assert paras and "Medicare Part D" in paras[0]
+    assert "Regulation and payer economics" in paras[0]
+
+
+def test_nothing_is_rendered_when_nothing_was_routed():
+    from intent_engine.founder_brief import dossier
+
+    class _Read:
+        competitive_ground = None
+
+    assert dossier._other_relationships(_Read()) == []

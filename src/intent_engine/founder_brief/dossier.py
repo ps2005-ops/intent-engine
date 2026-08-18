@@ -553,6 +553,36 @@ def _structural_competition(read, company) -> list:
     return out
 
 
+def _other_relationships(read) -> list:
+    """§6. What the filing named that is NOT a rival, under its own heading.
+
+    An index, a payer programme and a captive lender's competitors were all
+    published as companies contesting the subject's market. Removing them
+    made the read correct and made the analysis poorer — Medicare Part D
+    genuinely moves Walmart's pharmacy economics and a leasing market
+    genuinely decides whether Caterpillar's customer can buy at all.
+
+    So they are routed rather than dropped. Rendering them here is what makes
+    the routing real: a classification with no reader is a capability with no
+    caller, which this codebase has shipped before and called done.
+    """
+    ground = getattr(read, "competitive_ground", None)
+    rows = tuple(getattr(ground, "other_relationships", ()) or ())
+    if not rows:
+        return []
+    by_section: dict = {}
+    for section, name, reason in rows:
+        by_section.setdefault(section, []).append((name, reason))
+    out = []
+    for section, entries in list(by_section.items())[:3]:
+        names = ", ".join(n for n, _ in entries[:3])
+        out.append(end_sentence(
+            f"{section}: {names}. Named in the filing alongside the "
+            f"competitive discussion and kept out of it — "
+            f"{lower_first(entries[0][1])}"))
+    return out
+
+
 def _competitive(company, report, decision, hypotheses, families,
                  said, external=None, read=None) -> Passage:
     """Relative position, or a stated reason there is nothing to say.
@@ -659,6 +689,7 @@ def _competitive(company, report, decision, hypotheses, families,
             supported = _structural_competition(read, company)
             if supported:
                 paras.extend(supported)
+            paras.extend(_other_relationships(read))
             # §13 FORBIDS THE RETRIEVAL REPORT ON A PRIMARY SURFACE, and it
             # is right to: "No competitor's own account was retrieved for
             # this run" answers a question about the fetcher in the section a
@@ -673,6 +704,11 @@ def _competitive(company, report, decision, hypotheses, families,
                 "published positioning or pricing on the same buyer — until "
                 "then, treat a competitor moving first as the risk this "
                 "evidence cannot price.")
+    else:
+        # A company WITH named rivals still has an index, a payer or a lender
+        # in its filing, and the reader needs those in the right place rather
+        # than only when the competitive read was otherwise empty.
+        paras.extend(_other_relationships(read))
     return Passage("competitive", "Where this sits against the alternatives",
                    depth=BOTH, kind="evidence", paragraphs=tuple(paras),
                    items=tuple(items[:4]),

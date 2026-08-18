@@ -46,14 +46,21 @@ def test_a_structural_peer_is_not_a_direct_contest():
         _Row("Agnico Eagle Mines Limited", "STRUCTURAL_PEER"),
     ))
     assert "Agnico Eagle" not in sentence, sentence
-    assert "Substitute materials" in sentence
+    # Case-insensitive: §8 lower-cases a phrase read off the business model
+    # so it reads as the common noun it is mid-sentence. The claim under test
+    # is that the row SURVIVES, not how it is capitalised.
+    assert "substitute materials" in sentence.lower(), sentence
 
 
 def test_an_attributed_rung_still_earns_the_strong_sentence():
     sentence = _position("NVIDIA Corporation", _Profile(), None, (
         _Row("Huawei Technologies Co", "NAMED_BY_SUBJECT"),
     ))
-    assert "contested most directly by" in sentence
+    # §8 replaced the one-size frame ("contested MOST directly by", said of
+    # substitutes and in-house builds alike) with a clause per kind. An
+    # attributed firm still earns the direct sentence, which is the claim
+    # this test has always been about.
+    assert "contested directly by" in sentence, sentence
     assert "Huawei" in sentence
 
 

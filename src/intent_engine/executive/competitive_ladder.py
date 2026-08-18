@@ -279,6 +279,12 @@ class CompetitiveGround:
     next_measurement: str = ""
     #: What the run read, so the reader can judge the ladder's ceiling.
     basis_note: str = ""
+    #: §6. WHAT WAS NAMED AND IS NOT A RIVAL, under the heading it belongs
+    #: to. An index, a payer programme and a captive lender's competitors are
+    #: real facts about the company; the answer to publishing them as rivals
+    #: is the right section, not silence. Each entry is
+    #: (section, name, why it is here).
+    other_relationships: Tuple[Tuple[str, str, str], ...] = ()
 
     @property
     def best_rung(self) -> str:
@@ -303,6 +309,8 @@ class CompetitiveGround:
                 "best_rung": self.best_rung,
                 "next_measurement": self.next_measurement,
                 "basis_note": self.basis_note,
+                "other_relationships": [list(r)
+                                        for r in self.other_relationships],
                 "rivals": [r.as_dict() for r in self.rivals]}
 
 

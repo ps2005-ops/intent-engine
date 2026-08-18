@@ -444,7 +444,8 @@ def _make(identity, kind, rung, company, evidence="") -> Optional[Rival]:
 
 
 def build(company: str, profile, documents: Sequence[dict] = (),
-          named_firms: Sequence[dict] = ()) -> CompetitiveGround:
+          named_firms: Sequence[dict] = (),
+          other_relationships: Sequence[tuple] = ()) -> CompetitiveGround:
     """The competitive ground for one run, assembled up the ladder."""
     documents = list(documents or ())
     rivals: list = []
@@ -551,4 +552,5 @@ def build(company: str, profile, documents: Sequence[dict] = (),
             f"used before. Either moves this from a reading of the business "
             f"model to {company}'s own statement.")
     return CompetitiveGround(company=company, rivals=tuple(rivals),
-                             next_measurement=measurement, basis_note=basis)
+                             next_measurement=measurement, basis_note=basis,
+                             other_relationships=tuple(other_relationships))

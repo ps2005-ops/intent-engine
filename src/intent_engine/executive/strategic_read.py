@@ -271,6 +271,14 @@ class CompetitorRead:
     # and the rung stopped at `Rival`. Provenance that dies at a projection
     # boundary cannot govern how the claim is rendered.
     rung: str = ""
+    #: WHAT KIND OF ALTERNATIVE THIS IS, carried from the ladder for the same
+    #: reason `rung` is: the opening sentence has to say "contested directly
+    #: by" of a rival and something else of a substitute, and a projection
+    #: that drops the kind leaves the renderer with one sentence for all of
+    #: them. Meta's read is an in-house build, a rival surface and an
+    #: automation threat, and calling all three "contested most directly by"
+    #: is false about two.
+    kind: str = ""
 
     def as_dict(self) -> dict:
         return dataclasses.asdict(self)
@@ -789,9 +797,12 @@ def _ground(name, profile, documents):
     """
     try:
         from intent_engine.executive import competitive_ground
+        refused: list = []
+        named = _named_rivals(name, documents, profile=profile,
+                              refusals=refused)
         return competitive_ground.build(
-            name, profile, documents,
-            named_firms=_named_rivals(name, documents, profile=profile))
+            name, profile, documents, named_firms=named,
+            other_relationships=_routed(refused))
     except Exception:                                       # noqa: BLE001
         return None
 
@@ -1072,6 +1083,23 @@ def _position(name, profile, selection, rivals_read=()) -> str:
     ranked = [c for c in (rivals_read or ())
               if getattr(c, "rung", "") != "STRUCTURAL_PEER"]
     rivals = [c.name for c in ranked][:3]
+    # §8. THE WORDING IS A CLAIM, AND IT MUST MATCH WHAT WAS ESTABLISHED.
+    #
+    # "Contested most directly by" said of an in-house build, a do-nothing
+    # and an automation threat is false about all three, and those are what
+    # the ladder legitimately returns for a company whose filing names no
+    # firm. Meta's opening read "contested most directly by The advertiser
+    # spending the budget on its own channels" — a true alternative, given
+    # the wrong grammar. The kind decides the verb.
+    grouped = _by_alternative_kind(ranked)
+    if grouped:
+        bits = [grouped_clause for grouped_clause in grouped]
+        leverage = _enum_word(profile.operating_leverage)
+        if leverage:
+            bits.append(f"the economics that decide the contest are "
+                        f"{leverage} operating leverage — "
+                        f"{_lower_first(_first_clause(profile.operating_leverage))}")
+        return _sentence(", and ".join(bits))
     # "CONTESTED MOST DIRECTLY BY" IS A STRONG CLAIM AND NEEDS A STRONG BASIS.
     #
     # With no ladder rows this fell through to the manifest's structural
@@ -1100,13 +1128,91 @@ def _position(name, profile, selection, rivals_read=()) -> str:
                     + ", which earn differently and so are a weaker "
                       "comparison than a direct rival")
     elif rivals:
-        bits.append("Its position is contested most directly by "
+        # §8. ONE VOICE. This is the manifest peer fallback, reached only
+        # when the ladder returned nothing, and it said "contested MOST
+        # directly by" while the ladder path above says "contested directly
+        # by" — two claims of different strength for the same thing, decided
+        # by which producer happened to answer.
+        bits.append("Its position is contested directly by "
                     + _join(rivals))
     if leverage:
         bits.append(f"and the economics that decide the contest are "
                     f"{leverage} operating leverage — "
                     f"{_lower_first(_first_clause(profile.operating_leverage))}")
     return _sentence(", ".join(bits)) if bits else ""
+
+
+#: §8. ONE CLAUSE PER KIND OF ALTERNATIVE, in the order a reader needs them:
+#: who beats us in a deal, what the customer buys instead, what they build,
+#: and what happens when they do nothing. Keyed on the ladder's kind, never
+#: on the company (§43).
+_DIRECT_KINDS = ("DIRECT", "ADJACENT")
+_SUBSTITUTE_KINDS = ("SUBSTITUTE", "PLATFORM_BUNDLE", "OPEN_SOURCE",
+                     "CHANNEL_SHIFT", "AI_ENTRANT", "AI_REPLACEMENT",
+                     "REGULATORY", "BEHAVIOUR_SHIFT")
+_BUILD_KINDS = ("BUILD_IN_HOUSE",)
+_INERTIA_KINDS = ("MANUAL_WORKFLOW", "DO_NOTHING")
+
+
+#: A retrieved firm keeps its capital letter; a phrase read off the business
+#: model is a common noun and mid-sentence it must read like one. "customers
+#: can substitute Another surface holding the same attention hour" is the
+#: kind of sentence that tells a reader the text was assembled rather than
+#: written.
+_ATTRIBUTED_RUNGS = ("NAMED_BY_SUBJECT", "NAMED_BY_CUSTOMER",
+                     "NAMED_BY_RIVAL", "NAMED_BY_ANALYST")
+
+
+def _identity_in_sentence(row) -> str:
+    name = str(getattr(row, "name", "") or "")
+    if str(getattr(row, "rung", "") or "") in _ATTRIBUTED_RUNGS:
+        return name
+    return _lower_first(name)
+
+
+def _by_alternative_kind(rows) -> list:
+    """The opening sentence's clauses, one per kind that has a row.
+
+    THE FIRST CLAUSE CARRIES THE SUBJECT. A company whose filing names no
+    firm still has real alternatives, and the sentence has to say what they
+    are without either claiming a rival it does not have or reading as an
+    absence notice.
+    """
+    buckets = {"direct": [], "substitute": [], "build": [], "inertia": []}
+    for row in rows:
+        kind = str(getattr(row, "kind", "") or "")
+        identity = _identity_in_sentence(row)
+        if kind in _DIRECT_KINDS or not kind:
+            buckets["direct"].append(identity)
+        elif kind in _BUILD_KINDS:
+            buckets["build"].append(identity)
+        elif kind in _INERTIA_KINDS:
+            buckets["inertia"].append(identity)
+        else:
+            buckets["substitute"].append(identity)
+    lead_taken = bool(buckets["direct"])
+    out, budget = [], 3
+    for key, frame in (
+            ("direct", "Its position is contested directly by {}"),
+            ("substitute", "customers can substitute {}"),
+            ("build", "customers can internalise the work themselves — {}"),
+            ("inertia", "the alternative may be delaying the purchase "
+                        "altogether — {}")):
+        names = buckets[key][:budget]
+        if not names:
+            continue
+        budget -= len(names)
+        clause = frame.format(_join(names))
+        if not out and not lead_taken:
+            # No firm was retrieved, so the sentence leads with the economic
+            # truth rather than with a name it does not have.
+            clause = ("Its position is contested less by a named firm than "
+                      "by the alternatives its customers already have: "
+                      + clause)
+        out.append(clause)
+        if budget <= 0:
+            break
+    return out
 
 
 def _central_question(name, profile, selection) -> str:
@@ -1282,6 +1388,7 @@ def _from_ground(name, profile, selection, ground) -> Tuple[CompetitorRead, ...]
         out.append(CompetitorRead(
             name=rival.identity,
             rung=rival.rung,
+            kind=rival.kind,
             why_a_rival=_sentence(why),
             exposure=_sentence(getattr(move, "impact", "")
                                or _capitalise(rival.why_it_matters)),
@@ -1391,7 +1498,26 @@ def _level4_legacy(name, profile, selection, documents=()
     return tuple(out[:5])
 
 
-def _named_rivals(company: str, documents, profile=None) -> Tuple[dict, ...]:
+def _routed(refusals) -> Tuple[tuple, ...]:
+    """§6. The refused candidates, grouped under the section they belong to.
+
+    Building the routing and never calling it would be the shape of defect
+    this codebase keeps finding: a capability with no production caller reads
+    as done and shows a reader nothing.
+    """
+    try:
+        from intent_engine.executive.competitive_qualification import routed
+        out = []
+        for section, rows in sorted(routed(refusals or ()).items()):
+            for row in rows[:3]:
+                out.append((section, row.candidate, row.reason))
+        return tuple(out[:8])
+    except Exception:                                       # noqa: BLE001
+        return ()
+
+
+def _named_rivals(company: str, documents, profile=None,
+                  refusals=None) -> Tuple[dict, ...]:
     """Rivals this company named, from evidence the run already holds.
 
     Never raises: a competitive read that disappears because an extractor
@@ -1426,6 +1552,7 @@ def _named_rivals(company: str, documents, profile=None) -> Tuple[dict, ...]:
         # what the SUBJECT sells, and only the profile knows.
         found = find_competitors(
             own, subject=company, limit=4,
+            refusals=refusals,
             business_model=str(getattr(profile, "business_model_class", "")
                                or ""))
     except Exception:                                       # noqa: BLE001
