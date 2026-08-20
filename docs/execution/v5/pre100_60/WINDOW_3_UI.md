@@ -117,3 +117,54 @@ capture of the session — two of the previous three were lost or pre-fix.
 * **The evidence-beside-answers prediction could not be tested.**
   `FounderDecision.grounded_in` is absent from `cec9b2f`; it needs the next
   SHA.
+
+
+---
+
+## Closed, mechanism NOT established
+
+Re-run on `82ffe6f`, run `01M0G9ZW4QBCZB8QMFTVBZCG6X`, 170s, auto-advanced,
+10/10 answered. The row changed:
+
+| | |
+|---|---|
+| `71e4dc0` | WELLS FARGO — 10-K · **Regulatory or investor filing** · *is committing capital to capacity ahead of the demand for it* |
+| `82ffe6f` | WELLS FARGO — 10-K · **Independent evidence** · *"Information in response to this Item 7 can be found in the 2025 Annual Report…"* |
+
+The label is now the correct mapping for `independent_reporting`, and the text
+beside it is Wells Fargo's own content rather than a claim about JPMorgan's
+capital. A same-code-path local run against live SEC confirms the mechanism:
+`rows_where_ownership_disagrees_with_the_filer` = 0,
+`rows_citing_another_filers_document` = empty, and `distribution_model` cites
+`obs-src-b374efb5092e` → filer **19617**, JPMorgan's own 10-K.
+
+The capacity sentence remains, and that is **correct**: JPMorgan's own filing
+carries the signal.
+
+### The mechanism is not established, and the record says so
+
+`git diff --stat 71e4dc0 82ffe6f -- src/` is one file — the `elif`→`if` CIK
+fix plus an additive read-only route. By elimination the CIK fix moved the
+page. But that fix was jointly dismissed as unable to explain these captures,
+because the harness posts no `suggest_domain`, so `picked_domain` is empty and
+the old `elif` should already have fired.
+
+**Both cannot be true.** One premise is wrong and the run that would settle it
+— a pre-fix run whose `subject_cik` could be read — no longer exists.
+
+**Six confident stories about this one defect were wrong before this point.**
+The artifact records an unresolved mechanism rather than a seventh.
+
+### The durable fix is observability, not the repair
+
+Record `subject_cik` on the run at creation so it reaches `run_meta` and
+`provenance.json` for every run. Every hour spent here traces to one field
+being unobservable after the fact.
+
+### A constraint worth naming
+
+`provenance.json` is operator-gated, correctly — it carries tenant data.
+Neither agent doing the diagnosis could read it, and neither would enter
+credentials to try. The diagnostic built to settle live defects cannot be read
+by the people settling them, so run-scoped fields needed for this work must
+reach a readable surface or be logged.
