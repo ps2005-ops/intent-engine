@@ -198,12 +198,57 @@ def _mechanism_of(hypothesis) -> str:
     mechanism). It is one colon.
     """
     reasoning = _flat(_get(hypothesis, "reasoning"))
+    claim = ""
     if ":" in reasoning:
-        tail = reasoning.split(":", 1)[1].strip()
-        claim = _claim(tail)
-        if claim:
-            return claim
-    return _claim(reasoning) or _claim(_get(hypothesis, "statement"))
+        claim = _claim(reasoning.split(":", 1)[1].strip())
+    if not claim:
+        claim = _claim(reasoning) or _claim(_get(hypothesis, "statement"))
+    return claim
+
+
+def grounding_of(hypothesis) -> str:
+    """THIS company's own words, for a mechanism every company shares.
+
+    NOT APPENDED TO THE MECHANISM, and the reason is measured. Doing that
+    turned `test_no_sentence_is_printed_twice_in_either_document` red: the
+    Full Analysis ALREADY prints this quote, via `narrative.py`'s call to
+    `mechanism.because_line`, so grounding the mechanism string printed the
+    same sentence twice on the one surface that was already doing it right.
+    It also did nothing for the surface that was measured identical, because
+    the board answers route off topic, falsifier and recommendation — never
+    off the mechanism. A change that duplicated on one surface and did not
+    reach the other was not half a fix; it was neither half.
+
+    This is offered to callers that do NOT already show the quote. `qa.py` is
+    one: it had no access to the sentence at all.
+
+    MEASURED LIVE on 31e6138. Caterpillar and Exxon Mobil are DIFFERENT
+    business-model classes, render different business models on the page, and
+    answered EIGHT OF TEN board questions with the identical sentence —
+    "committing capital to capacity ahead of uncertain demand". Neither
+    qualifying is the defect; both genuinely commit capital to physical
+    capacity. The defect is that QUALIFYING WAS SUFFICIENT TO DETERMINE THE
+    WHOLE READING, because every field of the decision comes from the
+    pattern's static text with only `{company}` substituted.
+
+    The differentiation already existed and was thrown away here.
+    `reasoning._mechanism_evidence` captures, at the only point that still
+    knows which signal qualified, the sentence from THIS filer's document that
+    established the mechanism — and `decision.py`, the one object every
+    surface renders, never read it. Caterpillar's sentence is about dealer
+    inventory and backlog; Exxon's is about sanctioned projects and capex.
+    Same mechanism, different companies, and now different words.
+
+    This closes the produced-and-never-read half. It does NOT close the
+    template collapse itself: the topic, the alternatives, the falsifiers and
+    the implications are still the pattern's own text, so two companies
+    sharing a pattern still share those. See BATCH_A_FINAL_UI.md.
+    """
+    try:
+        from intent_engine.strategic_intelligence import mechanism as MECH
+        return MECH.because_line(hypothesis, limit=1)
+    except Exception:                                       # noqa: BLE001
+        return ""
 
 
 def _evidence_ids(hypothesis, kind: str) -> tuple:
@@ -347,6 +392,13 @@ class FounderDecision:
     what_each_result_would_favour: str = ""
     reconsider_when: str = ""
     verified: tuple = ()
+    #: WHOSE FILING MADE THIS TRUE. The pattern text is shared by every
+    #: company that qualifies; this is the sentence from THIS filer's own
+    #: document that qualified it. Carried on the decision because the
+    #: decision is the one object every surface renders, and Q&A -- the
+    #: surface measured identical for two different filers -- receives a
+    #: projected insight that never carried the hypothesis at all.
+    grounded_in: str = ""
     #: how the options were derived -- "topic" or "alternative". Internal.
     basis: str = ""
 
@@ -532,7 +584,8 @@ class FounderDecision:
             "evidence_required": list(self.evidence_required),
             "what_each_result_would_favour": self.what_each_result_would_favour,
             "reconsider_when": self.reconsider_when,
-            "verified": list(self.verified), "basis": self.basis,
+            "verified": list(self.verified),
+            "grounded_in": self.grounded_in, "basis": self.basis,
             # derived, so a renderer never has to re-derive them and drift
             "headline": self.headline,
             "undecided_question": self.undecided_question,
@@ -996,6 +1049,7 @@ def compose_decision(company_name, hypothesis, blind_spots=(),
 
     decision = FounderDecision(
         topic=topic, mechanism=mechanism, options=options,
+        grounded_in=grounding_of(hypothesis),
         limitation=limitation, falsifier=falsifier, watch_items=watch_items,
         recommendation_reason=reason, verified=verified, basis=basis,
         evidence_required=tuple(_flat(g) for g in gaps[:3]) or (

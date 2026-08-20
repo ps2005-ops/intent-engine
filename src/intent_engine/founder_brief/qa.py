@@ -354,6 +354,29 @@ def _intent(question: str, markers) -> bool:
     return any(m in low for m in markers)
 
 
+def _pattern_grounding(decision) -> str:
+    """The sentence from THIS company's filing that qualified its reading.
+
+    MEASURED LIVE on 31e6138. Caterpillar and Exxon Mobil are different
+    business-model classes and answered EIGHT OF TEN board questions with the
+    identical sentence, because every field of the composed decision is the
+    pattern's static text with only the company name substituted —
+    `compose_decision`'s own docstring says "nothing here is per-company".
+
+    READ OFF THE DECISION, NOT THE BRIEF. The brief carries a projected
+    `FounderInsight`, which has no hypothesis and no mechanism evidence on it
+    at all — so this surface never had access to the quote, which is exactly
+    why two different filers sounded identical here. The Full Analysis was
+    already right: `narrative.py` prints it via `mechanism.because_line`.
+
+    Not folded into the mechanism string either: that duplicated the sentence
+    on the surface already showing it and reached this one not at all.
+    """
+    if not isinstance(decision, dict):
+        return str(getattr(decision, "grounded_in", "") or "")
+    return str(decision.get("grounded_in") or "")
+
+
 def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
            trust=None, contract=None, decision=None,
@@ -508,6 +531,15 @@ def answer(question: str, brief, *, engine_answer: str = "",
             "one." if k else "Verified fact only — no interpretation is "
                              "offered because the evidence does not support "
                              "one.")
+    # WHOSE FILING MADE THIS TRUE. Two companies matching one pattern receive
+    # the same pattern text, so without this the answer is identical for both
+    # — measured on Caterpillar and Exxon, 8 of 10 board questions. The quote
+    # is only added where the answer does not already carry evidence of its
+    # own, so an evidence question keeps the source it chose.
+    if not out.strongest_evidence:
+        grounding = _pattern_grounding(decision)
+        if grounding:
+            out.strongest_evidence = grounding
     return out
 
 

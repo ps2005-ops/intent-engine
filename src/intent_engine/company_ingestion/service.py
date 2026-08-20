@@ -1348,7 +1348,12 @@ class CompanyIngestionService:
         # them is a fact about THAT filer. JPMorgan rendered Wells Fargo's
         # capacity sentence as its own distribution model until the producer
         # was told whose documents these are.
-        observations = derive_observations(documents, company=company_name)
+        # THE SUBJECT'S CIK IS WHAT DECIDES OWNERSHIP. Without it every
+        # EDGAR document looks equally like this filer's own, and Wells
+        # Fargo's 10-K stated JPMorgan's business model on the live page.
+        observations = derive_observations(
+            documents, company=company_name,
+            subject_cik=str((self.run_meta(run_id) or {}).get("cik") or ""))
         observations += list(extra_observations or ())
         if not observations:
             # MEASURED: 2 of 5 real companies (Toyota, Costco) died here with

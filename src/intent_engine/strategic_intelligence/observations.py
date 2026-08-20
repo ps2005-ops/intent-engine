@@ -1022,6 +1022,12 @@ def _subject_speaking_classes():
     return tuple(c for c in SOURCE_CLASSES if c not in INDEPENDENT_CLASSES)
 
 
+def _document_url(doc) -> str:
+    get = (doc.get if isinstance(doc, dict)
+           else lambda k, d=None, o=doc: getattr(o, k, d))
+    return str(get("final_url", "") or get("url", "") or "")
+
+
 def subject_documents(documents, *, subject_cik: str = "") -> list:
     """The documents that may describe THIS company. One owner for the rule.
 
@@ -1215,6 +1221,12 @@ def derive_observations(documents, *, company: str = "",
     """
     if subject_only:
         documents = subject_documents(documents, subject_cik=subject_cik)
+    # WHOSE DOCUMENT IS THIS, decided at the only layer that still has the
+    # URL. `build_mental_model` sees observations and never a URL, and
+    # `source_class` cannot answer it -- see `records.subject_owned`.
+    owned_urls = {_document_url(d)
+                  for d in subject_documents(documents,
+                                             subject_cik=subject_cik)}
     observations, seen = [], set()
     for doc in documents:
         # collapse duplicate pages: same content hash or same normalized URL
@@ -1327,6 +1339,7 @@ def derive_observations(documents, *, company: str = "",
                                             "strategic picture"),
             entity=entity,
             weak=weak,
+            subject_owned=_document_url(doc) in owned_urls,
             evidence_quality="weak" if weak else "strong"))
     return observations
 

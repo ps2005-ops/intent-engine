@@ -34,7 +34,9 @@ PROOFS = [
 
     ("A2. an independent class is treated as the subject's own voice",
      M,
-     "        own = (o.source_class or \"company_owned\") in speaks_for_subject",
+     "        own = (getattr(o, \"subject_owned\", True)\n"
+     "               and (o.source_class or \"company_owned\") "
+     "in speaks_for_subject)",
      "        own = True",
      f"{T}::test_provenance_never_names_another_registrant",
      "assert"),
@@ -71,6 +73,42 @@ PROOFS = [
      "        if False:",
      f"{T2}::test_an_unrecognised_source_class_fails_closed",
      "assert"),
+
+    # --- D: the class gate alone shipped inert; ownership must be carried
+    ("D1. the model decides ownership from source_class alone again",
+     M,
+     "        own = (getattr(o, \"subject_owned\", True)\n"
+     "               and (o.source_class or \"company_owned\") "
+     "in speaks_for_subject)",
+     "        own = (o.source_class or \"company_owned\") "
+     "in speaks_for_subject",
+     f"{T}::test_a_third_party_filing_cannot_state_the_model_even_as_"
+     "investor_material",
+     "stating this company's business model"),
+
+    ("D2. the producer stops deciding ownership from the URL",
+     O,
+     "            subject_owned=_document_url(doc) in owned_urls,",
+     "            subject_owned=True,",
+     f"{T}::test_another_registrants_filing_is_not_subject_owned",
+     "marked as this company's own"),
+
+    ("D3. the owned set is built without the subject's CIK",
+     O,
+     "    owned_urls = {_document_url(d)\n"
+     "                  for d in subject_documents(documents,\n"
+     "                                             subject_cik=subject_cik)}",
+     "    owned_urls = {_document_url(d) for d in documents}",
+     f"{T}::test_another_registrants_filing_is_not_subject_owned",
+     "marked as this company's own"),
+
+    ("E1. the mechanism evidence stops checking whose document it is",
+     ROOT / "src/intent_engine/strategic_intelligence/reasoning.py",
+     "            if not getattr(observation, \"subject_owned\", True):\n"
+     "                continue",
+     "            if False:\n                continue",
+     f"{T}::test_a_third_partys_sentence_is_never_the_companys_own_words",
+     "became the company's own"),
 
     # The repair must not re-create the failure it replaced.
     ("C1. observations are narrowed again, starving cross-source coverage",

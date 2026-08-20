@@ -98,6 +98,20 @@ class StrategicObservation:
     relevance: str = ""             # why this matters to the analysis
     entity: str = ""                # linked product/project/entity
     weak: bool = False              # title-only / generic marketing → weak
+    #: Whether the document this came from SPEAKS FOR the subject.
+    #:
+    #: MEASURED LIVE, twice. `source_class` cannot answer this: it encodes HOW
+    #: a document was retrieved, not WHOSE it is, and `edgar.filing_candidates`
+    #: stamps every filing it proposes `investor_material` whoever filed it.
+    #: So a class filter passed Wells Fargo's 10-K as JPMorgan's own and the
+    #: rendered page said JPMorgan "is committing capital to capacity ahead of
+    #: the demand for it", sourced to Wells Fargo.
+    #:
+    #: The EDGAR path names the filer, so ownership is decided where the URL
+    #: still exists -- in `observations.derive_observations` -- and carried
+    #: here, because `build_mental_model` sees observations and never a URL.
+    #: Defaults True so a hand-built observation behaves as it always has.
+    subject_owned: bool = True
     evidence_quality: str = "strong"  # strong | weak
     #: signal -> the sentence IN THIS DOCUMENT that evidenced it.
     #:

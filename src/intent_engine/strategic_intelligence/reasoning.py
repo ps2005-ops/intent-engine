@@ -207,6 +207,22 @@ def _mechanism_evidence(pattern, observations):
         for observation in observations:
             if signal not in (observation.signals or ()):
                 continue
+            # "THE COMPANY'S OWN WORDS" MUST BE THE COMPANY'S OWN WORDS.
+            #
+            # MEASURED LIVE on cec9b2f. Meta's page carried, sourced to
+            # NETWORK-1 TECHNOLOGIES' 2024 10-K — a patent litigant whose
+            # filing says "our case against Meta Platforms, Inc." — the line
+            # "Meta Platforms, Inc. is committing capital to capacity ahead
+            # of the demand for it". `narrative.py` renders this quote as
+            # "The company's own words:", and it was whoever's words the
+            # observation happened to carry.
+            #
+            # Filtering here fixes every consumer at once: the narrative, the
+            # decision's grounding, and the citations all read from this one
+            # producer. `subject_owned` is decided in `derive_observations`,
+            # where the URL still exists.
+            if not getattr(observation, "subject_owned", True):
+                continue
             quote = (getattr(observation, "signal_spans", None)
                      or {}).get(signal, "")
             if not quote:

@@ -122,7 +122,23 @@ def build_mental_model(company, observations, hypotheses, *, now,
     by_signal = {}
     own_by_signal = {}
     for o in observations:
-        own = (o.source_class or "company_owned") in speaks_for_subject
+        # TWO GATES, AND THE CLASS ONE IS THE WEAKER.
+        #
+        # MEASURED LIVE on cec9b2f, AFTER the class gate shipped: JPMorgan's
+        # page still read "Is committing capital to capacity ahead of the
+        # demand for it", sourced to WELLS FARGO & COMPANY's 10-K. The class
+        # filter passed it because `edgar.filing_candidates` stamps every
+        # filing it proposes `investor_material` WHOEVER FILED IT. source_class
+        # encodes HOW a document was retrieved, not WHOSE it is, and it can
+        # never carry ownership.
+        #
+        # `subject_owned` is decided in `derive_observations`, at the only
+        # layer that still has the URL -- the EDGAR path names the filer.
+        # This function sees observations and never a URL, which is why the
+        # first repair was written against the only signal visible here and
+        # was inert on the page.
+        own = (getattr(o, "subject_owned", True)
+               and (o.source_class or "company_owned") in speaks_for_subject)
         for s in o.signals:
             by_signal.setdefault(s, []).append(o)
             if own:
