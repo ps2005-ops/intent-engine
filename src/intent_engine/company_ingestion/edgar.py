@@ -135,6 +135,31 @@ TRUNCATABLE_FORMS = frozenset({"10-K", "20-F", "40-F"})
 #: bounded analysis. 16MB clears the largest observed filing with headroom
 #: without pretending there is no limit at all.
 MAX_FILING_BYTES = 16_000_000
+
+#: THE SUBMISSIONS INDEX IS NOT A WEB DOCUMENT AND MUST NOT SHARE ITS CAP.
+#:
+#: MEASURED. JPMorgan Chase (CIK 19617) files 25,746 recent documents, 22,368
+#: of them 424B2 structured-note prospectuses, and its submissions JSON is
+#: 4,573,499 bytes against a 2,000,000-byte MAX_RESPONSE_BYTES. The transport
+#: truncated it at exactly 2 MB, `json.loads` raised on the half-object, the
+#: broad `except` returned [], and the customer was told "no approved source
+#: could be retrieved" for a company whose 10-K was sitting in the index.
+#:
+#: Every other Batch-A company's index is about 160 KB, so nothing else in
+#: the cohort came near the cap and the defect looked like a JPMorgan quirk.
+#: It is not: it is every filer that issues frequently — the large banks and
+#: shelf issuers — and it scales with filing count, not with company size.
+MAX_SUBMISSIONS_BYTES = 32_000_000
+
+
+class SubmissionsTruncated(Exception):
+    """The index was cut off by the byte budget, so it cannot be read.
+
+    A DISTINCT EXCEPTION BECAUSE THE TWO OUTCOMES ARE DIFFERENT FACTS. "This
+    filer has no usable filings" and "we could not read the filer's index"
+    were both reported as an empty candidate list, and the second is a defect
+    in us that was being displayed as a fact about the company.
+    """
 _DROP_TOKENS = {"inc", "incorporated", "corp", "corporation", "co", "company",
                 "ltd", "limited", "plc", "llc", "lp", "holdings", "group",
                 "technologies", "technology", "the", "and", "of"}
@@ -167,7 +192,8 @@ def _sec_transport(url: str, timeout: float,
             len(body) > max_bytes)
 
 
-def _fetch_bytes(url, *, transport, resolver, timeout=8.0) -> bytes:
+def _fetch_bytes(url, *, transport, resolver, timeout=8.0,
+                 max_bytes=None) -> bytes:
     """Fetch a permitted SEC URL through the SSRF wall. The URL is validated
     and its host resolved to public addresses before any request; SEC serves
     JSON, so this is not subject to the HTML-only MIME gate. Injected
@@ -176,9 +202,25 @@ def _fetch_bytes(url, *, transport, resolver, timeout=8.0) -> bytes:
     if resolver is not False:
         resolve_public_addresses(urlparse(url).hostname, resolver=resolver)
     tx = transport if transport is not None else _sec_transport
-    status, headers, body, _exceeded = tx(url, timeout)
+    if max_bytes is None:
+        status, headers, body, exceeded = tx(url, timeout)
+    else:
+        try:
+            status, headers, body, exceeded = tx(url, timeout, max_bytes)
+        except TypeError:
+            # An injected transport that predates the budget argument keeps
+            # working against its own cap, which is what every test double
+            # does today.
+            status, headers, body, exceeded = tx(url, timeout)
     if isinstance(body, str):
         body = body.encode()
+    # TRUNCATION IS NOT AN ANSWER. Returning the cut-off bytes hands a broken
+    # JSON document to a parser whose failure is indistinguishable from a
+    # filer with nothing on file.
+    if exceeded:
+        raise SubmissionsTruncated(
+            f"{url} exceeded the {max_bytes or MAX_RESPONSE_BYTES:,}-byte "
+            f"budget for this call")
     return body
 
 
@@ -329,7 +371,8 @@ def registrant_classification(resolved, *, transport=None,
     try:
         raw = _fetch_bytes(
             SUBMISSIONS_URL.format(cik10=resolved["cik10"]),
-            transport=transport, resolver=resolver)
+            transport=transport, resolver=resolver,
+            max_bytes=MAX_SUBMISSIONS_BYTES)
         payload = json.loads(raw.decode("utf-8", "replace"))
     except Exception:                                       # noqa: BLE001
         return {}
@@ -356,7 +399,8 @@ def submissions(cik, *, transport=None, resolver=None) -> dict:
         return {}
     try:
         raw = _fetch_bytes(SUBMISSIONS_URL.format(cik10=digits.zfill(10)),
-                           transport=transport, resolver=resolver)
+                           transport=transport, resolver=resolver,
+                           max_bytes=MAX_SUBMISSIONS_BYTES)
         payload = json.loads(raw.decode("utf-8", "replace"))
     except Exception:                                       # noqa: BLE001
         return {}
@@ -370,7 +414,8 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
     try:
         raw = _fetch_bytes(
             SUBMISSIONS_URL.format(cik10=resolved["cik10"]),
-            transport=transport, resolver=resolver)
+            transport=transport, resolver=resolver,
+            max_bytes=MAX_SUBMISSIONS_BYTES)
         recent = json.loads(raw.decode("utf-8", "replace"))["filings"]["recent"]
         forms = recent["form"]
         accessions = recent["accessionNumber"]
