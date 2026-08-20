@@ -335,7 +335,31 @@ never a URL, which is exactly why the first repair was written against the only
 signal visible there. Route 2 is filtered at the producer, so the narrative,
 the decision's grounding and the citations move together rather than each
 growing its own filter.
-**Live reproof: FAILED, three times.** `71e4dc0` renders JPMorgan's page
+**Live reproof, fourth attempt (`82ffe6f`): the page MOVED, and neither
+session predicted it.** Wells Fargo now renders as what it is — labelled
+"Independent evidence", carrying its own Item 7 pointer, not a claim about
+JPMorgan's capital. "Distribution model — committing capital to capacity" is
+still there and, by fact 2 below, **that is correct**: JPMorgan's own 10-K
+carries the signal.
+
+Both diagnostic arrays are empty, computed on the deployed code path against
+live SEC: `rows_where_ownership_disagrees_with_the_filer = 0`, and
+`distribution_model` cites an observation resolving to **filer 19617,
+JPMorgan's own SEC 10-K**. The join both sessions predicted **does not exist**.
+
+**And the cause is probably the fix both sessions dismissed.** Between the
+failing capture and this one the commit range is
+`71e4dc0 → d3ccd5a → e57d02c → c0bcc05 → 82ffe6f`, and the only
+product-code change in it is `d3ccd5a` — the `elif` that discarded a confirmed
+pick's CIK. Everything else is docs or an additive read-only route. By
+elimination that is what moved the page, having been jointly reasoned away on
+the grounds that the journey harness omits `suggest_domain`.
+
+**Recorded as: the defect appears closed, the mechanism is NOT established,
+and the leading explanation is the repair both sessions ruled out.** The check
+that would settle it needs the pre-fix run, which no longer exists.
+
+**Prior live reproofs: FAILED, three times.** `71e4dc0` renders JPMorgan's page
 byte-identical to `0420fb0` and `cec9b2f`. The repair is verified by test, by
 11/11 break proofs, and by a probe against real EDGAR documents — and is inert
 on the page. **That is the strongest instance of this session's central
@@ -503,7 +527,23 @@ generalising from the consumer that failed. *The fix is a single owner, not a
 second implementation.* Collapsing these two shapes loses exactly the
 reasoning that separates a good fix from a duplicate.
 
-**Causal stories asserted and then disproved by execution — six of them.**
+**Both sessions reasoned from the same unexamined inference, in opposite
+directions, and the disagreement felt like scrutiny.** The Wells Fargo
+document's class was argued twice from a RENDERED LABEL rather than from the
+`source_class` the label is computed from. One session asserted it was *not*
+`investor_material` without measuring; the other asserted it *was*, without
+measuring, and used that to overrule the first — correctly, as it seemed, with
+the class sets quoted and the reasoning laid out. It is
+`independent_reporting`, measured by calling the producer directly.
+
+The useful half is not that one overruled the other. It is that **two people
+checking each other is not the same as either of them checking the thing.**
+Review felt like verification and was not, because both sides rested on the
+same inference and neither noticed they were making it. The only thing that
+moved this defect, at every stage, was somebody executing something.
+
+**Causal stories asserted and then disproved by execution — six of them, on
+one defect.**
 Four from the journey session: the SEC block is a burst limit (falsified by a
 paced wave); it is document size (falsified by measuring bytes);
 `level4_competition` is empty or the gate blocked it (falsified by three
@@ -515,6 +555,30 @@ capture). Every one was plausible. None survived execution — and *execution*
 is the right word, because two were experiments rather than rendered pages.
 That is why each root cause here records how it was established.
 
+**The six, in order, on the claim-ownership defect alone.**
+
+| # | whose | the story | what killed it |
+|---|---|---|---|
+| 1 | journey | the SEC block is a burst limit | a paced wave |
+| 2 | journey | it is document size | measuring the bytes |
+| 3 | journey | `level4_competition` is empty, or `_ground` was swallowed | three Bounded reads |
+| 4 | repair | step 1 overclaims from manifest peers; Q&A is accurate | the captures — none of the three strings is in any peer list |
+| 5 | repair | `source_class` alone is sufficient | the JPMorgan capture, then the producer |
+| 6 | journey | the document is `investor_material` | calling `_third_party_filing_candidates` |
+
+Four of the six were the journey session's, two the repairing session's, and
+**the two that survived longest — burst limit and document size — are the two
+that were asserted in a report before being tested.** A cheap hypothesis
+falsified in minutes costs nothing; the same hypothesis written into a status
+update outlives its evidence.
+
+A seventh is now on the record *before* its measurement: both sessions predict
+that `rows_where_ownership_disagrees_with_the_filer` will be **empty** and the
+Wells Fargo row will still render — gate correct, renderer joining. Since both
+predict the same thing for the same reasons, this is not an independent test
+of the hypothesis. It is a test of whether either session can name the
+mechanism at all.
+
 **Break proofs that came back `NOT_CAUGHT` or `INVALID`: more than twenty
 across both sessions — and not one of them meant the code was fine.** Every
 single one named a weak test, a dead guard, or a bound already enforced
@@ -523,7 +587,16 @@ no consumer, so the end-to-end assertion passed for the wrong reason; an
 assertion satisfied by a raw dict repr; a test that called the helper and
 walked past the call site being repaired; an assertion checking for the
 absence of one phrase, where removing the guard produced a *different* wrong
-sentence containing none of the words looked for. That last one is the
+sentence containing none of the words looked for. **And a measurement can silently stop measuring.** The journey session's
+first grep for the Wells Fargo row used a pattern requiring `— 10-K` within a
+bounded character range. It returned nothing, and "Wells Fargo is gone from
+the page" was thirty seconds from being reported as the repair working. The
+string was there; the pattern had narrowed. A wider grep found it at once.
+Third time in one session that the *pleasant* answer was the wrong one, and
+the only reason none of them shipped is that somebody widened the instrument
+before believing it.
+
+That last one is the
 sharpest: **absence-of-a-phrase is a spelling test, not a property.** A guard
 asserts the property, with a positive control beside it, so it can fail in
 both directions.
