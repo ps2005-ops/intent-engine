@@ -45,6 +45,23 @@ variants from a set gave 0/10 again (arbitrary iteration order replaced
 by run rather than by company, making three identical answers look distinct.
 **1/10 is the number to quote.**
 
+## The eight are NOT one measured cohort
+
+Window 1 ran on `0420fb0`; window 2 runs on `188da7c`, which carries three
+further repairs including the one that fixes the competitor contradiction. So
+these eight companies were **not** read on one build and this document must
+not present them as a single cohort. Two consequences, both stated rather than
+smoothed over:
+
+- Any cross-company comparison that spans the two windows is confounded by the
+  build, exactly as a NVIDIA-vs-Caterpillar comparison across `58ac7ef` and
+  `0420fb0` would have been. Within-window comparisons are sound.
+- **The JPMorgan ownership proof cannot come from window 2**, because
+  JPMorgan is not in it. "Did `committing capital to capacity` leave
+  JPMorgan's page" needs a JPMorgan re-run on `188da7c`. Until that run
+  exists, that repair is **verified by test and NOT by capture**, and is
+  recorded that way below.
+
 ## Reliability, window 1 (`0420fb0`)
 
 | company | seconds | auto-advanced | false failure | manual recovery | wrong identity | board answers |
@@ -163,6 +180,8 @@ observations, so it fails the cross-source bar on every run to fix a claim
 nobody had made yet. A break proof pins that so it cannot return silently.
 **Fix:** ownership is enforced where the claim is made. Support is restricted
 to subject-speaking classes; contradiction is not.
+**Live reproof: NOT YET.** Verified by unit test and break proof; the
+rendered-page proof needs a JPMorgan re-run on `188da7c`.
 
 ### D6 · The product named the competitors, then denied having identified any
 **Visible evidence:** 3 of 3 companies on `0420fb0`. Step 1 named rivals; Q&A
@@ -173,12 +192,17 @@ have answered correctly was skipped **precisely because the data was there** —
 `value` is truthy, so the emptiness check never fired. It depends on the shape
 of the composed decision, not on the company: three classes, three ladders,
 three Bounded reads, one failure.
-**Established by:** executing the router against the real field name. A
-competing hypothesis — that step 1 was overclaiming from class-level manifest
-peers — was **asserted from code-reading and then disproved by the captures**:
-none of the three rendered strings appears in any manifest peer list, and the
-ladder emits categories at `CONTESTED_CATEGORY`. That correction is recorded
-because the wrong mechanism was the plausible one.
+**Established by:** executing the router against the real field name.
+**Three plausible-wrong mechanisms preceded it, and two were the reporting
+session's own.** (1) "`level4_competition` is empty on the read Q&A builds",
+carried for two sessions. (2) "`_ground` raised and was swallowed on that
+request." (3) "Step 1 is overclaiming from class-level manifest peers and Q&A
+is the accurate surface" — the repairing session's, asserted from code-reading
+and disproved in one step by the captures: none of the three rendered strings
+appears in any manifest peer list, and the ladder emits categories at
+`CONTESTED_CATEGORY`. All three were plausible; none survived execution. That
+is the honest shape of how this was found, and it is why the method is
+recorded beside every cause in this document.
 **Fix:** rows are rendered; an unrenderable row falls through to the canonical
 read before anything reaches the absent copy. The branch serves every intent
 whose field holds rows, so the repair is at the shape.
@@ -204,6 +228,11 @@ opening once named 37signals and Exxon's a gold miner.
 
 ## Method notes worth carrying forward
 
+0. **Verify the instrument hardest when it agrees with you.** Three of the
+   four collapse-measurement errors were self-correcting because the number
+   looked wrong. The fourth produced 0/10 — a clean sweep — and was caught
+   only by reading the underlying answers before believing it. The flattering
+   error is the one that ships.
 1. **A guard that enumerates cannot cover what it does not know about.**
    True of the pattern denylist and true of `_tables()`.
 2. **AST keyword checks must fail closed.** A starred kwarg makes arguments

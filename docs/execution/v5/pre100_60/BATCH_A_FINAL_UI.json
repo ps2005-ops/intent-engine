@@ -423,5 +423,15 @@
       "core_min": "NOT_MEASURED",
       "final_status": "NOT_MEASURED"
     }
+  ],
+  "cohort_warning": "The eight companies were NOT read on one build. Window 1 (JPMorgan, NVIDIA, Walmart) ran on 0420fb0; window 2 (Meta, Amazon, Caterpillar, Exxon, Eli Lilly) runs on 188da7c, which carries three further repairs. Cross-window comparisons are confounded by the build; within-window comparisons are sound.",
+  "proofs_not_yet_captured": [
+    {
+      "repair": "claim ownership in the mental model (975321c)",
+      "test_status": "GREEN \u2014 unit tests and 7/7 break proofs",
+      "capture_status": "NOT_CAPTURED",
+      "what_is_needed": "a JPMorgan re-run on 188da7c, grepped for 'committing capital to capacity'. JPMorgan is not in window 2, so window 2 cannot supply it.",
+      "why_it_matters": "this codebase has shipped green-and-inert repairs before; a test proves the router, not the composed decision's shape in production"
+    }
   ]
 }
