@@ -19,7 +19,9 @@ from code-reading that a capture then contradicted.
 | `0420fb0` | bounded SEC retry, filing cache, the class gate, eight model-keyed tables |
 | `98a7a17` | per-run retry ledger + operator telemetry |
 | `975321c` | claim ownership in the mental model |
-| `188da7c` | structured rows rendered, one competitive state — **current** |
+| `188da7c` | structured rows rendered, one competitive state |
+| `cec9b2f` | archetype question coverage, the article fix |
+| `71e4dc0` | claim ownership rewired on both routes — **current** |
 
 ## Template collapse — the headline number
 
@@ -306,6 +308,58 @@ evidence beside this number, not as the purpose of a window.
 **The wrong fix, named in advance:** a bespoke class per company. §44 forbids
 it without evidence and it reproduces the original defect in a new shape.
 
+### D5 (continued) · The ownership repair shipped and was inert — twice
+**Visible evidence, on `cec9b2f`, after the class gate deployed:** JPMorgan's
+page unchanged — *"Is committing capital to capacity ahead of the demand for
+it"*, sourced to **Wells Fargo & Company**'s 10-K. And on Meta:
+*"Meta Platforms, Inc. is committing capital to capacity ahead of the demand
+for it"*, sourced to **Network-1 Technologies**' 2024 10-K — a patent litigant
+whose filing says "our case against Meta Platforms, Inc."
+**Root cause 1 — the class gate cannot do this job.**
+`edgar.filing_candidates` stamps `"source_class": "investor_material"` on every
+filing it proposes, *whoever filed it*. So another registrant's 10-K is
+subject-speaking by that test. **`source_class` encodes how a document was
+retrieved, not whose it is, and can never carry ownership.** The rendered label
+"Regulatory or investor filing" was the visible clue throughout.
+**Root cause 2 — a second route entirely.** The Meta case never went through
+`build_mental_model`. `narrative.py` renders the mechanism quote under the
+heading *"The company's own words:"*, and `reasoning._mechanism_evidence`
+supplied whichever observation happened to carry the signal.
+**Established by:** a rendered capture, after a code-read assertion by the
+repairing session — *"the class filter alone is sufficient"* — was wrong. The
+risk was flagged in the same message the error was made in.
+**Fix:** ownership is decided in `derive_observations`, at the only layer that
+still holds the URL (the EDGAR path names the filer), and carried on the
+observation as `subject_owned`. `build_mental_model` sees observations and
+never a URL, which is exactly why the first repair was written against the only
+signal visible there. Route 2 is filtered at the producer, so the narrative,
+the decision's grounding and the citations move together rather than each
+growing its own filter.
+**Live reproof: PENDING.** Verified by test and 11/11 break proofs — the same
+standing the version that shipped inert had. `grep "committing capital to
+capacity"` on JPMorgan and Meta is the deciding measurement.
+
+### D11 · Two companies sharing a pattern share the reading
+**Visible evidence:** Caterpillar and Exxon Mobil — *different* business-model
+classes, different rendered business models — answered **8 of 10** board
+questions with the identical sentence, "committing capital to capacity ahead of
+uncertain demand". Reproduced on two SHAs.
+**Root cause:** `compose_decision`'s own docstring states it: *"nothing here is
+per-company"*. Every field is the pattern's static text with only `{company}`
+substituted. **This was never code departing from intent — it was the intent,
+written down, and nobody read it back against what the product had become.**
+**Class is not the axis.** This is the cross-class form of what was measured
+offline *within* a class. One statement covers both: wherever two companies
+share a top pattern, they share the reading. A seventeenth table row keyed on
+class cannot fix it — these two are already in different classes.
+**Partially fixed:** the answer's evidence is now grounded in the sentence from
+*this* filer's own document (`FounderDecision.grounded_in`, read by Q&A, which
+receives a projected `FounderInsight` that never carried the hypothesis).
+**Predicted and confirmed:** grounding would *not* move the 8/10, because board
+answers route off topic/falsifier/recommendation and never off mechanism. It
+did not move. **The template itself is open**, recorded as an
+`xfail(strict=True)` so the day it passes is visible.
+
 ## Not yet cleared
 
 - **Distinct is not the §22 bar.** Some window-1 answers differ by
@@ -348,3 +402,90 @@ it without evidence and it reproduces the original defect in a new shape.
    to a chief executive.
 4. **Record how a cause was established.** Two wrong turns here were
    mechanisms asserted from code-reading that a capture later contradicted.
+
+---
+
+# Handover
+
+**`BATCH_A_FINAL_UI_COMPLETE` is NOT reached, and should not be recorded as
+reached.** Seven of eight companies have been read on a rendered page, across
+**four different SHAs**, and the twenty scorecard dimensions are
+`NOT_MEASURED` for every one of them. Rounding that up would be the same error
+this document spends most of its length describing.
+
+## What is measured, and would be defended
+
+| | |
+|---|---|
+| Template collapse | 10/10 identical → 1/10 → 0/10 across five, with one 8/10 pair remaining |
+| Reliability | 11/11 auto-advanced across three windows; 0 false failures; 0 manual recoveries; 110/110 board questions answered |
+| One run destroyed | by a redeploy during an open window (D8) |
+| Class gate | closed at source — `capacity_ahead_of_demand` reaches exactly the three companies that commit capital to physical capacity |
+| Case A (competitor contradiction) | closed **on the page** |
+| Archetype fallback | closed **on the page** — Meta asks a real question in its own variables |
+| Claim ownership | **OPEN**, verified by test only, both routes rewired and awaiting a rendered capture |
+| §37 zero-Anthropic | PASS — `REQUIRED_ANTHROPIC_CALLS = 0` across all six steps plus Q&A, evidence, sources, brief, X-Ray |
+| §36 security | PASS — 255 tests, plus new path-traversal proofs for the cache |
+
+## The next three things, in order
+
+1. **Settle grep 2.** JPMorgan exercises route 1, Meta exercises route 2. Two
+   runs. Until then the ownership repair has exactly the standing its
+   predecessor had when it shipped inert.
+2. **The template itself (D11).** The open half. The axis is *the qualifying
+   evidence*, not the class — a bespoke class per company reproduces the
+   original defect in a new shape, and §44 forbids it without evidence.
+3. **Batch B, live-UI-first.** The classification probe is done and names the
+   first pair: NVIDIA and AMD, back to back on one SHA, captured as evidence
+   beside the structural claim rather than as the purpose of a window.
+
+## How this session actually went
+
+Nine defects, and the patterns across them are about **who reads what**, not
+about any one subsystem. Two related shapes, kept separate because the fix
+differs:
+
+**Produced and never read** — nobody called them at all. `MODEL_CLASSES`, a
+registry no table consulted. `subject_documents`, written and never imported
+by the module that needed it. The retry ledger, wired onto the service and
+surfaced nowhere. *The fix is a caller.*
+
+**Read by one consumer and not another** — a subtler shape and the more
+dangerous one, because the thing looks alive. `classification_inputs` existed
+on the webapp while the ingestion layer kept its own name-only resolution.
+`mechanism_evidence` was read correctly by `narrative.py` all along and not by
+`decision.py` — a distinction the repairing session initially got wrong,
+generalising from the consumer that failed. *The fix is a single owner, not a
+second implementation.* Collapsing these two shapes loses exactly the
+reasoning that separates a good fix from a duplicate.
+
+**Causal stories asserted and then disproved by execution — six of them.**
+Four from the journey session: the SEC block is a burst limit (falsified by a
+paced wave); it is document size (falsified by measuring bytes);
+`level4_competition` is empty or the gate blocked it (falsified by three
+Bounded reads); filter the documents at the `derive_observations` call site
+(falsified by the independent-source-class bar going red). Two from the
+repairing session: step 1 is overclaiming from manifest peers (falsified by
+the captures); `source_class` alone is sufficient (falsified by the JPMorgan
+capture). Every one was plausible. None survived execution — and *execution*
+is the right word, because two were experiments rather than rendered pages.
+That is why each root cause here records how it was established.
+
+**Break proofs that came back `NOT_CAUGHT` or `INVALID`: more than twenty
+across both sessions — and not one of them meant the code was fine.** Every
+single one named a weak test, a dead guard, or a bound already enforced
+elsewhere: a test that passed on an empty list; a fixture whose signal reached
+no consumer, so the end-to-end assertion passed for the wrong reason; an
+assertion satisfied by a raw dict repr; a test that called the helper and
+walked past the call site being repaired; an assertion checking for the
+absence of one phrase, where removing the guard produced a *different* wrong
+sentence containing none of the words looked for. That last one is the
+sharpest: **absence-of-a-phrase is a spelling test, not a property.** A guard
+asserts the property, with a positive control beside it, so it can fail in
+both directions.
+
+And one about measurement: **verify the instrument hardest when it agrees with
+you.** Four instruments were tried on the collapse number. Three of the four
+errors were self-correcting because the result looked wrong. The fourth
+produced 0/10 — a clean sweep — and was caught only by reading the underlying
+answers before believing it. The flattering error is the one that ships.
