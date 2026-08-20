@@ -996,6 +996,10 @@ class WebApp:
             if session is None:
                 return self._redirect("/login")
             return self._ok_json(self._platform_status())
+        if route == ("GET", "runs", 3) and parts[2] == "provenance.json":
+            if session is None:
+                return self._redirect("/login")
+            return self._ok_json(self._run_provenance(parts[1]))
         if route == ("GET", "assistant", 1):
             return self._assistant_page(session)
         return self._error_page(404, "page not found")
@@ -8023,6 +8027,117 @@ class WebApp:
         _os.remove(probe)
 
     # --- unified operational dashboard (Part 5) -----------------------------
+    def _run_provenance(self, run_id) -> dict:
+        """Whose document is behind each thing this run states. Operator only.
+
+        WHY A SURFACE AND NOT ANOTHER HYPOTHESIS. The claim-ownership repair
+        has now read green in unit tests, passed a probe against real EDGAR
+        documents, and left the rendered page unchanged three times — and
+        five separate hypotheses about why have all been wrong. Two of them
+        were argued from a RENDERED LABEL rather than from the class it was
+        computed from, which is the same error in both directions.
+
+        This ends the guessing by making the run say what it used. For every
+        observation: the id, the title a reader sees, the source_class the
+        label is computed FROM, the origin URL (whose EDGAR path names the
+        filer), and whether the ownership gate marked it the subject's own.
+        A row where those disagree is the defect, and it takes one run.
+        """
+        meta = self.ci.run_meta(run_id) or {}
+        subject_cik = "".join(ch for ch in str(meta.get("cik") or "")
+                              if ch.isdigit())
+        rows = []
+        try:
+            from intent_engine.founder_brief.narrative import provenance_label
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+            company = str(meta.get("company_name") or "")
+            for raw in (report.get("observations") or ()):
+                if not isinstance(raw, dict):
+                    continue
+                origin = str(raw.get("origin") or "")
+                source_class = str(raw.get("source_class") or "")
+                filed_by = ""
+                if "/data/" in origin:
+                    filed_by = origin.split("/data/", 1)[1].split("/", 1)[0]
+                rows.append({
+                    "observation_id": raw.get("observation_id", ""),
+                    "source_title": raw.get("source_title", ""),
+                    "source_class": source_class,
+                    "rendered_label": provenance_label(
+                        source_class, title=str(raw.get("source_title") or ""),
+                        focal=company,
+                        excerpt=str(raw.get("excerpt") or "")[:200],
+                        origin=origin),
+                    "origin": origin,
+                    "filed_by_cik": filed_by,
+                    "is_subject_filing": (bool(filed_by)
+                                          and filed_by == subject_cik),
+                    "subject_owned": raw.get("subject_owned"),
+                    "strategic_signal": raw.get("strategic_signal", ""),
+                })
+        except Exception as exc:                            # noqa: BLE001
+            return {"run_id": run_id, "error": type(exc).__name__}
+        # The rows that ANSWER the question, called out rather than left to
+        # be spotted: a document filed by someone else that the gate marked
+        # the subject's own, or the reverse.
+        disagreeing = [r for r in rows
+                       if r["filed_by_cik"]
+                       and r["is_subject_filing"] is not bool(
+                           r["subject_owned"])]
+        # AND THE ROWS AS THE PAGE COMPOSES THEM.
+        #
+        # If the defect is a JOIN, every observation above looks correct on
+        # its own and the mismatch exists ONLY in the row — a clean
+        # observation list would then read as a clean bill of health and
+        # leave the join invisible. So each rendered row is resolved here the
+        # way a surface resolves it: the component's own evidence ids, and
+        # what each id actually points at.
+        by_id = {r["observation_id"]: r for r in rows}
+        rendered = []
+        try:
+            components = ((report.get("mental_model") or {}).get("components")
+                          or {})
+            for name, component in components.items():
+                if not isinstance(component, dict):
+                    continue
+                ids = list(component.get("supporting_observation_ids") or ())
+                cited = []
+                for oid in ids[:3]:
+                    hit = by_id.get(oid)
+                    cited.append({
+                        "observation_id": oid,
+                        "resolves": bool(hit),
+                        "source_title": (hit or {}).get("source_title", ""),
+                        "source_class": (hit or {}).get("source_class", ""),
+                        "rendered_label": (hit or {}).get("rendered_label", ""),
+                        "filed_by_cik": (hit or {}).get("filed_by_cik", ""),
+                        "is_subject_filing": (hit or {}).get(
+                            "is_subject_filing"),
+                    })
+                rendered.append({
+                    "row": name,
+                    "states": str(component.get("current_state") or "")[:200],
+                    "cited": cited,
+                    "cites_a_document_filed_by_someone_else": any(
+                        c["filed_by_cik"] and c["is_subject_filing"] is False
+                        for c in cited),
+                    "cites_an_id_that_does_not_resolve": any(
+                        not c["resolves"] for c in cited),
+                })
+        except Exception as exc:                            # noqa: BLE001
+            rendered = [{"error": type(exc).__name__}]
+
+        return {"run_id": run_id, "subject_cik": subject_cik,
+                "company_name": str(meta.get("company_name") or ""),
+                "observations": rows,
+                "rows_where_ownership_disagrees_with_the_filer": disagreeing,
+                "rendered_rows": rendered,
+                "rows_citing_another_filers_document": [
+                    r for r in rendered
+                    if r.get("cites_a_document_filed_by_someone_else")
+                    or r.get("cites_an_id_that_does_not_resolve")]}
+
     def _platform_status(self) -> dict:
         """One read-only status object for the whole platform — assembled from
         persisted runtime state. Every value is real (from the stores/status
