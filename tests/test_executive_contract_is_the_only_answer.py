@@ -390,15 +390,24 @@ def test_qa_does_not_collapse_every_question_into_one_refusal():
 # --- D28(b): the behaviour class, not the example -------------------------
 
 def _composed(**over):
-    """A composed decision shaped like the live one the X-Ray renders."""
-    base = {"key_risk": "Renewal concentration in the enterprise base.",
+    """A composed decision shaped like the live one the X-Ray renders.
+
+    STARTED FROM THE REAL SERIALISATION, not hand-listed. A composed decision
+    carries every dataclass field; a fixture listing only the ones a test
+    happened to need makes the completeness rule below fail for a correctly
+    routed intent — the same "fixture does not match production" defect this
+    file exists to prevent, arriving from the other direction.
+    """
+    from intent_engine.strategic_intelligence.decision import FounderDecision
+    base = dict(FounderDecision().as_dict())
+    base.update({"key_risk": "Renewal concentration in the enterprise base.",
             "falsifier": "A quarter where net retention falls below 100%.",
             "information_gaps": ["No independent pricing account exists."],
             "economic_history": {"statement": "Replay is not yet valid here."},
             "second_iteration": {"statement": "Nothing new arrived."},
             "competitors": ["Akamai", "Fastly"],
             "monitoring": ["Enterprise renewal disclosures."],
-            "recommended_next_move": "Hold price and instrument churn."}
+            "recommended_next_move": "Hold price and instrument churn."})
     base.update(over)
     return base
 

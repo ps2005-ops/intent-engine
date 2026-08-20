@@ -1,0 +1,103 @@
+{
+  "artifact": "BATCH_A_DEFECT_MATRIX",
+  "captured_on_sha": "fdbfe77",
+  "companies": 8,
+  "method": "all eight captured on ONE deployed SHA through the real customer journey, then diagnosed OFFLINE from the artifacts. Zero live analyses were spent on diagnosis.",
+  "mechanical_audit": {
+    "companies_with_flags": 0,
+    "checked": [
+      "missing route",
+      "empty route",
+      "failure language",
+      "raw enum",
+      "trailing ellipsis",
+      "cross-surface competitor contradiction"
+    ],
+    "note": "case A and the archetype fallback both hold: 'Who's the real competitor?' is identical on 0 of 28 pairs."
+  },
+  "instrument_corrections": [
+    {
+      "error": "chrome truncation applied to a whole ROUTE",
+      "symptom": "Meta/Amazon slides and full both scored 1.000",
+      "cause": "a 6,333-character page was truncated at its first boilerplate marker, comparing 454 characters of opening banner",
+      "corrected_to": 0.617,
+      "lesson": "a route is not an answer; strip chrome, do not truncate"
+    },
+    {
+      "error": "the bare word 'next' used as a chrome marker",
+      "symptom": "'What should we measure next?' identical on 28 of 28",
+      "cause": "the QUESTION contains 'next', so every answer truncated to 'what should we measure ' \u2014 an instrument that had stopped measuring",
+      "corrected_to": "5 of 28",
+      "lesson": "a bare common word is not a marker; verify the instrument hardest when it produces the most dramatic number"
+    }
+  ],
+  "qa_collapse_pairs_of_10": [
+    {
+      "a": "Caterpillar",
+      "b": "NVIDIA",
+      "identical": 9,
+      "shared": "capacity_ahead_of_demand"
+    },
+    {
+      "a": "Exxon Mobil",
+      "b": "NVIDIA",
+      "identical": 8,
+      "shared": "capacity_ahead_of_demand"
+    },
+    {
+      "a": "Caterpillar",
+      "b": "Exxon Mobil",
+      "identical": 8,
+      "shared": "capacity_ahead_of_demand"
+    },
+    {
+      "a": "Amazon",
+      "b": "Meta",
+      "identical": 8,
+      "shared": "portfolio_run_as_one"
+    },
+    {
+      "a": "Eli Lilly",
+      "b": "Walmart",
+      "identical": 7,
+      "shared": "BOTH REFUSED \u2014 not a shared pattern"
+    },
+    {
+      "a": "Meta",
+      "b": "NVIDIA",
+      "identical": 1,
+      "shared": "nothing \u2014 the floor, and the control"
+    }
+  ],
+  "root_cause": {
+    "finding": "EIGHT OF THE TEN board questions this programme asks reached no intent in the Q&A router. They fell to the strategic catch-all, which answers from the matched pattern's own text.",
+    "evidence": "the two questions that DID route \u2014 'What's the biggest risk?' and 'Who's the real competitor?' \u2014 are the two that did not collapse; competitor is 0 of 28",
+    "two_of_the_misses_were_trivial": [
+      "the falsifier marker required 'proveS this wrong'; the board asks 'What WOULD prove this wrong?' \u2014 one character",
+      "the monitoring marker knew 'monitor next' and not 'measure next'"
+    ],
+    "the_refusal": "Eli Lilly and Walmart answered eight questions with 'I am not going to give you a strategic read on this company' while their own introductions rendered 'Our read: Bounded' and a real central question. The trailing clause \u2014 'the same reason the summary above withheld it' \u2014 cites a refusal no longer being made.",
+    "one_gap": "one router gap produced two collapse clusters and one cross-surface contradiction, which had been treated as three separate defects"
+  },
+  "repair": {
+    "shape": "cluster-first: the router once, not three renderers",
+    "changes": [
+      "all ten board questions now route",
+      "four intents added: why_now, market_belief, weakest_assumption, impossible_hypothesis",
+      "recommendation hears management and the board",
+      "falsifier hears 'would prove'; monitoring hears 'measure'",
+      "a routed answer still carries its grounding \u2014 the early return had started skipping it"
+    ],
+    "guards": [
+      "every board question must route",
+      "no two intents may declare one field",
+      "no marker may be a bare common word",
+      "every intent needs markers, a field and an honest absent sentence"
+    ],
+    "break_proofs": "6/6"
+  },
+  "still_open": {
+    "successor_defect": "two companies sharing a top pattern still share the pattern's own text where a question routes to a field the decision fills from it. The router repair removes the CATCH-ALL half; composition from the company's own evidence is the other.",
+    "measured_by_the_other_session": "selection cannot close it: 2 options in 11 of 12 patterns, ONE gap in 11 of 12, and a lexical selector scored 0.000 on five of six fields because the scaffold speaks strategic vocabulary and the evidence speaks company vocabulary"
+  }
+}

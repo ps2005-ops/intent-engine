@@ -82,8 +82,12 @@ INTENT_ROUTES = (
      "information_gaps",
      "No open uncertainty has been recorded for this company."),
     ("falsifier",
-     ("proves this wrong", "prove you wrong", "proves you wrong",
-      "falsif", "what would change your mind", "kill switch"),
+     # "prove this wrong" without the s: the board question is "What WOULD
+     # prove this wrong?" and the marker required "proveS". One character,
+     # and the question fell to the catch-all for every company.
+     ("prove this wrong", "proves this wrong", "prove you wrong",
+      "proves you wrong", "falsif", "what would change your mind",
+      "kill switch"),
      "falsifier",
      "No falsifier has been established for this reading yet."),
     ("history",
@@ -100,14 +104,49 @@ INTENT_ROUTES = (
      "competitors",
      "No competitor has been selected for this company from the evidence."),
     ("monitoring",
-     ("monitor next", "what should we monitor", "watch next",
-      "check next", "monday"),
+     ("monitor next", "measure next", "what should we monitor",
+      "what should we measure", "watch next", "check next", "monday"),
      "monitoring",
      "Nothing is currently preregistered to watch for this company."),
     ("recommendation",
-     ("what should we do", "what should i do", "recommend", "next move"),
+     ("what should we do", "what should i do", "what should management do",
+      "what should they do", "what would you tell the board",
+      "tell the board", "recommend", "next move"),
      "recommended_next_move",
      "No action is put forward for this company from this run."),
+    # THE EIGHT THAT HAD NO ROUTE.
+    #
+    # MEASURED across all eight Batch-A companies on one SHA: of the ten
+    # board questions this programme asks, only TWO reached the router.
+    # "What's the biggest risk?" and "Who's the real competitor?" routed;
+    # the other eight fell to the strategic catch-all — which answers from
+    # the matched pattern's own text, so two companies on one pattern gave
+    # the same answer to all eight, and a company whose run concluded
+    # nothing gave a REFUSAL to all eight while its own introduction showed
+    # a Bounded read with a real central question.
+    #
+    # One router gap, two collapse clusters and one contradiction. The
+    # questions were being asked of a surface that had no idea what they
+    # meant.
+    ("why_now",
+     ("why now", "why this now", "why is now", "timing"),
+     "why_this_question",
+     "Nothing in the record makes this urgent rather than important."),
+    ("market_belief",
+     ("market believe", "market expect", "consensus", "priced in",
+      "what does the market"),
+     "expectations",
+     "No market expectation has been established for this company."),
+    ("weakest_assumption",
+     ("weakest assumption", "weakest link", "most fragile",
+      "shakiest", "what is assumed"),
+     "assumptions",
+     "No assumption has been isolated as the weakest in this reading."),
+    ("impossible_hypothesis",
+     ("impossible hypothesis", "impossible", "what could not be true",
+      "heretical", "what would surprise"),
+     "adversary",
+     "No impossible hypothesis has been put forward for this company."),
 )
 
 
@@ -129,6 +168,10 @@ def intent_of(question: str) -> str:
 #: the run's own decision has nothing in the field -- see `_route_answer`.
 _READ_FALLBACK = {
     "falsifier": ("level6_action", "falsifier"),
+    "market_belief": ("market_beliefs", ""),
+    "weakest_assumption": ("assumption_chain", ""),
+    "impossible_hypothesis": ("belief_challenges", ""),
+    "why_now": ("level5_decision", "text"),
     "recommendation": ("level6_action", "action_now"),
     "biggest_uncertainty": ("level6_action", "what_remains_unknown"),
     "biggest_risk": ("level6_action", "what_remains_unknown"),
@@ -185,6 +228,18 @@ def _from_read(name: str, read) -> str:
         return str(getattr(value, field, "") or "")
     if holder == "level7_monitoring":
         return "; ".join(s.text for s in (value or ())[:3])
+    if holder in ("market_beliefs", "belief_challenges"):
+        rows = tuple(value or ())[:2]
+        return "; ".join(
+            str(getattr(r, "statement", "") or getattr(r, "text", "") or r)
+            for r in rows)
+    if holder == "assumption_chain":
+        links = tuple(getattr(value, "links", ()) or ())
+        if links:
+            weakest = min(links, key=lambda l: getattr(l, "confidence", 1.0)) \
+                if all(hasattr(l, "confidence") for l in links) else links[0]
+            return str(getattr(weakest, "text", "") or weakest)
+        return str(getattr(value, "text", "") or "") if value else ""
     if holder == "level4_competition":
         return "; ".join(
             f"{c.name}: {c.likely_response} Watch {c.signal_to_watch}"
@@ -428,6 +483,15 @@ def answer(question: str, brief, *, engine_answer: str = "",
         out.direct_answer = _routed
         if contract is not None and getattr(contract, "run_contribution", ""):
             out.so_what = contract.run_contribution
+        # A ROUTED ANSWER IS STILL THIS COMPANY'S ANSWER. This path returns
+        # early, and when the router grew to cover all ten board questions
+        # that early return started skipping the grounding — so the very
+        # answers that had just stopped collapsing lost the sentence saying
+        # whose filing made them true. Caught by the test that pins it.
+        if not out.strongest_evidence:
+            grounding = _pattern_grounding(decision)
+            if grounding:
+                out.strongest_evidence = grounding
         return out
 
     if out_contribution and _intent(question, _STRATEGIC_INTENT):
