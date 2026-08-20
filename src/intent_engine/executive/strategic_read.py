@@ -158,6 +158,14 @@ def _lower_first(text: str) -> str:
         return ""
     # Never lowercase a proper noun or an initialism.
     head = flat.split(" ", 1)[0]
+    # A ONE-LETTER WORD IS AN ARTICLE, NOT AN ACRONYM. `"A".isupper()` is
+    # True, so the article "A" was protected as though it were an
+    # initialism, and the deployed introduction read "contested directly by
+    # A specialist doing one engine better than the bundle" — measured live
+    # on Amazon. "A." with the stop IS an initial ("A. Smith"), and "I" is
+    # always capitalised in English, so both keep the guard.
+    if len(head) == 1 and head.isalpha() and head != "I":
+        return flat[0].lower() + flat[1:]
     if head.isupper() or (len(head) > 1 and head[1:].lower() != head[1:]):
         return flat
     return flat[0].lower() + flat[1:]

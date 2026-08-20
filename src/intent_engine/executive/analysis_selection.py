@@ -58,6 +58,23 @@ CONTRACT = "analysis_selection.v1"
 #: The wording carries the lever, so the question below is a decision and not
 #: a topic.
 _ARCHETYPE_SUBJECT = {
+    # ADDED AFTER MEASUREMENT. ADVERTISING_PLATFORM proposes exactly two
+    # archetypes and NEITHER had a subject, so Meta and Alphabet fell through
+    # to the epistemic fallback -- "What does the published record establish
+    # about X, and what would have to be true before a commitment rests on
+    # it?" -- as their CENTRAL QUESTION, which is the single most important
+    # line on the page. Composed offline from their own filings 2026-08-20:
+    # the two companies' reads were identical on 10 of 12 projected fields
+    # and this was one of only two that differed, by company name alone.
+    #
+    # The same shape as the model-keyed tables: a class was added, and a
+    # table keyed on something that class INTRODUCES never got its rows.
+    # `_ARCHETYPE_SUBJECT` is keyed on archetype rather than model class, so
+    # the model-class registry guard could not see it.
+    "ENGAGEMENT": "how much of the audience's attention to convert into "
+                  "inventory, and where",
+    "MONETISATION_RATE": "what to charge for a unit of attention, and in "
+                         "which formats",
     "PRICING": "what to charge, and for what",
     "CAPACITY": "how much capacity to commit, and when",
     "PRODUCTIZATION": "what to build and package next",
@@ -494,6 +511,10 @@ def _decision_question(profile, archetype: str, facts: RecordFacts) -> str:
                      f"observed",
         "COMPETITIVE_RESPONSE": f"before the move reaches {driver}",
         "M&A": f"measured against building the same {driver} internally",
+        "ENGAGEMENT": f"given that ad load taken today is paid for out of "
+                      f"{driver} tomorrow",
+        "MONETISATION_RATE": f"given what {driver} the auction clears at that "
+                             f"price",
     }.get(archetype, "")
     return (f"For {name}: {subject}, {tail}?" if tail
             else f"For {name}: {subject}?")

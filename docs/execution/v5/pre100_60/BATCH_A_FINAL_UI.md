@@ -237,6 +237,75 @@ remedy because it depends on everyone remembering, and that protocol failed
 the first day it existed.
 **Interim:** commits are held locally for the duration of any live window.
 
+### D9 · An advertising platform was asked no strategic question at all
+**Visible evidence:** composing both reads offline from their own filings,
+Alphabet and Meta were identical on 10 of 12 projected fields, and one of the
+two that differed was the **central question** — which for both read *"What
+does the published record establish about <name>, and what would have to be
+true before a commitment rests on it?"* That is the epistemic fallback, in the
+slot reserved for the one decision worth arguing about.
+**Root cause:** `ADVERTISING_PLATFORM` proposes exactly two decision
+archetypes, `ENGAGEMENT` and `MONETISATION_RATE`, and **neither** had a row in
+`_ARCHETYPE_SUBJECT`, so `_decision_question` fell through.
+**Systemic class — the third instance, and the sharpest.** A class was added
+and a table keyed on something *that class introduces* never got its rows.
+The model-class registry guard could not see it because `_ARCHETYPE_SUBJECT`
+is keyed on **archetype**, not on model class. It was discovering tables in
+the right way and looking one key-space to the left. The general property is
+harder than the one first written: a class needs rows not only in tables
+keyed on CLASS, but in every table keyed on anything that class introduces.
+**Fix:** both rows written in this business's own variables — Meta now asks
+"how much of the audience's attention to convert into inventory, and where,
+given that ad load taken today is paid for out of users and their engagement
+tomorrow?" A guard discovers every archetype any registered class can propose
+and requires each to be able to ask; a break proof adds an archetype to a
+class menu and requires the suite to go red.
+**Live reproof: NOT YET** — both Meta captures this session were lost or
+pre-fix (see D8), which is why Meta is the thinnest-evidenced company here.
+
+### D10 · The article "A" was protected as an initialism
+**Visible evidence:** Amazon's opening on `31e6138` — *"contested directly by
+A specialist doing one engine better than the bundle"*, capital A mid-sentence.
+**Root cause:** `_lower_first` guards initialisms with `head.isupper()`, and
+`"A".isupper()` is `True`. Latent and pre-existing; surfaced by a new
+`_MODEL_ALTERNATIVES` entry beginning "A specialist…".
+**Fix:** a one-letter alphabetic head is an article unless it is "I". `"A."`
+keeps the guard because the stop makes it an initial. Found and fixed by the
+journey session; carried here to avoid a second mid-window redeploy.
+
+## §45 — the semiconductor bar fails structurally
+
+Composing real reads offline from each company's own filings
+(`same_class_read_probe.json`):
+
+| pair | identical projected fields |
+|---|---|
+| NVIDIA vs AMD | 8 / 12 |
+| NVIDIA vs Intel | 8 / 12 |
+| Intel vs Micron | 8 / 12 |
+| Microsoft vs Salesforce | 8 / 12 |
+| Alphabet vs Meta | 10 / 12 |
+
+For the semiconductors the only differences are identity,
+`strategic_position`, `level4_competition` and `competitive_rivals` — all four
+downstream of the competitive ladder, which quotes each filing's own words.
+**Identical:** central question, economic role, business-model statements,
+mechanisms, metrics, and "what matters now". NVIDIA and AMD are handed the
+same central question and the same six metrics.
+
+**What is established, and what is not.** The structural claim is a code fact
+needing no window: every class-keyed table returns one answer per class, so
+within a class only run-derived evidence can differentiate, and for
+advertising platforms even the ladder is class-derived. The 8/12 and 10/12
+corroborate it and give it a magnitude. What is **not** established is that
+these companies read alike *on the page* — this measures the read object, and
+the object is not the product. The four fields that do differ are exactly the
+ones a reader meets first. Batch B should capture the NVIDIA/AMD pair as
+evidence beside this number, not as the purpose of a window.
+
+**The wrong fix, named in advance:** a bespoke class per company. §44 forbids
+it without evidence and it reproduces the original defect in a new shape.
+
 ## Not yet cleared
 
 - **Distinct is not the §22 bar.** Some window-1 answers differ by

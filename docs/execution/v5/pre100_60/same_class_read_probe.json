@@ -1,0 +1,485 @@
+{
+  "measured_at": "2026-08-20",
+  "code_sha": "a2dd120 (local, pre-archetype-repair)",
+  "what_this_measures": "TWELVE PROJECTED FIELDS OF THE READ OBJECT, composed offline from each company's own SEC filings. It is NOT a measurement of the rendered page, and the governing rule of this phase is that the object is not the product. It is reported because the STRUCTURAL claim it corroborates needs no window at all.",
+  "structural_claim_verifiable_by_reading": "Every class-keyed table returns ONE answer per class. So two companies of the same class can differ only where RUN-DERIVED evidence reaches, and for ADVERTISING_PLATFORM even the competitive ladder is class-derived. This is a code fact, not an inference.",
+  "not_established": "That these companies read alike ON THE PAGE. The four fields that DO differ for the semiconductors are the ladder-derived ones, and those are what a reader sees first in the introduction and the competitive section. The page may differentiate more than 8/12 suggests, or less. Capture the pair in Batch B as evidence beside this number.",
+  "pairs": [
+    {
+      "a": "NVIDIA Corporation",
+      "b": "Advanced Micro Devices, Inc.",
+      "identical_fields": [
+        "central_question",
+        "competitive_basis",
+        "economic_role",
+        "level2_business_model",
+        "level3_mechanism",
+        "metrics",
+        "standing",
+        "what_matters_now"
+      ],
+      "differing_fields": [
+        "competitive_rivals",
+        "identity",
+        "level4_competition",
+        "strategic_position"
+      ],
+      "identical_count": 8,
+      "total": 12
+    },
+    {
+      "a": "NVIDIA Corporation",
+      "b": "Intel Corporation",
+      "identical_fields": [
+        "central_question",
+        "competitive_basis",
+        "economic_role",
+        "level2_business_model",
+        "level3_mechanism",
+        "metrics",
+        "standing",
+        "what_matters_now"
+      ],
+      "differing_fields": [
+        "competitive_rivals",
+        "identity",
+        "level4_competition",
+        "strategic_position"
+      ],
+      "identical_count": 8,
+      "total": 12
+    },
+    {
+      "a": "Intel Corporation",
+      "b": "Micron Technology, Inc.",
+      "identical_fields": [
+        "central_question",
+        "competitive_basis",
+        "economic_role",
+        "level2_business_model",
+        "level3_mechanism",
+        "metrics",
+        "standing",
+        "what_matters_now"
+      ],
+      "differing_fields": [
+        "competitive_rivals",
+        "identity",
+        "level4_competition",
+        "strategic_position"
+      ],
+      "identical_count": 8,
+      "total": 12
+    },
+    {
+      "a": "Microsoft Corporation",
+      "b": "Salesforce, Inc.",
+      "identical_fields": [
+        "central_question",
+        "competitive_basis",
+        "economic_role",
+        "level2_business_model",
+        "level3_mechanism",
+        "metrics",
+        "standing",
+        "what_matters_now"
+      ],
+      "differing_fields": [
+        "competitive_rivals",
+        "identity",
+        "level4_competition",
+        "strategic_position"
+      ],
+      "identical_count": 8,
+      "total": 12
+    },
+    {
+      "a": "Alphabet Inc.",
+      "b": "Meta Platforms, Inc.",
+      "identical_fields": [
+        "competitive_basis",
+        "competitive_rivals",
+        "economic_role",
+        "level2_business_model",
+        "level3_mechanism",
+        "level4_competition",
+        "metrics",
+        "standing",
+        "strategic_position",
+        "what_matters_now"
+      ],
+      "differing_fields": [
+        "central_question",
+        "identity"
+      ],
+      "identical_count": 10,
+      "total": 12
+    }
+  ],
+  "reads": {
+    "NVIDIA Corporation": {
+      "identity": "NVIDIA Corporation is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+      "economic_role": "It competes in a market of few credible suppliers; position turns on process capability and on access to manufacturing capacity; demand reaches it cyclical and inventory-amplified: end demand is smoothed by channel inventory, so orders overshoot in both directions.",
+      "strategic_position": "Its position is contested directly by AI computing processor products and accelerated computing solutions, and customers can substitute rental and used equipment in place of a new purchase.",
+      "central_question": "how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+        "Who the customers are: concentrated \u2014 a small number of large buyers can move a quarter on their own ordering decisions.",
+        "How it prices: negotiated contract price by product generation, with volume and long-term supply commitments.",
+        "What growth does to margin: HIGH and two-sided: fixed manufacturing cost rewards utilisation and punishes an idle line.",
+        "What it depends on: few qualified suppliers with long lead times; substitution is slow and expensive."
+      ],
+      "level3_mechanism": [
+        "Capacity and utilisation",
+        "Learning curve",
+        "Mix",
+        "Customer concentration"
+      ],
+      "level4_competition": [
+        "AI computing processor products",
+        "accelerated computing solutions",
+        "Keeping the existing fleet running longer",
+        "Rental and used equipment in place of a new purchase",
+        "Automation absorbing the task itself",
+        "Advanced Micro Devices, Inc."
+      ],
+      "metrics": [
+        "unit volume and mix",
+        "backlog or order book",
+        "capacity utilisation",
+        "gross margin",
+        "design wins",
+        "capital expenditure intensity"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from unit volume, product and node mix and average selling price \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on capacity commitment at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "AI computing processor products",
+        "accelerated computing solutions",
+        "Keeping the existing fleet running longer"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Advanced Micro Devices, Inc.": {
+      "identity": "Advanced Micro Devices, Inc. is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+      "economic_role": "It competes in a market of few credible suppliers; position turns on process capability and on access to manufacturing capacity; demand reaches it cyclical and inventory-amplified: end demand is smoothed by channel inventory, so orders overshoot in both directions.",
+      "strategic_position": "Its position is contested directly by AI NIC server products and adaptive SoC server products, and customers can substitute rental and used equipment in place of a new purchase.",
+      "central_question": "how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+        "Who the customers are: concentrated \u2014 a small number of large buyers can move a quarter on their own ordering decisions.",
+        "How it prices: negotiated contract price by product generation, with volume and long-term supply commitments.",
+        "What growth does to margin: HIGH and two-sided: fixed manufacturing cost rewards utilisation and punishes an idle line.",
+        "What it depends on: few qualified suppliers with long lead times; substitution is slow and expensive."
+      ],
+      "level3_mechanism": [
+        "Capacity and utilisation",
+        "Learning curve",
+        "Mix",
+        "Customer concentration"
+      ],
+      "level4_competition": [
+        "AI NIC server products",
+        "adaptive SoC server products",
+        "Keeping the existing fleet running longer",
+        "Rental and used equipment in place of a new purchase",
+        "Automation absorbing the task itself",
+        "Applied Materials, Inc."
+      ],
+      "metrics": [
+        "unit volume and mix",
+        "backlog or order book",
+        "capacity utilisation",
+        "gross margin",
+        "design wins",
+        "capital expenditure intensity"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from unit volume, product and node mix and average selling price \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on capacity commitment at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "AI NIC server products",
+        "adaptive SoC server products",
+        "Keeping the existing fleet running longer"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Intel Corporation": {
+      "identity": "Intel Corporation is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+      "economic_role": "It competes in a market of few credible suppliers; position turns on process capability and on access to manufacturing capacity; demand reaches it cyclical and inventory-amplified: end demand is smoothed by channel inventory, so orders overshoot in both directions.",
+      "strategic_position": "Its position is contested directly by semiconductor products and companies offering platform products, and customers can substitute rental and used equipment in place of a new purchase.",
+      "central_question": "how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+        "Who the customers are: concentrated \u2014 a small number of large buyers can move a quarter on their own ordering decisions.",
+        "How it prices: negotiated contract price by product generation, with volume and long-term supply commitments.",
+        "What growth does to margin: HIGH and two-sided: fixed manufacturing cost rewards utilisation and punishes an idle line.",
+        "What it depends on: few qualified suppliers with long lead times; substitution is slow and expensive."
+      ],
+      "level3_mechanism": [
+        "Capacity and utilisation",
+        "Learning curve",
+        "Mix",
+        "Customer concentration"
+      ],
+      "level4_competition": [
+        "semiconductor products",
+        "companies offering platform products",
+        "Keeping the existing fleet running longer",
+        "Rental and used equipment in place of a new purchase",
+        "Automation absorbing the task itself",
+        "Advanced Micro Devices, Inc."
+      ],
+      "metrics": [
+        "unit volume and mix",
+        "backlog or order book",
+        "capacity utilisation",
+        "gross margin",
+        "design wins",
+        "capital expenditure intensity"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from unit volume, product and node mix and average selling price \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on capacity commitment at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "semiconductor products",
+        "companies offering platform products",
+        "Keeping the existing fleet running longer"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Micron Technology, Inc.": {
+      "identity": "Micron Technology, Inc. is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+      "economic_role": "It competes in a market of few credible suppliers; position turns on process capability and on access to manufacturing capacity; demand reaches it cyclical and inventory-amplified: end demand is smoothed by channel inventory, so orders overshoot in both directions.",
+      "strategic_position": "Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute rental and used equipment in place of a new purchase and automation absorbing the task itself, and the alternative may be delaying the purchase altogether \u2014 keeping the existing fleet running longer.",
+      "central_question": "how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: design and manufacture of a physical product sold into a capacity-constrained supply chain.",
+        "Who the customers are: concentrated \u2014 a small number of large buyers can move a quarter on their own ordering decisions.",
+        "How it prices: negotiated contract price by product generation, with volume and long-term supply commitments.",
+        "What growth does to margin: HIGH and two-sided: fixed manufacturing cost rewards utilisation and punishes an idle line.",
+        "What it depends on: few qualified suppliers with long lead times; substitution is slow and expensive."
+      ],
+      "level3_mechanism": [
+        "Capacity and utilisation",
+        "Learning curve",
+        "Mix",
+        "Customer concentration"
+      ],
+      "level4_competition": [
+        "Keeping the existing fleet running longer",
+        "Rental and used equipment in place of a new purchase",
+        "Automation absorbing the task itself",
+        "Advanced Micro Devices, Inc.",
+        "Applied Materials, Inc."
+      ],
+      "metrics": [
+        "unit volume and mix",
+        "backlog or order book",
+        "capacity utilisation",
+        "gross margin",
+        "design wins",
+        "capital expenditure intensity"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from unit volume, product and node mix and average selling price \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on capacity commitment at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "Keeping the existing fleet running longer",
+        "Rental and used equipment in place of a new purchase",
+        "Automation absorbing the task itself"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Microsoft Corporation": {
+      "identity": "Microsoft Corporation is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale.",
+      "economic_role": "It competes in a market of many differentiated vendors competing on capability and switching cost rather than on price alone; demand reaches it budgeted and recurring; new bookings are discretionary, the renewal base is not.",
+      "strategic_position": "Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 the customer's own engineering, and the alternative may be delaying the purchase altogether \u2014 renewing nothing and keeping the current process, and the economics that decide the contest are high operating leverage \u2014 delivery cost rises far more slowly than contracted revenue, so incremental revenue is unusually valuable.",
+      "central_question": "what to charge, and for what, without losing more customer count than the price gains?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale.",
+        "Who the customers are: many accounts of uneven size; concentration risk sits in the largest contracts, not in the count.",
+        "How it prices: list price with negotiated discount, per seat or per unit of usage.",
+        "What growth does to margin: delivery cost rises far more slowly than contracted revenue, so incremental revenue is unusually valuable.",
+        "What it depends on: compute and bandwidth from a small number of providers."
+      ],
+      "level3_mechanism": [
+        "Operating leverage",
+        "Switching cost",
+        "Expansion economics",
+        "Price and packaging"
+      ],
+      "level4_competition": [
+        "The customer's own engineering",
+        "Renewing nothing and keeping the current process",
+        "Automation absorbing the task itself",
+        "Adobe Inc.",
+        "Cloudflare, Inc."
+      ],
+      "metrics": [
+        "revenue growth",
+        "large-customer growth",
+        "contracted backlog or remaining performance obligations",
+        "gross margin",
+        "net revenue retention",
+        "sales efficiency"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from customer count, seats or usage per customer and list and realised price \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on pricing and packaging at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "The customer's own engineering",
+        "Renewing nothing and keeping the current process",
+        "Automation absorbing the task itself"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Salesforce, Inc.": {
+      "identity": "Salesforce, Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale.",
+      "economic_role": "It competes in a market of many differentiated vendors competing on capability and switching cost rather than on price alone; demand reaches it budgeted and recurring; new bookings are discretionary, the renewal base is not.",
+      "strategic_position": "Its position is contested directly by cloud computing application service providers, and customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 the customer's own engineering, and the economics that decide the contest are high operating leverage \u2014 delivery cost rises far more slowly than contracted revenue, so incremental revenue is unusually valuable.",
+      "central_question": "what to charge, and for what, without losing more customer count than the price gains?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale.",
+        "Who the customers are: many accounts of uneven size; concentration risk sits in the largest contracts, not in the count.",
+        "How it prices: list price with negotiated discount, per seat or per unit of usage.",
+        "What growth does to margin: delivery cost rises far more slowly than contracted revenue, so incremental revenue is unusually valuable.",
+        "What it depends on: compute and bandwidth from a small number of providers."
+      ],
+      "level3_mechanism": [
+        "Operating leverage",
+        "Switching cost",
+        "Expansion economics",
+        "Price and packaging"
+      ],
+      "level4_competition": [
+        "cloud computing application service providers",
+        "The customer's own engineering",
+        "Renewing nothing and keeping the current process",
+        "Automation absorbing the task itself",
+        "Adobe Inc.",
+        "Cloudflare, Inc."
+      ],
+      "metrics": [
+        "revenue growth",
+        "large-customer growth",
+        "contracted backlog or remaining performance obligations",
+        "gross margin",
+        "net revenue retention",
+        "sales efficiency"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from customer count, seats or usage per customer and list and realised price \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on pricing and packaging at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "cloud computing application service providers",
+        "The customer's own engineering",
+        "Renewing nothing and keeping the current process"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Alphabet Inc.": {
+      "identity": "Alphabet Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forward and each period's revenue has to be re-earned by engagement.",
+      "economic_role": "It competes in a market of a few platforms holding most of the inventory, competing for advertiser budget against every other channel that can prove return; demand reaches it discretionary and cyclical: advertising budget is among the first spending cut in a downturn and among the first restored.",
+      "strategic_position": "Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute another surface holding the same attention hour and automation absorbing the task itself, and customers can internalise the work themselves \u2014 the advertiser spending the budget on its own channels, and the economics that decide the contest are high operating leverage \u2014 serving one more impression costs almost nothing, so incremental revenue is unusually valuable \u2014 and the same fixed base makes an engagement decline expensive quickly.",
+      "central_question": "What does the published record establish about Alphabet Inc., and what would have to be true before a commitment rests on it?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forward and each period's revenue has to be re-earned by engagement.",
+        "Who the customers are: two-sided and asymmetric \u2014 many small advertisers with a long tail, and a user base that pays nothing and can leave freely.",
+        "How it prices: real-time auction per impression, so price is set by competing advertisers rather than by the platform.",
+        "What growth does to margin: serving one more impression costs almost nothing, so incremental revenue is unusually valuable \u2014 and the same fixed base makes an engagement decline expensive quickly.",
+        "What it depends on: the distribution channel is the binding supplier: the operating systems, browsers and devices that decide what can be measured."
+      ],
+      "level3_mechanism": [
+        "Auction density",
+        "Attention supply",
+        "Measurement and signal",
+        "Advertiser concentration and mix"
+      ],
+      "level4_competition": [
+        "The advertiser spending the budget on its own channels",
+        "Another surface holding the same attention hour",
+        "Automation absorbing the task itself",
+        "37signals LLC",
+        "Adobe Inc."
+      ],
+      "metrics": [
+        "impressions or engaged time",
+        "price per impression",
+        "advertiser count and spend per advertiser",
+        "engagement per user",
+        "compute and infrastructure spend",
+        "regulatory and platform-policy exposure"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from users and their engagement, impressions or ad load per user and price per impression \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on engagement and time spent at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "The advertiser spending the budget on its own channels",
+        "Another surface holding the same attention hour",
+        "Automation absorbing the task itself"
+      ],
+      "competitive_basis": "EVIDENCE"
+    },
+    "Meta Platforms, Inc.": {
+      "identity": "Meta Platforms, Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forward and each period's revenue has to be re-earned by engagement.",
+      "economic_role": "It competes in a market of a few platforms holding most of the inventory, competing for advertiser budget against every other channel that can prove return; demand reaches it discretionary and cyclical: advertising budget is among the first spending cut in a downturn and among the first restored.",
+      "strategic_position": "Its position is contested less by a named firm than by the alternatives its customers already have: customers can substitute another surface holding the same attention hour and automation absorbing the task itself, and customers can internalise the work themselves \u2014 the advertiser spending the budget on its own channels, and the economics that decide the contest are high operating leverage \u2014 serving one more impression costs almost nothing, so incremental revenue is unusually valuable \u2014 and the same fixed base makes an engagement decline expensive quickly.",
+      "central_question": "What does the published record establish about Meta Platforms, Inc., and what would have to be true before a commitment rests on it?",
+      "standing": "BOUNDED",
+      "level2_business_model": [
+        "How the business makes money: attention resold to advertisers: revenue is an auction price per impression, so nothing is contracted forward and each period's revenue has to be re-earned by engagement.",
+        "Who the customers are: two-sided and asymmetric \u2014 many small advertisers with a long tail, and a user base that pays nothing and can leave freely.",
+        "How it prices: real-time auction per impression, so price is set by competing advertisers rather than by the platform.",
+        "What growth does to margin: serving one more impression costs almost nothing, so incremental revenue is unusually valuable \u2014 and the same fixed base makes an engagement decline expensive quickly.",
+        "What it depends on: the distribution channel is the binding supplier: the operating systems, browsers and devices that decide what can be measured."
+      ],
+      "level3_mechanism": [
+        "Auction density",
+        "Attention supply",
+        "Measurement and signal",
+        "Advertiser concentration and mix"
+      ],
+      "level4_competition": [
+        "The advertiser spending the budget on its own channels",
+        "Another surface holding the same attention hour",
+        "Automation absorbing the task itself",
+        "37signals LLC",
+        "Adobe Inc."
+      ],
+      "metrics": [
+        "impressions or engaged time",
+        "price per impression",
+        "advertiser count and spend per advertiser",
+        "engagement per user",
+        "compute and infrastructure spend",
+        "regulatory and platform-policy exposure"
+      ],
+      "what_matters_now": [
+        "Growth here has to come from users and their engagement, impressions or ad load per user and price per impression \u2014 there is no fourth source, so a plan that does not name one of those is not a growth plan.",
+        "Move on engagement and time spent at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment."
+      ],
+      "competitive_rivals": [
+        "The advertiser spending the budget on its own channels",
+        "Another surface holding the same attention hour",
+        "Automation absorbing the task itself"
+      ],
+      "competitive_basis": "EVIDENCE"
+    }
+  }
+}

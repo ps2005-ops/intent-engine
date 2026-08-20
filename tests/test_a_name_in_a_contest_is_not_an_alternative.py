@@ -489,3 +489,31 @@ def test_an_identity_that_merely_starts_differently_is_untouched():
         _row("Rental and used equipment in place of a new purchase",
              "SUBSTITUTE")]))
     assert "rental and used equipment" in joined
+
+
+# ===========================================================================
+# A ONE-LETTER WORD IS AN ARTICLE, NOT AN ACRONYM
+# ===========================================================================
+def test_the_article_a_is_lowercased_mid_sentence():
+    """MEASURED LIVE on Amazon: "contested directly by A specialist doing one
+    engine better than the bundle". `"A".isupper()` is True, so the guard that
+    protects initialisms protected the article."""
+    assert SR._lower_first("A specialist doing one engine better than the "
+                           "bundle").startswith("a specialist")
+
+
+def test_an_initialism_is_still_protected():
+    for name in ("AI replacing the workflow", "IBM Corporation",
+                 "A. Smith Holdings", "I. M. Pei Associates"):
+        assert SR._lower_first(name) == name, name
+
+
+def test_the_pronoun_i_is_still_protected():
+    assert SR._lower_first("I would not") == "I would not"
+
+
+def test_the_position_sentence_reads_it_as_an_article():
+    joined = " ".join(SR._by_alternative_kind([
+        _row("A specialist doing one engine better than the bundle",
+             "ADJACENT", "WORKFLOW_SUBSTITUTE")]))
+    assert "by a specialist doing one engine" in joined, joined
