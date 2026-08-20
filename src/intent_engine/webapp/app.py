@@ -1634,10 +1634,26 @@ class WebApp:
                 picked_domain = f"https://{picked_domain}"
             if picked_domain:
                 website = website or picked_domain
-            elif picked_cik:
-                # A filer with no domain on record. Same state the name-entry
-                # path calls IDENTIFIED_NO_DOMAIN: analysable, EDGAR-first,
-                # and never given a guessed website.
+            if picked_cik:
+                # A CONFIRMED PICK CARRIES BOTH, AND THIS USED TO BE AN ELIF.
+                #
+                # MEASURED LIVE across three deploys. JPMorgan has a domain
+                # AND a CIK, so `picked_domain` won and `filer_cik` stayed
+                # empty — the run opened with cik="", `run_meta` carried no
+                # CIK, and every downstream owner-of-this-document test had
+                # nothing to compare against. That is why the claim-ownership
+                # repair read green in tests, PASSED a real-EDGAR probe that
+                # was handed the CIK directly, and did not move the page:
+                # the producer was correct and was being asked "is this
+                # document filed under ''?".
+                #
+                # The comment above about never filling this in from
+                # elsewhere is about GUESSING — a CIK inferred from a name
+                # attributes one company's filings to another. This is not a
+                # guess. The customer picked a row showing the legal name,
+                # ticker, country and domain, and the pick was already
+                # validated against the typed name a few lines up. A
+                # confirmed pick is an answer, as the block above says.
                 filer_cik = picked_cik
         if company_name and not website and not filer_cik \
                 and not form.get("entity_id"):
