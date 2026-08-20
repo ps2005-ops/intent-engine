@@ -1,0 +1,81 @@
+{
+  "companies": [
+    "Caterpillar Inc.",
+    "Meta Platforms, Inc."
+  ],
+  "questions": 10,
+  "identical_across_all_companies": 10,
+  "identical_rate": 1.0,
+  "per_question": [
+    {
+      "question": "What does the market believe?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What does the market believe? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence)."
+    },
+    {
+      "question": "What impossible hypothesis should we test?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What impossible hypothesis should we test? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable."
+    },
+    {
+      "question": "What should management do?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What should management do? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence)."
+    },
+    {
+      "question": "What should we measure next?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What should we measure next? The decision this most affects: Whether a supply commitment should be treated as fixed or renegotiable."
+    },
+    {
+      "question": "What would prove this wrong?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What would prove this wrong? The strongest case against it: mainly the open evidence gaps below."
+    },
+    {
+      "question": "What would you tell the board?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What would you tell the board? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence)."
+    },
+    {
+      "question": "What's the biggest risk?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What's the biggest risk? Utilisation, order books and take-or-pay terms are not public."
+    },
+    {
+      "question": "What's the weakest assumption?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> What's the weakest assumption? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence). Evidence Strongest. "
+    },
+    {
+      "question": "Who's the real competitor?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> Who's the real competitor? No competitor has been selected for this company from the evidence."
+    },
+    {
+      "question": "Why now?",
+      "distinct_answers": 1,
+      "companies": 2,
+      "identical_pair_rate": 1.0,
+      "example": "<CO> Why now? Yes \u2014 on balance the evidence supports that committing capital to capacity ahead of uncertain demand (moderate confidence)."
+    }
+  ]
+}

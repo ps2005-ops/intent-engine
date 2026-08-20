@@ -1,0 +1,84 @@
+{
+  "companies": [
+    "Amazon.com, Inc.",
+    "Caterpillar Inc.",
+    "Eli Lilly and Company",
+    "Exxon Mobil Corporation",
+    "Meta Platforms, Inc."
+  ],
+  "questions": 10,
+  "identical_across_all_companies": 0,
+  "identical_rate": 0.0,
+  "per_question": [
+    {
+      "question": "What does the market believe?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What does the market believe? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence)."
+    },
+    {
+      "question": "What impossible hypothesis should we test?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What impossible hypothesis should we test? The decision this most affects: Which business a partnership or supply agreement actually depends on."
+    },
+    {
+      "question": "What should management do?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What should management do? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence)."
+    },
+    {
+      "question": "What should we measure next?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What should we measure next? The decision this most affects: Which business a partnership or supply agreement actually depends on."
+    },
+    {
+      "question": "What would prove this wrong?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What would prove this wrong? The strongest case against it: mainly the open evidence gaps below."
+    },
+    {
+      "question": "What would you tell the board?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What would you tell the board? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence)."
+    },
+    {
+      "question": "What's the biggest risk?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What's the biggest risk? Inter-segment transfers and shared cost allocations are not disclosed."
+    },
+    {
+      "question": "What's the weakest assumption?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> What's the weakest assumption? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence)."
+    },
+    {
+      "question": "Who's the real competitor?",
+      "distinct_answers": 5,
+      "companies": 5,
+      "identical_pair_rate": 0.0,
+      "example": "<CO> Who's the real competitor? publishers: This absorbs the task into something the customer already pays for, without ever entering this market. Watch Usage per seat in the accou"
+    },
+    {
+      "question": "Why now?",
+      "distinct_answers": 4,
+      "companies": 5,
+      "identical_pair_rate": 0.1,
+      "example": "<CO> Why now? Yes \u2014 on balance the evidence supports that running separately-reported businesses as a single portfolio (moderate confidence)."
+    }
+  ]
+}
