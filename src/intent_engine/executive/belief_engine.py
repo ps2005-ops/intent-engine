@@ -170,6 +170,21 @@ _EXPECTATION = {
 #: Keyed on class, and combined with trajectory and contested ground so that
 #: two companies of one class never produce one sentence.
 _MODEL_ENGINE = {
+    "ADVERTISING_PLATFORM": (
+        "attention sold by auction to many independent bidders",
+        "the price per impression the auction clears at, and how many "
+        "impressions there are to sell",
+        "impressions still growing while the price per impression falls"),
+    "MULTI_ENGINE_PLATFORM": (
+        "several businesses with different margins carried on one balance "
+        "sheet",
+        "which engine the operating profit came from, not what the "
+        "consolidated top line did",
+        "consolidated revenue growing while the high-margin engine slows"),
+    "SCALE_RETAIL": (
+        "buying scale converted into price, and price into traffic",
+        "traffic and basket against the margin the volume was bought at",
+        "comparable sales held only by giving back the margin"),
     "SUBSCRIPTION_SOFTWARE": (
         "renewal and expansion inside an installed base",
         "net revenue retention",

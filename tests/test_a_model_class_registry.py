@@ -64,13 +64,64 @@ def test_missing_model_classes_reports_in_registry_order():
 # ===========================================================================
 # Every model-keyed table must cover the registry
 # ===========================================================================
+#: Modules that make a decision keyed on business-model class. A module is
+#: listed here; its TABLES are discovered, not named — the previous version
+#: named two of eleven, and the nine it did not name were exactly the ones
+#: with no entry for the three newest classes.
+_MODEL_KEYED_MODULES = (
+    "intent_engine.company_ingestion.xbrl",              # metric selection
+    "intent_engine.product_eval.defect_taxonomy",        # foreign-language
+    "intent_engine.executive.competitive_ground",        # mechanism / rivals
+    "intent_engine.executive.belief_engine",             # market belief
+    "intent_engine.executive.strategic_read",            # metrics, mechanisms
+    "intent_engine.executive.history_simulator",         # history + rewind
+    "intent_engine.executive.company_profile",           # economics, history
+    "intent_engine.executive.analysis_selection",        # decision candidates
+)
+
+#: A table is model-keyed if it is a dict whose keys include at least this
+#: many REGISTERED classes. Three is enough to distinguish a model table from
+#: a dict that happens to contain one class name, and low enough that a table
+#: covering only the nine older classes is still caught.
+_MODEL_KEYED_THRESHOLD = 3
+
+
 def _tables():
-    from intent_engine.executive import competitive_ground as CG
-    from intent_engine.executive import strategic_read as SR
-    return {
-        "strategic_read._METRICS": SR._METRICS,
-        "competitive_ground._MODEL_ALTERNATIVES": CG._MODEL_ALTERNATIVES,
-    }
+    """Every model-class-keyed table in the product, discovered.
+
+    NAMING THE TABLES IS THE BUG. Two were named and eleven exist; the nine
+    unnamed ones had no row for ADVERTISING_PLATFORM, MULTI_ENGINE_PLATFORM
+    or SCALE_RETAIL, so Meta got no model-specific financial index, no
+    market-belief engine, no competitive mechanism, no history economics and
+    no counterfactual — and, worst, no entry in the very table that detects
+    take-or-pay language in a business that has no order book.
+
+    A table added tomorrow is discovered by the same rule, so this cannot
+    silently go stale again.
+    """
+    import importlib
+    registry = set(MODEL_CLASSES)
+    found = {}
+    for module_name in _MODEL_KEYED_MODULES:
+        module = importlib.import_module(module_name)
+        short = module_name.rsplit(".", 1)[-1]
+        for attr in dir(module):
+            value = getattr(module, attr, None)
+            if not isinstance(value, dict) or not value:
+                continue
+            keys = {k for k in value if isinstance(k, str)}
+            if len(keys & registry) >= _MODEL_KEYED_THRESHOLD:
+                found[f"{short}.{attr}"] = value
+    assert found, "no model-keyed table was discovered at all"
+    return found
+
+
+def test_the_discovery_finds_more_than_the_two_that_used_to_be_named():
+    """A guard that discovers nothing is a guard that passes for free."""
+    discovered = set(_tables())
+    assert {"strategic_read._METRICS",
+            "competitive_ground._MODEL_ALTERNATIVES"} <= discovered
+    assert len(discovered) >= 10, sorted(discovered)
 
 
 @pytest.mark.parametrize("table_name", sorted(_tables()))
@@ -204,3 +255,42 @@ def test_an_unclassified_company_still_gets_the_whole_library():
     )
     for unknown in ("", "UNKNOWN", None):
         assert len(patterns_for(unknown)) == len(PATTERN_LIBRARY), unknown
+
+
+# ===========================================================================
+# The thirteenth class
+# ===========================================================================
+def test_a_thirteenth_class_fails_every_model_keyed_system_closed():
+    """THE POINT OF A REGISTRY. Today's three exclusions already mask
+    today's symptom, so nothing above proves the next class will be caught.
+    This simulates one and requires every discovered model-keyed table to
+    report it missing — which is what turns the suite red until a human has
+    decided what that class's metric, belief, mechanism, history and
+    foreign-language set actually are.
+
+    If this test ever passes with an EMPTY report, the registry has stopped
+    being load-bearing and a fourteenth class will inherit generic logic in
+    silence, exactly as the thirteenth's three predecessors did.
+    """
+    thirteenth = "NEW_MODEL_CLASS_13"
+    assert thirteenth not in MODEL_CLASSES
+    registry = tuple(MODEL_CLASSES) + (thirteenth,)
+    uncovered = [name for name, table in _tables().items()
+                 if thirteenth not in table]
+    assert len(uncovered) == len(_tables()), (
+        "a model-keyed table already answers for a class nobody defined: "
+        f"{sorted(set(_tables()) - set(uncovered))}")
+
+    # And the same must hold for the pattern library's applicability.
+    from intent_engine.strategic_intelligence.patterns import PATTERN_LIBRARY
+    undecided = [p.pattern_id for p in PATTERN_LIBRARY
+                 if thirteenth not in (p.considered_model_classes or ())]
+    assert len(undecided) == len(PATTERN_LIBRARY), (
+        "a pattern already claims to have considered an undefined class")
+
+    # `missing_model_classes` is the mechanism each guard above uses, so it
+    # must report the new class against every table.
+    from intent_engine.executive.company_profile import missing_model_classes
+    for name, table in _tables().items():
+        assert thirteenth in missing_model_classes(table, registry=registry), \
+            f"{name} would not report the thirteenth class as missing"

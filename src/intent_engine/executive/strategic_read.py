@@ -559,6 +559,71 @@ _METRICS = {
 # §9 — the microeconomic mechanisms, chosen by business model
 # ===========================================================================
 _MECHANISMS = {
+    "ADVERTISING_PLATFORM": (
+        ("Auction density",
+         "price per impression is set by how many advertisers bid for the "
+         "same person, so revenue rises when competition for the impression "
+         "rises rather than when inventory does",
+         "whether to grow inventory or to grow the number of bidders "
+         "competing for the inventory that already exists"),
+        ("Attention supply",
+         "inventory is time spent, which is produced by the product's "
+         "ranking and recommendation quality rather than bought or built",
+         "how much engineering goes to engagement versus to monetisation"),
+        ("Measurement and signal",
+         "an advertiser pays for outcomes it can attribute, so the ability "
+         "to measure a conversion is itself a large part of the price",
+         "what to build when a platform or a regulator removes a signal"),
+        ("Advertiser concentration and mix",
+         "small direct-response advertisers and large brand budgets respond "
+         "to entirely different things, and a mix shift moves realised price "
+         "without any change in demand for the product",
+         "which advertiser cohort the next product decision is for"),
+    ),
+    "MULTI_ENGINE_PLATFORM": (
+        ("Engine mix",
+         "the consolidated margin is a weighted average of businesses whose "
+         "own margins are not close to each other, so mix moves the reported "
+         "result more than performance inside any one engine does",
+         "which engine gets the next unit of capital and management "
+         "attention"),
+        ("Cross-subsidy",
+         "a thin-margin engine can be run at scale because a fat-margin one "
+         "carries the fixed cost, and the arrangement is invisible in "
+         "consolidated statements",
+         "whether an engine that loses money standalone is a strategy or a "
+         "leak"),
+        ("Shared infrastructure leverage",
+         "capacity built for one engine is sold to the others and then to "
+         "outsiders, so the same asset earns twice",
+         "how much capacity to build ahead of the engine that needs it"),
+        ("Third-party participation",
+         "sellers, developers and advertisers on the platform add supply "
+         "without adding cost, and take share of the economics in exchange",
+         "how much of the platform to open, and on what terms"),
+    ),
+    "SCALE_RETAIL": (
+        ("Buying scale",
+         "volume bought at a lower unit cost can be given to the customer as "
+         "price or kept as margin, and the choice compounds either into "
+         "traffic or into earnings",
+         "how much of a cost advantage to pass through"),
+        ("Inventory turns",
+         "return on capital in retail is margin times turns, so a thin "
+         "margin earned four times beats a fat one earned once",
+         "whether to hold assortment breadth or working capital"),
+        ("Traffic and basket",
+         "the store or site is a fixed cost that is amortised over visits, "
+         "so an extra visit is close to pure contribution and an extra item "
+         "in the basket is closer still",
+         "what to spend to bring a customer back rather than to acquire a "
+         "new one"),
+        ("Private label and mix",
+         "own-brand product earns a materially higher margin and moves the "
+         "price the national brand can hold in the same aisle",
+         "how far to push own-brand before the assortment stops being a "
+         "destination"),
+    ),
     "SUBSCRIPTION_SOFTWARE": (
         ("Operating leverage",
          "delivery cost rises far more slowly than contracted revenue, so "

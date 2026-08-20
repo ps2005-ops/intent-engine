@@ -100,14 +100,20 @@ MODEL_CLASSES = (
 )
 
 
-def missing_model_classes(keys) -> list:
+def missing_model_classes(keys, registry=None) -> list:
     """Registry classes a model-keyed table does not cover, in registry order.
 
     The one helper every completeness guard uses, so "which classes exist" is
     answered in exactly one place.
+
+    `registry` overrides which classes are asked about. It exists so a guard
+    can simulate the class that will be added tomorrow and prove every
+    model-keyed system fails closed until a human has decided about it —
+    because today's tables already cover today's classes, and a guard that
+    can only see today cannot catch the next silent inheritance.
     """
     have = set(keys or ())
-    return [c for c in MODEL_CLASSES if c not in have]
+    return [c for c in (registry or MODEL_CLASSES) if c not in have]
 
 # --- how well this company is classified, stated rather than implied --------
 #
@@ -1248,6 +1254,27 @@ _CAUSAL = {
 
 #: Which historical regimes are worth replaying for this kind of business.
 _HISTORY = {
+    "ADVERTISING_PLATFORM": (
+        "periods when a platform or a regulator removed an advertising "
+        "signal and attribution had to be rebuilt",
+        "advertising recessions, where budgets were cut before the audience "
+        "was",
+        "attention shifts to a new format, where inventory had to be rebuilt "
+        "somewhere the auction had not yet formed"),
+    "MULTI_ENGINE_PLATFORM": (
+        "periods when one engine's capital programme was funded out of "
+        "another engine's cash flow",
+        "episodes when consolidated growth held while the profitable engine "
+        "decelerated",
+        "regulatory or structural pressure to separate engines that had been "
+        "run together"),
+    "SCALE_RETAIL": (
+        "periods of consumer trade-down, where traffic rose and basket "
+        "margin fell",
+        "cost inflation episodes and how much price the format could pass "
+        "through without losing trips",
+        "channel shifts, where the fixed base built for one way of shopping "
+        "had to serve another"),
     "SUBSCRIPTION_SOFTWARE": (
         "periods when the cost of capital rose and enterprise software "
         "budgets were re-approved rather than renewed automatically",

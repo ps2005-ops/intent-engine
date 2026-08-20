@@ -106,6 +106,28 @@ class ClassEconomics:
 
 
 CLASS_ECONOMICS: Dict[str, ClassEconomics] = {
+    "ADVERTISING_PLATFORM": ClassEconomics(
+        0.12, 0.70,
+        "an auction reprices continuously, so a good year is a year when "
+        "more advertisers competed for the same attention — that competition "
+        "persists while the attention does, and disappears with it",
+        "engagement and impressions delivered, against the price per "
+        "impression the auction cleared at"),
+    "MULTI_ENGINE_PLATFORM": ClassEconomics(
+        0.10, 0.72,
+        "the engines do not turn together: a commerce engine mean-reverts "
+        "with the consumer while an infrastructure engine compounds on "
+        "contracts, so the consolidated line reverts more slowly than "
+        "retail and faster than software",
+        "which engine produced the operating profit, and whether the "
+        "high-margin engine is still growing faster than the whole"),
+    "SCALE_RETAIL": ClassEconomics(
+        0.03, 0.60,
+        "share won on price is held only while the price is held, and the "
+        "cost advantage that funds it moves slowly — so an unusual year "
+        "persists about as long as the buying advantage behind it",
+        "comparable sales and traffic, against the gross margin the volume "
+        "was bought at"),
     "SUBSCRIPTION_SOFTWARE": ClassEconomics(
         0.15, 0.78,
         "contracted revenue renews, so an unusual year is carried into the "
@@ -468,6 +490,58 @@ class Alternative:
 #: operating leverage because its cost base is largely fixed, and a commodity
 #: producer cannot, because its cost base is the ore.
 CLASS_ALTERNATIVE: Dict[str, Alternative] = {
+    "ADVERTISING_PLATFORM": Alternative(
+        lever="raise auction density before raising inventory",
+        mechanism=(
+            "price per impression is set by how many advertisers bid for the "
+            "same person, so bringing more bidders — smaller advertisers, "
+            "new formats, better measurement — lifts the price on inventory "
+            "that already exists, at no incremental cost of supply"),
+        assumption=(
+            "that engagement holds while monetisation rises, which is true "
+            "when the extra load is priced into ranking and false when ad "
+            "load is simply increased"),
+        benefit="the same attention sold for more, with no capital spent",
+        risk=(
+            "pushing price or ad load past what the experience carries costs "
+            "the engagement that produced the inventory, and attention lost "
+            "to another product does not come back on a price cut"),
+        magnitude=0.040),
+    "MULTI_ENGINE_PLATFORM": Alternative(
+        lever="fund the high-margin engine ahead of the consolidated line",
+        mechanism=(
+            "the engines earn very different margins on the same capital, so "
+            "moving investment toward the infrastructure engine raises "
+            "operating profit faster than the same investment spread across "
+            "the whole — and the index here counts profit, not revenue"),
+        assumption=(
+            "that the commerce engine can hold its position without the "
+            "capital being redirected, which is true where the customer "
+            "relationship is already established and false in a land grab"),
+        benefit="a materially higher margin on a similar revenue path",
+        risk=(
+            "starving the engine that produces the customer relationship "
+            "eventually starves the one that monetises it, and the two are "
+            "connected in ways consolidated statements do not show"),
+        magnitude=0.050),
+    "SCALE_RETAIL": Alternative(
+        lever="take the cost advantage as turns rather than as margin",
+        mechanism=(
+            "return on capital in retail is margin times turns, so passing a "
+            "buying advantage through as price buys traffic, and traffic "
+            "raises turns on the same fixed store and logistics base"),
+        assumption=(
+            "that the cost advantage is structural and durable, which is "
+            "true where it comes from scale and distribution and false where "
+            "it came from a one-off buying cycle"),
+        benefit=(
+            "a lower margin earned more times a year, on the same invested "
+            "capital"),
+        risk=(
+            "price passed through that the cost base cannot fund is a margin "
+            "reduction that competitors match within a quarter, leaving the "
+            "traffic unbought and the margin gone"),
+        magnitude=0.025),
     "SUBSCRIPTION_SOFTWARE": Alternative(
         lever="convert growth into operating leverage a year earlier",
         mechanism=(

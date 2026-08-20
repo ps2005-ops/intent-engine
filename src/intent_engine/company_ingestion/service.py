@@ -20,7 +20,7 @@ from intent_engine.company_ingestion.entities import (
 from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
-from intent_engine.company_ingestion.fetch import safe_fetch
+from intent_engine.company_ingestion.fetch import FetchResult, safe_fetch
 from intent_engine.company_ingestion.filing_text import (
     is_filing_document, parse_filing_html,
 )
@@ -46,8 +46,52 @@ from intent_engine.founder_intelligence.records import (
 CONSENT_VERSION = "v1.1-source-approval"
 
 
-def _patterns_for_company(company_name: str, domain: str = ""):
+def _subject_evidence_text(documents, cik: str = "") -> str:
+    """The SUBJECT'S OWN filing text, and nothing else.
+
+    A competitor's 10-K describing ITS advertising revenue must never
+    classify this company — that is how a rival's business model becomes
+    the subject's. Two exclusions, both positive tests rather than trust:
+    a document filed under a DIFFERENT registrant's EDGAR path is not this
+    filer's, and a document the run itself classed `competitor` is not
+    either.
+    """
+    subject = (cik or "").lstrip("0")
+    texts = []
+    for doc in documents or ():
+        url = str((doc.get("final_url") if isinstance(doc, dict)
+                   else getattr(doc, "final_url", "")) or "")
+        source_class = str((doc.get("source_class") if isinstance(doc, dict)
+                            else getattr(doc, "source_class", "")) or "")
+        if subject and "/data/" in url and f"/data/{subject}/" not in url:
+            continue
+        if source_class == "competitor":
+            continue
+        text = (doc.get("text_content") if isinstance(doc, dict)
+                else getattr(doc, "text_content", "")) or ""
+        texts.append(str(text))
+    return "\n".join(texts)[:400_000]
+
+
+def _patterns_for_company(company_name: str, domain: str = "",
+                          registrant=None, evidence_text: str = ""):
     """The pattern library this company's business model can support.
+
+    THE GATE IS ONLY AS GOOD AS WHAT IT IS TOLD. This asked `profile_for`
+    for a classification while withholding the two inputs that produce one
+    for any company outside the curated manifest — the regulator's industry
+    code, and the filer's own revenue and segment sentences. Meta and Amazon
+    are not in the manifest, so both resolved to UNKNOWN, UNKNOWN takes the
+    whole library, and Meta was handed `capacity_ahead_of_demand` and told a
+    chief executive about take-or-pay terms and ageing production lines. The
+    applicability repair in `patterns_for` was correct and could not fire,
+    because nothing ever reached it but UNKNOWN.
+
+    `registrant` is the SEC's classification of this filer; `evidence_text`
+    is the SUBJECT'S OWN filing text, which is what separates two businesses
+    that share one industry code (SIC 7370 holds both Salesforce and Meta).
+    Both are optional, and passing neither reproduces the old behaviour —
+    which is why the seam test asserts the CALL SITE supplies them.
 
     Defensive by construction: a classification that cannot be resolved
     returns the whole library, so a profile lookup failing degrades to
@@ -57,8 +101,10 @@ def _patterns_for_company(company_name: str, domain: str = ""):
                                                                patterns_for)
     try:
         from intent_engine.executive.company_profile import profile_for
-        model = profile_for(name=company_name,
-                            domain=domain).business_model_class
+        model = profile_for(name=company_name, domain=domain,
+                            registrant=registrant,
+                            evidence_text=evidence_text
+                            ).business_model_class
     except Exception:                                       # noqa: BLE001
         return list(PATTERN_LIBRARY)
     return patterns_for(model)
@@ -66,16 +112,103 @@ def _patterns_for_company(company_name: str, domain: str = ""):
 
 class CompanyIngestionService:
     def __init__(self, path=DEFAULT_CI_PATH, *, transport=None,
-                 resolver=None, analyst_client=None, analyst_cache=None):
+                 resolver=None, analyst_client=None, analyst_cache=None,
+                 filing_cache=None, retry_ledger=None):
         self.store = IngestionStore(path)
         self.transport = transport      # injectable; None = real HTTP
         self.resolver = resolver        # injectable; False disables DNS check
+        # SEC filings are immutable, publicly addressed documents, so the
+        # 60-company programme re-reads the same bytes many times. The cache
+        # holds RETRIEVED CONTENT only; every company-specific reading of
+        # that content is recomputed per focal company. See filing_cache.
+        from intent_engine.company_ingestion.filing_cache import FilingCache
+        from intent_engine.company_ingestion.transient import RetryLedger
+        self.filing_cache = (filing_cache if filing_cache is not None
+                             else FilingCache())
+        # Retry accounting is per RUN-SCOPED SERVICE, not global: two runs in
+        # one process must not share a host budget.
+        self.retry_ledger = (retry_ledger if retry_ledger is not None
+                             else RetryLedger())
+        self._registrant_cache: dict = {}
+        self._classification_cache: dict = {}
         # The reasoning backend. None means "not configured", which produces
         # an honest EVIDENCE_LIMITED result -- never a template dressed up as
         # a finding. Injected in tests with a recorded client so CI makes no
         # model calls.
         self._analyst_client = analyst_client
         self._analyst_cache = analyst_cache
+
+    def classification_inputs(self, run_id: str, name: str = "",
+                              documents=None, allow_network: bool = True
+                              ) -> dict:
+        """What this run knows about WHAT KIND OF BUSINESS its subject is.
+
+        THE ONE OWNER. This existed already, on the webapp, and the ingestion
+        path had its own answer — which is how one run held two different
+        classifications of the same company. The executive layer got the fix
+        and the layer that gates the PATTERN LIBRARY did not, so Meta was
+        classified for the analysis and unclassified for the hypotheses, and
+        an advertising platform was offered a semiconductor capacity thesis.
+
+        Two facts, both already in hand:
+
+          * the regulator's industry code for THIS filer, resolved from the
+            run's own CIK rather than by re-resolving the typed name;
+          * the subject's own filing text, which is what separates the two
+            different businesses SIC 7370 contains.
+
+        A manifest company is classified by hand already, so neither is
+        fetched for one. Cached per run; at most one SEC call.
+        """
+        if run_id in self._classification_cache:
+            return self._classification_cache[run_id]
+        out = {"registrant": {}, "evidence_text": ""}
+        meta = self.run_meta(run_id) or {}
+        try:
+            from intent_engine.executive.company_profile import profile_for
+            if profile_for(name=name or str(meta.get("company_name") or ""),
+                           domain=str(meta.get("domain") or "")).known:
+                self._classification_cache[run_id] = out
+                return out
+        except Exception:                                   # noqa: BLE001
+            pass
+        if allow_network:
+            out["registrant"] = self._registrant_for(run_id, meta)
+        if documents is None:
+            try:
+                documents = list(self.store.retrieved(run_id))
+            except Exception:                               # noqa: BLE001
+                documents = []
+        out["evidence_text"] = _subject_evidence_text(
+            documents, str(meta.get("cik") or ""))
+        self._classification_cache[run_id] = out
+        return out
+
+    def _registrant_for(self, run_id: str, meta: dict) -> dict:
+        """The SEC's classification of this filer, memoised per run.
+
+        Fetched rather than assumed because it is the only thing that
+        classifies a company outside the curated 100-company manifest, and
+        an unclassified company takes every hypothesis in the library. Fully
+        defensive: any failure yields {}, which is exactly today's behaviour.
+        """
+        if run_id in self._registrant_cache:
+            return self._registrant_cache[run_id]
+        out: dict = {}
+        cik = str((meta or {}).get("cik") or "").strip()
+        if cik:
+            try:
+                from intent_engine.company_ingestion.edgar import (
+                    registrant_classification,
+                )
+                digits = int(cik.lstrip("0") or "0")
+                out = registrant_classification(
+                    {"cik": digits, "cik10": f"{digits:010d}"},
+                    transport=self.transport, resolver=self.resolver) or {}
+            except Exception:                               # noqa: BLE001
+                out = {}
+        self._registrant_cache[run_id] = out
+        return out
 
     # --- plumbing --------------------------------------------------------------
     def _append(self, event_type, *, run_id, domain, actor_type="system",
@@ -551,22 +684,49 @@ class CompanyIngestionService:
                 PDF_MIME_PREFIXES, PDF_OK, extract_pdf, is_pdf,
             )
             wants_pdf = is_pdf(url=candidate["url"])
-            result = safe_fetch(
-                candidate["url"], transport=self.transport,
-                resolver=self.resolver,
-                extra_mime_prefixes=PDF_MIME_PREFIXES if wants_pdf else (),
-                binary=wants_pdf,
-                # Filings only, flagged by the EDGAR adapter. `max_bytes`
-                # raises the budget for a statutory document, because most
-                # large-cap filings exceed the general 2MB cap and were being
-                # discarded whole — measured live on Caterpillar, whose 10-Q
-                # came back "too large" and left the run bounded.
-                # `accept_truncated` is the fallback for anything past even
-                # that budget; nothing downstream may call such a read
-                # complete.
-                accept_truncated=bool(candidate.get("accept_truncated")),
-                max_bytes=int(candidate.get("max_bytes")
-                              or MAX_RESPONSE_BYTES))
+            # A previously retrieved SEC filing is served from disk. The
+            # cached entry is the RESPONSE, not a reading of it: parsing,
+            # relevance, relationship and competitor classification all run
+            # below on every path, so analysing one filing for two companies
+            # still produces two different readings.
+            _cache_outcome, cached = self.filing_cache.get(candidate["url"])
+            if cached is not None:
+                result = FetchResult(
+                    ok=True, status_code=cached["status_code"],
+                    mime_type=cached["mime_type"],
+                    body=(cached["body"] if wants_pdf
+                          else cached["body"].decode("utf-8", "replace")),
+                    final_url=candidate["url"], redirects=[],
+                    failure_type=None, safe_message="", retryable=False,
+                    truncated=cached["truncated"])
+            else:
+                result = safe_fetch(
+                    candidate["url"], transport=self.transport,
+                    resolver=self.resolver,
+                    extra_mime_prefixes=(PDF_MIME_PREFIXES if wants_pdf
+                                         else ()),
+                    binary=wants_pdf,
+                    retry_ledger=self.retry_ledger,
+                    # Filings only, flagged by the EDGAR adapter. `max_bytes`
+                    # raises the budget for a statutory document, because most
+                    # large-cap filings exceed the general 2MB cap and were
+                    # being discarded whole — measured live on Caterpillar,
+                    # whose 10-Q came back "too large" and left the run
+                    # bounded. `accept_truncated` is the fallback for anything
+                    # past even that budget; nothing downstream may call such
+                    # a read complete.
+                    accept_truncated=bool(candidate.get("accept_truncated")),
+                    max_bytes=int(candidate.get("max_bytes")
+                                  or MAX_RESPONSE_BYTES))
+                if result["ok"]:
+                    self.filing_cache.put(
+                        candidate["url"],
+                        body=(result["body"] if isinstance(result["body"],
+                                                           bytes)
+                              else str(result["body"]).encode("utf-8")),
+                        mime_type=result.get("mime_type", ""),
+                        status_code=result.get("status_code", 200),
+                        truncated=bool(result.get("truncated")))
             if not result["ok"]:
                 failed.append(self._fail(
                     run_id, domain, candidate_id, result["failure_type"],
@@ -1140,6 +1300,11 @@ class CompanyIngestionService:
             observations = derive_analyst_evidence(documents, company_name)
             if not observations:
                 return None
+        # CLASSIFY BEFORE COMPOSING. One owner for "what kind of business is
+        # this", shared with the executive layer — a second copy is exactly
+        # how the two disagreed inside one run.
+        classification = self.classification_inputs(
+            run_id, company_name, documents=documents)
         report = build_strategic_report(
             company_name=company_name, observations=observations,
             previous_model=previous_model,
@@ -1156,7 +1321,17 @@ class CompanyIngestionService:
             # `patterns_for`. Withholding readings from a company we could not
             # classify trades a wrong answer for no answer, and no answer is
             # the failure this product was reopened to fix.
-            patterns=_patterns_for_company(company_name),
+            # CLASSIFY BEFORE GATING. Passing only the name resolved every
+            # company outside the manifest to UNKNOWN, and UNKNOWN takes the
+            # whole library — which is how an advertising platform was told
+            # about take-or-pay terms. The domain, the regulator's industry
+            # code, and the filer's OWN revenue/segment sentences are what
+            # separate two businesses sharing one SIC code.
+            patterns=_patterns_for_company(
+                company_name,
+                domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
+                registrant=classification["registrant"],
+                evidence_text=classification["evidence_text"]),
             # WHAT THE SEARCH DID, carried to the surface a reader sees. The
             # brief rendered "Another registrant's filing - none" as a bare
             # zero because this never crossed; only the provenance drawer had

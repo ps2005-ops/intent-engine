@@ -43,6 +43,9 @@ from urllib.parse import urlparse
 from intent_engine.company_ingestion.records import (
     MAX_RESPONSE_BYTES, USER_AGENT,
 )
+from intent_engine.company_ingestion.transient import (
+    DEFAULT_POLICY, call_with_retry,
+)
 from intent_engine.company_ingestion.validation import (
     resolve_public_addresses, validate_candidate_url,
 )
@@ -160,6 +163,8 @@ class SubmissionsTruncated(Exception):
     were both reported as an empty candidate list, and the second is a defect
     in us that was being displayed as a fact about the company.
     """
+
+
 _DROP_TOKENS = {"inc", "incorporated", "corp", "corporation", "co", "company",
                 "ltd", "limited", "plc", "llc", "lp", "holdings", "group",
                 "technologies", "technology", "the", "and", "of"}
@@ -193,25 +198,37 @@ def _sec_transport(url: str, timeout: float,
 
 
 def _fetch_bytes(url, *, transport, resolver, timeout=8.0,
-                 max_bytes=None) -> bytes:
+                 max_bytes=None, retry_policy=None, retry_ledger=None,
+                 sleeper=None, rng=None) -> bytes:
     """Fetch a permitted SEC URL through the SSRF wall. The URL is validated
     and its host resolved to public addresses before any request; SEC serves
     JSON, so this is not subject to the HTML-only MIME gate. Injected
-    transports (tests) are honoured so the suite never touches the network."""
+    transports (tests) are honoured so the suite never touches the network.
+
+    SEC is the host that actually throttles this product, and this function —
+    not `safe_fetch` — is how every EDGAR metadata read reaches it. Bounded,
+    host-scoped retry is applied here for the same reason it is applied
+    there: a 429 is "not now", and answering it by telling a customer their
+    company has no filings is wrong."""
     url = validate_candidate_url(url)
     if resolver is not False:
         resolve_public_addresses(urlparse(url).hostname, resolver=resolver)
     tx = transport if transport is not None else _sec_transport
-    if max_bytes is None:
-        status, headers, body, exceeded = tx(url, timeout)
-    else:
+
+    def _attempt():
+        if max_bytes is None:
+            return tx(url, timeout)
         try:
-            status, headers, body, exceeded = tx(url, timeout, max_bytes)
+            return tx(url, timeout, max_bytes)
         except TypeError:
             # An injected transport that predates the budget argument keeps
             # working against its own cap, which is what every test double
             # does today.
-            status, headers, body, exceeded = tx(url, timeout)
+            return tx(url, timeout)
+
+    status, headers, body, exceeded = call_with_retry(
+        _attempt, url=url, policy=retry_policy or DEFAULT_POLICY,
+        ledger=retry_ledger, sleeper=sleeper, rng=rng)
     if isinstance(body, str):
         body = body.encode()
     # TRUNCATION IS NOT AN ANSWER. Returning the cut-off bytes hands a broken

@@ -97,6 +97,16 @@ INDEX_FAMILY: Dict[str, Tuple[str, ...]] = {
     "MANUFACTURE_AND_AFTERMARKET": ("revenue", "operating_income"),
     "PEOPLE_OR_ROUTE_BASED_SERVICES": ("revenue", "operating_income"),
     "REGULATED_PRODUCT_OR_PROVIDER": ("revenue", "research"),
+    # An advertising platform's revenue IS impressions times clearing price,
+    # so revenue and the margin it was earned at are the whole index.
+    "ADVERTISING_PLATFORM": ("revenue", "operating_income"),
+    # Two engines with opposite margin structures. Revenue alone hides which
+    # one grew, so operating income is not optional here — it is the only
+    # place the mix shows up in a consolidated statement.
+    "MULTI_ENGINE_PLATFORM": ("revenue", "operating_income"),
+    # Thin margin on large volume: a retailer's revenue can grow while the
+    # decision that produced it destroyed value, and only the margin says so.
+    "SCALE_RETAIL": ("revenue", "operating_income"),
 }
 
 _DEFAULT_FAMILIES = ("revenue", "earnings")
@@ -125,6 +135,15 @@ INDEX_MEANING: Dict[str, str] = {
         "revenue — billable capacity actually sold",
     "REGULATED_PRODUCT_OR_PROVIDER":
         "revenue — the products currently approved and on the market",
+    "ADVERTISING_PLATFORM":
+        "revenue — advertising impressions delivered at the price the "
+        "auction cleared",
+    "MULTI_ENGINE_PLATFORM":
+        "revenue — the sum of engines with different margins, which is why "
+        "the profit line matters more than the top one",
+    "SCALE_RETAIL":
+        "revenue — traffic times basket, at the thin margin scale retail "
+        "earns on it",
 }
 
 _UNKNOWN_MEANING = ("revenue — the top line the company reports to its "

@@ -6941,65 +6941,28 @@ class WebApp:
     def classification_inputs(self, run_id, name: str = "") -> dict:
         """What this run knows about WHAT KIND OF BUSINESS its subject is.
 
-        Two facts, both already in hand, neither previously reaching the
-        classifier:
+        DELEGATED, NOT DUPLICATED. This logic used to live here and only
+        here, and the ingestion layer — which gates the pattern library —
+        had no answer at all, so one run carried two classifications of the
+        same company and only one of them reached the hypotheses. A second
+        copy is how that happened, so there is now one implementation, on
+        the service that owns the run, its meta and its documents.
 
-          * the regulator's industry code for THIS filer, resolved from the
-            run's own CIK rather than by re-resolving the typed name (a
-            second name resolution can only land on a different registrant);
-          * the subject's own filing text, which is what separates the two
-            different businesses SIC 7370 contains.
-
-        MEASURED: without these, Meta — a company whose 10-K this run had
-        already read — came back "not in the validation manifest and no
-        regulator industry classification was found", and every downstream
-        mechanism, metric and competitor was therefore selected from nothing.
-
-        Cached per run; makes at most one SEC call, and none under test.
+        `allow_network` carries this layer's rule that a test environment
+        makes no SEC call; the service passes its own injected transport, so
+        an in-process test is unaffected either way.
         """
         cache = getattr(self, "_classification_cache", None)
         if cache is None:
             cache = self._classification_cache = {}
         if run_id in cache:
             return cache[run_id]
-        out = {"registrant": {}, "evidence_text": ""}
-        meta = self.ci.run_meta(run_id) or {}
-        # A manifest company is classified by hand already: no call, no text.
         try:
-            from intent_engine.executive.company_profile import profile_for
-            if profile_for(name=name or str(meta.get("company_name") or ""),
-                           domain=str(meta.get("domain") or "")).known:
-                cache[run_id] = out
-                return out
+            out = self.ci.classification_inputs(
+                run_id, name, documents=self._retrieved_documents(run_id),
+                allow_network=(self.config.env != "test"))
         except Exception:                                     # noqa: BLE001
-            pass
-        cik = str(meta.get("cik") or "").strip()
-        if cik and self.config.env != "test":
-            try:
-                from intent_engine.company_ingestion.edgar import (
-                    registrant_classification,
-                )
-                digits = cik.lstrip("0") or "0"
-                out["registrant"] = registrant_classification(
-                    {"cik": int(digits), "cik10": f"{int(digits):010d}"}) or {}
-            except Exception:                                 # noqa: BLE001
-                out["registrant"] = {}
-        # The SUBJECT'S OWN documents only. A competitor's filing describing
-        # its advertising revenue must never classify this company.
-        try:
-            subject_cik = cik.lstrip("0")
-            texts = []
-            for doc in self._retrieved_documents(run_id):
-                url = str(doc.get("final_url") or "")
-                if subject_cik and "/data/" in url and \
-                        f"/data/{subject_cik}/" not in url:
-                    continue
-                if str(doc.get("source_class") or "") == "competitor":
-                    continue
-                texts.append(str(doc.get("text_content") or ""))
-            out["evidence_text"] = "\n".join(texts)[:400_000]
-        except Exception:                                     # noqa: BLE001
-            out["evidence_text"] = ""
+            out = {"registrant": {}, "evidence_text": ""}
         cache[run_id] = out
         return out
 

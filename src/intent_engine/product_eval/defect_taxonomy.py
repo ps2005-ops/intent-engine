@@ -297,6 +297,29 @@ BY_CODE = {d.code: d for d in DETECTORS}
 #: TEMPLATE_COLLAPSE defect, and it is detectable without knowing anything
 #: about the company beyond its model class.
 _MODEL_FOREIGN = {
+    # THE DEFECT THAT MOTIVATED THIS DETECTOR HAD NO ENTRY HERE. Meta was
+    # handed `capacity_ahead_of_demand` and told a chief executive about
+    # take-or-pay terms and ageing production lines, and this table — the
+    # one thing that would have caught it — had no row for an advertising
+    # platform, so the leak passed its own detector.
+    "ADVERTISING_PLATFORM": (
+        "take-or-pay", "ageing lines", "ore body", "reserve life",
+        "cost curve", "smelter", "refinery", "drilling", "reserve replacement",
+        "net interest margin", "deposit repricing", "loan losses",
+        "channel inventory", "dealer inventory", "installed fleet",
+        "aftermarket parts", "wafer", "fab", "backlog conversion",
+        "net revenue retention", "seats per customer"),
+    "MULTI_ENGINE_PLATFORM": (
+        "take-or-pay", "ore body", "reserve life", "cost curve", "smelter",
+        "refinery", "drilling", "net interest margin", "deposit repricing",
+        "loan losses", "dealer inventory", "installed fleet",
+        "aftermarket parts", "wafer", "ageing lines"),
+    "SCALE_RETAIL": (
+        "take-or-pay", "ore body", "reserve life", "smelter", "refinery",
+        "drilling", "net interest margin", "deposit repricing",
+        "loan losses", "wafer", "fab", "design win", "installed fleet",
+        "aftermarket parts", "net revenue retention", "seats per customer",
+        "annual recurring revenue", "ageing lines"),
     "SUBSCRIPTION_SOFTWARE": (
         "take-or-pay", "ageing lines", "ore body", "reserve life",
         "cost curve", "smelter", "refinery", "drilling", "net interest margin",
