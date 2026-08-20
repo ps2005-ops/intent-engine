@@ -31,6 +31,7 @@ SV = ROOT / "src/intent_engine/company_ingestion/service.py"
 
 T = "tests/test_transient_retry_and_filing_cache.py"
 T2 = "tests/test_filing_cache_serves_two_companies.py"
+T3 = "tests/test_retry_accounting_is_per_run.py"
 
 PROOFS = [
     # --- A: remove the retry loop entirely ---------------------------------
@@ -171,6 +172,25 @@ PROOFS = [
      "                if result[\"ok\"]:\n                    self.filing_cache.put(",
      "                if False:\n                    self.filing_cache.put(",
      f"{T2}::test_second_company_reads_the_cached_filing_without_a_second_request",
+     "assert"),
+
+    # --- J: one ledger per process is one budget for every customer -------
+    ("J1. the ledger goes back on the service, shared by every run",
+     SV,
+     "        ledger = self._retry_ledgers.get(run_id)\n"
+     "        if ledger is None:\n"
+     "            ledger = self._retry_ledgers[run_id] = RetryLedger()",
+     "        ledger = self._retry_ledgers.get(\"shared\")\n"
+     "        if ledger is None:\n"
+     "            ledger = self._retry_ledgers[\"shared\"] = RetryLedger()",
+     f"{T3}::test_a_spent_budget_does_not_follow_the_next_run",
+     "inherited the previous customer"),
+
+    ("J2. the telemetry stops reaching the operator surface",
+     SV,
+     "            \"total_retries\": retries,",
+     "            \"total_retries\": 0,",
+     f"{T3}::test_telemetry_reaches_a_surface",
      "assert"),
 
     # --- I: safe_fetch must actually route through the policy -------------

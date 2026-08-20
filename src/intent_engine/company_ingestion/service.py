@@ -21,6 +21,8 @@ from intent_engine.company_ingestion.external_discovery import (
     propose_external_candidates,
 )
 from intent_engine.company_ingestion.fetch import FetchResult, safe_fetch
+from intent_engine.company_ingestion.filing_cache import FilingCache
+from intent_engine.company_ingestion.transient import RetryLedger
 from intent_engine.company_ingestion.filing_text import (
     is_filing_document, parse_filing_html,
 )
@@ -121,14 +123,17 @@ class CompanyIngestionService:
         # 60-company programme re-reads the same bytes many times. The cache
         # holds RETRIEVED CONTENT only; every company-specific reading of
         # that content is recomputed per focal company. See filing_cache.
-        from intent_engine.company_ingestion.filing_cache import FilingCache
-        from intent_engine.company_ingestion.transient import RetryLedger
         self.filing_cache = (filing_cache if filing_cache is not None
                              else FilingCache())
-        # Retry accounting is per RUN-SCOPED SERVICE, not global: two runs in
-        # one process must not share a host budget.
-        self.retry_ledger = (retry_ledger if retry_ledger is not None
-                             else RetryLedger())
+        # RETRY ACCOUNTING IS PER RUN, AND THE DISTINCTION IS LOAD-BEARING.
+        # The webapp builds exactly ONE of these services for the whole
+        # process, so a ledger held on the service is shared by every
+        # customer: the first analysis would spend the per-host and run
+        # budgets and every later analysis in that process would get a
+        # retry policy that never retries. An injected ledger is honoured
+        # as-is, because a test that passes one wants to read it.
+        self._injected_ledger = retry_ledger
+        self._retry_ledgers: dict = {}
         self._registrant_cache: dict = {}
         self._classification_cache: dict = {}
         # The reasoning backend. None means "not configured", which produces
@@ -137,6 +142,66 @@ class CompanyIngestionService:
         # model calls.
         self._analyst_client = analyst_client
         self._analyst_cache = analyst_cache
+
+    def retry_ledger_for(self, run_id: str):
+        """This run's retry accounting. One ledger per run, never per
+        process — see the constructor for why that distinction matters."""
+        if self._injected_ledger is not None:
+            return self._injected_ledger
+        ledger = self._retry_ledgers.get(run_id)
+        if ledger is None:
+            ledger = self._retry_ledgers[run_id] = RetryLedger()
+        return ledger
+
+    def retrieval_telemetry(self, run_id: str) -> dict:
+        """What retrieval had to do to get this run's evidence.
+
+        DIAGNOSTICS, NOT CUSTOMER COPY. A chief executive must never have to
+        understand the phrase "429", a submissions-index size or a cache
+        key. But when a run comes back thin, "sec.gov asked us to wait twice
+        and we waited 3 seconds" is the difference between a defect in us
+        and a fact about the company, and that answer previously existed
+        only inside a local variable.
+        """
+        try:
+            retry = self.retry_ledger_for(run_id).snapshot()
+        except Exception:                                   # noqa: BLE001
+            retry = {}
+        try:
+            cache = self.filing_cache.snapshot()
+        except Exception:                                   # noqa: BLE001
+            cache = {}
+        return {"retry": retry, "filing_cache": cache}
+
+    def retrieval_telemetry_overview(self) -> dict:
+        """Retry and cache behaviour across every run this process served.
+
+        Aggregated because the per-run ledgers are the unit of accounting
+        but an operator asks a process-level question first: is SEC
+        throttling us right now, and is the filing cache doing anything.
+        """
+        hosts: dict = {}
+        retries = exhausted = 0
+        seconds = 0.0
+        for ledger in self._retry_ledgers.values():
+            snap = ledger.snapshot()
+            retries += snap.get("total_retries", 0)
+            seconds += snap.get("total_retry_seconds", 0.0)
+            exhausted += len(snap.get("exhausted_hosts") or ())
+            for host, spent in (snap.get("retry_seconds_by_host") or {}).items():
+                hosts[host] = round(hosts.get(host, 0.0) + spent, 3)
+        try:
+            cache = self.filing_cache.snapshot()
+        except Exception:                                   # noqa: BLE001
+            cache = {}
+        return {
+            "runs_with_a_ledger": len(self._retry_ledgers),
+            "total_retries": retries,
+            "total_retry_seconds": round(seconds, 3),
+            "hosts_whose_budget_ran_out": exhausted,
+            "retry_seconds_by_host": hosts,
+            "filing_cache": cache,
+        }
 
     def classification_inputs(self, run_id: str, name: str = "",
                               documents=None, allow_network: bool = True
@@ -706,7 +771,7 @@ class CompanyIngestionService:
                     extra_mime_prefixes=(PDF_MIME_PREFIXES if wants_pdf
                                          else ()),
                     binary=wants_pdf,
-                    retry_ledger=self.retry_ledger,
+                    retry_ledger=self.retry_ledger_for(run_id),
                     # Filings only, flagged by the EDGAR adapter. `max_bytes`
                     # raises the budget for a statutory document, because most
                     # large-cap filings exceed the general 2MB cap and were

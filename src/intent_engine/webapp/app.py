@@ -8096,9 +8096,20 @@ class WebApp:
             last_failure_detail = {"job": job, "at": at,
                                    "error": redact_secrets(err)}
 
+        # WHAT RETRIEVAL HAD TO DO. Operator-only on purpose: a chief
+        # executive must never be asked to understand "429", and an operator
+        # looking at a thin run must be able to tell "sec.gov asked us to
+        # wait" from "this company has published nothing". Before this the
+        # answer existed only inside a local variable.
+        try:
+            retrieval = self.ci.retrieval_telemetry_overview()
+        except Exception as exc:                            # noqa: BLE001
+            retrieval = {"error": type(exc).__name__}
+
         return {
             "as_of": as_of,
             "version": version_info(),
+            "retrieval": retrieval,
             "market": {
                 "candidate_pipeline": pipeline,
                 "predictions": pred_total,
