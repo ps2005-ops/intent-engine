@@ -194,7 +194,41 @@ class ComparablePattern:
     #: excluded from every class would be a pattern that never fires, so
     #: `validate` refuses that.
     excluded_model_classes: tuple = ()
+    #: THE CLASSES THIS PATTERN'S AUTHOR HAS ACTUALLY RULED ON.
+    #:
+    #: `excluded_model_classes` is a DENYLIST, and a denylist cannot exclude a
+    #: class that did not exist when it was written. Three classes were added
+    #: one cycle ago and every pattern in the library silently accepted all
+    #: three: they qualified for 12 of 12 patterns while older classes were
+    #: filtered to 5-11. Meta — an advertising auction whose buyers are
+    #: millions of independent advertisers — qualified for
+    #: `capacity_ahead_of_demand`, whose own `when_it_does_not_apply` says
+    #: "demand is spread across many independent buyers", and answered ten
+    #: board questions with a semiconductor capacity thesis.
+    #:
+    #: So applicability is now POSITIVE. A class absent from this tuple has
+    #: not been considered and the pattern is not offered for it, which fails
+    #: safe: an undecided class loses one reading instead of gaining twelve
+    #: wrong ones. `test_a_model_class_registry.py` requires every pattern to
+    #: consider every registered class, so "undecided" cannot survive a
+    #: commit.
+    considered_model_classes: tuple = ()
     limitations: str = ""
+
+    def applies_to_model(self, model_class: str) -> bool:
+        """May this pattern be offered for this kind of business?
+
+        Both gates, and both must pass: the class has to have been considered
+        AND not excluded. A legacy pattern that names no considered classes
+        keeps the old denylist behaviour, so this is additive.
+        """
+        model = str(model_class or "").strip().upper()
+        if not model or model == "UNKNOWN":
+            return True
+        if model in tuple(self.excluded_model_classes or ()):
+            return False
+        considered = tuple(self.considered_model_classes or ())
+        return model in considered if considered else True
 
     def validate(self) -> None:
         _require(bool(self.pattern_id), "pattern_id required")

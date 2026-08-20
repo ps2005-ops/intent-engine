@@ -60,6 +60,30 @@ UNKNOWN = "UNKNOWN"
 #: The nine business model classes the manifest actually uses. Every table
 #: below is keyed on these and nothing else, so a new class added to the
 #: manifest surfaces as a missing key rather than silently taking a default.
+#: THE REGISTRY OF BUSINESS-MODEL CLASSES. Every table keyed on a model class
+#: must be complete against this tuple, and `test_a_model_class_registry.py`
+#: fails the suite when one is not.
+#:
+#: WHY THIS IS ENFORCED AND WAS NOT. Three classes were added one cycle ago —
+#: ADVERTISING_PLATFORM, MULTI_ENGINE_PLATFORM, SCALE_RETAIL — and this tuple
+#: was not updated. Nothing read it, so nothing noticed. Measured consequences,
+#: all three found live:
+#:
+#:   * `patterns_for` filters by an EXCLUSION list, so a class absent from
+#:     every pattern's exclusions qualifies for every pattern. The three new
+#:     classes qualified for 12 of 12 patterns while every older class was
+#:     filtered to 5-11 — which is why Meta, Caterpillar and Exxon all
+#:     answered ten board questions with "committing capital to capacity
+#:     ahead of uncertain demand", a semiconductor capacity thesis, and were
+#:     all offered "Memory and sensor fabrication cycles" as the analogy.
+#:   * `strategic_read._METRICS` had no entry for any of the three, so three
+#:     companies got no model-specific metrics at all.
+#:   * `competitive_ground._MODEL_ALTERNATIVES` had no entry either, which
+#:     left Meta's whole competitive ground at one row until it was repaired.
+#:
+#: A denylist cannot exclude a class that did not exist when it was written.
+#: The registry plus a completeness guard is what makes the next added class
+#: impossible to forget.
 MODEL_CLASSES = (
     "SUBSCRIPTION_SOFTWARE",
     "DESIGN_AND_MANUFACTURE",
@@ -70,7 +94,20 @@ MODEL_CLASSES = (
     "MANUFACTURE_AND_AFTERMARKET",
     "PEOPLE_OR_ROUTE_BASED_SERVICES",
     "REGULATED_PRODUCT_OR_PROVIDER",
+    "ADVERTISING_PLATFORM",
+    "MULTI_ENGINE_PLATFORM",
+    "SCALE_RETAIL",
 )
+
+
+def missing_model_classes(keys) -> list:
+    """Registry classes a model-keyed table does not cover, in registry order.
+
+    The one helper every completeness guard uses, so "which classes exist" is
+    answered in exactly one place.
+    """
+    have = set(keys or ())
+    return [c for c in MODEL_CLASSES if c not in have]
 
 # --- how well this company is classified, stated rather than implied --------
 #

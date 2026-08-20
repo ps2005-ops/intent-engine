@@ -414,7 +414,55 @@ class StrategicRead:
 # when the metric is one this KIND of business is judged on. Asking a mining
 # company for net revenue retention and reporting its absence as a gap is how
 # a report becomes noise.
+#: THE THREE CLASSES ADDED ONE CYCLE AGO HAD NO ENTRY HERE, so Meta, Amazon
+#: and Walmart were judged on no model-specific metric at all — dimension 3
+#: of the scorecard, absent for three of eight companies and unnoticed because
+#: nothing checked this table against the registry. See
+#: `company_profile.MODEL_CLASSES` and `test_a_model_class_registry.py`.
 _METRICS = {
+    "ADVERTISING_PLATFORM": (
+        ("impressions or engaged time",
+         "the inventory being sold; without it there is nothing to auction"),
+        ("price per impression",
+         "the auction clearing price is the whole revenue line here"),
+        ("advertiser count and spend per advertiser",
+         "demand depth decides whether the auction clears at a good price"),
+        ("engagement per user",
+         "attention is the input to inventory, so it leads revenue"),
+        ("compute and infrastructure spend",
+         "recommendation quality is bought, and it is the largest cost line"),
+        ("regulatory and platform-policy exposure",
+         "targeting and data rules move revenue without any competitor acting"),
+    ),
+    "MULTI_ENGINE_PLATFORM": (
+        ("segment revenue and segment operating income",
+         "the engine carrying the revenue is not the one carrying the profit, "
+         "and only the split shows which"),
+        ("cloud or infrastructure growth and margin",
+         "the highest-margin engine sets the group's earnings power"),
+        ("advertising or take-rate revenue",
+         "third-party monetisation earns without carrying the inventory"),
+        ("fulfilment and logistics cost per unit",
+         "the cost that scales with volume rather than with revenue"),
+        ("capital expenditure by segment",
+         "which engine the capital is actually going into"),
+        ("paid unit or order growth",
+         "the volume the whole structure is built to serve"),
+    ),
+    "SCALE_RETAIL": (
+        ("comparable sales, split into traffic and basket",
+         "thin margin means small comparable moves swing profit"),
+        ("gross margin and markdown rate",
+         "buying scale and inventory discipline show up here first"),
+        ("inventory turns",
+         "the return in this model comes from turns, not from price premium"),
+        ("cost of goods and sourcing terms",
+         "the buying side is where a discounter's advantage is made"),
+        ("store and distribution operating cost",
+         "a largely fixed base against thin unit margin"),
+        ("membership, advertising and other high-margin income",
+         "the part of profit that does not come from selling goods"),
+    ),
     "SUBSCRIPTION_SOFTWARE": (
         ("revenue growth", "the rate the contracted base is compounding at"),
         ("large-customer growth",
