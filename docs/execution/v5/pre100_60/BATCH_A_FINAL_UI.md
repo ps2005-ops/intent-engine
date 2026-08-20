@@ -335,9 +335,53 @@ never a URL, which is exactly why the first repair was written against the only
 signal visible there. Route 2 is filtered at the producer, so the narrative,
 the decision's grounding and the citations move together rather than each
 growing its own filter.
-**Live reproof: PENDING.** Verified by test and 11/11 break proofs — the same
-standing the version that shipped inert had. `grep "committing capital to
-capacity"` on JPMorgan and Meta is the deciding measurement.
+**Live reproof: FAILED, three times.** `71e4dc0` renders JPMorgan's page
+byte-identical to `0420fb0` and `cec9b2f`. The repair is verified by test, by
+11/11 break proofs, and by a probe against real EDGAR documents — and is inert
+on the page. **That is the strongest instance of this session's central
+pattern, and it is worth more than any individual defect in this document:
+"green guard + passing real-data probe + unchanged page" is a complete set of
+reassurances, and all three can be true while the product is wrong.**
+
+**Where it is NOT, established by measurement rather than argument.** Three
+facts, all against live SEC, no demo quota:
+
+1. **The CIK arrives.** JPMorgan through the *service* — `create_run` →
+   `discover` → `approve` → `fetch_approved` → `derive_observations` — gives
+   `run_meta cik = '19617'`.
+2. **JPMorgan's own 10-K carries the capacity signal.** All three EDGAR
+   candidates are `/data/19617/` and come back `subject_owned=True`. The
+   *sentence* may be correct for JPMorgan; the evidence attributed beside it
+   is not.
+3. **Wells Fargo's document is `independent_reporting`, not
+   `investor_material`.** Measured by calling `_third_party_filing_candidates`
+   directly; the returned title matches the capture character for character.
+
+**Fact 3 breaks both sessions' stories.** The journey session inferred the
+class from the rendered label; the repairing session accepted it. And
+`provenance_label` is unambiguous on that exact title and URL:
+`independent_reporting → "Independent evidence"`,
+`investor_material → "Regulatory or investor filing"`.
+
+Meta's capture says "Independent evidence" beside Network-1 — **consistent**.
+JPMorgan's says "Regulatory or investor filing" beside a **Wells Fargo**
+title — **not**. That row joins one observation's class with another
+observation's title.
+
+**So the target has moved off the mental model.** The class gate excludes
+`independent_reporting` and would have blocked this before the CIK work
+existed. It is a join in whatever renders that evidence row, or a second
+route by which that document arrives carrying a different class. **Not
+guessed a third time.** The next step is instrumentation, and it can be
+narrow: surface each rendered evidence row's observation id beside its title
+and source_class for one JPMorgan run. Either answer names the join in one run.
+
+**A related fix shipped without being credited with this one.** `/analyze`
+assigned a confirmed pick's CIK in an `elif` under the domain branch, so every
+filer with both — every large filer — opened with `cik=""`. Real, and on the
+*human* path only: the journey harness omits `suggest_domain`, so the branch
+it exercised did set the CIK. Shipped on its own merits; **not** recorded as
+the cause of the capture that prompted it.
 
 ### D11 · Two companies sharing a pattern share the reading
 **Visible evidence:** Caterpillar and Exxon Mobil — *different* business-model
