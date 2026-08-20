@@ -167,6 +167,22 @@ class CompanyIngestionService:
             cache = {}
         return {"retry": retry, "filing_cache": cache}
 
+    def ownership_record(self, run_id: str) -> dict:
+        """What this run decided about whose documents it was reading.
+
+        Readable for ANY past run, including one nobody thought to
+        instrument — which is the whole point. Empty dict means the run
+        predates the event or never composed, and a caller must read that as
+        UNKNOWN rather than as "no CIK".
+        """
+        try:
+            for row in self.store.for_run(run_id):
+                if row.event_type == "ci.ownership_resolved":
+                    return dict(row.payload)
+        except Exception:                                   # noqa: BLE001
+            return {}
+        return {}
+
     def retrieval_telemetry_overview(self) -> dict:
         """Retry and cache behaviour across every run this process served.
 
@@ -1351,9 +1367,33 @@ class CompanyIngestionService:
         # THE SUBJECT'S CIK IS WHAT DECIDES OWNERSHIP. Without it every
         # EDGAR document looks equally like this filer's own, and Wells
         # Fargo's 10-K stated JPMorgan's business model on the live page.
+        subject_cik = str((self.run_meta(run_id) or {}).get("cik") or "")
         observations = derive_observations(
-            documents, company=company_name,
-            subject_cik=str((self.run_meta(run_id) or {}).get("cik") or ""))
+            documents, company=company_name, subject_cik=subject_cik)
+        # RECORD THE DECISION, NOT JUST ITS RESULT.
+        #
+        # Four deploys went into a defect whose entire difficulty was that
+        # this one field could not be inspected after the run ended. "Was the
+        # CIK empty?" was unanswerable because nothing wrote it down at the
+        # moment it mattered, and the run that would have answered it was
+        # gone before the question was framed. This is deliberately an EVENT
+        # rather than a live route: an event outlives the run, the process
+        # and the deploy, and can be read for a run nobody thought to
+        # instrument.
+        if run_id:
+            owned = sum(1 for o in observations
+                        if getattr(o, "subject_owned", True))
+            self._append(
+                "ci.ownership_resolved", run_id=run_id,
+                domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
+                payload={"subject_cik": subject_cik,
+                         "subject_cik_present": bool(subject_cik),
+                         "documents": len(documents),
+                         "observations": len(observations),
+                         "observations_subject_owned": owned,
+                         "observations_from_another_filer":
+                             len(observations) - owned},
+                idempotency_key=f"ci-ownership:{run_id}")
         observations += list(extra_observations or ())
         if not observations:
             # MEASURED: 2 of 5 real companies (Toyota, Costco) died here with

@@ -118,6 +118,14 @@ INGESTION_EVENTS = frozenset({
     # WHO the run is about, asserted before synthesis and independently of
     # whatever the run manages to retrieve.
     "ci.entity_identified",
+    # WHOSE DOCUMENTS THE RUN DECIDED IT WAS READING, recorded at the moment
+    # it decided. Four deploys were spent on a defect whose whole difficulty
+    # was that `subject_cik` was unobservable after the fact: a run that
+    # produced a wrong attribution could not be asked whether it had had a
+    # CIK at all, and the run that would have settled it was gone by the time
+    # the question was framed. An append-only event outlives the run, the
+    # process and the deploy, which a live route does not.
+    "ci.ownership_resolved",
 })
 
 

@@ -495,6 +495,47 @@ this document spends most of its length describing.
 | §37 zero-Anthropic | PASS — `REQUIRED_ANTHROPIC_CALLS = 0` across all six steps plus Q&A, evidence, sources, brief, X-Ray |
 | §36 security | PASS — 255 tests, plus new path-traversal proofs for the cache |
 
+## Where the programme stands
+
+| | |
+|---|---|
+| **Closed on a rendered page** | class gate · case A · archetype fallback · large filers |
+| **Closed on a rendered page, mechanism NOT established** | claim ownership |
+| **Open and measured** | the successor defect — two companies sharing a pattern share the reading, 8/10 across *different* classes; half fixed, half `xfail(strict=True)` |
+| **Not reached** | `BATCH_A_FINAL_UI_COMPLETE` — 7 of 8, five SHAs, twenty dimensions `NOT_MEASURED` |
+
+Claim ownership is deliberately on its own row rather than in the first. It
+*is* closed on the page — but the two accounts of why cannot both be true, one
+has a wrong premise, and neither session knows which. Filing it under "closed"
+would let the unestablished mechanism disappear into a tick.
+
+**That pair is now checkable, and today it was not.** A pre-fix and a post-fix
+run would each carry their own `ci.ownership_resolved`, and
+`subject_cik_present` would settle it in one comparison. The reason it cannot
+be settled today is exactly the reason that event now exists.
+
+**The successor defect is what to put in front of whoever picks this up.** It
+is the only remaining thing that changes what a chief executive reads, and it
+is the one where the tempting answer — another table row keyed on class —
+would reproduce the original defect in a new shape. Caterpillar and Exxon are
+already in *different* classes.
+
+## A design note the programme should carry
+
+**The diagnostic built to settle live defects cannot be read by either agent
+doing the diagnosing.** `/runs/<id>/provenance.json` is operator-gated, which
+is correct for tenant data and not a thing to weaken for convenience — neither
+session would enter credentials to read it, and neither did. But it means a
+run-scoped fact needed for this work has to either reach a surface that can be
+read, or be recorded where it outlives the run.
+
+A live route has a second failure the day it matters: it only answers for runs
+still resident in a process that has not restarted, and a redeploy destroyed
+one of the two runs that would have settled this. `ci.ownership_resolved` is
+the first instance of the principle that follows — **record the decision where
+it is made, in a store that outlives the run, the process and the deploy.**
+There will be others.
+
 ## The next three things, in order
 
 1. **Settle grep 2.** JPMorgan exercises route 1, Meta exercises route 2. Two
