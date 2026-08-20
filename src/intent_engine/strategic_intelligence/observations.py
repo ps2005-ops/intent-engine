@@ -1011,6 +1011,63 @@ def _is_weak(excerpt: str, title: str, signals: list) -> bool:
 MIN_ANALYST_EXCERPT_CHARS = 120
 
 
+#: The classes in which a document SPEAKS FOR the subject. Derived from the
+#: vocabulary rather than hand-written, so a class added tomorrow belongs to
+#: neither set until somebody decides — the same reason the pattern library's
+#: applicability had to stop being a denylist.
+def _subject_speaking_classes():
+    from intent_engine.company_ingestion.records import (
+        INDEPENDENT_CLASSES, SOURCE_CLASSES,
+    )
+    return tuple(c for c in SOURCE_CLASSES if c not in INDEPENDENT_CLASSES)
+
+
+def subject_documents(documents, *, subject_cik: str = "") -> list:
+    """The documents that may describe THIS company. One owner for the rule.
+
+    MEASURED LIVE on 0420fb0. JPMorgan's rendered page carried, under "How
+    the business actually works -> Distribution model", the sentence "Is
+    committing capital to capacity ahead of the demand for it" — attributed
+    to WELLS FARGO & COMPANY's 10-K. A signal detected in another bank's
+    filing became JPMorgan's own distribution model. The same run's evidence
+    also carried a blank-check SPAC whose 10-K opens "We are a blank check
+    company". Walmart's carried Ranpak, Ibotta and a 2023 BitNile filing.
+
+    A claim belongs to whoever made it. `strategic_read._named_rivals`
+    already carried this rule — it was repaired when Meta's introduction
+    named AT&T and Alphabet, which were the AUTHORS of third-party filings
+    the run had retrieved. The competitor producer was fixed and the
+    OBSERVATION producer, one level upstream and feeding the same report,
+    was not. One defect, two producers, one fixed.
+
+    Two rules, because one is not enough:
+
+      * a document in an INDEPENDENT class is another party's vantage by
+        definition, and must not describe the subject's own mechanics;
+      * a document filed under a DIFFERENT registrant's EDGAR path is not
+        this filer's, whatever class it was given — which is the rule that
+        catches a third-party 10-K classed as investor material.
+
+    This belongs to the producer, not to each call site, because a function
+    that builds a company's own mechanics should not silently accept
+    documents about other companies.
+    """
+    allowed = _subject_speaking_classes()
+    subject = (subject_cik or "").lstrip("0")
+    kept = []
+    for doc in documents or ():
+        get = (doc.get if isinstance(doc, dict)
+               else lambda k, d=None, o=doc: getattr(o, k, d))
+        source_class = str(get("source_class", "") or "")
+        if source_class and source_class not in allowed:
+            continue
+        url = str(get("final_url", "") or get("url", "") or "")
+        if subject and "/data/" in url and f"/data/{subject}/" not in url:
+            continue
+        kept.append(doc)
+    return kept
+
+
 def derive_analyst_evidence(documents, company: str = "") -> list:
     """Evidence for the grounded analyst -- every strategic page, signal or not.
 
@@ -1118,8 +1175,23 @@ def observation_sentence(subject: str, signal: str, label: str) -> str:
     return f"{sentence}, {because}." if because else f"{sentence}."
 
 
-def derive_observations(documents, *, company: str = "") -> list:
+def derive_observations(documents, *, company: str = "",
+                        subject_cik: str = "",
+                        subject_only: bool = False) -> list:
     """Build StrategicObservations from retrieved ingestion documents.
+
+    OWNERSHIP IS ENFORCED WHERE THE CLAIM IS MADE, NOT HERE. Filtering
+    third-party documents out at this point was tried and is wrong: a
+    COMPLETE report requires at least one INDEPENDENT source class, that
+    coverage is computed from these observations, and dropping them made
+    every run fail the cross-source bar to fix a claim nobody had made yet.
+    A rival's filing is real evidence; it simply may not describe the
+    SUBJECT'S OWN mechanics. `model.build_mental_model` applies
+    `subject_documents`' rule to the observations that STATE a component,
+    while leaving those that CONTRADICT one alone.
+
+    `subject_only=True` is available for a caller that wants the documents
+    narrowed here instead.
 
     Deduplicates repeated pages, filters title-only / generic-marketing noise
     into weak evidence, and records a real strategic signal (not a page title)
@@ -1141,6 +1213,8 @@ def derive_observations(documents, *, company: str = "") -> list:
     run with documents but no strategic report should still render an
     evidence-grounded descriptive brief instead of redirecting to nothing.
     """
+    if subject_only:
+        documents = subject_documents(documents, subject_cik=subject_cik)
     observations, seen = [], set()
     for doc in documents:
         # collapse duplicate pages: same content hash or same normalized URL

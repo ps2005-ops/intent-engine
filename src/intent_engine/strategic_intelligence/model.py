@@ -93,10 +93,40 @@ def build_mental_model(company, observations, hypotheses, *, now,
     """Construct the current model from evidence. If ``previous`` is given,
     prior_state / change_reason / first_seen_at are carried and updated so the
     model versions rather than rebuilding from zero."""
+    # A COMPONENT IS A CLAIM ABOUT THIS COMPANY, SO ONLY THIS COMPANY MAY
+    # STATE IT.
+    #
+    # MEASURED LIVE on 0420fb0. JPMorgan's rendered page said, under "How the
+    # business actually works -> Distribution model", "Is committing capital
+    # to capacity ahead of the demand for it" — and the attributed evidence
+    # was WELLS FARGO & COMPANY's 10-K. `current_state` is built from
+    # `o.strategic_signal or o.text` of whichever observations happen to
+    # carry the signal, and the run retrieves other registrants' filings on
+    # purpose because they are the only independent vantage we can reach. So
+    # another bank's sentence became JPMorgan's own distribution model.
+    #
+    # `strategic_read._named_rivals` already carried this rule, repaired when
+    # Meta's introduction named AT&T and Alphabet — the AUTHORS of
+    # third-party filings. The competitor producer was fixed and this one,
+    # which states the company's mechanics, was not.
+    #
+    # SUPPORT is restricted; CONTRADICTION is not. A rival's filing may not
+    # say what this company's growth engine IS, and may absolutely be the
+    # evidence that it is not what we thought.
+    from intent_engine.company_ingestion.records import (
+        INDEPENDENT_CLASSES, SOURCE_CLASSES,
+    )
+    speaks_for_subject = tuple(c for c in SOURCE_CLASSES
+                               if c not in INDEPENDENT_CLASSES)
+
     by_signal = {}
+    own_by_signal = {}
     for o in observations:
+        own = (o.source_class or "company_owned") in speaks_for_subject
         for s in o.signals:
             by_signal.setdefault(s, []).append(o)
+            if own:
+                own_by_signal.setdefault(s, []).append(o)
 
     prev_components = (previous.components if previous else {})
     components = {}
@@ -104,7 +134,7 @@ def build_mental_model(company, observations, hypotheses, *, now,
         support = []
         seen = set()
         for s in sigs:
-            for o in by_signal.get(s, []):
+            for o in own_by_signal.get(s, []):
                 if o.observation_id not in seen and not o.weak:
                     seen.add(o.observation_id)
                     support.append(o)

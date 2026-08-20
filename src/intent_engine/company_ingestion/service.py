@@ -58,17 +58,11 @@ def _subject_evidence_text(documents, cik: str = "") -> str:
     filer's, and a document the run itself classed `competitor` is not
     either.
     """
-    subject = (cik or "").lstrip("0")
+    from intent_engine.strategic_intelligence.observations import (
+        subject_documents,
+    )
     texts = []
-    for doc in documents or ():
-        url = str((doc.get("final_url") if isinstance(doc, dict)
-                   else getattr(doc, "final_url", "")) or "")
-        source_class = str((doc.get("source_class") if isinstance(doc, dict)
-                            else getattr(doc, "source_class", "")) or "")
-        if subject and "/data/" in url and f"/data/{subject}/" not in url:
-            continue
-        if source_class == "competitor":
-            continue
+    for doc in subject_documents(documents, subject_cik=cik):
         text = (doc.get("text_content") if isinstance(doc, dict)
                 else getattr(doc, "text_content", "")) or ""
         texts.append(str(text))
@@ -1348,6 +1342,12 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.reasoning import (
             build_strategic_report,
         )
+        # ONLY THE SUBJECT'S OWN DOCUMENTS DESCRIBE THE SUBJECT. The run
+        # retrieves other registrants' filings on purpose — they are the only
+        # independent vantage we can reach — and a signal found in one of
+        # them is a fact about THAT filer. JPMorgan rendered Wells Fargo's
+        # capacity sentence as its own distribution model until the producer
+        # was told whose documents these are.
         observations = derive_observations(documents, company=company_name)
         observations += list(extra_observations or ())
         if not observations:

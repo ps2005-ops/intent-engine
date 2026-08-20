@@ -125,13 +125,34 @@ def test_a_competitor_filing_cannot_classify_this_company():
     assert "RIVAL ADVERTISING REVENUE" not in text
 
 
-def test_no_cik_keeps_every_non_competitor_document():
-    documents = [{"final_url": "https://acme.com/a", "source_class": "product",
-                  "text_content": "alpha"},
+def test_no_cik_keeps_the_companys_own_pages_and_drops_the_rest():
+    """`source_class` is the closed vocabulary in
+    company_ingestion.records.SOURCE_CLASSES — "product" is a source_TYPE and
+    a real document can never carry it, so this fixture uses the classes
+    production actually assigns."""
+    documents = [{"final_url": "https://acme.com/a",
+                  "source_class": "company_owned", "text_content": "alpha"},
+                 {"final_url": "https://acme.com/ir",
+                  "source_class": "investor_material",
+                  "text_content": "gamma"},
                  {"final_url": "https://rival.com/b",
-                  "source_class": "competitor", "text_content": "beta"}]
+                  "source_class": "competitor", "text_content": "beta"},
+                 {"final_url": "https://press.example/c",
+                  "source_class": "independent_reporting",
+                  "text_content": "delta"}]
     text = _subject_evidence_text(documents, cik="")
-    assert "alpha" in text and "beta" not in text
+    assert "alpha" in text and "gamma" in text
+    assert "beta" not in text and "delta" not in text
+
+
+def test_an_unrecognised_source_class_fails_closed():
+    """Ownership is the one question where an unknown answer must not be
+    read as "yes". A class nobody has decided about is not the subject's
+    voice."""
+    text = _subject_evidence_text(
+        [{"final_url": "https://acme.com/a",
+          "source_class": "something_new", "text_content": "alpha"}], cik="")
+    assert "alpha" not in text
 
 
 # --- the seam: the call site must actually pass them --------------------
