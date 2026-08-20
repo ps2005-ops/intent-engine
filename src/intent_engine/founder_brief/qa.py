@@ -152,7 +152,29 @@ def _from_read(name: str, read) -> str:
     the sixth time. Q&A still does not decide anything: it projects, and this
     is the object it projects from when the run's own decision is silent.
     """
-    if read is None or not getattr(read, "puts_a_strategy_forward", False):
+    if read is None:
+        return ""
+    # §22. WHO CONTESTS THIS COMPANY IS NOT A STRATEGY, SO IT IS NOT GATED
+    # ON ONE.
+    #
+    # MEASURED LIVE on 0420fb0, 3 of 3 companies. Step 1 named the rivals —
+    # "contested directly by banks and brokerage firms" — and one click later
+    # this route answered "No competitor has been selected for this company
+    # from the evidence." The product named the competitors and then denied
+    # having identified any, which is the exact question a chief executive
+    # asks first.
+    #
+    # Two causes, both here. The strategy gate below refused every intent
+    # including this one, and a run may identify rivals while honestly
+    # withholding a recommendation. And the fallback read only
+    # `level4_competition`, which is EMPTY on exactly the runs where step 1
+    # falls through to the class-level peers — so the two surfaces were
+    # reading different objects. Both now project the ONE competitive state
+    # the read carries, with its basis, so this route can no longer contradict
+    # the page before it.
+    if name == "competitor":
+        return _competition_answer(read)
+    if not getattr(read, "puts_a_strategy_forward", False):
         return ""
     where = _READ_FALLBACK.get(name)
     if where is None:
@@ -168,6 +190,71 @@ def _from_read(name: str, read) -> str:
             f"{c.name}: {c.likely_response} Watch {c.signal_to_watch}"
             for c in (value or ())[:2])
     return ""
+
+
+def _competition_answer(read) -> str:
+    """The competitive state, in the words the rest of the product uses.
+
+    Named rivals from the run's own ladder are described in full — who they
+    are, how they are likely to respond, what to watch. A class-level basis
+    is stated AS a class-level basis, in the same sentence step 1 renders,
+    rather than being denied here and asserted there.
+    """
+    from intent_engine.executive.strategic_read import (
+        COMPETITION_FROM_EVIDENCE, competitive_sentence,
+    )
+    rows = tuple(getattr(read, "level4_competition", ()) or ())
+    basis = str(getattr(read, "competitive_basis", "") or "")
+    rivals = tuple(getattr(read, "competitive_rivals", ()) or ())
+    if rows and basis == COMPETITION_FROM_EVIDENCE:
+        return "; ".join(
+            f"{c.name}: {c.likely_response} Watch {c.signal_to_watch}"
+            for c in rows[:2])
+    if not rivals:
+        return ""
+    return competitive_sentence({"rivals": rivals, "basis": basis})
+
+
+#: Keys a structured decision row may carry, in the order a reader needs
+#: them. Ordered rather than guessed: the first present key is the row's
+#: subject, and the rest qualify it.
+_ROW_SUBJECT_KEYS = ("name", "title", "statement", "text", "label",
+                     "question", "summary")
+_ROW_DETAIL_KEYS = ("likely_response", "signal_to_watch", "why", "reason",
+                    "basis", "detail", "so_what", "plain")
+
+
+def _render_row(row) -> str:
+    """One structured decision row, as a sentence. "" if it carries nothing."""
+    if not isinstance(row, dict):
+        return str(row or "").strip()
+    subject = ""
+    for key in _ROW_SUBJECT_KEYS:
+        subject = str(row.get(key) or "").strip()
+        if subject:
+            break
+    details = []
+    for key in _ROW_DETAIL_KEYS:
+        value = str(row.get(key) or "").strip()
+        if value and value not in details:
+            details.append(value)
+    if subject and details:
+        return f"{subject}: {' '.join(details)}"
+    return subject or (details[0] if details else "")
+
+
+def _render_rows(value, limit: int = 3) -> str:
+    """A list of structured rows, rendered. "" when nothing is renderable.
+
+    PRESENT-BUT-UNFORMATTABLE IS NOT ABSENT, AND THIS IS WHERE THE PRODUCT
+    SAID IT WAS.
+    """
+    out = []
+    for row in list(value or ())[:limit]:
+        text = _render_row(row)
+        if text and text not in out:
+            out.append(text)
+    return "; ".join(out)
 
 
 def _route_answer(question: str, decision, read=None) -> tuple:
@@ -197,11 +284,34 @@ def _route_answer(question: str, decision, read=None) -> tuple:
             said = value.get("statement") or value.get("plain") or ""
             return (str(said) or absent), name
         if isinstance(value, (list, tuple)):
+            if value and any(isinstance(v, dict) for v in value):
+                # A POPULATED, STRUCTURED LIST IS NOT AN ABSENCE.
+                #
+                # MEASURED LIVE on 0420fb0, 3 of 3 companies. The composed
+                # decision carried competitor ROWS -- {"name": "Huawei
+                # Technologies Co", ...} -- and this branch returned "No
+                # competitor has been selected for this company from the
+                # evidence." while step 1 of the same run named them. The
+                # read fallback that would have answered correctly was
+                # skipped PRECISELY BECAUSE the data was there: `value` is
+                # truthy, so the emptiness check above never fired.
+                #
+                # The renderer could only join strings, so it treated rows it
+                # could not format as nothing at all. That is why it
+                # reproduced on three companies with three model classes,
+                # three different ladders and three Bounded reads -- it
+                # depends on the SHAPE of the decision, not on anything about
+                # the company.
+                rendered = _render_rows(value)
+                if rendered:
+                    return rendered, name
+                # Still nothing renderable: ask the canonical read before
+                # reaching for the absent copy. Refusing here is how a true
+                # statement came to look like an honest gap.
+                fallback = _from_read(row_name, read)
+                return (fallback or absent), name
             items = [str(v) for v in value if str(v or "").strip()]
             if not items:
-                return absent, name
-            if isinstance(value, (list, tuple)) and items and \
-                    isinstance(value[0], dict):
                 return absent, name
             return "; ".join(items[:3]), name
         text = str(value or "").strip()

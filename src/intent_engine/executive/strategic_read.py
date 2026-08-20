@@ -315,6 +315,12 @@ class Chapter:
     standing: str = BOUNDED_INFERENCE
 
 
+COMPETITION_FROM_EVIDENCE = "EVIDENCE"      # the run's own ladder named these
+COMPETITION_FROM_MODEL = "SAME_MODEL"       # same business model and sector
+COMPETITION_FROM_SECTOR = "SECTOR"          # sector-mate, earns differently
+COMPETITION_NONE = "NONE"                   # nothing, and we say so
+
+
 @dataclasses.dataclass(frozen=True)
 class StrategicRead:
     """The canonical read. One per run; every surface projects from it."""
@@ -369,6 +375,10 @@ class StrategicRead:
     #: What this particular run added, separately from what is known.
     run_contribution: str = ""
     evidence_note: str = ""
+    #: §22. WHO CONTESTS THIS COMPANY AND HOW WE KNOW — carried on the read
+    #: so no surface has to re-derive it and none can contradict another.
+    competitive_rivals: Tuple[str, ...] = ()
+    competitive_basis: str = COMPETITION_NONE
 
     def as_dict(self) -> dict:
         return {
@@ -399,6 +409,8 @@ class StrategicRead:
             "own_words_source": self.own_words_source,
             "run_contribution": self.run_contribution,
             "evidence_note": self.evidence_note,
+            "competitive_rivals": list(self.competitive_rivals),
+            "competitive_basis": self.competitive_basis,
         }
 
     @property
@@ -865,6 +877,7 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
     level3 = _level3(model)
     ground = _ground(name, profile, documents)
     level4 = _level4(name, profile, selection, documents, ground)
+    competition = competitive_state(profile, level4)
     position = _position(name, profile, selection, level4)
     level5 = _level5(name, selection, run_decision, standing)
     level6 = _level6(name, profile, selection, run_decision, standing,
@@ -892,6 +905,8 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
         own_words_source=_clean(own_words_source),
         run_contribution=_run_contribution(observations, documents),
         evidence_note=_evidence_note(observations, documents),
+        competitive_rivals=competition["rivals"],
+        competitive_basis=competition["basis"],
         competitive_ground=ground,
         market_beliefs=belief.get("beliefs", ()),
         belief_challenges=belief.get("challenges", ()),
@@ -1175,6 +1190,77 @@ def _economic_role(name, profile) -> str:
     return _sentence("; ".join(parts)) if parts else ""
 
 
+#: THE ONE COMPETITIVE STATE, and the basis it rests on.
+#:
+#: MEASURED LIVE on 0420fb0, 3 of 3 companies. Step 1 said "Its position is
+#: contested directly by banks and brokerage firms" (JPMorgan), "...by Huawei
+#: Technologies Co and Open-source AI" (NVIDIA), "...by social commerce
+#: platforms and delivery services" (Walmart) — and one click later the same
+#: run's Q&A answered "Who's the real competitor?" with "No competitor has
+#: been selected for this company from the evidence."
+#:
+#: Both sentences were describing the SAME state. The ladder returned nothing,
+#: so `_position` fell through to the manifest's class-level peers and stated
+#: them with an evidence-strength verb, while Q&A reported — accurately — that
+#: the evidence had named nobody. The product named the competitors and then
+#: denied having identified any, which is the exact question a chief executive
+#: asks first.
+#:
+#: The fix is not to silence either surface. It is that there is now ONE state
+#: with a STATED BASIS, and every surface projects it, so the strength of the
+#: claim is a property of the state rather than of which producer answered.
+def competitive_state(profile, rivals_read=()) -> dict:
+    """{rivals, basis} — who contests this company and how we know.
+
+    Ordered strongest-first. RUNG 9 (STRUCTURAL_PEER) is excluded from the
+    evidence basis on purpose: the ladder itself defines it as "same business
+    model; not a stated rival", and rendering the ladder's own weakest rung as
+    the strongest claim on the page is how Meta's opening came to name
+    37signals and Exxon's a gold miner.
+    """
+    ranked = [c for c in (rivals_read or ())
+              if getattr(c, "rung", "") != "STRUCTURAL_PEER"]
+    if ranked:
+        return {"rivals": tuple(c.name for c in ranked)[:3],
+                "basis": COMPETITION_FROM_EVIDENCE, "rows": tuple(ranked)}
+    peers = list(getattr(profile, "strategic_competitors", ()) or ())
+    strong = [c for c in peers
+              if getattr(c, "basis", "") == "SAME_MODEL_AND_SECTOR"]
+    if strong:
+        return {"rivals": tuple(c.name for c in strong)[:3],
+                "basis": COMPETITION_FROM_MODEL, "rows": ()}
+    if peers:
+        return {"rivals": tuple(c.name for c in peers)[:3],
+                "basis": COMPETITION_FROM_SECTOR, "rows": ()}
+    return {"rivals": (), "basis": COMPETITION_NONE, "rows": ()}
+
+
+def competitive_sentence(state) -> str:
+    """One reader-facing sentence per basis. The VERB is the basis.
+
+    A surface may choose how much of this to show; it may not choose a
+    different strength for it, and it may not deny it.
+    """
+    rivals = tuple((state or {}).get("rivals") or ())
+    basis = (state or {}).get("basis") or COMPETITION_NONE
+    if not rivals or basis == COMPETITION_NONE:
+        return ("This run's evidence named no rival, and none has been "
+                "inferred for it.")
+    if basis == COMPETITION_FROM_EVIDENCE:
+        return "Its position is contested directly by " + _join(rivals) + "."
+    if basis == COMPETITION_FROM_MODEL:
+        return ("This run's evidence named no rival. Businesses of this kind "
+                "contest the same demand with " + _join(rivals)
+                + ", which earn the same way.")
+    return ("This run's evidence named no rival. It sits in the same sector "
+            "as " + _join(rivals) + ", which earn differently and so are a "
+            "weaker comparison than a direct rival.")
+
+
+def _strip_full_stop(text: str) -> str:
+    return text[:-1] if text.endswith(".") else text
+
+
 def _position(name, profile, selection, rivals_read=()) -> str:
     """Where this company sits, named by the SAME rivals level 4 names.
 
@@ -1226,28 +1312,17 @@ def _position(name, profile, selection, rivals_read=()) -> str:
     #
     # A same-model peer still earns the strong sentence. A sector-mate gets a
     # sentence that says what it actually is.
-    hedged = False
-    if not rivals:
-        peers = list(profile.strategic_competitors or ())
-        strong = [c for c in peers
-                  if getattr(c, "basis", "") == "SAME_MODEL_AND_SECTOR"]
-        rivals = [c.name for c in (strong or peers)][:3]
-        hedged = not strong
+    # §8/§22. ONE VOICE, AND ONE STATE BEHIND IT. This fallback used to
+    # decide for itself which peers to name and how strongly to name them,
+    # which is how a class-level peer list came to be stated with an
+    # evidence-strength verb while Q&A, reading the same run, said no
+    # competitor had been selected. The strength of the claim is now a
+    # property of the state, not of which producer answered.
+    state = competitive_state(profile, rivals_read)
     leverage = _enum_word(profile.operating_leverage)
     bits = []
-    if rivals and hedged:
-        bits.append("It sits in the same sector as "
-                    + _join(rivals)
-                    + ", which earn differently and so are a weaker "
-                      "comparison than a direct rival")
-    elif rivals:
-        # §8. ONE VOICE. This is the manifest peer fallback, reached only
-        # when the ladder returned nothing, and it said "contested MOST
-        # directly by" while the ladder path above says "contested directly
-        # by" — two claims of different strength for the same thing, decided
-        # by which producer happened to answer.
-        bits.append("Its position is contested directly by "
-                    + _join(rivals))
+    if state["rivals"]:
+        bits.append(_strip_full_stop(competitive_sentence(state)))
     if leverage:
         bits.append(f"and the economics that decide the contest are "
                     f"{leverage} operating leverage — "
