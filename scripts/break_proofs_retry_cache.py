@@ -94,6 +94,26 @@ PROOFS = [
      f"{T}::test_a_lookalike_host_cannot_write_into_a_real_filings_slot",
      "assert"),
 
+    # A name containing a SLASH is already refused by the six-segment path
+    # check, so the filename shape is only load-bearing for a single segment
+    # that is not a filename — percent-encoding, backslashes, a null byte.
+    ("C4. the document segment is no longer held to a filename shape",
+     FC,
+     "    if not (_CIK_RE.match(cik) and _ACCESSION_RE.match(accession)\n"
+     "            and _DOC_RE.match(document)):\n        return None",
+     "    if not (_CIK_RE.match(cik) and _ACCESSION_RE.match(accession)):\n"
+     "        return None",
+     f"{T}::test_no_document_name_can_escape_the_cache_directory"
+     "[..%2f..%2fetc%2fpasswd]",
+     "assert"),
+
+    ("C5. the dot segments are accepted as a document name",
+     FC,
+     "    if document in (\".\", \"..\"):\n        return None",
+     "    if False:\n        return None",
+     f"{T}::test_no_document_name_can_escape_the_cache_directory[..]",
+     "assert"),
+
     # --- D: company-specific interpretation must never be cached ----------
     ("D1. a reading of the filing is written into the cache entry",
      FC,

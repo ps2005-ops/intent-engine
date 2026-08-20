@@ -215,6 +215,28 @@ basis: the ladder defines that rung as "same business model; not a stated
 rival", and rendering it as the strongest claim on the page is how Meta's
 opening once named 37signals and Exxon's a gold miner.
 
+### D8 · A markdown push destroyed a live analysis
+**Visible evidence:** Meta's window-2 run (`01M0FQHQ9T31DH41DWEHVCDEW3`) ran
+its full 556 seconds, never auto-advanced, and then returned 404 on all
+thirteen routes: *"This session does not have an analysis with that id.
+Analyses are kept per session and are cleared when the service restarts."*
+The run and its quota slot were lost.
+**Root cause:** three **docs-only** pushes to `v5/founder` during an open live
+window. Render redeploys on any push to the tracked branch regardless of what
+changed; guest sessions live in process memory; every in-flight run dies with
+the restart. The repairing session had asserted "docs-only, so your window is
+unaffected" without checking it.
+**Established by:** the peer session's capture, immediately.
+**Systemic class:** the deployed branch is also the artifact branch, so
+writing a report is an operational act. This belongs under live reliability,
+not tooling — the customer-visible version is a chief executive losing a
+five-minute analysis because somebody shipped a README.
+**Fix (proposed, not yet made):** separate the artifact branch from the
+deployed branch. Gating pushes on "nobody is holding a window" is the weaker
+remedy because it depends on everyone remembering, and that protocol failed
+the first day it existed.
+**Interim:** commits are held locally for the duration of any live window.
+
 ## Not yet cleared
 
 - **Distinct is not the §22 bar.** Some window-1 answers differ by
@@ -224,7 +246,18 @@ opening once named 37signals and Exxon's a gold miner.
 - **20-dimension scorecard:** NOT_MEASURED pending window 2.
 - **§23–§35** — presentation, history, Step 6, mobile/desktop, light/dark,
   accessibility, security, zero-Anthropic: NOT_MEASURED.
-- **Batch B:** not started.
+- **Batch B:** not started. The classification probe is done
+  (`batch_b_classification_probe.json`) and names the first pair to run:
+  **NVIDIA and AMD back to back on one SHA**, because six of sixteen
+  companies share `DESIGN_AND_MANUFACTURE` and an identical menu, and
+  same-class differentiation — not menu differentiation — is the §45 bar.
+- **§36 security re-proof:** PASS (255 tests) across tenant scope, run-route
+  ownership, the redirect wall, SSRF validation and demo mode, plus new
+  path-traversal proofs for the cache, which is a filesystem write path named
+  from a URL. Nine hostile document names refused, nothing written.
+- **§37 zero-Anthropic:** PASS. All six steps plus Q&A, evidence, sources,
+  brief and X-Ray render with the credential removed and the `anthropic`
+  module raising on use. `REQUIRED_ANTHROPIC_CALLS = 0`.
 
 ## Method notes worth carrying forward
 

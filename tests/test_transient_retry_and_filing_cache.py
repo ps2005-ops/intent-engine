@@ -387,3 +387,48 @@ def test_the_run_ceiling_binds_across_hosts_not_only_within_one():
     for host in snap["retry_seconds_by_host"]:
         assert snap["retry_seconds_by_host"][host] < \
             policy.total_retry_budget_s
+
+
+# --- the cache is a filesystem write path -------------------------------
+
+@pytest.mark.parametrize("document", [
+    "..", ".", "../../../../etc/passwd", "..%2f..%2fetc%2fpasswd",
+    "....//....//etc/passwd", "a/../../b.htm", "~/.ssh/id_rsa",
+    "\\..\\..\\windows\\system32", "a\x00.htm",
+])
+def test_no_document_name_can_escape_the_cache_directory(document, tmp_path):
+    """THE CACHE WRITES FILES NAMED FROM A URL. The document segment is the
+    only part of the key that is not digits, so it is the only part that
+    could carry a path. `filing_identity` must refuse anything it cannot
+    read as a plain filename rather than sanitising it — a sanitiser is a
+    denylist, and this file has already recorded what happens to those.
+    """
+    url = ("https://www.sec.gov/Archives/edgar/data/19617/"
+           f"000001961726000123/{document}")
+    assert filing_identity(url) is None
+    cache = FilingCache(tmp_path)
+    assert cache.put(url, body=b"x") is False
+    assert cache.get(url) == (CACHE_BYPASS, None)
+    written = [p for p in tmp_path.rglob("*") if p.is_file()]
+    assert written == [], written
+
+
+def test_every_written_path_stays_inside_the_cache_root(tmp_path):
+    cache = FilingCache(tmp_path)
+    assert cache.put(FILING_URL, body=b"x") is True
+    root = tmp_path.resolve()
+    for path in tmp_path.rglob("*"):
+        assert root in path.resolve().parents or path.resolve() == root
+
+
+def test_the_cache_is_not_keyed_on_anything_a_caller_supplies(tmp_path):
+    """Tenancy, stated as a property of the KEY. Every component comes from
+    the publisher's own address for a public document; nothing a caller
+    chose can steer where bytes land or which bytes come back."""
+    cache = FilingCache(tmp_path)
+    cache.put(FILING_URL, body=b"real")
+    # a second caller, different everything, same public document
+    other = FilingCache(tmp_path)
+    assert other.get(FILING_URL)[1]["body"] == b"real"
+    # and a different public document is a different slot
+    assert other.get(OTHER_ACCESSION)[0] == CACHE_MISS
