@@ -164,6 +164,13 @@ class Session:
     last_status: int = 0
     last_headers: dict = None
     last_bytes: int = 0
+    #: The outcome the SERVICE stated for this response, read from the
+    #: `X-Analysis-Outcome` header. The instrument that passed Meta searched
+    #: rendered prose for the literal string "Limited analysis" and therefore
+    #: scored "Analysis could not be completed" as a success. A named state
+    #: on the response is the fix: the harness stops having to know every
+    #: sentence the product can write.
+    last_outcome: str = ""
 
     def get(self, path: str):
         req = urllib.request.Request(self.base + path,
@@ -174,11 +181,17 @@ class Session:
                 self.last_status = r.status
                 self.last_headers = dict(r.headers)
                 self.last_bytes = len(raw)
+                self.last_outcome = r.headers.get("X-Analysis-Outcome", "")
                 return r.status, r.geturl(), raw.decode("utf-8", "replace")
         except urllib.error.HTTPError as exc:
+            self.last_status, self.last_outcome = exc.code, exc.headers.get(
+                "X-Analysis-Outcome", "")
             return exc.code, self.base + path, exc.read().decode("utf-8",
                                                                  "replace")
         except Exception as exc:                            # noqa: BLE001
+            # STALE IS WORSE THAN ABSENT. A failed request that keeps the
+            # PREVIOUS route's outcome makes a dead surface look healthy.
+            self.last_status, self.last_outcome = 0, ""
             self.errors.append(f"GET {path}: {type(exc).__name__}")
             return 0, self.base + path, ""
 
@@ -362,7 +375,7 @@ class Capture:
                          "routes": {}, "progress": []}
 
     def route(self, name: str, status: int, url: str, raw: str,
-              seconds: float = None) -> None:
+              seconds: float = None, outcome: str = "") -> None:
         """Write a route THE MOMENT IT SETTLES. See the module docstring."""
         body = text_of(raw)
         if seconds is not None:
@@ -372,7 +385,7 @@ class Capture:
         (self.dir / f"{name}.html").write_text(raw, "utf-8")
         self.manifest["routes"][name] = {
             "status": status, "final_url": url, "chars": len(body),
-            "html_chars": len(raw)}
+            "html_chars": len(raw), "outcome": outcome}
         self.flush()
 
     def json_file(self, name: str, payload) -> None:
@@ -507,9 +520,16 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
 
     state, landed, seconds, samples = wait_for_run(session, run_id)
     cap.manifest["progress"] = samples
+    # §4. T_FIRST_USEFUL is the moment the customer stops waiting: the run
+    # left the progress page for something readable. It is the number the
+    # 30-second target is about, and it is NOT the same as `seconds` on a run
+    # that keeps enriching afterwards.
+    first_useful = seconds if state == READY else None
     result.update({"status": state, "seconds": seconds,
+                   "first_useful": first_useful,
                    "auto_advanced": bool(landed), "landed_on": landed})
     cap.manifest.update({"status": state, "seconds": seconds,
+                         "first_useful": first_useful,
                          "auto_advanced": bool(landed)})
     cap.flush()
     if state != READY:
@@ -527,7 +547,26 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
         path = f"/runs/{run_id}" + (f"/{route}" if route else "")
         at = time.time()
         rstatus, rurl, raw = session.get(path)
-        cap.route(route or "run", rstatus, rurl, raw, time.time() - at)
+        cap.route(route or "run", rstatus, rurl, raw, time.time() - at,
+                  outcome=session.last_outcome)
+
+    # THE OUTCOME, AS THE SERVICE STATED IT, AND WHETHER IT STATED ONE THING.
+    #
+    # Six surfaces rendering a real analysis while `/full` rendered a failure
+    # page was one run telling two stories, and no capture on disk recorded
+    # that -- it had to be found by reading seven pages by eye. A
+    # disagreement is now a field.
+    stated = {r: v.get("outcome", "")
+              for r, v in cap.manifest["routes"].items() if v.get("outcome")}
+    distinct = sorted(set(stated.values()))
+    result["outcome"] = distinct[0] if len(distinct) == 1 else (
+        distinct[0] if distinct else "")
+    result["outcome_by_route"] = stated
+    result["outcome_disagreement"] = distinct if len(distinct) > 1 else []
+    cap.manifest.update({"outcome": result["outcome"],
+                         "outcome_by_route": stated,
+                         "outcome_disagreement": result["outcome_disagreement"]})
+    cap.flush()
 
     answers = []
     for question in BOARD_QUESTIONS:

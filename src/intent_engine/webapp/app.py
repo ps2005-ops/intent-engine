@@ -48,6 +48,7 @@ from intent_engine.company_ingestion.service import CompanyIngestionService
 from intent_engine.founder_intelligence.service import FounderIntelligenceService
 from intent_engine.strategic_intelligence import evidence_classes as _EC
 from intent_engine.webapp import acceptance as _acc
+from intent_engine.webapp import outcome as OUTCOME
 from intent_engine.webapp import autocomplete as _AC
 from intent_engine.webapp import failures as _failures
 from intent_engine.webapp import run_recovery as _recovery
@@ -707,6 +708,27 @@ class WebApp:
                             f"reference if you report it."))
             status, headers, body = self._error_page(500, detail)
         headers = headers + _SECURITY_HEADERS
+        # THE OUTCOME IS STATED, NOT INFERRED FROM PROSE.
+        #
+        # Meta Platforms rendered "Analysis could not be completed" on two
+        # deployed builds and was scored a PASS, because the acceptance
+        # instrument searched for the literal string "Limited analysis" and
+        # that page says something else. Every surface, and every instrument,
+        # was separately guessing a customer outcome from the words on a page.
+        #
+        # So the run's outcome travels with the response. A harness reads a
+        # named state; it no longer has to know every sentence the product can
+        # write. `_route` already ran, so this costs one read of state the
+        # request just used.
+        run_id = self._run_id_of(environ.get("PATH_INFO", ""))
+        if run_id:
+            try:
+                headers = headers + [("X-Analysis-Outcome",
+                                      self.analysis_outcome(run_id))]
+            except Exception:                               # noqa: BLE001
+                # Reporting an outcome must never be able to break the page
+                # whose outcome it reports.
+                _LOG.exception("outcome header failed for %s", run_id)
         payload = body.encode()
         headers.append(("Content-Length", str(len(payload))))
         start_response(status, headers)
@@ -2940,8 +2962,30 @@ class WebApp:
                 # from identity, listing and the documents; the primary screen
                 # was the only surface that would not.
                 stored = self._results.get(run_id)
-                if avail["documents"] and avail["has_result"] \
-                        and layer == "default":
+                # EVERY LAYER, NOT ONLY THE DEFAULT ONE.
+                #
+                # `layer == "default"` meant `/full` never reached the bounded
+                # surface and fell through to the failure page even when the
+                # run had documents AND a composed result. The comment below
+                # records the primary screen being repaired and calls it "the
+                # only surface that would not" tolerate a missing report;
+                # `/full` was the other one, and it kept the failure page.
+                #
+                # MEASURED on 517e7ae, Meta Platforms, ONE run:
+                #
+                #     intro    6,008 chars   real analysis
+                #     slides   5,863         real analysis
+                #     story    4,558         real analysis
+                #     history 29,692         real analysis
+                #     step 6   4,110         real analysis
+                #     brief   16,206         real analysis
+                #     full       755         "did not produce a report"
+                #
+                # Ten of ten board questions answered on the same run. The
+                # evidence was never insufficient; one route disagreed with
+                # the other six about the run it was rendering, and that route
+                # is the one a reader opens to read the analysis.
+                if avail["documents"] and avail["has_result"]:
                     # WHICH BOUNDED SURFACE. A run that composed a reading gets
                     # the founder brief. A run whose composition FAILED has
                     # evidence and no view, which is what
@@ -6865,7 +6909,8 @@ class WebApp:
     )
 
     @classmethod
-    def _recommended_candidate_ids(cls, candidates, *, refusing_hosts=()):
+    def _recommended_candidate_ids(cls, candidates, *, refusing_hosts=(),
+                                   subject_cik=""):
         """The default source set, chosen for EVIDENCE-FAMILY COVERAGE.
 
         Takes one candidate from each family in priority order, then a second
@@ -6916,11 +6961,73 @@ class WebApp:
             return any(host == bad or host.endswith("." + bad)
                        for bad in refused)
 
+        #: The subject's own CIK, as ten digits, or "". Ownership of an EDGAR
+        #: document is stated by its URL -- `/edgar/data/<CIK>/...` names the
+        #: FILER -- so it is decided here rather than inferred from a
+        #: source_class, which says what KIND of document it is and never
+        #: whose it is.
+        subject_cik = "".join(ch for ch in str(subject_cik or "")
+                              if ch.isdigit()).lstrip("0")
+
+        def _filed_by_subject(candidate) -> bool:
+            import re as _re
+            match = _re.search(r"/edgar/data/(\d+)",
+                               str(candidate.get("url") or ""))
+            if not match or not subject_cik:
+                return False
+            return match.group(1).lstrip("0") == subject_cik
+
         def _relevance_first(candidate):
             method = candidate.get("discovery_method")
             why = candidate.get("why_relevant", "")
             if method == "official_fallback":
                 return 0
+            # A THIRD PARTY'S FILING MAY NOT TAKE THE SUBJECT'S SLOT.
+            #
+            # `third_party_filing` and the subject's own EDGAR filing both
+            # returned 1, so they competed on equal footing. For a company
+            # with a domain that is survivable -- homepage and sitemap
+            # candidates fill the other families. For a company with NO domain
+            # on record the entire pool is EDGAR, and the two ranks interleave.
+            #
+            # MEASURED LIVE on 49b6c3a and 517e7ae. Meta Platforms is the one
+            # Wave-1 company with no domain, and its run read seven sources of
+            # which four were other registrants:
+            #
+            #     1326801  Meta Platforms          the subject
+            #     1849056  Oklo Inc.
+            #      895728  Enbridge Inc
+            #     1065078  Network-1 Technologies
+            #     1384905  RingCentral, Inc.
+            #
+            # One usable source, below the floor, and the customer was shown
+            # "this analysis could not be completed" for one of the most
+            # heavily documented companies in the world. The filings were not
+            # wrong to be found -- each does mention Meta -- they were wrong to
+            # displace Meta's own 10-K and 10-Q.
+            #
+            # So ownership ranks ahead of relevance: the subject's own filing
+            # first, a third party's mention of the subject well behind the
+            # company's own web sources, never level with it.
+            if "SEC EDGAR" in why and _filed_by_subject(candidate):
+                return 1
+            # ONLY WHERE OWNERSHIP CAN ACTUALLY BE DECIDED.
+            #
+            # The first version of this demoted every `third_party_filing`
+            # unconditionally, and broke three guards that had nothing to do
+            # with the subject: with NO subject CIK on the run, a filing an
+            # index returned is still the best ATTESTED source in the
+            # independent family, and "attested beats guessed" is a separate
+            # invariant with its own measured defect behind it (10 of 10
+            # slots to a guessed g2.com URL). Demoting it there did not make
+            # the subject's filings win -- there were none in the pool -- it
+            # just handed the slot back to the guess.
+            #
+            # So ownership only ranks where ownership is KNOWN. Without a
+            # subject CIK this rule has no opinion.
+            if subject_cik and not _filed_by_subject(candidate) and (
+                    method == "third_party_filing" or "SEC EDGAR" in why):
+                return 6
             if "SEC EDGAR" in why:
                 return 1
             # ATTESTED BEATS GUESSED — INSIDE THE INDEPENDENT FAMILY TOO.
@@ -7402,6 +7509,90 @@ class WebApp:
         except Exception:                                     # noqa: BLE001
             return "unknown"
 
+    #: A run-scoped path names its run in the second segment. Kept as one
+    #: pattern so the header cannot be attached to a different set of routes
+    #: than the ones a customer reads.
+    _RUN_PATH = re.compile(r"^/runs/([A-Za-z0-9_-]{6,64})(?:/|$)")
+
+    @classmethod
+    def _run_id_of(cls, path: str) -> str:
+        match = cls._RUN_PATH.match(str(path or ""))
+        return match.group(1) if match else ""
+
+    def analysis_outcome(self, run_id) -> str:
+        """WHAT HAPPENED TO THIS CUSTOMER'S ANALYSIS. The one producer.
+
+        Every consumer -- the progress page, the run page, the six steps, the
+        capture harness and the acceptance audit -- reads THIS, instead of
+        each deciding for itself from rendered text. `outcome.classify` holds
+        the rule; this supplies it with the two facts it needs and is the only
+        place that knows how to get them.
+        """
+        return OUTCOME.classify(
+            readiness=self.result_readiness(run_id),
+            run_state=self.ci.store.run_state(run_id),
+            exhaustion=self.evidence_report(run_id))
+
+    def evidence_report(self, run_id) -> dict:
+        """Was the SUBJECT's own evidence actually looked for and retrieved?
+
+        THE DISTINCTION THIS EXISTS FOR. "We could not find enough about this
+        company" and "our retrieval did not work" rendered the same apologetic
+        page, so retrieval defects hid behind honest-sounding copy for as long
+        as anyone cared to read it. Meta's run read seven sources of which
+        four were filed by Oklo, Enbridge, Network-1 and RingCentral; calling
+        that scarcity is a false statement about Meta.
+
+        Ownership of an EDGAR document is stated by its URL --
+        `/edgar/data/<CIK>/` names the FILER -- and ownership of a web page by
+        its host. Neither is inferred from `source_class`, which says how a
+        document was retrieved and never whose it is.
+        """
+        meta = (self.ci.run_meta(run_id) or {})
+        cik = "".join(c for c in str(meta.get("cik") or "")
+                      if c.isdigit()).lstrip("0")
+        host = str(meta.get("domain") or meta.get("website") or "").lower()
+        host = host.split("//")[-1].split("/")[0].removeprefix("www.")
+        try:
+            retrieved = self.ci.store.retrieved(run_id)
+            failures = self.ci.store.failures(run_id)
+            candidates = self.ci.store.candidates(run_id)
+        except Exception:                                   # noqa: BLE001
+            return {}
+
+        own = foreign = 0
+        for row in retrieved:
+            url = str(row.get("final_url") or row.get("original_url") or "")
+            filer = re.search(r"/edgar/data/(\d+)", url)
+            if filer:
+                if cik and filer.group(1).lstrip("0") == cik:
+                    own += 1
+                else:
+                    foreign += 1
+                continue
+            page_host = url.split("//")[-1].split("/")[0].lower()
+            page_host = page_host.removeprefix("www.")
+            if host and (page_host == host or page_host.endswith("." + host)):
+                own += 1
+            elif page_host:
+                foreign += 1
+
+        return {
+            "attempted": bool(candidates),
+            "retrieved": len(retrieved),
+            "subject_documents": own,
+            "foreign_documents": foreign,
+            # A run whose ONLY documents belong to other registrants did not
+            # establish scarcity about this company; it established that this
+            # company's own material never arrived.
+            "subject_retrieval_ok": own > 0,
+            "displaced_by_foreign": own == 0 and foreign > 0,
+            "rate_limited": any(
+                "429" in str(f.get("safe_message", "")) or
+                f.get("failure_type") == "rate_limited" for f in failures),
+            "retrieval_failures": len(failures),
+        }
+
     def _availability(self, run_id) -> dict:
         """What this run currently has. READ-ONLY, and the single source every
         run route consults before deciding what it may render."""
@@ -7562,7 +7753,8 @@ class WebApp:
             candidates = self.ci.store.candidates(run_id)
             if self.ci.store.approval(run_id) is None:
                 approved = self._recommended_candidate_ids(
-                    candidates, refusing_hosts=self.ci.refusing_hosts(run_id))
+                    candidates, refusing_hosts=self.ci.refusing_hosts(run_id),
+                    subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"))
                 rejected = [c["candidate_id"] for c in candidates
                             if c["candidate_id"] not in approved]
                 self.ci.approve(run_id, user_id=user_id,
@@ -7646,7 +7838,8 @@ class WebApp:
             candidates = self.ci.store.candidates(run_id)
             approved_ids = self._recommended_candidate_ids(
                 candidates,
-                refusing_hosts=self.ci.refusing_hosts(run_id))
+                refusing_hosts=self.ci.refusing_hosts(run_id),
+                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"))
             rejected = [c["candidate_id"] for c in candidates
                         if c["candidate_id"] not in approved_ids]
             try:
@@ -7690,7 +7883,8 @@ class WebApp:
             # Same reachability knowledge as auto-run, so the pre-checked set
             # on the review page and the set auto-run approves never disagree.
             selected = set(self._recommended_candidate_ids(
-                candidates, refusing_hosts=self.ci.refusing_hosts(run_id)))
+                candidates, refusing_hosts=self.ci.refusing_hosts(run_id),
+                subject_cik=(self.ci.run_meta(run_id) or {}).get("cik")))
 
         def _tag(c):
             if c.get("source_class") == "investor_material":
