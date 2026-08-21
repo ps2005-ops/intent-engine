@@ -1,0 +1,151 @@
+{
+  "company": "Meta Platforms, Inc.",
+  "deployed_sha": "61a7981",
+  "captured_at": "2026-08-21T22:15:01Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/intro",
+      "chars": 5962,
+      "html_chars": 31527,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/intro",
+      "chars": 5962,
+      "html_chars": 31527,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/intro",
+      "chars": 5962,
+      "html_chars": 31527,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/full",
+      "chars": 19823,
+      "html_chars": 58902,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/story",
+      "chars": 4530,
+      "html_chars": 34050,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/history",
+      "chars": 29234,
+      "html_chars": 104830,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/connect",
+      "chars": 4074,
+      "html_chars": 28980,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/intro",
+      "chars": 6045,
+      "html_chars": 31615,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/evidence",
+      "chars": 8004,
+      "html_chars": 26045,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/brief",
+      "chars": 17080,
+      "html_chars": 50398,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 3.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Meta Platforms, Inc. META \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17003
+    },
+    {
+      "t": 76.4,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17004,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/progress",
+      "head": ""
+    },
+    {
+      "t": 344.2,
+      "text": "Meta Platforms, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Meta Platforms, Inc. META \u00b7 SEC CIK 1326801 Meta Platforms, Inc. is a software platform business that runs on attention resold to advertisers: revenue is an auction price per impression, so nothing ",
+      "status": 200,
+      "html_bytes": 31600
+    }
+  ],
+  "process_before": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 40.4
+  },
+  "run_id": "01M0K68MZS4QQB1440H71HYRYJ",
+  "status": "READY",
+  "seconds": 344,
+  "first_useful": 344,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 36.21,
+    "intro": 29.52,
+    "slides": 40.88,
+    "full": 86.71,
+    "story": 38.49,
+    "history": 4.02,
+    "connect": 20.96
+  },
+  "evidence_gate": "compose=9 usable=9 families=identity|independent|investor|strategy|talent stored=9 attempt=1 failed=0/0 dropped=0/0/0/0 unexplained=0 regated=2 lang_rejected=-",
+  "outcome": "FULL_ANALYSIS_REFRESHING",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS_REFRESHING",
+    "intro": "FULL_ANALYSIS_REFRESHING",
+    "slides": "FULL_ANALYSIS_REFRESHING",
+    "full": "FULL_ANALYSIS_REFRESHING",
+    "story": "FULL_ANALYSIS_REFRESHING",
+    "history": "FULL_ANALYSIS_REFRESHING",
+    "connect": "FULL_ANALYSIS_REFRESHING"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+    "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout"
+  ]
+}

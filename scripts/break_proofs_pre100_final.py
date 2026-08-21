@@ -16,10 +16,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 APP = ROOT / "src/intent_engine/webapp/app.py"
 CON = ROOT / "src/intent_engine/executive/contract.py"
 NAR = ROOT / "src/intent_engine/founder_brief/narrative.py"
+RDY = ROOT / "src/intent_engine/company_ingestion/readiness.py"
 
 TP = "tests/test_refusal_copy_needs_an_empty_page.py"
 TG = "tests/test_a_gate_that_judged_nothing.py"
 TR = "tests/test_the_read_is_composed_once.py"
+TA = "tests/test_accents_alone_are_not_proof.py"
 
 PROOFS = [
     # --- P1. a page may not deny the reading it renders --------------------
@@ -92,6 +94,29 @@ PROOFS = [
           "        if memo:\n"
           "            return next(iter(memo.values()))",
           f"{TR}::test_a_different_run_is_composed_separately",
+          "assert"),
+
+    # --- P4. accents alone are not proof ----------------------------------
+    Proof("P4a. accents alone condemn a page again",
+          RDY,
+          "    accented_and_foreign = (accent_density >= _FOREIGN_ACCENT_DENSITY\n"
+          "                            and marker_density > 0)",
+          "    accented_and_foreign = accent_density >= _FOREIGN_ACCENT_DENSITY",
+          f"{TA}::test_accents_without_function_words_are_not_condemned",
+          "assert"),
+    Proof("P4b. corroborated accents stop condemning",
+          RDY,
+          "                            and marker_density > 0)",
+          "                            and marker_density > 1e9)",
+          f"{TA}::test_accents_WITH_function_words_are_still_condemned",
+          "assert"),
+    Proof("P4c. the marker bar stops condemning on its own",
+          RDY,
+          "    return not (marker_density >= _FOREIGN_MARKER_DENSITY\n"
+          "                or accented_and_foreign",
+          "    return not (marker_density >= 1e9\n"
+          "                or accented_and_foreign",
+          f"{TA}::test_the_marker_bar_alone_still_condemns",
           "assert"),
 ]
 

@@ -1,0 +1,123 @@
+{
+  "company": "The Goldman Sachs Group, Inc.",
+  "deployed_sha": "61a7981",
+  "captured_at": "2026-08-21T23:05:38Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/full",
+      "chars": 22882,
+      "html_chars": 63638,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/story",
+      "chars": 4428,
+      "html_chars": 33953,
+      "outcome": "FULL_ANALYSIS_REFRESHING"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/history",
+      "chars": 27687,
+      "html_chars": 102358,
+      "outcome": "FULL_ANALYSIS"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/connect",
+      "chars": 3998,
+      "html_chars": 28904,
+      "outcome": "FULL_ANALYSIS"
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current com",
+      "status": 200,
+      "html_bytes": 17030
+    },
+    {
+      "t": 13.8,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing The Goldman Sachs Group, Inc. GS \u00b7 goldmansachs.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current co",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 65.0,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17026,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/progress",
+      "head": ""
+    },
+    {
+      "t": 166.0,
+      "text": "The Goldman Sachs Group, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction The Goldman Sachs Group, Inc. GS \u00b7 USA \u00b7 goldmansachs.com \u00b7 SEC CIK 886982 The Goldman Sachs Group, Inc. is a financial regulated business that runs on earnings from a balance sheet or from",
+      "status": 200,
+      "html_bytes": 30765
+    }
+  ],
+  "process_before": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 3077.4
+  },
+  "run_id": "01M0K95AD7X112MV14GTPSWZP9",
+  "status": "READY",
+  "seconds": 166,
+  "first_useful": 166,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 24.51,
+    "intro": 20.3,
+    "slides": 26.45,
+    "full": 38.52,
+    "story": 15.82,
+    "history": 0.27,
+    "connect": 4.74
+  },
+  "evidence_gate": "compose=5 usable=5 families=identity|investor|strategy|talent stored=5 attempt=3 failed=25/21 dropped=0/0/0/0 unexplained=0 regated=no lang_rejected=-",
+  "outcome": "FULL_ANALYSIS",
+  "outcome_by_route": {
+    "run": "FULL_ANALYSIS_REFRESHING",
+    "intro": "FULL_ANALYSIS_REFRESHING",
+    "slides": "FULL_ANALYSIS_REFRESHING",
+    "full": "FULL_ANALYSIS_REFRESHING",
+    "story": "FULL_ANALYSIS_REFRESHING",
+    "history": "FULL_ANALYSIS",
+    "connect": "FULL_ANALYSIS"
+  },
+  "outcome_disagreement": [
+    "FULL_ANALYSIS",
+    "FULL_ANALYSIS_REFRESHING"
+  ]
+}

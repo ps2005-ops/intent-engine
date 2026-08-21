@@ -232,8 +232,34 @@ def is_english(document: dict) -> bool:
     # is how much of the text is foreign, per thousand words, which is a
     # property of the LANGUAGE rather than of the length.
     marker_density, accent_density = _densities(text, accented)
+    # ACCENTS ALONE, WITH NO FOREIGN FUNCTION WORDS, ARE NOT PROOF.
+    #
+    # MEASURED live on 61a7981, NVIDIA: eight of twelve documents refused by
+    # this test, and the instrument named them:
+    #
+    #     m0.00/a55.84   589 chars      m168.58/a8.58    2,329 chars
+    #     m0.00/a41.19 9,977 chars      m123.96/a13.79  10,951 chars
+    #     m0.00/a59.50   435 chars
+    #
+    # The last two exceed BOTH bars and are foreign by any reading. The
+    # first three contain not one function word from any of the five
+    # languages this table covers -- German, French, Spanish, Italian,
+    # Dutch -- while 4-6% of their characters are accented. Prose in those
+    # languages cannot avoid " der ", " le ", " el ", " per ", " een ". A
+    # document with none of them is not prose in them, and what accents at
+    # that density usually mean is a page dense in accented product or place
+    # names.
+    #
+    # This module's own rule is that "refusing a real company is far worse
+    # than the silence it was meant to replace, so the burden of proof sits
+    # on the accusation". An accusation with no corroborating evidence does
+    # not meet it. Nothing is loosened for a document that shows BOTH
+    # signals, and the combined half-threshold branch below already required
+    # markers.
+    accented_and_foreign = (accent_density >= _FOREIGN_ACCENT_DENSITY
+                            and marker_density > 0)
     return not (marker_density >= _FOREIGN_MARKER_DENSITY
-                or accent_density >= _FOREIGN_ACCENT_DENSITY
+                or accented_and_foreign
                 or (marker_density >= _FOREIGN_MARKER_DENSITY / 2
                     and accent_density >= _FOREIGN_ACCENT_DENSITY / 2))
 

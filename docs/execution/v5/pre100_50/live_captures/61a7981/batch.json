@@ -1,0 +1,142 @@
+[
+  {
+    "company": "Meta Platforms, Inc.",
+    "deployed_sha": "61a7981",
+    "status": "READY",
+    "run_id": "01M0K68MZS4QQB1440H71HYRYJ",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/61a7981/meta_platforms_inc",
+    "process_before": {
+      "boot_id": "193067c66f6744a2",
+      "started_at": 1787350461.0625536,
+      "uptime_seconds": 40.4
+    },
+    "entry_domain": "",
+    "seconds": 344,
+    "first_useful": 344,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K68MZS4QQB1440H71HYRYJ/intro",
+    "outcome": "FULL_ANALYSIS_REFRESHING",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS_REFRESHING",
+      "history": "FULL_ANALYSIS_REFRESHING",
+      "connect": "FULL_ANALYSIS_REFRESHING"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+      "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+      "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+      "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout",
+      "GET /runs/01M0K68MZS4QQB1440H71HYRYJ/progress: timeout"
+    ]
+  },
+  {
+    "company": "Pfizer Inc.",
+    "deployed_sha": "61a7981",
+    "status": "READY",
+    "run_id": "01M0K7B5XYACTST3X9D6Z5TSP4",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/61a7981/pfizer_inc",
+    "process_before": {
+      "boot_id": "193067c66f6744a2",
+      "started_at": 1787350461.0625536,
+      "uptime_seconds": 1172.3
+    },
+    "entry_domain": "pfizer.com",
+    "seconds": 280,
+    "first_useful": 280,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K7B5XYACTST3X9D6Z5TSP4/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout",
+      "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout",
+      "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout",
+      "GET /runs/01M0K7B5XYACTST3X9D6Z5TSP4/progress: timeout"
+    ]
+  },
+  {
+    "company": "NVIDIA Corporation",
+    "deployed_sha": "61a7981",
+    "status": "READY",
+    "run_id": "01M0K8257DY98105ZXY0ZZP8Y1",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/61a7981/nvidia_corporation",
+    "process_before": {
+      "boot_id": "193067c66f6744a2",
+      "started_at": 1787350461.0625536,
+      "uptime_seconds": 1925.4
+    },
+    "entry_domain": "nvidia.com",
+    "seconds": 67,
+    "first_useful": 67,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1",
+    "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "outcome_by_route": {
+      "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+      "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": []
+  },
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "61a7981",
+    "status": "READY",
+    "run_id": "01M0K8D7VT8S3WY8TA253H3WQC",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/61a7981/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "193067c66f6744a2",
+      "started_at": 1787350461.0625536,
+      "uptime_seconds": 2288.1
+    },
+    "entry_domain": "amd.com",
+    "seconds": 368,
+    "first_useful": 368,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8D7VT8S3WY8TA253H3WQC/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS",
+      "intro": "FULL_ANALYSIS",
+      "slides": "FULL_ANALYSIS",
+      "full": "FULL_ANALYSIS",
+      "story": "FULL_ANALYSIS",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout",
+      "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout",
+      "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout",
+      "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout",
+      "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout"
+    ]
+  }
+]

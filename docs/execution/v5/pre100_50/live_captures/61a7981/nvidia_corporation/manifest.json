@@ -1,0 +1,132 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "61a7981",
+  "captured_at": "2026-08-21T22:46:26Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1",
+      "chars": 2964,
+      "html_chars": 19929,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/intro",
+      "chars": 4499,
+      "html_chars": 29751,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1",
+      "chars": 2964,
+      "html_chars": 19929,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/full",
+      "chars": 2964,
+      "html_chars": 19929,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/story",
+      "chars": 5064,
+      "html_chars": 34717,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/history",
+      "chars": 28327,
+      "html_chars": 107926,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/connect",
+      "chars": 3857,
+      "html_chars": 28768,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1",
+      "chars": 2964,
+      "html_chars": 19929,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/evidence",
+      "chars": 8449,
+      "html_chars": 27265,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K8257DY98105ZXY0ZZP8Y1/brief",
+      "chars": 17059,
+      "html_chars": 51258,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u00b7 nvidia.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence w",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 67.0,
+      "text": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation A supported reading of NVIDIA Corporation exists and is set out on the Executive X-Ray. This run did not add enough independent evidence to strengthen it. Rather than sh",
+      "status": 200,
+      "html_bytes": 18396
+    }
+  ],
+  "process_before": {
+    "boot_id": "193067c66f6744a2",
+    "started_at": 1787350461.0625536,
+    "uptime_seconds": 1925.4
+  },
+  "run_id": "01M0K8257DY98105ZXY0ZZP8Y1",
+  "status": "READY",
+  "seconds": 67,
+  "first_useful": 67,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 10.75,
+    "intro": 6.54,
+    "slides": 7.98,
+    "full": 8.6,
+    "story": 6.91,
+    "history": 0.24,
+    "connect": 4.84
+  },
+  "evidence_gate": "compose=12 usable=4 families=customers|identity|investor|strategy stored=12 attempt=1 failed=2/1 dropped=0/0/0/8 unexplained=0 regated=no lang_rejected=src-8044b4239830@m0.0/a55.84/589c;src-1a1951e69cf4@m0.0/a41.19/9977c;src-c51f779d198d@m0.0/a59.5/435c;src-64665f8e9d8d@m9.54/a20.37/10063c;src-b59d30e1f452@m168.58/a8.58/2329c;src-b18a02146d04@m123.96/a13.79/10951c",
+  "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+  "outcome_by_route": {
+    "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}
