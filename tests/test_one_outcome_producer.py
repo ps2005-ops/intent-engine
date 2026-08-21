@@ -232,3 +232,33 @@ def test_a_run_that_read_only_other_companies_is_not_scarcity(app, monkeypatch):
     assert report["subject_documents"] == 0
     assert report["displaced_by_foreign"] is True
     assert app.analysis_outcome(run_id) != O.TRUE_EVIDENCE_SCARCITY
+
+
+def test_the_evidence_gate_travels_on_the_response(app):
+    """A FIELD NOTHING READS IS A FIELD THAT DOES NOT EXIST.
+
+    `compose` records how many documents the readiness gate held. Meta's
+    discrepancy -- "7 page(s) read; 1 carried usable evidence" over a list of
+    seven -- had to be chased through three falsified mechanisms precisely
+    because no artifact recorded which document set the gate looked at. The
+    number is only worth recording if a harness can read it.
+    """
+    client = Client(app)
+    run_id = _run(client)
+    app.wait_for_analysis(run_id, timeout=60)
+    _s, headers, _b = client.get(f"/runs/{run_id}")
+    gate = headers.get("X-Evidence-Gate", "")
+    assert "compose=" in gate and "stored=" in gate, gate
+    assert "usable=" in gate and "families=" in gate, gate
+
+
+def test_the_evidence_gate_never_reaches_a_reader(app):
+    """Measurement, not product copy. It is a header precisely so it cannot
+    become a diagnostic pasted onto a page a chief executive reads."""
+    client = Client(app)
+    run_id = _run(client)
+    app.wait_for_analysis(run_id, timeout=60)
+    for suffix in ("", "/intro", "/full"):
+        _s, _h, body = client.get(f"/runs/{run_id}{suffix}")
+        assert "compose=" not in body
+        assert "X-Evidence-Gate" not in body

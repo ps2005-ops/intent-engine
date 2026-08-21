@@ -724,7 +724,9 @@ class WebApp:
         if run_id:
             try:
                 headers = headers + [("X-Analysis-Outcome",
-                                      self.analysis_outcome(run_id))]
+                                      self.analysis_outcome(run_id)),
+                                     ("X-Evidence-Gate",
+                                      self.evidence_gate_summary(run_id))]
             except Exception:                               # noqa: BLE001
                 # Reporting an outcome must never be able to break the page
                 # whose outcome it reports.
@@ -7555,6 +7557,30 @@ class WebApp:
             readiness=self.result_readiness(run_id),
             run_state=self.ci.store.run_state(run_id),
             exhaustion=self.evidence_report(run_id))
+
+    def evidence_gate_summary(self, run_id) -> str:
+        """What the readiness gate held, versus what the store holds now.
+
+        A COMPACT HEADER BECAUSE THE ANSWER HAS TO SURVIVE A WAVE. `compose`
+        records `readiness_inputs`, and a field nothing reads is a field that
+        does not exist -- the whole reason Meta's discrepancy had to be
+        chased through three falsified mechanisms is that no artifact on disk
+        recorded which document set the gate was looking at.
+
+        Never customer-visible, never allowed to raise, and deliberately not
+        rendered on any page: this is measurement, not product copy.
+        """
+        inputs = (self._results.get(run_id) or {}).get("readiness_inputs") or {}
+        try:
+            stored = len([d for d in self.ci.store.retrieved(run_id)
+                          if d.get("retrieval_status") == "OK"])
+        except Exception:                                   # noqa: BLE001
+            stored = -1
+        return (f"compose={inputs.get('documents_at_compose', '?')} "
+                f"usable={inputs.get('usable_at_compose', '?')} "
+                f"families={'|'.join(inputs.get('families_at_compose') or []) or '-'} "
+                f"stored={stored} "
+                f"attempt={inputs.get('attempt', '?')}")
 
     def evidence_report(self, run_id) -> dict:
         """Was the SUBJECT's own evidence actually looked for and retrieved?

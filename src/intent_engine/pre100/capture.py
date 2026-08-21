@@ -171,6 +171,11 @@ class Session:
     #: on the response is the fix: the harness stops having to know every
     #: sentence the product can write.
     last_outcome: str = ""
+    #: What the readiness gate held versus what the store holds. Meta's
+    #: bounded page said "7 page(s) read; 1 carried usable evidence" and no
+    #: artifact recorded which document set the gate was looking at, so three
+    #: mechanisms had to be falsified one at a time from the outside.
+    last_gate: str = ""
 
     def get(self, path: str):
         req = urllib.request.Request(self.base + path,
@@ -182,16 +187,18 @@ class Session:
                 self.last_headers = dict(r.headers)
                 self.last_bytes = len(raw)
                 self.last_outcome = r.headers.get("X-Analysis-Outcome", "")
+                self.last_gate = r.headers.get("X-Evidence-Gate", "")
                 return r.status, r.geturl(), raw.decode("utf-8", "replace")
         except urllib.error.HTTPError as exc:
             self.last_status, self.last_outcome = exc.code, exc.headers.get(
                 "X-Analysis-Outcome", "")
+            self.last_gate = exc.headers.get("X-Evidence-Gate", "")
             return exc.code, self.base + path, exc.read().decode("utf-8",
                                                                  "replace")
         except Exception as exc:                            # noqa: BLE001
             # STALE IS WORSE THAN ABSENT. A failed request that keeps the
             # PREVIOUS route's outcome makes a dead surface look healthy.
-            self.last_status, self.last_outcome = 0, ""
+            self.last_status, self.last_outcome, self.last_gate = 0, "", ""
             self.errors.append(f"GET {path}: {type(exc).__name__}")
             return 0, self.base + path, ""
 
@@ -549,6 +556,8 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
         rstatus, rurl, raw = session.get(path)
         cap.route(route or "run", rstatus, rurl, raw, time.time() - at,
                   outcome=session.last_outcome)
+        if session.last_gate:
+            cap.manifest["evidence_gate"] = session.last_gate
 
     # THE OUTCOME, AS THE SERVICE STATED IT, AND WHETHER IT STATED ONE THING.
     #
