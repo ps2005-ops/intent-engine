@@ -8158,6 +8158,52 @@ class WebApp:
             if domain else None
         result = self.ci.compose_with_quality(run_id, fi_service=self.fi,
                                               previous_model=previous_model)
+        # THE GATE MUST JUDGE THE EVIDENCE THAT ARRIVED, NOT THE EVIDENCE
+        # THAT HAD ARRIVED WHEN IT RAN.
+        #
+        # MEASURED LIVE on 10d1620, Meta Platforms, first run after the
+        # evidence-gate header was deployed:
+        #
+        #     compose=1  usable=1  families=investor  stored=7  attempt=1
+        #
+        # The readiness gate was handed ONE document. The store holds SEVEN,
+        # three of them Meta's own SEC filings. The customer was told the
+        # public evidence about Meta Platforms was too thin to analyse, on a
+        # run that had read Meta's 10-K and its 10-Q.
+        #
+        # This was chased through three offline reproductions first, and all
+        # three were wrong: `usable_documents` keeps 7 of 7, `is_english` is
+        # True for 7 of 7, and raw-HTML truncation swept from 16MB to 200KB
+        # keeps 7 of 7. The gate itself, re-run on those seven documents,
+        # answers 7. Nothing was miscounting. Composition simply happened
+        # before the evidence finished arriving, and nothing looked again.
+        #
+        # ONE EXTRA PASS, AND ONLY WHEN DOCUMENTS ACTUALLY ARRIVED LATE.
+        # This does not re-run retrieval, does not fetch, and cannot loop:
+        # it recomposes at most once, and only when the store is strictly
+        # larger than the set the gate judged. `compose` is already
+        # idempotent and restart-safe -- rebuilding from stored documents is
+        # what it is written to do.
+        #
+        # NOT A FIX TO THE RACE. Which caller composed early is not
+        # established, and this deliberately does not guess: whatever the
+        # ordering turns out to be, judging seven documents is right and
+        # judging one of them is wrong.
+        seen = (result.get("readiness_inputs") or {}).get(
+            "documents_at_compose")
+        if isinstance(seen, int):
+            try:
+                stored = len(self.ci.store.retrieved(run_id))
+            except Exception:                               # noqa: BLE001
+                stored = seen
+            if stored > seen:
+                _LOG.info("recomposing %s: gate saw %d, store holds %d",
+                          run_id, seen, stored)
+                result = self.ci.compose_with_quality(
+                    run_id, fi_service=self.fi,
+                    previous_model=previous_model)
+                result.setdefault("readiness_inputs", {})["recomposed_from"] \
+                    = seen
         report = result.get("strategic_report")
         if report and domain:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])
