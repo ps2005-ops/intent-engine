@@ -1,0 +1,83 @@
+{
+  "company": "Honeywell International Inc.",
+  "deployed_sha": "743df06",
+  "run_id": "01M0JNSNBFCFMSV1FC1QE5AWQH",
+  "analysis_seconds": 274,
+  "stage_transitions": [
+    {
+      "t": 4.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Honeywell International Inc. HON \u00b7 honeywell.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compan",
+      "status": 200,
+      "html_bytes": 17031
+    },
+    {
+      "t": 65.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17031,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress",
+      "head": ""
+    },
+    {
+      "t": 147.9,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Honeywell International Inc. HON \u00b7 honeywell.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compan",
+      "status": 200,
+      "html_bytes": 17031
+    },
+    {
+      "t": 199.4,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Honeywell International Inc. HON \u00b7 honeywell.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current compa",
+      "status": 200,
+      "html_bytes": 17026
+    },
+    {
+      "t": 263.2,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17025,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress",
+      "head": ""
+    },
+    {
+      "t": 274.3,
+      "text": "Honeywell International Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Honeywell International Inc. Honeywell International Inc. sells several distinct products rather than one, so attention and engineering are split across products that compete with each other for both. Th",
+      "status": 200,
+      "html_bytes": 32397
+    }
+  ],
+  "route_seconds": {
+    "run": 3.05,
+    "intro": 9.81,
+    "slides": 7.28,
+    "full": 3.07,
+    "story": 6.14,
+    "history": 0.23,
+    "connect": 4.98
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 6604.4
+  },
+  "process_after": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 7152.1
+  },
+  "errors": [
+    "GET /runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress: timeout",
+    "GET /runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress: timeout",
+    "GET /runs/01M0JNSNBFCFMSV1FC1QE5AWQH/progress: timeout"
+  ]
+}

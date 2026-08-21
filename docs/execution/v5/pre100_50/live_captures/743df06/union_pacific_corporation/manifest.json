@@ -1,0 +1,138 @@
+{
+  "company": "Union Pacific Corporation",
+  "deployed_sha": "743df06",
+  "captured_at": "2026-08-21T17:00:04Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65",
+      "chars": 2275,
+      "html_chars": 18024,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/intro",
+      "chars": 4545,
+      "html_chars": 29797,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65",
+      "chars": 2277,
+      "html_chars": 18026,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/full",
+      "chars": 2277,
+      "html_chars": 18026,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/story",
+      "chars": 5170,
+      "html_chars": 34823,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/history",
+      "chars": 26499,
+      "html_chars": 107385,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/connect",
+      "chars": 3920,
+      "html_chars": 28801,
+      "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65",
+      "chars": 2277,
+      "html_chars": 18026,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/evidence",
+      "chars": 2410,
+      "html_chars": 17795,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JM87XK7WJNSV53RYH9ZM65/brief",
+      "chars": 15591,
+      "html_chars": 47957,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Union Pacific Corporation UNP \u00b7 up.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence",
+      "status": 200,
+      "html_bytes": 17017
+    },
+    {
+      "t": 29.9,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Union Pacific Corporation UNP \u00b7 up.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidenc",
+      "status": 200,
+      "html_bytes": 17013
+    },
+    {
+      "t": 62.3,
+      "text": "Limited analysis of Union Pacific Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of Union Pacific Corporation Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it",
+      "status": 200,
+      "html_bytes": 18062
+    }
+  ],
+  "process_before": {
+    "boot_id": "d7df6481c13e43c7",
+    "started_at": 1787326618.1855707,
+    "uptime_seconds": 4997.5
+  },
+  "run_id": "01M0JM87XK7WJNSV53RYH9ZM65",
+  "status": "READY",
+  "seconds": 62,
+  "first_useful": 62,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 4.33,
+    "intro": 15.66,
+    "slides": 3.21,
+    "full": 3.53,
+    "story": 6.97,
+    "history": 0.25,
+    "connect": 4.03
+  },
+  "evidence_gate": "compose=2 usable=2 families=investor stored=2 attempt=3 failed=27/24 dropped=0/0/0/0",
+  "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+  "outcome_by_route": {
+    "run": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "intro": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "slides": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "full": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "story": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "history": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+    "connect": "RETRIEVAL_TEMPORARILY_UNAVAILABLE"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}
