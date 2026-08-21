@@ -9,7 +9,7 @@ CAP = "src/intent_engine/pre100/capture.py"
 
 MUTATIONS = [
     ("A. one transport error ends the run again", CAP,
-     "MAX_POLL_ERRORS = 3",
+     "MAX_POLL_ERRORS = 6",
      "MAX_POLL_ERRORS = 1",
      "the live defect restored: two live analyses discarded by the "
      "instrument that was measuring them"),

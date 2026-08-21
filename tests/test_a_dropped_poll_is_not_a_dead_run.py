@@ -62,7 +62,13 @@ def test_a_service_that_stops_answering_is_still_a_failure(monkeypatch):
     tolerating a dead service -- that would replace a false failure with a
     capture that never ends."""
     monkeypatch.setattr(time, "sleep", lambda _s: None)
-    session = FakeSession([WORKING, DROPPED, DROPPED, DROPPED, DROPPED])
+    # LITERAL, NOT `MAX_POLL_ERRORS + 2`. Writing the script in terms of the
+    # constant under test makes the test agree with whatever that constant
+    # becomes -- two break proofs went from CAUGHT to NOT_CAUGHT the moment
+    # it was parameterised, because a test that adapts to the value it is
+    # checking is not checking it. Twelve drops is a dead service under any
+    # budget this file would sanely hold.
+    session = FakeSession([WORKING] + [DROPPED] * 12)
     state, _url, _secs, _samples = C.wait_for_run(session, "r1", poll=0)
     assert state == C.FAILED, state
 
@@ -102,9 +108,11 @@ def test_errors_scattered_across_a_long_run_do_not_accumulate(monkeypatch):
     company is discarded. That is the original defect with extra steps.
     """
     monkeypatch.setattr(time, "sleep", lambda _s: None)
-    session = FakeSession([WORKING, DROPPED, WORKING, WORKING,
-                           DROPPED, WORKING, WORKING,
-                           DROPPED, WORKING, LANDED])
+    # EIGHT scattered drops, each with a healthy poll between them. It has
+    # to be MORE than the consecutive budget or the test cannot tell a
+    # working reset from a missing one -- with three drops and a budget of
+    # six, deleting the reset changes nothing and the break proof said so.
+    session = FakeSession([WORKING, DROPPED] * 8 + [LANDED])
     state, _url, _secs, _samples = C.wait_for_run(session, "r1", poll=0)
     assert state == C.READY, (
         "three errors spread across a healthy run were added together")

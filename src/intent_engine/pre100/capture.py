@@ -38,7 +38,19 @@ STEPS = ("intro", "slides", "full", "story", "history", "connect")
 POLL_TIMEOUT = 45.0
 #: How many consecutive transport errors on the progress page are needed
 #: before the run is believed dead. One is not evidence of anything.
-MAX_POLL_ERRORS = 3
+#:
+#: SIX, NOT THREE, AND THE REASON IS MEASURED. On 0d02c0b Meta's service
+#: stopped answering `/runs/<id>/progress` for at least 105 CONSECUTIVE
+#: seconds -- three 45-second timeouts back to back, from t=78 to t=183 --
+#: on a run that had started normally. Three strikes declared that run dead
+#: while the analysis was, as far as anything here can tell, still running.
+#:
+#: This is a real product defect and it is recorded as one: a customer
+#: watching their own analysis sees a page that stops answering. But the
+#: instrument's job is to observe it, not to be the second thing that fails
+#: because of it. Six consecutive misses is about five minutes of silence,
+#: and the 480-second wall clock in `wait_for_run` remains the real backstop.
+MAX_POLL_ERRORS = 6
 #: Routes reachable from the steps, captured for the audit.
 EXTRA = ("sources", "evidence", "report", "brief")
 
