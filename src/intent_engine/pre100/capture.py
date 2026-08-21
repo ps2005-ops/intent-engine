@@ -49,6 +49,27 @@ BOARD_QUESTIONS = (
 )
 
 READY, FAILED, BLOCKED, TIMEOUT = "READY", "FAILED", "BLOCKED", "TIMEOUT"
+#: The run existed and then did not. A free preview spins down and restarts,
+#: and a restart clears in-memory guest sessions.
+RUN_LOST = "RUN_LOST"
+
+#: WHAT A DEAD RUN LOOKS LIKE FROM OUTSIDE. Measured: a canary wave captured
+#: sixteen valid routes per company and then ten ERROR PAGES per company as
+#: "answers" — "This session does not have an analysis with that id" — and
+#: the audit compared them and reported a catastrophic collapse, because
+#: forty identical error pages are, technically, identical. An unrecognised
+#: page stored as an answer is the same defect as a zero denominator read as
+#: absence.
+RUN_GONE_MARKERS = (
+    "does not have an analysis with that id",
+    "that analysis is not available here",
+    "analyses are kept per session",
+)
+
+
+def run_is_gone(text: str) -> bool:
+    low = (text or "").lower()
+    return any(marker in low for marker in RUN_GONE_MARKERS)
 
 
 def text_of(page: str) -> str:
@@ -228,7 +249,15 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
     if state != READY:
         return result
 
-    for route in ("", *STEPS, *EXTRA):
+    # THE SIX CUSTOMER STEPS FIRST, THEN Q&A, THEN THE REST.
+    #
+    # Q&A is the fragile half: it needs the run object to still be resident,
+    # and a free preview restarts. A wave that captured sixteen routes and
+    # then asked ten questions lost every answer to "this session does not
+    # have an analysis with that id" — the routes were fine and the answers
+    # were error pages. Asking sooner does not make the preview stable; it
+    # narrows the window in which it has to stay up.
+    for route in ("", *STEPS):
         path = f"/runs/{run_id}" + (f"/{route}" if route else "")
         rstatus, rurl, raw = session.get(path)
         cap.route(route or "run", rstatus, rurl, raw)
@@ -236,13 +265,40 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
     answers = []
     for question in BOARD_QUESTIONS:
         _s, _u, ask = session.get(f"/runs/{run_id}/answer")
+        # THE RUN CAN DIE MID-CAPTURE, and an error page is not an answer.
+        # Storing one turns a lost session into "every company said the same
+        # thing", which is exactly what a collapse measurement is looking
+        # for — so it must be named here, not discovered downstream.
+        if run_is_gone(ask):
+            result["status"] = RUN_LOST
+            result["run_lost_after_routes"] = True
+            result["answers_captured"] = len(answers)
+            cap.manifest.update({"status": RUN_LOST,
+                                 "run_lost_after_routes": True,
+                                 "answers_captured": len(answers)})
+            cap.flush()
+            return result
         token = Session.csrf(ask) or csrf
         astatus, aurl, apage = session.post(
             f"/runs/{run_id}/answer", {"csrf": token, "question": question},
             ref=f"/runs/{run_id}")
+        body = text_of(apage)
+        if run_is_gone(body):
+            result["status"] = RUN_LOST
+            result["answers_captured"] = len(answers)
+            cap.manifest.update({"status": RUN_LOST,
+                                 "answers_captured": len(answers)})
+            cap.flush()
+            return result
         answers.append({"question": question, "status": astatus,
-                        "answer": text_of(apage)})
+                        "answer": body})
         cap.json_file("qa.json", answers)
+
+    for route in EXTRA:
+        rstatus, rurl, raw = session.get(f"/runs/{run_id}/{route}")
+        if run_is_gone(raw):
+            break
+        cap.route(route, rstatus, rurl, raw)
 
     result["routes"] = len(cap.manifest["routes"])
     result["errors"] = session.errors

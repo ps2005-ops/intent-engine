@@ -206,3 +206,47 @@ def test_a_delta_names_what_may_inherit_its_pass(tmp_path):
 def test_the_search_is_case_insensitive_by_default(tmp_path, needle):
     d = _capture(tmp_path, evidence="Sourced to WELLS FARGO & COMPANY/MN")
     assert R.find(d, needle)["status"] == R.REPRODUCED
+
+
+# --- a lost run is not an answer -----------------------------------------
+
+def test_a_lost_run_is_recognised():
+    """MEASURED. A canary wave captured sixteen valid routes per company and
+    then ten ERROR PAGES per company as "answers" — "This session does not
+    have an analysis with that id" — and the audit compared them and reported
+    a catastrophic collapse, because forty identical error pages are,
+    technically, identical. It was the most alarming number of the session
+    and it was entirely an artefact of a preview that had restarted."""
+    assert C.run_is_gone(
+        "That analysis is not available here. This session does not have an "
+        "analysis with that id.")
+    assert C.run_is_gone("Analyses are kept per session and are cleared when "
+                         "the service restarts.")
+    assert not C.run_is_gone(
+        "Caterpillar is committing capital to capacity ahead of demand.")
+
+
+def test_error_pages_are_not_loaded_as_answers(tmp_path):
+    """The audit must refuse them, not compare them."""
+    d = tmp_path / "co"
+    d.mkdir()
+    (d / "manifest.json").write_text(json.dumps({"company": "Acme"}))
+    (d / "qa.json").write_text(json.dumps([
+        {"question": "What should management do?",
+         "answer": "That analysis is not available here. This session does "
+                   "not have an analysis with that id."}]))
+    assert A.load_qa(d) == [], (
+        "an error page was loaded as an answer, so a lost run reads as a "
+        "collapse")
+
+
+def test_a_real_answer_beside_an_error_page_survives(tmp_path):
+    d = tmp_path / "co2"
+    d.mkdir()
+    (d / "manifest.json").write_text(json.dumps({"company": "Acme"}))
+    (d / "qa.json").write_text(json.dumps([
+        {"question": "Q1", "answer": "A real strategic answer about Acme."},
+        {"question": "Q2", "answer": "This session does not have an analysis "
+                                     "with that id."}]))
+    rows = A.load_qa(d)
+    assert len(rows) == 1 and rows[0]["question"] == "Q1"

@@ -95,6 +95,7 @@ def load_qa(company_dir: pathlib.Path) -> list:
         raw = json.loads(_read(path))
     except Exception:                                       # noqa: BLE001
         return []
+    from intent_engine.pre100.capture import run_is_gone
     rows = []
     if isinstance(raw, dict):
         for question, value in raw.items():
@@ -112,7 +113,14 @@ def load_qa(company_dir: pathlib.Path) -> list:
                              "answer": value.get("answer")
                              or value.get("text") or "",
                              "status": value.get("status")})
-    return rows
+    # AN ERROR PAGE IS NOT AN ANSWER. Forty identical "this session does not
+    # have an analysis with that id" pages compare as a total collapse, which
+    # is the most alarming number a collapse measurement can produce and is
+    # entirely an artefact of a lost run.
+    live = [r for r in rows if not run_is_gone(r.get("answer") or "")]
+    if rows and not live:
+        return []
+    return live
 
 
 def _read(path: pathlib.Path) -> str:

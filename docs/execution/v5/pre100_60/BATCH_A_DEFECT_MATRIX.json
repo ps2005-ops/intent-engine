@@ -108,5 +108,18 @@
     "so": "the router gap explains the MAGNITUDE of the collapse and the refusal; the successor defect \u2014 shared pattern, shared reading \u2014 is untouched and remains the open item",
     "how_this_was_caught": "by measuring the repair offline before spending a canary run on it, rather than by asserting it from the shape of the fix",
     "an_instrument_error_inside_the_correction": "the first within-company measurement said 10/10 distinct for every company, which would have meant no catch-all at all. Each answer page ECHOES its own question, so the questions were differentiating the answers. Stripping the echo gave 5-6/10. Third instrument error of the session, same shape as the other two: the number looked clean and the instrument had stopped measuring the thing."
+  },
+  "canary_reproof_on_afeba08": {
+    "status": "NOT_CAPTURED",
+    "why": "the preview lost the run between the six steps and the Q&A POSTs, on 2 of 2 attempted canaries, with NO deploy happening in the window. Routes captured fine (5-6k chars each); every answer came back 'This session does not have an analysis with that id'.",
+    "what_this_is_not": "a product regression. The first measurement of the re-run reported within-company distinctness collapsing 6 -> 1 and cross-company 0 -> 10 identical, which would have been a catastrophic regression. It was forty copies of one error page. Caught by reading the answers before reporting the number \u2014 the fourth instrument failure of the session and the most alarming.",
+    "harness_repaired": "the capture now NAMES a lost run (RUN_LOST) instead of storing error pages as answers, and the audit refuses to load them. Q&A was also moved ahead of the low-value routes to narrow the window.",
+    "a_real_finding_inside_it": "the earlier eight-company wave on fdbfe77 captured 80 of 80 answers, and this window lost 2 of 2 \u2014 so it is intermittent, not constant. A guest who reads step 1 and then asks a question can be told the analysis is not available. That is customer-facing and is NOT explained by deploys, because none happened here.",
+    "quota": "about 14-16 live analyses spent across both sessions"
+  },
+  "what_is_established_about_the_router_repair": {
+    "offline": "it removes the catch-all, which was returning ONE repeated sentence for 4-6 of the ten questions per company",
+    "offline_limit": "it does NOT separate two same-pattern companies; every field the ten questions route to is itself pattern-derived",
+    "live": "UNMEASURED \u2014 the canary Q&A could not be captured"
   }
 }
