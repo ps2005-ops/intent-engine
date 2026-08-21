@@ -3551,10 +3551,49 @@ class WebApp:
                 company_key(name or str(meta.get("domain") or "") or run_id),
                 name=name, domain=str(meta.get("domain") or ""))
             dossier = DossierStore(self._runtime_root).latest(key)
-            return self._executive_read(dossier) if dossier is not None else {}
+            composed = (self._executive_read(dossier)
+                        if dossier is not None else {})
         except Exception:                                   # noqa: BLE001
             _LOG.warning("composed decision not read for %s", run_id)
             return {}
+        if not isinstance(composed, dict):
+            return {}
+        # TWO COMPOSERS, AND THE FIELD WAS ADDED TO THE OTHER ONE.
+        #
+        # MEASURED from the captures, not inferred: across all eight Batch-A
+        # companies on fdbfe77, ZERO of eighty Q&A answers carried the
+        # company's own qualifying sentence — on a build that contains
+        # `grounded_in`. The renderer was fine and the field was empty,
+        # because Q&A's decision comes from
+        # `executive.decision_synthesis.compose`, which builds a
+        # FounderDecision from the DOSSIER, while `grounded_in` was added to
+        # `strategic_intelligence.decision.compose_decision`, which builds one
+        # from the run's hypothesis. Same class, two producers, one repaired.
+        #
+        # This is the seam where BOTH objects exist, so the run's own
+        # grounding is joined on here rather than either composer learning
+        # about the other.
+        if not composed.get("grounded_in"):
+            composed["grounded_in"] = self._run_grounding(run_id)
+        return composed
+
+    def _run_grounding(self, run_id) -> str:
+        """The sentence from THIS company's filing that qualified its reading.
+
+        Read from the run's own report, which is where the hypothesis and its
+        `mechanism_evidence` live. Never raises: a missing grounding is an
+        absent sentence, not a broken page.
+        """
+        try:
+            from intent_engine.strategic_intelligence import mechanism as MECH
+            report = (self._result(run_id) or {}).get("strategic_report") or {}
+            for hypothesis in (report.get("hypotheses") or ()):
+                line = MECH.because_line(hypothesis, limit=1)
+                if line:
+                    return line
+        except Exception:                                   # noqa: BLE001
+            return ""
+        return ""
 
     def _executive_contract(self, run_id):
         """The one answer to "does a supported reading of this company exist".

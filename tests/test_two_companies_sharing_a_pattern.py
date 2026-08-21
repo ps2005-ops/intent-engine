@@ -194,3 +194,75 @@ def test_two_companies_sharing_a_pattern_do_not_share_the_whole_decision():
                           "recommendation_reason")
               if getattr(cat, f) and getattr(cat, f) == getattr(xom, f)]
     assert not shared, f"identical across two different filers: {shared}"
+
+
+# =======================================================================
+# TWO COMPOSERS, AND THE FIELD WAS ADDED TO THE OTHER ONE
+# =======================================================================
+#
+# MEASURED FROM THE CAPTURES, not inferred. Across all eight Batch-A
+# companies on fdbfe77 — a build that CONTAINS `grounded_in` — zero of
+# eighty Q&A answers carried the company's own qualifying sentence. The
+# renderer was fine: app.py renders `strongest_evidence` when it is set. The
+# field was empty.
+#
+# Q&A's decision comes from `executive.decision_synthesis.compose`, which
+# builds a FounderDecision from the DOSSIER. `grounded_in` was added to
+# `strategic_intelligence.decision.compose_decision`, which builds one from
+# the run's hypothesis. Same class, two producers, one repaired — the fifth
+# instance of that shape in this programme.
+
+def test_the_dossier_composer_does_not_carry_the_grounding():
+    """The premise, asserted rather than remembered. If this composer ever
+    learns to set it, the join below becomes redundant rather than wrong —
+    and this test says so instead of silently passing."""
+    import inspect
+
+    from intent_engine.executive import decision_synthesis as DS
+    source = inspect.getsource(DS.compose)
+    assert "grounded_in" not in source, (
+        "decision_synthesis.compose now sets grounded_in itself; the webapp "
+        "join is redundant and should be removed rather than left to shadow "
+        "it")
+
+
+def test_the_webapp_joins_the_runs_grounding_onto_the_composed_decision():
+    """The seam where BOTH objects exist. Asserted structurally because the
+    failure mode is silence: an empty string renders as nothing at all."""
+    import ast
+    import inspect
+    import pathlib
+
+    from intent_engine.webapp import app as _app
+    source = pathlib.Path(inspect.getsourcefile(_app)).read_text()
+    tree = ast.parse(source)
+    fn = next(n for n in ast.walk(tree)
+              if isinstance(n, ast.FunctionDef)
+              and n.name == "_composed_decision")
+    body = ast.get_source_segment(source, fn) or ""
+    assert "grounded_in" in body, (
+        "the composed decision Q&A reads no longer joins the run's grounding, "
+        "so the company's own words never reach an answer")
+    assert "_run_grounding" in body
+
+    producer = next(n for n in ast.walk(tree)
+                    if isinstance(n, ast.FunctionDef)
+                    and n.name == "_run_grounding")
+    assert producer, "the grounding has no producer"
+
+
+def test_an_existing_grounding_is_not_overwritten():
+    """The join fills a gap; it does not replace a value a composer set."""
+    import ast
+    import inspect
+    import pathlib
+
+    from intent_engine.webapp import app as _app
+    source = pathlib.Path(inspect.getsourcefile(_app)).read_text()
+    tree = ast.parse(source)
+    fn = next(n for n in ast.walk(tree)
+              if isinstance(n, ast.FunctionDef)
+              and n.name == "_composed_decision")
+    body = ast.get_source_segment(source, fn) or ""
+    assert 'if not composed.get("grounded_in")' in body, (
+        "the join overwrites a grounding the composer had already set")

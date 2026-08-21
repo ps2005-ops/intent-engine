@@ -22,7 +22,25 @@ Q = ROOT / "src/intent_engine/founder_brief/qa.py"
 T = "tests/test_two_companies_sharing_a_pattern.py"
 T2 = "tests/test_deep_intelligence_documents.py"
 
+W = ROOT / "src/intent_engine/webapp/app.py"
+T3 = "tests/test_two_companies_sharing_a_pattern.py"
+
 PROOFS = [
+    ("D1. the webapp stops joining the run's grounding",
+     W,
+     '        if not composed.get("grounded_in"):\n'
+     '            composed["grounded_in"] = self._run_grounding(run_id)',
+     '        pass',
+     f"{T3}::test_the_webapp_joins_the_runs_grounding_onto_the_composed_decision",
+     "no longer joins"),
+
+    ("D2. the join overwrites a grounding a composer already set",
+     W,
+     '        if not composed.get("grounded_in"):',
+     '        if True:',
+     f"{T3}::test_an_existing_grounding_is_not_overwritten",
+     "overwrites a grounding"),
+
     ("A1. the qualifying sentence is no longer read at all",
      D,
      "        return MECH.because_line(hypothesis, limit=1)",
@@ -30,15 +48,12 @@ PROOFS = [
      f"{T}::test_each_company_has_its_own_qualifying_sentence",
      "assert"),
 
-    ("A2. Q&A stops carrying whose filing made the answer true",
-     Q,
-     "    if not out.strongest_evidence:\n"
-     "        grounding = _pattern_grounding(decision)",
-     "    if False:\n"
-     "        grounding = _pattern_grounding(decision)",
-     f"{T}::test_the_qa_answer_carries_whose_filing_made_it_true",
-     "assert"),
-
+    # A2 REMOVED, NOT SILENTLY DROPPED. It mutated the grounding block at
+    # the END of `answer()`, which every board question now bypasses because
+    # they all route — so the mutation was a no-op and the proof reported
+    # NOT_CAUGHT for a correct guard. C1 covers the routed path, which is the
+    # one that actually runs. A proof whose site became unreachable is dead
+    # weight, and leaving it would have taught that the guard was weak.
     ("A4. the decision stops carrying the grounding at all",
      D,
      "        grounded_in=grounding_of(hypothesis),",
