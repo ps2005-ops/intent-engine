@@ -1026,6 +1026,27 @@ class CompanyIngestionService:
         # the strategic quality gate.
         result["readiness"] = readiness
         result["readiness_explanation"] = explain_readiness(readiness)
+        # WHAT THE GATE WAS ACTUALLY LOOKING AT, recorded beside its verdict.
+        #
+        # Meta's bounded page states "7 page(s) read; 1 carried usable
+        # evidence" and then lists the seven, including Meta's own 10-K and
+        # 10-Q. The list is read live from the store; the number comes from
+        # this assessment. Three mechanisms that would explain the gap were
+        # tested against the seven real documents and all three are false:
+        # `usable_documents` returns 7 of 7, `is_english` returns True for 7
+        # of 7, and raw-HTML truncation swept from 16MB down to 200KB leaves
+        # 7 of 7 (the real cap is 16MB, so nothing truncates at all).
+        #
+        # So a fourth guess is not worth making. This records the inputs, and
+        # the next run says which number is wrong instead of being argued
+        # about from the outside.
+        result["readiness_inputs"] = {
+            "documents_at_compose": len(documents),
+            "usable_at_compose": readiness.get("document_count"),
+            "families_at_compose": list(readiness.get("families") or []),
+            "source_ids": [d.get("source_id") for d in documents][:40],
+            "attempt": attempt,
+        }
         if readiness["may_synthesize"]:
             result["strategic_report"] = self._strategic_report(
                 meta["company_name"], documents, extra_observations,

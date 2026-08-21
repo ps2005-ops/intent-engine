@@ -3240,10 +3240,33 @@ class WebApp:
         # sat directly above a list of ten, because one counts evidence and the
         # other counts fetches. Both are true and the reader needs both, so the
         # sentence relates them rather than printing one and listing the other.
+        # ONE DENOMINATOR PER PAGE.
+        #
+        # `used` is read from the store, NOW. `note["source_count"]` was
+        # computed inside `compose`, THEN. On Meta's live run at 5d43053 the
+        # page said "7 page(s) read; 1 carried usable evidence" and listed
+        # seven, of which three are Meta's own filings. Amazon said the same
+        # thing on the same wave. A reader cannot reconcile those numbers,
+        # and neither could I: the gate, re-run offline on Meta's seven real
+        # documents, answers 7.
+        #
+        # So the page states what it can verify from the evidence in front of
+        # it, and a stale smaller count is not printed as if it described
+        # this list. The gate's verdict still stands -- this changes what the
+        # page SAYS, never what the run was allowed to do -- and the run now
+        # records `readiness_inputs` so the discrepancy is measured on the
+        # next wave rather than argued about.
         usable = note.get("source_count") or 0
         read_line = f"{len(used)} page(s) read"
         if usable and usable != len(used):
-            read_line += f"; {usable} carried usable evidence"
+            if usable < len(used):
+                # The gate saw FEWER documents than the store now holds. Say
+                # what is true of this list; do not attribute the smaller
+                # number to it.
+                read_line += (f"; the evidence gate was applied to {usable} "
+                              f"of them")
+            else:
+                read_line += f"; {usable} carried usable evidence"
         read_line += "."
         if set_aside:
             found += (f'<h3>Sources found but not used</h3>'
