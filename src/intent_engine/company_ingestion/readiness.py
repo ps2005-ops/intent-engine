@@ -315,6 +315,50 @@ def observations_as_documents(observations) -> list:
     return out
 
 
+def readiness_inputs(documents, verdict, *, attempt: int = 1) -> dict:
+    """WHAT THE GATE WAS LOOKING AT, counted over the set it judged.
+
+    ONE READER, BECAUSE TWO DRIFTED. The four `dropped_*` counters used to be
+    computed at first composition while `documents_at_compose` and
+    `usable_at_compose` were later overwritten by the re-gate. The header
+    then described two different document sets at once, and its arithmetic
+    stopped closing:
+
+        UnitedHealth, 743df06:  compose=13 usable=9 dropped=0/0/2/0
+
+    Thirteen minus two is eleven, not nine. Two documents disappeared into a
+    gap between two measurements of different things -- which is exactly the
+    confusion the breakdown was added to end. Both callers now come here.
+    """
+    documents = list(documents)
+    ok = [d for d in documents if d.get("retrieval_status") == "OK"]
+    texted = [d for d in ok if (d.get("text_content") or "").strip()]
+    deduped = usable_documents(documents)
+    english = [d for d in deduped if is_english(d)]
+    inputs = {
+        "dropped_not_ok": len(documents) - len(ok),
+        "dropped_empty": len(ok) - len(texted),
+        "dropped_duplicate": max(0, len(texted) - len(deduped)),
+        "dropped_language": max(0, len(deduped) - len(english)),
+        "documents_at_compose": len(documents),
+        "usable_at_compose": verdict.get("document_count"),
+        "families_at_compose": list(verdict.get("families") or []),
+        "source_ids": [d.get("source_id") for d in documents][:40],
+        "attempt": attempt,
+    }
+    # THE COUNTERS MUST CLOSE, and when they do not that is the finding.
+    # `usable` is the gate's own number; anything it dropped that these four
+    # filters do not name is attrition nobody has instrumented yet, and it is
+    # reported as its own quantity rather than left to be inferred from a
+    # subtraction that does not work.
+    named = (inputs["dropped_not_ok"] + inputs["dropped_empty"]
+             + inputs["dropped_duplicate"] + inputs["dropped_language"])
+    usable = inputs["usable_at_compose"]
+    if isinstance(usable, int):
+        inputs["dropped_unexplained"] = len(documents) - named - usable
+    return inputs
+
+
 def assess_readiness(*, documents, identity=None, failures=(),
                      extra_observations=(), attempt: int = 1,
                      mode=None) -> dict:

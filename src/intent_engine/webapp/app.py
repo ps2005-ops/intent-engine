@@ -723,8 +723,24 @@ class WebApp:
         run_id = self._run_id_of(environ.get("PATH_INFO", ""))
         if run_id:
             try:
-                headers = headers + [("X-Analysis-Outcome",
-                                      self.analysis_outcome(run_id)),
+                stated = self.analysis_outcome(run_id)
+                # A PAGE THAT FAILED MAY NOT REPORT THE RUN'S HAPPY OUTCOME.
+                #
+                # MEASURED on 743df06: Pfizer's `/runs/<id>` returned HTTP 500
+                # -- "Something went wrong on our side", 513 characters --
+                # while carrying `X-Analysis-Outcome: FULL_ANALYSIS`, because
+                # this header was attached after the error page was built and
+                # never looked at the status it was travelling on. Every other
+                # route rendered (full=21,718 chars), so the ANALYSIS was
+                # fine; the customer's landing screen was not, and the header
+                # said otherwise to anything reading it.
+                #
+                # The run's own outcome is unchanged and still readable
+                # elsewhere. What this states is what happened to THIS
+                # response, which is what a header on this response means.
+                if status[:1] == "5":
+                    stated = OUTCOME.ANALYSIS_FAILED
+                headers = headers + [("X-Analysis-Outcome", stated),
                                      ("X-Evidence-Gate",
                                       self.evidence_gate_summary(run_id))]
             except Exception:                               # noqa: BLE001
@@ -6986,6 +7002,42 @@ class WebApp:
             return any(host == bad or host.endswith("." + bad)
                        for bad in refused)
 
+        # A GUESS AT A CLOSED DOOR IS NOT WORTH A REQUEST, and ranking it last
+        # was not enough to stop it being made.
+        #
+        # MEASURED on 743df06. The comment above already says a guess aimed at
+        # a host we have watched refuse us "cannot succeed" -- but rank 9 is
+        # still eligible, and the leftover fill spends the unused budget on
+        # exactly these once the real candidates run out. Which is what
+        # happened to every blocked company in the gauntlet:
+        #
+        #     Union Pacific  failed=27, 24 of them at up.com
+        #     Goldman Sachs  failed=26, 24 of them at goldmansachs.com
+        #     Mastercard     failed=24, 22 of them at mastercard.com
+        #     Costco         failed=23, 21 of them at costco.com
+        #
+        # Twenty-odd requests per run to a host that had already refused the
+        # homepage, each one waiting out a refusal or a timeout before the
+        # customer sees anything. It is the largest single avoidable cost in
+        # first-useful latency, and it buys nothing.
+        #
+        # THE EXEMPTIONS ARE THE ONES THE RANKING ALREADY ARGUES FOR: a
+        # curated URL a human asserted, a regulatory filing, and a filing by
+        # another registrant are worth trying on a host that turned us away.
+        # Only the guesses are dropped.
+        def _is_a_guess_at_a_closed_door(candidate) -> bool:
+            if not _on_refusing_host(candidate):
+                return False
+            method = candidate.get("discovery_method")
+            if method in ("official_fallback", "third_party_filing"):
+                return False
+            if "SEC EDGAR" in (candidate.get("why_relevant") or ""):
+                return False
+            return True
+
+        candidates = [c for c in candidates
+                      if not _is_a_guess_at_a_closed_door(c)]
+
         #: The subject's own CIK, as ten digits, or "". Ownership of an EDGAR
         #: document is stated by its URL -- `/edgar/data/<CIK>/...` names the
         #: FILER -- so it is decided here rather than inferred from a
@@ -7607,7 +7659,11 @@ class WebApp:
                 f"{self.evidence_report(run_id).get('subject_failures', '?')} "
                 # status/empty/duplicate/language -- four different repairs,
                 # and `usable` alone cannot tell them apart.
-                f"dropped={dropped}")
+                f"dropped={dropped}"
+                # Attrition no filter above accounts for. Non-zero means the
+                # gate dropped documents for a reason nothing here names yet,
+                # which is a finding rather than a rounding error.
+                f" unexplained={inputs.get('dropped_unexplained', '?')}")
 
     def evidence_report(self, run_id) -> dict:
         """Was the SUBJECT's own evidence actually looked for and retrieved?
@@ -8279,13 +8335,31 @@ class WebApp:
                         explain as _explain,
                     )
                     result["readiness_explanation"] = _explain(verdict)
-                    result.setdefault("readiness_inputs", {}).update({
-                        "regated_from": seen,
-                        "documents_at_compose": stored,
-                        "usable_at_compose": verdict.get("document_count"),
-                        "families_at_compose": list(
-                            verdict.get("families") or []),
-                    })
+                    # EVERY COUNTER, OVER THE SET THE GATE JUST JUDGED.
+                    #
+                    # This used to overwrite three keys and leave the four
+                    # `dropped_*` counters describing the FIRST composition,
+                    # so the header reported two document sets at once and
+                    # its arithmetic did not close (UnitedHealth on 743df06:
+                    # `compose=13 usable=9 dropped=0/0/2/0`). A breakdown
+                    # that cannot be subtracted is worse than none: it looks
+                    # like an answer.
+                    from intent_engine.company_ingestion.readiness import (
+                        readiness_inputs as _inputs,
+                    )
+                    prior = result.get("readiness_inputs") or {}
+                    # READ HERE, NOT SMUGGLED THROUGH THE VERDICT. A first
+                    # version attached the document list to the verdict dict
+                    # and counted that, which silently became an empty list
+                    # the moment anything supplied its own
+                    # `_readiness_on_current_evidence` -- and the counters
+                    # then described nothing at all while looking populated.
+                    # The caller can see the store; it does not need the
+                    # callee's cooperation to count what is in it.
+                    fresh = _inputs(self.ci.store.retrieved(run_id), verdict,
+                                    attempt=prior.get("attempt", 1))
+                    fresh["regated_from"] = seen
+                    result.setdefault("readiness_inputs", {}).update(fresh)
                 changed = (verdict or {}).get("may_synthesize") and \
                     not result.get("strategic_report")
                 if changed:

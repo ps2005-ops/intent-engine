@@ -83,17 +83,26 @@ def test_guesses_fill_the_budget_after_attested_links_are_exhausted():
 
 # --- NEGATIVE CONTROLS: eligibility must not have moved ----------------------
 def test_a_refusing_host_is_still_ranked_below_every_guess():
-    """The reachability demotion must still outrank the attestation one.
+    """A guess at a host we have watched refuse us may not take a slot.
 
-    If this inverts, a guess aimed at a host we have watched refuse us climbs
-    back above real evidence — the Sony regression, restated.
+    THIS USED TO ASSERT AN ORDER: the closed-door candidate had to sort below
+    the reachable guess, because ranking it last was the strongest guarantee
+    available. It is no longer the strongest -- such a candidate is now
+    dropped from selection outright, since twenty-odd certain failures per
+    run were being made after the door had already been observed shut
+    (Union Pacific failed=27, 24 of them at up.com).
+
+    The invariant this test exists for is unchanged and is asserted more
+    directly: a guess aimed at a refusing host can never displace real
+    evidence -- the Sony regression, restated.
     """
     order = picked([candidate("onbad", method="homepage_link",
                               url="https://bad.com/x"),
                     candidate("guess", method="known_path",
                               url="https://acme.com/y")],
                    refusing_hosts=("bad.com",))
-    assert order.index("guess") < order.index("onbad")
+    assert "onbad" not in order, order
+    assert "guess" in order, order
 
 
 def test_the_budget_is_unchanged():

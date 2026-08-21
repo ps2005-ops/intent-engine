@@ -66,6 +66,28 @@ FILING_INDEX_URL = ("https://www.sec.gov/Archives/edgar/data/{cik}/"
 _PREFERRED_FORMS = ("10-K", "10-Q", "20-F", "40-F", "8-K", "6-K", "S-1",
                     "424B4", "DEF 14A")
 MAX_EDGAR_CANDIDATES = 3
+#: How many filings to propose when the company's own web presence produced
+#: NOTHING -- either it refused every request, or the run never had a domain.
+#:
+#: MEASURED across the 50-company gauntlet on 743df06. Twelve companies
+#: composed on exactly three documents, all of them SEC filings:
+#:
+#:     Goldman Sachs  failed=26/24   compose=3 families=investor
+#:     Mastercard     failed=24/22   compose=3 families=investor
+#:     Union Pacific  failed=27/24   compose=2 families=investor
+#:     UPS (no domain) failed=1/0    compose=2 families=investor
+#:
+#: The web budget was being spent on hosts that answer 403 to this service's
+#: egress -- lilly.com answers 200 from a laptop with the same User-Agent and
+#: refused this deployment seventeen times -- while the source that DOES
+#: answer was capped at three.
+#:
+#: So the budget moves rather than grows: a run that fetched nothing from the
+#: company's own site does not make MORE requests in total, it makes them
+#: somewhere they are served. Five filings span the annual report, the
+#: quarterly, a current report and the proxy, which after `family_of` reads
+#: the form is four evidence families rather than one.
+MAX_EDGAR_CANDIDATES_WEB_BLOCKED = 5
 
 # ONE FILING OF EACH KIND, NOT THREE OF THE SAME KIND.
 #
@@ -499,7 +521,8 @@ def filing_candidates(resolved, *, transport=None, resolver=None,
 
 
 def propose_edgar_candidates(*, company_name, ticker=None, transport=None,
-                             resolver=None, cik="") -> list:
+                             resolver=None, cik="",
+                             limit=MAX_EDGAR_CANDIDATES) -> list:
     """Resolve the company and return authoritative SEC filing candidates.
     Fully defensive: returns [] if the company can't be resolved or SEC is
     unreachable — discovery must never fail because of this adapter.
@@ -521,6 +544,6 @@ def propose_edgar_candidates(*, company_name, ticker=None, transport=None,
         if not resolved:
             return []
         return filing_candidates(resolved, transport=transport,
-                                 resolver=resolver)
+                                 resolver=resolver, limit=limit)
     except Exception:                                       # noqa: BLE001
         return []

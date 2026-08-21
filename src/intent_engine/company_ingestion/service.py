@@ -13,7 +13,21 @@ from intent_engine.company_ingestion.claims import (
     build_claims, executive_overview,
 )
 from intent_engine.company_ingestion.discovery import discover_candidates
-from intent_engine.company_ingestion.edgar import propose_edgar_candidates
+from intent_engine.company_ingestion.edgar import (
+    MAX_EDGAR_CANDIDATES, MAX_EDGAR_CANDIDATES_WEB_BLOCKED,
+    propose_edgar_candidates,
+)
+
+#: THE RETRIEVAL PLAN'S RESULT CODES. What was actually available, named
+#: once, so nothing downstream has to re-derive "was this company thinly
+#: documented, or did our fetching fail?" from a failure count.
+OFFICIAL_WEB_RETRIEVED = "OFFICIAL_WEB_RETRIEVED"
+OFFICIAL_WEB_BLOCKED = "OFFICIAL_WEB_BLOCKED"
+OFFICIAL_WEB_ABSENT = "OFFICIAL_WEB_ABSENT"
+SEC_RETRIEVED = "SEC_RETRIEVED"
+SEC_NONE = "SEC_NONE"
+INDEPENDENT_RETRIEVED = "INDEPENDENT_RETRIEVED"
+INDEPENDENT_NONE = "INDEPENDENT_NONE"
 from intent_engine.company_ingestion.entities import (
     entity_identity_facts, official_fallback_candidates, resolve_entity,
 )
@@ -128,6 +142,8 @@ class CompanyIngestionService:
         # as-is, because a test that passes one wants to read it.
         self._injected_ledger = retry_ledger
         self._retry_ledgers: dict = {}
+        # run_id -> what each retrieval avenue yielded.
+        self._retrieval_plans: dict = {}
         self._registrant_cache: dict = {}
         self._classification_cache: dict = {}
         # The reasoning backend. None means "not configured", which produces
@@ -502,14 +518,31 @@ class CompanyIngestionService:
             # and (like every candidate) fetched only after explicit approval.
             candidates = candidates + propose_external_candidates(
                 company_name=meta.get("company_name", ""), domain=domain)
+        # WHAT THE COMPANY'S OWN WEB PRESENCE ACTUALLY GAVE US, decided here
+        # rather than inferred later. Three states, and they are not the same
+        # finding: a site we never had, a site that refused us, and a site we
+        # read. Only the third is evidence about the company.
+        if not meta.get("website"):
+            web_plan = OFFICIAL_WEB_ABSENT
+        elif not result["ok"] or not candidates:
+            web_plan = OFFICIAL_WEB_BLOCKED
+        else:
+            web_plan = OFFICIAL_WEB_RETRIEVED
         # Authoritative structured fallback: for public companies, official SEC
         # EDGAR filings are permitted, server-rendered (non-JavaScript) HTML —
         # so a run is not at the mercy of a JavaScript-only marketing site.
         # Fully defensive: yields nothing (never raises) if the company is not
         # a filer or SEC is unreachable, so discovery is never broken by it.
+        #
+        # THE BUDGET MOVES TO WHERE IT IS SERVED. A run whose own site gave us
+        # nothing does not make more requests overall — it makes them at
+        # EDGAR, which answers, instead of at a host that does not.
         candidates = candidates + propose_edgar_candidates(
             company_name=meta.get("company_name", ""),
             cik=str(meta.get("cik") or ""),
+            limit=(MAX_EDGAR_CANDIDATES_WEB_BLOCKED
+                   if web_plan in (OFFICIAL_WEB_ABSENT, OFFICIAL_WEB_BLOCKED)
+                   else MAX_EDGAR_CANDIDATES),
             transport=self.transport, resolver=self.resolver)
         # THE ONLY INDEPENDENT VANTAGE POINT WE CAN ACTUALLY REACH.
         #
@@ -589,8 +622,29 @@ class CompanyIngestionService:
                              safe_message=result["safe_message"],
                              retryable=result.get("retryable", False)),
                          idempotency_key=f"fail:{run_id}:homepage")
+        # THE RETRIEVAL PLAN'S OWN RESULT, recorded once, so every consumer
+        # reads the same answer to "what was actually available?" rather than
+        # re-deriving it from failure counts.
+        self._retrieval_plans[run_id] = {
+            "official_web": web_plan,
+            "sec": (SEC_RETRIEVED if any(
+                c.get("source_class") == "investor_material"
+                for c in candidates) else SEC_NONE),
+            "independent": (INDEPENDENT_RETRIEVED if any(
+                c.get("source_class") in ("independent_reporting",
+                                          "customer_voice", "competitor")
+                for c in candidates) else INDEPENDENT_NONE),
+        }
         self._transition(run_id, domain, "AWAITING_SOURCE_APPROVAL")
         return self.store.candidates(run_id)
+
+    def retrieval_plan(self, run_id: str) -> dict:
+        """What each retrieval avenue yielded for this run.
+
+        Empty when discovery has not run. An empty dict is NOT a measured
+        "nothing was available" — it means nobody has looked yet.
+        """
+        return dict(self._retrieval_plans.get(run_id) or {})
 
     # --- observed reachability ---------------------------------------------
     # Failure types that mean "this host will not serve us", as opposed to
@@ -1051,23 +1105,10 @@ class CompanyIngestionService:
         # four different repairs. Counting them costs one pass over documents
         # already in memory.
         from intent_engine.company_ingestion.readiness import (
-            is_english as _is_en, usable_documents as _usable,
+            readiness_inputs as _inputs,
         )
-        _ok = [d for d in documents if d.get("retrieval_status") == "OK"]
-        _texted = [d for d in _ok if (d.get("text_content") or "").strip()]
-        _deduped = _usable(documents)
-        result["readiness_inputs"] = {
-            "dropped_not_ok": len(documents) - len(_ok),
-            "dropped_empty": len(_ok) - len(_texted),
-            "dropped_duplicate": max(0, len(_texted) - len(_deduped)),
-            "dropped_language": max(
-                0, len(_deduped) - len([d for d in _deduped if _is_en(d)])),
-            "documents_at_compose": len(documents),
-            "usable_at_compose": readiness.get("document_count"),
-            "families_at_compose": list(readiness.get("families") or []),
-            "source_ids": [d.get("source_id") for d in documents][:40],
-            "attempt": attempt,
-        }
+        result["readiness_inputs"] = _inputs(documents, readiness,
+                                             attempt=attempt)
         if readiness["may_synthesize"]:
             result["strategic_report"] = self._strategic_report(
                 meta["company_name"], documents, extra_observations,

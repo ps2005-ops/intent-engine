@@ -179,6 +179,17 @@ def verdict(company_dir) -> dict:
             failures.append(_fail("MISSING_ROUTE", name))
             continue
         size = chars if chars is not None else (row or {}).get("chars", 0)
+        # WHAT THE SERVER SAID ABOUT ITS OWN RESPONSE, read before the prose.
+        #
+        # MEASURED on 743df06: Pfizer's `/runs/<id>` -- the screen a customer
+        # lands on -- returned HTTP 500 with 513 characters of "Something
+        # went wrong on our side", while the same run's `/full` rendered
+        # 21,718 characters of real analysis. Nothing here looked at the
+        # status, so the only thing that caught it was the thinness of the
+        # error page, and a wordier error page would have passed.
+        code = int((routes.get(name) or {}).get("status") or 0)
+        if code >= 400:
+            failures.append(_fail("ROUTE_ERROR", f"{name}=HTTP {code}"))
         if size < THIN:
             failures.append(_fail("THIN_ROUTE", f"{name}={size} chars"))
         if row and row.get("failure_language"):
@@ -193,6 +204,16 @@ def verdict(company_dir) -> dict:
                        for row in audited["routes"] if not row.get("missing"))
     if stated in O.SUCCESSFUL and prose_failed:
         failures.append(_fail("STATED_SUCCESS_OVER_FAILURE_PAGE", stated))
+
+    # THE SAME LIE IN A DIFFERENT VOICE. A success claimed on a response the
+    # server itself marked 5xx is not a prose problem -- Pfizer's 500 page
+    # carried `X-Analysis-Outcome: FULL_ANALYSIS` -- and it may never be
+    # scored as a company that worked.
+    errored = [n for n in REQUIRED_ROUTES
+               if int((routes.get(n) or {}).get("status") or 0) >= 500]
+    if stated in O.SUCCESSFUL and errored:
+        failures.append(_fail("STATED_SUCCESS_OVER_SERVER_ERROR",
+                              f"{stated} on {', '.join(errored)}"))
 
     # --- identity ---------------------------------------------------------
     named = _identity(company_dir, company)
