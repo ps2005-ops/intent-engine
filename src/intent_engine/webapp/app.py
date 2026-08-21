@@ -7558,6 +7558,25 @@ class WebApp:
             run_state=self.ci.store.run_state(run_id),
             exhaustion=self.evidence_report(run_id))
 
+    def _readiness_on_current_evidence(self, run_id):
+        """Re-run the gate over every document the store now holds.
+
+        CHEAP ON PURPOSE. This reads stored text and fetches nothing, which
+        is what makes it usable on a run that has already composed once --
+        the expensive half is synthesis, not the gate.
+        """
+        try:
+            from intent_engine.company_ingestion.readiness import (
+                assess_readiness,
+            )
+            return assess_readiness(
+                documents=self.ci.store.retrieved(run_id),
+                identity=self.ci.entity_identity(run_id),
+                failures=self.ci.store.failures(run_id), attempt=1)
+        except Exception:                                   # noqa: BLE001
+            _LOG.warning("re-gating failed for %s", run_id)
+            return None
+
     def evidence_gate_summary(self, run_id) -> str:
         """What the readiness gate held, versus what the store holds now.
 
@@ -8197,13 +8216,49 @@ class WebApp:
             except Exception:                               # noqa: BLE001
                 stored = seen
             if stored > seen:
-                _LOG.info("recomposing %s: gate saw %d, store holds %d",
-                          run_id, seen, stored)
-                result = self.ci.compose_with_quality(
-                    run_id, fi_service=self.fi,
-                    previous_model=previous_model)
-                result.setdefault("readiness_inputs", {})["recomposed_from"] \
-                    = seen
+                # ASK THE GATE AGAIN BEFORE PAYING FOR A SECOND SYNTHESIS.
+                #
+                # The first version of this recomposed unconditionally, and
+                # the cost was not theoretical. MEASURED on b37bee2, 0d02c0b
+                # and e78c2a0: Meta's service stopped answering
+                # `/runs/<id>/progress` from t=33 to t=349 -- over five
+                # minutes of a single-worker deployment serving nobody -- and
+                # four consecutive Meta runs were unobservable. On the two
+                # SHAs before it, the same analysis finished in 48 and 52
+                # seconds.
+                #
+                # Re-running `assess_readiness` on the full document set is
+                # cheap: it reads text that is already in memory and fetches
+                # nothing. Re-running SYNTHESIS is what costs the five
+                # minutes. So the gate is asked first, and the expensive pass
+                # happens only when the extra evidence actually changes the
+                # verdict -- which is the only case where it could change
+                # what the customer reads.
+                verdict = self._readiness_on_current_evidence(run_id)
+                if verdict is not None:
+                    result["readiness"] = verdict
+                    from intent_engine.company_ingestion.readiness import (
+                        explain as _explain,
+                    )
+                    result["readiness_explanation"] = _explain(verdict)
+                    result.setdefault("readiness_inputs", {}).update({
+                        "regated_from": seen,
+                        "documents_at_compose": stored,
+                        "usable_at_compose": verdict.get("document_count"),
+                        "families_at_compose": list(
+                            verdict.get("families") or []),
+                    })
+                changed = (verdict or {}).get("may_synthesize") and \
+                    not result.get("strategic_report")
+                if changed:
+                    _LOG.info("recomposing %s: gate saw %d, store holds %d, "
+                              "and the fuller set clears the bar",
+                              run_id, seen, stored)
+                    result = self.ci.compose_with_quality(
+                        run_id, fi_service=self.fi,
+                        previous_model=previous_model)
+                    result.setdefault("readiness_inputs",
+                                      {})["recomposed_from"] = seen
         report = result.get("strategic_report")
         if report and domain:
             self.strategic_memory.save_snapshot(domain, report["mental_model"])

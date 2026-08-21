@@ -123,6 +123,11 @@ def test_a_run_whose_evidence_did_not_grow_composes_once(app):
     result = app._compose(run_id)
     inputs = result.get("readiness_inputs") or {}
     assert "recomposed_from" not in inputs, inputs
+    # AND IT MUST NOT EVEN RE-GATE. A break proof that flipped `stored >
+    # seen` to `True` stayed green while only `recomposed_from` was
+    # asserted, because the cost control below absorbed it -- so the test
+    # was measuring the second guard and calling it the first.
+    assert "regated_from" not in inputs, inputs
     assert inputs.get("documents_at_compose") == \
         len(app.ci.store.retrieved(run_id))
 
@@ -138,3 +143,66 @@ def test_the_gate_header_reports_both_numbers(app):
     compose = int(gate.split("compose=")[1].split()[0])
     stored = int(gate.split("stored=")[1].split()[0])
     assert compose == stored, f"gate judged {compose} of {stored}: {gate}"
+
+
+def test_a_fuller_set_that_still_fails_the_gate_costs_no_second_synthesis(app):
+    """THE COST CONTROL, and it exists because the first version had none.
+
+    MEASURED on b37bee2, 0d02c0b and e78c2a0: recomposing unconditionally
+    made Meta's service stop answering `/runs/<id>/progress` from t=33 to
+    t=349 -- five minutes of a single-worker deployment serving nobody -- and
+    four consecutive Meta runs were unobservable. The same analysis finished
+    in 48 and 52 seconds on the two SHAs before it.
+
+    Re-running the GATE is cheap and fixes the number the customer reads.
+    Re-running SYNTHESIS is the five minutes, and it is only worth paying
+    when the fuller evidence actually changes the verdict.
+    """
+    client = Client(app)
+    run_id = _open_run(client)
+    app.wait_for_analysis(run_id, timeout=60)
+    app._results.pop(run_id, None)
+
+    composes = {"n": 0}
+    real_compose = app.ci.compose_with_quality
+    state = {"first": True}
+    real_retrieved = app.ci.store.retrieved
+
+    def counting(rid, **kwargs):
+        composes["n"] += 1
+        if rid == run_id and state["first"]:
+            state["first"] = False
+            app.ci.store.retrieved = (
+                lambda r: list(real_retrieved(r))[:1] if r == run_id
+                else real_retrieved(r))
+            try:
+                return real_compose(rid, **kwargs)
+            finally:
+                app.ci.store.retrieved = real_retrieved
+        return real_compose(rid, **kwargs)
+    app.ci.compose_with_quality = counting
+
+    # The gate refuses whatever it is shown, so the fuller set changes the
+    # NUMBERS and not the verdict -- the case where a second synthesis buys
+    # the customer nothing.
+    import intent_engine.company_ingestion.readiness as R
+    real_assess = R.assess_readiness
+
+    def refusing(**kwargs):
+        out = dict(real_assess(**kwargs))
+        out["may_synthesize"] = False
+        return out
+    app._readiness_on_current_evidence = (
+        lambda rid: refusing(documents=app.ci.store.retrieved(rid),
+                             identity=app.ci.entity_identity(rid),
+                             failures=app.ci.store.failures(rid), attempt=1))
+
+    result = app._compose(run_id)
+    inputs = result.get("readiness_inputs") or {}
+    assert composes["n"] == 1, (
+        f"a second synthesis was paid for and changed no verdict "
+        f"({composes['n']} composes)")
+    assert inputs.get("regated_from") == 1, inputs
+    assert inputs.get("documents_at_compose") == \
+        len(app.ci.store.retrieved(run_id)), (
+        "the numbers the customer reads were not corrected")

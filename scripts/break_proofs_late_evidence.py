@@ -20,6 +20,20 @@ MUTATIONS = [
      "            if True:",
      "every customer pays for a second synthesis that changes nothing"),
 
+    ("E. a second synthesis is paid for even when the verdict is unchanged",
+     APP,
+     '                changed = (verdict or {}).get("may_synthesize") and \\\n'
+     '                    not result.get("strategic_report")',
+     "                changed = True",
+     "five minutes of a single-worker deployment serving nobody, for a page "
+     "that says the same thing"),
+
+    ("F. the gate is never re-run, so the numbers stay wrong", APP,
+     "                verdict = self._readiness_on_current_evidence(run_id)",
+     "                verdict = None",
+     "the customer still reads a count taken from a document set the run "
+     "has outgrown"),
+
     ("C. the gate stops recording what it was given", SVC,
      '            "documents_at_compose": len(documents),',
      '            "documents_at_compose": 0,',
