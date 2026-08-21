@@ -226,21 +226,44 @@ def _from_read(name: str, read) -> str:
     holder, field = where
     value = getattr(read, holder, None)
     if field:
-        return str(getattr(value, field, "") or "")
+        got = getattr(value, field, "") or ""
+        return _printable(str(got)) or _render_row(got)
     if holder == "level7_monitoring":
         return "; ".join(s.text for s in (value or ())[:3])
+    # THE SAME LEAK, THE OTHER PRODUCER.
+    #
+    # `or r` and `or weakest` are raw objects. MarketBelief has no
+    # `.statement` and no `.text`; Link has no `.text`; BeliefChallenge has
+    # neither. So each of these fell through to `str(<dataclass>)` and printed
+    # a repr at a board:
+    #
+    #     MarketBelief(belief_id='mb_7939cefbda', subject_id='Cloudflare,
+    #     Inc.', proposition="That Cloudflare, Inc.'s current weakness is a
+    #     cyclical trough rather than a structural reset", ...)
+    #
+    # MEASURED ON THE DEPLOYED FIX. `_route_answer` was repaired and the leak
+    # did not move: 3 of 3 answers on 49b6c3a, exactly as on 8397d67. The
+    # repaired branch reads the RUN'S DECISION; these three questions are
+    # answered from the CANONICAL READ, which is this function. The docstring
+    # above already counts five previous appearances of this seam -- D13,
+    # D17, D22, D25, D30 -- and this is the same one again.
+    #
+    # `_render_row` knows these shapes now (proposition, strongest_support,
+    # frm/to/because), and `_printable` refuses anything still repr-shaped,
+    # so a type nobody has taught it cannot leak here either.
     if holder in ("market_beliefs", "belief_challenges"):
         rows = tuple(value or ())[:2]
-        return "; ".join(
-            str(getattr(r, "statement", "") or getattr(r, "text", "") or r)
-            for r in rows)
+        rendered = [t for t in (_render_row(r) for r in rows) if t]
+        return "; ".join(rendered)
     if holder == "assumption_chain":
         links = tuple(getattr(value, "links", ()) or ())
         if links:
             weakest = min(links, key=lambda l: getattr(l, "confidence", 1.0)) \
                 if all(hasattr(l, "confidence") for l in links) else links[0]
-            return str(getattr(weakest, "text", "") or weakest)
-        return str(getattr(value, "text", "") or "") if value else ""
+            return _printable(str(getattr(weakest, "text", "") or "")) \
+                or _render_row(weakest)
+        return (_printable(str(getattr(value, "text", "") or ""))
+                or _render_row(value)) if value else ""
     if holder == "level4_competition":
         return "; ".join(
             f"{c.name}: {c.likely_response} Watch {c.signal_to_watch}"

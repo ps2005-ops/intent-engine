@@ -174,3 +174,70 @@ def test_an_empty_row_still_falls_through_to_the_absent_copy():
     assert name == "biggest_risk"
     assert answer, "an empty field must still say something"
     assert not _is_repr(answer)
+
+
+# --- the OTHER producer, which the first repair missed entirely -------------
+
+class _Read:
+    """The canonical read, carrying the shapes production carries.
+
+    `_route_answer` reads the RUN'S DECISION. These three questions are
+    answered from the read instead whenever the decision is silent -- which
+    is the normal case live. The first repair fixed only the decision branch
+    and the leak did not move: 3 of 3 answers still leaked on the deployed
+    build, identical to the build before it.
+    """
+
+    puts_a_strategy_forward = True
+    reading_exists = True
+
+    def __init__(self):
+        self.market_beliefs = (MarketBelief(),)
+        self.belief_challenges = (MarketBelief(),)
+        self.assumption_chain = _Chain()
+
+
+class _Chain:
+    def __init__(self):
+        self.links = (Link(),)
+
+
+def test_the_read_branch_renders_objects_too():
+    """THE REGRESSION THAT SHIPPED. Straight at `_from_read`."""
+    for holder in ("market_belief", "weakest_assumption"):
+        out = Q._from_read(holder, _Read())
+        assert not _is_repr(out), (holder, out)
+        assert "belief_id=" not in out and "standing=" not in out, (holder, out)
+
+
+def test_the_read_branch_still_says_something():
+    """Suppression is not a fix here either."""
+    said = Q._from_read("market_belief", _Read())
+    assert "cyclical trough" in said, said
+    assert "filed results show growth decelerating" in said, said
+    weak = Q._from_read("weakest_assumption", _Read())
+    assert "attention sold by auction" in weak, weak
+
+
+def test_answer_end_to_end_never_leaks_from_either_producer():
+    """Both producers, through the function the webapp actually calls.
+
+    A test that exercised only one branch is what let an inert repair look
+    green and ship.
+    """
+    class _Brief:
+        """Permissive: `answer` reads a dozen brief fields and none of them
+        are what this test is about. Naming them one by one would make the
+        test fail for reasons unrelated to the leak."""
+
+        def __getattr__(self, name):
+            return ""
+
+    for decision in ({}, {"expectations": [MarketBelief()]}):
+        for question in ("What does the market believe?",
+                         "What's the weakest assumption?"):
+            out = Q.answer(question, _Brief(), decision=decision,
+                           read=_Read())
+            assert not _is_repr(out.direct_answer), (question, decision,
+                                                     out.direct_answer)
+            assert "belief_id=" not in out.direct_answer

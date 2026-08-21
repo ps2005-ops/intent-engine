@@ -1,0 +1,106 @@
+{
+  "company": "Cloudflare, Inc.",
+  "deployed_sha": "49b6c3a",
+  "captured_at": "2026-08-21T05:25:39Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR",
+      "chars": 5902,
+      "html_chars": 32892
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/intro",
+      "chars": 5156,
+      "html_chars": 30699
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/slides",
+      "chars": 6200,
+      "html_chars": 50456
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/full",
+      "chars": 1385,
+      "html_chars": 16425
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/story",
+      "chars": 4409,
+      "html_chars": 33934
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/history",
+      "chars": 27790,
+      "html_chars": 94738
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/connect",
+      "chars": 4036,
+      "html_chars": 28952
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR",
+      "chars": 5902,
+      "html_chars": 32892
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/evidence",
+      "chars": 9369,
+      "html_chars": 28702
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0HCGCFZDJF7RE61J2YTGNHR/brief",
+      "chars": 19104,
+      "html_chars": 53590
+    }
+  },
+  "progress": [
+    {
+      "t": 0.3,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Cloudflare, Inc. NET \u00b7 cloudflare.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence ",
+      "status": 200,
+      "html_bytes": 17016
+    },
+    {
+      "t": 102.6,
+      "text": "Cloudflare, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Cloudflare, Inc. NET \u00b7 USA \u00b7 cloudflare.com \u00b7 SEC CIK 0001477333 Cloudflare, Inc. is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the i",
+      "status": 200,
+      "html_bytes": 30768
+    }
+  ],
+  "process_before": {
+    "boot_id": "4ef1abc720dd4d9e",
+    "started_at": 1787289915.6651065,
+    "uptime_seconds": 23.7
+  },
+  "run_id": "01M0HCGCFZDJF7RE61J2YTGNHR",
+  "status": "READY",
+  "seconds": 103,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 3.71,
+    "intro": 6.1,
+    "slides": 7.72,
+    "full": 0.17,
+    "story": 6.81,
+    "history": 0.27,
+    "connect": 5.02
+  },
+  "errors": []
+}

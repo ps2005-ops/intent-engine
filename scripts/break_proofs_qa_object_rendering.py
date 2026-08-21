@@ -52,6 +52,21 @@ MUTATIONS = [
      "    if False:",
      "the next producer shape leaks"),
 
+    ("J. the READ branch str()s its rows again", QA,
+     "        rendered = [t for t in (_render_row(r) for r in rows) if t]\n"
+     "        return \"; \".join(rendered)",
+     "        return \"; \".join(\n"
+     "            str(getattr(r, \"statement\", \"\") or getattr(r, \"text\", \"\") "
+     "or r)\n            for r in rows)",
+     "the leak that SHIPPED: the decision branch was repaired and these three "
+     "questions answer from the canonical read instead"),
+
+    ("K. the weakest link falls back to the object", QA,
+     "            return _printable(str(getattr(weakest, \"text\", \"\") or \"\")) \\\n"
+     "                or _render_row(weakest)",
+     "            return str(getattr(weakest, \"text\", \"\") or weakest)",
+     "Link() prints its repr on 'what is the weakest assumption?'"),
+
     ("G. a scalar object field is str()'d", QA,
      "        if not isinstance(value, (str, bytes)):\n"
      "            rendered = _render_row(value)\n"
