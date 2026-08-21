@@ -178,6 +178,22 @@ PROOFS = [
           "            return next(iter(memo.values()))",
           f"{TM}::test_a_different_run_in_the_same_request_is_its_own_answer",
           "assert"),
+
+    # --- R8. a run may compose twice -------------------------------------
+    Proof("R8a. the ownership record forgets what it is recording",
+          SVC,
+          'idempotency_key=f"ci-ownership:{run_id}:{len(documents)}")',
+          'idempotency_key=f"ci-ownership:{run_id}")',
+          "tests/test_a_run_may_compose_twice.py::"
+          "test_a_second_composition_over_more_evidence_does_not_raise",
+          "raised"),
+    Proof("R8b. the key stops naming the document count",
+          SVC,
+          'idempotency_key=f"ci-ownership:{run_id}:{len(documents)}")',
+          'idempotency_key=f"ci-ownership:{run_id}:x")',
+          "tests/test_a_run_may_compose_twice.py::"
+          "test_the_key_names_the_document_count",
+          "assert"),
 ]
 
 if __name__ == "__main__":

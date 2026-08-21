@@ -1476,7 +1476,22 @@ class CompanyIngestionService:
                          "observations_subject_owned": owned,
                          "observations_from_another_filer":
                              len(observations) - owned},
-                idempotency_key=f"ci-ownership:{run_id}")
+                # KEYED ON WHAT IT RECORDS, like every other per-composition
+                # event here (`claims:`, `reasoning:`, `ci-retry:`).
+                #
+                # This one was keyed on the run alone while its payload
+                # carries `documents` and `observations` -- numbers that
+                # change the moment a run composes twice. A retry pass, or a
+                # re-gate after late evidence, then hit the append-only
+                # store's collision guard:
+                #
+                #     ValueError: idempotency_key 'ci-ownership:<run>' was
+                #     already used for different content
+                #
+                # and the whole composition failed. Latent until the EDGAR
+                # budget widened and second passes became ordinary; AMD died
+                # this way on a22929c at t=58.
+                idempotency_key=f"ci-ownership:{run_id}:{len(documents)}")
         observations += list(extra_observations or ())
         if not observations:
             # MEASURED: 2 of 5 real companies (Toyota, Costco) died here with
