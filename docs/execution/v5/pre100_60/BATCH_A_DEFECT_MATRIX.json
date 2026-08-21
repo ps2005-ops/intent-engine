@@ -94,10 +94,19 @@
       "no marker may be a bare common word",
       "every intent needs markers, a field and an honest absent sentence"
     ],
-    "break_proofs": "6/6"
+    "break_proofs": "6/6",
+    "scope": "closes the catch-all half (within-company repetition and the Lilly/Walmart refusal); does NOT close the shared-pattern half"
   },
   "still_open": {
     "successor_defect": "two companies sharing a top pattern still share the pattern's own text where a question routes to a field the decision fills from it. The router repair removes the CATCH-ALL half; composition from the company's own evidence is the other.",
     "measured_by_the_other_session": "selection cannot close it: 2 options in 11 of 12 patterns, ONE gap in 11 of 12, and a lexical selector scored 0.000 on five of six fields because the scaffold speaks strategic vocabulary and the evidence speaks company vocabulary"
+  },
+  "correction_to_this_documents_own_first_claim": {
+    "what_was_claimed": "that the router gap produced everything we had been treating as three defects",
+    "what_is_true": "The router gap is real and is confirmed by the captures: measured with each answer's echoed QUESTION removed, every company gave only 5 or 6 DISTINCT answers out of ten, and the repeated sentence is the catch-all \u2014 'yes, on balance the evidence supports that committing capital to capacity...' for Caterpillar, Exxon and NVIDIA; 'running separately-reported businesses...' for Amazon and Meta; 'there is not enough public evidence to answer that confidently' for Lilly and Walmart. So 4 to 6 of the ten questions per company returned ONE repeated sentence.",
+    "what_the_repair_does_not_do": "It does NOT separate two companies that share a pattern. Measured offline against the repaired router: two same-pattern companies still answer identically, because every field the ten questions now route to is itself pattern-derived. Routing changes WHICH field is read, not whose text fills it.",
+    "so": "the router gap explains the MAGNITUDE of the collapse and the refusal; the successor defect \u2014 shared pattern, shared reading \u2014 is untouched and remains the open item",
+    "how_this_was_caught": "by measuring the repair offline before spending a canary run on it, rather than by asserting it from the shape of the fix",
+    "an_instrument_error_inside_the_correction": "the first within-company measurement said 10/10 distinct for every company, which would have meant no catch-all at all. Each answer page ECHOES its own question, so the questions were differentiating the answers. Stripping the echo gave 5-6/10. Third instrument error of the session, same shape as the other two: the number looked clean and the instrument had stopped measuring the thing."
   }
 }
