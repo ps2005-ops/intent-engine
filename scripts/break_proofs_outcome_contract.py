@@ -17,6 +17,25 @@ OUT = "src/intent_engine/webapp/outcome.py"
 VER = "src/intent_engine/pre100/verdict.py"
 
 MUTATIONS = [
+    ("M. a refused site is called thin evidence again", OUT,
+     '    if report.get("subject_failures"):\n'
+     "        return RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+     "    if False:\n        return RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+     "Goldman Sachs answering 403 is reported to a chief executive as thin "
+     "public evidence about Goldman Sachs"),
+
+    ("N. every bounded page becomes an operational fault", OUT,
+     '    if report.get("subject_failures"):',
+     "    if True:",
+     "TRUE_EVIDENCE_SCARCITY stops existing and a genuinely sparse private "
+     "company is reported as our failure"),
+
+    ("O. failures anywhere count as the subject's own site refusing", APP,
+     "            if host and (page_host == host or page_host.endswith"
+     '("." + host)):\n                subject_failures += 1',
+     "            if True:\n                subject_failures += 1",
+     "one third-party page refusing excuses genuinely thin evidence"),
+
     ("K. every capture reads as still being written", VER,
      "_STILL_WARM_SECONDS = 240",
      "_STILL_WARM_SECONDS = 10 ** 9",

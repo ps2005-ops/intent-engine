@@ -1,0 +1,47 @@
+{
+  "company": "American Express Company",
+  "deployed_sha": "dc17a9d",
+  "run_id": "01M0J9T67GBWW4CNF91PENQDAX",
+  "analysis_seconds": 18,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing American Express Company AXP \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working C",
+      "status": 200,
+      "html_bytes": 17006
+    },
+    {
+      "t": 8.6,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing American Express Company AXP \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Con",
+      "status": 200,
+      "html_bytes": 17001
+    },
+    {
+      "t": 17.9,
+      "text": "Limited analysis of American Express Company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of American Express Company Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it s",
+      "status": 200,
+      "html_bytes": 17165
+    }
+  ],
+  "route_seconds": {
+    "run": 4.09,
+    "intro": 12.08,
+    "slides": 5.88,
+    "full": 2.89,
+    "story": 6.18,
+    "history": 0.2,
+    "connect": 4.4
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 1519.1
+  },
+  "process_after": {
+    "boot_id": "9890b2f49d944a8a",
+    "started_at": 1787319148.8228748,
+    "uptime_seconds": 1722.6
+  },
+  "errors": []
+}

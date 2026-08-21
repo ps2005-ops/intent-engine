@@ -7603,6 +7603,8 @@ class WebApp:
                 f"families={'|'.join(inputs.get('families_at_compose') or []) or '-'} "
                 f"stored={stored} "
                 f"attempt={inputs.get('attempt', '?')} "
+                f"failed={len(self.ci.store.failures(run_id))}/"
+                f"{self.evidence_report(run_id).get('subject_failures', '?')} "
                 # status/empty/duplicate/language -- four different repairs,
                 # and `usable` alone cannot tell them apart.
                 f"dropped={dropped}")
@@ -7651,9 +7653,39 @@ class WebApp:
             elif page_host:
                 foreign += 1
 
+        # DID THE SUBJECT'S OWN SITE REFUSE US?
+        #
+        # MEASURED on dc17a9d. Seven of ten Wave-3 companies rendered
+        # "Limited analysis", every one of them with `compose=3 usable=3
+        # families=investor dropped=0/0/0/0` -- the gate discarding NOTHING
+        # and only SEC filings ever arriving. Fetching their homepages with
+        # this service's own user agent says why:
+        #
+        #     goldmansachs.com   HTTP 403
+        #     mastercard.com     HTTP 403
+        #     costco.com         timeout
+        #     nike.com           HTTP 200   -> FULL_ANALYSIS
+        #     walmart.com        HTTP 200   -> FULL_ANALYSIS
+        #     coca-colacompany   HTTP 200   -> FULL_ANALYSIS
+        #
+        # The publishers refused the bot. That is an operational fact about
+        # retrieval and it is emphatically NOT a finding about Goldman Sachs,
+        # which the product's own page already says in the next paragraph:
+        # "Public websites can refuse automated access."
+        subject_failures = 0
+        for row in failures:
+            candidate = next((c for c in candidates
+                              if c.get("candidate_id") == row.get(
+                                  "candidate_id")), None)
+            url = str((candidate or {}).get("url") or "")
+            page_host = url.split("//")[-1].split("/")[0].lower()
+            page_host = page_host.removeprefix("www.")
+            if host and (page_host == host or page_host.endswith("." + host)):
+                subject_failures += 1
         return {
             "attempted": bool(candidates),
             "retrieved": len(retrieved),
+            "subject_failures": subject_failures,
             "subject_documents": own,
             "foreign_documents": foreign,
             # A run whose ONLY documents belong to other registrants did not

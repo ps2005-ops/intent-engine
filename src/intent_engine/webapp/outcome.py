@@ -110,6 +110,20 @@ def classify(*, readiness, run_state="", exhaustion=None) -> str:
         # Documents arrived; none of them were this company's. Meta's run
         # read seven sources of which four were filed by other registrants.
         return RETRIEVAL_TEMPORARILY_UNAVAILABLE
+    # A COMPANY WHOSE OWN SITE REFUSED US IS NOT A THINLY DOCUMENTED
+    # COMPANY. This check sits ABOVE the scarcity branch, and the ordering
+    # is the whole point: the first version put scarcity first, so a run
+    # with recorded refusals against the subject's own domain still told the
+    # customer their evidence was thin. That is precisely the confusion the
+    # top of this file says the states exist to prevent, reintroduced by the
+    # order of two `if`s.
+    #
+    # MEASURED on dc17a9d: goldmansachs.com and mastercard.com answer 403 to
+    # this service's user agent and costco.com times out, while nike.com,
+    # walmart.com and coca-colacompany.com answer 200 -- and those three are
+    # exactly the Wave-3 companies that produced a full analysis.
+    if report.get("subject_failures"):
+        return RETRIEVAL_TEMPORARILY_UNAVAILABLE
     if report.get("attempted") and report.get("subject_retrieval_ok"):
         return TRUE_EVIDENCE_SCARCITY
     if report.get("retrieval_failures") or report.get("attempted") is False:

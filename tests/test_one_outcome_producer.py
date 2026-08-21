@@ -289,3 +289,71 @@ def test_the_gate_header_names_which_filter_dropped_a_document(app):
     assert sum(int(c) for c in counts) >= compose - usable, (
         f"{compose - usable} documents vanished and the buckets explain "
         f"{sum(int(c) for c in counts)}: {gate}")
+
+
+def test_a_site_that_refused_us_is_not_a_thinly_documented_company():
+    """THE WAVE-3 CLUSTER, and it was my own ordering that caused it.
+
+    Seven of ten Wave-3 companies rendered "Limited analysis", every one with
+    `compose=3 usable=3 families=investor dropped=0/0/0/0` -- the gate
+    discarding nothing, only SEC filings ever arriving. Fetching their
+    homepages with this service's own user agent says why:
+
+        goldmansachs.com   403        nike.com              200 -> FULL
+        mastercard.com     403        walmart.com           200 -> FULL
+        costco.com         timeout    coca-colacompany.com  200 -> FULL
+
+    The publishers refused the bot. Telling a chief executive that public
+    evidence about Goldman Sachs is thin, because Goldman's website declined
+    an automated request, is a false statement about the company -- and the
+    same page then says "Public websites can refuse automated access", so the
+    product already knew.
+    """
+    got = O.classify(readiness=_ready(opens_result=True, degraded=True),
+                     exhaustion={"attempted": True, "retrieved": 3,
+                                 "subject_documents": 3,
+                                 "subject_retrieval_ok": True,
+                                 "subject_failures": 2,
+                                 "retrieval_failures": 2})
+    assert got == O.RETRIEVAL_TEMPORARILY_UNAVAILABLE, got
+    assert got in O.OPERATIONAL_FAILURE
+
+
+def test_a_reachable_company_with_thin_evidence_is_still_scarcity():
+    """THE NEGATIVE CONTROL. If every bounded page became an operational
+    fault, TRUE_EVIDENCE_SCARCITY would stop existing and a genuinely sparse
+    private company would be reported as our failure -- which is the opposite
+    lie, told just as confidently."""
+    got = O.classify(readiness=_ready(opens_result=True, degraded=True),
+                     exhaustion={"attempted": True, "retrieved": 3,
+                                 "subject_documents": 3,
+                                 "subject_retrieval_ok": True,
+                                 "subject_failures": 0,
+                                 "retrieval_failures": 0})
+    assert got == O.TRUE_EVIDENCE_SCARCITY, got
+
+
+def test_a_failure_somewhere_else_does_not_excuse_thin_evidence():
+    """AND THE OTHER BOUNDARY. One third-party page refusing is not the
+    subject's site refusing; only failures against the SUBJECT's own domain
+    turn a bounded page into an operational fault."""
+    got = O.classify(readiness=_ready(opens_result=True, degraded=True),
+                     exhaustion={"attempted": True, "retrieved": 3,
+                                 "subject_documents": 3,
+                                 "subject_retrieval_ok": True,
+                                 "subject_failures": 0,
+                                 "retrieval_failures": 4})
+    assert got == O.TRUE_EVIDENCE_SCARCITY, got
+
+
+def test_the_gate_header_reports_how_many_fetches_failed(app):
+    """`failed=<all>/<on the subject's own domain>` -- the measurement that
+    separates the two, so the next wave does not need a manual curl."""
+    client = Client(app)
+    run_id = _run(client)
+    app.wait_for_analysis(run_id, timeout=60)
+    _s, headers, _b = client.get(f"/runs/{run_id}")
+    gate = headers["X-Evidence-Gate"]
+    assert "failed=" in gate, gate
+    total, _, subject = gate.split("failed=")[1].split()[0].partition("/")
+    assert total.isdigit() and subject.isdigit(), gate
