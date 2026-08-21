@@ -7595,11 +7595,17 @@ class WebApp:
                           if d.get("retrieval_status") == "OK"])
         except Exception:                                   # noqa: BLE001
             stored = -1
+        dropped = "/".join(str(inputs.get(k, "?")) for k in (
+            "dropped_not_ok", "dropped_empty", "dropped_duplicate",
+            "dropped_language"))
         return (f"compose={inputs.get('documents_at_compose', '?')} "
                 f"usable={inputs.get('usable_at_compose', '?')} "
                 f"families={'|'.join(inputs.get('families_at_compose') or []) or '-'} "
                 f"stored={stored} "
-                f"attempt={inputs.get('attempt', '?')}")
+                f"attempt={inputs.get('attempt', '?')} "
+                # status/empty/duplicate/language -- four different repairs,
+                # and `usable` alone cannot tell them apart.
+                f"dropped={dropped}")
 
     def evidence_report(self, run_id) -> dict:
         """Was the SUBJECT's own evidence actually looked for and retrieved?

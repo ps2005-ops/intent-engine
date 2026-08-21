@@ -262,3 +262,30 @@ def test_the_evidence_gate_never_reaches_a_reader(app):
         _s, _h, body = client.get(f"/runs/{run_id}{suffix}")
         assert "compose=" not in body
         assert "X-Evidence-Gate" not in body
+
+
+def test_the_gate_header_names_which_filter_dropped_a_document(app):
+    """FOUR FILTERS, FOUR DIFFERENT REPAIRS.
+
+    MEASURED on b0050e3, NVIDIA: `compose=12 usable=4`. The gate saw every
+    document the store held -- no seam, unlike Meta -- and discarded eight of
+    the twelve inside itself. `usable` alone cannot say whether that was
+    retrieval status, an empty body, the 400-character dedup fingerprint or
+    the language test, and choosing the wrong one is how a session gets spent
+    reproducing a mechanism that was never running.
+    """
+    client = Client(app)
+    run_id = _run(client)
+    app.wait_for_analysis(run_id, timeout=60)
+    _s, headers, _b = client.get(f"/runs/{run_id}")
+    gate = headers["X-Evidence-Gate"]
+    assert "dropped=" in gate, gate
+    counts = gate.split("dropped=")[1].split()[0].split("/")
+    assert len(counts) == 4, counts
+    assert all(c.isdigit() for c in counts), counts
+    compose = int(gate.split("compose=")[1].split()[0])
+    usable = int(gate.split("usable=")[1].split()[0])
+    # The four buckets must account for the gap, or they are decoration.
+    assert sum(int(c) for c in counts) >= compose - usable, (
+        f"{compose - usable} documents vanished and the buckets explain "
+        f"{sum(int(c) for c in counts)}: {gate}")

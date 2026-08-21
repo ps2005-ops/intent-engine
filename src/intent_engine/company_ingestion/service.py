@@ -1040,7 +1040,28 @@ class CompanyIngestionService:
         # So a fourth guess is not worth making. This records the inputs, and
         # the next run says which number is wrong instead of being argued
         # about from the outside.
+        # WHICH FILTER DROPPED THEM. MEASURED on b0050e3, NVIDIA:
+        #
+        #     compose=12  usable=4  families=customers|investor
+        #
+        # The gate saw every document the store held -- no seam, unlike Meta
+        # -- and discarded eight of the twelve inside itself. `usable` alone
+        # cannot say whether that was retrieval status, an empty body, the
+        # 400-character dedup fingerprint or the language test, and those are
+        # four different repairs. Counting them costs one pass over documents
+        # already in memory.
+        from intent_engine.company_ingestion.readiness import (
+            is_english as _is_en, usable_documents as _usable,
+        )
+        _ok = [d for d in documents if d.get("retrieval_status") == "OK"]
+        _texted = [d for d in _ok if (d.get("text_content") or "").strip()]
+        _deduped = _usable(documents)
         result["readiness_inputs"] = {
+            "dropped_not_ok": len(documents) - len(_ok),
+            "dropped_empty": len(_ok) - len(_texted),
+            "dropped_duplicate": max(0, len(_texted) - len(_deduped)),
+            "dropped_language": max(
+                0, len(_deduped) - len([d for d in _deduped if _is_en(d)])),
             "documents_at_compose": len(documents),
             "usable_at_compose": readiness.get("document_count"),
             "families_at_compose": list(readiness.get("families") or []),

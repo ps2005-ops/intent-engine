@@ -1,0 +1,128 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "b0050e3",
+  "captured_at": "2026-08-21T12:08:27Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4",
+      "chars": 2714,
+      "html_chars": 19277,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/intro",
+      "chars": 4502,
+      "html_chars": 29754,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4",
+      "chars": 2980,
+      "html_chars": 19971,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/full",
+      "chars": 2980,
+      "html_chars": 19971,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/story",
+      "chars": 5064,
+      "html_chars": 34717,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/history",
+      "chars": 28327,
+      "html_chars": 107926,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/connect",
+      "chars": 3857,
+      "html_chars": 28768,
+      "outcome": "TRUE_EVIDENCE_SCARCITY"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4",
+      "chars": 2980,
+      "html_chars": 19971,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/evidence",
+      "chars": 8449,
+      "html_chars": 27265,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0J3JX94F5P4ZR1RV7YDSDW4/brief",
+      "chars": 18233,
+      "html_chars": 52458,
+      "outcome": ""
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u00b7 nvidia.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence w",
+      "status": 200,
+      "html_bytes": 17015
+    },
+    {
+      "t": 55.8,
+      "text": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What ",
+      "status": 200,
+      "html_bytes": 18569
+    }
+  ],
+  "process_before": {},
+  "run_id": "01M0J3JX94F5P4ZR1RV7YDSDW4",
+  "status": "READY",
+  "seconds": 56,
+  "first_useful": 56,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 4.46,
+    "intro": 18.68,
+    "slides": 3.17,
+    "full": 2.86,
+    "story": 7.68,
+    "history": 0.26,
+    "connect": 5.16
+  },
+  "evidence_gate": "compose=12 usable=4 families=customers|investor stored=12 attempt=1",
+  "outcome": "TRUE_EVIDENCE_SCARCITY",
+  "outcome_by_route": {
+    "run": "TRUE_EVIDENCE_SCARCITY",
+    "intro": "TRUE_EVIDENCE_SCARCITY",
+    "slides": "TRUE_EVIDENCE_SCARCITY",
+    "full": "TRUE_EVIDENCE_SCARCITY",
+    "story": "TRUE_EVIDENCE_SCARCITY",
+    "history": "TRUE_EVIDENCE_SCARCITY",
+    "connect": "TRUE_EVIDENCE_SCARCITY"
+  },
+  "outcome_disagreement": [],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": []
+}
