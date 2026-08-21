@@ -1466,6 +1466,22 @@ class CompanyIngestionService:
         if run_id:
             owned = sum(1 for o in observations
                         if getattr(o, "subject_owned", True))
+            # KEYED ON THE CONTENT ITSELF, which closes the class rather than
+            # the instance.
+            #
+            # The count was the first repair, and it fixed the case measured
+            # (AMD, a22929c, composing over 12 documents then 13). It cannot
+            # fix a second composition over the SAME NUMBER of documents
+            # whose observations differ -- and the re-gate now fires on more
+            # runs than it used to, so equal-count recompositions became
+            # ordinary. A diagnostic event has no business failing an
+            # analysis, and this key can no longer collide: identical
+            # content still dedupes to one row, and anything different gets
+            # its own.
+            _fingerprint = hashlib.sha256(json.dumps(
+                {"cik": subject_cik, "documents": len(documents),
+                 "observations": len(observations), "owned": owned},
+                sort_keys=True).encode()).hexdigest()[:12]
             self._append(
                 "ci.ownership_resolved", run_id=run_id,
                 domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
@@ -1491,7 +1507,7 @@ class CompanyIngestionService:
                 # and the whole composition failed. Latent until the EDGAR
                 # budget widened and second passes became ordinary; AMD died
                 # this way on a22929c at t=58.
-                idempotency_key=f"ci-ownership:{run_id}:{len(documents)}")
+                idempotency_key=f"ci-ownership:{run_id}:{_fingerprint}")
         observations += list(extra_observations or ())
         if not observations:
             # MEASURED: 2 of 5 real companies (Toyota, Costco) died here with

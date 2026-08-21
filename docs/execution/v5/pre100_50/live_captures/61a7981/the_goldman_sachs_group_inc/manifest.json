@@ -51,6 +51,34 @@
       "chars": 3998,
       "html_chars": 28904,
       "outcome": "FULL_ANALYSIS"
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/intro",
+      "chars": 5156,
+      "html_chars": 30696,
+      "outcome": ""
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/evidence",
+      "chars": 4752,
+      "html_chars": 21235,
+      "outcome": ""
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/report",
+      "chars": 307,
+      "html_chars": 14888,
+      "outcome": ""
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/brief",
+      "chars": 19889,
+      "html_chars": 54426,
+      "outcome": ""
     }
   },
   "progress": [
@@ -119,5 +147,11 @@
   "outcome_disagreement": [
     "FULL_ANALYSIS",
     "FULL_ANALYSIS_REFRESHING"
+  ],
+  "qa_complete": true,
+  "answers_captured": 10,
+  "errors": [
+    "GET /runs/01M0K95AD7X112MV14GTPSWZP9/progress: timeout",
+    "GET /runs/01M0K95AD7X112MV14GTPSWZP9/progress: timeout"
   ]
 }

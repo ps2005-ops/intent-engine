@@ -138,5 +138,58 @@
       "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout",
       "GET /runs/01M0K8D7VT8S3WY8TA253H3WQC/progress: timeout"
     ]
+  },
+  {
+    "company": "The Goldman Sachs Group, Inc.",
+    "deployed_sha": "61a7981",
+    "status": "READY",
+    "run_id": "01M0K95AD7X112MV14GTPSWZP9",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/61a7981/the_goldman_sachs_group_inc",
+    "process_before": {
+      "boot_id": "193067c66f6744a2",
+      "started_at": 1787350461.0625536,
+      "uptime_seconds": 3077.4
+    },
+    "entry_domain": "goldmansachs.com",
+    "seconds": 166,
+    "first_useful": 166,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0K95AD7X112MV14GTPSWZP9/intro",
+    "outcome": "FULL_ANALYSIS",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "intro": "FULL_ANALYSIS_REFRESHING",
+      "slides": "FULL_ANALYSIS_REFRESHING",
+      "full": "FULL_ANALYSIS_REFRESHING",
+      "story": "FULL_ANALYSIS_REFRESHING",
+      "history": "FULL_ANALYSIS",
+      "connect": "FULL_ANALYSIS"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS",
+      "FULL_ANALYSIS_REFRESHING"
+    ],
+    "routes": 11,
+    "errors": [
+      "GET /runs/01M0K95AD7X112MV14GTPSWZP9/progress: timeout",
+      "GET /runs/01M0K95AD7X112MV14GTPSWZP9/progress: timeout"
+    ]
+  },
+  {
+    "company": "NIKE, Inc.",
+    "deployed_sha": "61a7981",
+    "status": "TIMEOUT",
+    "run_id": "01M0K9PFTADAMWXZ2X4BJ14Q79",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/61a7981/nike_inc",
+    "process_before": {
+      "boot_id": "193067c66f6744a2",
+      "started_at": 1787350461.0625536,
+      "uptime_seconds": 3640.1
+    },
+    "entry_domain": "nike.com",
+    "seconds": 482,
+    "first_useful": null,
+    "auto_advanced": false,
+    "landed_on": ""
   }
 ]

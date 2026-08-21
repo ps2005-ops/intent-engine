@@ -102,10 +102,39 @@ def test_a_second_composition_over_more_evidence_does_not_raise(tmp_path):
         "the two compositions recorded ownership under one key")
 
 
-def test_the_key_names_the_document_count(tmp_path):
-    """Pinned as a shape, so the next per-composition event copies it."""
+def test_the_key_names_what_it_records(tmp_path):
+    """A content fingerprint, not a count.
+
+    The count was the first repair and fixed the case measured (a second
+    composition over MORE documents). It cannot fix a second composition
+    over the same NUMBER of documents whose observations differ, and the
+    re-gate now fires on more runs than it used to. A diagnostic event has
+    no business failing an analysis.
+    """
     ci, fi, run_id = _pipeline(tmp_path)
     ci.compose(run_id, fi_service=fi)
     key = _ownership_keys(ci, run_id)[0]
-    documents = len(ci.store.retrieved(run_id))
-    assert key.endswith(f":{documents}"), (key, documents)
+    assert key.startswith(f"ci-ownership:{run_id}:")
+    tail = key.rsplit(":", 1)[1]
+    assert len(tail) == 12 and all(c in "0123456789abcdef" for c in tail), key
+
+
+def test_the_same_count_with_different_content_does_not_collide(tmp_path):
+    """THE CASE THE COUNT COULD NOT COVER."""
+    ci, fi, run_id = _pipeline(tmp_path)
+    ci.compose(run_id, fi_service=fi)
+    before = len(_ownership_keys(ci, run_id))
+    # Same document count, different observations: recompose with a curated
+    # observation added, which is exactly what an equal-count re-gate does.
+    try:
+        from intent_engine.strategic_intelligence.records import (
+            StrategicObservation,
+        )
+        ci.compose(run_id, fi_service=fi, extra_observations=(
+            StrategicObservation(
+                observation_id="x1",
+                text="The registrant added a new segment this year.",
+                observation_type="product_surface"),))
+    except IngestionError as exc:                           # pragma: no cover
+        pytest.fail(f"an equal-count recomposition raised: {exc}")
+    assert len(_ownership_keys(ci, run_id)) >= before
