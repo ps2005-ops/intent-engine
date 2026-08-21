@@ -48,6 +48,11 @@ def _write(tmp_path, *, name="Meta Platforms, Inc.", outcome=O.FULL_ANALYSIS,
     (d / "qa.json").write_text(json.dumps(answers), "utf-8")
     manifest = {"company": name, "deployed_sha": "test123",
                 "status": "READY", "cik": "0001326801",
+                # A FINISHED walk. Without this every fixture reads as a
+                # capture still being written, and every rule below is
+                # suppressed -- which is how the in-flight guard would have
+                # quietly disabled the whole instrument.
+                "qa_complete": True,
                 "entry_domain": "meta.com", "seconds": 120,
                 "routes": routes, "progress": [], "outcome": outcome,
                 "outcome_by_route": {r: outcome for r in routes},
@@ -123,7 +128,8 @@ def test_scarcity_is_a_failure_for_a_registrant_with_a_domain(tmp_path):
 def test_scarcity_is_allowed_for_a_company_with_neither_cik_nor_domain(tmp_path):
     """...and the same rule must NOT fail a genuinely sparse private company,
     or "make Limited rare" becomes "call every Limited a bug"."""
-    d = _write(tmp_path, outcome=O.TRUE_EVIDENCE_SCARCITY,
+    d = _write(tmp_path, name="Harbourline Fabrication LLC",
+               outcome=O.TRUE_EVIDENCE_SCARCITY,
                manifest_extra={"cik": "", "entry_domain": ""})
     codes = {f["code"] for f in V.verdict(d)["failures"]}
     assert "FALSE_SCARCITY" not in codes, codes
@@ -205,3 +211,87 @@ def test_a_batch_tallies_outcomes_and_failure_codes(tmp_path):
     batch = V.verdict_batch(tmp_path)
     assert batch["total"] == 1 and batch["passed"] == 1
     assert batch["by_outcome"][O.FULL_ANALYSIS] == 1
+
+
+def test_scarcity_is_caught_for_a_registrant_the_capture_forgot_to_record(
+        tmp_path):
+    """THE SECOND INSTRUMENT DEFECT, and it is the same shape as the first.
+
+    `expected_full` originally asked the capture manifest for a CIK. The
+    harness never writes one, and Meta has no domain on record either -- so
+    the rule written specifically to catch Meta answered False FOR META, and
+    the live capture on 5d43053 would have been scored a PASS while the
+    customer read "Limited analysis of Meta Platforms, Inc.".
+
+    A rule that cannot see the case it exists for is not a weaker rule. It is
+    not a rule.
+    """
+    d = _write(tmp_path, outcome=O.TRUE_EVIDENCE_SCARCITY,
+               manifest_extra={"cik": "", "entry_domain": ""})
+    assert V.expected_full({"company": "Meta Platforms, Inc."}) is True
+    codes = {f["code"] for f in V.verdict(d)["failures"]}
+    assert "FALSE_SCARCITY" in codes, codes
+
+
+def test_a_company_outside_the_universe_is_still_allowed_to_be_sparse(
+        tmp_path):
+    """The negative control for the lookup: an unknown private company gets
+    no CIK from anywhere, and a bounded page for it is honest."""
+    d = _write(tmp_path, name="Some Private Holdings LLC",
+               outcome=O.TRUE_EVIDENCE_SCARCITY,
+               manifest_extra={"cik": "", "entry_domain": ""})
+    assert V.expected_full({"company": "Some Private Holdings LLC"}) is False
+    codes = {f["code"] for f in V.verdict(d)["failures"]}
+    assert "FALSE_SCARCITY" not in codes, codes
+
+
+def test_a_capture_still_being_written_is_not_scored(tmp_path):
+    """THE IN-FLIGHT GUARD, and the control that keeps it honest.
+
+    `qa.json` is flushed after every answer, so a company read mid-walk shows
+    four answers and seven distinct ones -- an incomplete Q&A and a collapse,
+    both artefacts of reading too early. Microsoft was scored exactly that way
+    during Wave 1.
+
+    But "fewer than ten answers means still capturing" would make
+    QA_INCOMPLETE a rule that can never fire, so the test is the manifest's
+    own completion flag, with a recency fallback for captures written before
+    that flag existed.
+    """
+    qa = [{"question": f"q{i}", "answer": GOOD[:500] + str(i), "status": 200}
+          for i in range(4)]
+    d = _write(tmp_path, qa=qa, manifest_extra={"qa_complete": False})
+    result = V.verdict(d)
+    assert result["capturing"] is True
+    assert result["passed"] is None
+    assert result["failures"] == []
+
+
+def test_a_finished_capture_with_four_answers_is_still_a_failure(tmp_path):
+    """...and the negative control: completion is what suppresses the rule,
+    not the answer count."""
+    qa = [{"question": f"q{i}", "answer": GOOD[:500] + str(i), "status": 200}
+          for i in range(4)]
+    d = _write(tmp_path, qa=qa)
+    result = V.verdict(d)
+    assert not result.get("capturing")
+    assert "QA_INCOMPLETE" in {f["code"] for f in result["failures"]}
+
+
+def test_two_successful_outcomes_are_one_story_told_twice(tmp_path):
+    """Microsoft settled from refreshing to complete part-way through the
+    walk. Both states say a readable analysis exists; flagging that would
+    report the intended behaviour as a defect on every company that finishes
+    mid-capture."""
+    d = _write(tmp_path, manifest_extra={"outcome_disagreement": [
+        O.FULL_ANALYSIS, O.FULL_ANALYSIS_REFRESHING]})
+    codes = {f["code"] for f in V.verdict(d)["failures"]}
+    assert "OUTCOME_DISAGREEMENT" not in codes, codes
+
+
+def test_a_success_beside_a_failure_is_two_stories(tmp_path):
+    """...and the boundary the rule actually guards."""
+    d = _write(tmp_path, manifest_extra={"outcome_disagreement": [
+        O.FULL_ANALYSIS, O.RETRIEVAL_TEMPORARILY_UNAVAILABLE]})
+    codes = {f["code"] for f in V.verdict(d)["failures"]}
+    assert "OUTCOME_DISAGREEMENT" in codes

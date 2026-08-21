@@ -70,14 +70,40 @@ def _fail(code: str, detail: str = "") -> dict:
     return {"code": code, "detail": detail}
 
 
+#: The frozen validation universe, which is the authority on which of these
+#: companies is a registrant. Loaded once, tolerantly: an instrument that
+#: cannot run without a file is an instrument that gets skipped.
+_UNIVERSE_PATH = (pathlib.Path(__file__).resolve().parents[3] / "docs" /
+                  "execution" / "v5" / "pre100_50" / "UNIVERSE.json")
+
+
+def _universe() -> dict:
+    try:
+        raw = json.loads(_UNIVERSE_PATH.read_text("utf-8"))
+    except Exception:                                       # noqa: BLE001
+        return {}
+    return {c["entry_name"]: c for c in raw.get("companies", [])}
+
+
 def expected_full(manifest: dict) -> bool:
     """Should this company be expected to yield the WHOLE product?
 
     Derived from observable characteristics -- a registrant CIK, an official
     domain -- and never from a list of company names. A hard-coded exception
     for Meta would pass Meta and keep failing Microsoft.
+
+    READ FROM THE UNIVERSE, NOT ONLY THE MANIFEST. The first version asked
+    the capture, and the capture does not record the CIK it submitted. Meta
+    has no domain on record either, so `expected_full` answered False for the
+    one company this whole repair is about, and the FALSE_SCARCITY rule --
+    written specifically to catch it -- would have passed it. That is the
+    same failure as the string detector it replaces: a rule that cannot see
+    the case it exists for.
     """
-    return bool(manifest.get("cik") or manifest.get("entry_domain"))
+    if manifest.get("cik") or manifest.get("entry_domain"):
+        return True
+    row = _universe().get(manifest.get("company") or "") or {}
+    return bool(row.get("cik") or row.get("manifest_domain"))
 
 
 def verdict(company_dir) -> dict:
@@ -88,6 +114,19 @@ def verdict(company_dir) -> dict:
     routes = manifest.get("routes") or {}
     stated = manifest.get("outcome") or ""
     failures: list = []
+
+    # A COMPANY WHOSE ANALYSIS IS STILL RUNNING HAS NOT FAILED ANYTHING.
+    # The manifest is written the moment the run opens, so a company being
+    # captured right now has no status and scored as RUN_NOT_READY -- an
+    # invented defect that would inflate every mid-wave report.
+    if not manifest.get("status") and _recently_written(
+            company_dir / "manifest.json"):
+        return {"company": company,
+                "deployed_sha": manifest.get("deployed_sha", ""),
+                "outcome": stated, "outcome_by_route": {},
+                "seconds": None, "first_useful": None, "qa_answers": 0,
+                "capturing": True, "flags": [], "contradictions": [],
+                "failures": [], "passed": None}
 
     # --- did the run even end where a customer can read it? ---------------
     status = manifest.get("status") or ""
@@ -102,10 +141,23 @@ def verdict(company_dir) -> dict:
     # --- the stated outcome ----------------------------------------------
     if stated and stated not in O.OUTCOMES:
         failures.append(_fail("UNNAMED_OUTCOME", stated))
-    if manifest.get("outcome_disagreement"):
+    disagreement = manifest.get("outcome_disagreement") or []
+    if _straddles_readability(disagreement):
         # THE META DEFECT, AS A FIELD. One run, seven surfaces, two stories.
+        #
+        # NOT EVERY DIFFERENCE IS A CONTRADICTION. Microsoft's capture read
+        # FULL_ANALYSIS on some routes and FULL_ANALYSIS_REFRESHING on
+        # others, because the worker settled part-way through the walk. Both
+        # say a readable analysis exists; the run was simply still enriching
+        # when the first route was fetched, which is the behaviour §4 asks
+        # for. Flagging it would have reported the intended design as a
+        # defect on every company that finishes mid-capture.
+        #
+        # What Meta showed was different in kind: routes that disagreed about
+        # whether there was an analysis AT ALL. So the rule is the boundary,
+        # not the string.
         failures.append(_fail("OUTCOME_DISAGREEMENT",
-                              ", ".join(manifest["outcome_disagreement"])))
+                              ", ".join(disagreement)))
     if stated and stated not in O.SUCCESSFUL:
         if expected_full(manifest) and stated == O.TRUE_EVIDENCE_SCARCITY:
             # §6. For an information-rich registrant a bounded page is not
@@ -149,7 +201,26 @@ def verdict(company_dir) -> dict:
                               "the company is not named on its own intro"))
 
     # --- Q&A --------------------------------------------------------------
+    #
+    # A CAPTURE STILL BEING WRITTEN IS NOT A COMPANY THAT ANSWERED FOUR
+    # QUESTIONS. `qa.json` is flushed after every answer, so a company read
+    # mid-walk scores as an incomplete Q&A and, worse, as a collapse -- seven
+    # distinct answers out of seven look like "7/10" against a hardcoded
+    # denominator. The manifest says when the walk finished.
     qa = _qa_rows(company_dir)
+    in_flight = (not manifest.get("qa_complete") and len(qa) < QUESTIONS
+                 and manifest.get("status") == "READY"
+                 and _recently_written(company_dir / "qa.json"))
+    if in_flight:
+        return {"company": company,
+                "deployed_sha": manifest.get("deployed_sha", ""),
+                "outcome": stated,
+                "outcome_by_route": manifest.get("outcome_by_route") or {},
+                "seconds": manifest.get("seconds"),
+                "first_useful": manifest.get("first_useful"),
+                "qa_answers": len(qa), "capturing": True,
+                "flags": audited["flags"], "contradictions": [],
+                "failures": [], "passed": None}
     if len(qa) < QUESTIONS:
         failures.append(_fail("QA_INCOMPLETE", f"{len(qa)}/{QUESTIONS}"))
     leaks = [r for r in qa if REPR.search(r.get("answer") or "")]
@@ -171,6 +242,36 @@ def verdict(company_dir) -> dict:
             "contradictions": audited["contradictions"],
             "failures": failures,
             "passed": not failures}
+
+
+#: A capture written to within this many seconds is still being written.
+#: Only consulted for manifests from before `qa_complete` existed -- and it
+#: has to be a TIME test rather than "fewer than ten answers", because
+#: "fewer than ten means still capturing" would make QA_INCOMPLETE a rule
+#: that can never fire.
+_STILL_WARM_SECONDS = 240
+
+
+def _recently_written(path: pathlib.Path) -> bool:
+    import time
+    try:
+        return (time.time() - path.stat().st_mtime) < _STILL_WARM_SECONDS
+    except OSError:
+        return False
+
+
+def _straddles_readability(states) -> bool:
+    """Do these outcomes disagree about whether an analysis EXISTS?
+
+    Two successful states are one story told at two moments. A successful
+    state beside an unsuccessful one is two stories about one run, and that
+    is the defect this programme exists to catch.
+    """
+    states = [s for s in (states or []) if s]
+    if len(set(states)) < 2:
+        return False
+    return any(s in O.SUCCESSFUL for s in states) and \
+        any(s not in O.SUCCESSFUL for s in states)
 
 
 def _identity(company_dir: pathlib.Path, company: str):

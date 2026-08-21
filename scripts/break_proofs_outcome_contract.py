@@ -17,6 +17,17 @@ OUT = "src/intent_engine/webapp/outcome.py"
 VER = "src/intent_engine/pre100/verdict.py"
 
 MUTATIONS = [
+    ("K. every capture reads as still being written", VER,
+     "_STILL_WARM_SECONDS = 240",
+     "_STILL_WARM_SECONDS = 10 ** 9",
+     "the in-flight guard suppresses every rule in the instrument"),
+
+    ("L. a disagreement across the readability boundary is tolerated", VER,
+     "    return any(s in O.SUCCESSFUL for s in states) and \\\n"
+     "        any(s not in O.SUCCESSFUL for s in states)",
+     "    return False",
+     "one run saying it has an analysis and saying it does not is accepted"),
+
     ("A. /full is gated on the default layer again", APP,
      '                if avail["documents"] and avail["has_result"]:',
      '                if avail["documents"] and avail["has_result"] \\\n'
@@ -64,8 +75,8 @@ MUTATIONS = [
      "Limited analysis becomes a graceful fallback for broken retrieval"),
 
     ("I. the instrument ignores a surface disagreement", VER,
-     '    if manifest.get("outcome_disagreement"):',
-     '    if False:',
+     "    if _straddles_readability(disagreement):",
+     "    if False:",
      "one run telling two stories is recorded and never scored"),
 
     ("J. a stated success is trusted over the rendered page", VER,

@@ -631,6 +631,15 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
                         "answer": body})
         cap.json_file("qa.json", answers)
 
+    # THE WALK FINISHED. `qa.json` is flushed after every answer, so a reader
+    # opening the capture mid-walk cannot tell seven-of-ten-so-far from a
+    # company that answered seven. Without this the audit either scores an
+    # in-flight capture as a collapse, or -- worse -- suppresses every real
+    # incomplete Q&A to avoid doing so, which is a rule that cannot fail.
+    cap.manifest["qa_complete"] = True
+    cap.manifest["answers_captured"] = len(answers)
+    cap.flush()
+
     for route in EXTRA:
         rstatus, rurl, raw = session.get(f"/runs/{run_id}/{route}")
         if run_is_gone(raw):
