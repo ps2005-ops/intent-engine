@@ -1,0 +1,63 @@
+{
+  "company": "NIKE, Inc.",
+  "deployed_sha": "cb9e6b7",
+  "run_id": "01M0JY6H3ZB0GJZF0TA7SSQ2YZ",
+  "analysis_seconds": 177,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NIKE, Inc. NKE \u00b7 nike.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conn",
+      "status": 200,
+      "html_bytes": 17004
+    },
+    {
+      "t": 39.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing NIKE, Inc. NKE \u00b7 nike.com \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connec",
+      "status": 200,
+      "html_bytes": 17000
+    },
+    {
+      "t": 90.9,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17000,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "cf-cache-status": "DYNAMIC",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JY6H3ZB0GJZF0TA7SSQ2YZ/progress",
+      "head": ""
+    },
+    {
+      "t": 177.1,
+      "text": "NIKE, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NIKE, Inc. NKE \u00b7 USA \u00b7 nike.com \u00b7 SEC CIK 320187 NIKE, Inc. is a consumer business that runs on branded product sold through retail and direct channels, where the brand carries pricing power the product alone",
+      "status": 200,
+      "html_bytes": 29978
+    }
+  ],
+  "route_seconds": {
+    "run": 3.62,
+    "intro": 5.59,
+    "slides": 7.2,
+    "full": 2.5,
+    "story": 6.4,
+    "history": 0.35,
+    "connect": 4.24
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "2e390503615a4d2d",
+    "started_at": 1787340052.1714675,
+    "uptime_seconds": 1991.4
+  },
+  "process_after": {
+    "boot_id": "2e390503615a4d2d",
+    "started_at": 1787340052.1714675,
+    "uptime_seconds": 2342.8
+  },
+  "errors": [
+    "GET /runs/01M0JY6H3ZB0GJZF0TA7SSQ2YZ/progress: timeout",
+    "GET /runs/01M0JY6H3ZB0GJZF0TA7SSQ2YZ/progress: timeout"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "company": "NVIDIA Corporation",
+  "deployed_sha": "cb9e6b7",
+  "captured_at": "2026-08-21T19:35:34Z",
+  "routes": {},
+  "progress": [
+    {
+      "t": 1.7,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing NVIDIA Corporation NVDA \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Connec",
+      "status": 200,
+      "html_bytes": 17002
+    },
+    {
+      "t": 129.4,
+      "text": "",
+      "status": 0,
+      "html_bytes": 17005,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0JX5S3DNJZK0E9M21RPHY64/progress",
+      "head": ""
+    }
+  ],
+  "process_before": {
+    "boot_id": "2e390503615a4d2d",
+    "started_at": 1787340052.1714675,
+    "uptime_seconds": 882.8
+  },
+  "run_id": "01M0JX5S3DNJZK0E9M21RPHY64",
+  "status": "FAILED",
+  "seconds": 371,
+  "first_useful": null,
+  "auto_advanced": true
+}
