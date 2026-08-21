@@ -153,13 +153,28 @@ class Session:
             urllib.request.HTTPCookieProcessor(self.jar))
         self.errors: list = []
 
+    #: Set by `get` on every request, so a caller can ask WHY a body was
+    #: empty without a second round trip. Measured need: three of three live
+    #: companies polled a progress page that returned no text for most of the
+    #: wait, with no network error recorded -- and the same page renders 740
+    #: characters in every non-terminal state locally. A status code and a
+    #: content length separate "the service sent nothing" from "the harness
+    #: could not read what it sent", and nothing on disk could tell them
+    #: apart.
+    last_status: int = 0
+    last_headers: dict = None
+    last_bytes: int = 0
+
     def get(self, path: str):
         req = urllib.request.Request(self.base + path,
                                      headers={"User-Agent": UA})
         try:
             with self.opener.open(req, timeout=self.timeout) as r:
-                return r.status, r.geturl(), r.read().decode("utf-8",
-                                                             "replace")
+                raw = r.read()
+                self.last_status = r.status
+                self.last_headers = dict(r.headers)
+                self.last_bytes = len(raw)
+                return r.status, r.geturl(), raw.decode("utf-8", "replace")
         except urllib.error.HTTPError as exc:
             return exc.code, self.base + path, exc.read().decode("utf-8",
                                                                  "replace")
@@ -187,6 +202,39 @@ class Session:
     def csrf(page: str) -> str:
         match = re.search(r'name="csrf" value="([^"]+)"', page)
         return match.group(1) if match else ""
+
+
+def suggested_domain(name: str, *, base: str = DEFAULT_BASE) -> str:
+    """The domain the entry page's own autocomplete offers for this name.
+
+    The customer types a name, picks a row, and the form posts that row's
+    domain as `suggest_domain`. A harness that posts the CIK and not the
+    domain opens every run on the domainless-filer path and analyses the
+    company from EDGAR alone -- which is not the product, and cost two of
+    eleven Wave-1 companies a full analysis.
+
+    Returns "" when the registry has no domain for the company, which is the
+    honest answer for an SEC-registrant row: the customer's pick carries none
+    either. Never raises.
+    """
+    try:
+        url = (base.rstrip("/") + "/api/companies?q="
+               + urllib.parse.quote(name[:60]))
+        req = urllib.request.Request(url, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            rows = json.load(r).get("companies") or []
+    except Exception:                                       # noqa: BLE001
+        return ""
+    wanted = (name or "").strip().lower()
+    for row in rows:
+        if str(row.get("legal_name") or "").strip().lower() == wanted:
+            return str(row.get("domain") or "")
+    # No exact legal-name match: take the first row ONLY if it is the sole
+    # candidate. Guessing between several is how one company's evidence gets
+    # attributed to another.
+    if len(rows) == 1:
+        return str(rows[0].get("domain") or "")
+    return ""
 
 
 def process_identity(base: str = DEFAULT_BASE) -> dict:
@@ -248,17 +296,58 @@ class KeepWarm:
         return False
 
 
-def deployed_sha(base: str = DEFAULT_BASE) -> str:
-    """The SHA the capture is against. A capture without one cannot be
-    compared to anything, which is how eight companies came to be spread
-    across five builds."""
-    try:
-        req = urllib.request.Request(base.rstrip("/") + "/version",
-                                     headers={"User-Agent": UA})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return str(json.load(r).get("commit") or "")[:7]
-    except Exception:                                       # noqa: BLE001
-        return "unknown"
+#: What `deployed_sha` returns when it could not find out. Callers must REFUSE
+#: to capture on it rather than write a directory nothing can be compared
+#: with -- see `UnknownDeployment`.
+UNKNOWN_SHA = "unknown"
+
+
+class UnknownDeployment(RuntimeError):
+    """The build under test could not be identified, so nothing may be run."""
+
+
+def deployed_sha(base: str = DEFAULT_BASE, *, attempts: int = 3) -> str:
+    """The SHA the capture is against, or UNKNOWN_SHA.
+
+    A capture without one cannot be compared to anything, which is how eight
+    companies came to be spread across five builds.
+
+    RETRIED, BECAUSE ONE TIMEOUT IS NOT AN ANSWER. Measured: a wave of eight
+    opened with `sha=unknown` after a single transient failure on a service
+    that answered `/version` in 145ms before and after. The whole wave would
+    have landed in an uncomparable directory, and the first company was
+    already running before anyone could see the header line.
+    """
+    last = UNKNOWN_SHA
+    for attempt in range(max(1, attempts)):
+        try:
+            req = urllib.request.Request(base.rstrip("/") + "/version",
+                                         headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                sha = str(json.load(r).get("commit") or "")[:7]
+                if sha:
+                    return sha
+        except Exception:                                   # noqa: BLE001
+            pass
+        if attempt + 1 < max(1, attempts):
+            time.sleep(2 * (attempt + 1))
+    return last
+
+
+def require_deployed_sha(base: str = DEFAULT_BASE) -> str:
+    """The SHA, or raise. The gate every wave runner goes through.
+
+    Refusing costs one retry. Not refusing costs the wave: a capture written
+    under "unknown" is invisible to a `--resume`, is not comparable with the
+    canaries it was meant to extend, and is discovered only after the live
+    analyses have been spent.
+    """
+    sha = deployed_sha(base)
+    if sha == UNKNOWN_SHA:
+        raise UnknownDeployment(
+            f"{base}/version did not identify the build after 3 attempts; "
+            f"refusing to capture into an uncomparable directory")
+    return sha
 
 
 class Capture:
@@ -272,9 +361,13 @@ class Capture:
                                                       time.gmtime()),
                          "routes": {}, "progress": []}
 
-    def route(self, name: str, status: int, url: str, raw: str) -> None:
+    def route(self, name: str, status: int, url: str, raw: str,
+              seconds: float = None) -> None:
         """Write a route THE MOMENT IT SETTLES. See the module docstring."""
         body = text_of(raw)
+        if seconds is not None:
+            self.manifest.setdefault("route_seconds", {})[name] = round(
+                seconds, 2)
         (self.dir / f"{name}.txt").write_text(body, "utf-8")
         (self.dir / f"{name}.html").write_text(raw, "utf-8")
         self.manifest["routes"][name] = {
@@ -302,9 +395,30 @@ def wait_for_run(session: Session, run_id: str, *, timeout: float = 480.0,
     samples = []
     while time.time() - started < timeout:
         status, url, page = session.get(f"/runs/{run_id}/progress")
-        if len(samples) < 3:
-            samples.append({"t": round(time.time() - started),
-                            "text": text_of(page)[:300]})
+        # EVERY SAMPLE, not the first three. The stage sentence is the only
+        # thing a guest-side harness can see of retrieval-versus-composition,
+        # so a truncated sample list makes the dominant phase unknowable --
+        # and "the wait is too long" is not actionable without it. Only the
+        # text CHANGES are kept, so a four-minute run costs a handful of rows
+        # rather than forty near-identical ones.
+        stage = text_of(page)[:300]
+        if not samples or samples[-1]["text"] != stage:
+            row = {"t": round(time.time() - started, 1), "text": stage,
+                   "status": status, "html_bytes": getattr(
+                       session, "last_bytes", len(page))}
+            if not stage:
+                # AN EMPTY STAGE IS THE THING BEING INVESTIGATED, so it gets
+                # its headers. Everything else stays one line.
+                row["headers"] = {
+                    k.lower(): v for k, v in
+                    (getattr(session, "last_headers", None) or {}).items()
+                    if k.lower() in ("content-type", "content-length",
+                                     "content-encoding", "location",
+                                     "cf-cache-status", "x-render-origin-"
+                                     "server", "etag")}
+                row["final_url"] = url
+                row["head"] = (page or "")[:300]
+            samples.append(row)
         if status in (0, 500, 502, 503):
             return FAILED, url, round(time.time() - started), samples
         if "/progress" not in url:
@@ -318,6 +432,7 @@ def wait_for_run(session: Session, run_id: str, *, timeout: float = 480.0,
 
 def capture_company(name: str, cik: str = "", ticker: str = "", *,
                     base: str = DEFAULT_BASE, website: str = "",
+                    domain: str = "",
                     root: pathlib.Path = None, sha: str = "") -> dict:
     """One company, end to end, through the customer flow. Never raises."""
     root = pathlib.Path(root or "docs/execution/v5/pre100_60/live_captures")
@@ -352,6 +467,29 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
         form.update({"suggest_confirmed": name, "suggest_cik": cik})
     if ticker:
         form["suggest_ticker"] = ticker
+    # THE DOMAIN THE CUSTOMER'S OWN PICK CARRIES.
+    #
+    # `/api/companies` returns a domain for most rows, and the entry page
+    # posts it as `suggest_domain` when the customer chooses one. This
+    # harness sent the CIK and the ticker and NOT the domain, so every
+    # company opened on the domainless-filer path and the product analysed it
+    # from EDGAR alone -- which is not what a customer gets, and is the
+    # harness under-serving the product rather than automating it.
+    #
+    # Measured on 8397d67: Cloudflare reached 2 usable sources and ServiceNow
+    # 3, against a floor of 5, both with `1 kind(s) of evidence (investor)`
+    # and no official company page. Both rendered a Limited analysis. Adobe
+    # cleared the floor on EDGAR alone, so this is not "SEC-only always
+    # fails" -- it is that a company's own site was never asked for.
+    if not domain:
+        # ASK THE PAGE'S OWN AUTOCOMPLETE, which is what the customer's
+        # keystrokes do. A static table would drift from the registry the
+        # product actually serves, and would have nothing to say about the
+        # companies that are not in the manifest at all.
+        domain = suggested_domain(name, base=base)
+    if domain:
+        form["suggest_domain"] = domain
+    result["entry_domain"] = domain
     status, url, page = session.post("/analyze", form)
     if "/runs/" not in url:
         low = text_of(page).lower()
@@ -387,8 +525,9 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
     # narrows the window in which it has to stay up.
     for route in ("", *STEPS):
         path = f"/runs/{run_id}" + (f"/{route}" if route else "")
+        at = time.time()
         rstatus, rurl, raw = session.get(path)
-        cap.route(route or "run", rstatus, rurl, raw)
+        cap.route(route or "run", rstatus, rurl, raw, time.time() - at)
 
     answers = []
     for question in BOARD_QUESTIONS:
@@ -444,7 +583,12 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
                                  "answers_captured": len(answers)})
             cap.flush()
             return result
+        # THE ENDPOINT IS PART OF THE MEASUREMENT. A qa.json that does not
+        # say where it asked cannot be audited for the defect that produced
+        # it: ten answers captured from a GET-only route look exactly like
+        # ten answers until somebody re-reads the route table.
         answers.append({"question": question, "status": astatus,
+                        "endpoint": f"/runs/{{run_id}}/conversation",
                         "answer": body})
         cap.json_file("qa.json", answers)
 
@@ -457,5 +601,16 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
     result["routes"] = len(cap.manifest["routes"])
     result["errors"] = session.errors
     cap.manifest.update({"errors": session.errors})
-    cap.flush()
+    # §19/§42. What this run COST, kept beside what it said. Written last
+    # because it is the only artifact that is not evidence about the company.
+    cap.json_file("runtime.json", {
+        "company": name, "deployed_sha": sha, "run_id": run_id,
+        "analysis_seconds": result.get("seconds"),
+        "stage_transitions": cap.manifest.get("progress") or [],
+        "route_seconds": cap.manifest.get("route_seconds") or {},
+        "answers": len(answers),
+        "process_before": result.get("process_before") or {},
+        "process_after": process_identity(base),
+        "errors": session.errors,
+    })
     return result

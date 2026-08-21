@@ -1,0 +1,60 @@
+{
+  "company": "Microsoft Corporation",
+  "deployed_sha": "8397d67",
+  "run_id": "01M0H8WGT4D5DFBB41HXN9W0AZ",
+  "analysis_seconds": 195,
+  "stage_transitions": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing Microsoft Corporation MSFT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Con",
+      "status": 200,
+      "html_bytes": 17004
+    },
+    {
+      "t": 27.5,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing Microsoft Corporation MSFT \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Conne",
+      "status": 200,
+      "html_bytes": 17000
+    },
+    {
+      "t": 35.9,
+      "text": "",
+      "status": 303,
+      "html_bytes": 17000,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "x-render-origin-server": "WSGIServer/0.2 CPython/3.14.3",
+        "cf-cache-status": "DYNAMIC"
+      },
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H8WGT4D5DFBB41HXN9W0AZ/progress",
+      "head": ""
+    },
+    {
+      "t": 194.8,
+      "text": "Microsoft Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Microsoft Corporation MSFT \u00b7 USA \u00b7 SEC CIK 0000789019 Microsoft Corporation is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the in",
+      "status": 200,
+      "html_bytes": 31219
+    }
+  ],
+  "route_seconds": {
+    "run": 5.81,
+    "intro": 5.69,
+    "slides": 8.7,
+    "full": 13.66,
+    "story": 6.5,
+    "history": 0.25,
+    "connect": 4.61
+  },
+  "answers": 10,
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 564.9
+  },
+  "process_after": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 944.6
+  },
+  "errors": []
+}

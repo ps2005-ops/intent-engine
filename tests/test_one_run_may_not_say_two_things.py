@@ -58,6 +58,24 @@ class _App:
         self.failed_page_shown = True
         return ("failed", run_id)
 
+    def result_readiness(self, run_id):
+        """The real contract, computed from the dialled-in availability.
+
+        `only_watchable` asks this, so the double has to answer it or the
+        guard under test cannot run. Mirrors the one line of the real
+        implementation that decides `opens_result`: a result is readable when
+        there is a report, or a bounded reading over documents that were
+        actually retrieved.
+        """
+        avail = self._availability_value
+        readable = bool(avail.get("has_report")
+                        or (avail.get("has_result") and avail.get("documents")))
+        return {"opens_result": readable, "in_flight": avail.get("in_flight")}
+
+    # BORROWED, NOT REIMPLEMENTED. `only_watchable` is what stopped the
+    # progress/run-page redirect loop, and a double with its own version
+    # would let the real one drift away from the guard that depends on it.
+    only_watchable = APP.WebApp.only_watchable
     _step_guard = APP.WebApp._step_guard
 
 

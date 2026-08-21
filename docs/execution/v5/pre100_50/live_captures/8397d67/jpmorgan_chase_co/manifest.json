@@ -1,0 +1,110 @@
+{
+  "company": "JPMorgan Chase & Co.",
+  "deployed_sha": "8397d67",
+  "captured_at": "2026-08-21T02:25:17Z",
+  "routes": {
+    "run": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/intro",
+      "chars": 4708,
+      "html_chars": 30041
+    },
+    "intro": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/intro",
+      "chars": 4708,
+      "html_chars": 30041
+    },
+    "slides": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/slides",
+      "chars": 4638,
+      "html_chars": 41045
+    },
+    "full": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/full",
+      "chars": 20705,
+      "html_chars": 60292
+    },
+    "story": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/story",
+      "chars": 3713,
+      "html_chars": 31042
+    },
+    "history": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/history",
+      "chars": 28217,
+      "html_chars": 108742
+    },
+    "connect": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/connect",
+      "chars": 3974,
+      "html_chars": 28883
+    },
+    "sources": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/intro",
+      "chars": 4708,
+      "html_chars": 30041
+    },
+    "evidence": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/evidence",
+      "chars": 6935,
+      "html_chars": 24290
+    },
+    "report": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/report",
+      "chars": 307,
+      "html_chars": 14888
+    },
+    "brief": {
+      "status": 200,
+      "final_url": "https://intent-engine-preview-bridge.onrender.com/runs/01M0H2649J92VKGD80RBFP1NMX/brief",
+      "chars": 18438,
+      "html_chars": 53044
+    }
+  },
+  "progress": [
+    {
+      "t": 0.2,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Checking current evidence. Analysing JPMorgan Chase & Co. JPM \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence working Conne"
+    },
+    {
+      "t": 20.6,
+      "text": "Reading the public evidence\u2026 Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Reading the public evidence\u2026 Stress-testing the reading. Analysing JPMorgan Chase & Co. JPM \u2014 not this company? Identifying the company done Loading prior intelligence done Reading current company evidence done Connect"
+    },
+    {
+      "t": 37.4,
+      "text": ""
+    },
+    {
+      "t": 156.7,
+      "text": "JPMorgan Chase & Co. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction JPMorgan Chase & Co. JPM \u00b7 USA \u00b7 SEC CIK 0000019617 JPMorgan Chase & Co. is a financial regulated business that runs on earnings from a balance sheet or from a transaction network \u2014 spread and fees "
+    }
+  ],
+  "process_before": {
+    "boot_id": "ea27804e556c4fcf",
+    "started_at": 1787278313.388944,
+    "uptime_seconds": 804.3
+  },
+  "run_id": "01M0H2649J92VKGD80RBFP1NMX",
+  "status": "READY",
+  "seconds": 157,
+  "auto_advanced": true,
+  "route_seconds": {
+    "run": 5.81,
+    "intro": 4.89,
+    "slides": 7.41,
+    "full": 12.2,
+    "story": 5.82,
+    "history": 0.2,
+    "connect": 3.76
+  },
+  "errors": []
+}

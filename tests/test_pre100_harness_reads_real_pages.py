@@ -232,3 +232,56 @@ def test_within_company_distinctness_does_not_flatten_real_variety():
 def test_distinctness_of_nothing_is_not_zero_distinct():
     from intent_engine.pre100 import audit as A
     assert A.within_company_distinctness([], "Acme")["ratio"] is None
+
+
+# --- a wave may not run against a build it cannot name ---------------------
+
+def test_a_wave_refuses_to_capture_when_the_build_is_unknown(monkeypatch):
+    """MEASURED: a wave of eight opened with `sha=unknown`.
+
+    One transient `/version` failure, on a service that answered in 145ms
+    before and after, and every capture would have landed in a directory that
+    is not comparable with the canaries it was extending, is invisible to
+    `--resume`, and is only discovered after the live analyses are spent.
+
+    Refusing costs one retry. Not refusing costs the wave.
+    """
+    monkeypatch.setattr(capture, "deployed_sha",
+                        lambda base=None, **k: capture.UNKNOWN_SHA)
+    with pytest.raises(capture.UnknownDeployment):
+        capture.require_deployed_sha("https://example.invalid")
+
+
+def test_a_known_build_is_returned_unchanged(monkeypatch):
+    """THE POSITIVE CONTROL. A gate that refused everything would stop the
+    programme rather than protect it."""
+    monkeypatch.setattr(capture, "deployed_sha", lambda base=None, **k: "abc1234")
+    assert capture.require_deployed_sha("https://example.invalid") == "abc1234"
+
+
+def test_the_sha_lookup_retries_before_giving_up(monkeypatch):
+    """One timeout is not an answer."""
+    calls = {"n": 0}
+
+    class _Resp:
+        status = 200
+
+        def read(self):
+            return b'{"commit": "deadbee1234"}'
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def flaky(req, timeout=None):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise OSError("transient")
+        return _Resp()
+
+    monkeypatch.setattr(capture.urllib.request, "urlopen", flaky)
+    monkeypatch.setattr(capture.time, "sleep", lambda s: None)
+    assert capture.deployed_sha("https://example.invalid") == "deadbee"
+    assert calls["n"] == 3, calls

@@ -1,0 +1,17 @@
+{
+  "company": "Stripe, Inc.",
+  "deployed_sha": "8397d67",
+  "captured_at": "2026-08-21T05:06:39Z",
+  "routes": {},
+  "progress": [],
+  "process_before": {
+    "boot_id": "777e281ac5714ef8",
+    "started_at": 1787285577.8327832,
+    "uptime_seconds": 3222.1
+  },
+  "status": "BLOCKED",
+  "run_id": "",
+  "capture_path": "/private/tmp/claude-501/-Users-prathamsharma/bea0c787-4612-4517-a897-a65ffc93d927/scratchpad/g9/docs/execution/v5/pre100_50/live_captures/8397d67/stripe_inc",
+  "failure": "analyze did not open a run (HTTP 429)",
+  "entry_text": "Too many analyses for now Too many analyses for now What did work. Your session is active. What did not. This request was not carried out. Why. This preview limits how much one visitor can run, so it stays available to everyone. What to do next. Wait a little and try again. Run a new analysis Demo analysis limit reached for your network. You can try again in about 7 minutes. Analyses already runni"
+}

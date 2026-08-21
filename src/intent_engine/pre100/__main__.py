@@ -78,7 +78,11 @@ def cmd_batch(args) -> int:
         name, _, rest = entry.partition(":")
         cik, _, ticker = rest.partition(":")
         companies.append((name, cik, ticker))
-    sha = C.deployed_sha(args.base)
+    try:
+        sha = C.require_deployed_sha(args.base)
+    except C.UnknownDeployment as exc:
+        print(f"REFUSED: {exc}")
+        return 2
     root = pathlib.Path(args.capture_dir)
     print(f"sha={sha} companies={len(companies)} gap={args.gap}s")
     rows, started = [], None

@@ -29,6 +29,7 @@ evidence", the user asks "but what do you think?", and a chatty model obliges.
 from __future__ import annotations
 
 import re
+import dataclasses
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence
 
@@ -273,16 +274,84 @@ def _competition_answer(read) -> str:
 #: Keys a structured decision row may carry, in the order a reader needs
 #: them. Ordered rather than guessed: the first present key is the row's
 #: subject, and the rest qualify it.
+#: THE VOCABULARY IS PART OF THE FIX, NOT A SEPARATE POLISH STEP.
+#:
+#: Normalising the dataclasses stopped the repr reaching the reader and then
+#: rendered NOTHING, because none of these key names appear on MarketBelief,
+#: BeliefChallenge or Link. That trades a leak for an absence on a question
+#: whose answer is sitting right there -- which is the failure §24 exists to
+#: forbid, arriving through the door that was just opened.
+#:
+#: So the names the newly-routed producers actually use are named here.
+#: `proposition` is the belief itself; `strongest_support` is the case for
+#: it; `frm`/`to` are the two ends of a link and read as a subject and its
+#: consequence.
 _ROW_SUBJECT_KEYS = ("name", "title", "statement", "text", "label",
-                     "question", "summary")
+                     "question", "summary",
+                     "proposition", "strongest_support", "frm")
 _ROW_DETAIL_KEYS = ("likely_response", "signal_to_watch", "why", "reason",
-                    "basis", "detail", "so_what", "plain")
+                    "basis", "detail", "so_what", "plain",
+                    "basis_detail", "because", "to")
+
+
+#: What a Python object looks like when it reaches a reader: a lowercase type
+#: name, an open bracket, and a keyword argument. Matched so the product can
+#: REFUSE to print one rather than relying on having thought of every type.
+_LOOKS_LIKE_A_REPR = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*\((?:[a-z_]+=|\))")
+
+
+def _as_row(row):
+    """A decision row as a dict, whatever shape the producer used.
+
+    MEASURED LIVE on 8397d67, Meta and Cloudflare, on the two questions a
+    board cares most about:
+
+        marketbelief(belief_id='mb_f3a52cac10', subject_id='Meta Platforms,
+        Inc.', proposition="that ... resumes.", belief_type=...)
+
+    The renderer below recognised dicts and strings. `MarketBelief`,
+    `BeliefChallenge` and `Link` are DATACLASS INSTANCES, so every isinstance
+    check missed them and `str()` fell through to `repr()`.
+
+    The comment on the list branch in `_route_answer` records this same defect
+    being closed once, for rows that were dicts. Nothing taught it about
+    objects -- and it could not have been seen until the router repair made
+    these eight intents reachable at all, because before that they fell to a
+    catch-all that answered from the matched pattern's own text.
+    """
+    if isinstance(row, dict):
+        return row
+    if dataclasses.is_dataclass(row) and not isinstance(row, type):
+        try:
+            return dataclasses.asdict(row)
+        except Exception:                                   # noqa: BLE001
+            return {k: v for k, v in vars(row).items()
+                    if not k.startswith("_")}
+    if hasattr(row, "__dict__") and not isinstance(
+            row, (str, bytes, int, float, bool)):
+        return {k: v for k, v in vars(row).items()
+                if not k.startswith("_")}
+    return row
+
+
+def _printable(text: str) -> str:
+    """A sentence, or "" when what arrived is an object wearing one.
+
+    A TYPE LIST WOULD HAVE TO BE KEPT UP TO DATE. `_as_row` handles the three
+    shapes that exist today; this catches the fourth, whenever somebody adds
+    it. Refusing is safe here because every caller falls back to the canonical
+    read and then to the absent copy -- a bounded sentence rather than a
+    repr.
+    """
+    body = (text or "").strip()
+    return "" if _LOOKS_LIKE_A_REPR.match(body) else body
 
 
 def _render_row(row) -> str:
     """One structured decision row, as a sentence. "" if it carries nothing."""
+    row = _as_row(row)
     if not isinstance(row, dict):
-        return str(row or "").strip()
+        return _printable(str(row or ""))
     subject = ""
     for key in _ROW_SUBJECT_KEYS:
         subject = str(row.get(key) or "").strip()
@@ -339,6 +408,11 @@ def _route_answer(question: str, decision, read=None) -> tuple:
             said = value.get("statement") or value.get("plain") or ""
             return (str(said) or absent), name
         if isinstance(value, (list, tuple)):
+            # NORMALISE BEFORE ASKING WHAT SHAPE IT IS. The check below used
+            # to decide "structured or not" from the raw members, so a list
+            # of dataclasses answered "not structured" and went to the
+            # str()-join that printed their reprs.
+            value = [_as_row(v) for v in value]
             if value and any(isinstance(v, dict) for v in value):
                 # A POPULATED, STRUCTURED LIST IS NOT AN ABSENCE.
                 #
@@ -365,12 +439,18 @@ def _route_answer(question: str, decision, read=None) -> tuple:
                 # statement came to look like an honest gap.
                 fallback = _from_read(row_name, read)
                 return (fallback or absent), name
-            items = [str(v) for v in value if str(v or "").strip()]
+            items = [t for t in (_printable(str(v)) for v in value) if t]
             if not items:
                 return absent, name
             return "; ".join(items[:3]), name
-        text = str(value or "").strip()
-        return (text or absent), name
+        # A SCALAR CAN BE AN OBJECT TOO. `key_risk` and `falsifier` are
+        # strings today; nothing stops the next producer returning a row.
+        if not isinstance(value, (str, bytes)):
+            rendered = _render_row(value)
+            if rendered:
+                return rendered, name
+        text = _printable(str(value or ""))
+        return (text or _from_read(row_name, read) or absent), name
     return "", name
 
 

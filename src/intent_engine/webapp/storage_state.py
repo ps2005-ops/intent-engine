@@ -224,7 +224,13 @@ def may_promise_persistence(probe: dict) -> bool:
 # Measured need: two live canary runs disappeared between the customer steps
 # and the Q&A step, and the session that lost them had no way to tell a
 # restart from an application bug. This is that way.
-_PROCESS_STARTED = None
+#: Set AT IMPORT, beside BOOT_ID, for the same reason BOOT_ID is. Deferring
+#: it to the first call made `started_at` mean "when something first asked",
+#: so a service nobody polled for an hour reported an uptime of zero and a
+#: reader comparing two samples could not tell a young process from a quiet
+#: one. The boot id alone answers "did it restart"; this answers "how long has
+#: it been up", and it may not silently answer a different question.
+_PROCESS_STARTED = _time_at_import = __import__("time").time()
 
 
 def process_identity(now=None) -> dict:
@@ -236,7 +242,7 @@ def process_identity(now=None) -> dict:
     """
     import time as _time
     global _PROCESS_STARTED
-    if _PROCESS_STARTED is None:
+    if _PROCESS_STARTED is None:          # only if a test cleared it
         _PROCESS_STARTED = _time.time()
     moment = _time.time() if now is None else now
     return {"boot_id": BOOT_ID,

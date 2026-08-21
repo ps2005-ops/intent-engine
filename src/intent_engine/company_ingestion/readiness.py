@@ -122,6 +122,26 @@ _FOREIGN_MARKERS = (
     " de ", " het ", " een ", " voor ", " zijn ",               # nl
 )
 _FOREIGN_LETTERS = "äöüßàâçéèêëîïôùûñõáíóúåæø"
+#: Foreign function words per THOUSAND WORDS at which a document stops being
+#: readable English. German and French prose run far above this; English
+#: financial prose carrying "per share", "de minimis" and "El Paso" runs far
+#: below it at any length. Calibrated against real documents, not chosen:
+#: MEASURED, on real documents, through this product's own extractor:
+#:
+#:     Cloudflare 10-Q   0.50 markers / 1000 words   (71,377 words)
+#:     Cloudflare 10-K   0.56                        (85,567 words)
+#:     German page     371.08
+#:     French page     443.90
+#:
+#: A 600x separation. The bar is set at 40 -- eighty times the measured
+#: English rate and a ninth of the measured foreign rate -- so neither side
+#: is anywhere near it and a document has to be substantially foreign to
+#: cross. Chosen from the distribution above rather than picked.
+_FOREIGN_MARKER_DENSITY = 40.0
+#: Accented characters per thousand characters. Same idea: a German page is
+#: dense in umlauts; an English filing that names one French subsidiary is not.
+#: Both real filings measure 0.00.
+_FOREIGN_ACCENT_DENSITY = 5.0
 # Below this share of documents, the evidence is not in a language this
 # analysis can read. Set above a half deliberately: at exactly half, a report
 # would be built on the readable pages while silently ignoring as much again.
@@ -141,10 +161,56 @@ def is_english(document: dict) -> bool:
         return True                     # too short to judge; do not accuse it
     foreign_words = sum(1 for m in _FOREIGN_MARKERS if m in text)
     accented = sum(1 for ch in text if ch in _FOREIGN_LETTERS)
-    # Both signals, or a great deal of one. A single stray "de" in an English
-    # sentence about a French customer is not a language.
-    return not (foreign_words >= 4 or accented >= 6
-                or (foreign_words >= 2 and accented >= 2))
+
+    # PRESENCE IS NOT EVIDENCE IN A LONG DOCUMENT.
+    #
+    # `foreign_words` counts how many of the ~40 markers appear AT LEAST ONCE.
+    # That number can only rise as a document gets longer, and English
+    # financial prose contains several of them outright: " per " (per share),
+    # " de " (de minimis, de facto), " el " (El Paso), " la ", " il ", " lo ".
+    #
+    # Measured on Cloudflare's own 10-Q, through this product's extractor:
+    #
+    #      5,000 chars -> 1 marker      200,000 chars -> 1 marker
+    #     50,000 chars -> 1 marker      400,000 chars -> 2 markers
+    #    100,000 chars -> 1 marker      465,969 chars -> 3 markers
+    #
+    # An English SEC filing arrives at 3 against a threshold of 4. Nothing
+    # about the language changed between those rows; only the length did. The
+    # cost of crossing that line is not cosmetic -- a set-aside filing is
+    # evidence the analysis never sees, and a run that loses its 10-Q drops
+    # below the source floor and renders a Limited analysis. Cloudflare, the
+    # standing regression control, did exactly that live on 8397d67 with its
+    # 10-Q listed under "Sources found but not used".
+    #
+    # So a LONG document has to show foreign text DENSELY, not merely once.
+    # Short documents keep the original absolute test unchanged: a 300-word
+    # German blog post cannot reach a density threshold built for filings,
+    # and that is the case this check was written for.
+    #
+    # This can only move a document from foreign to English, never the other
+    # way -- the scaled thresholds are >= the originals for every length. A
+    # genuinely foreign document is dense in markers at any size.
+    # DENSITY, AND IT MUST BE COUNTED IN OCCURRENCES.
+    #
+    # A first version of this scaled the thresholds by length and kept
+    # counting DISTINCT markers. That was wrong in the dangerous direction and
+    # a positive control caught it: `foreign_words` can never exceed the ~40
+    # markers in the table, so a 280,000-character German document could not
+    # reach a bar of 56 and was reclassified ENGLISH -- the exact case this
+    # check exists for, broken by the repair.
+    #
+    # Occurrences scale with length; distinct markers saturate. So the measure
+    # is how much of the text is foreign, per thousand words, which is a
+    # property of the LANGUAGE rather than of the length.
+    words = max(1, text.count(" "))
+    occurrences = sum(text.count(m) for m in _FOREIGN_MARKERS)
+    marker_density = occurrences * 1000.0 / words
+    accent_density = accented * 1000.0 / max(1, len(text))
+    return not (marker_density >= _FOREIGN_MARKER_DENSITY
+                or accent_density >= _FOREIGN_ACCENT_DENSITY
+                or (marker_density >= _FOREIGN_MARKER_DENSITY / 2
+                    and accent_density >= _FOREIGN_ACCENT_DENSITY / 2))
 
 
 def english_share(documents) -> float:

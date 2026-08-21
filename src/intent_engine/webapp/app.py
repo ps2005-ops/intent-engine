@@ -2886,8 +2886,36 @@ class WebApp:
             # thing — that is the live 400 at t=0 and the live 500 that
             # followed it. The progress page is the honest transitional answer
             # and it already exists.
+            #
+            # ...BUT ONLY WHILE THERE IS NOTHING TO WATCH INSTEAD.
+            #
+            # THE REDIRECT LOOP. `_progress` sends the reader HERE the moment
+            # `result_readiness(...)["opens_result"]` is true, and this line
+            # sent them straight back while the worker was still in flight.
+            # Both conditions are true together for most of a normal run --
+            # from the moment a readable result composes until the worker
+            # clears -- so the two pages bounced off each other until the
+            # client gave up.
+            #
+            # MEASURED LIVE on 8397d67, and it is not an edge case:
+            #
+            #     Alphabet    303 loop from t=36s to t=152s   76% of the run
+            #     Meta        blank from t=37s to t=220s      83%
+            #     JPMorgan    blank from t=37s to t=157s      76%
+            #     Cloudflare  blank from t=9s  to t=20s       50%
+            #
+            # Four of four companies. The customer watching the analysis they
+            # asked for saw a page that never resolved, which is exactly the
+            # "ambiguous limbo" the terminal-state invariant forbids.
+            #
+            # `result_readiness` already states the rule and this line was the
+            # one place not following it: "opens_result is True IF AND ONLY IF
+            # a customer-readable result exists. When it is True the customer
+            # goes to the analysis, WHATEVER THE WORKER'S METADATA SAYS." So
+            # readiness decides, and in-flight only decides when readiness has
+            # nothing to offer.
             avail = self._availability(run_id)
-            if avail["in_flight"]:
+            if self.only_watchable(run_id):
                 return self._redirect(f"/runs/{run_id}/progress")
 
             if self.ci.store.run_state(run_id) == "FAILED":
@@ -4235,7 +4263,7 @@ class WebApp:
         # The same availability question the other run routes ask. This one
         # answered 200 with a full dossier while the primary screen answered
         # 400, which is how the two surfaces came to contradict each other.
-        if self._is_real_run(run_id) and self._availability(run_id)["in_flight"]:
+        if self._is_real_run(run_id) and self.only_watchable(run_id):
             return self._redirect(f"/runs/{run_id}/progress")
         """The executive brief — depth WITHOUT repetition.
 
@@ -4450,7 +4478,7 @@ class WebApp:
         if not self._owned(session, run_id):
             return self._no_such_run(session, run_id)
         avail = self._availability(run_id)
-        if avail["in_flight"]:
+        if self.only_watchable(run_id):
             return self._redirect(f"/runs/{run_id}/progress")
         from intent_engine.demo_dossier.store import DossierStore, company_key
         from intent_engine.founder_brief import xray
@@ -4673,7 +4701,7 @@ class WebApp:
         if not self._owned(session, run_id):
             return self._no_such_run(session, run_id)
         availability = self._availability(run_id)
-        if availability.get("in_flight"):
+        if self.only_watchable(run_id):
             return self._redirect(f"/runs/{run_id}/progress")
         # ONE RUN MAY NOT SAY TWO THINGS.
         #
@@ -5203,7 +5231,7 @@ class WebApp:
             # Asking for the deck before the deck exists is the reader
             # following the layer nav, not an error. Send them to the page
             # that says what IS ready.
-            if avail["in_flight"]:
+            if self.only_watchable(run_id):
                 return self._redirect(f"/runs/{run_id}/progress")
             if not avail["slides_ready"]:
                 if avail["state"] == "FAILED" and not avail["has_report"]:
@@ -7185,6 +7213,41 @@ class WebApp:
             out = {"registrant": {}, "evidence_text": ""}
         cache[run_id] = out
         return out
+
+    def only_watchable(self, run_id) -> bool:
+        """Is watching the run the ONLY thing this reader can do right now?
+
+        True while the worker is live AND nothing readable exists yet. False
+        the moment a result can be opened, whatever the worker is still doing.
+
+        WHY THIS IS ONE PREDICATE AND NOT FIVE CONDITIONS. Five surfaces asked
+        "is the worker in flight?" and sent the reader to the progress page if
+        so -- and the progress page sends them back as soon as
+        `result_readiness(...)["opens_result"]` is true. Both were true
+        together for most of a normal run, so the pages bounced off each other
+        until the client gave up.
+
+        MEASURED LIVE on 8397d67, four of four companies, as a 303 whose final
+        URL was the page it started from:
+
+            Alphabet    36s -> 152s   76% of the run
+            Meta        37s -> 220s   83%
+            JPMorgan    37s -> 157s   76%
+            Cloudflare   9s ->  20s   50%
+
+        Reproduced offline as a three-node cycle -- /runs/<id> -> /intro ->
+        /progress -> /runs/<id> -- which is why fixing the first site alone
+        only moved the loop one hop along.
+
+        The rule was already written down, in `result_readiness` below:
+        "opens_result is True IF AND ONLY IF a customer-readable result
+        exists. When it is True the customer goes to the analysis, whatever
+        the worker's metadata says." This is that sentence, in one place, so
+        the next surface to ask the question cannot answer it differently.
+        """
+        if not self._availability(run_id).get("in_flight"):
+            return False
+        return not self.result_readiness(run_id)["opens_result"]
 
     def result_readiness(self, run_id) -> dict:
         """Is there something this customer may be shown, and what is it?
