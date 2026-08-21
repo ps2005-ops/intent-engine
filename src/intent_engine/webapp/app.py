@@ -797,6 +797,7 @@ class WebApp:
         # another, which is the defect the line above exists to prevent.
         self._request.readiness = {}
         self._request.spans = []
+        self._request.reads = {}
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -4781,7 +4782,23 @@ class WebApp:
         """The canonical bounded read for this run (§56).
 
         ONE object, built once per request from everything the run holds, and
-        projected by every step. The alternative -- each page composing its
+        projected by every step -- WHICH IS NOW TRUE. The docstring has said
+        it since it was written and nothing enforced it: ten call sites, no
+        memo, and a single executive page composing the whole read three or
+        four times over. Each composition walks every retrieved document.
+
+        WHY THAT MATTERS MORE THAN IT LOOKS. MEASURED live on 5e1218e:
+        `/runs/<id>/progress` segments that cannot take 100ms -- a dict
+        lookup for `owned`, a lock acquire for `avail.in_flight` -- all
+        cluster at 88-106ms during analysis, which is the container's CPU
+        quota period. The instance is throttled, so every avoidable
+        recomposition is paid for in whole 100ms windows that some other
+        request spends waiting. Composing this once instead of four times is
+        the largest single CPU reduction available on the render path.
+
+        Per REQUEST and on the thread-local, for the same reason the
+        readiness memo is: one shared across requests would project one
+        visitor's run into another's page. The alternative -- each page composing its
         own -- is what produced a primary screen asserting an industrial
         capacity mechanism about a software network while the X-Ray two
         clicks away read it correctly as subscription software.
@@ -4790,6 +4807,17 @@ class WebApp:
         refusal, and a refusal on the first screen is the defect this whole
         change exists to remove.
         """
+        memo = getattr(self._request, "reads", None)
+        key = (run_id, name)
+        if memo is not None and key in memo:
+            return memo[key]
+        read = self._compose_strategic_read(run_id, name)
+        if memo is not None:
+            memo[key] = read
+        return read
+
+    def _compose_strategic_read(self, run_id, name=""):
+        """`_strategic_read` without the per-request memo."""
         from intent_engine.executive import strategic_read as SR
         from intent_engine.strategic_intelligence.decision import decision_of
 
@@ -8446,8 +8474,24 @@ class WebApp:
         # established, and this deliberately does not guess: whatever the
         # ordering turns out to be, judging seven documents is right and
         # judging one of them is wrong.
+        # A GATE THAT JUDGED NOTHING STILL JUDGED SOMETHING.
+        #
+        # `documents_at_compose` is absent exactly when `compose` took its
+        # early return -- "no approved source could be retrieved" -- because
+        # that path returns before `readiness_inputs` is recorded. This used
+        # to read `isinstance(seen, int)` and skip the re-gate entirely in
+        # that case, which is the ONE case where looking again matters most:
+        # the gate saw nothing, and evidence arrived afterwards.
+        #
+        # MEASURED live on 5e1218e, Meta Platforms: `compose=? stored=9
+        # regated=no`, outcome TRUE_EVIDENCE_SCARCITY. Nine documents in the
+        # store, a gate that judged none of them, and a re-gate whose
+        # precondition was the very field the failing path does not produce.
+        # A guard keyed on the presence of an instrument is not a guard.
         seen = (result.get("readiness_inputs") or {}).get(
             "documents_at_compose")
+        if seen is None:
+            seen = 0
         if isinstance(seen, int):
             try:
                 stored = len(self.ci.store.retrieved(run_id))
