@@ -62,6 +62,8 @@ class AppendOnlyStore:
         self.lock_path = self.path.with_suffix(".jsonl.lock")
         self._cache_key = None
         self._cache_rows = None
+        #: Byte offset the cached rows were parsed up to.
+        self._cache_offset = None
 
     # --- the shared mechanics (identical across all three originals) ---------
     def _locked(self, fn):
@@ -81,16 +83,20 @@ class AppendOnlyStore:
             return None
         return (stat.st_mtime_ns, stat.st_size)
 
-    def read_all(self) -> list:
-        if not self.path.exists():
-            return []
-        key = self._fingerprint()
-        if key is not None and key == self._cache_key:
-            return list(self._cache_rows)
+    def _parse_from(self, offset: int, first_lineno: int) -> list:
+        """Parse from a BYTE offset, which is why this reads binary.
+
+        `seek()` on a text-mode file takes an opaque cookie from `tell()`,
+        not a byte count -- passing `st_size` happens to work in CPython and
+        is undefined behaviour. The offset here comes from `stat`, so the
+        file is opened in binary and each line is decoded explicitly.
+        """
         rows = []
-        with open(self.path, encoding="utf-8") as f:
-            for lineno, line in enumerate(f, 1):
-                line = line.rstrip("\n")
+        with open(self.path, "rb") as f:
+            if offset:
+                f.seek(offset)
+            for lineno, raw in enumerate(f, first_lineno):
+                line = raw.decode("utf-8").rstrip("\n")
                 if not line:
                     continue
                 try:
@@ -101,7 +107,45 @@ class AppendOnlyStore:
                     raise self.corrupt_error(
                         f"{self.path} line {lineno} is malformed: {exc}"
                     ) from exc
-        self._cache_key, self._cache_rows = key, list(rows)
+        return rows
+
+    def read_all(self) -> list:
+        """Every row, parsed once.
+
+        WHY THE CACHE WAS NOT ENOUGH. It is keyed on `(mtime_ns, size)`, which
+        is exactly the pair that changes on every append -- so during the one
+        activity that matters, an analysis writing documents, the cache missed
+        on EVERY read and the whole log was re-parsed each time. `append`
+        itself calls `read_all` for its idempotency check, so writing N
+        documents cost O(N^2) parsing, and each `/progress` poll paid for a
+        full re-parse of a file the run was still growing. Measured on a
+        31 MB log: 35 ms per full parse, 153 ms for the four queries one
+        progress poll makes, and both grow without bound as the file does.
+        //
+        AN APPEND-ONLY LOG NEVER REWRITES ITS PREFIX, which is what makes
+        this safe: when the file has only grown, the rows already parsed are
+        still correct and only the new bytes need reading. Anything else --
+        the file shrinking, being replaced, or changing without growing --
+        falls back to the full parse, so no assumption is made that the
+        discipline is not already enforcing.
+        """
+        if not self.path.exists():
+            self._cache_key = self._cache_rows = self._cache_offset = None
+            return []
+        key = self._fingerprint()
+        if key is not None and key == self._cache_key:
+            return list(self._cache_rows)
+        size = key[1] if key else 0
+        offset = getattr(self, "_cache_offset", None)
+        if (self._cache_rows is not None and offset is not None
+                and size > offset):
+            # Grown only: parse the tail and keep what was already read.
+            rows = list(self._cache_rows) + self._parse_from(
+                offset, len(self._cache_rows) + 1)
+        else:
+            rows = self._parse_from(0, 1)
+        self._cache_key, self._cache_rows, self._cache_offset = \
+            key, list(rows), size
         return rows
 
     def find_by_idempotency_key(self, key: str):

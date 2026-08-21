@@ -766,6 +766,19 @@ class WebApp:
         # that a future early return which reads the claim inherits None
         # rather than another visitor's.
         self._request.claim = None
+        # ONE READINESS READ PER REQUEST, NOT THREE.
+        #
+        # `_progress` asks `result_readiness` up to three times, and each
+        # answer costs several reads of the ingestion log -- the same log the
+        # running analysis is appending to, so nothing upstream can cache it
+        # for us. `result_readiness` is documented READ-ONLY and composes,
+        # approves and fetches nothing, so two calls inside one request can
+        # only differ by a race the page has no way to act on.
+        #
+        # Per-REQUEST and on the thread-local, never on `self`: a memo shared
+        # between requests would show one visitor a state belonging to
+        # another, which is the defect the line above exists to prevent.
+        self._request.readiness = {}
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -7447,6 +7460,16 @@ class WebApp:
           * ``FAILED_FINAL`` is the only state that may show a final failure,
             and it requires that NO readable result exists.
         """
+        memo = getattr(self._request, "readiness", None)
+        if memo is not None and run_id in memo:
+            return memo[run_id]
+        verdict = self._result_readiness(run_id)
+        if memo is not None:
+            memo[run_id] = verdict
+        return verdict
+
+    def _result_readiness(self, run_id) -> dict:
+        """`result_readiness` without the per-request memo."""
         avail = self._availability(run_id)
         state = avail["state"] or "VALIDATING_COMPANY"
         # A readable result is a composed report, or a bounded reading built

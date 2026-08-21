@@ -23,11 +23,14 @@ RDY = ROOT / "src/intent_engine/company_ingestion/readiness.py"
 SVC = ROOT / "src/intent_engine/company_ingestion/service.py"
 APP = ROOT / "src/intent_engine/webapp/app.py"
 VER = ROOT / "src/intent_engine/pre100/verdict.py"
+LOG = ROOT / "src/intent_engine/agentos/append_only.py"
 
 TF = "tests/test_filing_family_is_the_form.py"
 TA = "tests/test_attrition_counters_close.py"
 TR = "tests/test_retrieval_plan_moves_the_budget.py"
 TD = "tests/test_a_guess_at_a_closed_door.py"
+TL = "tests/test_the_log_is_parsed_once.py"
+TM = "tests/test_one_readiness_read_per_request.py"
 
 PROOFS = [
     # --- R1. the filing family is the form, not the venue ------------------
@@ -118,6 +121,62 @@ PROOFS = [
           '    if stated in O.SUCCESSFUL and errored:',
           '    if False and stated in O.SUCCESSFUL and errored:',
           "tests/test_a_500_is_never_a_pass.py::test_a_success_claimed_on_a_server_error_is_a_defect",
+          "assert"),
+
+    # --- R6. the log is parsed once, not once per read ---------------------
+    Proof("R6a. the whole log is re-parsed on every read again",
+          LOG,
+          "        if (self._cache_rows is not None and offset is not None\n"
+          "                and size > offset):",
+          "        if False:",
+          f"{TL}::test_the_tail_is_the_only_thing_reparsed",
+          "re-parsed"),
+    Proof("R6b. a same-size rewrite is mistaken for growth",
+          LOG,
+          "        key = self._fingerprint()\n"
+          "        if key is not None and key == self._cache_key:",
+          "        key = self._fingerprint()\n"
+          "        if key is not None and self._cache_key is not None:",
+          f"{TL}::test_a_same_size_rewrite_is_parsed_again_in_full",
+          "assert"),
+    Proof("R6c. a shrinking file keeps rows it no longer has",
+          LOG,
+          "                and size > offset):",
+          "                and size != offset):",
+          f"{TL}::test_a_shrinking_file_is_parsed_again_in_full",
+          "assert"),
+    Proof("R6d. the offset read stops landing on a line boundary",
+          LOG,
+          "            if offset:\n                f.seek(offset)",
+          "            if offset:\n                f.seek(offset + 1)",
+          f"{TL}::test_multibyte_text_survives_an_offset_read",
+          "assert"),
+
+    # --- R7. one readiness read per request --------------------------------
+    Proof("R7a. the memo is dropped and the page asks three times",
+          APP,
+          '        memo = getattr(self._request, "readiness", None)\n'
+          "        if memo is not None and run_id in memo:\n"
+          "            return memo[run_id]",
+          "        memo = None",
+          f"{TM}::test_one_request_computes_it_once",
+          "assert"),
+    Proof("R7b. the memo outlives the request that made it",
+          APP,
+          "        self._request.readiness = {}\n",
+          "        self._request.readiness = getattr(\n"
+          '            self._request, "readiness", {})\n',
+          f"{TM}::test_the_next_request_does_not_inherit_the_answer",
+          "assert"),
+    Proof("R7c. one run's verdict is served for another run",
+          APP,
+          '        memo = getattr(self._request, "readiness", None)\n'
+          "        if memo is not None and run_id in memo:\n"
+          "            return memo[run_id]",
+          '        memo = getattr(self._request, "readiness", None)\n'
+          "        if memo:\n"
+          "            return next(iter(memo.values()))",
+          f"{TM}::test_a_different_run_in_the_same_request_is_its_own_answer",
           "assert"),
 ]
 
