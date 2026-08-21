@@ -148,6 +148,34 @@ _FOREIGN_ACCENT_DENSITY = 5.0
 MIN_ENGLISH_SHARE = 0.6
 
 
+def _densities(text: str, accented: int) -> tuple:
+    """The two numbers the language wall decides on. ONE producer.
+
+    Read by `is_english` to decide and by `readiness_inputs` to report, so a
+    document listed as language-rejected carries the same densities that
+    rejected it rather than a second opinion about them.
+    """
+    words = max(1, text.count(" "))
+    occurrences = sum(text.count(m) for m in _FOREIGN_MARKERS)
+    return (occurrences * 1000.0 / words,
+            accented * 1000.0 / max(1, len(text)))
+
+
+def _language_text(document: dict) -> tuple:
+    """Exactly the text and accent count `is_english` judges on."""
+    text = " " + " ".join((document.get("text_content") or "").lower().split()) \
+        + " "
+    return text, sum(1 for ch in text if ch in _FOREIGN_LETTERS)
+
+
+def _foreign_marker_density(document: dict) -> float:
+    return _densities(*_language_text(document))[0]
+
+
+def _accent_density(document: dict) -> float:
+    return _densities(*_language_text(document))[1]
+
+
 def is_english(document: dict) -> bool:
     """Whether this document is readable by the analysis.
 
@@ -203,10 +231,7 @@ def is_english(document: dict) -> bool:
     # Occurrences scale with length; distinct markers saturate. So the measure
     # is how much of the text is foreign, per thousand words, which is a
     # property of the LANGUAGE rather than of the length.
-    words = max(1, text.count(" "))
-    occurrences = sum(text.count(m) for m in _FOREIGN_MARKERS)
-    marker_density = occurrences * 1000.0 / words
-    accent_density = accented * 1000.0 / max(1, len(text))
+    marker_density, accent_density = _densities(text, accented)
     return not (marker_density >= _FOREIGN_MARKER_DENSITY
                 or accent_density >= _FOREIGN_ACCENT_DENSITY
                 or (marker_density >= _FOREIGN_MARKER_DENSITY / 2
@@ -351,6 +376,20 @@ def readiness_inputs(documents, verdict, *, attempt: int = 1) -> dict:
     # filters do not name is attrition nobody has instrumented yet, and it is
     # reported as its own quantity rather than left to be inferred from a
     # subtraction that does not work.
+    # WHICH DOCUMENTS THE LANGUAGE WALL TOOK, not just how many.
+    #
+    # MEASURED on 8fd6c82, NVIDIA: `dropped=0/0/0/8` -- eight of twelve
+    # refused by `is_english` alone. "Eight" cannot say whether they were
+    # genuinely localised pages discovery should never have proposed, or
+    # English pages the density heuristic misreads, and those are opposite
+    # repairs. Naming them costs one pass over text already in memory.
+    inputs["language_rejected"] = [
+        {"source_id": d.get("source_id"),
+         "url": (d.get("final_url") or d.get("original_url") or "")[:160],
+         "chars": len((d.get("text_content") or "")),
+         "marker_density": round(_foreign_marker_density(d), 2),
+         "accent_density": round(_accent_density(d), 2)}
+        for d in deduped if d not in english][:12]
     named = (inputs["dropped_not_ok"] + inputs["dropped_empty"]
              + inputs["dropped_duplicate"] + inputs["dropped_language"])
     usable = inputs["usable_at_compose"]

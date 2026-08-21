@@ -51,11 +51,28 @@ MARKET_UNAVAILABLE = "MARKET_UNAVAILABLE"
 MARKET_STALE = "MARKET_STALE"
 MARKET_INVALID = "MARKET_INVALID"
 NO_SUPPORTED_READING = "NO_SUPPORTED_READING"
+#: The curated pattern library matched no transition, AND no market reading is
+#: published -- but this run did compose a bounded economic read of the
+#: company, and every other surface is already rendering it.
+#:
+#: MEASURED on 743df06 and cb9e6b7, Pfizer Inc. Twelve usable documents across
+#: five families, and `/full` said "No strategic reading of Pfizer Inc.
+#: cleared the evidence bar, so none is asserted here" while `/intro`,
+#: `/story` and `/connect` on the SAME run said Pfizer "runs on a product or
+#: service that may only be sold once a regulator permits it and a payer
+#: agrees to pay for it", named generic competition to Xtandi and Xeljanz as
+#: the substitution, and set out rebate economics.
+#:
+#: The contract knew about two producers -- the run's transition decision and
+#: the published market reading -- and the bounded executive read was a third
+#: it was never told about. So the one place that answers "does a reading
+#: exist" was answering it from two thirds of the evidence.
+BOUNDED_READ_ONLY = "BOUNDED_READ_ONLY"
 
 #: Merge states in which a supported reading exists SOMEWHERE. A surface may
 #: not say "no strategic reading exists" in any of these.
 HAS_READING = frozenset({CURRENT_RUN_SUPPORTED, MARKET_SUPPORTED,
-                         BOTH_SUPPORTED})
+                         BOTH_SUPPORTED, BOUNDED_READ_ONLY})
 
 _SUPPORTED_STANDINGS = frozenset({"SUPPORTED", "BOUNDED"})
 
@@ -117,14 +134,19 @@ def _supported(decision) -> bool:
 
 
 def decide(*, company: str = "", run_decision=None, market_decision=None,
-           market_usable: bool = True,
-           market_reason: str = "") -> ExecutiveContract:
+           market_usable: bool = True, market_reason: str = "",
+           bounded_read: bool = False) -> ExecutiveContract:
     """Combine the run's reading and the published market reading. No I/O.
 
     `market_usable` is the caller's freshness and identity verdict, passed in
     rather than computed here: whether a snapshot is for the right company and
     recent enough is already decided by the bridge, and a second opinion about
     it would be a second contract.
+
+    `bounded_read` says this run composed an economic reading of the company
+    even though no curated transition matched -- the business model, what
+    decides revenue, what decides margin, what customers can substitute. That
+    is a reading, it is on the page, and a surface may not deny it.
     """
     run_ok = _supported(run_decision)
     market_ok = _supported(market_decision) and market_usable
@@ -150,6 +172,11 @@ def decide(*, company: str = "", run_decision=None, market_decision=None,
         # market engine has a reading for this company that did. The reading
         # exists, and what the run failed to do is a separate, smaller fact.
         state, readiness = MARKET_SUPPORTED, _readiness_of(market_decision)
+    elif bounded_read:
+        # No transition matched and no market reading is published, but the
+        # page in front of the reader is not empty. Its own name, because a
+        # bounded read licenses different sentences from a supported one.
+        state, readiness = BOUNDED_READ_ONLY, WITHHELD
     elif market_decision is None:
         state, readiness = MARKET_UNAVAILABLE, WITHHELD
     else:

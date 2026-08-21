@@ -19,6 +19,7 @@ import logging
 import os
 import re
 from dataclasses import asdict
+import contextlib
 import time
 import traceback
 import uuid
@@ -482,6 +483,17 @@ _SOURCE_FAMILY = {
 }
 
 
+def _language_note(inputs: dict) -> str:
+    """The language-rejected documents, compactly, for the gate header."""
+    rows = inputs.get("language_rejected") or []
+    if not rows:
+        return "-"
+    return ";".join(
+        f"{(r.get('url') or '').split('/')[-1][:28] or r.get('source_id')}"
+        f"@m{r.get('marker_density')}/a{r.get('accent_density')}"
+        f"/{r.get('chars')}c" for r in rows[:6])
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
@@ -683,6 +695,7 @@ class WebApp:
 
     # --- plumbing -------------------------------------------------------------
     def __call__(self, environ, start_response):
+        _began = time.monotonic()
         try:
             status, headers, body = self._route(environ)
         except WebAppError as exc:
@@ -743,6 +756,10 @@ class WebApp:
                 headers = headers + [("X-Analysis-Outcome", stated),
                                      ("X-Evidence-Gate",
                                       self.evidence_gate_summary(run_id))]
+                timing = self.request_timing(
+                    (time.monotonic() - _began) * 1000.0)
+                if timing:
+                    headers = headers + [("X-Request-Timing", timing)]
             except Exception:                               # noqa: BLE001
                 # Reporting an outcome must never be able to break the page
                 # whose outcome it reports.
@@ -779,6 +796,7 @@ class WebApp:
         # between requests would show one visitor a state belonging to
         # another, which is the defect the line above exists to prevent.
         self._request.readiness = {}
+        self._request.spans = []
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -2197,12 +2215,57 @@ class WebApp:
             return f"Running for {max(seconds, 1)}s."
         return f"Running for {seconds // 60}m {seconds % 60}s."
 
+    @contextlib.contextmanager
+    def _segment(self, name):
+        """Time one named span of a request and keep it on the thread-local.
+
+        WHY A TIMER AND NOT ANOTHER HYPOTHESIS. `/runs/<id>/progress` stops
+        answering for 100+ consecutive seconds during analysis while
+        `/version` answers in 0.15s, and the leading explanation -- the
+        append-only store re-parsing on every read -- was FALSIFIED by
+        removing it: the cost went 153ms -> 1ms per poll and the stall did
+        not move. Guessing a second mechanism costs another deploy and
+        another hour of quota, so the handler measures itself instead.
+
+        Never customer-visible: the numbers travel on a response header, like
+        `X-Evidence-Gate`, and nothing renders them.
+        """
+        start = time.monotonic()
+        try:
+            yield
+        finally:
+            spans = getattr(self._request, "spans", None)
+            if spans is not None:
+                spans.append((name, (time.monotonic() - start) * 1000.0))
+
+    def request_timing(self, wall_ms: float = 0.0) -> str:
+        """The spans this request recorded, longest first.
+
+        `wall` is the whole request and `named` is what the spans account
+        for. THE GAP IS THE POINT: a stall that is not inside any measured
+        segment is not in this handler at all, and that is a different
+        repair from a slow segment.
+        """
+        spans = getattr(self._request, "spans", None) or []
+        if not spans and not wall_ms:
+            return ""
+        named = sum(ms for _, ms in spans)
+        parts = " ".join(f"{n}={ms:.0f}"
+                         for n, ms in sorted(spans, key=lambda s: -s[1])[:9])
+        return (f"wall={wall_ms:.0f} named={named:.0f} "
+                f"unaccounted={max(0.0, wall_ms - named):.0f} {parts}").strip()
+
     def _progress(self, session, run_id):
-        if not self._owned(session, run_id):
+        with self._segment("owned"):
+            owned = self._owned(session, run_id)
+        if not owned:
             return self._no_such_run(session, run_id)
-        real = self._is_real_run(run_id)
+        with self._segment("is_real_run"):
+            real = self._is_real_run(run_id)
         if real:
-            status = self.ci.store.run_state(run_id) or "VALIDATING_COMPANY"
+            with self._segment("run_state"):
+                status = self.ci.store.run_state(run_id) \
+                    or "VALIDATING_COMPANY"
         else:
             status = self.fi.run_status(run_id)
             if status == "UNKNOWN":
@@ -2242,12 +2305,15 @@ class WebApp:
         # Measured live on eb18371 with "Meta": five sources retrieved, a
         # readable result present, and this page saying "no result to open".
         if real:
-            readiness = self.result_readiness(run_id)
+            with self._segment("readiness"):
+                readiness = self.result_readiness(run_id)
             if readiness["opens_result"]:
                 return self._redirect(f"/runs/{run_id}")
 
         # A worker that vanished must not leave this page polling forever.
-        if not terminal and self._interrupted_if_stale(run_id):
+        with self._segment("interrupted_if_stale"):
+            stale = not terminal and self._interrupted_if_stale(run_id)
+        if stale:
             status = self.ci.store.run_state(run_id) or status
             terminal = True
             # The worker dying does not destroy what it had already written.
@@ -2269,8 +2335,9 @@ class WebApp:
         # said FAILED for runs that had another attempt available and for runs
         # that had a result; the heading now follows readiness, which knows
         # the difference.
-        recoverable = bool(
-            real and self.result_readiness(run_id)["retryable"])
+        with self._segment("readiness_retryable"):
+            recoverable = bool(
+                real and self.result_readiness(run_id)["retryable"])
         heading = {
             "FAILED": "This analysis could not be completed",
             # Say what happened. "Reading the public evidence..." on a run
@@ -3917,13 +3984,54 @@ class WebApp:
             # second freshness contract, and two of those is how the first
             # one stops being believed.
             usable = dossier is not None
+            # THE THIRD PRODUCER OF A READING, which this contract used not
+            # to be told about.
+            #
+            # MEASURED, Pfizer Inc. on 743df06 and cb9e6b7: twelve usable
+            # documents across five families, `/full` saying "No strategic
+            # reading of Pfizer Inc. cleared the evidence bar, so none is
+            # asserted here", and `/intro`, `/story` and `/connect` on the
+            # SAME run saying Pfizer runs on a product that may only be sold
+            # once a regulator permits it and a payer agrees to pay for it,
+            # naming generic competition to Xtandi and Xeljanz as the
+            # substitution, and setting out rebate economics.
+            #
+            # The curated transition library matching nothing is a fact about
+            # a twelve-entry library. It is not a fact about whether this
+            # product has a reading of Pfizer, and the one place that answers
+            # that question was deciding it from two of the three producers.
             return ec.decide(
                 company=(getattr(dossier, "canonical_name", "") or name),
                 run_decision=decision_of(report), market_decision=market,
-                market_usable=usable)
+                market_usable=usable,
+                bounded_read=self._bounded_read_exists(run_id, name))
         except Exception:                                   # noqa: BLE001
             _LOG.warning("executive contract not composed for %s", run_id)
             return None
+
+    def _bounded_read_exists(self, run_id, name="") -> bool:
+        """Did this run compose an economic reading the pages are rendering?
+
+        Deliberately asks the SAME object the surfaces project from, rather
+        than re-deriving the question: a second opinion about whether a
+        reading exists is exactly the disagreement the contract removes.
+
+        ONE READER, NOT A SECOND OPINION. `StrategicRead` already answers
+        this as `puts_a_strategy_forward`, and the deep dossier has been
+        branching on it all along -- it is only the narrative, and the
+        contract every surface consults, that were never told. Re-deriving
+        the question here would make a third answer to a question that
+        exists to have one.
+
+        Never raises: a contract that can fail a page is worse than the
+        contradiction it removes.
+        """
+        try:
+            read = self._strategic_read(run_id, name)
+        except Exception:                                   # noqa: BLE001
+            return False
+        return bool(read is not None
+                    and getattr(read, "puts_a_strategy_forward", False))
 
     def _retrieved_documents(self, run_id):
         """The run's retrieved documents, or () when the store has no rows.
@@ -7686,7 +7794,17 @@ class WebApp:
                 # Attrition no filter above accounts for. Non-zero means the
                 # gate dropped documents for a reason nothing here names yet,
                 # which is a finding rather than a rounding error.
-                f" unexplained={inputs.get('dropped_unexplained', '?')}")
+                f" unexplained={inputs.get('dropped_unexplained', '?')}"
+                # DID THE RE-GATE RUN AT ALL? `compose < stored` alone cannot
+                # tell "the re-gate never fired" from "it fired and still saw
+                # the smaller set", and those are different repairs. Meta on
+                # 8fd6c82 read `compose=1 stored=9` and which of the two it
+                # was could not be established from the header.
+                f" regated={inputs.get('regated_from', 'no')}"
+                # WHICH documents the language wall took, so `dropped=x/x/x/8`
+                # can be adjudicated as false positives or as localised pages
+                # discovery should not have proposed.
+                f" lang_rejected={_language_note(inputs)}")
 
     def evidence_report(self, run_id) -> dict:
         """Was the SUBJECT's own evidence actually looked for and retrieved?
@@ -7781,9 +7899,12 @@ class WebApp:
     def _availability(self, run_id) -> dict:
         """What this run currently has. READ-ONLY, and the single source every
         run route consults before deciding what it may render."""
-        in_flight = self._analysis_in_flight(run_id)
-        state = self.ci.store.run_state(run_id)
-        documents = self._retrieved_documents(run_id)
+        with self._segment("avail.in_flight"):
+            in_flight = self._analysis_in_flight(run_id)
+        with self._segment("avail.run_state"):
+            state = self.ci.store.run_state(run_id)
+        with self._segment("avail.documents"):
+            documents = self._retrieved_documents(run_id)
         # `self._results.get` deliberately, NOT `_real_result`: composing here
         # would make a read a write again, which is the defect this exists for.
         result = self._results.get(run_id) or {}

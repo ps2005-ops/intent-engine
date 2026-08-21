@@ -463,6 +463,25 @@ def _executive_answer(company, decision, brief, consequence, supporting,
         # X-Ray was, on the next click, giving a supported pricing decision
         # for.
         if contract is not None and getattr(contract, "reading_exists", False):
+            # WHERE THE READING IS DECIDES WHICH SENTENCE IS TRUE.
+            #
+            # `BOUNDED_READ_ONLY` means no curated transition matched and no
+            # market reading is published, but this run DID compose an
+            # economic read -- the one every section below this paragraph is
+            # already rendering. Pointing at the X-Ray would send the reader
+            # away from the page that has it, and calling it "supported"
+            # would overclaim a read its own producer calls bounded.
+            from intent_engine.executive.contract import BOUNDED_READ_ONLY
+            if getattr(contract, "merge_state", "") == BOUNDED_READ_ONLY:
+                paras.append(
+                    f"No curated transition pattern matched {company}, so "
+                    f"what follows is read from the public record directly "
+                    f"rather than from a known pattern.")
+                paras.append(
+                    "It is bounded for that reason, and every claim below "
+                    "names the evidence it rests on.")
+                return Section(EXECUTIVE_ANSWER, "The answer",
+                               paragraphs=tuple(paras))
             paras.append(f"A supported reading of {company} exists and is set "
                          f"out on the Executive X-Ray.")
             paras.append(getattr(contract, "run_contribution", "") or
