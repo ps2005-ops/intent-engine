@@ -11,6 +11,44 @@ import sys
 DEFAULT_ROOT = pathlib.Path("docs/execution/v5/pre100_60/live_captures")
 
 
+def _already_captured(root, sha, name, rows) -> bool:
+    """Was this company already captured READY on THIS sha?
+
+    Never across shas: a capture from another build is not evidence about
+    this one, and a resume that silently inherited one would produce a wave
+    report spread over several builds -- which is how eight companies once
+    came to be compared across five.
+    """
+    done = pathlib.Path(root) / sha / _slug(name) / "manifest.json"
+    if not done.exists():
+        return False
+    try:
+        prior = json.loads(done.read_text("utf-8"))
+    except Exception:                                       # noqa: BLE001
+        return False
+    if prior.get("status") != "READY":
+        return False
+    rows.append({"company": name, "status": "READY", "resumed": True,
+                 "run_id": prior.get("run_id", ""),
+                 "capture_path": str(done.parent)})
+    return True
+
+
+def _slug(name: str) -> str:
+    from intent_engine.pre100.capture import slug
+    return slug(name)
+
+
+class _nothing:
+    """A context manager that does nothing, so the wave body has one shape."""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
 def _write(path: pathlib.Path, payload) -> pathlib.Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2), "utf-8")
@@ -18,6 +56,22 @@ def _write(path: pathlib.Path, payload) -> pathlib.Path:
 
 
 def cmd_batch(args) -> int:
+    """One wave, paced, resumable, and written as it goes.
+
+    THREE THINGS THIS MUST SURVIVE, all measured rather than anticipated:
+
+    the demo quota      ten analyses per IP per rolling hour. `--gap` is not
+                        a politeness setting; below 360s the wave spends its
+                        own budget and the tail returns "limit reached".
+    a lost session      the preview keeps runs on the instance that made
+                        them. `capture` writes each route as it settles and
+                        names a lost run rather than storing the error page.
+    an interrupted run  `--resume` skips companies already captured on THIS
+                        sha, so a wave that stops halfway costs nothing to
+                        continue. It never skips across shas: a capture from
+                        another build is not evidence about this one.
+    """
+    import time as _time
     from intent_engine.pre100 import capture as C
     companies = []
     for entry in args.companies:
@@ -25,19 +79,36 @@ def cmd_batch(args) -> int:
         cik, _, ticker = rest.partition(":")
         companies.append((name, cik, ticker))
     sha = C.deployed_sha(args.base)
-    print(f"sha={sha} companies={len(companies)}")
-    rows = []
-    for name, cik, ticker in companies:
-        row = C.capture_company(name, cik, ticker, base=args.base,
-                                root=args.capture_dir, sha=sha)
-        rows.append(row)
-        print(f"{row['status']:8s} {name[:28]:28s} "
-              f"{row.get('seconds', '-')}s run={row.get('run_id', '-')[:12]} "
-              f"{row['capture_path']}")
-        if row["status"] == C.BLOCKED and not args.keep_going:
-            print("BLOCKED — stopping so the rest of the quota is not spent")
-            break
-    out = _write(pathlib.Path(args.capture_dir) / sha / "batch.json", rows)
+    root = pathlib.Path(args.capture_dir)
+    print(f"sha={sha} companies={len(companies)} gap={args.gap}s")
+    rows, started = [], None
+    with (C.KeepWarm(args.base) if args.keep_warm else _nothing()):
+        for name, cik, ticker in companies:
+            if args.resume and _already_captured(root, sha, name, rows):
+                print(f"{'SKIP':10s} {name[:28]:28s} already on {sha}")
+                continue
+            if started is not None and args.gap:
+                # Quiet. A wave that narrates its own waiting spends model
+                # turns on the least informative thing it does.
+                _time.sleep(max(0.0, args.gap - (_time.time() - started)))
+            started = _time.time()
+            row = C.capture_company(name, cik, ticker, base=args.base,
+                                    root=args.capture_dir, sha=sha)
+            rows.append(row)
+            note = ""
+            if row["status"] == C.RUN_LOST:
+                note = f" restart_observed={row.get('restart_observed')}"
+            elif row["status"] == C.UNREADABLE:
+                note = f" because={row.get('unreadable_because')}"
+            print(f"{row['status']:10s} {name[:28]:28s} "
+                  f"{row.get('seconds', '-')}s "
+                  f"run={row.get('run_id', '-')[:12]}{note}")
+            _write(root / sha / "batch.json", rows)     # after EVERY company
+            if row["status"] == C.BLOCKED and not args.keep_going:
+                print("BLOCKED — stopping so the rest of the quota is not "
+                      "spent")
+                break
+    out = _write(root / sha / "batch.json", rows)
     print(f"\nwrote {out}")
     return 0 if all(r["status"] == C.READY for r in rows) else 1
 
@@ -50,9 +121,14 @@ def cmd_audit(args) -> int:
     print(f"captured={summary['captured']} "
           f"with_flags={summary['with_flags']}")
     for company in report["companies"]:
+        within = company.get("qa_within_company") or {}
+        line = f"  {company['company'][:26]:26s}"
+        if within.get("answers"):
+            line += (f" qa {within['distinct']}/{within['answers']} distinct")
         if company["flags"]:
-            print(f"  {company['company'][:26]:26s} "
-                  f"{', '.join(company['flags'][:5])}")
+            line += f"  {', '.join(company['flags'][:4])}"
+        if company["flags"] or within.get("answers"):
+            print(line)
     worst = (report.get("collapse") or {}).get("worst") or {}
     for surface, pair in worst.items():
         if surface == "qa":
@@ -99,6 +175,16 @@ def main(argv=None) -> int:
                                "onrender.com")
     batch.add_argument("--capture-dir", default=str(DEFAULT_ROOT))
     batch.add_argument("--keep-going", action="store_true")
+    batch.add_argument("--gap", type=int, default=360,
+                       help="seconds between analyses; the default IS the "
+                            "demo quota (10 per IP per rolling hour)")
+    batch.add_argument("--no-keep-warm", dest="keep_warm",
+                       action="store_false", default=True,
+                       help="do not hold the preview awake between "
+                            "companies; leaves idle recycles in the data")
+    batch.add_argument("--resume", action="store_true",
+                       help="skip companies already captured READY on this "
+                            "deployed sha")
     batch.set_defaults(func=cmd_batch)
 
     audit = sub.add_parser("audit", help="mechanical audit over a wave")

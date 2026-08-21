@@ -70,7 +70,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
     },
     {
       "company": "Caterpillar Inc.",
@@ -141,7 +146,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
     },
     {
       "company": "Eli Lilly and Company",
@@ -212,7 +222,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
     },
     {
       "company": "Exxon Mobil Corporation",
@@ -282,7 +297,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
     },
     {
       "company": "JPMorgan Chase & Co.",
@@ -353,7 +373,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
     },
     {
       "company": "Meta Platforms, Inc.",
@@ -423,7 +448,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
     },
     {
       "company": "NVIDIA Corporation",
@@ -494,7 +524,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 6,
+        "ratio": 0.6
+      }
     },
     {
       "company": "Walmart Inc.",
@@ -565,7 +600,12 @@
         }
       },
       "contradictions": [],
-      "flags": []
+      "flags": [],
+      "qa_within_company": {
+        "answers": 10,
+        "distinct": 5,
+        "ratio": 0.5
+      }
     }
   ],
   "collapse": {
@@ -2104,25 +2144,25 @@
         {
           "a": "Amazon.com, Inc.",
           "b": "Eli Lilly and Company",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Amazon.com, Inc.",
           "b": "Exxon Mobil Corporation",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Amazon.com, Inc.",
           "b": "JPMorgan Chase & Co.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Amazon.com, Inc.",
           "b": "Meta Platforms, Inc.",
-          "identical_answers": 2,
+          "identical_answers": 8,
           "of": 10
         },
         {
@@ -2134,13 +2174,13 @@
         {
           "a": "Amazon.com, Inc.",
           "b": "Walmart Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Caterpillar Inc.",
           "b": "Eli Lilly and Company",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
@@ -2152,13 +2192,13 @@
         {
           "a": "Caterpillar Inc.",
           "b": "JPMorgan Chase & Co.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Caterpillar Inc.",
           "b": "Meta Platforms, Inc.",
-          "identical_answers": 2,
+          "identical_answers": 1,
           "of": 10
         },
         {
@@ -2170,49 +2210,49 @@
         {
           "a": "Caterpillar Inc.",
           "b": "Walmart Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Eli Lilly and Company",
           "b": "Exxon Mobil Corporation",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Eli Lilly and Company",
           "b": "JPMorgan Chase & Co.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Eli Lilly and Company",
           "b": "Meta Platforms, Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Eli Lilly and Company",
           "b": "NVIDIA Corporation",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Eli Lilly and Company",
           "b": "Walmart Inc.",
-          "identical_answers": 2,
+          "identical_answers": 7,
           "of": 10
         },
         {
           "a": "Exxon Mobil Corporation",
           "b": "JPMorgan Chase & Co.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Exxon Mobil Corporation",
           "b": "Meta Platforms, Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
@@ -2224,43 +2264,43 @@
         {
           "a": "Exxon Mobil Corporation",
           "b": "Walmart Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "JPMorgan Chase & Co.",
           "b": "Meta Platforms, Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "JPMorgan Chase & Co.",
           "b": "NVIDIA Corporation",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "JPMorgan Chase & Co.",
           "b": "Walmart Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "Meta Platforms, Inc.",
           "b": "NVIDIA Corporation",
-          "identical_answers": 2,
+          "identical_answers": 1,
           "of": 10
         },
         {
           "a": "Meta Platforms, Inc.",
           "b": "Walmart Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         },
         {
           "a": "NVIDIA Corporation",
           "b": "Walmart Inc.",
-          "identical_answers": 1,
+          "identical_answers": 0,
           "of": 10
         }
       ]

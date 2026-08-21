@@ -95,7 +95,7 @@ def load_qa(company_dir: pathlib.Path) -> list:
         raw = json.loads(_read(path))
     except Exception:                                       # noqa: BLE001
         return []
-    from intent_engine.pre100.capture import run_is_gone
+    from intent_engine.pre100.capture import not_an_answer, run_is_gone
     rows = []
     if isinstance(raw, dict):
         for question, value in raw.items():
@@ -117,7 +117,16 @@ def load_qa(company_dir: pathlib.Path) -> list:
     # have an analysis with that id" pages compare as a total collapse, which
     # is the most alarming number a collapse measurement can produce and is
     # entirely an artefact of a lost run.
-    live = [r for r in rows if not run_is_gone(r.get("answer") or "")]
+    # A FAILURE PAGE IS NOT AN ANSWER EITHER, and it arrives by a different
+    # route than a lost run: a harness that asks at the wrong path, a CSRF
+    # rejection, a rate limit. `capture.not_an_answer` names those, and this
+    # is the second place they must be refused -- an audit that trusted its
+    # input would score ten copies of "page not found" as a company giving
+    # one very consistent strategic reading.
+    live = [r for r in rows
+            if not run_is_gone(r.get("answer") or "")
+            and not not_an_answer(r.get("answer") or "",
+                                  r.get("status") or 200)]
     if rows and not live:
         return []
     return live
@@ -338,6 +347,40 @@ def normalise(text: str, company: str, *, whole_page: bool = False) -> str:
     return re.sub(r"\s+", " ", body).strip().lower()
 
 
+def answer_body(question: str, answer: str, company: str) -> str:
+    """One answer with its own question, the identity and the chrome removed.
+
+    THE QUESTION IS ECHOED IN EVERY ANSWER. The page renders the question as
+    its heading, so a distinctness measure over raw answers is measuring the
+    ten questions -- which are different by construction -- and will report
+    ten-out-of-ten distinct however identical the readings are. Measured: a
+    company reporting 10/10 distinct answers dropped to 5 or 6 once its own
+    question was removed, and the repeated sentence was the catch-all.
+
+    Cross-company similarity is not affected the same way (both sides echo
+    the same question), which is exactly why this defect survived: the
+    measure that was wrong was the one nobody was comparing against a
+    control.
+    """
+    body = normalise(answer or "", company)
+    asked = normalise(question or "", company)
+    if asked and asked in body:
+        body = body.replace(asked, " ")
+    return re.sub(r"\s+", " ", body).strip()
+
+
+def within_company_distinctness(rows: list, company: str) -> dict:
+    """How many DIFFERENT things this company said across its ten answers."""
+    bodies = [answer_body(r.get("question", ""), r.get("answer", ""), company)
+              for r in rows]
+    bodies = [b for b in bodies if b]
+    if not bodies:
+        return {"answers": 0, "distinct": 0, "ratio": None}
+    distinct = len(set(bodies))
+    return {"answers": len(bodies), "distinct": distinct,
+            "ratio": round(distinct / len(bodies), 3)}
+
+
 def similarity(a: str, b: str) -> float:
     return round(SequenceMatcher(None, a, b).ratio(), 3)
 
@@ -394,6 +437,12 @@ def audit_batch(capture_root: pathlib.Path) -> dict:
         answers = load_qa(company_dir)
         if answers:
             bundle["qa"] = answers
+        # §33. Reported PER COMPANY, because a wave can have healthy
+        # cross-company separation and still have every company repeating
+        # itself ten times -- they are different defects with different
+        # causes, and one number cannot carry both.
+        report["qa_within_company"] = within_company_distinctness(
+            answers, name)
         texts[name] = bundle
     return {"capture_root": str(capture_root),
             "companies": companies,

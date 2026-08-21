@@ -52,6 +52,10 @@ READY, FAILED, BLOCKED, TIMEOUT = "READY", "FAILED", "BLOCKED", "TIMEOUT"
 #: The run existed and then did not. A free preview spins down and restarts,
 #: and a restart clears in-memory guest sessions.
 RUN_LOST = "RUN_LOST"
+#: The run is alive and a response came back that is not an answer. Almost
+#: always this harness's own fault; it is a state so that it is impossible to
+#: mistake for the product's.
+UNREADABLE = "UNREADABLE"
 
 #: WHAT A DEAD RUN LOOKS LIKE FROM OUTSIDE. Measured: a canary wave captured
 #: sixteen valid routes per company and then ten ERROR PAGES per company as
@@ -64,12 +68,67 @@ RUN_GONE_MARKERS = (
     "does not have an analysis with that id",
     "that analysis is not available here",
     "analyses are kept per session",
+    # The recovery screen. It is a BETTER page than the 404 it replaced and
+    # it is still not an answer: a harness that stored it would report that
+    # every company gave the same strategic reading.
+    "was lost when the service restarted",
+)
+
+#: A response that is a product failure page rather than a strategic answer.
+#: Distinct from RUN_GONE: these say the run is fine and this REQUEST was not.
+#: Kept separate because the two have different causes and different fixes,
+#: and collapsing them is how a routing mistake in the harness would have
+#: been read as a reliability problem in the product.
+NOT_AN_ANSWER_MARKERS = (
+    "page not found",
+    "something went wrong on our side",
+    "that is not available to this session",
+    "invalid csrf token",
+    "too many analyses for now",
 )
 
 
 def run_is_gone(text: str) -> bool:
     low = (text or "").lower()
     return any(marker in low for marker in RUN_GONE_MARKERS)
+
+
+def not_an_answer(text: str, status: int = 200) -> str:
+    """Why this response is not a strategic answer, or "" if it is one.
+
+    MEASURED, AND IT WAS THE HARNESS. This module posted every board question
+    to `/runs/<id>/answer`, which is a GET-only route: the product's Q&A form
+    posts to `/runs/<id>/conversation`. Ten "answers" per company would have
+    been ten copies of "page not found", stored as answers and then compared
+    for similarity -- the fifth instrument defect in this programme and the
+    same shape as the four before it. An unrecognised page is named here so
+    it can never be counted downstream.
+    """
+    body = (text or "").strip()
+    if not body:
+        return "EMPTY_RESPONSE"
+    if status >= 400:
+        return f"HTTP_{status}"
+    low = body.lower()
+    for marker in NOT_AN_ANSWER_MARKERS:
+        if marker in low:
+            return "FAILURE_PAGE"
+    return ""
+
+
+def _restart_observed(before: dict, after: dict):
+    """Did the serving process change between these two samples?
+
+    Returns True, False, or None when either sample is missing -- an unknown
+    is not a no. A run that vanished while the boot id held steady is a
+    DIFFERENT defect from one that vanished across a restart, and reporting
+    both as "lost" is what sent a previous session hunting for an application
+    bug that was an instance replacement.
+    """
+    a, b = (before or {}).get("boot_id"), (after or {}).get("boot_id")
+    if not a or not b:
+        return None
+    return a != b
 
 
 def text_of(page: str) -> str:
@@ -128,6 +187,65 @@ class Session:
     def csrf(page: str) -> str:
         match = re.search(r'name="csrf" value="([^"]+)"', page)
         return match.group(1) if match else ""
+
+
+def process_identity(base: str = DEFAULT_BASE) -> dict:
+    """Which process is serving, right now. Cheap enough to call per company.
+
+    A restart is the one explanation for a lost run that the application
+    cannot report about itself -- the instance that would have logged it is
+    the instance that went away. Sampling this before and after each company
+    turns "the run disappeared" into "the run disappeared AND the boot id
+    changed", which is a measurement rather than a hypothesis.
+    """
+    try:
+        req = urllib.request.Request(base.rstrip("/") + "/version",
+                                     headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return dict(json.load(r).get("process") or {})
+    except Exception:                                       # noqa: BLE001
+        return {}
+
+
+class KeepWarm:
+    """Hold the preview awake for the duration of a wave.
+
+    NOT A WAY OF HIDING RESTARTS. A free instance is recycled after a period
+    of inactivity, and the wave's own pacing gap -- six minutes, which is the
+    demo quota -- is a period of inactivity. That is a CONFOUND: a run lost to
+    an idle recycle and a run lost to a crash look identical from outside, and
+    only one of them says anything about the product.
+
+    So the idle path is removed and the measurement kept: `restart_observed`
+    still records every boot-id change, and a restart seen while this is
+    running is a restart that idleness does not explain.
+
+    `/healthz` returns a constant and touches no storage; it is the cheapest
+    request the service serves.
+    """
+
+    def __init__(self, base: str = DEFAULT_BASE, every: float = 120.0):
+        import threading
+        self.base, self.every = base.rstrip("/"), every
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._beat, daemon=True)
+
+    def _beat(self) -> None:
+        while not self._stop.wait(self.every):
+            try:
+                req = urllib.request.Request(self.base + "/healthz",
+                                             headers={"User-Agent": UA})
+                urllib.request.urlopen(req, timeout=20).read()
+            except Exception:                               # noqa: BLE001
+                pass                # a missed beat is not worth stopping for
+
+    def __enter__(self):
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc):
+        self._stop.set()
+        return False
 
 
 def deployed_sha(base: str = DEFAULT_BASE) -> str:
@@ -199,7 +317,7 @@ def wait_for_run(session: Session, run_id: str, *, timeout: float = 480.0,
 
 
 def capture_company(name: str, cik: str = "", ticker: str = "", *,
-                    base: str = DEFAULT_BASE,
+                    base: str = DEFAULT_BASE, website: str = "",
                     root: pathlib.Path = None, sha: str = "") -> dict:
     """One company, end to end, through the customer flow. Never raises."""
     root = pathlib.Path(root or "docs/execution/v5/pre100_60/live_captures")
@@ -208,6 +326,10 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
     session = Session(base)
     result = {"company": name, "deployed_sha": sha, "status": FAILED,
               "run_id": "", "capture_path": str(cap.dir)}
+
+    result["process_before"] = process_identity(base)
+    cap.manifest["process_before"] = result["process_before"]
+    cap.flush()
 
     session.get("/")
     session.post("/demo", {})
@@ -219,7 +341,13 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
         cap.flush()
         return result
 
+    # The landing form takes a name OR a website; both are fields a customer
+    # fills in, so supplying either is still the customer flow. `website` is
+    # what makes this harness drivable against a build with no outbound
+    # network, which is where its own defects get found without live quota.
     form = {"csrf": csrf, "consent": "on", "company_name": name}
+    if website:
+        form["website"] = website
     if cik:
         form.update({"suggest_confirmed": name, "suggest_cik": cik})
     if ticker:
@@ -270,23 +398,49 @@ def capture_company(name: str, cik: str = "", ticker: str = "", *,
         # thing", which is exactly what a collapse measurement is looking
         # for — so it must be named here, not discovered downstream.
         if run_is_gone(ask):
-            result["status"] = RUN_LOST
-            result["run_lost_after_routes"] = True
-            result["answers_captured"] = len(answers)
-            cap.manifest.update({"status": RUN_LOST,
-                                 "run_lost_after_routes": True,
-                                 "answers_captured": len(answers)})
+            after = process_identity(base)
+            result.update({
+                "status": RUN_LOST, "run_lost_after_routes": True,
+                "answers_captured": len(answers), "process_after": after,
+                "restart_observed": _restart_observed(
+                    result.get("process_before") or {}, after)})
+            cap.manifest.update({
+                "status": RUN_LOST, "run_lost_after_routes": True,
+                "answers_captured": len(answers), "process_after": after,
+                "restart_observed": result["restart_observed"]})
             cap.flush()
             return result
         token = Session.csrf(ask) or csrf
+        # THE ROUTE THE PRODUCT'S OWN FORM POSTS TO. `/answer` is GET-only;
+        # posting there returned "page not found" and this harness would have
+        # stored it as the company's strategic answer. See `not_an_answer`.
         astatus, aurl, apage = session.post(
-            f"/runs/{run_id}/answer", {"csrf": token, "question": question},
-            ref=f"/runs/{run_id}")
+            f"/runs/{run_id}/conversation",
+            {"csrf": token, "question": question}, ref=f"/runs/{run_id}")
         body = text_of(apage)
         if run_is_gone(body):
-            result["status"] = RUN_LOST
+            after = process_identity(base)
+            result.update({
+                "status": RUN_LOST, "answers_captured": len(answers),
+                "process_after": after,
+                "restart_observed": _restart_observed(
+                    result.get("process_before") or {}, after)})
+            cap.manifest.update({
+                "status": RUN_LOST, "answers_captured": len(answers),
+                "process_after": after,
+                "restart_observed": result["restart_observed"]})
+            cap.flush()
+            return result
+        refused = not_an_answer(body, astatus)
+        if refused:
+            # Named, stored, and NOT counted as an answer. The company keeps
+            # every route it did render; the audit sees a gap where a gap is.
+            result["status"] = UNREADABLE
+            result["unreadable_because"] = refused
             result["answers_captured"] = len(answers)
-            cap.manifest.update({"status": RUN_LOST,
+            cap.manifest.update({"status": UNREADABLE,
+                                 "unreadable_because": refused,
+                                 "unreadable_sample": body[:400],
                                  "answers_captured": len(answers)})
             cap.flush()
             return result

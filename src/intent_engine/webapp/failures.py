@@ -46,6 +46,11 @@ DEPLOYMENT_VERSION_MISMATCH = "DEPLOYMENT_VERSION_MISMATCH"
 AWAITING_SOURCE_APPROVAL = "AWAITING_SOURCE_APPROVAL"
 SHARE_LINK_UNAVAILABLE = "SHARE_LINK_UNAVAILABLE"
 NOT_FOUND = "NOT_FOUND"
+#: The run existed, this session started it, and the service no longer
+#: holds it. Distinct from NOT_FOUND, which cannot tell a restart from a
+#: typo from another person's run id and so had to say the same
+#: unhelpful thing to all three.
+RUN_RESTART_LOST = "RUN_RESTART_LOST"
 #: The reader left something out and can fix it themselves. Distinct from every
 #: other category here, all of which are faults on OUR side.
 INPUT_INCOMPLETE = "INPUT_INCOMPLETE"
@@ -57,7 +62,8 @@ CATEGORIES = (
     ANALYSIS_INTERRUPTED, EVIDENCE_INSUFFICIENT, REASONING_WITHHELD,
     MALFORMED_REASONING, RENDERING_FAILED, PERSISTENCE_FAILED,
     DEPLOYMENT_VERSION_MISMATCH, AWAITING_SOURCE_APPROVAL,
-    SHARE_LINK_UNAVAILABLE, NOT_FOUND, INPUT_INCOMPLETE,
+    SHARE_LINK_UNAVAILABLE, NOT_FOUND, RUN_RESTART_LOST,
+    INPUT_INCOMPLETE,
     INTERNAL_FAILURE,
 )
 
@@ -189,6 +195,15 @@ _COPY = {
         "the analysis may have been cleared when the service restarted.",
         "Ask whoever shared it for a fresh link.",
         False),
+    RUN_RESTART_LOST: (
+        "This analysis was lost when the service restarted",
+        "The reading itself is gone; nothing about it was wrong.",
+        "This preview keeps completed analyses on the instance that produced "
+        "them, and that instance was replaced. Nothing you entered was "
+        "invented or mis-read \u2014 the work simply is not here any more.",
+        "Run the same company again. It takes about as long as the first "
+        "time and reads the same public sources.",
+        True),
     NOT_FOUND: (
         "That analysis is not available here",
         "Nothing could be opened.",
@@ -246,6 +261,9 @@ _WHAT_WORKED = {
     NOT_FOUND: "Your session is active, and nothing you have already run was "
                "affected.",
     SHARE_LINK_UNAVAILABLE: "The link was received and checked.",
+    RUN_RESTART_LOST: "Your session is intact and the company you "
+                      "entered is known, so the run can be started "
+                      "again without retyping anything.",
     PROVIDER_CREDIT_EXHAUSTED: "The company was identified and its public "
                                "evidence was retrieved.",
     PROVIDER_RATE_LIMITED: "The company was identified and retrieval had "

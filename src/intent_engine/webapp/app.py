@@ -50,6 +50,7 @@ from intent_engine.strategic_intelligence import evidence_classes as _EC
 from intent_engine.webapp import acceptance as _acc
 from intent_engine.webapp import autocomplete as _AC
 from intent_engine.webapp import failures as _failures
+from intent_engine.webapp import run_recovery as _recovery
 from intent_engine.webapp.auth import AuthService, PASSWORD_RESET_STATUS
 from intent_engine.webapp.records import WebAppError, WebEvent
 from intent_engine.webapp.sharing import SharingService
@@ -643,6 +644,11 @@ class WebApp:
         self._analysis_pool = _Pool(max_workers=1,
                                     thread_name_prefix="analysis")
         self._analysis_lock = _threading.Lock()
+        # Per-request state that must not leak between concurrent
+        # requests. `claim` is this browser's signed last-run claim;
+        # a plain attribute on `self` would let one visitor's cookie
+        # decide what another visitor is told.
+        self._request = _threading.local()
         self._analysis_inflight: dict = {}   # run_id -> started monotonic
         self._analysis_attempts: dict = {}   # run_id -> executions started
         # Instrumented so duplicate execution is measurable rather than
@@ -707,6 +713,19 @@ class WebApp:
         return [payload]
 
     def _route(self, environ):
+        # CLEARED FIRST, POPULATED LATER. Worker threads are reused, so a
+        # claim left behind by the previous request is the previous BROWSER's
+        # claim. Two routes below return before the cookie is read (the
+        # untrusted-host refusal and the machine dossier route), and neither
+        # reads it today.
+        #
+        # DEFENCE IN DEPTH, AND SAID SO PLAINLY. Deleting this line is a
+        # mutation that runs GREEN, because every path that reads the claim
+        # assigns it a few lines further down; it is not a guard and is not
+        # counted as one in `break_proofs_run_durability.py`. It exists so
+        # that a future early return which reads the claim inherits None
+        # rather than another visitor's.
+        self._request.claim = None
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -727,6 +746,18 @@ class WebApp:
         # `external_intel/dossier_ingest`.
         if path == "/internal/strategic-dossier" and method == "POST":
             return self._ingest_strategic_dossier(environ)
+
+        # THE CLAIM THIS BROWSER CARRIES ABOUT ITS OWN LAST RUN.
+        #
+        # Read once, here, and kept on a thread-local rather than on `self` or
+        # on the shared session dict: two requests can be in flight at the
+        # same time and they do not necessarily come from the same browser.
+        # It is only ever consulted AFTER an ownership check has already
+        # failed (`_no_such_run`), so it can widen what a reader is TOLD about
+        # a run that is already gone and can never widen access to one that
+        # still exists. See `webapp.run_recovery`.
+        self._request.claim = _recovery.verify(
+            self.config.secret, self._cookie(environ, _recovery.COOKIE_NAME))
 
         sid = self._cookie(environ, "sid")
         session = self.auth.session(sid) if sid else None
@@ -787,7 +818,15 @@ class WebApp:
             return self._ready()
         if path == "/version":
             from intent_engine._version import version_info
-            return self._ok_json(version_info())
+            from intent_engine.webapp import storage_state as _ss
+            # THE COMMIT AND THE PROCESS, in one cheap call. `/readyz` folds
+            # every append-only store to answer, so it is the wrong place to
+            # poll while an analysis is running; this route touches nothing.
+            # A caller that sees `process.boot_id` change has watched a
+            # restart, which is the difference between "the product lost my
+            # run" and "the instance was replaced under me".
+            return self._ok_json(dict(version_info(),
+                                      process=_ss.process_identity()))
         if path == "/internal/acceptance" and method == "POST":
             return self._acceptance(environ)
         if path == "/internal-impact" and method == "GET":
@@ -1226,6 +1265,25 @@ class WebApp:
                             f"sid=deleted; Max-Age=0; Path=/{secure}"))
         return "303 See Other", headers, ""
 
+    def _with_run_claim(self, response, session, run_id, company=""):
+        """Attach this session's signed claim on `run_id` to any response.
+
+        Minted the moment a run is opened, because that is the only moment
+        the company name, the run id and the owner are all in hand -- and the
+        instance that knows them may not exist by the time the reader comes
+        back. Nothing is attached for a session-less request; there would be
+        no owner to bind the claim to.
+        """
+        if session is None or not session.get("user_id") or not run_id:
+            return response
+        status, headers, body = response
+        token = _recovery.mint(self.config.secret,
+                               user_id=session["user_id"], run_id=run_id,
+                               company=company)
+        return status, list(headers) + [
+            ("Set-Cookie", _recovery.cookie_header(
+                token, secure=self.config.cookie_secure))], body
+
     def _error_page(self, code, message):
         """A reader-facing failure. Never a status line and an exception.
 
@@ -1327,6 +1385,94 @@ class WebApp:
     def _owned(self, session, run_id):
         owner = self.web_store.owner_of(run_id)
         return owner is not None and owner == session["user_id"]
+
+    def _run_claim(self, session, run_id):
+        """This browser's signed proof that it started `run_id`, or None.
+
+        Only ever meaningful once ownership has already failed. See
+        `webapp.run_recovery` for why the proof is carried by the browser
+        rather than looked up: the lookup is exactly what a restart destroys.
+        """
+        if session is None:
+            return None
+        claim = getattr(self._request, "claim", None)
+        if _recovery.proves(claim, user_id=session.get("user_id") or "",
+                            run_id=run_id):
+            return claim
+        return None
+
+    def _missing_run_state(self, session, run_id):
+        """Which of the missing-run states this is. Never "unavailable".
+
+        The failure this replaces answered `RUN_NOT_FOUND` to three different
+        situations -- a restart, a typo, and another person's run id -- and so
+        told a guest whose analysis had just been destroyed the same thing it
+        tells a stranger probing ids. They are not the same event and they do
+        not have the same next step.
+        """
+        owner = self.web_store.owner_of(run_id)
+        if owner is not None:
+            if session is not None and owner == session.get("user_id"):
+                return _recovery.RUN_READY          # owned; refused elsewhere
+            return _recovery.RUN_NOT_OWNED
+        if self._run_claim(session, run_id) is not None:
+            return _recovery.RUN_RESTART_LOST
+        return _recovery.RUN_NOT_FOUND
+
+    def _no_such_run(self, session, run_id):
+        """The response for a run this session cannot open.
+
+        EVERY ANALYSIS TERMINATES VISIBLY. A run that the service no longer
+        holds is a terminal state of the customer's journey, so it gets a
+        page that names what happened and offers the one action that can
+        still work -- running the same company again -- instead of a 404 that
+        reads as "you are lost".
+
+        Isolation is unchanged. `RUN_NOT_OWNED` and `RUN_NOT_FOUND` both get
+        exactly the refusal they got before; only the case where THIS session
+        can prove it started THIS run is treated differently, and by then the
+        run is gone from the service either way.
+        """
+        state = self._missing_run_state(session, run_id)
+        if state != _recovery.RUN_RESTART_LOST:
+            return self._error_page(404, "no such run for this account")
+        claim = self._run_claim(session, run_id) or {}
+        return self._lost_run_page(session, claim.get("co") or "")
+
+    def _lost_run_page(self, session, company):
+        """The terminal recovery screen. One explanation, two ways forward."""
+        explained = _failures.explain(_failures.RUN_RESTART_LOST)
+        csrf = session["csrf"] if session else ""
+        named = _e(company) if company else "that company"
+        # RETRY IS A REAL RE-RUN, not a link back to an empty form. The
+        # company name travelled on the signed claim, so the reader does not
+        # retype it and cannot be silently switched to a different company.
+        retry = (f'<form action="/analyze" method="post">'
+                 f'<input type="hidden" name="csrf" value="{_e(csrf)}">'
+                 f'<input type="hidden" name="consent" value="on">'
+                 f'<input type="hidden" name="company_name" '
+                 f'value="{_e(company)}">'
+                 f'<button type="submit" class="cta">Analyse {named} again'
+                 f'</button></form>') if company else ''
+        body = (
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,'
+            f'initial-scale=1">'
+            f'<title>{_e(explained["title"])}</title></head><body>'
+            f'{self._nav(session, csrf)}'
+            f'<main class="brief"><h1>{_e(explained["title"])}</h1>'
+            f'<p><strong>What did work.</strong> '
+            f'{_e(explained["what_worked"])}</p>'
+            f'<p><strong>What did not.</strong> '
+            f'{_e(explained["what_failed"])}</p>'
+            f'<p><strong>Why.</strong> {_e(explained["why"])} '
+            f'Nothing was invented.</p>'
+            f'<p><strong>What to do.</strong> {_e(explained["next_step"])}</p>'
+            f'{retry}'
+            f'<p><a href="/demo">Analyse a different company</a></p>'
+            f'</main></body></html>')
+        return "200 OK", [("Content-Type", "text/html; charset=utf-8")], \
+            self._stylize(body)
 
     def _result(self, run_id):
         """The deterministic demo result for an owned run (idempotent rerun).
@@ -1786,11 +1932,16 @@ class WebApp:
                 # request thread with everything after it.
                 if self._analysis_async:
                     self._schedule_analysis(session["user_id"], run_id)
-                    return self._redirect(f"/runs/{run_id}/progress")
+                    return self._with_run_claim(
+                        self._redirect(f"/runs/{run_id}/progress"),
+                        session, run_id, company_name)
                 self.ci.discover(run_id)
-                return self._autorun(session, run_id)
+                return self._with_run_claim(self._autorun(session, run_id),
+                                            session, run_id, company_name)
             self.ci.discover(run_id)
-            return self._redirect(f"/runs/{run_id}/sources")
+            return self._with_run_claim(
+                self._redirect(f"/runs/{run_id}/sources"),
+                session, run_id, company_name)
         result = self.fi.run(company_name=DEMO_COMPANY_NAME,
                              website=f"https://{DEMO_DOMAIN}",
                              claims_by_section=demo_claims(), as_of=DEMO_AS_OF)
@@ -1814,7 +1965,9 @@ class WebApp:
         elif existing != session["user_id"]:
             # deterministic demo produces one run id; never reassign it
             return self._error_page(403, "this run belongs to another account")
-        return self._redirect(f"/runs/{run_id}/progress")
+        return self._with_run_claim(
+            self._redirect(f"/runs/{run_id}/progress"), session, run_id,
+            DEMO_COMPANY_NAME)
 
     def _name_choice_page(self, session, entry, form):
         """One name, several real companies. Ask, once, before any work.
@@ -1993,7 +2146,7 @@ class WebApp:
 
     def _progress(self, session, run_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         real = self._is_real_run(run_id)
         if real:
             status = self.ci.store.run_state(run_id) or "VALIDATING_COMPANY"
@@ -2145,10 +2298,18 @@ class WebApp:
                     # to make unnecessary. The storage limit is real and still
                     # disclosed; the navigation advice is gone, because the
                     # page redirects.
-                    f'<p class="fineprint">Preview note: runs are held in '
-                    f'memory, so a restart can interrupt one. If that '
-                    f'happens this page says so rather than waiting '
-                    f'forever.</p>')
+                    # THE NOTE STAYS UNTIL THE STORAGE CHANGES. Removing it
+                    # would be a promise this deployment cannot keep --
+                    # `/readyz` measures the runtime root as ephemeral, so a
+                    # replaced instance really does take completed analyses
+                    # with it. What changed is the ENDING: losing a run is no
+                    # longer a dead end, so the note now says what happens
+                    # instead of only what goes wrong.
+                    f'<p class="fineprint">Preview note: this service keeps '
+                    f'analyses on the instance that produced them, so a '
+                    f'restart can interrupt one. If that happens you are '
+                    f'told, and offered the same company again in one '
+                    f'click \u2014 never left waiting.</p>')
         return self._html(head + tail + '</main></body></html>')
 
     #: §11. What is being assembled, in the order a person would build it.
@@ -2675,7 +2836,7 @@ class WebApp:
 
     def _run_page(self, session, run_id, *, layer="default"):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         if self._is_real_run(run_id):
             # A FAILED real-company run has no report. Render an honest
             # failed-run page — never redirect back to source approval and
@@ -2917,7 +3078,7 @@ class WebApp:
         budget inside it is finite, so it cannot become a loop.
         """
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         # A FAILED or INTERRUPTED run is retried as a NEW ATTEMPT on the
         # worker -- retry must not reintroduce the blocking request the async
         # change just removed. Bounded, and a no-op while an attempt is live,
@@ -3444,7 +3605,7 @@ class WebApp:
         the learning surface can actually compare against.
         """
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         meta = self.ci.run_meta(run_id) or {}
         # THE OLD RUN'S RESULT IS KEPT. This popped it, which was correct only
         # while a fresh analysis reused the same run id -- clearing the cache
@@ -3524,7 +3685,7 @@ class WebApp:
         rather than by building a second drawer. The renderer is untouched.
         """
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         from intent_engine.demo_dossier.store import company_key
         meta = self.ci.run_meta(run_id) or {}
         name = str(meta.get("company_name") or "")
@@ -4070,7 +4231,7 @@ class WebApp:
         # /slides and /sources, and was simply missing on these three -- so
         # the protection looked present and was not.
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         # The same availability question the other run routes ask. This one
         # answered 200 with a full dossier while the primary screen answered
         # 400, which is how the two surfaces came to contradict each other.
@@ -4287,7 +4448,7 @@ class WebApp:
         across from the run's own decision below rather than left empty.
         """
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         avail = self._availability(run_id)
         if avail["in_flight"]:
             return self._redirect(f"/runs/{run_id}/progress")
@@ -4361,7 +4522,7 @@ class WebApp:
         route ends up serving an operator page.
         """
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         from intent_engine.founder_brief import layers as fl
         from intent_engine.founder_brief import render as fr
         brief, report, name = self._founder_layers(run_id)
@@ -4510,7 +4671,7 @@ class WebApp:
         Returns a response to send INSTEAD of the step, or None to proceed.
         """
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         availability = self._availability(run_id)
         if availability.get("in_flight"):
             return self._redirect(f"/runs/{run_id}/progress")
@@ -5881,7 +6042,7 @@ class WebApp:
 
     def _evidence(self, session, run_id, claim_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         result = self._result(run_id)
         for section in result.get("sections", []):
             for card in section.get("cards", []):
@@ -6031,7 +6192,7 @@ class WebApp:
 
     def _converse(self, session, run_id, form):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         question = form.get("question", "")
         # Prefer a strategic answer when the run has a strategic report and the
         # question maps to one of its hypotheses: reasoning chain + citations +
@@ -6243,7 +6404,7 @@ class WebApp:
 
     def _report(self, session, run_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         preview = render_report_preview(self._result(run_id))
         sections = "".join(f'<li>{_e(s["kind"])}</li>'
                            for s in preview.get("sections", []))
@@ -6263,7 +6424,7 @@ class WebApp:
             return self._error_page(403, "sharing is not available in demo "
                                          "mode")
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         token = self.sharing.create_share(run_id=run_id,
                                           owner_id=session["user_id"])
         share_hash = __import__("hashlib").sha256(token.encode()).hexdigest()
@@ -6290,7 +6451,7 @@ class WebApp:
             return self._error_page(403, "sharing is not available in demo "
                                          "mode")
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         self.sharing.revoke_share(token_hash=form.get("token_hash", ""),
                                   owner_id=session["user_id"])
         body = (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -6434,7 +6595,7 @@ class WebApp:
 
     def _feedback(self, session, run_id, form):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         csrf = session["csrf"]
         if not self.feedback_available():
             return self._error_page(
@@ -7451,7 +7612,7 @@ class WebApp:
     def _sources_page(self, session, run_id, *, selected_ids=None,
                       message=None, pasted=None):
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         meta = self.ci.run_meta(run_id)
         candidates = self.ci.store.candidates(run_id)
         approval = self.ci.store.approval(run_id)
@@ -7576,7 +7737,7 @@ class WebApp:
 
     def _sources_approve(self, session, run_id, form):
         if not self._owned(session, run_id) or not self._is_real_run(run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         if form.get("approve_consent") is None:
             return self._error_page(400, "explicit approval is required")
         # parse_qs collapsed to first value in _form; re-read all checkboxes
@@ -7628,7 +7789,7 @@ class WebApp:
 
     def _source_detail(self, session, run_id, source_id):
         if not self._owned(session, run_id):
-            return self._error_page(404, "no such run for this account")
+            return self._no_such_run(session, run_id)
         for record in self.ci.store.retrieved(run_id):
             if record["source_id"] == source_id:
                 body = (f'<!doctype html><html lang="en"><head>'
@@ -7953,9 +8114,22 @@ class WebApp:
             )
             ephemeral = (self._storage["durability"] == _EPHEMERAL)
             degraded = ephemeral and self.config.env == "production"
+            from intent_engine.webapp import storage_state as _ss
             payload = {"status": "degraded" if degraded else "ready",
                        "env": self.config.env,
                        "runtime_root": str(self._runtime_root),
+                       # WHO THIS PROCESS IS. A client that sees `boot_id`
+                       # change between two requests has WATCHED a restart --
+                       # which `boot_count` structurally cannot report, since
+                       # its ledger dies with the instance whose restart is in
+                       # question. This is how a lost run gets attributed to a
+                       # restart instead of guessed at.
+                       "process": _ss.process_identity(),
+                       # Is a persistent disk attached but unused? "No disk"
+                       # and "disk attached, RUNTIME_ROOT never pointed at it"
+                       # produce identical symptoms and have very different
+                       # fixes. Looked at, never acted on.
+                       "persistent_mounts": _ss.persistent_mount_candidates(),
                        "storage": {
                                       "durability": self._storage["durability"],
                                       "writable": self._storage["writable"],
