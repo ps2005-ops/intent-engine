@@ -30,6 +30,15 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 
 #: The six customer steps, in the order the product walks them.
 STEPS = ("intro", "slides", "full", "story", "history", "connect")
+
+#: A progress poll answers in well under a second when the service is well.
+#: The session-wide 180s applies to ANALYSIS routes, which legitimately take
+#: minutes; applying it to a poll meant one hung request consumed three
+#: minutes and then killed the capture.
+POLL_TIMEOUT = 45.0
+#: How many consecutive transport errors on the progress page are needed
+#: before the run is believed dead. One is not evidence of anything.
+MAX_POLL_ERRORS = 3
 #: Routes reachable from the steps, captured for the audit.
 EXTRA = ("sources", "evidence", "report", "brief")
 
@@ -177,11 +186,12 @@ class Session:
     #: mechanisms had to be falsified one at a time from the outside.
     last_gate: str = ""
 
-    def get(self, path: str):
+    def get(self, path: str, timeout: float = None):
         req = urllib.request.Request(self.base + path,
                                      headers={"User-Agent": UA})
         try:
-            with self.opener.open(req, timeout=self.timeout) as r:
+            with self.opener.open(req,
+                                  timeout=timeout or self.timeout) as r:
                 raw = r.read()
                 self.last_status = r.status
                 self.last_headers = dict(r.headers)
@@ -413,8 +423,10 @@ def wait_for_run(session: Session, run_id: str, *, timeout: float = 480.0,
     """
     started = time.time()
     samples = []
+    transport_errors = 0
     while time.time() - started < timeout:
-        status, url, page = session.get(f"/runs/{run_id}/progress")
+        status, url, page = session.get(f"/runs/{run_id}/progress",
+                                        timeout=POLL_TIMEOUT)
         # EVERY SAMPLE, not the first three. The stage sentence is the only
         # thing a guest-side harness can see of retrieval-versus-composition,
         # so a truncated sample list makes the dominant phase unknowable --
@@ -439,8 +451,29 @@ def wait_for_run(session: Session, run_id: str, *, timeout: float = 480.0,
                 row["final_url"] = url
                 row["head"] = (page or "")[:300]
             samples.append(row)
+        # ONE DROPPED POLL IS NOT A DEAD ANALYSIS.
+        #
+        # MEASURED: Adobe on 10d1620 and Meta on b37bee2 both ended FAILED
+        # with `status=0` at t=219.1s and t=218.8s -- one progress poll
+        # hanging for the session's 180-second socket timeout, on runs that
+        # were progressing normally ("Stress-testing the reading" at t=33).
+        # Adobe had completed the SAME analysis in 229s one SHA earlier.
+        #
+        # So two live companies were scored as failures by the instrument,
+        # and each one cost an analysis out of a quota of ten per hour. The
+        # server not answering ONE poll says nothing about the run; the
+        # run page is the thing that says whether the run is alive.
+        #
+        # The poll timeout is now short, because a progress page that takes
+        # 45 seconds is already telling us something, and a transport error
+        # has to happen repeatedly before it is believed.
         if status in (0, 500, 502, 503):
-            return FAILED, url, round(time.time() - started), samples
+            transport_errors += 1
+            if transport_errors >= MAX_POLL_ERRORS:
+                return FAILED, url, round(time.time() - started), samples
+            time.sleep(poll)
+            continue
+        transport_errors = 0
         if "/progress" not in url:
             return READY, url, round(time.time() - started), samples
         low = text_of(page).lower()
