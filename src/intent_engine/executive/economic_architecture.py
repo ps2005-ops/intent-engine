@@ -115,17 +115,98 @@ def _clean(text: str) -> str:
     return text
 
 
-def _clause(text: str, pattern: str) -> str:
-    match = re.search(pattern, text)
-    if not match:
-        return ""
-    found = _clean(match.group(match.lastindex or 0))
-    if not (_MIN_CLAUSE <= len(found)):
-        return ""
-    if len(found) > _MAX_CLAUSE:
-        cut = found[:_MAX_CLAUSE].rsplit(",", 1)[0]
-        found = cut if len(cut) >= _MIN_CLAUSE else found[:_MAX_CLAUSE]
-    return found
+#: What a company offers its STAFF is not what it sells.
+#:
+#: MEASURED LIVE on the deployed preview, f8c183f. Meta's economic engine
+#: rendered as "Meta Platforms, Inc. is a software platform business that
+#: runs on competitive compensation and a wide range of benefits, including
+#: many learning and development resources" -- the Human Capital section of
+#: its own 10-K, read as what Meta sells, in the first sentence a chief
+#: executive reads. `We offer ...` matched, and Item 1 states the employment
+#: offer before it states the product one.
+#:
+#: The verb was already guarded here ("operate IS NOT SELLING"); the OBJECT
+#: was not, so the same defect simply arrived through a different verb.
+#:
+#: "benefits" is deliberately NOT on its own list: an insurer sells benefits
+#: to members, and a stoplist that refused the word would refuse a real
+#: company's real product. It counts only alongside an employment marker,
+#: which is what makes the sentence about staff.
+_EMPLOYMENT_OBJECT = (
+    "compensation", "employee", "personnel", "workforce",
+    "learning and development", "paid time off", "parental leave",
+    "401(k)", "retirement", "equity award", "stock-based award",
+    "family care", "time away", "wellness", "resource groups",
+)
+
+
+#: A thing a company MIGHT do is not a thing it sells. Meta's filing has no
+#: product sentence in this grammar at all, so vetoing the Human Capital ones
+#: and continuing walked straight into Item 1A -- "we ... from time to time
+#: have had, and in the future may have, quality issues resulting from the
+#: design or manufacture of the products". A veto that only moves the wrong
+#: answer along is not a repair.
+_HYPOTHETICAL = (" may ", " could ", " would ", " might ", "from time to time",
+                 "adversely", "if we ", "no assurance")
+
+#: WHERE THE BUSINESS IS DESCRIBED, AND WHERE IT IS NOT.
+#:
+#: This is the real discriminator, and it is POSITIONAL rather than lexical.
+#: MEASURED on Meta's 2025 10-K: "Human Capital" occurs exactly once, at
+#: character 55,533, and ALL FIVE employment matches fall between 55,962 and
+#: 59,041 -- immediately after it. Every risk-factor match is past 159,000,
+#: well inside Item 1A. The Business section itself contains no sentence of
+#: this shape, which means EMPTY is the honest answer for Meta and the class
+#: prior plus its revenue basis is what the reader should get.
+#:
+#: A word list would have to grow once per filing; the heading does not.
+_HUMAN_CAPITAL = re.compile(r"(?i)\bhuman capital\b")
+
+#: Far enough in that a table-of-contents line cannot truncate the section.
+_MIN_BUSINESS_TEXT = 2000
+
+
+def _business_text(text: str) -> str:
+    """Item 1 up to the Human Capital subsection, where there is one."""
+    match = _HUMAN_CAPITAL.search(text or "")
+    if match and match.start() > _MIN_BUSINESS_TEXT:
+        return text[:match.start()]
+    return text
+
+
+def _is_employment_offer(clause: str) -> bool:
+    """Is this clause the offer made to STAFF rather than to customers?"""
+    low = (clause or "").lower()
+    return any(marker in low for marker in _EMPLOYMENT_OBJECT)
+
+
+def _is_not_a_product(clause: str) -> bool:
+    """Vetoes for `what_is_sold`: staff offers and hypotheticals."""
+    low = f" {(clause or '').lower()} "
+    return (_is_employment_offer(clause)
+            or any(marker in low for marker in _HYPOTHETICAL))
+
+
+def _clause(text: str, pattern: str, reject=None) -> str:
+    """The first clause this pattern finds that `reject` does not veto.
+
+    ITERATES rather than taking `re.search`'s first hit. A filing states many
+    things with the same grammar, and the first one is not always the one
+    meant -- when the earliest "We offer ..." is the employment offer, the
+    product sentence is usually still there, further down. Vetoing without
+    continuing would trade a wrong answer for an empty one.
+    """
+    for match in re.finditer(pattern, text):
+        found = _clean(match.group(match.lastindex or 0))
+        if not (_MIN_CLAUSE <= len(found)):
+            continue
+        if len(found) > _MAX_CLAUSE:
+            cut = found[:_MAX_CLAUSE].rsplit(",", 1)[0]
+            found = cut if len(cut) >= _MIN_CLAUSE else found[:_MAX_CLAUSE]
+        if reject is not None and reject(found):
+            continue
+        return found
+    return ""
 
 
 _SEGMENTS = re.compile(
@@ -164,6 +245,17 @@ def _segment_names(count_word: str, listing: str) -> tuple:
     tail = [_clean(x) for x in re.split(r"\s+and\s+", last, maxsplit=need)]
     parts = [x for x in head + tail if x]
     return tuple(parts) if len(parts) == want else ()
+
+#: Per-field vetoes. Only `what_is_sold` needs one today, and it is a map
+#: rather than a special case in the loop so the next field that needs one
+#: does not become a second `if`.
+_REJECT = {"what_is_sold": _is_not_a_product}
+
+#: Fields that may only be read from the Business section. The others must
+#: not be scoped: `margin_basis` and `capital_basis` are stated in MD&A,
+#: which is past every boundary above, and cutting there would empty two
+#: fields that were being read correctly.
+_BUSINESS_ONLY = ("what_is_sold",)
 
 _FIELDS = (
     # "operate" IS NOT SELLING. It matched "We operate in a very
@@ -305,8 +397,10 @@ def architecture_of(documents, *, company: str = "",
                                    match.group("names"))
             segments = tuple(n for n in names if 2 < len(n) <= 60)[:8]
         found = {}
+        business = _business_text(text)
         for name, pattern in _FIELDS:
-            clause = _clause(text, pattern)
+            clause = _clause(business if name in _BUSINESS_ONLY else text,
+                             pattern, reject=_REJECT.get(name))
             if clause:
                 found[name] = clause
         found.update({k: v for k, v in _engines(text, segments).items() if v})
