@@ -32,7 +32,21 @@ from __future__ import annotations
 from html import escape as _e
 from typing import Optional
 
-CSS = """
+#: WRAPPED, like every sibling it is concatenated with.
+#:
+#: MEASURED on Meta's live `/full` at b0ec8cb. `app.py` builds the page as
+#: `BRIEF_CSS + NARRATIVE_CSS + CHART_CSS + _cb.CSS + render_dossier(...)`.
+#: The other three constants each open with `<style>`; this one did not, so
+#: `_stylize` hoisted those three into <head> and left this one exactly where
+#: it sat -- as TEXT, immediately after `<main>`:
+#:
+#:     <main> .challenge{border:1px solid var(--rule);border-radius:10px; ...
+#:
+#: Two consequences, and the second is the worse one: every reader, text
+#: extractor and screen reader got a stylesheet as the opening content of the
+#: analysis, AND the rules never applied, so the belief-challenge card has
+#: been rendering unstyled on every company.
+CSS = """<style>
 .challenge{border:1px solid var(--rule);border-radius:10px;padding:1rem 1.15rem;
   margin:1.5rem 0;background:var(--surface-2)}
 .challenge h2{margin:0 0 .35rem;font-size:1.05rem}
@@ -47,6 +61,7 @@ CSS = """
   margin-left:.4rem;vertical-align:middle}
 @media (max-width:640px){.challenge dl{grid-template-columns:1fr;gap:.15rem .5rem}
   .challenge dt{margin-top:.6rem}}
+</style>
 """
 
 
