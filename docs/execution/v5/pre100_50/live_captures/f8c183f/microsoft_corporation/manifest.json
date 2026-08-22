@@ -1,0 +1,15 @@
+{
+ "company": "Microsoft Corporation",
+ "deployed_sha": "f8c183f",
+ "captured_at": "2026-08-22T04:37:19Z",
+ "run_id": "01M0KVJRV5J2EVJNZ5AHNSQ5C6",
+ "outcome": "",
+ "routes": {},
+ "seconds": 579,
+ "reliability": {
+  "connection_reset": 0,
+  "quota_block": false,
+  "retry_required": 0,
+  "manual_recovery": 0
+ }
+}

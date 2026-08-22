@@ -1,0 +1,65 @@
+[
+ {
+  "company": "Meta Platforms, Inc.",
+  "seconds": 535.3,
+  "run_id": "01M0KVJRVATJS94DNEN3QMYMDD",
+  "outcome": "",
+  "error": "",
+  "core_mean": 2.6,
+  "core_min": 0
+ },
+ {
+  "company": "Amazon.com, Inc.",
+  "seconds": 0.9,
+  "run_id": "",
+  "outcome": "",
+  "error": "analyze did not open a run (HTTP 500)",
+  "core_mean": null,
+  "core_min": null
+ },
+ {
+  "company": "Cloudflare, Inc.",
+  "seconds": 0.9,
+  "run_id": "",
+  "outcome": "",
+  "error": "analyze did not open a run (HTTP 500)",
+  "core_mean": null,
+  "core_min": null
+ },
+ {
+  "company": "JPMorgan Chase & Co.",
+  "seconds": 0.9,
+  "run_id": "",
+  "outcome": "",
+  "error": "analyze did not open a run (HTTP 500)",
+  "core_mean": null,
+  "core_min": null
+ },
+ {
+  "company": "The Goldman Sachs Group, Inc.",
+  "seconds": 0.9,
+  "run_id": "",
+  "outcome": "",
+  "error": "analyze did not open a run (HTTP 500)",
+  "core_mean": null,
+  "core_min": null
+ },
+ {
+  "company": "Caterpillar Inc.",
+  "seconds": 0.9,
+  "run_id": "",
+  "outcome": "",
+  "error": "analyze did not open a run (HTTP 500)",
+  "core_mean": null,
+  "core_min": null
+ },
+ {
+  "company": "Microsoft Corporation",
+  "seconds": 587.5,
+  "run_id": "01M0KVJRV5J2EVJNZ5AHNSQ5C6",
+  "outcome": "",
+  "error": "",
+  "core_mean": 2.6,
+  "core_min": 0
+ }
+]

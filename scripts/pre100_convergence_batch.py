@@ -196,7 +196,13 @@ def main(argv=None) -> int:
     ap.add_argument("outdir")
     ap.add_argument("--per-window", type=int, default=10)
     ap.add_argument("--window", type=int, default=3600)
-    ap.add_argument("--concurrency", type=int, default=2)
+    # ONE AT A TIME BY DEFAULT. Two concurrent nine-minute analyses on the
+    # throttled free instance preceded every founder surface of BOTH runs
+    # answering HTTP 500, and /analyze answering 500 to the next five
+    # visitors. Whatever the server-side cause, the harness should not be
+    # the thing that creates that load against a preview §20 says to respect
+    # rather than hammer.
+    ap.add_argument("--concurrency", type=int, default=1)
     ap.add_argument("--only", default="")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args(argv)
@@ -219,7 +225,12 @@ def main(argv=None) -> int:
         log("REFUSING: /version did not answer, so the SHA under test is "
             "unknown. §18 requires all fifty on ONE deployed SHA.")
         return 2
-    log(f"deployed_sha={sha}")
+    # A RUN-SCOPED TOKEN IN BOTH BANNERS. `batch.log` is appended across
+    # invocations, so "wait until BATCH END appears" matched the PREVIOUS
+    # run's line the instant a new batch started -- reporting a canary
+    # complete while it was still on its first company.
+    batch_id = time.strftime("%H%M%S", time.gmtime())
+    log(f"BATCH START {batch_id} deployed_sha={sha}")
     # A COMMA IS PART OF THE NAME. "Cloudflare, Inc." and "Meta Platforms,
     # Inc." both carry one, so splitting the selector on commas turned a
     # three-company canary into a one-company canary silently -- and a
@@ -243,6 +254,7 @@ def main(argv=None) -> int:
     window = Window(args.per_window, args.window)
     queue = collections.deque(todo)
     results = []
+    failures: list = []
     stop = threading.Event()
 
     def progress() -> None:
@@ -280,11 +292,38 @@ def main(argv=None) -> int:
             # A QUOTA PAGE IS NOT A CAPTURE. §21 says interrupt for quota
             # exhaustion; scoring the quota page as the product would put a
             # defect on the matrix that belongs to the harness.
+            # A RUN THAT NEVER OPENED IS NOT A CAPTURE. It was logged as
+            # "DONE ... in 1s" beside genuine nine-minute analyses, and
+            # scored, which puts a zero on the matrix that belongs to the
+            # service rather than to the company.
+            if row.get("error") and not row.get("run_id"):
+                log(f"NO RUN  {name}: {row['error']}")
+                with lock:
+                    failures.append(name)
+                    if len(failures) >= 3:
+                        log("three consecutive failures to open a run; "
+                            "stopping rather than burning the universe")
+                        stop.set()
+                continue
+            with lock:
+                failures.clear()
             if quota_blocked(row):
                 log(f"QUOTA reached on {name}; stopping the batch")
                 stop.set()
                 return
             company_dir = outdir / _slug(name)
+            company_dir.mkdir(parents=True, exist_ok=True)
+            # PERSIST THE FAILURE, NOT JUST THE SUCCESS.
+            #
+            # `run_company` writes run.json only on the path that opens a
+            # run. Five companies came back "analyze did not open a run
+            # (HTTP 500)" and the row carrying `entry_text` -- the page the
+            # service actually returned -- was discarded, leaving a manifest
+            # with no run_id and nothing to diagnose from. A failed capture
+            # is the one you most need the bytes for.
+            if not (company_dir / "run.json").exists():
+                (company_dir / "run.json").write_text(
+                    json.dumps(row, indent=1), "utf-8")
             write_manifest(company_dir, name, row, sha)
             quality = score_capture(
                 company_dir, tickers=(company.get("ticker"),)
@@ -313,7 +352,8 @@ def main(argv=None) -> int:
     for t in threads:
         t.join()
     progress()
-    log(f"BATCH END captured={len(results)} stopped={stop.is_set()}")
+    log(f"BATCH END {batch_id} captured={len(results)} "
+        f"stopped={stop.is_set()}")
     return 0
 
 
