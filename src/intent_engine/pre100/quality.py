@@ -162,9 +162,17 @@ DIMENSIONS = (
     # here: it is a monitoring item, and borrowing it would let this
     # dimension score on step 6's content instead of its own.
     ("recommendation", "brief",
+    # AND THE PRODUCT'S OWN HEADINGS, which is where a locator should have
+    # started. The brief has a section headed "The recommendation" followed by
+    # "What to do now:" -- 48 of 49 briefs carry each -- while this cue said
+    # "What to do NEXT". Eli Lilly, GE Aerospace and Exxon all scored 0 on a
+    # brief whose recommendation reads "move on pipeline and development
+    # priorities at a size that can be reversed inside one planning cycle, and
+    # instrument it so the result is readable before the next commitment".
      r"(What to do next|The choice:|management should|the decision in front"
      r"|Commit to the reading|Hold and verify|bears on one choice"
-     r"|the plan should|should be built on)[^.]{0,300}"),
+     r"|the plan should|should be built on|The recommendation"
+     r"|What to do now)[^.]{0,300}"),
     ("falsifier", "brief",
      r"(What could break it|would prove (?:this|us) wrong|falsif"
      r"|show it is wrong|change our mind)[^.]{0,300}"),

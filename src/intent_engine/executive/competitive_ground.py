@@ -31,6 +31,7 @@ both in the same words learns nothing from either.
 """
 from __future__ import annotations
 
+import re
 from typing import Optional, Sequence, Tuple
 
 from .competitive_ladder import (
@@ -231,6 +232,71 @@ _MODEL_ALTERNATIVES = {
 #: model missing from the table above still gets the §2 AI question asked.
 _AI_QUESTION = ("Automation absorbing the task itself", AI_REPLACEMENT,
                 DISPLACEMENT)
+
+# =============================================================================
+# A SUBSTITUTE MUST BE A MECHANISM THIS COMPANY'S CUSTOMERS ACTUALLY HAVE
+# =============================================================================
+#
+# The table above is keyed on the business-model CLASS, and a class is coarser
+# than the mechanism. MEASURED across 22 live companies at 589518f: eight
+# distinct substitution clauses served all 22, and "Rental and used equipment
+# in place of a new purchase" was asserted for NVIDIA, Broadcom, Qualcomm,
+# Micron, Intel, AMD and Texas Instruments -- every DESIGN_AND_MANUFACTURE
+# filer -- because the class conflates capital-equipment makers with the
+# people who sell them chips. Nobody rents second-hand DRAM instead of buying
+# it, and an executive told otherwise learns something false.
+#
+# The repair is NOT a finer sector table; that would move the same defect one
+# level down. A substitution clause names a MECHANISM, and a mechanism is
+# either available to this company's customers or it is not -- which its own
+# filing is the evidence for. So the alternatives that assert a mechanism now
+# carry the evidence that mechanism requires, and are dropped when the
+# subject's own words do not support it. §5: no defensible substitute is an
+# answer; an invented one is not.
+#
+# Verified on real filings: Caterpillar's 10-K carries the second-hand
+# mechanism 21 times ("the remanufacturing of Caterpillar engines and
+# components"); NVIDIA's, Adobe's, Microsoft's, Walmart's and Pfizer's carry
+# it zero times.
+
+#: mechanism name -> what the subject's own filing must show for it to be real
+_MECHANISM_EVIDENCE = {
+    # The same good, bought used or rented rather than new. Requires a
+    # SECOND-HAND MARKET in the thing the company sells. Deliberately not the
+    # bare word "refurbish": Costco's filing carries "remodels, refurbishments
+    # and improvements", which is its own property accounting and not
+    # something its shoppers can buy instead.
+    "SECOND_HAND": (
+        r"\b(used equipment|used machines?|used vehicles?|pre-owned|"
+        r"second-hand|secondhand|certified used|equipment rental|"
+        r"rental fleet|remanufactur\w*\s+(?:engines?|components?|products?|"
+        r"parts)|rebuilt\s+(?:engines?|machines?|components?))\b"),
+    # Someone other than the maker servicing or supplying parts for it.
+    "AFTERMARKET": (
+        r"\b(will-fit|non-OEM|independent service|third-party (?:service|"
+        r"parts|maintenance)|aftermarket parts)\b"),
+}
+
+#: alternative identity -> mechanism its assertion depends on
+_ALTERNATIVE_REQUIRES = {
+    "Rental and used equipment in place of a new purchase": "SECOND_HAND",
+    "Independent service and will-fit parts": "AFTERMARKET",
+    "Deferring replacement and rebuilding instead": "SECOND_HAND",
+}
+
+
+def _mechanism_supported(identity: str, own_words: str) -> bool:
+    """Does the subject's own evidence show this mechanism exists for it?
+
+    Alternatives with no mechanism requirement are unaffected -- internal
+    build, doing nothing and automation are available to every customer of
+    every business, which is exactly why §2 requires them to be asked.
+    """
+    mechanism = _ALTERNATIVE_REQUIRES.get(identity)
+    if not mechanism:
+        return True
+    return bool(re.search(_MECHANISM_EVIDENCE[mechanism], own_words or "",
+                          re.I))
 
 #: §9. LEVEL-K: what the other side does, and what we do after that.
 #:
@@ -507,6 +573,10 @@ def build(company: str, profile, documents: Sequence[dict] = (),
     for identity, kind, rung in (_MODEL_ALTERNATIVES.get(model, ())
                                  + (_AI_QUESTION,)):
         if taken_kinds.get(kind):
+            continue
+        # A MECHANISM THIS COMPANY'S CUSTOMERS DO NOT HAVE IS NOT AN
+        # ALTERNATIVE. See `_MECHANISM_EVIDENCE`.
+        if not _mechanism_supported(identity, own_words):
             continue
         add(_make(identity, kind, rung, company))
 

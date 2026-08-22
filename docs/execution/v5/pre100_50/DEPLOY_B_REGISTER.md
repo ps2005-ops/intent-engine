@@ -52,3 +52,91 @@ they need no deployment. Both are repaired against the 50 captures, not the 1.
 `what_is_sold` and `revenue_basis` both match mid-sentence relative clauses,
 glossary entries and revenue-recognition policy. Sentence-anchoring repairs 4
 of 11 outright and turns 4 wrong answers into honest empties.
+
+---
+
+## D4. Substitutes come from a sector prior, not from the company (CRITICAL, §15)
+
+MEASURED across 22 live companies on `589518f`: **8 distinct substitution
+clauses for 22 companies**, and they cluster by sector, not by business.
+
+| clause | n | companies |
+|---|---|---|
+| "rental and used equipment in place of a new purchase" | 8 | NVIDIA, Broadcom, Qualcomm, Micron, Intel, AMD, Texas Instruments, Applied Materials |
+| "non-bank providers reaching the customer directly" | 5 | Bank of America, JPMorgan, Goldman Sachs, Visa, Morgan Stanley |
+| "automation absorbing the task itself" | 4 | Adobe, Microsoft, ServiceNow, Shopify |
+| "another surface holding the same attention hour" | 2 | Alphabet, Meta |
+
+Only Amazon ("publishers, distributors and the shopper buying the same basket
+somewhere cheaper") and Salesforce ("cloud computing application service
+providers and AI-native companies") received substitutes derived from their
+own evidence.
+
+**And one of them is economically wrong.** "Customers can substitute rental
+and used equipment in place of a new purchase" is a capital-equipment
+substitution. It is defensible for Applied Materials, whose customers really
+can buy used fab tools. It is wrong for NVIDIA, Broadcom, Qualcomm, Micron and
+Texas Instruments: nobody rents second-hand DRAM or GPUs instead of buying
+chips. §13 names "unrelated competitors presented as direct" a critical
+defect, and this is its substitution half.
+
+The NAMED-RIVAL half of the same dimension is working and is genuinely
+company-specific — Qualcomm gets "HiSilicon and MediaTek", Visa gets "UnionPay
+and WeChat Pay", Cloudflare gets "on-premises network hardware vendors, point
+solution vendors and network security vendors". So the repair is not to the
+competition producer as a whole; it is to the substitution clause, which
+reaches for a sector prior when the filing did not yield one.
+
+This is the same failure this codebase has recorded before under "class prior
+must not be the answer", where per-class business-model text made five
+software companies byte-identical. The prior is being used as the answer
+rather than as the fallback, and a wrong prior is worse than an absent one:
+an executive reading "your customers can rent used equipment instead" about a
+memory business learns something false.
+
+Smallest repair: derive substitutes from the subject's own filing (its
+competition and risk-factor language names them), and where none is found,
+say so rather than substituting the sector's. `competition` scores 6 on 18 of
+22 companies today; this clause is why.
+
+---
+
+## R3 — progressive first-useful result: BUILT, MEASURED, NOT SHIPPED
+
+PERFORMANCE_GATE fails and the mechanism is exact: `/progress` releases the
+reader only when `result_readiness().opens_result` is true, that requires a
+composed result, and `_run_analysis` composes only after EVERY approved source
+has been fetched. Measured over 49 live companies: p50 165s, p90 377s, p95
+480s, fastest 88s, **0 of 49 under 30 seconds**.
+
+The repair was implemented and tested: retrieval in two waves, the first being
+the subject's own SEC filing plus its own front page (`fetch_approved` already
+accepts an explicit `candidate_ids` subset and is idempotent per
+source+content), an early bounded composition between them, then the full
+fetch and the final composition. 10 focused tests, all 10 red against
+`589518f`.
+
+**It is not in this deploy, deliberately.** Running it against the full suite
+turned two existing tests red —
+`test_repeated_same_day_analysis_never_500s` and
+`test_arbitrary_company_autoruns_recommended_sources` — both with
+"analysis worker did not finish", because a second composition roughly doubles
+the most expensive step in the worker. That is the honest trade the design
+intends for the READER, but it also means total completion time grows, and I
+could not establish from the captures what the approved-set-size distribution
+is, so any threshold for "when is the split worth a second composition" would
+have been a guess.
+
+Shipping an unmeasured change to the core analysis worker on the last
+available deploy, against a build that currently runs 50 consecutive live
+analyses with zero 500s, is a worse trade than reporting the gate as failed.
+
+Carried forward, complete:
+
+* patch: `R3_progressive_first_useful.patch`
+* tests: `R3_test_first_useful.py`
+
+What the next cycle must measure FIRST: the distribution of approved-set size
+and the wall-clock split between discover / fetch / compose. If compose is a
+large fraction of the 165s, two compositions is the wrong shape and the early
+reading needs a cheaper producer than the full one.
