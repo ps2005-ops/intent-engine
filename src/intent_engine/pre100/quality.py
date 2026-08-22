@@ -48,7 +48,14 @@ CORE = ("business_model", "economic_reasoning", "market_belief",
 
 #: (key, surface, cue). The cue LOCATES the passage; it does not score it.
 DIMENSIONS = (
-    ("intro", "intro", r"(SEC CIK \d+|·\s*USA|Ticker|— introduction)"),
+    # A CUE MUST CAPTURE CONTENT, NOT ONLY ITS OWN ANCHOR. This alternation
+    # had no trailing group, so the passage WAS the matched token -- and
+    # because "— introduction" appears in the page title before "SEC CIK"
+    # ever does, every company's passage was the two words "— introduction"
+    # and every company scored 6. Nineteen identical passages, nineteen
+    # identical scores, on a dimension nothing could move.
+    ("intro", "intro",
+     r"(SEC CIK \d+|·\s*USA|Ticker|— introduction)[^.]{0,300}"),
     # THE SUBJECT IS PART OF THE SENTENCE. This cue began at "is a…", which
     # excludes the company name that precedes it — so `_specific` looked for
     # the company in a passage the cue had just cut it out of, and every
@@ -134,13 +141,30 @@ DIMENSIONS = (
     # §26 NAMES THIS AND NOTHING DEFINED IT, so every company reported it
     # NOT_MEASURED and the gate failed fifty companies on a dimension no
     # instrument was pointed at.
+    # THE CUE MUST BE THE PRODUCT'S VOCABULARY, NOT THE RUBRIC'S. Measured
+    # over the 21 live briefs on 589518f: "revenue engine", "margin engine",
+    # "unit economics", "cost of revenue", "how the money" and "capital
+    # intensity" appear on ZERO pages. The phrases below were collected from
+    # what the product actually writes, and lift the dimension from 18 of 21
+    # to 21 of 21. Negative control: none of them matches a plain factual
+    # page with no economic mechanism in it.
     ("economic_reasoning", "full",
-     r"(revenue engine|margin engine|operating leverage|cost of revenue"
-     r"|unit economics|how the money|what it costs to serve"
-     r"|capital (?:intensity|structure))[^.]{0,300}"),
+     r"(operating leverage|what it costs to serve|fully-loaded cost"
+     r"|marginal cost|acquisition cost|incremental margin|margin narrowing"
+     r"|fixed cost|volume or through price|subsidis)[^.]{0,300}"),
+    # Same defect, same method. "management should" appears on ZERO of the 21
+    # briefs; the old set matched 16 of 21 and the five misses each carried a
+    # real recommendation the instrument could not see -- Bank of America's
+    # brief says "whether the plan should be fundable from operating cash
+    # rather than from a raise timed to a recovery in the price" and scored 0.
+    #
+    # "What we would watch next" appears on 21 of 21 and is deliberately NOT
+    # here: it is a monitoring item, and borrowing it would let this
+    # dimension score on step 6's content instead of its own.
     ("recommendation", "brief",
      r"(What to do next|The choice:|management should|the decision in front"
-     r"|Commit to the reading|Hold and verify)[^.]{0,300}"),
+     r"|Commit to the reading|Hold and verify|bears on one choice"
+     r"|the plan should|should be built on)[^.]{0,300}"),
     ("falsifier", "brief",
      r"(What could break it|would prove (?:this|us) wrong|falsif"
      r"|show it is wrong|change our mind)[^.]{0,300}"),
@@ -149,8 +173,11 @@ DIMENSIONS = (
      r"|information priority|minimum viable|kill switch)[^.]{0,300}"),
     ("presentation", "slides", r"."),
     ("full_analysis", "full", r"."),
+    # Same defect as `intro`: no trailing capture, so the passage was the
+    # anchor itself ("Better strategy") for all nineteen companies.
     ("history", "history",
-     r"(actually happened|market expected|better strategy|what happened)"),
+     r"(actually happened|market expected|better strategy|what happened)"
+     r"[^.]{0,300}"),
     ("qa", "qa", r"."),
     ("step6", "connect",
      r"(your own|internal|connect|what this becomes)[^.]{0,300}"),
@@ -218,9 +245,59 @@ def _specific(passage: str, company: str, tickers=()) -> bool:
         return True
     # A named proper noun that is NOT the company is a rival, a product or a
     # place -- all of which are company-specific.
-    others = [m for m in _PROPER.findall(passage)
+    #
+    # A CAPITAL LETTER IS NOT A NAME. Every sentence starts with one, and every
+    # heading capitalises. "Better strategy" was read as carrying the proper
+    # noun "Better", "The choice: Commit to..." as carrying "Commit" -- so two
+    # phrases the product writes identically for every company were both
+    # judged company-specific. Ordinary words are excluded by vocabulary; what
+    # survives is a name.
+    # A CAPITAL AT THE START OF A SENTENCE IS GRAMMAR, NOT A NAME.
+    #
+    # This was a stoplist, and a stoplist cannot work in either direction: it
+    # let through every capitalised word nobody had thought to list. NEGATIVE
+    # CONTROL, run against a capture whose every surface is generic filler
+    # naming no company, no number and no mechanism -- "The business operates
+    # in a competitive environment. Conditions may change over time." -- it
+    # scored 10, "company-specific and substantiated", on six dimensions,
+    # because "Conditions" and "Various" were read as names.
+    #
+    # Position is the discriminator that does not need a vocabulary: a name
+    # appears mid-sentence too. "Adobe" in "contested by Adobe and Salesforce"
+    # is a name; "Conditions" in "Conditions may change" is a sentence
+    # opening.
+    others = [m for m in _mid_sentence_proper_nouns(passage)
               if m.lower() not in tokens and len(m) > 4]
     return len(others) >= 1
+
+
+def _mid_sentence_proper_nouns(passage: str):
+    """Capitalised words that do NOT open a sentence."""
+    out = []
+    for match in _PROPER.finditer(passage or ""):
+        before = (passage[:match.start()].rstrip())
+        if not before:
+            continue                        # opens the passage
+        if before[-1] in ".!?:;·—–-":
+            continue                        # opens a sentence or a list item
+        out.append(match.group(0))
+    return out
+
+
+#: Capitalised words that are not names. These are the ones the product's own
+#: headings and sentence openings actually produce -- collected from the live
+#: passages that were being mis-read, not guessed at.
+_NOT_A_NAME = frozenset("""
+better commit choice hold verify these those there their which while would
+could should about after before because between during against another other
+every under above below since until whether within without through
+company companies business businesses market markets customer customers
+revenue margin margins price prices pricing product products service services
+capital growth demand supply strategy strategic decision decisions evidence
+analysis reading result results report reports source sources filing filings
+quarter quarterly annual segment segments industry sector economy economic
+management investors shareholders competitor competitors alternative
+""".split())
 
 
 def score_dimension(key: str, surface: str, cue: str, *, text: str,
@@ -258,7 +335,20 @@ def score_dimension(key: str, surface: str, cue: str, *, text: str,
                 "passage": passage[:300]}
     specific = _specific(passage, company, tickers)
     quantified = bool(_QUANTITY.search(passage))
-    substantial = len(passage) >= 90 or len(text) >= 1500
+    # SUBSTANTIATION IS A PROPERTY OF THE PASSAGE, NOT OF THE PAGE.
+    #
+    # This read `or len(text) >= 1500`, and `text` is the WHOLE SURFACE. Every
+    # real analysis page is longer than 1500 characters, so the clause was
+    # always true and the length of the passage never mattered.
+    #
+    # MEASURED across 19 live companies on 589518f: `history`'s cue captures
+    # no trailing text at all, so its passage is the literal phrase "Better
+    # strategy" -- byte-identical for all nineteen -- and it scored 10,
+    # "company-specific and substantiated", for every one of them. So did
+    # `recommendation` ("The choice: Commit to the reading now versus hold and
+    # verify first", also identical across all nineteen). A dimension that
+    # scores full marks on two shared words is a dimension that cannot fail.
+    substantial = len(passage) >= 90
     if specific and (quantified or substantial):
         score, why = 10, "company-specific and substantiated"
     elif specific:
@@ -332,3 +422,229 @@ def gate(rows: List[dict], *, core_mean=9.0, core_min=8.5) -> dict:
         "failing": fails,
         "passes": not fails and len(scored) == len(rows) and bool(rows),
     }
+
+
+# =============================================================================
+# CROSS-COMPANY DISTINCTNESS (§14, §17)
+# =============================================================================
+#
+# WHY A SECOND PASS EXISTS. `_specific` asks whether a passage NAMES this
+# company, which is a proxy. The property the gate is actually about is
+# whether the product said something DIFFERENT about this company than about
+# the other forty-nine -- and no single-company scorer can see that.
+#
+# It matters in both directions, and both were measured live on 589518f:
+#
+#   over-scoring   `history`, `recommendation` and `step6` each rendered ONE
+#                  passage, byte-identical across all nineteen companies, and
+#                  each scored 10 on every one of them.
+#   under-scoring  NVIDIA's margin passage ("manufacturing and foundry cost
+#                  and yield"), Alphabet's ("infrastructure and compute per
+#                  user served and content moderation") and Intel's ("the
+#                  capacity is pre-sold under long-term agreements") are
+#                  plainly different from each other and plainly about their
+#                  companies. None names its company or carries a number, so
+#                  all three scored 6.
+#
+# This is deliberately NOT a similarity threshold tuned until the numbers look
+# right. It is exact repetition: the same words, for a different company.
+
+#: A passage repeated for at least this share of the corpus is boilerplate.
+#: Two companies in a sector legitimately share a sentence; a third of the
+#: universe saying the same thing is the product's template showing through.
+SHARED_PASSAGE_SHARE = 0.34
+
+#: The ceiling a repeated passage may reach. 6 is the scorer's own "present
+#: but not specific to this company", which is exactly what a shared passage
+#: is -- so the cap reuses the band rather than inventing one.
+SHARED_PASSAGE_CAP = 6
+
+
+def _norm_passage(passage: str) -> str:
+    return " ".join((passage or "").split()).lower()
+
+
+def rescore_corpus(rows):
+    """Apply cross-company distinctness to per-company scores.
+
+    `rows` is [(company, scored_dict)] as `score_company` returned them. The
+    same list comes back, with any dimension whose passage is repeated across
+    the corpus capped and its `why` rewritten to say so.
+
+    Scoring stays a pure function of what is on the pages: nothing here reads
+    the product again, and a company scored alone is unchanged.
+    """
+    rows = [(name, row) for name, row in rows]
+    counts: Dict[str, Dict[str, int]] = {}
+    for _name, row in rows:
+        for dim in row.get("dimensions", []):
+            text = _norm_passage(dim.get("passage"))
+            if not text:
+                continue
+            counts.setdefault(dim["dimension"], {})
+            counts[dim["dimension"]][text] = \
+                counts[dim["dimension"]].get(text, 0) + 1
+    total = len(rows) or 1
+    floor = max(2, int(total * SHARED_PASSAGE_SHARE))
+    for _name, row in rows:
+        kept = []
+        for dim in row.get("dimensions", []):
+            text = _norm_passage(dim.get("passage"))
+            shared = counts.get(dim["dimension"], {}).get(text, 0)
+            score = dim.get("score")
+            if (text and shared >= floor and isinstance(score, int)
+                    and score > SHARED_PASSAGE_CAP):
+                dim = dict(dim, score=SHARED_PASSAGE_CAP,
+                           why=(f"identical passage on {shared} of {total} "
+                                f"companies — not specific to this one"))
+            kept.append(dim)
+        row["dimensions"] = kept
+        core = [d["score"] for d in kept
+                if d["dimension"] in CORE and isinstance(d["score"], int)]
+        if core:
+            row["core_mean"] = round(sum(core) / len(core), 2)
+            row["core_min"] = min(core)
+        scored = [d["score"] for d in kept if isinstance(d["score"], int)]
+        if scored:
+            row["mean"] = round(sum(scored) / len(scored), 2)
+    return rows
+
+
+# =============================================================================
+# SCORING THE PROSE, NOT THE HEADING (§14, §15, §17)
+# =============================================================================
+#
+# WHY THIS REPLACES THE HEADING-ANCHORED WINDOW.
+#
+# A cue is a LOCATOR. It finds the section a dimension lives in by matching
+# that section's heading -- and then the score was computed on the ~100
+# characters starting AT the heading, which is the heading and the explanatory
+# subtitle underneath it. Both are written once, for every company.
+#
+# MEASURED on 21 live companies at 589518f:
+#
+#   history                passage = "Better strategy Counterfactual Where a
+#                          named alternative available on the same information
+#                          plausibly led" -- identical for all 21
+#   impossible_hypothesis  "What could be true that we are not considering
+#                          These are propositions this company's current
+#                          framing rules out by construction" -- identical
+#   step6                  the NAV BAR: "Home · Your analyses · Guest demo
+#                          session Leave demo Connect your company"
+#
+# Those pages are not generic. Measured over whole surfaces, sentence by
+# sentence, the share of sentences unique to ONE company is:
+#
+#   history 70.4%   full 63.1%   brief 57.6%   connect 26.9%
+#
+# So the product writes company-specific prose and the instrument was scoring
+# the furniture in front of it. Fixing the cues one at a time would repeat the
+# defect at the next heading, so location and scoring are separated instead:
+# the cue still says WHERE, and what is scored is the prose that follows it
+# with corpus-shared sentences removed.
+
+#: How much prose after the anchor a dimension is judged on. Long enough to
+#: clear a heading and its subtitle, short enough that two dimensions on one
+#: surface are not scored on the same text.
+PROSE_WINDOW = 900
+
+#: A sentence written for at least this share of the corpus is furniture --
+#: a heading, a subtitle, a nav item, an explainer. Removed before scoring
+#: rather than penalised, because its presence says nothing either way.
+FURNITURE_SHARE = 0.8
+
+
+def _sentences(text: str):
+    return [x.strip() for x in re.split(r"(?<=[.!?])\s+|\s{2,}", text or "")
+            if len(x.strip()) > 30]
+
+
+def _furniture(surface_texts, share=FURNITURE_SHARE):
+    """Sentences repeated across the corpus on one surface."""
+    seen: Dict[str, int] = {}
+    for text in surface_texts:
+        for sentence in set(_sentences(text)):
+            seen[sentence] = seen.get(sentence, 0) + 1
+    floor = max(3, int(len(surface_texts) * share))
+    return {s for s, c in seen.items() if c >= floor}
+
+
+def score_corpus(company_dirs, tickers_by_company=None):
+    """Score every company against the corpus. §14's cross-company pass.
+
+    Two things no single-company scorer can do:
+
+      it removes FURNITURE -- the headings, subtitles and nav the product
+      writes identically for everyone -- so a dimension is judged on what was
+      written ABOUT THIS COMPANY;
+
+      it caps a passage that survives that and is STILL identical elsewhere,
+      which is template collapse and the thing §14 exists to catch.
+    """
+    company_dirs = [pathlib.Path(d) for d in company_dirs]
+    tickers_by_company = tickers_by_company or {}
+    surfaces = {s for _k, s, _c in DIMENSIONS}
+    texts: Dict[str, Dict[str, str]] = {}
+    for d in company_dirs:
+        texts[d.name] = {}
+        for surface in surfaces:
+            f = d / f"{surface}.txt"
+            texts[d.name][surface] = f.read_text("utf-8", errors="replace") \
+                if f.exists() else ""
+    furniture = {surface: _furniture([texts[n][surface] for n in texts])
+                 for surface in surfaces}
+    rows = []
+    for d in company_dirs:
+        manifest = {}
+        mp = d / "manifest.json"
+        if mp.exists():
+            try:
+                manifest = json.loads(mp.read_text("utf-8"))
+            except Exception:                               # noqa: BLE001
+                manifest = {}
+        company = manifest.get("company") or d.name
+        tickers = tickers_by_company.get(d.name, ())
+        dims = []
+        for key, surface, cue in DIMENSIONS:
+            text = texts[d.name].get(surface) or ""
+            if not text:
+                dims.append({"dimension": key, "surface": surface,
+                             "score": NOT_MEASURED,
+                             "why": "surface did not render", "passage": ""})
+                continue
+            if cue == ".":
+                window = text[:PROSE_WINDOW * 2]
+            else:
+                match = re.search(cue, text, re.I)
+                if not match:
+                    dims.append({"dimension": key, "surface": surface,
+                                 "score": 0, "passage": "",
+                                 "why": "no passage for this dimension on "
+                                        "the surface"})
+                    continue
+                window = text[match.start():match.start() + PROSE_WINDOW]
+            prose = " ".join(x for x in _sentences(window)
+                             if x not in furniture[surface])
+            if not prose:
+                dims.append({"dimension": key, "surface": surface, "score": 6,
+                             "why": "only shared section furniture here — "
+                                    "nothing written about this company",
+                             "passage": window[:300]})
+                continue
+            dims.append(_score_prose(key, surface, prose, company, tickers))
+        rows.append((d.name, {"company": company, "dimensions": dims}))
+    return rescore_corpus(rows)
+
+
+def _score_prose(key, surface, prose, company, tickers):
+    specific = _specific(prose, company, tickers)
+    quantified = bool(_QUANTITY.search(prose))
+    substantial = len(prose) >= 90
+    if specific and (quantified or substantial):
+        score, why = 10, "company-specific and substantiated"
+    elif specific:
+        score, why = 8, "company-specific"
+    else:
+        score, why = 6, "present but not specific to this company"
+    return {"dimension": key, "surface": surface, "score": score,
+            "why": why, "passage": prose[:300]}
