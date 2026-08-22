@@ -478,3 +478,41 @@ def test_an_empty_read_yields_no_passage_rather_than_an_empty_heading():
 
     assert not FD._adversary("X", _Bare(), SaidOnce()).is_substantive
     assert not FD._impossible("X", _Bare(), SaidOnce()).is_substantive
+
+
+# ---------------------------------------------------------------------------
+# 9. /analyze MUST FAIL LEGIBLY.
+#
+# MEASURED on the deployed preview, six times at concurrency 1 with a single
+# orchestrator: /analyze answered HTTP 500 in under a second for six
+# different companies, each carrying a confirmed CIK. The rate limiter
+# records the visitor's hit BEFORE the run is opened, so every one of those
+# 500s also spent one of their ten analyses for the hour.
+# ---------------------------------------------------------------------------
+
+def test_a_store_failure_does_not_become_an_unhandled_500():
+    import inspect
+
+    from intent_engine.webapp import app as APP
+    source = inspect.getsource(APP.WebApp._analyze)
+    start = source.index("run = self.ci.create_run(")
+    window = source[start:start + 2200]
+    assert "except Exception:" in window, (
+        "create_run catches only IngestionError and ValueError; anything "
+        "else the store raises is an unhandled 500 on a spent quota")
+    assert "503" in window
+
+
+def test_a_refused_schedule_is_not_reported_as_started():
+    """`_schedule_analysis` returns False when it refuses, and its own
+    docstring says a run that can never execute is worse than an honest no.
+    The return value was discarded, so a refusal redirected the visitor to a
+    progress page for work nobody had queued."""
+    import inspect
+
+    from intent_engine.webapp import app as APP
+    source = inspect.getsource(APP.WebApp._analyze)
+    i = source.index("if self._analysis_async:")
+    window = source[i:i + 1400]
+    assert "started = self._schedule_analysis(" in window
+    assert "if not started" in window

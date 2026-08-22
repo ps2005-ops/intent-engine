@@ -1220,11 +1220,44 @@ class WebApp:
                      f"{_retry_phrase(min(session_hits) + 86400 - now)} "
                      "Analyses already running are unaffected, and finished "
                      "ones stay under your analyses.")
+        # RESERVED, NOT SPENT. §4: quota is committed only once a run has
+        # actually been accepted and scheduled.
+        #
+        # MEASURED on the deployed preview, six times: /analyze answered 500
+        # in under a second and each one still consumed one of the visitor's
+        # ten analyses for the hour, because the hit was recorded here and
+        # the failure happened afterwards. A visitor could spend their whole
+        # hour on requests that produced nothing and were never explained.
         ip_hits.append(now)
         session_hits.append(now)
         self._demo_ip_hits[remote] = ip_hits
         session["analyses"] = session_hits
         return None
+
+    def _release_demo_quota(self, session, remote, stamp) -> None:
+        """Give back a reservation for a run that never started. §4.
+
+        Idempotent by construction: it removes ONE occurrence of the exact
+        timestamp it was given, so a double release cannot refund twice and
+        a concurrent request's reservation is untouched.
+        """
+        if stamp is None or not session.get("anonymous"):
+            return
+        hits = self._demo_ip_hits.get(remote)
+        if hits and stamp in hits:
+            hits.remove(stamp)
+            self._demo_ip_hits[remote] = hits
+        analyses = list(session.get("analyses") or [])
+        if stamp in analyses:
+            analyses.remove(stamp)
+            session["analyses"] = analyses
+
+    def _demo_quota_reservation(self, session, remote):
+        """The timestamp `_demo_rate_limited` just reserved, or None."""
+        if not session.get("anonymous"):
+            return None
+        hits = self._demo_ip_hits.get(remote) or []
+        return hits[-1] if hits else None
 
     def _stylize(self, body: str) -> str:
         """Ensure every page carries the shared stylesheet and the
@@ -1814,6 +1847,10 @@ class WebApp:
         limited = None if smoke else self._demo_rate_limited(session, remote)
         if limited is not None:
             return limited
+        # The reservation this request holds, so any path that fails to open
+        # or schedule a run can hand it back (§4).
+        _reserved = None if smoke else self._demo_quota_reservation(session,
+                                                                    remote)
         company_name = form.get("company_name", "")[:120].strip()
         website = (form.get("website") or "").strip()
         #: Set only when the company was identified as an SEC filer with no
@@ -1984,7 +2021,33 @@ class WebApp:
                     user_id=session["user_id"],
                     as_of=self._as_of(fresh=fresh))
             except (IngestionError, ValueError) as exc:
+                self._release_demo_quota(session, remote, _reserved)
                 return self._error_page(400, str(exc))
+            except Exception:                               # noqa: BLE001
+                # OPENING A RUN CAN FAIL FOR REASONS THAT ARE NOT THE INPUT.
+                #
+                # MEASURED on the deployed preview, six times at concurrency
+                # 1 with one orchestrator: /analyze answered HTTP 500 in
+                # under a second for six different companies, each with a
+                # confirmed CIK, and the visitor got the generic "Something
+                # went wrong on our side" page. Only these two exception
+                # types were caught, so anything the store raised -- and the
+                # runtime root here is EPHEMERAL, which is a documented
+                # blocker -- became an unhandled 500.
+                #
+                # THE QUOTA IS ALREADY SPENT AT THIS POINT: the rate limiter
+                # records the hit before this line, so each of those 500s
+                # consumed one of the visitor's ten analyses for the hour and
+                # told them nothing. That is the part that makes this worth
+                # catching rather than letting the generic handler take it.
+                _LOG.exception("create_run failed company=%r cik=%r",
+                               company_name, filer_cik)
+                self._release_demo_quota(session, remote, _reserved)
+                return self._error_page(
+                    503, "We could not start this analysis right now. This "
+                         "is a fault on our side, not in what you entered. "
+                         "Nothing was fetched and NO ANALYSIS CREDIT WAS "
+                         "USED — try again in a moment.")
             run_id = run["run_id"]
             existing = self.web_store.owner_of(run_id)
             if existing is None:
@@ -2003,7 +2066,32 @@ class WebApp:
                 # discovery is itself a network call and belongs off the
                 # request thread with everything after it.
                 if self._analysis_async:
-                    self._schedule_analysis(session["user_id"], run_id)
+                    # A REFUSED SCHEDULE MUST NOT LOOK LIKE A STARTED ONE.
+                    #
+                    # `_schedule_analysis` returns False when the pool is
+                    # saturated or the run is already terminal, and its
+                    # docstring says "refused, not silently dropped: a run
+                    # that can never execute is worse than an honest no".
+                    # The return value was discarded here, so a refusal
+                    # redirected the visitor to a progress page for work
+                    # nobody had queued -- which is the silent drop the
+                    # producer went out of its way to avoid.
+                    #
+                    # A run that is already finished still redirects: that is
+                    # the double-click case and its result exists.
+                    started = self._schedule_analysis(session["user_id"],
+                                                      run_id)
+                    if not started and not (
+                            run_id in self._results
+                            or self.ci.store.run_state(run_id)
+                            in self.TERMINAL_STATES):
+                        self._release_demo_quota(session, remote,
+                                                 _reserved)
+                        return self._error_page(
+                            503, "This preview is already running as many "
+                                 "analyses as it can at once. Nothing was "
+                                 "fetched and NO ANALYSIS CREDIT WAS USED — "
+                                 "try again in a few minutes.")
                     return self._with_run_claim(
                         self._redirect(f"/runs/{run_id}/progress"),
                         session, run_id, company_name)
