@@ -52,5 +52,43 @@
     "first_useful": null,
     "auto_advanced": true,
     "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KCHZ766V0A5N7R011KG1F9/progress"
+  },
+  {
+    "company": "Advanced Micro Devices, Inc.",
+    "deployed_sha": "16bc5af",
+    "status": "RUN_LOST",
+    "run_id": "01M0KCWW8TK8NCSCFXEE223A15",
+    "capture_path": "docs/execution/v5/pre100_50/live_captures/16bc5af/advanced_micro_devices_inc",
+    "process_before": {
+      "boot_id": "7cafdd67bb0645fa",
+      "started_at": 1787356540.910125,
+      "uptime_seconds": 896.0
+    },
+    "entry_domain": "amd.com",
+    "seconds": 424,
+    "first_useful": 424,
+    "auto_advanced": true,
+    "landed_on": "https://intent-engine-preview-bridge.onrender.com/runs/01M0KCWW8TK8NCSCFXEE223A15/intro",
+    "outcome": "FULL_ANALYSIS_REFRESHING",
+    "outcome_by_route": {
+      "run": "FULL_ANALYSIS_REFRESHING",
+      "slides": "WORKING",
+      "full": "WORKING",
+      "story": "WORKING",
+      "history": "WORKING",
+      "connect": "WORKING"
+    },
+    "outcome_disagreement": [
+      "FULL_ANALYSIS_REFRESHING",
+      "WORKING"
+    ],
+    "run_lost_after_routes": true,
+    "answers_captured": 0,
+    "process_after": {
+      "boot_id": "258ddde4f5e24742",
+      "started_at": 1787357921.8682811,
+      "uptime_seconds": 11.6
+    },
+    "restart_observed": true
   }
 ]

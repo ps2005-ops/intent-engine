@@ -23,7 +23,7 @@ CAPTURES = ROOT / "live_captures"
 #: describes the product as it stands.
 ORDER = ["8397d67", "49b6c3a", "517e7ae", "5d43053", "10d1620", "b37bee2",
          "0d02c0b", "e78c2a0", "b0050e3", "dc17a9d", "743df06", "cb9e6b7",
-         "a22929c", "8fd6c82", "5e1218e", "61a7981", "ea55870", "16bc5af"]
+         "a22929c", "8fd6c82", "5e1218e", "61a7981", "ea55870", "16bc5af", "f858d9e", "3b6ba34"]
 
 
 def newest_capture_per_company() -> dict:
@@ -37,8 +37,19 @@ def newest_capture_per_company() -> dict:
             except Exception:                               # noqa: BLE001
                 continue
             name = m.get("company")
-            if name in by_name:
-                latest[name] = (sha, manifest.parent, m)
+            if name not in by_name:
+                continue
+            # AN EMPTY CAPTURE IS NOT A NEWER MEASUREMENT.
+            #
+            # A quota-blocked or interrupted run writes a manifest with no
+            # outcome and no route text, and "newest wins" then replaced a
+            # complete capture with nothing -- five companies, and the core
+            # mean fell 0.12 for reasons that had nothing to do with the
+            # product. A capture that read no surface has not measured this
+            # company.
+            if not m.get("outcome") and not list(manifest.parent.glob("*.txt")):
+                continue
+            latest[name] = (sha, manifest.parent, m)
     return by_name, latest
 
 

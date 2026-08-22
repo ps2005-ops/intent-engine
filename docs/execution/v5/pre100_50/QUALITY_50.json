@@ -1,8 +1,8 @@
 {
  "gate": {
   "companies": 50,
-  "scored": 45,
-  "core_mean": 8.13,
+  "scored": 48,
+  "core_mean": 8.04,
   "core_min": 0,
   "failing": [
    [
@@ -11,7 +11,7 @@
    ],
    [
     "Advanced Micro Devices, Inc.",
-    "core NOT_MEASURED: business_model,revenue_drivers,margin_drivers,market_belief,competition,recommendation,full_analysis,presentation,history,qa"
+    "core NOT_MEASURED: market_belief,recommendation,qa"
    ],
    [
     "Alphabet Inc.",
@@ -71,7 +71,7 @@
    ],
    [
     "FedEx Corporation",
-    "core NOT_MEASURED: business_model,revenue_drivers,margin_drivers,market_belief,competition,recommendation,full_analysis,presentation,history,qa"
+    "core NOT_MEASURED: NO_CAPTURE"
    ],
    [
     "Freeport-McMoRan Inc.",
@@ -147,7 +147,7 @@
    ],
    [
     "QUALCOMM Incorporated",
-    "core NOT_MEASURED: business_model,revenue_drivers,margin_drivers,market_belief,competition,recommendation,full_analysis,presentation,history,qa"
+    "core NOT_MEASURED: NO_CAPTURE"
    ],
    [
     "RTX Corporation",
@@ -159,7 +159,7 @@
    ],
    [
     "ServiceNow, Inc.",
-    "core NOT_MEASURED: business_model,revenue_drivers,margin_drivers,market_belief,competition,recommendation,full_analysis,presentation,history,qa"
+    "core_mean 8.8"
    ],
    [
     "Shopify Inc.",
@@ -179,7 +179,7 @@
    ],
    [
     "The Goldman Sachs Group, Inc.",
-    "core NOT_MEASURED: business_model,revenue_drivers,margin_drivers,market_belief,competition,recommendation,full_analysis,presentation,history,qa"
+    "core_mean 8.8"
    ],
    [
     "The Home Depot, Inc.",
@@ -368,34 +368,34 @@
   {
    "company": "Advanced Micro Devices, Inc.",
    "deployed_sha": "16bc5af",
-   "outcome": "NO_OUTCOME",
+   "outcome": "FULL_ANALYSIS_REFRESHING",
    "dimensions": [
     {
      "dimension": "intro",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "business_model",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "revenue_drivers",
      "surface": "story",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "margin_drivers",
      "surface": "story",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
@@ -408,15 +408,15 @@
     {
      "dimension": "macro",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
@@ -436,8 +436,8 @@
     {
      "dimension": "competition",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
@@ -478,22 +478,22 @@
     {
      "dimension": "presentation",
      "surface": "slides",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "This analysis was lost when the service restarted Home \u00b7 Guest demo session Leave demo This analysis was lost when the service restarted What did work. Your session is intact and the company you entered is known, so the run can be started again without retyping anything. What did not. The reading it"
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "This analysis was lost when the service restarted Home \u00b7 Guest demo session Leave demo This analysis was lost when the service restarted What did work. Your session is intact and the company you entered is known, so the run can be started again without retyping anything. What did not. The reading it"
     },
     {
      "dimension": "history",
      "surface": "history",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
@@ -506,28 +506,21 @@
     {
      "dimension": "step6",
      "surface": "connect",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     }
    ],
-   "core_mean": null,
-   "core_min": null,
+   "core_mean": 2.86,
+   "core_min": 0,
    "core_unmeasured": [
-    "business_model",
-    "revenue_drivers",
-    "margin_drivers",
     "market_belief",
-    "competition",
     "recommendation",
-    "full_analysis",
-    "presentation",
-    "history",
     "qa"
    ],
-   "all_mean": null,
+   "all_mean": 1.82,
    "sha": "16bc5af",
-   "first_useful": null
+   "first_useful": 424
   },
   {
    "company": "Alphabet Inc.",
@@ -1755,7 +1748,7 @@
   },
   {
    "company": "Cloudflare, Inc.",
-   "deployed_sha": "5d43053",
+   "deployed_sha": "f858d9e",
    "outcome": "FULL_ANALYSIS",
    "dimensions": [
     {
@@ -1770,7 +1763,7 @@
      "surface": "intro",
      "score": 6,
      "why": "present but not specific to this company",
-     "passage": "is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale"
+     "passage": "is a software platform business that runs on a broad range of services to businesses of all sizes and in all geographies \u2014 making them more secure, enhancing the performance of their business-critical applications, and eliminating the cost and complexity of managing individual network; revenue from "
     },
     {
      "dimension": "revenue_drivers",
@@ -1796,9 +1789,9 @@
     {
      "dimension": "macro",
      "surface": "full",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "cycles the company cannot influence"
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "rategic Intelligence \u2014 Cloudflare, Inc"
     },
     {
      "dimension": "micro",
@@ -1868,14 +1861,14 @@
      "surface": "slides",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Cloudflare, Inc. \u2014 presentation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Cloudflare, Inc. \u2014 presentation The central strategic view Cloudflare, Inc. appears to be leaning on a buyer type whose budget it does not control. The evidence supports this as a low-confidence hypothesis, not a se"
+     "passage": "Cloudflare, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Cloudflare, Inc. NET \u00b7 USA \u00b7 cloudflare.com \u00b7 SEC CIK 1477333 Cloudflare, Inc. is a software platform business that runs on a broad range of services to businesses of all sizes and in all geographies \u2014 "
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Cloudflare, Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Cloudflare, Inc. Cloudflare's mission is to help build a better Internet. The answer Across the public record for Cloudflare, Inc., the company has built, certified, or disclosed something it would only have if thes"
+     "passage": "Strategic Intelligence \u2014 Cloudflare, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } Cloudflare, Inc. Full analysis \u2014 the intelligence "
     },
     {
      "dimension": "history",
@@ -1902,9 +1895,9 @@
    "core_mean": 8.8,
    "core_min": 6,
    "core_unmeasured": [],
-   "all_mean": 7.2,
-   "sha": "5d43053",
-   "first_useful": 107
+   "all_mean": 7.4,
+   "sha": "f858d9e",
+   "first_useful": 110
   },
   {
    "company": "ConocoPhillips",
@@ -2673,167 +2666,14 @@
   },
   {
    "company": "FedEx Corporation",
-   "deployed_sha": "743df06",
-   "outcome": "NO_OUTCOME",
-   "dimensions": [
-    {
-     "dimension": "intro",
-     "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "business_model",
-     "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "revenue_drivers",
-     "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "margin_drivers",
-     "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "capital_intensity",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "macro",
-     "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "micro",
-     "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "market_belief",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "belief_challenge",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "competition",
-     "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "adversary",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "impossible_hypothesis",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "recommendation",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "falsifier",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "mve",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "presentation",
-     "surface": "slides",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "full_analysis",
-     "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "history",
-     "surface": "history",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "qa",
-     "surface": "qa",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "step6",
-     "surface": "connect",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    }
-   ],
    "core_mean": null,
    "core_min": null,
    "core_unmeasured": [
-    "business_model",
-    "revenue_drivers",
-    "margin_drivers",
-    "market_belief",
-    "competition",
-    "recommendation",
-    "full_analysis",
-    "presentation",
-    "history",
-    "qa"
+    "NO_CAPTURE"
    ],
-   "all_mean": null,
-   "sha": "743df06",
-   "first_useful": null
+   "dimensions": [],
+   "deployed_sha": "",
+   "outcome": "NOT_EXECUTED"
   },
   {
    "company": "Freeport-McMoRan Inc.",
@@ -4520,7 +4360,7 @@
   },
   {
    "company": "Microsoft Corporation",
-   "deployed_sha": "5d43053",
+   "deployed_sha": "f858d9e",
    "outcome": "FULL_ANALYSIS",
    "dimensions": [
     {
@@ -4535,7 +4375,7 @@
      "surface": "intro",
      "score": 6,
      "why": "present but not specific to this company",
-     "passage": "is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale"
+     "passage": "is a software platform business that runs on an array of services, including cloud-based solutions that provide customers with AI, software, services, platforms, and content, and we provide solution support and consulting services; revenue upon transfer of control of promised products or services to"
     },
     {
      "dimension": "revenue_drivers",
@@ -4633,7 +4473,7 @@
      "surface": "slides",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Microsoft Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Microsoft Corporation MSFT \u00b7 USA \u00b7 microsoft.com \u00b7 SEC CIK 0000789019 Microsoft Corporation is a software platform business that runs on recurring software subscription: revenue is contracted and r"
+     "passage": "Microsoft Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Microsoft Corporation MSFT \u00b7 USA \u00b7 microsoft.com \u00b7 SEC CIK 789019 Microsoft Corporation is a software platform business that runs on an array of services, including cloud-based solutions that provi"
     },
     {
      "dimension": "full_analysis",
@@ -4668,8 +4508,8 @@
    "core_min": 3,
    "core_unmeasured": [],
    "all_mean": 6.85,
-   "sha": "5d43053",
-   "first_useful": 106
+   "sha": "f858d9e",
+   "first_useful": 110
   },
   {
    "company": "Morgan Stanley",
@@ -5591,167 +5431,14 @@
   },
   {
    "company": "QUALCOMM Incorporated",
-   "deployed_sha": "b0050e3",
-   "outcome": "NO_OUTCOME",
-   "dimensions": [
-    {
-     "dimension": "intro",
-     "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "business_model",
-     "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "revenue_drivers",
-     "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "margin_drivers",
-     "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "capital_intensity",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "macro",
-     "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "micro",
-     "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "market_belief",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "belief_challenge",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "competition",
-     "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "adversary",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "impossible_hypothesis",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "recommendation",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "falsifier",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "mve",
-     "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "presentation",
-     "surface": "slides",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "full_analysis",
-     "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "history",
-     "surface": "history",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "qa",
-     "surface": "qa",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    },
-    {
-     "dimension": "step6",
-     "surface": "connect",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
-    }
-   ],
    "core_mean": null,
    "core_min": null,
    "core_unmeasured": [
-    "business_model",
-    "revenue_drivers",
-    "margin_drivers",
-    "market_belief",
-    "competition",
-    "recommendation",
-    "full_analysis",
-    "presentation",
-    "history",
-    "qa"
+    "NO_CAPTURE"
    ],
-   "all_mean": null,
-   "sha": "b0050e3",
-   "first_useful": null
+   "dimensions": [],
+   "deployed_sha": "",
+   "outcome": "NOT_EXECUTED"
   },
   {
    "company": "RTX Corporation",
@@ -6061,167 +5748,156 @@
   },
   {
    "company": "ServiceNow, Inc.",
-   "deployed_sha": "743df06",
-   "outcome": "NO_OUTCOME",
+   "deployed_sha": "0d02c0b",
+   "outcome": "TRUE_EVIDENCE_SCARCITY",
    "dimensions": [
     {
      "dimension": "intro",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "\u2014 introduction"
     },
     {
      "dimension": "business_model",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "is a software platform business that runs on recurring software subscription: revenue is contracted and renews, so the installed base carries next period's revenue before any new sale"
     },
     {
      "dimension": "revenue_drivers",
      "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Where the money actually comes from Revenue is decided by customer count, seats or usage per customer and list and realised price, and whether that revenue becomes margin is decided by sales and marketing to acquire an account and engineering headcount"
     },
     {
      "dimension": "margin_drivers",
      "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "becomes margin is decided by sales and marketing to acquire an account and engineering headcount"
     },
     {
      "dimension": "capital_intensity",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund"
     },
     {
      "dimension": "macro",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "market_belief",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "market's current belief That ServiceNow, Inc"
     },
     {
      "dimension": "belief_challenge",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "Why it may be right A holder of this view is reading the record correctly as far as it goes: what it implies is whether there is a next growth vector being funded at all, which the investment line shows before the revenue line does, and nothing in what this run retrieved contradicts that"
     },
     {
      "dimension": "competition",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "contested directly by The buyer's own engineering team, and customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 broad range of solutions, and the economics that decide the contest are high operating leverage \u2014 delivery"
     },
     {
      "dimension": "adversary",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "impossible_hypothesis",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "The decision in front of management is what to charge, and for what, without losing more customer count than the price gains? Causal confidence: BOUNDED \u2014 supported in direction, not in size"
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "change our mind: a disclosure in pricing and packaging changes showing the mechanism moving in the opposite direction would overturn this reading"
     },
     {
      "dimension": "mve",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Minimum viable experiment: run the change on one segment or one cohort, hold the rest constant, and read customer count against the unchanged group for one full cycle \u2014 that isolates the effect without committing the whole book"
     },
     {
      "dimension": "presentation",
      "surface": "slides",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Limited analysis of ServiceNow, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of ServiceNow, Inc. There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What wa"
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Limited analysis of ServiceNow, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of ServiceNow, Inc. There is not enough public evidence to build a briefing on this company. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What wa"
     },
     {
      "dimension": "history",
      "surface": "history",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Better strategy"
     },
     {
      "dimension": "qa",
      "surface": "qa",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo ServiceNow, Inc. What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What does "
     },
     {
      "dimension": "step6",
      "surface": "connect",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
     }
    ],
-   "core_mean": null,
-   "core_min": null,
-   "core_unmeasured": [
-    "business_model",
-    "revenue_drivers",
-    "margin_drivers",
-    "market_belief",
-    "competition",
-    "recommendation",
-    "full_analysis",
-    "presentation",
-    "history",
-    "qa"
-   ],
-   "all_mean": null,
-   "sha": "743df06",
-   "first_useful": null
+   "core_mean": 8.8,
+   "core_min": 6,
+   "core_unmeasured": [],
+   "all_mean": 6.6,
+   "sha": "0d02c0b",
+   "first_useful": 57
   },
   {
    "company": "Shopify Inc.",
@@ -6837,167 +6513,156 @@
   },
   {
    "company": "The Goldman Sachs Group, Inc.",
-   "deployed_sha": "16bc5af",
-   "outcome": "NO_OUTCOME",
+   "deployed_sha": "3b6ba34",
+   "outcome": "FULL_ANALYSIS",
    "dimensions": [
     {
      "dimension": "intro",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "\u2014 introduction"
     },
     {
      "dimension": "business_model",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "is a financial regulated business that runs on prices to clients globally across thousands of products in all major asset classes and markets; revenue from our participation in large transactions, a decline in the number of large transactions has in the past and would in the future adversely affect "
     },
     {
      "dimension": "revenue_drivers",
      "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Where the money actually comes from Revenue is decided by spread on assets and liabilities, transaction and fee volume and balance or asset growth, and whether that revenue becomes margin is decided by cost of funds and credit and fraud losses"
     },
     {
      "dimension": "margin_drivers",
      "surface": "story",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "becomes margin is decided by cost of funds and credit and fraud losses"
     },
     {
      "dimension": "capital_intensity",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund"
     },
     {
      "dimension": "macro",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "rategic Intelligence \u2014 The Goldman Sachs Group, Inc"
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "prices as though this is already true, without waiting for an outside source to confirm it"
     },
     {
      "dimension": "market_belief",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "market's current belief That The Goldman Sachs Group, Inc"
     },
     {
      "dimension": "belief_challenge",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "the plainer account is right: one segment is aspirational marketing rather than real revenue"
     },
     {
      "dimension": "competition",
      "surface": "intro",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "contested directly by brokers and dealers, and customers can substitute non-bank providers reaching the customer directly"
     },
     {
      "dimension": "adversary",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "impossible_hypothesis",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "The choice: Commit to the reading now versus hold and verify first"
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "show it is wrong"
     },
     {
      "dimension": "mve",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "One check separates them: evidence that one named segment contributes negligible revenue"
     },
     {
      "dimension": "presentation",
      "surface": "slides",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "The Goldman Sachs Group, Inc. \u2014 presentation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Goldman Sachs Group, Inc. \u2014 presentation The central strategic view The Goldman Sachs Group, Inc. appears to be selling to a second kind of buyer that behaves nothing like the first. The Goldman Sac"
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Strategic Intelligence \u2014 The Goldman Sachs Group, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } The Goldman Sachs Group, Inc. Full an"
     },
     {
      "dimension": "history",
      "surface": "history",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Better strategy"
     },
     {
      "dimension": "qa",
      "surface": "qa",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Goldman Sachs Group, Inc. What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Evidence Strongest. \u201c\u2026on our balance sheet to a scaled third-pa"
     },
     {
      "dimension": "step6",
      "surface": "connect",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
     }
    ],
-   "core_mean": null,
-   "core_min": null,
-   "core_unmeasured": [
-    "business_model",
-    "revenue_drivers",
-    "margin_drivers",
-    "market_belief",
-    "competition",
-    "recommendation",
-    "full_analysis",
-    "presentation",
-    "history",
-    "qa"
-   ],
-   "all_mean": null,
-   "sha": "16bc5af",
-   "first_useful": null
+   "core_mean": 8.8,
+   "core_min": 6,
+   "core_unmeasured": [],
+   "all_mean": 7.2,
+   "sha": "3b6ba34",
+   "first_useful": 328
   },
   {
    "company": "The Home Depot, Inc.",
@@ -7932,13 +7597,17 @@
   ],
   "Advanced Micro Devices, Inc.": [
    "RUN_NOT_READY",
-   "MISSING_ROUTE",
+   "LOST_RUN",
+   "OUTCOME_DISAGREEMENT",
+   "ROUTE_ERROR",
    "THIN_ROUTE",
    "THIN_ROUTE",
    "THIN_ROUTE",
    "THIN_ROUTE",
    "THIN_ROUTE",
    "THIN_ROUTE",
+   "STATED_SUCCESS_OVER_SERVER_ERROR",
+   "WRONG_IDENTITY",
    "QA_INCOMPLETE"
   ],
   "Alphabet Inc.": [],
@@ -7967,17 +7636,6 @@
    "OPERATIONAL_FAILURE"
   ],
   "Exxon Mobil Corporation": [],
-  "FedEx Corporation": [
-   "RUN_NOT_READY",
-   "MISSING_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "QA_INCOMPLETE"
-  ],
   "Freeport-McMoRan Inc.": [],
   "GE Aerospace": [],
   "Honeywell International Inc.": [],
@@ -8002,45 +7660,16 @@
   "NextEra Energy, Inc.": [],
   "PepsiCo, Inc.": [],
   "Pfizer Inc.": [],
-  "QUALCOMM Incorporated": [
-   "RUN_NOT_READY",
-   "MISSING_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "QA_INCOMPLETE"
-  ],
   "RTX Corporation": [],
   "Salesforce, Inc.": [],
   "ServiceNow, Inc.": [
-   "RUN_NOT_READY",
-   "MISSING_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "QA_INCOMPLETE"
+   "FALSE_SCARCITY"
   ],
   "Shopify Inc.": [],
   "Stripe, Inc.": [],
   "Texas Instruments Incorporated": [],
   "The Coca-Cola Company": [],
-  "The Goldman Sachs Group, Inc.": [
-   "RUN_NOT_READY",
-   "MISSING_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "THIN_ROUTE",
-   "QA_INCOMPLETE"
-  ],
+  "The Goldman Sachs Group, Inc.": [],
   "The Home Depot, Inc.": [
    "FALSE_SCARCITY"
   ],

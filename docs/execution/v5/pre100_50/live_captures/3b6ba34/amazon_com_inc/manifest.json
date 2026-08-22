@@ -1,0 +1,18 @@
+{
+  "company": "Amazon.com, Inc.",
+  "deployed_sha": "3b6ba34",
+  "captured_at": "2026-08-22T02:40:32Z",
+  "routes": {},
+  "progress": [],
+  "process_before": {
+    "boot_id": "dae43c1445054526",
+    "started_at": 1787365432.1417418,
+    "uptime_seconds": 1001.0
+  },
+  "status": "FAILED",
+  "run_id": "",
+  "capture_path": "docs/execution/v5/pre100_50/live_captures/3b6ba34/amazon_com_inc",
+  "entry_domain": "",
+  "failure": "analyze did not open a run (HTTP 500)",
+  "entry_text": "Something went wrong on our side Something went wrong on our side What did work. Your request was received and the company you entered was recorded. What did not. The analysis did not complete. Why. This is a fault in the product, not in what you entered or in the company. What to do next. Run it again. If it keeps happening, the reference below identifies this run in our logs. Run a new analysis "
+}
