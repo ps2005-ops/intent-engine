@@ -417,8 +417,99 @@ def _near(clause: str, name: str, pattern: re.Pattern) -> str:
     return match.group(0) if match else ""
 
 
+# --- IS THIS A NAME AT ALL, OR A HEADING? (§10) -----------------------------
+#
+# MEASURED LIVE on cb9e6b7, Goldman Sachs, on the introduction a customer
+# reads:
+#
+#     "contested directly by Banking Supervision and Compensation Practices"
+#
+# That is an Item heading out of the 10-K's regulatory section. It reached
+# the page because every discriminator above reads the CLAUSE, and when the
+# clause carries no regulatory cue the name's own words decide -- so
+# "Banking Supervision and Compensation Practices" was typed
+# FINANCIAL_INSTITUTION on the strength of the word "Banking", and "Risk
+# Management and Internal Controls" was typed COMPANY on the strength of
+# nothing at all.
+#
+# THIS IS MORPHOLOGY, NOT ANOTHER STOPLIST. The module's history records
+# three live rounds in which entity stoplists were defeated inside a deploy,
+# because headings are built from the same vocabulary as the list. A rule
+# about word FORM is different in kind and does not need maintaining: English
+# process and abstract nouns end in a small closed set of suffixes, and a
+# phrase whose content words are ALL of that form names an activity, not an
+# actor. "Compensation" and "Supervision" cannot be sued, sell anything or
+# take a customer.
+#
+# A corporate designator settles it the other way immediately: "Wells Fargo
+# Equipment Finance Inc." is a firm whatever its nouns look like.
+_ABSTRACT_SUFFIX = re.compile(
+    r"(?:tion|sion|ment|ance|ence|ity|ing|ship|ism|ology|ance)$", re.I)
+#: Plural process heads that carry no suffix marker but are never firms.
+_PROCESS_HEAD = frozenset({
+    "practices", "controls", "standards", "requirements", "procedures",
+    "policies", "guidelines", "matters", "activities", "rules",
+    "obligations", "disclosures", "considerations", "measures", "safeguards",
+})
+_DESIGNATOR = re.compile(
+    r"\b(?:inc|corp|corporation|co|company|ltd|limited|llc|lp|llp|plc|"
+    r"ag|sa|nv|bv|se|oyj|ab|as|kk|gmbh|holdings|group|bank|partners)\b\.?",
+    re.I)
+_CONNECTOR = frozenset({"and", "or", "of", "the", "for", "in", "on", "to",
+                        "a", "an", "&"})
+
+
+def names_an_activity(name: str) -> bool:
+    """True when this phrase names a practice rather than an actor.
+
+    Conservative by construction: a corporate designator, or fewer than half
+    the content words being process nouns, and it is left alone. Refusing a
+    real rival is worse than the heading it was meant to remove.
+    """
+    text = str(name or "").strip()
+    if not text or _DESIGNATOR.search(text):
+        return False
+    words = [w for w in re.findall(r"[A-Za-z&']+", text)
+             if w.lower() not in _CONNECTOR]
+    if len(words) < 2:
+        return False
+    return _abstract_share(words) * 2 >= len(words)
+
+
+#: A SUFFIX IS ONLY A SUFFIX ON A LONG ENOUGH WORD.
+#:
+#: "Li Ning" is NIKE's rival and appears on its live introduction. "Ning"
+#: ends in -ing, and with "Li" too short to count the phrase read as 2-of-2
+#: abstract and the real competitor was refused. A gerund that names a
+#: business activity -- Banking, Reporting, Underwriting, Manufacturing --
+#: is long; a short syllable that happens to end the same way is a name.
+_MIN_ABSTRACT = 6
+_MIN_GERUND = 7
+
+
+def _abstract_share(words) -> int:
+    found = 0
+    for word in words:
+        low = word.lower()
+        if low in _PROCESS_HEAD:
+            found += 1
+            continue
+        match = _ABSTRACT_SUFFIX.search(word)
+        if not match:
+            continue
+        floor = _MIN_GERUND if low.endswith("ing") else _MIN_ABSTRACT
+        if len(word) >= floor:
+            found += 1
+    return found
+
+
 def entity_type_of(name: str, clause: str) -> Tuple[str, str]:
     """WHAT IS THIS THING? Returns (entity_type, the words that decided it)."""
+    # ASKED FIRST, because every test below reads either the clause or the
+    # name's vocabulary, and a heading defeats both: it sits in the clause
+    # like a name and is built from the same words.
+    if names_an_activity(name):
+        return ENTITY_CATEGORY, "names an activity, not an actor"
     governing_index = _near(clause, name, _INDEX_NOUN)
     if governing_index:
         return ENTITY_INDEX_PROVIDER, governing_index

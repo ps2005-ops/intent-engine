@@ -75,6 +75,9 @@ from typing import Optional, Sequence, Tuple
 
 from intent_engine.executive.analysis_selection import (AnalysisSelection,
                                                         RecordFacts, select)
+from intent_engine.executive.economic_architecture import (
+    architecture_of, describe,
+)
 from intent_engine.executive.company_profile import (UNKNOWN,
                                                      CompanyIntelligenceProfile,
                                                      PROFILE_AVAILABLE,
@@ -835,7 +838,7 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
             documents: Optional[Sequence[dict]] = None,
             own_words: str = "", own_words_source: str = "",
             manifest=None, registrant=None, evidence_text: str = "",
-            simulation=None) -> StrategicRead:
+            simulation=None, subject_cik: str = "") -> StrategicRead:
     """The bounded strategic read for one company.
 
     Never raises and never returns None: a surface that has to handle "no
@@ -876,7 +879,16 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
     standing, reason = _standing(profile, selection, observations, documents,
                                  run_decision)
 
-    identity = _identity(name, profile, selection)
+    # WHAT THIS COMPANY ACTUALLY SELLS, read from its own filings.
+    #
+    # The model class is a PRIOR -- it is how the engine knows which
+    # questions a business of this kind is judged on -- and it is no longer
+    # the answer. Measured on the 50-company gauntlet, the class WAS the
+    # answer and 79 of 990 pairs came out byte-identical: Adobe, Cloudflare,
+    # Microsoft, Salesforce and Shopify shared one sentence.
+    architecture = architecture_of(documents, company=name,
+                                   subject_cik=subject_cik)
+    identity = _identity(name, profile, selection, architecture)
     economic_role = _economic_role(name, profile)
     question = _central_question(name, profile, selection)
 
@@ -886,6 +898,36 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
     ground = _ground(name, profile, documents)
     level4 = _level4(name, profile, selection, documents, ground)
     competition = competitive_state(profile, level4)
+    # THE ADVERSARY, ONCE A RIVAL IS KNOWN.
+    #
+    # `select` runs before the ladder, so at that point the only rivals are
+    # the manifest's -- and `_adversary` was gated on the manifest, which is
+    # why the L0/L1/L2 engine ran for none of the fifty gauntlet companies.
+    # The ladder has just established rivals from the SUBJECT'S OWN filing,
+    # already qualified as economic actors. If the selection came back
+    # empty-handed, it is asked again with those.
+    if not getattr(selection, "adversary", ()) and level4:
+        try:
+            import dataclasses as _dc
+
+            from intent_engine.executive.analysis_selection import (
+                _adversary as _adv,
+            )
+
+            class _Rival:
+                __slots__ = ("name", "why")
+
+                def __init__(self, rival):
+                    self.name = rival.name
+                    self.why = rival.why_a_rival
+
+            moves = _adv(profile, selection.archetype, _facts_from(dossier),
+                         rivals=tuple(_Rival(r) for r in level4[:1]))
+            if moves:
+                selection = _dc.replace(selection, adversary=moves)
+        except Exception:                                   # noqa: BLE001
+            # An adversarial reading is worth having and never worth a page.
+            pass
     position = _position(name, profile, selection, level4)
     level5 = _level5(name, selection, run_decision, standing)
     level6 = _level6(name, profile, selection, run_decision, standing,
@@ -1170,7 +1212,7 @@ def _standing(profile, selection, observations, documents, run_decision):
 
 
 # --- the hero (§24) ---------------------------------------------------------
-def _identity(name, profile, selection) -> str:
+def _identity(name, profile, selection, architecture=None) -> str:
     """What this company IS -- synthesized, never the company's own copy.
 
     §22. The opener used to be the first qualifying sentence off the
@@ -1178,6 +1220,16 @@ def _identity(name, profile, selection) -> str:
     when it was clipped to fit, marketing that trailed off mid-clause.
     """
     sector = _pretty(profile.sector)
+    # MEASURED PARTICULARS BEAT THE CLASS PRIOR. `describe` falls back to
+    # the prior when the filing said nothing, so a company with no readable
+    # business section is exactly as well served as before and one with a
+    # readable section is no longer described as its neighbours are.
+    if architecture is not None and architecture.is_specific:
+        written = describe(architecture, name=name, sector=sector,
+                           class_prior=_lower_first(
+                               _first_clause(profile.business_model)))
+        if written:
+            return written
     model = _lower_first(_first_clause(profile.business_model))
     if sector and model:
         return _sentence(f"{name} is {_article(sector)} {sector} business "

@@ -4859,6 +4859,10 @@ class WebApp:
                 own_words_source=own_source,
                 registrant=ci_in["registrant"],
                 evidence_text=ci_in["evidence_text"],
+                # OWNERSHIP, so the economics are read out of THIS company's
+                # filings. A sentence in a rival's 10-K describes the rival.
+                subject_cik=self.ci.subject_cik(
+                    self.ci.run_meta(run_id) or {}),
                 # THE SIMULATION IS PASSED, NOT REBUILT. The belief layer
                 # needs the observed trajectory and the trajectory comes from
                 # the filed series; deriving it inside `compose` would put a

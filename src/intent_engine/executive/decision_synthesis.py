@@ -122,10 +122,67 @@ def _standing_of(dossier) -> str:
     question is refused, because that is precisely what "supported" would be
     claiming.
     """
-    if (dossier.market_block or {}).get("availability") not in ("AVAILABLE",
-                                                                "STALE"):
-        return REFUSED
+    # A MARKET READING THAT WAS NEVER PUBLISHED IS NOT A REFUSAL.
+    #
+    # This read "availability not in (AVAILABLE, STALE) -> REFUSED", which
+    # made the whole reading REFUSED for every company the market bundle has
+    # no snapshot for -- 24 of the 50 gauntlet companies. The recommendation
+    # then became, verbatim on NIKE's live Q&A:
+    #
+    #     "Do not act on this reading. Re-run once the market engine
+    #      publishes a snapshot this side will read."
+    #
+    # NIKE composed eleven documents across five families and reached
+    # FULL_ANALYSIS. Nothing about it was refused; a separate bundle simply
+    # does not cover it, and the reader was told not to act on their own
+    # company's analysis because of it.
+    #
+    # REFUSED is for a snapshot that EXISTS and cannot be read -- which is
+    # exactly what the copy above describes and what the state is for.
+    # Absence falls through to the evidence-based standing below, where a
+    # run with evidence and beliefs lands on BOUNDED and a run with neither
+    # still lands on UNMEASURABLE.
+    # REFUSED IS A STATE THE MARKET BLOCK ALREADY REPORTS, and it means a
+    # snapshot was found and rejected -- for the wrong company, or in a form
+    # this side will not read. That is what the customer sentence describes:
+    # "Re-run once the market engine publishes a snapshot this side will
+    # read."
+    #
+    # It used to be inferred instead, as "availability not in (AVAILABLE,
+    # STALE)", which also swept up every company the bundle simply does not
+    # cover -- 24 of the 50 in the gauntlet. The whole reading was then
+    # refused on the strength of a separate bundle's coverage, and NIKE's
+    # live Q&A answered "What should management do?" with
+    #
+    #     "Do not act on this reading. Re-run once the market engine
+    #      publishes a snapshot this side will read."
+    #
+    # on a company that composed eleven documents across five families and
+    # reached FULL_ANALYSIS. Nothing about it was refused.
+    #
+    # Absence now falls through to the evidence-based standing below, where
+    # a run with evidence and beliefs lands on BOUNDED and a run with
+    # neither still lands on UNMEASURABLE.
+    availability = (dossier.market_block or {}).get("availability")
     beliefs, evidence = _count(dossier, "beliefs"), _count(dossier, "evidence")
+    if availability == "REFUSED":
+        return REFUSED
+    # ABSENCE FALLS THROUGH ONLY FOR A RUN WITH SOMETHING TO STAND ON.
+    #
+    # A first version of this let every uncovered company fall through, and
+    # a run that derived NO observations then landed on UNMEASURABLE, whose
+    # sentence is "No evidence has been published for this company". For the
+    # Duolingo case -- ten sources retrieved, none of them carrying a signal
+    # -- that is false, and the page it replaced said the true thing: the
+    # sources were read and none carried dated, checkable material. Two
+    # tests hold that page and they were right to.
+    #
+    # So the reroute is confined to runs that HAVE evidence, which is the
+    # case it was written for: NIKE, eleven documents across five families,
+    # told not to act on its own analysis because a separate bundle does not
+    # cover it.
+    if availability not in ("AVAILABLE", "STALE") and not evidence:
+        return REFUSED
     if not evidence:
         return UNMEASURABLE
     if not beliefs:

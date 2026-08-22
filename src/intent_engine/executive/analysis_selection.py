@@ -634,16 +634,33 @@ def _causal(profile, archetype: str, facts: RecordFacts):
         f"decision, never by looking for the largest measurable effect")
 
 
-def _adversary(profile, archetype: str, facts: RecordFacts):
+def _adversary(profile, archetype: str, facts: RecordFacts, rivals=()):
     """L0/L1/L2 against the nearest real competitor.
 
-    Built only where a competitor was actually selected. QRE is not
-    attempted: utilities cannot be defensibly populated from counts, and
-    §10 says name that rather than fabricate a probability.
+    QRE is not attempted: utilities cannot be defensibly populated from
+    counts, and §10 says name that rather than fabricate a probability.
+
+    THE SEAM THAT KEPT THIS OFF EVERY PAGE. This was gated on
+    `profile.known`, which is True only for companies in the curated
+    validation manifest. Measured across the 50-company gauntlet: the
+    adversarial response appears on NO surface of ANY of the fifty, because
+    almost none of them are in that manifest -- a complete L0/L1/L2 engine
+    that ran for nobody.
+
+    A rival established from the SUBJECT'S OWN FILING is not a lesser fact
+    than a rival typed into the manifest; it is a better one. `rivals` is
+    that list, already qualified as economic actors by
+    `competitive_qualification`, and it is used when the manifest has
+    nothing. Neither source invents a competitor: with no rival from either,
+    this still returns nothing rather than reasoning against a placeholder.
     """
-    if not profile.known or not profile.strategic_competitors:
+    selected = tuple(profile.strategic_competitors or ()) if profile.known \
+        else ()
+    if not selected:
+        selected = tuple(rivals or ())
+    if not selected:
         return ()
-    rival = profile.strategic_competitors[0]
+    rival = selected[0]
     lever = _ARCHETYPE_LEVER.get(archetype, "this decision")
     drivers = profile.primary_revenue_drivers or ("the revenue base",)
     evidence = (f"{rival.name} was selected because it {rival.why}"
@@ -781,7 +798,7 @@ def select(company_id: str = "", *, name: str = "", domain: str = "",
            facts: Optional[RecordFacts] = None,
            profile: Optional[CompanyIntelligenceProfile] = None,
            manifest=None, registrant=None,
-           evidence_text: str = "") -> AnalysisSelection:
+           evidence_text: str = "", rivals=()) -> AnalysisSelection:
     """Choose this company's analysis. Deterministic, no model call.
 
     `registrant` is the SEC's classification of this filer, used only when
@@ -823,6 +840,7 @@ def select(company_id: str = "", *, name: str = "", domain: str = "",
         causal_question=causal_question,
         why_this_causal_question=why_causal,
         historical_dimensions=profile.relevant_historical_dimensions,
-        adversary=_adversary(profile, archetype, facts),
+        adversary=_adversary(profile, archetype, facts,
+                             rivals=rivals),
         scenarios=_scenarios(profile, archetype, facts, transmission),
     )
