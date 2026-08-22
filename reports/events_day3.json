@@ -1,0 +1,153 @@
+{
+ "results": [
+  {
+   "signal": "event_drift.v1",
+   "accuracy": 0.4921,
+   "band": [
+    0.053,
+    0.947
+   ],
+   "naive_band": [
+    0.474,
+    0.526
+   ],
+   "verdict": "unmeasurable (n_eff=5 < 30, A-M5)",
+   "observations": 1518,
+   "events": 1393,
+   "windows": 5,
+   "n_eff": 5,
+   "design_effect": 303.6,
+   "confidence": "low"
+  },
+  {
+   "signal": "report_drift.v1",
+   "accuracy": 0.5019,
+   "band": [
+    0.357,
+    0.643
+   ],
+   "naive_band": [
+    0.438,
+    0.562
+   ],
+   "verdict": "indistinguishable from 0.500",
+   "observations": 263,
+   "events": 263,
+   "windows": 49,
+   "n_eff": 49,
+   "design_effect": 5.37,
+   "confidence": "high"
+  },
+  {
+   "signal": "ownership_drift.v1",
+   "accuracy": 0.4745,
+   "band": [
+    0.167,
+    0.833
+   ],
+   "naive_band": [
+    0.486,
+    0.514
+   ],
+   "verdict": "unmeasurable (n_eff=9 < 30, A-M5)",
+   "observations": 4849,
+   "events": 2131,
+   "windows": 9,
+   "n_eff": 9,
+   "design_effect": 538.78,
+   "confidence": "low"
+  },
+  {
+   "signal": "proxy_drift.v1",
+   "accuracy": 0.6049,
+   "band": [
+    0.304,
+    0.696
+   ],
+   "naive_band": [
+    0.421,
+    0.579
+   ],
+   "verdict": "unmeasurable (n_eff=26 < 30, A-M5)",
+   "observations": 162,
+   "events": 160,
+   "windows": 26,
+   "n_eff": 26,
+   "design_effect": 6.23,
+   "confidence": "medium"
+  }
+ ],
+ "by_form": {
+  "8-K": [
+   699,
+   345
+  ],
+  "10-Q": [
+   168,
+   82
+  ],
+  "10-K/A": [
+   3,
+   3
+  ],
+  "4": [
+   4544,
+   2161
+  ],
+  "10-K": [
+   58,
+   29
+  ],
+  "6-K": [
+   819,
+   402
+  ],
+  "SC 13D/A": [
+   13,
+   7
+  ],
+  "SC 13G/A": [
+   219,
+   99
+  ],
+  "40-F": [
+   8,
+   7
+  ],
+  "SC 13D": [
+   5,
+   3
+  ],
+  "SC 13G": [
+   68,
+   31
+  ],
+  "8-K/A": [
+   12,
+   8
+  ],
+  "DEFA14A": [
+   88,
+   53
+  ],
+  "DEF 14A": [
+   58,
+   34
+  ],
+  "10-Q/A": [
+   1,
+   0
+  ],
+  "20-F": [
+   29,
+   14
+  ]
+ },
+ "skipped": {
+  "no_reaction": 15,
+  "before_price_history": 1059,
+  "horizon_not_elapsed": 52,
+  "no_price": 2,
+  "no_cik": 1
+ }
+}

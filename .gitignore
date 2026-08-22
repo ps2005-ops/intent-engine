@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
-.venv/
+.venv
 venv/
 .env
 *.egg-info/
@@ -104,3 +104,29 @@ uiproof/
 # SHA, and for a while the only copy of that module in existence was an
 # untracked file in one ephemeral scratchpad worktree.
 /validation/
+# Day 17 — unattended market operation. Runtime state, never source.
+#
+# Locks are per-process; run records and per-cycle reports are MACHINE-SPECIFIC
+# operating history. Committing them would let a fresh checkout inherit another
+# machine's uptime and "prove" an operational record it has not demonstrated —
+# the same reasoning as data/.boot_ledger.jsonl above.
+#
+# NOT ignored, deliberately: reports/funnel_history.json and
+# reports/market/research_assets.jsonl. Those are RESEARCH — the measurements
+# and the beliefs — and they are the only thing this project actually owns.
+/locks/
+/status/
+/dryrun/
+data/dryrun/
+reports/market/*_day.md
+reports/market/*_day.json
+reports/market/*_night.md
+reports/market/*_night.json
+reports/market/latest_*.json
+reports/market/signal_audit.jsonl
+
+# Day 18 — replay working state. Checkpoints and the price cache are
+# machine-specific and regenerable; the RESULTS (pilot_replay.json,
+# experiments.jsonl, strategies.jsonl) are research and stay tracked.
+reports/market/replay/price_cache/
+reports/market/replay/replay_*.json

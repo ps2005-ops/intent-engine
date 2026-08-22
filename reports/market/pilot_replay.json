@@ -1,0 +1,300 @@
+{
+ "window": "research",
+ "tier": 1,
+ "universe": {
+  "version": "security_universe.v1",
+  "eligibility_version": "eligibility.v1",
+  "total": 82,
+  "by_type": {
+   "equity": 67,
+   "broad_etf": 4,
+   "sector_etf": 11
+  },
+  "by_sector": {
+   "Broad": 4,
+   "Communication": 6,
+   "Communication Services": 2,
+   "Consumer": 1,
+   "Consumer Disc": 6,
+   "Consumer Discretionary": 5,
+   "Consumer Staples": 5,
+   "Energy": 5,
+   "Financials": 9,
+   "Healthcare": 7,
+   "Industrials": 6,
+   "Materials": 5,
+   "Real Estate": 1,
+   "Technology": 17,
+   "Utilities": 3
+  },
+  "delisted_retained": 3,
+  "delisted_symbols": [
+   "FRC",
+   "SIVB",
+   "TWTR"
+  ],
+  "with_company_evidence": 27,
+  "survivorship_limitation": "Tier membership is a CURRENT list with explicit delisting support, not a point-in-time index reconstruction. Securities that failed before this universe was authored are absent and cannot be recovered from it. Replay results carry an upward survivorship bias of unknown but non-zero size; no result may be reported as if the universe were survivorship-free."
+ },
+ "runs": [
+  {
+   "job": "replay:baseline_momentum.v1:1:2015-01-01:2022-12-31:research",
+   "strategy_key": "baseline_momentum.v1",
+   "window": "research",
+   "tier": 1,
+   "securities": 82,
+   "sessions_scanned": 120987,
+   "signals_fired": 89556,
+   "observations": 86301,
+   "budget": {
+    "max_seconds": 900.0,
+    "max_observations": 200000,
+    "elapsed_seconds": 29.98,
+    "observations": 86301,
+    "exhausted": false
+   },
+   "status": "completed",
+   "resumable": false,
+   "skipped": {
+    "unresolved_horizon": 3255,
+    "no_price_data": 5
+   }
+  },
+  {
+   "job": "replay:mean_reversion.v1:1:2015-01-01:2022-12-31:research",
+   "strategy_key": "mean_reversion.v1",
+   "window": "research",
+   "tier": 1,
+   "securities": 82,
+   "sessions_scanned": 120987,
+   "signals_fired": 12885,
+   "observations": 37334,
+   "budget": {
+    "max_seconds": 900.0,
+    "max_observations": 200000,
+    "elapsed_seconds": 23.48,
+    "observations": 37334,
+    "exhausted": false
+   },
+   "status": "completed",
+   "resumable": false,
+   "skipped": {
+    "unresolved_horizon": 1321,
+    "no_price_data": 5
+   }
+  },
+  {
+   "job": "replay:volatility_breakout.v1:1:2015-01-01:2022-12-31:research",
+   "strategy_key": "volatility_breakout.v1",
+   "window": "research",
+   "tier": 1,
+   "securities": 82,
+   "sessions_scanned": 120987,
+   "signals_fired": 19166,
+   "observations": 55378,
+   "budget": {
+    "max_seconds": 900.0,
+    "max_observations": 200000,
+    "elapsed_seconds": 25.41,
+    "observations": 55378,
+    "exhausted": false
+   },
+   "status": "completed",
+   "resumable": false,
+   "skipped": {
+    "unresolved_horizon": 2120,
+    "no_price_data": 5
+   }
+  }
+ ],
+ "tests": [
+  {
+   "name": "baseline_momentum.v1@20d",
+   "mean": -0.001563,
+   "n_raw": 86301,
+   "n_effective": 77,
+   "stdev": 0.097595,
+   "t_stat": -0.1405,
+   "p_value": 0.88826,
+   "measurable": true,
+   "reason": ""
+  },
+  {
+   "name": "mean_reversion.v1@3d",
+   "mean": -0.00103,
+   "n_raw": 12467,
+   "n_effective": 77,
+   "stdev": 0.039925,
+   "t_stat": -0.2263,
+   "p_value": 0.820985,
+   "measurable": true,
+   "reason": ""
+  },
+  {
+   "name": "mean_reversion.v1@5d",
+   "mean": -0.000451,
+   "n_raw": 12407,
+   "n_effective": 77,
+   "stdev": 0.049758,
+   "t_stat": -0.0796,
+   "p_value": 0.936543,
+   "measurable": true,
+   "reason": ""
+  },
+  {
+   "name": "mean_reversion.v1@10d",
+   "mean": -0.00163,
+   "n_raw": 12460,
+   "n_effective": 77,
+   "stdev": 0.070103,
+   "t_stat": -0.2041,
+   "p_value": 0.838281,
+   "measurable": true,
+   "reason": ""
+  },
+  {
+   "name": "volatility_breakout.v1@5d",
+   "mean": -0.002207,
+   "n_raw": 18477,
+   "n_effective": 77,
+   "stdev": 0.05363,
+   "t_stat": -0.3612,
+   "p_value": 0.717978,
+   "measurable": true,
+   "reason": ""
+  },
+  {
+   "name": "volatility_breakout.v1@10d",
+   "mean": -0.001823,
+   "n_raw": 18538,
+   "n_effective": 77,
+   "stdev": 0.073234,
+   "t_stat": -0.2184,
+   "p_value": 0.827102,
+   "measurable": true,
+   "reason": ""
+  },
+  {
+   "name": "volatility_breakout.v1@20d",
+   "mean": -0.001422,
+   "n_raw": 18363,
+   "n_effective": 77,
+   "stdev": 0.102006,
+   "t_stat": -0.1223,
+   "p_value": 0.902628,
+   "measurable": true,
+   "reason": ""
+  }
+ ],
+ "fdr": {
+  "method": "benjamini_hochberg",
+  "q": 0.1,
+  "tests": 7,
+  "threshold": null,
+  "discoveries": [],
+  "rejected": [
+   "volatility_breakout.v1@5d",
+   "mean_reversion.v1@3d",
+   "volatility_breakout.v1@10d",
+   "mean_reversion.v1@10d",
+   "baseline_momentum.v1@20d",
+   "volatility_breakout.v1@20d",
+   "mean_reversion.v1@5d"
+  ],
+  "note": "no strategy survives FDR control"
+ },
+ "leaderboard": {
+  "ranked": false,
+  "reason": "confidence intervals overlap; the ordering is not distinguishable from noise",
+  "rows": [
+   {
+    "strategy_key": "mean_reversion.v1",
+    "state": "REPLAY_ELIGIBLE",
+    "n_raw": 37334,
+    "n_effective": 77,
+    "design_effect": 484.86,
+    "win_rate": 0.4851,
+    "expectancy": -0.001038,
+    "profit_factor": 0.941,
+    "sharpe": -0.301,
+    "sortino": -0.29,
+    "max_drawdown": -1.0,
+    "turnover": 12885,
+    "mean_net_return": -0.001038,
+    "p_value": 0.867822,
+    "measurable": true,
+    "reason": "",
+    "interval": [
+     -0.013262,
+     0.011186
+    ]
+   },
+   {
+    "strategy_key": "baseline_momentum.v1",
+    "state": "REPLAY_ELIGIBLE",
+    "n_raw": 86301,
+    "n_effective": 77,
+    "design_effect": 1120.79,
+    "win_rate": 0.5008,
+    "expectancy": -0.001563,
+    "profit_factor": 0.954,
+    "sharpe": -0.254,
+    "sortino": -0.252,
+    "max_drawdown": -1.0,
+    "turnover": 86301,
+    "mean_net_return": -0.001563,
+    "p_value": 0.88826,
+    "measurable": true,
+    "reason": "",
+    "interval": [
+     -0.023362,
+     0.020236
+    ]
+   },
+   {
+    "strategy_key": "volatility_breakout.v1",
+    "state": "REPLAY_ELIGIBLE",
+    "n_raw": 55378,
+    "n_effective": 77,
+    "design_effect": 719.19,
+    "win_rate": 0.4915,
+    "expectancy": -0.001818,
+    "profit_factor": 0.931,
+    "sharpe": -0.366,
+    "sortino": -0.367,
+    "max_drawdown": -1.0,
+    "turnover": 19111,
+    "mean_net_return": -0.001818,
+    "p_value": 0.839488,
+    "measurable": true,
+    "reason": "",
+    "interval": [
+     -0.019413,
+     0.015777
+    ]
+   }
+  ],
+  "measurable": 3,
+  "unmeasurable": 0,
+  "fdr": {
+   "method": "benjamini_hochberg",
+   "q": 0.1,
+   "tests": 7,
+   "threshold": null,
+   "discoveries": [],
+   "rejected": [
+    "volatility_breakout.v1@5d",
+    "mean_reversion.v1@3d",
+    "volatility_breakout.v1@10d",
+    "mean_reversion.v1@10d",
+    "baseline_momentum.v1@20d",
+    "volatility_breakout.v1@20d",
+    "mean_reversion.v1@5d"
+   ],
+   "note": "no strategy survives FDR control"
+  },
+  "surviving_fdr": [],
+  "note": "no strategy survives false-discovery control; none is eligible for challenger status"
+ },
+ "elapsed_seconds": 79.9
+}

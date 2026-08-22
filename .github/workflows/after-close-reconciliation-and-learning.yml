@@ -1,0 +1,28 @@
+# E. After-close reconciliation AND learning — final fills/positions/equity,
+# then resolve (catch-up), score companies, generate candidates, write reports.
+name: after-close-reconciliation-and-learning
+
+on:
+  schedule:
+    - cron: "37 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      as_of:
+        description: "Override trading date (YYYY-MM-DD); blank = today (NY)"
+        required: false
+
+concurrency:
+  group: after-close-reconciliation-and-learning
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: ./.github/workflows/_hosted-job.yml
+    secrets: inherit
+    with:
+      job: after-close-reconciliation-and-learning
+      as_of: ${{ github.event.inputs.as_of }}
+      timeout_minutes: 30

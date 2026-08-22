@@ -1078,8 +1078,10 @@ class WebApp:
         # gate 404'd legitimate operator access and turned an information
         # leak into a lockout. /feedback's exposure is recorded as unverified
         # rather than guessed at; /status.json is what was measured leaking.
+        # `hosted` joins the list from the market lineage: the hosted-runtime
+        # console is the same class of surface as /dashboard.
         if parts and parts[0] in ("learning", "dashboard", "assistant",
-                                  "status.json"):
+                                  "status.json", "hosted"):
             if session is None:
                 return self._redirect("/login")
             if session.get("anonymous"):
@@ -1098,6 +1100,10 @@ class WebApp:
             return self._my_analyses(session)
         if route == ("GET", "dashboard", 1):
             return self._dashboard_page(session)
+        if route == ("GET", "hosted", 1):
+            return self._hosted_dashboard(session)
+        if path == "/hosted.json" and method == "GET":
+            return self._ok_json(self._hosted_data())
         if path in ("/feedback", "/feedback.jsonl") and method == "GET":
             if session is None:
                 return self._redirect("/login")
@@ -1357,6 +1363,39 @@ class WebApp:
         _LOG.info("strategic dossier %s for %s (%s)", result["status"],
                   result["company_id"], result["revision"])
         return self._ok_json(result)
+
+    # --- hosted runtime dashboard: read-only view over the durable DB -------
+    # Behind the same operations-console gate as /learning and /dashboard: a
+    # logged-in account only, never a guest demo session. It is plumbing, and a
+    # visitor evaluating the product should not be looking at it.
+    def _durable_store(self):
+        """A FRESH durable store per request — so the view recovers cleanly
+        after a free web service has slept. Reads DATABASE_URL from env."""
+        from intent_engine.storage.durable import DurableStore
+        return DurableStore()
+
+    def _hosted_data(self) -> dict:
+        import datetime
+
+        from intent_engine.hosted.budget import Budget
+        from intent_engine.hosted.dashboard import assemble
+        store = self._durable_store()
+        try:
+            return assemble(store, budget=Budget.from_env(),
+                            as_of=datetime.date.today().isoformat())
+        finally:
+            store.close()
+
+    def _hosted_dashboard(self, session):
+        from intent_engine.hosted.dashboard import render_html
+        frag = render_html(self._hosted_data())
+        body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                '<title>Hosted runtime — paper trading (simulated)</title>'
+                '<meta name="viewport" content="width=device-width,'
+                ' initial-scale=1"></head><body>'
+                f'{self._nav(session, session["csrf"] if session else "")}'
+                f'<main>{frag}</main></body></html>')
+        return self._html(self._stylize(body))
 
     def _redirect(self, where, *, set_sid=None, clear_cookie=False):
         headers = [("Location", where)]

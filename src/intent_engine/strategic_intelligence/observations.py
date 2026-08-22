@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
+from intent_engine.strategic_intelligence import evidence_text as ET
 from intent_engine.strategic_intelligence.records import StrategicObservation
 
 
@@ -1109,7 +1110,10 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
         if page_kind(doc.get("final_url", ""), title) != "strategic":
             continue
 
-        body = (doc.get("text_content") or "").strip()
+        # ONE excerpt rule, shared with `derive_observations` below. Two
+        # derivations reading the same document must not disagree about what
+        # it says; they differ in what they admit, not in what they read.
+        body = ET.body_text(doc)
         # AN INDEPENDENT SOURCE STILL HAS TO SAY SOMETHING.
         #
         # Measured on the eighteen third-party filings this product accepts:
@@ -1128,7 +1132,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             verdict = assess(text=body, company_name=company or "")
             if not verdict.usable_as_support:
                 continue
-        excerpt = (body or doc.get("meta_description") or "").strip()
+        excerpt = ET.evidence_excerpt(doc)
         if len(excerpt) < MIN_ANALYST_EXCERPT_CHARS:
             continue
 
@@ -1155,7 +1159,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             directly_observed=True,
             signals=tuple(signals),
             source_class=source_class,
-            excerpt=excerpt[:1200],
+            excerpt=excerpt[:ET.EXCERPT_CHARS],
             source_title=title or source_class,
             origin=doc.get("final_url", ""),
             date=(doc.get("retrieved_at", "") or "")[:10],
@@ -1165,6 +1169,7 @@ def derive_analyst_evidence(documents, company: str = "") -> list:
             weak=weak,
             evidence_quality="weak" if weak else "strong"))
     return evidence
+
 
 
 def observation_sentence(subject: str, signal: str, label: str) -> str:
@@ -1291,8 +1296,13 @@ def derive_observations(documents, *, company: str = "",
             excerpt, section = FS.best_excerpt(
                 body_text, form=(doc.get("filing") or {}).get("form", ""))
         if not excerpt:
-            excerpt = (doc.get("meta_description")
-                       or body_text[:280]).strip()
+            # THE MEASURED DEFECT this replaced read
+            #     (meta_description or text_content[:280])
+            # and it was production for every observation the engine made. A
+            # marketing page's meta_description IS its blurb; a filing's first
+            # 280 characters ARE its cover page. `evidence_excerpt` is the one
+            # body selector both derivations share.
+            excerpt = ET.evidence_excerpt(doc)
         else:
             excerpt = excerpt.strip()
         weak = _is_weak(excerpt, title, signals)

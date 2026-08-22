@@ -1,0 +1,25 @@
+{
+ "contract": "action_precision.v1",
+ "as_of": "2026-08-08",
+ "evaluation_set": {
+  "non_actions": 22,
+  "real_actions": 16,
+  "provenance": "hand-adjudicated from the wave-9 live run; every row read"
+ },
+ "measured": {
+  "non_actions_refused": "22/22",
+  "real_actions_lost": "0/16"
+ },
+ "in_sample_warning": "The shapes were written against this corpus, so 22/22 and 0/16 are FIT, not generalisation. What should transfer is that each pattern matches a STRUCTURE \u2014 habitual present, second person, a quoted testimonial, a comparison \u2014 rather than a remembered phrase. The next unseen corpus is the only real test.",
+ "live_effect": {
+  "actions_before": 38,
+  "actions_after": 16,
+  "established_objects_before": 1,
+  "established_objects_after": 1,
+  "non_actions_still_admitted": 0
+ },
+ "learning_split": {
+  "system_learning_gain": "the corpus reaching the object extractor is now 16 real actions instead of 38 mostly-prose sentences, and every refusal names which shape it was",
+  "economic_knowledge_gain": "NONE. The number of established competitive objects is unchanged at 1. A cleaner denominator is not a new fact about the world."
+ }
+}

@@ -1,0 +1,155 @@
+{
+ "contract": "research_priority.v1",
+ "as_of": "2026-08-08",
+ "summary": {
+  "contract": "research_priority.v1",
+  "priorities": 6,
+  "by_missing_fact": {
+   "NEED_DATE": 2,
+   "NEED_BUYER": 2,
+   "NEED_SUPPLIER": 1,
+   "NEED_OUTCOME": 1
+  },
+  "families_used": [
+   "changelog",
+   "customer_case_study",
+   "customer_launch_page",
+   "investor_release",
+   "newsroom",
+   "plan_comparison",
+   "pricing_page",
+   "procurement_record",
+   "regulatory_filing",
+   "release_notes",
+   "solution_page",
+   "supplier_disclosure"
+  ],
+  "note": "routing is by the MISSING FACT. A release note cannot say who a product is for, and a pricing page cannot say when something shipped, however well either has performed."
+ },
+ "priorities": [
+  {
+   "contract": "research_priority.v1",
+   "priority_id": "rpr_041f78133ae4",
+   "subject": "Salesforce",
+   "missing_fact": "NEED_DATE",
+   "question": "Retrieve the publication or effective date Salesforce states for: Commerce Cloud product changes over the last four quarters",
+   "why_it_matters": "no counterparty has an orderable action stream, so no two-sided timeline and therefore no sequence can exist",
+   "hypotheses_discriminated": [
+    "Salesforce publishes dated commerce changes somewhere",
+    "Salesforce publishes no dated commerce stream at all"
+   ],
+   "eligible_source_families": [
+    "newsroom",
+    "release_notes",
+    "changelog",
+    "investor_release"
+   ],
+   "voi": 0.95,
+   "resolution_window": "2026-09-30",
+   "provenance": {}
+  },
+  {
+   "contract": "research_priority.v1",
+   "priority_id": "rpr_05cff462ce3b",
+   "subject": "Toyota",
+   "missing_fact": "NEED_OUTCOME",
+   "question": "Retrieve the next reported outcome for Toyota bearing on: the next reported orders or backlog figure",
+   "why_it_matters": "ORDERS is the weakest UNKNOWN link on the strongest current chain",
+   "hypotheses_discriminated": [
+    "orders confirm the demand reading",
+    "orders move against it"
+   ],
+   "eligible_source_families": [
+    "regulatory_filing",
+    "investor_release",
+    "customer_case_study"
+   ],
+   "voi": 0.85,
+   "resolution_window": "2026-11-30",
+   "provenance": {}
+  },
+  {
+   "contract": "research_priority.v1",
+   "priority_id": "rpr_fdc973333abf",
+   "subject": "Adobe Commerce",
+   "missing_fact": "NEED_DATE",
+   "question": "Retrieve the publication or effective date Adobe Commerce states for: Adobe Commerce release history with per-entry dates",
+   "why_it_matters": "six official surfaces returned zero retrievable documents; the release-note page is a contents list",
+   "hypotheses_discriminated": [
+    "dated release notes exist behind a different path",
+    "Adobe Commerce publishes no machine-readable dated history"
+   ],
+   "eligible_source_families": [
+    "newsroom",
+    "release_notes",
+    "changelog",
+    "investor_release"
+   ],
+   "voi": 0.8,
+   "resolution_window": "2026-09-30",
+   "provenance": {}
+  },
+  {
+   "contract": "research_priority.v1",
+   "priority_id": "rpr_455abf3de57d",
+   "subject": "Cloudflare",
+   "missing_fact": "NEED_SUPPLIER",
+   "question": "Retrieve the suppliers or dependencies Cloudflare names in its own disclosures for: named suppliers or infrastructure dependencies in its filings",
+   "why_it_matters": "the economic chain's UNKNOWN links are all upstream of the company, and no SUPPLIES edge exists in the graph",
+   "hypotheses_discriminated": [
+    "filings name concentration or single-source dependency",
+    "no named dependency is disclosed"
+   ],
+   "eligible_source_families": [
+    "regulatory_filing",
+    "supplier_disclosure",
+    "procurement_record"
+   ],
+   "voi": 0.75,
+   "resolution_window": "2026-12-31",
+   "provenance": {}
+  },
+  {
+   "contract": "research_priority.v1",
+   "priority_id": "rpr_f1fb11caca34",
+   "subject": "Shopify",
+   "missing_fact": "NEED_BUYER",
+   "question": "Retrieve the buyer segment or customer type Shopify names for: Commerce Components, JavaScript for Shopify Functions, Tinker",
+   "why_it_matters": "nine real actions name no buyer, so their competitive object cannot be established from the sentence",
+   "hypotheses_discriminated": [
+    "a solution or pricing page names the segment",
+    "the buyer is genuinely unstated anywhere public"
+   ],
+   "eligible_source_families": [
+    "pricing_page",
+    "solution_page",
+    "customer_launch_page",
+    "plan_comparison"
+   ],
+   "voi": 0.7,
+   "resolution_window": "2026-10-31",
+   "provenance": {}
+  },
+  {
+   "contract": "research_priority.v1",
+   "priority_id": "rpr_4c3f34df9948",
+   "subject": "BigCommerce",
+   "missing_fact": "NEED_BUYER",
+   "question": "Retrieve the buyer segment or customer type BigCommerce names for: the June 1 2026 plan structure and pricing change",
+   "why_it_matters": "a real dated price change whose tier and buyer live in a table the sentence extractor cannot reach",
+   "hypotheses_discriminated": [
+    "the plan table names the segment per tier",
+    "the change is uniform across buyers"
+   ],
+   "eligible_source_families": [
+    "pricing_page",
+    "solution_page",
+    "customer_launch_page",
+    "plan_comparison"
+   ],
+   "voi": 0.65,
+   "resolution_window": "2026-10-31",
+   "provenance": {}
+  }
+ ]
+}

@@ -1,0 +1,936 @@
+# Bottleneck log
+
+One entry per improvement cycle. Each answers the same question before any
+code is written: **is the thing I was about to build actually the highest-
+leverage bottleneck?** The rule is that a bottleneck is *measured*, not
+asserted — every entry carries the number that decided it.
+
+Written newest-last, so the file reads as a history.
+
+## Bottleneck half-life
+
+The standing KPI for this phase. Markets are what the engine is learning
+*about*; half-life is how fast it is learning **to improve itself**, which is
+the thing that compounds.
+
+> **Half-life** — the number of days a verified bottleneck stays the #1
+> bottleneck before it is eliminated or overtaken.
+
+A shrinking half-life means the loop is tightening. A growing one means
+either the problems are getting genuinely harder or the measurement is getting
+slower — and the two are told apart by whether the *metric* moved, not by
+whether code shipped.
+
+| # | Bottleneck | Discovered | Metric before | Root cause | Fixed | Metric after | Days as #1 |
+|---|---|---|---|---|---|---|---|
+| 1 | No evidence collected at all | 2026-07-30 | 0 evidence rows/company; 100% `no_strategic_reading` | `research_fn` was a placeholder returning `{}`; universe carried no `website` to research | 2026-07-30 | dated, source-classed evidence for 8/11 companies | **<1** |
+| 2 | No outside source ever approved | 2026-07-30 | `independent_source` **0/11**; 3/3 readable tradables died at `no_outside_source` | `candidates[:8]` took discovery order; ~30 `company_owned` rank above 3 `customer_voice`, so outside sources were never approved | 2026-07-30 | `independent_source` 1/11; yield 36% → 45%; first company reaches the deepest gate | **<1** |
+
+Both were found and closed inside a day, but neither is evidence of a fast
+loop yet — they were both *self-inflicted*, introduced by the previous cycle
+and caught by the next measurement. The number worth watching starts when a
+bottleneck is external to the code just written.
+
+---
+
+## Cycle 1 — 2026-07-30
+
+### What I was about to build
+
+At the end of the previous cycle I asserted the next increment was a
+**market-evidence adapter**, on the reasoning that `no_market_evidence` was the
+gate blocking every WATCH record.
+
+### What the measurement said
+
+That was the right *observation* and the wrong *conclusion*. Three numbers,
+all taken from the running system rather than from the code's intent:
+
+| measurement | value | source |
+|---|---|---|
+| Companies in the universe | **5 total, 4 tradable** | `default_universe()` |
+| Sectors covered | 3 (Technology, Consumer, Fintech) | same |
+| Evidence produced per company in production | **0 rows, empty thesis** | `_env_research_fn`, hosted/context.py |
+
+The mission requires 20–50 evaluated opportunities per day across large/mid/
+small cap, growth/value, cyclical/defensive, and seven-plus sectors. The
+system can currently evaluate four companies in three sectors.
+
+More decisively: **`research_fn` returns `{"evidence": [], "thesis": ""}` in
+production.** Every "WATCH / no_market_evidence" record I measured last cycle
+came from an *injected test fake*. The real daily cycle produces four
+`NO_TRADE / no_strategic_reading` rows, because there is no evidence to reason
+over at all.
+
+### Why the market adapter was the wrong next build
+
+Compare the two candidates by what a day's learning would actually be:
+
+| build | daily output | learning gained |
+|---|---|---|
+| Market-evidence adapter only | 4 companies × 0 evidence → 4 `no_strategic_reading` | **zero** — the market signal never gets consulted, because the reasoner exits at an earlier gate |
+| Universe expansion only | 40 companies × 0 evidence → 40 `no_strategic_reading` | **zero** — a multiplier on nothing |
+| **Company evidence collection** | 4 companies × real evidence → real readings | **non-zero, for the first time** |
+
+The market adapter sits *behind* two gates the reasoner checks first
+(`no_strategic_reading`, then `no_dated_evidence` / `no_outside_source`). Wiring
+it while evidence collection returns nothing would have produced a component
+that could not run, and a measurement that could not move — the definition of
+building the wrong thing carefully.
+
+Universe breadth is a real gap and is second, not first: it is a multiplier,
+and the thing it multiplies is currently zero.
+
+This also agrees with the prescribed build order — Stage 1 is *market evidence
+collection* — which is a check on the reasoning rather than the reason for it.
+
+### Decision
+
+**Build the evidence collector, by wiring Founder Intelligence's real
+ingestion into `research_fn`.**
+
+Reuse, not new infrastructure: that pipeline is already built, already
+production-verified, and already retrieves real public sources, parses them,
+and derives dated observations with source classes. The call chain is
+service-level and needs no webapp — `create_run → discover → approve →
+compose_with_quality`, which is exactly what the web flow itself calls.
+
+### What this cycle must respect
+
+- **Provenance stays honest.** `create_run` and `approve` hardcode
+  `actor_type="human"` because they were written for a founder clicking a
+  button. An autonomous job recording itself as human would corrupt the audit
+  trail. `actor_type` already permits `"system"`; both entry points take it as
+  a parameter now, defaulting to `"human"` so the webapp flow is unchanged.
+- **Known ceiling, stated up front.** Founder Intelligence's own measured
+  limit is that roughly two companies in five yield a full strategic report;
+  JS-rendered sites return metadata only (`/readyz` → `browser_rendering:
+  false`). So this does not make every company reason — it makes *some*
+  companies reason, where today none do.
+
+### Expected measurable effect
+
+Before: every production company → `NO_TRADE / no_strategic_reading`, quality 0.
+
+After: companies whose sites are readable produce a dated, source-classed
+reading and advance to a later gate. **The metric that must move is the
+distribution of `blocked_by`** — specifically, `no_strategic_reading` falling
+and later gates rising. If it does not move, the build failed regardless of
+how much code it added.
+
+### Measured result
+
+Same universe, same day, placeholder `research_fn` versus the real one, run
+offline against the company fixture:
+
+| | `blocked_by` |
+|---|---|
+| Before | `no_strategic_reading: 3, not_tradable: 1` |
+| After | `view_withheld: 1, no_strategic_reading: 2, not_tradable: 1` |
+
+Per company, which is the clean measurement (see the caveat below), the gate
+moved from `no_strategic_reading` with quality 0.0 to `view_withheld` with
+real dated evidence and a non-zero quality. Stage 1 is operational: the
+adapter returns dated, source-classed evidence rows from the real pipeline,
+asserted by seven offline tests that run discovery, retrieval, parsing and
+composition rather than a mock of them.
+
+**Honest caveat on the sweep number.** Two of the three tradable companies did
+not advance, and that is an artefact of the measurement, not a product defect.
+`create_run` keys a run on `(domain, user_id, as_of)`, and the harness forced
+all four companies onto the single fixture domain, so they collapsed into one
+run and the later two reused the first's consumed approval. In production each
+company has its own domain. The per-company result is the one to trust; the
+sweep number understates the effect and is reported as measured anyway.
+
+### What the build found on the way
+
+The reasoner could not tell **"nothing was retrieved"** from **"plenty was
+retrieved and the strategic gate correctly declined to read a strategy from
+it."** Both reported `no_strategic_reading`. That made the whole `blocked_by`
+distribution — the metric this cycle is judged on — undiagnosable, because the
+two facts need opposite responses: fix the retrieval, versus do nothing at
+all. Split into `no_strategic_reading` and `view_withheld`, which is what let
+the measurement above show anything.
+
+That defect was invisible until real evidence started flowing. It is the
+argument for measuring after every build rather than reasoning about it.
+
+### Next cycle's candidate (to be re-verified, not assumed)
+
+Universe breadth: 4 tradable companies against a mission requiring 20–50 per
+day across caps and sectors, and 3 sectors against a required 7+. It is now a
+multiplier on something non-zero, which it was not before. **Do not build it
+without re-running this analysis** — the Stage-1 work may have exposed a
+larger constraint, and the point of this log is that the previous cycle's
+"obvious next step" was wrong.
+
+---
+
+## Cycle 2 — 2026-07-30
+
+### What I predicted, and why prediction is not measurement
+
+I closed cycle 1 saying: *"`view_withheld` may turn out to be the dominant
+gate, and that would make strategic-reading yield — not company count — the
+real constraint."*
+
+**Measurement disproved it.** Yield was not the binding gate, and neither was
+universe breadth, the standing roadmap item.
+
+### The instrument
+
+Eleven offline company fixtures (`product_eval/sites.py`), each on its own
+domain, run through the real ingestion and the real reasoner. Deterministic,
+network-free, and deliberately including the hard cases: a blocked site, a
+nonexistent company, two local businesses, and a site that argues with the
+analyst. This replaced cycle 1's flawed harness, which forced every company
+onto one fixture domain and collapsed them into a single run.
+
+### Ranked bottlenecks
+
+| rank | bottleneck | measurement | why ranked here |
+|---|---|---|---|
+| **1** | **No outside source is ever approved** | `independent_source` **0/11**. Every tradable company that formed a reading died at `no_outside_source` — **3 of 3** | A gate that can never pass. Not "fails sometimes": structurally unreachable, so no amount of upstream work could move it |
+| 2 | Strategic-reading yield | 4/11 overall, 4/8 of those with evidence | Real, but it gates *some* companies. #1 gated **all** of them |
+| 3 | Universe breadth | 4 tradable, 3 sectors vs 20–50/day and 7+ sectors | Still a multiplier — and multiplying a pipeline that cannot reach a position just produces more WATCH rows |
+| 4 | Retrieval on JS-rendered sites | 3/11 produced no evidence | Known, external, unchanged |
+
+### Root cause of #1
+
+Not a missing capability — discovery **was** finding outside sources, for
+every single company:
+
+```
+candidate source_classes: {company_owned: 30, executive_statement: 2,
+                           investor_material: 2, customer_voice: 3}
+retrieved doc source_classes: {company_owned: 3, executive_statement: 1,
+                               investor_material: 1}
+```
+
+The `customer_voice` candidates were discovered and never approved, because
+my own cycle-1 adapter approved `candidates[:8]` — the first eight in
+discovery order, which are all company pages. **A one-line slice made the gate
+it was feeding impossible to pass.**
+
+### Fix
+
+`select_diverse`: round-robin across source classes, outside classes drawn
+first so they cannot be crowded out, discovery order preserved *within* a
+class because that ranking is the ingestion layer's judgement.
+
+### Measured effect
+
+| metric | before | after |
+|---|---|---|
+| `independent_source` | **0/11** | 1/11 |
+| strategic-reading yield | 4/11 (36%) | **5/11 (45%)** |
+| yield among companies with evidence | 50% | **62%** |
+| view-withheld rate | 4/8 | 3/8 |
+| Shopify: gate → quality | `no_outside_source` → 0.525 | **`no_market_evidence` → 0.80** |
+
+Shopify is the first company in the corpus to reach the deepest gate in the
+pipeline: a dated, independently-corroborated reading with nothing left
+blocking it but the market signal.
+
+**Why 1/11 and not more, stated honestly.** Palantir and Sony still report
+`no_outside_source`. Their fixtures *declare* customer-voice candidates but do
+not serve those URLs, so retrieval 404s. That is the fixture having no outside
+source to find, and `no_outside_source` is then the correct answer rather than
+a defect. The fix works where an outside source actually exists; it cannot
+invent one.
+
+### Bottleneck ranking after this cycle
+
+1. **Strategic-reading yield** — 3 of 8 companies with evidence still produce
+   no view. Now the top gate for companies that have evidence.
+2. **Universe breadth** — unchanged, and now genuinely a multiplier on a
+   pipeline that can reach the deepest gate.
+3. Market-evidence adapter — reachable for the first time, and therefore no
+   longer speculative to build.
+
+**Do not treat #1 as decided.** Two cycles running, the measurement has
+overturned the predicted next step.
+
+---
+
+## Engineering prediction accuracy
+
+The engine should get better at predicting the impact of its own engineering,
+not only at reading markets. Recorded per cycle, before the build.
+
+| cycle | predicted #1 | actual #1 | predicted gain | actual gain | error | root cause of the error |
+|---|---|---|---|---|---|---|
+| 1 | market-evidence adapter | evidence collection returns nothing | — (no metric named in advance) | `no_strategic_reading` 3→2, yield 0→36% | **wrong bottleneck** | Reasoned from the gate I could *see* (`no_market_evidence`) without checking that the records showing it came from an injected test fake, not production |
+| 2 | strategic-reading yield | no outside source ever approved | — (no metric named in advance) | `independent_source` 0/11→1/11, yield 36%→45% | **wrong bottleneck** | Read a metric (`no_outside_source`) as a fact about the world — companies lack independent coverage — instead of inspecting the stage before it, where the candidates were present all along |
+| 3 | strategic-reading yield *(carried from cycle 2)* | **market-evidence adapter** | LV 0 → **1–3** | LV 0 → **1** | **correct, at the floor** | First cycle with a stated numeric prediction, and the first correct one. Landed at the floor for the reason given in advance: only Shopify clears every earlier gate |
+| 4 | resolution / outcome scoring | **the objective function itself** | — | LV shown gameable 0→10 by one constant; replaced | **wrong bottleneck** | Ranked features behind the metric without testing whether the metric survived being made a target. A one-day-old KPI is the least-tested component in the system, not the most trusted |
+| 5 | grading (resolution) | grading — **but of all decisions, not just positions** | decisions graded 9% | decisions graded **100%**; refusal justification measurable at n=10 | **target right, scope wrong** | Equated "decision" with "position". Refusals are 91% of what this engine does, and an explicit Decision Quality component was going unmeasured. Falsification caught it before implementation, not after |
+| 6 | universe breadth / sample size | **hypotheses must precede breadth** | n=30 samples | same n=30, worth **3.4× more** (novelty 4.0 → 13.7) | **wrong ordering** | Treated sample COUNT as the constraint when sample DIVERSITY was. Our own novelty metric, built in cycle 4 to catch this exact failure, falsified the plan when finally pointed at it |
+| 7 (Day 17) | **unattended operation** — not `strategic_view` | unattended operation, **plus an unpredicted integrity failure** | cycles/day 1 → **2**, so observations accumulate at 2x | cycles/day 1 → 2 as designed; **and a silent evidence-loss bug found in the 20:00–24:00 window** | **target right, unpredicted finding dominated** | I predicted a throughput gain and got one. The larger result was not predicted at all: making the engine run at 20:30 is what exposed that the leakage guard compared a UTC stamp against a local `as_of` and silently dropped every observation. The throughput doubling is worth 2x; the bug was costing 100% of evening evidence. **Scheduling work found a correctness bug, which is not a category I had in my prediction at all.** |
+| 8 (Day 18) | **narrative coupling**, not universe size | narrative coupling — confirmed | resolvable experiments/day **0 → >=10^3**, live positions stay ~0 | 179,013 raw / **77 effective**; live positions 0 | **correct** | First prediction to land in the interior rather than at a floor. It came from MEASURING the live research cost (25 s/security) and the gate order before proposing anything, instead of reasoning from the brief's premise that size was the constraint. The one surprise was a bug in my own effective-sample code that reported n_eff=1 and made every test unmeasurable — caught because the number was absurd, not because a test failed. |
+
+Cycles 1 and 2 named no numeric prediction in advance, so their error is
+recorded as categorical (wrong bottleneck) rather than as a magnitude. Cycle 3
+is the first with a stated numeric prediction, which is what makes an error
+bar possible at all.
+
+**Pattern across three cycles.** Every wrong prediction has the same shape: a
+terminal gate was read as a *finding about the domain* when it was a *finding
+about the stage before it*. The correction each time came from measuring one
+layer upstream. That is now the first thing to check, not the last.
+
+---
+
+## Cycle 3 — 2026-07-30
+
+### Learning Velocity, defined so it can be measured
+
+> **LV — the number of evaluations produced per cycle that can EVER yield a
+> right/wrong verdict.**
+
+An evaluation that can never be graded accumulates; it does not teach. This
+definition is deliberately harsh on volume: a hundred WATCH records with
+excellent reasoning have an LV of zero, because nothing in them will ever be
+confirmed or refuted.
+
+### Measured
+
+```
+evaluations produced       : 11
+RESOLVABLE (can be graded) :  0
+LEARNING VELOCITY          :  0
+terminal classification    : {WATCH: 3, NO_TRADE: 8}
+```
+
+**LV is zero and has been zero for the entire phase.** Every path terminates
+unresolvable. The loop is open: records accumulate and nothing ever tells the
+engine whether it was right.
+
+### Second-order thinking overturns the carried prediction
+
+The ranking said strategic-reading yield. Applying "if this bottleneck
+disappears, what becomes the next one?":
+
+| candidate | if fixed perfectly | resulting LV |
+|---|---|---|
+| Strategic-reading yield | the 3 companies with evidence and no view advance — to `no_outside_source` or `no_market_evidence`, still WATCH | **0** |
+| Universe breadth ×10 | 110 evaluations instead of 11, all still WATCH/NO_TRADE | **0** |
+| **Market-evidence adapter** | BUY/SELL becomes reachable → prediction → resolution → calibration | **> 0** |
+
+Two of the three top-ranked bottlenecks have a measured expected LV gain of
+**exactly zero**. They make the system better at producing records it can
+never grade. Only closing the loop moves LV off zero, and nothing downstream
+of it — post-mortems, calibration, knowledge extraction, weekly meta-review —
+can exist until it does.
+
+This is the third cycle running in which the predicted next bottleneck was
+wrong. It is the first in which the LV metric caught it *before* any code was
+written rather than after.
+
+### Prediction for this cycle — recorded before implementation
+
+**Hypothesis.** LV is zero because no component supplies market evidence, and
+the reasoner correctly refuses to invent a direction from a strategic thesis.
+Supplying an explicitly-labelled baseline signal closes the loop.
+
+**What will be built.** A momentum baseline over real price history — not a
+claim of skill. Its purpose is to make predictions *resolvable*, establish the
+bar any future signal must beat, and generate the ≥30 resolved predictions
+that `A-M5` requires before any accuracy claim is permitted. It is the on-ramp
+to calibration, not an attempt at alpha.
+
+**Predicted metric movement:**
+
+| metric | now | predicted after |
+|---|---|---|
+| Learning Velocity (gradable/cycle) | 0 | **1–3** |
+| companies reaching BUY/SELL | 0 | 1–3 |
+| terminal gate `no_market_evidence` | 1 | 0 |
+
+Prediction is deliberately narrow: only Shopify currently clears every earlier
+gate, so 1 is the floor. Sony and Palantir would join only if they also clear
+`no_outside_source`, which they do not. **Predicting >3 would be predicting a
+fix to a different bottleneck.**
+
+**Expected downstream effect.** Resolution, post-mortems and calibration
+become buildable for the first time — they are currently unbuildable, not
+merely unbuilt.
+
+**Expected risk.** A baseline with no demonstrated edge will produce wrong
+predictions. That is acceptable and is the point: a wrong resolved prediction
+has strictly more learning value than an ungradable WATCH. The risk to guard
+is not being wrong — it is the baseline being *mistaken for skill*, which is
+why the signal source is recorded on every opportunity and labelled
+unvalidated.
+
+### Measured result — predicted vs actual
+
+| metric | before | predicted | **actual** |
+|---|---|---|---|
+| Learning Velocity (gradable/cycle) | 0 | 1–3 | **1** |
+| companies reaching BUY/SELL | 0 | 1–3 | **1** (Shopify, via `baseline_momentum.v1`) |
+| terminal gate `no_market_evidence` | 1 | 0 | **0** |
+
+**Prediction correct, at the floor of the stated range** — and for the reason
+given in advance rather than by luck: only Shopify clears every earlier gate,
+so 1 was named as the floor and 3 would have required Sony and Palantir to
+also pass `no_outside_source`, which they do not. Predicting more would have
+been predicting a fix to a different bottleneck.
+
+**Learning Velocity is non-zero for the first time in the phase.** The loop is
+closed: an evaluation now exists that will eventually be graded right or
+wrong.
+
+### What this does and does not claim
+
+It does not claim skill. `baseline_momentum.v1` is a momentum rule with a
+stated prior of 0.55 and no demonstrated edge, and every record it produces
+carries `market_source` so calibration can hold it to its own account rather
+than averaging it in with whatever replaces it.
+
+Its value is that it is a *baseline*: without one, "our signal is good" is
+unfalsifiable, because there is nothing it had to beat. And it is the on-ramp
+`A-M5` requires — accuracy claims are gated behind ≥30 live-resolved
+predictions, and there is no route to thirty resolutions without first making
+predictions that resolve.
+
+### Bottleneck ranking after this cycle
+
+1. **Resolution and outcome scoring** — LV is 1 per cycle, but nothing yet
+   *grades* the prediction. Until resolution runs, LV is potential rather than
+   realised. This is now the highest-leverage item by the same argument that
+   promoted the market signal: everything downstream is unbuildable without it.
+2. **Universe breadth** — finally a true multiplier. Every company added now
+   has a path to a gradable evaluation, which was not true in cycles 1 or 2.
+3. **Strategic-reading yield** — 3 of 8, ranked #1 by the previous cycle and
+   demoted twice by second-order analysis. It produces better WATCH records,
+   not gradable ones.
+
+### Second-order check on that ranking
+
+If resolution existed, the next binding constraint would be **sample size**:
+one gradable evaluation per cycle needs thirty cycles to reach the A-M5
+threshold. That argues universe breadth becomes #1 immediately after
+resolution — the first time in the phase it will have been the right answer.
+Recorded now so the next cycle can test it rather than rediscover it.
+
+---
+
+## Cycle 4 — 2026-07-30 · the metric was the bottleneck
+
+### Measured first, on the metric itself
+
+Cycle 3's Learning Velocity was one day old. Rather than rank features, this
+cycle applied the metric-integrity test to LV. It failed:
+
+| `MIN_ABS_RETURN` | Learning Velocity |
+|---|---|
+| `0.02` (shipped) | 0 |
+| `0.0001` (one edit) | **10** |
+
+Ten companies moving inside the noise floor. Same evidence, same reasoning,
+same prices — LV rose 10× for a system that had become **worse**, since it
+would now be predicting noise confidently. Full write-up in
+[`METRIC_INTEGRITY.md`](METRIC_INTEGRITY.md).
+
+**The highest-leverage bottleneck was the objective function**, not any
+feature behind it. A wrong objective misdirects every future cycle, so its
+expected cost compounds faster than anything it would have ranked.
+
+### Learning Value replaces Learning Velocity
+
+Weighted by resolution quality × information gain × novelty × calibration
+impact — with a hard rule: **three of those four cannot be measured today and
+are therefore not estimated.**
+
+Zero predictions have resolved, there is no knowledge base, and `A-M5` gates
+calibration behind ≥30 resolutions. Implementing the full formula with guessed
+factors would be strictly worse than the metric it replaces: moving LV costs a
+code edit; moving a self-assigned factor costs an opinion. Unmeasurable factors
+return `UNMEASURABLE`, and the score **refuses to produce a number** while any
+are missing — because a partial product silently treats unknown as 1.0, which
+makes an unmeasured system score like a fully-understood one.
+
+### Novelty, and the correction it needed
+
+Novelty is measurable now and is the factor that guards the quantity-over-
+quality failure. The first implementation used flat tiers and **failed the
+motivating case**:
+
+| | resolvable | novelty-weighted (v1) | novelty-weighted (final) |
+|---|---|---|---|
+| A: 100 momentum trades | 100 | 50.5 ❌ | **5.19** |
+| B: 20 varied evaluations | 20 | 12.0 | **9.13** |
+| gaming: same trade ×10 | 10 | — | **1.55** |
+
+Flat per-company credit still let A win. Fixed with harmonic decay within a
+shape — `1/(1+k)` — chosen because that is how repeated sampling of one
+hypothesis behaves, not because it produces a preferred ordering. A hundred
+repeats are now worth about five first attempts.
+
+### Opportunity coverage
+
+Measured on the real universe, and it found a blind spot the engine could not
+see about itself:
+
+```
+counts: {sector: 3, industry: 4, market_cap: 0, region: 0}
+sector concentration: 0.5
+gaps: 8 of 10 sectors, ALL market caps, ALL regions
+```
+
+`market_cap` and `region` read **0 because those fields do not exist on
+`CompanyProfile`**. The engine cannot measure its own coverage on two of five
+dimensions. Reported as gaps rather than a score, deliberately — "no
+healthcare, no small-cap, no international" names the next companies to add;
+"coverage 0.4" invites optimising the number.
+
+### Ranking after this cycle
+
+1. **Resolution and outcome scoring** — unchanged at #1. Three of four Learning
+   Value factors turn on the moment outcomes exist. It is the single change
+   that unblocks the most measurement.
+2. **Universe breadth, now with coverage targets** — no longer "add companies"
+   but "add the eight missing sectors, and add the `market_cap` and `region`
+   fields so the gap can be measured at all".
+3. Strategic-reading yield — unchanged, still producing better WATCH records
+   rather than gradable ones.
+
+### Prediction for the next cycle — recorded now
+
+Resolution will move `resolution_quality` from `UNMEASURABLE` to measurable
+for **1** evaluation (the single baseline BUY), leaving Learning Value still
+unscored because `information_gain` and `calibration_impact` need a knowledge
+base and ≥30 resolutions respectively. **Predicted: LV score remains `None`,
+`unmeasurable_factors` drops from 3 to 2.** If it returns a number, something
+has been faked.
+
+---
+
+## Cycle 5 — 2026-07-30 · falsification changed the scope, not the target
+
+### Falsification protocol, run before any code
+
+Standing #1 was resolution / outcome scoring. Four alternatives were generated
+and each estimated by **Decision Quality** improvement, not learning:
+
+| alternative | DQ effect | verdict |
+|---|---|---|
+| Universe breadth | more decisions, still ungraded → DQ unmeasurable | rejected |
+| Strategic-reading yield | converts NO_TRADE → WATCH; both refusals, both ungraded | rejected |
+| Calibration | blocked by `A-M5` until n≥30 | impossible |
+| **Grading refusals, not just positions** | grades 91% of decisions instead of 9% | **dominates** |
+
+### What falsification found
+
+The ranking **survived** — grading is #1 — but its scope was wrong, and the
+wrong scope was expensive:
+
+```
+BUY / SELL         1 of 11 decisions  ( 9%)  ← what resolution would grade
+WATCH / NO_TRADE  10 of 11 decisions  (91%)  ← ungraded, permanently
+```
+
+"Refuses when evidence is insufficient" is an explicit Decision Quality
+component and was **not measured at all**. A resolution layer that graded only
+positions would have measured 9% of decisions and declared the loop closed.
+
+Trying to disprove the ranking did not overturn it. It stopped the right build
+from being done wrongly — which is the point of the protocol.
+
+### Causal chain, with evidence at each arrow
+
+```
+Grade refusals as first-class decisions
+        ↓  (share_of_decisions_graded 9% → 100%)
+Capability: the engine can evaluate its own refusals
+        ↓  (refusal_justification_rate 1.0, n=10, confidence MEDIUM)
+Behaviour: every gate cited is checked against a real list
+        ↓  (material_miss_rate 0.1, n=10 — Palantir forwent 31%)
+Metric: opportunity cost separated from correctness
+        ↓
+Decision Quality: a justified refusal that missed a 31% move is recorded as a
+GOOD decision with a bad outcome — the engine cannot learn to chase moves it
+had no evidence for
+```
+
+The last arrow is the one that matters. Grading that refusal as an error would
+have taught the engine to take positions on insufficient evidence whenever the
+coin landed well — actively destroying the capability being measured.
+
+### Metric confidence, now carried everywhere
+
+| metric | value | n | confidence |
+|---|---|---|---|
+| share of decisions graded | 1.00 | 11 | high |
+| refusal justification rate | 1.00 | 10 | medium |
+| material miss rate | 0.10 | 10 | medium |
+| position accuracy | 1.00 | **1** | **low** |
+
+Position accuracy is 100% and worth almost nothing — one sample. Reporting it
+without its confidence is how a system talks itself into certainty it has not
+earned.
+
+### Counterfactual — what would have changed my mind
+
+I would have built universe breadth instead if refusals had turned out to be a
+minority of decisions, or if `refusal_justification_rate` had come back near
+1.0 with **high** confidence, meaning refusal quality was already understood
+and not worth instrumenting. Neither held: refusals are 91%, and the rate rests
+on n=10.
+
+### Ranking after this cycle
+
+1. **Sample size** — every rate above is `low`/`medium` confidence. Nothing
+   reaches `A-M5`'s n≥30. The binding constraint is now decisions per cycle,
+   which makes universe breadth #1 for the first time in the phase — exactly as
+   predicted in cycle 3.
+2. Knowledge extraction — `information_gain` is the last Learning Value factor
+   with no path to measurement.
+3. Strategic-reading yield — unchanged.
+
+---
+
+## Cycle 6 — 2026-07-30 · the standing #1 was falsified by our own metric
+
+### Falsification, and this time the ranking did NOT survive
+
+Standing #1 was universe breadth (sample size). Both paths reach `A-M5`'s
+n≥30; the question is what those thirty samples are worth:
+
+| path to n=30 | samples | novelty-weighted | distinct shapes |
+|---|---|---|---|
+| A — expand universe first (one hypothesis) | 30 | **4.0** | 1 |
+| B — hypotheses first, then expand | 30 | **13.7** | 6 |
+
+**B is worth 3.4× more.** Path A is cycle 4's System-A failure rebuilt
+deliberately: thirty samples of one rule. Expanding the universe *before*
+hypotheses exist manufactures exactly the low-novelty volume the novelty
+metric was built two cycles ago to catch.
+
+The falsification was performed with a metric this project already owned,
+against a ranking this project already held. That is the first time the
+measurement apparatus has overturned a plan without new instrumentation.
+
+### Scope test applied before building
+
+*Will this be exercised within the next 5–10 cycles?* At ~1 gradable decision
+per cycle, three of seven proposed capabilities fail:
+
+| capability | verdict |
+|---|---|
+| explicit hypothesis per decision | **build** — fires on the first resolution |
+| hypothesis quality axis | **build** — measurable the moment one resolves |
+| expected information gain | **build** — serves the very next bottleneck |
+| belief revision (smallest) | **build** — fires on the first outcome |
+| knowledge graph | defer — needs hundreds of resolutions across regimes |
+| execution quality | defer — no fills exist to grade |
+| calibration quality | defer — `A-M5` blocks below n≥30 |
+
+Three deferred with the reason and the unblocking condition recorded.
+
+### What changed
+
+A position is now a *consequence* of a hypothesis rather than the unit itself.
+The baseline's hypothesis — "recent price direction persists" — was always
+being asserted; leaving it implicit is what made *"was the trade wrong or was
+the idea wrong?"* unanswerable.
+
+The four combinations, and the two that matter:
+
+| hypothesis | decision | diagnosis |
+|---|---|---|
+| supported | right | the reasoning worked |
+| **supported** | **wrong** | **timing or execution — not reasoning** |
+| **refuted** | **right** | **right for the wrong reason — rewards bad reasoning if counted a success** |
+| refuted | wrong | the idea was wrong |
+
+### Honest limits of what was built
+
+Belief revision uses a **fixed 0.05 step, not a Bayesian update**. The
+likelihoods a proper update needs are exactly what has not been measured yet,
+and inventing them would put a precise-looking number on a guess — the failure
+`METRIC_INTEGRITY.md` exists to prevent. The step is a stated placeholder,
+replaced when calibration data can derive one.
+
+Retirement requires n≥10 before it can fire. Killing a correct hypothesis
+after three unlucky outcomes is the most likely damage this feature could do.
+
+### Ranking after this cycle
+
+1. **Universe breadth** — returns to #1, now *behind* hypotheses rather than
+   ahead of them, which is the whole point of this cycle. Expansion now
+   produces attributable, multi-hypothesis samples.
+2. Knowledge extraction — `information_gain` remains the last Learning Value
+   factor with no measurement path.
+3. Strategic-reading yield — unchanged.
+
+---
+
+## Cycle 7 — 2026-07-30 · the balance rule fired, and it fired against the new idea
+
+### The rule triggered on arrival
+
+The engineering/research balance rule says: two consecutive process-only cycles
+force the next one to improve market capability. Measured:
+
+| # | cycle | kind |
+|---|---|---|
+| 4 | metric integrity / Learning Value | PROCESS |
+| 5 | decision quality grading | PROCESS |
+| 6 | hypothesis framework | PROCESS |
+
+**Three consecutive**, against a threshold of two. The escape clause requires
+proving an engineering bottleneck yields substantially greater Decision Quality
+gains:
+
+- theory-of-the-system framework → better architectural decisions → DQ **indirect**
+- universe breadth → more samples → n toward 30 → calibration measurable → DQ **direct**
+
+The clause does not apply. So the theory framework — the newest and most
+interesting proposal — was **deferred** (`D4`), and this cycle built market
+capability instead. That is the rule working as designed: it caught the project
+about to optimise the optimiser for a fourth straight cycle.
+
+### Built: breadth, along the dimensions measurement said were missing
+
+Coverage had reported `market_cap: 0, region: 0` — not "we cover none" but
+**the engine could not see those dimensions at all**. Both are now fields, and
+twelve companies were added to close the measured gaps.
+
+| | before | after |
+|---|---|---|
+| prediction-eligible companies | 4 | **16** |
+| sectors | 3 | **11** |
+| market-cap buckets | **0** | 4 |
+| regions | **0** | 4 |
+| sector concentration | 0.50 | **0.31** |
+| remaining gaps | 8 sectors, all caps, all regions | Communication Services, micro-cap |
+
+Deliberately **not** more technology large-caps: the engine already had three,
+and a fourth adds samples without adding a dimension it can learn along. Each
+addition names the gap it closes.
+
+### And it is breadth done in the right order
+
+Cycle 6 established that expanding before hypotheses exist manufactures
+low-novelty volume (30 samples worth 4.0 instead of 13.7). Hypotheses landed
+first, so every decision now carries `hypothesis_id` and this expansion
+produces attributable samples rather than thirty repetitions of one rule.
+
+### Two tests were coupled to the seed universe
+
+`test_eligibility_excludes_private_and_produces_intents` asserted
+`{"SHOP", "NET", "DUOL"}` and `test_assemble_has_all_section17_views` asserted
+`filled_orders == 3`. Both were pinned to universe *size* rather than to the
+property they protect — private companies never produce intents; one fill per
+eligible tradable. Rewritten to express the property, so the next breadth
+change does not break them.
+
+### Architectural debt register opened
+
+`ARCHITECTURAL_DEBT.md` records four placeholders, four deferred capabilities
+and four unproven assumptions, each with its introducing cycle and unblocking
+condition. The oldest placeholders — the 0.55 baseline prior and the
+`company_owned` default for unknown evidence kinds — are cycles 2–3 old and are
+the two most likely to be mistaken for settled design.
+
+Standing rule adopted: a placeholder surviving five cycles without its
+unblocking condition getting closer is no longer a placeholder, it is the
+design, and must be justified as such or replaced.
+
+### Ranking after this cycle
+
+1. **Resolution actually running** — 16 eligible companies now produce
+   gradable decisions per cycle instead of 1, so n≥30 is reachable in ~2
+   cycles rather than ~30. Nothing grades them yet.
+2. Theory-of-the-system framework (`D4`) — unblocked once this cycle restores
+   the market/process balance.
+3. Strategic-reading yield — unchanged.
+
+---
+
+## Cycle 8 — 2026-07-30 · first contact with reality
+
+### Reality exposure, measured before anything was built
+
+| | |
+|---|---|
+| real companies researched over live network | **0** |
+| real prices fetched | **0** |
+| real outcomes graded | **0** |
+| observed market regimes | **0** (`regime="calm"` hardcoded everywhere) |
+| cycles touching live market data | **0 of 7** |
+
+Every conclusion in this log up to here came from offline fixtures and
+synthetic price series. Engineering-to-reality ratio: **7:0**.
+
+### What is actually blocked, and what was not
+
+Real **prices** need a credential this environment does not have — no
+`TIINGO_API_KEY`, and Stooq now serves a JavaScript bot-challenge instead of
+CSV. That is a genuine external blocker and an owner action.
+
+Real **company research** needs no credential at all. It has been available
+every one of the last seven cycles and was never used. So this cycle ran the
+real ingestion over the real websites of all 16 universe companies.
+
+### Fixtures versus reality — the same pipeline, the same reasoner
+
+| metric | fixtures | **REAL** | |
+|---|---|---|---|
+| produced evidence | 8/11 (73%) | 10/16 (62%) | modest |
+| strategic-reading yield | 5/11 (45%) | **3/16 (19%)** | **collapsed** |
+| independent source found | 1/11 | **0/16** | **went to zero** |
+| dominant gate | `not_tradable` | **`view_withheld` (7/16)** | different failure |
+
+### What only reality could show
+
+**Cycle 2's headline fix does nothing in reality.** `select_diverse` moved
+`independent_source` from 0/11 to 1/11 on fixtures and was the cycle's
+measured success. On real companies it is **0/16**. The fix is real and the
+code is correct; its effect in reality is nil, because real company domains do
+not host third-party sources — discovery sees the company's own domain and SEC
+and nothing else. The fixture had customer-voice pages on the company's own
+host, which no real company does.
+
+**My cycle-2 prediction was right and the fixture measurement overturned it
+wrongly.** I predicted `view_withheld` would dominate; fixtures said
+`no_outside_source`; reality says `view_withheld`, 7 of 16. The measurement
+apparatus was confidently wrong because the instrument was unrepresentative.
+
+**Six of sixteen produced zero evidence** — J&J, Toyota, Infosys, Linde,
+Caterpillar, Duolingo. Large companies with rich public websites. This is the
+JS-rendering limitation, now measured on reality rather than inferred.
+
+**Caterpillar took 116s against a ~8s median.** A latency outlier no fixture
+could produce.
+
+### The assumption this disproves
+
+`A5` (new): *offline fixtures approximate reality closely enough to rank
+bottlenecks.* **Disproven.** Fixtures were systematically easier — 45% yield
+versus 19% — and easier in a way that inverted at least one ranking.
+
+Fixtures remain correct for regression tests, where determinism is the point.
+They are no longer sufficient for **ranking**, and every future ranking claim
+must be checked against a reality run before it is acted on.
+
+### Ranking after this cycle — from real data for the first time
+
+1. **Strategic-reading yield** — `view_withheld` 7/16 on reality. It has been
+   ranked #3 for three cycles on fixture evidence. Real data promotes it.
+2. **Retrieval on JS-rendered sites** — 6/16 produce nothing at all. Known,
+   external, and now sized.
+3. **Outside sources** — 0/16 and *not* fixable by selection, which cycle 2
+   believed. It needs a source of genuinely third-party evidence, which is a
+   different capability entirely.
+4. Price credential — the only blocker on grading anything.
+
+### Framework stability
+
+Consecutive cycles without core framework modification: **1** (this one). The
+first cycle in the project that changed no framework and no architecture — it
+ran the engine and measured what happened.
+
+---
+
+## Cycle 9 — 2026-07-30 · the loop is closed
+
+### The blocker was one credential, and it turned out not to be
+
+Tiingo, Polygon, Alpha Vantage, Finnhub, Twelve Data and IEX all need a key
+this environment lacks. Stooq now answers with a JavaScript bot-challenge
+instead of CSV. **Yahoo's chart endpoint answers with real daily OHLC and needs
+no key** — measured, not assumed, and it is the only route from "decision" to
+"graded decision" available today.
+
+### First resolved predictions in the project's history
+
+```
+companies priced        : 14/15   (OLO: HTTP error)
+paper trades opened     : 66
+PREDICTIONS RESOLVED    : 66
+position accuracy       : 0.500
+```
+
+### The result is a coin flip, and that is the most useful possible answer
+
+`momentum_persists.v1`: **33 supported, 33 refuted, support rate 0.500.**
+Confidence began at 0.55 and, after 66 recorded revisions, ended at **0.55** —
+the belief-revision machinery moved it up 33 times and down 33 times and
+landed exactly where it started.
+
+The baseline has **no measurable edge**. That was its stated design — a prior
+of 0.55 with no demonstrated skill — and it is now measured rather than
+asserted. **The bar every future signal has to beat is 0.500**, and it is on
+the record before anyone knew what it would be.
+
+Had this come back at 0.62 the correct response would have been suspicion, not
+celebration: a momentum rule beating the market on 66 samples usually means a
+lookahead bug. 0.500 is what a correct implementation of a no-edge rule looks
+like.
+
+### Accuracy by sector — real, and mostly too small to read
+
+| sector | n | accuracy |
+|---|---|---|
+| Technology | 19 | 0.474 |
+| Consumer Discretionary | 9 | 0.778 |
+| Consumer | 6 | 0.667 |
+| Healthcare | 6 | 0.667 |
+| Financials | 5 | 0.800 |
+| Consumer Staples | 5 | 0.000 |
+| Utilities | 5 | 0.400 |
+| Industrials | 5 | 0.400 |
+| Energy | 3 | 0.000 |
+| Materials | 3 | 0.333 |
+
+Financials at 0.80 and Consumer Staples at 0.00 are the kind of numbers that
+invite a story. **Both rest on n=5.** Under the metric-confidence rule every
+one of these is `low`, and none may inform a decision. They are recorded
+because the *shape* — that sector-level variation exists at all — is what
+argues for the coverage work done in cycle 7.
+
+### What this grades, and what it does not
+
+`baseline_momentum.v1` **in isolation**. The strategic gates are not applied,
+because company evidence cannot be time-travelled: a website shows today's
+content, and using it for a decision dated three months ago would be lookahead
+of the worst kind — invisible and flattering.
+
+So this answers one question honestly — *does the baseline have an edge?* — and
+is not a measurement of the whole engine.
+
+Lookahead is refused structurally, not by convention: `PriceSeries.on` never
+returns a price after the date requested, `trading_window` refuses to grade a
+horizon that has not elapsed, and decision dates are spaced 14 days apart so
+overlapping windows cannot resample one market move and report it as several
+independent tests.
+
+### Readiness, against the checklist
+
+| | |
+|---|---|
+| Architecture · Research · Decision engine · Paper trading | ready |
+| Hypothesis tracking · Falsification · Market exposure | ready |
+| **Outcome resolution** | **ready — 66 resolved** |
+| **Automatic grading** | **ready — position accuracy, by sector, by hypothesis** |
+| **Continuous learning from reality** | **ready — 66 belief revisions recorded** |
+
+`A-M5`'s n≥30 threshold is passed at n=66 — for this signal, on this replay.
+It is not passed for the *engine*, whose full path still has zero resolved
+decisions, and no accuracy claim is made about it.
+
+### Ranking after this cycle
+
+1. **A signal that beats 0.500** — the bar now exists and nothing clears it.
+   Every earlier bottleneck was about making measurement possible; this is the
+   first one about being *right*.
+2. **Strategic-reading yield** — `view_withheld` 7/16 on reality. Still the
+   gate on the full path.
+3. **JS-rendered retrieval** — 6/16 produce no evidence.
+
+Framework stability: **2** consecutive cycles without core framework
+modification.

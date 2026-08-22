@@ -318,7 +318,8 @@ class CompanyIngestionService:
 
     # --- run lifecycle -----------------------------------------------------------
     def create_run(self, *, company_name: str, website: str,
-                   user_id: str, as_of: str, cik: str = "") -> dict:
+                   user_id: str, as_of: str, cik: str = "",
+                   actor_type: str = "human") -> dict:
         """Open a run. A website is optional when a CIK identifies the filer.
 
         WHY A RUN MAY HAVE NO WEBSITE. Typed entry resolves any SEC
@@ -334,6 +335,12 @@ class CompanyIngestionService:
         independence count would read one origin for every filer on earth.
         The domain is what the company publishes on, and this company
         publishes nowhere we know of.
+
+        `actor_type` defaults to "human" because every caller until now was a
+        founder clicking a button, and that flow is unchanged. The autonomous
+        daily research cycle passes "system": it is not a person, and a run
+        recorded as human-initiated would put a false actor in an append-only
+        audit trail that exists precisely to answer "who asked for this?".
         """
         website = validate_candidate_url(website) if website else ""
         assert_no_secret(company_name, where="company name")
@@ -351,7 +358,7 @@ class CompanyIngestionService:
         stable_key = f"ci-run:{subject_key}:{user_id}:{as_of}"
         run_id = _kernel_stable_id(self.store, stable_key)
         self._append("ci.run_created", run_id=run_id, domain=domain,
-                     actor_type="human", actor_id=user_id,
+                     actor_type=actor_type, actor_id=user_id,
                      subject_type="run", subject_id=run_id,
                      payload={"company_name": company_name,
                               "website": website, "user_id": user_id,
@@ -722,7 +729,7 @@ class CompanyIngestionService:
 
     # --- approval ------------------------------------------------------------------
     def approve(self, run_id: str, *, user_id: str, approved_ids: list,
-                rejected_ids: list) -> dict:
+                rejected_ids: list, actor_type: str = "human") -> dict:
         existing = self.store.approval(run_id)
         if existing is not None:
             return existing              # immutable approval history
@@ -747,7 +754,7 @@ class CompanyIngestionService:
                    "rejected_candidate_ids": list(rejected_ids),
                    "consent_version": CONSENT_VERSION}
         self._append("ci.approval_recorded", run_id=run_id,
-                     domain=meta["domain"], actor_type="human",
+                     domain=meta["domain"], actor_type=actor_type,
                      actor_id=user_id, subject_type="approval",
                      subject_id=payload["approval_id"], payload=payload,
                      idempotency_key=f"appr:{run_id}")

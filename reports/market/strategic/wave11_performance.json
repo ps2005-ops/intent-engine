@@ -1,0 +1,12 @@
+{
+ "contract": "wave11_performance.v1",
+ "as_of": "2026-08-08",
+ "stages_ms": {
+  "occurrence_time.read (1 span)": 0.0036,
+  "relationship scope key": 0.0009,
+  "relationships() reload from disk": 0.0687,
+  "retention audit": 0.0023
+ },
+ "total_ms": 0.0755,
+ "note": "relationships() re-reads the ledger, so its cost scales with the file. At 4 edges it is trivial; a store with thousands would want the fold cached, and that is a real future cost recorded now rather than discovered later."
+}
