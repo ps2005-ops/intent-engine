@@ -143,11 +143,25 @@ INTENT_ROUTES = (
       "shakiest", "what is assumed"),
      "assumptions",
      "No assumption has been isolated as the weakest in this reading."),
+    # THE ROUTE POINTED AT THE WRONG OBJECT. "What could not be true?" was
+    # answered from `adversary`, which is the competitor's response ladder --
+    # a different question with a different producer. There was no impossible
+    # hypothesis to point at, so the route was aimed at the nearest field
+    # that existed; §5 built the producer, and this now reads it.
     ("impossible_hypothesis",
      ("impossible hypothesis", "impossible", "what could not be true",
-      "heretical", "what would surprise"),
+      "heretical", "what would surprise", "what are we not considering"),
+     "impossible_hypotheses",
+     "No heretical reading was put forward for this company: these are "
+     "derived from its measured economics, and too little of that could be "
+     "read from its own filings to support one."),
+    # THE ADVERSARY HAD NO ROUTE OF ITS OWN once the heresy took this field.
+    ("adversary",
+     ("what would they do", "how would they respond", "competitor respond",
+      "adversary", "if we move", "rival respond"),
      "adversary",
-     "No impossible hypothesis has been put forward for this company."),
+     "No adversarial reading was produced: it starts from a rival, and none "
+     "was established for this company from the published record."),
 )
 
 
@@ -171,7 +185,8 @@ _READ_FALLBACK = {
     "falsifier": ("level6_action", "falsifier"),
     "market_belief": ("market_beliefs", ""),
     "weakest_assumption": ("assumption_chain", ""),
-    "impossible_hypothesis": ("belief_challenges", ""),
+    "impossible_hypothesis": ("impossible_hypotheses", ""),
+    "adversary": ("adversary", ""),
     "why_now": ("level5_decision", "text"),
     "recommendation": ("level6_action", "action_now"),
     "biggest_uncertainty": ("level6_action", "what_remains_unknown"),
@@ -309,10 +324,15 @@ def _competition_answer(read) -> str:
 #: `proposition` is the belief itself; `strongest_support` is the case for
 #: it; `frm`/`to` are the two ends of a link and read as a subject and its
 #: consequence.
+#: `hypothesis`/`mechanism` are the heresy's two ends and `action`/`impact`
+#: are the adversary move's -- both newly routed here, and a producer whose
+#: key names are absent from these tuples renders as NOTHING, which is how a
+#: populated list came to answer "no competitor has been selected".
 _ROW_SUBJECT_KEYS = ("name", "title", "statement", "text", "label",
-                     "question", "summary",
+                     "question", "summary", "hypothesis", "action",
                      "proposition", "strongest_support", "frm")
 _ROW_DETAIL_KEYS = ("likely_response", "signal_to_watch", "why", "reason",
+                    "mechanism", "impact",
                     "basis", "detail", "so_what", "plain",
                     "basis_detail", "because", "to")
 

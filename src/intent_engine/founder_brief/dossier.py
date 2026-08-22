@@ -583,6 +583,95 @@ def _other_relationships(read) -> list:
     return out
 
 
+def _adversary(company, read, said) -> Passage:
+    """L0/L1/L2 against the nearest established rival. §6.
+
+    THE SURFACE THIS WAS MISSING. The engine has been complete for a long
+    time and scored 0.0 on all 44 measured companies, because its output sat
+    on the analysis selection and no reader-facing object carried it. It now
+    reaches the canonical read; this is the projection that puts it in front
+    of a reader, on the deepest surface, where an adversarial reading belongs.
+
+    Wired HERE and not only into `deep.py`: `/demo-dossiers/<id>/full` is an
+    operator route, and the customer's Full Analysis is this document. A
+    repair rendered on the wrong one of the two is the inert repair this
+    programme has now shipped three times.
+    """
+    rows = tuple(getattr(read, "adversary", ()) or ())
+    if not rows:
+        return Passage("adversary", "If we move, what do they do", depth=FULL)
+    paras = [
+        "One rival, three ways it could behave. The levels are not scenarios "
+        "about the market; they are assumptions about how much of our move "
+        "the competitor sees and when.",
+    ]
+    items = []
+    for row in rows[:3]:
+        if not isinstance(row, dict):
+            continue
+        line = end_sentence(
+            f"{row.get('level', '')} — {row.get('actor', '')} "
+            f"{row.get('action', '')}. {_capitalise_first(row.get('rationale', ''))} "
+            f"What follows: {lower_first(row.get('impact', ''))} "
+            f"Watch for {lower_first(row.get('observable_signal', ''))} "
+            f"Our counter: {lower_first(row.get('countermeasure', ''))}")
+        line = said.fresh(line)
+        if line:
+            items.append(line)
+    if not items:
+        return Passage("adversary", "If we move, what do they do", depth=FULL)
+    paras.extend(items)
+    paras.append(
+        "No probability is put on these branches. The inputs a game-theoretic "
+        "weighting would need are not in the published record, and a number "
+        "invented for the look of it would be the least trustworthy thing in "
+        "this document.")
+    return Passage("adversary", "If we move, what do they do",
+                   depth=FULL, paragraphs=tuple(paras))
+
+
+def _impossible(company, read, said) -> Passage:
+    """Propositions the current framing rules out. §5.
+
+    Each carries the economic mechanism that would make it true, what argues
+    for and against it, and the smallest experiment that would settle it --
+    because a heresy without a mechanism is a guess and a heresy without an
+    experiment cannot be acted on at a board table. None of it is asserted.
+    """
+    rows = tuple(getattr(read, "impossible_hypotheses", ()) or ())
+    if not rows:
+        return Passage("impossible",
+                       "What could be true that we are not considering",
+                       depth=FULL)
+    paras = [
+        "These are propositions this company's current framing rules out by "
+        "construction. None of them is a claim, and none is a forecast: each "
+        "is stated with the mechanism that would make it true and the "
+        "cheapest test that would settle it.",
+    ]
+    for row in rows[:4]:
+        if not isinstance(row, dict):
+            continue
+        line = end_sentence(
+            f"{row.get('hypothesis', '')} {_capitalise_first(row.get('mechanism', ''))} "
+            f"Why this is usually missed: {lower_first(row.get('why_missed', ''))} "
+            f"For it: {lower_first(row.get('evidence_for', ''))} "
+            f"Against it: {lower_first(row.get('evidence_against', ''))} "
+            f"It is falsified by {lower_first(row.get('falsifier', ''))} "
+            f"Smallest test: {lower_first(row.get('smallest_experiment', ''))} "
+            f"Standing: {row.get('plausibility', '')}")
+        line = said.fresh(line)
+        if line:
+            paras.append(line)
+    if len(paras) == 1:
+        return Passage("impossible",
+                       "What could be true that we are not considering",
+                       depth=FULL)
+    return Passage("impossible",
+                   "What could be true that we are not considering",
+                   depth=FULL, paragraphs=tuple(paras))
+
+
 def _competitive(company, report, decision, hypotheses, families,
                  said, external=None, read=None) -> Passage:
     """Relative position, or a stated reason there is nothing to say.
@@ -1281,6 +1370,8 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
         _customer_demand(company, report, index, said),
         _competitive(company, report, decision, hypotheses, families, said,
                      external, read=read),
+        _adversary(company, read, said),
+        _impossible(company, read, said),
         _market(company, market, said, external, modeled_market),
         _macro(company, report, decision, said, external),
         _analogs(company, report, decision, hypotheses, said),

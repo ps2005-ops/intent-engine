@@ -38,9 +38,13 @@ NOT_MEASURED = None
 
 #: The nine dimensions §20 calls core. A demo can be forgiven a weak history
 #: rewind; it cannot be forgiven an economic model that is wrong.
-CORE = ("business_model", "revenue_drivers", "margin_drivers",
-        "market_belief", "competition", "recommendation", "full_analysis",
-        "presentation", "history", "qa")
+#: §26's core list, which names `economic_reasoning`, `adversary` and
+#: `impossible_hypothesis` -- the first had no dimension defined and the
+#: other two were deliberately kept out of core while nothing produced them.
+#: All three now have producers, so all three are scored as core.
+CORE = ("business_model", "economic_reasoning", "market_belief",
+        "competition", "adversary", "impossible_hypothesis",
+        "recommendation", "full_analysis", "presentation", "history", "qa")
 
 #: (key, surface, cue). The cue LOCATES the passage; it does not score it.
 DIMENSIONS = (
@@ -84,11 +88,29 @@ DIMENSIONS = (
     # `adversary` key and an ADVERSARIAL scenario, so the concept exists in
     # the model and never reaches a reader. These two stay pointed at the
     # surface §23 says they belong on, and their zeros are the product's.
-    ("adversary", "brief",
-     r"(would respond|competitor response|if they match|retaliat"
-     r"|adversar)[^.]{0,300}"),
-    ("impossible_hypothesis", "brief",
-     r"(impossible|could not be true|would have to be)[^.]{0,300}"),
+    # BOTH NOW RENDER, AND BOTH RENDER ON `full`.
+    #
+    # They scored 0.0 on all 44 measured companies, and the note below was
+    # right that the zeros were the product's. They are no longer: the
+    # adversary reaches the read and the decision, and the heresies have a
+    # producer. The CUE MOVES TO THE SURFACE THAT WRITES THEM -- `deep.py`
+    # renders both inside the full analysis -- because a cue pointed at a
+    # surface the product does not write on invents a uniform defect, which
+    # this instrument has already done once.
+    ("adversary", "full",
+     r"(If we move, what do they do|L[012]\b|would respond"
+     r"|competitor response|anticipates|responds directly)[^.]{0,300}"),
+    ("impossible_hypothesis", "full",
+     r"(What could be true that we are not considering"
+     r"|may be worth more|may not be the customer|may stop existing"
+     r"|may be structurally unable|smallest test)[^.]{0,300}"),
+    # §26 NAMES THIS AND NOTHING DEFINED IT, so every company reported it
+    # NOT_MEASURED and the gate failed fifty companies on a dimension no
+    # instrument was pointed at.
+    ("economic_reasoning", "full",
+     r"(revenue engine|margin engine|operating leverage|cost of revenue"
+     r"|unit economics|how the money|what it costs to serve"
+     r"|capital (?:intensity|structure))[^.]{0,300}"),
     ("recommendation", "brief",
      r"(What to do next|The choice:|management should|the decision in front"
      r"|Commit to the reading|Hold and verify)[^.]{0,300}"),

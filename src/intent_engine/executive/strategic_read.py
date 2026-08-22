@@ -390,6 +390,20 @@ class StrategicRead:
     #: so no surface has to re-derive it and none can contradict another.
     competitive_rivals: Tuple[str, ...] = ()
     competitive_basis: str = COMPETITION_NONE
+    #: §6. THE ADVERSARY, CARRIED. The L0/L1/L2 engine has existed and been
+    #: complete for a long time, and scored 0.0 on all 44 measured companies
+    #: — because its output lived on `selection`, which no surface projects
+    #: from, and never reached the read. An engine whose result is not
+    #: exported has not been wired; it has been written.
+    adversary: Tuple[dict, ...] = ()
+    #: §5. Propositions the current framing rules out, with the mechanism
+    #: that would make each true. Also scored 0.0, for the simpler reason
+    #: that nothing produced one.
+    impossible_hypotheses: Tuple[dict, ...] = ()
+    #: §7. The measured economics, carried so the decision question, the
+    #: competitor set, Step 6 and Q&A read ONE ontology instead of each
+    #: inventing their own.
+    economic_architecture: Optional[dict] = None
 
     def as_dict(self) -> dict:
         return {
@@ -422,6 +436,9 @@ class StrategicRead:
             "evidence_note": self.evidence_note,
             "competitive_rivals": list(self.competitive_rivals),
             "competitive_basis": self.competitive_basis,
+            "adversary": list(self.adversary),
+            "impossible_hypotheses": list(self.impossible_hypotheses),
+            "economic_architecture": self.economic_architecture,
         }
 
     @property
@@ -939,8 +956,29 @@ def compose(*, company: str = "", company_id: str = "", domain: str = "",
                    level4)
     belief = _belief_pass(name, profile, ground, simulation, level6)
 
+    # §5/§6. BOTH REACH THE READ, which is the object every surface projects
+    # from. The adversary was computed above and left on `selection`; the
+    # heresies are produced here from the SAME measured architecture the
+    # identity sentence is built from, so no surface has to re-derive either
+    # and none can contradict another about them.
+    from intent_engine.executive.impossible_hypothesis import hypotheses_for
+    _rivals = tuple(c.name for c in (level4 or ()) if getattr(c, "name", ""))
+    _belief = ""
+    for _b in (belief.get("beliefs", ()) or ()):
+        _belief = str(getattr(_b, "statement", "")
+                      or getattr(_b, "text", "")
+                      or (_b.get("statement") or _b.get("text") or ""
+                          if isinstance(_b, dict) else ""))
+        if _belief:
+            break
     return StrategicRead(
         company=name, standing=standing, standing_reason=reason,
+        adversary=tuple(_adversary_row(m)
+                        for m in (selection.adversary or ())),
+        impossible_hypotheses=tuple(
+            h.as_dict() for h in hypotheses_for(
+                name, architecture, rivals=_rivals, market_belief=_belief)),
+        economic_architecture=architecture.as_dict(),
         identity=identity, economic_role=economic_role,
         strategic_position=position, central_question=question,
         what_matters_now=_what_matters_now(name, profile, selection, level6,
@@ -983,6 +1021,24 @@ def _ground(name, profile, documents):
             other_relationships=_routed(refused))
     except Exception:                                       # noqa: BLE001
         return None
+
+
+def _adversary_row(move) -> dict:
+    """One L0/L1/L2 move, with a sentence that names WHO and AT WHICH LEVEL.
+
+    The row is projected by surfaces that render a subject and a detail, and
+    `action` alone reads as "responds directly to this decision" with no
+    actor attached -- an adversarial reading whose adversary is anonymous.
+    The level is part of the claim: L2 is a different assertion from L0 about
+    the same firm, and collapsing them loses the ladder entirely.
+    """
+    row = move.as_dict()
+    level, actor = row.get("level", ""), row.get("actor", "")
+    action = row.get("action", "")
+    if actor and action:
+        row["statement"] = (f"{actor} ({level}) {action}" if level
+                            else f"{actor} {action}")
+    return row
 
 
 def _belief_pass(name, profile, ground, simulation, level6):

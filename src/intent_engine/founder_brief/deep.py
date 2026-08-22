@@ -199,6 +199,10 @@ def full_analysis(decision: dict, *, company: str = "", stamp: str = "",
         X._competitor_body(d)))
 
     body.append(_maybe(
+        "What could be true that we are not considering",
+        X._impossible_body(d)))
+
+    body.append(_maybe(
         "If we act, what follows", X._scenario_body(d)))
 
     body.append(_maybe(

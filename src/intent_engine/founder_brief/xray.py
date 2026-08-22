@@ -254,6 +254,47 @@ def _competitor_body(d: dict) -> str:
     return "".join(parts)
 
 
+def _impossible_body(d: dict) -> str:
+    """The heretical readings, with the mechanism that would make each true.
+
+    §5. This scored 0.0 on every measured company because nothing produced
+    one. Rendered with the mechanism and the falsifier ATTACHED rather than
+    as a list of provocations: a heresy without a mechanism is a guess, and
+    a heresy without an experiment is not actionable at a board table.
+    """
+    rows = d.get("impossible_hypotheses") or ()
+    if not rows:
+        return _absent("No heretical reading was put forward: these are "
+                       "derived from this company's measured economics, and "
+                       "too little of that could be read from its own "
+                       "filings to support one.")
+    items = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        items.append(
+            f'<li><p class="h">{_e(row.get("hypothesis", ""))}</p>'
+            f'<p class="m">{_e(row.get("mechanism", ""))}</p>'
+            f'<p class="chain">'
+            f'<span>why this is missed</span> {_e(row.get("why_missed", ""))}'
+            f'<br><span>argues for</span> {_e(row.get("evidence_for", ""))}'
+            f'<br><span>argues against</span> '
+            f'{_e(row.get("evidence_against", ""))}'
+            f'<br><span>if true</span> {_e(row.get("upside", ""))}'
+            f'<br><span>if acted on wrongly</span> '
+            f'{_e(row.get("downside", ""))}'
+            f'<br><span>falsified by</span> {_e(row.get("falsifier", ""))}'
+            f'<br><span>smallest test</span> '
+            f'{_e(row.get("smallest_experiment", ""))}</p>'
+            f'<p class="none">Standing: {_e(row.get("plausibility", ""))}. '
+            f'This is a proposition to test, not a claim about the '
+            f'company.</p></li>')
+    if not items:
+        return _absent("No heretical reading was put forward for this "
+                       "company.")
+    return f'<ul class="rowlist">{"".join(items)}</ul>'
+
+
 def _scenario_body(d: dict) -> str:
     rows = d.get("scenarios") or ()
     if not rows:

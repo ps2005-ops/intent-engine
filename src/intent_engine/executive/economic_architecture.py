@@ -46,7 +46,7 @@ import dataclasses
 import re
 from typing import Optional, Tuple
 
-CONTRACT = "economic_architecture.v1"
+CONTRACT = "economic_architecture.v2"
 
 #: A field is only worth rendering if it says something. Below this a match is
 #: a fragment, not a description.
@@ -68,6 +68,24 @@ class EconomicArchitecture:
     margin_basis: str = ""
     capital_basis: str = ""
     customer: str = ""
+    # --- v2: the rest of the canonical object (§7) -------------------------
+    #
+    # ONE ONTOLOGY, NOT ONE PER SURFACE. The decision question, the
+    # competitor set, the impossible hypothesis, the adversary, Step 6 and
+    # Q&A were each deriving their own idea of what the company runs on. The
+    # fields below exist so they read the same object instead.
+    buyer: str = ""             #: who signs, when it differs from the user
+    unit_of_sale: str = ""      #: what one purchase is
+    volume_driver: str = ""     #: what makes the unit count go up
+    growth_constraint: str = ""  #: what stops it going up
+    #: WHICH SEGMENT IS WHICH ENGINE. A multi-engine filer is not one
+    #: business, and the segment that earns the revenue is frequently not
+    #: the one that earns the profit or holds the strategic position.
+    #: Never invented: each is a segment the filing itself named, or "".
+    revenue_engine: str = ""
+    profit_engine: str = ""
+    strategic_engine: str = ""
+    secondary_engines: Tuple[str, ...] = ()
     #: Which of the above were found, for the scorer and the audit.
     measured: Tuple[str, ...] = ()
     #: Documents actually read, so a claim can be traced to a filer.
@@ -172,7 +190,82 @@ _FIELDS = (
     ("customer",
      r"[Oo]ur customers (?:are|include|consist of|range from)\s+"
      r"(?P<c>[^.]{20,240})"),
+    # --- v2 ---------------------------------------------------------------
+    ("buyer",
+     r"(?:[Ww]e (?:sell|market) (?:our|these) [a-z ]{2,40} (?:to|through)|"
+     r"[Oo]ur (?:products|services|solutions) are (?:sold|purchased) by)\s+"
+     r"(?P<c>[^.]{20,240})"),
+    ("unit_of_sale",
+     r"(?P<c>(?:[Ss]ubscriptions?|[Ll]icen[cs]es?|[Cc]ontracts?|[Pp]olicies|"
+     r"[Ss]eats?|[Uu]nits?|[Oo]rders?|[Tt]ransactions?)\s+"
+     r"(?:are|is)\s+(?:typically\s+|generally\s+)?"
+     r"(?:sold|priced|billed|entered into|renewed)[^.]{10,200})"),
+    ("volume_driver",
+     r"(?:[Gg]rowth (?:in|of) (?:our )?revenue|[Rr]evenue growth)\s+"
+     r"(?:is|was|has been)\s+(?:primarily\s+)?(?:driven|attributable)\s+"
+     r"(?:by|to)\s+(?P<c>[^.]{20,240})"),
+    ("growth_constraint",
+     r"(?:[Oo]ur (?:ability|growth) (?:to grow |)?depends|"
+     r"[Ww]e may (?:not )?be (?:unable|able) to (?:grow|scale))"
+     r"[^.]{0,20}?\s+(?:on|upon)\s+(?P<c>[^.]{20,240})"),
 )
+
+
+#: The largest/smallest qualifiers a filing uses when it ranks its own
+#: segments. Read only in a sentence that also names one of THIS filer's
+#: segments, so a generic superlative cannot promote a segment on its own.
+_LARGEST = re.compile(
+    r"\b(?:largest|biggest|principal|primary|most significant)\b", re.I)
+_MOST_PROFITABLE = re.compile(
+    r"\b(?:highest[- ]margin|most profitable|greatest operating income|"
+    r"largest (?:share of )?operating income)\b", re.I)
+_STRATEGIC = re.compile(
+    r"\b(?:strategic(?:ally)? (?:important|significant|critical)|"
+    r"long[- ]term growth|future growth|growth engine|key to our "
+    r"(?:strategy|future))\b", re.I)
+
+
+def _engines(text: str, segments: Tuple[str, ...]) -> dict:
+    """Which named segment is the revenue / profit / strategic engine.
+
+    §7: a multi-engine filer is not one business, and forcing one is how a
+    reader is told less than the filing already says. The three roles are
+    frequently three different segments -- the one that books the revenue,
+    the one that earns the margin, and the one the company is betting on.
+
+    NOTHING IS INVENTED AND NOTHING IS INFERRED FROM A CLASS. A role is
+    filled only when a sentence in this filer's own text carries both the
+    qualifier and one of the segment names it just declared; otherwise the
+    role stays empty, which is an honest state. A single-segment filer has
+    one engine and all three roles are the same segment -- which is the
+    correct reading, not a degenerate one.
+    """
+    if not segments:
+        return {}
+    if len(segments) == 1:
+        only = segments[0]
+        return {"revenue_engine": only, "profit_engine": only,
+                "strategic_engine": only, "secondary_engines": ()}
+    roles = {"revenue_engine": "", "profit_engine": "", "strategic_engine": ""}
+    tests = (("revenue_engine", _LARGEST),
+             ("profit_engine", _MOST_PROFITABLE),
+             ("strategic_engine", _STRATEGIC))
+    for sentence in re.split(r"(?<=[.])\s+", text):
+        if len(sentence) > 400:
+            continue
+        present = [s for s in segments if s.lower() in sentence.lower()]
+        if len(present) != 1:
+            # A sentence naming two segments does not rank either of them,
+            # and one naming none is about something else.
+            continue
+        for role, qualifier in tests:
+            if not roles[role] and qualifier.search(sentence):
+                roles[role] = present[0]
+    named = {v for v in roles.values() if v}
+    roles["secondary_engines"] = tuple(
+        s for s in segments if s not in named) if named else tuple(
+            segments[1:])
+    return roles
 
 
 def _subject_documents(documents, *, subject_cik: str = "") -> list:
@@ -216,6 +309,7 @@ def architecture_of(documents, *, company: str = "",
             clause = _clause(text, pattern)
             if clause:
                 found[name] = clause
+        found.update({k: v for k, v in _engines(text, segments).items() if v})
         return EconomicArchitecture(
             company=company, segments=segments,
             measured=tuple(sorted(found)) + (("segments",) if segments else ()),

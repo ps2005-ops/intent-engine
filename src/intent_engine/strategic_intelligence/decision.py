@@ -485,6 +485,10 @@ class FounderDecision:
     thesis: str = ""
     thesis_history: tuple = ()
     adversary: tuple = ()
+    #: §5. Propositions this company's current framing rules out, each with
+    #: the economic mechanism that would make it true and the smallest
+    #: experiment that would settle it. Bounded, falsifiable, never asserted.
+    impossible_hypotheses: tuple = ()
     scenarios: tuple = ()
     assumptions: tuple = ()
     information_gaps: tuple = ()
@@ -629,6 +633,7 @@ class FounderDecision:
             "thesis": self.thesis,
             "thesis_history": list(self.thesis_history),
             "adversary": list(self.adversary),
+            "impossible_hypotheses": list(self.impossible_hypotheses),
             "scenarios": list(self.scenarios),
             "assumptions": list(self.assumptions),
             "information_gaps": list(self.information_gaps),

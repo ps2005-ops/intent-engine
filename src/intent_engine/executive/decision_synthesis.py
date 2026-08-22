@@ -193,12 +193,28 @@ def _standing_of(dossier) -> str:
     #
     # The founder block carries the RUN's own evidence references, which is
     # what "does this company have something to stand on" actually means.
+    # ... AND IT WAS NEVER POPULATED. `webapp/app.py` is the only production
+    # caller of `founder_demo_snapshot.build_payload`, and it did not pass
+    # `evidence_ids`, so this block read NOT_ATTEMPTED/0 for every company on
+    # every run. The condition below could therefore never be satisfied, and
+    # the second repair shipped as inert as the first. Instrumented rather
+    # than guessed a third time: scripts/qa_seam_instrument.py walks this
+    # exact path and prints the block. The call site now supplies them.
     run_evidence = ((dossier.founder_block or {}).get("blocks") or {}) \
         .get("evidence") or {}
-    if availability not in ("AVAILABLE", "STALE") \
-            and not run_evidence.get("count"):
+    has_own_evidence = bool(run_evidence.get("count"))
+    if availability not in ("AVAILABLE", "STALE") and not has_own_evidence:
         return REFUSED
-    if not evidence:
+    # ONE DENOMINATOR, AND IT IS THE READING'S OWN.
+    #
+    # `evidence` here counts the MARKET block, which is empty for every
+    # company the bundle does not cover. Asking it whether the reading has
+    # anything under it sent a run with eleven of its own documents to
+    # UNMEASURABLE -- "No evidence has been published for this company" --
+    # which is the same false sentence as REFUSED wearing a different name.
+    # A reading stands on whatever evidence it actually has, from either
+    # side; only a run with none from either is unmeasurable.
+    if not evidence and not has_own_evidence:
         return UNMEASURABLE
     if not beliefs:
         # Documents without a belief over them: the engine holds no position,

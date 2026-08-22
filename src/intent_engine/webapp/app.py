@@ -3930,6 +3930,44 @@ class WebApp:
         # about the other.
         if not composed.get("grounded_in"):
             composed["grounded_in"] = self._run_grounding(run_id)
+        # TWO COMPOSERS, AND THE ADVERSARY WAS WIRED INTO THE OTHER ONE.
+        #
+        # Same seam, second field. `analysis_selection._adversary` was
+        # ungated last wave so the L0/L1/L2 engine would run for companies
+        # outside the curated manifest -- but that repair landed in
+        # `strategic_read.compose`, and the X-Ray, the full analysis and the
+        # presentation all render `decision_synthesis.compose`, whose
+        # `selection` still comes from the manifest. MEASURED: `adversary`
+        # scored 0.0 on all 44 companies both before and after.
+        #
+        # `competitors` has the identical shape: it is read off
+        # `profile.strategic_competitors`, which is the manifest's list, so
+        # every company outside the manifest showed no competitor set on the
+        # X-Ray while its own step 1 named rivals from its filings.
+        #
+        # Joined here rather than taught to either composer, which is the
+        # precedent `grounded_in` set directly above: this is the ONE place
+        # both objects exist, and a composer that reached into the other
+        # would be a second place for them to disagree.
+        # `_strategic_read` returns the OBJECT, not its dict. Reading it with
+        # `.get` would silently find nothing and this join would be one more
+        # repair that ships green and inert -- which is the failure mode this
+        # very session measured twice on the standing seam.
+        read = self._strategic_read(run_id)
+        for field in ("adversary", "impossible_hypotheses"):
+            value = list(getattr(read, field, ()) or ())
+            if value and not composed.get(field):
+                composed[field] = value
+        rivals = getattr(read, "level4_competition", ()) or ()
+        if rivals and not composed.get("competitors"):
+            composed["competitors"] = [
+                {"name": str(getattr(row, "name", "")),
+                 "why": str(getattr(row, "why_a_rival", "")
+                            or getattr(row, "why", ""))}
+                for row in rivals if getattr(row, "name", "")]
+        if not composed.get("economic_architecture"):
+            composed["economic_architecture"] = getattr(
+                read, "economic_architecture", None)
         return composed
 
     def _run_grounding(self, run_id) -> str:
@@ -3985,6 +4023,31 @@ class WebApp:
             # second freshness contract, and two of those is how the first
             # one stops being believed.
             usable = dossier is not None
+            # A DOSSIER IS NOT A MARKET READING.
+            #
+            # This asked only whether a dossier EXISTS. One always does after
+            # a run, including for the 24 gauntlet companies the market
+            # bundle does not cover -- its market side is assembled as
+            # UNAVAILABLE and every block in it is empty. The composed
+            # decision over that dossier was then handed to the contract as
+            # `market_decision` with `market_usable=True`, so whatever
+            # standing it reached was attributed to the market engine.
+            #
+            # It did not matter while such a dossier could only reach
+            # UNMEASURABLE. It matters now that a run's own evidence lifts it
+            # to BOUNDED: a fixture run whose OWN decision is WITHHELD was
+            # told "A supported reading of Acme exists and is set out on the
+            # Executive X-Ray" -- two surfaces of one run disagreeing about
+            # whether a reading exists, which is the single thing this
+            # contract was built to prevent.
+            #
+            # So the market side has to have actually published something.
+            # Absence routes to `market_decision=None`, which the contract
+            # already handles as "no market reading is published for this
+            # company, so the reading below rests on this run alone".
+            if str((getattr(dossier, "market_block", None) or {})
+                   .get("availability") or "") not in ("AVAILABLE", "STALE"):
+                market, usable = None, False
             # THE THIRD PRODUCER OF A READING, which this contract used not
             # to be told about.
             #
@@ -8725,10 +8788,50 @@ class WebApp:
             except Exception:  # noqa: BLE001 - a read model may not fail a run
                 _discovery = {}
 
+            # THE RUN'S OWN EVIDENCE REFERENCES, PASSED.
+            #
+            # `build_payload` has always accepted `evidence_ids`, and this --
+            # its ONLY production call site -- has never supplied them. Every
+            # dossier this deployment has ever written therefore carried
+            # `evidence_reference_ids = {state: NOT_ATTEMPTED, count: 0}`,
+            # for every company, however many documents the run composed.
+            #
+            # That is not a cosmetic gap. `decision_synthesis._standing_of`
+            # asks this block whether the run has anything to stand on, so a
+            # repair keyed on it could never fire: MEASURED by instrumenting
+            # the production path (scripts/qa_seam_instrument.py), Goldman
+            # Sachs reads NOT_ATTEMPTED/0 and lands on REFUSED, which is how
+            # a live CEO answer came to read "Do not act on this reading" on
+            # a company that composed eleven documents. Two repairs shipped
+            # green and inert against this field before it was measured.
+            #
+            # OBSERVATIONS, NOT DOCUMENTS. A retrieved page is not evidence
+            # until it yields a dated, checkable observation, and this
+            # product has one denominator per page for exactly that reason.
+            #
+            # MEASURED: feeding retrieved documents here broke the two tests
+            # that hold the honest page for a run which fetched ten sources
+            # and derived no signal from any of them -- "the sources were
+            # read and none carried dated, checkable material". That page is
+            # TRUE and it is the one absence state worth keeping, so the
+            # count that decides standing has to be the count of what was
+            # actually derived. Goldman composed eleven observations and is
+            # unaffected; the silent run keeps its page.
+            _evidence_ids = []
+            try:
+                for _obs in ((report or {}).get("observations") or ()):
+                    if not isinstance(_obs, dict):
+                        continue
+                    _oid = _obs.get("observation_id") or _obs.get("source_id")
+                    if _oid:
+                        _evidence_ids.append(str(_oid))
+            except Exception:  # noqa: BLE001 - a read model may not fail a run
+                _evidence_ids = []
             founder = read_founder_snapshot(fds.build_payload(
                 run_id=run_id, company_id=key, canonical_name=name,
                 domain=str(meta.get("domain") or ""), report=report,
                 context=context, scope=None,
+                evidence_ids=_evidence_ids,
                 independence=_assessed, claim_provenance=_provenance,
                 discovery=_discovery, learning=_learning))
 

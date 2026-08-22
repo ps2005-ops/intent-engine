@@ -447,17 +447,62 @@ def _near(clause: str, name: str, pattern: re.Pattern) -> str:
 #
 # A corporate designator settles it the other way immediately: "Wells Fargo
 # Equipment Finance Inc." is a firm whatever its nouns look like.
-_ABSTRACT_SUFFIX = re.compile(
-    r"(?:tion|sion|ment|ance|ence|ity|ing|ship|ism|ology|ance)$", re.I)
-#: Plural process heads that carry no suffix marker but are never firms.
-_PROCESS_HEAD = frozenset({
+#: A SUFFIX IS NOT A MEANING.
+#:
+#: This test used to be "a long word ending in -ing/-tion/-ment/-ance/-ity is
+#: abstract". MEASURED against a list of real firms: it refused Corning,
+#: Sterling, Reading, Downing, Fleming, Flushing, Genting, Herbalife
+#: Nutrition and Ping An Insurance -- ten of seventeen -- because "-ing" and
+#: "-ance" and "-ion" are as common in proper names as in process nouns.
+#: That is a substring wall, and this programme has now built the same wall
+#: three times: "alpha" inside "Alphabet", "Ning" inside "Li Ning", "Bank"
+#: inside "Bank of America".
+#:
+#: The replacement is a POSITIVE VOCABULARY of what a practice heading is
+#: made of. That is not a stoplist: a stoplist of bad names grows by one
+#: entry per company forever, while the vocabulary of business-process nouns
+#: is finite, closed, and shared by every filer on earth. A word counts as
+#: abstract because it NAMES A PROCESS, not because of how it ends.
+_PROCESS_WORD = frozenset({
+    # practice heads (plural nouns that are never a firm)
     "practices", "controls", "standards", "requirements", "procedures",
     "policies", "guidelines", "matters", "activities", "rules",
     "obligations", "disclosures", "considerations", "measures", "safeguards",
+    # the business processes themselves
+    "banking", "supervision", "compensation", "reporting", "underwriting",
+    "servicing", "lending", "hedging", "licensing", "staffing", "consulting",
+    "accounting", "auditing", "marketing", "advertising", "purchasing",
+    "sourcing", "planning", "budgeting", "forecasting", "monitoring",
+    "screening", "onboarding", "provisioning", "processing", "clearing",
+    "outsourcing", "offshoring", "modelling", "modeling", "testing",
+    "training", "laundering", "restructuring", "securitization",
+    "securitisation", "origination", "computing", "transformation",
+    "digitalization", "digitalisation", "optimization", "optimisation",
+    # the abstract nouns of governance
+    "governance", "compliance", "oversight", "valuation", "taxation",
+    "regulation", "litigation", "remuneration", "retention", "recruitment",
+    "procurement", "distribution", "allocation", "administration",
+    "integration", "migration", "settlement", "remediation", "diligence",
+    "management", "disclosure", "examination", "resolution", "custody",
+    "execution", "surveillance", "escalation", "attestation",
+    "certification", "verification", "authorization", "authorisation",
+    "reconciliation", "aggregation", "assessment", "measurement",
+    "validation", "calibration", "attribution", "provisioning",
+    "impairment", "enforcement", "engagement", "development",
+    # the objects those processes act on, when used as a heading head
+    "risk", "risks", "liquidity", "profitability", "sustainability",
+    "integrity", "safety", "quality", "cybersecurity",
 })
+#: Kept as the name the rest of the module already uses.
+_PROCESS_HEAD = _PROCESS_WORD
 _DESIGNATOR = re.compile(
     r"\b(?:inc|corp|corporation|co|company|ltd|limited|llc|lp|llp|plc|"
-    r"ag|sa|nv|bv|se|oyj|ab|as|kk|gmbh|holdings|group|bank|partners)\b\.?",
+    r"ag|sa|nv|bv|se|oyj|ab|as|kk|gmbh|holdings|group|bank|partners|"
+    # NON-US CORPORATE FORMS. "Genting Berhad" is a Malaysian conglomerate
+    # and read as a practice heading because nothing here knew "Berhad" is
+    # the local equivalent of "Inc.".
+    r"berhad|bhd|tbk|pjsc|jsc|spa|srl|asa|pte|pty|kgaa|sas|ooo|pao|"
+    r"aktiengesellschaft|incorporated)\b\.?",
     re.I)
 _CONNECTOR = frozenset({"and", "or", "of", "the", "for", "in", "on", "to",
                         "a", "an", "&"})
@@ -473,11 +518,52 @@ def names_an_activity(name: str) -> bool:
     text = str(name or "").strip()
     if not text or _DESIGNATOR.search(text):
         return False
+    # AN ACRONYM IS A NAME, NOT A PROCESS WORD.
+    #
+    # MEASURED against the gauntlet's own company list: "ASML Holding" came
+    # back CATEGORY_OR_PRACTICE. "Holding" is a long gerund and "ASML" is not
+    # in the process vocabulary, so one of two content words counted and the
+    # phrase read as half-abstract -- refusing a real semiconductor company
+    # exactly as "Ning" once refused NIKE's real rival.
+    #
+    # A practice heading is written in ordinary words. An initialism is a
+    # proper noun by construction and no filing heading is built from one.
+    if any(len(w) >= 2 and w.isupper()
+           for w in re.findall(r"[A-Za-z&']+", text)):
+        return False
     words = [w for w in re.findall(r"[A-Za-z&']+", text)
              if w.lower() not in _CONNECTOR]
     if len(words) < 2:
         return False
-    return _abstract_share(words) * 2 >= len(words)
+    # A CORPORATE FORM IN THE TAIL IS A NAME. "Holding", "Trading" and
+    # "Manufacturing" are process nouns AND the last word of real firms --
+    # Taiwan Semiconductor Manufacturing among them. Where the phrase ends in
+    # one, it is not counted as the evidence of abstraction, because the same
+    # word in that position is what makes it a company.
+    body = words[:-1] if words[-1].lower() in _CORPORATE_TAIL else words
+    if len(body) < 2:
+        return False
+    # THE HEAD OF A NOUN PHRASE DECIDES WHAT THE PHRASE IS.
+    #
+    # "Information Technology Management" is a heading with ONE process word
+    # in three, so the ratio alone missed it; "Sterling Infrastructure" and
+    # "Ping An Insurance" are firms whose ratio the old suffix wall inflated.
+    # English puts the head last in both, and the head is what the phrase
+    # names: a phrase headed by a process IS that process, whatever qualifies
+    # it. The ratio stays for the headings whose head is a plural practice
+    # noun sitting behind a qualifier.
+    if body[-1].lower() in _PROCESS_WORD:
+        return True
+    return _abstract_share(body) * 2 >= len(body)
+
+
+#: Words that name a corporate form when they end a name, and a process
+#: anywhere else. Position is what separates the two, so position is what is
+#: tested -- never the word on its own.
+_CORPORATE_TAIL = frozenset({
+    "holding", "holdings", "trading", "manufacturing", "shipping",
+    "leasing", "engineering", "consulting", "banking", "brewing",
+    "publishing", "mining", "drilling", "clearing", "printing"})
 
 
 #: A SUFFIX IS ONLY A SUFFIX ON A LONG ENOUGH WORD.
@@ -492,23 +578,100 @@ _MIN_GERUND = 7
 
 
 def _abstract_share(words) -> int:
-    found = 0
-    for word in words:
-        low = word.lower()
-        if low in _PROCESS_HEAD:
-            found += 1
-            continue
-        match = _ABSTRACT_SUFFIX.search(word)
-        if not match:
-            continue
-        floor = _MIN_GERUND if low.endswith("ing") else _MIN_ABSTRACT
-        if len(word) >= floor:
-            found += 1
-    return found
+    """How many of these words NAME A PROCESS.
+
+    Membership, not shape. The length floors below are kept because the
+    vocabulary is consulted in lowercase and a short token could otherwise
+    collide with an initial -- but the decision is the vocabulary's.
+    """
+    return sum(1 for word in words if word.lower() in _PROCESS_WORD)
+
+
+#: §8. THREE MORE THINGS THAT ARE NOT ACTORS, and each is refused by its
+#: STRUCTURE rather than by a list of bad names. A stoplist would have to be
+#: extended once per company, which is the maintenance shape this programme
+#: has repeatedly found to be a defect rather than a fix.
+#:
+#: MEASURED before this existed: "Net Interest Income", "Gross Margin",
+#: "Risk Factors", "Item 1A", "Basel III" and "S&P 500" every one of them
+#: typed COMPANY and was therefore eligible to be printed as a rival.
+
+#: An accounting MEASURE. A financial statement line is built entirely from
+#: measure vocabulary and carries no legal-entity suffix -- which is exactly
+#: what separates "Net Interest Income" from "Interest & Co."
+_MEASURE_WORD = frozenset({
+    "income", "margin", "margins", "revenue", "revenues", "equity", "return",
+    "returns", "assets", "liabilities", "expense", "expenses", "ratio",
+    "ratios", "yield", "yields", "earnings", "cash", "flow", "flows",
+    "capital", "interest", "profit", "profits", "loss", "losses", "cost",
+    "costs", "ebitda", "eps", "book", "value", "net", "gross", "operating",
+    "total", "per", "share", "on", "of", "and", "before", "after"})
+
+#: A FILING SECTION. This is a published regulatory taxonomy, not a list of
+#: names somebody disliked: these are the item headings Form 10-K itself
+#: prescribes, so encoding them is encoding the form.
+_FILING_SECTION = re.compile(
+    r"^(?:item\s+\d+[a-c]?\.?$"
+    r"|risk\s+factors$"
+    r"|unresolved\s+staff\s+comments$"
+    r"|legal\s+proceedings$"
+    r"|properties$"
+    r"|mine\s+safety\s+disclosures$"
+    r"|selected\s+financial\s+data$"
+    r"|management'?s?\s+discussion(?:\s+and\s+analysis)?.*$"
+    r"|liquidity\s+and\s+capital\s+resources$"
+    r"|quantitative\s+and\s+qualitative\s+disclosures.*$"
+    r"|controls\s+and\s+procedures$"
+    r"|exhibits?(?:\s+and\s+financial\s+statement\s+schedules)?$"
+    r"|financial\s+statements(?:\s+and\s+supplementary\s+data)?$)",
+    re.I)
+
+#: A MARKET INDEX names a level, not a firm: a word followed by a round
+#: number, or an explicit index noun inside the name itself.
+_INDEX_IN_NAME = re.compile(
+    r"\b(?:index|composite|average)\b|"
+    r"^[A-Z][\w&.\- ]{0,18}\s\d{2,4}$", re.I)
+
+#: A NAMED RULE. An accord or statute carries a Roman numeral or one of the
+#: instrument nouns; a company almost never does.
+#: "standard" and "framework" were in this list for one revision and refused
+#: STANDARD CHARTERED -- a real bank, and the Li Ning failure arriving
+#: through a different door. An instrument noun that also appears in ordinary
+#: company names is not a test; it is a substring wall. Only nouns that name
+#: an instrument and nothing else remain.
+_RULE_IN_NAME = re.compile(
+    r"\b(?:act|acts|regulation|regulations|directive|directives|"
+    r"accord|accords|basel|solvency|mifid|"
+    r"gdpr|hipaa|sarbanes|dodd[- ]frank)\b"
+    r"|\s(?:i{2,3}|iv|vi{1,3}|ix)$", re.I)
+
+
+def names_a_measure(name: str) -> bool:
+    """A financial-statement line rather than a firm.
+
+    Every word must be measure vocabulary. One proper noun outside it --
+    "Deere Capital", "Interest.co.nz" -- and this is not a measure.
+    """
+    words = [w for w in re.findall(r"[A-Za-z&']+", str(name or "")) if w]
+    if not (2 <= len(words) <= 5):
+        return False
+    return all(w.lower() in _MEASURE_WORD for w in words)
 
 
 def entity_type_of(name: str, clause: str) -> Tuple[str, str]:
     """WHAT IS THIS THING? Returns (entity_type, the words that decided it)."""
+    _bare = " ".join(str(name or "").split()).strip(" .")
+    # §8. ASKED WITH THE ACTIVITY TEST, for the same reason: each of these
+    # sits in a clause looking exactly like a name, and every test below
+    # reads either the clause or ordinary name vocabulary.
+    if _FILING_SECTION.match(_bare):
+        return ENTITY_CATEGORY, "names a section of the filing, not an actor"
+    if names_a_measure(_bare):
+        return ENTITY_CATEGORY, "names a financial measure, not an actor"
+    if _INDEX_IN_NAME.search(_bare):
+        return ENTITY_INDEX_PROVIDER, "names an index or a benchmark level"
+    if _RULE_IN_NAME.search(_bare):
+        return ENTITY_PROGRAM, "names a rule or an accord, not an actor"
     # ASKED FIRST, because every test below reads either the clause or the
     # name's vocabulary, and a heading defeats both: it sits in the clause
     # like a name and is built from the same words.
