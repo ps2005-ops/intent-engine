@@ -59,3 +59,30 @@ substitution clause. The class decides the contest rather than the filing.
 Both are the shape §7 names: the model class is the PRIOR and must stop being
 the ANSWER. The architecture object now exists and carries the measured
 particulars; these two fields do not read it yet.
+
+## After the cues were repaired
+
+The three artifact cues were repointed at the substantive passage. Re-measured
+over the same 48 captures, unchanged product:
+
+| field | before | after (identical) | after (near) |
+|---|---|---|---|
+| `step6` | 1035 | 81 | 7 |
+| `recommendation` | 166 | 42 | 126 |
+| `biggest_risk` | 66 | **0** | 0 |
+| `business_model` | 70 | 70 | 7 |
+| `central_question` | 37 | 37 | 2 |
+| `competitors` | 15 | 15 | 3 |
+| `board_answer` | 4 | 4 | 161 |
+| **total** | **1393** | **249** | **299** |
+
+`biggest_risk` went to zero, which is the correct answer: every one of its 66
+pairs was the same rival-kind constant.
+
+**The instrument was responsible for 82% of the finding it reported.** Nothing
+about the product changed between the two rows of this table.
+
+That is the third time in this programme an instrument has produced a uniform
+result that was read as a uniform defect. The rule it argues for: when a
+measurement comes back near-total, check the matched passage against the
+captured text before the number is written down anywhere.

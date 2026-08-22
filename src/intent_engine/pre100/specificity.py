@@ -44,11 +44,24 @@ FIELDS = (
     ("central_question", "intro",
      r"(The question[^.]{0,240}|decision worth arguing about[^.]{0,240}"
      r"|what to charge[^.]{0,240})"),
+    # THE SUBSTANTIVE SENTENCE, NOT THE FRAMING LINE.
+    #
+    # `The choice:` is a constant lead-in and it matched FIRST, so 166 pairs
+    # reported identical on a field whose actual content is specific --
+    # Alphabet's "is a measurable and growing share of orders originating
+    # from AI-agent surfaces rather than human browsing?" against Amazon's
+    # "segment disclosure showing no material inter-segment revenue". The
+    # instrument was reading the label above the answer.
     ("recommendation", "brief",
-     r"(What to do next|The choice:|management should|Commit to the reading"
-     r"|Hold and verify|Hold this decision)[^.]{0,300}"),
+     r"(What to do next|One check separates them|management should"
+     r"|Hold this decision)[^.]{0,300}"),
+    # `the risk is` matched `_LIKELIHOOD[SUBSTITUTE]` in competitive_ground:
+    # "the risk is that they are not responding to us at all" -- a correct
+    # constant about a KIND OF RIVAL, not a claim about the company. Two
+    # companies whose nearest rival is a substitute SHOULD share it, so
+    # counting it as a duplicate measured the vocabulary, not the product.
     ("biggest_risk", "brief",
-     r"(biggest risk|the risk is|what would hurt)[^.]{0,300}"),
+     r"(biggest risk|what would hurt|the risk to this reading)[^.]{0,300}"),
     ("competitors", "intro",
      r"(contested (?:most )?directly by[^.]{0,260}"
      r"|customers can substitute[^.]{0,260})"),
@@ -56,8 +69,14 @@ FIELDS = (
      r"(If we move, what do they do)[^.]{0,400}"),
     ("impossible_hypothesis", "full",
      r"(What could be true that we are not considering)[^.]{0,400}"),
+    # 1035 OF A POSSIBLE 1128 PAIRS -- 92% -- came from this cue matching the
+    # section's opening, which is identical BY DESIGN: "What this becomes with
+    # your own context. Everything you have just read was built from public
+    # evidence alone." A defect that uniform is the instrument, not the
+    # product. Step 6's company-specific material is the list of measures a
+    # business of this kind is judged on, which is where this now points.
     ("step6", "connect",
-     r"(your own|internal|what this becomes)[^.]{0,300}"),
+     r"(?:Internal intelligence|still bounded)[^A-Za-z]{0,4}(.{60,600})"),
     ("board_answer", "qa", r"^.{0,600}"),
 )
 
@@ -68,6 +87,15 @@ _CHROME = (
     "answers use only this run's approved evidence",
     "executive x-ray", "evidence — why this reading exists",
     "sources", "executive brief", "other views", "suggested:",
+    # OUR OWN QUESTIONS. The board questions are the same ten for every
+    # company by design, and the Q&A page prints the question above the
+    # answer -- so leaving them in makes every pair share their opening.
+    "what should management do?", "why now?", "what's the biggest risk?",
+    "what proves this wrong?", "who's the real competitor?",
+    "what does the market believe?", "what's the weakest assumption?",
+    "what should we measure next?", "what would you tell the board?",
+    "what impossible hypothesis should we test?",
+    "what would prove this wrong?",
 )
 
 

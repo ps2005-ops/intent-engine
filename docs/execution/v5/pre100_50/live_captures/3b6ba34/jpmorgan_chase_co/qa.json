@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What should management do?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What should management do? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Why now?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Why now? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. Why now? what to charge, and for what is a standing decision for this business model; measured market rate conditions reach this business and bear directly on it; measured policy rate conditions reach this business and bear directly on it. It was ranked above capital allocation on the same evidence. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the biggest risk?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the biggest risk? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What's the biggest risk? the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would prove this wrong?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would prove this wrong? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What would prove this wrong? The expected movement failing to appear in rate and pricing changes by the next review. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "Who's the real competitor?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "Who's the real competitor? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. Who's the real competitor? Bank of America Corporation: operates the same business model (balance sheet or network) in the same sector (financial regulated), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Bank of Montreal: operates the same business model (balance sheet or network) in the same sector (financial regulated), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR; Blackstone Inc.: operates the same business model (balance sheet or network) in the same sector (financial regulated), so it competes for the same customers and is exposed to the same cost and demand drivers SAME_MODEL_AND_SECTOR Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What does the market believe?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What does the market believe? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What does the market believe? That JPMorgan Chase & Co.'s current weakness is a cyclical trough rather than a structural reset, and the prior trajectory resumes.: JPMorgan Chase & Co.'s own filed results show growth slowing and margin narrowing. This is what a reader of that record carries into next year; nobody published it in these words and it is not a consensus estimate.; That the contest JPMorgan Chase & Co. has to win is against banks, and that holding that ground is what protects the economics.: JPMorgan Chase & Co.'s own words \u2014 not independent, and it is the company's account of its market. JPMorgan Chase & Co. names it directly. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What's the weakest assumption?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What's the weakest assumption? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What's the weakest assumption? JPMorgan Chase & Co.'s filed results: The filed series is what this reading is computed from. The spread earned on flow across a balance sheet is what the economics rest on Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What impossible hypothesis should we investigate?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What impossible hypothesis should we investigate? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What impossible hypothesis should we investigate? A holder of this view is reading the record correctly as far as it goes: what it implies is whether the slowdown is arriving through volume or through price, because only one of those recovers with the cycle, and nothing in what this run retrieved contradicts that.; A holder of this view is reading the record correctly as far as it goes: what it implies is wins and losses are decided against banks rather than somewhere else, and nothing in what this run retrieved contradicts that. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What should we measure next?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What should we measure next? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What should we measure next? 8 preregistered expectation(s) are open for this company; each carries its own falsifier and evaluation window.; The operating-posture distribution is uniform. The first observation that moves it is the cheapest signal available here. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  },
+  {
+    "question": "What would you tell the board?",
+    "status": 200,
+    "endpoint": "/runs/{run_id}/conversation",
+    "answer": "What would you tell the board? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo JPMorgan Chase & Co. What would you tell the board? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Why this matters This run did not add enough independent evidence to strengthen the existing reading; it neither established nor contradicted it. Ask a follow-up Your question Ask Suggested: What does this company do? Why does this matter? What should I do next? Which recent event makes this timely? What changed in the last six months? Other views \u2190 Back to the analysis The answer Executive X-Ray Intelligence Evidence \u2014 why this reading exists Sources Executive brief"
+  }
+]
