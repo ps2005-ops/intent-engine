@@ -53,8 +53,34 @@ UNIVERSE = ROOT / "docs/execution/v5/pre100_50/UNIVERSE.json"
 
 #: Copy the preview shows when the demo quota is spent. Captured as an
 #: analysis it would score as a product defect; it is a fact about us.
-QUOTA_MARKERS = ("demo limit", "rate limit", "too many analyses",
-                 "try again later", "quota")
+#:
+#: PHRASES, AND READ FROM THE PAGE TEXT ONLY. The first version included the
+#: bare word "quota" and was matched against `json.dumps(row)` -- which
+#: contains the key `"quota_block": false`. The detector read its own field
+#: name and stopped the canary after a company that had completed in 146
+#: seconds with nine surfaces captured. A marker that can match the
+#: instrument's own vocabulary is not a marker.
+QUOTA_MARKERS = ("demo limit", "too many analyses",
+                 "analysis limit", "come back in an hour",
+                 "you have reached the limit")
+
+
+def quota_blocked(row: dict) -> bool:
+    """Did the SERVICE refuse this run for quota?
+
+    The journey harness already decides this from the response it got, so
+    that verdict is authoritative and is asked first. The phrase scan is a
+    backstop and runs over the captured PAGE TEXT -- never over the
+    serialized record, whose keys are ours.
+    """
+    if (row.get("reliability") or {}).get("quota_block"):
+        return True
+    pages = []
+    for value in (row.get("routes") or {}).values():
+        if isinstance(value, dict):
+            pages.append(str(value.get("text") or ""))
+    blob = " ".join(pages).lower()
+    return any(m in blob for m in QUOTA_MARKERS)
 
 
 def _slug(name: str) -> str:
@@ -194,8 +220,20 @@ def main(argv=None) -> int:
             "unknown. §18 requires all fifty on ONE deployed SHA.")
         return 2
     log(f"deployed_sha={sha}")
-    companies = load_universe(
-        [o for o in args.only.split(",")] if args.only else None, args.limit)
+    # A COMMA IS PART OF THE NAME. "Cloudflare, Inc." and "Meta Platforms,
+    # Inc." both carry one, so splitting the selector on commas turned a
+    # three-company canary into a one-company canary silently -- and a
+    # selector that quietly narrows is worse than one that errors, because
+    # the batch still reports success. Semicolon separates; tickers work too.
+    selector = None
+    if args.only:
+        parts = args.only.split(";") if ";" in args.only \
+            else args.only.split(",")
+        selector = [o.strip() for o in parts if o.strip()]
+    companies = load_universe(selector, args.limit)
+    if selector and len(companies) != len(selector):
+        log(f"SELECTOR MATCHED {len(companies)} of {len(selector)}: "
+            f"{[c['entry_name'] for c in companies]}")
     todo = [c for c in companies
             if not already_captured(outdir, c["entry_name"])]
     log(f"universe={len(companies)} todo={len(todo)} "
@@ -242,9 +280,7 @@ def main(argv=None) -> int:
             # A QUOTA PAGE IS NOT A CAPTURE. §21 says interrupt for quota
             # exhaustion; scoring the quota page as the product would put a
             # defect on the matrix that belongs to the harness.
-            blob = json.dumps(row).lower()
-            if row.get("reliability", {}).get("quota_block") or \
-                    any(m in blob for m in QUOTA_MARKERS):
+            if quota_blocked(row):
                 log(f"QUOTA reached on {name}; stopping the batch")
                 stop.set()
                 return

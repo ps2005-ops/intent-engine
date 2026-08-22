@@ -140,3 +140,43 @@ def test_a_whole_surface_dimension_scores_the_surface_not_one_character():
 def test_a_surface_that_did_not_render_is_not_a_zero():
     row = Q.score_dimension("qa", "qa", ".", text="", company="A Inc.")
     assert row["score"] is Q.NOT_MEASURED
+
+
+# --- the instrument must stay able to see its own defect ------------------
+#
+# Widening the business-model locator to include the subject also pulled in
+# the "SEC CIK 0000796343" that precedes it on the intro. Adobe and
+# Salesforce still shared their sentence VERBATIM and the comparison reported
+# them as distinct, because a ten-digit number differed. A guard that cannot
+# fail is not a guard, and this one had been silently switched off by a
+# change made two files away for a different reason.
+
+REAL_INTRO = ("SEC CIK {cik} {name} is a software platform business that "
+              "runs on recurring software subscription: revenue is "
+              "contracted and renews, so the installed base carries next "
+              "period's revenue before any new sale")
+
+
+def test_an_identifier_does_not_hide_a_shared_sentence():
+    report = compare([
+        _row("Adobe Inc.",
+             business_model=REAL_INTRO.format(cik="0000796343",
+                                              name="Adobe Inc.")),
+        _row("Salesforce, Inc.",
+             business_model=REAL_INTRO.format(cik="0001108524",
+                                              name="Salesforce, Inc.")),
+    ])
+    assert report["byte_identical_count"] == 1, (
+        "a differing CIK hid a byte-identical business-model sentence")
+
+
+def test_the_identifier_strip_does_not_erase_real_numbers():
+    """NEGATIVE CONTROL. Stripping identifiers must not strip the figures
+    that make a passage specific, or every quantified page collapses."""
+    report = compare([
+        _row("A Inc.", recommendation="What to do next: hold price while "
+                       "the 2026 renewal cohort settles at 41% gross margin"),
+        _row("B Inc.", recommendation="What to do next: hold price while "
+                       "the 2026 renewal cohort settles at 63% gross margin"),
+    ])
+    assert report["byte_identical_count"] == 0

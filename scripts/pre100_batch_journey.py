@@ -32,7 +32,16 @@ BASE = os.environ.get("PRE100_BASE",
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
-STEPS = ["intro", "slides", "full", "story", "history", "connect"]
+#: The six the demo flow walks IN ORDER, then the surfaces a reader reaches
+#: from them. `brief` is not optional: SIX scored dimensions read it --
+#: market belief, belief challenge, recommendation, falsifier, MVE and the
+#: capital picture -- and a harness that does not fetch it makes all six
+#: NOT_MEASURED, which fails the gate for a reason that is about the harness.
+#: MEASURED on the f8c183f canary: Microsoft scored core_min 3 with
+#: `market_belief` and `recommendation` both "surface did not render", on a
+#: run whose brief was sitting one request away.
+STEPS = ["intro", "slides", "full", "story", "history", "connect",
+         "brief", "evidence", "sources", "report"]
 
 #: Copy that means the product gave up in front of a chief executive.
 ABSENCE = [

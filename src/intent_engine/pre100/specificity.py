@@ -39,8 +39,14 @@ SIMILAR = 0.90
 #: where a field is shared, so a passage cannot be "present" for one
 #: instrument and "absent" for the other.
 FIELDS = (
+    # THE SAME SPAN THE QUALITY GATE LOCATES, subject included. That gate
+    # needs the subject because it asks whether the sentence is about THIS
+    # company; this one does not care, because `_normalise` strips the name
+    # before any comparison. Sharing the locator is what keeps the two
+    # instruments from disagreeing about where a field is.
     ("business_model", "intro",
-     r"is an? [^.]{0,180}?business that runs on [^.]{0,260}"),
+     r"[A-Z][\w.&,' -]{2,60} is an? [^.]{0,180}?business that runs on "
+     r"[^.]{0,260}"),
     ("central_question", "intro",
      r"(The question[^.]{0,240}|decision worth arguing about[^.]{0,240}"
      r"|what to charge[^.]{0,240})"),
@@ -64,6 +70,7 @@ FIELDS = (
      r"(biggest risk|what would hurt|the risk to this reading)[^.]{0,300}"),
     ("competitors", "intro",
      r"(contested (?:most )?directly by[^.]{0,260}"
+     r"|the contest is most direct with[^.]{0,260}"
      r"|customers can substitute[^.]{0,260})"),
     ("adversary", "full",
      r"(If we move, what do they do)[^.]{0,400}"),
@@ -113,6 +120,17 @@ def _normalise(passage: str, company: str) -> str:
     for token in sorted(_variants(company), key=len, reverse=True):
         if len(token) > 3:
             text = text.replace(token.lower(), " ")
+    # AN IDENTIFIER IS THE NAME IN ANOTHER FORM.
+    #
+    # The intro prints "SEC CIK 0000796343 Adobe Inc. is a software platform
+    # business that runs on…", and once the locator was widened to include
+    # the subject, the CIK came with it. Adobe and Salesforce still shared
+    # that sentence VERBATIM and the comparison reported them as distinct —
+    # the instrument blinded to the exact defect it was built for, because a
+    # ten-digit number differed. Stripping the name and keeping its number is
+    # not stripping the name.
+    text = re.sub(r"\b(?:sec\s+)?cik\s*\d+\b", " ", text)
+    text = re.sub(r"\b\d{6,}\b", " ", text)
     return " ".join(text.split())
 
 

@@ -49,8 +49,21 @@ CORE = ("business_model", "economic_reasoning", "market_belief",
 #: (key, surface, cue). The cue LOCATES the passage; it does not score it.
 DIMENSIONS = (
     ("intro", "intro", r"(SEC CIK \d+|·\s*USA|Ticker|— introduction)"),
+    # THE SUBJECT IS PART OF THE SENTENCE. This cue began at "is a…", which
+    # excludes the company name that precedes it — so `_specific` looked for
+    # the company in a passage the cue had just cut it out of, and every
+    # business-model sentence read as generic. MEASURED on the deployed
+    # f8c183f capture: Microsoft's sentence is drawn from its own 10-K
+    # ("an array of services, including cloud-based solutions that provide
+    # customers with AI, software, services, platforms, and content") and
+    # scored 6, "present but not specific to this company".
+    #
+    # Whether two COMPANIES share a sentence is the specificity scorer's
+    # question and it strips the name deliberately. Within one page, the
+    # subject is what the sentence is about.
     ("business_model", "intro",
-     r"is an? [^.]{0,180}?business that runs on [^.]{0,260}"),
+     r"[A-Z][\w.&,' -]{2,60} is an? [^.]{0,180}?business that runs on "
+     r"[^.]{0,260}"),
     ("revenue_drivers", "story",
      r"(Revenue is decided by|where the money actually comes from)[^.]{0,300}"),
     ("margin_drivers", "story",
@@ -77,9 +90,18 @@ DIMENSIONS = (
     ("belief_challenge", "brief",
      r"(Why it may be right|What could break it|strongest (?:reason|"
      r"contradiction|support)|may be wrong|the plainer account)[^.]{0,300}"),
+    # THE PRODUCT'S WORDING MOVED. Measured on the deployed f8c183f capture
+    # of Microsoft: the competitive sentence reads "the contest is most
+    # direct with The customer's own engineering, Renewing nothing and
+    # keeping the current process" -- a real, correct competitive read made
+    # of substitutes rather than named firms. The old cue matched none of it
+    # and would have scored 0 on every company whose rivals are substitutes,
+    # which is a defect the instrument invents.
     ("competition", "intro",
      r"(contested (?:most )?directly by[^.]{0,260}"
+     r"|the contest is most direct with[^.]{0,260}"
      r"|customers can substitute[^.]{0,260}"
+     r"|the alternative may be[^.]{0,260}"
      r"|an adjacent threat[^.]{0,260}"
      r"|sits in the same sector as[^.]{0,260})"),
     # GENUINELY ABSENT, AND VERIFIED AS SUCH. Neither string appears on ANY
@@ -97,9 +119,14 @@ DIMENSIONS = (
     # renders both inside the full analysis -- because a cue pointed at a
     # surface the product does not write on invents a uniform defect, which
     # this instrument has already done once.
+    # REACH THE ACTOR. The section opens with a heading and a generic lead
+    # ("One rival, three ways it could behave"), and a cue that stops at the
+    # first full stop scores that lead — so a section naming a real rival at
+    # L0/L1/L2 read as "present but not specific". Measured on the f8c183f
+    # Microsoft capture: the actor is 180 characters past the heading.
     ("adversary", "full",
-     r"(If we move, what do they do|L[012]\b|would respond"
-     r"|competitor response|anticipates|responds directly)[^.]{0,300}"),
+     r"(?:If we move, what do they do|L[012]\s*—)"
+     r"[\s\S]{0,600}?L[012]\s*—\s*[^.]{0,200}"),
     ("impossible_hypothesis", "full",
      r"(What could be true that we are not considering"
      r"|may be worth more|may not be the customer|may stop existing"
