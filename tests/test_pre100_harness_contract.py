@@ -190,3 +190,23 @@ def test_a_quota_429_is_deferred_not_counted_as_a_failure():
     branch = source[i:j]
     assert "queue.appendleft" in branch, "a 429 does not re-queue the company"
     assert "failures.append" not in branch, "a 429 counts as a strike"
+
+
+def test_a_restart_casualty_is_requeued_not_scored():
+    """§6/§10. The free preview restarts under memory pressure -- measured at
+    62s uptime immediately after Salesforce scored 2.6 with its surfaces
+    gone. A run whose instance died has produced no reading, not a bad one,
+    and scoring it puts an infrastructure event on the quality matrix."""
+    source = pathlib.Path(B.__file__).read_text()
+    i = source.index("boot_after = boot_id()")
+    j = source.index("# A 429 IS NOT A FAILURE", i)
+    branch = source[i:j]
+    assert "queue.append(company)" in branch, "a restart casualty is dropped"
+    assert "RUN_RESTART_LOST" in branch
+    assert "score_capture" not in branch, "a restart casualty is scored"
+
+
+def test_the_batch_records_the_boot_it_ran_against():
+    source = pathlib.Path(B.__file__).read_text()
+    assert "boot_before = boot_id()" in source
+    assert "boot_id=boot_before" in source

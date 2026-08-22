@@ -232,6 +232,24 @@ def write_manifest(company_dir: pathlib.Path, name: str, row: dict,
         json.dumps(manifest, indent=1), "utf-8")
 
 
+def boot_id() -> str:
+    """The running process's identity. A change means the instance restarted.
+
+    §6/§10. The free preview restarts under memory pressure -- measured at
+    62 seconds of uptime immediately after a company scored 2.6 with its
+    surfaces gone. A run whose instance died mid-analysis has not produced a
+    bad reading; it has produced no reading, and scoring it as intelligence
+    quality corrupts the matrix with an infrastructure event.
+    """
+    import urllib.request
+    try:
+        with urllib.request.urlopen(J.BASE + "/version", timeout=30) as fh:
+            return str((json.loads(fh.read().decode()).get("process") or {})
+                       .get("boot_id") or "")
+    except Exception:                                       # noqa: BLE001
+        return ""
+
+
 def deployed_sha() -> str:
     """The SHA actually serving, read from the service. §18 requires ONE."""
     import urllib.request
@@ -355,8 +373,9 @@ def main(argv=None) -> int:
             if stop.is_set():
                 return
             log(f"START {name}")
+            boot_before = boot_id()
             register(outdir, harness_run_id=batch_id, company=name,
-                     deployed_sha=sha, state="START")
+                     deployed_sha=sha, boot_id=boot_before, state="START")
             started = time.time()
             try:
                 row = J.run_company(name, str(company.get("cik") or ""),
@@ -374,6 +393,21 @@ def main(argv=None) -> int:
             # "DONE ... in 1s" beside genuine nine-minute analyses, and
             # scored, which puts a zero on the matrix that belongs to the
             # service rather than to the company.
+            # THE INSTANCE DIED UNDER THIS RUN. §6: requeue, never score.
+            boot_after = boot_id()
+            if boot_before and boot_after and boot_before != boot_after:
+                log(f"RESTART {name}: instance restarted mid-run "
+                    f"({boot_before[:8]} -> {boot_after[:8]}); requeueing")
+                register(outdir, harness_run_id=batch_id, company=name,
+                         deployed_sha=sha, state="RUN_RESTART_LOST",
+                         boot_before=boot_before, boot_after=boot_after)
+                target = outdir / _slug(name)
+                if target.exists():
+                    lost = outdir / f"_restart_lost_{_slug(name)}_{batch_id}"
+                    target.rename(lost)
+                with lock:
+                    queue.append(company)
+                continue
             # A 429 IS NOT A FAILURE, IT IS A WAIT. §22: a quota window is
             # not a stop condition. Re-queue the company and sleep out the
             # window rather than burning it as one of three strikes -- the

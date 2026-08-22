@@ -1,0 +1,158 @@
+{
+ "company": "Amazon.com, Inc.",
+ "deployed_sha": "02f4644",
+ "outcome": "",
+ "dimensions": [
+  {
+   "dimension": "intro",
+   "surface": "intro",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "\u2014 introduction"
+  },
+  {
+   "dimension": "business_model",
+   "surface": "intro",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "SEC CIK 0001018724 Amazon.com, Inc. is a retail business that runs on our stores to enable hundreds of millions of unique products to be sold by us and by third parties across dozens of product categories"
+  },
+  {
+   "dimension": "revenue_drivers",
+   "surface": "story",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "Where the money actually comes from Revenue is decided by store and site traffic, average ticket and comparable sales, and whether that revenue becomes margin is decided by cost of goods and supplier terms and distribution and fulfilment cost per unit"
+  },
+  {
+   "dimension": "margin_drivers",
+   "surface": "story",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "becomes margin is decided by cost of goods and supplier terms and distribution and fulfilment cost per unit"
+  },
+  {
+   "dimension": "capital_intensity",
+   "surface": "brief",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund"
+  },
+  {
+   "dimension": "macro",
+   "surface": "full",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "rategic Intelligence \u2014 Amazon"
+  },
+  {
+   "dimension": "micro",
+   "surface": "full",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "prices as though this is already true, without waiting for an outside source to confirm it"
+  },
+  {
+   "dimension": "market_belief",
+   "surface": "brief",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "market's current belief That Amazon"
+  },
+  {
+   "dimension": "belief_challenge",
+   "surface": "brief",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "the plainer account is right: the segments are genuinely independent and the portfolio framing is investor-relations language rather than operating reality"
+  },
+  {
+   "dimension": "competition",
+   "surface": "intro",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "customers can substitute publishers, distributors and the shopper buying the same basket somewhere cheaper, and the economics that decide the contest are moderate operating leverage \u2014 a largely fixed store and distribution base against thin unit margin, so small comparable-sales move"
+  },
+  {
+   "dimension": "adversary",
+   "surface": "full",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "If we move, what do they do One rival, three ways it could behave. The levels are not scenarios about the market; they are assumptions about how much of our move the competitor sees and when. L0 \u2014 publishers continues its current course and does not react"
+  },
+  {
+   "dimension": "impossible_hypothesis",
+   "surface": "full",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "What could be true that we are not considering These are propositions this company's current framing rules out by construction"
+  },
+  {
+   "dimension": "economic_reasoning",
+   "surface": "full",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "what it costs to serve them Against it: a capability the customer cannot assemble \u2014 regulated, network-dependent, or data-dependent \u2014 would rule this out It is falsified by largest accounts showing no build activity at renewal falsifies this"
+  },
+  {
+   "dimension": "recommendation",
+   "surface": "brief",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "The choice: Commit to the reading now versus hold and verify first"
+  },
+  {
+   "dimension": "falsifier",
+   "surface": "brief",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "show it is wrong"
+  },
+  {
+   "dimension": "mve",
+   "surface": "brief",
+   "score": 6,
+   "why": "present but not specific to this company",
+   "passage": "One check separates them: segment disclosure showing no material inter-segment revenue"
+  },
+  {
+   "dimension": "presentation",
+   "surface": "slides",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "Amazon.com, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Amazon.com, Inc. AMZN \u00b7 SEC CIK 0001018724 Amazon.com, Inc. is a retail business that runs on our stores to enable hundreds of millions of unique products to be sold by us and by third parties across do"
+  },
+  {
+   "dimension": "full_analysis",
+   "surface": "full",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "Strategic Intelligence \u2014 Amazon.com, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } Amazon.com, Inc. Full analysis \u2014 the intelligence "
+  },
+  {
+   "dimension": "history",
+   "surface": "history",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "Better strategy"
+  },
+  {
+   "dimension": "qa",
+   "surface": "qa",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": " Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Amazon.com, Inc. What should management do? Hold this decision \u2014 what to charge, and for what \u2014 open for now. Run the smallest test that would settle it, and keep the current position in the meantime. Evidence Strongest. \u201c\u2026of the customer experie"
+  },
+  {
+   "dimension": "step6",
+   "surface": "connect",
+   "score": 10,
+   "why": "company-specific and substantiated",
+   "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
+  }
+ ],
+ "core_mean": 9.27,
+ "core_min": 6,
+ "core_unmeasured": [],
+ "all_mean": 8.29
+}
