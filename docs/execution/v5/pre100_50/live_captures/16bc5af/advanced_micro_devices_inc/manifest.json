@@ -1,0 +1,13 @@
+{
+  "company": "Advanced Micro Devices, Inc.",
+  "deployed_sha": "16bc5af",
+  "captured_at": "2026-08-22T00:10:36Z",
+  "routes": {},
+  "progress": [],
+  "process_before": {
+    "boot_id": "7cafdd67bb0645fa",
+    "started_at": 1787356540.910125,
+    "uptime_seconds": 896.0
+  },
+  "run_id": "01M0KCWW8TK8NCSCFXEE223A15"
+}

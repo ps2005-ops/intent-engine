@@ -23,7 +23,7 @@ CAPTURES = ROOT / "live_captures"
 #: describes the product as it stands.
 ORDER = ["8397d67", "49b6c3a", "517e7ae", "5d43053", "10d1620", "b37bee2",
          "0d02c0b", "e78c2a0", "b0050e3", "dc17a9d", "743df06", "cb9e6b7",
-         "a22929c", "8fd6c82", "5e1218e", "61a7981"]
+         "a22929c", "8fd6c82", "5e1218e", "61a7981", "ea55870", "16bc5af"]
 
 
 def newest_capture_per_company() -> dict:

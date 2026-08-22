@@ -1,8 +1,8 @@
 {
  "gate": {
   "companies": 50,
-  "scored": 46,
-  "core_mean": 8.19,
+  "scored": 45,
+  "core_mean": 8.13,
   "core_min": 0,
   "failing": [
    [
@@ -111,7 +111,7 @@
    ],
    [
     "Meta Platforms, Inc.",
-    "core NOT_MEASURED: market_belief,recommendation"
+    "core_mean 8.1"
    ],
    [
     "Micron Technology, Inc.",
@@ -127,11 +127,11 @@
    ],
    [
     "NIKE, Inc.",
-    "core_mean 8.5"
+    "core_mean 8.2"
    ],
    [
     "NVIDIA Corporation",
-    "core_min 6"
+    "core_mean 8.2"
    ],
    [
     "NextEra Energy, Inc.",
@@ -143,7 +143,7 @@
    ],
    [
     "Pfizer Inc.",
-    "core_mean 8.5"
+    "core_mean 8.2"
    ],
    [
     "QUALCOMM Incorporated",
@@ -179,7 +179,7 @@
    ],
    [
     "The Goldman Sachs Group, Inc.",
-    "core_min 6"
+    "core NOT_MEASURED: business_model,revenue_drivers,margin_drivers,market_belief,competition,recommendation,full_analysis,presentation,history,qa"
    ],
    [
     "The Home Depot, Inc.",
@@ -367,7 +367,7 @@
   },
   {
    "company": "Advanced Micro Devices, Inc.",
-   "deployed_sha": "8fd6c82",
+   "deployed_sha": "16bc5af",
    "outcome": "NO_OUTCOME",
    "dimensions": [
     {
@@ -526,7 +526,7 @@
     "qa"
    ],
    "all_mean": null,
-   "sha": "8fd6c82",
+   "sha": "16bc5af",
    "first_useful": null
   },
   {
@@ -4248,9 +4248,9 @@
     {
      "dimension": "capital_intensity",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "capital to capacity ahead of the demand for it, so the cost lands now while the payoff depends on demand that has not arrived yet"
     },
     {
      "dimension": "macro",
@@ -4269,16 +4269,16 @@
     {
      "dimension": "market_belief",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "market's current belief That Meta Platforms, Inc"
     },
     {
      "dimension": "belief_challenge",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "the plainer account is right: the segments are genuinely independent and the portfolio framing is investor-relations language rather than operating reality"
     },
     {
      "dimension": "competition",
@@ -4290,37 +4290,37 @@
     {
      "dimension": "adversary",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "impossible_hypothesis",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
      "passage": ""
     },
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "The choice: Commit to the reading now versus hold and verify first"
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "show it is wrong"
     },
     {
      "dimension": "mve",
      "surface": "brief",
-     "score": null,
-     "why": "surface did not render",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "One check separates them: segment disclosure showing no material inter-segment revenue"
     },
     {
      "dimension": "presentation",
@@ -4346,8 +4346,8 @@
     {
      "dimension": "qa",
      "surface": "qa",
-     "score": 10,
-     "why": "company-specific and substantiated",
+     "score": 3,
+     "why": "surface admits absence: 'not retrieved'",
      "passage": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Meta Platforms, Inc. What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Evidence Strongest. \u201cOur AI investments support initiatives across our p"
     },
     {
@@ -4358,13 +4358,10 @@
      "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
     }
    ],
-   "core_mean": 8.5,
-   "core_min": 6,
-   "core_unmeasured": [
-    "market_belief",
-    "recommendation"
-   ],
-   "all_mean": 8.33,
+   "core_mean": 8.1,
+   "core_min": 3,
+   "core_unmeasured": [],
+   "all_mean": 6.85,
    "sha": "61a7981",
    "first_useful": 344
   },
@@ -4829,7 +4826,7 @@
   },
   {
    "company": "NIKE, Inc.",
-   "deployed_sha": "cb9e6b7",
+   "deployed_sha": "16bc5af",
    "outcome": "FULL_ANALYSIS",
    "dimensions": [
     {
@@ -4870,16 +4867,16 @@
     {
      "dimension": "macro",
      "surface": "full",
-     "score": 3,
-     "why": "surface admits absence: 'no strategic reading'",
-     "passage": "rategic reading of NIKE, Inc"
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "rategic Intelligence \u2014 NIKE, Inc"
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": 3,
-     "why": "surface admits absence: 'no strategic reading'",
-     "passage": "pricing toward smaller committed steps, and whether to fund growth from operating cash rather than debt"
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "mix, and nothing in what this run retrieved contradicts that"
     },
     {
      "dimension": "market_belief",
@@ -4919,37 +4916,37 @@
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "The decision in front of management is what to charge, and for what, without losing more volume than the price gains? Causal confidence: BOUNDED \u2014 supported in direction, not in size"
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
+     "passage": ""
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
      "score": 6,
      "why": "present but not specific to this company",
-     "passage": "change our mind: a disclosure in pricing and promotional actions showing the mechanism moving in the opposite direction would overturn this reading"
+     "passage": "show it is wrong"
     },
     {
      "dimension": "mve",
      "surface": "brief",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Minimum viable experiment: run the change on one segment or one cohort, hold the rest constant, and read volume against the unchanged group for one full cycle \u2014 that isolates the effect without committing the whole book"
+     "passage": "cheapest way to find out Measure, for NIKE, Inc"
     },
     {
      "dimension": "presentation",
      "surface": "slides",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "NIKE, Inc. \u2014 presentation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NIKE, Inc. \u2014 presentation The central strategic view The decision in front of management is what to charge, and for what, without losing more volume than the price gains? Confidence: BOUNDED \u2014 supported in direction, not "
+     "passage": "NIKE, Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NIKE, Inc. NKE \u00b7 USA \u00b7 nike.com \u00b7 SEC CIK 320187 NIKE, Inc. is a consumer business that runs on branded product sold through retail and direct channels, where the brand carries pricing power the product alone"
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
-     "score": 3,
-     "why": "surface admits absence: 'no strategic reading'",
-     "passage": "NIKE, Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NIKE, Inc. NIKE designs, develops, markets and sells athletic footwear, apparel, equipment, accessories and services worldwide. The answer No strategic reading of NIKE, Inc. cleared the evidence bar, so none is asserted h"
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Strategic Intelligence \u2014 NIKE, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } NIKE, Inc. Full analysis \u2014 the intelligence behind the d"
     },
     {
      "dimension": "history",
@@ -4973,17 +4970,17 @@
      "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
     }
    ],
-   "core_mean": 8.5,
-   "core_min": 3,
+   "core_mean": 8.2,
+   "core_min": 0,
    "core_unmeasured": [],
-   "all_mean": 6.75,
-   "sha": "cb9e6b7",
-   "first_useful": 177
+   "all_mean": 7.1,
+   "sha": "16bc5af",
+   "first_useful": 212
   },
   {
    "company": "NVIDIA Corporation",
-   "deployed_sha": "8fd6c82",
-   "outcome": "RETRIEVAL_TEMPORARILY_UNAVAILABLE",
+   "deployed_sha": "ea55870",
+   "outcome": "FULL_ANALYSIS",
    "dimensions": [
     {
      "dimension": "intro",
@@ -5025,14 +5022,14 @@
      "surface": "full",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "rategy, newsroom or leadership statements Pages read SEC 10-K (2026-02-25) www"
+     "passage": "rategic Intelligence \u2014 NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo "
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": 0,
-     "why": "no passage for this dimension on the surface",
-     "passage": ""
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "volume or through price, because only one of those recovers with the cycle, and nothing in what this run retrieved contradicts that"
     },
     {
      "dimension": "market_belief",
@@ -5072,37 +5069,37 @@
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "The decision in front of management is how much capacity to commit, and when, given that the commitment to manufacturing and foundry cost is made before the unit volume it is meant to serve? Causal confidence: BOUNDED \u2014 supported in direction, not in size"
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
+     "passage": ""
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
      "score": 6,
      "why": "present but not specific to this company",
-     "passage": "change our mind: a disclosure in capacity and capital expenditure announcements showing the mechanism moving in the opposite direction would overturn this reading"
+     "passage": "show it is wrong"
     },
     {
      "dimension": "mve",
      "surface": "brief",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Minimum viable experiment: run the change on one segment or one cohort, hold the rest constant, and read unit volume against the unchanged group for one full cycle \u2014 that isolates the effect without committing the whole book"
+     "passage": "cheapest way to find out Measure, for NVIDIA Corporation, whether longer cycles concentrated in the smallest deal band \u2014 the one observation on which \u201cpricing friction rather than demand\u201d and \u201cactivation, not acquisition\u201d predict different things"
     },
     {
      "dimension": "presentation",
      "surface": "slides",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What "
+     "passage": "NVIDIA Corporation \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NVIDIA Corporation NVDA \u00b7 USA \u00b7 nvidia.com \u00b7 SEC CIK 1045810 NVIDIA Corporation is a semiconductor business that runs on design and manufacture of a physical product sold into a capacity-constrained s"
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Limited analysis of NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Limited analysis of NVIDIA Corporation Some kinds of evidence are missing, and there are places left to look. Rather than show a briefing that looks complete and is not, here is exactly where it stands. What "
+     "passage": "Strategic Intelligence \u2014 NVIDIA Corporation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } NVIDIA Corporation Full analysis \u2014 the intellige"
     },
     {
      "dimension": "history",
@@ -5116,7 +5113,7 @@
      "surface": "qa",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Low, by construction Ask a follow-up Your question Ask Suggested: What doe"
+     "passage": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NVIDIA Corporation What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Ask a follow-up Your question Ask Suggested: What does this company do? Wh"
     },
     {
      "dimension": "step6",
@@ -5126,12 +5123,12 @@
      "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
     }
    ],
-   "core_mean": 9.2,
-   "core_min": 6,
+   "core_mean": 8.2,
+   "core_min": 0,
    "core_unmeasured": [],
-   "all_mean": 7.3,
-   "sha": "8fd6c82",
-   "first_useful": 162
+   "all_mean": 7.1,
+   "sha": "ea55870",
+   "first_useful": 227
   },
   {
    "company": "NextEra Energy, Inc.",
@@ -5441,7 +5438,7 @@
   },
   {
    "company": "Pfizer Inc.",
-   "deployed_sha": "cb9e6b7",
+   "deployed_sha": "61a7981",
    "outcome": "FULL_ANALYSIS",
    "dimensions": [
     {
@@ -5482,16 +5479,16 @@
     {
      "dimension": "macro",
      "surface": "full",
-     "score": 3,
-     "why": "surface admits absence: 'no strategic reading'",
-     "passage": "rategic reading of Pfizer Inc"
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "rategic Intelligence \u2014 Pfizer Inc"
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": 3,
-     "why": "surface admits absence: 'no strategic reading'",
-     "passage": "price move records what the market expects, not whether the strategy is working"
+     "score": 6,
+     "why": "present but not specific to this company",
+     "passage": "pricing friction rather than demand\u201d and \u201cactivation, not acquisition\u201d predict different things"
     },
     {
      "dimension": "market_belief",
@@ -5531,37 +5528,37 @@
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "The decision in front of management is which development programmes to fund and which to stop, given how long it takes a programme to reach approved products and indications? Causal confidence: BOUNDED \u2014 supported in direction, not in size"
+     "score": 0,
+     "why": "no passage for this dimension on the surface",
+     "passage": ""
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
      "score": 6,
      "why": "present but not specific to this company",
-     "passage": "change our mind: a disclosure in regulatory decisions and submissions showing the mechanism moving in the opposite direction would overturn this reading"
+     "passage": "show it is wrong"
     },
     {
      "dimension": "mve",
      "surface": "brief",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Minimum viable experiment: run the change on one segment or one cohort, hold the rest constant, and read approved products and indications against the unchanged group for one full cycle \u2014 that isolates the effect without committing the whole book"
+     "passage": "cheapest way to find out Measure, for Pfizer Inc"
     },
     {
      "dimension": "presentation",
      "surface": "slides",
      "score": 10,
      "why": "company-specific and substantiated",
-     "passage": "Pfizer Inc. \u2014 presentation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Pfizer Inc. \u2014 presentation The central strategic view The decision in front of management is which development programmes to fund and which to stop, given how long it takes a programme to reach approved products and indi"
+     "passage": "Pfizer Inc. \u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction Pfizer Inc. PFE \u00b7 USA \u00b7 pfizer.com \u00b7 SEC CIK 78003 Pfizer Inc. is a healthcare business that runs on a product or service that may only be sold once a regulator permits it and a payer agrees to pay for it. I"
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
-     "score": 3,
-     "why": "surface admits absence: 'no strategic reading'",
-     "passage": "Pfizer Inc. \u2014 the decision Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Pfizer Inc. Financial Statements and Supplementary Data in this Form 10-K. The answer No strategic reading of Pfizer Inc. cleared the evidence bar, so none is asserted here. That absence is itself the finding: no curated"
+     "score": 10,
+     "why": "company-specific and substantiated",
+     "passage": "Strategic Intelligence \u2014 Pfizer Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } Pfizer Inc. Full analysis \u2014 the intelligence behind the"
     },
     {
      "dimension": "history",
@@ -5585,12 +5582,12 @@
      "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
     }
    ],
-   "core_mean": 8.5,
-   "core_min": 3,
+   "core_mean": 8.2,
+   "core_min": 0,
    "core_unmeasured": [],
-   "all_mean": 6.75,
-   "sha": "cb9e6b7",
-   "first_useful": 416
+   "all_mean": 7.1,
+   "sha": "61a7981",
+   "first_useful": 280
   },
   {
    "company": "QUALCOMM Incorporated",
@@ -6840,156 +6837,167 @@
   },
   {
    "company": "The Goldman Sachs Group, Inc.",
-   "deployed_sha": "cb9e6b7",
-   "outcome": "FULL_ANALYSIS",
+   "deployed_sha": "16bc5af",
+   "outcome": "NO_OUTCOME",
    "dimensions": [
     {
      "dimension": "intro",
      "surface": "intro",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "\u2014 introduction"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "business_model",
      "surface": "intro",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "is a financial regulated business that runs on earnings from a balance sheet or from a transaction network \u2014 spread and fees on volume the firm intermediates"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "revenue_drivers",
      "surface": "story",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "Where the money actually comes from Revenue is decided by spread on assets and liabilities, transaction and fee volume and balance or asset growth, and whether that revenue becomes margin is decided by cost of funds and credit and fraud losses"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "margin_drivers",
      "surface": "story",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "becomes margin is decided by cost of funds and credit and fraud losses"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "capital_intensity",
      "surface": "brief",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "macro",
      "surface": "full",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "rategic Intelligence \u2014 The Goldman Sachs Group, Inc"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "micro",
      "surface": "full",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "prices as though this is already true, without waiting for an outside source to confirm it"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "market_belief",
      "surface": "brief",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "market's current belief That The Goldman Sachs Group, Inc"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "belief_challenge",
      "surface": "brief",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "the plainer account is right: one segment is aspirational marketing rather than real revenue"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "competition",
      "surface": "intro",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "contested directly by Banking Supervision and Compensation Practices, and customers can substitute non-bank providers reaching the customer directly"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "adversary",
      "surface": "brief",
-     "score": 0,
-     "why": "no passage for this dimension on the surface",
+     "score": null,
+     "why": "surface did not render",
      "passage": ""
     },
     {
      "dimension": "impossible_hypothesis",
      "surface": "brief",
-     "score": 0,
-     "why": "no passage for this dimension on the surface",
+     "score": null,
+     "why": "surface did not render",
      "passage": ""
     },
     {
      "dimension": "recommendation",
      "surface": "brief",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "The choice: Commit to the reading now versus hold and verify first"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "falsifier",
      "surface": "brief",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "show it is wrong"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "mve",
      "surface": "brief",
-     "score": 6,
-     "why": "present but not specific to this company",
-     "passage": "One check separates them: evidence that one named segment contributes negligible revenue"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "presentation",
      "surface": "slides",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "The Goldman Sachs Group, Inc. \u2014 presentation Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Goldman Sachs Group, Inc. \u2014 presentation The central strategic view The Goldman Sachs Group, Inc. appears to be selling to a second kind of buyer that behaves nothing like the first. The Goldman Sac"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "full_analysis",
      "surface": "full",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "Strategic Intelligence \u2014 The Goldman Sachs Group, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo .challenge h2{margin:0 0 .35rem;font-size:1.05rem} .challenge .challenge .challenge .challenge .challenge @media (max-width:640px){.challenge .challenge } The Goldman Sachs Group, Inc. Full an"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "history",
      "surface": "history",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "Better strategy"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "qa",
      "surface": "qa",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "What should management do? Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo The Goldman Sachs Group, Inc. What should management do? Do not act on this reading. Re-run once the market engine publishes a snapshot this side will read. Evidence Strongest. \u201c\u2026on our balance sheet to a scaled third-pa"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     },
     {
      "dimension": "step6",
      "surface": "connect",
-     "score": 10,
-     "why": "company-specific and substantiated",
-     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone"
+     "score": null,
+     "why": "surface did not render",
+     "passage": ""
     }
    ],
-   "core_mean": 9.2,
-   "core_min": 6,
-   "core_unmeasured": [],
-   "all_mean": 7.4,
-   "sha": "cb9e6b7",
-   "first_useful": 201
+   "core_mean": null,
+   "core_min": null,
+   "core_unmeasured": [
+    "business_model",
+    "revenue_drivers",
+    "margin_drivers",
+    "market_belief",
+    "competition",
+    "recommendation",
+    "full_analysis",
+    "presentation",
+    "history",
+    "qa"
+   ],
+   "all_mean": null,
+   "sha": "16bc5af",
+   "first_useful": null
   },
   {
    "company": "The Home Depot, Inc.",
@@ -7990,9 +7998,7 @@
    "FALSE_SCARCITY"
   ],
   "NIKE, Inc.": [],
-  "NVIDIA Corporation": [
-   "OPERATIONAL_FAILURE"
-  ],
+  "NVIDIA Corporation": [],
   "NextEra Energy, Inc.": [],
   "PepsiCo, Inc.": [],
   "Pfizer Inc.": [],
@@ -8024,7 +8030,17 @@
   "Stripe, Inc.": [],
   "Texas Instruments Incorporated": [],
   "The Coca-Cola Company": [],
-  "The Goldman Sachs Group, Inc.": [],
+  "The Goldman Sachs Group, Inc.": [
+   "RUN_NOT_READY",
+   "MISSING_ROUTE",
+   "THIN_ROUTE",
+   "THIN_ROUTE",
+   "THIN_ROUTE",
+   "THIN_ROUTE",
+   "THIN_ROUTE",
+   "THIN_ROUTE",
+   "QA_INCOMPLETE"
+  ],
   "The Home Depot, Inc.": [
    "FALSE_SCARCITY"
   ],
