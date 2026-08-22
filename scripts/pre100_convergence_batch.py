@@ -83,6 +83,71 @@ def quota_blocked(row: dict) -> bool:
     return any(m in blob for m in QUOTA_MARKERS)
 
 
+class BatchLock:
+    """One orchestrator at a time. §1: ACTIVE_BATCH_COUNT <= 1.
+
+    The previous execution ran THREE batches against one IP because nothing
+    stopped a second `nohup` from starting. That contaminated the evidence
+    (one worker hit a directory another had moved), consumed the demo quota,
+    and produced HTTP 500s that could not be attributed to the product.
+
+    O_EXCL on a lock file carrying the holder's PID: a stale lock whose PID
+    is gone is reclaimed, and a live one refuses.
+    """
+
+    def __init__(self, path) -> None:
+        self.path = pathlib.Path(path)
+        self.acquired = False
+
+    def _holder(self):
+        try:
+            return int(self.path.read_text().split()[0])
+        except Exception:                                   # noqa: BLE001
+            return None
+
+    @staticmethod
+    def _alive(pid: int) -> bool:
+        try:
+            os.kill(pid, 0)
+            return True
+        except (OSError, TypeError):
+            return False
+
+    def acquire(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        holder = self._holder()
+        # NO SAME-PID ESCAPE HATCH. A `holder != os.getpid()` clause was here
+        # as re-entrancy, and it grants a SECOND lock to the same process --
+        # which is exactly the invariant this exists to hold. A live holder
+        # blocks, whoever it is.
+        if holder is not None and self._alive(holder):
+            return False
+        if holder is not None:
+            self.path.unlink(missing_ok=True)          # stale, reclaim it
+        try:
+            fd = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            return False
+        with os.fdopen(fd, "w") as fh:
+            fh.write(f"{os.getpid()} {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n")
+        self.acquired = True
+        return True
+
+    def release(self):
+        if self.acquired:
+            self.path.unlink(missing_ok=True)
+            self.acquired = False
+
+
+def register(outdir: pathlib.Path, **fields) -> None:
+    """§1F. Who is doing what, on disk, so a later session can see it."""
+    path = outdir / "workers.jsonl"
+    fields.setdefault("pid", os.getpid())
+    fields.setdefault("at", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    with path.open("a") as fh:
+        fh.write(json.dumps(fields) + "\n")
+
+
 def _slug(name: str) -> str:
     """EXACTLY the journey harness's slug.
 
@@ -220,6 +285,11 @@ def main(argv=None) -> int:
                 fh.write(line + "\n")
             print(line, flush=True)
 
+    lock = BatchLock(outdir.parent / ".batch.lock")
+    if not lock.acquire():
+        print(f"REFUSING: another batch holds {lock.path} "
+              f"(pid {lock._holder()}). §1: ACTIVE_BATCH_COUNT <= 1.")
+        return 3
     sha = deployed_sha()
     if not sha:
         log("REFUSING: /version did not answer, so the SHA under test is "
@@ -279,6 +349,8 @@ def main(argv=None) -> int:
             if stop.is_set():
                 return
             log(f"START {name}")
+            register(outdir, harness_run_id=batch_id, company=name,
+                     deployed_sha=sha, state="START")
             started = time.time()
             try:
                 row = J.run_company(name, str(company.get("cik") or ""),
@@ -354,6 +426,7 @@ def main(argv=None) -> int:
     progress()
     log(f"BATCH END {batch_id} captured={len(results)} "
         f"stopped={stop.is_set()}")
+    lock.release()
     return 0
 
 

@@ -200,6 +200,8 @@ def run_company(name: str, cik: str = "", ticker: str = "",
         low = text_of(page).lower()
         out["error"] = f"analyze did not open a run (HTTP {status})"
         out["entry_text"] = text_of(page)[:600]
+        out["entry_status"] = status
+        out["entry_body"] = page[:20000]
         out["reliability"]["quota_block"] = ("limit" in low or "quota" in low
                                              or status == 429)
         out["reliability"]["connection_reset"] = len(j.transport_errors)
@@ -260,6 +262,15 @@ def run_company(name: str, cik: str = "", ticker: str = "",
         pages[step] = {"status": status, "url": surl, "chars": len(body),
                        "absence": sorted({a for a in ABSENCE
                                           if a in body.lower()})}
+        # §2.6. EVERY NON-2xx KEEPS ITS BODY.
+        #
+        # Nine surfaces answered HTTP 500 on two live runs and all that
+        # survived was the integer. The body carries the product's own error
+        # reference, which is the only thread back to the server log, and
+        # `text_of` had already discarded it by the time anyone looked.
+        if not str(status).startswith("2"):
+            pages[step]["body"] = raw[:20000]
+            pages[step]["text"] = body[:4000]
     out["steps"] = pages
 
     intro, full, story = texts["intro"], texts["full"], texts["story"]
