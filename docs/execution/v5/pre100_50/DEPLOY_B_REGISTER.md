@@ -251,3 +251,44 @@ Smallest next repair: in the named-alternative extractor, require the
 candidate to appear elsewhere in the filing as a grammatical subject or with a
 corporate suffix, and drop it otherwise. Prevalence ~6/50; impact is high per
 occurrence because it lands on the competition dimension a reader trusts most.
+
+---
+
+## D4 LIVE REPROOF RESULT — the gate discriminates, and Qualcomm is a TRUE POSITIVE
+
+Measured on the deployed build, same journey, before (`589518f`) and after
+(`336311b`), counting every surface that renders the clause:
+
+| company | before | after | correct? |
+|---|---|---|---|
+| NVIDIA | intro, slides | **none** | yes — its filing names no second-hand mechanism |
+| Micron | intro, slides, full, brief, story | **none** | yes — same |
+| QUALCOMM | intro, slides | intro, slides | **yes, and this is the gate working** |
+
+Qualcomm looked at first like a partial failure. It is not. Its own 10-K says,
+three separate times, that a shift in consumer demand "in favor of
+**refurbished or secondhand devices**" would reduce its revenues and margins.
+Qualcomm's chips go into handsets, and second-hand handsets displacing new
+ones is a real substitution the company itself names as a risk. The gate found
+that evidence and kept the alternative, which is exactly what it was built to
+do — the difference between Qualcomm and Micron is a fact about their filings,
+not a bug.
+
+Micron's alternatives section was checked for over-correction and is
+byte-identical before and after apart from the removed clause: it still
+carries "Keeping the existing fleet running longer", correctly labelled "Not a
+company — the customer doing nothing, read from how this business model works
+rather than from a retrieved source". The dimension was not emptied.
+
+### Residual, smaller defect: the retained clause borrows template wording
+
+Qualcomm's substitution is real but renders as "rental and used equipment in
+place of a new purchase" — capital-equipment language inherited from the
+`DESIGN_AND_MANUFACTURE` row. The company's own words are "refurbished or
+secondhand devices". The mechanism is right and the sentence is not its own.
+
+Smallest next repair: when the gate finds the evidence, render the clause from
+the matched span rather than from the table's phrasing — the same principle
+already applied elsewhere in this codebase, that the subject's own words win
+over the composed fallback. Low severity: the claim is now true for every
+company that carries it; only the phrasing is generic.
