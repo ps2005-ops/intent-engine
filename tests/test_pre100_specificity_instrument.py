@@ -180,3 +180,37 @@ def test_the_identifier_strip_does_not_erase_real_numbers():
                        "the 2026 renewal cohort settles at 63% gross margin"),
     ])
     assert report["byte_identical_count"] == 0
+
+
+# --- the absence cap must fire on a real admission, and only then ---------
+
+def test_a_surface_that_gave_up_is_still_capped():
+    """POSITIVE CONTROL. Loosening the rule must not switch it off."""
+    row = Q.score_dimension(
+        "market_belief", "brief", r"(market)",
+        text="No market expectation has been established for this company.",
+        company="Adobe Inc.")
+    assert row["score"] == 3
+
+
+def test_the_repaired_qa_refusal_is_still_caught_if_it_returns():
+    row = Q.score_dimension(
+        "recommendation", "brief", r"(Do not act)",
+        text="Do not act on this reading. Re-run once the market engine "
+             "publishes a snapshot this side will read.",
+        company="NIKE, Inc.")
+    assert row["score"] == 3
+
+
+def test_a_provenance_qualifier_does_not_cap_a_substantive_surface():
+    """NEGATIVE CONTROL, from the live page. "read from the business model,
+    not retrieved" is the product distinguishing a DERIVED belief from a
+    retrieved one -- and it capped ten substantive Microsoft answers at 3."""
+    body = ("Microsoft Corporation is a software platform business. "
+            "That the contest it has to win is against the customer's own "
+            "engineering: read from the business model, not retrieved. "
+            ) + ("Detail about segments, pricing and renewal economics. " * 30)
+    assert len(body) >= 800
+    row = Q.score_dimension("qa", "qa", ".", text=body,
+                            company="Microsoft Corporation")
+    assert row["score"] >= 8, row

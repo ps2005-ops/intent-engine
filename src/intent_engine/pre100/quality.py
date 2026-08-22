@@ -167,13 +167,30 @@ _WORD = re.compile(r"[A-Za-z][A-Za-z'\-]+")
 _QUANTITY = re.compile(r"\d[\d,.]*\s*(%|bn|bps|billion|million|x\b)|\$\s?\d")
 _PROPER = re.compile(r"\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})*\b")
 
-#: Copy that means the product gave up. Its presence caps a dimension.
+#: Copy that means the product GAVE UP. Its presence caps a dimension.
+#:
+#: FULL ADMISSIONS ONLY. "not retrieved" was in this list, and it fired on
+#: Microsoft's live Q&A -- inside the sentence "read from the business model,
+#: not retrieved", which is the product correctly distinguishing a DERIVED
+#: belief from a retrieved one. Ten substantive, company-specific answers
+#: were capped at 3 by one honest provenance qualifier.
+#:
+#: A fragment that can appear inside a disclaimer is not an admission. Each
+#: entry here has to be unusable as anything but a statement that nothing
+#: was produced.
 _ABSENCE = (
-    "no information available", "not retrieved", "unable to determine",
+    "no information available", "unable to determine",
     "no strategic reading", "no reading cleared", "no estimate retrieved",
     "could not be completed", "analysis failed", "no history available",
     "cleared the evidence bar", "no market expectation",
+    "do not act on this reading",
 )
+
+#: Below this a surface is short enough that one admission IS the surface.
+#: Above it, an incidental phrase inside a long substantive page is not the
+#: page giving up, and capping the whole dimension on it measures the phrase
+#: rather than the product.
+_ADMISSION_DOMINATES_BELOW = 800
 
 
 def _text(company_dir: pathlib.Path, surface: str) -> str:
@@ -235,7 +252,7 @@ def score_dimension(key: str, surface: str, cue: str, *, text: str,
         passage = match.group(0)
     low = text.lower()
     admitted = [a for a in _ABSENCE if a in low]
-    if admitted:
+    if admitted and len(text) < _ADMISSION_DOMINATES_BELOW:
         return {"dimension": key, "surface": surface, "score": 3,
                 "why": f"surface admits absence: {admitted[0]!r}",
                 "passage": passage[:300]}
