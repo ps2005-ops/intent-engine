@@ -164,3 +164,17 @@ def test_a_complete_capture_counts(tmp_path):
     (d / "intro.txt").write_text("x")
     (d / "run.json").write_text("{}")
     assert B.already_captured(tmp_path, "Adobe Inc.") is True
+
+
+def test_a_run_that_never_opened_still_persists_its_body():
+    """The first version of the NO-RUN branch logged and `continue`d, which
+    discarded the body it exists to keep. Three empty directories proved it
+    on the first clean canary."""
+    source = pathlib.Path(B.__file__).read_text()
+    branch = source[source.index('if row.get("error") and not row.get("run_id")'):]
+    # THE STATEMENT, NOT THE WORD. The branch's own comment contains
+    # "`continue`d", so slicing at the bare word cut the branch off inside
+    # the comment and the assertion read four lines of prose.
+    branch = branch[:branch.index("\n                continue")]
+    assert '"run.json"' in branch and "write_manifest" in branch, (
+        "a failed /analyze is discarded before its body is written")

@@ -285,10 +285,13 @@ def main(argv=None) -> int:
                 fh.write(line + "\n")
             print(line, flush=True)
 
-    lock = BatchLock(outdir.parent / ".batch.lock")
-    if not lock.acquire():
-        print(f"REFUSING: another batch holds {lock.path} "
-              f"(pid {lock._holder()}). §1: ACTIVE_BATCH_COUNT <= 1.")
+    # NAMED `batch_lock`, not `lock`: `lock` is already the threading.Lock
+    # that `log()` uses, and shadowing it made every log call raise
+    # AttributeError: __enter__ on the first line of the batch.
+    batch_lock = BatchLock(outdir.parent / ".batch.lock")
+    if not batch_lock.acquire():
+        print(f"REFUSING: another batch holds {batch_lock.path} "
+              f"(pid {batch_lock._holder()}). §1: ACTIVE_BATCH_COUNT <= 1.")
         return 3
     sha = deployed_sha()
     if not sha:
@@ -369,6 +372,16 @@ def main(argv=None) -> int:
             # scored, which puts a zero on the matrix that belongs to the
             # service rather than to the company.
             if row.get("error") and not row.get("run_id"):
+                # PERSIST BEFORE CONTINUING. The first version of this branch
+                # logged the failure and `continue`d -- discarding the very
+                # body it was written to keep, which is the defect it claims
+                # to fix. A failed capture is the one you most need the bytes
+                # for; three empty directories proved it.
+                failed_dir = outdir / _slug(name)
+                failed_dir.mkdir(parents=True, exist_ok=True)
+                (failed_dir / "run.json").write_text(
+                    json.dumps(row, indent=1), "utf-8")
+                write_manifest(failed_dir, name, row, sha)
                 log(f"NO RUN  {name}: {row['error']}")
                 with lock:
                     failures.append(name)
@@ -426,7 +439,7 @@ def main(argv=None) -> int:
     progress()
     log(f"BATCH END {batch_id} captured={len(results)} "
         f"stopped={stop.is_set()}")
-    lock.release()
+    batch_lock.release()
     return 0
 
 
