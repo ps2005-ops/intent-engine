@@ -140,3 +140,114 @@ What the next cycle must measure FIRST: the distribution of approved-set size
 and the wall-clock split between discover / fetch / compose. If compose is a
 large fraction of the 165s, two compositions is the wrong shape and the early
 reading needs a cheaper producer than the full one.
+
+---
+
+## D5 — recommendation collapse: cause located, NOT repaired this session
+
+MEASURED over the 50-company baseline. 18 of 50 briefs render the bounded
+fallback sentence:
+
+> "What to do now: move on **{LEVER}** at a size that can be reversed inside
+> one planning cycle, and instrument it so the result is readable before the
+> next commitment."
+
+10 distinct levers across those 18, and they cluster by sector, not company:
+
+| lever | n | companies |
+|---|---|---|
+| pipeline and development priorities | 4 | Eli Lilly, Johnson & Johnson, Merck, Pfizer |
+| pricing of assets and liabilities | 3 | Bank of America, JPMorgan, Morgan Stanley |
+| production rate | 2 | Deere, GE Aerospace |
+| capital programme and sequencing | 2 | NextEra, Union Pacific |
+| pricing and promotion | 2 | Nike, PepsiCo |
+
+Four pharmaceutical companies with materially different economics — Lilly's
+incretin concentration, J&J's MedTech half, Merck's Keytruda dependence,
+Pfizer's post-COVID base — receive a byte-identical recommendation. By §5's
+test (same sentence, same action, same mechanism, economically different
+companies) that is a defect.
+
+### Where it comes from, and why it is not a one-line fix
+
+`strategic_read._bounded_action` already has the right precedence:
+
+```python
+action_now = recommended or _action_now(profile, selection, lever)
+```
+
+`recommended` is `run_decision.recommended_next_move` — derived from THIS
+run's evidence — and it wins whenever it exists. It exists for 32 of 50
+companies. The collapse is entirely in the fallback taken by the other 18.
+
+The obvious repair looked like a one-line inversion: `_action_now` re-reads
+`profile.primary_management_levers[0]` and discards the `lever` it was handed,
+which is backwards from the rule stated three lines above it. But the handed
+`lever` is `_ARCHETYPE_LEVER.get(archetype)` — **also a class prior**. Every
+input available to this fallback is class-keyed, so inverting the precedence
+would swap one sector constant for another, change the wording, and close
+nothing. That is a cosmetic change dressed as a repair, and it would have
+looked like progress in the next matrix.
+
+### The smallest real repair, for the next cycle
+
+Raise the hit rate of `run_decision.recommended_next_move` — the only
+company-derived action in this path — rather than improving the fallback.
+That is a decision-producer change and needs its own measurement: which of the
+18 runs reached no `recommended_next_move`, and what was missing from each.
+
+Until then the fallback should say what it is. It currently reads as a
+recommendation derived from this company; it is a reading of its business
+model. This codebase already distinguishes those two elsewhere ("read from the
+business model, not retrieved") and the same honesty belongs here.
+
+NOT changed in this session: it alters customer-visible copy on 18 of 50
+companies and there is no deploy left to prove it live.
+
+---
+
+## D6 — named alternatives include things that are not companies (found, NOT repaired)
+
+Found on Amazon during the D4 reproof, and confirmed **pre-existing**: the
+line is byte-identical on `589518f` and `336311b`, so D4 did not cause it.
+
+> "The alternatives this company's own evidence names are **Joint Venture**.
+> The closest is **Joint Venture** — competes for the same buyer with a
+> comparable product."
+
+"Joint Venture" is a corporate-structure noun lifted from Amazon's own filing,
+presented to a chief executive as Amazon's closest competitor.
+
+Prevalence across the baseline 50, counting every rendered
+"own evidence names are …" line:
+
+| extracted | company | verdict |
+|---|---|---|
+| Conagra Brands, Hormel Foods, Keurig Dr Pepper, Link Snacks | (snacks) | good |
+| Keurig Dr Pepper Inc, Danone S… | (beverage) | good, truncated |
+| Visa Direct, Visa B… | Visa | own products, truncated |
+| Joint Venture | Amazon | **corporate structure** |
+| The buyer | ×3 | **a role, not a firm** |
+| Permian Basin | Exxon | **a place** |
+| Sierra Nevada Corporation, L… | (aero) | good, truncated |
+| LM | (aero) | **fragment** |
+
+So roughly six of the ten rendered lines carry a degraded name — a generic
+noun, a role, a region, or a truncation — and two are genuinely good.
+
+§13 counts "unrelated competitors presented as direct" a critical defect, and
+"the closest is Joint Venture" meets it.
+
+NOT repaired here, deliberately. The obvious fix is a stoplist of generic
+nouns, and this session has already shown twice why that is the wrong shape:
+a stoplist let "Conditions" through as a proper noun in the scorer, and a
+sector table put used equipment in front of chip buyers. The right
+discriminator is the same one the scorer needed — whether the token is a NAME
+rather than a title-cased common-noun phrase — and that needs its own
+measurement over the 50 rendered lines plus a positive control that keeps
+"Keurig Dr Pepper" and "Hormel Foods".
+
+Smallest next repair: in the named-alternative extractor, require the
+candidate to appear elsewhere in the filing as a grammatical subject or with a
+corporate suffix, and drop it otherwise. Prevalence ~6/50; impact is high per
+occurrence because it lands on the competition dimension a reader trusts most.

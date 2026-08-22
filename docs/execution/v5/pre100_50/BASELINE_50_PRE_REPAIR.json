@@ -34,7 +34,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -96,8 +96,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -150,9 +150,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Adobe Inc. is a software platform business that run"
    }
   ],
-  "core_mean": 8.8,
+  "core_mean": 9.2,
   "core_min": 6,
-  "mean": 9.0
+  "mean": 9.2
  },
  "advanced_micro_devices_inc": {
   "company": "Advanced Micro Devices, Inc.",
@@ -251,8 +251,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -305,9 +305,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Advanced Micro Devices, Inc. is a semiconductor bus"
    }
   ],
-  "core_mean": 9.6,
-  "core_min": 6,
-  "mean": 9.6
+  "core_mean": 10.0,
+  "core_min": 10,
+  "mean": 9.8
  },
  "alphabet_inc": {
   "company": "Alphabet Inc.",
@@ -344,7 +344,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -499,7 +499,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -871,8 +871,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -925,9 +925,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Applied Materials, Inc. is a semiconductor business"
    }
   ],
-  "core_mean": 8.8,
+  "core_mean": 9.2,
   "core_min": 6,
-  "mean": 9.2
+  "mean": 9.4
  },
  "bank_of_america_corporation": {
   "company": "Bank of America Corporation",
@@ -1181,8 +1181,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -1235,9 +1235,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Broadcom Inc. is a semiconductor business that runs"
    }
   ],
-  "core_mean": 8.8,
+  "core_mean": 9.2,
   "core_min": 6,
-  "mean": 9.2
+  "mean": 9.4
  },
  "caterpillar_inc": {
   "company": "Caterpillar Inc.",
@@ -2731,8 +2731,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -2785,9 +2785,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Freeport-McMoRan Inc. is a materials energy busines"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.4
+  "mean": 9.6
  },
  "ge_aerospace": {
   "company": "GE Aerospace",
@@ -2824,7 +2824,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -2979,7 +2979,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -3041,8 +3041,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -3095,9 +3095,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Honeywell International Inc. is an industrial busin"
    }
   ],
-  "core_mean": 8.2,
+  "core_mean": 8.6,
   "core_min": 0,
-  "mean": 8.7
+  "mean": 8.9
  },
  "intel_corporation": {
   "company": "Intel Corporation",
@@ -3196,8 +3196,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -3250,9 +3250,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Intel Corporation is a semiconductor business that "
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.4
+  "mean": 9.6
  },
  "johnson_johnson": {
   "company": "Johnson & Johnson",
@@ -3289,7 +3289,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -3599,7 +3599,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -3909,7 +3909,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -4281,8 +4281,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -4335,9 +4335,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Micron Technology, Inc. is a semiconductor business"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.4
+  "mean": 9.6
  },
  "microsoft_corporation": {
   "company": "Microsoft Corporation",
@@ -4436,8 +4436,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -4490,9 +4490,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Microsoft Corporation is a software platform busine"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.4
+  "mean": 9.6
  },
  "morgan_stanley": {
   "company": "Morgan Stanley",
@@ -4646,6 +4646,161 @@
    }
   ],
   "core_mean": 8.8,
+  "core_min": 6,
+  "mean": 9.4
+ },
+ "nextera_energy_inc": {
+  "company": "NextEra Energy, Inc.",
+  "dimensions": [
+   {
+    "dimension": "intro",
+    "surface": "intro",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "\u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NextEra Energy, Inc. NEE \u00b7 USA \u00b7 nexteraenergy.com \u00b7 SEC CIK 0000753308 NextEra Energy, Inc. is an infrastructure business that runs on long-lived physical assets earning under contracts or a regulated rate base, where "
+   },
+   {
+    "dimension": "business_model",
+    "surface": "intro",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "SEC CIK 0000753308 NextEra Energy, Inc. is an infrastructure business that runs on long-lived physical assets earning under contracts or a regulated rate base, where the asset is the franchise. Its position is contested less by a named firm than by the alternatives its customers already have: custom"
+   },
+   {
+    "dimension": "revenue_drivers",
+    "surface": "story",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "Where the money actually comes from Revenue is decided by contracted or regulated volume, tariff or rate and asset base in service, and whether that revenue becomes margin is decided by financing cost and depreciation. Why growth and profitability are one question HIGH and financed: the cost base is"
+   },
+   {
+    "dimension": "margin_drivers",
+    "surface": "story",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "becomes margin is decided by financing cost and depreciation. Why growth and profitability are one question HIGH and financed: the cost base is capital and interest, so the cost of money is an operating variable. What the market rewards It sells into few operators, high barriers, and returns set as "
+   },
+   {
+    "dimension": "capital_intensity",
+    "surface": "brief",
+    "score": 6,
+    "why": "present but not specific to this company",
+    "passage": "capital programme and sequencing at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment. The recommendation What to do now: move on capital programme and sequencing at a size that can be reversed inside one planning cycle, and"
+   },
+   {
+    "dimension": "macro",
+    "surface": "full",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "rategic Intelligence \u2014 NextEra Energy, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. Full analysis \u2014 the intelligence behind the decision The answer A supported reading of NextEra Energy, Inc. exists and is set out on the Executive X-Ray. This run did not add enough "
+   },
+   {
+    "dimension": "micro",
+    "surface": "full",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "mix, and nothing in what this run retrieved contradicts that. What could break it Revenue growth holds while incremental margin falls \u2014 the shape of growth being bought rather than earned. The best competing explanation Growth is being bought. Spend is converting into revenue at a cost that the coho"
+   },
+   {
+    "dimension": "market_belief",
+    "surface": "brief",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "market's current belief That NextEra Energy, Inc.'s growth and margin can improve together for another year, because they just did. Inferred NextEra Energy, Inc.'s own filed results show growth accelerating and margin widening. Why it may be right A holder of this view is reading the record correctl"
+   },
+   {
+    "dimension": "belief_challenge",
+    "surface": "brief",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "Why it may be right A holder of this view is reading the record correctly as far as it goes: what it implies is the incremental margin on the next block of revenue, which is what separates operating leverage from a favourable mix, and nothing in what this run retrieved contradicts that. What could b"
+   },
+   {
+    "dimension": "competition",
+    "surface": "intro",
+    "score": 6,
+    "why": "present but not specific to this company",
+    "passage": "customers can substitute automation absorbing the task itself, and customers can internalise the work themselves \u2014 the counterparty self-supplying behind the meter, and the alternative may be delaying the purchase altogether \u2014 the contract not being renewed at the same terms. The strategic read The "
+   },
+   {
+    "dimension": "adversary",
+    "surface": "full",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "L0 \u2014 American Tower Corporation continues its current course and does not react. The move is below the threshold that would justify a response, or is not visible to it in time What follows: the full effect of committing the next increment of capital accrues, and contracted or regulated volume moves "
+   },
+   {
+    "dimension": "impossible_hypothesis",
+    "surface": "full",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "NextEra Energy, Inc.'s most important competitor may be its own customers deciding to do this themselves. It charges on interchange expense decreased $310 million in 2025 primarily related to lower amortization of deferred fuel costs, partly offset by higher fuel\u2026. A charge that scales with the cust"
+   },
+   {
+    "dimension": "economic_reasoning",
+    "surface": "full",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "incremental margin on the next block of revenue, which is what separates operating leverage from a favourable mix, and nothing in what this run retrieved contradicts that. What could break it Revenue growth holds while incremental margin falls \u2014 the shape of growth being bought rather than earned. T"
+   },
+   {
+    "dimension": "recommendation",
+    "surface": "brief",
+    "score": 6,
+    "why": "present but not specific to this company",
+    "passage": "The recommendation What to do now: move on capital programme and sequencing at a size that can be reversed inside one planning cycle, and instrument it so the result is readable before the next commitment. Why it matters: it is the parameter that decides whether committing the next increment of capi"
+   },
+   {
+    "dimension": "falsifier",
+    "surface": "brief",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "The market's current belief That NextEra Energy, Inc.'s growth and margin can improve together for another year, because they just did. Inferred NextEra Energy, Inc.'s own filed results show growth accelerating and margin widening. Why it may be right A holder of this view is reading the record corr"
+   },
+   {
+    "dimension": "mve",
+    "surface": "brief",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "cheapest way to find out Measure, for NextEra Energy, Inc., whether peers of the same class showing the same shape in the same quarters \u2014 the one observation on which \u201ca cycle is flattering the result\u201d and \u201cgrowth is being bought\u201d predict different things. The decision this changes move on capital p"
+   },
+   {
+    "dimension": "presentation",
+    "surface": "slides",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "\u2014 introduction Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Introduction NextEra Energy, Inc. NEE \u00b7 USA \u00b7 nexteraenergy.com \u00b7 SEC CIK 0000753308 NextEra Energy, Inc. is an infrastructure business that runs on long-lived physical assets earning under contracts or a regulated rate base, where "
+   },
+   {
+    "dimension": "full_analysis",
+    "surface": "full",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "Strategic Intelligence \u2014 NextEra Energy, Inc. Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo NextEra Energy, Inc. Full analysis \u2014 the intelligence behind the decision The answer A supported reading of NextEra Energy, Inc. exists and is set out on the Executive X-Ray. This run did not add enoug"
+   },
+   {
+    "dimension": "history",
+    "surface": "history",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "The line is revenue \u2014 contracted or rate-regulated, so it moves with the asset base rather than with demand. No operating-margin series was filed for every year, so this is the top line unadjusted. 2009 \u2014 as the record stood in February 2010 What was true then Observed By February 2010 the record sh"
+   },
+   {
+    "dimension": "qa",
+    "surface": "qa",
+    "score": null,
+    "why": "surface did not render",
+    "passage": ""
+   },
+   {
+    "dimension": "step6",
+    "surface": "connect",
+    "score": 10,
+    "why": "company-specific and substantiated",
+    "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish NextEra Energy, Inc. is an infrastructure business "
+   }
+  ],
+  "core_mean": 9.2,
   "core_min": 6,
   "mean": 9.4
  },
@@ -4994,7 +5149,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -5149,7 +5304,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -5459,7 +5614,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -5614,7 +5769,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -5676,8 +5831,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -5730,9 +5885,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Salesforce, Inc. is a software platform business th"
    }
   ],
-  "core_mean": 8.8,
+  "core_mean": 9.2,
   "core_min": 6,
-  "mean": 9.0
+  "mean": 9.2
  },
  "servicenow_inc": {
   "company": "ServiceNow, Inc.",
@@ -5769,7 +5924,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -5924,7 +6079,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -5986,8 +6141,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -6040,9 +6195,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Shopify Inc. is a software platform business that r"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.2
+  "mean": 9.4
  },
  "stripe_inc": {
   "company": "Stripe, Inc.",
@@ -6296,8 +6451,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -6350,9 +6505,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Texas Instruments Incorporated is a semiconductor b"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.4
+  "mean": 9.6
  },
  "the_coca_cola_company": {
   "company": "The Coca-Cola Company",
@@ -6389,7 +6544,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -6451,8 +6606,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -6505,9 +6660,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish The Coca-Cola Company is a consumer business that r"
    }
   ],
-  "core_mean": 8.6,
+  "core_mean": 9.0,
   "core_min": 0,
-  "mean": 8.9
+  "mean": 9.1
  },
  "the_goldman_sachs_group_inc": {
   "company": "The Goldman Sachs Group, Inc.",
@@ -6544,7 +6699,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -6606,8 +6761,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -6660,9 +6815,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish The Goldman Sachs Group, Inc. is a financial regula"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.2
+  "mean": 9.4
  },
  "the_home_depot_inc": {
   "company": "The Home Depot, Inc.",
@@ -7164,7 +7319,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
@@ -7226,8 +7381,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -7280,9 +7435,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish UnitedHealth Group Incorporated is a healthcare bus"
    }
   ],
-  "core_mean": 9.2,
+  "core_mean": 9.6,
   "core_min": 6,
-  "mean": 9.2
+  "mean": 9.4
  },
  "visa_inc": {
   "company": "Visa Inc.",
@@ -7381,8 +7536,8 @@
    {
     "dimension": "recommendation",
     "surface": "brief",
-    "score": 6,
-    "why": "identical passage on 16 of 49 companies \u2014 not specific to this one",
+    "score": 10,
+    "why": "company-specific and substantiated",
     "passage": "The choice: Commit to the reading now versus hold and verify first. What most limits this: the company's filings carry this, so it is stated under legal obligation rather than in marketing \u2014 but no outside account has tested whether it is working. The options, and what each costs Option 1 Commit to "
    },
    {
@@ -7435,9 +7590,9 @@
     "passage": "connect your company Home \u00b7 Your analyses \u00b7 Guest demo session Leave demo Connect your company What this becomes with your own context Everything you have just read was built from public evidence alone. Public intelligence \u2014 what it could establish Visa Inc. is a financial regulated business that ru"
    }
   ],
-  "core_mean": 8.8,
+  "core_mean": 9.2,
   "core_min": 6,
-  "mean": 9.2
+  "mean": 9.4
  },
  "walmart_inc": {
   "company": "Walmart Inc.",
@@ -7474,7 +7629,7 @@
     "dimension": "capital_intensity",
     "surface": "brief",
     "score": 6,
-    "why": "identical passage on 18 of 49 companies \u2014 not specific to this one",
+    "why": "identical passage on 18 of 50 companies \u2014 not specific to this one",
     "passage": "balance sheet depend on borrowing, so the cost of credit changes what those customers can afford and what the company can fund. US Department of Defense outlays (fiscal year to date) is rising: 764.7 $bn (from 718.9, +45.8), compared with the same month of the previous fiscal year, which is the only"
    },
    {
