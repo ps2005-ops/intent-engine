@@ -126,6 +126,7 @@ FINANCIER_STATE = "FINANCIER"
 REGULATOR_STATE = "REGULATOR"
 INDEX_OR_BENCHMARK = "INDEX_OR_BENCHMARK"
 PROGRAM_OR_POLICY = "PROGRAM_OR_POLICY"
+CATEGORY_OR_PRACTICE_STATE = "CATEGORY_OR_PRACTICE"
 INCIDENTALLY_NAMED = "INCIDENTALLY_NAMED"
 UNKNOWN_STATE = "UNKNOWN"
 
@@ -133,7 +134,7 @@ QUALIFICATION_STATES = (
     DIRECT_COMPETITOR, SUBSTITUTE_STATE, ADJACENT_THREAT_STATE,
     COMPLEMENT_STATE, CUSTOMER_STATE, SUPPLIER_STATE, PARTNER_STATE,
     FINANCIER_STATE, REGULATOR_STATE, INDEX_OR_BENCHMARK, PROGRAM_OR_POLICY,
-    INCIDENTALLY_NAMED, UNKNOWN_STATE)
+    CATEGORY_OR_PRACTICE_STATE, INCIDENTALLY_NAMED, UNKNOWN_STATE)
 
 #: §3. THE ONLY THREE THAT MAY REACH A COMPETITIVE CLAIM. Everything else is
 #: still published — under the heading it belongs to, never as a rival.
@@ -158,6 +159,8 @@ WORDING = {
     REGULATOR_STATE: "sets the terms this business operates under",
     INDEX_OR_BENCHMARK: "is how this company's shares are measured",
     PROGRAM_OR_POLICY: "is a programme whose terms move this business",
+    CATEGORY_OR_PRACTICE_STATE: ("is an activity this business is held to, "
+                                 "not a party it competes with"),
     INCIDENTALLY_NAMED: "appears in the filing without a stated relationship",
     UNKNOWN_STATE: "has an unestablished relationship",
 }
@@ -170,6 +173,7 @@ ROUTING = {
     REGULATOR_STATE: "Regulatory exposure",
     PROGRAM_OR_POLICY: "Regulation and payer economics",
     INDEX_OR_BENCHMARK: "Market, index and capital-market context",
+    CATEGORY_OR_PRACTICE_STATE: "Regulation and operating practice",
     CUSTOMER_STATE: "Demand concentration",
     SUPPLIER_STATE: "Supply and input dependence",
     PARTNER_STATE: "Partnerships and channel",
@@ -598,6 +602,23 @@ def qualify(*, candidate: str, evidence: str, subject: str,
         return refuse(UNKNOWN_STATE, UNKNOWN, "no candidate name")
 
     # A MEASURE IS NOT A MARKET. Nobody buys an index instead of advertising.
+    # AN ACTIVITY CANNOT BE CHOSEN INSTEAD OF A COMPANY.
+    #
+    # `entity_type_of` types this correctly as CATEGORY_OR_PRACTICE and
+    # NOTHING READ THE ANSWER: there was no arm for it here, so it fell
+    # through to the ordinary company path and `may_contest` came back True.
+    # MEASURED LIVE on cb9e6b7 AND STILL ON f858d9e after the classifier was
+    # fixed -- Goldman's introduction read "contested directly by Banking
+    # Supervision and Compensation Practices" on both. A classification that
+    # nothing acts on is not a repair.
+    #
+    # §6: it is not deleted. "Banking Supervision" is a real fact about a
+    # bank, and it leaves here with the heading it belongs under.
+    if entity == ENTITY_CATEGORY:
+        return refuse(CATEGORY_OR_PRACTICE_STATE, UNKNOWN,
+                      f"{name!r} names an activity or practice, not an "
+                      f"actor a customer could choose instead",
+                      confidence="HIGH")
     if entity == ENTITY_INDEX_PROVIDER:
         return refuse(INDEX_OR_BENCHMARK, INDEX_BENCHMARK,
                       f"governed by {governing!r}: this names how the "

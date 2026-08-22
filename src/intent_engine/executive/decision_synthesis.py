@@ -181,7 +181,22 @@ def _standing_of(dossier) -> str:
     # case it was written for: NIKE, eleven documents across five families,
     # told not to act on its own analysis because a separate bundle does not
     # cover it.
-    if availability not in ("AVAILABLE", "STALE") and not evidence:
+    # THE RUN'S EVIDENCE, NOT THE MARKET'S.
+    #
+    # A first version asked `_count(dossier, "evidence")`, which reads
+    # `market_block.blocks` -- and that block is empty precisely when no
+    # snapshot was published. The condition was therefore circular: it could
+    # only be satisfied when a snapshot existed, so the repair never fired
+    # for the companies it was written for. MEASURED: Goldman Sachs on
+    # f858d9e still answered "Do not act on this reading" after the fix
+    # shipped, unit-tested and break-proved.
+    #
+    # The founder block carries the RUN's own evidence references, which is
+    # what "does this company have something to stand on" actually means.
+    run_evidence = ((dossier.founder_block or {}).get("blocks") or {}) \
+        .get("evidence") or {}
+    if availability not in ("AVAILABLE", "STALE") \
+            and not run_evidence.get("count"):
         return REFUSED
     if not evidence:
         return UNMEASURABLE

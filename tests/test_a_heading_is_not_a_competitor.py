@@ -79,3 +79,53 @@ def test_a_single_word_is_never_an_activity():
     """One word carries no phrase structure to read."""
     for name in ("Banking", "Supervision", "Compensation"):
         assert names_an_activity(name) is False, name
+
+
+# --- the classification has to be ACTED ON ---------------------------------
+#
+# `entity_type_of` typed the heading correctly and NOTHING READ THE ANSWER:
+# `qualify` had no arm for CATEGORY_OR_PRACTICE, so it fell through to the
+# ordinary company path and `may_contest` came back True. Goldman's live
+# introduction read "contested directly by Banking Supervision and
+# Compensation Practices" BOTH before the classifier was fixed and after --
+# a classification nothing acts on is not a repair.
+
+from intent_engine.executive.competitive_qualification import (        # noqa: E402
+    CATEGORY_OR_PRACTICE_STATE, DIRECT_COMPETITOR, qualify,
+)
+
+_GOLDMAN = ("We compete with Banking Supervision and Compensation Practices "
+            "and with JPMorgan Chase for institutional clients.")
+
+
+def test_an_activity_may_not_contest():
+    for name in ("Banking Supervision", "Compensation Practices"):
+        q = qualify(candidate=name, evidence=_GOLDMAN, subject="Goldman")
+        assert q.qualification_state == CATEGORY_OR_PRACTICE_STATE, name
+        assert q.may_contest is False, name
+
+
+def test_the_real_rival_in_the_same_sentence_still_contests():
+    """THE CONTROL, and it must be able to fail."""
+    q = qualify(candidate="JPMorgan Chase", evidence=_GOLDMAN,
+                subject="Goldman")
+    assert q.qualification_state == DIRECT_COMPETITOR
+    assert q.may_contest is True
+
+
+def test_an_activity_is_routed_not_deleted():
+    """§6: it is a real fact about a bank, under the right heading."""
+    q = qualify(candidate="Banking Supervision", evidence=_GOLDMAN,
+                subject="Goldman")
+    assert q.section == "Regulation and operating practice", q.section
+
+
+def test_the_finder_returns_only_the_actor():
+    """END TO END, through the producer that fed the live sentence."""
+    from intent_engine.external_intel.competitor_finder import find_competitors
+    documents = [{"text": _GOLDMAN * 4, "observation_id": "o1",
+                  "source_title": "SEC 10-K",
+                  "source_class": "investor_material", "date": "2026-02-25"}]
+    names = [c.name for c in (find_competitors(
+        documents, subject="The Goldman Sachs Group, Inc.") or ())]
+    assert names == ["JPMorgan Chase"], names

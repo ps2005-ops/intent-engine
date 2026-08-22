@@ -26,24 +26,41 @@ from intent_engine.executive.decision_synthesis import (
 
 
 class _Dossier:
-    """The shape `_standing_of` reads: counts live under market_block.blocks."""
+    """The two sides `_standing_of` reads.
 
-    def __init__(self, market):
+    THE RUN'S EVIDENCE LIVES ON THE FOUNDER BLOCK. A first version of this
+    fixture put it on the market block, which is exactly the mistake the
+    code made: that block is empty when no snapshot was published, so a
+    condition asking it "does this run have evidence" can only ever answer
+    no. Goldman still said "Do not act on this reading" after the repair
+    shipped green.
+    """
+
+    def __init__(self, market, founder):
         self.market_block = market
+        self.founder_block = founder
 
 
-def _dossier(block, *, evidence=3, beliefs=2):
+def _dossier(block, *, evidence=3, beliefs=2, run_evidence=None):
     market = dict(block)
     market["blocks"] = {
         "evidence": {"state": "AVAILABLE", "count": evidence},
         "beliefs": {"state": "AVAILABLE", "count": beliefs},
     }
-    return _Dossier(market)
+    founder = {"blocks": {"evidence": {
+        "state": "AVAILABLE",
+        "count": evidence if run_evidence is None else run_evidence}}}
+    return _Dossier(market, founder)
 
 
 def test_no_snapshot_published_is_not_a_refusal():
-    """THE DEFECT. NIKE's shape: real evidence, no market coverage."""
-    standing = _standing_of(_dossier({"availability": "UNAVAILABLE"}))
+    """THE DEFECT. NIKE's shape: real evidence, no market coverage.
+
+    The run's evidence is on the FOUNDER block; the market block is empty
+    for exactly these companies, which is what made the first repair inert.
+    """
+    standing = _standing_of(_dossier({"availability": "UNAVAILABLE"},
+                                     evidence=0, run_evidence=9))
     assert standing != REFUSED, standing
 
 
@@ -77,14 +94,14 @@ def test_a_run_with_no_evidence_keeps_the_page_it_had():
     dated, checkable material. Two existing tests hold that page, and they
     were right to.
     """
-    assert _standing_of(
-        _dossier({"availability": "UNAVAILABLE"}, evidence=0)) == REFUSED
+    assert _standing_of(_dossier({"availability": "UNAVAILABLE"},
+                                 evidence=0, run_evidence=0)) == REFUSED
 
 
 def test_a_run_with_no_evidence_and_no_market_is_not_promoted():
     """Whatever it is called, an empty run may not reach a recommendation."""
     standing = _standing_of(_dossier({"availability": "UNAVAILABLE"},
-                                     evidence=0))
+                                     evidence=0, run_evidence=0))
     assert standing in (REFUSED, UNMEASURABLE)
 
 

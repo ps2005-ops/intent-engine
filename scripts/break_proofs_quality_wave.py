@@ -84,6 +84,21 @@ PROOFS = [
           f"{TH}::test_a_corporate_designator_settles_it_immediately",
           "assert"),
 
+    Proof("Q2d. the category type is computed and then ignored again",
+          CQ,
+          "    if entity == ENTITY_CATEGORY:\n"
+          "        return refuse(CATEGORY_OR_PRACTICE_STATE, UNKNOWN,",
+          "    if False:\n"
+          "        return refuse(CATEGORY_OR_PRACTICE_STATE, UNKNOWN,",
+          f"{TH}::test_the_finder_returns_only_the_actor",
+          "assert"),
+    Proof("Q2e. the real rival is refused along with the headings",
+          CQ,
+          "    if entity == ENTITY_CATEGORY:",
+          "    if True:",
+          f"{TH}::test_the_real_rival_in_the_same_sentence_still_contests",
+          "assert"),
+
     # --- Q3. the adversary reaches a reader -------------------------------
     Proof("Q3a. the manifest gate is restored",
           AS,
@@ -101,7 +116,8 @@ PROOFS = [
     # --- Q4. absence is not refusal ---------------------------------------
     Proof("Q4a. a missing snapshot refuses the whole reading again",
           DS,
-          "    if availability not in (\"AVAILABLE\", \"STALE\") and not evidence:",
+          "    if availability not in (\"AVAILABLE\", \"STALE\") \\\n"
+          "            and not run_evidence.get(\"count\"):",
           "    if availability not in (\"AVAILABLE\", \"STALE\"):",
           f"{TS}::test_no_snapshot_published_is_not_a_refusal",
           "assert"),
@@ -113,9 +129,18 @@ PROOFS = [
           "assert"),
     Proof("Q4c. an empty run is promoted out of its honest page",
           DS,
-          "    if availability not in (\"AVAILABLE\", \"STALE\") and not evidence:",
+          "    if availability not in (\"AVAILABLE\", \"STALE\") \\\n"
+          "            and not run_evidence.get(\"count\"):",
           "    if False:",
           f"{TS}::test_a_run_with_no_evidence_keeps_the_page_it_had",
+          "assert"),
+    Proof("Q4d. the run's evidence is read off the market block again",
+          DS,
+          "    run_evidence = ((dossier.founder_block or {}).get(\"blocks\") or {}) \\\n"
+          "        .get(\"evidence\") or {}",
+          "    run_evidence = ((dossier.market_block or {}).get(\"blocks\") or {}) \\\n"
+          "        .get(\"evidence\") or {}",
+          f"{TS}::test_no_snapshot_published_is_not_a_refusal",
           "assert"),
 ]
 
