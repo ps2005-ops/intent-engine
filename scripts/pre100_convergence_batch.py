@@ -269,6 +269,9 @@ def main(argv=None) -> int:
     # rather than hammer.
     ap.add_argument("--concurrency", type=int, default=1)
     ap.add_argument("--only", default="")
+    ap.add_argument("--quota-wait", type=int, default=600,
+                    help="seconds to sleep when the preview "
+                         "answers 429 before retrying")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args(argv)
 
@@ -371,6 +374,23 @@ def main(argv=None) -> int:
             # "DONE ... in 1s" beside genuine nine-minute analyses, and
             # scored, which puts a zero on the matrix that belongs to the
             # service rather than to the company.
+            # A 429 IS NOT A FAILURE, IT IS A WAIT. §22: a quota window is
+            # not a stop condition. Re-queue the company and sleep out the
+            # window rather than burning it as one of three strikes -- the
+            # previous run counted three 429s as "three consecutive failures
+            # to open a run" and stopped a 50-company programme over the
+            # preview working exactly as designed.
+            if "HTTP 429" in str(row.get("error") or ""):
+                with lock:
+                    queue.appendleft(company)
+                log(f"QUOTA  {name} deferred; sleeping {args.quota_wait}s")
+                register(outdir, harness_run_id=batch_id, company=name,
+                         deployed_sha=sha, state="QUOTA_DEFERRED")
+                waited = 0
+                while waited < args.quota_wait and not stop.is_set():
+                    time.sleep(15)
+                    waited += 15
+                continue
             if row.get("error") and not row.get("run_id"):
                 # PERSIST BEFORE CONTINUING. The first version of this branch
                 # logged the failure and `continue`d -- discarding the very

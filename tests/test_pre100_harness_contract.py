@@ -178,3 +178,15 @@ def test_a_run_that_never_opened_still_persists_its_body():
     branch = branch[:branch.index("\n                continue")]
     assert '"run.json"' in branch and "write_manifest" in branch, (
         "a failed /analyze is discarded before its body is written")
+
+
+def test_a_quota_429_is_deferred_not_counted_as_a_failure():
+    """Three 429s were counted as "three consecutive failures to open a run"
+    and stopped a 50-company programme over the preview behaving exactly as
+    designed. §22: a quota window is not a stop condition."""
+    source = pathlib.Path(B.__file__).read_text()
+    i = source.index('if "HTTP 429" in str(row.get("error") or "")')
+    j = source.index('if row.get("error") and not row.get("run_id")', i)
+    branch = source[i:j]
+    assert "queue.appendleft" in branch, "a 429 does not re-queue the company"
+    assert "failures.append" not in branch, "a 429 counts as a strike"
