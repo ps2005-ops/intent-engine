@@ -30,6 +30,33 @@
 
 ---
 
+## Three live cycles
+
+| | cycle | what it proved |
+|---|---|---|
+| **1** | day, 2026-08-24 | the bridge read fields production does not write (0 of 151 beliefs crossed); two steps ran green and invisible |
+| **2** | night, 2026-08-27 | **52 of 155 beliefs crossed** with real mechanisms and falsifiers; **71 company nodes → 3 sufficient indices**; 6 shocks with participant views; 28 zero-trade records |
+| **3** | day, 2026-08-27 | **COMPLETED, and its numbers are the sharpest demonstration in this whole run.** 554 evidence nodes ingested, **3 new**, 551 duplicate — novelty 0.0054. A naive counter would have reported 554 units of learning for a cycle that learned three things. The rolling window reports `INSUFFICIENT_HISTORY` on one cycle of history rather than `STABLE`. The cycle itself was marked `SKIPPED_NO_NEW_MARKET_SESSION`: the duplicate-bar guard refused to count Wednesday's close twice. |
+
+Cycle 2's `SHARED ECONOMIC CORE` section, verbatim:
+
+```
+- conditions measured: 5 of 35 in the vocabulary (0.143 coverage)
+- evidence nodes published: 160
+- beliefs published: 52 of 155 offered
+- structural shocks evaluated: 6 (6 reach a quantity; 0 substantially forced flow)
+- zero-trade records written: 28 (decline precision: UNMEASURABLE — nothing scored yet)
+- company evidence nodes read: 71 across 5 companies
+- indices sufficient: 3 of 8   ·   tradable: 0
+```
+
+The zero-trade gates are real: `no_market_evidence` ×23, `view_withheld` ×4,
+`not_tradable` ×1. Decline precision reports **UNMEASURABLE** rather than
+100%, because a rate over unscored rejections is how a gate proves itself
+right by being recent.
+
+---
+
 ## What the live runs found
 
 ### 1. The bridge read fields production does not write
@@ -76,6 +103,18 @@ raises.
 
 ### 5. Two steps ran green and invisible
 `econ_publish` and `econ_aggregate` completed successfully for a full cycle and appeared in neither the markdown nor the JSON, because the report reads named keys and nobody added them.
+
+### 6. `acceleration` had no producer
+
+> Cycle 3, verbatim: `learning acceleration: INSUFFICIENT_HISTORY · 1 cycle(s) of history` —
+> `this cycle: 3 new of 554 evidence nodes (novelty 0.0054), belief movement 0.0`
+
+The module was complete, tested, and **imported by nothing**. Rolling windows over a history nobody writes are windows over an empty list: every one would have reported `INSUFFICIENT_HISTORY` forever, and nobody could have told that from a genuinely young engine. Its own suite passed perfectly against fixtures the whole time.
+
+The publish step now records real counts each cycle — `evidence_new` is content this core had not seen before, not rows appended, and `belief_movement` is the *size* of the probability changes rather than the count of them, so a velocity measure cannot be gamed by running more often.
+
+### 7. Seven more live-artifact pins, on the clean baseline
+Four tests in `economic_chain` and `counterfactual_memory` failed on the **unmodified** baseline — they assert counts of a production ledger the launchd runtime appended to between 2026-08-24 and 2026-08-27, and every one went red because the engine had learned *more*. Replaced with the structural claims they stood in for: that unknown chain nodes form a **prefix** (the engine knows companies and not the economy they sit in), that the weakest link names where a run of gaps **ends**, and that an episode is never its own analogy. Three more of the same class were repaired in the merge commit.
 
 ---
 
