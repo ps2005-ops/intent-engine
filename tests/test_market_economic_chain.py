@@ -126,22 +126,60 @@ def test_scoring_prefers_coverage_and_resolution_over_volume():
 # --- the real chain -------------------------------------------------------
 
 def test_the_honda_chain_is_honest_about_what_is_missing():
+    """COUNTS REPLACED BY THE STRUCTURE THEY WERE STANDING IN FOR.
+
+    This asserted `known_nodes == 4`, `unknown_nodes == 3` and a missing set
+    of exactly {MACRO_STATE, CUSTOMER_STATE, ORDERS}. All three were facts
+    about the live ledger on the day they were written, and the ledger is a
+    growing production artifact: measured 2026-08-27 the chain reads 5 known
+    and 2 missing, because an orders observation for Honda arrived. The
+    engine learned MORE and the suite went red.
+
+    What the module's own docstring actually claims is STRUCTURAL, and it
+    holds at every ledger size: the unknown nodes are a PREFIX of the chain.
+    The engine knows a great deal about companies and little about the
+    economy they sit in, so what is missing is always the top of the
+    transmission, never a hole in the middle.
+    """
     built = EC.build(rows(), subject="honda")
     got = built.as_dict()
     assert got["overall_status"] == EC.UNKNOWN
-    assert got["known_nodes"] == 4 and got["unknown_nodes"] == 3
-    assert got["by_link_status"] == {EC.UNKNOWN: 3, EC.HYPOTHESIZED: 3}
-    missing = {n["node_type"] for n in got["nodes"]
-               if n["status"] == EC.UNKNOWN}
-    assert missing == {EC.MACRO_STATE, EC.CUSTOMER_STATE, EC.ORDERS}
+    assert got["known_nodes"] + got["unknown_nodes"] == len(got["nodes"])
+    assert sum(got["by_link_status"].values()) == len(built.links)
+
+    statuses = [n.status for n in built.nodes]
+    unknown_indices = [i for i, st in enumerate(statuses)
+                       if st == EC.UNKNOWN]
+    assert unknown_indices, "nothing is unknown; the fixture is exhausted"
+    assert unknown_indices == list(range(len(unknown_indices))), (
+        f"the unknown nodes are not a prefix of the chain: {statuses}. A hole "
+        "in the MIDDLE would be a different finding from an unmeasured "
+        "economy, and this test exists to tell them apart.")
+    assert built.nodes[0].node_type == EC.MACRO_STATE
+    assert built.nodes[0].status == EC.UNKNOWN, (
+        "MACRO_STATE became known without the shared economic core being "
+        "wired into this chain; that is a real change and should be asserted "
+        "deliberately rather than passing here by accident")
 
 
 def test_the_weakest_link_names_the_boundary_not_the_first_gap():
-    """Three consecutive UNKNOWNs are one finding; name where it ends."""
+    """Consecutive UNKNOWNs are one finding; name where the run ENDS.
+
+    The node pair was pinned and moved when the ledger grew. The claim is
+    relational: the weakest link starts at the LAST unknown node in chain
+    order, not the first, because three consecutive gaps are one gap.
+    """
     built = EC.build(rows(), subject="honda")
-    assert built.weakest_link.source == EC.ORDERS
-    assert built.weakest_link.target == EC.COMPANY_DEMAND
+    order = [n.node_type for n in built.nodes]
+    unknown = [n.node_type for n in built.nodes if n.status == EC.UNKNOWN]
+    assert unknown, "nothing is unknown; the fixture is exhausted"
     assert built.weakest_link.status == EC.UNKNOWN
+    assert built.weakest_link.source == unknown[-1], (
+        f"the weakest link starts at {built.weakest_link.source}, which is "
+        f"not the last unknown node ({unknown[-1]}); naming the FIRST gap "
+        "reports a run of three as three separate findings")
+    assert order.index(built.weakest_link.target) > \
+        order.index(built.weakest_link.source)
 
 
 def test_a_node_holds_the_figure_not_the_announcement_of_it():
@@ -165,10 +203,13 @@ def test_the_document_supplies_its_own_alternative_explanation():
 
 
 def test_the_founder_translation_separates_established_from_missing():
-    got = EC.build(rows(), subject="honda").founder_translation()
-    assert len(got["established"]) == 4
-    assert len(got["missing"]) == 3
-    assert got["weakest_link"] == "ORDERS → COMPANY_DEMAND"
+    """The SPLIT is the claim; the two counts were the ledger's, not the code's."""
+    built = EC.build(rows(), subject="honda")
+    got = built.founder_translation()
+    assert len(got["established"]) + len(got["missing"]) == len(built.nodes)
+    assert got["missing"], "nothing is reported missing on a chain with gaps"
+    assert got["weakest_link"] == (
+        f"{built.weakest_link.source} \u2192 {built.weakest_link.target}")
     assert got["what_would_resolve_it"]
     assert "relying on the unmeasured ones" in got["why_it_matters"]
 

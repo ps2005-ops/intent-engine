@@ -2218,6 +2218,317 @@ def replay_step(series_fn: Optional[Callable] = None,
 # ---------------------------------------------------------------------------
 # health + report
 # ---------------------------------------------------------------------------
+def econ_publish_step(ctx: C.CycleContext) -> dict:
+    """Publish this engine's economic state to the shared core.
+
+    WHY THIS IS A CYCLE STEP AND NOT A UTILITY
+    -------------------------------------------
+    A contract with no producer is not a boundary, it is a document -- the
+    strategic export spent weeks in exactly that state, correct and never
+    called, with the founder side having nothing to read however carefully
+    the schema was specified. The economic core would have gone the same way.
+    This is the call site.
+
+    IT RUNS AFTER `knowledge`, DELIBERATELY. The beliefs it publishes are the
+    ones this cycle's learning produced. Publishing before the fold would
+    export yesterday's beliefs with today's date on them.
+
+    NEVER RAISES. The shared core is a consumer of this engine, not a
+    dependency of it: a founder deployment that cannot be written to must not
+    fail a market cycle. A failure is reported by name.
+    """
+    from intent_engine.market import econ_bridge as EB
+    from intent_engine.market import learning_store as LS
+    from intent_engine.market import macro_state as MS
+
+    try:
+        store = LS.LearningStore(pathlib.Path(ctx.root) / LS.DEFAULT_PATH)
+        observations = [MS.from_dict(row)
+                        for row in store.macro_observations()]
+        # AS KNOWN AT THIS CYCLE'S DATE, not the latest of everything. A
+        # revision published after `as_of` describes a figure this engine
+        # could not have held today, and exporting it would hand the founder
+        # side a state it can never reproduce from the same ledger.
+        current = MS.as_known_at(observations, ctx.as_of)
+        # The RAW LEDGER ROWS, not `store.beliefs()`. A belief object alone
+        # cannot satisfy the shared contract: its falsifier and its expected
+        # observation live on the expectation record, joined on
+        # `hypothesis_id`, and its mechanism lives on the causal family that
+        # expectation names. Handing over objects is what made the first live
+        # cycle report 151 beliefs as stating no observable.
+        rows = list(store._rows()) if hasattr(store, "_rows") else []
+        report = EB.publish_state(
+            observations=current, as_of=ctx.as_of,
+            ledger_rows=rows,
+            graph_summary=_econ_graph_summary(),
+            runtime_root=(None if ctx.dry_run else ctx.root))
+        report["dry_run"] = ctx.dry_run
+        report["shocks"] = _econ_shocks(ctx)
+        report["zero_trade"] = _econ_zero_trade(ctx)
+        report["acceleration"] = _econ_acceleration(ctx, report)
+        return report
+    except Exception as exc:  # noqa: BLE001 - see docstring
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+def _econ_acceleration(ctx: C.CycleContext, publish: dict) -> dict:
+    """Record what this cycle produced, and read the rolling windows back.
+
+    THE PRODUCER THAT WAS MISSING. `econ.acceleration` was complete, tested,
+    and imported by nothing -- which is this repository's most repeated
+    failure and the one its own memory names twice: a capability with no call
+    site is a document. Rolling windows over a history nobody writes are
+    windows over an empty list, and every one of them reports
+    INSUFFICIENT_HISTORY forever without anybody being able to tell that from
+    a genuinely young engine.
+
+    EVERY FIELD IS A COUNT OF SOMETHING NAMED. `evidence_new` is nodes whose
+    id this core had not seen before -- a real question about content, not a
+    count of rows appended. `belief_movement` is the sum of absolute
+    probability changes, which is the QUALITY counterpart to `beliefs_revised`:
+    ten revisions that each moved a probability by 0.001 are not ten units of
+    learning, and a velocity measure that cannot tell them apart is gameable
+    by running more often.
+    """
+    from intent_engine.econ import acceleration as AC
+    from intent_engine.econ import store as EST
+
+    try:
+        seen_before = {str(r.get("node_id")) for r in
+                       EST.load(ctx.root, "node", upto=_previous_day(ctx.as_of))
+                       if isinstance(r, dict)}
+        today_nodes = [r for r in EST.load(ctx.root, "node", upto=ctx.as_of)
+                       if isinstance(r, dict)]
+        ingested = len(today_nodes)
+        new = sum(1 for r in today_nodes
+                  if str(r.get("node_id")) not in seen_before)
+
+        beliefs = [r for r in EST.load(ctx.root, "belief", upto=ctx.as_of)
+                   if isinstance(r, dict)]
+        movement = 0.0
+        for row in beliefs:
+            for rev in (row.get("revisions") or ()):
+                if isinstance(rev, dict):
+                    movement += abs(float(rev.get("posterior") or 0.0)
+                                    - float(rev.get("prior") or 0.0))
+
+        zero = publish.get("zero_trade") or {}
+        counts = AC.CycleCounts(
+            cycle_id=str(ctx.run_id), at=ctx.as_of,
+            evidence_ingested=ingested, evidence_new=new,
+            beliefs_declared=int(publish.get("beliefs_published") or 0),
+            beliefs_revised=sum(len(r.get("revisions") or ())
+                                for r in beliefs),
+            zero_trade_learnings=int(zero.get("recorded_this_cycle") or 0),
+            near_misses=int(zero.get("by_verdict", {}).get("NEAR_MISS", 0)),
+            causal_updates=int((publish.get("shocks") or {}).get(
+                "evaluated") or 0),
+            belief_movement=movement)
+        if not ctx.dry_run:
+            EST.append(ctx.root, "cycle_counts", counts.as_dict(),
+                       written_at=ctx.as_of)
+
+        history = [AC.CycleCounts(**{
+            k: v for k, v in row.items()
+            if k in AC.CycleCounts.__dataclass_fields__})
+            for row in EST.load(ctx.root, "cycle_counts", upto=ctx.as_of)
+            if isinstance(row, dict)]
+        got = AC.report(history)
+        got["recorded_this_cycle"] = counts.as_dict()
+        return got
+    except Exception as exc:  # noqa: BLE001 - a metric must not fail a cycle
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+def _previous_day(as_of: str) -> str:
+    import datetime
+    try:
+        return (datetime.date.fromisoformat(as_of[:10])
+                - datetime.timedelta(days=1)).isoformat()
+    except (ValueError, TypeError):        # pragma: no cover - guarded input
+        return as_of
+
+
+def _econ_shocks(ctx: C.CycleContext) -> dict:
+    """Evaluate the named structural shocks, with who would have to move.
+
+    THREE LAYERS THAT ARE ONLY WORTH ANYTHING TOGETHER. The shock says what
+    the mechanism implies; the participant view says which mandates would
+    respond and how fast; the reflexivity attribution says how much of the
+    resulting move would be the responding rather than the mechanism. A shock
+    reported alone invites exactly the error the third layer exists to stop --
+    re-estimating a mechanism from a move that was mostly forced flow.
+
+    Written to the core so a founder surface can read the transmission
+    without reading anything about how this engine trades.
+    """
+    from intent_engine.econ import levelk as LK
+    from intent_engine.econ import reflexivity as RX
+    from intent_engine.econ import seed as SEED
+    from intent_engine.econ import shock as SH
+    from intent_engine.econ import store as EST
+
+    graph = SEED.seed_graph()
+    out = []
+    for name in sorted(SH.NAMED_SHOCKS):
+        quantity, direction, label = SH.NAMED_SHOCKS[name]
+        result = SH.evaluate_structural_shock(graph, name, as_of=ctx.as_of)
+        view = LK.react(quantity=quantity, direction=direction,
+                        as_of=ctx.as_of, shock_label=label)
+        # Dealer gamma sign is NOT supplied: this deployment cannot estimate
+        # it, and `armed_loops` treats unknown as not armed rather than
+        # guessing. It is the loop a guess would matter most in.
+        attribution = RX.attribution(view)
+        row = result.as_dict()
+        row["participants"] = {
+            "responding": view.as_dict()["participants_responding"],
+            "net_flow": view.as_dict()["net_flow"],
+            "reflexivity_risk": view.reflexivity_risk}
+        row["attribution"] = attribution.as_dict()
+        warning = RX.learning_warning(attribution)
+        if warning:
+            row["learning_warning"] = warning
+        out.append(row)
+    if not ctx.dry_run:
+        EST.append_many(ctx.root, "state_snapshot",
+                        [{"contract": "econ_shock_set.v1",
+                          "as_of": ctx.as_of, "shocks": out}],
+                        written_at=ctx.as_of)
+    return {"evaluated": len(out),
+            "with_effects": sum(1 for r in out if r["effects"]),
+            "reflexive": sum(1 for r in out
+                             if r["attribution"]["reflexive_share"]
+                             in ("comparable", "dominant")),
+            "names": [r["shock"] for r in out]}
+
+
+def _econ_zero_trade(ctx: C.CycleContext) -> dict:
+    """What the engine declined this cycle, recorded so it can be scored.
+
+    WHY THIS IS THE MOST IMPORTANT LOOP HERE. Measured on this engine's own
+    history: eleven consecutive cycles, 28 companies, 27 carrying independent
+    evidence, and net knowledge gain of zero every time -- because the only
+    path to a belief update ran through a RESOLVED POSITION. No trade meant
+    no learning, structurally, and the discarded majority is exactly where
+    the engine's judgement was most conservative.
+
+    The funnel already knows every gate that fired. This turns each one into
+    a record that a later cycle can resolve, rather than a number in a
+    report nobody can score.
+    """
+    from intent_engine.econ import store as EST
+    from intent_engine.econ import zero_trade as ZT
+
+    rows = (ctx.results.get("funnel") or {}).get("rows") or []
+    if not rows:
+        rows = (ctx.results.get("research") or {}).get("rows") or []
+    records = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        gate = str(row.get("gate") or "")
+        if not gate:
+            continue
+        subject = str(row.get("company") or "")
+        if not subject:
+            continue
+        records.append(ZT.rejected(
+            subject=subject, as_of=ctx.as_of, gate=gate,
+            reason=(f"classified {row.get('classification') or 'no_trade'} "
+                    f"at gate {gate}"),
+            what_happened=f"declined at gate: {gate}"))
+    if records and not ctx.dry_run:
+        EST.append_many(ctx.root, "zero_trade",
+                        [r.as_dict() for r in records], written_at=ctx.as_of)
+    summary = ZT.summarise(records)
+    summary["recorded_this_cycle"] = len(records)
+    return summary
+
+
+def _econ_graph_summary() -> dict:
+    """The seed causal graph's shape, for the state's provenance block."""
+    from intent_engine.econ import seed as ESEED
+    try:
+        return ESEED.seed_graph().summary()
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def econ_aggregate_step(ctx: C.CycleContext) -> dict:
+    """Build candidate macro indicators from public company evidence.
+
+    THE COMPANY -> MARKET DIRECTION. Section 18: what crosses is the public
+    corporate evidence this engine reads while analysing companies -- hiring,
+    pricing, capacity, inventories, demand language, financing, supply. What
+    never crosses is anything about who used the product; there is no path
+    from a demo query to an economic node, and `test_econ_bridges` asserts
+    the absence of one.
+
+    Everything built here is a CANDIDATE. It is not tradable, no code path
+    turns one into a signal, and promotion runs through `econ.promotion`,
+    which requires forward validation in more than one regime.
+    """
+    from intent_engine.econ import aggregates as AG
+    from intent_engine.econ import store as EST
+
+    try:
+        nodes = _econ_company_nodes(ctx)
+        built = AG.build_all(nodes=nodes, as_of=ctx.as_of)
+        sufficient = [a for a in built.values() if a.sufficient]
+        if not ctx.dry_run:
+            EST.append_many(ctx.root, "aggregate",
+                            [a.as_dict() for a in built.values()],
+                            written_at=ctx.as_of)
+            for agg in sufficient:
+                EST.append(ctx.root, "node",
+                           AG.as_node(agg, as_of=ctx.as_of).as_dict(),
+                           written_at=ctx.as_of)
+        summary = AG.summarise(built)
+        summary["company_nodes_read"] = len(nodes)
+        summary["companies"] = len({n.subject for n in nodes})
+        summary["dry_run"] = ctx.dry_run
+        return summary
+    except Exception as exc:  # noqa: BLE001 - a candidate index is not the cycle
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+def _econ_company_nodes(ctx: C.CycleContext) -> list:
+    """The public company evidence this cycle holds, as shared nodes.
+
+    Read from the store rather than from `ctx.learning_inbox`, so a cycle
+    that ingested nothing new still builds an index over the standing
+    corpus. An index that only exists on days with fresh evidence would be
+    absent exactly when the panel is most stable.
+    """
+    from intent_engine.econ import evidence as EV
+    from intent_engine.econ import store as EST
+    from intent_engine.econ import vocabulary as V
+
+    rows = EST.load(ctx.root, "node", upto=ctx.as_of)
+    out = []
+    for row in rows:
+        if not isinstance(row, dict) or row.get("node_class") != V.COMPANY:
+            continue
+        if row.get("visibility") != V.PUBLIC:
+            continue
+        try:
+            out.append(EV.node(
+                node_class=V.COMPANY, kind=str(row.get("kind") or ""),
+                subject=str(row.get("subject") or ""),
+                standing=str(row.get("standing") or V.OBSERVED),
+                occurred_at=str(row.get("occurred_at") or ""),
+                available_at=str(row.get("available_at") or ""),
+                publisher=str((row.get("provenance") or {}).get(
+                    "publisher") or ""),
+                value=row.get("value"), unit=str(row.get("unit") or ""),
+                statement=str(row.get("statement") or ""),
+                confidence=float(row.get("confidence") or 0.5),
+                visibility=V.PUBLIC, producer="reload"))
+        except Exception:  # noqa: BLE001 - a malformed row is not the cycle
+            continue
+    return out
+
+
 def health_step(ctx: C.CycleContext) -> dict:
     from intent_engine.market import health as H
     return H.check(ctx.root).as_dict()
@@ -2243,6 +2554,8 @@ def day_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("assets", assets_step),
         ("learning", learning_step),
         ("knowledge", knowledge_step),
+        ("econ_publish", econ_publish_step),
+        ("econ_aggregate", econ_aggregate_step),
         ("learning_health", learning_health_step),
         ("health", health_step),
         ("report", report_step),
@@ -2262,6 +2575,8 @@ def night_steps(*, research_fn=None, series_fn=None) -> List[tuple]:
         ("assets", assets_step),
         ("learning", learning_step),
         ("knowledge", knowledge_step),
+        ("econ_publish", econ_publish_step),
+        ("econ_aggregate", econ_aggregate_step),
         ("learning_health", learning_health_step),
         ("replay", replay_step(series_fn=None)),
         ("health", health_step),

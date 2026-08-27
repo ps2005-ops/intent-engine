@@ -159,6 +159,107 @@ def _belief_learning(learning: dict) -> List[str]:
     return lines
 
 
+def _econ_section(ctx) -> List[str]:
+    """What crossed between the two products this cycle, and what did not.
+
+    Both directions on one screen, because the question an operator has is
+    not "did the step run" but "is the substrate actually shared". A cycle
+    that published forty conditions and built no index has a company-evidence
+    problem; one that built indices from a panel of five has a concentration
+    problem. Neither is visible from a green tick.
+    """
+    publish = ctx.results.get("econ_publish") or {}
+    aggregate = ctx.results.get("econ_aggregate") or {}
+    if not publish and not aggregate:
+        return ["_the economic-core steps did not run in this cycle_"]
+
+    lines = []
+    if publish.get("error"):
+        lines.append(f"- ! market -> core FAILED: {publish['error']}")
+    else:
+        unc = publish.get("uncertainty") or {}
+        lines += [
+            "**market -> core** (what this engine knows about the economy)",
+            "",
+            f"- conditions measured: **{publish.get('conditions_measured', 0)}**"
+            f" of {unc.get('vocabulary', 0)} in the vocabulary"
+            f" ({unc.get('coverage', 0)} coverage)",
+            f"- evidence nodes published: {publish.get('nodes_published', 0)}",
+            f"- beliefs published: {publish.get('beliefs_published', 0)}"
+            f" of {publish.get('beliefs_offered', 0)} offered",
+        ]
+        refused = publish.get("beliefs_refused_no_observable") or 0
+        if refused:
+            lines.append(
+                f"- beliefs refused for stating no observable: **{refused}** "
+                "— a belief nobody preregistered an observation for can only "
+                "ever be confirmed")
+        unmapped = publish.get("unmapped_kinds") or {}
+        if unmapped:
+            lines.append(f"- ! state kinds with no mapping: {unmapped}")
+        missing = (unc.get("unmeasured") or [])[:8]
+        if missing:
+            lines.append(f"- unmeasured conditions: {', '.join(missing)}")
+
+    shocks = publish.get("shocks") or {}
+    if shocks and not publish.get("error"):
+        lines += [
+            "",
+            f"- structural shocks evaluated: **{shocks.get('evaluated', 0)}**"
+            f" ({shocks.get('with_effects', 0)} reach a quantity in the "
+            f"graph; {shocks.get('reflexive', 0)} would be substantially "
+            "forced flow rather than mechanism)",
+        ]
+    zero = publish.get("zero_trade") or {}
+    if zero and not publish.get("error"):
+        precision = zero.get("decline_precision")
+        lines.append(
+            f"- zero-trade records written: "
+            f"**{zero.get('recorded_this_cycle', 0)}** "
+            f"(decline precision: "
+            f"{'UNMEASURABLE — nothing scored yet' if precision is None else precision})")
+
+    accel = publish.get("acceleration") or {}
+    if accel and not accel.get("error"):
+        headline = accel.get("headline", "")
+        window = accel.get("headline_window", "")
+        lines.append(
+            f"- learning acceleration: **{headline}**"
+            + (f" over the {window} window" if window else "")
+            + f" · {accel.get('cycles', 0)} cycle(s) of history")
+        this = accel.get("recorded_this_cycle") or {}
+        if this:
+            lines.append(
+                f"  - this cycle: {this.get('evidence_new', 0)} new of "
+                f"{this.get('evidence_ingested', 0)} evidence nodes "
+                f"(novelty {this.get('novelty')}), belief movement "
+                f"{this.get('belief_movement')}")
+
+    lines.append("")
+    if aggregate.get("error"):
+        lines.append(f"- ! company -> core FAILED: {aggregate['error']}")
+        return lines
+    lines += [
+        "**company -> core** (candidate indicators from public company "
+        "evidence)",
+        "",
+        f"- company evidence nodes read: "
+        f"{aggregate.get('company_nodes_read', 0)} "
+        f"across {aggregate.get('companies', 0)} companies",
+        f"- indices sufficient: **{aggregate.get('sufficient', 0)}** of "
+        f"{aggregate.get('indices', 0)} "
+        f"(insufficient: {aggregate.get('insufficient', 0)})",
+        f"- tradable: **{aggregate.get('tradable', 0)}** — candidates are "
+        "not signals until forward validated",
+    ]
+    for name, reading in sorted((aggregate.get("readings") or {}).items()):
+        lines.append(
+            f"  - `{name}` {reading.get('direction')} "
+            f"(score {reading.get('score')}, panel {reading.get('panel')}, "
+            f"largest contributor {reading.get('concentration')})")
+    return lines
+
+
 def render_report(ctx) -> Tuple[str, dict]:
     """Build both forms. Returns (markdown, payload)."""
     research = ctx.results.get("research") or {}
@@ -221,6 +322,17 @@ def render_report(ctx) -> Tuple[str, dict]:
         # that grows without limit is how free text gets into a dated
         # artifact. Counts and standings only.
         "knowledge": _knowledge_summary(ctx.results.get("knowledge") or {}),
+        # THE SHARED ECONOMIC CORE. Both econ steps ran green in the first
+        # cycle after they were wired and appeared in NEITHER the markdown
+        # nor the payload, because this report reads named keys and nobody
+        # added them. A step whose result is not in the record has no
+        # history, and "it ran" is the only thing anyone can ever say about
+        # it -- which is the same defect the knowledge block above documents,
+        # one cycle later and one step over.
+        "econ": {
+            "publish": ctx.results.get("econ_publish") or {},
+            "aggregate": ctx.results.get("econ_aggregate") or {},
+        },
         "health": {k: health.get(k) for k in ("overall", "cycles", "lock",
                                               "scheduler", "storage", "notes")},
         "unmeasurable": {name: reason for name, reason in _POSITION_METRICS},
@@ -387,6 +499,10 @@ def render_report(ctx) -> Tuple[str, dict]:
         lines.append(f"- ! {note}")
 
     lines += [
+        "",
+        "## SHARED ECONOMIC CORE",
+        "",
+    ] + _econ_section(ctx) + [
         "",
         "## LEARNING ACCELERATION",
         "",

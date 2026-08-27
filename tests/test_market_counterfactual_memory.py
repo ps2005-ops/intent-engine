@@ -211,11 +211,37 @@ def test_a_different_shape_retrieves_nothing():
 
 
 def test_an_episode_is_never_an_analogy_for_its_own_subject():
-    """That is the same case, not a comparable one."""
+    """That is the same case, not a comparable one.
+
+    ASSERTED AS THE INVARIANT, NOT AS AN EMPTY RESULT. This used to require
+    that Cloudflare retrieve NOTHING for a revenue/loss shape, which was true
+    only while no OTHER subject in the live ledger carried that shape. One
+    now does -- an Etsy episode -- and it is a perfectly good analogy: Etsy
+    is not Cloudflare. The test was reading a fact about the corpus as if it
+    were the rule.
+
+    The rule is self-exclusion, and it is now checked over every subject the
+    ledger holds, which is both stronger and unable to pass by the corpus
+    happening to be thin.
+    """
     episodes = CM.build(rows())
-    assert CM.apply(episodes, subject="cloudflare",
-                    family="demand_weakening",
-                    opening_evidence=["Revenue Rises as Loss Widens"]) == ()
+    subjects = sorted({e.subject for e in episodes} - {""})
+    assert subjects, "no episodes were built; the rule is unexercised"
+    checked = 0
+    for subject in subjects:
+        for family in ("demand_weakening", "demand_strengthening",
+                       "pricing_power"):
+            for applied in CM.apply(
+                    episodes, subject=subject, family=family,
+                    opening_evidence=["Revenue Rises as Loss Widens",
+                                      "Stock Falls on Q3 Earnings"]):
+                checked += 1
+                assert applied.from_subject != applied.to_subject, (
+                    f"{subject} was offered its own episode as an analogy "
+                    "for itself; that is the same case, not a comparable one")
+    assert checked, (
+        "no analogy was retrieved for any subject or family; the "
+        "self-exclusion rule was not actually exercised")
 
 
 def test_the_price_shape_retrieves_the_duolingo_episode():

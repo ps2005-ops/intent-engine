@@ -4434,9 +4434,46 @@ class WebApp:
         except Exception:  # noqa: BLE001 - context must never break a run
             _LOG.warning("strategic context unavailable for %s", run_id)
 
+        # THE SHARED ECONOMIC STATE, and this company's evidenced exposure
+        # to it. Read from the canonical core, never recomputed here: the
+        # defect this closes is two macro pictures in one product, with the
+        # better one unreachable. The founder side may not import the market
+        # engine and does not; `econ` is neutral and both consume it.
+        #
+        # Fails soft like every other context family. A deployment where no
+        # market engine has ever run reads "unavailable" with a reason, and
+        # the analysis proceeds on the company's own evidence.
+        economy, exposures = None, ()
+        try:
+            from intent_engine.external_intel import econ_context as ec
+            economy = ec.load(self._runtime_root, as_of=today)
+            exposures = self._econ_exposures(macro or (), observations)
+            # Exposures read from this company's own FILINGS, joined to the
+            # ones its macro factors established. The filing path is the one
+            # that finds anything: measured across six companies, the macro
+            # factors contributed a handful and the filings contributed 39.
+            exposures = tuple(dict.fromkeys(
+                tuple(exposures) + self._filed_exposures(run_id, today)))
+        except Exception:  # noqa: BLE001 - context must never break a run
+            _LOG.warning("economic context unavailable for %s", run_id)
+
+        # THE OTHER DIRECTION, and it runs even when the state is absent.
+        # This company's public statements about hiring, pricing, capacity,
+        # inventories, demand, financing and supply become evidence nodes in
+        # the shared graph, where the market engine's aggregate step reads
+        # them. Nothing about who USED the product crosses; there is no path
+        # from a demo query to an economic node.
+        try:
+            self._publish_econ_evidence(
+                run_id=run_id, company_name=name, observations=observations,
+                documents=documents, today=today)
+        except Exception:  # noqa: BLE001 - see above
+            _LOG.warning("econ evidence not published for %s", run_id)
+
         context = ep.build_context(market=market, macro=macro or (),
                                    competitors=competitors or (),
-                                   strategic=strategic, as_of=today)
+                                   strategic=strategic, economy=economy,
+                                   economy_exposures=exposures, as_of=today)
 
         # Tell the market engine what became of the dossier it published.
         # Only this side knows: the file is read, validated, accepted or
@@ -4509,6 +4546,118 @@ class WebApp:
 
         self._external_cache[run_id] = context
         return context
+
+    #: Founder-side macro factor keys -> shared economic-state condition
+    #: kinds. An exposure only counts when the company's OWN evidence
+    #: established it, which is what `macro_contract.validate_factor` already
+    #: enforces -- so this maps factors that survived that gate, and never
+    #: derives an exposure from a sector.
+    _ECON_EXPOSURE_MAP = {
+        "policy_rate": "policy_rate", "interest_rate": "policy_rate",
+        "rates": "policy_rate", "inflation": "inflation",
+        "cpi": "inflation", "unemployment": "labour",
+        "employment": "labour", "labour": "labour", "labor": "labour",
+        "wages": "wages", "gdp": "growth", "growth": "growth",
+        "industrial_production": "industrial_production",
+        "housing": "housing", "oil": "commodity_oil",
+        "energy": "commodity_oil", "gas": "commodity_gas",
+        "copper": "commodity_copper", "dollar": "fx_dxy",
+        "currency": "fx_dxy", "fx": "fx_dxy",
+        "credit": "financial_conditions",
+        "financial_conditions": "financial_conditions",
+        "treasury": "treasury_10y", "yield": "treasury_10y",
+        "real_yield": "real_yield",
+    }
+
+    def _econ_exposures(self, macro_factors, observations) -> tuple:
+        """Which shared economic quantities THIS company is exposed to.
+
+        Derived from the macro factors that already passed
+        `macro_contract.validate_factor`, which refuses a factor not bound to
+        a retrieved observation. Nothing here widens that: a condition the
+        company has no evidenced connection to does not become an exposure
+        because its sector suggests one.
+        """
+        out = []
+        for factor in macro_factors or ():
+            for source in (getattr(factor, "factor", ""),
+                           getattr(factor, "name", ""),
+                           getattr(getattr(factor, "observation", None),
+                                   "series_id", "")):
+                key = str(source or "").strip().lower()
+                if not key:
+                    continue
+                mapped = self._ECON_EXPOSURE_MAP.get(key)
+                if mapped is None:
+                    mapped = next((v for k, v in
+                                   self._ECON_EXPOSURE_MAP.items()
+                                   if k in key), None)
+                if mapped and mapped not in out:
+                    out.append(mapped)
+                    break
+        return tuple(out)
+
+    def _filed_exposures(self, run_id: str, today: str) -> tuple:
+        """Economic quantities this company's own documents state it depends on.
+
+        Read from the shared core, where `_publish_econ_evidence` wrote them
+        during this run's translation. Reading them back rather than keeping
+        them in memory means a page rendered from a cached run gets the same
+        answer as the analysis that produced it.
+        """
+        try:
+            from intent_engine.econ import store as est
+            from intent_engine.external_intel import strategic_contract as sc
+            company_id = sc.company_key(
+                (self.ci.entity_identity(run_id) or {}).get("canonical_name")
+                or (self.ci.run_meta(run_id) or {}).get("company_name") or "")
+            rows = est.load(self._runtime_root, "priority", upto=today)
+            return tuple(
+                str(r.get("quantity"))
+                for r in rows
+                if isinstance(r, dict)
+                and r.get("record") == "company_exposure"
+                and r.get("company_id") == company_id and r.get("quantity"))
+        except Exception:  # noqa: BLE001 - context must never break a run
+            return ()
+
+    def _publish_econ_evidence(self, *, run_id: str, company_name: str,
+                               observations, documents, today: str) -> dict:
+        """This company's public statements, as shared economic evidence.
+
+        Written to the canonical core so the market engine's aggregate step
+        can build candidate indicators from a panel of companies. The
+        translation refuses anything tenant-private and anything with no
+        stated direction, and reports what it declined -- a translator that
+        returned only its output would make a 90% loss invisible.
+        """
+        from intent_engine.econ import store as est
+        from intent_engine.external_intel import econ_evidence as ee
+        from intent_engine.external_intel import strategic_contract as sc
+
+        company_id = sc.company_key(company_name) or run_id
+        out = ee.translate(observations, company_id=company_id,
+                           company_name=company_name, as_of=today,
+                           documents=documents)
+        if out["nodes"]:
+            est.append_many(self._runtime_root, "node",
+                            [n.as_dict() for n in out["nodes"]],
+                            written_at=today)
+        # The exposures travel with the evidence. Without them the shared
+        # economic state reaches this company and stops: `relevant_to` needs
+        # a quantity this company is evidenced to be exposed to, and an
+        # analysis with no exposures reads every economic condition as
+        # irrelevant to it.
+        if out.get("exposures"):
+            est.append_many(
+                self._runtime_root, "priority",
+                [dict(r, record="company_exposure", as_of=today,
+                      company_id=company_id) for r in out["exposures"]],
+                written_at=today)
+        _LOG.info("econ evidence for %s: %d of %d offered crossed (%s)",
+                  company_id, out["translated"], out["offered"],
+                  out["declined"])
+        return out
 
     def _record_learning(self, *, run_id: str, company_id: str, context,
                          dossier_revision: str = "") -> dict:
@@ -9587,6 +9736,188 @@ class WebApp:
         return self._html(_chrome(body, self._nav(session)))
 
     # --- learning platform (read-only observation via Personal AI) ----------
+    #: The eleven questions Section 28 requires `/learning` to answer. Kept
+    #: as data so the page cannot quietly stop answering one: every question
+    #: renders, and a question with no answer renders its absence and the
+    #: reason, rather than being dropped from the list.
+    _ECON_QUESTIONS = (
+        ("what_changed", "What changed?"),
+        ("why", "Why?"),
+        ("market_belief", "What does the engine currently believe?"),
+        ("most_fragile", "Which belief is most fragile?"),
+        ("what_would_break_it", "What would break it?"),
+        ("learning_faster", "What are we learning faster about?"),
+        ("stuck", "Where is the system stuck?"),
+        ("seek_next", "What should we find out next?"),
+        ("open_expectations", "What forward expectations are open?"),
+        ("resolved", "What resolved recently?"),
+        ("wrong", "What did the system get wrong?"),
+    )
+
+    def _econ_intelligence(self, as_of: str) -> dict:
+        """Answer Section 28's questions from the shared economic core.
+
+        READS, NEVER COMPUTES. Every number here is already in the core; this
+        assembles them. A surface that derived its own version of a belief
+        count is how two pages of the same product came to disagree about how
+        much the engine knew.
+
+        An unanswerable question returns an ABSENCE with a reason. That is
+        the difference between "the engine has resolved nothing yet" and
+        "this page does not know how to ask", and only the first is a fact
+        about the engine.
+        """
+        from intent_engine.econ import calibration as CAL
+        from intent_engine.econ import store as EST
+        from intent_engine.external_intel import econ_context as EC
+
+        out = {"as_of": as_of, "answers": {}, "available": False}
+        try:
+            summary = EST.summary(self._runtime_root)
+        except Exception as exc:  # noqa: BLE001
+            summary = {"counts": {}, "error": str(exc)}
+        out["store"] = summary
+        context = EC.load(self._runtime_root, as_of=as_of)
+        out["available"] = context.available
+        if not context.available:
+            for key, question in self._ECON_QUESTIONS:
+                out["answers"][key] = {"answer": "", "absent": True,
+                                       "reason": context.reason}
+            return out
+
+        beliefs = list(context.beliefs)
+        conditions = {k: v for k, v in context.conditions.items()
+                      if v.get("known")}
+        moving = [v for v in conditions.values()
+                  if v.get("direction") in ("UP", "DOWN")]
+        fragile = max(beliefs, key=lambda b: float(b.get("fragility") or 0),
+                      default=None)
+
+        def answer(key, text, absent_reason=""):
+            out["answers"][key] = {
+                "answer": text, "absent": not text,
+                "reason": absent_reason or (
+                    "" if text else "the core holds nothing that answers "
+                                    "this yet")}
+
+        answer("what_changed",
+               (f"{len(moving)} of {len(conditions)} measured conditions "
+                f"moved: "
+                + ", ".join(f"{v['kind'].replace('_', ' ')} "
+                            f"{'up' if v['direction'] == 'UP' else 'down'}"
+                            for v in moving[:5]))
+               if moving else "")
+        answer("why",
+               ("each reading names the publisher and the evidence node it "
+                "is; the causal graph states which mechanisms connect them, "
+                "and only edges at evidence level 3 or above are permitted "
+                "to say one causes another")
+               if conditions else "")
+        answer("market_belief",
+               (f"{len(beliefs)} belief(s) published to the shared core. "
+                + "; ".join(str(b.get("proposition", ""))[:110]
+                            for b in beliefs[:3]))
+               if beliefs else "",
+               absent_reason=("the market engine has published no belief "
+                              "that carries a mechanism, a falsifier and a "
+                              "preregistered observation; beliefs missing "
+                              "any of the three are refused at the bridge "
+                              "and reported by causal family in the cycle "
+                              "report"))
+        answer("most_fragile",
+               (f"{str(fragile.get('proposition', ''))[:140]} "
+                f"(probability {fragile.get('probability')}, fragility "
+                f"{fragile.get('fragility')})") if fragile else "")
+        answer("what_would_break_it",
+               str(fragile.get("falsifier", "")) if fragile else "")
+
+        counts = summary.get("counts") or {}
+        answer("learning_faster",
+               (f"the core holds {counts.get('node', 0)} evidence node(s) "
+                f"and {counts.get('aggregate', 0)} candidate indicator(s); "
+                "learning acceleration is reported per rolling window in the "
+                "cycle report")
+               if counts else "")
+        unmeasured = (context.uncertainty or {}).get("unmeasured") or []
+        answer("stuck",
+               (f"{len(unmeasured)} economic condition(s) in the vocabulary "
+                f"are unmeasured: {', '.join(unmeasured[:6])}")
+               if unmeasured else "")
+        answer("seek_next",
+               (f"the unmeasured conditions above, ranked by how far a "
+                "belief could move on them; series this deployment cannot "
+                "read at all are listed with the reason in `econ.series`")
+               if unmeasured else "")
+
+        try:
+            expectations = EST.load(self._runtime_root, "expectation")
+        except Exception:  # noqa: BLE001
+            expectations = []
+        open_count = sum(1 for e in expectations
+                         if isinstance(e, dict) and e.get("outcome") == "OPEN")
+        resolved = [e for e in expectations if isinstance(e, dict)
+                    and e.get("outcome") in ("CORRECT", "INCORRECT",
+                                             "NEAR_MISS")]
+        answer("open_expectations",
+               f"{open_count} open forward expectation(s)"
+               if open_count else "")
+        answer("resolved",
+               f"{len(resolved)} resolved forward expectation(s)"
+               if resolved else "",
+               absent_reason=("no forward expectation has been written to "
+                              "the shared core and reached its window yet"))
+        wrong = [e for e in resolved if e.get("outcome") == "INCORRECT"]
+        answer("wrong",
+               "; ".join(str(e.get("reconciliation", ""))[:100]
+                         for e in wrong[:3]) if wrong else "")
+
+        # SECTION 37. The calibration line is rendered from the ledger, and
+        # it is PRE-CALIBRATION until the declared minimum is met. There is
+        # no branch here that prints a percentage before then.
+        from intent_engine.econ import belief as EB
+        rehydrated = []
+        for row in expectations:
+            if not isinstance(row, dict):
+                continue
+            try:
+                rehydrated.append(EB.Expectation(**{
+                    k: v for k, v in row.items()
+                    if k in EB.Expectation.__dataclass_fields__}))
+            except Exception:  # noqa: BLE001
+                continue
+        out["calibration"] = CAL.report(rehydrated).as_dict()
+        return out
+
+    def _econ_learning_block(self, as_of: str) -> str:
+        """The shared-core section of `/learning`, as HTML."""
+        data = self._econ_intelligence(as_of)
+        rows = []
+        for key, question in self._ECON_QUESTIONS:
+            entry = data["answers"].get(key) or {}
+            if entry.get("absent"):
+                rows.append(
+                    f"<li><strong>{_e(question)}</strong><br>"
+                    f"<em>not answerable yet — {_e(entry.get('reason', ''))}"
+                    f"</em></li>")
+            else:
+                rows.append(f"<li><strong>{_e(question)}</strong><br>"
+                            f"{_e(entry.get('answer', ''))}</li>")
+        counts = (data.get("store") or {}).get("counts") or {}
+        counts_html = (", ".join(f"{_e(k)}: {v}"
+                                 for k, v in sorted(counts.items()))
+                       or "the shared core holds nothing yet")
+        cal = data.get("calibration") or {}
+        cal_html = _e(cal.get("headline", "")) if cal else (
+            "no forward expectations have been recorded")
+        return (
+            f'<h2>Shared economic core</h2>'
+            f'<p><em>One economic state, read by both the market engine and '
+            f'every company analysis. This page shows what the core holds; '
+            f'it exposes no position, no book and no scheduler.</em></p>'
+            f'<p><strong>Calibration:</strong> {cal_html}</p>'
+            f'<p><strong>Core contents:</strong> {counts_html}</p>'
+            f'<ul>{"".join(rows)}</ul>')
+
     def _learning_page(self, session):
         """Personal AI's read-only view of the learning brain: the candidate
         pipeline by status and the paper book's scored metrics. This page
@@ -9617,6 +9948,7 @@ class WebApp:
             f'<h2>Candidates</h2>{cand_html}'
             f'<h2>Paper-trading book (shadow — no real money)</h2>'
             f'<p>{_e(pb["text"])}</p>'
+            f'{self._econ_learning_block(as_of)}'
             f'<p><a href="/">Back to start</a></p>'
             f'</main></body></html>')
         return self._html(_chrome(body, self._nav(session)))

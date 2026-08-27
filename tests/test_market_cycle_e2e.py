@@ -50,9 +50,30 @@ def test_a_complete_day_cycle_runs_every_step(tmp_path):
     assert result.status == C.COMPLETED, result.reason
     assert [s.name for s in result.steps] == [
         "research", "opportunity", "funnel", "positions", "paper_entries",
-        "assets", "learning", "knowledge", "learning_health", "health",
+        "assets", "learning", "knowledge", "econ_publish", "econ_aggregate",
+        "learning_health", "health",
         "report"]  # day does NOT acquire sources: it is night-only
     assert all(s.ok for s in result.steps)
+
+
+def test_the_economic_core_is_published_after_the_knowledge_fold(tmp_path):
+    """Order, not just membership.
+
+    `econ_publish` exports the beliefs this cycle's learning produced.
+    Running it before `knowledge` would export YESTERDAY'S beliefs with
+    today's date on them, which is the stale-surface error in its most
+    expensive form: the founder side would read a dated economic state that
+    the ledger cannot reproduce.
+    """
+    names = [n for n, _ in STEPS.day_steps()]
+    assert names.index("econ_publish") > names.index("knowledge")
+    assert names.index("econ_aggregate") > names.index("econ_publish")
+    for build in (STEPS.day_steps, STEPS.night_steps):
+        step_names = [n for n, _ in build()]
+        assert "econ_publish" in step_names
+        assert "econ_aggregate" in step_names, (
+            "the company -> market direction is missing from a cycle; the "
+            "flywheel only turns if both halves run")
 
 
 def test_learning_health_runs_after_learning_so_it_sees_this_session(tmp_path):

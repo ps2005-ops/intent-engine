@@ -219,10 +219,22 @@ _PATTERNS: Tuple[Tuple[str, str], ...] = (
             r"(cost|inflation|pressur\w+|shortage)\b"),
     (SUPPLY, r"\b(supply chain|supplier|component|semiconductor)\b"
              r"[^.]{0,60}\b(constraint|shortage|disrupt\w+|depend\w+)\b"),
+    # TWO DEAD BRANCHES, FOUND BY RUNNING THE PATTERNS OVER REAL FILINGS.
+    #
+    # `\b(\d+\s*%|...)\b` could never match a percentage: the group ends on
+    # "%", a non-word character, and the trailing \b then requires the NEXT
+    # character to be a word character. In "22% of revenue" it is a space, so
+    # the boundary fails. Only the "percent" and "majority" spellings ever
+    # rated, and "22% of revenue" is the form filings actually use. The
+    # boundary now belongs to the alternatives that are words.
     (CUSTOMER_CONCENTRATION,
      r"\b(largest|top|single)\s+(customer|client)s?\b[^.]{0,60}"
-     r"\b(\d+\s*%|percent|majority)\b"),
-    (CAPITAL_INTENSITY, r"\b(capital expenditure|capex|capital intensity|"
+     r"(?:\b\d+\s*%|\bpercent\b|\bmajority\b)"),
+    # `capital expenditure` did not match "capital expenditures", which is
+    # the form nearly every filing uses -- the trailing \b fails against the
+    # plural "s". Measured on six annual reports: the singular appears twice
+    # and the plural forty-one times.
+    (CAPITAL_INTENSITY, r"\b(capital expenditures?|capex|capital intensity|"
                         r"capital[- ]intensive)\b"),
     (REGULATORY, r"\b(regulat\w+|tariff|sanction)\w*\b[^.]{0,60}"
                  r"\b(our|its)\b[^.]{0,40}\b(business|operations|results)\b"),
