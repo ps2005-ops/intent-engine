@@ -235,6 +235,152 @@ UNIVERSE: Tuple[SeriesSpec, ...] = (
 BY_KEY: Dict[str, SeriesSpec] = {s.key: s for s in UNIVERSE}
 
 
+
+# =============================================================================
+# BEHAVIOURAL SERIES (Section 4's collective-human family)
+# =============================================================================
+# Section 27's rule applies here more sharply than anywhere else: NEVER
+# FABRICATE UNAVAILABLE DATA. The temptation with behavioural series is
+# acute, because a plausible-looking sentiment number is easy to synthesise
+# and nobody would immediately notice. So the ones that are genuinely
+# readable are marked LIVE with their publisher named, and the ones that are
+# proprietary, licensed or simply not published are marked UNAVAILABLE with
+# the reason -- which is what keeps the collective-state coverage figure
+# honest rather than flattering.
+
+#: A NOTE ON WHAT WAS CHECKED, NOT ASSUMED
+#: ----------------------------------------
+#: These were first written as LIVE, because the underlying figures are
+#: public and the series ids are real. Then the endpoints were actually
+#: called. The BLS API answers and is genuinely keyless -- so the two series
+#: this engine reads through it are LIVE. FRED's keyless CSV endpoint did NOT
+#: answer this engine within a usable timeout, and `macro_ingest` already
+#: records that the FRED API needs a key the deployment does not have. So
+#: every FRED-routed series below is KEYED, which is the difference between a
+#: coverage figure that is true and one that merely looks better.
+BEHAVIOURAL: Tuple[SeriesSpec, ...] = (
+    # --- readable now, keyless, verified by calling it ----------------------
+    _s("JTS000000000000000QUR", "quits", "US quits rate, total nonfarm",
+       "percent", "monthly", LIVE, publisher="BLS JOLTS (api.bls.gov)"),
+    _s("LNS11300000", "labour_participation",
+       "US labour force participation rate", "percent", "monthly", LIVE,
+       publisher="BLS (api.bls.gov)"),
+
+    # --- real, public, and behind a key this deployment does not have -------
+    _s("UMCSENT", "survey_confidence", "U. Michigan consumer sentiment",
+       "index", "monthly", KEYED, publisher="University of Michigan / FRED",
+       reason="routed through FRED, whose API needs a key this deployment "
+              "does not hold; the keyless fredgraph CSV endpoint did not "
+              "answer within 12s when called"),
+    _s("MICH", "household_expectation", "U. Michigan inflation expectation",
+       "percent", "monthly", KEYED, publisher="University of Michigan / FRED",
+       reason="same FRED key gap as UMCSENT"),
+    _s("PSAVERT", "saving_rate", "personal saving rate", "percent",
+       "monthly", KEYED, publisher="BEA / FRED",
+       reason="same FRED key gap; BEA's own API also requires registration"),
+    _s("BABATOTALSAUS", "business_formation", "business applications",
+       "thousands", "monthly", KEYED, publisher="Census BFS / FRED",
+       reason="same FRED key gap. The Census BFS API was tested directly and "
+              "returns 'Missing Key'; a guessed bulk-CSV path 404s. A "
+              "keyless route may exist and has not been found, which is a "
+              "different statement from one existing"),
+    _s("DRCCLACBS", "delinquency", "credit card delinquency rate, all banks",
+       "percent", "quarterly", KEYED, publisher="Federal Reserve H.8 / FRED",
+       reason="same FRED key gap. This is the single most damaging gap in "
+              "the behavioural family: delinquency is the discriminating "
+              "instrument for financial anxiety, and without it that "
+              "construct rests on contested proxies alone"),
+    _s("REVOLSL", "revolving_balance", "revolving consumer credit",
+       "billions", "monthly", KEYED, publisher="Federal Reserve G.19 / FRED",
+       reason="same FRED key gap"),
+
+    # --- derivable from series already read ---------------------------------
+    _s("job_switching_rate", "job_switching", "quits relative to "
+       "participation", "ratio", "monthly", DERIVABLE,
+       derivation="the quits rate against the participation rate; a rising "
+                  "quits rate on a falling participation rate is people "
+                  "leaving the labour force, which is the OPPOSITE reading "
+                  "to confident job-switching",
+       inputs=("JTS000000000000000QUR", "LNS11300000")),
+    _s("defensive_share", "defensive_spending",
+       "staples share of retail control group", "ratio", "monthly",
+       UNAVAILABLE,
+       reason="requires the retail sales control-group detail, which routes "
+              "through FRED or the Census advance report; no adapter reads "
+              "either, so this is declared rather than approximated"),
+
+    # --- named, and NOT available ------------------------------------------
+    _s("consumer_trade_down", "trade_down", "observed trade-down intensity",
+       "ratio", "monthly", UNAVAILABLE,
+       reason="no public series measures basket substitution directly; the "
+              "readable evidence is company disclosure of it, which enters "
+              "as COMPANY evidence and therefore may not corroborate a "
+              "consumer aggregate built from the same disclosures"),
+    _s("big_ticket_intent", "big_ticket_intent",
+       "durable-goods buying conditions", "index", "monthly", KEYED,
+       reason="the U. Michigan buying-conditions sub-indices are published "
+              "but not in the free FRED series set this engine reads"),
+    _s("household_trust", "trust_index", "trust in institutions",
+       "index", "annual", UNAVAILABLE,
+       reason="the major trust barometers are proprietary and annual; an "
+              "annual figure cannot support a quarterly-horizon forecast "
+              "comparison, so this construct stays measurement-blocked"),
+    _s("search_distress", "search_interest", "search volume, distress terms",
+       "index", "weekly", UNAVAILABLE,
+       reason="trends APIs forbid the redistribution this would require, and "
+              "the unauthenticated endpoints are rate-limited to the point "
+              "of unusability. Named so the gap is legible rather than "
+              "looking like an oversight"),
+    _s("retail_speculation", "retail_speculation",
+       "retail share of speculative volume", "ratio", "daily", UNAVAILABLE,
+       reason="retail order-flow share is a vendor product; the free proxies "
+              "for it are themselves derived from price, which would make "
+              "this a market signal wearing a behavioural label"),
+    _s("public_language_tone", "public_language", "aggregate public tone",
+       "index", "daily", UNAVAILABLE,
+       reason="no licensed corpus is configured; a tone index built from "
+              "whatever text happened to be scrapeable measures the scrape, "
+              "not the population"),
+)
+
+# Folded into the one universe, so `available()`, `missing()` and
+# `coverage()` all see the behavioural family without a second code path --
+# a parallel registry is how a series ends up readable by one reporter and
+# invisible to another.
+UNIVERSE = UNIVERSE + BEHAVIOURAL
+BY_KEY = {s.key: s for s in UNIVERSE}
+
+
+def behavioural_coverage() -> dict:
+    """What the collective-state layer can actually measure today.
+
+    Reported separately from the economic coverage because the two have very
+    different shapes: the macro side is mostly readable and the behavioural
+    side is mostly not, and averaging them into one figure would hide the
+    fact that half the collective vocabulary has no instrument at all.
+    """
+    from .proxies import BY_DIMENSION, uncovered_dimensions
+    readable = {s.kind for s in BEHAVIOURAL
+                if s.availability in (LIVE, DERIVABLE)}
+    blocked = {s.kind: s.reason for s in BEHAVIOURAL
+               if s.availability in (UNAVAILABLE, KEYED)}
+    measurable, blocked_dims = [], {}
+    for dim, proxies in BY_DIMENSION.items():
+        kinds = {p.kind for p in proxies}
+        if kinds & readable:
+            measurable.append(dim)
+        else:
+            blocked_dims[dim] = sorted(
+                f"{k}: {blocked.get(k, 'no series declared')}"
+                for k in kinds)
+    return {"behavioural_series": len(BEHAVIOURAL),
+            "readable_now": len(readable),
+            "blocked": len(blocked),
+            "dimensions_measurable_now": sorted(measurable),
+            "dimensions_blocked_by_data": blocked_dims,
+            "dimensions_with_no_proxy_at_all": uncovered_dimensions()}
+
+
 def available(*states: str) -> List[SeriesSpec]:
     wanted = set(states) or {LIVE}
     return [s for s in UNIVERSE if s.availability in wanted]

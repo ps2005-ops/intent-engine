@@ -2265,10 +2265,228 @@ def econ_publish_step(ctx: C.CycleContext) -> dict:
         report["dry_run"] = ctx.dry_run
         report["shocks"] = _econ_shocks(ctx)
         report["zero_trade"] = _econ_zero_trade(ctx)
+        # BEFORE acceleration, deliberately: the acceleration counters read
+        # this cycle's collective updates, and a producer that ran after them
+        # would report zero movement forever while working perfectly.
+        report["collective_state"] = _econ_collective(ctx)
         report["acceleration"] = _econ_acceleration(ctx, report)
         return report
     except Exception as exc:  # noqa: BLE001 - see docstring
         return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+
+def _econ_collective(ctx: C.CycleContext) -> dict:
+    """Estimate collective human state from this cycle's behavioural evidence.
+
+    THE CALL SITE FOR THE WHOLE COLLECTIVE LAYER. Everything in
+    `econ.collective`, `econ.proxies`, `econ.bayes` and `econ.estimator` is
+    reachable from here and from nowhere else in production -- which is the
+    condition this repository has failed at repeatedly: a complete, tested
+    subsystem that nothing imports is a document, and `acceleration` was
+    exactly that until its own call site was written.
+
+    IT FETCHES, THEN IT ESTIMATES. Behavioural nodes are collected live and
+    APPENDED to the shared store as BEHAVIORAL, never as MACRO. The class is
+    the whole point: if quits arrived as a macro labour reading, the
+    incremental-value comparison would be scoring a model against itself.
+
+    IT REPORTS ITS OWN EMPTINESS. `measurable_dimensions` is one of sixteen
+    today, and the report says so with the reason -- because a collective
+    layer that printed sixteen posteriors from proxies it cannot read would
+    be the most convincing thing in this codebase and the least true.
+
+    NEVER RAISES. A behavioural publisher that refuses must not fail a market
+    cycle; it reports by name, like every other feed here.
+    """
+    from intent_engine.econ import collective as CO
+    from intent_engine.econ import construct as CK
+    from intent_engine.econ import estimator as EST_C
+    from intent_engine.econ import series as SER
+    from intent_engine.econ import store as EST
+    from intent_engine.econ import vocabulary as V
+    from intent_engine.market import behavioral_ingest as BI
+
+    try:
+        fetched = BI.collect(retrieved_at=ctx.as_of)
+        nodes = fetched["nodes"]
+
+        # Persist as evidence, so the next cycle can tell a node it has
+        # already folded in from one that is genuinely new. Without this,
+        # every cycle would report the same rows as fresh learning.
+        if nodes and not ctx.dry_run:
+            EST.append_many(ctx.root, "node",
+                            [n.as_dict() for n in nodes],
+                            written_at=ctx.as_of)
+
+        register = _econ_construct_register(ctx)
+        population = CO.population("US_households", V.HOUSEHOLD)
+        prior = _econ_prior_collective(ctx, population.key)
+
+        estimate, updates, diagnostics = EST_C.estimate(
+            population=population, as_of=ctx.as_of, nodes=nodes,
+            register=register, prior=prior)
+
+        register = _econ_promote_observed(register, estimate, at=ctx.as_of)
+        # Re-stamp the estimate with the register's POST-transition states.
+        # Without this the same report publishes a reading labelled CANDIDATE
+        # beside a register that calls the construct OBSERVED -- one run
+        # saying two things, which Section 55 names as a closure blocker and
+        # this codebase has shipped before.
+        estimate = _econ_restamp(estimate, register)
+
+        if not ctx.dry_run:
+            if estimate.measured:
+                EST.append(ctx.root, "collective_state", estimate.as_dict(),
+                           written_at=ctx.as_of)
+            # The register is persisted EVERY cycle, measured or not: a
+            # retirement recorded in memory and never written is a construct
+            # that comes back tomorrow.
+            EST.append_many(ctx.root, "construct",
+                            [c.as_dict() for c in register],
+                            written_at=ctx.as_of)
+
+        return {"contract": CO.CONTRACT,
+                "fetched": fetched["collected"],
+                "fetch_failures": fetched["sources_failed"],
+                "empty_because": fetched["empty_because"],
+                "population": population.key,
+                "coverage": estimate.coverage,
+                "readings": CO.summarise(estimate)["readings"],
+                "updates": diagnostics["updates"],
+                "register": CK.summarise(register),
+                "measurement_reality": SER.behavioural_coverage(),
+                "diagnostics": {k: v for k, v in diagnostics.items()
+                                if k != "readings"}}
+    except Exception as exc:  # noqa: BLE001 - see docstring
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+def _econ_construct_register(ctx: C.CycleContext) -> list:
+    """The construct register, reloaded from the store or seeded once.
+
+    RELOADED, not rebuilt. A register rebuilt each cycle from a seed would
+    reset every retirement, and a construct that comes back from the dead
+    every night has not been retired at all -- which is the difference
+    between Section 42 being implemented and being described.
+    """
+    from intent_engine.econ import construct as CK
+    from intent_engine.econ import proxies as PX
+    from intent_engine.econ import store as EST
+
+    rows = [r for r in EST.load(ctx.root, "construct", upto=ctx.as_of)
+            if isinstance(r, dict)]
+    by_dim = {}
+    for r in rows:
+        dim = r.get("dimension")
+        if dim:
+            by_dim[dim] = r          # last write wins; the store is append-only
+    register = []
+    for dim, r in sorted(by_dim.items()):
+        try:
+            register.append(CK.Construct(
+                dimension=dim, state=r.get("state", "CANDIDATE"),
+                proposed_by=r.get("proposed_by", "reloaded"),
+                proxy=r.get("proxy", ""),
+                retired_reason=r.get("retired_reason", "")))
+        except Exception:  # noqa: BLE001 - a bad row must not kill the cycle
+            continue
+    # SEEDED AS CANDIDATE, NOT OBSERVED. `observe()` means a named proxy
+    # actually produced a posterior. Seeding at OBSERVED because a proxy is
+    # DECLARED would claim a measurement that never happened -- the same
+    # shape of defect as a capability with no call site, one state along.
+    # `_econ_promote_observed` moves them only once a posterior exists.
+    known = {c.dimension for c in register}
+    for dim in PX.covered_dimensions():
+        if dim not in known:
+            register.append(CK.propose(
+                dim, proposed_by="behavioural-economics seed",
+                proxy=",".join(sorted(p.kind for p in PX.BY_DIMENSION[dim]))))
+    return register
+
+
+def _econ_promote_observed(register, estimate, *, at: str) -> list:
+    """Move a CANDIDATE to OBSERVED once a real posterior exists for it.
+
+    The only transition this cycle performs automatically. Everything above
+    OBSERVED requires Section 18's comparison, which needs resolved forward
+    outcomes and therefore cannot happen inside the cycle that opened them.
+    """
+    from intent_engine.econ import construct as CK
+    from intent_engine.econ import proxies as PX
+    from intent_engine.econ import vocabulary as V
+
+    out = []
+    for c in register:
+        est = estimate.dimensions.get(c.dimension)
+        if (c.state == V.CANDIDATE and est is not None
+                and est.posterior_mean is not None):
+            out.append(CK.observe(
+                c, proxy=c.proxy or ",".join(
+                    sorted(p.kind for p in PX.BY_DIMENSION.get(
+                        c.dimension, ()))), at=at))
+        else:
+            out.append(c)
+    return out
+
+
+
+def _econ_restamp(estimate, register):
+    """Give every dimension the promotion state the register now holds."""
+    from dataclasses import replace
+    from intent_engine.econ import collective as CO
+
+    states = {c.dimension: c.state for c in register}
+    changed = {name: replace(est, promotion_state=states.get(
+                   name, est.promotion_state))
+               for name, est in estimate.dimensions.items()}
+    return CO.build(population=estimate.population, as_of=estimate.as_of,
+                    dimensions=list(changed.values()),
+                    source_nodes=estimate.source_nodes,
+                    provenance=estimate.provenance)
+
+
+def _econ_prior_collective(ctx: C.CycleContext, population_key: str):
+    """Last cycle's estimate for this population, or None.
+
+    Reloading the prior is what makes `moved` mean anything: without it every
+    cycle's posterior would have prior_mean=None and the dashboard would say
+    "at a level" forever rather than "rising" or "easing".
+    """
+    from intent_engine.econ import collective as CO
+    from intent_engine.econ import store as EST
+
+    rows = [r for r in EST.load(ctx.root, "collective_state", upto=ctx.as_of)
+            if isinstance(r, dict)
+            and (r.get("population") or {}).get("key") == population_key]
+    if not rows:
+        return None
+    latest = max(rows, key=lambda r: str(r.get("as_of", "")))
+    try:
+        pop_row = latest["population"]
+        pop = CO.Population(name=pop_row["name"], scale=pop_row["scale"],
+                            geography=pop_row.get("geography", "US"),
+                            cohort=pop_row.get("cohort", ""),
+                            context=pop_row.get("context", ""))
+        dims = []
+        for name, d in (latest.get("dimensions") or {}).items():
+            if d.get("posterior_mean") is None:
+                continue
+            dims.append(CO.DimensionEstimate(
+                dimension=name, posterior_mean=d["posterior_mean"],
+                uncertainty=d.get("uncertainty", 0.5),
+                trend=d.get("trend", ""),
+                confidence=d.get("confidence", 0.0),
+                prior_mean=d.get("prior_mean"),
+                evidence=tuple(d.get("evidence") or ()),
+                contradictory_evidence=tuple(
+                    d.get("contradictory_evidence") or ()),
+                promotion_state=d.get("promotion_state", "CANDIDATE")))
+        return CO.build(population=pop, as_of=latest["as_of"],
+                        dimensions=dims,
+                        source_nodes=latest.get("source_nodes") or ())
+    except Exception:  # noqa: BLE001 - a malformed prior is no prior
+        return None
 
 
 def _econ_acceleration(ctx: C.CycleContext, publish: dict) -> dict:

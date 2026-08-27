@@ -52,7 +52,12 @@ MACRO = "MACRO"
 MARKET_STRUCTURE = "MARKET_STRUCTURE"
 COMPANY = "COMPANY"
 STRATEGIC = "STRATEGIC"
-NODE_CLASSES = (MACRO, MARKET_STRUCTURE, COMPANY, STRATEGIC)
+#: What a population was OBSERVED DOING or SAYING (Section 4). Deliberately a
+#: fifth class rather than a subset of MACRO: a behavioural observation is a
+#: measurement of people, and the moment it is filed as macro the engine loses
+#: the ability to ask whether people told it something the aggregates had not.
+BEHAVIORAL = "BEHAVIORAL"
+NODE_CLASSES = (MACRO, MARKET_STRUCTURE, COMPANY, STRATEGIC, BEHAVIORAL)
 
 #: The measurable kinds inside each class. This is a VOCABULARY, not a
 #: schema: a node whose kind is not here is refused, because an unrecognised
@@ -88,6 +93,19 @@ NODE_KINDS = {
         "capacity_expansion", "acquisition", "vertical_integration",
         "regulatory_change",
     ),
+    #: Section 4's collective-human family. Every one of these is a PUBLIC
+    #: aggregate of what a population did or reported -- never an inference
+    #: about a named person, and never a private record.
+    BEHAVIORAL: (
+        "survey_confidence", "survey_expectation", "survey_trust",
+        "search_interest", "spending_level", "spending_mix",
+        "discretionary_intent", "big_ticket_intent", "trade_down",
+        "saving_rate", "borrowing_rate", "delinquency", "credit_application",
+        "revolving_balance", "job_switching", "quits", "labour_participation",
+        "business_formation", "household_expectation", "trust_index",
+        "retail_speculation", "risk_taking_proxy", "defensive_spending",
+        "public_language", "public_attention", "information_diffusion",
+    ),
 }
 
 #: Flat set, for the membership test.
@@ -116,3 +134,107 @@ def require(condition: bool, message: str) -> None:
     """A refusal that reads as a sentence rather than an assertion trace."""
     if not condition:
         raise EconError(message)
+
+
+# =============================================================================
+# COLLECTIVE HUMAN STATE (Sections 5-8, 29, 42)
+# =============================================================================
+# Everything below names a LATENT ESTIMATE ABOUT PEOPLE. It is kept in this
+# module for the same reason the rest is: two spellings of one construct is
+# how "risk appetite" and "risk_appetite" become two variables that never
+# corroborate each other, and a research programme whose whole output is a
+# comparison of two models cannot afford that.
+
+CONTRACT_COLLECTIVE = "collective_state.v1"
+
+# --- the scales (Section 6) -------------------------------------------------
+# "The market is fearful" is not a state, because it names no population.
+# Every estimate must sit at exactly one of these scales, and the scale is
+# what makes "fear among first-time homebuyers" a different object from
+# "fear among bank risk officers" rather than a rewording of it.
+INDIVIDUAL = "INDIVIDUAL"          # Personal AI only; refused in public state
+HOUSEHOLD = "HOUSEHOLD"
+DEMOGRAPHIC_COHORT = "DEMOGRAPHIC_COHORT"
+CONSUMER_COHORT = "CONSUMER_COHORT"
+WORKER_COHORT = "WORKER_COHORT"
+INVESTOR_COHORT = "INVESTOR_COHORT"
+EXECUTIVE_COHORT = "EXECUTIVE_COHORT"
+INDUSTRY = "INDUSTRY"
+POPULATION = "POPULATION"
+SCALES = (INDIVIDUAL, HOUSEHOLD, DEMOGRAPHIC_COHORT, CONSUMER_COHORT,
+          WORKER_COHORT, INVESTOR_COHORT, EXECUTIVE_COHORT, INDUSTRY,
+          POPULATION)
+
+#: The scale a public world model may never hold. Section 52: an individual
+#: state is a Personal-AI object, and the firewall is that this package
+#: refuses to build one rather than trusting a caller not to ask.
+PRIVATE_SCALES = frozenset({INDIVIDUAL})
+
+# --- the dimensions (Section 5) ---------------------------------------------
+# These are CANDIDATE constructs, not truths. Section 7: a framework may
+# propose a dimension; only Section 18's incremental-value test may keep one.
+COLLECTIVE_DIMENSIONS = (
+    "financial_anxiety", "perceived_control", "institutional_trust",
+    "interpersonal_trust", "hope", "anger", "stress", "agency", "belonging",
+    "risk_appetite", "time_horizon", "certainty", "perceived_security",
+    "perceived_fairness", "willingness_to_experiment", "future_orientation",
+)
+
+#: Section 3's wall, as data. A collective dimension may never be spelled with
+#: an economic quantity's name, nor an economic quantity with a dimension's:
+#: "credit stress" is not "fear", and "market volatility" is not "anxiety".
+#: `tests/test_econ_collective_state.py` asserts the two sets are disjoint.
+def collective_dimension_collisions() -> frozenset:
+    """Names claimed by both the economic and the collective vocabulary."""
+    return frozenset(COLLECTIVE_DIMENSIONS) & ALL_KINDS
+
+
+# --- market participants are NOT people (Section 29) ------------------------
+# A dealer's gamma is not a mood. Kept as a separate tuple so that a caller
+# asking for a collective state cannot be handed a positioning reading.
+#: EXACTLY the classes `levelk.PARTICIPANTS` models. A second, prettier list
+#: here would be two spellings of one participant, which is how a reflexive
+#: loop goes undetected: the flow engine reacts for `corporate_buybacks` and
+#: a report keyed on `corporate_buyback` finds nothing and says so calmly.
+#: `test_a_market_participant_is_not_a_population` asserts they agree.
+PARTICIPANT_CLASSES = (
+    "corporate_buybacks", "cta_trend_following", "discretionary_macro",
+    "long_only", "market_makers", "options_dealers", "passive_index",
+    "retail", "risk_parity", "volatility_control",
+)
+
+# --- promotion states (Section 42) ------------------------------------------
+CANDIDATE = "CANDIDATE"
+OBSERVED_C = "OBSERVED"      # a proxy exists and has been measured
+TESTED = "TESTED"            # it has faced Section 18's comparison once
+REPLICATED = "REPLICATED"    # and again, out of sample
+PROMOTED = "PROMOTED"
+WEAKENED = "WEAKENED"
+RETIRED = "RETIRED"
+COLLECTIVE_STATES = (CANDIDATE, OBSERVED_C, TESTED, REPLICATED, PROMOTED,
+                     WEAKENED, RETIRED)
+
+# --- what a new observation did to a posterior (Section 10) -----------------
+# "Arrival != learning" is the whole point of this tuple. A duplicate is
+# named, not silently counted, because counting it is how a cycle reports
+# 554 units of learning for a cycle that learned three things.
+CONFIRMATION = "CONFIRMATION"
+STRENGTHENING = "STRENGTHENING"
+WEAKENING = "WEAKENING"
+CONTRADICTION = "CONTRADICTION"
+NO_INFORMATION = "NO_INFORMATION"
+DUPLICATE_EVIDENCE = "DUPLICATE_EVIDENCE"
+EVIDENCE_EFFECTS = (CONFIRMATION, STRENGTHENING, WEAKENING, CONTRADICTION,
+                    NO_INFORMATION, DUPLICATE_EVIDENCE)
+
+#: Effects that moved the posterior. The others arrived.
+INFORMATIVE_EFFECTS = frozenset({CONFIRMATION, STRENGTHENING, WEAKENING,
+                                 CONTRADICTION})
+
+
+class CollectiveStateViolation(EconError):
+    """A collective-state estimate broke one of Section 5's requirements."""
+
+
+class UnsupportedInference(EconError):
+    """A psychological claim was made that the evidence does not license."""

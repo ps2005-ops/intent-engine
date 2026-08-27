@@ -44,7 +44,12 @@ ECON_DIR = "econ"
 KINDS = ("node", "belief", "belief_revision", "expectation",
          "expectation_resolution", "causal_edge", "attack", "aggregate",
          "zero_trade", "cycle_counts", "candidate", "state_snapshot",
-         "replay_verdict", "priority")
+         "replay_verdict", "priority",
+         # --- the collective-human layer ---
+         # `construct` is the register (Section 42) and MUST survive across
+         # cycles: a register rebuilt from a seed each night would resurrect
+         # every retired construct, which is not retirement.
+         "construct", "collective_state", "comparison", "bleed")
 
 
 class StoreError(EconError):

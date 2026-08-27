@@ -123,6 +123,14 @@ class CompanyEconomicState:
     competitors: Tuple[dict, ...] = ()
     substitutes: Tuple[dict, ...] = ()
     impossible_hypotheses: Tuple[dict, ...] = ()
+    #: Which collective constructs reach THIS company, and through what
+    #: channel (Section 12's `collective_behavior_exposures`). Deliberately
+    #: NOT a copy of the population's state: Section 13's closing line is
+    #: that the same psychological conclusion must not be dumped into every
+    #: company, and an exposure is what makes the reading company-specific.
+    #: Empty is the correct value for a company with no declared channel --
+    #: better than the population average, which is a guess wearing a number.
+    collective_exposures: Tuple[dict, ...] = ()
     #: Which tenant this state belongs to. Empty means public-only.
     tenant: str = ""
 
@@ -207,6 +215,8 @@ class CompanyEconomicState:
             "expectations": [dict(e) for e in self.expectations],
             "falsifiers": list(self.falsifiers),
             "competitors": [dict(c) for c in self.competitors],
+            "collective_exposures": [dict(x)
+                                     for x in self.collective_exposures],
             "substitutes": [dict(s) for s in self.substitutes],
             "impossible_hypotheses": [dict(h)
                                       for h in self.impossible_hypotheses],
@@ -226,6 +236,7 @@ def build(*, company_id: str, company_name: str, as_of: str,
           substitutes: Sequence[dict] = (),
           impossible_hypotheses: Sequence[dict] = (),
           expectations: Sequence[dict] = (),
+          collective_exposures: Sequence[dict] = (),
           falsifiers: Sequence[str] = ()) -> CompanyEconomicState:
     """The supported constructor. Exposure evidence must be IN the evidence.
 
@@ -245,4 +256,6 @@ def build(*, company_id: str, company_name: str, as_of: str,
         evidence=tuple(evidence), tenant=tenant,
         competitors=tuple(competitors), substitutes=tuple(substitutes),
         impossible_hypotheses=tuple(impossible_hypotheses),
-        expectations=tuple(expectations), falsifiers=tuple(falsifiers))
+        expectations=tuple(expectations),
+        collective_exposures=tuple(collective_exposures),
+        falsifiers=tuple(falsifiers))

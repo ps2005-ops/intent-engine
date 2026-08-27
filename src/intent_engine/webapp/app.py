@@ -6538,8 +6538,97 @@ class WebApp:
             '<p class="none">Read from the market engine&rsquo;s own learning '
             'record. Activity and learning are shown separately: reading more '
             'is not the same as knowing more.</p>'
-            + "".join(windows) + '</main></body></html>')
+            + "".join(windows)
+            + self._collective_block()
+            + '</main></body></html>')
         return self._html(body)
+
+    def _collective_block(self) -> str:
+        """Section 49: what the engine believes people are doing differently.
+
+        THREE NUMBERS, ALWAYS TOGETHER. Measured, usable and promoted are
+        almost never equal, and a panel showing only the first would present
+        effort as if it were result -- the same mistake the window panel
+        above refuses to make with arrival counts.
+
+        THE EMPTY CASE IS THE INTERESTING ONE TODAY. One construct of sixteen
+        is measurable, and rendering that as a blank section would read as
+        "nothing to report" rather than "the layer is built and starved".
+        So the block always renders, and always names the reason.
+        """
+        try:
+            from intent_engine.econ import dashboard as CD
+            # An ATTRIBUTE, set in __init__, not a method. Calling it would
+            # raise TypeError, which the except below would swallow into a
+            # permanently blank panel -- the silent-zero shape this codebase
+            # has shipped before.
+            payload = CD.build(self._runtime_root)
+        except Exception:                                   # noqa: BLE001
+            return ""
+        if not payload.get("available"):
+            return ""
+        h = payload["headline"]
+        inc = payload["incremental_value"]
+
+        rows = []
+        for pop in payload.get("populations", []):
+            who = (pop.get("population") or {}).get("name", pop.get("key"))
+            for r in pop.get("readings", []):
+                moved = r.get("moved")
+                move = ("" if moved is None
+                        else f' <span class="none">({moved:+.3f} since the '
+                             f'previous estimate)</span>')
+                rows.append(
+                    f'<li>{_e(r["sentence"])}{move}<br>'
+                    f'<span class="none">{_e(r["promotion_state"])} — '
+                    f'{_e(r["meaning"])}</span></li>')
+        readings = ("<ul>" + "".join(rows) + "</ul>" if rows else
+                    '<p class="none">No population has a usable reading in '
+                    'this store yet.</p>')
+
+        if inc.get("status") == "MEASURED":
+            delta = inc.get("incremental_delta")
+            value = (
+                f'<h3>Base economic model vs base + collective state</h3>'
+                f'<ul class="counts">'
+                f'<li>base economic model: '
+                f'{_e(str(inc.get("base_economic_model_score")))}</li>'
+                f'<li>base + collective state: '
+                f'{_e(str(inc.get("base_plus_collective_score")))}</li>'
+                f'<li><strong>incremental delta: {_e(str(delta))}</strong> '
+                f'({_e(str(inc.get("robust_improvements")))} robust of '
+                f'{_e(str(inc.get("tested")))} tested)</li></ul>')
+        else:
+            value = (f'<h3>Base economic model vs base + collective state</h3>'
+                     f'<p class="none">{_e(inc.get("reason", ""))}</p>')
+
+        retired = "".join(
+            f'<li>{_e(r["dimension"])} — {_e(r["reason"])}</li>'
+            for r in payload.get("retired", []))
+        reality = payload.get("measurement_reality", {})
+        blocked = reality.get("dimensions_blocked_by_data", {})
+        blocked_html = "".join(
+            f'<li>{_e(d)}: {_e("; ".join(v)[:180])}</li>'
+            for d, v in sorted(blocked.items()))
+
+        return (
+            '<section class="card"><h2>What people appear to be doing '
+            'differently</h2>'
+            f'<p class="verdict">{_e(payload.get("verdict", ""))}</p>'
+            f'<ul class="counts">'
+            f'<li>{_e(str(h["vocabulary"]))} constructs declared; '
+            f'{_e(str(h["with_a_proxy"]))} have a proxy; '
+            f'{_e(str(h["measurable_today"]))} can be measured with the data '
+            f'this deployment can actually read</li>'
+            f'<li>{_e(str(h["measured"]))} currently measured, '
+            f'{_e(str(h["promoted"]))} promoted, '
+            f'{_e(str(h["retired"]))} tested and removed</li></ul>'
+            + readings + value
+            + (f'<h3>Removed for adding no predictive value</h3>'
+               f'<ul>{retired}</ul>' if retired else "")
+            + (f'<h3>Cannot be measured here, and why</h3>'
+               f'<ul>{blocked_html}</ul>' if blocked_html else "")
+            + '</section>')
 
     def _registrant(self, dossier) -> dict:
         """The SEC's classification of this filer, or {}.

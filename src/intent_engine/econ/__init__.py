@@ -51,6 +51,28 @@ WHAT LIVES HERE
     company       CompanyEconomicState: one company, in that economy
     store         append-only durable form under the shared runtime root
 
+THE COLLECTIVE-HUMAN LAYER (Sections 5-8, 13-14, 18, 21-22, 42, 56)
+--------------------------------------------------------------------
+    collective    CollectiveStateEstimate: a POPULATION's latent state, typed
+                  separately from economic state because credit stress is not
+                  fear and a model that spells them the same way can never
+                  ask whether one predicts the other
+    proxies       behavioural observations -> constructs, each loading stated
+                  as a hypothesis with a rationale, a sign and an honest noise
+    bayes         precision-weighted posteriors, and a NAME for what each
+                  observation did — arrival is not learning
+    estimator     the producer the cycle calls; retired constructs are not
+                  computed, not merely hidden
+    incremental   THE GATE. Base economic model vs base + collective state,
+                  paired, bootstrapped, FDR-corrected, hindsight-walled. The
+                  only thing that may promote a psychological variable
+    construct     a construct's life and death: CANDIDATE -> ... -> PROMOTED,
+                  or RETIRED and removed
+    transmission  economy <-> psychology <-> behaviour <-> company, in one
+                  registry so that reflexive loops are detectable at all
+    bleed         where a conventional mechanism under-delivered, and which
+                  measurable construct is proposed to have absorbed it
+
 WHAT THIS PACKAGE REFUSES
 -------------------------
     - trading internals in shared state (allowlist, at every depth, plus a
@@ -63,15 +85,30 @@ WHAT THIS PACKAGE REFUSES
     - causal language below evidence level 3
     - an accuracy figure before the declared minimum forward sample
     - live capital, at this stage, by construction
+    - an individual's psychological state in the public world model (Section
+      52): the public core cannot CONSTRUCT one, rather than trusting its
+      callers not to ask for one
+    - a psychological construct informing a decision before it has beaten the
+      base economic model out of sample, in two regimes, after correcting for
+      the size of the test family
+    - a posterior over a construct rendered as a fraction of a population
+      ("Americans are 73% afraid"); `collective.narrate` is the only
+      supported renderer and it refuses that sentence shape
 """
 from __future__ import annotations
 
 from .vocabulary import (               # noqa: F401
-    CONTRACT, EconError, LineageViolation, PUBLIC, PrivacyViolation,
-    TENANT_PRIVATE,
+    BEHAVIORAL, CANDIDATE, COLLECTIVE_DIMENSIONS, CONTRACT,
+    CONTRACT_COLLECTIVE, EVIDENCE_EFFECTS, PROMOTED, PUBLIC, RETIRED, SCALES,
+    CollectiveStateViolation, EconError, LineageViolation, PrivacyViolation,
+    TENANT_PRIVATE, UnsupportedInference,
 )
 
 __all__ = [
     "CONTRACT", "EconError", "PrivacyViolation", "LineageViolation",
     "PUBLIC", "TENANT_PRIVATE",
+    # --- the collective-human layer ---
+    "BEHAVIORAL", "COLLECTIVE_DIMENSIONS", "CONTRACT_COLLECTIVE",
+    "EVIDENCE_EFFECTS", "SCALES", "CANDIDATE", "PROMOTED", "RETIRED",
+    "CollectiveStateViolation", "UnsupportedInference",
 ]
