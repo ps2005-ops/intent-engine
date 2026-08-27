@@ -103,6 +103,11 @@ NODE_KINDS = {
         "saving_rate", "borrowing_rate", "delinquency", "credit_application",
         "revolving_balance", "job_switching", "quits", "labour_participation",
         "business_formation", "household_expectation", "trust_index",
+        # Added once real instruments for them were found and called. Each is
+        # a measurement of what households are EXPERIENCING or DOING, not an
+        # inference about how they feel about it -- the latter is a construct
+        # and lives in COLLECTIVE_DIMENSIONS.
+        "debt_service_burden", "underemployment", "employment_ratio",
         "retail_speculation", "risk_taking_proxy", "defensive_spending",
         "public_language", "public_attention", "information_diffusion",
     ),

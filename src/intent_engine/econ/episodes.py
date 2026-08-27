@@ -333,3 +333,176 @@ def summarise() -> dict:
             "construct_coverage": coverage,
             "span": [min(e.start for e in EPISODES),
                      max(e.end for e in EPISODES)]}
+
+
+# =============================================================================
+# §7: THE DISCOVERED CATALOG
+# =============================================================================
+# `EPISODES` above is a hand-written test bed: windows somebody chose, with a
+# consensus and an alternative attached. It is useful and it cannot be used to
+# COUNT independent events, because the count would then be a property of the
+# list rather than of the data.
+#
+# `EconomicEpisode` is the other object. It is DISCOVERED from the
+# contemporaneous regime classifier reading the walled panel at each origin,
+# so an episode exists because the data said so at the time, not because we
+# remember it happening. The named list in §7 of the run prompt -- 1973-75,
+# 1979-82, 1987, 1990-91 and the rest -- is used for COVERAGE AUDIT only:
+# `coverage_audit` reports which of those windows the discovery actually
+# found, which is a check on the classifier, not an input to it.
+
+STRESS_REGIMES = ("CREDIT_STRESS", "LIQUIDITY_STRESS", "INFLATION_SHOCK",
+                  "LABOUR_DETERIORATION")
+
+#: How many consecutive calm origins end an episode. Two quarters of nothing
+#: happening is a normalisation; one month is a gap in the data.
+NORMALISATION_ORIGINS = 6
+
+
+@dataclass(frozen=True)
+class EconomicEpisode:
+    """A stretch of stress the classifier found, with its evidence."""
+
+    episode_id: str
+    start_as_known: str
+    end_as_known: str
+    regime_sequence: Tuple[str, ...]
+    #: What fired first, and its reading. The trigger is recorded as the
+    #: evidence at the FIRST origin rather than the worst one, because an
+    #: episode is dated by when it became visible.
+    trigger_evidence: Dict[str, float]
+    peak_stress: int
+    #: The origin at which every stress condition had cleared, or "" when the
+    #: episode ran to the end of the sample.
+    normalization: str
+    #: The last date any input to the classification was knowable. Equal to
+    #: the last origin: an episode discovered this way carries no hindsight.
+    information_cutoff: str
+    provenance: str
+    origins: Tuple[str, ...] = ()
+
+    @property
+    def origin_count(self) -> int:
+        return len(self.origins)
+
+    @property
+    def resolved(self) -> bool:
+        return bool(self.normalization)
+
+    def covers(self, date: str) -> bool:
+        return self.start_as_known <= date <= self.end_as_known
+
+    def as_dict(self) -> dict:
+        return {"episode_id": self.episode_id,
+                "start_as_known": self.start_as_known,
+                "end_as_known": self.end_as_known,
+                "regime_sequence": list(self.regime_sequence),
+                "trigger_evidence": dict(self.trigger_evidence),
+                "peak_stress": self.peak_stress,
+                "normalization": self.normalization,
+                "information_cutoff": self.information_cutoff,
+                "provenance": self.provenance,
+                "origins": len(self.origins),
+                "resolved": self.resolved}
+
+
+def discover(readings: Sequence) -> List[EconomicEpisode]:
+    """Find stress episodes in a time-ordered run of RegimeReadings.
+
+    An episode OPENS at the first origin where any stress regime holds, and
+    CLOSES after `NORMALISATION_ORIGINS` consecutive origins with none. The
+    closing rule is what stops one long expansion punctuated by single
+    readings from being counted as a dozen separate crises -- the failure
+    mode the run prompt names explicitly ("treat one contiguous crisis as 20
+    independent episodes").
+    """
+    ordered = sorted(readings, key=lambda r: r.as_of)
+    out: List[EconomicEpisode] = []
+    open_ep = None
+    calm_run = 0
+    for r in ordered:
+        stressed = [x for x in r.regimes if x in STRESS_REGIMES]
+        if stressed:
+            calm_run = 0
+            if open_ep is None:
+                open_ep = {"start": r.as_of, "origins": [], "seq": [],
+                           "trigger": dict(r.evidence), "peak": 0,
+                           "last": r.as_of}
+            open_ep["origins"].append(r.as_of)
+            open_ep["seq"].extend(x for x in stressed
+                                  if x not in open_ep["seq"])
+            open_ep["peak"] = max(open_ep["peak"], len(stressed))
+            open_ep["last"] = r.as_of
+        elif open_ep is not None:
+            calm_run += 1
+            if calm_run >= NORMALISATION_ORIGINS:
+                out.append(_close(open_ep, r.as_of))
+                open_ep, calm_run = None, 0
+    if open_ep is not None:
+        out.append(_close(open_ep, ""))
+    return out
+
+
+def _close(ep: dict, normalised_at: str) -> EconomicEpisode:
+    return EconomicEpisode(
+        episode_id=f"EP_{ep['start'][:7].replace('-', '')}",
+        start_as_known=ep["start"], end_as_known=ep["last"],
+        regime_sequence=tuple(ep["seq"]), trigger_evidence=ep["trigger"],
+        peak_stress=ep["peak"], normalization=normalised_at,
+        information_cutoff=ep["last"],
+        provenance=("econ.regime.classify over the walled panel; no window "
+                    "was supplied and no outcome was consulted"),
+        origins=tuple(ep["origins"]))
+
+
+#: Windows the run prompt lists. USED FOR COVERAGE AUDIT ONLY -- never to
+#: label, never to seed discovery. A period in this list that discovery did
+#: NOT find is a finding about the classifier or about the data reach; a
+#: period discovery found that is not here is not an error at all.
+AUDIT_WINDOWS: Tuple[Tuple[str, str, str], ...] = (
+    ("late_1960s_inflation", "1966-01-01", "1970-12-31"),
+    ("1973_75", "1973-01-01", "1975-12-31"),
+    ("1979_82", "1979-01-01", "1982-12-31"),
+    ("1987", "1987-08-01", "1988-03-31"),
+    ("1990_91", "1990-01-01", "1991-12-31"),
+    ("1994_tightening", "1994-01-01", "1995-06-30"),
+    ("1997_98", "1997-07-01", "1998-12-31"),
+    ("2000_02", "2000-03-01", "2002-12-31"),
+    ("2007_09", "2007-06-01", "2009-12-31"),
+    ("2011", "2011-06-01", "2012-03-31"),
+    ("2015_16", "2015-06-01", "2016-06-30"),
+    ("2018", "2018-09-01", "2019-01-31"),
+    ("2020", "2020-02-01", "2020-12-31"),
+    ("2021_23", "2021-04-01", "2023-12-31"),
+    ("2023_banking", "2023-03-01", "2023-09-30"),
+)
+
+
+def coverage_audit(found: Sequence[EconomicEpisode],
+                   origin_span: Tuple[str, str] = ("", "")) -> dict:
+    """Which known windows the discovery reached, and why it missed the rest.
+
+    A window outside the origin span was NOT MISSED -- there were no origins
+    in it to classify. Reporting those as misses would turn a data-reach
+    limit into a classifier defect, which is the wrong lesson from the same
+    number.
+    """
+    lo, hi = origin_span
+    rows = []
+    for key, start, end in AUDIT_WINDOWS:
+        in_reach = (not lo) or (start <= hi and end >= lo)
+        hit = [e.episode_id for e in found
+               if e.start_as_known <= end and e.end_as_known >= start]
+        rows.append({"window": key, "start": start, "end": end,
+                     "in_origin_reach": in_reach,
+                     "episodes_found": hit,
+                     "status": ("FOUND" if hit else
+                                ("MISSED" if in_reach else "OUT_OF_REACH"))})
+    return {"contract": CONTRACT + "/coverage",
+            "origin_span": list(origin_span),
+            "windows": rows,
+            "found": sum(1 for r in rows if r["status"] == "FOUND"),
+            "missed": sum(1 for r in rows if r["status"] == "MISSED"),
+            "out_of_reach": sum(1 for r in rows
+                                if r["status"] == "OUT_OF_REACH"),
+            "discovered_episodes": [e.as_dict() for e in found]}

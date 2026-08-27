@@ -92,6 +92,11 @@ class Forecast:
     horizon_days: int
     model: str
     regime: str = "ALL"
+    #: What this forecast is NOT independent of. Rows sharing an origin share
+    #: their features and overlap in their outcome windows; leaving this
+    #: empty falls back to the target id, which makes every row its own
+    #: cluster and reproduces the pseudo-replication this exists to stop.
+    cluster: str = ""
 
     def __post_init__(self) -> None:
         require(bool(self.target_id), "a forecast names its target")
@@ -164,6 +169,154 @@ def _quantile(sorted_xs: Sequence[float], q: float) -> float:
     return sorted_xs[lo] + (sorted_xs[hi] - sorted_xs[lo]) * (idx - lo)
 
 
+def count_episodes(clusters: Sequence[str], *, gap_days: int = 200) -> int:
+    """How many SEPARATE episodes the clusters fall into.
+
+    Clustering on the origin fixes rows-within-origin. It does not fix
+    origins-within-episode: quarterly origins running consecutively through
+    one inflation shock are not independent draws either, and a bootstrap
+    over them will happily report a narrow interval because every origin in
+    the episode tells the same story.
+
+    The INFLATION_SHOCK slice is the worked example -- 14 origins that are
+    really two episodes, 2005-2008 and 2021-2023. A result resting on two
+    events is a hypothesis, not a finding, however small its interval.
+
+    Reported rather than corrected: a block bootstrap over two blocks is not
+    meaningfully better than counting them, and pretending otherwise would
+    replace an honest "too few episodes" with a confident-looking number.
+    """
+    import datetime as _dt
+    dates = sorted({c for c in clusters if len(c) == 10 and c[4] == "-"})
+    if not dates:
+        return len(set(clusters))
+    episodes, prev = 1, None
+    for d in dates:
+        cur = _dt.date(int(d[:4]), int(d[5:7]), int(d[8:10]))
+        if prev is not None and (cur - prev).days > gap_days:
+            episodes += 1
+        prev = cur
+    return episodes
+
+
+#: Below this many separate episodes, an interval is reported and NOT
+#: believed. Two episodes can produce any interval you like.
+MIN_EPISODES = 3
+
+
+def _cluster_bootstrap_ci(diffs: Sequence[float], clusters: Sequence[str], *,
+                          seed: int) -> Tuple[float, float, float, int]:
+    """Percentile interval that resamples CLUSTERS, not observations.
+
+    WHY THIS IS NOT OPTIONAL HERE. Each forecast origin contributes several
+    rows -- five targets at two horizons -- built from the SAME features with
+    OVERLAPPING outcome windows. Those rows are not independent draws, and a
+    bootstrap that resamples them individually treats one origin as up to ten
+    pieces of evidence.
+
+    The concrete damage: an INFLATION_SHOCK slice of "n=30" came from 14
+    origins clustered in two episodes, and the row bootstrap returned
+    [+0.081, +0.271] with p=0.002 -- a decisive-looking result resting on two
+    events. Resampling origins instead gives the interval the actual
+    replication supports.
+
+    Returns (lo, hi, p, n_clusters). `n_clusters` is the honest sample size
+    and is reported instead of the row count wherever the two disagree.
+    """
+    rng = random.Random(seed)
+    by_cluster: Dict[str, List[float]] = {}
+    for d, c in zip(diffs, clusters):
+        by_cluster.setdefault(c, []).append(d)
+    keys = sorted(by_cluster)
+    k = len(keys)
+    if k < 2:
+        return None, None, 1.0, k
+    means = []
+    for _ in range(BOOTSTRAP_DRAWS):
+        picked = [by_cluster[keys[rng.randrange(k)]] for _ in range(k)]
+        flat = [x for grp in picked for x in grp]
+        means.append(sum(flat) / len(flat))
+    means.sort()
+    alpha = (1.0 - CI_LEVEL) / 2.0
+    lo = _quantile(means, alpha)
+    hi = _quantile(means, 1.0 - alpha)
+    below = sum(1 for m in means if m <= 0.0) / BOOTSTRAP_DRAWS
+    p = min(1.0, 2.0 * min(below, 1.0 - below))
+    return lo, hi, p, k
+
+
+def episode_blocks(clusters: Sequence[str], *, gap_days: int = 200
+                   ) -> Dict[str, str]:
+    """cluster -> episode id. Contiguous origins are ONE block.
+
+    The unit `_episode_bootstrap_ci` resamples. Built from the origins' own
+    spacing rather than from a list of remembered crises, so an episode is a
+    run of dates the sample actually contains.
+    """
+    import datetime as _dt
+    dates = sorted({c for c in clusters if len(c) == 10 and c[4] == "-"})
+    out: Dict[str, str] = {}
+    if not dates:
+        return {c: c for c in clusters}
+    block, prev = dates[0], None
+    for d in dates:
+        cur = _dt.date(int(d[:4]), int(d[5:7]), int(d[8:10]))
+        if prev is not None and (cur - prev).days > gap_days:
+            block = d
+        out[d] = f"EP_{block}"
+        prev = cur
+    for c in clusters:
+        out.setdefault(c, f"EP_{c}")
+    return out
+
+
+def _episode_bootstrap_ci(diffs: Sequence[float], clusters: Sequence[str], *,
+                          seed: int, gap_days: int = 200,
+                          blocks: Dict[str, str] = None
+                          ) -> Tuple[float, float, float, int]:
+    """Percentile interval that resamples EPISODES, not origins.
+
+    WHY A THIRD LEVEL. Clustering on the origin fixes rows-within-origin.
+    Fourteen quarterly origins running consecutively through one inflation
+    shock are still one event, and an origin bootstrap over them narrows the
+    interval on evidence that is not there.
+
+    WHAT IT REPORTS WHEN THERE ARE TOO FEW. Below `MIN_EPISODES` blocks the
+    interval is returned anyway AND the block count is returned with it, so
+    the caller can print both. It is not silently widened to something
+    defensible: an interval computed from two blocks means nothing whatever
+    its width, and manufacturing a wide one would hide that behind a number
+    that looks cautious.
+    """
+    rng = random.Random(seed)
+    blocks = blocks or episode_blocks(clusters, gap_days=gap_days)
+    by_block: Dict[str, List[float]] = {}
+    for d, c in zip(diffs, clusters):
+        by_block.setdefault(blocks.get(c, c), []).append(d)
+    keys = sorted(by_block)
+    k = len(keys)
+    if k < 2:
+        # ONE BLOCK IS NOT A NARROW INTERVAL, IT IS NO INTERVAL.
+        #
+        # Returning (0.0, 0.0) here printed "episode-aware CI [+0.00000,
+        # +0.00000]" beside a real delta of -0.00948 -- a result that looks
+        # like an impossibly precise zero and is actually an absence. None
+        # is returned instead, and every caller has to say "undefined".
+        return None, None, 1.0, k
+    means = []
+    for _ in range(BOOTSTRAP_DRAWS):
+        picked = [by_block[keys[rng.randrange(k)]] for _ in range(k)]
+        flat = [x for grp in picked for x in grp]
+        means.append(sum(flat) / len(flat))
+    means.sort()
+    alpha = (1.0 - CI_LEVEL) / 2.0
+    lo = _quantile(means, alpha)
+    hi = _quantile(means, 1.0 - alpha)
+    below = sum(1 for m in means if m <= 0.0) / BOOTSTRAP_DRAWS
+    p = min(1.0, 2.0 * min(below, 1.0 - below))
+    return lo, hi, p, k
+
+
 def _bootstrap_ci(diffs: Sequence[float], *, seed: int
                   ) -> Tuple[float, float, float]:
     """Percentile interval and a two-sided p-value for mean(diffs) != 0.
@@ -204,26 +357,76 @@ class Comparison:
     ci_high: float
     p_value: float
     verdict: str
+    #: Independent units behind `n_paired`. When these differ, the smaller
+    #: one is the sample size that means anything.
+    n_clusters: int = 0
+    #: How many SEPARATE episodes those clusters fall into. Two contiguous
+    #: crises are two events however many quarterly origins they contain.
+    n_episodes: int = 0
+    #: The episode-aware interval, resampling contiguous runs of origins as
+    #: single blocks. Reported BESIDE the clustered one, never instead of it:
+    #: they answer different questions and a reader needs both to see how
+    #: much of the precision came from re-describing one event.
+    episode_ci_low: Optional[float] = None
+    episode_ci_high: Optional[float] = None
+    #: True when the clustered bootstrap had a single cluster and the
+    #: reported interval came from the row bootstrap instead. A reader must
+    #: be able to tell an interval that survived clustering from one that
+    #: never faced it.
+    single_cluster: bool = False
     #: Set by `adjust()` once the whole family is known. Until then a single
     #: comparison cannot honestly claim significance.
     fdr_adjusted: bool = False
     survives_fdr: Optional[bool] = None
+    #: The smallest true delta this sample could have separated from zero.
+    #: Reported beside every verdict so a null result can be read correctly:
+    #: an observed delta well inside this band is UNTESTED, not disproven.
+    mde: Optional[float] = None
     note: str = ""
 
     @property
     def robust(self) -> bool:
         """Positive, interval clear of zero, AND it survived the family."""
         return (self.verdict == IMPROVEMENT
-                and self.survives_fdr is True)
+                and self.survives_fdr is True
+                and not self.too_few_episodes)
+
+    @property
+    def too_few_episodes(self) -> bool:
+        """Does this rest on too few separate events to believe?"""
+        return bool(self.n_episodes) and self.n_episodes < MIN_EPISODES
+
+    @property
+    def underpowered(self) -> bool:
+        """Was the observed delta too small for this sample to resolve?
+
+        A null result here means "not measured", not "measured as zero".
+        """
+        return (self.mde is not None and self.mde > 0
+                and abs(self.delta) < self.mde)
 
     def as_dict(self) -> dict:
-        return {"name": self.name, "dimension": self.dimension,
+        return {"underpowered": self.underpowered, "mde": self.mde,
+                "n_clusters": self.n_clusters, "n_episodes": self.n_episodes,
+                "too_few_episodes": self.too_few_episodes,
+                "pseudo_replication": (
+                    self.n_clusters and self.n_paired > self.n_clusters * 2),
+                "name": self.name, "dimension": self.dimension,
                 "regime": self.regime, "horizon_days": self.horizon_days,
                 "population": self.population, "n_paired": self.n_paired,
                 "base_score": self.base_score,
                 "augmented_score": self.augmented_score,
                 "delta": self.delta,
-                "ci": [self.ci_low, self.ci_high], "p_value": self.p_value,
+                "ci": [self.ci_low, self.ci_high],
+                "episode_ci": ([self.episode_ci_low, self.episode_ci_high]
+                               if self.episode_ci_low is not None else None),
+                "episode_ci_note": (
+                    None if self.episode_ci_low is not None else
+                    f"undefined: {self.n_episodes} episode(s). One block "
+                    "cannot support an interval, and a zero-width one would "
+                    "read as certainty."),
+                "single_cluster": self.single_cluster,
+                "p_value": self.p_value,
                 "verdict": self.verdict, "fdr_adjusted": self.fdr_adjusted,
                 "survives_fdr": self.survives_fdr, "robust": self.robust,
                 "note": self.note}
@@ -235,7 +438,10 @@ class Comparison:
         "improves", and it may not use it before `adjust()` has run.
         """
         base = (f"{self.dimension} / {self.population} / {self.regime} / "
-                f"{self.horizon_days}d (n={self.n_paired})")
+                f"{self.horizon_days}d (n={self.n_paired}"
+                + (f", {self.n_clusters} independent origins)"
+                   if self.n_clusters and self.n_clusters != self.n_paired
+                   else ")"))
         if self.verdict == INSUFFICIENT_SAMPLE:
             return (f"{base}: not tested — {self.n_paired} paired forecasts "
                     f"is below the floor of {MIN_PAIRED}.")
@@ -262,7 +468,8 @@ class Comparison:
 def compare(*, name: str, dimension: str, population: str,
             base: Sequence[Forecast], augmented: Sequence[Forecast],
             outcomes: Sequence[Outcome], regime: str = "ALL",
-            horizon_days: int = 0, seed: int = 20260827) -> Comparison:
+            horizon_days: int = 0, seed: int = 20260827,
+            blocks: Dict[str, str] = None) -> Comparison:
     """Score two models on the SAME targets and test whether B beats A.
 
     Delta is defined as base_score - augmented_score, so POSITIVE MEANS THE
@@ -297,11 +504,32 @@ def compare(*, name: str, dimension: str, population: str,
     b_losses = [brier(b_by[t], by_id[t]) for t in shared]
     a_losses = [brier(a_by[t], by_id[t]) for t in shared]
     diffs = [b - a for b, a in zip(b_losses, a_losses)]   # >0 = augmented won
+    # The cluster is the forecast ORIGIN when one was supplied. Falling back
+    # to the target id means one row per cluster, which is the unclustered
+    # bootstrap -- correct only when the rows really are independent.
+    clusters = [b_by[t].cluster or b_by[t].information_cutoff or t
+                for t in shared]
 
     base_score = sum(b_losses) / n
     aug_score = sum(a_losses) / n
     delta = base_score - aug_score
-    lo, hi, p = _bootstrap_ci(diffs, seed=seed)
+    lo, hi, p, n_clusters = _cluster_bootstrap_ci(diffs, clusters, seed=seed)
+    # `blocks` maps an origin to the MACROECONOMIC PHASE it sits in. Without
+    # it the block is a contiguous run of dates, which is right for a regime
+    # slice and wrong for a global sample: consecutive monthly origins
+    # spanning 1978-2026 form one contiguous run and forty-eight years of
+    # separate crises. Passing the phase map makes the two episode counts on
+    # a result -- the one in the sample and the one in the interval -- the
+    # same number.
+    elo, ehi, _ep, n_episodes = _episode_bootstrap_ci(
+        diffs, clusters, seed=seed, blocks=blocks)
+    if lo is None or hi is None:
+        # A single cluster cannot support an interval. Fall back to the row
+        # bootstrap AND say so, rather than printing a fabricated zero.
+        lo, hi, p = _bootstrap_ci(diffs, seed=seed)
+        single_cluster = True
+    else:
+        single_cluster = False
 
     if delta <= 0:
         verdict, note = NO_IMPROVEMENT, (
@@ -317,7 +545,13 @@ def compare(*, name: str, dimension: str, population: str,
 
     return Comparison(name=name, dimension=dimension, regime=regime,
                       horizon_days=horizon_days, population=population,
-                      n_paired=n, base_score=round(base_score, 5),
+                      mde=round((hi - lo) / 2.0, 5),
+                      episode_ci_low=(None if elo is None else round(elo, 5)),
+                      episode_ci_high=(None if ehi is None else round(ehi, 5)),
+                      single_cluster=single_cluster,
+                      n_paired=n, n_clusters=n_clusters,
+                      n_episodes=n_episodes,
+                      base_score=round(base_score, 5),
                       augmented_score=round(aug_score, 5),
                       delta=round(delta, 5), ci_low=round(lo, 5),
                       ci_high=round(hi, 5), p_value=round(p, 5),
@@ -360,6 +594,25 @@ def adjust(comparisons: Sequence[Comparison], *, q: float = FDR_Q
     return out
 
 
+def minimum_detectable_delta(diffs: Sequence[float], *, seed: int = 7,
+                             level: float = CI_LEVEL) -> float:
+    """The smallest true delta this sample could have distinguished from zero.
+
+    WHY THIS BELONGS BESIDE EVERY NULL RESULT. "No robust improvement" reads
+    as "the feature does not work". It can equally mean "this sample could
+    not have detected it either way", and those support opposite next
+    actions: retire the construct, or go and get more data.
+
+    Computed as the half-width of the bootstrap interval around the observed
+    differences: a true effect smaller than that would have produced an
+    interval straddling zero however real it was.
+    """
+    if len(diffs) < 2:
+        return float("inf")
+    lo, hi, _p = _bootstrap_ci(diffs, seed=seed)
+    return round((hi - lo) / 2.0, 5)
+
+
 def report(comparisons: Sequence[Comparison]) -> dict:
     """Section 56's report, with the numbers a reader needs to disagree."""
     adjusted = (list(comparisons)
@@ -395,6 +648,70 @@ def report(comparisons: Sequence[Comparison]) -> dict:
                                   if base is not None else None),
             "fdr_q": FDR_Q, "ci_level": CI_LEVEL,
             "min_paired": MIN_PAIRED,
+            "underpowered": sum(1 for c in adjusted if c.underpowered),
+            "median_mde": (
+                round(sorted(c.mde for c in tested if c.mde is not None)
+                      [len(tested) // 2], 5)
+                if tested and any(c.mde is not None for c in tested)
+                else None),
             "by_dimension": by_dimension,
             "statements": [c.statement() for c in adjusted],
             "detail": [c.as_dict() for c in adjusted]}
+
+
+# =============================================================================
+# STRUCTURAL GUARDS
+# =============================================================================
+
+class ClusteringDefect(EconError):
+    """A comparison was scored as if its rows were independent."""
+
+
+def assert_clusters_are_origins(c: Comparison) -> None:
+    """A comparison whose clusters equal its rows was never clustered.
+
+    THE DEFECT THIS CATCHES. `Forecast.cluster` defaults to "", and `compare`
+    falls back to the target id -- one cluster per row, which IS the
+    unclustered bootstrap. That fallback is correct only when the rows really
+    are independent, and it is silent when they are not. An INFLATION_SHOCK
+    slice of "n=30" from 14 origins returned [+0.081, +0.271] with p=0.002
+    under it.
+    """
+    if c.verdict == INSUFFICIENT_SAMPLE:
+        return
+    if c.n_clusters >= c.n_paired:
+        raise ClusteringDefect(
+            f"{c.name}: {c.n_paired} paired forecasts resolved to "
+            f"{c.n_clusters} clusters. One cluster per row is the row "
+            "bootstrap; either the forecasts genuinely come from that many "
+            "distinct origins, or `Forecast.cluster` was not set and the "
+            "interval is claiming precision the sample does not have.")
+
+
+def assert_not_promoted_underpowered(c: Comparison) -> None:
+    """A result that WOULD be reported as a finding must have earned it.
+
+    WHY THIS DOES NOT READ `c.robust`. The first version did, and `robust`
+    already returns False for an underpowered or few-episode result -- so the
+    guard could never fire. It was a guard that cannot fail, added to catch
+    exactly the class of defect it was itself an instance of, and a test
+    asserting it raises is what revealed that.
+
+    The condition it has to check is the one a reader would act on: an
+    interval clear of zero that survived the family. That is the state in
+    which a number gets quoted, and it is where the power and episode floors
+    have to be applied independently rather than inherited from a property
+    that has already applied them.
+    """
+    would_be_reported = (c.verdict == IMPROVEMENT and c.survives_fdr is True)
+    if would_be_reported and c.underpowered:
+        raise ClusteringDefect(
+            f"{c.name}: reported robust with delta {c.delta:+.5f} inside an "
+            f"MDE of {c.mde}. The sample could not have separated this "
+            "effect from zero either way, so the result is UNMEASURED, not "
+            "measured.")
+    if would_be_reported and c.too_few_episodes:
+        raise ClusteringDefect(
+            f"{c.name}: reported robust on {c.n_episodes} independent "
+            f"episode(s); the floor is {MIN_EPISODES}. Two events can "
+            "produce any interval you like.")

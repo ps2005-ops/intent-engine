@@ -46,6 +46,9 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 from . import macro_state as MS
 
+# Section 27: ONE producer for the pattern layer. See _PATTERNS below.
+from intent_engine.econ.exposure import _PATTERNS as _EXP_PATTERNS
+
 CONTRACT = "company_exposure.v1"
 
 # --- the dimensions --------------------------------------------------------
@@ -203,42 +206,23 @@ def infer_from_sector(*_args, **_kwargs):
 # merely nearby in the sentence. "Our results are sensitive to fuel prices"
 # rates; "fuel prices rose this year" does not, because the second is a fact
 # about the world that happens to appear in a company's document.
-_PATTERNS: Tuple[Tuple[str, str], ...] = (
-    (RATE, r"\b(our|the compan\w+|its)\b[^.]{0,80}\b(interest rate|"
-           r"floating rate|variable rate|rate)\s+(exposure|risk|sensitiv\w+)"),
-    (RATE, r"\b(exposed|sensitive)\s+to\b[^.]{0,40}\binterest rates?\b"),
-    (CREDIT, r"\b(our|its)\b[^.]{0,60}\b(refinanc\w+|debt maturit\w+|"
-             r"credit facilit\w+|covenant\w*)\b"),
-    (FX, r"\b(currency|exchange[- ]rate|foreign exchange|FX)\s+"
-         r"(exposure|risk|translation|headwind|impact)\b"),
-    (COMMODITY, r"\b(raw material|commodity|input)\s+(cost|price)\w*\b"
-                r"[^.]{0,60}\b(our|its|impact\w*|pressur\w+)\b"),
-    (ENERGY, r"\b(energy|fuel|electricity)\s+(cost|price)\w*\b"
-             r"[^.]{0,60}\b(our|its|impact\w*|pressur\w+)\b"),
-    (LABOR, r"\b(labou?r|wage|hiring|headcount)\s+"
-            r"(cost|inflation|pressur\w+|shortage)\b"),
-    (SUPPLY, r"\b(supply chain|supplier|component|semiconductor)\b"
-             r"[^.]{0,60}\b(constraint|shortage|disrupt\w+|depend\w+)\b"),
-    # TWO DEAD BRANCHES, FOUND BY RUNNING THE PATTERNS OVER REAL FILINGS.
-    #
-    # `\b(\d+\s*%|...)\b` could never match a percentage: the group ends on
-    # "%", a non-word character, and the trailing \b then requires the NEXT
-    # character to be a word character. In "22% of revenue" it is a space, so
-    # the boundary fails. Only the "percent" and "majority" spellings ever
-    # rated, and "22% of revenue" is the form filings actually use. The
-    # boundary now belongs to the alternatives that are words.
-    (CUSTOMER_CONCENTRATION,
-     r"\b(largest|top|single)\s+(customer|client)s?\b[^.]{0,60}"
-     r"(?:\b\d+\s*%|\bpercent\b|\bmajority\b)"),
-    # `capital expenditure` did not match "capital expenditures", which is
-    # the form nearly every filing uses -- the trailing \b fails against the
-    # plural "s". Measured on six annual reports: the singular appears twice
-    # and the plural forty-one times.
-    (CAPITAL_INTENSITY, r"\b(capital expenditures?|capex|capital intensity|"
-                        r"capital[- ]intensive)\b"),
-    (REGULATORY, r"\b(regulat\w+|tariff|sanction)\w*\b[^.]{0,60}"
-                 r"\b(our|its)\b[^.]{0,40}\b(business|operations|results)\b"),
-)
+#: THE CANONICAL PATTERNS, IMPORTED RATHER THAN RESTATED (Section 27).
+#:
+#: These lived here as a second copy of `econ.exposure._PATTERNS`, kept in
+#: sync by hand. The cost of that is on the record: when two dead regex
+#: branches were found -- `\d+\s*%` could never match a percentage, and
+#: `capital expenditure` never matched the plural that filings actually use
+#: -- BOTH copies had to be fixed, and a fix applied to one would have left
+#: the market and founder sides silently inferring different exposures from
+#: the same sentence.
+#:
+#: One producer for the pattern layer. The market side keeps its own standing
+#: and attribution logic, which is a legitimate downstream difference: a
+#: headline and a filing establish the same exposure with different
+#: authority, and only this side needs to say so.
+_PATTERNS: Tuple[Tuple[str, str], ...] = tuple(
+    _EXP_PATTERNS.items() if isinstance(_EXP_PATTERNS, dict)
+    else _EXP_PATTERNS)
 
 _COMPILED = tuple((dim, re.compile(pat, re.I)) for dim, pat in _PATTERNS)
 

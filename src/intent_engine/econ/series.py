@@ -248,78 +248,123 @@ BY_KEY: Dict[str, SeriesSpec] = {s.key: s for s in UNIVERSE}
 # the reason -- which is what keeps the collective-state coverage figure
 # honest rather than flattering.
 
-#: A NOTE ON WHAT WAS CHECKED, NOT ASSUMED
-#: ----------------------------------------
-#: These were first written as LIVE, because the underlying figures are
-#: public and the series ids are real. Then the endpoints were actually
-#: called. The BLS API answers and is genuinely keyless -- so the two series
-#: this engine reads through it are LIVE. FRED's keyless CSV endpoint did NOT
-#: answer this engine within a usable timeout, and `macro_ingest` already
-#: records that the FRED API needs a key the deployment does not have. So
-#: every FRED-routed series below is KEYED, which is the difference between a
-#: coverage figure that is true and one that merely looks better.
+#: A NOTE ON WHAT WAS CHECKED, AND ON GETTING IT WRONG ONCE
+#: ---------------------------------------------------------
+#: These were first written as LIVE, on the reasonable ground that the figures
+#: are public and the series ids are real. Then they were called with a
+#: 12-second deadline, FRED did not answer inside it, and they were rewritten
+#: as KEYED with "the keyless endpoint did not answer" as the stated reason.
+#:
+#: That was wrong. The endpoint is keyless and answers in roughly 15-20
+#: seconds. A single probe with too short a deadline had become a documented
+#: architectural constraint, and the coverage figure it produced -- one
+#: measurable construct of sixteen -- was reported as a finding about the
+#: world rather than about the timeout.
+#:
+#: `scripts/probe_behavioural_sources.py` now calls every candidate and writes
+#: `reports/behavioural_source_probe.json`, and
+#: `tests/test_alfred_ingest.py::test_every_live_series_has_an_adapter`
+#: refuses a LIVE claim with no adapter behind it. The lesson is narrower than
+#: "verify things": a NEGATIVE result from a single probe is a hypothesis, and
+#: it needs at least as much scepticism as a positive one.
 BEHAVIOURAL: Tuple[SeriesSpec, ...] = (
-    # --- readable now, keyless, verified by calling it ----------------------
-    _s("JTS000000000000000QUR", "quits", "US quits rate, total nonfarm",
-       "percent", "monthly", LIVE, publisher="BLS JOLTS (api.bls.gov)"),
-    _s("LNS11300000", "labour_participation",
-       "US labour force participation rate", "percent", "monthly", LIVE,
-       publisher="BLS (api.bls.gov)"),
-
-    # --- real, public, and behind a key this deployment does not have -------
+    # --- keyless, vintage-correct, verified by calling them ----------------
+    # Routed through ALFRED (alfred.stlouisfed.org), which honours
+    # `vintage_date`. FRED's fredgraph endpoint accepts the same parameter and
+    # SILENTLY IGNORES IT -- see `market/alfred.py` for why that distinction
+    # is load-bearing rather than pedantic.
     _s("UMCSENT", "survey_confidence", "U. Michigan consumer sentiment",
-       "index", "monthly", KEYED, publisher="University of Michigan / FRED",
-       reason="routed through FRED, whose API needs a key this deployment "
-              "does not hold; the keyless fredgraph CSV endpoint did not "
-              "answer within 12s when called"),
-    _s("MICH", "household_expectation", "U. Michigan inflation expectation",
-       "percent", "monthly", KEYED, publisher="University of Michigan / FRED",
-       reason="same FRED key gap as UMCSENT"),
-    _s("PSAVERT", "saving_rate", "personal saving rate", "percent",
-       "monthly", KEYED, publisher="BEA / FRED",
-       reason="same FRED key gap; BEA's own API also requires registration"),
-    _s("BABATOTALSAUS", "business_formation", "business applications",
-       "thousands", "monthly", KEYED, publisher="Census BFS / FRED",
-       reason="same FRED key gap. The Census BFS API was tested directly and "
-              "returns 'Missing Key'; a guessed bulk-CSV path 404s. A "
-              "keyless route may exist and has not been found, which is a "
-              "different statement from one existing"),
-    _s("DRCCLACBS", "delinquency", "credit card delinquency rate, all banks",
-       "percent", "quarterly", KEYED, publisher="Federal Reserve H.8 / FRED",
-       reason="same FRED key gap. This is the single most damaging gap in "
-              "the behavioural family: delinquency is the discriminating "
-              "instrument for financial anxiety, and without it that "
-              "construct rests on contested proxies alone"),
+       "index", "monthly", LIVE, publisher="U. Michigan via ALFRED"),
+    _s("MICH", "household_expectation",
+       "U. Michigan 1-year inflation expectation", "percent", "monthly", LIVE,
+       publisher="U. Michigan via ALFRED"),
+    _s("PSAVERT", "saving_rate", "US personal saving rate", "percent",
+       "monthly", LIVE, publisher="BEA via ALFRED"),
+    _s("DRCCLACBS", "delinquency",
+       "credit card delinquency rate, all commercial banks", "percent",
+       "quarterly", LIVE, publisher="Federal Reserve H.8 via ALFRED"),
     _s("REVOLSL", "revolving_balance", "revolving consumer credit",
-       "billions", "monthly", KEYED, publisher="Federal Reserve G.19 / FRED",
-       reason="same FRED key gap"),
+       "billions", "monthly", LIVE,
+       publisher="Federal Reserve G.19 via ALFRED"),
+    _s("BABATOTALSAUS", "business_formation", "business applications",
+       "thousands", "monthly", LIVE, publisher="Census BFS via ALFRED"),
+    _s("JTSQUR", "quits", "quits rate, total nonfarm", "percent", "monthly",
+       LIVE, publisher="BLS JOLTS via ALFRED"),
+    _s("CIVPART", "labour_participation",
+       "labour force participation rate", "percent", "monthly", LIVE,
+       publisher="BLS via ALFRED"),
 
-    # --- derivable from series already read ---------------------------------
+    _s("CORCACBS", "delinquency",
+       "credit card charge-off rate, all commercial banks", "percent",
+       "quarterly", LIVE, publisher="Federal Reserve via ALFRED"),
+    _s("DRSFRMACBS", "delinquency",
+       "single-family mortgage delinquency rate", "percent", "quarterly",
+       LIVE, publisher="Federal Reserve via ALFRED"),
+    _s("TDSP", "debt_service_burden",
+       "household debt service as a share of disposable income", "percent",
+       "quarterly", LIVE, publisher="Federal Reserve via ALFRED"),
+    _s("U6RATE", "underemployment",
+       "U-6 underemployment rate", "percent", "monthly", LIVE,
+       publisher="BLS via ALFRED"),
+    _s("EMRATIO", "employment_ratio", "employment-population ratio",
+       "percent", "monthly", LIVE, publisher="BLS via ALFRED"),
+    _s("BOGZ1FL153064486Q", "risk_taking_proxy",
+       "household equity holdings as a share of financial assets", "percent",
+       "quarterly", LIVE, publisher="Federal Reserve Z.1 via ALFRED"),
+    _s("DGORDER", "big_ticket_intent",
+       "manufacturers' new orders, durable goods", "millions", "monthly",
+       LIVE, publisher="Census via ALFRED"),
+    _s("HSN1F", "big_ticket_intent", "new one-family houses sold",
+       "thousands", "monthly", LIVE, publisher="Census via ALFRED"),
+    _s("USACSCICP02STSAM", "survey_expectation",
+       "OECD consumer confidence indicator, United States", "index",
+       "monthly", LIVE, publisher="OECD via ALFRED"),
+
+    # --- the same two quantities, by their BLS ids -------------------------
+    # `market/behavioral_ingest` reads quits and participation directly from
+    # api.bls.gov, which uses different ids for the same quantities that
+    # ALFRED serves as JTSQUR and CIVPART. Both are declared, because a
+    # fetcher reading a series nobody declared means the coverage figure is
+    # computed from a different set than the one that runs.
+    #
+    # SUPERSEDED, not removed: the BLS route is keyless and works, but it
+    # cannot serve a VINTAGE, so it cannot support a walled replay. It stays
+    # as a live-cycle fallback for when the ALFRED route is unavailable, and
+    # the panel never uses it.
+    _s("JTS000000000000000QUR", "quits", "quits rate, total nonfarm (BLS id)",
+       "percent", "monthly", LIVE, publisher="BLS JOLTS (api.bls.gov)",
+       derivation="", inputs=(),
+       reason="superseded by JTSQUR via ALFRED for anything vintage-walled; "
+              "retained as a keyless live-cycle fallback"),
+    _s("LNS11300000", "labour_participation",
+       "labour force participation rate (BLS id)", "percent", "monthly",
+       LIVE, publisher="BLS (api.bls.gov)",
+       reason="superseded by CIVPART via ALFRED for anything vintage-walled; "
+              "retained as a keyless live-cycle fallback"),
+
+    # --- derivable from series above ---------------------------------------
     _s("job_switching_rate", "job_switching", "quits relative to "
        "participation", "ratio", "monthly", DERIVABLE,
        derivation="the quits rate against the participation rate; a rising "
                   "quits rate on a falling participation rate is people "
                   "leaving the labour force, which is the OPPOSITE reading "
                   "to confident job-switching",
-       inputs=("JTS000000000000000QUR", "LNS11300000")),
-    _s("defensive_share", "defensive_spending",
-       "staples share of retail control group", "ratio", "monthly",
-       UNAVAILABLE,
-       reason="requires the retail sales control-group detail, which routes "
-              "through FRED or the Census advance report; no adapter reads "
-              "either, so this is declared rather than approximated"),
+       inputs=("JTSQUR", "CIVPART")),
+    _s("credit_stress_ratio", "credit_application",
+       "revolving balance growth against saving rate", "ratio", "monthly",
+       DERIVABLE,
+       derivation="revolving credit growth outpacing the saving rate "
+                  "indicates borrowing to cover ordinary consumption rather "
+                  "than to finance a purchase",
+       inputs=("REVOLSL", "PSAVERT")),
 
-    # --- named, and NOT available ------------------------------------------
-    _s("consumer_trade_down", "trade_down", "observed trade-down intensity",
-       "ratio", "monthly", UNAVAILABLE,
-       reason="no public series measures basket substitution directly; the "
-              "readable evidence is company disclosure of it, which enters "
-              "as COMPANY evidence and therefore may not corroborate a "
-              "consumer aggregate built from the same disclosures"),
+    # --- named, and genuinely not available --------------------------------
     _s("big_ticket_intent", "big_ticket_intent",
        "durable-goods buying conditions", "index", "monthly", KEYED,
        reason="the U. Michigan buying-conditions sub-indices are published "
-              "but not in the free FRED series set this engine reads"),
+              "as separate series this engine has not yet mapped; the parent "
+              "sentiment index IS read (UMCSENT), so this is unmapped rather "
+              "than unavailable"),
     _s("household_trust", "trust_index", "trust in institutions",
        "index", "annual", UNAVAILABLE,
        reason="the major trust barometers are proprietary and annual; an "

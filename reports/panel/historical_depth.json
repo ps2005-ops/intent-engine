@@ -1,0 +1,361 @@
+{
+  "contract": "econ_historical_depth.v1",
+  "early_check_vintage": "1998-02-15",
+  "probed_at": "2026-08-27",
+  "series": {
+    "BABATOTALSAUS": {
+      "earliest_alfred_vintage": "2021-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "business_formation",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 35,
+      "revision_behaviour": "NO_VINTAGE_HISTORY",
+      "series_id": "BABATOTALSAUS"
+    },
+    "BAMLH0A0HYM2": {
+      "earliest_alfred_vintage": "2024-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "credit_spread_hy",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "NO_VINTAGE_HISTORY",
+      "series_id": "BAMLH0A0HYM2"
+    },
+    "BOGZ1FL153064486Q": {
+      "earliest_alfred_vintage": "2020-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "risk_taking_proxy",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 75,
+      "revision_behaviour": "NO_VINTAGE_HISTORY",
+      "series_id": "BOGZ1FL153064486Q"
+    },
+    "CIVPART": {
+      "earliest_alfred_vintage": "1997-02-15",
+      "early_stability": {
+        "checked": true,
+        "differing": 17,
+        "differing_fraction": 0.0283,
+        "max_relative_change": 0.00299,
+        "overlap": 601,
+        "stable_against_early": true,
+        "vintage": "1998-02-15"
+      },
+      "kind": "labour_participation",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 20,
+      "revision_behaviour": "STABLE",
+      "series_id": "CIVPART"
+    },
+    "CORCACBS": {
+      "earliest_alfred_vintage": "2012-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "delinquency",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 60,
+      "revision_behaviour": "REVISED",
+      "series_id": "CORCACBS"
+    },
+    "CPIAUCSL": {
+      "earliest_alfred_vintage": "1973-02-15",
+      "early_stability": {
+        "checked": true,
+        "differing": 116,
+        "differing_fraction": 0.1895,
+        "max_relative_change": 0.001394,
+        "overlap": 612,
+        "stable_against_early": true,
+        "vintage": "1998-02-15"
+      },
+      "kind": "inflation",
+      "node_class": "MACRO",
+      "publication_lag_days": 15,
+      "revision_behaviour": "STABLE",
+      "series_id": "CPIAUCSL"
+    },
+    "DFF": {
+      "earliest_alfred_vintage": "2006-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "SeriesAbsent: DFF@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a fa"
+      },
+      "kind": "policy_rate",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "STABLE",
+      "series_id": "DFF"
+    },
+    "DGORDER": {
+      "earliest_alfred_vintage": "2000-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "big_ticket_intent",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 35,
+      "revision_behaviour": "REVISED",
+      "series_id": "DGORDER"
+    },
+    "DGS10": {
+      "earliest_alfred_vintage": "2006-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "SeriesAbsent: DGS10@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a "
+      },
+      "kind": "treasury_10y",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "STABLE",
+      "series_id": "DGS10"
+    },
+    "DGS2": {
+      "earliest_alfred_vintage": "2006-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "SeriesAbsent: DGS2@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a f"
+      },
+      "kind": "treasury_2y",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "STABLE",
+      "series_id": "DGS2"
+    },
+    "DRCCLACBS": {
+      "earliest_alfred_vintage": "2012-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "delinquency",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 60,
+      "revision_behaviour": "REVISED",
+      "series_id": "DRCCLACBS"
+    },
+    "DRSFRMACBS": {
+      "earliest_alfred_vintage": "2012-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "delinquency",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 60,
+      "revision_behaviour": "REVISED",
+      "series_id": "DRSFRMACBS"
+    },
+    "EMRATIO": {
+      "earliest_alfred_vintage": "1997-02-15",
+      "early_stability": {
+        "checked": true,
+        "differing": 23,
+        "differing_fraction": 0.0383,
+        "max_relative_change": 0.00314,
+        "overlap": 601,
+        "stable_against_early": true,
+        "vintage": "1998-02-15"
+      },
+      "kind": "employment_ratio",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 20,
+      "revision_behaviour": "STABLE",
+      "series_id": "EMRATIO"
+    },
+    "GDPC1": {
+      "earliest_alfred_vintage": "1992-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "growth",
+      "node_class": "MACRO",
+      "publication_lag_days": 30,
+      "revision_behaviour": "REVISED",
+      "series_id": "GDPC1"
+    },
+    "HOUST": {
+      "earliest_alfred_vintage": "1961-02-15",
+      "early_stability": {
+        "checked": true,
+        "differing": 36,
+        "differing_fraction": 0.0769,
+        "max_relative_change": 0.043758,
+        "overlap": 468,
+        "stable_against_early": false,
+        "vintage": "1998-02-15"
+      },
+      "kind": "housing",
+      "node_class": "MACRO",
+      "publication_lag_days": 20,
+      "revision_behaviour": "STABLE",
+      "series_id": "HOUST"
+    },
+    "HSN1F": {
+      "earliest_alfred_vintage": "2000-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "SeriesAbsent: HSN1F@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a "
+      },
+      "kind": "big_ticket_intent",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 30,
+      "revision_behaviour": "STABLE",
+      "series_id": "HSN1F"
+    },
+    "INDPRO": {
+      "earliest_alfred_vintage": "1960-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "industrial_production",
+      "node_class": "MACRO",
+      "publication_lag_days": 20,
+      "revision_behaviour": "REVISED",
+      "series_id": "INDPRO"
+    },
+    "JTSQUR": {
+      "earliest_alfred_vintage": "2011-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "quits",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 40,
+      "revision_behaviour": "REVISED",
+      "series_id": "JTSQUR"
+    },
+    "MICH": {
+      "earliest_alfred_vintage": "2000-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "SeriesAbsent: MICH@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a f"
+      },
+      "kind": "household_expectation",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 15,
+      "revision_behaviour": "STABLE",
+      "series_id": "MICH"
+    },
+    "PCEC96": {
+      "earliest_alfred_vintage": "1980-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "consumer_demand",
+      "node_class": "MACRO",
+      "publication_lag_days": 30,
+      "revision_behaviour": "REVISED",
+      "series_id": "PCEC96"
+    },
+    "PSAVERT": {
+      "earliest_alfred_vintage": "1997-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "saving_rate",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 30,
+      "revision_behaviour": "REVISED",
+      "series_id": "PSAVERT"
+    },
+    "REVOLSL": {
+      "earliest_alfred_vintage": "1997-02-15",
+      "early_stability": {
+        "checked": true,
+        "differing": 360,
+        "differing_fraction": 1.0,
+        "max_relative_change": 1050.163158,
+        "overlap": 360,
+        "stable_against_early": false,
+        "vintage": "1998-02-15"
+      },
+      "kind": "revolving_balance",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 40,
+      "revision_behaviour": "STABLE",
+      "series_id": "REVOLSL"
+    },
+    "TDSP": {
+      "earliest_alfred_vintage": "2000-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "debt_service_burden",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 70,
+      "revision_behaviour": "REVISED",
+      "series_id": "TDSP"
+    },
+    "U6RATE": {
+      "earliest_alfred_vintage": "2012-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "underemployment",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 20,
+      "revision_behaviour": "REVISED",
+      "series_id": "U6RATE"
+    },
+    "UMCSENT": {
+      "earliest_alfred_vintage": "1999-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "SeriesAbsent: UMCSENT@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than "
+      },
+      "kind": "survey_confidence",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 15,
+      "revision_behaviour": "STABLE",
+      "series_id": "UMCSENT"
+    },
+    "UNRATE": {
+      "earliest_alfred_vintage": "1961-02-15",
+      "early_stability": {
+        "checked": true,
+        "differing": 18,
+        "differing_fraction": 0.03,
+        "max_relative_change": 0.021277,
+        "overlap": 601,
+        "stable_against_early": true,
+        "vintage": "1998-02-15"
+      },
+      "kind": "labour",
+      "node_class": "MACRO",
+      "publication_lag_days": 20,
+      "revision_behaviour": "STABLE",
+      "series_id": "UNRATE"
+    },
+    "USACSCICP02STSAM": {
+      "earliest_alfred_vintage": "2019-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "survey_expectation",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 40,
+      "revision_behaviour": "NO_VINTAGE_HISTORY",
+      "series_id": "USACSCICP02STSAM"
+    }
+  }
+}

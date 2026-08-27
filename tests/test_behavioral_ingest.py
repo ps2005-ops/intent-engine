@@ -119,12 +119,34 @@ def test_declared_kinds_are_in_the_behavioral_vocabulary():
         assert lag > 0, "a zero publication lag is a hindsight leak"
 
 
-def test_the_series_registry_agrees_with_the_adapter():
+def test_every_live_series_is_read_by_some_adapter():
     """A series declared LIVE that no adapter reads is a coverage figure that
-    is a promise rather than a measurement."""
+    is a promise rather than a measurement.
+
+    TWO adapters now serve behavioural series: this BLS one, and
+    `market.alfred`, which routes most of them through ALFRED for vintage
+    correctness. The guard checks the UNION -- an earlier version compared
+    against the BLS adapter alone and failed the moment a second adapter was
+    added, which is the guard working, not the guard being wrong.
+    """
     from intent_engine.econ import series as S
-    live_behavioural = {s.key for s in S.BEHAVIOURAL
-                        if s.availability == S.LIVE}
-    assert live_behavioural == set(BI.BLS_BEHAVIOURAL), (
-        f"series.py calls {sorted(live_behavioural)} LIVE but the adapter "
-        f"reads {sorted(BI.BLS_BEHAVIOURAL)}")
+    from intent_engine.market import alfred as AL
+
+    live = {s.key for s in S.BEHAVIOURAL if s.availability == S.LIVE}
+    served = set(BI.BLS_BEHAVIOURAL) | set(AL.BEHAVIOURAL_IDS)
+    orphans = live - served
+    assert not orphans, (
+        f"{sorted(orphans)} are declared LIVE and no adapter reads them")
+
+
+def test_no_adapter_reads_a_series_nobody_declared():
+    """The other direction: coverage computed from a different set than the
+    one that runs."""
+    from intent_engine.econ import series as S
+    from intent_engine.market import alfred as AL
+
+    declared = {s.key for s in S.BEHAVIOURAL}
+    served = set(BI.BLS_BEHAVIOURAL) | set(AL.BEHAVIOURAL_IDS)
+    undeclared = served - declared
+    assert not undeclared, (
+        f"{sorted(undeclared)} are fetched and not declared in econ.series")

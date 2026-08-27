@@ -1,0 +1,644 @@
+{
+  "by_classification": {
+    "MEASURABLE_LIVE": [
+      "financial_anxiety",
+      "future_orientation",
+      "perceived_control",
+      "perceived_security",
+      "risk_appetite",
+      "time_horizon"
+    ],
+    "NO_DEFENSIBLE_INSTRUMENT": [
+      "agency",
+      "anger",
+      "belonging",
+      "certainty",
+      "hope",
+      "institutional_trust",
+      "interpersonal_trust",
+      "perceived_fairness",
+      "stress",
+      "willingness_to_experiment"
+    ]
+  },
+  "constructs_total": 16,
+  "contract": "econ_instrument_map.v1",
+  "indistinguishable_pairs": [],
+  "measurable": [
+    "financial_anxiety",
+    "future_orientation",
+    "perceived_control",
+    "perceived_security",
+    "risk_appetite",
+    "time_horizon"
+  ],
+  "measurable_count": 6,
+  "no_instrument": [
+    "agency",
+    "anger",
+    "belonging",
+    "certainty",
+    "hope",
+    "institutional_trust",
+    "interpersonal_trust",
+    "perceived_fairness",
+    "stress",
+    "willingness_to_experiment"
+  ],
+  "rows": [
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "agency",
+      "definition": "belief in one's own capacity to act effectively",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "the only candidate instruments (business formation, quits) are already the instruments for perceived_control. Two constructs sharing one instrument set are one construct with two names",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "anger",
+      "definition": "expressed collective anger",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": true,
+          "dimension": "anger",
+          "kind": "public_language",
+          "noise": 0.25,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "aggregate sentiment of public text; the weakest instrument here, and marked as such rather than given a flattering noise",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "requires a licensed text corpus. A tone index built from whatever happens to be scrapeable measures the scrape",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "belonging",
+      "definition": "sense of connection to a community",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "no public series measures it, and no behavioural proxy discriminates it from participation measures already used elsewhere",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "certainty",
+      "definition": "confidence about the near-term future",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "survey dispersion would be the right instrument and the public releases publish central tendencies, not distributions",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "MEASURABLE_LIVE",
+      "confounders": [
+        "news cycle drives stated sentiment independently of experience",
+        "delinquency is a lagging record of a decision made months earlier",
+        "partisan composition shifts survey levels without any change in behaviour"
+      ],
+      "construct_id": "financial_anxiety",
+      "definition": "the degree to which households expect their own financial position to worsen, and act to protect against it",
+      "expected_direction": "rises with debt service burden and delinquency; falls with sentiment",
+      "frequency": "monthly/quarterly",
+      "history_start": "",
+      "measurable": true,
+      "measurement_risk": "the 2022 divergence \u2014 sentiment at recessionary levels while consumption held \u2014 is the standing evidence that the stated and revealed instruments here can disagree for years",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "financial_anxiety",
+          "kind": "survey_confidence",
+          "noise": 0.12,
+          "range": [
+            40,
+            120
+          ],
+          "rationale": "consumer confidence indices fall when households report worry about their own finances; inverted because high confidence is low anxiety",
+          "sign": "-"
+        },
+        {
+          "contested": false,
+          "dimension": "financial_anxiety",
+          "kind": "delinquency",
+          "noise": 0.1,
+          "range": [
+            1.0,
+            8.0
+          ],
+          "rationale": "households miss payments when they have run out of buffer; a behavioural record rather than a stated feeling",
+          "sign": "+"
+        },
+        {
+          "contested": true,
+          "dimension": "financial_anxiety",
+          "kind": "revolving_balance",
+          "noise": 0.15,
+          "range": [
+            -5.0,
+            15.0
+          ],
+          "rationale": "revolving credit growth outpacing income growth indicates borrowing to cover ordinary consumption",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "financial_anxiety",
+          "kind": "defensive_spending",
+          "noise": 0.12,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "the share of the basket in staples rises when households protect against a worse month ahead",
+          "sign": "+"
+        },
+        {
+          "contested": true,
+          "dimension": "financial_anxiety",
+          "kind": "saving_rate",
+          "noise": 0.22,
+          "range": [
+            2.0,
+            12.0
+          ],
+          "rationale": "precautionary saving rises with anxiety -- but a high saving rate is equally consistent with perceived control, so this cannot discriminate on its own",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "financial_anxiety",
+          "kind": "debt_service_burden",
+          "noise": 0.09,
+          "range": [
+            8.0,
+            14.0
+          ],
+          "rationale": "the share of disposable income committed to debt service is the cleanest non-survey measure of how much room a household has left; unlike a sentiment index it cannot be moved by the news",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "",
+      "revision_policy": "publisher vintages available through ALFRED",
+      "vintage_available": true
+    },
+    {
+      "classification": "MEASURABLE_LIVE",
+      "confounders": [
+        "the OECD indicator is itself partly built from national surveys this engine also reads, which is a lineage problem as much as a confounding one"
+      ],
+      "construct_id": "future_orientation",
+      "definition": "whether households are oriented toward improvement ahead or toward protecting what they have",
+      "expected_direction": "rises with the OECD confidence indicator",
+      "frequency": "monthly",
+      "history_start": "",
+      "measurable": true,
+      "measurement_risk": "LINEAGE: if the OECD indicator incorporates UMich, then using both is double counting. Marked and not yet resolved",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "future_orientation",
+          "kind": "discretionary_intent",
+          "noise": 0.13,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "discretionary purchase intent is deferred first when the future feels short",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "future_orientation",
+          "kind": "trade_down",
+          "noise": 0.12,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "substituting cheaper alternatives is the first observable act of a shortened horizon",
+          "sign": "-"
+        },
+        {
+          "contested": false,
+          "dimension": "future_orientation",
+          "kind": "survey_expectation",
+          "noise": 0.13,
+          "range": [
+            95.0,
+            105.0
+          ],
+          "rationale": "the OECD consumer confidence indicator is normalised around 100 and leads its own national surveys; used for orientation toward the future rather than for present anxiety",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "",
+      "revision_policy": "publisher vintages available through ALFRED",
+      "vintage_available": true
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "hope",
+      "definition": "expectation that things will improve",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "would share every instrument with future_orientation; kept distinct in the vocabulary and retired here rather than given a duplicate loading",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "institutional_trust",
+      "definition": "confidence that institutions will behave predictably and in good faith",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "institutional_trust",
+          "kind": "trust_index",
+          "noise": 0.14,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "published trust indices are the direct instrument, with all the framing sensitivity that survey instruments carry",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "institutional_trust",
+          "kind": "survey_trust",
+          "noise": 0.15,
+          "range": [
+            0.0,
+            100.0
+          ],
+          "rationale": "confidence-in-institutions survey batteries",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "the major trust barometers are proprietary and annual. An annual figure cannot support a quarterly-horizon forecast comparison, so even licensing one would not make this testable at the horizons this engine forecasts at",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "interpersonal_trust",
+      "definition": "trust in other people rather than institutions",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "the General Social Survey measures it biennially with a multi-year lag. Real, and far too slow for any horizon this engine forecasts at",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "MEASURABLE_LIVE",
+      "confounders": [
+        "quits rise in a hot labour market regardless of how anyone feels",
+        "participation falls for demographic reasons unrelated to control"
+      ],
+      "construct_id": "perceived_control",
+      "definition": "the degree to which workers believe they can change their own situation through their own action",
+      "expected_direction": "rises with quits and participation; falls with involuntary underemployment",
+      "frequency": "monthly",
+      "history_start": "",
+      "measurable": true,
+      "measurement_risk": "the quits rate is a labour-market statistic first and a psychological reading second; if it adds value, the value may belong to the labour market rather than to the construct",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "perceived_control",
+          "kind": "household_expectation",
+          "noise": 0.13,
+          "range": [
+            -30,
+            40
+          ],
+          "rationale": "households who expect their own situation to improve report more command over it than those expecting only the economy to improve",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "perceived_control",
+          "kind": "job_switching",
+          "noise": 0.11,
+          "range": [
+            1.0,
+            3.5
+          ],
+          "rationale": "voluntarily leaving a job is a costly signal that a worker believes they can secure another",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "perceived_control",
+          "kind": "quits",
+          "noise": 0.1,
+          "range": [
+            1.2,
+            3.2
+          ],
+          "rationale": "the quits rate is the cleanest revealed-preference reading of workers' confidence in their own options",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "perceived_control",
+          "kind": "business_formation",
+          "noise": 0.16,
+          "range": [
+            200,
+            500
+          ],
+          "rationale": "new business applications commit personal capital to a belief that effort will produce a result",
+          "sign": "+"
+        },
+        {
+          "contested": true,
+          "dimension": "perceived_control",
+          "kind": "underemployment",
+          "noise": 0.14,
+          "range": [
+            6.0,
+            18.0
+          ],
+          "rationale": "involuntary part-time work is the absence of the outside option that makes a worker feel in command; weaker here than for security because it conflates 'cannot find' with 'chose not to look'",
+          "sign": "-"
+        }
+      ],
+      "retire_reason": "",
+      "revision_policy": "publisher vintages available through ALFRED",
+      "vintage_available": true
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "perceived_fairness",
+      "definition": "sense that outcomes are distributed justly",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "no public series; the survey instruments that exist are annual, framing-sensitive and not released as time series",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "MEASURABLE_LIVE",
+      "confounders": [
+        "U-6 conflates 'could not find full-time' with 'chose part-time'",
+        "employment ratio moves with retirement demographics"
+      ],
+      "construct_id": "perceived_security",
+      "definition": "a household's sense that its current position is stable, distinct from anxiety about the future",
+      "expected_direction": "rises with the employment-population ratio; falls with U-6 underemployment",
+      "frequency": "monthly",
+      "history_start": "",
+      "measurable": true,
+      "measurement_risk": "security and control share the labour market as their evidence base and may not be separable in practice; they are kept apart because their instruments differ, and the incremental-value test will say whether that distinction earns anything",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "perceived_security",
+          "kind": "underemployment",
+          "noise": 0.1,
+          "range": [
+            6.0,
+            18.0
+          ],
+          "rationale": "U-6 counts people working part-time because they could not find full-time work \u2014 involuntary underemployment is the direct observable of insecurity, distinct from anxiety about it",
+          "sign": "-"
+        },
+        {
+          "contested": false,
+          "dimension": "perceived_security",
+          "kind": "employment_ratio",
+          "noise": 0.12,
+          "range": [
+            55.0,
+            65.0
+          ],
+          "rationale": "the share of the working-age population actually employed; a structural floor under a household's sense of its own position",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "",
+      "revision_policy": "publisher vintages available through ALFRED",
+      "vintage_available": true
+    },
+    {
+      "classification": "MEASURABLE_LIVE",
+      "confounders": [
+        "the equity share rises mechanically when equities rise, with no change in behaviour \u2014 a valuation effect, not an allocation decision"
+      ],
+      "construct_id": "risk_appetite",
+      "definition": "households' willingness to hold volatile assets and take on future obligation",
+      "expected_direction": "rises with the household equity share",
+      "frequency": "monthly/quarterly",
+      "history_start": "",
+      "measurable": true,
+      "measurement_risk": "THE VALUATION CONFOUND IS SEVERE. A share-of-assets measure moves with prices. Any finding here must be checked against a flow measure before it means anything",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "risk_appetite",
+          "kind": "retail_speculation",
+          "noise": 0.13,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "the share of retail activity in the most speculative instruments available to households",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "risk_appetite",
+          "kind": "risk_taking_proxy",
+          "noise": 0.14,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "aggregate household allocation to volatile assets",
+          "sign": "+"
+        },
+        {
+          "contested": true,
+          "dimension": "risk_appetite",
+          "kind": "credit_application",
+          "noise": 0.18,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "applying for credit commits to a future obligation -- though it also rises under distress, which is the opposite state",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "risk_appetite",
+          "kind": "risk_taking_proxy",
+          "noise": 0.11,
+          "range": [
+            20.0,
+            55.0
+          ],
+          "rationale": "household equity holdings as a share of financial assets is revealed allocation, not stated intent",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "",
+      "revision_policy": "publisher vintages available through ALFRED",
+      "vintage_available": true
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "stress",
+      "definition": "acute, near-term distress in the population",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": true,
+          "dimension": "stress",
+          "kind": "search_interest",
+          "noise": 0.2,
+          "range": [
+            0.0,
+            100.0
+          ],
+          "rationale": "search volume for distress terms; a weak instrument because search behaviour is driven by news cycles as much as by experience",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "search-volume series are the standard proxy and the trends APIs forbid the redistribution this would require. The alternative \u2014 distress-term frequency in public text \u2014 measures the news cycle, not the population",
+      "revision_policy": "",
+      "vintage_available": false
+    },
+    {
+      "classification": "MEASURABLE_LIVE",
+      "confounders": [
+        "both instruments are rate-sensitive, and rates are in the base economic model already",
+        "durable orders include defence and aircraft, which are not household decisions at all"
+      ],
+      "construct_id": "time_horizon",
+      "definition": "how far ahead households are willing to commit resources",
+      "expected_direction": "rises with durable-goods orders and home sales",
+      "frequency": "monthly",
+      "history_start": "",
+      "measurable": true,
+      "measurement_risk": "the rate sensitivity means this construct may add nothing over a base model that already holds rates; that is exactly what the incremental-value test is for",
+      "population": "US_households",
+      "proxies": [
+        {
+          "contested": false,
+          "dimension": "time_horizon",
+          "kind": "big_ticket_intent",
+          "noise": 0.12,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "intent to buy a durable good is a commitment to a horizon longer than the purchase itself",
+          "sign": "+"
+        },
+        {
+          "contested": false,
+          "dimension": "time_horizon",
+          "kind": "big_ticket_intent",
+          "noise": 0.11,
+          "range": [
+            0.0,
+            1.0
+          ],
+          "rationale": "durable-goods orders and new-home sales commit a household to a horizon longer than the purchase; both are placed on a common scale by the proxy's declared range",
+          "sign": "+"
+        }
+      ],
+      "retire_reason": "",
+      "revision_policy": "publisher vintages available through ALFRED",
+      "vintage_available": true
+    },
+    {
+      "classification": "NO_DEFENSIBLE_INSTRUMENT",
+      "confounders": [],
+      "construct_id": "willingness_to_experiment",
+      "definition": "willingness to try unfamiliar options",
+      "expected_direction": "n/a",
+      "frequency": "",
+      "history_start": "",
+      "measurable": false,
+      "measurement_risk": "no instrument",
+      "population": "US_households",
+      "proxies": [],
+      "retire_reason": "would share business formation with perceived_control and agency; retired rather than triple-counted",
+      "revision_policy": "",
+      "vintage_available": false
+    }
+  ]
+}

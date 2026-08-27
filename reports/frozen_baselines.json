@@ -1,0 +1,64 @@
+[
+  {
+    "admits_positive_effect": true,
+    "augmented_score": 0.23612,
+    "base_feature_set": [
+      "UNRATE",
+      "CPIAUCSL",
+      "DFF",
+      "DGS2",
+      "DGS10",
+      "HOUST",
+      "INDPRO",
+      "PCEC96"
+    ],
+    "base_score": 0.22664,
+    "baseline_id": "GLOBAL_COLLECTIVE_HUMAN_STATE_V1",
+    "ci": [
+      -0.02618,
+      0.00661
+    ],
+    "code_sha": "050f6a8",
+    "delta": -0.00948,
+    "families_tested": 10,
+    "feature_set": [
+      "BABATOTALSAUS",
+      "BOGZ1FL153064486Q",
+      "CORCACBS",
+      "DGORDER",
+      "DRCCLACBS",
+      "DRSFRMACBS",
+      "EMRATIO",
+      "HSN1F",
+      "JTSQUR",
+      "MICH",
+      "PSAVERT",
+      "REVOLSL",
+      "TDSP",
+      "U6RATE",
+      "UMCSENT",
+      "USACSCICP02STSAM"
+    ],
+    "frozen_at": "2026-08-27",
+    "mde": 0.0164,
+    "n_paired": 500,
+    "note": "first vintage-walled, preregistered test of the collective block. TWO defects were found and fixed before freezing: (1) a prior run reported +0.134 Brier on housing surviving FDR, which was the model fitting calendar time through non-stationary levels; (2) a kind-keyed dict silently dropped quits and participation from the feature set, moving the pooled delta by 0.005 with nothing in the report saying why.",
+    "outcome": "NOT_PROMOTED",
+    "panel_hash": "6936e55e1eacd426",
+    "partitions": {
+      "consumption_180d": 92,
+      "consumption_360d": 92,
+      "credit_stress_180d": 92,
+      "credit_stress_360d": 92,
+      "housing_180d": 92,
+      "housing_360d": 92,
+      "industrial_180d": 92,
+      "industrial_360d": 92,
+      "labour_180d": 92,
+      "labour_360d": 92
+    },
+    "preregistration_hash": "4ae395b62fb60f85",
+    "rules_out_improvement_above": 0.00661,
+    "underpowered_families": 9
+  }
+]

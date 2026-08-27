@@ -156,6 +156,38 @@ REGISTRY: Tuple[Proxy, ...] = (
        "substituting cheaper alternatives is the first observable act of a "
        "shortened horizon"),
 
+    # --- newly instrumented, after the second probe round --------------------
+    # Every loading below rests on a series this engine has actually called.
+    # They are added because instruments were FOUND, not because the constructs
+    # needed rescuing: four constructs are still retired below for having none.
+    _p("debt_service_burden", "financial_anxiety", POSITIVE, 8.0, 14.0, 0.09,
+       "the share of disposable income committed to debt service is the "
+       "cleanest non-survey measure of how much room a household has left; "
+       "unlike a sentiment index it cannot be moved by the news"),
+    _p("underemployment", "perceived_security", NEGATIVE, 6.0, 18.0, 0.10,
+       "U-6 counts people working part-time because they could not find "
+       "full-time work — involuntary underemployment is the direct "
+       "observable of insecurity, distinct from anxiety about it"),
+    _p("employment_ratio", "perceived_security", POSITIVE, 55.0, 65.0, 0.12,
+       "the share of the working-age population actually employed; a "
+       "structural floor under a household's sense of its own position"),
+    _p("underemployment", "perceived_control", NEGATIVE, 6.0, 18.0, 0.14,
+       "involuntary part-time work is the absence of the outside option "
+       "that makes a worker feel in command; weaker here than for security "
+       "because it conflates 'cannot find' with 'chose not to look'",
+       contested=True),
+    _p("risk_taking_proxy", "risk_appetite", POSITIVE, 20.0, 55.0, 0.11,
+       "household equity holdings as a share of financial assets is revealed "
+       "allocation, not stated intent"),
+    _p("big_ticket_intent", "time_horizon", POSITIVE, 0.0, 1.0, 0.11,
+       "durable-goods orders and new-home sales commit a household to a "
+       "horizon longer than the purchase; both are placed on a common scale "
+       "by the proxy's declared range"),
+    _p("survey_expectation", "future_orientation", POSITIVE, 95.0, 105.0, 0.13,
+       "the OECD consumer confidence indicator is normalised around 100 and "
+       "leads its own national surveys; used for orientation toward the "
+       "future rather than for present anxiety"),
+
     # --- attention / language ------------------------------------------------
     _p("search_interest", "stress", POSITIVE, 0.0, 100.0, 0.20,
        "search volume for distress terms; a weak instrument because search "
@@ -178,6 +210,28 @@ for _proxy in REGISTRY:
 
 def covered_dimensions() -> List[str]:
     return sorted(BY_DIMENSION)
+
+
+def indistinguishable_pairs() -> List[tuple]:
+    """Constructs whose instrument sets are identical.
+
+    Section 3's wall, one level deeper than spelling. Two constructs measured
+    by exactly the same series are not two constructs -- they are one
+    construct with two names, and the incremental-value test would credit
+    whichever happened to be tested first while the other rode along.
+
+    Reported rather than raised, because the correct remedy depends on which
+    it is: find a discriminating instrument, or retire one of them.
+    """
+    out = []
+    dims = sorted(BY_DIMENSION)
+    for i, a in enumerate(dims):
+        ka = {p.kind for p in BY_DIMENSION[a]}
+        for b in dims[i + 1:]:
+            kb = {p.kind for p in BY_DIMENSION[b]}
+            if ka == kb:
+                out.append((a, b, sorted(ka)))
+    return out
 
 
 def uncovered_dimensions() -> List[str]:

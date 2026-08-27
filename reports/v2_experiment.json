@@ -1,0 +1,4612 @@
+{
+  "arms": {
+    "DEEP": {
+      "arm": {
+        "base_series": [
+          "UNRATE",
+          "CPIAUCSL",
+          "DFF",
+          "DGS2",
+          "DGS10",
+          "HOUST",
+          "INDPRO"
+        ],
+        "behavioural_series": [
+          "EMRATIO",
+          "UMCSENT"
+        ],
+        "name": "DEEP",
+        "note": "1978-01 onward. A NARROWER behavioural block -- reported as narrower -- bought for the only thing that was scarce: separate economic episodes",
+        "origins": 584,
+        "span": [
+          "1978-01-15",
+          "2026-08-15"
+        ]
+      },
+      "baseline_gate_passed": true,
+      "baseline_gate_passing_families": [
+        "industrial_180d",
+        "industrial_360d",
+        "labour_360d"
+      ],
+      "baseline_ladder_per_family": {
+        "consumption_180d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.06358) does not beat BASE_RATE. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.0,
+              "BASE_RATE": 0.05905,
+              "MACRO": 0.06358,
+              "PERSISTENCE": 0.175,
+              "REGIME_MACRO": 0.06227
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.0,
+              "directional_accuracy": 0.0,
+              "features": 0,
+              "n": 0,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.05905,
+              "directional_accuracy": 0.9396,
+              "features": 0,
+              "n": 480,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.06358,
+              "directional_accuracy": 0.9333,
+              "features": 18,
+              "n": 480,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.175,
+              "directional_accuracy": 0.775,
+              "features": 0,
+              "n": 480,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.06227,
+              "directional_accuracy": 0.9396,
+              "features": 0,
+              "n": 480,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "consumption_360d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.06085) does not beat BASE_RATE. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.0,
+              "BASE_RATE": 0.05941,
+              "MACRO": 0.06085,
+              "PERSISTENCE": 0.18566,
+              "REGIME_MACRO": 0.07003
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.0,
+              "directional_accuracy": 0.0,
+              "features": 0,
+              "n": 0,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.05941,
+              "directional_accuracy": 0.9411,
+              "features": 0,
+              "n": 475,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.06085,
+              "directional_accuracy": 0.9389,
+              "features": 18,
+              "n": 475,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.18566,
+              "directional_accuracy": 0.7537,
+              "features": 0,
+              "n": 475,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.07003,
+              "directional_accuracy": 0.92,
+              "features": 0,
+              "n": 475,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "credit_stress_180d": {
+          "gate": {
+            "beaten": [],
+            "lost_to": [
+              "BASE_RATE",
+              "PERSISTENCE"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.34347) does not beat BASE_RATE, PERSISTENCE. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.0,
+              "BASE_RATE": 0.25385,
+              "MACRO": 0.34347,
+              "PERSISTENCE": 0.20423,
+              "REGIME_MACRO": 0.3456
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.0,
+              "directional_accuracy": 0.0,
+              "features": 0,
+              "n": 0,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25385,
+              "directional_accuracy": 0.5735,
+              "features": 0,
+              "n": 340,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.34347,
+              "directional_accuracy": 0.5676,
+              "features": 18,
+              "n": 340,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.20423,
+              "directional_accuracy": 0.7176,
+              "features": 0,
+              "n": 340,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.3456,
+              "directional_accuracy": 0.5824,
+              "features": 0,
+              "n": 340,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "credit_stress_360d": {
+          "gate": {
+            "beaten": [],
+            "lost_to": [
+              "BASE_RATE",
+              "PERSISTENCE"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.33252) does not beat BASE_RATE, PERSISTENCE. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.0,
+              "BASE_RATE": 0.24666,
+              "MACRO": 0.33252,
+              "PERSISTENCE": 0.22425,
+              "REGIME_MACRO": 0.34829
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.0,
+              "directional_accuracy": 0.0,
+              "features": 0,
+              "n": 0,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.24666,
+              "directional_accuracy": 0.5731,
+              "features": 0,
+              "n": 335,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.33252,
+              "directional_accuracy": 0.594,
+              "features": 18,
+              "n": 335,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.22425,
+              "directional_accuracy": 0.6687,
+              "features": 0,
+              "n": 335,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.34829,
+              "directional_accuracy": 0.5851,
+              "features": 0,
+              "n": 335,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "housing_180d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.27757) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.25177,
+              "BASE_RATE": 0.25248,
+              "MACRO": 0.27757,
+              "PERSISTENCE": 0.3543,
+              "REGIME_MACRO": 0.2901
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.25177,
+              "directional_accuracy": 0.4562,
+              "features": 0,
+              "n": 480,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25248,
+              "directional_accuracy": 0.4396,
+              "features": 0,
+              "n": 480,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.27757,
+              "directional_accuracy": 0.5625,
+              "features": 18,
+              "n": 480,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.3543,
+              "directional_accuracy": 0.4188,
+              "features": 0,
+              "n": 480,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.2901,
+              "directional_accuracy": 0.525,
+              "features": 0,
+              "n": 480,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "housing_360d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.31996) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.25931,
+              "BASE_RATE": 0.25751,
+              "MACRO": 0.31996,
+              "PERSISTENCE": 0.35105,
+              "REGIME_MACRO": 0.33976
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.25931,
+              "directional_accuracy": 0.4463,
+              "features": 0,
+              "n": 475,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25751,
+              "directional_accuracy": 0.4568,
+              "features": 0,
+              "n": 475,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.31996,
+              "directional_accuracy": 0.5389,
+              "features": 18,
+              "n": 475,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.35105,
+              "directional_accuracy": 0.4253,
+              "features": 0,
+              "n": 475,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.33976,
+              "directional_accuracy": 0.5411,
+              "features": 0,
+              "n": 475,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "industrial_180d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "lost_to": [],
+            "passed": true,
+            "reason": "the macro baseline (Brier 0.18715) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "scores": {
+              "AR": 0.20583,
+              "BASE_RATE": 0.20284,
+              "MACRO": 0.18715,
+              "PERSISTENCE": 0.23646,
+              "REGIME_MACRO": 0.19224
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.20583,
+              "directional_accuracy": 0.7083,
+              "features": 0,
+              "n": 480,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.20284,
+              "directional_accuracy": 0.7312,
+              "features": 0,
+              "n": 480,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.18715,
+              "directional_accuracy": 0.7333,
+              "features": 18,
+              "n": 480,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.23646,
+              "directional_accuracy": 0.6521,
+              "features": 0,
+              "n": 480,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.19224,
+              "directional_accuracy": 0.7479,
+              "features": 0,
+              "n": 480,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "industrial_360d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "lost_to": [],
+            "passed": true,
+            "reason": "the macro baseline (Brier 0.17151) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "scores": {
+              "AR": 0.20456,
+              "BASE_RATE": 0.20333,
+              "MACRO": 0.17151,
+              "PERSISTENCE": 0.24355,
+              "REGIME_MACRO": 0.17387
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.20456,
+              "directional_accuracy": 0.7368,
+              "features": 0,
+              "n": 475,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.20333,
+              "directional_accuracy": 0.7411,
+              "features": 0,
+              "n": 475,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.17151,
+              "directional_accuracy": 0.7811,
+              "features": 18,
+              "n": 475,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.24355,
+              "directional_accuracy": 0.6379,
+              "features": 0,
+              "n": 475,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.17387,
+              "directional_accuracy": 0.7832,
+              "features": 0,
+              "n": 475,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "labour_180d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.19503) does not beat AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.19147,
+              "BASE_RATE": 0.22082,
+              "MACRO": 0.19503,
+              "PERSISTENCE": 0.24844,
+              "REGIME_MACRO": 0.18117
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.19147,
+              "directional_accuracy": 0.725,
+              "features": 0,
+              "n": 480,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.22082,
+              "directional_accuracy": 0.6979,
+              "features": 0,
+              "n": 480,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.19503,
+              "directional_accuracy": 0.7229,
+              "features": 18,
+              "n": 480,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.24844,
+              "directional_accuracy": 0.5375,
+              "features": 0,
+              "n": 480,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.18117,
+              "directional_accuracy": 0.7438,
+              "features": 0,
+              "n": 480,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "labour_360d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "lost_to": [],
+            "passed": true,
+            "reason": "the macro baseline (Brier 0.17781) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "scores": {
+              "AR": 0.21554,
+              "BASE_RATE": 0.23398,
+              "MACRO": 0.17781,
+              "PERSISTENCE": 0.24513,
+              "REGIME_MACRO": 0.14814
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.21554,
+              "directional_accuracy": 0.6442,
+              "features": 0,
+              "n": 475,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.23398,
+              "directional_accuracy": 0.6232,
+              "features": 0,
+              "n": 475,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.17781,
+              "directional_accuracy": 0.7663,
+              "features": 18,
+              "n": 475,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.24513,
+              "directional_accuracy": 0.5558,
+              "features": 0,
+              "n": 475,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.14814,
+              "directional_accuracy": 0.8063,
+              "features": 0,
+              "n": 475,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        }
+      },
+      "by_regime": {
+        "CREDIT_STRESS": {
+          "augmented_score": 0.18171,
+          "base_score": 0.13426,
+          "ci": [
+            -0.06735,
+            -0.02807
+          ],
+          "delta": -0.04745,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.06536,
+            0.00627
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01964,
+          "n_clusters": 36,
+          "n_episodes": 2,
+          "n_paired": 108,
+          "name": "CREDIT_STRESS",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.0,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 14.6,
+            "headline": "108 rows / 36 origins / 14.6 effective / 2 episodes",
+            "horizons": 2,
+            "icc": 0.1964,
+            "independent_episodes": 2,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.423,
+            "origins_per_episode": [
+              9,
+              27
+            ],
+            "pseudo_replication_factor": 7.4,
+            "raw_rows": 108,
+            "rows_per_episode": [
+              27,
+              81
+            ],
+            "span": [
+              "2017-06-15",
+              "2024-11-15"
+            ],
+            "targets": 3,
+            "unique_origins": 36
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": true,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "DISINFLATION": {
+          "augmented_score": 0.25261,
+          "base_score": 0.22603,
+          "ci": [
+            -0.04084,
+            -0.01367
+          ],
+          "delta": -0.02658,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.099,
+            1e-05
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01358,
+          "n_clusters": 76,
+          "n_episodes": 8,
+          "n_paired": 228,
+          "name": "DISINFLATION",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.0,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 15.54,
+            "headline": "228 rows / 76 origins / 15.5 effective / 8 episodes",
+            "horizons": 2,
+            "icc": 0.0375,
+            "independent_episodes": 8,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.6605,
+            "origins_per_episode": [
+              3,
+              6,
+              36,
+              1,
+              6,
+              1,
+              12,
+              11
+            ],
+            "pseudo_replication_factor": 14.67,
+            "raw_rows": 228,
+            "rows_per_episode": [
+              9,
+              18,
+              108,
+              3,
+              18,
+              3,
+              36,
+              33
+            ],
+            "span": [
+              "1987-01-15",
+              "2021-03-15"
+            ],
+            "targets": 3,
+            "unique_origins": 76
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "INFLATION_SHOCK": {
+          "augmented_score": 0.32053,
+          "base_score": 0.31491,
+          "ci": [
+            -0.01735,
+            0.00682
+          ],
+          "delta": -0.00562,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.01903,
+            0.03553
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01209,
+          "n_clusters": 83,
+          "n_episodes": 4,
+          "n_paired": 249,
+          "name": "INFLATION_SHOCK",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.362,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 30.74,
+            "headline": "249 rows / 83 origins / 30.7 effective / 4 episodes",
+            "horizons": 2,
+            "icc": 0.328,
+            "independent_episodes": 4,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.4595,
+            "origins_per_episode": [
+              43,
+              5,
+              9,
+              26
+            ],
+            "pseudo_replication_factor": 8.1,
+            "raw_rows": 249,
+            "rows_per_episode": [
+              129,
+              15,
+              27,
+              78
+            ],
+            "span": [
+              "1987-10-15",
+              "2023-07-15"
+            ],
+            "targets": 3,
+            "unique_origins": 83
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "LABOUR_DETERIORATION": {
+          "augmented_score": 0.26954,
+          "base_score": 0.2551,
+          "ci": [
+            -0.02988,
+            -5e-05
+          ],
+          "delta": -0.01444,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.08619,
+            0.02081
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01491,
+          "n_clusters": 85,
+          "n_episodes": 5,
+          "n_paired": 255,
+          "name": "LABOUR_DETERIORATION",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.049,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 11.33,
+            "headline": "255 rows / 85 origins / 11.3 effective / 5 episodes",
+            "horizons": 2,
+            "icc": 0.1062,
+            "independent_episodes": 5,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.7647,
+            "origins_per_episode": [
+              24,
+              17,
+              1,
+              27,
+              16
+            ],
+            "pseudo_replication_factor": 22.5,
+            "raw_rows": 255,
+            "rows_per_episode": [
+              72,
+              51,
+              3,
+              81,
+              48
+            ],
+            "span": [
+              "1990-12-15",
+              "2024-12-15"
+            ],
+            "targets": 3,
+            "unique_origins": 85
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "LIQUIDITY_STRESS": {
+          "augmented_score": 0.24192,
+          "base_score": 0.20605,
+          "ci": [
+            -0.05092,
+            -0.02227
+          ],
+          "delta": -0.03587,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.05803,
+            -0.0021
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01432,
+          "n_clusters": 58,
+          "n_episodes": 4,
+          "n_paired": 174,
+          "name": "LIQUIDITY_STRESS",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.0,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 23.43,
+            "headline": "174 rows / 58 origins / 23.4 effective / 4 episodes",
+            "horizons": 2,
+            "icc": 0.0476,
+            "independent_episodes": 4,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.4246,
+            "origins_per_episode": [
+              9,
+              11,
+              12,
+              26
+            ],
+            "pseudo_replication_factor": 7.43,
+            "raw_rows": 174,
+            "rows_per_episode": [
+              27,
+              33,
+              36,
+              78
+            ],
+            "span": [
+              "1988-12-15",
+              "2024-08-15"
+            ],
+            "targets": 3,
+            "unique_origins": 58
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "LOW_VOL_EXPANSION": {
+          "augmented_score": 0.13858,
+          "base_score": 0.136,
+          "ci": [
+            -0.0066,
+            0.00164
+          ],
+          "delta": -0.00258,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.01427,
+            0.01072
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00412,
+          "n_clusters": 286,
+          "n_episodes": 12,
+          "n_paired": 845,
+          "name": "LOW_VOL_EXPANSION",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.221,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 123.15,
+            "headline": "845 rows / 286 origins / 123.2 effective / 12 episodes",
+            "horizons": 2,
+            "icc": 0.3568,
+            "independent_episodes": 12,
+            "mean_rows_per_origin": 2.95,
+            "origin_autocorrelation": 0.398,
+            "origins_per_episode": [
+              23,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              11,
+              5,
+              5,
+              4,
+              1
+            ],
+            "pseudo_replication_factor": 6.86,
+            "raw_rows": 845,
+            "rows_per_episode": [
+              68,
+              258,
+              24,
+              81,
+              21,
+              252,
+              75,
+              21,
+              15,
+              15,
+              12,
+              3
+            ],
+            "span": [
+              "1985-11-15",
+              "2025-11-15"
+            ],
+            "targets": 3,
+            "unique_origins": 286
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "POLICY_EASING": {
+          "sample": {
+            "effective_origins": 4.0,
+            "headline": "12 rows / 4 origins / 4.0 effective / 2 episodes",
+            "horizons": 2,
+            "icc": 0.0,
+            "independent_episodes": 2,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.0,
+            "origins_per_episode": [
+              2,
+              2
+            ],
+            "pseudo_replication_factor": 3.0,
+            "raw_rows": 12,
+            "rows_per_episode": [
+              6,
+              6
+            ],
+            "span": [
+              "1986-01-15",
+              "1991-04-15"
+            ],
+            "targets": 3,
+            "unique_origins": 4
+          },
+          "verdict": "INSUFFICIENT_SAMPLE"
+        },
+        "POLICY_TIGHTENING": {
+          "sample": {
+            "effective_origins": 6.0,
+            "headline": "18 rows / 6 origins / 6.0 effective / 3 episodes",
+            "horizons": 2,
+            "icc": 0.7772,
+            "independent_episodes": 3,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.0,
+            "origins_per_episode": [
+              3,
+              2,
+              1
+            ],
+            "pseudo_replication_factor": 3.0,
+            "raw_rows": 18,
+            "rows_per_episode": [
+              9,
+              6,
+              3
+            ],
+            "span": [
+              "1990-11-15",
+              "2022-11-15"
+            ],
+            "targets": 3,
+            "unique_origins": 6
+          },
+          "verdict": "INSUFFICIENT_SAMPLE"
+        },
+        "RECOVERY": {
+          "augmented_score": 0.13775,
+          "base_score": 0.13299,
+          "ci": [
+            -0.00811,
+            -0.00141
+          ],
+          "delta": -0.00476,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.00987,
+            -0.00194
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00335,
+          "n_clusters": 226,
+          "n_episodes": 10,
+          "n_paired": 678,
+          "name": "RECOVERY",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.001,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 78.02,
+            "headline": "678 rows / 226 origins / 78.0 effective / 10 episodes",
+            "horizons": 2,
+            "icc": 0.1181,
+            "independent_episodes": 10,
+            "mean_rows_per_origin": 3.0,
+            "origin_autocorrelation": 0.4867,
+            "origins_per_episode": [
+              9,
+              50,
+              16,
+              72,
+              11,
+              21,
+              3,
+              13,
+              9,
+              22
+            ],
+            "pseudo_replication_factor": 8.69,
+            "raw_rows": 678,
+            "rows_per_episode": [
+              27,
+              150,
+              48,
+              216,
+              33,
+              63,
+              9,
+              39,
+              27,
+              66
+            ],
+            "span": [
+              "1986-02-15",
+              "2023-02-15"
+            ],
+            "targets": 3,
+            "unique_origins": 226
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        }
+      },
+      "constructs": {
+        "financial_anxiety": {
+          "ci": [
+            -0.00493,
+            0.00103
+          ],
+          "delta": -0.00195,
+          "features": [
+            "UMCSENT_q",
+            "UMCSENT_yoy"
+          ],
+          "mde": 0.00298,
+          "sample": "1430 rows / 481 origins / 203.2 effective / 15 episodes",
+          "sample_detail": {
+            "effective_origins": 203.19,
+            "headline": "1430 rows / 481 origins / 203.2 effective / 15 episodes",
+            "horizons": 2,
+            "icc": 0.2053,
+            "independent_episodes": 15,
+            "mean_rows_per_origin": 2.97,
+            "origin_autocorrelation": 0.406,
+            "origins_per_episode": [
+              23,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              11,
+              62,
+              33,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 7.04,
+            "raw_rows": 1430,
+            "rows_per_episode": [
+              68,
+              258,
+              24,
+              81,
+              21,
+              252,
+              75,
+              21,
+              186,
+              99,
+              3,
+              57,
+              87,
+              27,
+              171
+            ],
+            "span": [
+              "1985-11-15",
+              "2025-11-15"
+            ],
+            "targets": 3,
+            "unique_origins": 481
+          },
+          "series": [
+            "CORCACBS",
+            "DRCCLACBS",
+            "DRSFRMACBS",
+            "PSAVERT",
+            "REVOLSL",
+            "TDSP",
+            "UMCSENT"
+          ],
+          "verdict": "INSUFFICIENT_POWER"
+        },
+        "future_orientation": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "USACSCICP02STSAM"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        },
+        "perceived_control": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "BABATOTALSAUS",
+            "JTSQUR",
+            "MICH",
+            "U6RATE"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        },
+        "perceived_security": {
+          "ci": [
+            -0.00762,
+            -0.00226
+          ],
+          "delta": -0.00504,
+          "features": [
+            "EMRATIO_q",
+            "EMRATIO_yoy"
+          ],
+          "mde": 0.00268,
+          "sample": "1430 rows / 481 origins / 86.9 effective / 15 episodes",
+          "sample_detail": {
+            "effective_origins": 86.9,
+            "headline": "1430 rows / 481 origins / 86.9 effective / 15 episodes",
+            "horizons": 2,
+            "icc": 0.2281,
+            "independent_episodes": 15,
+            "mean_rows_per_origin": 2.97,
+            "origin_autocorrelation": 0.694,
+            "origins_per_episode": [
+              23,
+              86,
+              8,
+              27,
+              7,
+              84,
+              25,
+              11,
+              62,
+              33,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 16.46,
+            "raw_rows": 1430,
+            "rows_per_episode": [
+              68,
+              258,
+              24,
+              81,
+              21,
+              252,
+              75,
+              21,
+              186,
+              99,
+              3,
+              57,
+              87,
+              27,
+              171
+            ],
+            "span": [
+              "1985-11-15",
+              "2025-11-15"
+            ],
+            "targets": 3,
+            "unique_origins": 481
+          },
+          "series": [
+            "EMRATIO",
+            "U6RATE"
+          ],
+          "verdict": "INSUFFICIENT_POWER"
+        },
+        "risk_appetite": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "BOGZ1FL153064486Q"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        },
+        "time_horizon": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "DGORDER",
+            "HSN1F"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        }
+      },
+      "coverage_audit": {
+        "contract": "econ_episodes.v1/coverage",
+        "discovered_episodes": [
+          {
+            "end_as_known": "1983-07-15",
+            "episode_id": "EP_197801",
+            "information_cutoff": "1983-07-15",
+            "normalization": "1984-01-15",
+            "origins": 67,
+            "peak_stress": 3,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK",
+              "LIQUIDITY_STRESS",
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "1978-01-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.41,
+              "inflation_yoy": 0.06713,
+              "policy_change_pp": 0.25,
+              "unemployment_change_pp": -1.4
+            }
+          },
+          {
+            "end_as_known": "1985-02-15",
+            "episode_id": "EP_198403",
+            "information_cutoff": "1985-02-15",
+            "normalization": "1985-08-15",
+            "origins": 12,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK"
+            ],
+            "resolved": true,
+            "start_as_known": "1984-03-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 1.05,
+              "inflation_yoy": 0.0429,
+              "policy_change_pp": 0.21,
+              "unemployment_change_pp": -2.6
+            }
+          },
+          {
+            "end_as_known": "1992-11-15",
+            "episode_id": "EP_198710",
+            "information_cutoff": "1992-11-15",
+            "normalization": "1993-05-15",
+            "origins": 57,
+            "peak_stress": 2,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK",
+              "LIQUIDITY_STRESS",
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "1987-10-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.99,
+              "inflation_yoy": 0.04288,
+              "policy_change_pp": 0.17,
+              "unemployment_change_pp": -1.1
+            }
+          },
+          {
+            "end_as_known": "2002-10-15",
+            "episode_id": "EP_200002",
+            "information_cutoff": "2002-10-15",
+            "normalization": "2003-04-15",
+            "origins": 28,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "LIQUIDITY_STRESS",
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "2000-02-15",
+            "trigger_evidence": {
+              "curve_slope_pp": -0.06,
+              "inflation_yoy": 0.02676,
+              "policy_change_pp": 0.15,
+              "unemployment_change_pp": -0.3
+            }
+          },
+          {
+            "end_as_known": "2003-07-15",
+            "episode_id": "EP_200307",
+            "information_cutoff": "2003-07-15",
+            "normalization": "2004-01-15",
+            "origins": 1,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "2003-07-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 2.39,
+              "inflation_yoy": 0.01894,
+              "policy_change_pp": 0.06,
+              "unemployment_change_pp": 0.6
+            }
+          },
+          {
+            "end_as_known": "2007-05-15",
+            "episode_id": "EP_200511",
+            "information_cutoff": "2007-05-15",
+            "normalization": "2007-11-15",
+            "origins": 15,
+            "peak_stress": 2,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK",
+              "LIQUIDITY_STRESS"
+            ],
+            "resolved": true,
+            "start_as_known": "2005-11-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.11,
+              "inflation_yoy": 0.04742,
+              "policy_change_pp": 0.04,
+              "unemployment_change_pp": -0.5
+            }
+          },
+          {
+            "end_as_known": "2010-05-15",
+            "episode_id": "EP_200801",
+            "information_cutoff": "2010-05-15",
+            "normalization": "2010-11-15",
+            "origins": 29,
+            "peak_stress": 2,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK",
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "2008-01-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 1.23,
+              "inflation_yoy": 0.04373,
+              "policy_change_pp": 0.13,
+              "unemployment_change_pp": 0.6
+            }
+          },
+          {
+            "end_as_known": "2018-02-15",
+            "episode_id": "EP_201706",
+            "information_cutoff": "2018-02-15",
+            "normalization": "2018-08-15",
+            "origins": 9,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "CREDIT_STRESS"
+            ],
+            "resolved": true,
+            "start_as_known": "2017-06-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.8,
+              "delinquency_yoy": 0.12558,
+              "inflation_yoy": 0.02176,
+              "policy_change_pp": 0.0,
+              "unemployment_change_pp": -0.4
+            }
+          },
+          {
+            "end_as_known": "2024-12-15",
+            "episode_id": "EP_202004",
+            "information_cutoff": "2024-12-15",
+            "normalization": "2025-06-15",
+            "origins": 56,
+            "peak_stress": 3,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "LABOUR_DETERIORATION",
+              "INFLATION_SHOCK",
+              "LIQUIDITY_STRESS",
+              "CREDIT_STRESS"
+            ],
+            "resolved": true,
+            "start_as_known": "2020-04-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.53,
+              "delinquency_yoy": 0.02756,
+              "inflation_yoy": 0.02341,
+              "policy_change_pp": 0.0,
+              "unemployment_change_pp": 0.6
+            }
+          },
+          {
+            "end_as_known": "2026-07-15",
+            "episode_id": "EP_202607",
+            "information_cutoff": "2026-07-15",
+            "normalization": "",
+            "origins": 1,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK"
+            ],
+            "resolved": false,
+            "start_as_known": "2026-07-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.4,
+              "delinquency_yoy": -0.04575,
+              "inflation_yoy": 0.0427,
+              "policy_change_pp": 0.0,
+              "unemployment_change_pp": -0.1
+            }
+          }
+        ],
+        "found": 8,
+        "missed": 5,
+        "origin_span": [
+          "1978-01-15",
+          "2026-08-15"
+        ],
+        "out_of_reach": 2,
+        "windows": [
+          {
+            "end": "1970-12-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1966-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "late_1960s_inflation"
+          },
+          {
+            "end": "1975-12-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1973-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "1973_75"
+          },
+          {
+            "end": "1982-12-31",
+            "episodes_found": [
+              "EP_197801"
+            ],
+            "in_origin_reach": true,
+            "start": "1979-01-01",
+            "status": "FOUND",
+            "window": "1979_82"
+          },
+          {
+            "end": "1988-03-31",
+            "episodes_found": [
+              "EP_198710"
+            ],
+            "in_origin_reach": true,
+            "start": "1987-08-01",
+            "status": "FOUND",
+            "window": "1987"
+          },
+          {
+            "end": "1991-12-31",
+            "episodes_found": [
+              "EP_198710"
+            ],
+            "in_origin_reach": true,
+            "start": "1990-01-01",
+            "status": "FOUND",
+            "window": "1990_91"
+          },
+          {
+            "end": "1995-06-30",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "1994-01-01",
+            "status": "MISSED",
+            "window": "1994_tightening"
+          },
+          {
+            "end": "1998-12-31",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "1997-07-01",
+            "status": "MISSED",
+            "window": "1997_98"
+          },
+          {
+            "end": "2002-12-31",
+            "episodes_found": [
+              "EP_200002"
+            ],
+            "in_origin_reach": true,
+            "start": "2000-03-01",
+            "status": "FOUND",
+            "window": "2000_02"
+          },
+          {
+            "end": "2009-12-31",
+            "episodes_found": [
+              "EP_200801"
+            ],
+            "in_origin_reach": true,
+            "start": "2007-06-01",
+            "status": "FOUND",
+            "window": "2007_09"
+          },
+          {
+            "end": "2012-03-31",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "2011-06-01",
+            "status": "MISSED",
+            "window": "2011"
+          },
+          {
+            "end": "2016-06-30",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "2015-06-01",
+            "status": "MISSED",
+            "window": "2015_16"
+          },
+          {
+            "end": "2019-01-31",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "2018-09-01",
+            "status": "MISSED",
+            "window": "2018"
+          },
+          {
+            "end": "2020-12-31",
+            "episodes_found": [
+              "EP_202004"
+            ],
+            "in_origin_reach": true,
+            "start": "2020-02-01",
+            "status": "FOUND",
+            "window": "2020"
+          },
+          {
+            "end": "2023-12-31",
+            "episodes_found": [
+              "EP_202004"
+            ],
+            "in_origin_reach": true,
+            "start": "2021-04-01",
+            "status": "FOUND",
+            "window": "2021_23"
+          },
+          {
+            "end": "2023-09-30",
+            "episodes_found": [
+              "EP_202004"
+            ],
+            "in_origin_reach": true,
+            "start": "2023-03-01",
+            "status": "FOUND",
+            "window": "2023_banking"
+          }
+        ]
+      },
+      "elapsed_seconds": 57.2,
+      "episodes": [
+        {
+          "end_as_known": "1983-07-15",
+          "episode_id": "EP_197801",
+          "information_cutoff": "1983-07-15",
+          "normalization": "1984-01-15",
+          "origins": 67,
+          "peak_stress": 3,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "1978-01-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.41,
+            "inflation_yoy": 0.06713,
+            "policy_change_pp": 0.25,
+            "unemployment_change_pp": -1.4
+          }
+        },
+        {
+          "end_as_known": "1985-02-15",
+          "episode_id": "EP_198403",
+          "information_cutoff": "1985-02-15",
+          "normalization": "1985-08-15",
+          "origins": 12,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK"
+          ],
+          "resolved": true,
+          "start_as_known": "1984-03-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 1.05,
+            "inflation_yoy": 0.0429,
+            "policy_change_pp": 0.21,
+            "unemployment_change_pp": -2.6
+          }
+        },
+        {
+          "end_as_known": "1992-11-15",
+          "episode_id": "EP_198710",
+          "information_cutoff": "1992-11-15",
+          "normalization": "1993-05-15",
+          "origins": 57,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "1987-10-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.99,
+            "inflation_yoy": 0.04288,
+            "policy_change_pp": 0.17,
+            "unemployment_change_pp": -1.1
+          }
+        },
+        {
+          "end_as_known": "2002-10-15",
+          "episode_id": "EP_200002",
+          "information_cutoff": "2002-10-15",
+          "normalization": "2003-04-15",
+          "origins": 28,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2000-02-15",
+          "trigger_evidence": {
+            "curve_slope_pp": -0.06,
+            "inflation_yoy": 0.02676,
+            "policy_change_pp": 0.15,
+            "unemployment_change_pp": -0.3
+          }
+        },
+        {
+          "end_as_known": "2003-07-15",
+          "episode_id": "EP_200307",
+          "information_cutoff": "2003-07-15",
+          "normalization": "2004-01-15",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2003-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 2.39,
+            "inflation_yoy": 0.01894,
+            "policy_change_pp": 0.06,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2007-05-15",
+          "episode_id": "EP_200511",
+          "information_cutoff": "2007-05-15",
+          "normalization": "2007-11-15",
+          "origins": 15,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2005-11-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.11,
+            "inflation_yoy": 0.04742,
+            "policy_change_pp": 0.04,
+            "unemployment_change_pp": -0.5
+          }
+        },
+        {
+          "end_as_known": "2010-05-15",
+          "episode_id": "EP_200801",
+          "information_cutoff": "2010-05-15",
+          "normalization": "2010-11-15",
+          "origins": 29,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2008-01-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 1.23,
+            "inflation_yoy": 0.04373,
+            "policy_change_pp": 0.13,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2018-02-15",
+          "episode_id": "EP_201706",
+          "information_cutoff": "2018-02-15",
+          "normalization": "2018-08-15",
+          "origins": 9,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2017-06-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.8,
+            "delinquency_yoy": 0.12558,
+            "inflation_yoy": 0.02176,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.4
+          }
+        },
+        {
+          "end_as_known": "2024-12-15",
+          "episode_id": "EP_202004",
+          "information_cutoff": "2024-12-15",
+          "normalization": "2025-06-15",
+          "origins": 56,
+          "peak_stress": 3,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION",
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2020-04-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.53,
+            "delinquency_yoy": 0.02756,
+            "inflation_yoy": 0.02341,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2026-07-15",
+          "episode_id": "EP_202607",
+          "information_cutoff": "2026-07-15",
+          "normalization": "",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK"
+          ],
+          "resolved": false,
+          "start_as_known": "2026-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.4,
+            "delinquency_yoy": -0.04575,
+            "inflation_yoy": 0.0427,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.1
+          }
+        }
+      ],
+      "features": {
+        "base": [
+          "CPIAUCSL_q",
+          "CPIAUCSL_yoy",
+          "DFF_lvl",
+          "DFF_q",
+          "DFF_yoy",
+          "DGS10_lvl",
+          "DGS10_q",
+          "DGS10_yoy",
+          "DGS2_lvl",
+          "DGS2_q",
+          "DGS2_yoy",
+          "HOUST_q",
+          "HOUST_yoy",
+          "INDPRO_q",
+          "INDPRO_yoy",
+          "UNRATE_lvl",
+          "UNRATE_q",
+          "UNRATE_yoy"
+        ],
+        "base_dropped": [],
+        "behavioural": [
+          "EMRATIO_q",
+          "EMRATIO_yoy",
+          "UMCSENT_q",
+          "UMCSENT_yoy"
+        ],
+        "behavioural_dropped": []
+      },
+      "h3": {
+        "augmented_score": 0.18691,
+        "base_score": 0.17885,
+        "ci": [
+          -0.01245,
+          -0.00374
+        ],
+        "delta": -0.00805,
+        "dimension": "collective_block",
+        "episode_ci": [
+          -0.02444,
+          0.00619
+        ],
+        "episode_ci_note": null,
+        "fdr_adjusted": false,
+        "horizon_days": 0,
+        "mde": 0.00436,
+        "n_clusters": 481,
+        "n_episodes": 15,
+        "n_paired": 1430,
+        "name": "H3_GLOBAL",
+        "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+        "p_value": 0.0,
+        "population": "US_households",
+        "pseudo_replication": true,
+        "regime": "ALL",
+        "robust": false,
+        "single_cluster": false,
+        "survives_fdr": null,
+        "too_few_episodes": false,
+        "underpowered": false,
+        "verdict": "NO_IMPROVEMENT"
+      },
+      "h3_all_families": {
+        "augmented_score": 0.2096,
+        "base_score": 0.20516,
+        "ci": [
+          -0.00789,
+          -0.001
+        ],
+        "delta": -0.00444,
+        "dimension": "collective_block",
+        "episode_ci": [
+          -0.01497,
+          0.00561
+        ],
+        "episode_ci_note": null,
+        "fdr_adjusted": false,
+        "horizon_days": 0,
+        "mde": 0.00345,
+        "n_clusters": 482,
+        "n_episodes": 15,
+        "n_paired": 4495,
+        "name": "H3_GLOBAL_ALL_FAMILIES",
+        "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+        "p_value": 0.011,
+        "population": "US_households",
+        "pseudo_replication": true,
+        "regime": "ALL",
+        "robust": false,
+        "single_cluster": false,
+        "survives_fdr": null,
+        "too_few_episodes": false,
+        "underpowered": false,
+        "verdict": "NO_IMPROVEMENT"
+      },
+      "h3_verdict": "INSUFFICIENT_POWER",
+      "h4": {
+        "calm": {
+          "augmented_score": 0.13858,
+          "base_score": 0.136,
+          "ci": [
+            -0.0066,
+            0.00164
+          ],
+          "delta": -0.00258,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.01427,
+            0.01072
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00412,
+          "n_clusters": 286,
+          "n_episodes": 12,
+          "n_paired": 845,
+          "name": "CALM",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.221,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "calm_sample": {
+          "effective_origins": 123.15,
+          "headline": "845 rows / 286 origins / 123.2 effective / 12 episodes",
+          "horizons": 2,
+          "icc": 0.3568,
+          "independent_episodes": 12,
+          "mean_rows_per_origin": 2.95,
+          "origin_autocorrelation": 0.398,
+          "origins_per_episode": [
+            23,
+            86,
+            8,
+            27,
+            7,
+            84,
+            25,
+            11,
+            5,
+            5,
+            4,
+            1
+          ],
+          "pseudo_replication_factor": 6.86,
+          "raw_rows": 845,
+          "rows_per_episode": [
+            68,
+            258,
+            24,
+            81,
+            21,
+            252,
+            75,
+            21,
+            15,
+            15,
+            12,
+            3
+          ],
+          "span": [
+            "1985-11-15",
+            "2025-11-15"
+          ],
+          "targets": 3,
+          "unique_origins": 286
+        },
+        "stressed": {
+          "augmented_score": 0.25671,
+          "base_score": 0.24075,
+          "ci": [
+            -0.02416,
+            -0.00736
+          ],
+          "delta": -0.01596,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.04588,
+            0.01441
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.0084,
+          "n_clusters": 195,
+          "n_episodes": 7,
+          "n_paired": 585,
+          "name": "STRESSED",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.0,
+          "population": "US_households",
+          "pseudo_replication": true,
+          "regime": "ALL",
+          "robust": false,
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "stressed_sample": {
+          "effective_origins": 42.06,
+          "headline": "585 rows / 195 origins / 42.1 effective / 7 episodes",
+          "horizons": 2,
+          "icc": 0.1316,
+          "independent_episodes": 7,
+          "mean_rows_per_origin": 3.0,
+          "origin_autocorrelation": 0.6451,
+          "origins_per_episode": [
+            57,
+            28,
+            1,
+            15,
+            29,
+            9,
+            56
+          ],
+          "pseudo_replication_factor": 13.91,
+          "raw_rows": 585,
+          "rows_per_episode": [
+            171,
+            84,
+            3,
+            45,
+            87,
+            27,
+            168
+          ],
+          "span": [
+            "1987-10-15",
+            "2024-12-15"
+          ],
+          "targets": 3,
+          "unique_origins": 195
+        }
+      },
+      "h4_verdict": "INSUFFICIENT_POWER",
+      "paired_all_families": 4495,
+      "paired_scored": 1430,
+      "regimes": {
+        "calm_on_partial_evidence": 194,
+        "calm_quorum": 3,
+        "confident": 181,
+        "contract": "econ_regime.v1",
+        "counts": {
+          "CREDIT_STRESS": 36,
+          "DISINFLATION": 76,
+          "INFLATION_SHOCK": 157,
+          "LABOUR_DETERIORATION": 118,
+          "LIQUIDITY_STRESS": 99,
+          "LOW_VOL_EXPANSION": 309,
+          "POLICY_EASING": 24,
+          "POLICY_TIGHTENING": 11,
+          "RECOVERY": 269
+        },
+        "multi_regime_origins": 395,
+        "negative_control": "LOW_VOL_EXPANSION",
+        "origins": 584,
+        "thresholds": {
+          "credit_delinquency_yoy": 0.1,
+          "curve_inversion_pp": 0.0,
+          "inflation_high": 0.04,
+          "inflation_low": 0.015,
+          "policy_move_pp": 0.75,
+          "unemployment_fall_pp": -0.3,
+          "unemployment_rise_pp": 0.5
+        },
+        "unclassifiable": 403
+      },
+      "rows": 5387,
+      "sample": {
+        "effective_origins": 127.15,
+        "headline": "1430 rows / 481 origins / 127.1 effective / 15 episodes",
+        "horizons": 2,
+        "icc": 0.1927,
+        "independent_episodes": 15,
+        "mean_rows_per_origin": 2.97,
+        "origin_autocorrelation": 0.5818,
+        "origins_per_episode": [
+          23,
+          86,
+          8,
+          27,
+          7,
+          84,
+          25,
+          11,
+          62,
+          33,
+          1,
+          19,
+          29,
+          9,
+          57
+        ],
+        "pseudo_replication_factor": 11.25,
+        "raw_rows": 1430,
+        "rows_per_episode": [
+          68,
+          258,
+          24,
+          81,
+          21,
+          252,
+          75,
+          21,
+          186,
+          99,
+          3,
+          57,
+          87,
+          27,
+          171
+        ],
+        "span": [
+          "1985-11-15",
+          "2025-11-15"
+        ],
+        "targets": 3,
+        "unique_origins": 481
+      },
+      "skipped": {
+        "no_outcome": 453,
+        "thin_base": 0,
+        "thin_behavioural": 0
+      }
+    },
+    "MODERN": {
+      "arm": {
+        "base_series": [
+          "UNRATE",
+          "CPIAUCSL",
+          "DFF",
+          "DGS2",
+          "DGS10",
+          "HOUST",
+          "INDPRO",
+          "PCEC96"
+        ],
+        "behavioural_series": [
+          "EMRATIO",
+          "MICH",
+          "PSAVERT",
+          "REVOLSL",
+          "UMCSENT"
+        ],
+        "name": "MODERN",
+        "note": "every series with a vintage record from 1998-02",
+        "origins": 343,
+        "span": [
+          "1998-02-15",
+          "2026-08-15"
+        ]
+      },
+      "baseline_gate_passed": true,
+      "baseline_gate_passing_families": [
+        "industrial_360d",
+        "labour_360d"
+      ],
+      "baseline_ladder_per_family": {
+        "consumption_180d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.12836) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.09117,
+              "BASE_RATE": 0.08053,
+              "MACRO": 0.12836,
+              "PERSISTENCE": 0.16977,
+              "REGIME_MACRO": 0.11314
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.09117,
+              "directional_accuracy": 0.9055,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.08053,
+              "directional_accuracy": 0.92,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.12836,
+              "directional_accuracy": 0.84,
+              "features": 20,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.16977,
+              "directional_accuracy": 0.7855,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.11314,
+              "directional_accuracy": 0.8618,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "consumption_360d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.11636) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.10401,
+              "BASE_RATE": 0.09471,
+              "MACRO": 0.11636,
+              "PERSISTENCE": 0.19028,
+              "REGIME_MACRO": 0.09706
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.10401,
+              "directional_accuracy": 0.8926,
+              "features": 0,
+              "n": 270,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.09471,
+              "directional_accuracy": 0.9037,
+              "features": 0,
+              "n": 270,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.11636,
+              "directional_accuracy": 0.8519,
+              "features": 20,
+              "n": 270,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.19028,
+              "directional_accuracy": 0.7444,
+              "features": 0,
+              "n": 270,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.09706,
+              "directional_accuracy": 0.8889,
+              "features": 0,
+              "n": 270,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "credit_stress_180d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE"
+            ],
+            "lost_to": [
+              "PERSISTENCE"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.21585) does not beat PERSISTENCE. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.0,
+              "BASE_RATE": 0.26174,
+              "MACRO": 0.21585,
+              "PERSISTENCE": 0.17932,
+              "REGIME_MACRO": 0.21163
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.0,
+              "directional_accuracy": 0.0,
+              "features": 0,
+              "n": 0,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.26174,
+              "directional_accuracy": 0.5527,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.21585,
+              "directional_accuracy": 0.6945,
+              "features": 20,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.17932,
+              "directional_accuracy": 0.7745,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.21163,
+              "directional_accuracy": 0.7309,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "credit_stress_360d": {
+          "gate": {
+            "beaten": [],
+            "lost_to": [
+              "BASE_RATE",
+              "PERSISTENCE"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.30349) does not beat BASE_RATE, PERSISTENCE. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.0,
+              "BASE_RATE": 0.26642,
+              "MACRO": 0.30349,
+              "PERSISTENCE": 0.2,
+              "REGIME_MACRO": 0.27928
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.0,
+              "directional_accuracy": 0.0,
+              "features": 0,
+              "n": 0,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.26642,
+              "directional_accuracy": 0.5444,
+              "features": 0,
+              "n": 270,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.30349,
+              "directional_accuracy": 0.637,
+              "features": 20,
+              "n": 270,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.2,
+              "directional_accuracy": 0.7222,
+              "features": 0,
+              "n": 270,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.27928,
+              "directional_accuracy": 0.6593,
+              "features": 0,
+              "n": 270,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "housing_180d": {
+          "gate": {
+            "beaten": [
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "BASE_RATE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.30350) does not beat BASE_RATE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.27073,
+              "BASE_RATE": 0.25609,
+              "MACRO": 0.3035,
+              "PERSISTENCE": 0.36864,
+              "REGIME_MACRO": 0.31266
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.27073,
+              "directional_accuracy": 0.5345,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25609,
+              "directional_accuracy": 0.4582,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.3035,
+              "directional_accuracy": 0.5745,
+              "features": 20,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.36864,
+              "directional_accuracy": 0.3891,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.31266,
+              "directional_accuracy": 0.5782,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "housing_360d": {
+          "gate": {
+            "beaten": [],
+            "lost_to": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.39234) does not beat BASE_RATE, PERSISTENCE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.29061,
+              "BASE_RATE": 0.26074,
+              "MACRO": 0.39234,
+              "PERSISTENCE": 0.34653,
+              "REGIME_MACRO": 0.34972
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.29061,
+              "directional_accuracy": 0.5407,
+              "features": 0,
+              "n": 270,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.26074,
+              "directional_accuracy": 0.4333,
+              "features": 0,
+              "n": 270,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.39234,
+              "directional_accuracy": 0.4963,
+              "features": 20,
+              "n": 270,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.34653,
+              "directional_accuracy": 0.4333,
+              "features": 0,
+              "n": 270,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.34972,
+              "directional_accuracy": 0.5778,
+              "features": 0,
+              "n": 270,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "industrial_180d": {
+          "gate": {
+            "beaten": [],
+            "lost_to": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.26995) does not beat BASE_RATE, PERSISTENCE, AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.24281,
+              "BASE_RATE": 0.23401,
+              "MACRO": 0.26995,
+              "PERSISTENCE": 0.25159,
+              "REGIME_MACRO": 0.31234
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.24281,
+              "directional_accuracy": 0.6327,
+              "features": 0,
+              "n": 275,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.23401,
+              "directional_accuracy": 0.6691,
+              "features": 0,
+              "n": 275,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.26995,
+              "directional_accuracy": 0.64,
+              "features": 20,
+              "n": 275,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.25159,
+              "directional_accuracy": 0.6218,
+              "features": 0,
+              "n": 275,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.31234,
+              "directional_accuracy": 0.5891,
+              "features": 0,
+              "n": 275,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "industrial_360d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "lost_to": [],
+            "passed": true,
+            "reason": "the macro baseline (Brier 0.19022) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "scores": {
+              "AR": 0.26929,
+              "BASE_RATE": 0.25321,
+              "MACRO": 0.19022,
+              "PERSISTENCE": 0.25509,
+              "REGIME_MACRO": 0.24209
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.26929,
+              "directional_accuracy": 0.6074,
+              "features": 0,
+              "n": 270,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.25321,
+              "directional_accuracy": 0.6593,
+              "features": 0,
+              "n": 270,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.19022,
+              "directional_accuracy": 0.7556,
+              "features": 20,
+              "n": 270,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.25509,
+              "directional_accuracy": 0.6148,
+              "features": 0,
+              "n": 270,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.24209,
+              "directional_accuracy": 0.7037,
+              "features": 0,
+              "n": 270,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "labour_180d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE"
+            ],
+            "lost_to": [
+              "AR"
+            ],
+            "passed": false,
+            "reason": "the macro baseline (Brier 0.17237) does not beat AR. Section 10: fix the baseline, do not score the augmentation. A delta measured between two models that both lose to a constant is not evidence about the feature block.",
+            "scores": {
+              "AR": 0.14704,
+              "BASE_RATE": 0.22576,
+              "MACRO": 0.17237,
+              "PERSISTENCE": 0.24576,
+              "REGIME_MACRO": 0.18965
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.14704,
+              "directional_accuracy": 0.8214,
+              "features": 0,
+              "n": 280,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.22576,
+              "directional_accuracy": 0.7214,
+              "features": 0,
+              "n": 280,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.17237,
+              "directional_accuracy": 0.7429,
+              "features": 20,
+              "n": 280,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.24576,
+              "directional_accuracy": 0.5464,
+              "features": 0,
+              "n": 280,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.18965,
+              "directional_accuracy": 0.7357,
+              "features": 0,
+              "n": 280,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        },
+        "labour_360d": {
+          "gate": {
+            "beaten": [
+              "BASE_RATE",
+              "PERSISTENCE",
+              "AR"
+            ],
+            "lost_to": [],
+            "passed": true,
+            "reason": "the macro baseline (Brier 0.12426) beats every trivial rung (BASE_RATE, PERSISTENCE, AR), so a delta measured against it means something",
+            "scores": {
+              "AR": 0.14054,
+              "BASE_RATE": 0.24662,
+              "MACRO": 0.12426,
+              "PERSISTENCE": 0.24676,
+              "REGIME_MACRO": 0.12444
+            }
+          },
+          "ladder": {
+            "AR": {
+              "brier": 0.14054,
+              "directional_accuracy": 0.8185,
+              "features": 0,
+              "n": 270,
+              "name": "AR",
+              "note": ""
+            },
+            "BASE_RATE": {
+              "brier": 0.24662,
+              "directional_accuracy": 0.7,
+              "features": 0,
+              "n": 270,
+              "name": "BASE_RATE",
+              "note": ""
+            },
+            "MACRO": {
+              "brier": 0.12426,
+              "directional_accuracy": 0.8556,
+              "features": 20,
+              "n": 270,
+              "name": "MACRO",
+              "note": ""
+            },
+            "PERSISTENCE": {
+              "brier": 0.24676,
+              "directional_accuracy": 0.5519,
+              "features": 0,
+              "n": 270,
+              "name": "PERSISTENCE",
+              "note": ""
+            },
+            "REGIME_MACRO": {
+              "brier": 0.12444,
+              "directional_accuracy": 0.8481,
+              "features": 0,
+              "n": 270,
+              "name": "REGIME_MACRO",
+              "note": ""
+            }
+          }
+        }
+      },
+      "by_regime": {
+        "CREDIT_STRESS": {
+          "augmented_score": 0.13272,
+          "base_score": 0.12677,
+          "ci": [
+            -0.03585,
+            0.024
+          ],
+          "delta": -0.00595,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.13479,
+            0.037
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.02993,
+          "n_clusters": 36,
+          "n_episodes": 2,
+          "n_paired": 72,
+          "name": "CREDIT_STRESS",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.721,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 7.47,
+            "headline": "72 rows / 36 origins / 7.5 effective / 2 episodes",
+            "horizons": 1,
+            "icc": 0.2244,
+            "independent_episodes": 2,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.6563,
+            "origins_per_episode": [
+              9,
+              27
+            ],
+            "pseudo_replication_factor": 9.64,
+            "raw_rows": 72,
+            "rows_per_episode": [
+              18,
+              54
+            ],
+            "span": [
+              "2017-06-15",
+              "2024-11-15"
+            ],
+            "targets": 2,
+            "unique_origins": 36
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": true,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "DISINFLATION": {
+          "augmented_score": 0.25814,
+          "base_score": 0.23766,
+          "ci": [
+            -0.03508,
+            -0.00729
+          ],
+          "delta": -0.02048,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.04584,
+            -0.00391
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.0139,
+          "n_clusters": 63,
+          "n_episodes": 6,
+          "n_paired": 126,
+          "name": "DISINFLATION",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.002,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 26.64,
+            "headline": "126 rows / 63 origins / 26.6 effective / 6 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 6,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.4056,
+            "origins_per_episode": [
+              36,
+              1,
+              2,
+              1,
+              12,
+              11
+            ],
+            "pseudo_replication_factor": 4.73,
+            "raw_rows": 126,
+            "rows_per_episode": [
+              72,
+              2,
+              4,
+              2,
+              24,
+              22
+            ],
+            "span": [
+              "2002-08-15",
+              "2021-03-15"
+            ],
+            "targets": 2,
+            "unique_origins": 63
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "INFLATION_SHOCK": {
+          "augmented_score": 0.11471,
+          "base_score": 0.13304,
+          "ci": [
+            -0.0182,
+            0.05446
+          ],
+          "delta": 0.01834,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.07598,
+            0.15605
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.03633,
+          "n_clusters": 40,
+          "n_episodes": 3,
+          "n_paired": 80,
+          "name": "INFLATION_SHOCK",
+          "note": "positive point estimate, interval includes zero; consistent with no effect",
+          "p_value": 0.344,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 27.72,
+            "headline": "80 rows / 40 origins / 27.7 effective / 3 episodes",
+            "horizons": 1,
+            "icc": 0.0825,
+            "independent_episodes": 3,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.1813,
+            "origins_per_episode": [
+              5,
+              9,
+              26
+            ],
+            "pseudo_replication_factor": 2.89,
+            "raw_rows": 80,
+            "rows_per_episode": [
+              10,
+              18,
+              52
+            ],
+            "span": [
+              "2005-11-15",
+              "2023-07-15"
+            ],
+            "targets": 2,
+            "unique_origins": 40
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NOT_ROBUST"
+        },
+        "LABOUR_DETERIORATION": {
+          "augmented_score": 0.21987,
+          "base_score": 0.19725,
+          "ci": [
+            -0.04834,
+            0.00482
+          ],
+          "delta": -0.02261,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.02572,
+            -0.00071
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.02658,
+          "n_clusters": 47,
+          "n_episodes": 4,
+          "n_paired": 94,
+          "name": "LABOUR_DETERIORATION",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.094,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 19.46,
+            "headline": "94 rows / 47 origins / 19.5 effective / 4 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 4,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.4144,
+            "origins_per_episode": [
+              3,
+              1,
+              27,
+              16
+            ],
+            "pseudo_replication_factor": 4.83,
+            "raw_rows": 94,
+            "rows_per_episode": [
+              6,
+              2,
+              54,
+              32
+            ],
+            "span": [
+              "2002-08-15",
+              "2024-12-15"
+            ],
+            "targets": 2,
+            "unique_origins": 47
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "LIQUIDITY_STRESS": {
+          "augmented_score": 0.13205,
+          "base_score": 0.16649,
+          "ci": [
+            0.00543,
+            0.06412
+          ],
+          "delta": 0.03445,
+          "dimension": "collective_block",
+          "episode_ci": [
+            0.02034,
+            0.04096
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.02935,
+          "n_clusters": 38,
+          "n_episodes": 2,
+          "n_paired": 76,
+          "name": "LIQUIDITY_STRESS",
+          "note": "interval clear of zero; pending family-wide FDR correction",
+          "p_value": 0.017,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 24.0,
+            "headline": "76 rows / 38 origins / 24.0 effective / 2 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 2,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.2257,
+            "origins_per_episode": [
+              12,
+              26
+            ],
+            "pseudo_replication_factor": 3.17,
+            "raw_rows": 76,
+            "rows_per_episode": [
+              24,
+              52
+            ],
+            "span": [
+              "2006-02-15",
+              "2024-08-15"
+            ],
+            "targets": 2,
+            "unique_origins": 38
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": true,
+          "underpowered": false,
+          "verdict": "IMPROVEMENT"
+        },
+        "LOW_VOL_EXPANSION": {
+          "augmented_score": 0.15801,
+          "base_score": 0.14425,
+          "ci": [
+            -0.02094,
+            -0.0064
+          ],
+          "delta": -0.01375,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.02803,
+            0.00212
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00727,
+          "n_clusters": 157,
+          "n_episodes": 8,
+          "n_paired": 314,
+          "name": "LOW_VOL_EXPANSION",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.0,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 46.87,
+            "headline": "314 rows / 157 origins / 46.9 effective / 8 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 8,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.5402,
+            "origins_per_episode": [
+              8,
+              27,
+              7,
+              84,
+              25,
+              1,
+              4,
+              1
+            ],
+            "pseudo_replication_factor": 6.7,
+            "raw_rows": 314,
+            "rows_per_episode": [
+              16,
+              54,
+              14,
+              168,
+              50,
+              2,
+              8,
+              2
+            ],
+            "span": [
+              "2002-11-15",
+              "2025-01-15"
+            ],
+            "targets": 2,
+            "unique_origins": 157
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "POLICY_EASING": {
+          "sample": null,
+          "verdict": "INSUFFICIENT_SAMPLE"
+        },
+        "POLICY_TIGHTENING": {
+          "sample": {
+            "effective_origins": 1.0,
+            "headline": "2 rows / 1 origins / 1.0 effective / 1 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 1,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.0,
+            "origins_per_episode": [
+              1
+            ],
+            "pseudo_replication_factor": 2.0,
+            "raw_rows": 2,
+            "rows_per_episode": [
+              2
+            ],
+            "span": [
+              "2022-11-15",
+              "2022-11-15"
+            ],
+            "targets": 2,
+            "unique_origins": 1
+          },
+          "verdict": "INSUFFICIENT_SAMPLE"
+        },
+        "RECOVERY": {
+          "augmented_score": 0.16011,
+          "base_score": 0.15093,
+          "ci": [
+            -0.02047,
+            0.00259
+          ],
+          "delta": -0.00918,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.04653,
+            0.0076
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01153,
+          "n_clusters": 143,
+          "n_episodes": 6,
+          "n_paired": 286,
+          "name": "RECOVERY",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.117,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "sample": {
+            "effective_origins": 87.84,
+            "headline": "286 rows / 143 origins / 87.8 effective / 6 episodes",
+            "horizons": 1,
+            "icc": 0.0,
+            "independent_episodes": 6,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.239,
+            "origins_per_episode": [
+              16,
+              72,
+              11,
+              13,
+              9,
+              22
+            ],
+            "pseudo_replication_factor": 3.26,
+            "raw_rows": 286,
+            "rows_per_episode": [
+              32,
+              144,
+              22,
+              26,
+              18,
+              44
+            ],
+            "span": [
+              "2004-03-15",
+              "2023-02-15"
+            ],
+            "targets": 2,
+            "unique_origins": 143
+          },
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        }
+      },
+      "constructs": {
+        "financial_anxiety": {
+          "ci": [
+            -0.0128,
+            0.00531
+          ],
+          "delta": -0.00385,
+          "features": [
+            "PSAVERT_q",
+            "PSAVERT_yoy",
+            "REVOLSL_q",
+            "REVOLSL_yoy",
+            "UMCSENT_q",
+            "UMCSENT_yoy"
+          ],
+          "mde": 0.00906,
+          "sample": "540 rows / 270 origins / 111.7 effective / 12 episodes",
+          "sample_detail": {
+            "effective_origins": 111.68,
+            "headline": "540 rows / 270 origins / 111.7 effective / 12 episodes",
+            "horizons": 1,
+            "icc": 0.0343,
+            "independent_episodes": 12,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.4148,
+            "origins_per_episode": [
+              8,
+              27,
+              7,
+              84,
+              25,
+              1,
+              3,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 4.84,
+            "raw_rows": 540,
+            "rows_per_episode": [
+              16,
+              54,
+              14,
+              168,
+              50,
+              2,
+              6,
+              2,
+              38,
+              58,
+              18,
+              114
+            ],
+            "span": [
+              "2002-08-15",
+              "2025-01-15"
+            ],
+            "targets": 2,
+            "unique_origins": 270
+          },
+          "series": [
+            "CORCACBS",
+            "DRCCLACBS",
+            "DRSFRMACBS",
+            "PSAVERT",
+            "REVOLSL",
+            "TDSP",
+            "UMCSENT"
+          ],
+          "verdict": "INSUFFICIENT_POWER"
+        },
+        "future_orientation": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "USACSCICP02STSAM"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        },
+        "perceived_control": {
+          "ci": [
+            -0.00762,
+            -0.00124
+          ],
+          "delta": -0.00431,
+          "features": [
+            "MICH_q",
+            "MICH_yoy"
+          ],
+          "mde": 0.00319,
+          "sample": "540 rows / 270 origins / 88.8 effective / 12 episodes",
+          "sample_detail": {
+            "effective_origins": 88.84,
+            "headline": "540 rows / 270 origins / 88.8 effective / 12 episodes",
+            "horizons": 1,
+            "icc": 0.0048,
+            "independent_episodes": 12,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.5049,
+            "origins_per_episode": [
+              8,
+              27,
+              7,
+              84,
+              25,
+              1,
+              3,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 6.08,
+            "raw_rows": 540,
+            "rows_per_episode": [
+              16,
+              54,
+              14,
+              168,
+              50,
+              2,
+              6,
+              2,
+              38,
+              58,
+              18,
+              114
+            ],
+            "span": [
+              "2002-08-15",
+              "2025-01-15"
+            ],
+            "targets": 2,
+            "unique_origins": 270
+          },
+          "series": [
+            "BABATOTALSAUS",
+            "JTSQUR",
+            "MICH",
+            "U6RATE"
+          ],
+          "verdict": "INSUFFICIENT_POWER"
+        },
+        "perceived_security": {
+          "ci": [
+            -0.00718,
+            -0.00055
+          ],
+          "delta": -0.00387,
+          "features": [
+            "EMRATIO_q",
+            "EMRATIO_yoy"
+          ],
+          "mde": 0.00332,
+          "sample": "540 rows / 270 origins / 149.5 effective / 12 episodes",
+          "sample_detail": {
+            "effective_origins": 149.5,
+            "headline": "540 rows / 270 origins / 149.5 effective / 12 episodes",
+            "horizons": 1,
+            "icc": 0.0411,
+            "independent_episodes": 12,
+            "mean_rows_per_origin": 2.0,
+            "origin_autocorrelation": 0.2872,
+            "origins_per_episode": [
+              8,
+              27,
+              7,
+              84,
+              25,
+              1,
+              3,
+              1,
+              19,
+              29,
+              9,
+              57
+            ],
+            "pseudo_replication_factor": 3.61,
+            "raw_rows": 540,
+            "rows_per_episode": [
+              16,
+              54,
+              14,
+              168,
+              50,
+              2,
+              6,
+              2,
+              38,
+              58,
+              18,
+              114
+            ],
+            "span": [
+              "2002-08-15",
+              "2025-01-15"
+            ],
+            "targets": 2,
+            "unique_origins": 270
+          },
+          "series": [
+            "EMRATIO",
+            "U6RATE"
+          ],
+          "verdict": "INSUFFICIENT_POWER"
+        },
+        "risk_appetite": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "BOGZ1FL153064486Q"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        },
+        "time_horizon": {
+          "delta": null,
+          "sample": "no balanced feature in this arm",
+          "series": [
+            "DGORDER",
+            "HSN1F"
+          ],
+          "verdict": "INSUFFICIENT_DATA"
+        }
+      },
+      "coverage_audit": {
+        "contract": "econ_episodes.v1/coverage",
+        "discovered_episodes": [
+          {
+            "end_as_known": "2002-10-15",
+            "episode_id": "EP_200002",
+            "information_cutoff": "2002-10-15",
+            "normalization": "2003-04-15",
+            "origins": 28,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "LIQUIDITY_STRESS",
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "2000-02-15",
+            "trigger_evidence": {
+              "curve_slope_pp": -0.06,
+              "inflation_yoy": 0.02676,
+              "policy_change_pp": 0.15,
+              "unemployment_change_pp": -0.3
+            }
+          },
+          {
+            "end_as_known": "2003-07-15",
+            "episode_id": "EP_200307",
+            "information_cutoff": "2003-07-15",
+            "normalization": "2004-01-15",
+            "origins": 1,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "2003-07-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 2.39,
+              "inflation_yoy": 0.01894,
+              "policy_change_pp": 0.06,
+              "unemployment_change_pp": 0.6
+            }
+          },
+          {
+            "end_as_known": "2007-05-15",
+            "episode_id": "EP_200511",
+            "information_cutoff": "2007-05-15",
+            "normalization": "2007-11-15",
+            "origins": 15,
+            "peak_stress": 2,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK",
+              "LIQUIDITY_STRESS"
+            ],
+            "resolved": true,
+            "start_as_known": "2005-11-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.11,
+              "inflation_yoy": 0.04742,
+              "policy_change_pp": 0.04,
+              "unemployment_change_pp": -0.5
+            }
+          },
+          {
+            "end_as_known": "2010-05-15",
+            "episode_id": "EP_200801",
+            "information_cutoff": "2010-05-15",
+            "normalization": "2010-11-15",
+            "origins": 29,
+            "peak_stress": 2,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK",
+              "LABOUR_DETERIORATION"
+            ],
+            "resolved": true,
+            "start_as_known": "2008-01-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 1.23,
+              "inflation_yoy": 0.04373,
+              "policy_change_pp": 0.13,
+              "unemployment_change_pp": 0.6
+            }
+          },
+          {
+            "end_as_known": "2018-02-15",
+            "episode_id": "EP_201706",
+            "information_cutoff": "2018-02-15",
+            "normalization": "2018-08-15",
+            "origins": 9,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "CREDIT_STRESS"
+            ],
+            "resolved": true,
+            "start_as_known": "2017-06-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.8,
+              "delinquency_yoy": 0.12558,
+              "inflation_yoy": 0.02176,
+              "policy_change_pp": 0.0,
+              "unemployment_change_pp": -0.4
+            }
+          },
+          {
+            "end_as_known": "2024-12-15",
+            "episode_id": "EP_202004",
+            "information_cutoff": "2024-12-15",
+            "normalization": "2025-06-15",
+            "origins": 56,
+            "peak_stress": 3,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "LABOUR_DETERIORATION",
+              "INFLATION_SHOCK",
+              "LIQUIDITY_STRESS",
+              "CREDIT_STRESS"
+            ],
+            "resolved": true,
+            "start_as_known": "2020-04-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.53,
+              "delinquency_yoy": 0.02756,
+              "inflation_yoy": 0.02341,
+              "policy_change_pp": 0.0,
+              "unemployment_change_pp": 0.6
+            }
+          },
+          {
+            "end_as_known": "2026-07-15",
+            "episode_id": "EP_202607",
+            "information_cutoff": "2026-07-15",
+            "normalization": "",
+            "origins": 1,
+            "peak_stress": 1,
+            "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+            "regime_sequence": [
+              "INFLATION_SHOCK"
+            ],
+            "resolved": false,
+            "start_as_known": "2026-07-15",
+            "trigger_evidence": {
+              "curve_slope_pp": 0.4,
+              "delinquency_yoy": -0.04575,
+              "inflation_yoy": 0.0427,
+              "policy_change_pp": 0.0,
+              "unemployment_change_pp": -0.1
+            }
+          }
+        ],
+        "found": 5,
+        "missed": 4,
+        "origin_span": [
+          "1998-02-15",
+          "2026-08-15"
+        ],
+        "out_of_reach": 6,
+        "windows": [
+          {
+            "end": "1970-12-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1966-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "late_1960s_inflation"
+          },
+          {
+            "end": "1975-12-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1973-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "1973_75"
+          },
+          {
+            "end": "1982-12-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1979-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "1979_82"
+          },
+          {
+            "end": "1988-03-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1987-08-01",
+            "status": "OUT_OF_REACH",
+            "window": "1987"
+          },
+          {
+            "end": "1991-12-31",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1990-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "1990_91"
+          },
+          {
+            "end": "1995-06-30",
+            "episodes_found": [],
+            "in_origin_reach": false,
+            "start": "1994-01-01",
+            "status": "OUT_OF_REACH",
+            "window": "1994_tightening"
+          },
+          {
+            "end": "1998-12-31",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "1997-07-01",
+            "status": "MISSED",
+            "window": "1997_98"
+          },
+          {
+            "end": "2002-12-31",
+            "episodes_found": [
+              "EP_200002"
+            ],
+            "in_origin_reach": true,
+            "start": "2000-03-01",
+            "status": "FOUND",
+            "window": "2000_02"
+          },
+          {
+            "end": "2009-12-31",
+            "episodes_found": [
+              "EP_200801"
+            ],
+            "in_origin_reach": true,
+            "start": "2007-06-01",
+            "status": "FOUND",
+            "window": "2007_09"
+          },
+          {
+            "end": "2012-03-31",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "2011-06-01",
+            "status": "MISSED",
+            "window": "2011"
+          },
+          {
+            "end": "2016-06-30",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "2015-06-01",
+            "status": "MISSED",
+            "window": "2015_16"
+          },
+          {
+            "end": "2019-01-31",
+            "episodes_found": [],
+            "in_origin_reach": true,
+            "start": "2018-09-01",
+            "status": "MISSED",
+            "window": "2018"
+          },
+          {
+            "end": "2020-12-31",
+            "episodes_found": [
+              "EP_202004"
+            ],
+            "in_origin_reach": true,
+            "start": "2020-02-01",
+            "status": "FOUND",
+            "window": "2020"
+          },
+          {
+            "end": "2023-12-31",
+            "episodes_found": [
+              "EP_202004"
+            ],
+            "in_origin_reach": true,
+            "start": "2021-04-01",
+            "status": "FOUND",
+            "window": "2021_23"
+          },
+          {
+            "end": "2023-09-30",
+            "episodes_found": [
+              "EP_202004"
+            ],
+            "in_origin_reach": true,
+            "start": "2023-03-01",
+            "status": "FOUND",
+            "window": "2023_banking"
+          }
+        ]
+      },
+      "elapsed_seconds": 39.7,
+      "episodes": [
+        {
+          "end_as_known": "2002-10-15",
+          "episode_id": "EP_200002",
+          "information_cutoff": "2002-10-15",
+          "normalization": "2003-04-15",
+          "origins": 28,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LIQUIDITY_STRESS",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2000-02-15",
+          "trigger_evidence": {
+            "curve_slope_pp": -0.06,
+            "inflation_yoy": 0.02676,
+            "policy_change_pp": 0.15,
+            "unemployment_change_pp": -0.3
+          }
+        },
+        {
+          "end_as_known": "2003-07-15",
+          "episode_id": "EP_200307",
+          "information_cutoff": "2003-07-15",
+          "normalization": "2004-01-15",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2003-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 2.39,
+            "inflation_yoy": 0.01894,
+            "policy_change_pp": 0.06,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2007-05-15",
+          "episode_id": "EP_200511",
+          "information_cutoff": "2007-05-15",
+          "normalization": "2007-11-15",
+          "origins": 15,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2005-11-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.11,
+            "inflation_yoy": 0.04742,
+            "policy_change_pp": 0.04,
+            "unemployment_change_pp": -0.5
+          }
+        },
+        {
+          "end_as_known": "2010-05-15",
+          "episode_id": "EP_200801",
+          "information_cutoff": "2010-05-15",
+          "normalization": "2010-11-15",
+          "origins": 29,
+          "peak_stress": 2,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK",
+            "LABOUR_DETERIORATION"
+          ],
+          "resolved": true,
+          "start_as_known": "2008-01-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 1.23,
+            "inflation_yoy": 0.04373,
+            "policy_change_pp": 0.13,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2018-02-15",
+          "episode_id": "EP_201706",
+          "information_cutoff": "2018-02-15",
+          "normalization": "2018-08-15",
+          "origins": 9,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2017-06-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.8,
+            "delinquency_yoy": 0.12558,
+            "inflation_yoy": 0.02176,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.4
+          }
+        },
+        {
+          "end_as_known": "2024-12-15",
+          "episode_id": "EP_202004",
+          "information_cutoff": "2024-12-15",
+          "normalization": "2025-06-15",
+          "origins": 56,
+          "peak_stress": 3,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "LABOUR_DETERIORATION",
+            "INFLATION_SHOCK",
+            "LIQUIDITY_STRESS",
+            "CREDIT_STRESS"
+          ],
+          "resolved": true,
+          "start_as_known": "2020-04-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.53,
+            "delinquency_yoy": 0.02756,
+            "inflation_yoy": 0.02341,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": 0.6
+          }
+        },
+        {
+          "end_as_known": "2026-07-15",
+          "episode_id": "EP_202607",
+          "information_cutoff": "2026-07-15",
+          "normalization": "",
+          "origins": 1,
+          "peak_stress": 1,
+          "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
+          "regime_sequence": [
+            "INFLATION_SHOCK"
+          ],
+          "resolved": false,
+          "start_as_known": "2026-07-15",
+          "trigger_evidence": {
+            "curve_slope_pp": 0.4,
+            "delinquency_yoy": -0.04575,
+            "inflation_yoy": 0.0427,
+            "policy_change_pp": 0.0,
+            "unemployment_change_pp": -0.1
+          }
+        }
+      ],
+      "features": {
+        "base": [
+          "CPIAUCSL_q",
+          "CPIAUCSL_yoy",
+          "DFF_lvl",
+          "DFF_q",
+          "DFF_yoy",
+          "DGS10_lvl",
+          "DGS10_q",
+          "DGS10_yoy",
+          "DGS2_lvl",
+          "DGS2_q",
+          "DGS2_yoy",
+          "HOUST_q",
+          "HOUST_yoy",
+          "INDPRO_q",
+          "INDPRO_yoy",
+          "PCEC96_q",
+          "PCEC96_yoy",
+          "UNRATE_lvl",
+          "UNRATE_q",
+          "UNRATE_yoy"
+        ],
+        "base_dropped": [],
+        "behavioural": [
+          "EMRATIO_q",
+          "EMRATIO_yoy",
+          "MICH_q",
+          "MICH_yoy",
+          "PSAVERT_q",
+          "PSAVERT_yoy",
+          "REVOLSL_q",
+          "REVOLSL_yoy",
+          "UMCSENT_q",
+          "UMCSENT_yoy"
+        ],
+        "behavioural_dropped": []
+      },
+      "h3": {
+        "augmented_score": 0.16771,
+        "base_score": 0.15724,
+        "ci": [
+          -0.02006,
+          -0.00119
+        ],
+        "delta": -0.01047,
+        "dimension": "collective_block",
+        "episode_ci": [
+          -0.03277,
+          0.00483
+        ],
+        "episode_ci_note": null,
+        "fdr_adjusted": false,
+        "horizon_days": 0,
+        "mde": 0.00943,
+        "n_clusters": 270,
+        "n_episodes": 12,
+        "n_paired": 540,
+        "name": "H3_GLOBAL",
+        "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+        "p_value": 0.033,
+        "population": "US_households",
+        "pseudo_replication": false,
+        "regime": "ALL",
+        "robust": false,
+        "single_cluster": false,
+        "survives_fdr": null,
+        "too_few_episodes": false,
+        "underpowered": false,
+        "verdict": "NO_IMPROVEMENT"
+      },
+      "h3_all_families": {
+        "augmented_score": 0.21564,
+        "base_score": 0.22155,
+        "ci": [
+          -0.00172,
+          0.01366
+        ],
+        "delta": 0.00591,
+        "dimension": "collective_block",
+        "episode_ci": [
+          -0.00861,
+          0.03155
+        ],
+        "episode_ci_note": null,
+        "fdr_adjusted": false,
+        "horizon_days": 0,
+        "mde": 0.00769,
+        "n_clusters": 282,
+        "n_episodes": 12,
+        "n_paired": 2730,
+        "name": "H3_GLOBAL_ALL_FAMILIES",
+        "note": "positive point estimate, interval includes zero; consistent with no effect",
+        "p_value": 0.14,
+        "population": "US_households",
+        "pseudo_replication": true,
+        "regime": "ALL",
+        "robust": false,
+        "single_cluster": false,
+        "survives_fdr": null,
+        "too_few_episodes": false,
+        "underpowered": true,
+        "verdict": "NOT_ROBUST"
+      },
+      "h3_verdict": "INSUFFICIENT_POWER",
+      "h4": {
+        "calm": {
+          "augmented_score": 0.15801,
+          "base_score": 0.14425,
+          "ci": [
+            -0.02094,
+            -0.0064
+          ],
+          "delta": -0.01375,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.02803,
+            0.00212
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.00727,
+          "n_clusters": 157,
+          "n_episodes": 8,
+          "n_paired": 314,
+          "name": "CALM",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.0,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": false,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "calm_sample": {
+          "effective_origins": 46.87,
+          "headline": "314 rows / 157 origins / 46.9 effective / 8 episodes",
+          "horizons": 1,
+          "icc": 0.0,
+          "independent_episodes": 8,
+          "mean_rows_per_origin": 2.0,
+          "origin_autocorrelation": 0.5402,
+          "origins_per_episode": [
+            8,
+            27,
+            7,
+            84,
+            25,
+            1,
+            4,
+            1
+          ],
+          "pseudo_replication_factor": 6.7,
+          "raw_rows": 314,
+          "rows_per_episode": [
+            16,
+            54,
+            14,
+            168,
+            50,
+            2,
+            8,
+            2
+          ],
+          "span": [
+            "2002-11-15",
+            "2025-01-15"
+          ],
+          "targets": 2,
+          "unique_origins": 157
+        },
+        "stressed": {
+          "augmented_score": 0.1812,
+          "base_score": 0.17529,
+          "ci": [
+            -0.02545,
+            0.01329
+          ],
+          "delta": -0.00591,
+          "dimension": "collective_block",
+          "episode_ci": [
+            -0.06771,
+            0.01902
+          ],
+          "episode_ci_note": null,
+          "fdr_adjusted": false,
+          "horizon_days": 0,
+          "mde": 0.01937,
+          "n_clusters": 113,
+          "n_episodes": 6,
+          "n_paired": 226,
+          "name": "STRESSED",
+          "note": "the augmented model's mean loss is no better than the base model's; this construct is a retirement candidate",
+          "p_value": 0.533,
+          "population": "US_households",
+          "pseudo_replication": false,
+          "regime": "ALL",
+          "robust": false,
+          "single_cluster": false,
+          "survives_fdr": null,
+          "too_few_episodes": false,
+          "underpowered": true,
+          "verdict": "NO_IMPROVEMENT"
+        },
+        "stressed_sample": {
+          "effective_origins": 53.12,
+          "headline": "226 rows / 113 origins / 53.1 effective / 6 episodes",
+          "horizons": 1,
+          "icc": 0.0081,
+          "independent_episodes": 6,
+          "mean_rows_per_origin": 2.0,
+          "origin_autocorrelation": 0.3604,
+          "origins_per_episode": [
+            3,
+            1,
+            15,
+            29,
+            9,
+            56
+          ],
+          "pseudo_replication_factor": 4.25,
+          "raw_rows": 226,
+          "rows_per_episode": [
+            6,
+            2,
+            30,
+            58,
+            18,
+            112
+          ],
+          "span": [
+            "2002-08-15",
+            "2024-12-15"
+          ],
+          "targets": 2,
+          "unique_origins": 113
+        }
+      },
+      "h4_verdict": "INSUFFICIENT_POWER",
+      "paired_all_families": 2730,
+      "paired_scored": 540,
+      "regimes": {
+        "calm_on_partial_evidence": 89,
+        "calm_quorum": 3,
+        "confident": 181,
+        "contract": "econ_regime.v1",
+        "counts": {
+          "CREDIT_STRESS": 36,
+          "DISINFLATION": 73,
+          "INFLATION_SHOCK": 41,
+          "LABOUR_DETERIORATION": 61,
+          "LIQUIDITY_STRESS": 49,
+          "LOW_VOL_EXPANSION": 204,
+          "POLICY_TIGHTENING": 3,
+          "RECOVERY": 160
+        },
+        "multi_regime_origins": 225,
+        "negative_control": "LOW_VOL_EXPANSION",
+        "origins": 343,
+        "thresholds": {
+          "credit_delinquency_yoy": 0.1,
+          "curve_inversion_pp": 0.0,
+          "inflation_high": 0.04,
+          "inflation_low": 0.015,
+          "policy_move_pp": 0.75,
+          "unemployment_fall_pp": -0.3,
+          "unemployment_rise_pp": 0.5
+        },
+        "unclassifiable": 162
+      },
+      "rows": 3301,
+      "sample": {
+        "effective_origins": 106.69,
+        "headline": "540 rows / 270 origins / 106.7 effective / 12 episodes",
+        "horizons": 1,
+        "icc": 0.0,
+        "independent_episodes": 12,
+        "mean_rows_per_origin": 2.0,
+        "origin_autocorrelation": 0.4335,
+        "origins_per_episode": [
+          8,
+          27,
+          7,
+          84,
+          25,
+          1,
+          3,
+          1,
+          19,
+          29,
+          9,
+          57
+        ],
+        "pseudo_replication_factor": 5.06,
+        "raw_rows": 540,
+        "rows_per_episode": [
+          16,
+          54,
+          14,
+          168,
+          50,
+          2,
+          6,
+          2,
+          38,
+          58,
+          18,
+          114
+        ],
+        "span": [
+          "2002-08-15",
+          "2025-01-15"
+        ],
+        "targets": 2,
+        "unique_origins": 270
+      },
+      "skipped": {
+        "no_outcome": 129,
+        "thin_base": 0,
+        "thin_behavioural": 0
+      }
+    }
+  },
+  "elapsed_seconds": 173.2,
+  "panel": {
+    "cells": 158586,
+    "cells_by_revision_state": {
+      "MEASURED_STABLE": 59150,
+      "PUBLISHER_VINTAGE": 99436
+    },
+    "content_hash": "d6cbed966dd4ca55",
+    "contract": "econ_panel.v1",
+    "earliest": "1919-01-01",
+    "latest": "2026-08-25",
+    "periods_with_more_than_one_vintage": 8166,
+    "series": 27,
+    "spans": {
+      "BABATOTALSAUS": [
+        "2004-07-01",
+        "2026-07-01"
+      ],
+      "BAMLH0A0HYM2": [
+        "2023-08-28",
+        "2026-08-14"
+      ],
+      "BOGZ1FL153064486Q": [
+        "1945-10-01",
+        "2026-01-01"
+      ],
+      "CIVPART": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "CORCACBS": [
+        "1985-01-01",
+        "2026-01-01"
+      ],
+      "CPIAUCSL": [
+        "1947-01-01",
+        "2026-07-01"
+      ],
+      "DFF": [
+        "1954-07-01",
+        "2026-08-25"
+      ],
+      "DGORDER": [
+        "1958-02-01",
+        "2026-06-01"
+      ],
+      "DGS10": [
+        "1962-01-02",
+        "2026-08-25"
+      ],
+      "DGS2": [
+        "1976-06-01",
+        "2026-08-25"
+      ],
+      "DRCCLACBS": [
+        "1991-01-01",
+        "2026-01-01"
+      ],
+      "DRSFRMACBS": [
+        "1991-01-01",
+        "2026-01-01"
+      ],
+      "EMRATIO": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "GDPC1": [
+        "1947-01-01",
+        "2026-04-01"
+      ],
+      "HOUST": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "HSN1F": [
+        "1963-01-01",
+        "2026-06-01"
+      ],
+      "INDPRO": [
+        "1919-01-01",
+        "2026-06-01"
+      ],
+      "JTSQUR": [
+        "2000-12-01",
+        "2026-06-01"
+      ],
+      "MICH": [
+        "1978-01-01",
+        "2026-06-01"
+      ],
+      "PCEC96": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "PSAVERT": [
+        "1959-01-01",
+        "2026-06-01"
+      ],
+      "REVOLSL": [
+        "1968-01-01",
+        "2026-06-01"
+      ],
+      "TDSP": [
+        "1980-01-01",
+        "2026-01-01"
+      ],
+      "U6RATE": [
+        "1994-01-01",
+        "2026-07-01"
+      ],
+      "UMCSENT": [
+        "1952-11-01",
+        "2026-06-01"
+      ],
+      "UNRATE": [
+        "1948-01-01",
+        "2026-07-01"
+      ],
+      "USACSCICP02STSAM": [
+        "1960-01-01",
+        "2026-06-01"
+      ]
+    }
+  },
+  "power": {
+    "DEEP_VS_QUARTERLY": {
+      "after": {
+        "effective_origins": 127.15,
+        "headline": "1430 rows / 481 origins / 127.2 effective / 15 episodes",
+        "horizons": 0,
+        "icc": 0.1927,
+        "independent_episodes": 15,
+        "mean_rows_per_origin": 0.0,
+        "origin_autocorrelation": 0.5818,
+        "origins_per_episode": [],
+        "pseudo_replication_factor": 11.25,
+        "raw_rows": 1430,
+        "rows_per_episode": [],
+        "span": [
+          "",
+          ""
+        ],
+        "targets": 0,
+        "unique_origins": 481
+      },
+      "before": {
+        "effective_origins": 35.04,
+        "headline": "500 rows / 50 origins / 35.0 effective / 1 episodes",
+        "horizons": 0,
+        "icc": 0.0049,
+        "independent_episodes": 1,
+        "mean_rows_per_origin": 0.0,
+        "origin_autocorrelation": 0.176,
+        "origins_per_episode": [],
+        "pseudo_replication_factor": 14.27,
+        "raw_rows": 500,
+        "rows_per_episode": [],
+        "span": [
+          "",
+          ""
+        ],
+        "targets": 0,
+        "unique_origins": 50
+      },
+      "effective_gain": 3.629,
+      "episode_gain": 15.0,
+      "mde_reduction": 0.73,
+      "median_mde_after": 0.00436,
+      "median_mde_before": 0.01614704081907345,
+      "row_gain": 2.86,
+      "statement": "rows x2.86, effective origins x3.63, episodes x15.00. Genuine gain, and in the currency that was actually scarce: separate economic events.",
+      "verdict": "INFORMATION_GAINED_EPISODES"
+    },
+    "MONTHLY_VS_QUARTERLY": {
+      "after": {
+        "effective_origins": 106.69,
+        "headline": "540 rows / 270 origins / 106.7 effective / 12 episodes",
+        "horizons": 0,
+        "icc": 0.0,
+        "independent_episodes": 12,
+        "mean_rows_per_origin": 0.0,
+        "origin_autocorrelation": 0.4335,
+        "origins_per_episode": [],
+        "pseudo_replication_factor": 5.06,
+        "raw_rows": 540,
+        "rows_per_episode": [],
+        "span": [
+          "",
+          ""
+        ],
+        "targets": 0,
+        "unique_origins": 270
+      },
+      "before": {
+        "effective_origins": 35.04,
+        "headline": "500 rows / 50 origins / 35.0 effective / 1 episodes",
+        "horizons": 0,
+        "icc": 0.0049,
+        "independent_episodes": 1,
+        "mean_rows_per_origin": 0.0,
+        "origin_autocorrelation": 0.176,
+        "origins_per_episode": [],
+        "pseudo_replication_factor": 14.27,
+        "raw_rows": 500,
+        "rows_per_episode": [],
+        "span": [
+          "",
+          ""
+        ],
+        "targets": 0,
+        "unique_origins": 50
+      },
+      "effective_gain": 3.045,
+      "episode_gain": 12.0,
+      "mde_reduction": 0.416,
+      "median_mde_after": 0.00943,
+      "median_mde_before": 0.01614704081907345,
+      "row_gain": 1.08,
+      "statement": "rows x1.08, effective origins x3.04, episodes x12.00. Genuine gain, and in the currency that was actually scarce: separate economic events.",
+      "verdict": "INFORMATION_GAINED_EPISODES"
+    }
+  },
+  "preregistration_hash": "4ae395b62fb60f85",
+  "v2_hash": "d1e266aa7acfc67f"
+}
