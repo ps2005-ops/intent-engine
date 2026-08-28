@@ -447,3 +447,225 @@ def assert_no_double_count(signal_id: str, lineage: Dict[str, Sequence[str]],
             f"from. A derived aggregate cannot independently support its own "
             f"input; counting it is how one observation becomes three.")
     return None
+
+
+# =============================================================================
+# §16 DIMENSION QUALITY — LIVE IS NOT USEFUL
+# =============================================================================
+
+LIVE_DECISION_RELEVANT = "LIVE_DECISION_RELEVANT"
+LIVE_CONTEXT_ONLY = "LIVE_CONTEXT_ONLY"
+LIVE_UNPROVEN_VALUE = "LIVE_UNPROVEN_VALUE"
+BLOCKED = "BLOCKED"
+QUALITIES = (LIVE_DECISION_RELEVANT, LIVE_CONTEXT_ONLY, LIVE_UNPROVEN_VALUE,
+             BLOCKED)
+
+
+def classify_dimension(audit, *, deltas_produced: int,
+                       relations_supported: int,
+                       company_consumers: int) -> str:
+    """A dimension can be LIVE and useless. Which is it?
+
+    LIVE counts a series being readable. That is a fact about acquisition, not
+    about value: a dimension nothing consumes and nothing decides on is
+    infrastructure, and reporting it beside a decision-relevant one inflates
+    the coverage number with things that do not matter.
+    """
+    if audit.status == "BLOCKED":
+        return BLOCKED
+    if deltas_produced > 0 and company_consumers > 0:
+        return LIVE_DECISION_RELEVANT
+    if relations_supported > 0 or company_consumers > 0:
+        return LIVE_CONTEXT_ONLY
+    return LIVE_UNPROVEN_VALUE
+
+
+# =============================================================================
+# §18 RELATION VALIDATION — A LAG THAT HAS NOT ELAPSED IS NOT A FAILURE
+# =============================================================================
+
+REL_CANDIDATE = "CANDIDATE"
+REL_OBSERVED = "OBSERVED"
+REL_SUPPORTED = "SUPPORTED_PREDICTIVE"
+REL_NOT_PROVEN = "CANDIDATE_NOT_PROVEN"
+REL_CONTRADICTED = "CONTRADICTED"
+REL_RETIRED = "RETIRED"
+REL_PENDING = "PENDING_LAG"
+REL_STATES = (REL_CANDIDATE, REL_OBSERVED, REL_SUPPORTED, REL_NOT_PROVEN,
+              REL_CONTRADICTED, REL_RETIRED, REL_PENDING)
+
+
+@dataclass(frozen=True)
+class RelationCheck:
+    """One relation, evaluated against what actually happened."""
+
+    relation: str
+    source_moved: bool
+    source_move: float
+    lag_elapsed: bool
+    days_since_source_move: Optional[int]
+    lag_days: int
+    target_moved: Optional[bool]
+    target_move: Optional[float]
+    direction_correct: Optional[bool]
+    magnitude_plausible: Optional[bool]
+    regime_applicable: bool
+    note: str = ""
+
+    @property
+    def state(self) -> str:
+        """§18: the ordering matters and it is the whole point.
+
+        A relation whose lag has NOT elapsed is PENDING, never a failure.
+        The previous run's bleed detector compared year-on-year changes with
+        no lag check at all and reported four of six relations as
+        non-firing -- some of which had simply not had time to fire.
+        """
+        if not self.regime_applicable:
+            return REL_CANDIDATE
+        if not self.source_moved:
+            return REL_CANDIDATE
+        if not self.lag_elapsed:
+            return REL_PENDING
+        if self.target_moved is None:
+            return REL_NOT_PROVEN
+        if self.direction_correct:
+            return (REL_SUPPORTED if self.magnitude_plausible
+                    else REL_OBSERVED)
+        return REL_CONTRADICTED
+
+    def as_dict(self) -> dict:
+        return {"relation": self.relation, "state": self.state,
+                "source_moved": self.source_moved,
+                "source_move": round(self.source_move, 5),
+                "lag_elapsed": self.lag_elapsed,
+                "days_since_source_move": self.days_since_source_move,
+                "lag_days": self.lag_days,
+                "target_moved": self.target_moved,
+                "target_move": (round(self.target_move, 5)
+                                if self.target_move is not None else None),
+                "direction_correct": self.direction_correct,
+                "magnitude_plausible": self.magnitude_plausible,
+                "regime_applicable": self.regime_applicable,
+                "note": self.note}
+
+
+def assert_lag_respected(check: RelationCheck) -> None:
+    """§18/§35.6: a relation may not be scored before its lag has elapsed."""
+    if not check.lag_elapsed and check.state in (REL_CONTRADICTED,
+                                                 REL_NOT_PROVEN):
+        raise WorldModelDefect(
+            f"{check.relation} was scored {check.state} with "
+            f"{check.days_since_source_move} of {check.lag_days} lag days "
+            "elapsed. A mechanism that has not had time to fire has not "
+            "failed to fire.")
+
+
+# =============================================================================
+# §26 STAGNATION DETECTOR V2 — SEVEN CATEGORIES, ONE OF THEM FINE
+# =============================================================================
+
+DUPLICATE_INPUT = "DUPLICATE_INPUT_STAGNATION"
+PRODUCER_STAG = "PRODUCER_STAGNATION"
+BELIEF_STAG = "BELIEF_STAGNATION"
+EXPECTATION_STAG = "EXPECTATION_STAGNATION"
+RESOLUTION_STAG = "RESOLUTION_STAGNATION"
+DECISION_STAG = "DECISION_STAGNATION"
+LEGITIMATE = "LEGITIMATE_STABILITY"
+STAGNATION_KINDS = (DUPLICATE_INPUT, PRODUCER_STAG, BELIEF_STAG,
+                    EXPECTATION_STAG, RESOLUTION_STAG, DECISION_STAG,
+                    LEGITIMATE)
+
+
+@dataclass(frozen=True)
+class StagnationAlert:
+    """One way learning can be quiet, with what to do about it."""
+
+    kind: str
+    reason: str
+    evidence: str
+    next_diagnostic: str
+
+    def __post_init__(self) -> None:
+        require(self.kind in STAGNATION_KINDS, f"unknown kind {self.kind!r}")
+        require(bool(self.next_diagnostic.strip()),
+                f"{self.kind}: an alert with no recommended next diagnostic "
+                "is a complaint")
+
+    def as_dict(self) -> dict:
+        return {"kind": self.kind, "reason": self.reason,
+                "evidence": self.evidence,
+                "next_diagnostic": self.next_diagnostic}
+
+
+def detect_stagnation(*, unique_evidence: int, duplicate_evidence: int,
+                      drivers_moved: int, drivers_total: int,
+                      belief_updates: int, expectations_opened: int,
+                      expectations_due: int, resolutions: int,
+                      material_deltas: int, comparisons: int
+                      ) -> List[StagnationAlert]:
+    """§26: distinguish legitimate stability from broken learning.
+
+    The categories are separate because they call for different repairs. A
+    system whose beliefs never move because no evidence arrived has an
+    ACQUISITION problem; one whose beliefs never move while evidence pours in
+    has a BELIEF problem; one whose expectations never resolve because none is
+    due has nothing wrong at all.
+    """
+    out: List[StagnationAlert] = []
+    if duplicate_evidence and unique_evidence == 0:
+        out.append(StagnationAlert(
+            kind=DUPLICATE_INPUT,
+            reason="every observation this cycle was already held",
+            evidence=f"{duplicate_evidence} duplicates, 0 unique",
+            next_diagnostic="check the acquisition dedupe key; a key that "
+                            "includes the read date makes everything look new "
+                            "and a key that omits a real field makes "
+                            "everything look duplicate"))
+    if drivers_total and drivers_moved == 0:
+        out.append(StagnationAlert(
+            kind=PRODUCER_STAG,
+            reason="no economic driver moved at all",
+            evidence=f"0 of {drivers_total} drivers moved",
+            next_diagnostic="compare the panel content hash against the "
+                            "previous cycle; an identical hash means the "
+                            "producer did not run"))
+    if unique_evidence > 0 and belief_updates == 0:
+        out.append(StagnationAlert(
+            kind=BELIEF_STAG,
+            reason="new evidence arrived and no belief moved",
+            evidence=f"{unique_evidence} unique observations, 0 revisions",
+            next_diagnostic="check whether the belief engine is reading the "
+                            "fresh evidence or only already-ingested nodes"))
+    if drivers_moved > 0 and expectations_opened == 0:
+        out.append(StagnationAlert(
+            kind=EXPECTATION_STAG,
+            reason="drivers moved and no expectation was opened",
+            evidence=f"{drivers_moved} drivers moved, 0 expectations",
+            next_diagnostic="check the eligibility rule; opening none is "
+                            "correct only when no relation reached its "
+                            "trigger threshold"))
+    if expectations_due > 0 and resolutions == 0:
+        out.append(StagnationAlert(
+            kind=RESOLUTION_STAG,
+            reason="expectations came due and none resolved",
+            evidence=f"{expectations_due} due, 0 resolved",
+            next_diagnostic="check the resolution contract's series and "
+                            "vintage policy against the panel"))
+    if comparisons > 0 and material_deltas == 0:
+        out.append(StagnationAlert(
+            kind=DECISION_STAG,
+            reason="no company analysis changed in any regime",
+            evidence=f"0 material of {comparisons} comparisons",
+            next_diagnostic="check whether the state reaches the analysis at "
+                            "all; a world model that is present and not read "
+                            "produces exactly this"))
+    if not out:
+        out.append(StagnationAlert(
+            kind=LEGITIMATE,
+            reason="every producer advanced, evidence was considered, and "
+                   "decisions changed where the state bore on them",
+            evidence=f"{drivers_moved}/{drivers_total} drivers moved, "
+                     f"{material_deltas}/{comparisons} decisions changed",
+            next_diagnostic="none required; re-check next cycle"))
+    return out

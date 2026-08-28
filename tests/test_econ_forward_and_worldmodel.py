@@ -260,3 +260,196 @@ def test_a_derived_aggregate_cannot_corroborate_its_own_input():
     WM.assert_no_double_count("agg", lineage, ["node2"])
     with pytest.raises(WM.WorldModelDefect):
         WM.assert_no_double_count("agg", lineage, ["node1"])
+
+
+# =============================================================================
+# V5: THE A/B DECISION-VALUE FRAMEWORK AND THE META-GUARD
+# =============================================================================
+
+def _an(FA, variant, **kw):
+    base = {"company_id": "c", "as_of": "2026-01-01", "variant": variant,
+            "top_priority": "ch", "action": FA.MONITOR,
+            "risks": (FA.Risk(risk_id="r1", severity="LOW", channel="ch",
+                              mechanism="m", standing=FA.INFERRED,
+                              evidence=("e1",)),),
+            "information_requests": ("q",), "evidence": ("e1",)}
+    base.update(kw)
+    return FA.Analysis(**base)
+
+
+def test_a_wording_change_is_not_a_decision_delta():
+    """The whole reason the decision fields are enums."""
+    from intent_engine.econ import founder_ab as FA
+    a = _an(FA, "A", prose="alpha")
+    b = _an(FA, "B", prose="beta and a long macro paragraph")
+    d = FA.compare(a, b, regime="t")
+    assert not d.is_material
+    assert d.verdict == "NO_MATERIAL_ECONOMIC_DELTA"
+    assert any(f.field == "prose" and not f.material for f in d.fields)
+
+
+def test_a_structured_field_change_is_material():
+    from intent_engine.econ import founder_ab as FA
+    a = _an(FA, "A")
+    b = _an(FA, "B", action=FA.PREPARE)
+    d = FA.compare(a, b, regime="t")
+    assert d.is_material and "action" in d.material_fields
+
+
+def test_a_material_delta_without_a_trigger_is_not_credited():
+    """§13: no attribution, no credited improvement."""
+    from intent_engine.econ import founder_ab as FA
+    a = _an(FA, "A")
+    b = _an(FA, "B", action=FA.PREPARE)
+    assert not FA.compare(a, b, regime="t").attributable
+    d = FA.compare(a, b, regime="t",
+                   triggers={"action": ("driver moved", "mechanism",
+                                        ("panel:X@2026-01-01",))})
+    assert d.attributable and d.verdict == "MATERIAL_AND_ATTRIBUTED"
+
+
+def test_a_baseline_with_no_risks_is_refused():
+    """Two of the seven material fields are computed FROM the risks, so an A
+    with none concedes them before the comparison starts."""
+    from intent_engine.econ import founder_ab as FA
+    with pytest.raises(FA.AnalysisDefect):
+        FA.assert_baseline_is_real(_an(FA, "A", risks=()))
+    FA.assert_baseline_is_real(_an(FA, "A"))
+
+
+def test_baseline_a_may_not_have_seen_the_economic_state():
+    from intent_engine.econ import founder_ab as FA
+    with pytest.raises(FA.AnalysisDefect):
+        FA.assert_baseline_is_real(_an(FA, "A", economic_inputs=("x",)))
+
+
+def test_a_and_b_must_share_an_evidence_cutoff():
+    """Otherwise the treatment is 'more recent data', not 'the world model'."""
+    from intent_engine.econ import founder_ab as FA
+    a = _an(FA, "A")
+    b = _an(FA, "B", as_of="2026-06-01")
+    with pytest.raises(Exception):
+        FA.compare(a, b, regime="t")
+
+
+def test_confidence_rising_on_no_new_grounded_observation_is_damage():
+    from intent_engine.econ import founder_ab as FA
+    a = _an(FA, "A", confidence="LOW",
+            risks=(FA.Risk(risk_id="r", severity="LOW", channel="ch",
+                           mechanism="m", standing=FA.OBSERVED,
+                           evidence=("e",)),))
+    b = _an(FA, "B", confidence="HIGH",
+            risks=(FA.Risk(risk_id="r", severity="LOW", channel="ch",
+                           mechanism="m", standing=FA.INFERRED,
+                           evidence=()),))
+    kinds = [d.kind for d in FA.detect_damage(a, b, regime="t")]
+    assert "EXCESSIVE_CONFIDENCE" in kinds
+
+
+def test_the_rubric_is_frozen():
+    from intent_engine.econ import founder_ab as FA
+    assert FA.rubric_hash() == "15f463e9e671cb03"
+    with pytest.raises(FA.AnalysisDefect):
+        FA.assert_rubric_unchanged("0000000000000000")
+
+
+def test_a_relation_whose_lag_has_not_elapsed_has_not_failed():
+    """§18. The previous run reported 4 of 6 relations as non-firing with no
+    lag check at all."""
+    from intent_engine.econ import worldmodel as WM
+    pending = WM.RelationCheck(
+        relation="r", source_moved=True, source_move=0.1, lag_elapsed=False,
+        days_since_source_move=10, lag_days=180, target_moved=False,
+        target_move=0.0, direction_correct=False, magnitude_plausible=False,
+        regime_applicable=True)
+    assert pending.state == WM.REL_PENDING
+    WM.assert_lag_respected(pending)
+
+
+def test_a_live_dimension_is_not_automatically_useful():
+    from intent_engine.econ import worldmodel as WM
+    live = WM.DimensionAudit(
+        dimension="d", producer="p", source="s", frequency="m",
+        as_of="2026-08-01", freshness_days=10, persisted=True,
+        consumer=("x",), standing=WM.OBSERVED)
+    assert WM.classify_dimension(live, deltas_produced=0,
+                                 relations_supported=0,
+                                 company_consumers=0) == WM.LIVE_UNPROVEN_VALUE
+    assert WM.classify_dimension(live, deltas_produced=2,
+                                 relations_supported=0,
+                                 company_consumers=1) == WM.LIVE_DECISION_RELEVANT
+
+
+def test_stagnation_v2_separates_legitimate_stability_from_broken_learning():
+    from intent_engine.econ import worldmodel as WM
+    broken = WM.detect_stagnation(
+        unique_evidence=0, duplicate_evidence=50, drivers_moved=0,
+        drivers_total=10, belief_updates=0, expectations_opened=0,
+        expectations_due=5, resolutions=0, material_deltas=0, comparisons=60)
+    kinds = {a.kind for a in broken}
+    assert WM.DUPLICATE_INPUT in kinds and WM.PRODUCER_STAG in kinds
+    assert WM.LEGITIMATE not in kinds
+    for a in broken:
+        assert a.next_diagnostic.strip()
+    healthy = WM.detect_stagnation(
+        unique_evidence=10, duplicate_evidence=2, drivers_moved=6,
+        drivers_total=10, belief_updates=3, expectations_opened=2,
+        expectations_due=0, resolutions=0, material_deltas=24, comparisons=60)
+    assert [a.kind for a in healthy] == [WM.LEGITIMATE]
+
+
+def test_an_alert_without_a_next_diagnostic_is_refused():
+    from intent_engine.econ import worldmodel as WM
+    with pytest.raises(Exception):
+        WM.StagnationAlert(kind=WM.BELIEF_STAG, reason="r", evidence="e",
+                           next_diagnostic="  ")
+
+
+# --- §36 the meta-guard -----------------------------------------------------
+
+def test_a_proof_that_mutates_its_own_guard_is_refused():
+    """The mistake this project made thirteen times across three runs."""
+    from intent_engine.econ import breakproof as BP
+    bad = BP.Proof(name="t", description="d", target_kind=BP.PRODUCER,
+                   mutated_file="f", mutated_symbol="WM.assert_no_double_count",
+                   guard_under_test="assert_no_double_count",
+                   production_call_path="scripts/run_world_model.py")
+    with pytest.raises(BP.TautologicalProof):
+        bad.validate()
+
+
+def test_a_proof_may_test_guard_integrity_when_it_says_so():
+    from intent_engine.econ import breakproof as BP
+    ok = BP.Proof(name="t", description="d", target_kind=BP.PRODUCER,
+                  mutated_file="f", mutated_symbol="assert_x",
+                  guard_under_test="assert_x",
+                  production_call_path="scripts/run_world_model.py",
+                  tests_guard_integrity=True)
+    ok.validate()
+    s = BP.summarise([ok])
+    assert s["guard_integrity_proofs"] == ["t"]
+    assert s["defect_coverage_proofs"] == 0
+
+
+def test_a_proof_must_name_a_production_call_path():
+    from intent_engine.econ import breakproof as BP
+    with pytest.raises(Exception):
+        BP.Proof(name="t", description="d", target_kind=BP.PRODUCER,
+                 mutated_file="f", mutated_symbol="a",
+                 guard_under_test="b", production_call_path="  ").validate()
+
+
+def test_a_no_op_mutation_is_refused():
+    from intent_engine.econ import breakproof as BP
+    p = BP.Proof(name="t", description="d", target_kind=BP.PRODUCER,
+                 mutated_file="f", mutated_symbol="a", guard_under_test="b",
+                 production_call_path="p", bytes_before=10, bytes_after=10)
+    with pytest.raises(BP.TautologicalProof):
+        p.assert_mutation_landed()
+
+
+def test_the_meta_guard_sees_through_a_module_prefix():
+    from intent_engine.econ import breakproof as BP
+    assert BP._same_symbol("WM.assert_x", "assert_x")
+    assert BP._same_symbol("assert_x", "  ASSERT_X  ")
+    assert not BP._same_symbol("build_rows", "assert_x")
