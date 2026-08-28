@@ -279,6 +279,24 @@
     "series_id": "T10Y3M"
   },
   {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 2303,
+    "series_id": "MORTGAGE30US"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 39,
+    "max_relative_change": 0.056436,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 663,
+    "series_id": "PERMIT"
+  },
+  {
     "behaviour": "REVISED",
     "differing": 52,
     "max_relative_change": 0.016785,

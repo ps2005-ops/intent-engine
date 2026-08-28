@@ -7,36 +7,41 @@
       "earliest_alfred_vintage": "2014-02-15",
       "early_stability": {
         "checked": false,
-        "why": "series revises; vintages required"
+        "why": "SeriesAbsent: AAA10Y@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a"
       },
       "kind": "credit_spread_ig",
       "node_class": "MACRO",
       "publication_lag_days": 1,
-      "revision_behaviour": "UNKNOWN",
+      "revision_behaviour": "STABLE",
       "series_id": "AAA10Y"
     },
     "BAA": {
       "earliest_alfred_vintage": "1997-02-15",
       "early_stability": {
-        "checked": false,
-        "why": "series revises; vintages required"
+        "checked": true,
+        "differing": 0,
+        "differing_fraction": 0.0,
+        "max_relative_change": 0.0,
+        "overlap": 949,
+        "stable_against_early": true,
+        "vintage": "1998-02-15"
       },
-      "kind": "borrowing_rate",
+      "kind": "credit_spread_ig",
       "node_class": "MACRO",
       "publication_lag_days": 1,
-      "revision_behaviour": "UNKNOWN",
+      "revision_behaviour": "STABLE",
       "series_id": "BAA"
     },
     "BAA10Y": {
       "earliest_alfred_vintage": "2014-02-15",
       "early_stability": {
         "checked": false,
-        "why": "series revises; vintages required"
+        "why": "SeriesAbsent: BAA10Y@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a"
       },
       "kind": "credit_spread_ig",
       "node_class": "MACRO",
       "publication_lag_days": 1,
-      "revision_behaviour": "UNKNOWN",
+      "revision_behaviour": "STABLE",
       "series_id": "BAA10Y"
     },
     "BABATOTALSAUS": {
@@ -287,6 +292,18 @@
       "revision_behaviour": "STABLE",
       "series_id": "MICH"
     },
+    "MORTGAGE30US": {
+      "earliest_alfred_vintage": "2011-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "financial_conditions",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "MORTGAGE30US"
+    },
     "PCEC96": {
       "earliest_alfred_vintage": "1980-02-15",
       "early_stability": {
@@ -298,6 +315,18 @@
       "publication_lag_days": 30,
       "revision_behaviour": "REVISED",
       "series_id": "PCEC96"
+    },
+    "PERMIT": {
+      "earliest_alfred_vintage": "2000-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "housing",
+      "node_class": "MACRO",
+      "publication_lag_days": 20,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "PERMIT"
     },
     "PSAVERT": {
       "earliest_alfred_vintage": "1997-02-15",
@@ -332,12 +361,12 @@
       "earliest_alfred_vintage": "2014-02-15",
       "early_stability": {
         "checked": false,
-        "why": "series revises; vintages required"
+        "why": "SeriesAbsent: T10Y3M@1998-02-15: HTTP 404 \u2014 this series has no vintage at that date, which for a series that begins later is a fact about the data rather than a"
       },
       "kind": "curve_slope",
       "node_class": "MACRO",
       "publication_lag_days": 1,
-      "revision_behaviour": "UNKNOWN",
+      "revision_behaviour": "STABLE",
       "series_id": "T10Y3M"
     },
     "TDSP": {
@@ -373,7 +402,7 @@
       "kind": "underemployment",
       "node_class": "BEHAVIORAL",
       "publication_lag_days": 12,
-      "revision_behaviour": "UNKNOWN",
+      "revision_behaviour": "REVISED",
       "series_id": "UEMP15OV"
     },
     "UMCSENT": {

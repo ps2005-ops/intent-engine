@@ -1,0 +1,50 @@
+FORWARD
+    expectations_open        = 12
+    expectations_new         = 0 (the twelve are unchanged; 12 received a DERIVED machine-readable resolution contract as a superseding record)
+    expectations_resolved    = 0
+    BASE/AUGMENTED_pairs     = 6 matched, 0 unmatched
+    calibration_status       = PRE_CALIBRATION — nothing but the count of open and resolved expectations
+    gap to EARLY_CALIBRATION      {"episodes": 1, "families": 2, "origins": 4, "resolved": 10}
+    lifecycle                = all seven facts hold (True)
+    resolver PROVED on a backdated rehearsal ledger: 36 expectations opened, 36 resolved, ladder moved PRE_CALIBRATION -> EARLY_CALIBRATION, 18 pairs scored. Its probabilities are fixed constants, not model output; it proves the machinery and is never mixed into the real record.
+
+ECONOMIC WORLD MODEL
+    dimensions_live          = 11
+    dimensions_partial       = 0
+    dimensions_blocked       = 6 of 17 — ['commodities', 'fx', 'liquidity', 'real_rates', 'volatility', 'positioning']
+    typed relations          = 6
+    transmission paths       = 2 (policy_to_housing (3 orders), curve_to_output (2 orders))
+    causal_bleeds            = 4 of 6 relations did not fire, all recorded CANDIDATE_NOT_PROVEN
+        DFF -> MORTGAGE30US: expected DOWN, observed UP, priority 0.45
+        PERMIT -> HOUST: expected DOWN, observed UP, priority 0.45
+        T10Y3M -> BAA10Y: expected UP, observed DOWN, priority 0.45
+        UNRATE -> PCEC96: expected DOWN, observed UP, priority 0.45
+
+COMPANY
+    companies_tested         = 10
+    company_specificity      = 21 distinct channels across 21 implications (1.0)
+        CAVEAT: this measures that the AUTHORED channels are distinct. It is a floor against one paragraph under ten names, not evidence that the system derived them.
+    DecisionDelta_nonzero    = 10/10 against a placeholder — which measures the placeholder.
+    THE LOAD-BEARING TEST    = 5/10 company analyses changed when the economic state moved from 2025-08-27 to 2026-08-27 (6 of 10 drivers moved). The world model is read, not merely present.
+
+FOUNDER
+    economic_integration     = LIVE — 10 companies, company-specific channels, traceable to panel readings
+    human_state_integration  = REFUSED / FROZEN_CANDIDATE
+    History_Rewind_economic  = the state-vs-state comparison is the economic rewind; counterfactual typing is unchanged and break proof 11 guards it
+    History_Rewind_human     = REFUSED
+
+LEARNING
+    false_discoveries_killed = 5 across the programme
+    hypotheses_retired       = ['UMCSENT->HOUST lead']
+    constructs_promoted      = 0
+    stagnation_detector      = STABLE (compared ['2025-08-27', '2026-08-27'])
+    reopening_gate           = FROZEN_CANDIDATE — 3 routes in, 4 closed
+
+HISTORICAL GAPS (the only two that were reopened, both bounded)
+    pre2012_credit           = CANDIDATES_FOUND — candidates found (['DRTSCILM', 'DRTSCLCC', 'NPTLTL', 'TOTCI']) and NONE cleared the equivalence bar: best was NPTLTL with crisis agreement 0.89 but a rank correlation of +0.15. No defensible household-credit substitute exists in a keyless archive. Search stopped.
+    housing_baseline         = BASELINE_INVALID — adding MORTGAGE30US and PERMIT did not make the macro block beat a constant at either horizon in either arm. The target stays BASELINE_INVALID; it was not tuned until it won.
+
+QUALITY
+    break_proofs             = 14/14 CAUGHT, 0 NOT_CAUGHT, 0 NOT_APPLIED, 0 UNRELIABLE
+    known_SEV1               = none
+    known_learning_SEV2      = the channel-specificity metric measures authored vocabulary, not derived reasoning. Stated at the point of use rather than left to be discovered.

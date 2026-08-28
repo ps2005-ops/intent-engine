@@ -1,0 +1,182 @@
+{
+  "contract": "econ_two_gaps.v1",
+  "gap_a_pre2012_credit": {
+    "candidates": {
+      "CORCACBN": {
+        "differing": 73,
+        "earliest_alfred_vintage": "2012-02-15",
+        "never_revised": false,
+        "observations": 166,
+        "overlap": 120,
+        "revision_behaviour": "REVISED",
+        "series_id": "CORCACBN",
+        "start": "1985-01-01",
+        "status": "NO_EARLIER_ARCHIVE",
+        "usable_from": "2012-02-15",
+        "why": "charge-off rate on credit card loans (NSA)"
+      },
+      "DRALACBN": {
+        "differing": 58,
+        "earliest_alfred_vintage": "2012-02-15",
+        "never_revised": false,
+        "observations": 166,
+        "overlap": 120,
+        "revision_behaviour": "REVISED",
+        "series_id": "DRALACBN",
+        "start": "1985-01-01",
+        "status": "NO_EARLIER_ARCHIVE",
+        "usable_from": "2012-02-15",
+        "why": "delinquency rate on all loans, all commercial banks (NSA)"
+      },
+      "DRCCLACBN": {
+        "differing": 37,
+        "earliest_alfred_vintage": "2012-02-15",
+        "never_revised": false,
+        "observations": 142,
+        "overlap": 96,
+        "revision_behaviour": "REVISED",
+        "series_id": "DRCCLACBN",
+        "start": "1991-01-01",
+        "status": "NO_EARLIER_ARCHIVE",
+        "usable_from": "2012-02-15",
+        "why": "credit card delinquency, not seasonally adjusted"
+      },
+      "DRCLACBS": {
+        "differing": 68,
+        "earliest_alfred_vintage": "2012-02-15",
+        "never_revised": false,
+        "observations": 158,
+        "overlap": 112,
+        "revision_behaviour": "REVISED",
+        "series_id": "DRCLACBS",
+        "start": "1987-01-01",
+        "status": "NO_EARLIER_ARCHIVE",
+        "usable_from": "2012-02-15",
+        "why": "delinquency rate on all consumer loans, all commercial banks"
+      },
+      "DRTSCILM": {
+        "differing": 37,
+        "earliest_alfred_vintage": "2011-02-15",
+        "never_revised": false,
+        "observations": 146,
+        "overlap": 101,
+        "revision_behaviour": "REVISED",
+        "series_id": "DRTSCILM",
+        "start": "1990-04-01",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "2011-02-15",
+        "why": "net share of banks tightening standards, C&I loans"
+      },
+      "DRTSCLCC": {
+        "differing": 13,
+        "earliest_alfred_vintage": "2011-02-15",
+        "never_revised": false,
+        "observations": 123,
+        "overlap": 78,
+        "revision_behaviour": "REVISED",
+        "series_id": "DRTSCLCC",
+        "start": "1996-01-01",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "2011-02-15",
+        "why": "net share of banks tightening standards, credit cards"
+      },
+      "NPTLTL": {
+        "differing": 1,
+        "earliest_alfred_vintage": "2003-02-15",
+        "never_revised": false,
+        "observations": 131,
+        "overlap": 109,
+        "revision_behaviour": "STABLE",
+        "series_id": "NPTLTL",
+        "start": "1988-01-01",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "2003-02-15",
+        "why": "nonperforming total loans to total loans"
+      },
+      "TOTCI": {
+        "differing": 1579,
+        "earliest_alfred_vintage": "1997-02-15",
+        "never_revised": false,
+        "observations": 2798,
+        "overlap": 2210,
+        "revision_behaviour": "STABLE",
+        "series_id": "TOTCI",
+        "start": "1973-01-03",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "1997-02-15",
+        "why": "commercial and industrial loans, all commercial banks"
+      }
+    },
+    "note": "",
+    "usable": [
+      "DRTSCILM",
+      "DRTSCLCC",
+      "NPTLTL",
+      "TOTCI"
+    ],
+    "verdict": "CANDIDATES_FOUND"
+  },
+  "gap_b_housing_baseline": {
+    "candidates": {
+      "HSN1F": {
+        "differing": 28,
+        "earliest_alfred_vintage": "2000-02-15",
+        "never_revised": false,
+        "observations": 763,
+        "overlap": 627,
+        "revision_behaviour": "STABLE",
+        "series_id": "HSN1F",
+        "start": "1963-01-01",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "2000-02-15",
+        "why": "new one-family houses sold"
+      },
+      "MORTGAGE30US": {
+        "differing": 0,
+        "earliest_alfred_vintage": "2011-02-15",
+        "never_revised": true,
+        "observations": 2892,
+        "overlap": 2303,
+        "revision_behaviour": "STABLE",
+        "series_id": "MORTGAGE30US",
+        "start": "1971-04-02",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "1971-04-02",
+        "why": "30-year fixed mortgage rate, weekly from 1971"
+      },
+      "MSACSR": {
+        "differing": 19,
+        "earliest_alfred_vintage": "2012-02-15",
+        "never_revised": false,
+        "observations": 763,
+        "overlap": 627,
+        "revision_behaviour": "STABLE",
+        "series_id": "MSACSR",
+        "start": "1963-01-01",
+        "status": "NO_EARLIER_ARCHIVE",
+        "usable_from": "2012-02-15",
+        "why": "monthly supply of new houses"
+      },
+      "PERMIT": {
+        "differing": 39,
+        "earliest_alfred_vintage": "2000-02-15",
+        "never_revised": false,
+        "observations": 799,
+        "overlap": 663,
+        "revision_behaviour": "REVISED",
+        "series_id": "PERMIT",
+        "start": "1960-01-01",
+        "status": "USABLE_PRE_2012",
+        "usable_from": "2000-02-15",
+        "why": "new private housing units authorised by building permits"
+      }
+    },
+    "note": "admission still depends on the baseline ladder: a longer series that does not make the macro model beat a constant leaves housing BASELINE_INVALID.",
+    "usable": [
+      "HSN1F",
+      "MORTGAGE30US",
+      "PERMIT"
+    ]
+  },
+  "probed_at": "2026-08-27"
+}

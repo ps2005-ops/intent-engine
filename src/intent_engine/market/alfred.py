@@ -198,6 +198,25 @@ REGISTRY: Tuple[AlfredSeries, ...] = (
        "percent", 1),
     _s("T10Y3M", M, "curve_slope",
        "10-year Treasury minus 3-month bill", "percent", 1),
+    #: §29B. Housing direction was BASELINE_INVALID in both arms at both
+    #: horizons -- the macro block scored worse than a constant. It had no
+    #: mortgage rate and no permits in it, which is most of what a housing
+    #: model is. MORTGAGE30US is a published weekly rate, never restated
+    #: (0 of 2,880 overlapping observations differ), and runs from 1971.
+    #:
+    #: This is a BASE-block addition, not a behavioural one. It needs no
+    #: equivalence test because it is not standing in for anything: it is the
+    #: conventional variable the conventional model was missing.
+    #: Filed as `financial_conditions`: there is no housing-specific rate
+    #: kind in the MACRO vocabulary, and inventing one would put a series in
+    #: a group nothing else reads. The kind decides which side of a
+    #: comparison a series lands on, so it is chosen from the vocabulary
+    #: rather than from the label.
+    _s("MORTGAGE30US", M, "financial_conditions",
+       "30-year fixed mortgage rate", "percent", 1),
+    _s("PERMIT", M, "housing",
+       "new private housing units authorised by building permits",
+       "thousands", 20),
     #: TWO CANDIDATES WERE PROBED AND REFUSED. Recorded here rather than
     #: deleted, because "we looked and it did not qualify" is a different
     #: statement from "we did not look".

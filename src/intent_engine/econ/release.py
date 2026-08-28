@@ -127,7 +127,7 @@ PERCENTAGE_POINT_SERIES = frozenset({
     # V3: spreads and yields are percentage points, and a spread crosses zero
     # routinely -- T10Y3M inverts in every tightening cycle, which is exactly
     # the period the model most needs to read.
-    "BAA10Y", "AAA10Y", "BAA", "T10Y3M",
+    "BAA10Y", "AAA10Y", "BAA", "T10Y3M", "MORTGAGE30US",
 })
 
 
@@ -201,6 +201,10 @@ RULES: Tuple[ReleaseRule, ...] = (
                 "Moody's monthly average, early the following month"),
     ReleaseRule("T10Y3M", DAILY, 1, "H.15, next business day"),
     ReleaseRule("UEMP15OV", MONTHLY, 12, "same release as UNRATE"),
+    ReleaseRule("MORTGAGE30US", DAILY, 1,
+                "Freddie Mac primary mortgage market survey, weekly; dated "
+                "next day"),
+    ReleaseRule("PERMIT", MONTHLY, 20, "new residential construction"),
 )
 
 BY_ID: Dict[str, ReleaseRule] = {r.series_id: r for r in RULES}
