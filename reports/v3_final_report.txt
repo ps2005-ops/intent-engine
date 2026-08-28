@@ -1,0 +1,84 @@
+HISTORICAL_COVERAGE
+    candidates probed        = 20
+    reached before 2011      = 12
+    equivalence-tested       = 9
+    DEFENSIBLE_PROXY         = ['UEMP15OV']
+    SAME_SERIES_NOT_A_PROXY  = ['UMCSENT1']
+    UNUSABLE                 = ['UEMPMEAN']
+    WEAK_PROXY               = ['BAA10Y', 'AAA10Y', 'BAA', 'T10Y3M', 'UEMP15OV', 'UEMPMEAN']
+    ADMITTED to the behavioural block = ['UEMP15OV'] (DEFENSIBLE_PROXY for U6RATE, extending `underemployment` from 2012 back to 1964)
+    ADMITTED to the base block        = ['BAA','BAA10Y','AAA10Y','T10Y3M'] — never-revised market prices. NOT behavioural proxies: the rank correlation of a corporate credit spread with household credit-card delinquency is +0.04.
+    REFUSED                           = UMCSENT1 (it is FRED's pre-1978 quarterly segment of UMCSENT itself, scoring 1.00 on all four metrics because it IS the incumbent), UEMPMEAN (crisis agreement 0.00 against JTSQUR, 0.17 against U6RATE)
+
+POWER
+    V2 effective origins = 127.15
+    V3 effective origins = 81.62
+    V2 episodes          = 15
+    V3 episodes          = 15
+    V2 MDE               = 0.00436
+    V3 MDE               = 0.00505
+    The effective count FELL. Adding four financial-conditions controls changed the base model's predictions, and the paired differences became more autocorrelated across origins. More features is not more independent information, and the run says so rather than quoting the row count.
+
+H7 SENTIMENT
+    preregistered as 3a5c4d36259e08a2 before the V3 panel was scored
+    housing:              NOT SCORED — BASELINE_INVALID in both arms at both horizons. Historical out-of-sample: the macro block scores Brier 0.2735 against a constant's 0.2525. This is not a human-state failure.
+    industrial production (historical out-of-sample, paired Brier):
+                           incremental delta -0.00247
+                           clustered CI [-0.00763, 0.00248]
+                           episode-aware CI [-0.0075, 0.00333]
+                           sample 955 rows / 480 origins / 190.1 effective / 15 episodes
+                           lead time: 1 episode warned by both models, below the floor of 3
+                           episode stability: REGIME_DEPENDENT — the sign of the delta flips between episode classes
+    VERDICT              = INSUFFICIENT_POWER
+
+    THE OBSERVED SIGNAL DID NOT SURVIVE
+      UMCSENT -> HOUST   subsample(n=482) lag +6 LEADING | full(n=584) lag +0 COINCIDENT  => WINDOW ARTIFACT
+      UMCSENT -> INDPRO  subsample(n=482) lag +7 LEADING | full(n=584) lag +6 LEADING  => ROBUST
+      The previous run measured the lag on the 482 origins that appeared in its TEST FOLDS. Walk-forward reserves the earliest slice for training, so the measurement began in 1986 while the record begins in 1978. Adding the Volcker disinflation and the 1980-82 housing cycles removes the housing lead entirely and RAISES the correlation from +0.298 to +0.405.
+      Confounders: the industrial lead survives UNRATE, BAA and CPIAUCSL one at a time and is KILLED by all three together (lag -11, LAGGING).
+      2008 break: pre-2008 sentiment LAGS housing by 2 months; post-2008 it leads by 8. Not one mechanism.
+      Wealth effects: UNTESTABLE — no vintage-correct household wealth series exists in this panel. Unchecked, not ruled out.
+    MECHANISM ROLE       = EARLY_REFLECTION_OF_ANOTHER_VARIABLE
+
+H3/H4/H5/H6 (rerun: feature coverage and baseline quality both changed)
+    DEEP     H3 INSUFFICIENT_POWER  H4 INSUFFICIENT_POWER
+    MODERN   H3 INSUFFICIENT_POWER  H4 INSUFFICIENT_POWER
+    unchanged from V2. The stronger base block and the added underemployment history did not move either verdict.
+
+BASELINE VALID TARGETS
+    DEEP     ['INDPRO_180d', 'INDPRO_240d'] of ['HOUST_180d', 'HOUST_240d', 'INDPRO_180d', 'INDPRO_240d']
+    MODERN   none of ['HOUST_180d', 'HOUST_240d', 'INDPRO_180d', 'INDPRO_240d']
+    V3 forecast families clearing the ladder: DEEP ['industrial_180d', 'industrial_360d', 'labour_360d'], MODERN ['industrial_360d', 'labour_360d']
+
+CONSTRUCT VERDICTS / HUMAN-STATE ROLES
+    UMCSENT->HOUST       RETIRE
+    UMCSENT->INDPRO      INSUFFICIENT_DATA
+    collective_block     INSUFFICIENT_DATA (both arms)
+    UEMP15OV             OBSERVED — reaches the model, no role earned
+    no construct earned FORECASTING, EARLY_WARNING, TRANSMISSION_CONTEXT or REGIME_CLASSIFICATION
+
+REAL_FORWARD
+    open       = 12 expectations = 6 BASE/AUGMENTED pairs
+    resolved   = 0
+    waiting    = AWAITING_REAL_WORLD_RESOLUTION
+    lifecycle  = all seven facts hold (True): opens with a resolution rule, survives reload, refuses retrospective edit, resolves only at horizon, resolution appends, calibration consumes resolved only, unresolved excluded
+
+FOUNDER_INTEGRATION      = REFUSED
+HISTORY_REWIND           = NOT RUN. §24 requires validated episode data and nothing was validated; running it would show a CollectiveHumanState reading no test supports.
+CAUSAL_BLEEDS            = none promoted. H6 was NOT_SUPPORTED in both arms in V2 and was not re-run: no mechanism input changed.
+FALSE_DISCOVERIES_KILLED = 1 — 'consumer sentiment leads housing starts by 6-8 months', the previous run's single positive finding.
+ASSUMPTIONS_RETIRED      = 3 — that a longer series is a proxy (rank +0.04); that UMCSENT1 is the expectations component (it is UMCSENT); that a temporal order measured on evaluation folds describes the series.
+
+LEARNING_ACCELERATION
+    series_probed                20
+    series_admitted              5
+    series_refused               15
+    hypotheses_preregistered     1
+    hypotheses_resolved          1
+    false_discoveries_killed     1
+    assumptions_retired          3
+    network_calls                580
+    real_forward_pairs           6
+
+CALIBRATION_STATUS       = PRE_CALIBRATION (12 open, 0 resolved, 30 required). Every number above is HISTORICAL OUT-OF-SAMPLE PERFORMANCE.
+BREAK_PROOFS             = 12/12 CAUGHT, 0 NOT_CAUGHT, 0 NOT_APPLIED, 0 UNRELIABLE

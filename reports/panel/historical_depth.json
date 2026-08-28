@@ -3,6 +3,42 @@
   "early_check_vintage": "1998-02-15",
   "probed_at": "2026-08-27",
   "series": {
+    "AAA10Y": {
+      "earliest_alfred_vintage": "2014-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "credit_spread_ig",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "AAA10Y"
+    },
+    "BAA": {
+      "earliest_alfred_vintage": "1997-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "borrowing_rate",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "BAA"
+    },
+    "BAA10Y": {
+      "earliest_alfred_vintage": "2014-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "credit_spread_ig",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "BAA10Y"
+    },
     "BABATOTALSAUS": {
       "earliest_alfred_vintage": "2021-02-15",
       "early_stability": {
@@ -292,6 +328,18 @@
       "revision_behaviour": "STABLE",
       "series_id": "REVOLSL"
     },
+    "T10Y3M": {
+      "earliest_alfred_vintage": "2014-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "curve_slope",
+      "node_class": "MACRO",
+      "publication_lag_days": 1,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "T10Y3M"
+    },
     "TDSP": {
       "earliest_alfred_vintage": "2000-02-15",
       "early_stability": {
@@ -315,6 +363,18 @@
       "publication_lag_days": 20,
       "revision_behaviour": "REVISED",
       "series_id": "U6RATE"
+    },
+    "UEMP15OV": {
+      "earliest_alfred_vintage": "1964-02-15",
+      "early_stability": {
+        "checked": false,
+        "why": "series revises; vintages required"
+      },
+      "kind": "underemployment",
+      "node_class": "BEHAVIORAL",
+      "publication_lag_days": 12,
+      "revision_behaviour": "UNKNOWN",
+      "series_id": "UEMP15OV"
     },
     "UMCSENT": {
       "earliest_alfred_vintage": "1999-02-15",

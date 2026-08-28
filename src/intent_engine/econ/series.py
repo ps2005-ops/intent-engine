@@ -306,6 +306,18 @@ BEHAVIOURAL: Tuple[SeriesSpec, ...] = (
     _s("U6RATE", "underemployment",
        "U-6 underemployment rate", "percent", "monthly", LIVE,
        publisher="BLS via ALFRED"),
+    #: U6RATE's real-time archive begins in 2012, which made underemployment
+    #: -- and therefore perceived_control and perceived_security -- unwalled
+    #: before then. UEMP15OV has ALFRED vintages back to 1964 and earned
+    #: DEFENSIBLE_PROXY against U6RATE over 390 overlapping periods (rank
+    #: +0.83, crisis agreement 0.82, weakest metric direction at 0.61).
+    #:
+    #: NOT SPLICED. `equivalence.splice_allowed` is False for anything below
+    #: DIRECT_MEASURE, so this enters as its own column beside U6RATE rather
+    #: than as a longer version of it.
+    _s("UEMP15OV", "underemployment",
+       "number unemployed 15 weeks and over", "thousands", "monthly", LIVE,
+       publisher="BLS via ALFRED"),
     _s("EMRATIO", "employment_ratio", "employment-population ratio",
        "percent", "monthly", LIVE, publisher="BLS via ALFRED"),
     _s("BOGZ1FL153064486Q", "risk_taking_proxy",

@@ -355,3 +355,96 @@ def assert_v2_unchanged(expected: str) -> None:
             "H3-H6 were fixed before the monthly panel produced a result; "
             "editing them afterwards is the mutation break proof 11 exists "
             "to catch.")
+
+
+# =============================================================================
+# §7: H7 — THE SENTIMENT LEAD, AS A FIRST-CLASS HYPOTHESIS
+# =============================================================================
+# The previous run found ONE replicated result: consumer sentiment leads
+# housing starts by 6-8 months and industrial production by 7-8 months, on
+# vintage-walled data, in two independent arms. It was recorded OBSERVED and
+# explicitly NOT predictive.
+#
+# That is the right state for a temporal-order measurement and the wrong place
+# to leave it. A lead is necessary for early warning and not sufficient: the
+# lead can be entirely explained by variables the economic model already has,
+# in which case sentiment is LEADING_BUT_REDUNDANT -- a real relationship with
+# no incremental value. H7 is the test that separates those.
+#
+# DECLARED BEFORE THE V3 PANEL WAS EVALUATED. The targets, horizons, feature
+# set, metrics, partitions and episode floor are all fixed here, and
+# `assert_h7_unchanged` refuses a run against a declaration that moved.
+#
+# WHY SENTIMENT ALONE AND NOT THE WHOLE BLOCK. H3 already tested the block and
+# was not supported. Testing the block again under a new name would be the
+# same hypothesis with the failures discarded. H7 adds exactly one column.
+
+H7 = {
+    "hypothesis_id": "H7_SENTIMENT_EARLY_WARNING",
+    "statement": (
+        "Contemporaneously available consumer sentiment (UMCSENT, read at the "
+        "forecast origin through the vintage wall) contains incremental "
+        "information about future housing activity and industrial production "
+        "at a 6-8 month horizon, BEYOND the conventional economic block."),
+    "targets": ("HOUST", "INDPRO"),
+    #: 180 and 240 days. The measured lead was 6-8 months for housing and 7-8
+    #: for industrial production; these bracket it. Fixed now so that the
+    #: horizon cannot be chosen after seeing which one worked.
+    "horizons": (180, 240),
+    "feature_added": ("UMCSENT",),
+    "base_block": ("UNRATE", "CPIAUCSL", "DFF", "DGS2", "DGS10", "HOUST",
+                   "INDPRO", "PCEC96", "BAA", "BAA10Y", "AAA10Y", "T10Y3M"),
+    "metrics": ("paired_brier_delta", "origin_clustered_interval",
+                "episode_aware_interval", "lead_time_raw",
+                "lead_time_alarm_matched", "false_alarm_rate"),
+    "partitions": ("blocked_expanding_folds", "folds=5", "embargo_days=45",
+                   "purge_outcomes_resolving_into_test_window"),
+    "episode_floor": 3,
+    "prediction": (
+        "the paired Brier delta is positive with an episode-aware interval "
+        "excluding zero on at least 3 independent episodes, OR the "
+        "alarm-matched lead time is positive on at least 3 episodes without "
+        "an increase in the false-alarm rate"),
+    "falsifier": (
+        "the episode-aware interval includes zero at a sample whose "
+        "detectable effect is smaller than the interval V2 still admits, AND "
+        "the alarm-matched lead-time delta is not positive. A lead that "
+        "disappears once the economic block is conditioned on is "
+        "LEADING_BUT_REDUNDANT, which is a refutation of H7 and not a "
+        "weaker form of support."),
+    "decision_rule": (
+        "PROMOTE_GLOBAL_FORECAST on a supported Brier delta. "
+        "PROMOTE_EARLY_WARNING on a supported alarm-matched lead time with no "
+        "worse false alarms. LEADING_BUT_REDUNDANT when the temporal order "
+        "holds and neither metric clears. INSUFFICIENT_POWER when the sample "
+        "could not have resolved either. Never a global promotion on a "
+        "lead-time result, and never an early-warning promotion on a raw "
+        "lead time that vanishes when alarms are matched."),
+    "negative_control": (
+        "the same test on the calm regime, and the raw-versus-alarm-matched "
+        "comparison. A model that warns earlier only because it warns more "
+        "has not warned earlier."),
+    "supersedes_observation": ("UMCSENT->HOUST and UMCSENT->INDPRO, recorded "
+                               "OBSERVED in WORLD_MODEL_RESEARCH_V2"),
+}
+
+
+def h7_declaration() -> dict:
+    return {"contract": CONTRACT, "hypothesis": H7,
+            "rule": ("declared before the V3 panel was evaluated; every "
+                     "reported H7 number carries this hash")}
+
+
+def h7_hash() -> str:
+    return hashlib.sha256(
+        json.dumps(h7_declaration(), sort_keys=True).encode()).hexdigest()[:16]
+
+
+def assert_h7_unchanged(expected: str) -> None:
+    actual = h7_hash()
+    if actual != expected:
+        raise EconError(
+            f"the H7 declaration changed: expected {expected}, now {actual}. "
+            "The targets, horizons and feature set were fixed before the V3 "
+            "panel produced a number; editing them afterwards is break proof "
+            "8's mutation.")

@@ -506,3 +506,72 @@ def coverage_audit(found: Sequence[EconomicEpisode],
             "out_of_reach": sum(1 for r in rows
                                 if r["status"] == "OUT_OF_REACH"),
             "discovered_episodes": [e.as_dict() for e in found]}
+
+
+class EpisodeSplitRefused(EconError):
+    """Episodes were cut finer than the data supports, to clear a floor."""
+
+
+def assert_no_artificial_split(eps: Sequence[EconomicEpisode], *,
+                               normalisation_origins: int = None) -> None:
+    """Two episodes must be separated by a real normalisation.
+
+    §15's guard. The episode floor is three, and the cheapest way to clear it
+    is to cut one long crisis into four -- which `discover` will not do, but
+    any caller assembling an episode list by hand could. This checks the
+    property on the LIST rather than trusting the producer.
+
+    The 2008-2010 episode contains 29 monthly origins and would happily yield
+    five "episodes" at a two-month gap rule. It is one event, and a floor
+    that can be satisfied by re-cutting the same event is not a floor.
+    """
+    import datetime as _dt
+    need = (normalisation_origins if normalisation_origins is not None
+            else NORMALISATION_ORIGINS)
+    ordered = sorted(eps, key=lambda e: e.start_as_known)
+    bad = []
+    for a, b in zip(ordered, ordered[1:]):
+        d0 = _dt.date(int(a.end_as_known[:4]), int(a.end_as_known[5:7]),
+                      int(a.end_as_known[8:10]))
+        d1 = _dt.date(int(b.start_as_known[:4]), int(b.start_as_known[5:7]),
+                      int(b.start_as_known[8:10]))
+        months = (d1 - d0).days / 30.4
+        if months < need:
+            bad.append(f"{a.episode_id} ends {a.end_as_known} and "
+                       f"{b.episode_id} starts {b.start_as_known}: "
+                       f"{months:.1f} months apart, below the {need}-origin "
+                       "normalisation")
+    if bad:
+        raise EpisodeSplitRefused(
+            f"{len(bad)} episode pair(s) are not separated by a real "
+            f"normalisation:\n  " + "\n  ".join(bad[:5]))
+
+
+def ledger(eps: Sequence[EconomicEpisode], *, panel=None,
+           behavioural: Sequence[str] = (), targets: Sequence[str] = ()
+           ) -> dict:
+    """§15: the canonical episode record, with what could be READ during it.
+
+    `behavioural_available` is the part that matters for a later run: an
+    episode with no walled behavioural series in it cannot test a
+    behavioural hypothesis however dramatic it was.
+    """
+    rows = []
+    for e in eps:
+        avail = []
+        if panel is not None:
+            mid = e.origins[len(e.origins) // 2] if e.origins else \
+                e.start_as_known
+            for sid in behavioural:
+                if panel.history(sid, as_of=mid, lookback=2):
+                    avail.append(sid)
+        rows.append({
+            **e.as_dict(),
+            "behavioural_available": sorted(avail),
+            "behavioural_missing": sorted(set(behavioural) - set(avail)),
+            "targets": list(targets),
+            "testable_for_behaviour": len(avail) >= 2})
+    return {"contract": CONTRACT + "/ledger", "episodes": len(rows),
+            "testable_for_behaviour": sum(1 for r in rows
+                                          if r["testable_for_behaviour"]),
+            "detail": rows}

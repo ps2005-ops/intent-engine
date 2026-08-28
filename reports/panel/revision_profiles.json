@@ -241,5 +241,50 @@
     "note": "",
     "overlap": 273,
     "series_id": "GDPC1"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 7347,
+    "series_id": "BAA10Y"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 8094,
+    "series_id": "AAA10Y"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 1156,
+    "series_id": "BAA"
+  },
+  {
+    "behaviour": "STABLE",
+    "differing": 0,
+    "max_relative_change": 0.0,
+    "needs_vintages": false,
+    "note": "0.0% of overlapping observations changed, by at most 0.00%; below the thresholds (5% / 1%), so the current series is used as its own vintage history",
+    "overlap": 8344,
+    "series_id": "T10Y3M"
+  },
+  {
+    "behaviour": "REVISED",
+    "differing": 52,
+    "max_relative_change": 0.016785,
+    "needs_vintages": true,
+    "note": "",
+    "overlap": 808,
+    "series_id": "UEMP15OV"
   }
 ]

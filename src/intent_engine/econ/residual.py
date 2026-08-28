@@ -336,3 +336,32 @@ def temporal_order(signal: Sequence[Tuple[str, float]],
     return TemporalOrder(signal="", target="", best_lag=best_lag,
                          best_correlation=best_c,
                          lag_profile=tuple(profile), n=len(keys))
+
+
+class CausalOverreach(EconError):
+    """A temporal order was promoted to a causal or predictive claim."""
+
+
+#: The only states a temporal-order measurement may confer on its own.
+LEAD_ONLY_STATES = ("OBSERVED", "LEADING_BUT_REDUNDANT", "RETIRE",
+                    "INSUFFICIENT_DATA", "TESTED_NOT_PROMOTED")
+
+
+def assert_lead_is_not_causal(order: "TemporalOrder", verdict: str) -> None:
+    """§9/§25: leading a series does not make you its cause.
+
+    THE DEFECT THIS CATCHES. `UMCSENT -> HOUST, lag +6, LEADING` is a
+    correlation between two lagged series. It is compatible with sentiment
+    driving housing, with housing driving sentiment through a slower channel,
+    with a third variable driving both, and -- as this run measured -- with
+    the lead being a property of which origins were sampled. A promotion
+    needs the incremental test, not the lag.
+    """
+    if verdict not in LEAD_ONLY_STATES:
+        raise CausalOverreach(
+            f"a temporal order (lag {order.best_lag:+d}, correlation "
+            f"{order.best_correlation:+.3f}) was given the verdict "
+            f"{verdict!r}. A lead may confer only {LEAD_ONLY_STATES}; "
+            "anything stronger requires an incremental-value or lead-time "
+            "result, and this run's own housing lead turned out to be an "
+            "artifact of the sampled origins.")

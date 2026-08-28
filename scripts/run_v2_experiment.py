@@ -81,8 +81,15 @@ def arms(panel, manifest) -> dict:
     usable = {sid: p for sid, p in pol.items() if p["mode"] != "EXCLUDED"}
     beh_all = tuple(sorted({k for keys in series_by_construct().values()
                             for k in keys}))
+    # V3: the base block gains four financial-conditions controls. None of
+    # them qualified as a BEHAVIOURAL proxy -- corporate credit spreads have
+    # a rank correlation of +0.04 with household credit-card delinquency, so
+    # they measure a different thing entirely -- but they are conventional
+    # economic variables the base model should have had, and a stronger base
+    # makes the collective test harder rather than easier.
     base_all = ("UNRATE", "CPIAUCSL", "DFF", "DGS2", "DGS10",
-                "HOUST", "INDPRO", "PCEC96")
+                "HOUST", "INDPRO", "PCEC96",
+                "BAA", "BAA10Y", "AAA10Y", "T10Y3M")
 
     def readable_from(sid, origin):
         """Does this series have any walled value at `origin`?"""

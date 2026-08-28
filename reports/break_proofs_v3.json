@@ -1,0 +1,82 @@
+{
+  "caught": 12,
+  "contract": "econ_break_proofs_v3.v1",
+  "not_applied": 0,
+  "not_caught": 0,
+  "proofs": 12,
+  "results": [
+    {
+      "description": "the origin grid is inferred from a date suffix",
+      "detail": "AssertionError: the runner derives its origin grid from a date suffix again; one quarterly series' release calendar would set the sampling grid, as it did when 344 origins appeared where 115 were planned",
+      "proof": "01_origins_from_string_match",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the assumed-lag check is removed from the panel builder",
+      "detail": "AssertionError: the panel builder no longer checks that a revising series carries only publisher vintages; today's value under a historical release date would ship again",
+      "proof": "02_panel_overwritten_with_revised_values",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "a kind-keyed dict keeps one series per kind",
+      "detail": "BlockDefect: 4 live instrument(s) are declared and did not reach the model: ['CORCACBS', 'DGORDER', 'DRCCLACBS', 'U6RATE']. A block that silently loses a series produces a delta about a different feature set from the one the report names.",
+      "proof": "03_drop_same_kind_instrument",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the ladder is scored once across every family",
+      "detail": "AssertionError: the baseline ladder is scored once across every family; with base rates from 0.28 to 0.92 no single fit can represent them and the gate would measure the harness",
+      "proof": "04_pooled_family_baseline",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the normalisation window is set to zero",
+      "detail": "AssertionError: two episodes two months apart were accepted as separate events",
+      "proof": "05_one_episode_as_many",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "percentage-point series lose their arithmetic difference",
+      "detail": "AssertionError: the saving rate's change became undefined at a zero base; the series would silently leave the block again",
+      "proof": "06_relative_change_across_zero",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the single-block refusal is removed",
+      "detail": "AssertionError: a single-block sample returned an interval [+0.01500, +0.01500]; an episode-level verdict would be read off a row-level bootstrap",
+      "proof": "07_row_interval_for_episode_verdict",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "a preregistered H7 horizon is edited",
+      "detail": "EconError: the H7 declaration changed: expected 3a5c4d36259e08a2, now e0fcc7d1e84e1c19. The targets, horizons and feature set were fixed before the V3 panel produced a number; editing them afterwards is break proof 8's mutation.",
+      "proof": "08_mutate_h7_after_results",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the causal-overreach check is removed from the verdict path",
+      "detail": "AssertionError: the verdict path no longer checks that a temporal order is not being promoted to a predictive state; a lag of +6 months could carry a PROMOTE verdict on its own",
+      "proof": "09_lead_only_promoted_as_causal",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the report stops validating its own text",
+      "detail": "AssertionError: the V3 report no longer checks its own wording against the calibration status; a historical Brier could ship as accuracy",
+      "proof": "10_historical_satisfies_forward_calibration",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the Founder gate stops reading the verdicts",
+      "detail": "AssertionError: Founder eligibility no longer derives from the construct verdicts; an unsupported signal would reach a company recommendation",
+      "proof": "11_unsupported_signal_enters_founder",
+      "verdict": "CAUGHT"
+    },
+    {
+      "description": "the immutability check on the forward ledger is removed",
+      "detail": "LedgerViolation: the ledger accepted a changed horizon on an existing expectation; the forward record is editable",
+      "proof": "12_rewrite_forward_expectation",
+      "verdict": "CAUGHT"
+    }
+  ],
+  "unreliable": 0
+}

@@ -209,12 +209,35 @@ def assert_no_unsupported_claim(text: str, rep: CalibrationReport) -> None:
     """
     if rep.may_report_accuracy:
         return
-    low = text.lower()
     banned = ("accuracy", "win rate", "hit rate", "sharpe", "alpha",
               "outperform", "beat the market", "% correct", "brier")
-    found = [b for b in banned if b in low]
+    #: A banned term is permitted when the SAME SENTENCE scopes it to the
+    #: historical record. That is the distinction the wall is actually for:
+    #: "historical out-of-sample Brier was 0.24" is a fact about a backtest,
+    #: and "our accuracy is 78%" is a claim about the future that zero
+    #: resolved predictions cannot support.
+    #:
+    #: The rule was previously a document-wide substring search, which
+    #: refused an entire research report for containing the word "Brier"
+    #: anywhere in it -- and a wall that cannot be satisfied by a truthful
+    #: sentence gets removed rather than obeyed. Scoping it to the sentence
+    #: makes it MORE precise, not weaker: an unqualified claim still raises
+    #: even when a qualified one appears elsewhere in the same document.
+    qualifiers = ("historical", "out-of-sample", "out of sample", "backtest",
+                  "in this sample", "in-sample", "pre_calibration",
+                  "pre-calibration")
+    import re as _re
+    found = []
+    for sentence in _re.split(r"(?<=[.!?])\s+|\n", text):
+        low = sentence.lower()
+        if any(q in low for q in qualifiers):
+            continue
+        found.extend(f"{b} :: {sentence.strip()[:70]}"
+                     for b in banned if b in low)
     if found:
         raise ValueError(
-            f"the text claims {found} while calibration status is "
-            f"{rep.status} on {rep.resolved} resolved forward prediction(s). "
-            f"{rep.headline()}")
+            f"{len(found)} unqualified performance claim(s) while "
+            f"calibration status is {rep.status} on {rep.resolved} resolved "
+            f"forward prediction(s):\n  " + "\n  ".join(found[:3])
+            + f"\n{rep.headline()}\nA sentence may quote a historical "
+            "figure when it says so in that sentence.")

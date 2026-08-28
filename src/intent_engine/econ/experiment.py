@@ -262,3 +262,149 @@ def assert_no_trending_levels(names: Sequence[str]) -> None:
             f"{bad} are raw levels of trending series. A level that rises "
             "every period is the date wearing an economic name, and a model "
             "given the date will fit it.")
+
+
+# =============================================================================
+# §7/§12: ARBITRARY (target, horizon) ROWS, AND WHICH OF THEM ARE TESTABLE
+# =============================================================================
+
+def build_target_rows(panel, arm: "Arm", *, targets: Sequence[str],
+                      horizons: Sequence[int],
+                      readings: Dict[str, object] = None,
+                      base_series: Sequence[str] = (),
+                      extra_series: Sequence[str] = ()
+                      ) -> Tuple[List[FC.Row], dict]:
+    """Rows for a hypothesis that declares its own targets and horizons.
+
+    `build_rows` reads `preregistration.FAMILIES`, which is right for H1-H6
+    and wrong for H7: H7 declares HOUST and INDPRO at 180 and 240 days, and
+    240 is not a preregistered family horizon. Adding it to FAMILIES would
+    change the V1 declaration hash after the fact, which is precisely the
+    mutation break proof 8 exists to catch.
+    """
+    base_block = tuple(base_series) or arm.base_series
+    rows: List[FC.Row] = []
+    skipped = {"thin_base": 0, "thin_extra": 0, "no_outcome": 0}
+    truth = {t: dict(panel.history(t, as_of="2099-01-01")) for t in targets}
+    periods = {t: sorted(truth[t]) for t in targets}
+
+    for origin in arm.origins:
+        base_f = features_at(panel, origin, base_block)
+        extra_f = features_at(panel, origin, extra_series) if extra_series \
+            else {}
+        if len(base_f) < 6:
+            skipped["thin_base"] += 1
+            continue
+        if extra_series and not extra_f:
+            skipped["thin_extra"] += 1
+            continue
+        reg_f = (regime_features(readings[origin])
+                 if readings and origin in readings else {})
+        reg_label = ("|".join(readings[origin].regimes)
+                     if readings and origin in readings else "ALL")
+        for t in targets:
+            for h in horizons:
+                past = [p for p in periods[t] if p <= origin]
+                if len(past) < 3:
+                    skipped["no_outcome"] += 1
+                    continue
+                now_p = past[-1]
+                fut = [p for p in periods[t] if p > now_p]
+                want = max(0, (h // 30) // max(1, 12 // _periods_for_year(t)))
+                if len(fut) <= want:
+                    skipped["no_outcome"] += 1
+                    continue
+                fut_p = fut[want]
+                last_move = 0.0
+                if len(past) >= 2:
+                    prev = truth[t][past[-2]]
+                    last_move = (1.0 if truth[t][now_p] > prev
+                                 else (-1.0 if truth[t][now_p] < prev else 0.0))
+                rows.append(FC.Row(
+                    origin=origin, target=f"{t}_{h}d", horizon_days=h,
+                    features={**base_f, **extra_f, **reg_f,
+                              BS.PERSISTENCE_FEATURE: last_move},
+                    outcome=truth[t][fut_p] > truth[t][now_p],
+                    regime=reg_label, outcome_knowable_at=fut_p))
+    return rows, skipped
+
+
+@dataclass(frozen=True)
+class TargetEligibility:
+    """§12: may this forecast family carry a human-state verdict at all?
+
+    A family whose base model loses to a constant cannot. The previous run
+    reported CollectiveHumanState verdicts on eight such families before the
+    per-family gate existed, and every one of those verdicts was a statement
+    about the harness.
+    """
+
+    target_id: str
+    base_rate: float
+    usable_origins: int
+    effective_origins: float
+    episodes: int
+    baseline_clear: bool
+    baseline_reason: str
+    mde: Optional[float] = None
+
+    @property
+    def eligible_for_human_test(self) -> bool:
+        from .incremental import MIN_EPISODES
+        return (self.baseline_clear and self.episodes >= MIN_EPISODES
+                and self.usable_origins > 0)
+
+    @property
+    def why_not(self) -> str:
+        from .incremental import MIN_EPISODES
+        if not self.baseline_clear:
+            return f"BASELINE_INVALID: {self.baseline_reason}"
+        if self.episodes < MIN_EPISODES:
+            return (f"INSUFFICIENT_EPISODES: {self.episodes} of "
+                    f"{MIN_EPISODES}")
+        return ""
+
+    def as_dict(self) -> dict:
+        return {"target_id": self.target_id,
+                "base_rate": round(self.base_rate, 4),
+                "usable_origins": self.usable_origins,
+                "effective_origins": round(self.effective_origins, 2),
+                "episodes": self.episodes,
+                "baseline_clear": self.baseline_clear,
+                "baseline_reason": self.baseline_reason,
+                "mde": self.mde,
+                "eligible_for_human_test": self.eligible_for_human_test,
+                "why_not": self.why_not}
+
+
+def assert_origins_declared(origins: Sequence[str],
+                            declared: Sequence[str]) -> None:
+    """The forecast grid must come from the manifest, not from a pattern.
+
+    THE DEFECT THIS CATCHES. `origins = [v for v in panel vintages if
+    v.endswith("-15")]` admitted 344 origins where the acquisition planned
+    115, because one quarterly series publishes on the fifteenth. An
+    experiment must not take its sampling grid from one series' publication
+    calendar.
+    """
+    extra = sorted(set(origins) - set(declared))
+    if extra:
+        raise BlockDefect(
+            f"{len(extra)} origin(s) are not in the declared grid "
+            f"(e.g. {extra[:3]}). The grid is declared by the acquisition "
+            "manifest; anything else is a pattern match on a date string.")
+
+
+def assert_per_family_baseline(ladder_by_family: Dict[str, object]) -> None:
+    """§11: the ladder is scored per family, never pooled.
+
+    THE DEFECT THIS CATCHES. One logistic fitted across ten families with
+    base rates from 0.28 to 0.92 cannot represent any of them, lost to a
+    per-fold constant everywhere, and produced a baseline-gate failure that
+    was a statement about the harness rather than about the economy.
+    """
+    if len(ladder_by_family) < 2:
+        raise BlockDefect(
+            f"the baseline ladder was scored on {len(ladder_by_family)} "
+            "family group(s). Families with base rates from 0.28 to 0.92 "
+            "cannot share one fit, and a pooled ladder measures the harness.")

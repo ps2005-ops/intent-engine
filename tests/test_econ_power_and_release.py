@@ -418,3 +418,138 @@ def test_balanced_names_drops_a_feature_that_is_absent_at_some_origins():
                    features={"A_yoy": 1.0}, outcome=False)]
     kept, dropped = EX.balanced_names(rows, ("A", "B"))
     assert kept == ["A_yoy"] and dropped == ["B_yoy"]
+
+
+# =============================================================================
+# V3: EQUIVALENCE, THE FORWARD LEDGER, AND THE SENTENCE-SCOPED CLAIM WALL
+# =============================================================================
+
+def test_a_perfect_equivalence_score_is_an_identity_not_a_proxy():
+    """UMCSENT1 scored 1.00 on all four metrics because it IS UMCSENT --
+    FRED's pre-1978 quarterly segment of it."""
+    from intent_engine.econ import equivalence as EQ
+    a = [(f"{2000 + i // 12}-{i % 12 + 1:02d}-01", float(i % 7))
+         for i in range(40)]
+    r = EQ.compare(candidate="X", incumbent="Y", construct="c",
+                   candidate_series=a, incumbent_series=a)
+    assert r.identical
+    assert r.verdict == EQ.SAME_SERIES
+    assert not r.splice_allowed
+
+
+def test_the_weakest_equivalence_metric_decides():
+    """A proxy that tracks the level and turns three quarters late is useless
+    for a lead-time claim, and an average would hide that."""
+    from intent_engine.econ import equivalence as EQ
+    r = EQ.Equivalence(candidate="c", incumbent="i", construct="k",
+                       overlap=100, direction_agreement=0.95,
+                       rank_correlation=0.95, turning_point_agreement=0.10,
+                       crisis_agreement=0.95, expected_sign=1)
+    assert r.weakest[0] == "turning_point"
+    assert r.verdict == EQ.WEAK_PROXY
+    assert not r.splice_allowed
+
+
+def test_only_a_direct_measure_may_be_spliced():
+    from intent_engine.econ import equivalence as EQ
+    for v, ok in ((EQ.DIRECT_MEASURE, True), (EQ.DEFENSIBLE_PROXY, False),
+                  (EQ.WEAK_PROXY, False), (EQ.UNUSABLE, False)):
+        r = EQ.Equivalence(
+            candidate="c", incumbent="i", construct="k", overlap=100,
+            direction_agreement=0.9 if ok else 0.65,
+            rank_correlation=0.9 if ok else 0.65,
+            turning_point_agreement=0.9 if ok else 0.65,
+            crisis_agreement=0.9 if ok else 0.65, expected_sign=1)
+        if r.verdict == v:
+            assert r.splice_allowed is ok
+
+
+def test_the_forward_ledger_refuses_a_retrospective_edit(tmp_path):
+    from intent_engine.econ import forward_ledger as FL
+    p = tmp_path / "fwd.jsonl"
+    rec = {"expectation_id": "ex-1", "information_cutoff": "2026-08-27",
+           "horizon_days": 180, "expires_at": "2027-02-23",
+           "resolution_rule": "rule", "confidence": 0.5,
+           "quantity": "q", "expected_direction": "UP", "outcome": "OPEN"}
+    FL.append([rec], path=p)
+    moved = dict(rec, horizon_days=360)
+    with pytest.raises(FL.LedgerViolation):
+        FL.append([moved], path=p)
+    # An outcome may be appended; the prediction may not move.
+    FL.append([dict(rec, outcome="RESOLVED", resolved_at="2027-02-24")],
+              path=p)
+    assert len(FL.load(path=p)) == 2
+    assert FL.by_id(path=p)["ex-1"]["outcome"] == "RESOLVED"
+
+
+def test_all_seven_lifecycle_facts_hold_on_a_real_ledger(tmp_path):
+    from intent_engine.econ import forward_ledger as FL
+    p = tmp_path / "fwd.jsonl"
+    FL.append([{"expectation_id": f"ex-{i}",
+                "information_cutoff": "2026-08-27", "horizon_days": 180,
+                "expires_at": "2027-02-23", "resolution_rule": "r",
+                "confidence": 0.5, "quantity": "q",
+                "expected_direction": "UP", "outcome": "OPEN"}
+               for i in range(4)], path=p)
+    r = FL.assert_lifecycle(p)
+    assert r["all_seven_hold"]
+    assert r["open"] == 4 and r["resolved"] == 0
+    assert r["due_now"] == 0
+
+
+def test_a_lead_alone_may_not_confer_a_predictive_state():
+    from intent_engine.econ import residual as RS
+    o = RS.TemporalOrder(signal="s", target="t", best_lag=6,
+                         best_correlation=0.3, lag_profile=(), n=400)
+    for ok in RS.LEAD_ONLY_STATES:
+        RS.assert_lead_is_not_causal(o, ok)
+    for bad in ("PROMOTE_GLOBAL_FORECAST", "PROMOTE_EARLY_WARNING",
+                "CAUSAL_SUPPORTED"):
+        with pytest.raises(RS.CausalOverreach):
+            RS.assert_lead_is_not_causal(o, bad)
+
+
+def test_a_historical_figure_may_be_quoted_when_the_sentence_says_so():
+    """The wall was a document-wide substring search and refused an entire
+    research report for containing the word Brier anywhere in it. A wall a
+    truthful sentence cannot satisfy gets removed rather than obeyed."""
+    from intent_engine.econ import calibration as CAL
+    rep = CAL.report([])
+    CAL.assert_no_unsupported_claim(
+        "Historical out-of-sample Brier was 0.24.", rep)
+    with pytest.raises(ValueError):
+        CAL.assert_no_unsupported_claim("Brier 0.24", rep)
+    # An unqualified claim still raises even beside a qualified one.
+    with pytest.raises(ValueError):
+        CAL.assert_no_unsupported_claim(
+            "Historical out-of-sample Brier was 0.24. Our accuracy is 78%.",
+            rep)
+
+
+def test_two_episodes_inside_one_crisis_are_refused():
+    from intent_engine.econ import episodes as EPI
+    mk = EPI.EconomicEpisode
+    a = mk("A", "2008-01-15", "2008-06-15", ("CREDIT_STRESS",), {}, 1, "",
+           "2008-06-15", "p", ("2008-01-15",))
+    b = mk("B", "2008-08-15", "2008-12-15", ("CREDIT_STRESS",), {}, 1, "",
+           "2008-12-15", "p", ("2008-08-15",))
+    c = mk("C", "2010-01-15", "2010-06-15", ("CREDIT_STRESS",), {}, 1, "",
+           "2010-06-15", "p", ("2010-01-15",))
+    with pytest.raises(EPI.EpisodeSplitRefused):
+        EPI.assert_no_artificial_split([a, b])
+    EPI.assert_no_artificial_split([a, c])
+
+
+def test_the_origin_grid_must_come_from_the_manifest():
+    from intent_engine.econ import experiment as EX
+    EX.assert_origins_declared(["2000-01-15"], ["2000-01-15", "2000-04-15"])
+    with pytest.raises(EX.BlockDefect):
+        EX.assert_origins_declared(["2000-01-15", "1946-01-15"],
+                                   ["2000-01-15"])
+
+
+def test_a_pooled_baseline_is_refused():
+    from intent_engine.econ import experiment as EX
+    EX.assert_per_family_baseline({"a": 1, "b": 2})
+    with pytest.raises(EX.BlockDefect):
+        EX.assert_per_family_baseline({"ALL": 1})

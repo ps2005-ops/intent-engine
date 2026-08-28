@@ -173,6 +173,52 @@ REGISTRY: Tuple[AlfredSeries, ...] = (
     _s("PCEC96", M, "consumer_demand", "real personal consumption",
        "billions", 30),
     _s("GDPC1", M, "growth", "real gross domestic product", "billions", 30),
+
+    # --- V3: pre-2011 depth, admitted only after the equivalence test -----
+    #
+    # The credit and JOLTS series stop being WALLED before 2011-2012 even
+    # though the data runs to 1985-1991: ALFRED's real-time archive begins
+    # there. These reach earlier, and each names the incumbent it stands in
+    # for so `econ.equivalence` can refuse it.
+    #
+    # The three market spreads are never revised -- 0 of 7,347 / 8,094 /
+    # 8,344 overlapping observations differ across a nine-year vintage span --
+    # because a closing yield is not restated. That is what makes them usable
+    # at a 1978 origin without a vintage archive.
+    _s("BAA10Y", M, "credit_spread_ig",
+       "Moody's Baa corporate yield over the 10-year Treasury", "percent", 1),
+    _s("AAA10Y", M, "credit_spread_ig",
+       "Moody's Aaa corporate yield over the 10-year Treasury", "percent", 1),
+    #: Filed as credit_spread_ig, not borrowing_rate: `borrowing_rate` is not
+    #: a MACRO kind in the vocabulary, and
+    #: `test_behavioural_series_are_not_filed_as_macro` refused it. The kind
+    #: is what decides which side of the incremental comparison a series
+    #: lands on, so a mis-filed kind is a model scoring against itself.
+    _s("BAA", M, "credit_spread_ig", "Moody's Baa corporate bond yield",
+       "percent", 1),
+    _s("T10Y3M", M, "curve_slope",
+       "10-year Treasury minus 3-month bill", "percent", 1),
+    #: TWO CANDIDATES WERE PROBED AND REFUSED. Recorded here rather than
+    #: deleted, because "we looked and it did not qualify" is a different
+    #: statement from "we did not look".
+    #:
+    #:   UMCSENT1 was listed as the Michigan EXPECTATIONS component. It is
+    #:     not. It is FRED's pre-1978 QUARTERLY SEGMENT OF UMCSENT ITSELF --
+    #:     92 observations, 1952-11 to 1977-11, bit-identical where they
+    #:     overlap. It scored 1.00 on all four equivalence metrics, which is
+    #:     what an identity looks like through a proxy test.
+    #:   UEMPMEAN (mean unemployment duration, vintages from 1972) failed
+    #:     both pairings: WEAK_PROXY for U6RATE with crisis agreement 0.17,
+    #:     UNUSABLE for JTSQUR with crisis agreement 0.00. Duration lengthens
+    #:     long after a crisis begins, which is exactly the wrong shape for
+    #:     an early-warning construct.
+    #:
+    #: UEMP15OV survived: DEFENSIBLE_PROXY for U6RATE over 390 overlapping
+    #: periods (rank +0.83, crisis 0.82), with ALFRED vintages back to 1964.
+    #: It extends `underemployment` -- and therefore perceived_control and
+    #: perceived_security -- from 2012 back to the 1960s.
+    _s("UEMP15OV", B, "underemployment",
+       "number unemployed 15 weeks and over", "thousands", 12),
 )
 
 BY_ID: Dict[str, AlfredSeries] = {s.series_id: s for s in REGISTRY}

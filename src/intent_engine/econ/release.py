@@ -124,6 +124,10 @@ PERCENTAGE_POINT_SERIES = frozenset({
     "UNRATE", "U6RATE", "CIVPART", "EMRATIO", "PSAVERT", "MICH",
     "DFF", "DGS2", "DGS10", "BAMLH0A0HYM2", "TDSP",
     "DRCCLACBS", "CORCACBS", "DRSFRMACBS", "BOGZ1FL153064486Q",
+    # V3: spreads and yields are percentage points, and a spread crosses zero
+    # routinely -- T10Y3M inverts in every tightening cycle, which is exactly
+    # the period the model most needs to read.
+    "BAA10Y", "AAA10Y", "BAA", "T10Y3M",
 })
 
 
@@ -189,6 +193,14 @@ RULES: Tuple[ReleaseRule, ...] = (
 
     # --- market data -------------------------------------------------------
     ReleaseRule("BAMLH0A0HYM2", DAILY, 1, "index level, next business day"),
+
+    # --- V3 additions ------------------------------------------------------
+    ReleaseRule("BAA10Y", DAILY, 1, "H.15 / Moody's, next business day"),
+    ReleaseRule("AAA10Y", DAILY, 1, "H.15 / Moody's, next business day"),
+    ReleaseRule("BAA", MONTHLY, 5,
+                "Moody's monthly average, early the following month"),
+    ReleaseRule("T10Y3M", DAILY, 1, "H.15, next business day"),
+    ReleaseRule("UEMP15OV", MONTHLY, 12, "same release as UNRATE"),
 )
 
 BY_ID: Dict[str, ReleaseRule] = {r.series_id: r for r in RULES}
