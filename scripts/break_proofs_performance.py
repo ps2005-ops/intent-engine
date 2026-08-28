@@ -119,6 +119,23 @@ PROOFS = [
      f"{T}::test_batch_callers_are_not_held_to_an_interactive_budget",
      "assert"),
 
+    # --- 18: discovery is inside the budget too --------------------------
+    ("p-13. discovery enrichment ignores the budget entirely",
+     CI / "service.py",
+     "            optional_ok = (deadline is None\n"
+     "                           or deadline.may_start(HIGH_VALUE_OPTIONAL))",
+     "            optional_ok = True",
+     f"{T}::test_discovery_optional_branches_are_bounded",
+     "skipping enrichment without recording it"),
+
+    ("p-14. a budget with time left silently deletes enrichment discovery",
+     CI / "service.py",
+     "            optional_ok = (deadline is None\n"
+     "                           or deadline.may_start(HIGH_VALUE_OPTIONAL))",
+     "            optional_ok = False",
+     f"{T}::test_discovery_budget_does_not_bind_when_there_is_time",
+     "changed the candidate set"),
+
     # --- 3/45: speed was not bought with evidence ------------------------
     ("p-11. the phrase prefilter skips a scan that could have matched",
      S / "strategic_intelligence" / "observations.py",

@@ -8975,7 +8975,12 @@ class WebApp:
         domain = meta.get("domain", "")
         deadline = self._analysis_deadlines.get(run_id)
         try:
-            self.ci.discover(run_id)
+            # ONE BUDGET ACROSS BOTH ACQUISITION STAGES. Discovery and
+            # retrieval are the two halves of the same wait; budgeting only
+            # the second one leaves the customer exposed to the first.
+            self.ci.discover(run_id, deadline=(
+                deadline.reserving(self.COMPOSE_RESERVE_S)
+                if deadline is not None else None))
             candidates = self.ci.store.candidates(run_id)
             if self.ci.store.approval(run_id) is None:
                 approved = self._recommended_candidate_ids(

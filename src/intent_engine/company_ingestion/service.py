@@ -501,9 +501,18 @@ class CompanyIngestionService:
         return out
 
     # --- discovery ---------------------------------------------------------------
-    def discover(self, run_id: str) -> list:
+    def discover(self, run_id: str, *, deadline=None) -> list:
         """One bounded homepage fetch → candidate list. Idempotent: stored
-        candidates are returned on rerun without refetching."""
+        candidates are returned on rerun without refetching.
+
+        `deadline` bounds the OPTIONAL discovery branches. Retrieval was
+        bounded first and discovery was not, which left half the acquisition
+        path outside the budget: this function makes SEC full-text-search and
+        sitemap requests of its own, and a slow regulator could spend the
+        whole interactive window before a single approved source was fetched.
+        The company's own homepage and its EDGAR filings are not optional and
+        are never skipped -- without them there is no analysis to bound.
+        """
         stored = self.store.candidates(run_id)
         if stored:
             return stored
@@ -542,10 +551,24 @@ class CompanyIngestionService:
         _pool = ThreadPoolExecutor(max_workers=2,
                                    thread_name_prefix="discover")
         try:
-            third_party = _pool.submit(self._third_party_filing_candidates,
-                                       meta, run_id=run_id)
+            # §18. Both are HIGH_VALUE_OPTIONAL: they widen the evidence and
+            # neither is required for a defensible reading. A budget already
+            # spent skips them and SAYS so, rather than making the customer
+            # wait for enrichment they will not be shown.
+            from intent_engine.company_ingestion.deadline import (
+                HIGH_VALUE_OPTIONAL,
+            )
+            optional_ok = (deadline is None
+                           or deadline.may_start(HIGH_VALUE_OPTIONAL))
+            if not optional_ok and deadline is not None:
+                deadline.record_gap(
+                    "discovery", "third-party filings and sitemap not "
+                                 "searched — interactive budget spent")
+            third_party = (_pool.submit(self._third_party_filing_candidates,
+                                        meta, run_id=run_id)
+                           if optional_ok else None)
             sitemap = (_pool.submit(self._sitemap_candidates, meta["website"])
-                       if meta.get("website") else None)
+                       if meta.get("website") and optional_ok else None)
             if meta.get("website"):
                 result = safe_fetch(meta["website"], transport=self.transport,
                                     resolver=self.resolver)
@@ -560,7 +583,8 @@ class CompanyIngestionService:
                 # homepage is JavaScript-rendered and exposes no links.
                 # robots.txt Disallow is honoured. Dispatched before the
                 # homepage fetch above; only the join happens here.
-                candidates = candidates + sitemap.result()
+                if sitemap is not None:
+                    candidates = candidates + sitemap.result()
                 # Bounded external-source proposals (customer voice etc.)
                 # broaden the evidence beyond company-owned pages. Off-domain,
                 # UNVERIFIED, and (like every candidate) fetched only after
@@ -602,7 +626,8 @@ class CompanyIngestionService:
             # public is EDGAR full-text search, where a COMPETITOR'S OWN 10-K names
             # this company. Different author, regulatory venue, exact date,
             # permanent citation.
-            candidates = candidates + third_party.result()
+            if third_party is not None:
+                candidates = candidates + third_party.result()
         finally:
             _pool.shutdown(wait=True)
         # Curated official sources for a KNOWN entity. This is what stops a

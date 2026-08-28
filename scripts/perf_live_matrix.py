@@ -157,6 +157,7 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
 
     # --- the poll, at one-second resolution --------------------------------
     core_ready = complete = None
+    poll_timings = []
     outcome = ""
     stages_seen = []
     last_stage = ""
@@ -167,6 +168,16 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
         polls += 1
         elapsed = time.monotonic() - began
         outcome = headers.get("X-Analysis-Outcome", outcome)
+        # §6/§31. THE HANDLER MEASURES ITSELF, so a slow poll can be split
+        # into work this handler did and time it merely waited for. On the
+        # free instance the two have completely different repairs: a slow
+        # segment is our code, and a large `unaccounted` is the analysis
+        # worker holding the one CPU share this container gets.
+        timing = headers.get("X-Request-Timing", "")
+        if timing:
+            poll_timings.append({"at_s": round(elapsed, 1),
+                                 "client_s": round(_dt, 2),
+                                 "server": timing})
         text = visible(body)
         # WHICH RUNG THE LADDER IS ON, so a stall can be attributed to a
         # stage instead of reported as a total.
@@ -201,6 +212,11 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
     row["complete_seconds"] = complete
     row["stages"] = stages_seen
     row["polls"] = polls
+    row["poll_timings"] = poll_timings[:12]
+    if poll_timings:
+        client = [t["client_s"] for t in poll_timings]
+        row["poll_seconds_median"] = round(statistics.median(client), 2)
+        row["poll_seconds_max"] = round(max(client), 2)
     row["slowest_stage"] = max(
         ({"stage": s["stage"],
           "seconds": round((stages_seen[i + 1]["at_s"] if i + 1 < len(stages_seen)

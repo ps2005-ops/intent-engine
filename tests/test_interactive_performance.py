@@ -394,3 +394,50 @@ def test_prefilter_probe_is_a_necessary_condition():
             without = phrase.replace(word, "zzz")
             assert O._cannot_contain(without, phrase) or \
                 word.casefold() in without.casefold()
+
+
+# --- §18: discovery is inside the budget too -------------------------------
+
+def test_discovery_optional_branches_are_bounded(slow_pipeline):
+    """A spent budget skips ENRICHMENT discovery and says it did.
+
+    Retrieval was bounded first and discovery was not, which left half the
+    acquisition path outside the budget: `discover` makes SEC full-text
+    search and sitemap requests of its own, so a slow regulator could consume
+    the whole interactive window before one approved source was fetched.
+    """
+    ci, _, _rid, record = slow_pipeline
+    run = ci.create_run(company_name="Brightlake", website=BASE,
+                        user_id="u", as_of=AS_OF)
+    spent = Deadline(total_s=0.05)
+    record.clear()
+    candidates = ci.discover(run["run_id"], deadline=spent)
+
+    assert candidates, "discovery must still produce the required candidates"
+    assert any(g["stage"] == "discovery" for g in spent.gaps), (
+        "skipping enrichment without recording it leaves the reader to infer "
+        f"the absence: {spent.gaps}")
+    # The company's own homepage is REQUIRED and is never skipped — without it
+    # there is no analysis to bound.
+    assert any(u == BASE for u, _t in record), (
+        "the homepage is required, not enrichment, and must still be read")
+
+
+def test_discovery_budget_does_not_bind_when_there_is_time(slow_pipeline):
+    """The positive control: a healthy budget skips nothing.
+
+    Without this, a filter that refused everything would satisfy the test
+    above and quietly delete the enrichment path on every run.
+    """
+    ci, _, _rid, record = slow_pipeline
+    run = ci.create_run(company_name="Brightlake", website=BASE,
+                        user_id="u", as_of=AS_OF)
+    healthy = Deadline.for_tier(TIER_1)
+    with_budget = ci.discover(run["run_id"], deadline=healthy)
+
+    run2 = ci.create_run(company_name="Brightlake", website=BASE,
+                         user_id="u2", as_of=AS_OF)
+    unbounded = ci.discover(run2["run_id"], deadline=None)
+    assert [c["url"] for c in with_budget] == [c["url"] for c in unbounded], (
+        "a budget with time left changed the candidate set")
+    assert not [g for g in healthy.gaps if g["stage"] == "discovery"]
