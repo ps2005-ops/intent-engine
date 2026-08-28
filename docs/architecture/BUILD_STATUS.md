@@ -71,7 +71,7 @@ the collective-human layer above is unchanged and still `FROZEN_CANDIDATE`.*
 | 22 | CEO Q&A off the same object | `founder_brief/qa._economic_answer` | **LIVE_PROVEN** | answered live with the context's own provenance |
 | 23 | information priority, named | `econ_decision._priorities` | **LIVE_PROVEN** | rendered live: "How much of … is already contracted, hedged or repriced" |
 | 26 | product break proofs | `scripts/break_proofs_product.py` | **LIVE_PROVEN** | 16/16 caught, 0 tautologies, against the deployed code paths |
-| 39 | operator learning surface | `webapp._econ_decision_block` | **BUILT_NOT_LIVE_PROVEN** | added after the second deploy; asserted by test, not yet observed on the preview |
+| 39 | operator learning surface | `webapp._econ_decision_block` | **LIVE_PROVEN** | observed on the preview: 13 conditions, 13 open predictions, 0 resolved, `PRE_CALIBRATION` and no percentage |
 | 15 | economic History Rewind | — | **PARTIAL** | the history programme exists offline; no supported live case, and it is not blocking |
 | — | Founder ← collective human state | `econ/founder_view.py` | **REFUSED** | zero of sixteen constructs promoted; the contract raises on any of them |
 

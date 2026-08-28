@@ -6902,8 +6902,8 @@ class WebApp:
         return (
             '<section class="card"><h2>Economic decision layer</h2>'
             f'<p class="verdict"><strong>{_e(fresh)}</strong> — the shared '
-            f'state is dated {_e(context.as_of)} and is {_e(str(age))} days '
-            f'old.</p>'
+            f'state is dated {_e(context.as_of)} and is '
+            f'{_e("1 day" if age == 1 else f"{age} days")} old.</p>'
             f'<ul class="counts">'
             f'<li>{len(known)} condition(s) measured of '
             f'{_e(str((context.uncertainty or {}).get("vocabulary", "?")))} '

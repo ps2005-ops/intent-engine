@@ -474,3 +474,43 @@ than dressed up.
 `CALIBRATION_STATUS = PRE_CALIBRATION` at **n = 0** resolved forward
 predictions. Nothing here carries an accuracy claim and the contract raises if
 one is asserted.
+
+---
+
+## Third live check: the copy repairs, confirmed on the deployed SHA
+
+`5a338fd3`, Salesforce, one analysis. Everything that must read zero reads
+zero, and the two repairs are visible in the rendered text:
+
+```
+attempted                   1
+spoke (material delta)      1
+cross-surface conflict      0
+internal enum leaks         0
+denies-then-shows exposure  0
+reading called unavailable  0
+server errors               0
+client timeouts             0
+```
+
+> …The variable it moves here is **cost of funds and the hurdle rate on
+> committed capital**. Changes top priority demand capture at the storefront
+> becomes cost of funds and the hurdle rate on committed capital because
+> financial conditions is rising to 6.66 percentage points from 6.58 a year
+> earlier (2025-08-21) (as of 2026-08-27, MORTGAGE30US, FRED). Changes top
+> risks **a company risk from its own evidence** becomes **the economic risk
+> to financial conditions**…
+
+Before the repair the same sentence read "the policy path that sets funding
+cost and demand" — a different condition's variable than the one in the
+trigger beneath it — and "company:blind:0 becomes econ:financial_conditions".
+
+### And a defect in the harness, found by the harness failing
+
+The scoped self-contradiction check crashed on its first live run:
+`TypeError: argument of type 'bool' is not iterable`. `score()` already had a
+local named `section` holding a boolean, and the new parameter of the same
+name was shadowed the moment it was read. It cost one analysis from the
+hourly quota. The parameter is now `section_text`, and the harness carries a
+self-test that hands it a section — which is exactly the call the shadowing
+prevented.

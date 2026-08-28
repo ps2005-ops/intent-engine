@@ -135,10 +135,12 @@ PRE_CAL = "no accuracy record to quote"
 BLOCKED_MARKER = "rests entirely on the company's own evidence"
 
 
-def score(name: str, pages: dict, section: str = "") -> dict:
+def score(name: str, pages: dict, section_text: str = "") -> dict:
     """§32's scorecard, computed from what the deployed pages actually say.
 
-    `section` is the ECONOMIC SECTION's own text. Two of these checks are
+    `section_text` is the ECONOMIC SECTION's own text. It is NOT called
+    `section`: this function already had a local of that name holding a
+    BOOLEAN, and the parameter was shadowed the moment it was read. Two of these checks are
     about what one section says about itself, and scoring them against the
     whole joined page is how Caterpillar was reported as contradicting
     itself: its economic section is internally consistent, and the phrase the
@@ -148,7 +150,7 @@ def score(name: str, pages: dict, section: str = "") -> dict:
     """
     text = {k: visible(v["body"]) for k, v in pages.items()}
     joined = " ".join(text.values())
-    section = section or ""
+    section_text = section_text or ""
     section = any(m in joined for m in ECON_MARKERS)
     abstained = ABSTAIN_MARKER in joined
     spoke = SPEAK_MARKER in joined and "changes" in joined
@@ -179,11 +181,11 @@ def score(name: str, pages: dict, section: str = "") -> dict:
         # state measures, and the very next sentence listed the state's
         # reading of the conditions they were exposed to.
         "denies_exposure_then_shows_one": (
-            "no exposure to any condition" in section
-            and "the shared economic state reads" in section),
+            "no exposure to any condition" in section_text
+            and "the shared economic state reads" in section_text),
         # Three of ten reported the economic reading "unavailable" while the
         # state was published and dated the previous day.
-        "reading_called_unavailable": "(unavailable)" in section,
+        "reading_called_unavailable": "(unavailable)" in section_text,
         "words": {k: len(v.split()) for k, v in text.items()},
     }
 
@@ -254,7 +256,8 @@ def analyse(name, domain, *, poll_seconds, verbose=True):
                                 "chars": len(body)})
     row["state"] = "READ" if ready else "TIMED_OUT"
     row["econ_excerpt"] = econ_excerpt(pages)
-    row["score"] = score(name, pages, section=row["econ_excerpt"])
+    row["score"] = score(name, pages,
+                         section_text=row["econ_excerpt"])
     # A TIMEOUT AND A 500 ARE DIFFERENT FINDINGS. Status 0 is this client
     # giving up; a 4xx/5xx is the server answering badly. Counting them
     # together is what made the first matrix report "4 requests with a
