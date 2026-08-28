@@ -1026,6 +1026,120 @@ _MACRO_FACTORS = (
 )
 
 
+def _economic_impact(company, econ, said) -> Passage:
+    """§11: ECONOMIC IMPACT, as a CEO decision surface.
+
+    Six things, in the order a decision-maker needs them: what changed, how it
+    reaches this company, what it changes about the recommendation, how sure we
+    are, what would change the view, and what to learn next.
+
+    RENDERED FROM THE CANONICAL CONTEXT AND NOTHING ELSE. Every sentence below
+    comes off `FounderEconomicContext`, which is built once per run, so the
+    brief and the full analysis cannot word this verdict differently or reach
+    opposite ones -- §21 is a property of there being one object rather than of
+    two renderers agreeing.
+
+    ABSTENTION IS RENDERED, NOT SKIPPED. §7: when the state was read and does
+    not bear on the decision, the section says exactly that in one line and
+    stops. It does not become a heading with nothing under it, and it does not
+    grow an economic paragraph to justify its own existence -- a section that
+    always speaks teaches its reader to stop reading it.
+    """
+    if econ is None:
+        return Passage("economic", "Economic impact", depth=FULL)
+    headline = econ.headline()
+    if not econ.available:
+        # §18. The analysis stands on the company's own evidence; the section
+        # states what is missing rather than disappearing, because a missing
+        # section and an unread economy look identical to a reader.
+        return Passage(
+            "economic", "Economic impact", depth=FULL,
+            paragraphs=(headline, econ.reason) if econ.reason else (headline,))
+    if econ.abstains:
+        text = [headline]
+        if econ.abstention_reason:
+            text.append(econ.abstention_reason)
+        return Passage("economic", "Economic impact", depth=BOTH,
+                       paragraphs=tuple(t for t in text if t),
+                       evidence_ids=tuple(p.observation
+                                          for p in econ.provenance)[:4],
+                       note=_econ_note(econ))
+    items = [{"label": "What changed", "text": end_sentence(headline)}]
+    if econ.economic_state_summary:
+        items.append({"label": "The reading",
+                      "text": end_sentence(econ.economic_state_summary)})
+    live = [e for e in econ.company_exposures if e.measured and e.mechanism]
+    if live:
+        e = live[0]
+        items.append({
+            "label": "How it reaches this company",
+            "text": end_sentence(
+                f"{e.mechanism.rstrip('.')}. The variable it moves here is "
+                f"{lower_first(e.business_variable or e.channel.lower())}")})
+    for change in econ.material_decision_delta[:3]:
+        items.append({
+            "label": f"Changes {change.field.replace('_', ' ')}",
+            "text": end_sentence(
+                f"{_before_after(change)} because {lower_first(change.trigger)}")})
+    if econ.falsifiers:
+        items.append({"label": "What would change our view",
+                      "text": end_sentence(econ.falsifiers[0])})
+    if econ.information_priorities:
+        items.append({"label": "What to learn next",
+                      "text": end_sentence(econ.information_priorities[0])})
+    for item in items:
+        said.remember(item["text"])
+    return Passage(
+        "economic", "Economic impact", depth=BOTH, kind="labelled",
+        items=tuple(items[:6]),
+        evidence_ids=tuple(p.observation for p in econ.provenance)[:4],
+        note=_econ_note(econ))
+
+
+def _before_after(change) -> str:
+    """A structured field move, in words a reader can check.
+
+    The values are enums and identifiers, not prose, so this states them as
+    they are rather than paraphrasing -- a paraphrase is where "PREPARE" turns
+    into a recommendation nobody's structured field actually carries.
+    """
+    def one(value):
+        if isinstance(value, (list, tuple)):
+            return ", ".join(str(v) for v in value) or "nothing"
+        if isinstance(value, dict):
+            return "; ".join(f"{k} {v}" for k, v in sorted(value.items()))
+        return str(value) if str(value).strip() else "nothing"
+    return f"{one(change.before)} becomes {one(change.after)}"
+
+
+def _econ_note(econ) -> str:
+    """Freshness, standing and calibration, in one line and never overstated.
+
+    §13/§41. The calibration state is translated: PRE_CALIBRATION is an enum
+    and "no prediction has come due yet, so there is no accuracy record to
+    quote" is what it means. §14's guarantee -- that no rehearsal result is in
+    that number -- is what makes the sentence safe to print.
+    """
+    from intent_engine.econ import founder_contract as FC
+    age = {FC.CURRENT: "current", FC.DELAYED: "delayed",
+           FC.STALE: "stale", FC.BLOCKED: "unavailable"}.get(
+               econ.freshness, econ.freshness.lower())
+    bits = [f"Economic reading as of {econ.as_of} ({age}"
+            + (f", {econ.age_days} days old)" if econ.age_days >= 0 else ")")]
+    if econ.candidate_relations:
+        bits.append(f"{len(econ.candidate_relations)} further relation(s) are "
+                    f"being tracked and are not yet supported, so none of them "
+                    f"is stated here as a finding")
+    if econ.calibration_status == FC.PRE_CALIBRATION:
+        n = len(econ.forward_expectations)
+        bits.append(
+            f"{n} forward prediction(s) are open and none has come due, so "
+            "there is no accuracy record to quote yet" if n else
+            "no forward prediction has come due, so there is no accuracy "
+            "record to quote yet")
+    return ". ".join(bits) + "."
+
+
 def _analogs(company, report, decision, hypotheses, said) -> Passage:
     """Where this has played out before, and where the comparison stops.
 
@@ -1324,7 +1438,7 @@ def _evidence_appendix(report, index) -> Passage:
 def build_dossier(*, company: str, report: Optional[dict] = None,
                   decision=None, market=None, narrative=None,
                   documents=(), external=None, read=None,
-                  modeled_market=None) -> Dossier:
+                  modeled_market=None, econ=None) -> Dossier:
     """The canonical deep material, assembled once for both deep surfaces.
 
     `narrative` is the already-built primary screen. It is passed in so the
@@ -1373,6 +1487,12 @@ def build_dossier(*, company: str, report: Optional[dict] = None,
         _adversary(company, read, said),
         _impossible(company, read, said),
         _market(company, market, said, external, modeled_market),
+        # BEFORE `_macro`, DELIBERATELY. `said` is seeded forward, so whichever
+        # section composes first owns the material. The economic impact section
+        # is the decision-relevant one and the keyword-spotted macro section is
+        # the fallback; composing the fallback first would let it claim a
+        # sentence the decision section then has to skip.
+        _economic_impact(company, econ, said),
         _macro(company, report, decision, said, external),
         _analogs(company, report, decision, hypotheses, said),
         _opportunity(company, report, said),

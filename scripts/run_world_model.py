@@ -86,6 +86,25 @@ PATHS = [
 # ---------------------------------------------------------------------------
 # §17/§18 COMPANY CHANNELS. The channel is the point: two companies may both
 # be hurt by weak demand and the CHANNEL is what makes the analysis specific.
+#
+# THE FOURTH ELEMENT IS THE ADVERSE DRIVER DIRECTION, AND IT USED TO BE
+# SOMETHING ELSE.
+#
+# It was a "base direction" that consumers resolved by flipping it when the
+# driver fell. Traced empirically, that convention made EVERY channel adverse
+# when its driver ROSE -- which is right for unemployment and credit spreads
+# and inverted for consumption, industrial production and permits. Nike's own
+# mechanism says "weaker real consumption hits units before price", and the
+# harness scored falling consumption as NOT adverse for Nike. Union Pacific's
+# says "aggregates and lumber carloads follow permits", and rising permits
+# scored as adverse for it.
+#
+# Found by running the same sixty cases through the product consumer, whose
+# sign comes from the canonical business-model transmission table: five
+# divergences in one direction and two in the other, all seven on demand
+# channels. The field now says exactly what it means -- which way the DRIVER
+# has to move to hurt this company through this channel -- and MIXED means the
+# mechanism states both directions and no net sign may be asserted.
 # ---------------------------------------------------------------------------
 COMPANIES = {
     "walmart": ("Walmart", "consumer_staples",
@@ -95,36 +114,36 @@ COMPANIES = {
                   "deteriorates", "MIXED"),
                  ("CPIAUCSL", "price gap versus competitors",
                   "grocery inflation widens the everyday-low-price advantage "
-                  "against higher-priced grocers", "UP")]),
+                  "against higher-priced grocers", "MIXED")]),
     "nike": ("Nike", "consumer_discretionary",
              [("PCEC96", "discretionary unit demand",
                "footwear and apparel are deferrable; weaker real consumption "
                "hits units before price", "DOWN"),
               ("UNRATE", "promotional intensity and inventory",
                "soft demand meets ordered inventory, so the adjustment shows "
-               "up as markdowns before it shows up as revenue", "DOWN")]),
+               "up as markdowns before it shows up as revenue", "UP")]),
     "jpmorgan": ("JPMorgan", "financials",
                  [("T10Y3M", "net interest margin",
                    "an inverted curve compresses the spread between funding "
                    "and lending; the deposit beta decides how fast", "DOWN"),
                   ("BAA10Y", "credit provisioning",
                    "a wider spread anticipates the charge-offs that drive "
-                   "reserve builds", "DOWN"),
+                   "reserve builds", "UP"),
                   ("DFF", "loan demand",
                    "a higher policy rate suppresses new origination volume "
-                   "even where credit quality holds", "DOWN")]),
+                   "even where credit quality holds", "UP")]),
     "visa": ("Visa", "payments",
              [("PCEC96", "ticket value and spend mix",
                "volume is resilient because payments are non-deferrable; the "
                "damage is in average ticket and cross-border mix", "DOWN"),
               ("UNRATE", "cross-border travel volume",
                "the highest-yield transactions are discretionary travel, "
-               "which is the first to go", "DOWN")]),
+               "which is the first to go", "UP")]),
     "caterpillar": ("Caterpillar", "industrials",
                     [("BAA10Y", "customer financing cost",
                       "equipment is bought on credit; the dealer's financing "
                       "cost gates the order before the end market weakens",
-                      "DOWN"),
+                      "UP"),
                      ("INDPRO", "order backlog conversion",
                       "backlog converts to revenue only if the customer's own "
                       "capex survives", "DOWN"),
@@ -138,11 +157,11 @@ COMPANIES = {
                "measurable", "DOWN"),
               ("DFF", "advertiser cost of capital",
                "venture and growth-stage advertisers cut first when "
-               "financing is expensive", "DOWN")]),
+               "financing is expensive", "UP")]),
     "nvidia": ("NVIDIA", "semiconductors",
                [("BAA10Y", "customer capex financing",
                  "data-centre buildout is financed; a wider spread lengthens "
-                 "the ordering cycle before it cuts it", "DOWN"),
+                 "the ordering cycle before it cuts it", "UP"),
                 ("INDPRO", "supply-chain utilisation",
                  "substrate and packaging capacity tracks industrial output "
                  "rather than end demand", "MIXED")]),
@@ -157,15 +176,15 @@ COMPANIES = {
     "salesforce": ("Salesforce", "software",
                    [("UNRATE", "seat count",
                      "subscription revenue is priced per seat, so hiring "
-                     "freezes hit renewals before they hit new logos", "DOWN"),
+                     "freezes hit renewals before they hit new logos", "UP"),
                     ("DFF", "deal cycle length",
                      "a higher discount rate lengthens procurement approval "
-                     "for multi-year commitments", "DOWN")]),
+                     "for multi-year commitments", "UP")]),
     "regional_private": ("A private regional builder", "sparse",
                          [("MORTGAGE30US", "buyer qualification rate",
                            "a small builder's constraint is how many buyers "
                            "clear underwriting at the prevailing rate, not "
-                           "its own cost of capital", "DOWN")]),
+                           "its own cost of capital", "UP")]),
 }
 
 
@@ -190,15 +209,17 @@ def read_state(panel):
 def implications(state):
     out = []
     for cid, (name, sector, chans) in sorted(COMPANIES.items()):
-        for driver, channel, mechanism, base_dir in chans:
+        for driver, channel, mechanism, adverse_dir in chans:
             r = state.get(driver)
             if r is None:
                 continue
-            # The company-level direction flips with the driver's own move.
+            # DOWN means "this channel is hurt", and it is hurt when the
+            # driver moves the way `adverse_dir` names. A MIXED channel
+            # states both directions in its own mechanism and never resolves
+            # to an adverse reading.
             moved = r["direction"]
-            direction = base_dir
-            if base_dir in ("UP", "DOWN") and moved == "DOWN":
-                direction = "UP" if base_dir == "DOWN" else "DOWN"
+            direction = "DOWN" if (adverse_dir in ("UP", "DOWN")
+                                   and moved == adverse_dir) else "UP"
             mag = ("HIGH" if abs(r["yoy_change"]) > 0.10
                    else ("MEDIUM" if abs(r["yoy_change"]) > 0.02 else "LOW"))
             out.append(WM.CompanyImplication(

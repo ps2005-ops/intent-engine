@@ -241,8 +241,14 @@ def bp4():
             "injected macro with no decision change was not flagged")
 
     def mutate(t):
+        # RETARGETED, because the line it named no longer exists. The
+        # adverse-direction convention was corrected -- see
+        # `run_world_model.COMPANIES` -- and a proof pinned to the old text
+        # reports NOT_APPLIED, which is the honest answer and is not a pass.
         return t.mutate("scripts/run_decision_value.py",
-                        "        if direction != \"DOWN\" or mag < MATERIAL_MOVE:\n"
+                        "        if (adverse_dir not in (\"UP\", \"DOWN\")\n"
+                        "                or r[\"direction\"] != adverse_dir "
+                        "or mag < MATERIAL_MOVE):\n"
                         "            continue",
                         "        if False:  # MUTATION\n"
                         "            continue")

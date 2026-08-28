@@ -176,6 +176,22 @@ def assert_call_path_exists(repo: pathlib.Path, proof: Proof) -> None:
         # A guard can also be enforced by a raise inside the producer.
         if isinstance(node, ast.Raise):
             called.add("__raise__")
+        # A GUARD CAN ALSO BE A TEST, AND A TEST'S CALL SITE IS ITS SUITE.
+        #
+        # Six product proofs were REFUSED for naming a test file that
+        # "never calls" the test in it -- which is true and is not the
+        # question. A pytest test is invoked by collection, so its DEFINITION
+        # in a collected file is its call path, and requiring a literal call
+        # would force every structural guard to be wrapped in a fake caller.
+        #
+        # This does not weaken §36. The anti-tautology rule is
+        # `mutated_symbol != guard_under_test` and is checked separately in
+        # `Proof.validate`. What this function enforces is that the guard
+        # ACTUALLY EXISTS AND RUNS in the named file, and a test function that
+        # is not defined there still fails.
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                and node.name.startswith("test_"):
+            called.add(node.name)
     if guard not in called and "__raise__" not in called:
         raise TautologicalProof(
             f"{proof.name}: {proof.production_call_path} never calls "

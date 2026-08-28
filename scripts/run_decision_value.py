@@ -99,16 +99,17 @@ def version_b(cid, as_of, state):
                      channel=priority, mechanism=why, standing=FA.INFERRED,
                      evidence=(f"company_profile:{cid}",))]
     inputs, adverse, requests, falsifiers = [], [], [], []
-    for driver, channel, mechanism, base_dir in channels:
+    for driver, channel, mechanism, adverse_dir in channels:
         r = state.get(driver)
         if r is None:
             continue
         inputs.append(f"panel:{driver}@{r['as_of']}")
-        direction = base_dir
-        if base_dir in ("UP", "DOWN") and r["direction"] == "DOWN":
-            direction = "UP" if base_dir == "DOWN" else "DOWN"
+        # THE CHANNEL IS HURT WHEN THE DRIVER MOVES THE WAY ITS MECHANISM
+        # SAYS IT IS HURT BY. See `run_world_model.COMPANIES` for the
+        # inverted convention this replaces and how it was found.
         mag = abs(r["yoy_change"])
-        if direction != "DOWN" or mag < MATERIAL_MOVE:
+        if (adverse_dir not in ("UP", "DOWN")
+                or r["direction"] != adverse_dir or mag < MATERIAL_MOVE):
             continue
         sev_b = "HIGH" if mag > 0.10 else "MEDIUM"
         adverse.append((mag, channel, driver))
@@ -150,14 +151,13 @@ def triggers_for(cid, state):
     _p, _a, _s, _w = STRUCTURAL[cid]
     _name, _sector, channels = COMPANIES[cid]
     best, out = None, {}
-    for driver, channel, mechanism, base_dir in channels:
+    for driver, channel, mechanism, adverse_dir in channels:
         r = state.get(driver)
         if r is None:
             continue
-        direction = base_dir
-        if base_dir in ("UP", "DOWN") and r["direction"] == "DOWN":
-            direction = "UP" if base_dir == "DOWN" else "DOWN"
-        if direction != "DOWN" or abs(r["yoy_change"]) < MATERIAL_MOVE:
+        if (adverse_dir not in ("UP", "DOWN")
+                or r["direction"] != adverse_dir
+                or abs(r["yoy_change"]) < MATERIAL_MOVE):
             continue
         if best is None or abs(r["yoy_change"]) > best[0]:
             best = (abs(r["yoy_change"]), driver, channel, mechanism, r)

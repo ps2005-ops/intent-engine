@@ -424,6 +424,118 @@ def _render_rows(value, limit: int = 3) -> str:
     return "; ".join(out)
 
 
+#: §22. Economic questions, answered from the canonical economic context and
+#: from nothing else. Listed BEFORE the generic router runs, because
+#: "what should we monitor next" is answerable from either object and the
+#: economic one is the more specific answer when an economic delta exists.
+#:
+#: WHY THESE ROUTE SEPARATELY. The failure being prevented is a second
+#: reasoning universe: Q&A composing an economic explanation out of the report
+#: while the brief renders one out of the context object, and the two
+#: disagreeing. Every string below is lifted from the context; none is
+#: composed here.
+ECONOMIC_INTENTS = (
+    ("why_changed", ("why did this recommendation change",
+                     "why did the recommendation change",
+                     "why has this changed", "what changed economically",
+                     "why did your recommendation change")),
+    ("which_factor", ("which economic factor", "what economic factor",
+                      "which factor matters most", "biggest economic",
+                      "most important economic")),
+    ("economic_evidence", ("what evidence supports it",
+                           "what evidence supports that",
+                           "evidence for the economic",
+                           "where does that economic")),
+    ("economic_wrong", ("what could make this wrong",
+                        "what would make this wrong",
+                        "how could the economic reading be wrong")),
+    ("differently", ("differently than", "different from our competitor",
+                     "why does this affect us differently",
+                     "why us and not")),
+    ("economic_monitor", ("what should i monitor next",
+                          "what economic", "economic conditions")),
+)
+
+
+def economic_intent_of(question: str) -> str:
+    low = (question or "").lower()
+    for name, markers in ECONOMIC_INTENTS:
+        if any(m in low for m in markers):
+            return name
+    return ""
+
+
+def _economic_answer(question: str, econ) -> str:
+    """One economic question, answered off the shared context.
+
+    Returns "" when the question is not economic OR when the context has
+    nothing that answers it. An empty return falls through to the ordinary
+    router, which is right: an invented economic answer is worse than a
+    company answer to an economic question.
+    """
+    if econ is None:
+        return ""
+    name = economic_intent_of(question)
+    if not name:
+        return ""
+    if not econ.available:
+        # §18/§26.12. The honest answer is that there is no economic reading,
+        # not a reading composed here to fill the gap.
+        return f"{econ.headline()} {econ.reason}".strip()
+    if name == "why_changed":
+        if not econ.material_decision_delta:
+            return f"{econ.headline()} {econ.abstention_reason}".strip()
+        c = econ.material_decision_delta[0]
+        return (f"{econ.headline()} The change is to "
+                f"{c.field.replace('_', ' ')}, and it is there because "
+                f"{c.trigger}. The mechanism is: {c.mechanism}")
+    if name == "which_factor":
+        live = [e for e in econ.company_exposures if e.measured]
+        if not live:
+            return econ.headline()
+        e = live[0]
+        return (f"{e.quantity.replace('_', ' ').capitalize()}, through "
+                f"{e.channel.replace('_', ' ').lower()}. {e.mechanism} "
+                f"The variable it moves here is "
+                f"{e.business_variable or e.channel.lower()}.")
+    if name == "economic_evidence":
+        if not econ.provenance:
+            return econ.headline()
+        rows = "; ".join(
+            f"{p.claim} — {p.source}, {p.as_of}" for p in econ.provenance[:3])
+        return (f"Every economic claim here rests on a published series read "
+                f"from the shared economic state: {rows}.")
+    if name == "economic_wrong":
+        if econ.falsifiers:
+            return (f"This economic reading would be wrong if "
+                    f"{econ.falsifiers[0]}.")
+        if econ.abstains:
+            return ("The reading here is that the economy does not change "
+                    "this recommendation. It would be wrong if a condition "
+                    "this company is exposed to moved adversely through a "
+                    "channel we have established — none currently does.")
+        return econ.headline()
+    if name == "differently":
+        live = [e for e in econ.company_exposures if e.measured and e.mechanism]
+        if not live:
+            return ""
+        e = live[0]
+        return (f"The same condition reaches different businesses through "
+                f"different mechanisms. Here it reaches "
+                f"{econ.company_id} as: {e.mechanism} A business with a "
+                f"different model would be reached through a different "
+                f"variable, or not at all — a condition with no established "
+                f"mechanism into a business is not reported as an exposure "
+                f"for it.")
+    if name == "economic_monitor":
+        if econ.information_priorities:
+            return (f"{econ.information_priorities[0]}. "
+                    + (f"Also: {econ.information_priorities[1]}."
+                       if len(econ.information_priorities) > 1 else "")).strip()
+        return econ.headline()
+    return ""
+
+
 def _route_answer(question: str, decision, read=None) -> tuple:
     """(answer, matched_intent). Reads the composed decision, never invents.
 
@@ -558,7 +670,7 @@ def _pattern_grounding(decision) -> str:
 def answer(question: str, brief, *, engine_answer: str = "",
            observations: Optional[Sequence[dict]] = None,
            trust=None, contract=None, decision=None,
-           read=None) -> FounderAnswer:
+           read=None, econ=None) -> FounderAnswer:
     """Frame an answer using the shared object. Never invents a conclusion.
 
     `trust` is the CANONICAL standing produced by the market side, not a
@@ -601,6 +713,25 @@ def answer(question: str, brief, *, engine_answer: str = "",
     # we do" and "what should we monitor next" alike -- so running it first
     # collapsed a monitoring question onto the recommendation answer. Caught by
     # the distinctness test rather than live, which is the point of having it.
+    # §22. THE ECONOMIC ROUTER FIRST, AND ONLY WHERE IT HAS AN ANSWER.
+    #
+    # Same evidence graph as every other surface: `_economic_answer` reads the
+    # canonical `FounderEconomicContext` and composes nothing. It returns ""
+    # when the context cannot answer, so an economic question about a company
+    # with no economic reading still reaches the ordinary router rather than
+    # being answered out of thin air -- §26.12.
+    _econ_routed = _economic_answer(question, econ)
+    if _econ_routed:
+        out.direct_answer = _econ_routed
+        if econ is not None and econ.material_decision_delta:
+            out.decision_affected = (
+                econ.material_decision_delta[0].why_material)
+        if econ is not None and econ.provenance:
+            out.strongest_evidence = (
+                f"{econ.provenance[0].claim} ({econ.provenance[0].source}, "
+                f"{econ.provenance[0].as_of})")
+        return out
+
     _routed, _matched = _route_answer(question, decision, read)
     if _routed:
         out.direct_answer = _routed

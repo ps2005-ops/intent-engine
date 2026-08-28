@@ -1,10 +1,10 @@
 {
-  "code_sha": "82e93726",
+  "code_sha": "d63a9891",
   "regimes": {
     "calm_expansion": {
-      "abstained": 6,
+      "abstained": 7,
       "as_of": "2016-05-15",
-      "attributed": 4,
+      "attributed": 3,
       "companies": 10,
       "damage": 0,
       "damages": [],
@@ -20,7 +20,7 @@
         "T10Y3M": "DOWN",
         "UNRATE": "DOWN"
       },
-      "material": 4,
+      "material": 3,
       "regimes_held": [
         "DISINFLATION",
         "LOW_VOL_EXPANSION",
@@ -93,7 +93,7 @@
           },
           "attributable": true,
           "b": {
-            "action": "PREPARE",
+            "action": "INVESTIGATE",
             "as_of": "2016-05-15",
             "company_id": "caterpillar",
             "confidence": "MEDIUM",
@@ -109,22 +109,20 @@
               "panel:PERMIT@2016-03-01"
             ],
             "falsifiers": [
-              "customer financing cost holds while BAA10Y continues UP",
-              "construction end-market holds while PERMIT continues UP"
+              "customer financing cost holds while BAA10Y continues UP"
             ],
             "information_requests": [
-              "how much of customer financing cost is already contracted",
-              "how much of construction end-market is already contracted"
+              "how much of customer financing cost is already contracted"
             ],
             "metrics": {
-              "distinct_channels": 3,
+              "distinct_channels": 2,
               "economic_inputs": 3,
               "evidence_citations": 4,
-              "falsifiers": 2,
-              "information_requests": 2,
+              "falsifiers": 1,
+              "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 3,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -150,24 +148,13 @@
                 "risk_id": "caterpillar:BAA10Y",
                 "severity": "MEDIUM",
                 "standing": "OBSERVED"
-              },
-              {
-                "channel": "construction end-market",
-                "evidence": [
-                  "panel:PERMIT@2016-03-01"
-                ],
-                "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
-                "risk_id": "caterpillar:PERMIT",
-                "severity": "MEDIUM",
-                "standing": "OBSERVED"
               }
             ],
-            "scenario": "LIKELY",
+            "scenario": "POSSIBLE",
             "top_priority": "customer financing cost",
             "top_risks": [
               "caterpillar:structural",
-              "caterpillar:BAA10Y",
-              "caterpillar:PERMIT"
+              "caterpillar:BAA10Y"
             ],
             "unknowns": [
               "what is already contracted"
@@ -175,14 +162,14 @@
             "variant": "B"
           },
           "b_metrics": {
-            "distinct_channels": 3,
+            "distinct_channels": 2,
             "economic_inputs": 3,
             "evidence_citations": 4,
-            "falsifiers": 2,
-            "information_requests": 2,
+            "falsifiers": 1,
+            "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 3,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
@@ -201,7 +188,7 @@
               "why_material": "the channel a founder would look at first changed"
             },
             {
-              "after": "PREPARE",
+              "after": "INVESTIGATE",
               "before": "MONITOR",
               "field": "action",
               "material": true,
@@ -210,13 +197,12 @@
                 "panel:BAA10Y@2016-05-13"
               ],
               "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
-              "why_material": "the action moved from MONITOR to PREPARE"
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
             },
             {
               "after": [
                 "caterpillar:structural",
-                "caterpillar:BAA10Y",
-                "caterpillar:PERMIT"
+                "caterpillar:BAA10Y"
               ],
               "before": [
                 "caterpillar:structural"
@@ -229,18 +215,6 @@
               ],
               "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
               "why_material": "the top-three risks were reordered or replaced"
-            },
-            {
-              "after": "LIKELY",
-              "before": "POSSIBLE",
-              "field": "scenario",
-              "material": true,
-              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
-              "provenance": [
-                "panel:BAA10Y@2016-05-13"
-              ],
-              "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
-              "why_material": "the scenario band moved"
             },
             {
               "after": "MEDIUM",
@@ -286,7 +260,6 @@
             "top_priority",
             "action",
             "top_risks",
-            "scenario",
             "confidence",
             "information_priority"
           ],
@@ -359,7 +332,7 @@
           },
           "attributable": true,
           "b": {
-            "action": "INVESTIGATE",
+            "action": "PREPARE",
             "as_of": "2016-05-15",
             "company_id": "jpmorgan",
             "confidence": "MEDIUM",
@@ -375,20 +348,22 @@
               "panel:DFF@2016-05-14"
             ],
             "falsifiers": [
+              "net interest margin holds while T10Y3M continues DOWN",
               "credit provisioning holds while BAA10Y continues UP"
             ],
             "information_requests": [
+              "how much of net interest margin is already contracted",
               "how much of credit provisioning is already contracted"
             ],
             "metrics": {
               "distinct_channels": 2,
               "economic_inputs": 3,
               "evidence_citations": 4,
-              "falsifiers": 1,
-              "information_requests": 1,
+              "falsifiers": 2,
+              "information_requests": 2,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 2,
+              "risks": 3,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -406,6 +381,16 @@
                 "standing": "INFERRED"
               },
               {
+                "channel": "net interest margin",
+                "evidence": [
+                  "panel:T10Y3M@2016-05-13"
+                ],
+                "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+                "risk_id": "jpmorgan:T10Y3M",
+                "severity": "HIGH",
+                "standing": "OBSERVED"
+              },
+              {
                 "channel": "credit provisioning",
                 "evidence": [
                   "panel:BAA10Y@2016-05-13"
@@ -416,9 +401,10 @@
                 "standing": "OBSERVED"
               }
             ],
-            "scenario": "POSSIBLE",
-            "top_priority": "credit provisioning",
+            "scenario": "LIKELY",
+            "top_priority": "net interest margin",
             "top_risks": [
+              "jpmorgan:T10Y3M",
               "jpmorgan:structural",
               "jpmorgan:BAA10Y"
             ],
@@ -431,42 +417,31 @@
             "distinct_channels": 2,
             "economic_inputs": 3,
             "evidence_citations": 4,
-            "falsifiers": 1,
-            "information_requests": 1,
+            "falsifiers": 2,
+            "information_requests": 2,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 2,
+            "risks": 3,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "jpmorgan",
           "fields": [
             {
-              "after": "credit provisioning",
-              "before": "net interest margin",
-              "field": "top_priority",
-              "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
-              "provenance": [
-                "panel:BAA10Y@2016-05-13"
-              ],
-              "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
-              "why_material": "the channel a founder would look at first changed"
-            },
-            {
-              "after": "INVESTIGATE",
+              "after": "PREPARE",
               "before": "MONITOR",
               "field": "action",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2016-05-13"
+                "panel:T10Y3M@2016-05-13"
               ],
-              "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
-              "why_material": "the action moved from MONITOR to INVESTIGATE"
+              "trigger": "T10Y3M moved -0.2100 year-on-year to 1.42 as of 2016-05-13",
+              "why_material": "the action moved from MONITOR to PREPARE"
             },
             {
               "after": [
+                "jpmorgan:T10Y3M",
                 "jpmorgan:structural",
                 "jpmorgan:BAA10Y"
               ],
@@ -475,39 +450,51 @@
               ],
               "field": "top_risks",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2016-05-13"
+                "panel:T10Y3M@2016-05-13"
               ],
-              "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
+              "trigger": "T10Y3M moved -0.2100 year-on-year to 1.42 as of 2016-05-13",
               "why_material": "the top-three risks were reordered or replaced"
+            },
+            {
+              "after": "LIKELY",
+              "before": "POSSIBLE",
+              "field": "scenario",
+              "material": true,
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+              "provenance": [
+                "panel:T10Y3M@2016-05-13"
+              ],
+              "trigger": "T10Y3M moved -0.2100 year-on-year to 1.42 as of 2016-05-13",
+              "why_material": "the scenario band moved"
             },
             {
               "after": "MEDIUM",
               "before": "LOW",
               "field": "confidence",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2016-05-13"
+                "panel:T10Y3M@2016-05-13"
               ],
-              "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
+              "trigger": "T10Y3M moved -0.2100 year-on-year to 1.42 as of 2016-05-13",
               "why_material": "stated confidence moved"
             },
             {
               "after": [
-                "how much of credit provisioning is already contracted"
+                "how much of net interest margin is already contracted"
               ],
               "before": [
                 "current reading of net interest margin"
               ],
               "field": "information_priority",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2016-05-13"
+                "panel:T10Y3M@2016-05-13"
               ],
-              "trigger": "BAA10Y moved +0.0400 year-on-year to 2.9 as of 2016-05-13",
+              "trigger": "T10Y3M moved -0.2100 year-on-year to 1.42 as of 2016-05-13",
               "why_material": "the most valuable missing information changed"
             },
             {
@@ -523,9 +510,9 @@
           ],
           "is_material": true,
           "material_fields": [
-            "top_priority",
             "action",
             "top_risks",
+            "scenario",
             "confidence",
             "information_priority"
           ],
@@ -1422,12 +1409,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": true,
+          "attributable": false,
           "b": {
-            "action": "INVESTIGATE",
+            "action": "MONITOR",
             "as_of": "2016-05-15",
             "company_id": "unionpacific",
-            "confidence": "MEDIUM",
+            "confidence": "LOW",
             "economic_inputs": [
               "panel:INDPRO@2016-03-01",
               "panel:PERMIT@2016-03-01"
@@ -1438,20 +1425,20 @@
               "panel:PERMIT@2016-03-01"
             ],
             "falsifiers": [
-              "construction materials volume holds while PERMIT continues UP"
+              "Union Pacific reports carload volume moving against expectation"
             ],
             "information_requests": [
-              "how much of construction materials volume is already contracted"
+              "current reading of carload volume"
             ],
             "metrics": {
-              "distinct_channels": 2,
+              "distinct_channels": 1,
               "economic_inputs": 2,
               "evidence_citations": 3,
               "falsifiers": 1,
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 2,
+              "risks": 1,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -1467,112 +1454,32 @@
                 "risk_id": "unionpacific:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
-              },
-              {
-                "channel": "construction materials volume",
-                "evidence": [
-                  "panel:PERMIT@2016-03-01"
-                ],
-                "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-                "risk_id": "unionpacific:PERMIT",
-                "severity": "MEDIUM",
-                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
-            "top_priority": "construction materials volume",
+            "top_priority": "carload volume",
             "top_risks": [
-              "unionpacific:structural",
-              "unionpacific:PERMIT"
+              "unionpacific:structural"
             ],
             "unknowns": [
-              "what is already contracted"
+              "the current economic environment"
             ],
             "variant": "B"
           },
           "b_metrics": {
-            "distinct_channels": 2,
+            "distinct_channels": 1,
             "economic_inputs": 2,
             "evidence_citations": 3,
             "falsifiers": 1,
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 2,
+            "risks": 1,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "unionpacific",
           "fields": [
-            {
-              "after": "construction materials volume",
-              "before": "carload volume",
-              "field": "top_priority",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2016-03-01"
-              ],
-              "trigger": "PERMIT moved +0.0366 year-on-year to 1076 as of 2016-03-01",
-              "why_material": "the channel a founder would look at first changed"
-            },
-            {
-              "after": "INVESTIGATE",
-              "before": "MONITOR",
-              "field": "action",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2016-03-01"
-              ],
-              "trigger": "PERMIT moved +0.0366 year-on-year to 1076 as of 2016-03-01",
-              "why_material": "the action moved from MONITOR to INVESTIGATE"
-            },
-            {
-              "after": [
-                "unionpacific:structural",
-                "unionpacific:PERMIT"
-              ],
-              "before": [
-                "unionpacific:structural"
-              ],
-              "field": "top_risks",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2016-03-01"
-              ],
-              "trigger": "PERMIT moved +0.0366 year-on-year to 1076 as of 2016-03-01",
-              "why_material": "the top-three risks were reordered or replaced"
-            },
-            {
-              "after": "MEDIUM",
-              "before": "LOW",
-              "field": "confidence",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2016-03-01"
-              ],
-              "trigger": "PERMIT moved +0.0366 year-on-year to 1076 as of 2016-03-01",
-              "why_material": "stated confidence moved"
-            },
-            {
-              "after": [
-                "how much of construction materials volume is already contracted"
-              ],
-              "before": [
-                "current reading of carload volume"
-              ],
-              "field": "information_priority",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2016-03-01"
-              ],
-              "trigger": "PERMIT moved +0.0366 year-on-year to 1076 as of 2016-03-01",
-              "why_material": "the most valuable missing information changed"
-            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -1584,16 +1491,10 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": true,
-          "material_fields": [
-            "top_priority",
-            "action",
-            "top_risks",
-            "confidence",
-            "information_priority"
-          ],
+          "is_material": false,
+          "material_fields": [],
           "regime": "calm_expansion",
-          "verdict": "MATERIAL_AND_ATTRIBUTED"
+          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
         },
         {
           "a": {
@@ -1900,9 +1801,9 @@
       ]
     },
     "credit_stress": {
-      "abstained": 6,
+      "abstained": 4,
       "as_of": "2023-06-15",
-      "attributed": 4,
+      "attributed": 6,
       "companies": 10,
       "damage": 0,
       "damages": [],
@@ -1918,7 +1819,7 @@
         "T10Y3M": "UP",
         "UNRATE": "UP"
       },
-      "material": 4,
+      "material": 6,
       "regimes_held": [
         "CREDIT_STRESS",
         "INFLATION_SHOCK",
@@ -1989,12 +1890,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": false,
+          "attributable": true,
           "b": {
-            "action": "MONITOR",
+            "action": "INVESTIGATE",
             "as_of": "2023-06-15",
             "company_id": "caterpillar",
-            "confidence": "LOW",
+            "confidence": "MEDIUM",
             "economic_inputs": [
               "panel:BAA10Y@2023-06-14",
               "panel:INDPRO@2023-05-01",
@@ -2007,20 +1908,20 @@
               "panel:PERMIT@2023-04-01"
             ],
             "falsifiers": [
-              "Caterpillar reports order backlog conversion moving against expectation"
+              "construction end-market holds while PERMIT continues DOWN"
             ],
             "information_requests": [
-              "current reading of order backlog conversion"
+              "how much of construction end-market is already contracted"
             ],
             "metrics": {
-              "distinct_channels": 1,
+              "distinct_channels": 2,
               "economic_inputs": 3,
               "evidence_citations": 4,
               "falsifiers": 1,
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 1,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -2036,32 +1937,112 @@
                 "risk_id": "caterpillar:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
+              },
+              {
+                "channel": "construction end-market",
+                "evidence": [
+                  "panel:PERMIT@2023-04-01"
+                ],
+                "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+                "risk_id": "caterpillar:PERMIT",
+                "severity": "HIGH",
+                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
-            "top_priority": "order backlog conversion",
+            "top_priority": "construction end-market",
             "top_risks": [
+              "caterpillar:PERMIT",
               "caterpillar:structural"
             ],
             "unknowns": [
-              "the current economic environment"
+              "what is already contracted"
             ],
             "variant": "B"
           },
           "b_metrics": {
-            "distinct_channels": 1,
+            "distinct_channels": 2,
             "economic_inputs": 3,
             "evidence_citations": 4,
             "falsifiers": 1,
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 1,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "caterpillar",
           "fields": [
+            {
+              "after": "construction end-market",
+              "before": "order backlog conversion",
+              "field": "top_priority",
+              "material": true,
+              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the channel a founder would look at first changed"
+            },
+            {
+              "after": "INVESTIGATE",
+              "before": "MONITOR",
+              "field": "action",
+              "material": true,
+              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
+            },
+            {
+              "after": [
+                "caterpillar:PERMIT",
+                "caterpillar:structural"
+              ],
+              "before": [
+                "caterpillar:structural"
+              ],
+              "field": "top_risks",
+              "material": true,
+              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the top-three risks were reordered or replaced"
+            },
+            {
+              "after": "MEDIUM",
+              "before": "LOW",
+              "field": "confidence",
+              "material": true,
+              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "stated confidence moved"
+            },
+            {
+              "after": [
+                "how much of construction end-market is already contracted"
+              ],
+              "before": [
+                "current reading of order backlog conversion"
+              ],
+              "field": "information_priority",
+              "material": true,
+              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the most valuable missing information changed"
+            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -2073,10 +2054,16 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": false,
-          "material_fields": [],
+          "is_material": true,
+          "material_fields": [
+            "top_priority",
+            "action",
+            "top_risks",
+            "confidence",
+            "information_priority"
+          ],
           "regime": "credit_stress",
-          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
+          "verdict": "MATERIAL_AND_ATTRIBUTED"
         },
         {
           "a": {
@@ -3280,12 +3267,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": false,
+          "attributable": true,
           "b": {
-            "action": "MONITOR",
+            "action": "INVESTIGATE",
             "as_of": "2023-06-15",
             "company_id": "unionpacific",
-            "confidence": "LOW",
+            "confidence": "MEDIUM",
             "economic_inputs": [
               "panel:INDPRO@2023-05-01",
               "panel:PERMIT@2023-04-01"
@@ -3296,20 +3283,20 @@
               "panel:PERMIT@2023-04-01"
             ],
             "falsifiers": [
-              "Union Pacific reports carload volume moving against expectation"
+              "construction materials volume holds while PERMIT continues DOWN"
             ],
             "information_requests": [
-              "current reading of carload volume"
+              "how much of construction materials volume is already contracted"
             ],
             "metrics": {
-              "distinct_channels": 1,
+              "distinct_channels": 2,
               "economic_inputs": 2,
               "evidence_citations": 3,
               "falsifiers": 1,
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 1,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -3325,32 +3312,112 @@
                 "risk_id": "unionpacific:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
+              },
+              {
+                "channel": "construction materials volume",
+                "evidence": [
+                  "panel:PERMIT@2023-04-01"
+                ],
+                "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
+                "risk_id": "unionpacific:PERMIT",
+                "severity": "HIGH",
+                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
-            "top_priority": "carload volume",
+            "top_priority": "construction materials volume",
             "top_risks": [
+              "unionpacific:PERMIT",
               "unionpacific:structural"
             ],
             "unknowns": [
-              "the current economic environment"
+              "what is already contracted"
             ],
             "variant": "B"
           },
           "b_metrics": {
-            "distinct_channels": 1,
+            "distinct_channels": 2,
             "economic_inputs": 2,
             "evidence_citations": 3,
             "falsifiers": 1,
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 1,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "unionpacific",
           "fields": [
+            {
+              "after": "construction materials volume",
+              "before": "carload volume",
+              "field": "top_priority",
+              "material": true,
+              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the channel a founder would look at first changed"
+            },
+            {
+              "after": "INVESTIGATE",
+              "before": "MONITOR",
+              "field": "action",
+              "material": true,
+              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
+            },
+            {
+              "after": [
+                "unionpacific:PERMIT",
+                "unionpacific:structural"
+              ],
+              "before": [
+                "unionpacific:structural"
+              ],
+              "field": "top_risks",
+              "material": true,
+              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the top-three risks were reordered or replaced"
+            },
+            {
+              "after": "MEDIUM",
+              "before": "LOW",
+              "field": "confidence",
+              "material": true,
+              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "stated confidence moved"
+            },
+            {
+              "after": [
+                "how much of construction materials volume is already contracted"
+              ],
+              "before": [
+                "current reading of carload volume"
+              ],
+              "field": "information_priority",
+              "material": true,
+              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
+              "provenance": [
+                "panel:PERMIT@2023-04-01"
+              ],
+              "trigger": "PERMIT moved -0.2106 year-on-year to 1417 as of 2023-04-01",
+              "why_material": "the most valuable missing information changed"
+            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -3362,10 +3429,16 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": false,
-          "material_fields": [],
+          "is_material": true,
+          "material_fields": [
+            "top_priority",
+            "action",
+            "top_risks",
+            "confidence",
+            "information_priority"
+          ],
           "regime": "credit_stress",
-          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
+          "verdict": "MATERIAL_AND_ATTRIBUTED"
         },
         {
           "a": {
@@ -5369,9 +5442,9 @@
       ]
     },
     "inflation_stress": {
-      "abstained": 5,
+      "abstained": 6,
       "as_of": "2022-07-15",
-      "attributed": 5,
+      "attributed": 4,
       "companies": 10,
       "damage": 0,
       "damages": [],
@@ -5387,7 +5460,7 @@
         "T10Y3M": "DOWN",
         "UNRATE": "DOWN"
       },
-      "material": 5,
+      "material": 4,
       "regimes_held": [
         "INFLATION_SHOCK",
         "LIQUIDITY_STRESS",
@@ -5460,7 +5533,7 @@
           },
           "attributable": true,
           "b": {
-            "action": "PREPARE",
+            "action": "INVESTIGATE",
             "as_of": "2022-07-15",
             "company_id": "caterpillar",
             "confidence": "MEDIUM",
@@ -5476,22 +5549,20 @@
               "panel:PERMIT@2022-05-01"
             ],
             "falsifiers": [
-              "customer financing cost holds while BAA10Y continues UP",
-              "order backlog conversion holds while INDPRO continues UP"
+              "customer financing cost holds while BAA10Y continues UP"
             ],
             "information_requests": [
-              "how much of customer financing cost is already contracted",
-              "how much of order backlog conversion is already contracted"
+              "how much of customer financing cost is already contracted"
             ],
             "metrics": {
               "distinct_channels": 2,
               "economic_inputs": 3,
               "evidence_citations": 4,
-              "falsifiers": 2,
-              "information_requests": 2,
+              "falsifiers": 1,
+              "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 3,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -5517,24 +5588,13 @@
                 "risk_id": "caterpillar:BAA10Y",
                 "severity": "HIGH",
                 "standing": "OBSERVED"
-              },
-              {
-                "channel": "order backlog conversion",
-                "evidence": [
-                  "panel:INDPRO@2022-06-01"
-                ],
-                "mechanism": "backlog converts to revenue only if the customer's own capex survives",
-                "risk_id": "caterpillar:INDPRO",
-                "severity": "MEDIUM",
-                "standing": "OBSERVED"
               }
             ],
-            "scenario": "LIKELY",
+            "scenario": "POSSIBLE",
             "top_priority": "customer financing cost",
             "top_risks": [
               "caterpillar:BAA10Y",
-              "caterpillar:structural",
-              "caterpillar:INDPRO"
+              "caterpillar:structural"
             ],
             "unknowns": [
               "what is already contracted"
@@ -5545,11 +5605,11 @@
             "distinct_channels": 2,
             "economic_inputs": 3,
             "evidence_citations": 4,
-            "falsifiers": 2,
-            "information_requests": 2,
+            "falsifiers": 1,
+            "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 3,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
@@ -5568,7 +5628,7 @@
               "why_material": "the channel a founder would look at first changed"
             },
             {
-              "after": "PREPARE",
+              "after": "INVESTIGATE",
               "before": "MONITOR",
               "field": "action",
               "material": true,
@@ -5577,13 +5637,12 @@
                 "panel:BAA10Y@2022-07-14"
               ],
               "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
-              "why_material": "the action moved from MONITOR to PREPARE"
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
             },
             {
               "after": [
                 "caterpillar:BAA10Y",
-                "caterpillar:structural",
-                "caterpillar:INDPRO"
+                "caterpillar:structural"
               ],
               "before": [
                 "caterpillar:structural"
@@ -5596,18 +5655,6 @@
               ],
               "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
               "why_material": "the top-three risks were reordered or replaced"
-            },
-            {
-              "after": "LIKELY",
-              "before": "POSSIBLE",
-              "field": "scenario",
-              "material": true,
-              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
-              "provenance": [
-                "panel:BAA10Y@2022-07-14"
-              ],
-              "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
-              "why_material": "the scenario band moved"
             },
             {
               "after": "MEDIUM",
@@ -5653,7 +5700,6 @@
             "top_priority",
             "action",
             "top_risks",
-            "scenario",
             "confidence",
             "information_priority"
           ],
@@ -5726,7 +5772,7 @@
           },
           "attributable": true,
           "b": {
-            "action": "INVESTIGATE",
+            "action": "PREPARE",
             "as_of": "2022-07-15",
             "company_id": "jpmorgan",
             "confidence": "MEDIUM",
@@ -5742,20 +5788,22 @@
               "panel:DFF@2022-07-14"
             ],
             "falsifiers": [
+              "net interest margin holds while T10Y3M continues DOWN",
               "credit provisioning holds while BAA10Y continues UP"
             ],
             "information_requests": [
+              "how much of net interest margin is already contracted",
               "how much of credit provisioning is already contracted"
             ],
             "metrics": {
               "distinct_channels": 2,
               "economic_inputs": 3,
               "evidence_citations": 4,
-              "falsifiers": 1,
-              "information_requests": 1,
+              "falsifiers": 2,
+              "information_requests": 2,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 2,
+              "risks": 3,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -5773,6 +5821,16 @@
                 "standing": "INFERRED"
               },
               {
+                "channel": "net interest margin",
+                "evidence": [
+                  "panel:T10Y3M@2022-07-14"
+                ],
+                "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+                "risk_id": "jpmorgan:T10Y3M",
+                "severity": "HIGH",
+                "standing": "OBSERVED"
+              },
+              {
                 "channel": "credit provisioning",
                 "evidence": [
                   "panel:BAA10Y@2022-07-14"
@@ -5783,9 +5841,10 @@
                 "standing": "OBSERVED"
               }
             ],
-            "scenario": "POSSIBLE",
-            "top_priority": "credit provisioning",
+            "scenario": "LIKELY",
+            "top_priority": "net interest margin",
             "top_risks": [
+              "jpmorgan:T10Y3M",
               "jpmorgan:BAA10Y",
               "jpmorgan:structural"
             ],
@@ -5798,42 +5857,31 @@
             "distinct_channels": 2,
             "economic_inputs": 3,
             "evidence_citations": 4,
-            "falsifiers": 1,
-            "information_requests": 1,
+            "falsifiers": 2,
+            "information_requests": 2,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 2,
+            "risks": 3,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "jpmorgan",
           "fields": [
             {
-              "after": "credit provisioning",
-              "before": "net interest margin",
-              "field": "top_priority",
-              "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
-              "provenance": [
-                "panel:BAA10Y@2022-07-14"
-              ],
-              "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
-              "why_material": "the channel a founder would look at first changed"
-            },
-            {
-              "after": "INVESTIGATE",
+              "after": "PREPARE",
               "before": "MONITOR",
               "field": "action",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2022-07-14"
+                "panel:T10Y3M@2022-07-14"
               ],
-              "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
-              "why_material": "the action moved from MONITOR to INVESTIGATE"
+              "trigger": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
+              "why_material": "the action moved from MONITOR to PREPARE"
             },
             {
               "after": [
+                "jpmorgan:T10Y3M",
                 "jpmorgan:BAA10Y",
                 "jpmorgan:structural"
               ],
@@ -5842,39 +5890,51 @@
               ],
               "field": "top_risks",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2022-07-14"
+                "panel:T10Y3M@2022-07-14"
               ],
-              "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
+              "trigger": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
               "why_material": "the top-three risks were reordered or replaced"
+            },
+            {
+              "after": "LIKELY",
+              "before": "POSSIBLE",
+              "field": "scenario",
+              "material": true,
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+              "provenance": [
+                "panel:T10Y3M@2022-07-14"
+              ],
+              "trigger": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
+              "why_material": "the scenario band moved"
             },
             {
               "after": "MEDIUM",
               "before": "LOW",
               "field": "confidence",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2022-07-14"
+                "panel:T10Y3M@2022-07-14"
               ],
-              "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
+              "trigger": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
               "why_material": "stated confidence moved"
             },
             {
               "after": [
-                "how much of credit provisioning is already contracted"
+                "how much of net interest margin is already contracted"
               ],
               "before": [
                 "current reading of net interest margin"
               ],
               "field": "information_priority",
               "material": true,
-              "mechanism": "a wider spread anticipates the charge-offs that drive reserve builds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:BAA10Y@2022-07-14"
+                "panel:T10Y3M@2022-07-14"
               ],
-              "trigger": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
+              "trigger": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
               "why_material": "the most valuable missing information changed"
             },
             {
@@ -5890,9 +5950,9 @@
           ],
           "is_material": true,
           "material_fields": [
-            "top_priority",
             "action",
             "top_risks",
+            "scenario",
             "confidence",
             "information_priority"
           ],
@@ -6862,12 +6922,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": true,
+          "attributable": false,
           "b": {
-            "action": "INVESTIGATE",
+            "action": "MONITOR",
             "as_of": "2022-07-15",
             "company_id": "unionpacific",
-            "confidence": "MEDIUM",
+            "confidence": "LOW",
             "economic_inputs": [
               "panel:INDPRO@2022-06-01",
               "panel:PERMIT@2022-05-01"
@@ -6878,10 +6938,10 @@
               "panel:PERMIT@2022-05-01"
             ],
             "falsifiers": [
-              "carload volume holds while INDPRO continues UP"
+              "Union Pacific reports carload volume moving against expectation"
             ],
             "information_requests": [
-              "how much of carload volume is already contracted"
+              "current reading of carload volume"
             ],
             "metrics": {
               "distinct_channels": 1,
@@ -6891,7 +6951,7 @@
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 2,
+              "risks": 1,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -6907,26 +6967,15 @@
                 "risk_id": "unionpacific:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
-              },
-              {
-                "channel": "carload volume",
-                "evidence": [
-                  "panel:INDPRO@2022-06-01"
-                ],
-                "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
-                "risk_id": "unionpacific:INDPRO",
-                "severity": "MEDIUM",
-                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
             "top_priority": "carload volume",
             "top_risks": [
-              "unionpacific:structural",
-              "unionpacific:INDPRO"
+              "unionpacific:structural"
             ],
             "unknowns": [
-              "what is already contracted"
+              "the current economic environment"
             ],
             "variant": "B"
           },
@@ -6938,69 +6987,12 @@
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 2,
+            "risks": 1,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "unionpacific",
           "fields": [
-            {
-              "after": "INVESTIGATE",
-              "before": "MONITOR",
-              "field": "action",
-              "material": true,
-              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
-              "provenance": [
-                "panel:INDPRO@2022-06-01"
-              ],
-              "trigger": "INDPRO moved +0.0416 year-on-year to 104.4 as of 2022-06-01",
-              "why_material": "the action moved from MONITOR to INVESTIGATE"
-            },
-            {
-              "after": [
-                "unionpacific:structural",
-                "unionpacific:INDPRO"
-              ],
-              "before": [
-                "unionpacific:structural"
-              ],
-              "field": "top_risks",
-              "material": true,
-              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
-              "provenance": [
-                "panel:INDPRO@2022-06-01"
-              ],
-              "trigger": "INDPRO moved +0.0416 year-on-year to 104.4 as of 2022-06-01",
-              "why_material": "the top-three risks were reordered or replaced"
-            },
-            {
-              "after": "MEDIUM",
-              "before": "LOW",
-              "field": "confidence",
-              "material": true,
-              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
-              "provenance": [
-                "panel:INDPRO@2022-06-01"
-              ],
-              "trigger": "INDPRO moved +0.0416 year-on-year to 104.4 as of 2022-06-01",
-              "why_material": "stated confidence moved"
-            },
-            {
-              "after": [
-                "how much of carload volume is already contracted"
-              ],
-              "before": [
-                "current reading of carload volume"
-              ],
-              "field": "information_priority",
-              "material": true,
-              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
-              "provenance": [
-                "panel:INDPRO@2022-06-01"
-              ],
-              "trigger": "INDPRO moved +0.0416 year-on-year to 104.4 as of 2022-06-01",
-              "why_material": "the most valuable missing information changed"
-            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -7012,15 +7004,10 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": true,
-          "material_fields": [
-            "action",
-            "top_risks",
-            "confidence",
-            "information_priority"
-          ],
+          "is_material": false,
+          "material_fields": [],
           "regime": "inflation_stress",
-          "verdict": "MATERIAL_AND_ATTRIBUTED"
+          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
         },
         {
           "a": {
@@ -7327,9 +7314,9 @@
       ]
     },
     "labour_deterioration": {
-      "abstained": 7,
+      "abstained": 5,
       "as_of": "2020-12-15",
-      "attributed": 3,
+      "attributed": 5,
       "companies": 10,
       "damage": 0,
       "damages": [],
@@ -7345,7 +7332,7 @@
         "T10Y3M": "UP",
         "UNRATE": "UP"
       },
-      "material": 3,
+      "material": 5,
       "regimes_held": [
         "DISINFLATION",
         "LABOUR_DETERIORATION"
@@ -7415,12 +7402,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": false,
+          "attributable": true,
           "b": {
-            "action": "MONITOR",
+            "action": "INVESTIGATE",
             "as_of": "2020-12-15",
             "company_id": "caterpillar",
-            "confidence": "LOW",
+            "confidence": "MEDIUM",
             "economic_inputs": [
               "panel:BAA10Y@2020-12-14",
               "panel:INDPRO@2020-11-01",
@@ -7433,10 +7420,10 @@
               "panel:PERMIT@2020-10-01"
             ],
             "falsifiers": [
-              "Caterpillar reports order backlog conversion moving against expectation"
+              "order backlog conversion holds while INDPRO continues DOWN"
             ],
             "information_requests": [
-              "current reading of order backlog conversion"
+              "how much of order backlog conversion is already contracted"
             ],
             "metrics": {
               "distinct_channels": 1,
@@ -7446,7 +7433,7 @@
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 1,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -7462,15 +7449,26 @@
                 "risk_id": "caterpillar:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
+              },
+              {
+                "channel": "order backlog conversion",
+                "evidence": [
+                  "panel:INDPRO@2020-11-01"
+                ],
+                "mechanism": "backlog converts to revenue only if the customer's own capex survives",
+                "risk_id": "caterpillar:INDPRO",
+                "severity": "MEDIUM",
+                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
             "top_priority": "order backlog conversion",
             "top_risks": [
-              "caterpillar:structural"
+              "caterpillar:structural",
+              "caterpillar:INDPRO"
             ],
             "unknowns": [
-              "the current economic environment"
+              "what is already contracted"
             ],
             "variant": "B"
           },
@@ -7482,12 +7480,69 @@
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 1,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "caterpillar",
           "fields": [
+            {
+              "after": "INVESTIGATE",
+              "before": "MONITOR",
+              "field": "action",
+              "material": true,
+              "mechanism": "backlog converts to revenue only if the customer's own capex survives",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
+            },
+            {
+              "after": [
+                "caterpillar:structural",
+                "caterpillar:INDPRO"
+              ],
+              "before": [
+                "caterpillar:structural"
+              ],
+              "field": "top_risks",
+              "material": true,
+              "mechanism": "backlog converts to revenue only if the customer's own capex survives",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "the top-three risks were reordered or replaced"
+            },
+            {
+              "after": "MEDIUM",
+              "before": "LOW",
+              "field": "confidence",
+              "material": true,
+              "mechanism": "backlog converts to revenue only if the customer's own capex survives",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "stated confidence moved"
+            },
+            {
+              "after": [
+                "how much of order backlog conversion is already contracted"
+              ],
+              "before": [
+                "current reading of order backlog conversion"
+              ],
+              "field": "information_priority",
+              "material": true,
+              "mechanism": "backlog converts to revenue only if the customer's own capex survives",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "the most valuable missing information changed"
+            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -7499,10 +7554,15 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": false,
-          "material_fields": [],
+          "is_material": true,
+          "material_fields": [
+            "action",
+            "top_risks",
+            "confidence",
+            "information_priority"
+          ],
           "regime": "labour_deterioration",
-          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
+          "verdict": "MATERIAL_AND_ATTRIBUTED"
         },
         {
           "a": {
@@ -8633,12 +8693,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": false,
+          "attributable": true,
           "b": {
-            "action": "MONITOR",
+            "action": "INVESTIGATE",
             "as_of": "2020-12-15",
             "company_id": "unionpacific",
-            "confidence": "LOW",
+            "confidence": "MEDIUM",
             "economic_inputs": [
               "panel:INDPRO@2020-11-01",
               "panel:PERMIT@2020-10-01"
@@ -8649,10 +8709,10 @@
               "panel:PERMIT@2020-10-01"
             ],
             "falsifiers": [
-              "Union Pacific reports carload volume moving against expectation"
+              "carload volume holds while INDPRO continues DOWN"
             ],
             "information_requests": [
-              "current reading of carload volume"
+              "how much of carload volume is already contracted"
             ],
             "metrics": {
               "distinct_channels": 1,
@@ -8662,7 +8722,7 @@
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 1,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -8678,15 +8738,26 @@
                 "risk_id": "unionpacific:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
+              },
+              {
+                "channel": "carload volume",
+                "evidence": [
+                  "panel:INDPRO@2020-11-01"
+                ],
+                "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
+                "risk_id": "unionpacific:INDPRO",
+                "severity": "MEDIUM",
+                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
             "top_priority": "carload volume",
             "top_risks": [
-              "unionpacific:structural"
+              "unionpacific:structural",
+              "unionpacific:INDPRO"
             ],
             "unknowns": [
-              "the current economic environment"
+              "what is already contracted"
             ],
             "variant": "B"
           },
@@ -8698,12 +8769,69 @@
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 1,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "unionpacific",
           "fields": [
+            {
+              "after": "INVESTIGATE",
+              "before": "MONITOR",
+              "field": "action",
+              "material": true,
+              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
+            },
+            {
+              "after": [
+                "unionpacific:structural",
+                "unionpacific:INDPRO"
+              ],
+              "before": [
+                "unionpacific:structural"
+              ],
+              "field": "top_risks",
+              "material": true,
+              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "the top-three risks were reordered or replaced"
+            },
+            {
+              "after": "MEDIUM",
+              "before": "LOW",
+              "field": "confidence",
+              "material": true,
+              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "stated confidence moved"
+            },
+            {
+              "after": [
+                "how much of carload volume is already contracted"
+              ],
+              "before": [
+                "current reading of carload volume"
+              ],
+              "field": "information_priority",
+              "material": true,
+              "mechanism": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
+              "provenance": [
+                "panel:INDPRO@2020-11-01"
+              ],
+              "trigger": "INDPRO moved -0.0550 year-on-year to 104 as of 2020-11-01",
+              "why_material": "the most valuable missing information changed"
+            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -8715,10 +8843,15 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": false,
-          "material_fields": [],
+          "is_material": true,
+          "material_fields": [
+            "action",
+            "top_risks",
+            "confidence",
+            "information_priority"
+          ],
           "regime": "labour_deterioration",
-          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
+          "verdict": "MATERIAL_AND_ATTRIBUTED"
         },
         {
           "a": {
@@ -9111,9 +9244,9 @@
       ]
     },
     "recovery": {
-      "abstained": 3,
+      "abstained": 4,
       "as_of": "2016-01-15",
-      "attributed": 7,
+      "attributed": 6,
       "companies": 10,
       "damage": 0,
       "damages": [],
@@ -9129,7 +9262,7 @@
         "T10Y3M": "DOWN",
         "UNRATE": "DOWN"
       },
-      "material": 7,
+      "material": 6,
       "regimes_held": [
         "DISINFLATION",
         "LOW_VOL_EXPANSION",
@@ -9202,7 +9335,7 @@
           },
           "attributable": true,
           "b": {
-            "action": "PREPARE",
+            "action": "INVESTIGATE",
             "as_of": "2016-01-15",
             "company_id": "caterpillar",
             "confidence": "MEDIUM",
@@ -9218,22 +9351,20 @@
               "panel:PERMIT@2015-11-01"
             ],
             "falsifiers": [
-              "customer financing cost holds while BAA10Y continues UP",
-              "construction end-market holds while PERMIT continues UP"
+              "customer financing cost holds while BAA10Y continues UP"
             ],
             "information_requests": [
-              "how much of customer financing cost is already contracted",
-              "how much of construction end-market is already contracted"
+              "how much of customer financing cost is already contracted"
             ],
             "metrics": {
-              "distinct_channels": 3,
+              "distinct_channels": 2,
               "economic_inputs": 3,
               "evidence_citations": 4,
-              "falsifiers": 2,
-              "information_requests": 2,
+              "falsifiers": 1,
+              "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 3,
+              "risks": 2,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -9259,23 +9390,12 @@
                 "risk_id": "caterpillar:BAA10Y",
                 "severity": "HIGH",
                 "standing": "OBSERVED"
-              },
-              {
-                "channel": "construction end-market",
-                "evidence": [
-                  "panel:PERMIT@2015-11-01"
-                ],
-                "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
-                "risk_id": "caterpillar:PERMIT",
-                "severity": "HIGH",
-                "standing": "OBSERVED"
               }
             ],
-            "scenario": "LIKELY",
-            "top_priority": "construction end-market",
+            "scenario": "POSSIBLE",
+            "top_priority": "customer financing cost",
             "top_risks": [
               "caterpillar:BAA10Y",
-              "caterpillar:PERMIT",
               "caterpillar:structural"
             ],
             "unknowns": [
@@ -9284,47 +9404,46 @@
             "variant": "B"
           },
           "b_metrics": {
-            "distinct_channels": 3,
+            "distinct_channels": 2,
             "economic_inputs": 3,
             "evidence_citations": 4,
-            "falsifiers": 2,
-            "information_requests": 2,
+            "falsifiers": 1,
+            "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 3,
+            "risks": 2,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "caterpillar",
           "fields": [
             {
-              "after": "construction end-market",
+              "after": "customer financing cost",
               "before": "order backlog conversion",
               "field": "top_priority",
               "material": true,
-              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
               "provenance": [
-                "panel:PERMIT@2015-11-01"
+                "panel:BAA10Y@2016-01-14"
               ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
+              "trigger": "BAA10Y moved +0.1500 year-on-year to 3.36 as of 2016-01-14",
               "why_material": "the channel a founder would look at first changed"
             },
             {
-              "after": "PREPARE",
+              "after": "INVESTIGATE",
               "before": "MONITOR",
               "field": "action",
               "material": true,
-              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
               "provenance": [
-                "panel:PERMIT@2015-11-01"
+                "panel:BAA10Y@2016-01-14"
               ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "the action moved from MONITOR to PREPARE"
+              "trigger": "BAA10Y moved +0.1500 year-on-year to 3.36 as of 2016-01-14",
+              "why_material": "the action moved from MONITOR to INVESTIGATE"
             },
             {
               "after": [
                 "caterpillar:BAA10Y",
-                "caterpillar:PERMIT",
                 "caterpillar:structural"
               ],
               "before": [
@@ -9332,35 +9451,23 @@
               ],
               "field": "top_risks",
               "material": true,
-              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
               "provenance": [
-                "panel:PERMIT@2015-11-01"
+                "panel:BAA10Y@2016-01-14"
               ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
+              "trigger": "BAA10Y moved +0.1500 year-on-year to 3.36 as of 2016-01-14",
               "why_material": "the top-three risks were reordered or replaced"
-            },
-            {
-              "after": "LIKELY",
-              "before": "POSSIBLE",
-              "field": "scenario",
-              "material": true,
-              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
-              "provenance": [
-                "panel:PERMIT@2015-11-01"
-              ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "the scenario band moved"
             },
             {
               "after": "MEDIUM",
               "before": "LOW",
               "field": "confidence",
               "material": true,
-              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
               "provenance": [
-                "panel:PERMIT@2015-11-01"
+                "panel:BAA10Y@2016-01-14"
               ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
+              "trigger": "BAA10Y moved +0.1500 year-on-year to 3.36 as of 2016-01-14",
               "why_material": "stated confidence moved"
             },
             {
@@ -9372,11 +9479,11 @@
               ],
               "field": "information_priority",
               "material": true,
-              "mechanism": "residential and non-residential permits lead machine utilisation by two to three quarters",
+              "mechanism": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
               "provenance": [
-                "panel:PERMIT@2015-11-01"
+                "panel:BAA10Y@2016-01-14"
               ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
+              "trigger": "BAA10Y moved +0.1500 year-on-year to 3.36 as of 2016-01-14",
               "why_material": "the most valuable missing information changed"
             },
             {
@@ -9395,7 +9502,6 @@
             "top_priority",
             "action",
             "top_risks",
-            "scenario",
             "confidence",
             "information_priority"
           ],
@@ -9484,10 +9590,12 @@
               "panel:DFF@2016-01-14"
             ],
             "falsifiers": [
+              "net interest margin holds while T10Y3M continues DOWN",
               "credit provisioning holds while BAA10Y continues UP",
               "loan demand holds while DFF continues UP"
             ],
             "information_requests": [
+              "how much of net interest margin is already contracted",
               "how much of credit provisioning is already contracted",
               "how much of loan demand is already contracted"
             ],
@@ -9495,11 +9603,11 @@
               "distinct_channels": 3,
               "economic_inputs": 3,
               "evidence_citations": 4,
-              "falsifiers": 2,
-              "information_requests": 2,
+              "falsifiers": 3,
+              "information_requests": 3,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 3,
+              "risks": 4,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -9515,6 +9623,16 @@
                 "risk_id": "jpmorgan:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
+              },
+              {
+                "channel": "net interest margin",
+                "evidence": [
+                  "panel:T10Y3M@2016-01-14"
+                ],
+                "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+                "risk_id": "jpmorgan:T10Y3M",
+                "severity": "HIGH",
+                "standing": "OBSERVED"
               },
               {
                 "channel": "credit provisioning",
@@ -9538,11 +9656,11 @@
               }
             ],
             "scenario": "LIKELY",
-            "top_priority": "loan demand",
+            "top_priority": "net interest margin",
             "top_risks": [
+              "jpmorgan:T10Y3M",
               "jpmorgan:BAA10Y",
-              "jpmorgan:DFF",
-              "jpmorgan:structural"
+              "jpmorgan:DFF"
             ],
             "unknowns": [
               "what is already contracted"
@@ -9553,56 +9671,44 @@
             "distinct_channels": 3,
             "economic_inputs": 3,
             "evidence_citations": 4,
-            "falsifiers": 2,
-            "information_requests": 2,
+            "falsifiers": 3,
+            "information_requests": 3,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 3,
+            "risks": 4,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "jpmorgan",
           "fields": [
             {
-              "after": "loan demand",
-              "before": "net interest margin",
-              "field": "top_priority",
-              "material": true,
-              "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds",
-              "provenance": [
-                "panel:DFF@2016-01-14"
-              ],
-              "trigger": "DFF moved +0.1600 year-on-year to 0.36 as of 2016-01-14",
-              "why_material": "the channel a founder would look at first changed"
-            },
-            {
               "after": "PREPARE",
               "before": "MONITOR",
               "field": "action",
               "material": true,
-              "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:DFF@2016-01-14"
+                "panel:T10Y3M@2016-01-14"
               ],
-              "trigger": "DFF moved +0.1600 year-on-year to 0.36 as of 2016-01-14",
+              "trigger": "T10Y3M moved -0.1600 year-on-year to 1.85 as of 2016-01-14",
               "why_material": "the action moved from MONITOR to PREPARE"
             },
             {
               "after": [
+                "jpmorgan:T10Y3M",
                 "jpmorgan:BAA10Y",
-                "jpmorgan:DFF",
-                "jpmorgan:structural"
+                "jpmorgan:DFF"
               ],
               "before": [
                 "jpmorgan:structural"
               ],
               "field": "top_risks",
               "material": true,
-              "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:DFF@2016-01-14"
+                "panel:T10Y3M@2016-01-14"
               ],
-              "trigger": "DFF moved +0.1600 year-on-year to 0.36 as of 2016-01-14",
+              "trigger": "T10Y3M moved -0.1600 year-on-year to 1.85 as of 2016-01-14",
               "why_material": "the top-three risks were reordered or replaced"
             },
             {
@@ -9610,11 +9716,11 @@
               "before": "POSSIBLE",
               "field": "scenario",
               "material": true,
-              "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:DFF@2016-01-14"
+                "panel:T10Y3M@2016-01-14"
               ],
-              "trigger": "DFF moved +0.1600 year-on-year to 0.36 as of 2016-01-14",
+              "trigger": "T10Y3M moved -0.1600 year-on-year to 1.85 as of 2016-01-14",
               "why_material": "the scenario band moved"
             },
             {
@@ -9622,27 +9728,27 @@
               "before": "LOW",
               "field": "confidence",
               "material": true,
-              "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:DFF@2016-01-14"
+                "panel:T10Y3M@2016-01-14"
               ],
-              "trigger": "DFF moved +0.1600 year-on-year to 0.36 as of 2016-01-14",
+              "trigger": "T10Y3M moved -0.1600 year-on-year to 1.85 as of 2016-01-14",
               "why_material": "stated confidence moved"
             },
             {
               "after": [
-                "how much of credit provisioning is already contracted"
+                "how much of net interest margin is already contracted"
               ],
               "before": [
                 "current reading of net interest margin"
               ],
               "field": "information_priority",
               "material": true,
-              "mechanism": "a higher policy rate suppresses new origination volume even where credit quality holds",
+              "mechanism": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
               "provenance": [
-                "panel:DFF@2016-01-14"
+                "panel:T10Y3M@2016-01-14"
               ],
-              "trigger": "DFF moved +0.1600 year-on-year to 0.36 as of 2016-01-14",
+              "trigger": "T10Y3M moved -0.1600 year-on-year to 1.85 as of 2016-01-14",
               "why_material": "the most valuable missing information changed"
             },
             {
@@ -9658,7 +9764,6 @@
           ],
           "is_material": true,
           "material_fields": [
-            "top_priority",
             "action",
             "top_risks",
             "scenario",
@@ -10803,12 +10908,12 @@
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
-          "attributable": true,
+          "attributable": false,
           "b": {
-            "action": "INVESTIGATE",
+            "action": "MONITOR",
             "as_of": "2016-01-15",
             "company_id": "unionpacific",
-            "confidence": "MEDIUM",
+            "confidence": "LOW",
             "economic_inputs": [
               "panel:INDPRO@2015-12-01",
               "panel:PERMIT@2015-11-01"
@@ -10819,20 +10924,20 @@
               "panel:PERMIT@2015-11-01"
             ],
             "falsifiers": [
-              "construction materials volume holds while PERMIT continues UP"
+              "Union Pacific reports carload volume moving against expectation"
             ],
             "information_requests": [
-              "how much of construction materials volume is already contracted"
+              "current reading of carload volume"
             ],
             "metrics": {
-              "distinct_channels": 2,
+              "distinct_channels": 1,
               "economic_inputs": 2,
               "evidence_citations": 3,
               "falsifiers": 1,
               "information_requests": 1,
               "mechanism_completeness": 1.0,
               "provenance_coverage": 1.0,
-              "risks": 2,
+              "risks": 1,
               "unknowns_surfaced": 1,
               "unsupported_claims": 0
             },
@@ -10848,112 +10953,32 @@
                 "risk_id": "unionpacific:structural",
                 "severity": "MEDIUM",
                 "standing": "INFERRED"
-              },
-              {
-                "channel": "construction materials volume",
-                "evidence": [
-                  "panel:PERMIT@2015-11-01"
-                ],
-                "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-                "risk_id": "unionpacific:PERMIT",
-                "severity": "HIGH",
-                "standing": "OBSERVED"
               }
             ],
             "scenario": "POSSIBLE",
-            "top_priority": "construction materials volume",
+            "top_priority": "carload volume",
             "top_risks": [
-              "unionpacific:PERMIT",
               "unionpacific:structural"
             ],
             "unknowns": [
-              "what is already contracted"
+              "the current economic environment"
             ],
             "variant": "B"
           },
           "b_metrics": {
-            "distinct_channels": 2,
+            "distinct_channels": 1,
             "economic_inputs": 2,
             "evidence_citations": 3,
             "falsifiers": 1,
             "information_requests": 1,
             "mechanism_completeness": 1.0,
             "provenance_coverage": 1.0,
-            "risks": 2,
+            "risks": 1,
             "unknowns_surfaced": 1,
             "unsupported_claims": 0
           },
           "company_id": "unionpacific",
           "fields": [
-            {
-              "after": "construction materials volume",
-              "before": "carload volume",
-              "field": "top_priority",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2015-11-01"
-              ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "the channel a founder would look at first changed"
-            },
-            {
-              "after": "INVESTIGATE",
-              "before": "MONITOR",
-              "field": "action",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2015-11-01"
-              ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "the action moved from MONITOR to INVESTIGATE"
-            },
-            {
-              "after": [
-                "unionpacific:PERMIT",
-                "unionpacific:structural"
-              ],
-              "before": [
-                "unionpacific:structural"
-              ],
-              "field": "top_risks",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2015-11-01"
-              ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "the top-three risks were reordered or replaced"
-            },
-            {
-              "after": "MEDIUM",
-              "before": "LOW",
-              "field": "confidence",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2015-11-01"
-              ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "stated confidence moved"
-            },
-            {
-              "after": [
-                "how much of construction materials volume is already contracted"
-              ],
-              "before": [
-                "current reading of carload volume"
-              ],
-              "field": "information_priority",
-              "material": true,
-              "mechanism": "aggregates and lumber carloads follow permits with a two-quarter lag",
-              "provenance": [
-                "panel:PERMIT@2015-11-01"
-              ],
-              "trigger": "PERMIT moved +0.1881 year-on-year to 1282 as of 2015-11-01",
-              "why_material": "the most valuable missing information changed"
-            },
             {
               "after": "<B>",
               "before": "<A>",
@@ -10965,16 +10990,10 @@
               "why_material": "wording differs; \u00a78 does not count it"
             }
           ],
-          "is_material": true,
-          "material_fields": [
-            "top_priority",
-            "action",
-            "top_risks",
-            "confidence",
-            "information_priority"
-          ],
+          "is_material": false,
+          "material_fields": [],
           "regime": "recovery",
-          "verdict": "MATERIAL_AND_ATTRIBUTED"
+          "verdict": "NO_MATERIAL_ECONOMIC_DELTA"
         },
         {
           "a": {
@@ -11320,20 +11339,20 @@
   },
   "rubric_hash": "15f463e9e671cb03",
   "summary": {
-    "abstained": 36,
+    "abstained": 35,
     "attributable_delta_rate": 1.0,
-    "attributed": 24,
+    "attributed": 25,
     "comparisons": 60,
     "damage": 0,
     "damage_by_kind": {},
-    "material": 24,
+    "material": 25,
     "material_field_movements": {
-      "action": 24,
-      "confidence": 24,
-      "information_priority": 24,
-      "scenario": 4,
-      "top_priority": 14,
-      "top_risks": 24
+      "action": 25,
+      "confidence": 25,
+      "information_priority": 25,
+      "scenario": 3,
+      "top_priority": 11,
+      "top_risks": 25
     },
     "negative_control": "PASS",
     "unattributed": 0

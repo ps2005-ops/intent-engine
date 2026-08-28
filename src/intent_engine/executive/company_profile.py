@@ -1006,7 +1006,136 @@ _TRANSMISSION = {
         "one",
     ("INDUSTRIAL_DEMAND", "BALANCE_SHEET_OR_NETWORK"):
         "activity drives credit demand and transaction volume",
+    # --- SCALE_RETAIL. A model class the manifest carries and this table did
+    # not, so a scale retailer received no economic reading at all -- measured
+    # at 1 of the 100 manifest companies, and one of the ten in the live
+    # matrix. A class with no mechanism is silent, not unexposed.
+    ("MARKET_RATE", "SCALE_RETAIL"):
+        "rates set the carry on the inventory in the stores and the hurdle on "
+        "the store and distribution capital programme",
+    ("LABOR", "SCALE_RETAIL"):
+        "store and distribution wages are the dominant controllable cost, so "
+        "the labour market sets the operating margin before any pricing "
+        "action",
+    ("COMMODITY", "SCALE_RETAIL"):
+        "fuel and agricultural inputs enter the landed cost of goods and the "
+        "cost of moving them to the store",
+    ("UNEMPLOYMENT", "SCALE_RETAIL"):
+        "weaker employment moves households toward lower-margin staples and "
+        "private label, so traffic can RISE while mix deteriorates",
+    ("INFLATION", "SCALE_RETAIL"):
+        "grocery inflation raises the cost of goods and simultaneously widens "
+        "the everyday-low-price gap against higher-priced grocers",
+    # --- CURVE_SLOPE and CREDIT_SPREAD. Neither is the LEVEL of rates, and
+    # folding them into MARKET_RATE was why a bank could never receive an
+    # economic reading: the level's effect on a balance sheet is genuinely
+    # two-sided and therefore unsigned, while the slope's is not. Measured on
+    # the 60-case parity harness -- JPMorgan was silent in every regime the
+    # research arm spoke in.
+    ("CURVE_SLOPE", "BALANCE_SHEET_OR_NETWORK"):
+        "the spread between what assets yield and what funding costs IS the "
+        "primary revenue driver, and the slope of the curve is that spread "
+        "before any deposit-beta lag",
+    ("CREDIT_SPREAD", "BALANCE_SHEET_OR_NETWORK"):
+        "a wider spread is the market pricing in the charge-offs that drive "
+        "reserve builds, and it reaches the income statement through "
+        "provisioning before it reaches the book",
+    ("CREDIT_SPREAD", "MANUFACTURE_AND_AFTERMARKET"):
+        "equipment is bought on credit, so the customer's financing cost "
+        "gates the order before the end market itself weakens",
+    ("CREDIT_SPREAD", "DESIGN_AND_MANUFACTURE"):
+        "customers' capacity buildouts are financed, so a wider spread "
+        "lengthens the ordering cycle before it cuts it",
+    ("CREDIT_SPREAD", "CONTRACTED_OR_RATE_BASE_ASSETS"):
+        "the capital programme is debt-financed, so the spread sets the cost "
+        "of the next asset on top of the risk-free rate",
+    ("CREDIT_SPREAD", "COMMODITY_PRODUCER"):
+        "sustaining and expansion capital is financed against a volatile "
+        "revenue line, so the spread widens fastest exactly when the price "
+        "falls",
+
 }
+
+#: Which way each channel has to move to hurt each kind of business. Same key
+#: as `_TRANSMISSION`, and every entry is the sign the mechanism there already
+#: states. A pair ABSENT from this table has no established sign, and
+#: `adverse_direction_for` returns "" for it — see that method for why the
+#: absence is deliberate rather than an omission to be filled in later.
+_ADVERSE_DIRECTION = {
+    # --- rates: expensive money hurts, except where the spread is the
+    # product and the mechanism itself says the two legs move at different
+    # speeds. That pair is absent.
+    ("MARKET_RATE", "BRANDED_CONSUMER"): "UP",
+    ("MARKET_RATE", "COMMODITY_PRODUCER"): "UP",
+    ("MARKET_RATE", "CONTRACTED_OR_RATE_BASE_ASSETS"): "UP",
+    ("MARKET_RATE", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("MARKET_RATE", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("MARKET_RATE", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("MARKET_RATE", "SUBSCRIPTION_SOFTWARE"): "UP",
+    ("POLICY_RATE", "BRANDED_CONSUMER"): "UP",
+    ("POLICY_RATE", "CONTRACTED_OR_RATE_BASE_ASSETS"): "UP",
+    ("POLICY_RATE", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("POLICY_RATE", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("POLICY_RATE", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("POLICY_RATE", "SUBSCRIPTION_SOFTWARE"): "UP",
+    # --- inflation: a cost squeeze, except for a brand whose relative price
+    # position improves with it and a rate-base owner whose tariffs escalate.
+    # Both of those pairs are two-sided in the mechanism and are absent.
+    ("INFLATION", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("INFLATION", "REGULATED_PRODUCT_OR_PROVIDER"): "UP",
+    ("INFLATION", "BALANCE_SHEET_OR_NETWORK"): "UP",
+    # --- labour cost: a tighter market costs more.
+    ("LABOR", "BRANDED_CONSUMER"): "UP",
+    ("LABOR", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("LABOR", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "UP",
+    ("LABOR", "SUBSCRIPTION_SOFTWARE"): "UP",
+    # --- unemployment: households stop spending and stop repaying. For a
+    # people-based services firm the mechanism states the OPPOSITE sign --
+    # "a loose labour market lowers hiring cost" -- so rising unemployment is
+    # not the adverse direction there and the pair carries DOWN.
+    ("UNEMPLOYMENT", "BRANDED_CONSUMER"): "UP",
+    ("UNEMPLOYMENT", "BALANCE_SHEET_OR_NETWORK"): "UP",
+    ("UNEMPLOYMENT", "PEOPLE_OR_ROUTE_BASED_SERVICES"): "DOWN",
+    # --- activity: falling activity is the adverse direction everywhere it
+    # is the demand side, including for the producer whose price it sets.
+    ("INDUSTRIAL_DEMAND", "BALANCE_SHEET_OR_NETWORK"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "COMMODITY_PRODUCER"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "CONTRACTED_OR_RATE_BASE_ASSETS"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "DESIGN_AND_MANUFACTURE"): "DOWN",
+    ("INDUSTRIAL_DEMAND", "MANUFACTURE_AND_AFTERMARKET"): "DOWN",
+    # --- commodities: an input cost for everyone who buys them, and the
+    # revenue line for the one who sells them.
+    ("COMMODITY", "BRANDED_CONSUMER"): "UP",
+    ("COMMODITY", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("COMMODITY", "COMMODITY_PRODUCER"): "DOWN",
+    # --- currency: a stronger home currency translates overseas revenue back
+    # at less. The subscription pair is absent because its own mechanism says
+    # "the underlying subscription is unaffected".
+    ("CURRENCY", "BRANDED_CONSUMER"): "UP",
+    ("CURRENCY", "COMMODITY_PRODUCER"): "UP",
+    ("CURRENCY", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("CURRENCY", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("CURRENCY", "REGULATED_PRODUCT_OR_PROVIDER"): "UP",
+    # --- SCALE_RETAIL. Rates, labour and commodities are unambiguous costs.
+    # Unemployment and inflation are ABSENT and that is the whole point: the
+    # mechanisms above state both directions for a scale retailer -- traffic
+    # rises while mix deteriorates, the price gap widens while the cost of
+    # goods rises -- so neither has a net sign and neither may move a
+    # recommendation. This is the pair the parity harness caught being
+    # asserted in four of six regimes.
+    ("MARKET_RATE", "SCALE_RETAIL"): "UP",
+    ("POLICY_RATE", "SCALE_RETAIL"): "UP",
+    ("LABOR", "SCALE_RETAIL"): "UP",
+    ("COMMODITY", "SCALE_RETAIL"): "UP",
+    # --- the curve and the spread, where the level of rates is two-sided.
+    ("CURVE_SLOPE", "BALANCE_SHEET_OR_NETWORK"): "DOWN",
+    ("CREDIT_SPREAD", "BALANCE_SHEET_OR_NETWORK"): "UP",
+    ("CREDIT_SPREAD", "MANUFACTURE_AND_AFTERMARKET"): "UP",
+    ("CREDIT_SPREAD", "DESIGN_AND_MANUFACTURE"): "UP",
+    ("CREDIT_SPREAD", "CONTRACTED_OR_RATE_BASE_ASSETS"): "UP",
+    ("CREDIT_SPREAD", "COMMODITY_PRODUCER"): "UP",
+}
+
 
 
 # --- one normalisation, at the source --------------------------------------
@@ -1094,6 +1223,35 @@ class CompanyIntelligenceProfile:
     public_private: str = UNKNOWN
     multi_segment: bool = False
     contract: str = CONTRACT
+
+    def adverse_direction_for(self, channel: str) -> str:
+        """Which way `channel` has to move to HURT this kind of business.
+
+        "UP", "DOWN", or "" when the sign is not established — and the empty
+        answer is the important one. A single sign per channel would say that
+        rising inflation is bad for everybody, and it is not: it widens an
+        everyday-low-price grocer's advantage over higher-priced rivals while
+        it squeezes a regulated provider whose net price is set by payers.
+        Reading one sign for both is how two companies get the same
+        paragraph, which is the failure this whole profile exists to prevent.
+
+        WHERE THE SIGNS COME FROM. Each one is the direction the mechanism
+        beside it already states. `_TRANSMISSION[(COMMODITY,
+        COMMODITY_PRODUCER)]` says "the commodity price IS the realised price
+        of output", so a rising commodity price helps and the adverse
+        direction is DOWN.
+
+        AMBIGUOUS IS A REAL ANSWER AND IT FAILS CLOSED. Several mechanisms are
+        explicitly two-sided — "many contracts and tariffs escalate with
+        inflation, so it reaches revenue as well as cost" states no net sign,
+        and neither does "a pass-through in some contracts and a margin
+        exposure in others". Those pairs are absent from the table, so the
+        condition is READ and reported and can never be the thing that moves a
+        recommendation. Guessing a sign for them would be asserting a net
+        effect the evidence does not carry.
+        """
+        return _ADVERSE_DIRECTION.get((str(channel).upper(),
+                                       self.business_model_class), "")
 
     def transmission_for(self, channel: str) -> str:
         """The mechanism by which `channel` reaches THIS kind of business.

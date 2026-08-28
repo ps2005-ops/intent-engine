@@ -7,8 +7,8 @@
   "defect_coverage_proofs": 16,
   "detail": [
     {
-      "bytes_after": 13501,
-      "bytes_before": 13336,
+      "bytes_after": 13543,
+      "bytes_before": 13378,
       "bytes_delta": 165,
       "description": "a stub Baseline A is credited as decision value",
       "detail": "AnalysisDefect: Baseline A for walmart carries no risks. `top_risks` and `risk_severity` are two of the seven material fields and both are computed from them, so an A with none concedes them before the comparison starts.",
@@ -37,8 +37,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 13362,
-      "bytes_before": 13336,
+      "bytes_after": 13404,
+      "bytes_before": 13378,
       "bytes_delta": 26,
       "description": "a material field moves with no world-model fact behind it",
       "detail": "AssertionError: a material decision delta carries no trigger, mechanism or provenance; \u00a713 refuses to credit it and the run would have reported it as value",
@@ -52,9 +52,9 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 13311,
-      "bytes_before": 13336,
-      "bytes_delta": -25,
+      "bytes_after": 13288,
+      "bytes_before": 13378,
+      "bytes_delta": -90,
       "description": "B adds macro risks without changing the decision",
       "detail": "AssertionError: every driver now becomes a risk regardless of direction or magnitude; B would inject macro commentary into every company analysis and DecisionDamage IRRELEVANT_MACRO is what catches it",
       "guard_under_test": "detect_damage",
@@ -67,8 +67,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 21940,
-      "bytes_before": 21936,
+      "bytes_after": 27242,
+      "bytes_before": 27238,
       "bytes_delta": 4,
       "description": "a bleed is emitted as a proven cause",
       "detail": "WorldModelDefect: a causal bleed carries status 'PROVEN_CAUSE'. A bleed is a measured non-response with a CANDIDATE explanation. Rates fell, demand did not respond, therefore fear -- is a story, and the whole point of the object is that it stays one until something tests it.",
@@ -82,8 +82,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 21933,
-      "bytes_before": 21936,
+      "bytes_after": 27235,
+      "bytes_before": 27238,
       "bytes_delta": -3,
       "description": "a relation is judged before its lag has elapsed",
       "detail": "WorldModelDefect: r was scored CONTRADICTED with 10 of 180 lag days elapsed. A mechanism that has not had time to fire has not failed to fire.",
@@ -127,8 +127,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 25110,
-      "bytes_before": 25015,
+      "bytes_after": 26359,
+      "bytes_before": 26264,
       "bytes_delta": 95,
       "description": "a frozen human-state series becomes a company driver",
       "detail": "AssertionError: ['UMCSENT'] appear as company drivers while CollectiveHumanState is FROZEN_CANDIDATE with zero promoted constructs",
@@ -157,8 +157,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 21915,
-      "bytes_before": 21936,
+      "bytes_after": 27217,
+      "bytes_before": 27238,
       "bytes_delta": -21,
       "description": "the lineage walk stops finding ancestors",
       "detail": "AssertionError: a corroborator two hops up the lineage was not found",
@@ -172,8 +172,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 24995,
-      "bytes_before": 25015,
+      "bytes_after": 26244,
+      "bytes_before": 26264,
       "bytes_delta": -20,
       "description": "the no-change branch of the stagnation detector goes",
       "detail": "AssertionError: no company analysis changed and the detector reported STABLE; a cycle where nothing moves would be recorded as healthy learning",
@@ -187,8 +187,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 24978,
-      "bytes_before": 25015,
+      "bytes_after": 26227,
+      "bytes_before": 26264,
       "bytes_delta": -37,
       "description": "the identical-state branch of the detector goes",
       "detail": "AssertionError: a state compared with itself produced no alert; the exact call-site bug the detector caught last run would now pass silently",
@@ -202,8 +202,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 13365,
-      "bytes_before": 13336,
+      "bytes_after": 13407,
+      "bytes_before": 13378,
       "bytes_delta": 29,
       "description": "Baseline A is emptied of its structural knowledge",
       "detail": "AnalysisDefect: Baseline A for walmart carries no risks. `top_risks` and `risk_severity` are two of the seven material fields and both are computed from them, so an A with none concedes them before the comparison starts.",

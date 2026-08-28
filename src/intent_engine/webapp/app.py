@@ -798,6 +798,11 @@ class WebApp:
         self._request.readiness = {}
         self._request.spans = []
         self._request.reads = {}
+        # THE ECONOMIC CONTEXT MEMO, CLEARED FOR THE SAME REASON THE OTHERS
+        # ARE. Worker threads are reused; a memo left behind is the previous
+        # visitor's company, and this one carries their run's economic
+        # exposures and decision delta.
+        self._request.econ = {}
         if (self.config.env == "production"
                 and environ.get("HTTP_HOST", "").split(":")[0]
                 not in self.config.trusted_hosts):
@@ -3756,7 +3761,8 @@ class WebApp:
                                  if self._listing_for(run_id).ticker else None,
                                  modeled_market=self._modeled_expectation(
                                      run_id, _name),
-                                 read=self._strategic_read(run_id, _name))
+                                 read=self._strategic_read(run_id, _name),
+                                 econ=self._founder_economic_context(run_id))
         from intent_engine.founder_brief import challenge_block as _cb
         strat = (fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + _cb.CSS
                  + fd.render_dossier(
@@ -4443,20 +4449,19 @@ class WebApp:
         # Fails soft like every other context family. A deployment where no
         # market engine has ever run reads "unavailable" with a reason, and
         # the analysis proceeds on the company's own evidence.
-        economy, exposures = None, ()
-        try:
-            from intent_engine.external_intel import econ_context as ec
-            economy = ec.load(self._runtime_root, as_of=today)
-            exposures = self._econ_exposures(macro or (), observations)
-            # Exposures read from this company's own FILINGS, joined to the
-            # ones its macro factors established. The filing path is the one
-            # that finds anything: measured across six companies, the macro
-            # factors contributed a handful and the filings contributed 39.
-            exposures = tuple(dict.fromkeys(
-                tuple(exposures) + self._filed_exposures(run_id, today)))
-        except Exception:  # noqa: BLE001 - context must never break a run
-            _LOG.warning("economic context unavailable for %s", run_id)
-
+        # THIS COMPANY'S OWN EVIDENCE CROSSES FIRST, AND THE ORDER IS THE
+        # WHOLE POINT.
+        #
+        # `_filed_exposures` READS what this writes, from the same store,
+        # a few lines below. Running the read first meant the analysis
+        # pass always found zero exposures -- and that pass is the one
+        # that CACHES the context, so every page render of a fresh run
+        # got the empty answer and the economic section reported
+        # INSUFFICIENT_EVIDENCE for a company whose filings had just
+        # established its exposures. It corrected itself only after a
+        # restart dropped the cache, which is the shape of a defect that
+        # cannot be reproduced by looking at it twice.
+        #
         # THE OTHER DIRECTION, and it runs even when the state is absent.
         # This company's public statements about hiring, pricing, capacity,
         # inventories, demand, financing and supply become evidence nodes in
@@ -4469,6 +4474,31 @@ class WebApp:
                 documents=documents, today=today)
         except Exception:  # noqa: BLE001 - see above
             _LOG.warning("econ evidence not published for %s", run_id)
+
+        economy, exposures = None, ()
+        try:
+            from intent_engine.external_intel import econ_context as ec
+            # THE RUN'S OWN EVIDENCE CUTOFF, NOT TODAY'S DATE.
+            #
+            # §26.16. The company evidence was gathered at `run_meta.as_of`
+            # and the baseline analysis rests on it. Reading the economy at a
+            # later date makes the treatment "the world model PLUS more recent
+            # information", and the difference between the two arms stops
+            # being attributable to the world model at all. `store.load`'s
+            # cutoff is a write-order cutoff, so this asks the store what it
+            # had recorded by the run's date -- which is the question.
+            _run_as_of = str((self.ci.run_meta(run_id) or {}).get("as_of")
+                             or "") or today
+            economy = ec.load(self._runtime_root, as_of=_run_as_of)
+            exposures = self._econ_exposures(macro or (), observations)
+            # Exposures read from this company's own FILINGS, joined to the
+            # ones its macro factors established. The filing path is the one
+            # that finds anything: measured across six companies, the macro
+            # factors contributed a handful and the filings contributed 39.
+            exposures = tuple(dict.fromkeys(
+                tuple(exposures) + self._filed_exposures(run_id, today)))
+        except Exception:  # noqa: BLE001 - context must never break a run
+            _LOG.warning("economic context unavailable for %s", run_id)
 
         context = ep.build_context(market=market, macro=macro or (),
                                    competitors=competitors or (),
@@ -4702,6 +4732,165 @@ class WebApp:
             return {"state": "PRODUCER_FAILED",
                     "detail": f"{type(exc).__name__}: {str(exc)[:160]}"}
 
+    def _founder_economic_context(self, run_id: str):
+        """§4/§6/§21: ONE economic decision context per run, for every surface.
+
+        Memoised on the per-request thread-local for the same reason
+        `_strategic_read` is: the brief, the full analysis, the Q&A and the
+        API all render it, and four surfaces each building their own is
+        exactly how brief and full came to say opposite things about the same
+        company. §21 is a property of there being one object, not of four
+        renderers agreeing.
+
+        Never raises. §18 -- a missing or unreadable economic state leaves the
+        founder analysis untouched and the section states what is missing.
+        """
+        memo = getattr(self._request, "econ", None)
+        if memo is None:
+            memo = self._request.econ = {}
+        if run_id in memo:
+            return memo[run_id]
+        memo[run_id] = ctx = self._compose_founder_economic_context(run_id)
+        return ctx
+
+    def _compose_founder_economic_context(self, run_id: str):
+        from intent_engine.econ import founder_contract as FC
+        from intent_engine.external_intel import econ_decision as ED
+        try:
+            meta = self.ci.run_meta(run_id) or {}
+            identity = self.ci.entity_identity(run_id) or {}
+            name = (identity.get("canonical_name") or identity.get("name")
+                    or str(meta.get("company_name") or ""))
+            # THE RUN'S OWN CUTOFF, NOT TODAY'S DATE. §26.16: a product that
+            # reads the economy at a different date from the one its evidence
+            # was gathered at is comparing two vintages and calling the
+            # difference an economic effect. `run_meta.as_of` is the date the
+            # company evidence was gathered at, so it is the date the economic
+            # state must be read at too.
+            as_of = str(meta.get("as_of") or "") or self._as_of()
+            external = self._external_context(run_id)
+            economy = getattr(external, "economy", None)
+            exposures = tuple(getattr(external, "economy_exposures", ()) or ())
+            from intent_engine.external_intel import (
+                strategic_contract as _sc,
+            )
+            company_id = _sc.company_key(name) or run_id
+            if economy is None or not getattr(economy, "available", False):
+                return FC.blocked(
+                    company_id,
+                    reason=(getattr(economy, "reason", "")
+                            or "no shared economic state is available to this "
+                               "deployment"),
+                    as_of=as_of, status=FC.BLOCKED_DATA)
+            ci_in = self.classification_inputs(run_id, name)
+            from intent_engine.executive import company_profile as CPF
+            profile = CPF.profile_for(
+                company_id, name=name,
+                domain=str(meta.get("domain") or ""),
+                registrant=ci_in.get("registrant"),
+                evidence_text=ci_in.get("evidence_text", ""))
+            # THE RUN'S OWN DECISION. `StrategicRead` carries a `Statement`
+            # for the level-5 answer, not a `FounderDecision`, and the object
+            # the comparator projects is the decision -- so it is read from
+            # the report, which is where every other surface reads it.
+            decision = self._run_decision(run_id)
+            return ED.build(
+                company_id=company_id, company_name=name, as_of=as_of,
+                economy=economy, exposures=exposures, profile=profile,
+                decision=decision, risks=self._decision_risks(run_id),
+                runtime_root=self._runtime_root,
+                relations=self._econ_relations(run_id))
+        except Exception as exc:                            # noqa: BLE001
+            # A FAULT IS REPORTED AS A FAULT. Returning an abstention here
+            # would tell a founder the economy does not bear on their
+            # decision, which is a claim, when what happened is that we could
+            # not work it out.
+            _LOG.warning("economic context failed for %s: %s", run_id, exc)
+            from intent_engine.external_intel import (
+                strategic_contract as _sc,
+            )
+            return FC.blocked(
+                _sc.company_key(str((self.ci.run_meta(run_id)
+                                     or {}).get("company_name") or ""))
+                or run_id,
+                reason=(f"the economic reading could not be composed for this "
+                        f"analysis ({type(exc).__name__}); it is reported as "
+                        f"unavailable rather than omitted"),
+                status=FC.BLOCKED_EXTERNAL)
+
+    def _run_decision(self, run_id):
+        """The run's own FounderDecision, or None."""
+        from intent_engine.strategic_intelligence.decision import decision_of
+        try:
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+            return decision_of(report) if report else None
+        except Exception:                                   # noqa: BLE001
+            return None
+
+    def _decision_risks(self, run_id) -> list:
+        """This run's own risks, in the structured comparison vocabulary.
+
+        Baseline A's risks come from the company's OWN evidence -- the
+        strategic report's vulnerabilities -- and each carries the observation
+        that established it. §3: an A with no risks concedes two of the seven
+        material fields before the comparison starts, so a run with no
+        vulnerability produces no baseline and the delta is not claimed.
+        """
+        try:
+            result = self._result(run_id) or {}
+            report = result.get("strategic_report") or {}
+        except Exception:                                   # noqa: BLE001
+            return []
+        out = []
+        for i, row in enumerate(report.get("vulnerabilities") or ()):
+            d = row.as_dict() if hasattr(row, "as_dict") else row
+            if not isinstance(d, dict):
+                continue
+            layer = str(d.get("exposed_layer") or "")
+            mechanism = str(d.get("mechanism") or "")
+            if not layer.strip() or not mechanism.strip():
+                continue
+            out.append({
+                "risk_id": f"company:{i}",
+                # THE REPORT'S OWN CONFIDENCE, MAPPED. Stamping every
+                # company risk MEDIUM would make `risk_severity` -- one of the
+                # seven material fields -- a constant on the A side, and a
+                # constant baseline field is a field B wins for free.
+                "severity": {"HIGH": "HIGH", "MEDIUM": "MEDIUM",
+                             "LOW": "LOW"}.get(
+                                 str(d.get("confidence", "")).upper(), "LOW"),
+                "channel": layer,
+                "mechanism": mechanism,
+                "standing": "INFERRED",
+                "evidence": tuple(str(e) for e in
+                                  (d.get("evidence") or ()))[:3]})
+        return out[:4]
+
+    def _econ_relations(self, run_id) -> list:
+        """Economic relations held about this economy, with their standing.
+
+        Read from the shared state's beliefs. A belief that has not been
+        supported out of sample arrives CANDIDATE and the contract keeps it in
+        a separate list, so no surface can render it as a finding -- §26.4.
+        """
+        try:
+            external = self._external_context(run_id)
+            economy = getattr(external, "economy", None)
+            rows = []
+            for b in (getattr(economy, "beliefs", ()) or ()):
+                if not isinstance(b, dict):
+                    continue
+                rows.append({
+                    "statement": str(b.get("proposition", "")),
+                    "state": str(b.get("status", "")),
+                    "mechanism": str(b.get("mechanism", "")),
+                    "falsifier": str(b.get("falsifier", "")),
+                    "evidence": (str(b.get("belief_id", "")),)})
+            return rows[:6]
+        except Exception:                                   # noqa: BLE001
+            return []
+
     def _market_snapshot(self, run_id: str):
         """The founder-facing market context, in the shape the layers read.
 
@@ -4852,7 +5041,8 @@ class WebApp:
                                 if self._listing_for(run_id).ticker else None,
                                 modeled_market=self._modeled_expectation(
                                     run_id, name),
-                                read=self._strategic_read(run_id, name))
+                                read=self._strategic_read(run_id, name),
+                                econ=self._founder_economic_context(run_id))
         body = fr.BRIEF_CSS + fn.NARRATIVE_CSS + _charts.CHART_CSS + \
             fd.render_dossier(
                 book, depth=fd.BRIEF, run_id=run_id,
@@ -6966,7 +7156,13 @@ class WebApp:
                                     trust=_trust,
                                     # D31: the canonical read, so Q&A cannot
                                     # deny a falsifier step 1 is showing.
-                                    read=self._strategic_read(run_id))
+                                    read=self._strategic_read(run_id),
+                                    # §22: ONE economic object across brief,
+                                    # full analysis and Q&A. Three surfaces
+                                    # answering an economic question from
+                                    # three derivations is three products.
+                                    econ=self._founder_economic_context(
+                                        run_id))
         return self._founder_answer_page(session, run_id, founder_answer)
         flat_claims = self._run_claims(run_id)
         # The previous turn's subject, so "Why?" and "Explain that" resolve
