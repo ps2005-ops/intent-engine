@@ -494,6 +494,9 @@ def _language_note(inputs: dict) -> str:
         f"/{r.get('chars')}c" for r in rows[:6])
 
 
+_CONSTANT_SHAPED = re.compile(r"^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+$")
+
+
 class WebApp:
     """The WSGI callable. All state-changing routes require login + CSRF."""
 
@@ -6412,6 +6415,70 @@ class WebApp:
                        ("Why this reading exists", f"{base}/evidence")])
         return self._html(self._page(company, body, None, ""))
 
+    #: What a leaked constant looks like: SHOUTING words joined by
+    #: underscores. Single all-caps words are NOT constants by shape -- USA,
+    #: 10-K and META all are that -- so the ones that are states are mapped
+    #: by name below instead.
+    #: Internal state names, in the reader's words.
+    #:
+    #: MEASURED on Meta's live `/evidence` at b0ec8cb: "Search coverage:
+    #: DISCOVERY_PARTIAL · reading: HAVE_INDEPENDENT" and "Relevance:
+    #: DIRECTLY_RELEVANT · Counts as corroboration: yes". Those are internal
+    #: enum constants printed as customer copy, on the one page whose whole
+    #: job is to make a hostile reader trust the evidence.
+    #:
+    #: Mapped explicitly rather than transformed. A generic
+    #: `.replace("_", " ").lower()` turns DISCOVERY_PARTIAL into "discovery
+    #: partial", which is not English and still reads as a leaked constant;
+    #: and it would quietly invent wording for states nobody has looked at.
+    #: The fallback exists so an UNMAPPED state degrades to something
+    #: readable instead of shouting, but the guard below is what stops one
+    #: going unnoticed.
+    _PLAIN_STATE = {
+        "DISCOVERY_NOT_RUN": "no search was run",
+        "DISCOVERY_PARTIAL": "partial — more sources remain unread",
+        "DISCOVERY_ADEQUATE": "adequate for this reading",
+        "DISCOVERY_EXHAUSTED": "exhausted — everything findable was read",
+        "DISCOVERY_BLOCKED": "blocked — sources refused automated access",
+        "HAVE_INDEPENDENT": "independent corroboration found",
+        # THE DISTINCTION THIS PRODUCT EXISTS TO KEEP. A zero is either a
+        # fact about the company or a limit of our search, and these two
+        # states are how they are told apart. Mapped by hand rather than
+        # left to the fallback: "failed to find" and "found none" happen to
+        # be readable English, but a distinction this load-bearing must not
+        # depend on a generic transform producing acceptable words.
+        "FAILED_TO_FIND": "none retrieved — a limit of our search, "
+                          "not a finding about the company",
+        "FOUND_NONE": "searched thoroughly and none exists",
+        "PARTIALLY_INDEPENDENT": "partly corroborated by independent sources",
+        "NO_INDEPENDENT": "no independent corroboration yet",
+        "DIRECTLY_RELEVANT": "directly about this company",
+        "DECISION_RELEVANT": "bears on the decision",
+        "CLAIM_RELEVANT": "supports a specific claim",
+        "CONTEXTUALLY_RELEVANT": "background context",
+        "WEAKLY_RELEVANT": "weakly related",
+        "IRRELEVANT": "not relevant",
+        "CURRENT": "current",
+        "STALE": "out of date",
+    }
+
+    @classmethod
+    def _plain_state(cls, value) -> str:
+        """A state name a reader can act on, never the constant itself."""
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
+        if raw in cls._PLAIN_STATE:
+            return cls._PLAIN_STATE[raw]
+        # ONLY UNDERSCORE-JOINED CONSTANTS. A first version also lowered any
+        # all-caps word over three characters, and its own control caught it
+        # rewriting "10-K" to "10-k" -- this runs over every record on the
+        # page, so a form type, a country or a ticker would have been
+        # quietly corrupted to hide a constant nobody had leaked.
+        if _CONSTANT_SHAPED.match(raw):
+            return raw.replace("_", " ").lower()
+        return raw
+
     @staticmethod
     def _discovery_detail(discovery: dict) -> str:
         """How hard we looked, in the buyer's words rather than ours.
@@ -6522,8 +6589,8 @@ class WebApp:
             + (f'<p>{_e(reading["statement"])}</p>' if reading["statement"]
                else "")
             + f'<p class="none">Search coverage: '
-              f'{_e(reading["coverage"])} · reading: {_e(reading["reading"])}'
-              f'</p>'
+              f'{_e(self._plain_state(reading["coverage"]))} · reading: '
+              f'{_e(self._plain_state(reading["reading"]))}</p>'
             + self._discovery_detail(discovery)
             + '</section>')
 
@@ -6535,6 +6602,8 @@ class WebApp:
                                ("Retrieved", "retrieved_at"),
                                ("Freshness", "freshness")):
                 value = str(rec.get(key) or "")
+                if key == "freshness":          # CURRENT / STALE are internal
+                    value = self._plain_state(value)
                 if value:
                     bits.append(f"<dt>{label}</dt><dd>{_e(value)}</dd>")
             url = str(rec.get("url") or "")
@@ -6552,7 +6621,8 @@ class WebApp:
                 + f'<dl>{"".join(bits)}</dl>'
                 + f'<p class="none">Independent voice: '
                   f'{"yes" if rec.get("independent_voice") else "no"} · '
-                  f'Relevance: {_e(rec.get("relevance") or "")} · '
+                  f'Relevance: '
+                  f'{_e(self._plain_state(rec.get("relevance")))} · '
                   f'Counts as corroboration: '
                   f'{"yes" if rec.get("independence_bearing") else "no"}</p>'
                 + (f'<p class="none">{_e(rec.get("relevance_reason") or "")}'

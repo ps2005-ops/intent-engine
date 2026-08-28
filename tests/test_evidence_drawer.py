@@ -129,9 +129,15 @@ def test_the_zero_is_reported_as_a_limit_of_our_search(app):
     a zero must read as OUR limit, never as a finding about the company."""
     _store(app, [OWN, SET_ASIDE])
     _, body = Client(app).get("/demo-dossiers/cloudflare/evidence")
-    assert REL.FAILED_TO_FIND in body
+    # THE STATE, IN THE READER'S WORDS. This asserted the raw constant
+    # `FAILED_TO_FIND` appeared in the page -- which was true, and was the
+    # defect: internal enum names were being printed as customer copy on the
+    # one page whose job is to make a hostile reader trust the evidence.
+    # The GUARANTEE is unchanged and is what the next two lines check.
+    assert REL.FAILED_TO_FIND not in body, "the raw constant reached the page"
+    assert "a limit of our search, not a finding about the company" in body
     assert "limit of what we retrieved" in body
-    assert "found none" not in body.lower()
+    assert "searched thoroughly and none exists" not in body
 
 
 def test_a_supporting_source_moves_the_headline(app):

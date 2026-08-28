@@ -112,12 +112,35 @@ def test_a_same_size_rewrite_is_parsed_again_in_full(log):
     assert [e.n for e in store.read_all()] == [4, 5, 6]
 
 
-def test_corruption_in_the_tail_still_raises(log):
+def test_corruption_in_the_tail_is_seen_by_the_incremental_read(log):
+    """The cache must never be why damage goes unnoticed.
+
+    This guarded the incremental path: rows already parsed are not re-read,
+    so the newly-appended bytes are the only place corruption can hide. That
+    guarantee is unchanged. What changed is the ANSWER -- a torn tail is a
+    write that never completed, and it is now truncated back to the last
+    complete record instead of making the log permanently unreadable. The
+    thing being asserted is still that the tail was looked at.
+    """
     _write(log, range(4))
     store = _Store(log)
-    store.read_all()
+    store.read_all()                                # warm the cache
     with open(log, "a", encoding="utf-8") as fh:
         fh.write("{not json\n")
+
+    assert [e.n for e in store.read_all()] == [0, 1, 2, 3]
+    assert "{not json" not in log.read_text()       # seen, and repaired
+
+
+def test_interior_corruption_still_raises_through_the_cache(log):
+    """The control: damage with readable rows after it is NOT a torn tail,
+    and the incremental path must refuse it exactly as a cold read does."""
+    _write(log, range(4))
+    store = _Store(log)
+    store.read_all()                                # warm the cache
+    with open(log, "a", encoding="utf-8") as fh:
+        fh.write("{not json\n")
+    _write(log, [9], mode="a")                      # a good row AFTER the bad
     with pytest.raises(CorruptLogError):
         store.read_all()
 

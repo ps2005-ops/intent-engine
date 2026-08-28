@@ -210,3 +210,33 @@ def test_the_batch_records_the_boot_it_ran_against():
     source = pathlib.Path(B.__file__).read_text()
     assert "boot_before = boot_id()" in source
     assert "boot_id=boot_before" in source
+
+
+# --- 5. the harness must send what the real form sends ---------------------
+
+def test_the_journey_posts_the_domain_the_customers_pick_carries():
+    """A harness that sends less than the entry page does is not automating
+    the customer flow, it is bypassing it.
+
+    MEASURED across 132 stored captures: this journey posted `suggest_cik`
+    and `suggest_ticker` and never `suggest_domain`, so every run opened on
+    the domainless-filer path and was analysed from EDGAR alone. Every
+    single-family run in the corpus (`families=investor`) ended in
+    TRUE_EVIDENCE_SCARCITY or RETRIEVAL_TEMPORARILY_UNAVAILABLE -- 21 of 21,
+    not one full analysis -- and no capture ever reached a company-published
+    page. `capture.py` had already been repaired for exactly this; the batch
+    drives THIS module, so the repair had no caller.
+    """
+    source = pathlib.Path(J.__file__).read_text()
+    assert '"suggest_domain"' in source, \
+        "the journey never posts suggest_domain"
+    assert "_suggested_domain(name)" in source, \
+        "the domain must come from the page's own autocomplete, not a table"
+
+
+def test_the_journey_asks_the_products_own_autocomplete_for_the_domain():
+    """One implementation, not a second copy that can drift from it."""
+    import inspect
+    src = inspect.getsource(J._suggested_domain)
+    assert "from intent_engine.pre100.capture import suggested_domain" in src
+    assert J._suggested_domain("a name no registry carries at all") == ""

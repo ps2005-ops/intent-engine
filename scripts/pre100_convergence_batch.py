@@ -162,13 +162,29 @@ def _slug(name: str) -> str:
 
 
 def load_universe(only=None, limit=0):
+    """The frozen universe, filtered.
+
+    AN EXPLICIT SELECTION OVERRIDES `resolvable`. That flag was frozen by
+    asking the SEC registrant table, so it means "has a CIK" -- and the only
+    row it excludes is Stripe, Inc., a PRIVATE company with no CIK and no
+    ticker. The product resolves Stripe perfectly well: its own
+    `/api/companies` returns `stripe.com`, which is the path a customer takes
+    for any private company. So the flag is right about the regulator and
+    wrong about the product, and a sweep that silently ran 49 of 50 reported
+    a complete universe while never touching the one private control §22 asks
+    for by name.
+
+    The flag still filters the DEFAULT sweep, because a company nobody named
+    and that nothing can resolve is not worth a slot. Naming it is an answer.
+    """
     data = json.loads(UNIVERSE.read_text("utf-8"))
-    rows = [c for c in data["companies"] if c.get("resolvable", True)]
+    everything = data["companies"]
     if only:
         wanted = {o.strip().lower() for o in only if o.strip()}
-        rows = [c for c in rows
+        return [c for c in everything
                 if c["entry_name"].lower() in wanted
-                or str(c.get("ticker", "")).lower() in wanted]
+                or str(c.get("ticker", "")).lower() in wanted][:limit or None]
+    rows = [c for c in everything if c.get("resolvable", True)]
     return rows[:limit] if limit else rows
 
 

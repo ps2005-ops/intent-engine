@@ -166,6 +166,21 @@ def section(text: str, start: str, stop: tuple = ()) -> str:
     return text[i:j].strip()
 
 
+def _suggested_domain(name: str) -> str:
+    """The domain the entry page's own autocomplete offers for this name.
+
+    Delegates to the one implementation, in `intent_engine.pre100.capture`,
+    rather than carrying a second copy that can drift from it. Never raises:
+    a harness that dies because an autocomplete call timed out would cost a
+    company its analysis over a field that is optional.
+    """
+    try:
+        from intent_engine.pre100.capture import suggested_domain
+        return suggested_domain(name, base=BASE)
+    except Exception:                                       # noqa: BLE001
+        return ""
+
+
 def run_company(name: str, cik: str = "", ticker: str = "",
                 outdir: str = ".") -> dict:
     j = Journey()
@@ -194,6 +209,31 @@ def run_company(name: str, cik: str = "", ticker: str = "",
         form["suggest_cik"] = cik
     if ticker:
         form["suggest_ticker"] = ticker
+    # THE DOMAIN THE CUSTOMER'S OWN PICK CARRIES, AND THIS HARNESS WAS NOT
+    # SENDING IT.
+    #
+    # `/api/companies` returns a domain for most rows and the entry page
+    # posts it as `suggest_domain` when the customer chooses one. Posting the
+    # CIK and the ticker WITHOUT it opens every run on the domainless-filer
+    # path, so the product analyses the company from EDGAR alone -- which is
+    # not what a customer gets. That is the harness under-serving the
+    # product, not automating it.
+    #
+    # MEASURED across 132 stored captures: every run whose evidence came from
+    # one family (`families=investor`) ended in TRUE_EVIDENCE_SCARCITY or
+    # RETRIEVAL_TEMPORARILY_UNAVAILABLE -- 21 of 21, not one full analysis --
+    # and no capture in the whole corpus ever reached a company-published
+    # page. Scoring 50 companies through this form would have measured the
+    # harness and reported it as the product.
+    #
+    # `capture.py` was repaired for exactly this and the batch drives THIS
+    # module, so the fix had no caller. Asking the page's own autocomplete is
+    # what the customer's keystrokes do; a static table would drift from the
+    # registry the product actually serves.
+    domain = _suggested_domain(name)
+    if domain:
+        form["suggest_domain"] = domain
+    out["entry_domain"] = domain
     t0 = time.time()
     status, url, page = j.post("/analyze", form)
     if "/runs/" not in url:
