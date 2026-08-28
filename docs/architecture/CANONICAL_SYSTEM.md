@@ -126,3 +126,68 @@ that predicts nothing.
 and `CALIBRATION_STATUS` is `PRE_CALIBRATION` at n=0 real forward
 resolutions.** The binding constraint is data acquisition. Everything else is
 built and waiting on it.
+
+
+---
+
+## The economic seam, end to end
+
+*Added at V3 closure. This is the whole path from a published series to a
+sentence a chief executive reads.*
+
+```
+reports/panel/historical_panel.jsonl        public, revision-aware
+    -> scripts/publish_econ_state.py        the producer, year-on-year priors
+    -> data/econ/state_snapshot.jsonl       the shared state, on disk
+    -> econ.state.EconomicState             validated against an allowlist
+    -> external_intel.econ_context          readings, re-validated on the way in
+    -> external_intel.econ_decision         state x exposure x mechanism
+    -> econ.founder_contract                FounderEconomicContext
+    -> founder_brief.dossier                the ECONOMIC IMPACT passage
+       founder_brief.qa                      the CEO answers
+       webapp.app                            one memoised object per request
+```
+
+### The import wall
+
+`econ` imports neither product. `tests/test_econ_core_is_neutral.py` parses
+the source and refuses an import of `market`, `external_intel`,
+`founder_brief`, `webapp` or any other product package. The founder side
+consumes the neutral contract; the neutral core never learns a founder
+exists.
+
+### The four rules the seam rests on
+
+**No evidenced exposure, no reading.** An exposure comes from the company's
+own filings, and a condition it has no evidenced exposure to is named as
+unmeasured rather than dropped — "this company is exposed to real yields and
+nothing here measures them" is an information priority.
+
+**No mechanism, no change.** The mechanism comes from
+`company_profile._TRANSMISSION`, keyed on (channel, business model). A
+condition with no mechanism into this business is reported and can never move
+a decision.
+
+**The sign is a company fact.** `_ADVERSE_DIRECTION` uses the same key as the
+mechanism, so the two cannot disagree. A pair whose mechanism states BOTH
+directions carries no sign, and that absence is deliberate: rising inflation
+widens a scale retailer's everyday-low-price advantage and squeezes a
+regulated provider whose net price is set by payers.
+
+**A stale state cannot speak.** The context recomputes its own freshness from
+the two dates it carries and refuses a producer whose label disagrees.
+
+### One object, three surfaces
+
+`FounderEconomicContext` is built once per request and memoised on the
+per-request thread-local, cleared at the top of `_route` beside the other
+memos — a memo that survives a request is the previous visitor's company.
+"Brief and full may not contradict" is therefore a property of there being
+one object, not of three renderers agreeing.
+
+### Where the classification comes from, and what it gates
+
+One classification per run, from `company_profile.profile_for`, gating four
+things: the pattern library, the tension library, the transmission mechanism
+and the adverse direction. A second copy is exactly how two parts of one run
+came to disagree about what kind of business the subject is.

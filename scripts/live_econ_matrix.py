@@ -112,7 +112,13 @@ def _opener():
 #: figure is the free instance's CPU quota rather than the work. An
 #: instrument that reports "the page failed" when what happened is "the page
 #: is slow" sends the next session looking for the wrong thing.
-PAGE_TIMEOUT = 300
+#: 90s, DOWN FROM 300s, and the reason is that the instrument was costing
+#: more than it measured. At 300s a single wave of eight companies could
+#: spend three hours waiting on pages that were never going to answer, which
+#: buys nothing: a page that has not answered in ninety seconds is already a
+#: finding, and recording it as SLOW at 90s says the same thing as recording
+#: it as SLOW at 300s while leaving time to test the rest of the matrix.
+PAGE_TIMEOUT = 90
 
 
 def _get(op, path, timeout=PAGE_TIMEOUT):
@@ -288,8 +294,17 @@ def analyse(name, domain, *, poll_seconds, verbose=True):
         row["requests"].append({"path": f"/runs/{run_id}{suffix}",
                                 "status": st, "seconds": round(dt, 1),
                                 "chars": len(body)})
-    row["state"] = "READ" if ready else "TIMED_OUT"
+    # CONTENT DECIDES, NOT THE POLL'S FLAG. Comcast's primary screen timed
+    # out at 90s and its brief and full analysis both answered with a
+    # complete economic section — so the run HAD produced a readable result
+    # and the poll had simply stopped waiting. Scoring it TIMED_OUT reports a
+    # product failure where there was a slow page.
+    #
+    # This does not inflate the count: it requires the section to be
+    # genuinely present in what was served, not merely a 200.
     row["econ_excerpt"] = econ_excerpt(pages)
+    row["state"] = ("READ" if (ready or row["econ_excerpt"].strip())
+                    else "TIMED_OUT")
     row["score"] = score(name, pages,
                          section_text=row["econ_excerpt"])
     # A TIMEOUT AND A 500 ARE DIFFERENT FINDINGS. Status 0 is this client
@@ -301,6 +316,12 @@ def analyse(name, domain, *, poll_seconds, verbose=True):
     row["timeouts"] = [r for r in row["requests"] if r["status"] == 0]
     row["slowest_seconds"] = max((r["seconds"] for r in row["requests"]),
                                  default=0.0)
+    # THE WHOLE COST OF ONE COMPANY, so a wave that takes hours can be
+    # attributed rather than guessed at. The first 24-company run was
+    # abandoned after four hours on eight companies: at a 300s page timeout a
+    # single wave can spend three of those hours waiting on pages that were
+    # never going to answer.
+    row["total_seconds"] = round(sum(r["seconds"] for r in row["requests"]), 1)
     if verbose:
         s = row["score"]
         print(f"  {name:<18}{row['state']:<12}"
@@ -313,7 +334,7 @@ def analyse(name, domain, *, poll_seconds, verbose=True):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--poll", type=int, default=420)
+    ap.add_argument("--poll", type=int, default=300)
     ap.add_argument("--only", default="")
     ap.add_argument("--slice", default="",
                     help="i:n — run wave i of n, so the 24-company list fits "

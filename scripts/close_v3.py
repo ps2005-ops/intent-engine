@@ -101,6 +101,53 @@ def _relation_checks() -> list:
 
 
 # =============================================================================
+# §12 WHAT A BLOCKED DIMENSION WOULD BE WORTH
+# =============================================================================
+def blocked_priority(ledger: dict) -> list:
+    """Rank the blocked dimensions by what unblocking them would buy.
+
+    NOT A BUILD LIST. A dimension is unblocked only when the data is
+    ACCESSIBLE and it closes a material product defect; otherwise the blocker
+    is preserved explicitly. Ranking them anyway is what stops "blocked"
+    becoming a place things go to be forgotten — an operator can see which
+    absence is expensive and which is not.
+
+    `expected_decision_value` counts the companies whose declared channels
+    reference the dimension's series. A blocked dimension nothing would
+    consume is worth nothing to unblock, however interesting it is.
+    """
+    rows = []
+    for r in ledger["rows"]:
+        if r["value"] != WM.BLOCKED:
+            continue
+        rows.append({
+            "dimension": r["dimension"], "series": r["series"],
+            "expected_decision_value": r["company_consumers"],
+            "affected_mechanisms": sorted({
+                CHANNEL_OF.get(r["dimension"], "") for _x in [0]} - {""}),
+            "blocker": r["note"],
+            "accessible_here": False,
+            "recommendation": (
+                "preserve the blocker; no series in this panel measures it "
+                "and nothing in the product currently consumes it"
+                if not r["company_consumers"] else
+                f"{r['company_consumers']} company channel(s) reference this "
+                "dimension and cannot be read; acquisition would close a "
+                "real gap")})
+    return sorted(rows, key=lambda x: -x["expected_decision_value"])
+
+
+CHANNEL_OF: dict = {}
+try:                                                        # noqa: SIM105
+    from intent_engine.external_intel.econ_decision import (
+        CHANNEL_OF as _CH,
+    )
+    CHANNEL_OF = dict(_CH)
+except Exception:                                           # noqa: BLE001
+    pass
+
+
+# =============================================================================
 # §13 THE RELATION LEDGER
 # =============================================================================
 def relation_ledger() -> dict:
@@ -304,8 +351,14 @@ def main() -> int:
     for p in rec["problems"]:
         print(f"  {p}")
 
+    blocked = blocked_priority(dims)
+    print(f"\n=== §12 BLOCKED DIMENSIONS, RANKED ===")
+    for b in blocked:
+        print(f"  {b['dimension']:<26}consumers={b['expected_decision_value']}"
+              f"  {b['recommendation'][:70]}")
     payload = {"contract": "v3_closure.v1", "code_sha": _sha(),
                "as_of": AS_OF, "dimensions": dims, "relations": rels,
+               "blocked_priority": blocked,
                "learning": learning, "reconciliation": rec}
     (OUT / "v3_closure.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True, default=str))

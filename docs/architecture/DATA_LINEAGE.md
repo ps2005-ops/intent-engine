@@ -138,3 +138,71 @@ breach that also lies about its own sample size.
 
 Zero cross-tenant learning by default. The public core additionally cannot
 construct an `INDIVIDUAL`-scale population at all.
+
+
+---
+
+## The economic state: producer, path, and what re-validates it
+
+*Added at V3 closure.*
+
+### Two legitimate producers, one contract
+
+| producer | writes from | used where |
+|---|---|---|
+| `market.econ_bridge.publish` | the market engine's own ledger | a deployment that runs a market engine |
+| `scripts/publish_econ_state.py` | `reports/panel/historical_panel.jsonl` | the founder preview, which cannot mount the engine's disk |
+
+Both write `state_snapshot` to the same store against the same allowlist, and
+`provenance.producer` records which one wrote it. This is **not a fallback
+inside the reader**: `econ_context.load` reads one store at one path and says
+UNAVAILABLE when it is empty, so "wrong root", "unset root" and "genuinely
+empty" stay distinguishable — which is why the reader has no fallback and
+must not grow one.
+
+### The prior is a year back, chosen by date
+
+`ConditionReading.direction` is computed against the previous observation
+published for that quantity. The first version of the panel publisher wrote
+the two most recent rows, so every reading was a one-day or one-month change
+against a materiality threshold declared for year-on-year change: one of
+thirteen conditions cleared it, and it was moving the favourable way.
+
+Chosen **by date**, not by counting observations back — the series are
+irregular, and counting gave a "year-ago" prior sixteen days old for the
+high-yield spread. A series that does not reach back a year publishes one
+observation and reads NO_PRIOR, which says so.
+
+### The unit decides the transform
+
+The producer stamps `percentage_point` on the series
+`econ.release.PERCENTAGE_POINT_SERIES` names. The consumer takes an
+arithmetic difference for those and a relative change for everything else —
+the same rule the research arm uses, looked up on different sides. The
+producer knows the series; the consumer knows the condition; neither needs
+the other's vocabulary.
+
+A ratio on a zero-crossing series is not a small error: the 3-month/10-year
+slope was −0.02 a year ago and 0.83 now, which as a ratio is a 4,250% move.
+
+### Untrusted on the way in
+
+The state on disk may have been written by an older producer, a newer one, or
+a hand edit. `econ_context.load` re-validates it against `econ.state.ALLOWED`
+— the same allowlist the producer validated against, declared independently
+on this side — and refuses a payload carrying a field it does not recognise
+rather than rendering it.
+
+### The seam is derived, not stored
+
+`FounderEconomicContext` is not persisted. It is rebuilt per request from the
+state snapshot, the run's stored documents and the run meta, so a redeploy
+reproduces it rather than losing it. That is why "survives persistence and
+reload" is provable by dropping the process cache and comparing verdicts.
+
+### What may cite what
+
+`Provenance.evidence_type` is an allowlist: `published_series`,
+`regulatory_filing`, `company_document`, `shared_economic_state`. A class not
+on it cannot support a material change, and the constructor refuses it — so a
+private or model-internal figure cannot arrive dressed as a public fact.

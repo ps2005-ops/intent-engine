@@ -191,3 +191,67 @@ Zero cross-tenant learning by default.
 5. **§9's state-space engine is partial**: precision-weighted Bayesian updating
    with uncertainty, but no dynamic transition model. A construct's posterior
    does not decay toward a prior between observations.
+
+
+---
+
+## The dimension ledger, and why LIVE is not the same as useful
+
+*Added at V3 closure. `reports/v3_closure.json` holds the derived ledger;
+`scripts/close_v3.py` produces it from canonical records.*
+
+A dimension can be LIVE and useless. LIVE counts a series being readable,
+which is a fact about acquisition rather than about value: a dimension
+nothing consumes and nothing decides on is infrastructure, and reporting it
+beside a decision-relevant one inflates coverage with things that do not
+matter.
+
+Four states, assigned by `worldmodel.classify_dimension`:
+
+| state | meaning |
+|---|---|
+| `LIVE_DECISION_RELEVANT` | a company consumes it AND it has produced a delta |
+| `LIVE_CONTEXT_ONLY` | consumed, or supporting a relation, but deciding nothing yet |
+| `LIVE_UNPROVEN_VALUE` | readable and reaching nothing |
+| `BLOCKED` | no series in this panel measures it |
+
+The blocked dimensions **stay in the denominator**. Removing them would raise
+coverage by narrowing the question, which is the failure the four states
+exist to prevent.
+
+## Relations: a lag that has not elapsed is not a failure
+
+`RelationCheck.state` orders its tests deliberately. A relation whose regime
+does not hold, or whose driver did not move, is CANDIDATE — untested, not
+failed. One whose driver moved but whose lag has not elapsed is PENDING_LAG.
+Only after the lag has elapsed does the target's behaviour decide between
+SUPPORTED_PREDICTIVE, OBSERVED, CANDIDATE_NOT_PROVEN and CONTRADICTED.
+
+An earlier bleed detector compared year-on-year changes with no lag check at
+all and reported four of six relations as non-firing — some of which had
+simply not had time to fire.
+
+The ledger records `next_eligible_evaluation` per relation, computed from the
+lag, so a later cycle does not re-report the same untested relation as a
+failure.
+
+## The transmission tables
+
+Two tables, one key: `(channel, business_model_class)`.
+
+- `_TRANSMISSION` gives the mechanism — the sentence saying HOW the condition
+  reaches this kind of business.
+- `_ADVERSE_DIRECTION` gives the sign — which way it has to move to hurt.
+
+Sharing the key is what stops them disagreeing. A pair present in the first
+and absent from the second has a mechanism and **no established sign**, and
+that is deliberate: several mechanisms state both directions ("many contracts
+and tariffs escalate with inflation, so it reaches revenue as well as cost"),
+and asserting a net effect the evidence does not carry is the failure the
+absence prevents.
+
+`CURVE_SLOPE` and `CREDIT_SPREAD` are separate channels from `MARKET_RATE`
+because neither is the LEVEL of rates. Folding all three together gave a bank
+three exposures through one channel whose sign is deliberately unestablished,
+so it could never receive an economic reading at all — which is the clearest
+case there is of a condition reaching a business through a named mechanism.

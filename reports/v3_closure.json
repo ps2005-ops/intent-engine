@@ -1,6 +1,62 @@
 {
   "as_of": "2026-08-27",
-  "code_sha": "f5e1237f",
+  "blocked_priority": [
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "commodities",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "fx",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "liquidity",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "positioning",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "real_rates",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    },
+    {
+      "accessible_here": false,
+      "affected_mechanisms": [],
+      "blocker": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+      "dimension": "volatility",
+      "expected_decision_value": 0,
+      "recommendation": "preserve the blocker; no series in this panel measures it and nothing in the product currently consumes it",
+      "series": []
+    }
+  ],
+  "code_sha": "e41e38dc",
   "contract": "v3_closure.v1",
   "dimensions": {
     "as_of": "2026-08-27",

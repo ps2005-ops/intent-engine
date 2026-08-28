@@ -122,3 +122,61 @@ These do not change between versions:
 - no accuracy claim before the declared forward sample
 - no construct informs a decision before it beats the base economic model
 - paper only
+
+
+---
+
+## V3 closure — what ends here, and what starts next
+
+*Written at closure. The status matrix is
+`docs/architecture/BUILD_STATUS.md`; this is the boundary.*
+
+### What V3 was
+
+Public-evidence company intelligence with an economic world model behind it:
+read what a company publishes, read what the economy is doing, and say
+whether the second changes a decision about the first — with provenance, with
+falsifiers, and with the discipline to say nothing when nothing changed.
+
+### What ends here
+
+Foundational V3 building. The seam is closed vertically, deployed, and
+exercised against a broad company matrix. The remaining V3 work is not
+engineering:
+
+1. **real forward evidence resolving with time.** Thirteen preregistered
+   predictions, none due before 2026-12. `PRE_CALIBRATION` holds until they
+   resolve, and no amount of engineering moves that.
+2. **real customer validation**, which is V4's premise rather than V3's.
+3. **named external blockers** — six economic dimensions have no readable
+   series here, and the tension library covers one business-model class.
+
+### What V4 is, and why it needs real customers
+
+Permissioned INTERNAL company intelligence: documents and data the company
+itself holds, decision memory, actual decisions and their outcomes, a
+Personal Founder AI, an internal causal and operating graph, role-aware
+intelligence, and the fusion of internal with external evidence.
+
+The measurement V4 exists to make is the one V3 structurally cannot: does
+acting on this recommendation improve what the business actually does. V3 can
+show that a decision field moved for an attributable reason. Only outcomes
+can show the move was right.
+
+**Do not start V4 implementation until V3 closure is recorded**, and do not
+let V4 reopen a V3 question — the frozen collective-human register and the
+unresolved forward ledger are answers waiting on reality, not gaps waiting on
+code.
+
+### What V5 is
+
+A bounded autonomous enterprise operating system: permissioned actions,
+action-and-result learning, workflow orchestration, a multi-agent operating
+layer, governance, human approval, reversible execution and auditability.
+
+### Permanent across both
+
+The Learning Acceleration and Validation Loop. It is not a V3 artefact: the
+question "is this system actually learning, or merely busy" outlives every
+stage, and the separation of evidence velocity from knowledge velocity is the
+apparatus that answers it.
