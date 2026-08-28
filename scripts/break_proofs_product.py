@@ -831,9 +831,14 @@ def bp18():
         pass
 
     def mutate(t):
+        # RETARGETED after `MARKETPLACE_OR_PLATFORM` was removed: it was a
+        # class this product never assigns, so a tension gated on it could
+        # never fire and the "gate" was a delete. A proof pinned to text that
+        # no longer exists reports NOT_APPLIED, which is honest and is not a
+        # pass.
         return t.mutate(
             PATTERNS,
-            '        "applies_to": ("MARKETPLACE_OR_PLATFORM",),\n',
+            '        "applies_to": ("SUBSCRIPTION_SOFTWARE",),\n',
             "")
 
     def check(t):

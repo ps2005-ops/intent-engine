@@ -1,9 +1,8 @@
 {
   "by_verdict": {
-    "CAUGHT": 25,
-    "NOT_APPLIED": 1
+    "CAUGHT": 26
   },
-  "caught": 25,
+  "caught": 26,
   "contract": "econ_breakproof.v1",
   "defect_coverage_proofs": 26,
   "detail": [
@@ -263,11 +262,11 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 0,
-      "bytes_before": 0,
-      "bytes_delta": 0,
+      "bytes_after": 75124,
+      "bytes_before": 75174,
+      "bytes_delta": -50,
       "description": "the tension declares no applicability, so the gate has nothing to check it against",
-      "detail": "the mutation pattern did not match",
+      "detail": "AssertionError:      assert not undeclared, (\n            f\"{undeclared} declare no applicability and can therefore never \"\n            \"fire; a tension with no business model is a sentence looking for a \"\n            \"company\")\nE       AssertionError: ['enterprise_vs_smb_sim",
       "guard_under_test": "test_every_tension_declares_which_businesses_it_applies_to",
       "mutated_file": "src/intent_engine/strategic_intelligence/patterns.py",
       "mutated_symbol": "TENSIONS",
@@ -275,7 +274,7 @@
       "proof": "18_bank_receives_a_marketplace_blind_spot",
       "target_kind": "PRODUCER",
       "tests_guard_integrity": false,
-      "verdict": "NOT_APPLIED"
+      "verdict": "CAUGHT"
     },
     {
       "bytes_after": 75142,
@@ -372,7 +371,7 @@
       "bytes_before": 29003,
       "bytes_delta": -13,
       "description": "the corpus check stops looking, so ten companies sharing one recommendation goes unreported",
-      "detail": "AssertionError: OMMENDATION' in set()\nE        +  where set() = _kinds([])\nE        +    where [] = <function detect_generic at 0x10674ce50>([Analysis(company_id='c0', as_of='2026-08-27', variant='B', top_priority='cost of funds', action='MONITOR', risks=(Ris...fidence='LOW',",
+      "detail": "AssertionError: OMMENDATION' in set()\nE        +  where set() = _kinds([])\nE        +    where [] = <function detect_generic at 0x103c99e50>([Analysis(company_id='c0', as_of='2026-08-27', variant='B', top_priority='cost of funds', action='MONITOR', risks=(Ris...fidence='LOW',",
       "guard_under_test": "test_generic_recommendation_is_caught",
       "mutated_file": "src/intent_engine/econ/founder_ab.py",
       "mutated_symbol": "detect_generic",
@@ -400,7 +399,7 @@
   ],
   "guard_integrity_proofs": [],
   "meta_guard": "every proof declared a mutated symbol distinct from the guard it tests, and a production call path that was checked to contain the call. Proofs marked guard_integrity are counted separately and are NOT defect coverage.",
-  "not_applied": 1,
+  "not_applied": 0,
   "not_caught": 0,
   "proofs": 26,
   "refused_tautology": 0,
