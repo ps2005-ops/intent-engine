@@ -41,8 +41,15 @@ Show evidence: artifact-id src-01H..., replay-id replay-01H...
 
 @pytest.fixture
 def shopify_report():
+    # THE BUSINESS MODEL IS PART OF THE REAL CALL NOW, and passing it is not a
+    # concession to the gate -- it is what production supplies. A tension
+    # fires on signal names, and signal names are generic enough that a chip
+    # designer's partner and platform language matched a marketplace's, so
+    # `patterns.tension_applies` fails closed on an unread model. A fixture
+    # that omits it is testing the refusal, not the reasoning.
     return build_strategic_report(company_name=SHOPIFY_COMPANY,
-                                  observations=shopify_observations())
+                                  observations=shopify_observations(),
+                                  business_model="SUBSCRIPTION_SOFTWARE")
 
 
 # --- J1: at least 3 non-generic strategic hypotheses ------------------------

@@ -781,8 +781,288 @@ def bp16():
     return run(p, mutate=mutate, check=check, positive_control=control)
 
 
+PATTERNS = "src/intent_engine/strategic_intelligence/patterns.py"
+REASONING = "src/intent_engine/strategic_intelligence/reasoning.py"
+INSIGHTS = "src/intent_engine/strategic_intelligence/insights.py"
+BLIND = "tests/test_blind_spot_contract.py"
+
+
+# =============================================================================
+# 17-21. the blind-spot contract
+# =============================================================================
+def bp17():
+    p = _p(name="17_semiconductor_receives_a_commerce_blind_spot",
+           description="the applicability gate is removed, so a tension fires "
+                       "on signal names alone and a chip designer is handed "
+                       "commerce language",
+           target_kind=BP.PRODUCER, mutated_file=REASONING,
+           mutated_symbol="_build_blind_spots",
+           guard_under_test="test_a_semiconductor_does_not_receive_a_commerce_tension",
+           production_call_path=BLIND)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            REASONING,
+            "        ok, kind = tension_applies(t, business_model)\n"
+            "        if not ok:",
+            "        ok, kind = tension_applies(t, business_model)\n"
+            "        ok = True\n"
+            "        if not ok:")
+
+    def check(t):
+        t.pytest(f"{BLIND}::test_a_semiconductor_does_not_receive_a_"
+                 f"commerce_tension")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp18():
+    p = _p(name="18_bank_receives_a_marketplace_blind_spot",
+           description="the tension declares no applicability, so the gate "
+                       "has nothing to check it against",
+           target_kind=BP.PRODUCER, mutated_file=PATTERNS,
+           mutated_symbol="TENSIONS",
+           guard_under_test="test_every_tension_declares_which_businesses_it_applies_to",
+           production_call_path=BLIND)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            PATTERNS,
+            '        "applies_to": ("MARKETPLACE_OR_PLATFORM",),\n',
+            "")
+
+    def check(t):
+        t.pytest(f"{BLIND}::test_every_tension_declares_which_businesses_"
+                 f"it_applies_to")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp19():
+    p = _p(name="19_unread_model_becomes_an_observed_tension",
+           description="an unread business model is treated as applicable, "
+                       "so a company we could not classify is told about a "
+                       "tension we cannot rule out",
+           target_kind=BP.PRODUCER, mutated_file=PATTERNS,
+           mutated_symbol="tension_applies",
+           guard_under_test="test_an_unread_business_model_is_a_coverage_gap_not_a_tension",
+           production_call_path=BLIND)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            PATTERNS,
+            '    if not str(business_model or "").strip():\n'
+            "        return False, MODEL_COVERAGE_GAP",
+            "    if False:\n"
+            "        return False, MODEL_COVERAGE_GAP")
+
+    def check(t):
+        t.pytest(f"{BLIND}::test_an_unread_business_model_is_a_coverage_"
+                 f"gap_not_a_tension")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp20():
+    p = _p(name="20_not_applicable_reported_as_missing_evidence",
+           description="a tension the model rules out is reported as an "
+                       "information gap, which is a claim about the company "
+                       "rather than about the library",
+           target_kind=BP.PRODUCER, mutated_file=PATTERNS,
+           mutated_symbol="tension_applies",
+           guard_under_test="test_a_semiconductor_does_not_receive_a_commerce_tension",
+           production_call_path=BLIND)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            PATTERNS,
+            "    if business_model not in applies:\n"
+            "        return False, NOT_APPLICABLE",
+            "    if business_model not in applies:\n"
+            "        return True, INFERRED_INFORMATION_GAP")
+
+    def check(t):
+        t.pytest(f"{BLIND}::test_a_semiconductor_does_not_receive_a_"
+                 f"commerce_tension")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp21():
+    p = _p(name="21_generic_fallback_overrides_the_company_model",
+           description="the surprise and opportunity producers stop consulting "
+                       "the model, so the tension leaks onto the surfaces "
+                       "that render them",
+           target_kind=BP.PRODUCER, mutated_file=INSIGHTS,
+           mutated_symbol="_live_tensions",
+           guard_under_test="test_surprises_and_opportunities_are_gated_by_the_same_rule",
+           production_call_path=BLIND)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            INSIGHTS,
+            "        ok, _kind = tension_applies(t, business_model)\n"
+            "        if ok:",
+            "        ok, _kind = tension_applies(t, business_model)\n"
+            "        if True:")
+
+    def check(t):
+        t.pytest(f"{BLIND}::test_surprises_and_opportunities_are_gated_by_"
+                 f"the_same_rule")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+LEDGER = "src/intent_engine/econ/forward_ledger.py"
+CLOSURE = "tests/test_v3_closure_ledgers.py"
+ADVERSARIAL = "tests/test_damage_detector_adversarial.py"
+AB = "src/intent_engine/econ/founder_ab.py"
+
+
+# =============================================================================
+# 22-26. the closure seams
+# =============================================================================
+def bp22():
+    p = _p(name="22_expectation_written_without_a_creation_date",
+           description="a forward record loses the date it was made, so it "
+                       "cannot answer whether its cutoff preceded it",
+           target_kind=BP.PERSISTENCE, mutated_file=LEDGER,
+           mutated_symbol="load",
+           guard_under_test="assert_lifecycle",
+           production_call_path=LEDGER)
+
+    def control():
+        FL = importlib.import_module("intent_engine.econ.forward_ledger")
+        assert FL.assert_lifecycle()["all_seven_hold"]
+
+    def mutate(t):
+        return t.mutate(
+            LEDGER,
+            '                       and r.get("created_at"))]',
+            "                       )]")
+
+    def check(t):
+        FL = t.load("intent_engine.econ.forward_ledger")
+        rows = [{"expectation_id": "ex-x", "information_cutoff": "2026-01-01",
+                 "horizon_days": 90, "expires_at": "2026-12-01",
+                 "resolution_rule": "r", "confidence": 0.5, "quantity": "q",
+                 "expected_direction": "UP", "outcome": "OPEN"}]
+        path = t.root / "fwd.jsonl"
+        FL.append(rows, path=path)
+        FL.assert_lifecycle(path)
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp23():
+    p = _p(name="23_report_diverges_from_the_ledger",
+           description="the learning report keeps its own count instead of "
+                       "deriving it, so it can disagree with the record",
+           target_kind=BP.PRODUCER, mutated_file="scripts/close_v3.py",
+           mutated_symbol="learning_ledger",
+           guard_under_test="test_a_report_that_disagrees_with_the_ledger_is_refused",
+           production_call_path=CLOSURE)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            "scripts/close_v3.py",
+            '            "real_open": len(real) - len(resolved),',
+            '            "real_open": 99,')
+
+    def check(t):
+        t.pytest(f"{CLOSURE}::test_the_learning_ledger_reconciles_with_the_"
+                 f"forward_ledger")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp24():
+    p = _p(name="24_a_damage_kind_loses_its_detector",
+           description="a declared damage kind stops being detectable, so a "
+                       "damage count of zero is partly about the vocabulary",
+           target_kind=BP.PRODUCER, mutated_file=AB,
+           mutated_symbol="detect_damage",
+           guard_under_test="test_every_declared_damage_kind_has_a_detector",
+           production_call_path=ADVERSARIAL)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            AB,
+            '                    kind="WRONG_EXPOSURE",',
+            '                    kind="STALE_STATE",')
+
+    def check(t):
+        t.pytest(f"{ADVERSARIAL}::test_every_declared_damage_kind_has_a_"
+                 f"detector")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp25():
+    p = _p(name="25_generic_recommendation_across_a_corpus",
+           description="the corpus check stops looking, so ten companies "
+                       "sharing one recommendation goes unreported",
+           target_kind=BP.PRODUCER, mutated_file=AB,
+           mutated_symbol="detect_generic",
+           guard_under_test="test_generic_recommendation_is_caught",
+           production_call_path=ADVERSARIAL)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            AB,
+            "    if len(analyses) < 3:\n        return []",
+            "    if True:\n        return []")
+
+    def check(t):
+        t.pytest(f"{ADVERSARIAL}::test_generic_recommendation_is_caught")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
+def bp26():
+    p = _p(name="26_economic_risk_identified_by_an_id_prefix",
+           description="the damage detector decides what is an economic risk "
+                       "from an id prefix only one producer uses, so the "
+                       "other producer's risks read as non-economic",
+           target_kind=BP.CONSUMER, mutated_file=AB,
+           mutated_symbol="detect_damage",
+           guard_under_test="test_an_economic_risk_declares_its_quantity_rather_than_encoding_it",
+           production_call_path=ADVERSARIAL)
+
+    def control():
+        pass
+
+    def mutate(t):
+        return t.mutate(
+            AB,
+            "    econ_risks = [r for r in b.risks if r.quantity]",
+            '    econ_risks = [r for r in b.risks\n'
+            '                  if r.risk_id.startswith("econ:")]')
+
+    def check(t):
+        t.pytest(f"{ADVERSARIAL}::test_an_economic_risk_declares_its_"
+                 f"quantity_rather_than_encoding_it")
+    return run(p, mutate=mutate, check=check, positive_control=control)
+
+
 PROOFS = [bp01, bp02, bp03, bp04, bp05, bp06, bp07, bp08,
-          bp09, bp10, bp11, bp12, bp13, bp14, bp15, bp16]
+          bp09, bp10, bp11, bp12, bp13, bp14, bp15, bp16,
+          bp17, bp18, bp19, bp20, bp21, bp22, bp23, bp24, bp25, bp26]
 
 
 def main() -> int:

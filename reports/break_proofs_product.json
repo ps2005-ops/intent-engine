@@ -1,14 +1,15 @@
 {
   "by_verdict": {
-    "CAUGHT": 16
+    "CAUGHT": 25,
+    "NOT_APPLIED": 1
   },
-  "caught": 16,
+  "caught": 25,
   "contract": "econ_breakproof.v1",
-  "defect_coverage_proofs": 16,
+  "defect_coverage_proofs": 26,
   "detail": [
     {
-      "bytes_after": 569497,
-      "bytes_before": 569574,
+      "bytes_after": 571533,
+      "bytes_before": 571610,
       "bytes_delta": -77,
       "description": "the deep surfaces are built without the economic context, so no economic reading can ever appear",
       "detail": "AssertionError:    assert total >= 2, f\"expected the brief and the full analysis, saw {total}\"\n>       assert carrying == total, (\n            f\"{total - carrying} of {total} build_dossier call(s) do not pass the \"\n            \"economic context; that surface can never show an",
@@ -22,8 +23,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35418,
-      "bytes_before": 35465,
+      "bytes_after": 35873,
+      "bytes_before": 35920,
       "bytes_delta": -47,
       "description": "NO_MATERIAL_ECONOMIC_DELTA is rewritten into a macro paragraph, so the deliberate silence disappears",
       "detail": "EconError: c: status COMPLETE with no material change. The abstention states exist for this; COMPLETE with nothing in it renders as a heading with no content.",
@@ -37,8 +38,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35378,
-      "bytes_before": 35465,
+      "bytes_after": 35833,
+      "bytes_before": 35920,
       "bytes_delta": -87,
       "description": "a material change reaches a surface with no trigger, mechanism or provenance behind it",
       "detail": "AssertionError: the reading went silent: NO_MATERIAL_ECONOMIC_DELTA / Current economic conditions do not materially change the strategic recommendation for this company. / refused=({'field': 'top_priority', 'code': 'NOT_ATTRIBUTABLE', 'reason': 'the field moved with no trigge",
@@ -52,8 +53,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35390,
-      "bytes_before": 35465,
+      "bytes_after": 35845,
+      "bytes_before": 35920,
       "bytes_delta": -75,
       "description": "an unsupported relation is sorted into the supported list, where a surface states it as a finding",
       "detail": "AssertionError: a CANDIDATE relation was promoted to supported",
@@ -82,8 +83,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35413,
-      "bytes_before": 35465,
+      "bytes_after": 35868,
+      "bytes_before": 35920,
       "bytes_delta": -52,
       "description": "a rehearsal expectation is admitted to the forward list, where it would become a track record",
       "detail": "ContextViolation: c: 1 rehearsal expectation(s) (['ex-r']) reached the founder contract. REHEARSAL exists to prove the forward machinery can score itself on history; it is not a prediction anyone made about the future and may never contribute to a customer-facing accuracy figur",
@@ -112,8 +113,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35459,
-      "bytes_before": 35465,
+      "bytes_after": 35914,
+      "bytes_before": 35920,
       "bytes_delta": -6,
       "description": "the age of the state stops being computed, so an old reading produces a confident recommendation",
       "detail": "ContextViolation: c: this context is labelled CURRENT but its own dates -- a state of 2025-01-01 read at 2026-08-25, 601 days -- make it STALE. A freshness that disagrees with the dates behind it is not a label, it is a wrong input to every guard downstream of it.",
@@ -127,8 +128,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35411,
-      "bytes_before": 35465,
+      "bytes_after": 35866,
+      "bytes_before": 35920,
       "bytes_delta": -54,
       "description": "an absent economic state raises instead of reporting BLOCKED_DATA, taking the whole analysis with it",
       "detail": "AttributeError: 'NoneType' object has no attribute 'available'",
@@ -187,8 +188,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35463,
-      "bytes_before": 35465,
+      "bytes_after": 35918,
+      "bytes_before": 35920,
       "bytes_delta": -2,
       "description": "an evidence class a founder surface may not cite is admitted behind a material change",
       "detail": "EconError: 'tenant_private_note' is not an evidence class a founder surface may cite; known: ('published_series', 'regulatory_filing', 'company_document', 'shared_economic_state')",
@@ -202,8 +203,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 35467,
-      "bytes_before": 35465,
+      "bytes_after": 35922,
+      "bytes_before": 35920,
       "bytes_delta": 2,
       "description": "the same economic trigger is credited to a second field, inflating the delta with no new information",
       "detail": "TypeError: 'NoneType' object is not iterable",
@@ -217,8 +218,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 20973,
-      "bytes_before": 20945,
+      "bytes_after": 29031,
+      "bytes_before": 29003,
       "bytes_delta": 28,
       "description": "prose is added to the material field list, so a rewording registers as decision value",
       "detail": "AssertionError:    AssertionError: assert 'prose' not in ('top_priority', 'action', 'top_risks', 'scenario', 'confidence', 'information_priority', ...)\nE        +  where ('top_priority', 'action', 'top_risks', 'scenario', 'confidence', 'information_priority', ...) = <module '",
@@ -232,8 +233,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 569569,
-      "bytes_before": 569574,
+      "bytes_after": 571605,
+      "bytes_before": 571610,
       "bytes_delta": -5,
       "description": "the economic state is read at today's date while the company evidence is dated at the run's cutoff",
       "detail": "AssertionError: k.value for k in call.keywords if k.arg == \"as_of\")\n            name = getattr(arg, \"id\", \"\")\n>           assert name != \"today\", (\n                \"the economic state is read at today's date while the company \"\n                \"evidence is dated at the run's ",
@@ -245,19 +246,169 @@
       "target_kind": "CALL_SITE",
       "tests_guard_integrity": false,
       "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 55870,
+      "bytes_before": 55852,
+      "bytes_delta": 18,
+      "description": "the applicability gate is removed, so a tension fires on signal names alone and a chip designer is handed commerce language",
+      "detail": "AssertionError: anded ['Consolidating checkout/identity/data rails may encroach on l']\nE       assert [BlindSpot(bl..._APPLICABLE')] == []\nE         \nE         Left contains one more item: BlindSpot(blind_spot_id='blind-control_vs_partner_openness', observed_tension='Consolid",
+      "guard_under_test": "test_a_semiconductor_does_not_receive_a_commerce_tension",
+      "mutated_file": "src/intent_engine/strategic_intelligence/reasoning.py",
+      "mutated_symbol": "_build_blind_spots",
+      "production_call_path": "tests/test_blind_spot_contract.py",
+      "proof": "17_semiconductor_receives_a_commerce_blind_spot",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 0,
+      "bytes_before": 0,
+      "bytes_delta": 0,
+      "description": "the tension declares no applicability, so the gate has nothing to check it against",
+      "detail": "the mutation pattern did not match",
+      "guard_under_test": "test_every_tension_declares_which_businesses_it_applies_to",
+      "mutated_file": "src/intent_engine/strategic_intelligence/patterns.py",
+      "mutated_symbol": "TENSIONS",
+      "production_call_path": "tests/test_blind_spot_contract.py",
+      "proof": "18_bank_receives_a_marketplace_blind_spot",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "NOT_APPLIED"
+    },
+    {
+      "bytes_after": 75142,
+      "bytes_before": 75174,
+      "bytes_delta": -32,
+      "description": "an unread business model is treated as applicable, so a company we could not classify is told about a tension we cannot rule out",
+      "detail": "AssertionError: ence it is: a model we could not\n        read and a model that rules the tension out are different findings.\"\"\"\n        commerce = P.TENSIONS[0]\n        blind, refused = _build_blind_spots(_both_sides(commerce), \"\")\n        assert blind == []\n>       assert re",
+      "guard_under_test": "test_an_unread_business_model_is_a_coverage_gap_not_a_tension",
+      "mutated_file": "src/intent_engine/strategic_intelligence/patterns.py",
+      "mutated_symbol": "tension_applies",
+      "production_call_path": "tests/test_blind_spot_contract.py",
+      "proof": "19_unread_model_becomes_an_observed_tension",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 75183,
+      "bytes_before": 75174,
+      "bytes_delta": 9,
+      "description": "a tension the model rules out is reported as an information gap, which is a claim about the company rather than about the library",
+      "detail": "AssertionError: anded ['Consolidating checkout/identity/data rails may encroach on l']\nE       assert [BlindSpot(bl...RMATION_GAP')] == []\nE         \nE         Left contains one more item: BlindSpot(blind_spot_id='blind-control_vs_partner_openness', observed_tension='Consolid",
+      "guard_under_test": "test_a_semiconductor_does_not_receive_a_commerce_tension",
+      "mutated_file": "src/intent_engine/strategic_intelligence/patterns.py",
+      "mutated_symbol": "tension_applies",
+      "production_call_path": "tests/test_blind_spot_contract.py",
+      "proof": "20_not_applicable_reported_as_missing_evidence",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 15830,
+      "bytes_before": 15828,
+      "bytes_delta": 2,
+      "description": "the surprise and opportunity producers stop consulting the model, so the tension leaks onto the surfaces that render them",
+      "detail": "AssertionError: live_tensions(obs, \"DESIGN_AND_MANUFACTURE\") == []\nE       AssertionError: assert [{'applies_to...rails'], ...}] == []\nE         \nE         Left contains one more item: {'applies_to': ('SUBSCRIPTION_SOFTWARE',), 'counter_explanation': 'Owning rails can raise r",
+      "guard_under_test": "test_surprises_and_opportunities_are_gated_by_the_same_rule",
+      "mutated_file": "src/intent_engine/strategic_intelligence/insights.py",
+      "mutated_symbol": "_live_tensions",
+      "production_call_path": "tests/test_blind_spot_contract.py",
+      "proof": "21_generic_fallback_overrides_the_company_model",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 7997,
+      "bytes_before": 8020,
+      "bytes_delta": -23,
+      "description": "a forward record loses the date it was made, so it cannot answer whether its cutoff preceded it",
+      "detail": "EconError: 1 expectation(s) name an information cutoff AFTER the date they were made: ['ex-x']. A prediction cannot use evidence that arrived after it was written down.",
+      "guard_under_test": "assert_lifecycle",
+      "mutated_file": "src/intent_engine/econ/forward_ledger.py",
+      "mutated_symbol": "load",
+      "production_call_path": "src/intent_engine/econ/forward_ledger.py",
+      "proof": "22_expectation_written_without_a_creation_date",
+      "target_kind": "PERSISTENCE",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 14312,
+      "bytes_before": 14335,
+      "bytes_delta": -23,
+      "description": "the learning report keeps its own count instead of deriving it, so it can disagree with the record",
+      "detail": "AssertionError: S ===================================\n_________ test_the_learning_ledger_reconciles_with_the_forward_ledger __________\n\n    def test_the_learning_ledger_reconciles_with_the_forward_ledger():\n        c = _closure()\n        learning = c.learning_ledger()\n>      ",
+      "guard_under_test": "test_a_report_that_disagrees_with_the_ledger_is_refused",
+      "mutated_file": "scripts/close_v3.py",
+      "mutated_symbol": "learning_ledger",
+      "production_call_path": "tests/test_v3_closure_ledgers.py",
+      "proof": "23_report_diverges_from_the_ledger",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 29000,
+      "bytes_before": 29003,
+      "bytes_delta": -3,
+      "description": "a declared damage kind stops being detectable, so a damage count of zero is partly about the vocabulary",
+      "detail": "AssertionError: it appears to.\"\"\"\n        coverage = FA.damage_coverage()\n>       assert not coverage[\"without_detector\"], (\n            f\"{coverage['without_detector']} are declared and undetectable, so a \"\n            \"DecisionDamage of 0 is partly a statement about this tu",
+      "guard_under_test": "test_every_declared_damage_kind_has_a_detector",
+      "mutated_file": "src/intent_engine/econ/founder_ab.py",
+      "mutated_symbol": "detect_damage",
+      "production_call_path": "tests/test_damage_detector_adversarial.py",
+      "proof": "24_a_damage_kind_loses_its_detector",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 28990,
+      "bytes_before": 29003,
+      "bytes_delta": -13,
+      "description": "the corpus check stops looking, so ten companies sharing one recommendation goes unreported",
+      "detail": "AssertionError: OMMENDATION' in set()\nE        +  where set() = _kinds([])\nE        +    where [] = <function detect_generic at 0x10674ce50>([Analysis(company_id='c0', as_of='2026-08-27', variant='B', top_priority='cost of funds', action='MONITOR', risks=(Ris...fidence='LOW',",
+      "guard_under_test": "test_generic_recommendation_is_caught",
+      "mutated_file": "src/intent_engine/econ/founder_ab.py",
+      "mutated_symbol": "detect_generic",
+      "production_call_path": "tests/test_damage_detector_adversarial.py",
+      "proof": "25_generic_recommendation_across_a_corpus",
+      "target_kind": "PRODUCER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
+    },
+    {
+      "bytes_after": 29040,
+      "bytes_before": 29003,
+      "bytes_delta": 37,
+      "description": "the damage detector decides what is an economic risk from an id prefix only one producer uses, so the other producer's risks read as non-economic",
+      "detail": "AssertionError: =('q',), falsifiers=(), evidence=('e',), unknowns=(), economic_inputs=(), prose=''), Analysis(company_id='acme', as_of='2026-08-27', variant='B', top_priority='p', action='ACT', risks=(Risk(risk_id='walm...nfidence='LOW', information_requests=('q',), falsifier",
+      "guard_under_test": "test_an_economic_risk_declares_its_quantity_rather_than_encoding_it",
+      "mutated_file": "src/intent_engine/econ/founder_ab.py",
+      "mutated_symbol": "detect_damage",
+      "production_call_path": "tests/test_damage_detector_adversarial.py",
+      "proof": "26_economic_risk_identified_by_an_id_prefix",
+      "target_kind": "CONSUMER",
+      "tests_guard_integrity": false,
+      "verdict": "CAUGHT"
     }
   ],
   "guard_integrity_proofs": [],
   "meta_guard": "every proof declared a mutated symbol distinct from the guard it tests, and a production call path that was checked to contain the call. Proofs marked guard_integrity are counted separately and are NOT defect coverage.",
-  "not_applied": 0,
+  "not_applied": 1,
   "not_caught": 0,
-  "proofs": 16,
+  "proofs": 26,
   "refused_tautology": 0,
   "target_kinds": {
     "CALL_SITE": 2,
-    "CONSUMER": 3,
-    "PERSISTENCE": 1,
-    "PRODUCER": 8,
+    "CONSUMER": 4,
+    "PERSISTENCE": 2,
+    "PRODUCER": 16,
     "RENDERER": 2
   },
   "unreliable": 0

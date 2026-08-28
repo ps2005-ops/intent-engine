@@ -42,21 +42,55 @@ import urllib.request
 BASE = "https://intent-engine-preview-bridge.onrender.com"
 OUT = pathlib.Path("reports/live_econ_matrix.json")
 
-#: §19/§32. Ten companies chosen for SPREAD, not for a happy path: a scale
-#: retailer, a branded consumer brand, a bank, a payments network, an
-#: industrial, two software companies of different kinds, a chip designer, a
-#: rate-base asset owner, and one that is deliberately hard.
+#: §42. Chosen for SPREAD across business-model classes and sectors, not for
+#: a happy path. Two per sector wherever the distinction matters, because a
+#: single company per sector cannot separate "this sector reads correctly"
+#: from "this company happens to".
+#:
+#: The last two are deliberately hard: a small filer with little public
+#: product surface, and a company the validation manifest does not carry, so
+#: the profile is sparse and the engine must say so rather than guess.
+#:
+#: THE HOURLY QUOTA IS TEN ANALYSES PER IP. This list is longer than one
+#: window on purpose -- `--slice` runs it in waves.
 COMPANIES = [
+    # retail
     ("Walmart", "walmart.com"),
+    ("Costco Wholesale", "costco.com"),
+    # consumer discretionary
     ("Nike", "nike.com"),
+    ("Starbucks", "starbucks.com"),
+    # financials
     ("JPMorgan Chase", "jpmorganchase.com"),
+    ("Bank of America", "bankofamerica.com"),
+    # payments
     ("Visa", "visa.com"),
+    ("Mastercard", "mastercard.com"),
+    # industrials
     ("Caterpillar", "caterpillar.com"),
-    ("Meta Platforms", "meta.com"),
-    ("NVIDIA", "nvidia.com"),
-    ("Salesforce", "salesforce.com"),
+    ("Deere & Company", "deere.com"),
     ("Union Pacific", "up.com"),
+    # semiconductors
+    ("NVIDIA", "nvidia.com"),
+    ("Advanced Micro Devices", "amd.com"),
+    ("ASML Holding", "asml.com"),
+    # software
+    ("Salesforce", "salesforce.com"),
+    ("ServiceNow", "servicenow.com"),
     ("Cloudflare", "cloudflare.com"),
+    # communications
+    ("Meta Platforms", "meta.com"),
+    ("Comcast", "comcast.com"),
+    # energy / commodity producer
+    ("Exxon Mobil", "exxonmobil.com"),
+    # healthcare / regulated
+    ("Johnson & Johnson", "jnj.com"),
+    # utilities / rate base
+    ("NextEra Energy", "nexteraenergy.com"),
+    # sparse evidence: a real filer with little public product surface
+    ("Olo Inc", "olo.com"),
+    # a company outside the validation manifest, so the profile is sparse
+    ("Duolingo", "duolingo.com"),
 ]
 
 SURFACES = ("", "/brief", "/full")
@@ -281,6 +315,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--poll", type=int, default=420)
     ap.add_argument("--only", default="")
+    ap.add_argument("--slice", default="",
+                    help="i:n — run wave i of n, so the 24-company list fits "
+                         "the ten-per-hour quota across several windows")
     ap.add_argument("--skip", default="",
                     help="comma-separated names to leave for a browser "
                          "journey, so the hourly quota covers both")
@@ -302,6 +339,12 @@ def main() -> int:
     todo = [c for c in COMPANIES
             if (not args.only or args.only.lower() in c[0].lower())
             and c[0].lower() not in skip]
+    if args.slice:
+        i, n = (int(x) for x in args.slice.split(":"))
+        # STRIDED, NOT BLOCKED. A contiguous block would put every retailer in
+        # one wave and every semiconductor in another, so a wave that failed
+        # would look like a sector failing.
+        todo = [c for j, c in enumerate(todo) if j % n == i]
     rows = []
     for name, domain in todo:
         rows.append(analyse(name, domain, poll_seconds=args.poll))

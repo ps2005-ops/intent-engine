@@ -95,6 +95,13 @@ def main() -> int:
             #: maps to a band, and the band is declared before resolution.
             "confidence": {"LOW": 0.65, "MEDIUM": 0.55,
                            "HIGH": 0.5}[rel.uncertainty],
+            # WHEN IT WAS MADE, beside what it could know. The first
+            # version wrote only the cutoff, so the one record it opened
+            # could not answer "did this prediction use evidence that arrived
+            # after it was made" -- the single invariant a preregistered
+            # claim exists to support. `belief.Expectation` requires the
+            # pair; this file wrote to the ledger directly and skipped it.
+            "created_at": AS_OF,
             "information_cutoff": AS_OF, "horizon_days": rel.lag_days,
             "expires_at": expires,
             "resolution_rule": (
@@ -107,6 +114,7 @@ def main() -> int:
                         f"{TRIGGER} trigger, and the {rel.lag_days}d lag has "
                         f"elapsed"),
             "outcome": FE.OPEN, "code_sha": sha,
+            "source": "V2", "visibility": "PUBLIC",
             "note": ("opened from a SUPPORTED_PREDICTIVE relation with a "
                      "qualifying driver move. §20: never opened to increase "
                      "N.")})

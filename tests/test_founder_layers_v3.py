@@ -714,8 +714,14 @@ def _rich_report():
     from intent_engine.strategic_intelligence.shopify_fixture import (
         SHOPIFY_COMPANY, shopify_observations,
     )
-    return build_strategic_report(company_name=SHOPIFY_COMPANY,
-                                  observations=shopify_observations()).as_dict()
+    # THE BUSINESS MODEL IS PART OF THE REAL CALL. A tension fires on signal
+    # names, and signal names are generic enough that a chip designer's
+    # partner language matched a marketplace's -- so `tension_applies` fails
+    # closed on an unread model. Production supplies it; a fixture that omits
+    # it is exercising the refusal rather than the brief.
+    return build_strategic_report(
+        company_name=SHOPIFY_COMPANY, observations=shopify_observations(),
+        business_model="SUBSCRIPTION_SOFTWARE").as_dict()
 
 
 def _rich_pair():

@@ -531,3 +531,66 @@ def test_the_section_explains_the_change_through_the_exposure_it_rests_on():
     assert ctx.material_decision_delta
     assert ctx.lead_exposure is not None
     assert ctx.lead_exposure.quantity in ctx.material_decision_delta[0].trigger
+
+
+# --- §10 the three states, kept apart through every layer --------------------
+def _three_states():
+    """One economy, three companies, three different answers."""
+    econ = _economy(treasury_10y=_reading("treasury_10y", 6.0, 4.0, "UP"))
+    quiet = _economy(treasury_10y=_reading("treasury_10y", 4.01, 4.0, "UP"))
+    return {
+        "MATERIAL": _build(economy=econ),
+        "ABSTAIN": _build(economy=quiet),
+        "INSUFFICIENT": _build(economy=econ, exposures=()),
+    }
+
+
+def test_the_three_states_are_distinct_in_the_core():
+    s = _three_states()
+    assert s["MATERIAL"].status == FC.COMPLETE
+    assert s["ABSTAIN"].status == FC.NO_MATERIAL_ECONOMIC_DELTA
+    assert s["INSUFFICIENT"].status == FC.INSUFFICIENT_EVIDENCE
+    assert len({x.status for x in s.values()}) == 3
+
+
+def test_abstention_and_insufficient_evidence_are_never_collapsed():
+    """They answer different questions. "The economy does not bear on this
+    decision" is a reading; "this company has no evidenced exposure" is a gap
+    in the exposure map. Collapsing them tells an operator to fix the wrong
+    thing."""
+    s = _three_states()
+    assert s["ABSTAIN"].abstains and not s["INSUFFICIENT"].abstains
+    assert s["ABSTAIN"].headline() != s["INSUFFICIENT"].headline()
+    assert "do not materially change" in s["ABSTAIN"].headline()
+    assert "no exposure to any condition" in s["INSUFFICIENT"].headline()
+
+
+def test_the_three_states_survive_serialisation_and_reload():
+    import json
+    for name, ctx in _three_states().items():
+        back = FC.FounderEconomicContext.from_dict(
+            json.loads(json.dumps(ctx.as_dict(), default=str)))
+        assert back.status == ctx.status, name
+        assert back.headline() == ctx.headline(), name
+
+
+def test_the_three_states_render_three_different_passages():
+    from intent_engine.founder_brief import dossier as FD
+    from intent_engine.strategic_intelligence.editorial import SaidOnce
+    rendered = {}
+    for name, ctx in _three_states().items():
+        p = FD._economic_impact("Acme", ctx, SaidOnce())
+        text = " ".join(list(p.paragraphs)
+                        + [i["text"] for i in p.items if isinstance(i, dict)])
+        rendered[name] = text
+        assert p.is_substantive, name
+    assert len(set(rendered.values())) == 3, "two states rendered the same"
+
+
+def test_the_three_states_give_three_different_answers_in_qa():
+    from intent_engine.founder_brief import qa as FQA
+    answers = {name: FQA._economic_answer(
+        "Why did this recommendation change?", ctx)
+        for name, ctx in _three_states().items()}
+    assert all(answers.values())
+    assert len(set(answers.values())) == 3, "Q&A collapsed two states"

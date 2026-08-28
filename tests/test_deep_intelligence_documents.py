@@ -476,8 +476,9 @@ def test_break_a_gap_names_a_family_the_run_actually_retrieved():
     from intent_engine.strategic_intelligence.shopify_fixture import (
         shopify_observations,
     )
-    report = build_strategic_report(company_name="Shopify",
-                                    observations=shopify_observations())
+    report = build_strategic_report(
+        company_name="Shopify", observations=shopify_observations(),
+        business_model="SUBSCRIPTION_SOFTWARE")
     retrieved = {o.source_class for o in report.observations}
     for gap in report.evidence_gaps:
         if "has corroborated this yet" not in gap:

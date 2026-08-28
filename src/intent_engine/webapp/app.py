@@ -4909,6 +4909,47 @@ class WebApp:
                     "evidence": tuple(
                         str(e) for e in
                         (d.get("supporting_observation_ids") or ()))[:3]})
+        if not out:
+            out.extend(self._stated_exposure_risks(run_id))
+        return out[:4]
+
+    def _stated_exposure_risks(self, run_id) -> list:
+        """What THIS company says it depends on, in its own filings.
+
+        THE THIRD SOURCE, AND THE ONLY ONE THAT IS NEVER LIBRARY TEXT.
+        Vulnerabilities need a matched pattern; blind spots need a tension the
+        business model can have; both are written once and shared by every
+        company that qualifies. This is a sentence out of the subject's own
+        document -- "our results are sensitive to..." -- and it is the shape
+        §3 asks Baseline A to have: the company's own structural economics.
+
+        IT IS NOT THE TREATMENT. A is what the company says about itself; B
+        adds what the economic state says those conditions are actually
+        doing. The exposure is company evidence, the reading is not, and the
+        two are separated by which side of the comparison they enter.
+        """
+        try:
+            from intent_engine.econ import exposure as EXP
+            documents = [d.get("text_content") or ""
+                         for d in self._retrieved_documents(run_id)]
+            rows = EXP.read(documents, company_id=run_id) if documents else []
+        except Exception:                                   # noqa: BLE001
+            return []
+        out = []
+        for i, row in enumerate(rows):
+            basis = str(row.get("basis") or "").strip()
+            dimension = str(row.get("dimension") or "")
+            if not basis or not dimension:
+                continue
+            out.append({
+                "risk_id": f"company:stated:{i}",
+                "severity": "LOW",
+                "channel": dimension.replace("_", " ").lower()
+                                    .replace(" exposure", ""),
+                "mechanism": basis[:240],
+                "standing": "INFERRED",
+                "source": "stated_exposure",
+                "evidence": (f"filing:{run_id}",)})
         return out[:4]
 
     def _econ_relations(self, run_id) -> list:

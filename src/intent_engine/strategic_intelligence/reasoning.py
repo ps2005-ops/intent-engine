@@ -406,14 +406,34 @@ def _build_shifts(observations):
     return shifts
 
 
-def _build_blind_spots(observations):
+def _build_blind_spots(observations, business_model: str = ""):
+    """Tensions this company's evidence shows AND its business model can have.
+
+    TWO CONDITIONS, AND THE SECOND WAS MISSING. A tension used to fire on
+    signal names alone, and signal names are generic: NVIDIA's partner and
+    platform language matched a marketplace's, so its founder analysis led
+    with "Consolidating checkout/identity/data rails may encroach on layers
+    partners currently monetize" -- and, through the Baseline A fallback, that
+    sentence became its `top_priority`.
+
+    `patterns.tension_applies` decides, and it fails CLOSED: an undeclared
+    applicability or an unread business model produces no blind spot rather
+    than a confident sentence about the wrong kind of company. The refusals
+    are returned beside the results so the absence is legible as a decision.
+    """
+    from intent_engine.strategic_intelligence.patterns import tension_applies
     present = _signals_present(observations)
-    blind = []
+    blind, refused = [], []
     for t in TENSIONS:
         left = [s for s in t["left"] if s in present]
         right = [s for s in t["right"] if s in present]
         if not (left and right):
             continue                      # a tension needs BOTH sides observed
+        ok, kind = tension_applies(t, business_model)
+        if not ok:
+            refused.append({"tension_id": t["tension_id"], "kind": kind,
+                            "business_model": business_model or "UNKNOWN"})
+            continue
         supp = [o.observation_id for o in
                 _obs_with_any(observations, t["left"] + t["right"])]
         blind.append(BlindSpot(
@@ -423,8 +443,9 @@ def _build_blind_spots(observations):
             counter_explanation=t["counter_explanation"],
             evidence_needed=list(t["evidence_needed"]),
             decision_affected=t["decision_affected"],
+            kind=kind,
             supporting_observation_ids=supp))
-    return blind
+    return blind, refused
 
 
 # --- portfolio selection ------------------------------------------------------
@@ -928,7 +949,8 @@ def build_strategic_report(*, company_name, observations,
                            discovery_coverage=None,
                            retrieval_failures=None,
                            economic_history=None,
-                           source_coverage=None) -> StrategicReport:
+                           source_coverage=None,
+                           business_model: str = "") -> StrategicReport:
     """Compose a StrategicReport from structured observations. Status is left
     to the quality gate (:func:`quality.evaluate_report`), which the caller
     should apply; this function sets a provisional status of the gate result."""
@@ -1000,7 +1022,8 @@ def build_strategic_report(*, company_name, observations,
     fired_pattern_ids = {h.pattern_id for h in hypotheses}
     used_patterns = [p for p in patterns if p.pattern_id in fired_pattern_ids]
 
-    blind_spots = _build_blind_spots(observations)
+    blind_spots, blind_spots_refused = _build_blind_spots(
+        observations, business_model)
     questions = _build_questions(hypotheses, observations)
     shifts = _build_shifts(observations)
 
@@ -1073,10 +1096,12 @@ def build_strategic_report(*, company_name, observations,
     model = build_mental_model(company_name, observations, hypotheses,
                                now=when, previous=prev, blind_spots=blind_spots)
     surprises = [s.as_dict() for s in
-                 _ins.detect_surprises(company_name, observations, hypotheses)]
+                 _ins.detect_surprises(company_name, observations, hypotheses,
+                                          business_model)]
     opportunities = [o.as_dict() for o in
                      _ins.detect_opportunities(company_name, observations,
-                                               hypotheses)]
+                                               hypotheses,
+                                               business_model)]
     vulnerabilities = [v.as_dict() for v in
                        _ins.detect_vulnerabilities(company_name, observations,
                                                    hypotheses)]
@@ -1102,6 +1127,7 @@ def build_strategic_report(*, company_name, observations,
                          if isinstance(source_coverage, dict) else {}),
         limited_scope_accepted=user_accepts_limited_scope, evidence_graph=graph,
         timeline=timeline, agenda=agenda, source_library=source_library,
+        blind_spots_refused=blind_spots_refused,
         mental_model=model.as_dict(), surprises=surprises,
         opportunities=opportunities, vulnerabilities=vulnerabilities,
         underexamined_questions=underexamined, what_changed=changes, feed=feed)

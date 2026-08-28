@@ -83,6 +83,16 @@ class Risk:
     mechanism: str
     standing: str
     evidence: Tuple[str, ...] = ()
+    #: The economic condition this risk comes THROUGH, when it is an economic
+    #: risk at all. Empty for a risk that rests on the company's own evidence.
+    #:
+    #: DECLARED, NOT PARSED OUT OF THE ID. The first version of the damage
+    #: detector decided "is this an economic risk" from an id prefix
+    #: (`econ:`), which only the product arm uses -- so the research arm's
+    #: risks all read as non-economic and UNNECESSARY_CHANGE and
+    #: MISSED_MATERIAL_RISK fired on 25 of 25 material cases. A uniform count
+    #: is what a broken instrument looks like, not a finding.
+    quantity: str = ""
 
     def __post_init__(self) -> None:
         require(self.severity in SEVERITY, f"unknown severity "
@@ -93,7 +103,8 @@ class Risk:
     def as_dict(self) -> dict:
         return {"risk_id": self.risk_id, "severity": self.severity,
                 "channel": self.channel, "mechanism": self.mechanism,
-                "standing": self.standing, "evidence": list(self.evidence)}
+                "standing": self.standing, "evidence": list(self.evidence),
+                "quantity": self.quantity}
 
 
 @dataclass(frozen=True)
@@ -360,10 +371,23 @@ def compare(a: Analysis, b: Analysis, *, regime: str,
 # §14 DECISION DAMAGE
 # =============================================================================
 
+#: THREE OF THESE COULD NEVER FIRE.
+#:
+#: `FALSE_SPECIFICITY`, `WRONG_EXPOSURE` and `GENERIC_RECOMMENDATION` were
+#: declared and no detector referenced them, so "DecisionDamage = 0" was in
+#: part a statement about a vocabulary rather than about the analyses. A
+#: declared kind with no detector is the same defect as a test that cannot
+#: fail: it reports the absence of something nothing was looking for.
+#:
+#: Each now has a detector, and two more kinds are added for the two damages
+#: §9 names that the pairwise detector could see and did not:
+#: `UNNECESSARY_CHANGE` (the recommendation moved with nothing driving it) and
+#: `MISSED_MATERIAL_RISK` (an adverse condition moved and B stayed silent).
 DAMAGE_KINDS = ("IRRELEVANT_MACRO", "FALSE_SPECIFICITY",
                 "UNSUPPORTED_MECHANISM", "EXCESSIVE_CONFIDENCE",
                 "WRONG_EXPOSURE", "STALE_STATE", "DUPLICATED_EVIDENCE",
-                "GENERIC_RECOMMENDATION")
+                "GENERIC_RECOMMENDATION", "UNNECESSARY_CHANGE",
+                "MISSED_MATERIAL_RISK", "WRONG_SIGN")
 
 
 @dataclass(frozen=True)
@@ -386,9 +410,93 @@ class DecisionDamage:
 
 
 def detect_damage(a: Analysis, b: Analysis, *, regime: str,
-                  stale_days: Optional[int] = None) -> List[DecisionDamage]:
-    """Structural damage checks. No judge, no opinion."""
+                  stale_days: Optional[int] = None,
+                  evidenced_exposures: Sequence[str] = (),
+                  adverse_conditions: Sequence[str] = (),
+                  ) -> List[DecisionDamage]:
+    """Structural damage checks. No judge, no opinion.
+
+    `evidenced_exposures` are the quantities this company's OWN evidence
+    establishes it is exposed to, and `adverse_conditions` are the ones the
+    state says are moving against it. Both are optional: a caller that cannot
+    supply them gets the checks that do not need them, and the checks that do
+    stay silent rather than guessing. Silence here is not a pass — see
+    `damage_coverage`.
+    """
     out = []
+    # --- WRONG_EXPOSURE: a risk on a channel this company is not exposed to.
+    #
+    # The whole product rests on "no evidenced exposure, no reading", and
+    # nothing was checking the OUTPUT against that rule. A B that raised a
+    # commodity risk for a company whose evidence names only rates would have
+    # passed every other check here.
+    if evidenced_exposures:
+        allowed = {str(x) for x in evidenced_exposures}
+        for r in b.risks:
+            quantity = r.quantity
+            if not quantity:
+                continue
+            if quantity not in allowed:
+                out.append(DecisionDamage(
+                    company_id=b.company_id, regime=regime,
+                    kind="WRONG_EXPOSURE",
+                    detail=(f"B raises a risk through {quantity!r}, which is "
+                            f"not among this company's evidenced exposures "
+                            f"{sorted(allowed)[:4]}"),
+                    evidence=r.evidence))
+    # --- FALSE_SPECIFICITY: a figure in the prose that no evidence carries.
+    #
+    # A mechanism that names a number the analysis cannot source is the
+    # false-precision failure in miniature: it reads as measurement and is
+    # decoration.
+    cited = " ".join(list(b.evidence) + list(b.economic_inputs)
+                     + [r.trigger_text for r in () ])
+    for r in b.risks:
+        if r.standing != OBSERVED:
+            continue
+        figures = _figures(r.mechanism)
+        unsourced = [f for f in figures if f not in cited]
+        if unsourced:
+            out.append(DecisionDamage(
+                company_id=b.company_id, regime=regime,
+                kind="FALSE_SPECIFICITY",
+                detail=(f"risk {r.risk_id} states {unsourced[:2]} as observed "
+                        "and no cited evidence carries the figure"),
+                evidence=r.evidence))
+    # --- UNNECESSARY_CHANGE: the action moved with nothing driving it.
+    econ_risks = [r for r in b.risks if r.quantity]
+    if (ACTION_RANK[b.action] != ACTION_RANK[a.action] and not econ_risks):
+        out.append(DecisionDamage(
+            company_id=b.company_id, regime=regime,
+            kind="UNNECESSARY_CHANGE",
+            detail=(f"the action moved {a.action} -> {b.action} and B carries "
+                    "no economic risk; a recommendation that changes with "
+                    "nothing behind it is worse than one that does not move")))
+    # --- WRONG_SIGN: a risk raised on a condition moving the FAVOURABLE way.
+    #
+    # The sign lives on the company profile and the product reads it there,
+    # so this is the output check for the same rule: a risk whose own trigger
+    # says the condition moved the way that HELPS this business is the
+    # generic-macro failure with a mechanism attached.
+    for r in b.risks:
+        if not r.quantity or r.standing != OBSERVED:
+            continue
+        quantity = r.quantity
+        if adverse_conditions and quantity not in set(adverse_conditions):
+            out.append(DecisionDamage(
+                company_id=b.company_id, regime=regime, kind="WRONG_SIGN",
+                detail=(f"B raises {quantity!r} as a risk while the state has "
+                        "it moving the way that helps this business"),
+                evidence=r.evidence))
+    # --- MISSED_MATERIAL_RISK: an adverse condition moved and B stayed quiet.
+    if adverse_conditions and not econ_risks:
+        out.append(DecisionDamage(
+            company_id=b.company_id, regime=regime,
+            kind="MISSED_MATERIAL_RISK",
+            detail=(f"{sorted(adverse_conditions)[:3]} moved adversely through "
+                    "an established channel and B raised no risk; abstention "
+                    "is a result only when the state does not bear on the "
+                    "decision")))
     if b.unsupported_claims > a.unsupported_claims:
         out.append(DecisionDamage(
             company_id=b.company_id, regime=regime,
@@ -436,6 +544,60 @@ def detect_damage(a: Analysis, b: Analysis, *, regime: str,
             detail=f"{len(b.evidence) - len(set(b.evidence))} repeated "
                    "citation(s)"))
     return out
+
+
+def _figures(text: str) -> List[str]:
+    """Numeric claims in a sentence, as they are written."""
+    import re
+    return [m.group(0) for m in re.finditer(r"\d+(?:[.,]\d+)?%?", str(text))]
+
+
+def detect_generic(analyses: Sequence[Analysis], *,
+                   regime: str = "corpus") -> List[DecisionDamage]:
+    """GENERIC_RECOMMENDATION, which no pairwise check can see.
+
+    "The same recommendation for every company" is a property of a CORPUS,
+    and the pairwise detector had no way to look at one — which is why the
+    kind was declared and dead. A mechanism or a priority shared by most of a
+    set of different businesses is the template collapse this product keeps
+    rediscovering, and it is now measured rather than assumed absent.
+    """
+    if len(analyses) < 3:
+        return []
+    out: List[DecisionDamage] = []
+    threshold = max(3, (len(analyses) * 2) // 3)
+    for label, values in (
+            ("top_priority", [x.top_priority for x in analyses]),
+            ("mechanism", [r.mechanism for x in analyses for r in x.risks
+                           if r.quantity])):
+        counts: Dict[str, int] = {}
+        for v in values:
+            key = " ".join(str(v).lower().split())
+            if key:
+                counts[key] = counts.get(key, 0) + 1
+        for key, n in counts.items():
+            if n >= threshold:
+                out.append(DecisionDamage(
+                    company_id="*", regime=regime,
+                    kind="GENERIC_RECOMMENDATION",
+                    detail=(f"{n} of {len(analyses)} companies share one "
+                            f"{label}: {key[:90]!r}")))
+    return out
+
+
+def damage_coverage() -> dict:
+    """Which declared kinds a detector can actually produce.
+
+    Reported so "DecisionDamage = 0" can be read against the number of things
+    that were being looked for. A kind with no detector makes the zero mean
+    less than it appears to.
+    """
+    import inspect
+    src = (inspect.getsource(detect_damage)
+           + inspect.getsource(detect_generic))
+    live = tuple(k for k in DAMAGE_KINDS if f'"{k}"' in src)
+    return {"declared": list(DAMAGE_KINDS), "with_detector": list(live),
+            "without_detector": [k for k in DAMAGE_KINDS if k not in live]}
 
 
 # =============================================================================

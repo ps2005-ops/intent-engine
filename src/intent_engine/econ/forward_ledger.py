@@ -124,12 +124,35 @@ def assert_lifecycle(path: pathlib.Path = None, *, at: str = "2026-08-27"
     facts = {}
 
     # 1. every expectation carries what it needs to be scored later.
-    missing = [r["expectation_id"] for r in recs
+    # `created_at` IS PART OF FACT 1, and it was missing from the list.
+    #
+    # A record with a cutoff and no creation date cannot answer the single
+    # question preregistration exists to answer: did this prediction use
+    # evidence that arrived after it was made. One record on the real ledger
+    # was written without it, by a generator that appended here directly
+    # rather than through `belief.Expectation`, which requires the pair.
+    # THE CURRENT STATE OF EACH EXPECTATION, NOT EVERY ROW.
+    #
+    # Records accumulate: a resolution is a new line and does not repeat every
+    # field, so asking every ROW for a complete field set would fail on every
+    # resolution the ledger has ever taken. `by_id` folds the rows forward,
+    # which is what "the state of this expectation" means here.
+    current = list(by_id(p).values())
+    missing = [r["expectation_id"] for r in current
                if not (r.get("information_cutoff") and r.get("horizon_days")
-                       and r.get("resolution_rule") and r.get("expires_at"))]
+                       and r.get("resolution_rule") and r.get("expires_at")
+                       and r.get("created_at"))]
     require(not missing,
             f"{len(missing)} expectation(s) cannot be scored: {missing[:3]}")
     facts["opens_with_a_resolution_rule"] = True
+    # AND THE CUTOFF PRECEDES THE CREATION. Hindsight enters exactly here.
+    leaked = [r["expectation_id"] for r in current
+              if r.get("information_cutoff", "") > r.get("created_at", "")]
+    require(not leaked,
+            f"{len(leaked)} expectation(s) name an information cutoff AFTER "
+            f"the date they were made: {leaked[:3]}. A prediction cannot use "
+            "evidence that arrived after it was written down.")
+    facts["cutoff_precedes_creation"] = True
 
     # 2. reload is byte-identical.
     again = load(p)

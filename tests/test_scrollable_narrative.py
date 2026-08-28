@@ -57,8 +57,15 @@ def _report(company="Shopify"):
     from intent_engine.strategic_intelligence.shopify_fixture import (
         shopify_observations,
     )
-    return build_strategic_report(company_name=company,
-                                  observations=shopify_observations()).as_dict()
+    # THE BUSINESS MODEL IS PART OF THE REAL CALL. `tension_applies` fails
+    # closed on an unread model, so a fixture that omits it exercises the
+    # refusal rather than the report -- and here that would quietly weaken
+    # `test_break_two_unrelated_companies_receive_the_same_deep_report`,
+    # whose B side deliberately has no blind spots and whose whole point is
+    # the contrast with an A side that does.
+    return build_strategic_report(
+        company_name=company, observations=shopify_observations(),
+        business_model="SUBSCRIPTION_SOFTWARE").as_dict()
 
 
 def _brief(report, company="Shopify"):

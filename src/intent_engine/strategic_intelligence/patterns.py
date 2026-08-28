@@ -1294,9 +1294,38 @@ HYPOTHESIS_SCAFFOLDS = {
 
 # Live tensions used to build responsible blind-spot hypotheses: a tension is
 # "live" when observations present signals from BOTH sides.
+#: WHICH BUSINESS A TENSION IS A TENSION FOR.
+#:
+#: MEASURED LIVE. NVIDIA's founder analysis carried "Consolidating
+#: checkout/identity/data rails may encroach on layers partners currently
+#: monetize" as its leading company risk, and the same sentence reached
+#: Baseline A's `top_priority`. It is commerce-platform language on a chip
+#: designer, and nothing in this table stopped it: a tension fired whenever
+#: two SIGNAL NAMES were both present in the observations, and signal names
+#: are generic enough that a semiconductor company's partner and platform
+#: language matches a marketplace's.
+#:
+#: All three tensions below describe a multi-sided commerce platform. That is
+#: an honest statement about this library's coverage -- one business-model
+#: class of the ten the validation manifest carries -- and it is written down
+#: rather than hidden by letting the tensions fire everywhere. Widening the
+#: library means writing tensions that are true of the other classes, which is
+#: research, not a filter change.
+#:
+#: `applies_to` is REQUIRED on every tension. A tension with no declared
+#: applicability cannot fire at all -- fail closed, because the failure this
+#: closes is a confident sentence about the wrong kind of company.
+#:
+#: AND EVERY NAME IN IT MUST BE A CLASS THAT EXISTS. The first version of this
+#: table declared `MARKETPLACE_OR_PLATFORM`, which is not one of the ten
+#: classes `company_profile` carries -- so the tension it gated could never
+#: fire for any real company, which is a silent deletion wearing the shape of
+#: a filter. `test_every_applicable_class_is_a_real_business_model` pins it.
+
 TENSIONS = [
     {
         "tension_id": "enterprise_vs_smb_simplicity",
+        "applies_to": ("SUBSCRIPTION_SOFTWARE",),
         "left": ("enterprise_expansion", "product_breadth"),
         "right": ("smb_simplicity",),
         "observed_tension": "An enterprise/platform push is growing at the "
@@ -1317,6 +1346,7 @@ TENSIONS = [
     },
     {
         "tension_id": "breadth_vs_clear_value_prop",
+        "applies_to": ("SUBSCRIPTION_SOFTWARE",),
         "left": ("product_breadth",),
         "right": ("merchant_outcome_positioning", "storefront_creation"),
         "observed_tension": "Expanding product breadth strengthens lock-in but "
@@ -1337,6 +1367,7 @@ TENSIONS = [
     },
     {
         "tension_id": "control_vs_partner_openness",
+        "applies_to": ("SUBSCRIPTION_SOFTWARE",),
         "left": ("platform_control", "checkout_identity_rails"),
         "right": ("partner_ecosystem_enablement",),
         "observed_tension": "Consolidating checkout/identity/data rails may "
@@ -1354,3 +1385,43 @@ TENSIONS = [
                              "keep the ecosystem growing.",
     },
 ]
+
+
+# --- §5/§6 the blind-spot contract ------------------------------------------
+#: Why a blind spot exists, or why one does not. Five states, because five
+#: different things get confused with each other when a section is allowed to
+#: be merely empty or merely full.
+KNOWN_MISSING_EVIDENCE = "KNOWN_MISSING_EVIDENCE"
+INFERRED_INFORMATION_GAP = "INFERRED_INFORMATION_GAP"
+SOURCE_COVERAGE_GAP = "SOURCE_COVERAGE_GAP"
+MODEL_COVERAGE_GAP = "MODEL_COVERAGE_GAP"
+NOT_APPLICABLE = "NOT_APPLICABLE"
+BLIND_SPOT_KINDS = (KNOWN_MISSING_EVIDENCE, INFERRED_INFORMATION_GAP,
+                    SOURCE_COVERAGE_GAP, MODEL_COVERAGE_GAP, NOT_APPLICABLE)
+
+
+def tension_applies(tension: dict, business_model: str) -> tuple:
+    """(may it fire, why not). Fail closed on an undeclared applicability.
+
+    Returns one of `BLIND_SPOT_KINDS` as the reason, so a caller can report
+    the ABSENCE with its cause rather than as an empty section: a tension the
+    business model rules out and a business model we could not read are
+    different facts about the run, and only the second is a coverage gap in
+    this engine.
+    """
+    applies = tuple(tension.get("applies_to") or ())
+    if not applies:
+        return False, MODEL_COVERAGE_GAP
+    if not str(business_model or "").strip():
+        return False, MODEL_COVERAGE_GAP
+    if business_model not in applies:
+        return False, NOT_APPLICABLE
+    return True, INFERRED_INFORMATION_GAP
+
+
+def tension_model_coverage() -> dict:
+    """Which business models this library can produce a tension for at all."""
+    covered = sorted({m for t in TENSIONS for m in (t.get("applies_to") or ())})
+    return {"tensions": len(TENSIONS), "models_covered": covered,
+            "undeclared": [t["tension_id"] for t in TENSIONS
+                           if not t.get("applies_to")]}

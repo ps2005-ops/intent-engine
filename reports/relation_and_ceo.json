@@ -13,7 +13,7 @@
     "caterpillar": {
       "1_what_changed": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
       "2_why_it_matters_to_us": "equipment is bought on credit; the dealer's financing cost gates the order before the end market weakens",
-      "3_decision_affected": "MONITOR -> PREPARE on customer financing cost",
+      "3_decision_affected": "MONITOR -> INVESTIGATE on customer financing cost",
       "4_evidence": [
         "company_profile:caterpillar",
         "panel:BAA10Y@2022-07-14",
@@ -24,12 +24,10 @@
         "what is already contracted"
       ],
       "6_would_change_the_recommendation": [
-        "customer financing cost holds while BAA10Y continues UP",
-        "order backlog conversion holds while INDPRO continues UP"
+        "customer financing cost holds while BAA10Y continues UP"
       ],
       "7_learn_next": [
-        "how much of customer financing cost is already contracted",
-        "how much of order backlog conversion is already contracted"
+        "how much of customer financing cost is already contracted"
       ],
       "abstained": false,
       "company": "Caterpillar",
@@ -37,9 +35,9 @@
       "standing_of_top_risk": "OBSERVED"
     },
     "jpmorgan": {
-      "1_what_changed": "BAA10Y moved +0.1200 year-on-year to 2.31 as of 2022-07-14",
-      "2_why_it_matters_to_us": "a wider spread anticipates the charge-offs that drive reserve builds",
-      "3_decision_affected": "MONITOR -> INVESTIGATE on credit provisioning",
+      "1_what_changed": "T10Y3M moved -0.8500 year-on-year to 0.56 as of 2022-07-14",
+      "2_why_it_matters_to_us": "an inverted curve compresses the spread between funding and lending; the deposit beta decides how fast",
+      "3_decision_affected": "MONITOR -> PREPARE on net interest margin",
       "4_evidence": [
         "company_profile:jpmorgan",
         "panel:BAA10Y@2022-07-14",
@@ -50,15 +48,17 @@
         "what is already contracted"
       ],
       "6_would_change_the_recommendation": [
+        "net interest margin holds while T10Y3M continues DOWN",
         "credit provisioning holds while BAA10Y continues UP"
       ],
       "7_learn_next": [
+        "how much of net interest margin is already contracted",
         "how much of credit provisioning is already contracted"
       ],
       "abstained": false,
       "company": "JPMorgan",
       "provenance_coverage": 1.0,
-      "standing_of_top_risk": "OBSERVED"
+      "standing_of_top_risk": "INFERRED"
     },
     "meta": {
       "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
@@ -175,24 +175,24 @@
       "standing_of_top_risk": "INFERRED"
     },
     "unionpacific": {
-      "1_what_changed": "INDPRO moved +0.0416 year-on-year to 104.4 as of 2022-06-01",
-      "2_why_it_matters_to_us": "rail volume is close to a direct read on industrial output; the mix between intermodal and bulk decides yield",
-      "3_decision_affected": "MONITOR -> INVESTIGATE on carload volume",
+      "1_what_changed": "nothing in the economic state moved enough to bear on this decision",
+      "2_why_it_matters_to_us": "Union Pacific's exposure runs through carload volume, and nothing read this period moves it",
+      "3_decision_affected": "none; the standing decision on carload volume holds",
       "4_evidence": [
         "company_profile:unionpacific",
         "panel:INDPRO@2022-06-01",
         "panel:PERMIT@2022-05-01"
       ],
       "5_uncertain_about": [
-        "what is already contracted"
+        "the current economic environment"
       ],
       "6_would_change_the_recommendation": [
-        "carload volume holds while INDPRO continues UP"
+        "Union Pacific reports carload volume moving against expectation"
       ],
       "7_learn_next": [
-        "how much of carload volume is already contracted"
+        "current reading of carload volume"
       ],
-      "abstained": false,
+      "abstained": true,
       "company": "Union Pacific",
       "provenance_coverage": 1.0,
       "standing_of_top_risk": "INFERRED"
@@ -276,7 +276,7 @@
       "question": "what if the driver reverses"
     },
     {
-      "answer": "the channel is MONITOR -> PREPARE on customer financing cost; a competitor with a different financing or mix posture absorbs the same driver elsewhere",
+      "answer": "the channel is MONITOR -> INVESTIGATE on customer financing cost; a competitor with a different financing or mix posture absorbs the same driver elsewhere",
       "grounded_in": [
         "company_profile:caterpillar",
         "panel:BAA10Y@2022-07-14",
@@ -296,7 +296,7 @@
       "question": "what are you least certain about"
     },
     {
-      "answer": "MONITOR -> PREPARE on customer financing cost",
+      "answer": "MONITOR -> INVESTIGATE on customer financing cost",
       "grounded_in": [
         "company_profile:caterpillar",
         "panel:BAA10Y@2022-07-14",
@@ -326,9 +326,9 @@
     },
     "funding": {
       "company_consumers": 1,
-      "deltas_produced": 0,
+      "deltas_produced": 1,
       "freshness_days": 1,
-      "quality": "LIVE_CONTEXT_ONLY",
+      "quality": "LIVE_DECISION_RELEVANT",
       "relations_supported": 0,
       "status": "LIVE"
     },
@@ -438,17 +438,17 @@
     },
     "yield_curve": {
       "company_consumers": 1,
-      "deltas_produced": 0,
+      "deltas_produced": 1,
       "freshness_days": 1,
-      "quality": "LIVE_CONTEXT_ONLY",
+      "quality": "LIVE_DECISION_RELEVANT",
       "relations_supported": 0,
       "status": "LIVE"
     }
   },
   "dimension_quality_counts": {
     "BLOCKED": 6,
-    "LIVE_CONTEXT_ONLY": 3,
-    "LIVE_DECISION_RELEVANT": 6,
+    "LIVE_CONTEXT_ONLY": 1,
+    "LIVE_DECISION_RELEVANT": 8,
     "LIVE_UNPROVEN_VALUE": 2
   },
   "history_rewind_economic": [
@@ -474,7 +474,7 @@
         "priority": "order backlog conversion"
       },
       "founder_B": {
-        "action": "PREPARE",
+        "action": "INVESTIGATE",
         "confidence": "MEDIUM",
         "priority": "customer financing cost"
       },
@@ -489,7 +489,6 @@
         "top_priority",
         "action",
         "top_risks",
-        "scenario",
         "confidence",
         "information_priority"
       ],
@@ -497,7 +496,7 @@
     },
     {
       "as_of": "2023-06-15",
-      "company": "Nike",
+      "company": "Caterpillar",
       "counterfactual_label": "SCENARIO_ASSUMPTION",
       "economic_state_at_T": {
         "BAA10Y": "DOWN",
@@ -514,17 +513,18 @@
       "founder_A": {
         "action": "MONITOR",
         "confidence": "LOW",
-        "priority": "discretionary unit demand"
+        "priority": "order backlog conversion"
       },
       "founder_B": {
         "action": "INVESTIGATE",
         "confidence": "MEDIUM",
-        "priority": "promotional intensity and inventory"
+        "priority": "construction end-market"
       },
       "information_available_at_T": [
-        "company_profile:nike",
-        "panel:PCEC96@2023-04-01",
-        "panel:UNRATE@2023-05-01"
+        "company_profile:caterpillar",
+        "panel:BAA10Y@2023-06-14",
+        "panel:INDPRO@2023-05-01",
+        "panel:PERMIT@2023-04-01"
       ],
       "regime": "credit_stress",
       "what_B_changed": [

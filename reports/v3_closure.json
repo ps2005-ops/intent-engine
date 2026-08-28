@@ -1,566 +1,640 @@
 {
-  "at": "2026-08-27",
-  "calibration": {
-    "minimum": 30,
-    "open_expectations": 12,
-    "resolved": 0,
-    "rule": "every number in this run is HISTORICAL OUT-OF-SAMPLE PERFORMANCE and none of it is live accuracy",
-    "status": "PRE_CALIBRATION"
-  },
-  "code_sha": "277bec62",
-  "construct_verdicts": {
-    "collective_block": {
-      "DEEP": {
-        "H3": "INSUFFICIENT_POWER",
-        "H4": "INSUFFICIENT_POWER",
-        "verdict": "INSUFFICIENT_DATA",
-        "why": "re-run on the V3 panel with a stronger base block and UEMP15OV added; both verdicts unchanged"
+  "as_of": "2026-08-27",
+  "code_sha": "f5e1237f",
+  "contract": "v3_closure.v1",
+  "dimensions": {
+    "as_of": "2026-08-27",
+    "by_value": {
+      "BLOCKED": 6,
+      "LIVE_CONTEXT_ONLY": 6,
+      "LIVE_DECISION_RELEVANT": 3,
+      "LIVE_UNPROVEN_VALUE": 2
+    },
+    "dimensions": 17,
+    "rows": [
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "commodities",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
       },
-      "MODERN": {
-        "H3": "INSUFFICIENT_POWER",
-        "H4": "INSUFFICIENT_POWER",
-        "verdict": "INSUFFICIENT_DATA",
-        "why": "re-run on the V3 panel with a stronger base block and UEMP15OV added; both verdicts unchanged"
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "credit",
+        "freshness_days": 1,
+        "note": "from ['BAA10Y', 'AAA10Y', 'BAA', 'DRCCLACBS', 'CORCACBS']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "BAA10Y",
+          "AAA10Y",
+          "BAA",
+          "DRCCLACBS",
+          "CORCACBS"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "5 of 5 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 1,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 1,
+        "dimension": "funding",
+        "freshness_days": 1,
+        "note": "from ['T10Y3M']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "T10Y3M"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_DECISION_RELEVANT"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "fx",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-06-01",
+        "company_consumers": 6,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "growth",
+        "freshness_days": 87,
+        "note": "from ['INDPRO', 'PCEC96']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "INDPRO",
+          "PCEC96"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "2 of 2 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-06-01",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "household_balance_sheet",
+        "freshness_days": 87,
+        "note": "from ['PSAVERT', 'REVOLSL', 'TDSP']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "PSAVERT",
+          "REVOLSL",
+          "TDSP"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "3 of 3 series readable",
+        "value": "LIVE_UNPROVEN_VALUE"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-20",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 3,
+        "dimension": "housing",
+        "freshness_days": 7,
+        "note": "from ['HOUST', 'PERMIT', 'MORTGAGE30US', 'HSN1F']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 1,
+        "series": [
+          "HOUST",
+          "PERMIT",
+          "MORTGAGE30US",
+          "HSN1F"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "4 of 4 series readable",
+        "value": "LIVE_DECISION_RELEVANT"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-07-01",
+        "company_consumers": 1,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "inflation",
+        "freshness_days": 57,
+        "note": "from ['CPIAUCSL']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "CPIAUCSL"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-07-01",
+        "company_consumers": 4,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "labour",
+        "freshness_days": 57,
+        "note": "from ['UNRATE', 'U6RATE', 'EMRATIO', 'CIVPART', 'UEMP15OV']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "UNRATE",
+          "U6RATE",
+          "EMRATIO",
+          "CIVPART",
+          "UEMP15OV"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "5 of 5 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "liquidity",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-25",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "policy_rates",
+        "freshness_days": 2,
+        "note": "from ['DFF']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "DFF"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "positioning",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "real_rates",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 3,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "risk_appetite",
+        "freshness_days": 1,
+        "note": "from ['BAA10Y']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "BAA10Y"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "1 of 1 series readable",
+        "value": "LIVE_CONTEXT_ONLY"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-06-01",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 0,
+        "dimension": "sentiment",
+        "freshness_days": 87,
+        "note": "from ['UMCSENT', 'MICH']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "UMCSENT",
+          "MICH"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "2 of 2 series readable",
+        "value": "LIVE_UNPROVEN_VALUE"
+      },
+      {
+        "acquisition": "BLOCKED",
+        "as_of": "",
+        "company_consumers": 0,
+        "consumer": [
+          "EconomicState"
+        ],
+        "deltas_produced": 0,
+        "dimension": "volatility",
+        "freshness_days": null,
+        "note": "no series in this panel measures it. BLOCKED, not absent: the dimension stays in the denominator.",
+        "persisted": false,
+        "producer": "",
+        "relations_supported": 0,
+        "series": [],
+        "source": "",
+        "standing": "UNKNOWN",
+        "uncertainty": "",
+        "value": "BLOCKED"
+      },
+      {
+        "acquisition": "LIVE",
+        "as_of": "2026-08-26",
+        "company_consumers": 1,
+        "consumer": [
+          "EconomicState",
+          "CompanyEconomicState",
+          "founder_view"
+        ],
+        "deltas_produced": 1,
+        "dimension": "yield_curve",
+        "freshness_days": 1,
+        "note": "from ['DGS2', 'DGS10', 'T10Y3M']",
+        "persisted": true,
+        "producer": "econ.panel",
+        "relations_supported": 0,
+        "series": [
+          "DGS2",
+          "DGS10",
+          "T10Y3M"
+        ],
+        "source": "ALFRED/FRED",
+        "standing": "OBSERVED",
+        "uncertainty": "3 of 3 series readable",
+        "value": "LIVE_DECISION_RELEVANT"
       }
-    },
-    "refused_candidates": {
-      "DEFENSIBLE_PROXY": [
-        "UEMP15OV"
-      ],
-      "SAME_SERIES_NOT_A_PROXY": [
-        "UMCSENT1"
-      ],
-      "UNUSABLE": [
-        "UEMPMEAN"
-      ],
-      "WEAK_PROXY": [
-        "BAA10Y",
-        "AAA10Y",
-        "BAA",
-        "T10Y3M",
-        "UEMP15OV",
-        "UEMPMEAN"
-      ]
-    },
-    "sentiment": {
-      "UMCSENT->HOUST": {
-        "mechanism_role": "EARLY_REFLECTION_OF_ANOTHER_VARIABLE",
-        "role_tested": [
-          "FORECASTING",
-          "EARLY_WARNING"
-        ],
-        "verdict": "RETIRE",
-        "why": "the lead was a property of the origins that were measured, not of the series. On the 482 evaluation-fold origins UMCSENT leads HOUST by 6 months; on all 584 the lag is 0 and the correlation is HIGHER (+0.405 against +0.298). Adding 1978-1986 -- the Volcker disinflation and the largest housing cycles in the sample -- removes the lead."
-      },
-      "UMCSENT->INDPRO": {
-        "mechanism_role": "EARLY_REFLECTION_OF_ANOTHER_VARIABLE",
-        "role_tested": [
-          "FORECASTING",
-          "EARLY_WARNING"
-        ],
-        "verdict": "INSUFFICIENT_DATA",
-        "why": "the lead is robust to the window and survives each confounder singly, but the incremental Brier delta is -0.00247 with an episode-aware interval spanning zero, and only one episode was warned by both models -- below the floor of three."
-      }
-    },
-    "underemployment_extension": {
-      "series": "UEMP15OV",
-      "verdict": "OBSERVED",
-      "why": "DEFENSIBLE_PROXY for U6RATE, extending the construct from 2012 back to 1964. It reaches the model; it has not yet earned a predictive role."
-    }
+    ]
   },
-  "episode_ledger": {
-    "contract": "econ_episodes.v1/ledger",
-    "detail": [
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [
-          "PSAVERT",
-          "REVOLSL"
-        ],
-        "end_as_known": "1983-07-15",
-        "episode_id": "EP_197801",
-        "information_cutoff": "1983-07-15",
-        "normalization": "1984-01-15",
-        "origins": 67,
-        "peak_stress": 3,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "INFLATION_SHOCK",
-          "LIQUIDITY_STRESS",
-          "LABOUR_DETERIORATION"
-        ],
-        "resolved": true,
-        "start_as_known": "1978-01-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 0.41,
-          "inflation_yoy": 0.06713,
-          "policy_change_pp": 0.25,
-          "unemployment_change_pp": -1.4
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [
-          "PSAVERT",
-          "REVOLSL"
-        ],
-        "end_as_known": "1985-02-15",
-        "episode_id": "EP_198403",
-        "information_cutoff": "1985-02-15",
-        "normalization": "1985-08-15",
-        "origins": 12,
-        "peak_stress": 1,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "INFLATION_SHOCK"
-        ],
-        "resolved": true,
-        "start_as_known": "1984-03-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 1.05,
-          "inflation_yoy": 0.0429,
-          "policy_change_pp": 0.21,
-          "unemployment_change_pp": -2.6
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [
-          "PSAVERT",
-          "REVOLSL"
-        ],
-        "end_as_known": "1992-11-15",
-        "episode_id": "EP_198710",
-        "information_cutoff": "1992-11-15",
-        "normalization": "1993-05-15",
-        "origins": 57,
-        "peak_stress": 2,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "INFLATION_SHOCK",
-          "LIQUIDITY_STRESS",
-          "LABOUR_DETERIORATION"
-        ],
-        "resolved": true,
-        "start_as_known": "1987-10-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 0.99,
-          "inflation_yoy": 0.04288,
-          "policy_change_pp": 0.17,
-          "unemployment_change_pp": -1.1
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2002-10-15",
-        "episode_id": "EP_200002",
-        "information_cutoff": "2002-10-15",
-        "normalization": "2003-04-15",
-        "origins": 28,
-        "peak_stress": 1,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "LIQUIDITY_STRESS",
-          "LABOUR_DETERIORATION"
-        ],
-        "resolved": true,
-        "start_as_known": "2000-02-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": -0.06,
-          "inflation_yoy": 0.02676,
-          "policy_change_pp": 0.15,
-          "unemployment_change_pp": -0.3
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2003-07-15",
-        "episode_id": "EP_200307",
-        "information_cutoff": "2003-07-15",
-        "normalization": "2004-01-15",
-        "origins": 1,
-        "peak_stress": 1,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "LABOUR_DETERIORATION"
-        ],
-        "resolved": true,
-        "start_as_known": "2003-07-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 2.39,
-          "inflation_yoy": 0.01894,
-          "policy_change_pp": 0.06,
-          "unemployment_change_pp": 0.6
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2007-05-15",
-        "episode_id": "EP_200511",
-        "information_cutoff": "2007-05-15",
-        "normalization": "2007-11-15",
-        "origins": 15,
-        "peak_stress": 2,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "INFLATION_SHOCK",
-          "LIQUIDITY_STRESS"
-        ],
-        "resolved": true,
-        "start_as_known": "2005-11-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 0.11,
-          "inflation_yoy": 0.04742,
-          "policy_change_pp": 0.04,
-          "unemployment_change_pp": -0.5
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2010-05-15",
-        "episode_id": "EP_200801",
-        "information_cutoff": "2010-05-15",
-        "normalization": "2010-11-15",
-        "origins": 29,
-        "peak_stress": 2,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "INFLATION_SHOCK",
-          "LABOUR_DETERIORATION"
-        ],
-        "resolved": true,
-        "start_as_known": "2008-01-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 1.23,
-          "inflation_yoy": 0.04373,
-          "policy_change_pp": 0.13,
-          "unemployment_change_pp": 0.6
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2018-02-15",
-        "episode_id": "EP_201706",
-        "information_cutoff": "2018-02-15",
-        "normalization": "2018-08-15",
-        "origins": 9,
-        "peak_stress": 1,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "CREDIT_STRESS"
-        ],
-        "resolved": true,
-        "start_as_known": "2017-06-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 0.8,
-          "delinquency_yoy": 0.12558,
-          "inflation_yoy": 0.02176,
-          "policy_change_pp": 0.0,
-          "unemployment_change_pp": -0.4
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2024-12-15",
-        "episode_id": "EP_202004",
-        "information_cutoff": "2024-12-15",
-        "normalization": "2025-06-15",
-        "origins": 56,
-        "peak_stress": 3,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "LABOUR_DETERIORATION",
-          "INFLATION_SHOCK",
-          "LIQUIDITY_STRESS",
-          "CREDIT_STRESS"
-        ],
-        "resolved": true,
-        "start_as_known": "2020-04-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 0.53,
-          "delinquency_yoy": 0.02756,
-          "inflation_yoy": 0.02341,
-          "policy_change_pp": 0.0,
-          "unemployment_change_pp": 0.6
-        }
-      },
-      {
-        "behavioural_available": [
-          "EMRATIO",
-          "MICH",
-          "PSAVERT",
-          "REVOLSL",
-          "UEMP15OV",
-          "UMCSENT"
-        ],
-        "behavioural_missing": [],
-        "end_as_known": "2026-07-15",
-        "episode_id": "EP_202607",
-        "information_cutoff": "2026-07-15",
-        "normalization": "",
-        "origins": 1,
-        "peak_stress": 1,
-        "provenance": "econ.regime.classify over the walled panel; no window was supplied and no outcome was consulted",
-        "regime_sequence": [
-          "INFLATION_SHOCK"
-        ],
-        "resolved": false,
-        "start_as_known": "2026-07-15",
-        "targets": [
-          "DRCCLACBS",
-          "HOUST",
-          "INDPRO",
-          "PCEC96",
-          "UNRATE"
-        ],
-        "testable_for_behaviour": true,
-        "trigger_evidence": {
-          "curve_slope_pp": 0.4,
-          "delinquency_yoy": -0.04575,
-          "inflation_yoy": 0.0427,
-          "policy_change_pp": 0.0,
-          "unemployment_change_pp": -0.1
-        }
-      }
-    ],
-    "episodes": 10,
-    "testable_for_behaviour": 10
-  },
-  "founder_integration": {
-    "status": "REFUSED",
-    "why": "nothing earned a supported role. The one replicated observation was retired as a window artifact on housing and is INSUFFICIENT_DATA on industrial production. The six-company test is not run."
-  },
-  "h7_hash": "3a5c4d36259e08a2",
-  "information_priority": [
-    {
-      "acquisition_cost": "MEDIUM \u2014 likely a licensed or FOIA route",
-      "decision_impact": "HIGH",
-      "expected_power_gain": "financial_anxiety becomes testable across 8 more episodes; it is currently the only construct with a discriminating instrument and no history",
-      "question": "a vintage-correct household credit series before 2012 (H.8 delinquency real-time archive, or a licensed bank-panel equivalent)",
-      "score": 9,
-      "uncertainty": "HIGH"
-    },
-    {
-      "acquisition_cost": "LOW \u2014 MORTGAGE30US and PERMIT are on ALFRED",
-      "decision_impact": "HIGH",
-      "expected_power_gain": "unblocks the target where the sentiment claim was strongest; today it cannot be scored at all",
-      "question": "a housing-direction baseline that beats a constant (mortgage rates, permits, months-of-supply, all vintage-correct)",
-      "score": 9,
-      "uncertainty": "HIGH"
-    },
-    {
-      "acquisition_cost": "MEDIUM \u2014 Z.1 has no early real-time archive",
-      "decision_impact": "MEDIUM",
-      "expected_power_gain": "turns 'unchecked' into 'ruled out' for the mechanism claim",
-      "question": "a vintage-correct household WEALTH series, to close the one adversary alternative that is UNTESTABLE",
-      "score": 6,
-      "uncertainty": "MEDIUM"
-    },
-    {
-      "acquisition_cost": "HIGH \u2014 no keyless vintage source found",
-      "decision_impact": "MEDIUM",
-      "expected_power_gain": "UEMPMEAN failed as a quits proxy with crisis agreement 0.00; a real flow series would extend perceived_control",
-      "question": "pre-JOLTS labour FLOW data (hires and separations, not stocks)",
-      "score": 4,
-      "uncertainty": "MEDIUM"
-    },
-    {
-      "acquisition_cost": "LOW",
-      "decision_impact": "LOW",
-      "expected_power_gain": "measured at x2.86 rows for x3.63 effective origins last run; the grid is not the constraint and has not been for two runs",
-      "question": "more forecast origins or a finer grid",
-      "score": 1,
-      "uncertainty": "LOW"
-    }
-  ],
   "learning": {
-    "assumptions_retired": 3,
-    "constructs_extended": [
-      "underemployment (2012 -> 1964)"
-    ],
-    "effective_origins_v2": 127.15,
-    "effective_origins_v3": 81.62,
-    "episodes_v2": 15,
-    "episodes_v3": 15,
-    "false_discoveries_killed": 1,
-    "hypotheses_preregistered": 1,
-    "hypotheses_resolved": 1,
-    "learning_quality": "HIGH: the single replicated result the previous run reported as its one positive finding was retired by a test this run built to attack it. That is the machinery working.",
-    "network_calls": 580,
-    "real_forward_pairs": 6,
-    "series_admitted": 5,
-    "series_probed": 20,
-    "series_refused": 15,
-    "stagnation": "NO: the constraint moved from 'historical behavioural depth' to two specific, named, cheap-to-acquire gaps \u2014 a pre-2012 household credit archive and a housing baseline that beats a coin flip."
-  },
-  "real_forward": {
-    "carried": 12,
-    "note": "\u00a719: no session time is spent waiting. The expectations are open, the lifecycle is proved, and the next judge is the calendar.",
-    "opened": 0,
-    "pairs": 6,
-    "path": "reports/real_forward_expectations.jsonl",
-    "status": "AWAITING_REAL_WORLD_RESOLUTION",
-    "total": 12
-  },
-  "zero_trade": [
-    {
-      "confidence": 0.95,
-      "cycle": "V3_H7_HOUST",
-      "information_missing": "none \u2014 this was resolvable and resolved",
-      "later_evaluation_rule": "re-open only if a measurement on the FULL record shows a lead",
-      "outcome": "REJECTED_SIGNAL",
-      "reason": "the temporal order was a window artifact; the lead vanishes on the full origin record"
+    "as_of": "2026-08-27",
+    "decision_value": {
+      "abstained": 35,
+      "attributed": 25,
+      "cases": 60,
+      "damage": 0,
+      "damage_by_kind": {},
+      "damage_kinds_declared": 11,
+      "damage_kinds_with_a_detector": 11,
+      "material": 25,
+      "negative_control": "PASS"
     },
-    {
-      "confidence": 0.6,
-      "cycle": "V3_H7_INDPRO",
-      "information_missing": "more episodes in which the base model warns at all",
-      "later_evaluation_rule": "re-test when the eligible-family episode count exceeds three warned episodes",
-      "outcome": "NO_SIGNAL",
-      "reason": "the lead is robust but the incremental Brier delta is negative with an episode-aware interval spanning zero, and only one episode was warned by both models"
+    "expectations": {
+      "calibration_status": "PRE_CALIBRATION",
+      "real_open": 13,
+      "real_resolved": 0,
+      "rehearsal_isolated": true,
+      "why": "no real prediction has reached its horizon; calibration with an empty denominator is the claim this programme exists to not make"
     },
-    {
-      "confidence": 0.9,
-      "cycle": "V3_HOUSING_BASELINE",
-      "information_missing": "a housing model that beats a coin flip; this is not a human-state failure",
-      "later_evaluation_rule": "H7 on housing cannot be scored until a base model clears the ladder",
-      "outcome": "NO_SIGNAL",
-      "reason": "housing direction is BASELINE_INVALID in both arms at both horizons: the macro block scores 0.2735 against a constant's 0.2525"
+    "product_parity": {
+      "cases": 60,
+      "explained": 8,
+      "identical": 52,
+      "unexplained": 0
+    },
+    "relations": {
+      "by_state": {
+        "CANDIDATE": 5,
+        "SUPPORTED_PREDICTIVE": 1
+      },
+      "evaluated": 6,
+      "not_tested_because_driver_did_not_move": 5,
+      "not_tested_because_lag_pending": 0
     }
-  ]
+  },
+  "reconciliation": {
+    "checked": 4,
+    "problems": [],
+    "reconciles": true
+  },
+  "relations": {
+    "as_of": "2026-08-27",
+    "by_state": {
+      "CANDIDATE": 5,
+      "SUPPORTED_PREDICTIVE": 1
+    },
+    "relations": 6,
+    "rows": [
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 2,
+        "direction_correct": false,
+        "evidence": "both series in the panel, daily, never revised",
+        "falsifier": "the mortgage rate moves opposite to the policy rate over two consecutive quarters",
+        "lag_days": 30,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:DFF",
+          "panel:MORTGAGE30US"
+        ],
+        "mechanism": "the policy rate sets the front of the curve and mortgage pricing follows the long end with a spread that widens under funding stress",
+        "next_eligible_evaluation": "2026-09-24",
+        "order": 1,
+        "regime": "ALL",
+        "relation": "DFF->MORTGAGE30US",
+        "sign": 1,
+        "source": "DFF",
+        "source_move": 0.0,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "MORTGAGE30US",
+        "target_moved": true,
+        "uncertainty": "LOW",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "",
+        "days_since_source_move": 7,
+        "direction_correct": true,
+        "evidence": "panel, 1971-2026",
+        "falsifier": "permits rise through a 200bp mortgage-rate increase",
+        "lag_days": 120,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:MORTGAGE30US",
+          "panel:PERMIT"
+        ],
+        "mechanism": "a higher mortgage rate raises the monthly payment on a given price, and builders pull permits before they pull starts",
+        "next_eligible_evaluation": "2026-12-18",
+        "order": 1,
+        "regime": "ALL",
+        "relation": "MORTGAGE30US->PERMIT",
+        "sign": -1,
+        "source": "MORTGAGE30US",
+        "source_move": 0.12,
+        "source_moved": true,
+        "status": "SUPPORTED_PREDICTIVE",
+        "target": "PERMIT",
+        "target_moved": true,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": ""
+      },
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 87,
+        "direction_correct": false,
+        "evidence": "panel, 1960-2026",
+        "falsifier": "starts and permits diverge for a year",
+        "lag_days": 60,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:PERMIT",
+          "panel:HOUST"
+        ],
+        "mechanism": "a permit is a committed intention to start; the gap between them is the builder's own timing",
+        "next_eligible_evaluation": "2026-08-27",
+        "order": 2,
+        "regime": "ALL",
+        "relation": "PERMIT->HOUST",
+        "sign": 1,
+        "source": "PERMIT",
+        "source_move": -0.01787,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "HOUST",
+        "target_moved": true,
+        "uncertainty": "LOW",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "",
+        "days_since_source_move": 1,
+        "direction_correct": true,
+        "evidence": "panel, 1986-2026",
+        "falsifier": "industrial production accelerates through a 200bp spread widening",
+        "lag_days": 180,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:BAA10Y",
+          "panel:INDPRO"
+        ],
+        "mechanism": "a wider credit spread raises the marginal cost of corporate financing, which shows up first in inventory and capex and then in output",
+        "next_eligible_evaluation": "2027-02-22",
+        "order": 2,
+        "regime": "ALL",
+        "relation": "BAA10Y->INDPRO",
+        "sign": -1,
+        "source": "BAA10Y",
+        "source_move": -0.01,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "INDPRO",
+        "target_moved": false,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 1,
+        "direction_correct": false,
+        "evidence": "panel, 1982-2026",
+        "falsifier": "spreads narrow through a sustained inversion",
+        "lag_days": 180,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:T10Y3M",
+          "panel:BAA10Y"
+        ],
+        "mechanism": "an inverted curve compresses bank net interest margin, lending standards tighten, and the credit spread widens",
+        "next_eligible_evaluation": "2027-02-22",
+        "order": 1,
+        "regime": "ALL",
+        "relation": "T10Y3M->BAA10Y",
+        "sign": -1,
+        "source": "T10Y3M",
+        "source_move": -0.02,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "BAA10Y",
+        "target_moved": true,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      },
+      {
+        "counterevidence": "the target moved against the sign",
+        "days_since_source_move": 57,
+        "direction_correct": false,
+        "evidence": "panel, 1959-2026",
+        "falsifier": "real consumption rises through a 1pp unemployment increase",
+        "lag_days": 90,
+        "last_evaluated": "2026-08-27",
+        "lineage": [
+          "panel:UNRATE",
+          "panel:PCEC96"
+        ],
+        "mechanism": "employment is the household income channel; spending follows with a lag set by savings buffers",
+        "next_eligible_evaluation": "2026-09-29",
+        "order": 3,
+        "regime": "ALL",
+        "relation": "UNRATE->PCEC96",
+        "sign": -1,
+        "source": "UNRATE",
+        "source_move": 0.0,
+        "source_moved": false,
+        "status": "CANDIDATE",
+        "target": "PCEC96",
+        "target_moved": false,
+        "uncertainty": "MEDIUM",
+        "why_not_supported": "the driver did not move, so the relation was not tested \u2014 this is not a failure of the relation"
+      }
+    ],
+    "states_declared": [
+      "CANDIDATE",
+      "OBSERVED",
+      "SUPPORTED_PREDICTIVE",
+      "CANDIDATE_NOT_PROVEN",
+      "CONTRADICTED",
+      "RETIRED",
+      "PENDING_LAG"
+    ]
+  }
 }

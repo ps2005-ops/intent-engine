@@ -377,7 +377,7 @@ def augmented(base: FA.Analysis, *, rows: Sequence[dict], profile,
     for r in adverse:
         variable = _business_variable(r["channel"], profile)
         risks.append(FA.Risk(
-            risk_id=f"econ:{r['quantity']}",
+            risk_id=f"econ:{r['quantity']}", quantity=r["quantity"],
             severity="HIGH" if len(adverse) > 2 else "MEDIUM",
             channel=variable or r["channel"].replace("_", " ").lower(),
             mechanism=r["mechanism"], standing=FA.OBSERVED,
@@ -595,8 +595,15 @@ def build(*, company_id: str, company_name: str, as_of: str, economy,
             refused.append({"field": f.field, "code": code,
                             "reason": FC.refusal_reason(code)})
     # §14 DAMAGE, on the product path and with the same detector.
-    damage = FA.detect_damage(base, b, regime="live",
-                              stale_days=(age if age >= 0 else None))
+    # THE DETECTOR IS GIVEN WHAT IT NEEDS TO SEE THE OUTPUT CHECKS.
+    # Four of its eleven kinds compare B against what this company is
+    # evidenced to be exposed to and what the state says is moving against it.
+    # Withholding those made them silent, and a silent check reads exactly
+    # like a clean result.
+    damage = FA.detect_damage(
+        base, b, regime="live", stale_days=(age if age >= 0 else None),
+        evidenced_exposures=[r["quantity"] for r in rows],
+        adverse_conditions=[r["quantity"] for r in rows if r["adverse"]])
     for d in damage:
         refused.append({"field": "*", "code": d.kind, "reason": d.detail})
     if damage:

@@ -114,7 +114,8 @@ def version_b(cid, as_of, state):
         sev_b = "HIGH" if mag > 0.10 else "MEDIUM"
         adverse.append((mag, channel, driver))
         risks.append(FA.Risk(
-            risk_id=f"{cid}:{driver}", severity=sev_b, channel=channel,
+            risk_id=f"{cid}:{driver}", quantity=driver,
+            severity=sev_b, channel=channel,
             mechanism=mechanism, standing=FA.OBSERVED,
             evidence=(f"panel:{driver}@{r['as_of']}",)))
         requests.append(f"how much of {channel} is already contracted")
@@ -173,6 +174,25 @@ def triggers_for(cid, state):
     return out
 
 
+def _adverse_drivers(cid, state):
+    """Which of this company's drivers the state has moving against it.
+
+    Handed to the damage detector so its output checks -- wrong exposure,
+    wrong sign, missed material risk -- can run at all. Without them four of
+    eleven kinds are silent, and a silent check reads like a clean result.
+    """
+    _name, _sector, channels = COMPANIES[cid]
+    out = []
+    for driver, _channel, _mechanism, adverse_dir in channels:
+        r = state.get(driver)
+        if r is None or adverse_dir not in ("UP", "DOWN"):
+            continue
+        if r["direction"] == adverse_dir \
+                and abs(r["yoy_change"]) >= MATERIAL_MOVE:
+            out.append(driver)
+    return out
+
+
 def main() -> int:
     FA.assert_rubric_unchanged(RUBRIC_HASH)
     print(f"=== RUBRIC {FA.rubric_hash()} — frozen before any pair scored ===")
@@ -187,7 +207,11 @@ def main() -> int:
         RWM.AS_OF = as_of
         state = read_state(panel)
         reading = RG.classify(panel, as_of)
-        rows, dmg = [], []
+        # THE OBJECTS, NOT THEIR DICTS. Rehydrating an `Analysis` from
+        # `as_dict()` fails on the computed fields it also serialises, and a
+        # corpus check that silently rebuilt something slightly different
+        # would be measuring the rebuild.
+        rows, dmg, b_objects = [], [], []
         for cid in sorted(STRUCTURAL):
             a = baseline_a(cid, as_of)
             FA.assert_baseline_is_real(a)
@@ -195,8 +219,19 @@ def main() -> int:
             d = FA.compare(a, b, regime=reg_name,
                            triggers=triggers_for(cid, state))
             rows.append({**d.as_dict(), "a": a.as_dict(), "b": b.as_dict()})
+            b_objects.append(b)
             dmg.extend(x.as_dict() for x in
-                       FA.detect_damage(a, b, regime=reg_name))
+                       FA.detect_damage(
+                           a, b, regime=reg_name,
+                           evidenced_exposures=[
+                               d for d, _c, _m, _s in COMPANIES[cid][2]],
+                           adverse_conditions=_adverse_drivers(cid, state)))
+        # §26 CROSS-COMPANY GENERICNESS, which no pairwise check can see.
+        # Ten different businesses sharing one priority or one mechanism is
+        # the template collapse this product keeps rediscovering, and the
+        # kind was declared and dead until it had a corpus to look at.
+        dmg.extend(x.as_dict()
+                   for x in FA.detect_generic(b_objects, regime=reg_name))
         mat = sum(1 for r in rows if r["is_material"])
         att = sum(1 for r in rows if r["attributable"])
         abst = sum(1 for r in rows

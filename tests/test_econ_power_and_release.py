@@ -485,7 +485,12 @@ def test_the_forward_ledger_refuses_a_retrospective_edit(tmp_path):
 def test_all_seven_lifecycle_facts_hold_on_a_real_ledger(tmp_path):
     from intent_engine.econ import forward_ledger as FL
     p = tmp_path / "fwd.jsonl"
+    # `created_at` IS PART OF FACT 1 NOW. A record with a cutoff and no
+    # creation date cannot answer the one question preregistration exists to
+    # answer -- did this prediction use evidence that arrived after it was
+    # made -- and one record on the REAL ledger was written without it.
     FL.append([{"expectation_id": f"ex-{i}",
+                "created_at": "2026-08-27",
                 "information_cutoff": "2026-08-27", "horizon_days": 180,
                 "expires_at": "2027-02-23", "resolution_rule": "r",
                 "confidence": 0.5, "quantity": "q",
@@ -493,6 +498,7 @@ def test_all_seven_lifecycle_facts_hold_on_a_real_ledger(tmp_path):
                for i in range(4)], path=p)
     r = FL.assert_lifecycle(p)
     assert r["all_seven_hold"]
+    assert r["facts"]["cutoff_precedes_creation"]
     assert r["open"] == 4 and r["resolved"] == 0
     assert r["due_now"] == 0
 

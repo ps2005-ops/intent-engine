@@ -62,6 +62,23 @@ from intent_engine.founder_intelligence.records import (
 CONSENT_VERSION = "v1.1-source-approval"
 
 
+def _business_model_of(company_name, *, domain="", registrant=None,
+                       evidence_text="") -> str:
+    """This company's business-model class, or "" when it cannot be read.
+
+    Empty is a real answer and the tension library fails closed on it: a
+    tension we cannot rule out is not a tension we may assert.
+    """
+    try:
+        from intent_engine.executive.company_profile import profile_for
+        profile = profile_for(name=company_name, domain=domain,
+                              registrant=registrant,
+                              evidence_text=evidence_text)
+        return profile.business_model_class if profile.known else ""
+    except Exception:                                       # noqa: BLE001
+        return ""
+
+
 def _subject_evidence_text(documents, cik: str = "") -> str:
     """The SUBJECT'S OWN filing text, and nothing else.
 
@@ -1577,7 +1594,19 @@ class CompanyIngestionService:
                 documents=documents,
                 observations=[{"source_class": getattr(o, "source_class", "")}
                               for o in (observations or ())],
-                failures=self.failure_summary(run_id)))
+                failures=self.failure_summary(run_id)),
+            # THE SAME CLASSIFICATION THAT GATES THE PATTERN LIBRARY, GATING
+            # THE TENSION LIBRARY. A tension fires on signal names, and signal
+            # names are generic enough that a chip designer's partner and
+            # platform language matched a marketplace's -- NVIDIA led with
+            # "Consolidating checkout/identity/data rails may encroach on
+            # layers partners currently monetize". One classification, two
+            # gates, no second copy.
+            business_model=_business_model_of(
+                company_name,
+                domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
+                registrant=classification["registrant"],
+                evidence_text=classification["evidence_text"]))
         payload = report.as_dict()
 
         # --- the reasoning layer ------------------------------------------

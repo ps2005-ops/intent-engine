@@ -412,6 +412,12 @@ class BlindSpot:
     evidence_needed: list
     decision_affected: str
     supporting_observation_ids: list = field(default_factory=list)
+    #: Why this blind spot exists, from `patterns.BLIND_SPOT_KINDS`. A gap has
+    #: to say what kind of gap it is: evidence we know is missing, an
+    #: information gap we inferred, a source we could not reach, and a
+    #: business model this engine has no tension for are four different
+    #: findings and four different next actions.
+    kind: str = "INFERRED_INFORMATION_GAP"
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -464,6 +470,12 @@ class StrategicReport:
     underexamined_questions: list = field(default_factory=list)
     what_changed: list = field(default_factory=list)    # vs previous model
     feed: list = field(default_factory=list)            # intelligence feed
+
+    #: Tensions whose two sides WERE both observed and which this company's
+    #: business model rules out, each with its reason. Returned rather than
+    #: dropped: a section that showed nothing would be indistinguishable from
+    #: a company with no tensions, and the two call for opposite next steps.
+    blind_spots_refused: list = field(default_factory=list)
 
     def observation(self, obs_id: str):
         for o in self.observations:
