@@ -190,3 +190,56 @@ Seven states, and the two that look like nothing are the two that matter most.
 An abstention renders one line and stops. It does not become a missing
 section, and it does not grow a macro paragraph to justify its own heading — a
 section that always speaks teaches its reader to stop reading it.
+
+---
+
+## The first live matrix
+
+Deployed SHA `5f21b055`, ten companies, one anonymous session each, driven
+through the real entry screen with its CSRF token — `curl` cannot hold the
+session and a harness that sends less than the form does is bypassing the
+customer flow rather than testing it.
+
+```
+attempted                10
+read a result            10
+economic section present 10
+spoke (material delta)    0
+abstained                 2
+cross-surface conflict    0
+internal enum leaks       0
+requests with a 4xx/5xx   4
+```
+
+Ten of ten rendered the section and none of them contradicted itself across
+the brief and the full analysis. **And none of them spoke** — which is the
+result this run turned on, because five of the six reasons were defects.
+
+### What the matrix found
+
+| sev | defect | evidence |
+|---|---|---|
+| SEV1 | the published prior was the ADJACENT observation, not a year back | 1 of 13 conditions cleared a threshold declared for year-on-year change, and it was moving the favourable way |
+| SEV1 | a page that contradicted itself one sentence later | 5 of 10: "no evidenced exposure to any condition the shared economic state measures", then "the shared economic state reads policy rate…" |
+| SEV1 | a ratio taken on a series that crosses zero | the 3m/10y slope was −0.02 a year ago and 0.83 now: a 4,250% "move" |
+| SEV1 | half the matrix had no Baseline A | `detect_vulnerabilities` fires only for a hypothesis whose pattern is in the vulnerability playbook |
+| SEV2 | a condition in a channel that inverted its sign | `consumer_demand` sat in UNEMPLOYMENT, so a strengthening consumer read as a risk |
+| SEV2 | an internal enum in customer copy | "rising to 6.66 percentage_point" |
+| SEV2 | a label a reader cannot check | `financial_conditions` is measured here by the 30-year mortgage rate |
+| SEV2 | A and B compared two different kinds of thing | a decision question "becomes" a business variable |
+| SEV2 | an absent exposure reported as an absent reading | 3 of 10 said "(unavailable)" while the state sat on disk dated the previous day |
+| SEV3 | one 500 on a primary screen; four client-side timeouts at 180s | Union Pacific |
+
+Every one of the SEV1s and SEV2s is repaired in the commit that follows the
+matrix, and the matrix harness now scores the two contradictions and the enum
+leak directly — so the second iteration shows them gone rather than asserting
+it.
+
+### The one that is not a defect
+
+`detect_vulnerabilities` returning nothing for a company the pattern library
+does not match is upstream of this work and was not invented here. The repair
+is a fallback to blind spots — the same shape, resting on the company's own
+observations, carried at LOW severity with its source recorded. It is a
+genuinely weaker claim than a vulnerability and is not presented as an equal
+one.

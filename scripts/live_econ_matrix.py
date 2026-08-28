@@ -69,7 +69,19 @@ def _opener():
         urllib.request.HTTPRedirectHandler), jar
 
 
-def _get(op, path, timeout=180):
+#: How long a page fetch may take before the harness gives up.
+#:
+#: THE FIRST MATRIX RECORDED FOUR "FAILURES" THAT WERE TIMEOUTS AT EXACTLY
+#: 180.1s, and a timeout is not a failure -- it is the harness deciding to
+#: stop waiting. Measured locally, the primary screen and the full analysis
+#: cost 0.86s each with the economic context and 0.73s without, so the live
+#: figure is the free instance's CPU quota rather than the work. An
+#: instrument that reports "the page failed" when what happened is "the page
+#: is slow" sends the next session looking for the wrong thing.
+PAGE_TIMEOUT = 300
+
+
+def _get(op, path, timeout=PAGE_TIMEOUT):
     req = urllib.request.Request(BASE + path,
                                  headers={"User-Agent": "econ-matrix/1"})
     started = time.monotonic()
@@ -85,7 +97,7 @@ def _get(op, path, timeout=180):
             time.monotonic() - started
 
 
-def _post(op, path, fields, timeout=240):
+def _post(op, path, fields, timeout=PAGE_TIMEOUT):
     body = urllib.parse.urlencode(fields).encode()
     req = urllib.request.Request(
         BASE + path, data=body,
@@ -233,8 +245,15 @@ def analyse(name, domain, *, poll_seconds, verbose=True):
     row["state"] = "READ" if ready else "TIMED_OUT"
     row["score"] = score(name, pages)
     row["econ_excerpt"] = econ_excerpt(pages)
+    # A TIMEOUT AND A 500 ARE DIFFERENT FINDINGS. Status 0 is this client
+    # giving up; a 4xx/5xx is the server answering badly. Counting them
+    # together is what made the first matrix report "4 requests with a
+    # 4xx/5xx" when there was one.
     row["failures"] = [r for r in row["requests"]
-                       if not str(r["status"]).startswith(("2", "3"))]
+                       if str(r["status"]).startswith(("4", "5"))]
+    row["timeouts"] = [r for r in row["requests"] if r["status"] == 0]
+    row["slowest_seconds"] = max((r["seconds"] for r in row["requests"]),
+                                 default=0.0)
     if verbose:
         s = row["score"]
         print(f"  {name:<18}{row['state']:<12}"
@@ -282,6 +301,7 @@ def main() -> int:
     denies = [r for r in read if r["score"]["denies_exposure_then_shows_one"]]
     unavail = [r for r in read if r["score"]["reading_called_unavailable"]]
     fails = [r for r in rows if r.get("failures")]
+    slow = [r for r in rows if r.get("timeouts")]
     print(f"\n=== LIVE MATRIX ({args.label}) ===")
     print(f"  attempted                {len(rows)}")
     print(f"  read a result            {len(read)}")
@@ -292,7 +312,8 @@ def main() -> int:
     print(f"  internal enum leaks      {len(leaks)}  (requires 0)")
     print(f"  denies-then-shows exposure{len(denies):>3}  (requires 0)")
     print(f"  reading called unavailable{len(unavail):>3}  (requires 0)")
-    print(f"  requests with a 4xx/5xx  {len(fails)}")
+    print(f"  server errors (4xx/5xx)  {len(fails)}")
+    print(f"  client timeouts >{PAGE_TIMEOUT}s   {len(slow)}")
     payload = {"contract": "live_econ_matrix.v1", "label": args.label,
                "base": BASE, "version": version,
                "readyz": {k: readyz.get(k) for k in
@@ -304,7 +325,8 @@ def main() -> int:
                            "enum_leaks": len(leaks),
                            "denies_then_shows_exposure": len(denies),
                            "reading_called_unavailable": len(unavail),
-                           "http_failures": len(fails)},
+                           "http_failures": len(fails),
+                           "client_timeouts": len(slow)},
                "rows": rows}
     out = pathlib.Path(args.out) if args.out else OUT
     out.parent.mkdir(parents=True, exist_ok=True)
