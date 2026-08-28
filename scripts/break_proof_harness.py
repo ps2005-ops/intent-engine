@@ -53,7 +53,18 @@ import time
 from typing import Dict, List, Optional, Sequence, Tuple
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PY = "/Users/prathamsharma/intent-engine/.venv/bin/python"
+#: THE INTERPRETER MUST BELONG TO THE TREE BEING PROVEN.
+#:
+#: This was hardcoded to the MAIN worktree's venv. Run from any other
+#: worktree it imports `intent_engine` from a different checkout entirely, so
+#: every mutation lands in a mirror the interpreter never reads and twenty
+#: proofs report NOT_CAUGHT for a reason that has nothing to do with the
+#: guards. `GUARD_PYTHON` overrides; otherwise this worktree's own .venv wins
+#: and the old path remains only as a last resort.
+PY = (os.environ.get("GUARD_PYTHON")
+      or (str(ROOT / ".venv/bin/python")
+          if (ROOT / ".venv/bin/python").exists()
+          else "/Users/prathamsharma/intent-engine/.venv/bin/python"))
 
 # --- verdicts ---------------------------------------------------------------
 HELD = "HELD"                          # mutation caught, for the right reason

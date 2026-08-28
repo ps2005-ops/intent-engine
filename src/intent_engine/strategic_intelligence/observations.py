@@ -33,7 +33,64 @@ def _phrase_pattern(phrase: str) -> "re.Pattern":
     return re.compile(r"(?<!\w)" + r"[\s\-/]+".join(parts) + r"(?!\w)", re.I)
 
 
+#: CASEFOLDED ONCE PER DOCUMENT, not once per phrase.
+#:
+#: MEASURED on a cold Apple analysis (reports/perf/apple_before.json): one run
+#: made 15,208 phrase scans across 866 MB of document text, and 13,821 of them
+#: -- 91% -- matched nothing at all. The scan itself was 9.4s of a 29.8s
+#: analysis: the single largest cost in the whole interactive path, larger
+#: than every network request combined.
+#:
+#: `maxsize` is small on purpose. Callers walk documents one at a time and
+#: make many consecutive calls against the same text, so a handful of entries
+#: already gives a near-perfect hit rate, and this holds whole filings in
+#: memory on a free instance with little of it.
+@lru_cache(maxsize=16)
+def _folded(text: str) -> str:
+    return text.casefold()
+
+
+@lru_cache(maxsize=8192)
+def _phrase_probe(phrase: str) -> tuple:
+    """The substrings that MUST all be present for `_phrase_pattern` to match.
+
+    WHY THIS IS SOUND, AND WHY IT IS CASEFOLD RATHER THAN LOWER.
+    `_phrase_pattern` joins the phrase's words with `[\s\-/]+` under `re.I`,
+    so every word appears literally in any text the pattern matches. Testing
+    for the longest word is therefore a NECESSARY condition: a text failing it
+    cannot match, and skipping it removes no evidence. This is a speed change
+    with no semantic content -- the phrases that DO occur are scanned exactly
+    as before, and the sentence returned is the same sentence.
+
+    `re.I` folds beyond `str.lower`: it matches ASCII "k" against U+212A
+    KELVIN SIGN and "s" against U+017F LATIN SMALL LETTER LONG S, neither of
+    which `lower()` normalises. `casefold()` does, so the probe cannot produce
+    a false negative on a document that uses them. Only ASCII words are used
+    as probes; anything else falls back to the full scan rather than reasoning
+    about a fold we have not checked.
+    """
+    words = [w.casefold() for w in phrase.split() if w.isascii()]
+    # Longest first: the most selective word rejects the document on the first
+    # test, so the common ones are usually never looked for at all. MEASURED:
+    # testing only the longest word left 4,440 scans standing (a phrase like
+    # "system of record" probes "record", which occurs in every filing) and
+    # 197 of them matched. Every word is independently necessary, so testing
+    # all of them is the same proof applied more than once.
+    return tuple(sorted(set(words), key=len, reverse=True))
+
+
+def _cannot_contain(text: str, phrase: str) -> bool:
+    """True when `phrase` provably does not occur in `text`."""
+    probes = _phrase_probe(phrase)
+    if not probes:
+        return False                      # nothing we can prove; scan it
+    folded = _folded(text)
+    return any(probe not in folded for probe in probes)
+
+
 def _has_phrase(text: str, phrase: str) -> bool:
+    if _cannot_contain(text, phrase):
+        return False
     return _phrase_pattern(phrase).search(text) is not None
 
 
@@ -120,7 +177,14 @@ def owned_match(text: str, phrases, company: str = ""):
 
     A demonstrably foreign subject is different, and is always rejected.
     """
+    folded_text = text or ""
     for phrase in phrases:
+        # THE SCAN IS SKIPPED ONLY WHEN IT PROVABLY CANNOT MATCH. See
+        # `_phrase_probe`: a phrase whose longest word is absent from the
+        # casefolded document cannot be matched by a pattern that requires
+        # that word literally. 91% of this loop's scans were of that kind.
+        if _cannot_contain(folded_text, phrase):
+            continue
         # BOUNDED. When every occurrence is somebody else's, the loop would
         # otherwise walk all of them — and a 10-K can repeat a phrase across
         # hundreds of risk-factor sentences, which is precisely the document

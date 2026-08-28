@@ -49,6 +49,11 @@ RETRIEVAL_STATUSES = ("OK", "FAILED", "UNAVAILABLE", "SKIPPED")
 FAILURE_TYPES = ("timeout", "connection", "http_status", "too_large",
                  "bad_mime", "unsafe_redirect", "blocked", "parse_error",
                  "javascript_only",
+                 # The source was never dialled because the analysis ran out
+                 # of its interactive budget first. Emphatically NOT a
+                 # finding about the company or the host: it is a fact about
+                 # how long we were willing to wait, and it is retryable.
+                 "deadline_exceeded",
                  # The page WAS retrieved, but its text tripped the credential
                  # scanner and was refused before storage. Reporting that as
                  # "blocked" told the reader the address failed a safety check,

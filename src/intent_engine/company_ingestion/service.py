@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from urllib.parse import urlparse
 
 from intent_engine.agentos.identity import stable_id as _kernel_stable_id
@@ -47,7 +48,7 @@ from intent_engine.company_ingestion.readiness import (
     assess_readiness, explain as explain_readiness,
 )
 from intent_engine.company_ingestion.records import (
-    IngestionError, IngestionEvent, MAX_APPROVED_SOURCES,
+    CONNECT_TIMEOUT_S, IngestionError, IngestionEvent, MAX_APPROVED_SOURCES,
     MAX_RESPONSE_BYTES, MAX_TOTAL_BYTES_PER_RUN, failure_record,
     retrieved_record,
 )
@@ -523,62 +524,87 @@ class CompanyIngestionService:
         # string or propose candidates on a guessed host. They are skipped
         # rather than fed a placeholder: the EDGAR path further down needs no
         # domain, and for a filer it is the authoritative source anyway.
-        if meta.get("website"):
-            result = safe_fetch(meta["website"], transport=self.transport,
-                                resolver=self.resolver)
-            links = []
-            if result["ok"]:
-                links = parse_html(result["body"])["links"]
-            candidates = discover_candidates(company_url=meta["website"],
-                                             homepage_links=links)
-            # Sitemap/robots discovery: the publisher's OWN list of real,
-            # canonical URLs. Guessed known-paths mostly 403/404; sitemap URLs
-            # exist by construction, and this works even when the homepage is
-            # JavaScript-rendered and exposes no links. robots.txt Disallow is
-            # honoured.
-            candidates = candidates + self._sitemap_candidates(meta["website"])
-            # Bounded external-source proposals (customer voice etc.) broaden
-            # the evidence beyond company-owned pages. Off-domain, UNVERIFIED,
-            # and (like every candidate) fetched only after explicit approval.
-            candidates = candidates + propose_external_candidates(
-                company_name=meta.get("company_name", ""), domain=domain)
-        # WHAT THE COMPANY'S OWN WEB PRESENCE ACTUALLY GAVE US, decided here
-        # rather than inferred later. Three states, and they are not the same
-        # finding: a site we never had, a site that refused us, and a site we
-        # read. Only the third is evidence about the company.
-        if not meta.get("website"):
-            web_plan = OFFICIAL_WEB_ABSENT
-        elif not result["ok"] or not candidates:
-            web_plan = OFFICIAL_WEB_BLOCKED
-        else:
-            web_plan = OFFICIAL_WEB_RETRIEVED
-        # Authoritative structured fallback: for public companies, official SEC
-        # EDGAR filings are permitted, server-rendered (non-JavaScript) HTML —
-        # so a run is not at the mercy of a JavaScript-only marketing site.
-        # Fully defensive: yields nothing (never raises) if the company is not
-        # a filer or SEC is unreachable, so discovery is never broken by it.
+        # THE INDEPENDENT BRANCHES START TOGETHER.
         #
-        # THE BUDGET MOVES TO WHERE IT IS SERVED. A run whose own site gave us
-        # nothing does not make more requests overall — it makes them at
-        # EDGAR, which answers, instead of at a host that does not.
-        candidates = candidates + propose_edgar_candidates(
-            company_name=meta.get("company_name", ""),
-            cik=str(meta.get("cik") or ""),
-            limit=(MAX_EDGAR_CANDIDATES_WEB_BLOCKED
-                   if web_plan in (OFFICIAL_WEB_ABSENT, OFFICIAL_WEB_BLOCKED)
-                   else MAX_EDGAR_CANDIDATES),
-            transport=self.transport, resolver=self.resolver)
-        # THE ONLY INDEPENDENT VANTAGE POINT WE CAN ACTUALLY REACH.
+        # MEASURED on a cold Apple run: discovery cost 8.55s, and 5.3s of it
+        # was `_third_party_filing_candidates` — EDGAR full-text search, which
+        # needs the company's NAME and nothing this function has yet to
+        # compute. It was waiting behind a homepage fetch and a sitemap walk
+        # it has no dependency on whatsoever.
         #
-        # Ten companies produced ZERO independent sources: every one was the
-        # company describing itself. The families that would fix that were
-        # probed and are not accessible without bypassing controls we will not
-        # bypass -- review sites answer 403, newswire feeds 401/404. What IS
-        # public is EDGAR full-text search, where a COMPETITOR'S OWN 10-K names
-        # this company. Different author, regulatory venue, exact date,
-        # permanent citation.
-        candidates = candidates + self._third_party_filing_candidates(
-            meta, run_id=run_id)
+        # Two things genuinely depend on the homepage: `discover_candidates`
+        # (it reads the links) and the EDGAR *limit* (a run whose own site
+        # refused us is allowed more filings). Those stay sequential below.
+        # The list is then assembled in the ORIGINAL order, so the rank a
+        # candidate is stored with — and therefore which sources the
+        # recommendation picks — is byte-for-byte what it was.
+        from concurrent.futures import ThreadPoolExecutor
+        _pool = ThreadPoolExecutor(max_workers=2,
+                                   thread_name_prefix="discover")
+        try:
+            third_party = _pool.submit(self._third_party_filing_candidates,
+                                       meta, run_id=run_id)
+            sitemap = (_pool.submit(self._sitemap_candidates, meta["website"])
+                       if meta.get("website") else None)
+            if meta.get("website"):
+                result = safe_fetch(meta["website"], transport=self.transport,
+                                    resolver=self.resolver)
+                links = []
+                if result["ok"]:
+                    links = parse_html(result["body"])["links"]
+                candidates = discover_candidates(company_url=meta["website"],
+                                                 homepage_links=links)
+                # Sitemap/robots discovery: the publisher's OWN list of real,
+                # canonical URLs. Guessed known-paths mostly 403/404; sitemap
+                # URLs exist by construction, and this works even when the
+                # homepage is JavaScript-rendered and exposes no links.
+                # robots.txt Disallow is honoured. Dispatched before the
+                # homepage fetch above; only the join happens here.
+                candidates = candidates + sitemap.result()
+                # Bounded external-source proposals (customer voice etc.)
+                # broaden the evidence beyond company-owned pages. Off-domain,
+                # UNVERIFIED, and (like every candidate) fetched only after
+                # explicit approval.
+                candidates = candidates + propose_external_candidates(
+                    company_name=meta.get("company_name", ""), domain=domain)
+            # WHAT THE COMPANY'S OWN WEB PRESENCE ACTUALLY GAVE US, decided here
+            # rather than inferred later. Three states, and they are not the same
+            # finding: a site we never had, a site that refused us, and a site we
+            # read. Only the third is evidence about the company.
+            if not meta.get("website"):
+                web_plan = OFFICIAL_WEB_ABSENT
+            elif not result["ok"] or not candidates:
+                web_plan = OFFICIAL_WEB_BLOCKED
+            else:
+                web_plan = OFFICIAL_WEB_RETRIEVED
+            # Authoritative structured fallback: for public companies, official SEC
+            # EDGAR filings are permitted, server-rendered (non-JavaScript) HTML —
+            # so a run is not at the mercy of a JavaScript-only marketing site.
+            # Fully defensive: yields nothing (never raises) if the company is not
+            # a filer or SEC is unreachable, so discovery is never broken by it.
+            #
+            # THE BUDGET MOVES TO WHERE IT IS SERVED. A run whose own site gave us
+            # nothing does not make more requests overall — it makes them at
+            # EDGAR, which answers, instead of at a host that does not.
+            candidates = candidates + propose_edgar_candidates(
+                company_name=meta.get("company_name", ""),
+                cik=str(meta.get("cik") or ""),
+                limit=(MAX_EDGAR_CANDIDATES_WEB_BLOCKED
+                       if web_plan in (OFFICIAL_WEB_ABSENT, OFFICIAL_WEB_BLOCKED)
+                       else MAX_EDGAR_CANDIDATES),
+                transport=self.transport, resolver=self.resolver)
+            # THE ONLY INDEPENDENT VANTAGE POINT WE CAN ACTUALLY REACH.
+            #
+            # Ten companies produced ZERO independent sources: every one was the
+            # company describing itself. The families that would fix that were
+            # probed and are not accessible without bypassing controls we will not
+            # bypass -- review sites answer 403, newswire feeds 401/404. What IS
+            # public is EDGAR full-text search, where a COMPETITOR'S OWN 10-K names
+            # this company. Different author, regulatory venue, exact date,
+            # permanent citation.
+            candidates = candidates + third_party.result()
+        finally:
+            _pool.shutdown(wait=True)
         # Curated official sources for a KNOWN entity. This is what stops a
         # multinational whose primary domain refuses automated access from
         # collapsing into whatever single filing happened to be reachable:
@@ -778,7 +804,8 @@ class CompanyIngestionService:
         return payload
 
     # --- retrieval -------------------------------------------------------------------
-    def fetch_approved(self, run_id: str, *, candidate_ids=None) -> dict:
+    def fetch_approved(self, run_id: str, *, candidate_ids=None,
+                       deadline=None) -> dict:
         """Fetch ONLY approved candidates; idempotent per source+content;
         partial success is honest.
 
@@ -808,6 +835,12 @@ class CompanyIngestionService:
         # `compose_with_quality` runs afterwards -- which is where the same
         # dead host was being dialled a second and third time.
         host_failures = self._host_failure_counts(run_id, candidates)
+        # THE NETWORK, OVERLAPPED. Every decision below is still made one
+        # candidate at a time, in this order. See `_prefetch`.
+        prefetched = self._prefetch(targets, candidates, run_id=run_id,
+                                    already=already,
+                                    host_failures=host_failures,
+                                    deadline=deadline)
         ok, failed = [], []
         for candidate_id in targets:
             candidate = candidates[candidate_id]
@@ -852,34 +885,36 @@ class CompanyIngestionService:
                     final_url=candidate["url"], redirects=[],
                     failure_type=None, safe_message="", retryable=False,
                     truncated=cached["truncated"])
+            elif candidate_id in prefetched:
+                # Already acquired concurrently above. The DECISION about it
+                # is still made here, in this order, so the ledger, the byte
+                # budget and the failure sequence are what they always were.
+                result = prefetched.pop(candidate_id)
+            elif deadline is not None and not deadline.may_start():
+                # THE BUDGET HAS TO BIND HERE TOO. `_prefetch` declines to
+                # DISPATCH past the deadline, but a candidate it skipped
+                # arrives here and this branch used to dial it anyway -- so an
+                # expired budget still spent the full serial time, which is
+                # the entire failure it exists to prevent. Caught by
+                # `test_deadline_bounds_acquisition_and_records_the_gap`,
+                # which measured 2.44s against a budget of 0.05s.
+                deadline.record_gap(
+                    "evidence", f"{candidate.get('url', '')[:120]} not "
+                                f"requested — interactive budget spent")
+                failed.append(self._fail(
+                    run_id, domain, candidate_id, "deadline_exceeded",
+                    "not requested: the interactive time budget for this "
+                    "analysis was spent before this source was reached",
+                    True))
+                continue
             else:
-                result = safe_fetch(
-                    candidate["url"], transport=self.transport,
-                    resolver=self.resolver,
-                    extra_mime_prefixes=(PDF_MIME_PREFIXES if wants_pdf
-                                         else ()),
-                    binary=wants_pdf,
-                    retry_ledger=self.retry_ledger_for(run_id),
-                    # Filings only, flagged by the EDGAR adapter. `max_bytes`
-                    # raises the budget for a statutory document, because most
-                    # large-cap filings exceed the general 2MB cap and were
-                    # being discarded whole — measured live on Caterpillar,
-                    # whose 10-Q came back "too large" and left the run
-                    # bounded. `accept_truncated` is the fallback for anything
-                    # past even that budget; nothing downstream may call such
-                    # a read complete.
-                    accept_truncated=bool(candidate.get("accept_truncated")),
-                    max_bytes=int(candidate.get("max_bytes")
-                                  or MAX_RESPONSE_BYTES))
-                if result["ok"]:
-                    self.filing_cache.put(
-                        candidate["url"],
-                        body=(result["body"] if isinstance(result["body"],
-                                                           bytes)
-                              else str(result["body"]).encode("utf-8")),
-                        mime_type=result.get("mime_type", ""),
-                        status_code=result.get("status_code", 200),
-                        truncated=bool(result.get("truncated")))
+                started = time.monotonic()
+                result = self._acquire(
+                    candidate, run_id=run_id, wants_pdf=wants_pdf,
+                    timeout=(None if deadline is None
+                             else deadline.budget_for(CONNECT_TIMEOUT_S)))
+                if deadline is not None:
+                    deadline.spend(time.monotonic() - started)
             if not result["ok"]:
                 failed.append(self._fail(
                     run_id, domain, candidate_id, result["failure_type"],
@@ -978,6 +1013,139 @@ class CompanyIngestionService:
         return {"ok": ok, "failed": failed,
                 "status": "COMPLETE" if not failed
                 else ("PARTIAL" if ok else "FAILED")}
+
+    #: §48/§49. Bounded, and bounded twice. The global cap is what a free
+    #: instance can hold sockets and memory for; the per-host cap is what
+    #: keeps a concurrent pass from looking like a burst to one publisher.
+    #: SEC in particular answers 429 to bursts, and a 429 costs the run more
+    #: than the serialism it replaced.
+    _FETCH_CONCURRENCY = 6
+    _FETCH_PER_HOST = 2
+
+    def _acquire(self, candidate, *, run_id, wants_pdf, timeout=None):
+        """One URL, over the network or out of the filing cache.
+
+        Extracted so the sequential decision loop and the concurrent prefetch
+        share ONE acquisition path. Two copies of this would be two retry
+        policies, two cache-write rules and two byte budgets that drift.
+        """
+        from intent_engine.company_ingestion.pdf import PDF_MIME_PREFIXES
+        kwargs = dict(
+            transport=self.transport, resolver=self.resolver,
+            extra_mime_prefixes=(PDF_MIME_PREFIXES if wants_pdf else ()),
+            binary=wants_pdf,
+            retry_ledger=self.retry_ledger_for(run_id),
+            # Filings only, flagged by the EDGAR adapter. `max_bytes` raises
+            # the budget for a statutory document, because most large-cap
+            # filings exceed the general 2MB cap and were being discarded
+            # whole — measured live on Caterpillar, whose 10-Q came back "too
+            # large" and left the run bounded. `accept_truncated` is the
+            # fallback for anything past even that budget; nothing downstream
+            # may call such a read complete.
+            accept_truncated=bool(candidate.get("accept_truncated")),
+            max_bytes=int(candidate.get("max_bytes") or MAX_RESPONSE_BYTES))
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+        result = safe_fetch(candidate["url"], **kwargs)
+        if result["ok"]:
+            self.filing_cache.put(
+                candidate["url"],
+                body=(result["body"] if isinstance(result["body"], bytes)
+                      else str(result["body"]).encode("utf-8")),
+                mime_type=result.get("mime_type", ""),
+                status_code=result.get("status_code", 200),
+                truncated=bool(result.get("truncated")))
+        return result
+
+    def _prefetch(self, targets, candidates, *, run_id, already,
+                  host_failures, deadline=None) -> dict:
+        """Acquire the approved URLs CONCURRENTLY. Returns candidate_id -> result.
+
+        WHY THIS IS SEPARATE FROM THE DECISION LOOP
+        -------------------------------------------
+        The loop below is not a loop over independent work: it accumulates a
+        byte budget, trips a dead-host breaker mid-pass, and appends to an
+        append-only ledger in a defined order. Parallelising it in place would
+        change all three, and the failure would be invisible — the same
+        documents, admitted in a different order, with a breaker that trips
+        against whichever host happened to answer first.
+
+        So only the NETWORK moves. Fourteen approved URLs on a cold Apple run
+        were fetched one after another; they are independent of each other,
+        and nothing downstream depends on the order they arrive in — only on
+        the order they are DECIDED in, which is unchanged.
+
+        The breaker is still honoured here, at dispatch: a host that has
+        already refused twice is not dialled again, exactly as before. What it
+        cannot do concurrently is trip on a failure that has not happened yet,
+        so a candidate the breaker would have skipped may be fetched. That
+        costs a request; it cannot change a decision, because the loop below
+        re-applies the breaker against the failures it has actually seen.
+        """
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        from intent_engine.company_ingestion.pdf import is_pdf
+
+        pending = []
+        for candidate_id in targets:
+            candidate = candidates[candidate_id]
+            source_id = f"src-{candidate_id[5:]}"
+            if source_id in already:
+                continue                      # already retrieved in this run
+            host = urlparse(candidate.get("url") or "").hostname
+            if host and host_failures.get(host, 0) >= self._DEAD_HOST_AFTER:
+                continue                      # the breaker has this host
+            if self.filing_cache.get(candidate["url"])[1] is not None:
+                continue                      # served from disk, not dialled
+            pending.append((candidate_id, candidate, host or ""))
+        if len(pending) < 2:
+            return {}                         # nothing to overlap
+
+        lock = threading.Lock()
+        live_failures: dict = dict(host_failures)
+        host_slots: dict = {}
+        out: dict = {}
+
+        def acquire(entry):
+            candidate_id, candidate, host = entry
+            with lock:
+                if live_failures.get(host, 0) >= self._DEAD_HOST_AFTER:
+                    return                    # died while we were queued
+            if deadline is not None and not deadline.may_start():
+                with lock:
+                    deadline.record_gap(
+                        "evidence", f"{candidate.get('url', '')[:120]} not "
+                                    f"requested — interactive budget spent")
+                return
+            slot = host_slots.setdefault(host, threading.Semaphore(
+                self._FETCH_PER_HOST))
+            with slot:
+                budget = (None if deadline is None
+                          else deadline.budget_for(CONNECT_TIMEOUT_S))
+                if budget == 0.0:
+                    return
+                started = time.monotonic()
+                try:
+                    result = self._acquire(
+                        candidate, run_id=run_id,
+                        wants_pdf=is_pdf(url=candidate["url"]),
+                        timeout=budget)
+                except Exception:                          # noqa: BLE001
+                    return                    # the loop re-fetches it itself
+                finally:
+                    if deadline is not None:
+                        deadline.spend(time.monotonic() - started)
+            with lock:
+                out[candidate_id] = result
+                if not result["ok"] and host and \
+                        result["failure_type"] in self._HOST_LEVEL_FAILURES:
+                    live_failures[host] = live_failures.get(host, 0) + 1
+
+        workers = min(self._FETCH_CONCURRENCY, len(pending))
+        with ThreadPoolExecutor(max_workers=workers,
+                                thread_name_prefix="fetch") as pool:
+            list(pool.map(acquire, pending))
+        return out
 
     def _build_record(self, *, source_id, run_id, domain, candidate, result,
                       parsed, body, freshness):

@@ -666,6 +666,14 @@ class WebApp:
         # decide what another visitor is told.
         self._request = _threading.local()
         self._analysis_inflight: dict = {}   # run_id -> started monotonic
+        # §21. ONE BUDGET PER ANALYSIS, created when the work is queued and
+        # read by every stage that spends it. Before this, each stage was
+        # separately bounded and the SUM was bounded by nothing: fourteen
+        # sources x an 8s timeout x three attempts is the 4m54s a real
+        # customer waited on Apple while every individual component stayed
+        # inside its own limit.
+        self._analysis_deadlines: dict = {}  # run_id -> Deadline
+        self._analysis_gaps: dict = {}       # run_id -> spent budget + gaps
         self._analysis_attempts: dict = {}   # run_id -> executions started
         # Instrumented so duplicate execution is measurable rather than
         # inferred from output: a second worker on one attempt can produce an
@@ -8298,10 +8306,29 @@ class WebApp:
     #: treated as INTERRUPTED. The free instance restarts without warning, and
     #: a run left permanently "reading evidence" is the worst of both worlds:
     #: it never finishes and never admits it.
-    STALE_ATTEMPT_SECONDS = 15 * 60
+    #:
+    #: FIFTEEN MINUTES WAS NOT A SAFETY MARGIN, IT WAS THE BUG. This check
+    #: only ever fires for a run that is NOT in `_analysis_inflight` -- and
+    #: the in-flight entry is written before the work is submitted, so a run
+    #: missing from it has no worker in this process at all. Its worker is
+    #: provably gone. Waiting another quarter of an hour to say so is how a
+    #: restarted instance produced a page that polled itself forever.
+    #:
+    #: Three minutes is still generous against the 60s/120s hard budgets: it
+    #: is longer than any run is allowed to take, so a live run can never be
+    #: mistaken for a dead one.
+    STALE_ATTEMPT_SECONDS = 180
 
     TERMINAL_STATES = ("COMPLETE", "PARTIAL", "FAILED", "REJECTED",
                        "INTERRUPTED")
+
+    #: §22. Seconds held back from the interactive budget for composition.
+    #: MEASURED: composition of a cold Apple run costs 7-11s locally and is
+    #: pure CPU, so it is the one stage whose duration we can predict. Letting
+    #: acquisition spend the whole budget would push the ANSWER past the hard
+    #: deadline -- the customer would have waited the full 60s and still be
+    #: handed a spinner, which is the exact failure this run exists to remove.
+    COMPOSE_RESERVE_S = 20.0
 
     # --- what exists for a run, asked once -------------------------------
     #
@@ -8924,6 +8951,9 @@ class WebApp:
             self._analysis_inflight[run_id] = time.monotonic()
             self._analysis_attempts[run_id] = \
                 self._analysis_attempts.get(run_id, 0) + 1
+        from intent_engine.company_ingestion.deadline import Deadline
+        self._analysis_deadlines[run_id] = Deadline.for_tier(
+            self._tier_for(run_id))
         try:
             self._analysis_pool.submit(self._run_analysis, user_id, run_id)
         except RuntimeError:                    # pool shut down
@@ -8943,6 +8973,7 @@ class WebApp:
             self._worker_starts[run_id] = self._worker_starts.get(run_id, 0) + 1
         meta = self.ci.run_meta(run_id) or {}
         domain = meta.get("domain", "")
+        deadline = self._analysis_deadlines.get(run_id)
         try:
             self.ci.discover(run_id)
             candidates = self.ci.store.candidates(run_id)
@@ -8954,7 +8985,21 @@ class WebApp:
                             if c["candidate_id"] not in approved]
                 self.ci.approve(run_id, user_id=user_id,
                                 approved_ids=approved, rejected_ids=rejected)
-                self.ci.fetch_approved(run_id)
+                # §22. The acquisition phase stops early ON PURPOSE, so the
+                # step that turns evidence into an answer is still inside the
+                # interactive budget when it runs.
+                self.ci.fetch_approved(
+                    run_id, deadline=(deadline.reserving(self.COMPOSE_RESERVE_S)
+                                      if deadline is not None else None))
+            # §22. COMPOSITION IS NOT OPTIONAL AND IS NOT BUDGETED AWAY.
+            #
+            # The budget bounds ACQUISITION -- the part that talks to hosts we
+            # do not control and that produced the 4m54s stall. Reasoning over
+            # what already arrived is local, bounded, and is the only step
+            # that turns evidence into something a reader can use. Skipping it
+            # to save time would hit the latency target by deleting the
+            # product, which §3 forbids: a run that spent its budget composes
+            # what it has and SAYS which evidence is missing.
             self._results[run_id] = self._compose(run_id)
             with self._analysis_lock:
                 self._terminal_writes[run_id] = \
@@ -8993,6 +9038,35 @@ class WebApp:
         finally:
             with self._analysis_lock:
                 self._analysis_inflight.pop(run_id, None)
+                spent = self._analysis_deadlines.pop(run_id, None)
+            if spent is not None and spent.gaps:
+                # The gaps outlive the budget object: they are what the reader
+                # is told, so they are recorded where the page can read them
+                # rather than discarded with the timer that produced them.
+                self._analysis_gaps[run_id] = spent.as_dict()
+
+    def _tier_for(self, run_id: str) -> str:
+        """Which interactive contract this run is held to (§2).
+
+        Tier 1 is the well-known public company an executive types in and
+        expects an answer to inside half a minute. Everything else -- a filer
+        with no domain, a sparse private company -- is a deeper read and is
+        held to the tier-2 budget, because holding it to tier 1 would not make
+        it faster, only earlier to give up.
+        """
+        from intent_engine.company_ingestion.deadline import TIER_1, TIER_2
+        try:
+            meta = self.ci.run_meta(run_id) or {}
+            if not meta.get("website"):
+                return TIER_2               # filer-only: filings are the path
+            listing = self._listing_for(run_id)
+            return TIER_1 if getattr(listing, "ticker", "") else TIER_2
+        except Exception:                                   # noqa: BLE001
+            return TIER_2
+
+    def analysis_gaps(self, run_id: str) -> dict:
+        """What this run could not finish inside its budget, if anything."""
+        return self._analysis_gaps.get(run_id) or {}
 
     def _interrupted_if_stale(self, run_id: str) -> bool:
         """Mark a run INTERRUPTED when its worker vanished.
