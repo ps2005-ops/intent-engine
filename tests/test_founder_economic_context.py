@@ -470,3 +470,64 @@ def test_the_baseline_priority_is_the_same_kind_of_thing_as_the_augmented_one():
     assert base is not None
     assert base.top_priority == "the partner ecosystem"
     assert "Whether to invest" not in base.top_priority
+
+
+def test_the_freshness_note_is_written_in_english():
+    """Live: "Economic reading as of 2026-08-27 (current, 1 days old)"."""
+    from intent_engine.founder_brief import dossier as FD
+    def note(age):
+        return FD._econ_note(FC.FounderEconomicContext(
+            company_id="c", as_of="2026-08-27",
+            status=FC.NO_MATERIAL_ECONOMIC_DELTA, freshness=FC.CURRENT,
+            age_days=age))
+    assert "1 day old" in note(1) and "1 days" not in note(1)
+    assert "today" in note(0)
+    assert "12 days old" in note(12)
+
+
+def test_the_economic_answer_never_says_a_thing_reaches_you_through_itself():
+    """Measured live: "Policy rate, through policy rate." The channel and the
+    quantity are frequently the same word; the useful noun is the variable it
+    moves in THIS business, and it was already on the exposure."""
+    from intent_engine.founder_brief import qa as FQA
+    ctx = FC.FounderEconomicContext(
+        company_id="acme", as_of="2026-08-27",
+        status=FC.NO_MATERIAL_ECONOMIC_DELTA, freshness=FC.CURRENT,
+        age_days=1,
+        company_exposures=(FC.Exposure(
+            quantity="policy_rate", measured=True, channel="POLICY_RATE",
+            mechanism="rates set the discount rate on customers' own "
+                      "investment cases",
+            business_variable="the policy path that sets funding cost and "
+                              "demand"),))
+    answer = FQA._economic_answer("Which economic factor matters most?", ctx)
+    assert "through policy rate." not in answer.lower(), answer
+    assert "the policy path that sets funding cost" in answer
+    assert answer[0].isupper()
+
+
+def test_internal_risk_identifiers_never_reach_a_customer_sentence():
+    """Measured live: "Changes top risks company:blind:0 becomes
+    econ:financial_conditions, company:0". Those are internal handles."""
+    from intent_engine.founder_brief import dossier as FD
+    change = FC.FieldChange(
+        field="top_risks", before=["company:blind:0"],
+        after=["econ:financial_conditions", "company:0"],
+        trigger="t", mechanism="m", provenance=("p",))
+    said = FD._before_after(change)
+    assert "company:blind:0" not in said and "econ:financial" not in said
+    assert "economic risk to financial conditions" in said
+
+
+def test_the_section_explains_the_change_through_the_exposure_it_rests_on():
+    """Live, NVIDIA's section explained the change through the
+    capacity-commitment mechanism while the trigger named a different
+    condition -- because the renderer took `company_exposures[0]`."""
+    econ = _economy(
+        treasury_10y=_reading("treasury_10y", 6.0, 4.0, "UP"),
+        commodity_oil=_reading("commodity_oil", 50.0, 100.0, "DOWN"))
+    ctx = _build(economy=econ, exposures=("commodity_oil", "treasury_10y"),
+                 profile=_profile("DESIGN_AND_MANUFACTURE"))
+    assert ctx.material_decision_delta
+    assert ctx.lead_exposure is not None
+    assert ctx.lead_exposure.quantity in ctx.material_decision_delta[0].trigger

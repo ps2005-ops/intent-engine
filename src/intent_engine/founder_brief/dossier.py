@@ -1068,9 +1068,14 @@ def _economic_impact(company, econ, said) -> Passage:
     if econ.economic_state_summary:
         items.append({"label": "The reading",
                       "text": end_sentence(econ.economic_state_summary)})
+    # THE EXPOSURE THE CHANGE RESTS ON, not the first one measured. Live,
+    # NVIDIA's section explained the change through the capacity-commitment
+    # mechanism while the trigger beneath it named a different condition.
     live = [e for e in econ.company_exposures if e.measured and e.mechanism]
-    if live:
-        e = live[0]
+    lead = econ.lead_exposure if (econ.lead_exposure
+                                  and econ.lead_exposure.mechanism) else None
+    if lead or live:
+        e = lead or live[0]
         items.append({
             "label": "How it reaches this company",
             "text": end_sentence(
@@ -1105,11 +1110,30 @@ def _before_after(change) -> str:
     """
     def one(value):
         if isinstance(value, (list, tuple)):
-            return ", ".join(str(v) for v in value) or "nothing"
+            return ", ".join(_readable_id(str(v)) for v in value) or "nothing"
         if isinstance(value, dict):
-            return "; ".join(f"{k} {v}" for k, v in sorted(value.items()))
+            return "; ".join(f"{_readable_id(k)} {v}"
+                             for k, v in sorted(value.items()))
         return str(value) if str(value).strip() else "nothing"
     return f"{one(change.before)} becomes {one(change.after)}"
+
+
+def _readable_id(value: str) -> str:
+    """A risk identifier, said out loud.
+
+    `top_risks` carries risk IDS, and they reached a customer surface
+    verbatim: "Changes top risks company:blind:0 becomes
+    econ:financial_conditions, company:0". They are internal handles, and
+    §41 keeps those on operator surfaces.
+    """
+    text = str(value)
+    if text.startswith("econ:"):
+        return f"the economic risk to {text[5:].replace('_', ' ')}"
+    if text.startswith("company:blind:"):
+        return "a company risk from an observed tension"
+    if text.startswith("company:"):
+        return "a company risk from its own evidence"
+    return text
 
 
 def _econ_note(econ) -> str:
@@ -1124,8 +1148,11 @@ def _econ_note(econ) -> str:
     age = {FC.CURRENT: "current", FC.DELAYED: "delayed",
            FC.STALE: "stale", FC.BLOCKED: "unavailable"}.get(
                econ.freshness, econ.freshness.lower())
+    days = ("today" if econ.age_days == 0 else
+            "1 day old" if econ.age_days == 1 else
+            f"{econ.age_days} days old")
     bits = [f"Economic reading as of {econ.as_of} ({age}"
-            + (f", {econ.age_days} days old)" if econ.age_days >= 0 else ")")]
+            + (f", {days})" if econ.age_days >= 0 else ")")]
     if econ.candidate_relations:
         bits.append(f"{len(econ.candidate_relations)} further relation(s) are "
                     f"being tracked and are not yet supported, so none of them "

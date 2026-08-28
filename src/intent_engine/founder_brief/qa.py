@@ -494,10 +494,17 @@ def _economic_answer(question: str, econ) -> str:
         if not live:
             return econ.headline()
         e = live[0]
-        return (f"{e.quantity.replace('_', ' ').capitalize()}, through "
-                f"{e.channel.replace('_', ' ').lower()}. {e.mechanism} "
-                f"The variable it moves here is "
-                f"{e.business_variable or e.channel.lower()}.")
+        quantity = e.quantity.replace("_", " ")
+        variable = e.business_variable or e.channel.replace("_", " ").lower()
+        # "POLICY RATE, THROUGH POLICY RATE." Measured live: the channel and
+        # the quantity are frequently the same word, and naming the channel
+        # produced a tautology where the useful noun -- the variable it moves
+        # in THIS business -- was already available.
+        mechanism = e.mechanism.strip().rstrip(".")
+        return (f"{quantity[:1].upper()}{quantity[1:]}, through "
+                f"{variable}. {mechanism[:1].upper()}{mechanism[1:]}."
+                if mechanism else
+                f"{quantity[:1].upper()}{quantity[1:]}, through {variable}.")
     if name == "economic_evidence":
         if not econ.provenance:
             return econ.headline()
@@ -727,9 +734,10 @@ def answer(question: str, brief, *, engine_answer: str = "",
             out.decision_affected = (
                 econ.material_decision_delta[0].why_material)
         if econ is not None and econ.provenance:
+            claim = econ.provenance[0].claim
             out.strongest_evidence = (
-                f"{econ.provenance[0].claim} ({econ.provenance[0].source}, "
-                f"{econ.provenance[0].as_of})")
+                f"{claim[:1].upper()}{claim[1:]} "
+                f"({econ.provenance[0].source}, {econ.provenance[0].as_of})")
         return out
 
     _routed, _matched = _route_answer(question, decision, read)

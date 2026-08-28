@@ -46,6 +46,44 @@ one.
 | 52 | Personal AI separation | `PRIVATE_SCALES` | **LIVE_PROVEN** | the public core cannot construct an individual state |
 | 56 | out-of-sample delta reporting | `incremental.report` | **BUILT_NOT_LIVE_PROVEN** | reports base / augmented / delta / CI / n / FDR. Status is `NOT_YET_MEASURED` in production |
 
+## The economic world model on the founder product path
+
+*Added by the productization run. Every row here is about the ECONOMIC layer;
+the collective-human layer above is unchanged and still `FROZEN_CANDIDATE`.*
+
+| § | capability | module | status | note |
+|---|---|---|---|---|
+| 4 | `FounderEconomicContext` product contract | `econ/founder_contract.py` | **LIVE_PROVEN** | rendered on the deployed preview; brief and full carry byte-identical economic text for one run |
+| 5 | seven failure states, none collapsing into a blank | `founder_contract.STATUSES` | **LIVE_PROVEN** | four of the seven observed live across ten companies |
+| 6 | state → exposure → mechanism → decision field | `external_intel/econ_decision.py` | **LIVE_PROVEN** | the join runs on every deployed analysis |
+| 8 | decision-damage wall before a surface | `founder_contract.admit` | **LIVE_PROVEN** | refusals are carried on the context and were observed live |
+| 9 | company-specific transmission | `executive/company_profile` | **LIVE_PROVEN** | sign and mechanism keyed on (channel, business model); two model classes produce two different readings of one economy |
+| 11 | ECONOMIC IMPACT section | `founder_brief/dossier._economic_impact` | **LIVE_PROVEN** | present on `/brief` and `/full`, deployed |
+| 12 | provenance on every visible claim | `founder_contract.Provenance` | **LIVE_PROVEN** | source, observation, as_of, evidence class; the series that measured a labelled condition is named |
+| 13 | forward status, `PRE_CALIBRATION` | `econ_decision.forward_status` | **LIVE_PROVEN** | "3 forward prediction(s) are open and none has come due" rendered live; no percentage anywhere |
+| 14 | rehearsal isolation | contract + reader | **LIVE_PROVEN** | two independent barriers: the reader opens only the real ledger, and the contract refuses a REHEARSAL-sourced record |
+| 16 | survives persistence and reload | rebuild from the append-only store | **LIVE_PROVEN** | the context is derived, not stored, so a redeploy reproduces it; asserted and observed |
+| 17 | freshness, and a stale state that cannot speak | `founder_contract.freshness_of` | **LIVE_PROVEN** | the context recomputes its own freshness and refuses a producer that disagrees |
+| 18 | a missing state leaves the analysis intact | `econ_decision.build` early returns | **LIVE_PROVEN** | ten of ten companies served a full analysis with no state published |
+| 19/32 | multi-company matrix | `scripts/live_econ_matrix.py` | **LIVE_PROVEN** | ten companies across nine business-model classes, twice |
+| 20 | offline semantic parity with the research arm | `scripts/run_product_parity.py` | **BUILT_NOT_LIVE_PROVEN** | 52/60 identical, 8 explained, 0 unexplained; it is an offline instrument by design |
+| 21 | one canonical context across surfaces | per-request memo | **LIVE_PROVEN** | brief and full observed carrying the same sentences for one deployed run |
+| 22 | CEO Q&A off the same object | `founder_brief/qa._economic_answer` | **LIVE_PROVEN** | answered live with the context's own provenance |
+| 23 | information priority, named | `econ_decision._priorities` | **LIVE_PROVEN** | rendered live: "How much of … is already contracted, hedged or repriced" |
+| 26 | product break proofs | `scripts/break_proofs_product.py` | **LIVE_PROVEN** | 16/16 caught, 0 tautologies, against the deployed code paths |
+| 39 | operator learning surface | `webapp._econ_decision_block` | **BUILT_NOT_LIVE_PROVEN** | added after the second deploy; asserted by test, not yet observed on the preview |
+| 15 | economic History Rewind | — | **PARTIAL** | the history programme exists offline; no supported live case, and it is not blocking |
+| — | Founder ← collective human state | `econ/founder_view.py` | **REFUSED** | zero of sixteen constructs promoted; the contract raises on any of them |
+
+**What is NOT proven.** A material live DecisionDelta on a real company. The
+seam runs end to end and the abstention and insufficient-evidence paths are
+proven live; a company whose own filings establish an exposure to a condition
+that is *currently* moving adversely, on a run that also produced a Baseline A,
+did not occur in either matrix. That is a conjunction of three facts about the
+world, not a gap in the wiring, and it is stated rather than manufactured.
+
+---
+
 ## Deliberately not built this tranche
 
 These are specification sections I did **not** deliver, recorded as decisions

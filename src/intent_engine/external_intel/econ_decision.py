@@ -354,6 +354,15 @@ def _business_variable(channel: str, profile) -> str:
             or _CHANNEL_VARIABLE.get(channel, ""))
 
 
+def lead_row(rows: Sequence[dict]) -> Optional[dict]:
+    """The adverse condition the delta rests on. One definition, one place."""
+    adverse = [r for r in rows if r["adverse"]]
+    if not adverse:
+        return None
+    return max(adverse, key=lambda r: (r["channel"] == "MARKET_RATE",
+                                       r["quantity"]))
+
+
 def augmented(base: FA.Analysis, *, rows: Sequence[dict], profile,
               company_name: str = "") -> Tuple[FA.Analysis, Dict[str, tuple]]:
     """B: everything A has, plus the economic state, and nothing else.
@@ -390,8 +399,7 @@ def augmented(base: FA.Analysis, *, rows: Sequence[dict], profile,
             unknowns=base.unknowns, economic_inputs=inputs, prose="")
         return b, {}
 
-    lead = max(adverse, key=lambda r: (r["channel"] == "MARKET_RATE",
-                                       r["quantity"]))
+    lead = lead_row(rows)
     variable = _business_variable(lead["channel"], profile)
     action = FA.PREPARE if len(adverse) > 1 else FA.INVESTIGATE
     if FA.ACTION_RANK[base.action] > FA.ACTION_RANK[action]:
@@ -617,7 +625,19 @@ def build(*, company_id: str, company_name: str, as_of: str, economy,
         provenance=_provenance(rows),
         freshness=freshness, age_days=age,
         computed_at=(as_of or _today()),
+        # THE EXPOSURE THE CHANGE RESTS ON, not the first one measured. Live,
+        # NVIDIA's section explained the change through the
+        # capacity-commitment mechanism while the trigger named a different
+        # condition entirely.
+        lead_exposure=_lead_exposure(exposures_out, lead_row(rows)),
         refused=tuple(refused), **fwd)
+
+
+def _lead_exposure(exposures, lead):
+    if lead is None:
+        return None
+    return next((e for e in exposures
+                 if e.measured and e.quantity == lead["quantity"]), None)
 
 
 def _forward_kwargs(runtime_root, as_of: str) -> dict:

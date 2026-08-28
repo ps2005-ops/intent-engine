@@ -468,6 +468,12 @@ class FounderEconomicContext:
     candidate_relations: Tuple[Relation, ...] = ()
     causal_bleeds: Tuple[str, ...] = ()
     material_decision_delta: Tuple[FieldChange, ...] = ()
+    #: The exposure the delta actually rests on. Carried so a renderer shows
+    #: the mechanism BEHIND the change rather than whichever exposure happens
+    #: to be first -- live, NVIDIA's section explained the change through the
+    #: capacity-commitment mechanism while the trigger named a different
+    #: condition, because the renderer took `company_exposures[0]`.
+    lead_exposure: Optional[Exposure] = None
     abstention_status: str = ""
     abstention_reason: str = ""
     uncertainty: Dict[str, Any] = field(default_factory=dict)
@@ -647,6 +653,8 @@ class FounderEconomicContext:
             "economic_state_summary": self.economic_state_summary,
             "relevant_dimensions": list(self.relevant_dimensions),
             "company_exposures": [e.as_dict() for e in self.company_exposures],
+            "lead_exposure": (self.lead_exposure.as_dict()
+                              if self.lead_exposure else None),
             "supported_relations": [r.as_dict()
                                     for r in self.supported_relations],
             "candidate_relations": [r.as_dict()
@@ -694,6 +702,8 @@ class FounderEconomicContext:
             company_exposures=tuple(
                 Exposure.from_dict(x)
                 for x in (d.get("company_exposures") or ())),
+            lead_exposure=(Exposure.from_dict(d["lead_exposure"])
+                           if d.get("lead_exposure") else None),
             supported_relations=tuple(
                 Relation.from_dict(x)
                 for x in (d.get("supported_relations") or ())),

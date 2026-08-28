@@ -135,10 +135,20 @@ PRE_CAL = "no accuracy record to quote"
 BLOCKED_MARKER = "rests entirely on the company's own evidence"
 
 
-def score(name: str, pages: dict) -> dict:
-    """§32's scorecard, computed from what the deployed pages actually say."""
+def score(name: str, pages: dict, section: str = "") -> dict:
+    """§32's scorecard, computed from what the deployed pages actually say.
+
+    `section` is the ECONOMIC SECTION's own text. Two of these checks are
+    about what one section says about itself, and scoring them against the
+    whole joined page is how Caterpillar was reported as contradicting
+    itself: its economic section is internally consistent, and the phrase the
+    check looked for appears elsewhere on the full analysis. A
+    self-contradiction check has to read the thing that would be
+    contradicting itself.
+    """
     text = {k: visible(v["body"]) for k, v in pages.items()}
     joined = " ".join(text.values())
+    section = section or ""
     section = any(m in joined for m in ECON_MARKERS)
     abstained = ABSTAIN_MARKER in joined
     spoke = SPEAK_MARKER in joined and "changes" in joined
@@ -169,11 +179,11 @@ def score(name: str, pages: dict) -> dict:
         # state measures, and the very next sentence listed the state's
         # reading of the conditions they were exposed to.
         "denies_exposure_then_shows_one": (
-            "no exposure to any condition" in joined
-            and "the shared economic state reads" in joined),
+            "no exposure to any condition" in section
+            and "the shared economic state reads" in section),
         # Three of ten reported the economic reading "unavailable" while the
         # state was published and dated the previous day.
-        "reading_called_unavailable": "(unavailable)" in joined,
+        "reading_called_unavailable": "(unavailable)" in section,
         "words": {k: len(v.split()) for k, v in text.items()},
     }
 
@@ -243,8 +253,8 @@ def analyse(name, domain, *, poll_seconds, verbose=True):
                                 "status": st, "seconds": round(dt, 1),
                                 "chars": len(body)})
     row["state"] = "READ" if ready else "TIMED_OUT"
-    row["score"] = score(name, pages)
     row["econ_excerpt"] = econ_excerpt(pages)
+    row["score"] = score(name, pages, section=row["econ_excerpt"])
     # A TIMEOUT AND A 500 ARE DIFFERENT FINDINGS. Status 0 is this client
     # giving up; a 4xx/5xx is the server answering badly. Counting them
     # together is what made the first matrix report "4 requests with a
@@ -268,6 +278,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--poll", type=int, default=420)
     ap.add_argument("--only", default="")
+    ap.add_argument("--skip", default="",
+                    help="comma-separated names to leave for a browser "
+                         "journey, so the hourly quota covers both")
     ap.add_argument("--label", default="first")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
@@ -282,8 +295,10 @@ def main() -> int:
     print(f"storage          "
           f"{(readyz.get('storage') or {}).get('durability', '?')}\n")
 
+    skip = {x.strip().lower() for x in args.skip.split(",") if x.strip()}
     todo = [c for c in COMPANIES
-            if not args.only or args.only.lower() in c[0].lower()]
+            if (not args.only or args.only.lower() in c[0].lower())
+            and c[0].lower() not in skip]
     rows = []
     for name, domain in todo:
         rows.append(analyse(name, domain, poll_seconds=args.poll))

@@ -22,8 +22,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34664,
-      "bytes_before": 34711,
+      "bytes_after": 35418,
+      "bytes_before": 35465,
       "bytes_delta": -47,
       "description": "NO_MATERIAL_ECONOMIC_DELTA is rewritten into a macro paragraph, so the deliberate silence disappears",
       "detail": "EconError: c: status COMPLETE with no material change. The abstention states exist for this; COMPLETE with nothing in it renders as a heading with no content.",
@@ -37,8 +37,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34624,
-      "bytes_before": 34711,
+      "bytes_after": 35378,
+      "bytes_before": 35465,
       "bytes_delta": -87,
       "description": "a material change reaches a surface with no trigger, mechanism or provenance behind it",
       "detail": "AssertionError: the reading went silent: NO_MATERIAL_ECONOMIC_DELTA / Current economic conditions do not materially change the strategic recommendation for this company. / refused=({'field': 'top_priority', 'code': 'NOT_ATTRIBUTABLE', 'reason': 'the field moved with no trigge",
@@ -52,8 +52,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34636,
-      "bytes_before": 34711,
+      "bytes_after": 35390,
+      "bytes_before": 35465,
       "bytes_delta": -75,
       "description": "an unsupported relation is sorted into the supported list, where a surface states it as a finding",
       "detail": "AssertionError: a CANDIDATE relation was promoted to supported",
@@ -82,8 +82,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34659,
-      "bytes_before": 34711,
+      "bytes_after": 35413,
+      "bytes_before": 35465,
       "bytes_delta": -52,
       "description": "a rehearsal expectation is admitted to the forward list, where it would become a track record",
       "detail": "ContextViolation: c: 1 rehearsal expectation(s) (['ex-r']) reached the founder contract. REHEARSAL exists to prove the forward machinery can score itself on history; it is not a prediction anyone made about the future and may never contribute to a customer-facing accuracy figur",
@@ -97,8 +97,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34921,
-      "bytes_before": 35010,
+      "bytes_after": 35594,
+      "bytes_before": 35683,
       "bytes_delta": -89,
       "description": "the stored form drops the material delta, so a run reopened after a restart shows a different verdict",
       "detail": "EconError: c: status COMPLETE with no material change. The abstention states exist for this; COMPLETE with nothing in it renders as a heading with no content.",
@@ -112,8 +112,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34705,
-      "bytes_before": 34711,
+      "bytes_after": 35459,
+      "bytes_before": 35465,
       "bytes_delta": -6,
       "description": "the age of the state stops being computed, so an old reading produces a confident recommendation",
       "detail": "ContextViolation: c: this context is labelled CURRENT but its own dates -- a state of 2025-01-01 read at 2026-08-25, 601 days -- make it STALE. A freshness that disagrees with the dates behind it is not a label, it is a wrong input to every guard downstream of it.",
@@ -127,8 +127,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34657,
-      "bytes_before": 34711,
+      "bytes_after": 35411,
+      "bytes_before": 35465,
       "bytes_delta": -54,
       "description": "an absent economic state raises instead of reporting BLOCKED_DATA, taking the whole analysis with it",
       "detail": "AttributeError: 'NoneType' object has no attribute 'available'",
@@ -157,8 +157,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 91047,
-      "bytes_before": 91013,
+      "bytes_after": 92256,
+      "bytes_before": 92222,
       "bytes_delta": 34,
       "description": "the renderer composes its own verdict instead of rendering the context's, so two surfaces can differ",
       "detail": "AssertionError: xposed to moved'\nE        +  where 'Current economic conditions do not materially change the strategic recommendation for this company.' = headline()\nE        +    where headline = FounderEconomicContext(company_id='acme', as_of='2026-08-20', status='NO_MATERI",
@@ -172,8 +172,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 45227,
-      "bytes_before": 45240,
+      "bytes_after": 45727,
+      "bytes_before": 45740,
       "bytes_delta": -13,
       "description": "the economic answer is composed rather than lifted, so Q&A can assert a reading nothing supports",
       "detail": "AssertionError: e.founder_brief import qa as FQA\n        blocked = FC.blocked(\"acme\", reason=\"nothing has been published here\")\n        text = FQA._economic_answer(\"Which economic factor matters most?\", blocked)\n>       assert \"nothing has been published here\" in text\nE      ",
@@ -187,8 +187,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34709,
-      "bytes_before": 34711,
+      "bytes_after": 35463,
+      "bytes_before": 35465,
       "bytes_delta": -2,
       "description": "an evidence class a founder surface may not cite is admitted behind a material change",
       "detail": "EconError: 'tenant_private_note' is not an evidence class a founder surface may cite; known: ('published_series', 'regulatory_filing', 'company_document', 'shared_economic_state')",
@@ -202,8 +202,8 @@
       "verdict": "CAUGHT"
     },
     {
-      "bytes_after": 34713,
-      "bytes_before": 34711,
+      "bytes_after": 35467,
+      "bytes_before": 35465,
       "bytes_delta": 2,
       "description": "the same economic trigger is credited to a second field, inflating the delta with no new information",
       "detail": "TypeError: 'NoneType' object is not iterable",

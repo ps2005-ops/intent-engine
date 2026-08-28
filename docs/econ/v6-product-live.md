@@ -243,3 +243,234 @@ is a fallback to blind spots — the same shape, resting on the company's own
 observations, carried at LOW severity with its source recorded. It is a
 genuinely weaker claim than a vulnerability and is not presented as an equal
 one.
+
+---
+
+## Live browser inspection
+
+Driven in a real browser against the deployed preview, on a real run
+(Cloudflare, `01M13KKFZBN3J72214DCQ5QMY7`) — the entry form filled and
+submitted through `form.requestSubmit()`, because a ref-click on the submit
+button reports success and silently does nothing at desktop widths.
+
+| check | result |
+|---|---|
+| economic section on `/brief` | present |
+| economic section on `/full` | present, byte-identical text |
+| dark mode contrast (section text on body) | 15.8:1 |
+| 1440 × 900 light | no horizontal overflow |
+| 768 × 1024 dark | no horizontal overflow |
+| 375 × 812 dark | **page overflows to 568px** — see below |
+| economic section at 375px | 283px wide; does not overflow |
+| CEO Q&A, "Which economic factor matters most?" | answered from the context, with provenance |
+
+### The mobile overflow is not this section's
+
+At 375px the full analysis scrolls to 568px. The innermost offenders are an
+unbroken company-claim string in the customer-demand section (522px) and five
+SVG `<text>` labels in the charts (437–475px). The economic section measures
+283px and does not overflow. Both offenders are pre-existing surfaces outside
+this seam, and are recorded rather than repaired — widening the change to
+every page is exactly the scope this run was told not to take.
+
+### Two copy defects the browser found and the harness could not
+
+**"Policy rate, through policy rate."** The Q&A answer named the CHANNEL as
+the thing a factor reaches you through, and the channel and the quantity are
+frequently the same word. The useful noun — the variable it moves in *this*
+business — was already on the exposure.
+
+**"(current, 1 days old)."** Pluralisation.
+
+Both are repaired and pinned by tests that quote the live string.
+
+---
+
+## The second live iteration
+
+**Type: `SOFTWARE_REPAIR`, not `NEW_EVIDENCE`.** The panel is the same file it
+was; nothing new arrived. What changed is how the prior observation is chosen,
+how a move is measured, and what the page says. Calling that learning would be
+the exact confusion §37 forbids.
+
+Deployed SHA `27064b93`, nine companies through the harness (the tenth,
+Cloudflare, was driven in the browser so one hour's quota covered both).
+
+| | first (`5f21b055`) | second (`27064b93`) |
+|---|---|---|
+| attempted | 10 | 9 |
+| read a result | 10 | 9 |
+| economic section present | 10 | 9 |
+| **spoke — material delta** | **0** | **2** |
+| abstained | 2 | 1 |
+| cross-surface conflict | 0 | 0 |
+| internal enum leaks | 0 | 0 |
+| **denies exposure then shows one** | **5** | **0** |
+| **reading called "unavailable"** | **3** | **0** |
+| server errors (4xx/5xx) | 1 | **0** |
+| client timeouts | 4 @ 180s | 2 @ 300s |
+
+Every defect the first matrix found is measured directly in the second, and
+every one of them is zero.
+
+### Nine companies, seven mechanisms, no two alike
+
+| company | model class | what the page says the economy reaches it through |
+|---|---|---|
+| Walmart | SCALE_RETAIL | "rates set the carry on the inventory in the stores" |
+| Nike | BRANDED_CONSUMER | "rates reach household discretionary spending" |
+| JPMorgan | BALANCE_SHEET_OR_NETWORK | "rates move the cost of funds and the yield on assets at different speeds" |
+| Visa | BALANCE_SHEET_OR_NETWORK | abstains — nothing it is exposed to moves adversely |
+| Caterpillar | MANUFACTURE_AND_AFTERMARKET | no evidenced exposure; says so, and says it is a gap in the map |
+| Meta | *unclassified* | no mechanism established; asks whether policy rate reaches it at all |
+| NVIDIA | DESIGN_AND_MANUFACTURE | "rates set the hurdle on capacity commitments made years before the revenue they carry" |
+| Salesforce | SUBSCRIPTION_SOFTWARE | "rates set the discount rate on customers' own investment cases" |
+| Union Pacific | CONTRACTED_OR_RATE_BASE_ASSETS | "the capital programme is debt-financed" |
+
+JPMorgan is the interesting one: it has the mechanism and does **not** speak,
+because the sign of the rate LEVEL for a balance-sheet business is
+deliberately unestablished — the mechanism itself says the two legs move at
+different speeds. A single sign per channel would have made it speak, wrongly.
+
+### What the second matrix found
+
+| sev | defect | status |
+|---|---|---|
+| SEV2 | internal risk IDs in customer copy: "Changes top risks company:blind:0 becomes econ:financial_conditions" | repaired |
+| SEV2 | the section explained the change through `company_exposures[0]` rather than the exposure the change rests on | repaired — the lead exposure is carried on the contract |
+| SEV2 | the harness's own self-contradiction check read the whole joined page, so Caterpillar was reported as contradicting itself when its section is consistent | instrument repaired, and the report re-scored |
+| SEV3 | two client timeouts at 300s on the full analysis | not repaired — measured locally at 0.86s with the context and 0.73s without, so it is the free instance's CPU quota |
+| SEV3 | the blind-spot fallback imports the pattern library's generic language into Baseline A's `top_priority` | **named, not repaired** — see below |
+
+### The limitation this run did not fix
+
+Baseline A's risks now fall back to blind spots when the vulnerability
+playbook does not match, which is what made a delta measurable at all. Blind
+spots come from the pattern library, and the library's sentences are not
+always company-specific: NVIDIA's `top_priority` "before" value read
+"Consolidating checkout/identity/data rails may encroach on layers partners
+currently monetize", which is commerce language on a chip designer.
+
+The delta itself is sound — the AFTER value, the trigger, the mechanism and
+the provenance are all this company's — but the BEFORE value inherits
+whatever the library said. Repairing `_build_blind_spots` is upstream of this
+seam and is recorded rather than attempted, because widening the change to
+the pattern library is the scope this run was told not to take.
+
+---
+
+## §40 The demo, chosen after the matrix
+
+The strongest real case is **Salesforce**, run `01M13PFD24FB0SFQXSVHJ95365`
+on the deployed preview. It is chosen because the whole chain is present and
+checkable, not because it is flattering.
+
+**1. The company question** — the run's own decision, composed from
+Salesforce's retrieved evidence before any economic reading is applied.
+
+**2. The public evidence** — filings and investor material retrieved for this
+run; the evidence appendix lists what was read and what was not.
+
+**3. What the company-only analysis sees** — Baseline A: `top_priority` =
+*demand capture at the storefront*, and one company risk from its own
+evidence.
+
+**4. The current economic state** — "As of 2026-08-27 the shared economic
+state reads policy rate falling; financial conditions rising." Published from
+`reports/panel/historical_panel.jsonl` by `econ_panel_publisher.v1`, thirteen
+conditions, each dated with a year-earlier prior.
+
+**5. How that state transmits to this company** — "rates set the discount rate
+on customers' own investment cases, so higher rates lengthen procurement and
+slow new bookings without touching the contracted base." That sentence comes
+from `(MARKET_RATE, SUBSCRIPTION_SOFTWARE)` in the canonical transmission
+table. Nike's page, from the same state, says something else entirely.
+
+**6. The exact decision delta** — three structured fields:
+
+```
+top_priority          demand capture at the storefront
+                   -> cost of funds and the hurdle rate on committed capital
+top_risks             a company risk from its own evidence
+                   -> the economic risk to financial conditions,
+                      a company risk from its own evidence
+information_priority  <the run's own gap>
+                   -> how much of cost of funds and the hurdle rate on
+                      committed capital is already contracted or hedged
+```
+
+**7. Why it is material** — the channel a founder looks at first changed, and
+the most valuable missing information changed with it. Both are in the
+preregistered `MATERIAL_FIELDS` list, frozen before any pair was scored.
+
+**8. Evidence and provenance** — "financial conditions is rising to 6.66
+percentage points from 6.58 a year earlier (2025-08-21) (as of 2026-08-27,
+MORTGAGE30US, FRED)". The series is named because "financial conditions" is a
+label a reader cannot otherwise check.
+
+**9. What could make it wrong** — "Salesforce reports cost of funds and the
+hurdle rate on committed capital holding while financial conditions continues
+up."
+
+**10. What the system wants to learn next** — "How much of cost of funds and
+the hurdle rate on committed capital is already contracted, hedged or
+repriced." Not "more research is needed".
+
+**11. The forward expectation being tracked** — three open predictions, each
+with a resolution rule and an expiry, appended to an immutable ledger.
+
+**12. Status** — `PRE_CALIBRATION`, rendered as "none has come due, so there
+is no accuracy record to quote yet". No percentage appears anywhere.
+
+### And the abstention, which is the better half of the demo
+
+**Visa**, same state, same deployment, same hour:
+
+> Current economic conditions do not materially change the strategic
+> recommendation for this company. Policy rate was read against this
+> company's own exposures and none of them moves adversely through a channel
+> that reaches this business, so the recommendation is unchanged.
+
+One line, then the analysis continues. The system had the macro information,
+read it against Visa's own evidenced exposures, and deliberately did not
+change the recommendation.
+
+**JPMorgan is the same point made harder.** It has the mechanism — "rates
+move the cost of funds and the yield on assets at different speeds, so the
+spread reprices" — and still does not speak, because that mechanism states
+both directions and therefore carries no sign. A product willing to say
+something about every company would have spoken there and been wrong.
+
+---
+
+## §46 Release gate
+
+| capability | status |
+|---|---|
+| EconomicState → Founder, deployed and executing on real HTTP requests | **LIVE_PROVEN** |
+| rendered output exposes it on `/brief` and `/full` | **LIVE_PROVEN** |
+| multi-company matrix (10, then 9) | **LIVE_PROVEN** |
+| provenance survives to the page | **LIVE_PROVEN** |
+| abstention survives productization | **LIVE_PROVEN** |
+| CEO Q&A off the same object | **LIVE_PROVEN** |
+| forward status / `PRE_CALIBRATION` language | **LIVE_PROVEN** |
+| unsupported human state remains blocked | **REFUSED**, by construction |
+| offline semantic parity | **BUILT_NOT_LIVE_PROVEN** (an offline instrument by design) |
+| operator learning panel | **BUILT_NOT_LIVE_PROVEN** (added after the second deploy) |
+| economic History Rewind | **PARTIAL** |
+
+**The economic Founder integration is `LIVE_PROVEN`.**
+
+### What is NOT claimed
+
+A material live DecisionDelta requires three things at once: the company's own
+filings must establish an exposure to a condition the shared state measures,
+that condition must currently be moving adversely through a mechanism this
+business model has, and the run must also have produced a Baseline A. Two of
+nine companies met all three. That is a fact about the world and about the
+evidence this deployment can read, and it is reported as two of nine rather
+than dressed up.
+
+`CALIBRATION_STATUS = PRE_CALIBRATION` at **n = 0** resolved forward
+predictions. Nothing here carries an accuracy claim and the contract raises if
+one is asserted.
