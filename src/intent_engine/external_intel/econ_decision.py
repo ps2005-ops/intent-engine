@@ -81,8 +81,16 @@ CHANNEL_OF = {
     "inflation": "INFLATION",
     "inflation_expectation": "INFLATION",
     "wages": "LABOR",
+    # THE UNEMPLOYMENT CHANNEL CARRIES THE UNEMPLOYMENT RATE AND NOTHING ELSE.
+    #
+    # `consumer_demand` was mapped here too, and the channel's adverse
+    # direction is UP -- because a RISING unemployment rate hurts. Real
+    # consumption rising is the opposite reading, so the map inverted its
+    # sign and a strengthening consumer would have been reported as a risk to
+    # a consumer brand. A condition may only sit in a channel whose adverse
+    # direction means the same thing for it.
     "labour": "UNEMPLOYMENT",
-    "consumer_demand": "UNEMPLOYMENT",
+    "consumer_demand": "INDUSTRIAL_DEMAND",
     "growth": "INDUSTRIAL_DEMAND",
     "industrial_production": "INDUSTRIAL_DEMAND",
     "business_investment": "INDUSTRIAL_DEMAND",
@@ -130,28 +138,73 @@ MATERIAL_MOVE = 0.03
 
 #: The smallest previous level a PROPORTIONAL move can be computed from. Below
 #: it, a relative change is a divide-by-a-near-zero-base and reports an
-#: enormous move for an economically trivial one -- a curve slope going from
-#: 0.001 to 0.05 is 4,900%. Such a condition is still READ and still reported;
-#: it simply cannot be the thing that moves a decision, and the reason is
-#: recorded rather than the move being silently kept or silently dropped.
+#: enormous move for an economically trivial one. It applies ONLY to series a
+#: ratio is meaningful for; see `PERCENTAGE_POINT` below for the ones it is
+#: not, which is where the real damage was.
 MIN_BASE_FOR_RELATIVE = 0.01
+
+#: The unit the producer stamps on a reading measured in PERCENTAGE POINTS.
+#:
+#: A ratio is the wrong instrument for these and the threshold guard was not
+#: enough to save it: the 3-month/10-year slope was -0.02 a year ago and 0.83
+#: now, and `MIN_BASE_FOR_RELATIVE` let 0.02 through -- so an 85 basis point
+#: steepening was measured as a 4,250% move. Rates, spreads, slopes and
+#: unemployment rates cross zero or sit near it routinely, and every one of
+#: them takes an arithmetic DIFFERENCE in points.
+#:
+#: This is the same rule the research arm uses (`experiment.change` ->
+#: `release.is_percentage_point`); what differs is only where it is looked up.
+#: The producer knows the series and stamps the unit; the consumer knows the
+#: condition and reads it. Neither needs the other's vocabulary.
+PERCENTAGE_POINT = "percentage_point"
 
 #: The evidence class every shared-state reading carries. A published series
 #: read from the canonical core is exactly that and nothing more.
 STATE_EVIDENCE_CLASS = "shared_economic_state"
 
 
-def relative_move(value, prior) -> Optional[float]:
-    """(value - prior) / |prior|, or None when that number would be a lie."""
+def material_move(value, prior, unit: str = "") -> Optional[float]:
+    """How far this condition has moved, in the transform its unit calls for.
+
+    Percentage points take a difference; everything else takes a relative
+    change. `None` means the move is not computable, and a move that is not
+    computable never counts as material -- an unmeasurable change is not a
+    large one.
+    """
     if value is None or prior is None:
         return None
     try:
-        base = abs(float(prior))
+        now, then = float(value), float(prior)
     except (TypeError, ValueError):
         return None
-    if base < MIN_BASE_FOR_RELATIVE:
+    if str(unit) == PERCENTAGE_POINT:
+        return now - then
+    if abs(then) < MIN_BASE_FOR_RELATIVE:
         return None
-    return (float(value) - float(prior)) / base
+    return (now - then) / abs(then)
+
+
+#: How a unit is spoken on a customer surface. §41: `percentage_point` is an
+#: internal enum and it reached a live page as "rising to 6.66
+#: percentage_point", which is neither English nor a unit anyone writes.
+_UNIT_WORDS = {PERCENTAGE_POINT: "percentage points", "percent": "percent",
+               "index": "", "thousands": "thousand", "": ""}
+
+
+def unit_words(unit: str) -> str:
+    return _UNIT_WORDS.get(str(unit), str(unit).replace("_", " "))
+
+
+def instrument_of(node_id: str) -> str:
+    """The published series a condition was measured BY.
+
+    `financial_conditions` is measured here by MORTGAGE30US, so a reader told
+    only that "financial conditions is rising to 6.66" has been given a label
+    they cannot check against anything. The series is already in the node id;
+    naming it turns the claim into one a reader can look up.
+    """
+    parts = str(node_id or "").split(":")
+    return parts[1] if len(parts) >= 2 else ""
 
 
 def _today() -> str:
@@ -168,6 +221,15 @@ def _severity_from(readiness: str, risk_count: int) -> str:
             "INVESTIGATION_REQUIRED": "MEDIUM"}.get(readiness, "LOW")
 
 
+def _leading_channel(risks: Sequence[dict]) -> str:
+    """The channel the company's own leading risk names."""
+    for r in risks or ():
+        channel = str((r or {}).get("channel") or "").strip()
+        if channel:
+            return channel
+    return ""
+
+
 def baseline_from_decision(decision, *, company_id: str, as_of: str,
                            risks: Sequence[dict] = (),
                            channel: str = "") -> Optional[FA.Analysis]:
@@ -178,7 +240,18 @@ def baseline_from_decision(decision, *, company_id: str, as_of: str,
     baseline; handing the comparator an empty A is how a crippled control
     manufactures product value, and §3 forbids it.
     """
+    # A'S PRIORITY MUST BE THE SAME KIND OF THING AS B'S.
+    #
+    # `top_priority` is one of the seven material fields, and it was falling
+    # back to the decision TOPIC -- a full sentence -- while B sets it to a
+    # business variable. Live that produced: "Whether to invest ahead of
+    # demand in owning checkout/identity/data rails vs. deepening the core
+    # product. becomes cost of funds and the hurdle rate on committed
+    # capital", which reads as a non-sequitur because the two sides are a
+    # question and a variable. The company's own leading risk names a
+    # CHANNEL, which is the comparable thing.
     priority = (channel or str(getattr(decision, "decision_archetype", ""))
+                or _leading_channel(risks)
                 or str(getattr(decision, "topic", "")))
     readiness = str(getattr(decision, "readiness", "")) or "UNKNOWN"
     action = {"DECISION_READY": FA.PREPARE,
@@ -249,7 +322,8 @@ def transmissions(*, readings: Sequence[dict], profile,
             continue
         direction = str(row.get("direction", "")).upper()
         adverse_when = profile.adverse_direction_for(channel)
-        move = relative_move(row.get("value"), row.get("prior_value"))
+        move = material_move(row.get("value"), row.get("prior_value"),
+                             row.get("unit") or "")
         # THREE CONDITIONS, AND THE MAGNITUDE IS THE ONE THAT WAS MISSING.
         # A move in the adverse direction that is smaller than the declared
         # threshold is a reading, not a reason; and a move whose size cannot
@@ -335,14 +409,18 @@ def augmented(base: FA.Analysis, *, rows: Sequence[dict], profile,
                         f"while {lead['quantity'].replace('_', ' ')} continues "
                         f"{lead['direction'].lower()}"]
                        + list(base.falsifiers))[:3]
+    words = unit_words(lead.get("unit", ""))
     value = ("" if lead.get("value") is None
-             else f"{lead['value']:g}{(' ' + lead['unit']) if lead.get('unit') else ''}")
+             else f"{lead['value']:g}{(' ' + words) if words else ''}")
     prior = ("" if lead.get("prior_value") is None
-             else f" from {lead['prior_value']:g} on {lead.get('prior_as_of', '')}")
+             else f" from {lead['prior_value']:g} a year earlier "
+                  f"({lead.get('prior_as_of', '')})")
+    instrument = instrument_of(lead.get("node_id", ""))
+    source = ", ".join(x for x in (instrument, lead.get("publisher", "")) if x)
     trigger = (f"{lead['quantity'].replace('_', ' ')} is "
                f"{'rising' if lead['direction'] == 'UP' else 'falling'} to "
                f"{value}{prior} (as of {lead['as_of']}"
-               f"{', ' + lead['publisher'] if lead.get('publisher') else ''})")
+               f"{', ' + source if source else ''})")
     provenance = (f"econ:{lead['quantity']}@{lead['as_of']}",)
     triggers = {f: (trigger, lead["mechanism"], provenance)
                 for f in FA.MATERIAL_FIELDS}
@@ -441,7 +519,12 @@ def build(*, company_id: str, company_name: str, as_of: str, economy,
                     "any condition the shared economic state measures, so no "
                     "economic reading is asserted for it. That is a gap in "
                     "this company's exposure map, not a quiet economy."),
-            as_of=state_as_of, status=FC.INSUFFICIENT_EVIDENCE)
+            as_of=state_as_of, status=FC.INSUFFICIENT_EVIDENCE,
+            # THE STATE IS PRESENT AND DATED. Only the exposure is missing, so
+            # reporting the reading itself as "unavailable" describes the wrong
+            # absence.
+            freshness=freshness, age_days=age,
+            computed_at=(as_of or _today()))
 
     rows, unmapped = transmissions(readings=readings, profile=profile)
     exposures_out = tuple(

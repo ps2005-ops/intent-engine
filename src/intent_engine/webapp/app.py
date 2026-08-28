@@ -4845,6 +4845,22 @@ class WebApp:
             report = result.get("strategic_report") or {}
         except Exception:                                   # noqa: BLE001
             return []
+        # TWO SOURCES, IN ORDER, AND THE FALLBACK IS NOT A CONSOLATION PRIZE.
+        #
+        # MEASURED LIVE on 5f21b055 across ten companies: five produced no
+        # Baseline A at all, so no economic delta could be measured for
+        # half the matrix. The cause is upstream and specific --
+        # `detect_vulnerabilities` only fires for a hypothesis whose
+        # `pattern_id` is in the vulnerability playbook, so a company the
+        # pattern library does not match has zero of them however much
+        # evidence was read.
+        #
+        # A BLIND SPOT IS THE SAME SHAPE. It names an observed tension and
+        # why it may matter -- a channel and a mechanism, resting on the
+        # company's own observations -- which is exactly what a Baseline A
+        # risk is. It is a genuinely weaker claim than a vulnerability, so it
+        # carries LOW severity and the source is recorded on the risk rather
+        # than being silently equivalent.
         out = []
         for i, row in enumerate(report.get("vulnerabilities") or ()):
             d = row.as_dict() if hasattr(row, "as_dict") else row
@@ -4860,14 +4876,39 @@ class WebApp:
                 # company risk MEDIUM would make `risk_severity` -- one of the
                 # seven material fields -- a constant on the A side, and a
                 # constant baseline field is a field B wins for free.
-                "severity": {"HIGH": "HIGH", "MEDIUM": "MEDIUM",
-                             "LOW": "LOW"}.get(
+                #
+                # The detector writes "moderate" and "low", lower case, and
+                # the first version of this map looked for "MEDIUM" -- so
+                # every company risk fell through to LOW and the field was a
+                # constant anyway.
+                "severity": {"HIGH": "HIGH", "MODERATE": "MEDIUM",
+                             "MEDIUM": "MEDIUM", "LOW": "LOW"}.get(
                                  str(d.get("confidence", "")).upper(), "LOW"),
                 "channel": layer,
                 "mechanism": mechanism,
                 "standing": "INFERRED",
+                "source": "vulnerability",
                 "evidence": tuple(str(e) for e in
                                   (d.get("evidence") or ()))[:3]})
+        if not out:
+            for i, row in enumerate(report.get("blind_spots") or ()):
+                d = row.as_dict() if hasattr(row, "as_dict") else row
+                if not isinstance(d, dict):
+                    continue
+                tension = str(d.get("observed_tension") or "")
+                why = str(d.get("why_it_may_matter") or "")
+                if not tension.strip() or not why.strip():
+                    continue
+                out.append({
+                    "risk_id": f"company:blind:{i}",
+                    "severity": "LOW",
+                    "channel": tension,
+                    "mechanism": why,
+                    "standing": "INFERRED",
+                    "source": "blind_spot",
+                    "evidence": tuple(
+                        str(e) for e in
+                        (d.get("supporting_observation_ids") or ()))[:3]})
         return out[:4]
 
     def _econ_relations(self, run_id) -> list:
@@ -6799,9 +6840,90 @@ class WebApp:
             'record. Activity and learning are shown separately: reading more '
             'is not the same as knowing more.</p>'
             + "".join(windows)
+            + self._econ_decision_block()
             + self._collective_block()
             + '</main></body></html>')
         return self._html(body)
+
+    def _econ_decision_block(self) -> str:
+        """§39: what the economic layer knows, and what it has not yet earned.
+
+        OPERATOR-FACING, so the enums stay. §41's rule is about CUSTOMER
+        surfaces; an operator debugging why a company abstained needs the
+        refusal code, not a translation of it.
+
+        THE CALIBRATION LINE IS THE POINT. It states PRE-CALIBRATION and the
+        number of RESOLVED forward predictions, which is zero, and it may not
+        contain a percentage -- an accuracy figure with an empty denominator
+        is the claim this whole programme exists to not make. The rehearsal
+        ledger is a different file and this reads the real store only.
+        """
+        import datetime as _dt
+        from intent_engine.econ import founder_contract as FC
+        from intent_engine.external_intel import econ_context as EC
+        from intent_engine.external_intel import econ_decision as ED
+        today = _dt.date.today().isoformat()
+        try:
+            context = EC.load(self._runtime_root, as_of=today)
+        except Exception:                                   # noqa: BLE001
+            context = None
+        if context is None or not context.available:
+            reason = getattr(context, "reason", "") or \
+                "the shared economic state could not be read"
+            return ('<section class="card"><h2>Economic decision layer</h2>'
+                    f'<p class="none">{_e(reason)}</p></section>')
+        fresh, age = FC.freshness_of(context.as_of, at=today)
+        known = [v for v in context.conditions.values() if v.get("known")]
+        moving = [v for v in known if v.get("direction") in ("UP", "DOWN")]
+        try:
+            exps, calibration, counts = ED.forward_status(self._runtime_root,
+                                                          at=today)
+        except Exception:                                   # noqa: BLE001
+            exps, calibration, counts = [], FC.PRE_CALIBRATION, {}
+        supported = [b for b in context.beliefs
+                     if str(b.get("status", "")).upper().startswith(
+                         "SUPPORTED")]
+        candidate = [b for b in context.beliefs if b not in supported]
+        def _row(v) -> str:
+            value = v.get("value")
+            shown = f"{value:g}" if isinstance(value, (int, float)) else ""
+            prior = str(v.get("prior_as_of", "")) or "no earlier reading"
+            return (f'<li>{_e(str(v.get("kind", "")))}: '
+                    f'{_e(str(v.get("direction", "")))} to {_e(shown)} '
+                    f'(as of {_e(str(v.get("as_of", "")))}, from {_e(prior)})'
+                    f'</li>')
+
+        rows = "".join(
+            _row(v) for v in
+            sorted(known, key=lambda x: str(x.get("kind", "")))[:14])
+        forward = "".join(
+            f'<li>{_e(x.quantity)} {_e(x.expected_direction)} by '
+            f'{_e(x.expires_at)}</li>' for x in exps[:3])
+        return (
+            '<section class="card"><h2>Economic decision layer</h2>'
+            f'<p class="verdict"><strong>{_e(fresh)}</strong> — the shared '
+            f'state is dated {_e(context.as_of)} and is {_e(str(age))} days '
+            f'old.</p>'
+            f'<ul class="counts">'
+            f'<li>{len(known)} condition(s) measured of '
+            f'{_e(str((context.uncertainty or {}).get("vocabulary", "?")))} '
+            f'in the vocabulary</li>'
+            f'<li>{len(moving)} moved; {len(known) - len(moving)} did '
+            f'not</li>'
+            f'<li>{len(supported)} supported relation(s), '
+            f'{len(candidate)} candidate — a candidate is tracked and is '
+            f'never stated as a finding</li>'
+            f'<li>{_e(str(counts.get("open", 0)))} forward prediction(s) '
+            f'open, {_e(str(counts.get("resolved", 0)))} resolved</li>'
+            f'<li>CALIBRATION: {_e(calibration)} — no prediction has come '
+            f'due, so there is no accuracy figure and none is shown</li>'
+            f'<li>rehearsal results are held in a separate ledger this '
+            f'surface does not read</li>'
+            f'</ul>'
+            + (f'<h3>What is being tracked</h3><ul>{forward}</ul>'
+               if forward else "")
+            + f'<h3>Conditions</h3><ul class="counts">{rows}</ul>'
+            '</section>')
 
     def _collective_block(self) -> str:
         """Section 49: what the engine believes people are doing differently.

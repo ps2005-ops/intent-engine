@@ -147,8 +147,21 @@ def score(name: str, pages: dict) -> dict:
             {e for e in ("NO_MATERIAL_ECONOMIC_DELTA", "BLOCKED_DATA",
                          "CANDIDATE_NOT_PROVEN", "PRE_CALIBRATION",
                          "INSUFFICIENT_EVIDENCE", "SUBSCRIPTION_SOFTWARE",
-                         "BALANCE_SHEET_OR_NETWORK", "MARKET_RATE")
+                         "BALANCE_SHEET_OR_NETWORK", "MARKET_RATE",
+                         # Added after it was measured on a rendered page:
+                         # "rising to 6.66 percentage_point".
+                         "percentage_point")
              if e in joined}),
+        # THE SELF-CONTRADICTION FOUND IN THE FIRST MATRIX. Five of ten
+        # companies were told they had no evidenced exposure to anything the
+        # state measures, and the very next sentence listed the state's
+        # reading of the conditions they were exposed to.
+        "denies_exposure_then_shows_one": (
+            "no exposure to any condition" in joined
+            and "the shared economic state reads" in joined),
+        # Three of ten reported the economic reading "unavailable" while the
+        # state was published and dated the previous day.
+        "reading_called_unavailable": "(unavailable)" in joined,
         "words": {k: len(v.split()) for k, v in text.items()},
     }
 
@@ -266,6 +279,8 @@ def main() -> int:
     section = [r for r in read if r["score"]["economic_section_present"]]
     contra = [r for r in read if r["score"]["cross_surface_contradiction"]]
     leaks = [r for r in read if r["score"]["internal_enums_leaked"]]
+    denies = [r for r in read if r["score"]["denies_exposure_then_shows_one"]]
+    unavail = [r for r in read if r["score"]["reading_called_unavailable"]]
     fails = [r for r in rows if r.get("failures")]
     print(f"\n=== LIVE MATRIX ({args.label}) ===")
     print(f"  attempted                {len(rows)}")
@@ -275,6 +290,8 @@ def main() -> int:
     print(f"  abstained                {len(abst)}")
     print(f"  cross-surface conflict   {len(contra)}  (requires 0)")
     print(f"  internal enum leaks      {len(leaks)}  (requires 0)")
+    print(f"  denies-then-shows exposure{len(denies):>3}  (requires 0)")
+    print(f"  reading called unavailable{len(unavail):>3}  (requires 0)")
     print(f"  requests with a 4xx/5xx  {len(fails)}")
     payload = {"contract": "live_econ_matrix.v1", "label": args.label,
                "base": BASE, "version": version,
@@ -285,6 +302,8 @@ def main() -> int:
                            "abstained": len(abst),
                            "contradictions": len(contra),
                            "enum_leaks": len(leaks),
+                           "denies_then_shows_exposure": len(denies),
+                           "reading_called_unavailable": len(unavail),
                            "http_failures": len(fails)},
                "rows": rows}
     out = pathlib.Path(args.out) if args.out else OUT

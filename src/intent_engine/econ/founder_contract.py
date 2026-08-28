@@ -606,6 +606,22 @@ class FounderEconomicContext:
                     "analysis. What follows is the company's own evidence "
                     "only.")
         if self.status == INSUFFICIENT_EVIDENCE:
+            # ONE STATUS, TWO CAUSES, AND THIS USED TO ANSWER ONLY THE FIRST.
+            #
+            # MEASURED LIVE on 5f21b055, five of ten companies: the page said
+            # "no evidenced exposure to any condition the shared economic
+            # state measures" and then, one sentence later, listed the
+            # conditions this company is exposed to. Both sentences came off
+            # this object. INSUFFICIENT_EVIDENCE is returned when the company
+            # has no exposure AND when the run's own analysis produced no
+            # recommendation to compare against, and the headline was
+            # hard-coded to the first.
+            #
+            # The two reasons are already distinct and already stored, so the
+            # headline reads the reason rather than choosing one of them.
+            if self.reason.strip():
+                return self.reason.strip()[:1].upper() + \
+                    self.reason.strip()[1:]
             return ("This company has no evidenced exposure to any condition "
                     "the shared economic state measures, so no economic "
                     "reading is asserted for it.")
@@ -708,11 +724,22 @@ class FounderEconomicContext:
 
 
 def blocked(company_id: str, *, reason: str, as_of: str = "",
-            status: str = BLOCKED_DATA) -> FounderEconomicContext:
-    """§18. Founder still works; the economic section says what is missing."""
+            status: str = BLOCKED_DATA, freshness: str = BLOCKED,
+            age_days: int = -1, computed_at: str = ""
+            ) -> FounderEconomicContext:
+    """§18. Founder still works; the economic section says what is missing.
+
+    `freshness` defaults to BLOCKED and is passed in for the one case where
+    that is wrong: a company with no evidenced exposure, on a deployment where
+    a state IS published and IS current. Live, three of ten companies were
+    told the economic reading was "unavailable" while the state sat on disk
+    dated the previous day -- which understates what the deployment holds and
+    sends an operator looking for a publishing failure that had not happened.
+    """
     require(status in (BLOCKED_DATA, BLOCKED_EXTERNAL, FAILED,
                        INSUFFICIENT_EVIDENCE),
             f"{status!r} is not an unavailable state")
     return FounderEconomicContext(company_id=company_id, as_of=as_of,
                                   status=status, reason=reason,
-                                  freshness=BLOCKED, age_days=-1)
+                                  freshness=freshness, age_days=age_days,
+                                  computed_at=computed_at)

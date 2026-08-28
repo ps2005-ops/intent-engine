@@ -453,3 +453,47 @@ def test_this_company_s_exposures_are_published_before_they_are_read():
         f"exposures are read at line {read} and written at line {publish}; "
         "the analysis pass caches what it read, so a fresh run would report "
         "no exposure for a company whose filings establish several")
+
+
+# --- §39 the operator learning surface --------------------------------------
+def test_the_operator_surface_states_pre_calibration_without_a_percentage(
+        tmp_path):
+    """§13/§14/§39. The line that must never become an accuracy claim.
+
+    An operator needs the forward status; a forward status with a percentage
+    in it before anything has resolved is the "the model is 80% accurate"
+    claim assembled out of an empty denominator. The rehearsal ledger lives
+    in a different file and this surface does not read it.
+    """
+    import re
+    app = _app(tmp_path)
+    _publish_state(app._runtime_root)
+    block = app._econ_decision_block()
+    assert "CALIBRATION: PRE_CALIBRATION" in block
+    assert "no accuracy figure" in block
+    assert "rehearsal" in block.lower()
+    # No percentage anywhere in the calibration sentence.
+    line = block[block.index("CALIBRATION:"):block.index("CALIBRATION:") + 220]
+    assert "%" not in line, line
+    assert not re.search(r"\d+(\.\d+)?\s*%", block), \
+        "an accuracy percentage reached the operator surface"
+
+
+def test_the_operator_surface_separates_supported_from_candidate(tmp_path):
+    """§12. Two counts, always together: a surface showing only the first
+    would present everything the engine is watching as something it knows."""
+    app = _app(tmp_path)
+    _publish_state(app._runtime_root)
+    block = app._econ_decision_block()
+    assert "candidate" in block
+    assert "never stated as a finding" in block
+
+
+def test_the_operator_surface_reports_an_absent_state_as_absent(tmp_path):
+    """A blank panel and an unread economy look identical; only one is a
+    fact about the engine."""
+    app = _app(tmp_path)
+    block = app._econ_decision_block()
+    assert "Economic decision layer" in block
+    assert "no economic state has been published" in block.lower() \
+        or "could not be read" in block.lower()

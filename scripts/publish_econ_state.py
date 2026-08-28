@@ -86,16 +86,81 @@ def _macro_cells(panel: PN.Panel, as_of: str):
     return by_kind
 
 
+#: How far back the comparison reaches. A YEAR, chosen by date rather than by
+#: counting observations back.
+#:
+#: THE FIRST VERSION PUBLISHED THE TWO MOST RECENT OBSERVATIONS, and the state
+#: it produced was useless for a decision. `ConditionReading.direction` is
+#: computed against the previous observation published for that quantity, so
+#: two adjacent rows made every reading a one-day or one-month change: the
+#: 10-year Treasury moved 0.0128 and the policy rate 0.0000, against a
+#: materiality threshold of 0.03 that was declared for YEAR-ON-YEAR change.
+#: Measured across all thirteen conditions, exactly one cleared it, and it was
+#: moving the favourable way -- so the product would have abstained on every
+#: company for a reason that was an artefact of the publisher.
+#:
+#: Chosen BY DATE and not by index: `_periods_for_year` counts observations,
+#: and these series are irregular, so counting back gave a "year-ago" prior
+#: sixteen days old for the high-yield spread.
+LOOKBACK_DAYS = 365
+
+
+def _year_ago(hist, latest_period: str):
+    """The most recent observation at or before a year before `latest_period`.
+
+    Returns None when the series does not reach back a year, and the caller
+    publishes a single observation instead -- which reads NO_PRIOR and says so,
+    rather than presenting a short comparison as a yearly one.
+    """
+    import datetime as _dt
+    try:
+        target = (_dt.date.fromisoformat(latest_period)
+                  - _dt.timedelta(days=LOOKBACK_DAYS)).isoformat()
+    except ValueError:
+        return None
+    found = None
+    for period, value in hist[:-1]:
+        if period <= target:
+            found = (period, value)
+    return found
+
+
+#: The unit that tells a consumer which change transform to use.
+#:
+#: A spread, a yield and an unemployment rate are PERCENTAGE POINTS, and a
+#: relative change on them is undefined where they cross zero -- the 3-month /
+#: 10-year slope inverts in every tightening cycle, and its year-ago value
+#: here is -0.02, which turns a two-basis-point move into a 4,250% one. The
+#: canonical list is `econ.release.PERCENTAGE_POINT_SERIES`, keyed by series;
+#: this records the answer ON THE READING, because the consumer knows the
+#: condition and never the series that measured it.
+PERCENTAGE_POINT = "percentage_point"
+
+
+def _unit_for(sid: str, panel_unit: str) -> str:
+    from intent_engine.econ import release as RL
+    return PERCENTAGE_POINT if RL.is_percentage_point(sid) else (panel_unit
+                                                                 or "index")
+
+
+def _published_pair(sid: str, hist):
+    """The two observations that make one year-on-year reading."""
+    latest = hist[-1]
+    prior = _year_ago(hist, latest[0])
+    return [prior, latest] if prior is not None else [latest]
+
+
 def build_state(panel: PN.Panel, *, as_of: str) -> ES.EconomicState:
     by_kind = _macro_cells(panel, as_of)
     nodes = []
     for kind, (sid, hist, unit) in sorted(by_kind.items()):
-        for period, value in hist[-2:]:
+        for period, value in _published_pair(sid, hist):
             nodes.append(EV.EconomicNode(
                 node_id=f"panel:{sid}:{period}",
                 node_class=MACRO, kind=kind, subject="US",
                 standing="OBSERVED", occurred_at=period,
-                available_at=as_of, value=float(value), unit=unit,
+                available_at=as_of, value=float(value),
+                unit=_unit_for(sid, unit),
                 provenance=EV.Provenance(
                     publisher=PUBLISHER, venue=VENUE,
                     document_id=sid, producer=PRODUCER)))
@@ -174,11 +239,12 @@ def _nodes_of(state, panel, as_of):
     by_kind = _macro_cells(panel, as_of)
     out = []
     for kind, (sid, hist, unit) in sorted(by_kind.items()):
-        for period, value in hist[-2:]:
+        for period, value in _published_pair(sid, hist):
             out.append(EV.EconomicNode(
                 node_id=f"panel:{sid}:{period}", node_class=MACRO, kind=kind,
                 subject="US", standing="OBSERVED", occurred_at=period,
-                available_at=as_of, value=float(value), unit=unit,
+                available_at=as_of, value=float(value),
+                unit=_unit_for(sid, unit),
                 provenance=EV.Provenance(publisher=PUBLISHER, venue=VENUE,
                                          document_id=sid, producer=PRODUCER)))
     return out

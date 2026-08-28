@@ -191,7 +191,29 @@ def test_a_company_with_no_evidenced_exposure_says_so_rather_than_abstaining():
     econ = _economy(treasury_10y=_reading("treasury_10y", 6.0, 4.0, "UP"))
     ctx = _build(economy=econ, exposures=())
     assert ctx.status == FC.INSUFFICIENT_EVIDENCE
-    assert "no evidenced exposure" in ctx.headline()
+    assert "no exposure to any condition" in ctx.headline()
+    assert "not a quiet economy" in ctx.headline()
+    # The state IS present and dated; only the exposure is missing.
+    assert ctx.freshness == FC.CURRENT, \
+        "an absent exposure was reported as an absent economic reading"
+
+
+def test_one_status_with_two_causes_gives_two_different_headlines():
+    """MEASURED LIVE: five of ten companies were told they had "no evidenced
+    exposure to any condition the shared economic state measures" and then,
+    one sentence later, shown the conditions they were exposed to. Both
+    sentences came off this object."""
+    no_exposure = FC.blocked("acme", reason=(
+        "this company's own evidence establishes no exposure to any "
+        "condition the shared economic state measures"),
+        status=FC.INSUFFICIENT_EVIDENCE)
+    no_baseline = FC.blocked("acme", reason=(
+        "this run's own analysis produced no recommendation to compare "
+        "against, so no economic change to it can be measured"),
+        status=FC.INSUFFICIENT_EVIDENCE)
+    assert no_exposure.headline() != no_baseline.headline()
+    assert "no exposure" in no_exposure.headline()
+    assert "no recommendation to compare" in no_baseline.headline()
 
 
 # --- 7. unsupported relation ------------------------------------------------
@@ -342,9 +364,41 @@ def test_a_move_too_small_to_act_on_does_not_move_a_decision():
 def test_a_move_from_a_near_zero_base_is_read_but_never_acted_on():
     """A relative change against a base of nothing is a divide-by-zero
     wearing a percentage sign."""
-    assert ED.relative_move(0.05, 0.001) is None
-    assert ED.relative_move(4.5, 4.0) == pytest.approx(0.125)
-    assert ED.relative_move(None, 4.0) is None
+    assert ED.material_move(0.05, 0.001, "index") is None
+    assert ED.material_move(4.5, 4.0, "index") == pytest.approx(0.125)
+    assert ED.material_move(None, 4.0, "index") is None
+
+
+def test_a_percentage_point_series_takes_a_difference_not_a_ratio():
+    """The curve slope was -0.02 a year ago and 0.83 now. As a ratio that is
+    a 4,250% move; as the 85 basis points it actually is, it is 0.85.
+
+    Measured on the published state: the near-zero guard did not save it,
+    because 0.02 is above the guard's floor. Rates, spreads, slopes and
+    unemployment rates all cross or approach zero, and every one of them
+    takes an arithmetic difference -- the same rule the research arm uses.
+    """
+    assert ED.material_move(0.83, -0.02, ED.PERCENTAGE_POINT) == \
+        pytest.approx(0.85)
+    ratio = ED.material_move(0.83, -0.02, "index")
+    assert ratio is not None and ratio > 40, \
+        "the ratio should be absurd; that is why the unit decides"
+
+
+def test_a_condition_may_not_sit_in_a_channel_that_inverts_its_sign():
+    """`consumer_demand` was mapped to UNEMPLOYMENT, whose adverse direction
+    is UP -- so a strengthening consumer read as a risk to a consumer brand.
+    A condition belongs only in a channel whose adverse direction means the
+    same thing for it."""
+    assert ED.CHANNEL_OF["labour"] == "UNEMPLOYMENT"
+    assert ED.CHANNEL_OF["consumer_demand"] != "UNEMPLOYMENT"
+    econ = _economy(consumer_demand=_reading("consumer_demand", 1.1e4,
+                                             1.0e4, "UP"))
+    ctx = _build(economy=econ, exposures=("consumer_demand",),
+                 profile=_profile("BRANDED_CONSUMER"))
+    assert not ctx.material_decision_delta, (
+        "rising real consumption was reported as adverse for a consumer "
+        "brand")
 
 
 # --- wording may never count ------------------------------------------------
@@ -356,3 +410,63 @@ def test_a_wording_only_difference_cannot_be_represented_as_a_change():
     assert "prose" not in names and "text" not in names
     from intent_engine.econ import founder_ab as FA
     assert "prose" not in FA.MATERIAL_FIELDS
+
+
+# --- §41 customer copy ------------------------------------------------------
+def test_a_unit_enum_never_reaches_a_customer_sentence():
+    """Measured on a rendered page: "rising to 6.66 percentage_point".
+
+    That is an internal enum wearing a unit's place in an English sentence.
+    §41 keeps scientific terminology on operator surfaces; a unit on a
+    customer surface is spoken.
+    """
+    assert ED.unit_words(ED.PERCENTAGE_POINT) == "percentage points"
+    assert ED.unit_words("index") == ""
+    econ = _economy(treasury_10y=dict(
+        _reading("treasury_10y", 6.0, 4.0, "UP"), unit=ED.PERCENTAGE_POINT))
+    ctx = _build(economy=econ)
+    for change in ctx.material_decision_delta:
+        assert "percentage_point" not in change.trigger, change.trigger
+        assert "percentage points" in change.trigger
+
+
+def test_a_labelled_condition_names_the_series_that_measured_it():
+    """`financial_conditions` is measured here by the 30-year mortgage rate.
+
+    A reader told only that "financial conditions is rising to 6.66" has been
+    given a label they cannot check against anything. The series is in the
+    node id already; naming it makes the claim checkable.
+    """
+    assert ED.instrument_of("panel:MORTGAGE30US:2026-08-27") == "MORTGAGE30US"
+    assert ED.instrument_of("") == ""
+    econ = _economy(treasury_10y=dict(
+        _reading("treasury_10y", 6.0, 4.0, "UP"),
+        node_id="panel:DGS10:2026-08-20"))
+    ctx = _build(economy=econ)
+    assert ctx.material_decision_delta
+    assert "DGS10" in ctx.material_decision_delta[0].trigger
+
+
+def test_the_baseline_priority_is_the_same_kind_of_thing_as_the_augmented_one():
+    """`top_priority` is one of the seven material fields, and A was falling
+    back to the decision TOPIC -- a full sentence -- while B sets a business
+    variable. Live that rendered as "Whether to invest ahead of demand in
+    owning checkout/identity/data rails vs. deepening the core product.
+    becomes cost of funds and the hurdle rate on committed capital"."""
+    class NoArchetype:
+        readiness = "INVESTIGATION_REQUIRED"
+        decision_archetype = ""
+        topic = ("Whether to invest ahead of demand in owning "
+                 "checkout/identity/data rails vs. deepening the core "
+                 "product.")
+        evidence_required = ("x",)
+        watch_items = ()
+        falsifier = "f"
+    base = ED.baseline_from_decision(
+        NoArchetype(), company_id="acme", as_of="2026-08-25",
+        risks=[{"risk_id": "company:0", "severity": "LOW",
+                "channel": "the partner ecosystem", "mechanism": "m",
+                "standing": "INFERRED", "evidence": ("e",)}])
+    assert base is not None
+    assert base.top_priority == "the partner ecosystem"
+    assert "Whether to invest" not in base.top_priority
