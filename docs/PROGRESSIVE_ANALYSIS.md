@@ -244,3 +244,81 @@ Named rather than counted as done:
 
 Three §48 break proofs correspond to these and are **not claimed**: there is
 nothing to mutate, and a proof against unbuilt behaviour would be theatre.
+
+## 10. Where the deployed time goes — two hypotheses killed, one proven
+
+Section 9 established that the model was never the bottleneck and that the
+server stays responsive. It concluded the instance "cannot run it inside a
+30-second budget". That conclusion is right, but `/healthz` does not
+establish it: a sixteen-character endpoint needs almost no CPU, so it stays
+fast on a throttled instance while the WORKER is throttled hard. It rules out
+GIL/web contention, which is a different question.
+
+### The measurement that isolates CPU
+
+Serving an already-composed report page is pure CPU and zero network
+(`/runs/<id>` reads the cached `_results`; the only `_compose` on a read path
+is `/retry`, which is a deliberate second look). Local and deployed pages are
+within 2% of the same size, so this is like for like:
+
+| | time | size | rate |
+|---|---|---|---|
+| local render | 466.9 ms | 29,630 chars | **16.14 ms/KB** |
+| deployed `/` | 8,850 ms | 29,081 chars | 311.63 ms/KB — **19.3x** |
+| deployed `/brief` | 10,750 ms | 52,516 chars | 209.61 ms/KB — **13.0x** |
+
+### Hypothesis 1 — the append-only ledger. FALSIFIED.
+
+`for_run` is `[r for r in self.read_all() if r.run_id == run_id]` and
+`read_all` returns `list(self._cache_rows)`, so every query copies and scans
+the WHOLE ledger. Local ledgers hold one run; the preview holds every run ever
+made, which would make this a defect that only exists in production. It is
+not the cost:
+
+```
+ONE RENDER makes: read_all=10  for_run=10
+
+rows=  2,000   store cost ~  0.7 ms
+rows= 20,000   store cost ~  7.8 ms
+rows=100,000   store cost ~ 92.4 ms
+```
+
+92 ms at 100,000 rows is ~1% of the deployed 8,850 ms, and rendering the same
+run's page was flat (476.6 -> 471.2 ms, 0.99x) while unrelated runs grew the
+ledger 27x. Linear in N, and far too small at any plausible size. Worth
+fixing one day for its own sake; it is not this.
+
+### Hypothesis 2 — CPU throughput. HELD.
+
+What remains is that the instance executes the same deterministic Python
+13-19x slower. That is consistent with every other observation, and the
+alternatives are not: composition amplifies ~30x while network-bound
+acquisition amplifies ~4x (CPU-bound work amplifies, I/O-bound work does
+not), and the Tier-1 spread is 77s across six very different companies (a
+per-company evidence problem scatters; a fixed multiplier does not).
+
+### The requirement, stated exactly
+
+Deployed CORE p50 is 210.9s against a 30s target and a 60s hard budget. The
+deterministic work is ~13-19x slower than a developer machine, so the
+interactive budget needs roughly an order of magnitude more CPU throughput
+than the preview currently has — a dedicated-CPU plan, not a shared one.
+`render.yaml` declares `plan: starter` for `intent-engine-web`, but the
+preview is configured through the Render dashboard rather than the Blueprint
+(`config/preview.yaml`), so its actual plan is not recorded in this
+repository and should be read from the dashboard before sizing.
+
+**This is BLOCKED_INFRASTRUCTURE, not a code defect.** The application
+architecture is correct: the core is separable, is published before the model
+runs, and survives a deep failure. Nothing in this repository will move
+210.9s to 30s.
+
+### A broken instrument, found and fixed
+
+`evidence_citations` reported 0 for all six Tier-1 companies. It counted
+`https?://` in the body, and the report cites evidence through INTERNAL
+routes (`/runs/<id>/evidence/<claim>`) -- the rendered HTML contains no
+absolute href at all, so the counter could never return anything but zero.
+Six identical zeros were the tell: a real per-company evidence problem
+scatters. Fixed to count the link the page actually emits. No conclusion
+about evidence coverage should be drawn from any run measured before this.

@@ -186,7 +186,18 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
             # §4: the core must cite the evidence it rests on, so the count
             # comes from the page the reader opens. Counted on the RAW body
             # because the hrefs are attributes and `visible()` strips them.
-            citations = len(set(re.findall(r"https?://[^\s\"'<>]+", body)))
+            #
+            # COUNTED ON THE LINK THIS PAGE ACTUALLY EMITS. This matched
+            # `https?://` and reported 0 for all six Tier-1 companies -- not
+            # because nothing was cited, but because the report cites evidence
+            # through INTERNAL routes (`/runs/<id>/evidence/<claim>`) and the
+            # rendered HTML contains no absolute href at all. A counter that
+            # cannot return anything but zero is not a measurement, and six
+            # identical zeros is what gave it away: a real per-company
+            # evidence problem would scatter.
+            citations = len(set(
+                re.findall(r"/runs/[A-Za-z0-9_-]+/evidence/[^\s\"'<>]+", body)
+            )) + len(set(re.findall(r"https?://[^\s\"'<>]+", body)))
         pages[suffix] = {"status": st, "chars": len(body),
                          "seconds": round(dt, 1),
                          "deep_pending": DEEP_PENDING_MARK in text.lower(),
