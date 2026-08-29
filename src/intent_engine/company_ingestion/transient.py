@@ -164,13 +164,33 @@ class RetryLedger:
         self._retries: dict = {}      # host -> retries actually performed
         self._exhausted: set = set()  # hosts whose budget ran out
         self.events: list = []        # one record per completed operation
+        # ONE LEDGER, NOW SEVERAL THREADS.
+        #
+        # This class was written for a strictly sequential fetch loop, and
+        # every counter here is a read-modify-write:
+        #
+        #     self._spent[key] = self._spent.get(key, 0.0) + seconds
+        #
+        # Concurrent retrieval (`service._prefetch`) hands ONE ledger to up to
+        # six workers, so two threads charging the same host interleave
+        # between the read and the write and one of the charges is lost. The
+        # consequence is not a wrong number on a dashboard: `remaining()` is
+        # what decides `mark_exhausted`, so an under-counted budget keeps
+        # dialling a host that should have been dropped, and an over-counted
+        # one retires a host that was answering.
+        #
+        # Reentrant because `record` reads `remaining` while holding it.
+        import threading
+        self._lock = threading.RLock()
 
     # --- budget ---------------------------------------------------------
     def spent(self, host: str) -> float:
-        return self._spent.get(host or "", 0.0)
+        with self._lock:
+            return self._spent.get(host or "", 0.0)
 
     def spent_total(self) -> float:
-        return sum(self._spent.values())
+        with self._lock:
+            return sum(self._spent.values())
 
     def remaining(self, host: str) -> float:
         """The smaller of what this host has left and what the RUN has left.
@@ -184,32 +204,43 @@ class RetryLedger:
 
     def charge(self, host: str, seconds: float) -> None:
         key = host or ""
-        self._spent[key] = self._spent.get(key, 0.0) + seconds
-        self._retries[key] = self._retries.get(key, 0) + 1
+        with self._lock:
+            self._spent[key] = self._spent.get(key, 0.0) + seconds
+            self._retries[key] = self._retries.get(key, 0) + 1
 
     def mark_exhausted(self, host: str) -> None:
-        self._exhausted.add(host or "")
+        with self._lock:
+            self._exhausted.add(host or "")
 
     def exhausted(self, host: str) -> bool:
-        return (host or "") in self._exhausted
+        with self._lock:
+            return (host or "") in self._exhausted
 
     # --- telemetry ------------------------------------------------------
     def record(self, *, host, url, attempt_count, final_status,
                retry_exhausted, elapsed_retry_time) -> None:
         key = host or ""
-        self._attempts[key] = self._attempts.get(key, 0) + attempt_count
-        self.events.append({
-            "host": key,
-            "url": url,
-            "attempt_count": attempt_count,
-            "final_status": final_status,
-            "retry_exhausted": bool(retry_exhausted),
-            "elapsed_retry_time": round(float(elapsed_retry_time), 3),
-        })
+        with self._lock:
+            self._attempts[key] = self._attempts.get(key, 0) + attempt_count
+            self.events.append({
+                "host": key,
+                "url": url,
+                "attempt_count": attempt_count,
+                "final_status": final_status,
+                "retry_exhausted": bool(retry_exhausted),
+                "elapsed_retry_time": round(float(elapsed_retry_time), 3),
+            })
 
     def snapshot(self) -> dict:
         """What diagnostics reads. Never shown to a customer: a Chief
         Strategy Officer must not have to understand the phrase '429'."""
+        # A CONSISTENT PICTURE, not eight independent reads. Without the
+        # lock this could report a host in `attempts_by_host` that is absent
+        # from `retry_seconds_by_host` because a worker wrote between them.
+        with self._lock:
+            return self._snapshot()
+
+    def _snapshot(self) -> dict:
         return {
             "hosts": sorted(set(self._spent) | set(self._attempts)),
             "attempts_by_host": dict(self._attempts),

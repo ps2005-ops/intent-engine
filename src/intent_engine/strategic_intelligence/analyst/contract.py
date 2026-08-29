@@ -55,9 +55,17 @@ class ResultState:
     RETRIEVAL_BLOCKED = "RETRIEVAL_BLOCKED"
     STRATEGICALLY_INSUFFICIENT = "STRATEGICALLY_INSUFFICIENT"
     FAILED = "FAILED"
+    #: The evidence-grounded core analysis is complete and readable, and the
+    #: deeper strategic reading has not finished yet. This is the ONLY state
+    #: that is expected to change on its own, and it is deliberately not an
+    #: evidence state: the cause is that we have not run the reasoning yet,
+    #: not anything about what was retrieved. Telling a reader their evidence
+    #: was thin while the model is still working sends them to collect more
+    #: sources, which cannot help.
+    DEEP_PENDING = "DEEP_PENDING"
 
     ALL = (COMPLETE, EVIDENCE_LIMITED, ENTITY_AMBIGUOUS, RETRIEVAL_BLOCKED,
-           STRATEGICALLY_INSUFFICIENT, FAILED)
+           STRATEGICALLY_INSUFFICIENT, FAILED, DEEP_PENDING)
 
     #: states in which a strategic presentation/brief may be shown
     PRESENTABLE = (COMPLETE,)
@@ -96,6 +104,11 @@ class ResultState:
             "is deciding. A confident-looking report here would be invented.",
         FAILED:
             "The analysis did not complete. No conclusions should be drawn.",
+        DEEP_PENDING:
+            "The evidence-grounded reading below is complete: what was "
+            "retrieved, what this company depends on, and how the current "
+            "economy reaches it. The deeper strategic review is still "
+            "running and will be added to this page when it finishes.",
     }
 
 

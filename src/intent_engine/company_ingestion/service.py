@@ -138,6 +138,25 @@ def _patterns_for_company(company_name: str, domain: str = "",
     return patterns_for(model)
 
 
+#: §34. What the DEEP half of an analysis is doing, kept separate from the
+#: run state because they answer different questions: the run state says
+#: whether the pipeline is finished, this says whether the strategic reading
+#: has arrived. A run can be COMPLETE with deep still PENDING, and a reader
+#: who is shown one when they needed the other cannot tell what to wait for.
+DEEP_PENDING = "PENDING"
+DEEP_RUNNING = "RUNNING"
+DEEP_COMPLETE = "COMPLETE"
+DEEP_FAILED = "FAILED"
+DEEP_UNAVAILABLE = "UNAVAILABLE"
+DEEP_STATUSES = (DEEP_PENDING, DEEP_RUNNING, DEEP_COMPLETE, DEEP_FAILED,
+                 DEEP_UNAVAILABLE)
+
+#: §13. The decision fields a deep reading may change. Enums and identifiers
+#: only -- a wording change literally cannot move any of them, so a "material
+#: deep change" cannot be manufactured by rephrasing.
+DEEP_MATERIAL_FIELDS = ("result_state", "reasoning_provenance")
+
+
 class CompanyIngestionService:
     def __init__(self, path=DEFAULT_CI_PATH, *, transport=None,
                  resolver=None, analyst_client=None, analyst_cache=None,
@@ -1239,7 +1258,8 @@ class CompanyIngestionService:
 
     # --- composition ------------------------------------------------------------------
     def compose(self, run_id: str, *, fi_service, competitor_approved=False,
-                extra_observations=(), previous_model=None, attempt: int = 1):
+                extra_observations=(), previous_model=None, attempt: int = 1,
+                deep: bool = True):
         """Build real claims and run the existing Founder Intelligence
         composition. Deterministic; restart-safe (rebuilds from stored
         documents).
@@ -1329,9 +1349,25 @@ class CompanyIngestionService:
         if readiness["may_synthesize"]:
             result["strategic_report"] = self._strategic_report(
                 meta["company_name"], documents, extra_observations,
-                previous_model=previous_model, run_id=run_id)
-            self._record_reasoning(run_id, domain, documents,
-                                   result["strategic_report"])
+                previous_model=previous_model, run_id=run_id, deep=deep)
+            # A CORE PASS DID NOT ATTEMPT REASONING, SO IT IS NOT A
+            # REASONING ATTEMPT.
+            #
+            # `ci.reasoning_assessed` is the operator's record of whether the
+            # ANALYST accepted, and `reasoning_overview` divides acceptances
+            # by attempts. Recording the core pass would enter
+            # "attempted=True, accepted=False" for a pass that never called
+            # the analyst -- halving the measured acceptance rate with runs
+            # that never asked. The deep pass records it, once, when it has
+            # actually happened.
+            # `_strategic_report` returns None when no observation could be
+            # derived at all, and that is still a reasoning outcome worth
+            # recording -- `attempted` is computed from it.
+            _core_only = (result["strategic_report"] or {}).get(
+                "deep_status") == DEEP_PENDING
+            if not _core_only:
+                self._record_reasoning(run_id, domain, documents,
+                                       result["strategic_report"])
         else:
             # No strategic dashboard is built at all. Not a hidden one, not an
             # empty one — the section simply does not exist, so there is
@@ -1396,7 +1432,8 @@ class CompanyIngestionService:
             report=report)
 
     def compose_with_quality(self, run_id: str, *, fi_service,
-                             max_passes=None, **compose_kwargs) -> dict:
+                             max_passes=None, deadline=None,
+                             **compose_kwargs) -> dict:
         """Compose, score the report, and — when the quality gate says more
         evidence would plausibly help — retrieve targeted additional sources
         and compose again. Bounded, deterministic, and fully diagnosed.
@@ -1452,9 +1489,21 @@ class CompanyIngestionService:
                                   "retry_pass": attempt, "reason": reason,
                                   "targets": list(extra)},
                          idempotency_key=f"ci-retry:{run_id}:{target_key}")
+            # THE LAST UNBOUNDED ACQUISITION PATH. Retrieval and discovery
+            # were both put inside the budget and this was not: the quality
+            # gate can order up to MAX_RETRY_PASSES ADDITIONAL fetch passes
+            # from inside composition, each one a fresh set of network calls
+            # with nothing above it counting the seconds. A run could pass
+            # every stage-level bound and still spend minutes here.
+            if deadline is not None and not deadline.may_start():
+                deadline.record_gap(
+                    "evidence", f"targeted retry for {reason} not attempted "
+                                f"— interactive budget spent")
+                break
             attempted.update(extra)
             before = dict(gaps)
-            self.fetch_approved(run_id, candidate_ids=extra)
+            self.fetch_approved(run_id, candidate_ids=extra,
+                                deadline=deadline)
             after = evidence_gaps(self.store.retrieved(run_id))
             history.append({"pass": attempt, "reason": reason,
                             "new_sources": list(extra),
@@ -1587,7 +1636,23 @@ class CompanyIngestionService:
                      "analyst_evidence": len(evidence),
                      "independent_sources": independent,
                      "filings": filings},
-            idempotency_key=f"reasoning:{run_id}:{len(documents)}")
+            # THE KEY HAS TO NAME ITS CONTENT, NOT COUNT ITS INPUTS.
+            #
+            # This was `reasoning:{run_id}:{len(documents)}`, which was true
+            # while a run reasoned exactly once. Progressive analysis reasons
+            # TWICE over the same documents -- once for the core, once when
+            # the strategic reading is merged -- so the document count is
+            # identical and the payload is not. MEASURED: three tests died on
+            # `idempotency_key 'reasoning:...:14' was already used for
+            # different content`.
+            #
+            # Both passes are worth recording: "the core reasoned from the
+            # pattern library" and "the analyst then accepted" are two facts
+            # about one run, and collapsing them would lose the acceptance
+            # rate the operator view exists to report. So the provenance --
+            # which is exactly what differs -- goes in the key.
+            idempotency_key=(f"reasoning:{run_id}:{len(documents)}:"
+                             f"{report.get('reasoning_provenance') or 'none'}"))
 
     def reasoning_overview(self) -> dict:
         """Rich-analysis acceptance, for operators. Never founder-facing."""
@@ -1650,8 +1715,61 @@ class CompanyIngestionService:
                                              key=lambda kv: -kv[1]),
                 "runs": runs[-50:]}
 
+    def enrich_deep(self, run_id: str, result: dict, *, previous_model=None,
+                    deadline=None) -> dict:
+        """Run the strategic reading and merge it into THIS result (§12).
+
+        ONE analysis, upgraded -- never a second report. The core object the
+        reader already opened is mutated in place, so there is no window in
+        which two documents about one company disagree, and no way for a
+        reader to be looking at an orphaned earlier version.
+
+        A failure here costs the DEEP half and nothing else: the core stays
+        exactly as it was, and `deep_status` says what happened. That is the
+        §25 contract -- model failure may not destroy a result the customer
+        is already reading.
+        """
+        report = (result or {}).get("strategic_report")
+        if not isinstance(report, dict):
+            return result                     # nothing composed; nothing to add
+        if report.get("deep_status") not in (DEEP_PENDING, None):
+            return result                     # already enriched, or refused
+        meta = self.run_meta(run_id) or {}
+        company_name = meta.get("company_name", "")
+        documents = list(self.store.retrieved(run_id))
+        before = {k: report.get(k) for k in DEEP_MATERIAL_FIELDS}
+        import time as _time
+        started = _time.monotonic()
+        try:
+            deep = self._strategic_report(
+                company_name, documents, (), previous_model=previous_model,
+                run_id=run_id, deep=True)
+        except Exception as exc:              # noqa: BLE001 - core survives
+            report["deep_status"] = DEEP_FAILED
+            report["deep_failure"] = type(exc).__name__
+            report["deep_seconds"] = round(_time.monotonic() - started, 2)
+            return result
+        # MERGE, NOT REPLACE. Only the fields the reasoning layer owns move;
+        # the evidence, coverage and provenance the reader already saw are
+        # the same objects they were.
+        for key in ("strategic_analysis", "result_state",
+                    "result_state_detail", "reasoning_provenance",
+                    "critic_findings", "strategic_memory", "daily_view",
+                    "evidence_count", "withheld_explanation"):
+            if key in deep:
+                report[key] = deep[key]
+        report["deep_status"] = DEEP_COMPLETE
+        report["deep_seconds"] = round(_time.monotonic() - started, 2)
+        # §13. What the deeper reading CHANGED about what the executive was
+        # first shown, recorded rather than silently rewritten.
+        after = {k: report.get(k) for k in DEEP_MATERIAL_FIELDS}
+        report["deep_changes"] = [
+            {"field": k, "core": before[k], "deep": after[k]}
+            for k in DEEP_MATERIAL_FIELDS if before[k] != after[k]]
+        return result
+
     def _strategic_report(self, company_name, documents, extra_observations,
-                          previous_model=None, run_id=""):
+                          previous_model=None, run_id="", deep: bool = True):
         from intent_engine.strategic_intelligence.observations import (
             derive_analyst_evidence, derive_observations,
         )
@@ -1820,6 +1938,29 @@ class CompanyIngestionService:
         payload["reasoning_provenance"] = "pattern_library"
         payload["result_state"] = ResultState.EVIDENCE_LIMITED
         payload["strategic_analysis"] = None
+        # CORE STOPS HERE, AND IT IS NOT A DEGRADED ANALYSIS.
+        #
+        # Everything above is derived from THIS company's retrieved evidence:
+        # what changed, when, from which source, what it depends on, what is
+        # missing. What is NOT above is the strategic reading, and the model
+        # call that produces it is the whole remaining latency — measured on
+        # the deployed service at 192-204s inside one stage, against a 60s
+        # interactive budget.
+        #
+        # So the reader gets the evidence-grounded half immediately and the
+        # reasoning is merged into this same object when it arrives. The
+        # scaffolds in `hypotheses`/`patterns`/`blind_spots` are NOT promoted
+        # to findings to fill the gap: they are library structure, they are
+        # generic by construction, and presenting them as this company's
+        # conclusions would buy latency with the one thing that may not be
+        # spent on it.
+        if not deep:
+            payload["deep_status"] = DEEP_PENDING
+            payload["result_state"] = ResultState.DEEP_PENDING
+            payload["result_state_detail"] = \
+                ResultState.EXPLANATION[ResultState.DEEP_PENDING]
+            return payload
+        payload["deep_status"] = DEEP_RUNNING
         try:
             analysis, state, findings = analyse(
                 company_name, evidence,

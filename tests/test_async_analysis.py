@@ -629,9 +629,14 @@ def test_gate_g4_composition_failure_still_leaves_a_useful_bounded_result(
     real_compose = app._compose
     calls = {"n": 0}
 
-    def exploding_compose(run_id):
+    def exploding_compose(run_id, *, deep=True):
+        # `deep` mirrors the production signature: composition is now two
+        # phases (core, then the strategic reading), and a double that does
+        # not accept the flag raises TypeError before the code under test
+        # runs -- which reports as "compose was never reached" and hides the
+        # very failure this gate exists to exercise.
         calls["n"] += 1
-        real_compose(run_id)                     # retrieval really happened
+        real_compose(run_id, deep=deep)          # retrieval really happened
         raise ValueError("claim text overclaims: ['always']")
 
     app._compose = exploding_compose

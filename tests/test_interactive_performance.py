@@ -509,3 +509,30 @@ def test_a_per_call_timeout_overrides_the_client_default():
     assert seen.get("timeout") == 9.0, (
         "a per-call timeout must reach the SDK, or a caller with 9s left "
         "still makes a 60s call")
+
+
+def test_the_quality_retry_loop_is_inside_the_budget(slow_pipeline):
+    """§18. Composition may order more fetching; it may not do so unbounded.
+
+    Retrieval and discovery were both put inside the budget and this was not.
+    The quality gate can order up to MAX_RETRY_PASSES ADDITIONAL fetch passes
+    from INSIDE composition, each a fresh set of network calls with nothing
+    above it counting the seconds — so a run could pass every stage-level
+    bound and still spend minutes here.
+    """
+    import inspect
+    from intent_engine.company_ingestion.service import CompanyIngestionService
+
+    src = inspect.getsource(CompanyIngestionService.compose_with_quality)
+    # The retry fetch must carry the budget...
+    assert "deadline=deadline" in src, (
+        "the quality gate's targeted retry fetches without a deadline")
+    # ...and the loop must stop when there is none left, rather than only
+    # shortening the calls it makes.
+    assert "may_start()" in src, (
+        "an exhausted budget must stop the retry loop, not merely bound "
+        "each fetch inside it")
+    assert "deadline=None" in inspect.signature(
+        CompanyIngestionService.compose_with_quality).__str__().replace(" ", "")\
+        or "deadline" in inspect.signature(
+            CompanyIngestionService.compose_with_quality).parameters

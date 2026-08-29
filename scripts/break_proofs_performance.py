@@ -136,6 +136,17 @@ PROOFS = [
      f"{T}::test_discovery_budget_does_not_bind_when_there_is_time",
      "changed the candidate set"),
 
+    ("p-18. composition orders unbounded extra fetch passes",
+     CI / "service.py",
+     "            if deadline is not None and not deadline.may_start():\n"
+     "                deadline.record_gap(\n"
+     "                    \"evidence\", f\"targeted retry for {reason} not attempted \"\n"
+     "                                f\"— interactive budget spent\")\n"
+     "                break",
+     "            pass",
+     f"{T}::test_the_quality_retry_loop_is_inside_the_budget",
+     "must stop the retry loop"),
+
     # --- 19/20: the model call is the last unbounded external call -------
     ("p-15. the model call falls back to the SDK's ten-minute default",
      ROOT / "src" / "intent_engine" / "core" / "llm_client.py",

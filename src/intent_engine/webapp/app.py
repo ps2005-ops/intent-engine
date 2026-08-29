@@ -674,6 +674,10 @@ class WebApp:
         # inside its own limit.
         self._analysis_deadlines: dict = {}  # run_id -> Deadline
         self._analysis_gaps: dict = {}       # run_id -> spent budget + gaps
+        # §40. When the CORE became readable, which is the number the
+        # interactive SLO is written against -- distinct from when the whole
+        # analysis finished, which is what every previous measurement recorded.
+        self._core_ready_at: dict = {}       # run_id -> monotonic
         self._analysis_attempts: dict = {}   # run_id -> executions started
         # Instrumented so duplicate execution is measurable rather than
         # inferred from output: a second worker on one attempt can produce an
@@ -8974,6 +8978,12 @@ class WebApp:
         meta = self.ci.run_meta(run_id) or {}
         domain = meta.get("domain", "")
         deadline = self._analysis_deadlines.get(run_id)
+        # Read ONCE, before composition, and reused by the deep pass — the
+        # persisted model is what "what changed since last time" is computed
+        # against, and re-reading it after the core has been published would
+        # compare the deep reading against a model this run just wrote.
+        previous_model_for_deep = (self.strategic_memory.latest_model(domain)
+                                   if domain else None)
         try:
             # ONE BUDGET ACROSS BOTH ACQUISITION STAGES. Discovery and
             # retrieval are the two halves of the same wait; budgeting only
@@ -9005,10 +9015,33 @@ class WebApp:
             # to save time would hit the latency target by deleting the
             # product, which §3 forbids: a run that spent its budget composes
             # what it has and SAYS which evidence is missing.
-            self._results[run_id] = self._compose(run_id)
+            # §7/§9/§10. THE CORE IS COMPOSED, PUBLISHED, AND OPENABLE
+            # BEFORE THE MODEL RUNS.
+            #
+            # `_availability` reads `strategic_report` out of `self._results`,
+            # and `result_readiness` opens the analysis the moment one exists
+            # -- in flight or not. So publishing the core here is what turns a
+            # four-minute wait into a readable page: the reader gets the
+            # evidence, the exposure and the economic reading while the
+            # strategic review is still being written.
+            core = self._compose(run_id, deep=False)
+            self._results[run_id] = core
+            self._core_ready_at[run_id] = time.monotonic()
             with self._analysis_lock:
                 self._terminal_writes[run_id] = \
                     self._terminal_writes.get(run_id, 0) + 1
+            # §25. The deep half may fail, time out, or be refused, and the
+            # core the customer is already reading survives all three. It is
+            # deliberately NOT inside the outer handler's failure path: a deep
+            # failure is not an analysis failure and may not mark the run
+            # FAILED, because the run produced a result the reader can use.
+            try:
+                self._results[run_id] = self.ci.enrich_deep(
+                    run_id, core, previous_model=previous_model_for_deep,
+                    deadline=self._analysis_deadlines.get(run_id))
+            except Exception as exc:              # noqa: BLE001
+                _LOG.warning("deep enrichment failed run=%s %s: %s", run_id,
+                             type(exc).__name__, str(exc)[:200])
         except Exception as exc:  # noqa: BLE001 - a worker may not escape
             # THE CLASS ALONE COULD NOT BE ACTED ON. Every composition failure
             # on this service logged "ValueError" and nothing else, and
@@ -9369,7 +9402,7 @@ class WebApp:
         return assess(stored,
                       app_version=version_info().get("app_version", ""))
 
-    def _compose(self, run_id):
+    def _compose(self, run_id, *, deep: bool = True):
         """Compose the run, threading the persisted mental model so the report
         is a VIEW over the company's evolving state, then persist the new
         snapshot and publish strategic events durably (idempotent).
@@ -9381,8 +9414,12 @@ class WebApp:
         domain = meta["domain"] if meta else ""
         previous_model = self.strategic_memory.latest_model(domain) \
             if domain else None
-        result = self.ci.compose_with_quality(run_id, fi_service=self.fi,
-                                              previous_model=previous_model)
+        # The FULL budget, not the reserved view: the reserve exists to
+        # protect composition, so composition is what spends it — including
+        # the targeted retry passes the quality gate can order from inside.
+        result = self.ci.compose_with_quality(
+            run_id, fi_service=self.fi, previous_model=previous_model,
+            deadline=self._analysis_deadlines.get(run_id), deep=deep)
         # THE GATE MUST JUDGE THE EVIDENCE THAT ARRIVED, NOT THE EVIDENCE
         # THAT HAD ARRIVED WHEN IT RAN.
         #
@@ -9494,9 +9531,15 @@ class WebApp:
                     _LOG.info("recomposing %s: gate saw %d, store holds %d, "
                               "and the fuller set clears the bar",
                               run_id, seen, stored)
+                    # `deep=deep`, NOT the default. This branch only fires
+                    # when the first pass produced no report at all, so it
+                    # cannot double a model call today -- but it defaults to
+                    # deep=True, and a CORE pass that reached here would run
+                    # the very call the core exists to not wait for. The flag
+                    # travels or the split has a hole in it.
                     result = self.ci.compose_with_quality(
                         run_id, fi_service=self.fi,
-                        previous_model=previous_model)
+                        previous_model=previous_model, deep=deep)
                     result.setdefault("readiness_inputs",
                                       {})["recomposed_from"] = seen
         report = result.get("strategic_report")
