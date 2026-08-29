@@ -97,7 +97,34 @@ own test, because removing either alone left the other standing.
 
 **Result: 7.0s → 2.3s.**
 
-### 3.3 Parallel discovery
+### 3.3 The model call — the last unbounded external call
+
+**Found only on the deployed build.** After the acquisition repairs, Apple's
+stall *moved*: `Reading current company evidence` completed at 29.5s (was
+312.3s) and the run then sat in `Mapping competitors` for 204.2s.
+
+Composition amplified ~30× from local to deployed while retrieval amplified
+~4×, and that asymmetry was the tell. The deployed instance has
+`ANTHROPIC_API_KEY` set, so `default_client()` builds a real reasoning
+backend; the local runs had no key and were silently profiling **a pipeline
+with no model call in it**. A local measurement of a request path the customer
+does not receive is not a measurement of the product.
+
+`analyst/runner.py` declares `REQUEST_TIMEOUT_S = 60.0` beside
+`MAX_ATTEMPTS = 2`, and a docstring promising "one call, a hard token ceiling,
+a timeout, at most one retry". **The constant appeared exactly once in the
+whole tree — at its own definition.** `LLMClient` built
+`Anthropic(api_key=...)` with no timeout and no retry override, so the real
+bound was the SDK default of 600s × the SDK's own 2 retries × the runner's 2
+attempts: up to forty minutes for a call the code describes as bounded.
+
+The constant was already right; the **wiring** was missing. It is now passed
+to the client, `max_retries=0` takes retry policy away from the SDK (the
+runner already owns it, and the SDK default made the real attempt count four
+while the log explained two), and `call_tool` accepts a per-call override so a
+caller holding an interactive budget spends what it has left.
+
+### 3.4 Parallel discovery
 
 `_third_party_filing_candidates` (EDGAR full-text search) and the sitemap walk
 need only the company name and website, and were waiting behind a homepage
@@ -166,6 +193,24 @@ and one gap was recorded at two sites. Each was repaired by strengthening the
 test, not by weakening the proof.
 
 ---
+
+## 5a. The harness was also the load
+
+The first live harness polled every 1s for resolution against a 30s target.
+On this instance `/healthz` — sixteen characters, no work — costs **1.89s**
+(TTFB 0.5–1.0s; DNS 3ms, TLS 21ms, so it is server time, not network). 28
+polls spent roughly 50s of the instance's capacity competing with the single
+analysis thread for one CPU share **under the GIL** — the WSGI server is
+threaded and the analysis is CPU-bound Python, so every poll contends
+directly with the work it is waiting for. The harness then reported that
+contention as the product's latency.
+
+The poll cadence now matches the progress page's own 4s `meta refresh`, so it
+measures what a customer's browser actually causes.
+
+**`/version` staying fast during a stall is not counter-evidence.** A route
+that does no work is fast at any CPU share. An earlier session used exactly
+that observation to reject a hypothesis and left the real cause unnamed.
 
 ## 6. Benchmark methodology
 
