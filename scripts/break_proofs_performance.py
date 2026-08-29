@@ -136,6 +136,30 @@ PROOFS = [
      f"{T}::test_discovery_budget_does_not_bind_when_there_is_time",
      "changed the candidate set"),
 
+    # --- 19/20: the model call is the last unbounded external call -------
+    ("p-15. the model call falls back to the SDK's ten-minute default",
+     ROOT / "src" / "intent_engine" / "core" / "llm_client.py",
+     "        self._client = Anthropic(api_key=resolved_key, timeout=self.timeout,\n"
+     "                                 max_retries=0)",
+     "        self._client = Anthropic(api_key=resolved_key)",
+     f"{T}::test_the_model_call_is_actually_bounded",
+     "assert"),
+
+    ("p-16. a declared analyst timeout is passed to nothing",
+     S / "strategic_intelligence" / "analyst" / "runner.py",
+     "    return LLMClient(model=model, timeout=REQUEST_TIMEOUT_S)",
+     "    return LLMClient(model=model)",
+     f"{T}::test_the_model_call_is_actually_bounded",
+     "declared and never passed"),
+
+    ("p-17. a caller's remaining budget cannot reach the SDK",
+     ROOT / "src" / "intent_engine" / "core" / "llm_client.py",
+     "        client = (self._client if timeout is None\n"
+     "                  else self._client.with_options(timeout=float(timeout)))",
+     "        client = self._client",
+     f"{T}::test_a_per_call_timeout_overrides_the_client_default",
+     "must reach the SDK"),
+
     # --- 3/45: speed was not bought with evidence ------------------------
     ("p-11. the phrase prefilter skips a scan that could have matched",
      S / "strategic_intelligence" / "observations.py",

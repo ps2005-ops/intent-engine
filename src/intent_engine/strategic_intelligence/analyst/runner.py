@@ -231,7 +231,10 @@ def default_client(model=DEFAULT_MODEL):
     if not os.environ.get("ANTHROPIC_API_KEY"):
         return None
     from intent_engine.core.llm_client import LLMClient
-    return LLMClient(model=model)
+    # THE DECLARED BOUND, ACTUALLY APPLIED. REQUEST_TIMEOUT_S sat in this
+    # module unreferenced by anything, so every deployed analysis ran on the
+    # SDK's ten-minute default.
+    return LLMClient(model=model, timeout=REQUEST_TIMEOUT_S)
 
 
 def analyse(company_name, observations, *, client=None, cache=None,
@@ -282,6 +285,7 @@ def analyse(company_name, observations, *, client=None, cache=None,
                     "entirely in the supplied evidence."),
                 input_schema=ANALYSIS_SCHEMA,
                 max_tokens=MAX_OUTPUT_TOKENS,
+                timeout=REQUEST_TIMEOUT_S,
             )
             usage = {"attempts": attempt,
                      "elapsed_s": round(time.monotonic() - started, 2)}

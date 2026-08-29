@@ -77,7 +77,19 @@ TIER2 = [
     ("Duolingo", "duolingo.com"),                      # unusual model
 ]
 
-POLL_S = 1.0
+#: THE HARNESS MUST NOT BE THE LOAD IT IS MEASURING.
+#:
+#: This was 1.0s, for resolution against a 30-second target. MEASURED on the
+#: deployed instance: `/healthz` — sixteen characters, no work — costs 1.89s,
+#: so every request carries ~1.5s of free-tier overhead before any handler
+#: runs. Twenty-eight polls at 1s spent roughly 50s of the instance's
+#: capacity competing with the single analysis worker for one CPU share, and
+#: then reported the contention as the product's latency.
+#:
+#: Four seconds is what the progress page's own `<meta http-equiv="refresh">`
+#: uses, so this now measures what a customer's browser actually causes.
+#: Resolution is 4s against a 30s target, which is enough to judge it.
+POLL_S = 4.0
 PAGE_TIMEOUT = 90
 
 

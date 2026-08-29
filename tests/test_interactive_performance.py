@@ -441,3 +441,71 @@ def test_discovery_budget_does_not_bind_when_there_is_time(slow_pipeline):
     assert [c["url"] for c in with_budget] == [c["url"] for c in unbounded], (
         "a budget with time left changed the candidate set")
     assert not [g for g in healthy.gaps if g["stage"] == "discovery"]
+
+
+# --- §19/§20: no external call may block for minutes -----------------------
+
+def test_the_model_call_is_actually_bounded():
+    """A declared timeout that nothing passes is not a timeout.
+
+    MEASURED on the deployed preview: Apple sat in "Mapping competitors" for
+    204s. `analyst/runner.py` declares REQUEST_TIMEOUT_S = 60.0 and
+    MAX_ATTEMPTS = 2, which READS as a bounded call — but the constant
+    appeared exactly once in the whole tree, at its own definition. The real
+    bound was the SDK default of 600s, times the SDK's two retries, times the
+    runner's two attempts.
+
+    This asserts the wiring, not the constant: a value nothing consumes is
+    the exact defect being fixed, so the test follows it to the client.
+    """
+    import inspect
+    from intent_engine.core.llm_client import LLMClient
+    from intent_engine.strategic_intelligence.analyst import runner
+
+    # The client hands the SDK a timeout AND takes retry policy away from it —
+    # the runner already owns retries, and the SDK's default of 2 would make
+    # the real attempt count four while logging two.
+    init = inspect.getsource(LLMClient.__init__)
+    assert "timeout=self.timeout" in init
+    assert "max_retries=0" in init
+
+    # And the analyst's declared bound is the one actually handed over.
+    built = inspect.getsource(runner.default_client)
+    assert "timeout=REQUEST_TIMEOUT_S" in built, (
+        "REQUEST_TIMEOUT_S is declared and never passed to anything")
+    assert runner.REQUEST_TIMEOUT_S <= TIER2_HARD_S, (
+        f"one model call may take {runner.REQUEST_TIMEOUT_S}s, which is "
+        f"longer than the whole tier-2 interactive budget")
+
+
+def test_a_per_call_timeout_overrides_the_client_default():
+    """A caller holding a budget spends what IT has left."""
+    from intent_engine.core.llm_client import LLMClient
+
+    seen = {}
+
+    class FakeMessages:
+        def create(self, **kw):
+            raise RuntimeError("not reached in this test")
+
+    class FakeSDK:
+        def __init__(self, timeout=None):
+            self.timeout = timeout
+            self.messages = FakeMessages()
+
+        def with_options(self, timeout=None):
+            seen["timeout"] = timeout
+            return FakeSDK(timeout=timeout)
+
+    client = LLMClient.__new__(LLMClient)
+    client._client = FakeSDK(timeout=60.0)
+    client.model = "m"
+    client.timeout = 60.0
+    try:
+        client.call_tool(system="s", user_message="u", tool_name="t",
+                         tool_description="d", input_schema={}, timeout=9.0)
+    except RuntimeError:
+        pass
+    assert seen.get("timeout") == 9.0, (
+        "a per-call timeout must reach the SDK, or a caller with 9s left "
+        "still makes a 60s call")
