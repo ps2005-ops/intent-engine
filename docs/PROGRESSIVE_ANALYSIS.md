@@ -148,7 +148,88 @@ every one was a finding: a `None or X` no-op mutation, two redundant guards
 masking each other, a fake deep payload carrying identical fields, and an
 assertion ordered behind a weaker one.
 
-## 9. Not built in this run
+## 9. What the deployed measurement actually found — and what I got wrong
+
+The progressive split works, and it **did not improve deployed latency**.
+Both statements are true, and the second one corrects the previous run's
+diagnosis.
+
+| | Apple | Microsoft |
+|---|---|---|
+| Deployed, before progressive (model inside compose) | 240.1s | — |
+| Deployed CORE_READY, model deferred | **264.4s** | **200.5s** |
+| Local, deterministic, end to end | 12.6s | 28.6s |
+
+### The model was not the dominant cost
+
+The previous run concluded that ~200s of Apple's 240s was the synchronous
+model call. That was an **inference, never isolated**: composition amplified
+~30x from local to deployed while retrieval amplified ~4x, and the deployed
+instance has an API key while the local one does not — so the model looked
+like the difference.
+
+It was not. `ANTHROPIC_API_KEY` is absent locally, which means **every local
+profile was already the deterministic-only path**. With the model now deferred
+out of the core entirely, the same stage still takes ~170–230s. The
+deterministic composition and acquisition are the cost.
+
+### The server is not starved either
+
+The other candidate explanation was GIL/CPU contention: the core is published
+early but no request can be served while the worker runs, so the publish
+cannot be observed. Measured directly, with `/healthz` (sixteen characters, no
+work) polled every 3s throughout a live analysis:
+
+```
+idle                0.19s
+during the run      0.50s median, 1.40s max, 58/58 OK, 0 failures
+slowdown            2.6x
+```
+
+The server is responsive. Process separation (§28) would not recover the time,
+so it is not the repair — which is worth knowing before building it.
+
+### What the cost actually is
+
+Local Microsoft, deterministic: discover 12.99s, fetch 9.65s, **core compose
+5.93s**. Deployed CORE 200.5s — roughly 7x end to end, with CPU-bound
+composition amplifying far more than network-bound acquisition.
+
+The application architecture is correct: the core is genuinely separable, is
+published first, and survives a deep failure. The instance cannot run it
+inside a 30-second budget.
+
+### The Tier-1 cohort, deployed
+
+| company | CORE_READY |
+|---|---|
+| Amazon | 187.3s |
+| Microsoft | 200.5s |
+| Meta Platforms | 209.8s |
+| Alphabet | 212.0s |
+| NVIDIA | 214.8s |
+| Apple | 264.4s |
+
+**6/6 reached a readable core. Zero failures, zero hangs, zero refusals.**
+p50 **210.9s**, p90 214.8s, max 264.4s — and every one of the six is over the
+60s hard budget, at 7.0x the 30s p50 target.
+
+The spread is 77s across six very different companies. That tightness is the
+finding: a per-company evidence problem would scatter, a fixed CPU multiplier
+would not. The cost is systemic.
+
+### DEEP_READY is not measurable with the current instrument
+
+`result_state_detail` renders only when **no key insight cleared the bar**,
+and the core produces one from the pattern library — so the `DEEP_PENDING`
+sentence never appears on the page and its absence proves nothing.
+
+The harness reports `MARKER_NEVER_SEEN` / `NO_PENDING_ON_FIRST_POLL` rather
+than treating absence as success. It would otherwise have reported a DEEP
+time of "immediately" on every company, which is the false pass this run was
+most at risk of. **DEEP_READY is therefore unmeasured, not passing.**
+
+## 10. Not built in this run
 
 Named rather than counted as done:
 

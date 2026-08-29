@@ -145,15 +145,37 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
     row["progress_unreachable_polls"] = unreachable
 
     # --- phase 2: wait for the deep reading to be merged in ---------------
+    #
+    # THE ABSENCE OF A PHRASE IS ONLY EVIDENCE IF THE PHRASE CAN APPEAR.
+    # `result_state_detail` renders on the brief, and only when no key
+    # insight cleared the bar. If the marker never shows up at all, "marker
+    # absent" means the instrument is looking in the wrong place — not that
+    # the deep reading landed. That would report a false pass on the one
+    # number this run exists to measure, so it is recorded as
+    # MARKER_NEVER_SEEN and `deep_ready_seconds` stays None.
+    row["deep_detection"] = "MARKER_NEVER_SEEN"
     if row["core_ready_seconds"] is not None:
         while time.monotonic() - began < budget_s:
-            st, body, url, _d, _h = _req(op, f"/runs/{run_id}", timeout=60)
+            st, body, _u, _d, _h = _req(op, f"/runs/{run_id}/brief",
+                                        timeout=60)
             el = time.monotonic() - began
-            if st == 200 and DEEP_PENDING_MARK not in visible(body).lower():
+            if st != 200 or len(body) < 2000:
+                time.sleep(POLL_S)
+                continue
+            pending = DEEP_PENDING_MARK in visible(body).lower()
+            if pending:
+                row["deep_detection"] = "PENDING_SEEN"
+            elif row["deep_detection"] == "PENDING_SEEN":
+                # Seen, then gone: the deep reading was merged in.
                 row["deep_ready_seconds"] = round(el, 1)
+                row["deep_detection"] = "MERGED"
                 break
-            if st == 200 and len(body) < 2000:
-                break                       # not a real page; stop waiting
+            else:
+                # Never pending on the first look. Either deep finished
+                # before the first poll, or the marker does not render here.
+                # Distinguished by whether a strategic reading is present.
+                row["deep_detection"] = "NO_PENDING_ON_FIRST_POLL"
+                break
             time.sleep(POLL_S)
 
     pages, citations = {}, 0
