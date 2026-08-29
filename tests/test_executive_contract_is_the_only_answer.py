@@ -343,6 +343,14 @@ def test_every_strategic_surface_is_declared_in_the_verdict_register():
         "_sources_page", "_source_detail", "_evidence", "_progress",
         "_share_create", "_share_revoke", "_feedback", "_retry_evidence",
         "_fresh_analysis", "_sources_approve", "_report",
+        # Measurement, not a verdict. `/timing` serves lifecycle timestamps,
+        # a document count, run state, and the provenance of each. It asserts
+        # nothing about the COMPANY -- no thesis, no decision, no findings --
+        # so there is no executive verdict for it to source. Declared here
+        # rather than in the register because putting a benchmark surface
+        # into a register of strategic conclusions makes that register mean
+        # less.
+        "_timing_json",
     }
     undeclared = [h for h in sorted(handlers)
                   if h not in NON_STRATEGIC and h not in register]

@@ -178,6 +178,38 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
                 break
             time.sleep(POLL_S)
 
+    # --- canonical timings, read from the product ------------------------
+    #
+    # WHAT CHANGED AND WHY. `core_open_seconds` below is what every previous
+    # number in this project was: the wall-clock moment the progress page
+    # stopped redirecting, at 4s poll granularity -- 13% of a 30s budget --
+    # over a network, from a harness. It is a real UX fact and it is kept as
+    # one. It is not the latency the SLO is written against.
+    #
+    # `core_ready_seconds` now comes from `ci.lifecycle_marked`, recorded
+    # inside the worker at the instant the core became openable. Same for the
+    # evidence count, which is now the number of retrieved documents rather
+    # than a regex for `https?://` over the rendered HTML -- a counter that
+    # reported 0 for six of six companies because this product cites evidence
+    # through internal routes and emits no absolute href at all.
+    st, body, _u, _d, _h = _req(op, f"/runs/{run_id}/timing", timeout=60)
+    canonical = {}
+    if st == 200:
+        try:
+            canonical = json.loads(body)
+        except ValueError:
+            canonical = {}
+    row["core_open_seconds"] = row.get("core_ready_seconds")
+    if canonical.get("core_latency_s") is not None:
+        row["core_ready_seconds"] = canonical["core_latency_s"]
+        row["metric_source"] = canonical.get("provenance", {})
+    else:
+        row["metric_source"] = {"core_ready_seconds": "ui_redirect_fallback"}
+    if canonical.get("deep_latency_s") is not None:
+        row["deep_ready_seconds"] = canonical["deep_latency_s"]
+    row["canonical_evidence_count"] = canonical.get("evidence_count")
+    row["canonical_result_state"] = canonical.get("result_state")
+
     pages, citations = {}, 0
     for suffix in ("", "/brief"):
         st, body, url, dt, h = _req(op, f"/runs/{run_id}{suffix}", timeout=120)

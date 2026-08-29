@@ -1025,6 +1025,8 @@ class WebApp:
             return self._sources_approve(session, parts[1], form)
         if route == ("GET", "runs", 4) and parts[2] == "sources":
             return self._source_detail(session, parts[1], parts[3])
+        if route == ("GET", "runs", 3) and parts[2] == "timing":
+            return self._timing_json(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "progress":
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
@@ -1344,6 +1346,62 @@ class WebApp:
     def _html(self, body, *, status="200 OK", extra_headers=()):
         return status, [("Content-Type", "text/html; charset=utf-8"),
                         *extra_headers], self._stylize(body)
+
+    def _timing_json(self, session, run_id):
+        """CANONICAL measurement, so the harness stops inferring from prose.
+
+        Every previous number came from watching the rendered product:
+        CORE_READY was "the progress page stopped redirecting" and the
+        evidence count was a regex for `https?://` over the HTML -- which
+        could never match, because this product cites evidence through
+        internal routes. Six identical zeros across six companies were the
+        tell. A benchmark that reads the UI measures the UI.
+
+        Each value therefore states WHERE IT CAME FROM. A metric that cannot
+        name its source cannot be trusted at the point it decides a release.
+        """
+        if not self._owned(session, run_id) or not self._is_real_run(run_id):
+            return self._no_such_run(session, run_id)
+        marks = self.ci.lifecycle(run_id)
+        import datetime as _dtm
+
+        def _at(key):
+            raw = marks.get(key)
+            if not raw:
+                return None
+            try:
+                return _dtm.datetime.fromisoformat(
+                    raw.replace("Z", "+00:00"))
+            except ValueError:
+                return None
+
+        def _delta(a, b):
+            x, y = _at(a), _at(b)
+            return round((y - x).total_seconds(), 2) if x and y else None
+
+        documents = list(self.ci.store.retrieved(run_id))
+        report = (self._results.get(run_id) or {}).get("strategic_report") or {}
+        return self._ok_json({
+            "run_id": run_id,
+            "markers": marks,
+            "core_latency_s": _delta("accepted", "core_ready"),
+            "deep_latency_s": _delta("accepted", "deep_ready"),
+            "evidence_count": len(documents),
+            "deep_status": report.get("deep_status"),
+            "result_state": report.get("result_state"),
+            "run_state": self.ci.store.run_state(run_id),
+            "trace": self.ci.trace(run_id),
+            "provenance": {
+                "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+                "core_latency_s": "persisted_lifecycle_event",
+                "deep_latency_s": "persisted_lifecycle_event",
+                "evidence_count": "canonical_retrieved_documents",
+                "deep_status": "composed_report_object",
+                "result_state": "composed_report_object",
+                "run_state": "persisted_run_transitions",
+                "trace": "persisted_spans:ci.trace_recorded",
+            },
+        })
 
     def _ok_json(self, obj):
         return "200 OK", [("Content-Type", "application/json")], json.dumps(obj)
@@ -8958,6 +9016,13 @@ class WebApp:
         from intent_engine.company_ingestion.deadline import Deadline
         self._analysis_deadlines[run_id] = Deadline.for_tier(
             self._tier_for(run_id))
+        # THE CLOCK STARTS WHERE THE CUSTOMER'S WAIT STARTS -- when the work
+        # is accepted, not when a worker happens to pick it up. Queue time is
+        # part of the wait, and measuring from job start would hide it.
+        try:
+            self.ci.mark_lifecycle(run_id, "accepted")
+        except Exception:                       # noqa: BLE001 - never block
+            _LOG.warning("lifecycle accepted marker failed run=%s", run_id)
         try:
             self._analysis_pool.submit(self._run_analysis, user_id, run_id)
         except RuntimeError:                    # pool shut down
@@ -8984,28 +9049,40 @@ class WebApp:
         # compare the deep reading against a model this run just wrote.
         previous_model_for_deep = (self.strategic_memory.latest_model(domain)
                                    if domain else None)
+        from intent_engine.company_ingestion.latency import Trace
+        trace = Trace(run_id)
         try:
             # ONE BUDGET ACROSS BOTH ACQUISITION STAGES. Discovery and
             # retrieval are the two halves of the same wait; budgeting only
             # the second one leaves the customer exposed to the first.
-            self.ci.discover(run_id, deadline=(
-                deadline.reserving(self.COMPOSE_RESERVE_S)
-                if deadline is not None else None))
+            with trace.span("discovery", deadline=deadline) as sp:
+                self.ci.discover(run_id, deadline=(
+                    deadline.reserving(self.COMPOSE_RESERVE_S)
+                    if deadline is not None else None))
+                sp["item_count"] = len(self.ci.store.candidates(run_id))
             candidates = self.ci.store.candidates(run_id)
             if self.ci.store.approval(run_id) is None:
-                approved = self._recommended_candidate_ids(
-                    candidates, refusing_hosts=self.ci.refusing_hosts(run_id),
-                    subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"))
-                rejected = [c["candidate_id"] for c in candidates
-                            if c["candidate_id"] not in approved]
-                self.ci.approve(run_id, user_id=user_id,
-                                approved_ids=approved, rejected_ids=rejected)
+                with trace.span("source_selection", deadline=deadline) as sp:
+                    approved = self._recommended_candidate_ids(
+                        candidates,
+                        refusing_hosts=self.ci.refusing_hosts(run_id),
+                        subject_cik=(self.ci.run_meta(run_id) or {}).get("cik"))
+                    rejected = [c["candidate_id"] for c in candidates
+                                if c["candidate_id"] not in approved]
+                    self.ci.approve(run_id, user_id=user_id,
+                                    approved_ids=approved,
+                                    rejected_ids=rejected)
+                    sp["item_count"] = len(approved)
+                    sp["candidates"] = len(candidates)
                 # §22. The acquisition phase stops early ON PURPOSE, so the
                 # step that turns evidence into an answer is still inside the
                 # interactive budget when it runs.
-                self.ci.fetch_approved(
-                    run_id, deadline=(deadline.reserving(self.COMPOSE_RESERVE_S)
-                                      if deadline is not None else None))
+                with trace.span("retrieval", deadline=deadline) as sp:
+                    self.ci.fetch_approved(
+                        run_id,
+                        deadline=(deadline.reserving(self.COMPOSE_RESERVE_S)
+                                  if deadline is not None else None))
+                    sp["item_count"] = len(list(self.ci.store.retrieved(run_id)))
             # §22. COMPOSITION IS NOT OPTIONAL AND IS NOT BUDGETED AWAY.
             #
             # The budget bounds ACQUISITION -- the part that talks to hosts we
@@ -9024,9 +9101,23 @@ class WebApp:
             # four-minute wait into a readable page: the reader gets the
             # evidence, the exposure and the economic reading while the
             # strategic review is still being written.
-            core = self._compose(run_id, deep=False)
+            with trace.span("core_composition", deadline=deadline) as sp:
+                core = self._compose(run_id, deep=False)
+                sp["item_count"] = len(list(self.ci.store.retrieved(run_id)))
             self._results[run_id] = core
             self._core_ready_at[run_id] = time.monotonic()
+            # Marked AFTER publication, so the recorded instant is one at
+            # which the result could actually be opened. Marking before would
+            # record an intention rather than an availability.
+            try:
+                self.ci.mark_lifecycle(run_id, "core_ready")
+            except Exception:                   # noqa: BLE001
+                _LOG.warning("lifecycle core_ready marker failed run=%s",
+                             run_id)
+            # RECORDED AT CORE_READY, not at the end of the run. A trace
+            # written only after DEEP would be lost for exactly the runs
+            # whose latency is worth reading -- the ones that never finish.
+            self.ci.record_trace(run_id, "core", trace.waterfall())
             with self._analysis_lock:
                 self._terminal_writes[run_id] = \
                     self._terminal_writes.get(run_id, 0) + 1
@@ -9036,9 +9127,17 @@ class WebApp:
             # failure is not an analysis failure and may not mark the run
             # FAILED, because the run produced a result the reader can use.
             try:
+                self.ci.mark_lifecycle(run_id, "deep_started")
+            except Exception:                   # noqa: BLE001
+                pass
+            try:
                 self._results[run_id] = self.ci.enrich_deep(
                     run_id, core, previous_model=previous_model_for_deep,
                     deadline=self._analysis_deadlines.get(run_id))
+                try:
+                    self.ci.mark_lifecycle(run_id, "deep_ready")
+                except Exception:               # noqa: BLE001
+                    pass
             except Exception as exc:              # noqa: BLE001
                 _LOG.warning("deep enrichment failed run=%s %s: %s", run_id,
                              type(exc).__name__, str(exc)[:200])

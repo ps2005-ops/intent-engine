@@ -2086,6 +2086,52 @@ class CompanyIngestionService:
             return {}
         return EH.assess(observations=rows)
 
+    def record_trace(self, run_id: str, phase: str, waterfall: dict) -> None:
+        """Persist one phase's spans. Best-effort: never fail an analysis."""
+        try:
+            self._append("ci.trace_recorded", run_id=run_id,
+                         domain=(self.run_meta(run_id) or {}).get("domain", ""),
+                         payload={"phase": phase, **waterfall},
+                         idempotency_key=f"ci-trace:{run_id}:{phase}")
+        except Exception:                         # noqa: BLE001
+            pass
+
+    def trace(self, run_id: str) -> list:
+        """Every recorded phase for one run, oldest first."""
+        return [row.payload for row in self.store.for_run(run_id)
+                if row.event_type == "ci.trace_recorded"]
+
+    def mark_lifecycle(self, run_id: str, marker: str) -> None:
+        """Record that a run crossed one lifecycle boundary, at this instant.
+
+        Idempotent per (run, marker): the FIRST crossing is the true one, and
+        a retry or a second worker must not move a timestamp the measurement
+        already depends on.
+        """
+        from intent_engine.company_ingestion.records import LIFECYCLE_MARKERS
+        if marker not in LIFECYCLE_MARKERS:
+            raise IngestionError(f"unknown lifecycle marker: {marker!r}")
+        self._append("ci.lifecycle_marked", run_id=run_id,
+                     domain=(self.run_meta(run_id) or {}).get("domain", ""),
+                     payload={"marker": marker},
+                     idempotency_key=f"ci-lifecycle:{run_id}:{marker}")
+
+    def lifecycle(self, run_id: str) -> dict:
+        """The canonical timings for one run, as ISO instants.
+
+        Read from the persisted event stream rather than from a process
+        dictionary, so a restart, a second worker or a later question can all
+        still get the same answer.
+        """
+        out: dict = {}
+        for row in self.store.for_run(run_id):
+            if row.event_type == "ci.lifecycle_marked":
+                out.setdefault(row.payload.get("marker", ""), row.occurred_at)
+            elif row.event_type == "ci.run_created":
+                out.setdefault("created", row.occurred_at)
+        out.pop("", None)
+        return out
+
     def failure_summary(self, run_id: str) -> dict:
         """Counts by failure type for this run. Never URLs.
 

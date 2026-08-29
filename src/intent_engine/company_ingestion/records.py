@@ -131,7 +131,24 @@ INGESTION_EVENTS = frozenset({
     # the question was framed. An append-only event outlives the run, the
     # process and the deploy, which a live route does not.
     "ci.ownership_resolved",
+    # WHEN each lifecycle boundary was crossed, recorded where it happened.
+    # The interactive SLO is written against CORE_READY, and CORE_READY was
+    # being measured by watching a progress page stop redirecting -- a UI
+    # side effect, in a harness, over a network, with a 4s poll granularity
+    # that alone is 13% of a 30s budget. An append-only marker outlives the
+    # process, is exact, and cannot be changed by a template edit.
+    "ci.lifecycle_marked",
+    # WHERE THE TIME WENT, recorded per stage rather than argued from
+    # end-to-end ratios. Two hypotheses about the deployed latency were
+    # reasoned from totals and both were wrong; an aggregate cannot say which
+    # stage owns the seconds.
+    "ci.trace_recorded",
 })
+
+#: The boundaries worth timing. Deliberately short: a marker nobody divides
+#: by is a row in a ledger that has to be maintained forever.
+LIFECYCLE_MARKERS = ("accepted", "core_ready", "deep_started", "deep_ready",
+                     "terminal")
 
 
 class IngestionError(ValueError):

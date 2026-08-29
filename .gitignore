@@ -130,3 +130,6 @@ reports/market/signal_audit.jsonl
 # experiments.jsonl, strategies.jsonl) are research and stay tracked.
 reports/market/replay/price_cache/
 reports/market/replay/replay_*.json
+
+# Runtime agent ownership markers — never committed.
+.agent-lock/

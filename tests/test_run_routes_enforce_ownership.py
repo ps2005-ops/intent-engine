@@ -30,7 +30,11 @@ LAYERS = ["", "/brief", "/dashboard", "/story", "/slides", "/full",
           # The three steps the six-step story added. Every one of them
           # reaches a run by id, so every one of them is an ownership
           # question.
-          "/intro", "/history", "/connect"]
+          "/intro", "/history", "/connect",
+          # Measurement is not exempt: /timing states when a run happened,
+          # how much evidence it holds and what state it reached, which is
+          # this account's business and nobody else's.
+          "/timing"]
 
 
 class _Client:
