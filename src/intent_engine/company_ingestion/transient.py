@@ -198,9 +198,19 @@ class RetryLedger:
         Two ceilings, and the tighter one wins. Without the run ceiling a
         per-host budget multiplies by the number of hosts a run touches.
         """
-        return max(0.0, min(
-            self.policy.total_retry_budget_s - self.spent(host),
-            self.policy.run_retry_budget_s - self.spent_total()))
+        # HELD ACROSS BOTH READS, not once per read. `spent` and
+        # `spent_total` each take the lock and give it back, so a worker that
+        # charges in the gap between them makes this return a budget the
+        # ledger never held -- the per-host half read before the charge, the
+        # run half after it. This is the call `mark_exhausted` is decided
+        # from, the one the constructor comment says can retire a host that
+        # was answering, so the COMPOSITE read is what has to be atomic;
+        # locking only the accessors left exactly this gap open. Reentrant,
+        # so the inner calls may retake it.
+        with self._lock:
+            return max(0.0, min(
+                self.policy.total_retry_budget_s - self.spent(host),
+                self.policy.run_retry_budget_s - self.spent_total()))
 
     def charge(self, host: str, seconds: float) -> None:
         key = host or ""

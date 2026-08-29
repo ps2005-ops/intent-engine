@@ -23,6 +23,8 @@ import pytest
 from company_fixture_pages import BASE
 from company_fixture_pages import transport as fixture_transport
 from intent_engine.company_ingestion import service as SVC
+from intent_engine.company_ingestion.transient import RetryLedger
+from intent_engine.founder_brief.build import PUBLIC_INFORMATION_RICH, build
 from intent_engine.strategic_intelligence.analyst.contract import ResultState
 from intent_engine.webapp.app import WebApp
 from intent_engine.webapp.config import AppConfig
@@ -296,3 +298,118 @@ def test_the_retry_ledger_guards_its_counters():
         "charges were lost to a race between threads")  # smoke, not proof
     assert ledger.spent("example.com") == pytest.approx(expected * 0.001,
                                                         rel=1e-6)
+
+
+# --- the core may not ship the library's reasoning as this company's --------
+
+def _core_shaped_report(state, provenance="pattern_library"):
+    """A CORE payload: the pattern library ran and the analyst did not.
+
+    Shaped as `_strategic_report` leaves it before the model call -- a full
+    `thesis` and `hypotheses` from the library, `strategic_analysis` still
+    None, and the provenance saying where that reasoning came from.
+    """
+    return {
+        "result_state": state,
+        "reasoning_provenance": provenance,
+        "strategic_analysis": None if provenance == "pattern_library" else {"x": 1},
+        "thesis": {
+            "view": "Recurring services are growing faster than hardware.",
+            "why_care": "Whether to keep investing in depth or in adjacency",
+            "tension": "Services growth is outpacing the hardware that carries it",
+            "why_it_may_matter": "Pricing power may migrate away from the device",
+            "transition": "The install base is being monetised after the sale",
+        },
+        "hypotheses": [{
+            "statement": "Consolidating checkout and identity rails may "
+                         "encroach on layers partners currently monetize.",
+            "reasoning": "Platform owners capture the layer they standardise.",
+            "supporting_observation_ids": ["obs-1", "obs-2"],
+            "falsification_questions": ["Do partners report margin loss?"],
+            "decision_implications": ["Decide whether to build or partner"],
+            "confidence": "medium",
+        }],
+        "observations": [],
+    }
+
+
+_OBS = [{"source_class": "investor_material", "id": "obs-1"}]
+
+
+@pytest.mark.parametrize("state", list(ResultState.ALL))
+def test_a_core_never_ships_library_scaffolds_as_findings(state):
+    """No result state may carry pattern-library reasoning onto the page.
+
+    THE DENYLIST WAS THE BUG. `_WITHHELD_STATES` listed EVIDENCE_LIMITED, the
+    CORE/DEEP split gave the pre-model payload DEEP_PENDING instead, and the
+    scaffolds walked through: `key_insight` became `thesis.view`, and the next
+    three became `hypotheses[:3]` -- on the screen a chief executive opens
+    first, in seconds, which is exactly what made the split worth doing.
+    Asserting it for every state in the contract is what stops the NEXT state
+    from reopening it, since the mistake was never about one name.
+    """
+    brief = build(company="Apple Inc.", mode=PUBLIC_INFORMATION_RICH,
+                  report=_core_shaped_report(state), observations=_OBS)
+    assert brief.key_insight is None, (
+        f"{state} let the pattern library reach the page as "
+        f"{brief.key_insight.fact!r}")
+
+
+def test_an_analyst_backed_report_still_produces_an_insight():
+    """The positive control: the gate above withholds scaffolds, not everything.
+
+    Without this, deleting the whole insight path would pass the test above,
+    and a wall that refuses every report is not a wall -- it is an outage.
+    """
+    brief = build(company="Apple Inc.", mode=PUBLIC_INFORMATION_RICH,
+                  report=_core_shaped_report(ResultState.COMPLETE,
+                                             provenance="grounded_analyst"),
+                  observations=_OBS)
+    assert brief.key_insight is not None
+    assert brief.key_insight.fact
+
+
+# --- the retry budget is read as one number, not two ------------------------
+
+def test_remaining_is_read_atomically():
+    """`remaining` must report a budget the ledger actually held.
+
+    IT IS THE COMPOSITE READ THAT DECIDES. Locking each accessor made every
+    single field safe and left the one call that matters unsafe: `remaining`
+    reads the per-host spend, releases, then reads the run total. A worker
+    charging in that gap makes the two halves describe different moments, and
+    `mark_exhausted` is decided from the answer.
+
+    The interleaving is forced rather than raced, so this fails for its stated
+    reason instead of when the scheduler happens to cooperate.
+    """
+    ledger = RetryLedger()
+    ledger.charge("other.example", 20.0)      # run total 20 of 45
+    before = ledger.remaining("h.example")    # min(20-0, 45-20) = 20.0
+    after_if_charged = 1.0                    # min(20-19, 45-39) = 1.0
+
+    reached, charged = threading.Event(), threading.Event()
+    original_spent = ledger.spent
+
+    def spent_then_yield(host):
+        value = original_spent(host)
+        reached.set()
+        charged.wait(0.3)      # blocked by the lock when the lock is correct
+        return value
+
+    ledger.spent = spent_then_yield
+
+    def charger():
+        reached.wait(1.0)
+        ledger.charge("h.example", 19.0)
+        charged.set()
+
+    worker = threading.Thread(target=charger)
+    worker.start()
+    got = ledger.remaining("h.example")
+    charged.set()
+    worker.join(2.0)
+
+    assert got in (before, after_if_charged), (
+        f"remaining() reported {got}, a budget the ledger never held: the "
+        f"per-host half was read before the charge and the run half after it")

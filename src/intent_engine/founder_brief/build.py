@@ -78,6 +78,11 @@ _WITHHELD_STATES = frozenset({
     "LIMITED", "REFUSED",
 })
 
+#: The provenance composition stamps on a report whose hypotheses came from
+#: the pattern library rather than from a verified analyst reading. This, and
+#: not the state name, is what separates a reading from a scaffold.
+_SCAFFOLD_PROVENANCE = "pattern_library"
+
 NEVER_INVENT = ("leadership discussions", "strategic pivots",
                 "customer adoption", "unit economics", "defensibility",
                 "market share", "revenue", "margins", "retention")
@@ -768,6 +773,21 @@ def _insight_candidates(report: dict,
     # serious thing this product could do. The strategic brief already honours
     # this state; the founder brief now honours the same one.
     if str(report.get("result_state") or "").upper() in _WITHHELD_STATES:
+        return []
+    # AND THE SAME QUESTION ASKED STRUCTURALLY, because the line above is a
+    # denylist and a denylist cannot exclude a class invented after it. The
+    # CORE/DEEP split added DEEP_PENDING, the pre-model payload began carrying
+    # it instead of EVIDENCE_LIMITED, and the scaffolds walked straight
+    # through onto the primary screen: `key_insight` became `thesis.view` and
+    # the next three became `hypotheses[:3]` -- generic by construction,
+    # carrying real observation ids so `safe_insights` passes them, shown on
+    # the page a chief executive opens first and now opens in seconds.
+    #
+    # DEEP_PENDING is deliberately NOT added to the set above as well. It
+    # would be a second guard over the same case, and a redundant guard masks
+    # the proof of the one doing the work -- removing either would leave the
+    # test green and the wall would only look defended.
+    if str(report.get("reasoning_provenance") or "") == _SCAFFOLD_PROVENANCE:
         return []
 
     view = thesis.get("view") or ""

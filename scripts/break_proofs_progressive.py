@@ -114,6 +114,27 @@ PROOFS = [
      "        if True:",
      f"{T}::test_the_retry_ledger_guards_its_counters",
      "without the lock"),
+
+    # g-11/g-12 were found by reading the CORE payload against the layer that
+    # renders it, not by a failing test — both shipped green.
+    ("g-11. the core ships the pattern library as this company's finding",
+     S / "founder_brief" / "build.py",
+     "    if str(report.get(\"reasoning_provenance\") or \"\") "
+     "== _SCAFFOLD_PROVENANCE:\n        return []",
+     "    if False:\n        return []",
+     f"{T}::test_a_core_never_ships_library_scaffolds_as_findings",
+     "let the pattern library reach the page"),
+
+    ("g-12. the retry budget is read as two numbers from two moments",
+     CI / "transient.py",
+     "        with self._lock:\n            return max(0.0, min(\n"
+     "                self.policy.total_retry_budget_s - self.spent(host),\n"
+     "                self.policy.run_retry_budget_s - self.spent_total()))",
+     "        if True:\n            return max(0.0, min(\n"
+     "                self.policy.total_retry_budget_s - self.spent(host),\n"
+     "                self.policy.run_retry_budget_s - self.spent_total()))",
+     f"{T}::test_remaining_is_read_atomically",
+     "a budget the ledger never held"),
 ]
 
 
