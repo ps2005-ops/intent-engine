@@ -129,12 +129,25 @@ def run(company: str, website: str, budget_s: float) -> dict:
             except ValueError:
                 timing = {}
             if timing.get("core_latency_s") is not None:
-                opened_at = round(time.monotonic() - began, 1)
-                break
+                if opened_at is None:
+                    # LATENCY IS STAMPED HERE, at the first moment the answer
+                    # is readable. Waiting for the trace below must not be
+                    # charged to the product.
+                    opened_at = round(time.monotonic() - began, 1)
+                # THE TRACE LANDS AFTER THE MARKER, and the gap grew when
+                # enrichment moved off the CORE path: `record_trace` now runs
+                # after it, ~6s later. Breaking on `core_latency_s` alone read
+                # inside that window and reported a run with no spans at all,
+                # which looks exactly like a missing trace.
+                spans = any((ph.get("spans") or [])
+                            for ph in (timing.get("trace") or []))
+                if spans or time.monotonic() - began > budget_s - 5:
+                    break
         time.sleep(POLL_S)
     return {"status": "OK", "run_id": rid, "timing": timing,
             "harness_observed_s": opened_at,
-            "total_s": round(time.monotonic() - began, 1)}
+            "total_s": round(time.monotonic() - began, 1),
+            "_opener": op}
 
 
 def own_time(spans):

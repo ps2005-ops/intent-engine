@@ -529,3 +529,28 @@ def test_moving_enrichment_off_core_did_not_delete_it(app, finished):
     call = worker.index("_publish_enrichment")
     assert call > ready, (
         "enrichment must run AFTER core_ready, or it still delays the reader")
+
+
+def test_probe_time_is_excluded_from_both_sides_of_the_accounting():
+    """`unaccounted` must describe the PRODUCT, not the instrument.
+
+    Calibration spans were excluded from `covered` but left inside
+    `total_wall_ms`, so `unaccounted` came out equal to the probe cost and
+    nothing else: 1786.1ms unaccounted against 1782.7ms of probe on a real
+    deployed run. That reads as a 1.9% instrumentation gap in the pipeline
+    which does not exist, and the collector refuses to rank stages above 1%.
+    Subtract the probe from both sides or from neither.
+    """
+    import time as _t
+    from intent_engine.company_ingestion.latency import Trace
+    t = Trace("r")
+    with t.span("real_stage"):
+        _t.sleep(0.05)
+    t.calibrate("cpu_yardstick")
+    wf = t.waterfall()
+    probe = [s for s in wf["spans"] if s["name"] == "cpu_yardstick"][0]
+    assert probe["wall_ms"] > 0, "positive control: the probe must cost time"
+    assert abs(wf["unaccounted_wall_ms"]) < probe["wall_ms"], (
+        f"unaccounted ({wf['unaccounted_wall_ms']}ms) is the probe's own "
+        f"cost ({probe['wall_ms']}ms), not a gap in the pipeline")
+    assert wf["unaccounted_wall_ms"] < 20.0

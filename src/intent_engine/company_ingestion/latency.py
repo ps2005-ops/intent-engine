@@ -194,6 +194,15 @@ class Trace:
         next reader to optimise the 40s.
         """
         wall = round((time.monotonic() - self._origin) * 1000, 1)
+        # THE PROBE'S OWN TIME IS NOT THE PRODUCT'S. It is excluded from
+        # `covered`, so leaving it inside `total` makes `unaccounted` equal
+        # the probe cost and nothing else -- measured at 1786.1ms unaccounted
+        # against 1782.7ms of probe, which reads as a 1.9% instrumentation
+        # gap that does not exist. Subtract it from both sides or from
+        # neither.
+        wall -= sum(s.get("wall_ms", 0.0) for s in self.spans
+                    if s.get("calibration"))
+        wall = round(wall, 1)
         # TOP-LEVEL ONLY. Children are a breakdown OF a parent, not additional
         # elapsed time beside it.
         # Calibration spans are instrument overhead, not pipeline stages, so
