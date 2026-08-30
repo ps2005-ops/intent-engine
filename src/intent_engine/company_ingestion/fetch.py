@@ -12,6 +12,7 @@ import urllib.error
 import urllib.request
 from urllib.parse import urlparse
 
+from intent_engine.company_ingestion import httppool
 from intent_engine.company_ingestion.records import (
     ACCEPTED_MIME_PREFIXES, CONNECT_TIMEOUT_S, MAX_REDIRECTS,
     MAX_RESPONSE_BYTES, USER_AGENT,
@@ -35,12 +36,25 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None                       # surface 3xx as HTTPError
 
 
+_DEFAULT_HEADERS = {"User-Agent": USER_AGENT,
+                    "Accept": "text/html,text/plain"}
+
+
 def _default_transport(url: str, timeout: float,
                        max_bytes: int = MAX_RESPONSE_BYTES):
-    """Returns (status_code, headers_dict, body_bytes_capped, exceeded)."""
+    """Returns (status_code, headers_dict, body_bytes_capped, exceeded).
+
+    Served from the process-wide keep-alive pool when pooling is enabled. The
+    urllib path below is kept as the fallback and is byte-for-byte the
+    behaviour this function always had: same headers, same cap, same
+    no-redirect handling, same exceptions. See `httppool` for why the saving
+    is a connection count and never a request count.
+    """
+    if httppool.pooling_enabled():
+        return httppool.POOL.request(url, timeout, max_bytes,
+                                     headers=_DEFAULT_HEADERS)
     opener = urllib.request.build_opener(_NoRedirect())
-    request = urllib.request.Request(url, headers={
-        "User-Agent": USER_AGENT, "Accept": "text/html,text/plain"})
+    request = urllib.request.Request(url, headers=dict(_DEFAULT_HEADERS))
     response = opener.open(request, timeout=timeout)
     body = response.read(max_bytes + 1)
     headers = {k.lower(): v for k, v in response.headers.items()}

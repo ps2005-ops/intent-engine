@@ -518,7 +518,18 @@ def test_moving_enrichment_off_core_did_not_delete_it(app, finished):
                 src = inspect.getsource(fn)
             except (OSError, TypeError):
                 continue
-            if "self._compose(run_id, deep=False" in src:
+            # BOTH CONDITIONS. `dir()` is alphabetical, and composing a core
+            # pass stopped being unique to the worker once the deferred
+            # continuation recomposed over the widened evidence --
+            # `_acquire_deferred` sorts first and was selected instead, so
+            # this guard reported that the worker had lost enrichment when
+            # what it had actually found was a different method.
+            #
+            # Marking `core_ready` IS what makes a method the interactive
+            # worker, and it is the property the assertions below already
+            # depend on.
+            if ("self._compose(run_id, deep=False" in src
+                    and 'mark_lifecycle(run_id, "core_ready")' in src):
                 worker = src
                 break
     assert worker, "no worker composes a CORE pass -- the search itself broke"

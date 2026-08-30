@@ -101,6 +101,29 @@ class Deadline:
         return cls(total_s=float(total_s or hard), tier=tier)
 
     @classmethod
+    def for_continuation(cls, tier: str = TIER_1, *, total_s: float = 0.0):
+        """A FRESH budget for evidence acquired after the reader has an answer.
+
+        §22. The interactive budget bounds the wait. Once `core_ready` is
+        marked there is no wait left to bound: the customer is reading, and
+        the remaining approved sources are being acquired behind them.
+
+        Handing that pass the ALREADY-SPENT interactive deadline is the
+        failure this constructor exists to prevent. `budget_for` returns 0.0
+        below MIN_USEFUL_FETCH_S, so every deferred source would come back as
+        `deadline_exceeded` -- deferral would silently become deletion, and
+        the run would record a retrieval FAILURE for evidence nobody had
+        asked for yet. "Do not delete them" is the whole contract of
+        deferral.
+
+        It is a budget and not `unbounded()`: a continuation that never ends
+        holds a worker on a single-share instance for as long as a dead host
+        cares to stall, and the deep pass is queued behind it.
+        """
+        hard = TIER1_HARD_S if tier == TIER_1 else TIER2_HARD_S
+        return cls(total_s=float(total_s or hard), tier=tier)
+
+    @classmethod
     def unbounded(cls):
         """A budget that never expires — for batch and offline callers.
 

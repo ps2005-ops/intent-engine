@@ -40,6 +40,10 @@ import re
 import urllib.request
 from urllib.parse import urlparse
 
+from intent_engine.company_ingestion import httppool
+from intent_engine.company_ingestion import (
+    public_metadata as PUBLIC_METADATA,
+)
 from intent_engine.company_ingestion.records import (
     MAX_RESPONSE_BYTES, USER_AGENT,
 )
@@ -209,14 +213,44 @@ def _sec_transport(url: str, timeout: float,
     MAX_FILING_BYTES."""
     contact = os.environ.get("SEC_CONTACT_EMAIL", "").strip()
     ua = USER_AGENT + (f" contact:{contact}" if contact else "")
+    head = {"User-Agent": ua, "Accept": "application/json,text/html"}
+    # SEC is the host this module talks to most and the one it is most
+    # careful with. Reuse changes the number of CONNECTIONS, never the number
+    # of requests, so the fair-access discipline recorded in
+    # docs/INTERACTIVE_PERFORMANCE.md is untouched -- and a run that opens one
+    # connection instead of nine is, if anything, a lighter guest.
+    if httppool.pooling_enabled():
+        return httppool.POOL.request(url, timeout, max_bytes, headers=head)
     opener = urllib.request.build_opener(_NoRedirect())
-    request = urllib.request.Request(url, headers={
-        "User-Agent": ua, "Accept": "application/json,text/html"})
+    request = urllib.request.Request(url, headers=head)
     response = opener.open(request, timeout=timeout)
     body = response.read(max_bytes + 1)
     headers = {k.lower(): v for k, v in response.headers.items()}
     return (response.status, headers, body[:max_bytes],
             len(body) > max_bytes)
+
+
+#: WHICH SEC URLS ARE THE SAME FACT FOR EVERY COMPANY.
+#:
+#: The registrant tables are a public index: identical bytes whatever the
+#: customer typed, downloaded 795,179 bytes at a time, TWICE per analysis
+#: before this existed. A submissions index is per-registrant and changes only
+#: when that registrant files, so it is cacheable for far less time.
+#:
+#: A FILING IS NOT IN HERE. `FilingCache` owns filing documents, keyed on
+#: attested EDGAR identity, and a 16MB primary document has no business in a
+#: process-memory cache sized for index tables.
+def _registry_ttl(url: str):
+    """The cache lifetime for a SEC metadata URL, or None if it is not one."""
+    if not PUBLIC_METADATA.enabled():
+        return None
+    plain = str(url or "")
+    if plain in (TICKERS_URL,) or plain.startswith(
+            "https://www.sec.gov/files/company_tickers"):
+        return PUBLIC_METADATA.TTL_REGISTRY_S
+    if plain.startswith("https://data.sec.gov/submissions/"):
+        return PUBLIC_METADATA.TTL_SUBMISSIONS_S
+    return None
 
 
 def _fetch_bytes(url, *, transport, resolver, timeout=8.0,
@@ -248,6 +282,20 @@ def _fetch_bytes(url, *, transport, resolver, timeout=8.0,
             # does today.
             return tx(url, timeout)
 
+    cache_ttl = _registry_ttl(url) if transport is None else None
+    if cache_ttl is not None:
+        # A cached body short-circuits BEFORE the request. Only registry
+        # tables and submission indexes qualify -- never a filing document,
+        # which `FilingCache` already owns and which would not fit here.
+        #
+        # Only when the caller did NOT inject a transport. An injected
+        # transport means the caller is deciding what comes back, and a cache
+        # answering in front of it would be answering for it -- which in the
+        # suite is one test's fixture serving another test's assertion.
+        hit = PUBLIC_METADATA.STORE.get(url)
+        if hit is not None:
+            return hit
+
     status, headers, body, exceeded = call_with_retry(
         _attempt, url=url, policy=retry_policy or DEFAULT_POLICY,
         ledger=retry_ledger, sleeper=sleeper, rng=rng)
@@ -260,6 +308,10 @@ def _fetch_bytes(url, *, transport, resolver, timeout=8.0,
         raise SubmissionsTruncated(
             f"{url} exceeded the {max_bytes or MAX_RESPONSE_BYTES:,}-byte "
             f"budget for this call")
+    if cache_ttl is not None and PUBLIC_METADATA.enabled():
+        # Stored only after every check above passed. A truncated or failed
+        # response must never be served again as if it were the record.
+        PUBLIC_METADATA.STORE.put(url, body, cache_ttl)
     return body
 
 

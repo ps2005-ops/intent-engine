@@ -121,6 +121,18 @@ INGESTION_EVENTS = frozenset({
     # list from a rediscovered one, and the whole point of the snapshot is
     # the difference between them.
     "ci.snapshot_reused",
+    # WHAT CHANGED AFTER THE READER ALREADY HAD AN ANSWER. CORE stops
+    # blocking once the readiness contract is met and the remaining approved
+    # sources are acquired afterwards; when that wider evidence moves the
+    # thesis, the decision implications or the result state, the change is
+    # recorded here and shown as a CHANGE. Rewriting the page under a reader
+    # who has acted on it is worse than making them wait.
+    #
+    # REGISTERED WITH THE HANDLER, NOT AFTER IT. The last new event type in
+    # this file was added to the producer and not to this set: `_append`
+    # raised, a broad `except` swallowed it, and every "warm" run silently
+    # performed a full cold discovery while reporting nothing wrong.
+    "ci.analysis_updated",
     # report-quality diagnostics (operator observability)
     "ci.quality_assessed",
     # Operator-only: did the RICH path actually land? "The reasoning backend

@@ -1150,7 +1150,7 @@ class CompanyIngestionService:
 
     # --- retrieval -------------------------------------------------------------------
     def fetch_approved(self, run_id: str, *, candidate_ids=None,
-                       deadline=None) -> dict:
+                       deadline=None, sufficiency_probe=None) -> dict:
         """Fetch ONLY approved candidates; idempotent per source+content;
         partial success is honest.
 
@@ -1158,6 +1158,14 @@ class CompanyIngestionService:
         by the quality retry loop to retrieve ADDITIONAL evidence for families
         the first pass missed. Every id must still be a discovered candidate of
         this run, and the original approval remains immutable.
+
+        ``sufficiency_probe`` is called with the documents retrieved so far,
+        after each wave, and returns `sufficiency.evaluate`'s verdict. When it
+        reports `sufficient`, acquisition stops BLOCKING and the untouched
+        targets come back under ``deferred`` — to be acquired after the reader
+        has an answer, not instead of. Omitted (every batch caller, every
+        existing test), acquisition runs to the end of the list exactly as it
+        always did.
         """
         meta = self.run_meta(run_id)
         approval = self.store.approval(run_id)
@@ -1182,180 +1190,218 @@ class CompanyIngestionService:
         host_failures = self._host_failure_counts(run_id, candidates)
         # THE NETWORK, OVERLAPPED. Every decision below is still made one
         # candidate at a time, in this order. See `_prefetch`.
-        prefetched = self._prefetch(targets, candidates, run_id=run_id,
-                                    already=already,
-                                    host_failures=host_failures,
-                                    deadline=deadline)
-        ok, failed = [], []
-        for candidate_id in targets:
-            candidate = candidates[candidate_id]
-            source_id = f"src-{candidate_id[5:]}"
-            host = urlparse(candidate.get("url") or "").hostname
-            if host and host_failures.get(host, 0) >= self._DEAD_HOST_AFTER \
-                    and source_id not in already:
-                # Not a finding about the company: a host that has already
-                # refused to answer twice in this run is recorded as
-                # unreachable rather than dialled again for eight seconds.
-                failed.append(self._fail(
-                    run_id, domain, candidate_id, "host_unreachable",
-                    f"{host} failed {host_failures[host]} times earlier in "
-                    f"this run; not dialled again", True))
+        # ACQUISITION IN WAVES, SO SUFFICIENCY CAN ACTUALLY STOP IT.
+        #
+        # `_prefetch` dispatched EVERY approved target before the decision
+        # loop ran, so by the time the first document was judged, the network
+        # cost of all fourteen had already been paid. A stopping condition
+        # evaluated after that loop can only decide what to THINK about work
+        # already done -- it cannot make the reader wait less, which is the
+        # whole point of having one.
+        #
+        # So dispatch is chunked into waves of `_FETCH_CONCURRENCY`, which is
+        # exactly the width the pool had anyway. The decision loop still walks
+        # `targets` IN ORDER and decides one candidate at a time, so the
+        # ledger, the byte budget and the failure sequence are what they were;
+        # the only thing that moved is when the next wave is dialled.
+        #
+        # WITHOUT A PROBE, THERE IS ONE WAVE and this is byte-for-byte the
+        # previous behaviour -- which is what every batch caller and every
+        # existing test gets.
+        ok, failed, deferred = [], [], []
+        stopped_by = None
+        if sufficiency_probe is None:
+            waves = [list(targets)]
+        else:
+            width = max(1, int(self._FETCH_CONCURRENCY))
+            waves = [list(targets[i:i + width])
+                     for i in range(0, len(targets), width)] or [[]]
+        for wave in waves:
+            if stopped_by is not None:
+                # NOT A FAILURE AND NOT A DROP. These are handed back so the
+                # caller can acquire them AFTER the reader has an answer; a
+                # deferred source that never arrives is recorded as a gap.
+                deferred.extend(wave)
                 continue
-            if source_id in already:
-                ok.append(already[source_id])
-                continue
-            if total_bytes >= MAX_TOTAL_BYTES_PER_RUN:
-                failed.append(self._fail(run_id, domain, candidate_id,
-                                         "too_large",
-                                         "run byte budget exhausted", False))
-                continue
-            # Investor decks, shareholder letters and annual reports are often
-            # PDFs; fetch those as raw bytes through the same guarded path.
-            from intent_engine.company_ingestion.pdf import (
-                PDF_MIME_PREFIXES, PDF_OK, extract_pdf, is_pdf,
-            )
-            wants_pdf = is_pdf(url=candidate["url"])
-            # A previously retrieved SEC filing is served from disk. The
-            # cached entry is the RESPONSE, not a reading of it: parsing,
-            # relevance, relationship and competitor classification all run
-            # below on every path, so analysing one filing for two companies
-            # still produces two different readings.
-            _cache_outcome, cached = self.filing_cache.get(candidate["url"])
-            if cached is not None:
-                result = FetchResult(
-                    ok=True, status_code=cached["status_code"],
-                    mime_type=cached["mime_type"],
-                    body=(cached["body"] if wants_pdf
-                          else cached["body"].decode("utf-8", "replace")),
-                    final_url=candidate["url"], redirects=[],
-                    failure_type=None, safe_message="", retryable=False,
-                    truncated=cached["truncated"])
-            elif candidate_id in prefetched:
-                # Already acquired concurrently above. The DECISION about it
-                # is still made here, in this order, so the ledger, the byte
-                # budget and the failure sequence are what they always were.
-                result = prefetched.pop(candidate_id)
-            elif deadline is not None and not deadline.may_start():
-                # THE BUDGET HAS TO BIND HERE TOO. `_prefetch` declines to
-                # DISPATCH past the deadline, but a candidate it skipped
-                # arrives here and this branch used to dial it anyway -- so an
-                # expired budget still spent the full serial time, which is
-                # the entire failure it exists to prevent. Caught by
-                # `test_deadline_bounds_acquisition_and_records_the_gap`,
-                # which measured 2.44s against a budget of 0.05s.
-                deadline.record_gap(
-                    "evidence", f"{candidate.get('url', '')[:120]} not "
-                                f"requested — interactive budget spent")
-                failed.append(self._fail(
-                    run_id, domain, candidate_id, "deadline_exceeded",
-                    "not requested: the interactive time budget for this "
-                    "analysis was spent before this source was reached",
-                    True))
-                continue
-            else:
-                started = time.monotonic()
-                result = self._acquire(
-                    candidate, run_id=run_id, wants_pdf=wants_pdf,
-                    timeout=(None if deadline is None
-                             else deadline.budget_for(CONNECT_TIMEOUT_S)))
-                if deadline is not None:
-                    deadline.spend(time.monotonic() - started)
-            if not result["ok"]:
-                failed.append(self._fail(
-                    run_id, domain, candidate_id, result["failure_type"],
-                    result["safe_message"], result.get("retryable", False)))
-                # Count it immediately so the breaker trips WITHIN this pass.
-                # Seeding from the store alone would only help the next pass,
-                # and the ten timeouts that motivated this were all in one.
-                if host and result["failure_type"] in self._HOST_LEVEL_FAILURES:
-                    host_failures[host] = host_failures.get(host, 0) + 1
-                continue
-            self._transition(run_id, domain, "PARSING_SOURCES")
-            body = result["body"]
-            if wants_pdf or is_pdf(mime=result.get("mime_type", ""),
-                                   body=body if isinstance(body, bytes) else b""):
-                raw = body if isinstance(body, bytes) else body.encode()
-                document = extract_pdf(raw, url=candidate["url"])
-                if document["status"] != PDF_OK:
-                    # An encrypted, malformed, or image-only PDF is recorded
-                    # as an honest failure — never admitted as empty evidence.
+            prefetched = self._prefetch(wave, candidates, run_id=run_id,
+                                        already=already,
+                                        host_failures=host_failures,
+                                        deadline=deadline)
+            for candidate_id in wave:
+                candidate = candidates[candidate_id]
+                source_id = f"src-{candidate_id[5:]}"
+                host = urlparse(candidate.get("url") or "").hostname
+                if host and host_failures.get(host, 0) >= self._DEAD_HOST_AFTER \
+                        and source_id not in already:
+                    # Not a finding about the company: a host that has already
+                    # refused to answer twice in this run is recorded as
+                    # unreachable rather than dialled again for eight seconds.
                     failed.append(self._fail(
-                        run_id, domain, candidate_id, "parse_error",
-                        document["reason"], False))
+                        run_id, domain, candidate_id, "host_unreachable",
+                        f"{host} failed {host_failures[host]} times earlier in "
+                        f"this run; not dialled again", True))
                     continue
-                parsed = {"title": readable_title(document["title"],
-                                                  candidate.get("title")),
-                          "meta_description": "",
-                          "text": document["text"],
-                          "content_hash": document["content_hash"],
-                          "modified_date": "", "links": [],
-                          "extraction_mode": "pdf",
-                          "blocks_found": 0}
-            elif is_filing_document(url=candidate["url"],
-                                    form=candidate.get("form", "")):
-                # A regulatory filing is not a web page and is not parsed like
-                # one. `parse_html` buffers text only inside `<p>`/`<li>`/`<td>`
-                # and a modern inline-XBRL filing contains NONE of the first
-                # two — Datadog's 10-K has zero `<p>` and 4,857 `<span>`, so
-                # 93% of the document was silently discarded and Item 7 never
-                # reached a detector. Ordinary pages keep the ordinary parser.
-                parsed = parse_filing_html(
-                    body, url=candidate["url"],
-                    form=candidate.get("form", ""),
-                    truncated=bool(result.get("truncated")),
-                    status_code=result.get("status_code", 200),
-                    mime_type=result.get("mime_type", "text/html"))
-            else:
-                parsed = parse_html(body)
-            if not parsed["text"].strip():
-                # Fetched successfully but yielded no readable text — a
-                # JavaScript-only shell or an empty document. Record it as a
-                # per-source failure rather than admitting an empty "document"
-                # that would silently pad an otherwise evidence-free report.
-                failed.append(self._fail(
-                    run_id, domain, candidate_id, "javascript_only",
-                    "page returned no readable text (JavaScript-only or "
-                    "empty document)", False))
-                continue
-            freshness = "CURRENT"
-            if parsed.get("modified_date"):
-                from datetime import datetime, timezone
+                if source_id in already:
+                    ok.append(already[source_id])
+                    continue
+                if total_bytes >= MAX_TOTAL_BYTES_PER_RUN:
+                    failed.append(self._fail(run_id, domain, candidate_id,
+                                             "too_large",
+                                             "run byte budget exhausted", False))
+                    continue
+                # Investor decks, shareholder letters and annual reports are often
+                # PDFs; fetch those as raw bytes through the same guarded path.
+                from intent_engine.company_ingestion.pdf import (
+                    PDF_MIME_PREFIXES, PDF_OK, extract_pdf, is_pdf,
+                )
+                wants_pdf = is_pdf(url=candidate["url"])
+                # A previously retrieved SEC filing is served from disk. The
+                # cached entry is the RESPONSE, not a reading of it: parsing,
+                # relevance, relationship and competitor classification all run
+                # below on every path, so analysing one filing for two companies
+                # still produces two different readings.
+                _cache_outcome, cached = self.filing_cache.get(candidate["url"])
+                if cached is not None:
+                    result = FetchResult(
+                        ok=True, status_code=cached["status_code"],
+                        mime_type=cached["mime_type"],
+                        body=(cached["body"] if wants_pdf
+                              else cached["body"].decode("utf-8", "replace")),
+                        final_url=candidate["url"], redirects=[],
+                        failure_type=None, safe_message="", retryable=False,
+                        truncated=cached["truncated"])
+                elif candidate_id in prefetched:
+                    # Already acquired concurrently above. The DECISION about it
+                    # is still made here, in this order, so the ledger, the byte
+                    # budget and the failure sequence are what they always were.
+                    result = prefetched.pop(candidate_id)
+                elif deadline is not None and not deadline.may_start():
+                    # THE BUDGET HAS TO BIND HERE TOO. `_prefetch` declines to
+                    # DISPATCH past the deadline, but a candidate it skipped
+                    # arrives here and this branch used to dial it anyway -- so an
+                    # expired budget still spent the full serial time, which is
+                    # the entire failure it exists to prevent. Caught by
+                    # `test_deadline_bounds_acquisition_and_records_the_gap`,
+                    # which measured 2.44s against a budget of 0.05s.
+                    deadline.record_gap(
+                        "evidence", f"{candidate.get('url', '')[:120]} not "
+                                    f"requested — interactive budget spent")
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, "deadline_exceeded",
+                        "not requested: the interactive time budget for this "
+                        "analysis was spent before this source was reached",
+                        True))
+                    continue
+                else:
+                    started = time.monotonic()
+                    result = self._acquire(
+                        candidate, run_id=run_id, wants_pdf=wants_pdf,
+                        timeout=(None if deadline is None
+                                 else deadline.budget_for(CONNECT_TIMEOUT_S)))
+                    if deadline is not None:
+                        deadline.spend(time.monotonic() - started)
+                if not result["ok"]:
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, result["failure_type"],
+                        result["safe_message"], result.get("retryable", False)))
+                    # Count it immediately so the breaker trips WITHIN this pass.
+                    # Seeding from the store alone would only help the next pass,
+                    # and the ten timeouts that motivated this were all in one.
+                    if host and result["failure_type"] in self._HOST_LEVEL_FAILURES:
+                        host_failures[host] = host_failures.get(host, 0) + 1
+                    continue
+                self._transition(run_id, domain, "PARSING_SOURCES")
+                body = result["body"]
+                if wants_pdf or is_pdf(mime=result.get("mime_type", ""),
+                                       body=body if isinstance(body, bytes) else b""):
+                    raw = body if isinstance(body, bytes) else body.encode()
+                    document = extract_pdf(raw, url=candidate["url"])
+                    if document["status"] != PDF_OK:
+                        # An encrypted, malformed, or image-only PDF is recorded
+                        # as an honest failure — never admitted as empty evidence.
+                        failed.append(self._fail(
+                            run_id, domain, candidate_id, "parse_error",
+                            document["reason"], False))
+                        continue
+                    parsed = {"title": readable_title(document["title"],
+                                                      candidate.get("title")),
+                              "meta_description": "",
+                              "text": document["text"],
+                              "content_hash": document["content_hash"],
+                              "modified_date": "", "links": [],
+                              "extraction_mode": "pdf",
+                              "blocks_found": 0}
+                elif is_filing_document(url=candidate["url"],
+                                        form=candidate.get("form", "")):
+                    # A regulatory filing is not a web page and is not parsed like
+                    # one. `parse_html` buffers text only inside `<p>`/`<li>`/`<td>`
+                    # and a modern inline-XBRL filing contains NONE of the first
+                    # two — Datadog's 10-K has zero `<p>` and 4,857 `<span>`, so
+                    # 93% of the document was silently discarded and Item 7 never
+                    # reached a detector. Ordinary pages keep the ordinary parser.
+                    parsed = parse_filing_html(
+                        body, url=candidate["url"],
+                        form=candidate.get("form", ""),
+                        truncated=bool(result.get("truncated")),
+                        status_code=result.get("status_code", 200),
+                        mime_type=result.get("mime_type", "text/html"))
+                else:
+                    parsed = parse_html(body)
+                if not parsed["text"].strip():
+                    # Fetched successfully but yielded no readable text — a
+                    # JavaScript-only shell or an empty document. Record it as a
+                    # per-source failure rather than admitting an empty "document"
+                    # that would silently pad an otherwise evidence-free report.
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, "javascript_only",
+                        "page returned no readable text (JavaScript-only or "
+                        "empty document)", False))
+                    continue
+                freshness = "CURRENT"
+                if parsed.get("modified_date"):
+                    from datetime import datetime, timezone
+                    try:
+                        modified = datetime.fromisoformat(
+                            parsed["modified_date"].replace("Z", "+00:00"))
+                        if modified.tzinfo is None:
+                            modified = modified.replace(tzinfo=timezone.utc)
+                        age_days = (datetime.now(timezone.utc)
+                                    - modified).days
+                        if age_days > 400:
+                            freshness = "STALE"
+                    except ValueError:
+                        pass                 # a date we cannot parse stays CURRENT
+                # A source whose text trips the credential detector is DROPPED, not
+                # stored — but dropping it must cost this one source, never the
+                # run. The detector is deliberately blunt (any 13–16 digit run
+                # reads as a card number), and SEC EDGAR result pages concatenate
+                # commission file numbers into exactly that shape. Letting the
+                # exception escape turned one false positive on one public filing
+                # into a total analysis failure with a generic error page.
                 try:
-                    modified = datetime.fromisoformat(
-                        parsed["modified_date"].replace("Z", "+00:00"))
-                    if modified.tzinfo is None:
-                        modified = modified.replace(tzinfo=timezone.utc)
-                    age_days = (datetime.now(timezone.utc)
-                                - modified).days
-                    if age_days > 400:
-                        freshness = "STALE"
-                except ValueError:
-                    pass                 # a date we cannot parse stays CURRENT
-            # A source whose text trips the credential detector is DROPPED, not
-            # stored — but dropping it must cost this one source, never the
-            # run. The detector is deliberately blunt (any 13–16 digit run
-            # reads as a card number), and SEC EDGAR result pages concatenate
-            # commission file numbers into exactly that shape. Letting the
-            # exception escape turned one false positive on one public filing
-            # into a total analysis failure with a generic error page.
-            try:
-                record = self._build_record(
-                    source_id=source_id, run_id=run_id, domain=domain,
-                    candidate=candidate, result=result, parsed=parsed,
-                    body=body, freshness=freshness)
-            except SecretRejected as exc:
-                failed.append(self._fail(
-                    run_id, domain, candidate_id, "content_rejected",
-                    str(exc), False))
-                continue
-            total_bytes += record["byte_count"]
-            self._append("ci.source_retrieved", run_id=run_id, domain=domain,
-                         subject_type="source", subject_id=source_id,
-                         payload=record,
-                         idempotency_key=f"src:{run_id}:{source_id}:"
-                                         f"{record['content_hash'][:12]}")
-            ok.append(record)
-        return {"ok": ok, "failed": failed,
+                    record = self._build_record(
+                        source_id=source_id, run_id=run_id, domain=domain,
+                        candidate=candidate, result=result, parsed=parsed,
+                        body=body, freshness=freshness)
+                except SecretRejected as exc:
+                    failed.append(self._fail(
+                        run_id, domain, candidate_id, "content_rejected",
+                        str(exc), False))
+                    continue
+                total_bytes += record["byte_count"]
+                self._append("ci.source_retrieved", run_id=run_id, domain=domain,
+                             subject_type="source", subject_id=source_id,
+                             payload=record,
+                             idempotency_key=f"src:{run_id}:{source_id}:"
+                                             f"{record['content_hash'][:12]}")
+                ok.append(record)
+
+            if sufficiency_probe is not None:
+                verdict = sufficiency_probe(ok)
+                if verdict and verdict.get("sufficient"):
+                    stopped_by = dict(verdict)
+        return {"ok": ok, "failed": failed, "deferred": deferred,
+                "sufficiency": stopped_by,
                 "status": "COMPLETE" if not failed
                 else ("PARTIAL" if ok else "FAILED")}
 
@@ -2601,6 +2647,40 @@ class CompanyIngestionService:
         except Exception:  # noqa: BLE001 - a read model may not fail a run
             return {}
         return counts
+
+    def record_analysis_updated(self, run_id: str, *, fields, new_documents,
+                                reason: str) -> None:
+        """Record that evidence arriving after `core_ready` moved the answer.
+
+        The reader is told a named set of fields changed and how much new
+        evidence caused it. Not a new report and not a correction: the first
+        answer was defensible on the evidence it had, and this is what the
+        rest of the evidence did to it.
+        """
+        meta = self.run_meta(run_id) or {}
+        self._append("ci.analysis_updated", run_id=run_id,
+                     domain=meta.get("domain", ""),
+                     subject_type="run", subject_id=run_id,
+                     payload={"fields_changed": sorted(fields),
+                              "new_documents": int(new_documents),
+                              "reason": reason},
+                     # CONTENT-DERIVED, NOT RUN-SCOPED. A key over the run
+                     # and the field NAMES alone collides the moment the same
+                     # fields move twice with different counts -- which is
+                     # precisely the `ci-ownership:<run>` defect this file
+                     # already carries a comment about. The payload that can
+                     # differ goes in the key.
+                     idempotency_key="ci-updated:" + run_id + ":"
+                                     + hashlib.sha256(json.dumps(
+                                         {"f": sorted(fields),
+                                          "n": int(new_documents)},
+                                         sort_keys=True).encode()
+                                     ).hexdigest()[:12])
+
+    def analysis_updates(self, run_id: str) -> list:
+        """Every `ci.analysis_updated` row for this run, oldest first."""
+        return [dict(row.payload) for row in self.store.for_run(run_id)
+                if row.event_type == "ci.analysis_updated"]
 
     def discovery_report(self, run_id: str) -> dict:
         """What the independent-channel search DID for this run.

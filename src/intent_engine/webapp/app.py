@@ -9291,6 +9291,10 @@ class WebApp:
                     if deadline is not None else None))
                 sp["item_count"] = len(self.ci.store.candidates(run_id))
             candidates = self.ci.store.candidates(run_id)
+            # DEFINED ON EVERY PATH, not only the one that assigns it. A run
+            # whose approval was already recorded skips the block below
+            # entirely, and the continuation further down still reads this.
+            deferred_ids: list = []
             if self.ci.store.approval(run_id) is None:
                 with trace.span("source_selection", deadline=deadline) as sp:
                     approved = self._recommended_candidate_ids(
@@ -9308,11 +9312,38 @@ class WebApp:
                 # step that turns evidence into an answer is still inside the
                 # interactive budget when it runs.
                 with trace.span("retrieval", deadline=deadline) as sp:
-                    self.ci.fetch_approved(
+                    # §5/§7. CORE STOPS BLOCKING WHEN THE CONTRACT IS MET,
+                    # not when the approved list runs out.
+                    #
+                    # MEASURED: `readiness.assess_readiness` reached
+                    # READY_FOR_FULL_REPORT after 5 documents for NVIDIA and
+                    # Microsoft and 8 for JPMorgan, against 13, 8 and 10
+                    # fetched, and never changed state again. Everything
+                    # after that index was evidence the reader waited for and
+                    # the product's own contract did not require.
+                    #
+                    # The rest is DEFERRED, not dropped: it is acquired after
+                    # `core_ready` below, on a fresh budget, and a source that
+                    # never arrives is a recorded gap.
+                    #
+                    # THIS CALL SITE IS THE WHOLE CHANGE. An earlier edit
+                    # added `_sufficiency_probe` and `_acquire_deferred` and
+                    # failed to write this line: the helpers existed, sixteen
+                    # break proofs held, thirty-one tests passed, and every
+                    # production run called `fetch_approved` with no probe and
+                    # then raised NameError on `deferred_ids`. A fix with no
+                    # caller is not a fix, and no test that drives a helper
+                    # directly can tell the difference.
+                    fetched = self.ci.fetch_approved(
                         run_id,
                         deadline=(deadline.reserving(self.COMPOSE_RESERVE_S)
-                                  if deadline is not None else None))
+                                  if deadline is not None else None),
+                        sufficiency_probe=self._sufficiency_probe(run_id))
+                    deferred_ids = list(fetched.get("deferred") or ())
                     sp["item_count"] = len(list(self.ci.store.retrieved(run_id)))
+                    sp["deferred"] = len(deferred_ids)
+                    if fetched.get("sufficiency"):
+                        sp["stopped_on"] = fetched["sufficiency"].get("reason")
             # §22. COMPOSITION IS NOT OPTIONAL AND IS NOT BUDGETED AWAY.
             #
             # The budget bounds ACQUISITION -- the part that talks to hosts we
@@ -9362,6 +9393,38 @@ class WebApp:
             except Exception:                   # noqa: BLE001 - never a run
                 _LOG.warning("enrichment failed after core_ready run=%s",
                              run_id)
+            # §5. THE DEFERRED EVIDENCE IS ACQUIRED HERE, and the reader is
+            # already reading. If it changes the answer they are TOLD, through
+            # `analysis_updated`, rather than having the page rewritten under
+            # them -- a recommendation that silently becomes a different
+            # recommendation is worse than a slower one.
+            trace.calibrate("cpu_yardstick_after")
+            # RECORDED AT CORE_READY, not at the end of the run. A trace
+            # written only after DEEP would be lost for exactly the runs
+            # whose latency is worth reading -- the ones that never finish.
+            self.ci.record_trace(run_id, "core", trace.waterfall())
+            # THE CORE TRACE LANDS BEFORE THE CONTINUATION, NOT AFTER IT.
+            #
+            # `record_trace` already ran a few seconds behind the `core_ready`
+            # marker, and two of ten cohort rows -- Caterpillar and Alphabet,
+            # the two SLOWEST -- were read inside that window and came back
+            # with no spans at all, quietly removing the most interesting rows
+            # from every bucket ranking. Putting the deferred acquisition in
+            # front of it would widen exactly that window, on exactly the runs
+            # whose latency is worth reading.
+            #
+            # The continuation records its own phase below, so nothing is lost
+            # -- the core trace simply stops waiting for work the core did not
+            # do.
+            if deferred_ids:
+                try:
+                    core = self._acquire_deferred(run_id, core, deferred_ids,
+                                                  trace=trace)
+                    self._results[run_id] = core
+                    self.ci.record_trace(run_id, "core", trace.waterfall())
+                except Exception as exc:            # noqa: BLE001
+                    _LOG.warning("deferred acquisition failed run=%s %s: %s",
+                                 run_id, type(exc).__name__, str(exc)[:200])
             # A SECOND READING, taken where the cost actually landed. The
             # first is at t=0 when the worker contends with nothing;
             # composition is where 48 of the 90 seconds went, so the CPU
@@ -9369,11 +9432,7 @@ class WebApp:
             # Two readings also test REPRODUCIBILITY: a constraint that shows
             # up once could be a noisy neighbour, one that shows up at both
             # ends of the run is the machine we were given.
-            trace.calibrate("cpu_yardstick_after")
-            # RECORDED AT CORE_READY, not at the end of the run. A trace
-            # written only after DEEP would be lost for exactly the runs
-            # whose latency is worth reading -- the ones that never finish.
-            self.ci.record_trace(run_id, "core", trace.waterfall())
+
             with self._analysis_lock:
                 self._terminal_writes[run_id] = \
                     self._terminal_writes.get(run_id, 0) + 1
@@ -9982,6 +10041,123 @@ class WebApp:
         if deep:
             self._publish_enrichment(run_id, stamped, trace=trace)
         return stamped
+
+    # ------------------------------------------------------------------
+    # §5/§7/§24. Minimum-evidence CORE, and what happens to the rest.
+    # ------------------------------------------------------------------
+    def _sufficiency_probe(self, run_id: str):
+        """A callable acquisition consults after each wave.
+
+        It asks `readiness.assess_readiness` -- the SAME contract that decides
+        whether a report may be published. A second definition of "enough
+        evidence" would let acquisition stop on one standard while composition
+        refused on another, and the run would be fast because it had stopped
+        producing a product. This project shipped that failure once already.
+        """
+        from intent_engine.company_ingestion import sufficiency
+
+        meta = self.ci.run_meta(run_id) or {}
+        # `ci.subject_cik`, NOT `meta["cik"]`. A run started from a website
+        # carries no CIK -- which is the ORDINARY case -- so reading meta
+        # directly made the "wait for the subject's own filing" condition
+        # return True for every domain-entry run and never fire once.
+        # Measured: meta["cik"] is "" for Apple and NVIDIA, while
+        # `subject_cik` resolves 320193 and 1045810. A guard that cannot fail
+        # is not a guard.
+        subject_cik = str(self.ci.subject_cik(meta) or "")
+
+        def probe(documents):
+            try:
+                return sufficiency.evaluate(
+                    documents,
+                    identity=self.ci.entity_identity(run_id),
+                    failures=list(self.ci.store.failures(run_id)),
+                    subject_cik=subject_cik)
+            except Exception as exc:            # noqa: BLE001
+                # A probe that cannot answer means "keep going", which is the
+                # behaviour that existed before it. LOGGED, because a silent
+                # fallback here looks exactly like a run that never had enough
+                # evidence to stop -- the failure mode this session already
+                # shipped once with the snapshot short-circuit.
+                _LOG.warning("sufficiency probe failed run=%s %s: %s", run_id,
+                             type(exc).__name__, str(exc)[:200])
+                return {"sufficient": False, "reason": "probe unavailable"}
+
+        return probe
+
+    #: How much of the report may change before the reader is TOLD it changed,
+    #: rather than the page being rewritten under them. Any change to the
+    #: thesis, the decision implications or the result state is material by
+    #: construction: those are the sentences a reader acts on.
+    _MATERIAL_REPORT_FIELDS = ("thesis", "decision_implications",
+                              "result_state", "status")
+
+    @staticmethod
+    def _decision_fingerprint(result) -> dict:
+        """The part of a composed result a reader would notice changing."""
+        report = (result or {}).get("strategic_report") or {}
+        out = {}
+        for field in WebApp._MATERIAL_REPORT_FIELDS:
+            value = report.get(field)
+            out[field] = json.dumps(value, sort_keys=True, default=str)                 if isinstance(value, (list, dict)) else str(value or "")
+        return out
+
+    def _acquire_deferred(self, run_id, core, deferred_ids, trace=None):
+        """Acquire the evidence CORE did not wait for, then say what changed.
+
+        THE READER IS ALREADY READING. `core_ready` has been marked and the
+        result is openable, so this stage may not fail the run, may not block,
+        and may not silently replace what is on the screen. Three rules:
+
+        1. It composes AGAIN over the wider evidence.
+        2. If the decision fingerprint is unchanged, the richer result
+           replaces the core silently -- nothing a reader acts on moved.
+        3. If it CHANGED, the run records `ci.analysis_updated` naming the
+           fields that moved and how many new documents caused it, so the
+           change is visible as a change rather than as a different page.
+
+        A recommendation that quietly becomes a different recommendation is
+        worse than a slower one, which is the whole reason deferral has to
+        carry an update signal rather than just a recompose.
+        """
+        from contextlib import nullcontext
+        span = (trace.span("deferred_acquisition") if trace is not None
+                else nullcontext({}))
+        before_documents = len(list(self.ci.store.retrieved(run_id)))
+        with span as sp:
+            # A FRESH BUDGET, NOT THE SPENT ONE. The interactive deadline
+            # bounds the WAIT, and by here `core_ready` is marked and there is
+            # no wait left to bound. Passing the spent deadline would make
+            # `budget_for` return 0.0 for every deferred source, record each
+            # one as `deadline_exceeded`, and turn deferral into deletion
+            # wearing a retrieval failure -- against evidence nobody had asked
+            # for yet.
+            from intent_engine.company_ingestion.deadline import Deadline
+            fetched = self.ci.fetch_approved(
+                run_id, candidate_ids=list(deferred_ids),
+                deadline=Deadline.for_continuation(self._tier_for(run_id)))
+            after_documents = len(list(self.ci.store.retrieved(run_id)))
+            if isinstance(sp, dict):
+                sp["item_count"] = after_documents - before_documents
+            if after_documents <= before_documents:
+                # Nothing new arrived, so there is nothing to recompose and
+                # nothing to tell the reader. The gaps the fetch recorded are
+                # already on the run.
+                return core
+            widened = self._compose(run_id, deep=False, trace=trace)
+        before = self._decision_fingerprint(core)
+        after = self._decision_fingerprint(widened)
+        changed = sorted(k for k in before if before[k] != after[k])
+        if changed:
+            try:
+                self.ci.record_analysis_updated(
+                    run_id, fields=changed,
+                    new_documents=after_documents - before_documents,
+                    reason="evidence acquired after the first answer was "
+                           "published")
+            except Exception:                   # noqa: BLE001
+                _LOG.warning("analysis_updated marker failed run=%s", run_id)
+        return widened
 
     def _publish_enrichment(self, run_id, stamped, trace=None):
         """Market refresh and dossier write -- everything CORE does not need.
