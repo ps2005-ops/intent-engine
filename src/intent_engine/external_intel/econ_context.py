@@ -96,8 +96,67 @@ def unavailable(reason: str) -> EconContext:
     return EconContext(available=False, reason=reason)
 
 
+#: ONE WORLD, READ ONCE. Keyed on (root, as_of) and invalidated by the state
+#: file's own mtime/size, so a republished state is picked up on the next call
+#: and an unchanged one is never re-parsed.
+_CACHE: dict = {}
+#: Bounded so a long-lived process analysing many `as_of` dates cannot grow
+#: this without limit. Small on purpose: real deployments read one or two.
+_CACHE_MAX = 8
+
+
+def _state_fingerprint(runtime_root) -> tuple:
+    """What must change before a cached read stops being valid."""
+    import pathlib as _pl
+    try:
+        root = _pl.Path(runtime_root)
+        newest = ()
+        for pat in ("econ/state_snapshot*", "**/state_snapshot*"):
+            for f in root.glob(pat):
+                try:
+                    st = f.stat()
+                except OSError:
+                    continue
+                newest = max(newest, (st.st_mtime_ns, st.st_size, f.name))
+        return newest
+    except Exception:                                       # noqa: BLE001
+        # Unknown fingerprint means "do not trust a cache entry", which
+        # degrades to today's behaviour rather than to a stale world.
+        return ()
+
+
 def load(runtime_root, *, as_of: str = "") -> EconContext:
-    """Read the shared economic state, or say why there is none."""
+    """Read the shared economic state, or say why there is none.
+
+    MEMOISED ACROSS REQUESTS, because the economy is not a property of the
+    company being analysed. This re-read and re-validated the state snapshot
+    from disk on EVERY call, so a fifty-company cohort rebuilt one identical
+    macro world fifty times -- and each rebuild is a file read plus a full
+    contract validation on the interactive path.
+
+    The cache key carries the state file's mtime and size, so a republished
+    state invalidates it on the next call. That matters more than the saving:
+    a cache that could serve yesterday's world as today's would be the
+    stale-as-current defect this codebase already refuses elsewhere.
+
+    An empty fingerprint means the files could not be stat'd, and that is
+    treated as "do not trust a cached entry" -- the uncached read, which is
+    exactly today's behaviour.
+    """
+    fingerprint = _state_fingerprint(runtime_root)
+    key = (str(runtime_root), str(as_of), fingerprint)
+    if fingerprint and key in _CACHE:
+        return _CACHE[key]
+    result = _load_uncached(runtime_root, as_of=as_of)
+    if fingerprint:
+        if len(_CACHE) >= _CACHE_MAX:
+            _CACHE.clear()
+        _CACHE[key] = result
+    return result
+
+
+def _load_uncached(runtime_root, *, as_of: str = "") -> EconContext:
+    """The read itself. See `load` for why it is memoised."""
     try:
         rows = EST.load(runtime_root, "state_snapshot", upto=as_of)
     except Exception as exc:                       # noqa: BLE001

@@ -224,6 +224,14 @@ def test_the_brief_does_not_restate_the_narrative(tmp_path):
     # navigable -- so comparing it against itself proves nothing and fails
     # for the one reason this test does not care about.
     below = re.sub(r"(?s)<nav\b.*?</nav>", " ", below)
+    # THE FOLLOW-UP BOX IS A CONTROL, NOT ANALYSIS -- the same reasoning as
+    # the nav above. It is mounted from ONE declaration onto every report
+    # surface precisely so a reader who has learned it in one place has
+    # learned it everywhere, which means its suggested questions are
+    # identical by construction. Comparing that against itself fails for the
+    # one reason this test does not care about: the question "What should I
+    # do next?" is not a restatement of the narrative's argument.
+    below = re.sub(r'(?s)<section class="ui-controls".*?</section>', " ", below)
     # The approval notice is a CONSENT notice, not analysis. It belongs
     # wherever artefacts are offered, on every surface that offers them.
     echoed = [ln for ln in _text(below).splitlines()

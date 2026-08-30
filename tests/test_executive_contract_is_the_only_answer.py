@@ -358,6 +358,13 @@ def test_every_strategic_surface_is_declared_in_the_verdict_register():
         # declared non-strategic four lines above: a surface cannot become a
         # verdict site by being rendered as JSON instead of as HTML.
         "_progress_json",
+        # A MOUNT, NOT A SURFACE. `_with_ask` wraps a page that is itself
+        # declared here or in the register, and adds one control: a box to
+        # type a question into. It asserts nothing about the company -- the
+        # ANSWER is produced by `/conversation`, which is a POST route with
+        # its own accountability. Declaring the wrapper as a verdict site
+        # would make the register describe where a text input lives.
+        "_with_ask",
     }
     undeclared = [h for h in sorted(handlers)
                   if h not in NON_STRATEGIC and h not in register]

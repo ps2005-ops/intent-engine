@@ -1036,32 +1036,43 @@ class WebApp:
         # THE SIX-STEP STORY (§17). `founder_brief.flow` owns the order;
         # these three routes are the steps the product did not have.
         if route == ("GET", "runs", 3) and parts[2] == "intro":
-            return self._intro_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._intro_page(session, parts[1]))
         # THE SCROLLABLE DECISION NARRATIVE. It was the default route until
         # step 1 took that place, and a designed 900-word surface with no
         # route into it is exactly the defect the verdict register exists to
         # catch. It is now a secondary surface, reached from the step that
         # raises the question it answers.
         if route == ("GET", "runs", 3) and parts[2] == "answer":
-            return self._answer_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._answer_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "history":
             return self._history_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "connect":
             return self._connect_page(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "story":
-            return self._story_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._story_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "dashboard":
-            return self._intelligence_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._intelligence_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "brief":
-            return self._executive_brief_page(session, parts[1])
+            return self._with_ask(
+                session, parts[1],
+                self._executive_brief_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "xray":
-            return self._run_xray(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._run_xray(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "evidence":
-            return self._run_evidence(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._run_evidence(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "slides":
-            return self._slides_page(session, parts[1])
+            return self._with_ask(session, parts[1],
+                                  self._slides_page(session, parts[1]))
         if route == ("GET", "runs", 3) and parts[2] == "full":
-            return self._run_page(session, parts[1], layer="full")
+            return self._with_ask(
+                session, parts[1],
+                self._run_page(session, parts[1], layer="full"))
         if route == ("GET", "runs", 4) and parts[2] == "evidence":
             return self._evidence(session, parts[1], parts[3])
         if route == ("POST", "runs", 3) and parts[2] == "conversation":
@@ -6249,6 +6260,63 @@ class WebApp:
             trailing=self._ask_form(run_id, report, session))
         return self._html(self._page(f"{name} — the decision", body,
                                      session, session.get("csrf", "")))
+
+    #: SURFACES THAT MUST CARRY "ASK A FOLLOW-UP", declared once.
+    #:
+    #: MEASURED LIVE on 517180e6 with Microsoft: Q&A appeared on 3 of 9
+    #: surfaces -- `/answer`, `/full`, `/slides` had it; `/brief`, `/xray`,
+    #: `/dashboard`, `/intro`, `/evidence`, `/sources` did not. That is what
+    #: per-page mounting produces: nobody decided `/brief` should be mute, it
+    #: was simply never edited.
+    #:
+    #: So the mount is DECLARATIVE and happens at the route, and this tuple is
+    #: read by both the router and the test. A new report page cannot develop
+    #: a `/brief`-shaped hole without failing the surface test, and the
+    #: question of whether a surface should answer questions is settled here
+    #: rather than in six separate render functions.
+    #:
+    #: `sources` and the per-item evidence pages are deliberately absent: they
+    #: inspect one document's provenance, and a question asked there is a
+    #: question about the analysis, which is one click away on every one of
+    #: them.
+    ASK_SURFACES = ("intro", "answer", "brief", "xray", "dashboard", "story",
+                    "slides", "full", "evidence")
+
+    def _with_ask(self, session, run_id, response):
+        """Mount the ONE canonical Q&A component on a rendered report page.
+
+        Injected rather than passed in, because the alternative is editing
+        every page function and remembering to edit the next one. The form is
+        identical on every surface -- same component, same route, same
+        context -- so a reader who has learned it in one place has learned it
+        everywhere.
+
+        Fails open: a page that cannot build the form is still a page. Losing
+        the follow-up box costs a feature; raising here would cost the report.
+        """
+        try:
+            status, headers, body = response
+        except (TypeError, ValueError):
+            return response
+        if not isinstance(body, str) or "</main>" not in body:
+            return response
+        if "/conversation" in body:
+            return response          # a page that already mounts it
+        # OWNERSHIP, BECAUSE THIS READS RUN DATA. The wrapped handler has
+        # already checked -- but this function calls `_founder_layers(run_id)`
+        # itself to build company-specific suggestions, so it is a reader of
+        # the run in its own right. A future route that wraps a page which
+        # forgot to check would otherwise leak one company's questions onto
+        # another reader's screen, and the wrapper is exactly the place nobody
+        # would think to look.
+        if not self._owned(session, run_id):
+            return response
+        try:
+            _b, report, _n = self._founder_layers(run_id)
+            section = self._ask_form(run_id, report, session)
+        except Exception:                                   # noqa: BLE001
+            return response
+        return status, headers, body.replace("</main>", section + "</main>", 1)
 
     def _ask_form(self, run_id, report, session):
         """The one-click assistant, with company-specific suggestions."""

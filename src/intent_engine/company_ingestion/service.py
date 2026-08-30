@@ -63,6 +63,46 @@ from intent_engine.founder_intelligence.records import (
 CONSENT_VERSION = "v1.1-source-approval"
 
 
+from concurrent.futures import TimeoutError as FuturesTimeout
+
+
+def _bounded_result(future, deadline, stage: str, detail: str = ""):
+    """A future's value, or None when the budget will not cover the wait.
+
+    `may_start()` DECIDES WHETHER TO DISPATCH; THIS BOUNDS THE WAIT. The two
+    are different questions and only the first was being asked here. A sitemap
+    crawl or an EDGAR full-text search dispatched at t=5s with the budget
+    intact could still be running at t=90s, and `future.result()` with no
+    timeout waits for it however long that is -- so a run could pass every
+    stage-level gate and still blow through the hard deadline inside one join.
+
+    MEASURED: Microsoft, 517180e6, discovery 27.7s and retrieval 40.5s -- 63%
+    of a 107.8s CORE, against a 60s interactive budget that nothing in this
+    path could enforce.
+
+    Returns None on timeout and records a gap, so the caller degrades to the
+    candidates it already has instead of losing the run. A source that did not
+    arrive in time is a bounded gap, which the reader is told about; it is not
+    a failure.
+    """
+    if future is None:
+        return None
+    if deadline is None:
+        return future.result()
+    left = deadline.remaining
+    if left <= 0:
+        deadline.record_gap(stage, detail or "no budget left to wait for it")
+        future.cancel()
+        return None
+    try:
+        return future.result(timeout=left)
+    except FuturesTimeout:
+        deadline.record_gap(
+            stage, detail or f"did not return within {left:.1f}s of budget")
+        future.cancel()
+        return None
+
+
 def _business_model_of(company_name, *, domain="", registrant=None,
                        evidence_text="") -> str:
     """This company's business-model class, or "" when it cannot be read.
@@ -603,7 +643,11 @@ class CompanyIngestionService:
                 # robots.txt Disallow is honoured. Dispatched before the
                 # homepage fetch above; only the join happens here.
                 if sitemap is not None:
-                    candidates = candidates + sitemap.result()
+                    _sm = _bounded_result(
+                        sitemap, deadline, "discovery",
+                        "sitemap crawl did not return inside the "
+                        "interactive budget")
+                    candidates = candidates + (_sm or [])
                 # Bounded external-source proposals (customer voice etc.)
                 # broaden the evidence beyond company-owned pages. Off-domain,
                 # UNVERIFIED, and (like every candidate) fetched only after
@@ -646,9 +690,20 @@ class CompanyIngestionService:
             # this company. Different author, regulatory venue, exact date,
             # permanent citation.
             if third_party is not None:
-                candidates = candidates + third_party.result()
+                _tp = _bounded_result(
+                    third_party, deadline, "discovery",
+                    "third-party filing search did not return "
+                    "inside the interactive budget")
+                candidates = candidates + (_tp or [])
         finally:
-            _pool.shutdown(wait=True)
+            # NOT `wait=True`. Bounding the joins above and then
+            # blocking here on the same futures would give the
+            # unbounded wait straight back -- the timeout would be
+            # recorded as a gap and the request would still sit
+            # here until the worker finished. A cancelled future
+            # whose thread is still winding down costs nothing the
+            # reader can see.
+            _pool.shutdown(wait=False)
         # Curated official sources for a KNOWN entity. This is what stops a
         # multinational whose primary domain refuses automated access from
         # collapsing into whatever single filing happened to be reachable:
