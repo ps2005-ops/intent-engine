@@ -254,13 +254,24 @@ def analyse(name, domain, *, budget_s, verbose=True) -> dict:
     # than a regex for `https?://` over the rendered HTML -- a counter that
     # reported 0 for six of six companies because this product cites evidence
     # through internal routes and emits no absolute href at all.
-    st, body, _u, _d, _h = _req(op, f"/runs/{run_id}/timing", timeout=60)
+    # THE TRACE LANDS AFTER THE MARKER. `core_latency_s` is written at
+    # `core_ready`; `record_trace` runs after enrichment, a few seconds later.
+    # Reading once caught two of ten runs in that window -- Alphabet and
+    # Caterpillar came back with no spans at all, and both were slow runs, so
+    # the gap silently removed the most interesting rows from the ranking.
     canonical = {}
-    if st == 200:
-        try:
-            canonical = json.loads(body)
-        except ValueError:
-            canonical = {}
+    for _attempt in range(10):
+        st, body, _u, _d, _h = _req(op, f"/runs/{run_id}/timing", timeout=60)
+        if st == 200:
+            try:
+                canonical = json.loads(body)
+            except ValueError:
+                canonical = {}
+        if any((ph.get("spans") or []) for ph in (canonical.get("trace") or [])):
+            break
+        if canonical.get("core_latency_s") is None and _attempt > 4:
+            break                       # not going to arrive; report what is
+        time.sleep(3)
     row["core_open_seconds"] = row.get("core_ready_seconds")
     if canonical.get("core_latency_s") is not None:
         row["core_ready_seconds"] = canonical["core_latency_s"]
