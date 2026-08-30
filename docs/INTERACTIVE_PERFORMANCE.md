@@ -335,3 +335,103 @@ that differ 8-15x in scheduling.
 - **`find -newermt '-60 minutes'` errors on BSD/macOS** and prints nothing,
   which is indistinguishable from "nothing changed". It reported a clean tree
   while three files were being written by another session.
+
+## 8. PRE-100 product phase: what was repaired, and what the cohort says
+
+### The measurements that drove it
+
+Ten companies, one SHA, same harness, twice — before and after two repairs:
+
+| | c7c28d52 | 7948b3b8 |
+|---|---|---|
+| CORE p50 | 104.7s | **78.3s** |
+| CORE p90 | 134.0s | **87.4s** |
+| CORE max | 141.1s | 132.5s |
+| usable reports | 10/10 | 10/10 |
+| DEEP completed | 4/10 | 7/10 |
+| mean discovery | 23.2s | 17.5s |
+| mean retrieval | 25.2s | 19.6s |
+| mean composition | 44.0s | 21.5s |
+
+Generalization is not in question: ten companies across platforms, payments,
+banking, retail and industrials all produced a real report with 7–15 evidence
+items, no company-specific behaviour and no failures. The performance gate is.
+
+### What each repair actually did
+
+**The 120s maximum now bounds the stage that spends the time.** `may_start()`
+decided whether a *fetch* could begin; nothing bounded composition, which was
+44s of a 107s median. The deadline is threaded
+`compose_with_quality → compose → _strategic_report → derive_observations`,
+and the document loop stops when it expires — **between** documents, never
+inside one, because a half-read document yields an excerpt that is not what
+the document says. Composition fell 51%.
+
+**An optional source may not decide how long the reader waits.** The
+third-party filing search was bounded by `deadline.remaining` — 40s on a 60s
+budget after the composition reserve — so the bound existed, was correct, and
+never once fired. `CLASS_SHARE` says what a class may spend *cumulatively*; it
+had no answer for what one branch may spend *waiting*. Both optional discovery
+branches now take an 8s cap on top of the budget. Discovery fell 24%.
+
+**Snapshot reuse works, and does not help a cohort.** `PublicCompanySnapshot`
+eliminates discovery on a repeat analysis: −99% (32.8s → 0.17s Microsoft,
+23.9s → 0.23s Apple), CORE −21%/−25%, reports composed and evidence intact. A
+50-company qualification is 50 *first* analyses, so none of that saving
+appears in it. Warm runs are a returning-reader benefit, not a cohort one.
+
+### Why more CPU is not the whole answer
+
+Composition consumes 3.71s of CPU over 25.10s of wall on this instance —
+**14.8% of a core**. Scaling only that bucket by the measured share, holding
+the network constant:
+
+| CPU | p50 | p90 |
+|---|---|---|
+| current | 76.5s | 79.0s |
+| 2× | 63.0s | 67.6s |
+| 4× | 56.1s | 62.2s |
+| full core | 53.3s | **60.0s** |
+
+A realistic one-tier jump does not reach the gate. A fully unstarved core
+lands exactly on p90 60.0s and still misses the ≤30s p50 preference. The
+application repairs bought 26s; CPU is worth roughly another 23s; the
+remaining ~37s is network wait against SEC and company hosts, which neither
+buys.
+
+### Two acquisition repairs attempted and reverted
+
+Both were plausible latency savings that changed behaviour toward an external
+host, and both were refused by something the repository had already recorded.
+
+**Per-host fetch concurrency 2 → 4.** Justified on the grounds that SEC's 429s
+are company-correlated rather than cadence-correlated. That claim could not be
+cited from this repository, and `docs/INTERACTIVE_PERFORMANCE.md` records the
+opposite as measured. `test_concurrency_is_bounded_per_host` asserts a
+*literal* 3 rather than `_FETCH_PER_HOST + 1`, precisely so the product cannot
+raise its own bound — and it caught this. To revisit: instrument 429s per host
+against concurrency on the live service, record the result here, then move the
+guard and the constant together.
+
+**EDGAR dispatched in parallel with the homepage fetch.** It waits 11.2s for
+an input it never reads — it needs the name and CIK, both already in `meta`.
+The only real dependency is its *limit* (5 filings if our own site refused us,
+3 if it answered), so early dispatch means asking for 5 and truncating. That
+is output-identical in the candidate list and **not** in request count: every
+healthy run would make two extra requests to SEC.
+`test_the_blocked_budget_is_strictly_larger_and_is_the_one_used` pins the
+property that broke. A correct version needs an *offset* on the proposal, so a
+blocked run tops up 3 → 5 rather than re-asking for 5.
+
+### Standing limitations
+
+- **Feedback (live):** `BLOCKED_INFRASTRUCTURE`. `feedback_available()`
+  requires `DURABLE_PROVEN`; the preview has no persistent disk, so the form
+  stays off rather than promising to keep what it is sent. The implementation
+  is complete and tested and activates itself when durability is proven.
+- **Restart durability:** `BLOCKED_INFRASTRUCTURE`. Snapshots and runs live on
+  the ephemeral runtime root and are lost on redeploy. Cold/warm is therefore
+  measured inside one deployment lifetime and is **not** restart-survival
+  evidence.
+- **Benchmark throughput:** 10 analyses per IP per rolling hour. A
+  50-company qualification is ~5h of wall clock at that rate.
