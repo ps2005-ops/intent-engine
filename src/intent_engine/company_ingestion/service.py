@@ -1259,7 +1259,7 @@ class CompanyIngestionService:
     # --- composition ------------------------------------------------------------------
     def compose(self, run_id: str, *, fi_service, competitor_approved=False,
                 extra_observations=(), previous_model=None, attempt: int = 1,
-                deep: bool = True):
+                deep: bool = True, trace=None):
         """Build real claims and run the existing Founder Intelligence
         composition. Deterministic; restart-safe (rebuilds from stored
         documents).
@@ -1301,15 +1301,28 @@ class CompanyIngestionService:
             failures=failures, extra_observations=extra_observations,
             attempt=attempt)
         self._transition(run_id, domain, "ASSEMBLING_REPORT")
-        result = fi_service.run(
-            company_name=meta["company_name"], website=meta["website"],
-            claims_by_section=claims, as_of=meta["as_of"],
-            approved_inputs=tuple(d["source_id"] for d in documents))
+        if trace is not None:
+            with trace.span("fi_run") as _sp:
+                result = fi_service.run(
+                    company_name=meta["company_name"],
+                    website=meta["website"], claims_by_section=claims,
+                    as_of=meta["as_of"],
+                    approved_inputs=tuple(d["source_id"] for d in documents))
+                _sp["item_count"] = len(documents)
+        else:
+            result = fi_service.run(
+                company_name=meta["company_name"], website=meta["website"],
+                claims_by_section=claims, as_of=meta["as_of"],
+                approved_inputs=tuple(d["source_id"] for d in documents))
         result["ingestion_run_id"] = run_id
         result["overview"] = executive_overview(
             claims, company_name=meta["company_name"],
             source_count=len(documents), failure_count=len(failures))
-        result["evidence_library"] = self.evidence_library(run_id)
+        if trace is not None:
+            with trace.span("evidence_library"):
+                result["evidence_library"] = self.evidence_library(run_id)
+        else:
+            result["evidence_library"] = self.evidence_library(run_id)
         # V1.2 strategic intelligence layer: derive structured observations
         # from the approved documents and run the deterministic strategic
         # reasoning engine over them. Additive — the legacy sections are
@@ -1347,9 +1360,16 @@ class CompanyIngestionService:
         result["readiness_inputs"] = _inputs(documents, readiness,
                                              attempt=attempt)
         if readiness["may_synthesize"]:
-            result["strategic_report"] = self._strategic_report(
-                meta["company_name"], documents, extra_observations,
-                previous_model=previous_model, run_id=run_id, deep=deep)
+            if trace is not None:
+                with trace.span("strategic_report"):
+                    result["strategic_report"] = self._strategic_report(
+                        meta["company_name"], documents, extra_observations,
+                        previous_model=previous_model, run_id=run_id,
+                        deep=deep, trace=trace)
+            else:
+                result["strategic_report"] = self._strategic_report(
+                    meta["company_name"], documents, extra_observations,
+                    previous_model=previous_model, run_id=run_id, deep=deep)
             # A CORE PASS DID NOT ATTEMPT REASONING, SO IT IS NOT A
             # REASONING ATTEMPT.
             #
@@ -1527,7 +1547,8 @@ class CompanyIngestionService:
         if trace is not None:
             with trace.span("compose_proper", deadline=deadline):
                 result = self.compose(run_id, fi_service=fi_service,
-                                      attempt=spent, **compose_kwargs)
+                                      attempt=spent, trace=trace,
+                                      **compose_kwargs)
         else:
             result = self.compose(run_id, fi_service=fi_service, attempt=spent,
                                   **compose_kwargs)
@@ -1781,7 +1802,8 @@ class CompanyIngestionService:
         return result
 
     def _strategic_report(self, company_name, documents, extra_observations,
-                          previous_model=None, run_id="", deep: bool = True):
+                          previous_model=None, run_id="", deep: bool = True,
+                          trace=None):
         from intent_engine.strategic_intelligence.observations import (
             derive_analyst_evidence, derive_observations,
         )
@@ -1798,8 +1820,14 @@ class CompanyIngestionService:
         # EDGAR document looks equally like this filer's own, and Wells
         # Fargo's 10-K stated JPMorgan's business model on the live page.
         subject_cik = str((self.run_meta(run_id) or {}).get("cik") or "")
-        observations = derive_observations(
-            documents, company=company_name, subject_cik=subject_cik)
+        if trace is not None:
+            with trace.span("derive_observations") as _sp:
+                observations = derive_observations(
+                    documents, company=company_name, subject_cik=subject_cik)
+                _sp["item_count"] = len(observations or ())
+        else:
+            observations = derive_observations(
+                documents, company=company_name, subject_cik=subject_cik)
         # RECORD THE DECISION, NOT JUST ITS RESULT.
         #
         # Four deploys went into a defect whose entire difficulty was that
@@ -1874,62 +1902,70 @@ class CompanyIngestionService:
         # CLASSIFY BEFORE COMPOSING. One owner for "what kind of business is
         # this", shared with the executive layer — a second copy is exactly
         # how the two disagreed inside one run.
-        classification = self.classification_inputs(
-            run_id, company_name, documents=documents)
-        report = build_strategic_report(
-            company_name=company_name, observations=observations,
-            previous_model=previous_model,
-            # THE PATTERN LIBRARY, GATED BY WHAT KIND OF BUSINESS THIS IS.
-            #
-            # Without this the library offers every reading to every company
-            # and the signals decide. Signals record what a company's pages
-            # TALK ABOUT, which is why Cloudflare -- whose 10-K discusses
-            # network capacity and names large customers -- was handed the
-            # capacity-ahead-of-demand reading and told a CEO about
-            # "take-or-pay terms" and "replacing ageing lines".
-            #
-            # An unclassified company still gets the whole library: see
-            # `patterns_for`. Withholding readings from a company we could not
-            # classify trades a wrong answer for no answer, and no answer is
-            # the failure this product was reopened to fix.
-            # CLASSIFY BEFORE GATING. Passing only the name resolved every
-            # company outside the manifest to UNKNOWN, and UNKNOWN takes the
-            # whole library — which is how an advertising platform was told
-            # about take-or-pay terms. The domain, the regulator's industry
-            # code, and the filer's OWN revenue/segment sentences are what
-            # separate two businesses sharing one SIC code.
-            patterns=_patterns_for_company(
-                company_name,
-                domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
-                registrant=classification["registrant"],
-                evidence_text=classification["evidence_text"]),
-            # WHAT THE SEARCH DID, carried to the surface a reader sees. The
-            # brief rendered "Another registrant's filing - none" as a bare
-            # zero because this never crossed; only the provenance drawer had
-            # it, and the drawer is not what a chief executive opens first.
-            discovery_coverage=self.discovery_report(run_id),
-            retrieval_failures=self.failure_summary(run_id),
-            economic_history=self.archive_depth(run_id),
-            # THE ONE ACCOUNT OF WHAT EACH FAMILY DID. Built from documents
-            # AND observations, because the gap between them is exactly what
-            # the old observation-only count could not express.
-            source_coverage=_SC.assess(
-                documents=documents,
-                observations=[{"source_class": getattr(o, "source_class", "")}
-                              for o in (observations or ())],
-                failures=self.failure_summary(run_id)),
-            # THE SAME CLASSIFICATION THAT GATES THE PATTERN LIBRARY, GATING
-            # THE TENSION LIBRARY. A tension fires on signal names, and signal
-            # names are generic enough that a chip designer's partner and
-            # platform language matched a marketplace's -- NVIDIA led with
-            # "Consolidating checkout/identity/data rails may encroach on
-            # layers partners currently monetize". One classification, two
-            # gates, no second copy.
-            business_model=_business_model_of(
-                company_name,
-                domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
-                registrant=classification["registrant"],
-                evidence_text=classification["evidence_text"]))
+        if trace is not None:
+            with trace.span("classification"):
+                classification = self.classification_inputs(
+                    run_id, company_name, documents=documents)
+        else:
+            classification = self.classification_inputs(
+                run_id, company_name, documents=documents)
+        _build_span = (trace.span("build_report") if trace is not None
+                       else __import__("contextlib").nullcontext({}))
+        with _build_span:
+            report = build_strategic_report(
+                company_name=company_name, observations=observations,
+                previous_model=previous_model,
+                # THE PATTERN LIBRARY, GATED BY WHAT KIND OF BUSINESS THIS IS.
+                #
+                # Without this the library offers every reading to every company
+                # and the signals decide. Signals record what a company's pages
+                # TALK ABOUT, which is why Cloudflare -- whose 10-K discusses
+                # network capacity and names large customers -- was handed the
+                # capacity-ahead-of-demand reading and told a CEO about
+                # "take-or-pay terms" and "replacing ageing lines".
+                #
+                # An unclassified company still gets the whole library: see
+                # `patterns_for`. Withholding readings from a company we could not
+                # classify trades a wrong answer for no answer, and no answer is
+                # the failure this product was reopened to fix.
+                # CLASSIFY BEFORE GATING. Passing only the name resolved every
+                # company outside the manifest to UNKNOWN, and UNKNOWN takes the
+                # whole library — which is how an advertising platform was told
+                # about take-or-pay terms. The domain, the regulator's industry
+                # code, and the filer's OWN revenue/segment sentences are what
+                # separate two businesses sharing one SIC code.
+                patterns=_patterns_for_company(
+                    company_name,
+                    domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
+                    registrant=classification["registrant"],
+                    evidence_text=classification["evidence_text"]),
+                # WHAT THE SEARCH DID, carried to the surface a reader sees. The
+                # brief rendered "Another registrant's filing - none" as a bare
+                # zero because this never crossed; only the provenance drawer had
+                # it, and the drawer is not what a chief executive opens first.
+                discovery_coverage=self.discovery_report(run_id),
+                retrieval_failures=self.failure_summary(run_id),
+                economic_history=self.archive_depth(run_id),
+                # THE ONE ACCOUNT OF WHAT EACH FAMILY DID. Built from documents
+                # AND observations, because the gap between them is exactly what
+                # the old observation-only count could not express.
+                source_coverage=_SC.assess(
+                    documents=documents,
+                    observations=[{"source_class": getattr(o, "source_class", "")}
+                                  for o in (observations or ())],
+                    failures=self.failure_summary(run_id)),
+                # THE SAME CLASSIFICATION THAT GATES THE PATTERN LIBRARY, GATING
+                # THE TENSION LIBRARY. A tension fires on signal names, and signal
+                # names are generic enough that a chip designer's partner and
+                # platform language matched a marketplace's -- NVIDIA led with
+                # "Consolidating checkout/identity/data rails may encroach on
+                # layers partners currently monetize". One classification, two
+                # gates, no second copy.
+                business_model=_business_model_of(
+                    company_name,
+                    domain=str((self.run_meta(run_id) or {}).get("domain") or ""),
+                    registrant=classification["registrant"],
+                    evidence_text=classification["evidence_text"]))
         payload = report.as_dict()
 
         # --- the reasoning layer ------------------------------------------

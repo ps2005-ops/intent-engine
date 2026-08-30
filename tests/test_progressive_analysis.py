@@ -56,18 +56,24 @@ def _slow_deep(delay=DEEP_DELAY, fail=False, mutate=None):
     seen = {"deep_calls": 0}
 
     def patched(self, company_name, documents, extra, previous_model=None,
-                run_id="", deep=True):
+                run_id="", deep=True, trace=None):
+        # `trace` mirrors the production signature. A double that does not
+        # accept a new keyword-only parameter raises TypeError BEFORE the
+        # code under test runs, and reports as the very failure the test
+        # exists to exercise. Third occurrence this session (`deep`, then
+        # `trace` on _compose, now here): adding a keyword-only parameter is
+        # a breaking change to every double of that method.
         if not deep:
             return original(self, company_name, documents, extra,
                             previous_model=previous_model, run_id=run_id,
-                            deep=False)
+                            deep=False, trace=trace)
         seen["deep_calls"] += 1
         time.sleep(delay)
         if fail:
             raise RuntimeError("the model is unavailable")
         payload = original(self, company_name, documents, extra,
                            previous_model=previous_model, run_id=run_id,
-                           deep=False)
+                           deep=False, trace=trace)
         payload["result_state"] = ResultState.COMPLETE
         payload["reasoning_provenance"] = "grounded_analyst"
         payload["strategic_analysis"] = {"decisions": []}
