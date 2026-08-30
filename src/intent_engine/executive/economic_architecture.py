@@ -149,6 +149,47 @@ _EMPLOYMENT_OBJECT = (
 _HYPOTHETICAL = (" may ", " could ", " would ", " might ", "from time to time",
                  "adversely", "if we ", "no assurance")
 
+#: HOW REVENUE IS *ACCOUNTED FOR* IS NOT HOW THE COMPANY EARNS.
+#:
+#: MEASURED LIVE on 517180e6, Microsoft. Its economic engine rendered as
+#: "... and we provide solution support and consulting services; revenue upon
+#: transfer of control of promised products or services to customers in an
+#: amount that reflects the consideration we expect to receive in exchange for
+#: those products or services" -- the ASC 606 revenue-recognition policy,
+#: presented to a chief executive as what Microsoft sells.
+#:
+#: This is the third arrival of one defect: the grammar of a filing sentence
+#: does not tell you what the sentence is ABOUT. Staff offers came first,
+#: hypotheticals second, and an accounting policy is simply the next section
+#: written in the same shape.
+#:
+#: THESE PHRASES ARE UNAMBIGUOUS, which is why a lexical veto is safe here
+#: where a bare word list would not be. "revenue" and "customers" appear in
+#: every real product sentence and are deliberately absent; a company can
+#: sell "services" but no company sells "a performance obligation". Each
+#: entry is standard-setter vocabulary that has no use outside an accounting
+#: policy -- so this cannot refuse a real description the way a stoplist on
+#: "benefits" would have refused an insurer's actual product.
+_ACCOUNTING_POLICY = (
+    "transfer of control",
+    "performance obligation",
+    "in an amount that reflects the consideration",
+    "expect to be entitled",
+    "expect to receive in exchange",
+    "revenue is recognized",
+    "revenue is recognised",
+    "asc 606",
+    "topic 606",
+    "standalone selling price",
+    "contract asset",
+    "contract liability",
+    "deferred revenue is",
+    "estimated useful li",
+    "in accordance with gaap",
+    "generally accepted accounting principles",
+)
+
+
 #: WHERE THE BUSINESS IS DESCRIBED, AND WHERE IT IS NOT.
 #:
 #: This is the real discriminator, and it is POSITIONAL rather than lexical.
@@ -180,10 +221,21 @@ def _is_employment_offer(clause: str) -> bool:
     return any(marker in low for marker in _EMPLOYMENT_OBJECT)
 
 
+def _is_accounting_policy(clause: str) -> bool:
+    """Is this clause about how revenue is RECOGNISED rather than earned?
+
+    A revenue-recognition policy is written in the same grammar as a product
+    description and is about bookkeeping. See `_ACCOUNTING_POLICY`.
+    """
+    low = (clause or "").lower()
+    return any(marker in low for marker in _ACCOUNTING_POLICY)
+
+
 def _is_not_a_product(clause: str) -> bool:
-    """Vetoes for `what_is_sold`: staff offers and hypotheticals."""
+    """Vetoes for `what_is_sold`: staff offers, hypotheticals, and policy."""
     low = f" {(clause or '').lower()} "
     return (_is_employment_offer(clause)
+            or _is_accounting_policy(clause)
             or any(marker in low for marker in _HYPOTHETICAL))
 
 

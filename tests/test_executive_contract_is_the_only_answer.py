@@ -351,6 +351,13 @@ def test_every_strategic_surface_is_declared_in_the_verdict_register():
         # into a register of strategic conclusions makes that register mean
         # less.
         "_timing_json",
+        # The same reasoning, for the progress poller. `/progress.json`
+        # serves the stage ladder, an elapsed line and ONE instruction --
+        # where to navigate when the run becomes readable. Every field is
+        # produced by the same calls `_progress` makes, and `_progress` is
+        # declared non-strategic four lines above: a surface cannot become a
+        # verdict site by being rendered as JSON instead of as HTML.
+        "_progress_json",
     }
     undeclared = [h for h in sorted(handlers)
                   if h not in NON_STRATEGIC and h not in register]

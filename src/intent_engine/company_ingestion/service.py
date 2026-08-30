@@ -1782,16 +1782,41 @@ class CompanyIngestionService:
             report["deep_failure"] = type(exc).__name__
             report["deep_seconds"] = round(_time.monotonic() - started, 2)
             return result
-        # MERGE, NOT REPLACE. Only the fields the reasoning layer owns move;
-        # the evidence, coverage and provenance the reader already saw are
-        # the same objects they were.
-        for key in ("strategic_analysis", "result_state",
-                    "result_state_detail", "reasoning_provenance",
-                    "critic_findings", "strategic_memory", "daily_view",
-                    "evidence_count", "withheld_explanation"):
+        # A DEEP FAILURE IS NOT AN ANALYSIS FAILURE, and it may not overwrite
+        # the core's state with its own.
+        #
+        # MEASURED LIVE on 517180e6, Microsoft: a complete readable report,
+        # `deep_status: COMPLETE`, and `result_state: FAILED` on the same run.
+        # The cause is this branch. `analyse` returns
+        # `(None, ResultState.FAILED, [])` when the provider call gives up --
+        # it FAILS WITHOUT RAISING -- so the `except` above never fires, the
+        # loop below merged that FAILED over the core's own state, and the
+        # line after it announced the deep pass as COMPLETE. Two false
+        # statements from one missing check.
+        #
+        # The core the reader is already holding is unchanged by a model call
+        # that did not return: its evidence, coverage and provenance are the
+        # same objects. So the core keeps its state, and the deep half is
+        # recorded as what it was.
+        deep_failed = deep.get("result_state") == "FAILED"
+        merged = ("strategic_analysis", "result_state",
+                  "result_state_detail", "reasoning_provenance",
+                  "critic_findings", "strategic_memory", "daily_view",
+                  "evidence_count", "withheld_explanation")
+        for key in merged:
             if key in deep:
+                # `result_state`/`result_state_detail` describe the WHOLE run.
+                # Everything else here is owned by the reasoning layer and is
+                # absent or empty on a failed pass, so it carries no lie.
+                if deep_failed and key in ("result_state",
+                                           "result_state_detail"):
+                    continue
                 report[key] = deep[key]
-        report["deep_status"] = DEEP_COMPLETE
+        if deep_failed:
+            report["deep_status"] = DEEP_FAILED
+            report["deep_failure"] = "ANALYST_RETURNED_FAILED"
+        else:
+            report["deep_status"] = DEEP_COMPLETE
         report["deep_seconds"] = round(_time.monotonic() - started, 2)
         # §13. What the deeper reading CHANGED about what the executive was
         # first shown, recorded rather than silently rewritten.

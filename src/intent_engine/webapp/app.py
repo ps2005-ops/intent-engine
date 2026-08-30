@@ -1027,6 +1027,8 @@ class WebApp:
             return self._source_detail(session, parts[1], parts[3])
         if route == ("GET", "runs", 3) and parts[2] == "timing":
             return self._timing_json(session, parts[1])
+        if route == ("GET", "runs", 3) and parts[2] == "progress.json":
+            return self._progress_json(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "progress":
             return self._progress(session, parts[1])
         if route == ("GET", "runs", 3) and parts[2] == "report":
@@ -1804,7 +1806,17 @@ class WebApp:
                     f'<input type="hidden" name="website" '
                     f'value="{_e(c["website"])}"></form>'
                     for i, c in enumerate(GOLDEN_COMPANIES))
+                # THE EXPECTATION BEFORE THE COMMITMENT, not only after it.
+                #
+                # A reader who is told nothing decides for themselves at
+                # about forty seconds that the thing has hung. The same wait
+                # is unremarkable once the range has been stated. It sits
+                # here, immediately under the button, because that is the
+                # last thing read before the wait starts -- and it is the
+                # same constant the progress page renders, so the promise
+                # made here and the promise shown there cannot drift.
                 intro = (
+                    f'<p class="eta">{_e(self.ETA_COPY)}</p>'
                     f'<p class="try-line">Not sure where to start? '
                     f'Try {examples}.</p>{forms}')
                 # After the form, not before the headline. Injected at
@@ -2532,8 +2544,24 @@ class WebApp:
 
         if status in ("COMPLETE", "PARTIAL"):
             return self._redirect(f"/runs/{run_id}")
-        refresh = ('' if terminal
-                   else '<meta http-equiv="refresh" content="4">')
+        # NO FULL-PAGE RELOAD. This was
+        #     <meta http-equiv="refresh" content="4">
+        # which reloaded the whole document every 4 seconds: the server
+        # re-rendered ~17KB of HTML each time and the browser threw away the
+        # page and rebuilt it. Measured on the preview, that is ~15 full
+        # renders a minute, on an instance the analysis is already starved
+        # for -- so the poller was competing with the worker it was waiting
+        # on, and the reader saw flicker, scroll reset and focus loss. That
+        # is the whole of the "laggy" complaint; the analysis was not what
+        # felt slow.
+        #
+        # The replacement fetches a small JSON document and patches the three
+        # things that change. The meta refresh survives inside <noscript>, so
+        # a client without scripting keeps exactly the old behaviour rather
+        # than being stranded on a page that never updates.
+        refresh = ('' if terminal else
+                   f'<noscript><meta http-equiv="refresh" content="4">'
+                   f'</noscript>')
         # A run that failed must say so in the heading. Softening every state
         # into "Reading the public evidence…" would hide a failure behind a
         # progress message, which is worse than the jargon it replaced.
@@ -2602,7 +2630,36 @@ class WebApp:
             # is a real limit a tester can hit. It is a footnote now rather
             # than a boxed warning above the fold — infrastructure limits are
             # not what a demo is about.
-            tail = (f'<p role="status" aria-live="polite">'
+            # THE POLLER, AND THE ONLY THING ON THIS PAGE THAT RUNS JS.
+            #
+            # It fetches `progress.json` -- a few hundred bytes -- patches the
+            # step line, the ladder and the elapsed line, and navigates ONCE
+            # when the run becomes readable. Nothing else on the page is
+            # touched, so scroll position, focus and any text selection
+            # survive, which a document reload cannot offer.
+            poll = (
+                f'<script>(function(){{'
+                f'var u="/runs/{_e(run_id)}/progress.json",n=0;'
+                f'function set(id,v){{var e=document.getElementById(id);'
+                f'if(e&&v!=null&&e.innerHTML!==v)e.innerHTML=v;}}'
+                f'function tick(){{'
+                f'fetch(u,{{cache:"no-store",credentials:"same-origin"}})'
+                f'.then(function(r){{return r.ok?r.json():null;}})'
+                f'.then(function(d){{'
+                f'if(!d)return schedule();'
+                f'if(d.open_at){{location.replace(d.open_at);return;}}'
+                f'set("pg-step",d.step_html);set("pg-stages",d.stages_html);'
+                f'set("pg-elapsed",d.elapsed);'
+                f'if(d.terminal){{location.reload();return;}}'
+                f'schedule();}})'
+                f'.catch(schedule);}}'
+                # BACK OFF, do not hammer a starved instance. 2s while the
+                # reader is watching closely, easing to 6s on a long run.
+                f'function schedule(){{n++;'
+                f'setTimeout(tick,n<10?2000:6000);}}'
+                f'schedule();}})();</script>')
+            tail = (poll
+                    + f'<p role="status" aria-live="polite" id="pg-step">'
                     f'<strong>{_e(step)}.</strong></p>'
                     f'{self._identity_confirmation(run_id)}'
                     # ONE LIST, NOT TWO. The tier table and the stage ladder
@@ -2611,8 +2668,15 @@ class WebApp:
                     # "Loading what we already know - partial" and "Loading
                     # prior intelligence - DONE" four lines apart. Two
                     # vocabularies for one state reads as a malfunction.
-                    f'{self._stage_ladder(hyd, status)}'
-                    f'<p>{_e(self._elapsed_line(run_id))}</p>'
+                    f'<div id="pg-stages">{self._stage_ladder(hyd, status)}'
+                    f'</div>'
+                    f'<p id="pg-elapsed">{_e(self._elapsed_line(run_id))}</p>'
+                    # THE EXPECTATION, WHERE THE WAITING HAPPENS. A reader who
+                    # is told nothing assumes the worst at 40 seconds; the
+                    # same wait is unremarkable when the range was stated up
+                    # front. This is the same string the landing page shows,
+                    # from one constant, so the two can never disagree.
+                    f'<p class="eta">{_e(self.ETA_COPY)}</p>'
                     f'<p>We\'re building the analysis now. This page opens it '
                     f'by itself the moment it is ready.</p>'
                     # "YOUR ANALYSES" IS NOT A RECOVERY INSTRUCTION.
@@ -2637,6 +2701,77 @@ class WebApp:
                     f'told, and offered the same company again in one '
                     f'click \u2014 never left waiting.</p>')
         return self._html(head + tail + '</main></body></html>')
+
+    def _progress_json(self, session, run_id):
+        """The few hundred bytes the progress page actually needs.
+
+        WHY THIS EXISTS. The page used to reload itself every four seconds,
+        which made the server render the whole document -- ~17KB -- to
+        communicate that one word had changed from "to come" to "working".
+        On an instance measured at 7-12% of a local core, ~15 of those a
+        minute is CPU taken from the analysis the reader is waiting for.
+
+        Deliberately NOT a second source of truth: every field here is
+        produced by the same call the HTML page makes, so the two cannot
+        drift into disagreeing about the same run.
+        """
+        # THE SAME OWNERSHIP GATE THE PAGE HAS. A cheap polling route is
+        # still a route: without this, any session could watch the progress
+        # of a run belonging to somebody else, and a run id is the only
+        # secret protecting it. Caught by
+        # `test_every_run_layer_route_calls_the_ownership_guard`, which is
+        # exactly the class of gate that exists because a new route is the
+        # easiest place to forget one.
+        if not self._owned(session, run_id):
+            return ("404 Not Found",
+                    [("Content-Type", "application/json")],
+                    json.dumps({"error": "not_found"}))
+        real = self._is_real_run(run_id)
+        status = self.ci.store.run_state(run_id) or "RUNNING"
+        terminal = status in self.TERMINAL_STATES
+        # `open_at` is the ONLY instruction the client acts on, and it is the
+        # same readiness the HTML route redirects on -- so a reader with
+        # scripting and one without arrive at the same place.
+        open_at = None
+        if real:
+            try:
+                if self.result_readiness(run_id)["opens_result"]:
+                    open_at = f"/runs/{run_id}"
+            except Exception:                             # noqa: BLE001
+                open_at = None
+        if open_at is None and status in ("COMPLETE", "PARTIAL"):
+            open_at = f"/runs/{run_id}"
+        payload = {"run_id": run_id, "status": status, "terminal": terminal,
+                   "open_at": open_at}
+        if open_at is None and not terminal:
+            try:
+                hyd = self._hydration_state(run_id, terminal=terminal)
+                step = (hyd.get("current_step") or "").strip() \
+                    or self._stage_line(status)
+                payload["step_html"] = f"<strong>{_e(step)}.</strong>"
+                payload["stages_html"] = self._stage_ladder(hyd, status)
+                payload["elapsed"] = _e(self._elapsed_line(run_id))
+            except Exception:                             # noqa: BLE001
+                # A projection failure costs the DETAIL, never the poll: the
+                # client keeps its current text and asks again, which is the
+                # same thing the old reload did on a slow render.
+                pass
+        return self._ok_json(payload)
+
+    #: THE MAXIMUM IS A CONTRACT, NOT REASSURANCE.
+    #:
+    #: A page that says "up to 2 minutes" and then keeps spinning at 2:30 has
+    #: told the reader something false, which is worse than saying nothing.
+    #: `INTERACTIVE_MAX_S` is therefore the same number the deadline enforces:
+    #: at it, the reader gets a bounded CORE or an explicit terminal state.
+    #:
+    #: Measured on the preview at da9fe4da: Apple 72.2s and 84.5s, Microsoft
+    #: 107.78s. So "under a minute" is NOT sayable yet and is deliberately not
+    #: said -- the copy promises what the p90 can currently support, and gets
+    #: tightened when the cohort earns it, never before.
+    INTERACTIVE_MAX_S = 120
+    ETA_COPY = ("Analysis usually takes about a minute. Deeper or "
+                "less-covered companies can take up to two minutes.")
 
     #: §11. What is being assembled, in the order a person would build it.
     #: Named for the WORK rather than for the lifecycle, because "VALIDATING
@@ -7676,11 +7811,16 @@ class WebApp:
             # demonstrated." That is a paragraph about our hosting at the foot
             # of someone's report on their competitor. It is still reported in
             # full at /readyz, where the person who can act on it looks.
+            # TRUTHFUL, AND NOT AN INFRASTRUCTURE REPORT. The previous copy
+            # was honest but explained OUR hosting at the foot of someone
+            # else's report; the operator detail stays at /readyz, where the
+            # person who can act on it looks. The gate itself is unchanged:
+            # this deployment may not promise to keep what it is sent, so it
+            # does not ask.
             return (
                 f'<section class="fb" aria-label="Feedback"><h2>Feedback</h2>'
-                f'<p>Feedback is switched off here for now — we could not '
-                f'promise to keep what you sent, and asking anyway would be '
-                f'worse than not asking.</p></section>')
+                f'<p>Feedback is temporarily unavailable in this preview '
+                f'environment.</p></section>')
         return (
             f'<form action="/runs/{_e(run_id)}/feedback" method="post" '
             f'class="fb"><input type="hidden" name="csrf" value="{_e(csrf)}">'
