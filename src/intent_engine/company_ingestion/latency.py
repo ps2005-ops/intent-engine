@@ -45,27 +45,45 @@ DEEP_SPANS = ("deep_reasoning",)
 _YARDSTICK_ROUNDS = 60_000
 
 
-def cpu_yardstick() -> float:
-    """Milliseconds of WALL time for a fixed, pure-CPU workload.
+def cpu_yardstick() -> dict:
+    """Wall AND CPU for a fixed, pure-CPU workload with no I/O of any kind.
 
     WHY A YARDSTICK AND NOT A RATIO. `wall_ms` high with `cpu_ms` low has two
     completely different causes -- blocking on I/O, or being descheduled
     while ready to run -- and they demand opposite repairs. `build_report`
     assembles in-memory structures and CANNOT do I/O, yet deployed it shows
     2702ms wall against 404ms CPU: its CPU time grew 1.4x while its wall grew
-    9.2x. That is a CPU share, not a network.
+    9.2x. That is a CPU share, not a network. Running a known quantity of
+    arithmetic inline turns that inference into a measurement.
 
-    Running a known quantity of arithmetic inline turns that inference into a
-    measurement: divide the deployed figure by the local one and every other
-    span's wall becomes interpretable. A span slower than the yardstick
-    predicts is doing real I/O; a span tracking it is simply being starved.
+    WHY BOTH CLOCKS, AND NOT JUST WALL. Wall alone cannot separate the two
+    ways a machine can be slow, and they are bought differently:
+
+        wall up 9x, probe CPU FLAT   -> the work needed the same CPU and
+                                        waited to be scheduled. A larger CPU
+                                        SHARE fixes this.
+        wall up 9x, probe CPU UP 9x  -> the core executes this arithmetic
+                                        slower (or the CPU clock is charged
+                                        for time stolen by the hypervisor).
+                                        A bigger share buys nothing; a
+                                        FASTER CLASS of machine is required.
+
+    Recording only wall would let an infrastructure purchase be argued from a
+    number that cannot tell those apart. `rounds` is returned so a later
+    reader can confirm two readings measured the SAME work -- comparing
+    across a changed constant would be silently meaningless.
     """
     import hashlib
-    began = time.monotonic()
+    began_wall = time.monotonic()
+    began_cpu = time.thread_time()
     digest = b"0" * 64
     for _ in range(_YARDSTICK_ROUNDS):
         digest = hashlib.sha256(digest).digest()
-    return round((time.monotonic() - began) * 1000, 2)
+    return {
+        "wall_ms": round((time.monotonic() - began_wall) * 1000, 2),
+        "cpu_ms": round((time.thread_time() - began_cpu) * 1000, 2),
+        "rounds": _YARDSTICK_ROUNDS,
+    }
 
 
 class Trace:
@@ -119,6 +137,54 @@ class Trace:
                     pass
             self.spans.append(rec)
 
+    def mark(self, name: str, began_wall: float, began_cpu: float,
+             **attrs) -> dict:
+        """Record a span from timings the caller already took.
+
+        WHY THIS EXISTS ALONGSIDE `span`. Wrapping an existing multi-line
+        block in a `with` means re-indenting every line inside it, and doing
+        that purely to add a measurement is how a 51-line call had its
+        arguments silently re-associated and how an edit referencing a
+        helper that did not exist reached the tree. A block that is awkward
+        to wrap gets two timestamps and this call instead: no indentation
+        changes, so the diff is additive and the code under it is untouched.
+
+        Depth follows the CURRENT nesting, so a marked span sits beside the
+        `with`-style spans recorded at the same level rather than looking
+        like a top-level stage.
+        """
+        rec: dict = {"name": name, "depth": self._depth,
+                     "offset_s": round(began_wall - self._origin, 3),
+                     "wall_ms": round((time.monotonic() - began_wall) * 1000, 1),
+                     "cpu_ms": round((time.thread_time() - began_cpu) * 1000, 1),
+                     "status": "ok"}
+        rec.update(attrs)
+        self.spans.append(rec)
+        return rec
+
+    def calibrate(self, name: str) -> dict:
+        """Record one CPU yardstick reading as a span.
+
+        NOT a pipeline stage: flagged `calibration` so the waterfall excludes
+        it from both covered wall and total CPU. A probe that vanished on
+        failure would leave the trace looking complete while the one number
+        that interprets every other span is missing, so a failure is recorded
+        with its class rather than swallowed -- the same bare-`except` that
+        hid `external_context` for four wrong hypotheses.
+        """
+        rec: dict = {"name": name, "depth": 0, "calibration": True,
+                     "offset_s": round(time.monotonic() - self._origin, 3)}
+        try:
+            rec.update(cpu_yardstick())
+            rec["status"] = "ok"
+        except Exception as exc:                  # noqa: BLE001
+            rec["status"] = "error"
+            rec["failure_class"] = type(exc).__name__
+            rec["wall_ms"] = 0.0
+            rec["cpu_ms"] = 0.0
+        self.spans.append(rec)
+        return rec
+
     def waterfall(self) -> dict:
         """What the spans add up to, and what they do NOT account for.
 
@@ -140,7 +206,10 @@ class Trace:
             "total_wall_ms": wall,
             "covered_wall_ms": round(covered, 1),
             "unaccounted_wall_ms": round(wall - covered, 1),
+            # SAME EXCLUSION AS `covered`. The probe burns real CPU by
+            # design; counting it would charge the product for cycles the
+            # instrument spent measuring the machine.
             "total_cpu_ms": round(
                 sum(s.get("cpu_ms", 0.0) for s in self.spans
-                    if s.get("depth", 0) == 0), 1),
+                    if s.get("depth", 0) == 0 and not s.get("calibration")), 1),
         }

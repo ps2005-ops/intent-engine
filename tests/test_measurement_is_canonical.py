@@ -318,3 +318,132 @@ def test_a_nested_span_is_not_counted_twice(app):
         f"nested span double-counted: covered={wf['covered_wall_ms']} "
         f"total={wf['total_wall_ms']}")
     assert wf["unaccounted_wall_ms"] >= -1.0
+
+
+def test_the_yardstick_measures_cpu_and_not_only_wall():
+    """A wall-only probe cannot say WHY the machine is slow.
+
+    Descheduling and a slower core both stretch wall time, and they are
+    bought differently -- more CPU share fixes the first and does nothing for
+    the second. Separating them needs the probe's own CPU time, which the
+    first version of this recorded as a hardcoded 0.0.
+    """
+    from intent_engine.company_ingestion.latency import (
+        _YARDSTICK_ROUNDS, cpu_yardstick,
+    )
+    r = cpu_yardstick()
+    assert set(r) == {"wall_ms", "cpu_ms", "rounds"}
+    assert r["rounds"] == _YARDSTICK_ROUNDS, (
+        "the round count is reported so two readings can be PROVEN to have "
+        "measured the same work; comparing across a changed constant is "
+        "silently meaningless")
+    assert r["wall_ms"] > 0 and r["cpu_ms"] > 0
+
+
+def test_the_yardstick_is_free_of_io():
+    """The control's whole value is that it CANNOT wait on anything.
+
+    If the probe did any I/O its slowdown would confound the two causes it
+    exists to separate. On an unloaded machine its CPU time must therefore
+    account for essentially all of its wall time.
+    """
+    from intent_engine.company_ingestion.latency import cpu_yardstick
+    best = max(cpu_yardstick()["cpu_ms"] / max(cpu_yardstick()["wall_ms"], 1e-9)
+               for _ in range(5))
+    assert best > 0.80, (
+        f"probe spent {1 - best:.0%} of its wall time not computing; a "
+        f"yardstick that waits cannot calibrate scheduling")
+
+
+def test_calibration_is_excluded_from_the_product_accounting():
+    """Instrument overhead is not time or CPU the product spent.
+
+    Counting the probe would make the waterfall claim it explained work the
+    analysis never did, and would inflate the run's CPU total -- the number
+    used to decide whether a stage is starved or waiting.
+    """
+    import time as _t
+    from intent_engine.company_ingestion.latency import Trace
+    t = Trace("r")
+    with t.span("core_composition"):
+        _t.sleep(0.02)
+    t.calibrate("cpu_yardstick")
+    wf = t.waterfall()
+    probe = [s for s in wf["spans"] if s["name"] == "cpu_yardstick"][0]
+
+    # POSITIVE CONTROL. Without this the assertions below would also pass on
+    # a probe that recorded nothing at all, which is the defect being fixed.
+    assert probe["cpu_ms"] > 0 and probe["wall_ms"] > 0
+    assert probe["calibration"] is True
+
+    stage = [s for s in wf["spans"] if s["name"] == "core_composition"][0]
+    assert wf["covered_wall_ms"] == pytest.approx(stage["wall_ms"], abs=1.0)
+    assert wf["total_cpu_ms"] == pytest.approx(stage["cpu_ms"], abs=1.0)
+
+
+def test_a_marked_span_sits_beside_its_siblings():
+    """`mark` exists so a long block can be timed without re-indenting it.
+
+    A marked span must therefore be indistinguishable from a `with` span at
+    the same nesting level -- otherwise it would look like a top-level stage
+    and be added to `covered` twice over.
+    """
+    import time as _t
+    from intent_engine.company_ingestion.latency import Trace
+    t = Trace("r")
+    with t.span("parent"):
+        w, c = _t.monotonic(), _t.thread_time()
+        _t.sleep(0.01)
+        t.mark("marked_child", w, c, note="x")
+        with t.span("with_child"):
+            _t.sleep(0.01)
+    by = {s["name"]: s for s in t.waterfall()["spans"]}
+    assert by["marked_child"]["depth"] == by["with_child"]["depth"] == 1
+    assert by["marked_child"]["note"] == "x"
+    assert by["marked_child"]["wall_ms"] >= 5.0
+
+
+def test_own_time_partitions_the_run_instead_of_overlapping_it():
+    """Nested spans must not have their seconds counted more than once.
+
+    A parent's time INCLUDES its children's, so any quantity summed across
+    every span counts the same seconds repeatedly. Summing "excess beyond CPU
+    starvation" that way reported 68.8s unexplained in a 90.2s run -- 76% --
+    where the true figure is 25.8s. A double-counted number does not look
+    wrong; it looks precise and alarming, which is what makes it dangerous.
+
+    The invariant that makes it safe: OWN times partition the wall clock, so
+    they sum to the run and never past it.
+    """
+    import pathlib as _p
+    import sys as _s
+    _s.path.insert(0, str(_p.Path(__file__).resolve().parents[1] / "scripts"))
+    import types as _t
+    if "perf_progressive_matrix" not in _s.modules:      # network-free import
+        _stub = _t.ModuleType("perf_progressive_matrix")
+        _stub.BASE = ""
+        _stub.POLL_S = 1
+        _stub._opener = lambda: (None, None)
+        _stub._req = lambda *a, **k: (200, "")
+        _stub.visible = lambda *a: ""
+        _s.modules["perf_progressive_matrix"] = _stub
+    from perf_deployed_waterfall import own_time
+
+    spans = [
+        {"name": "child_a", "depth": 1, "offset_s": 0.0, "wall_ms": 3000.0,
+         "cpu_ms": 1000.0},
+        {"name": "child_b", "depth": 1, "offset_s": 3.0, "wall_ms": 2000.0,
+         "cpu_ms": 500.0},
+        {"name": "parent", "depth": 0, "offset_s": 0.0, "wall_ms": 6000.0,
+         "cpu_ms": 2000.0},
+        {"name": "probe", "depth": 0, "offset_s": 6.0, "wall_ms": 100.0,
+         "cpu_ms": 100.0, "calibration": True},
+    ]
+    own = own_time(spans)
+    assert own["child_a"]["own_wall_ms"] == 3000.0
+    assert own["child_b"]["own_wall_ms"] == 2000.0
+    # the parent owns only what its children do not account for
+    assert own["parent"]["own_wall_ms"] == 1000.0
+    assert sum(v["own_wall_ms"] for v in own.values()) == 6000.0, (
+        "own times must sum to the parent's wall, not to 11000ms")
+    assert "probe" not in own, "calibration is instrument overhead, not stage time"

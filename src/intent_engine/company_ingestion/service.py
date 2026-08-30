@@ -1821,7 +1821,17 @@ class CompanyIngestionService:
         # Fargo's 10-K stated JPMorgan's business model on the live page.
         subject_cik = str((self.run_meta(run_id) or {}).get("cik") or "")
         if trace is not None:
-            with trace.span("derive_observations") as _sp:
+            # BYTES, NOT JUST DOCUMENTS. This stage scans each document's full
+            # text -- signal detection, filing detection, section-aware
+            # excerpt selection -- so its cost tracks CHARACTERS, not the
+            # document count. Deployed it used 4.2x the CPU of the local run
+            # on 11 documents against 10, and without the size there is no way
+            # to tell a real defect from one extra 10-K. A comparison that
+            # cannot rule out its own confound is not a measurement.
+            _chars = sum(len(d.get("text_content") or "") for d in documents)
+            with trace.span("derive_observations",
+                            documents=len(documents),
+                            text_chars=_chars) as _sp:
                 observations = derive_observations(
                     documents, company=company_name, subject_cik=subject_cik)
                 _sp["item_count"] = len(observations or ())
@@ -1838,6 +1848,11 @@ class CompanyIngestionService:
         # rather than a live route: an event outlives the run, the process
         # and the deploy, and can be read for a run nobody thought to
         # instrument.
+        # TIMED WITH TWO TIMESTAMPS, NOT A `with`. This block is ~40 lines
+        # and wrapping it would re-indent every one of them to add a
+        # measurement -- the edit shape that already cost this investigation
+        # a mis-indented call and a phantom helper.
+        _own_w, _own_c = time.monotonic(), time.thread_time()
         if run_id:
             owned = sum(1 for o in observations
                         if getattr(o, "subject_owned", True))
@@ -1883,6 +1898,9 @@ class CompanyIngestionService:
                 # budget widened and second passes became ordinary; AMD died
                 # this way on a22929c at t=58.
                 idempotency_key=f"ci-ownership:{run_id}:{_fingerprint}")
+        if trace is not None:
+            trace.mark("ownership_append", _own_w, _own_c,
+                       wrote_event=bool(run_id))
         observations += list(extra_observations or ())
         if not observations:
             # MEASURED: 2 of 5 real companies (Toyota, Costco) died here with
@@ -1980,7 +1998,19 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.analyst import (
             AnalystUnavailable, ResultState, analyse,
         )
-        evidence = derive_analyst_evidence(documents, company_name)
+        # THE SECOND FULL PASS OVER THE SAME DOCUMENTS. `derive_observations`
+        # above filters on a controlled-vocabulary signal; this one filters on
+        # whether a human would call the page evidence. Two derivations by
+        # design (see observations.py) -- but two scans of every document's
+        # full text, and this is the larger half of the 17.6s that had no span
+        # on it at all.
+        if trace is not None:
+            with trace.span("analyst_evidence") as _ae:
+                evidence = derive_analyst_evidence(documents, company_name)
+                _ae["item_count"] = len(evidence or ())
+                _ae["used_on_this_path"] = bool(deep)
+        else:
+            evidence = derive_analyst_evidence(documents, company_name)
         evidence += list(extra_observations or ())
 
         payload["reasoning_provenance"] = "pattern_library"

@@ -33,8 +33,11 @@ PROOFS = [
 
     ("g-2. the worker composes deep first, so nothing is publishable early",
      S / "webapp" / "app.py",
-     "            core = self._compose(run_id, deep=False)",
-     "            core = self._compose(run_id, deep=True)",
+     # Anchor follows the call site: a `trace=` argument was added after
+     # this proof was written, and an ANCHOR_MISSING proof is an UNVERIFIED
+     # guard, not a passing one.
+     "                core = self._compose(run_id, deep=False, trace=trace)",
+     "                core = self._compose(run_id, deep=True, trace=trace)",
      f"{T}::test_the_core_is_readable_before_the_model_has_run",
      "the reader waited for the model"),
 
