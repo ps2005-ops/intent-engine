@@ -56,7 +56,7 @@ def _slow_deep(delay=DEEP_DELAY, fail=False, mutate=None):
     seen = {"deep_calls": 0}
 
     def patched(self, company_name, documents, extra, previous_model=None,
-                run_id="", deep=True, trace=None):
+                run_id="", deep=True, trace=None, deadline=None):
         # `trace` mirrors the production signature. A double that does not
         # accept a new keyword-only parameter raises TypeError BEFORE the
         # code under test runs, and reports as the very failure the test

@@ -1511,7 +1511,7 @@ class CompanyIngestionService:
     # --- composition ------------------------------------------------------------------
     def compose(self, run_id: str, *, fi_service, competitor_approved=False,
                 extra_observations=(), previous_model=None, attempt: int = 1,
-                deep: bool = True, trace=None):
+                deep: bool = True, trace=None, deadline=None):
         """Build real claims and run the existing Founder Intelligence
         composition. Deterministic; restart-safe (rebuilds from stored
         documents).
@@ -1617,11 +1617,12 @@ class CompanyIngestionService:
                     result["strategic_report"] = self._strategic_report(
                         meta["company_name"], documents, extra_observations,
                         previous_model=previous_model, run_id=run_id,
-                        deep=deep, trace=trace)
+                        deep=deep, trace=trace, deadline=deadline)
             else:
                 result["strategic_report"] = self._strategic_report(
                     meta["company_name"], documents, extra_observations,
-                    previous_model=previous_model, run_id=run_id, deep=deep)
+                    previous_model=previous_model, run_id=run_id, deep=deep,
+                    deadline=deadline)
             # A CORE PASS DID NOT ATTEMPT REASONING, SO IT IS NOT A
             # REASONING ATTEMPT.
             #
@@ -1800,10 +1801,10 @@ class CompanyIngestionService:
             with trace.span("compose_proper", deadline=deadline):
                 result = self.compose(run_id, fi_service=fi_service,
                                       attempt=spent, trace=trace,
-                                      **compose_kwargs)
+                                      deadline=deadline, **compose_kwargs)
         else:
             result = self.compose(run_id, fi_service=fi_service, attempt=spent,
-                                  **compose_kwargs)
+                                  deadline=deadline, **compose_kwargs)
         if "quality" not in result:
             # No source could be retrieved at all: compose already returned an
             # honest FAILED run with no report to score. Rediscovery cannot
@@ -2080,7 +2081,7 @@ class CompanyIngestionService:
 
     def _strategic_report(self, company_name, documents, extra_observations,
                           previous_model=None, run_id="", deep: bool = True,
-                          trace=None):
+                          trace=None, deadline=None):
         from intent_engine.strategic_intelligence.observations import (
             derive_analyst_evidence, derive_observations,
         )
@@ -2110,11 +2111,16 @@ class CompanyIngestionService:
                             documents=len(documents),
                             text_chars=_chars) as _sp:
                 observations = derive_observations(
-                    documents, company=company_name, subject_cik=subject_cik)
+                    documents, company=company_name, subject_cik=subject_cik,
+                    deadline=deadline)
                 _sp["item_count"] = len(observations or ())
+                _sp["deadline_stopped"] = bool(
+                    deadline is not None
+                    and getattr(deadline, "expired", False))
         else:
             observations = derive_observations(
-                documents, company=company_name, subject_cik=subject_cik)
+                documents, company=company_name, subject_cik=subject_cik,
+                deadline=deadline)
         # RECORD THE DECISION, NOT JUST ITS RESULT.
         #
         # Four deploys went into a defect whose entire difficulty was that

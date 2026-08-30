@@ -1252,7 +1252,8 @@ def observation_sentence(subject: str, signal: str, label: str) -> str:
 
 def derive_observations(documents, *, company: str = "",
                         subject_cik: str = "",
-                        subject_only: bool = False) -> list:
+                        subject_only: bool = False,
+                        deadline=None) -> list:
     """Build StrategicObservations from retrieved ingestion documents.
 
     OWNERSHIP IS ENFORCED WHERE THE CLAIM IS MADE, NOT HERE. Filtering
@@ -1298,6 +1299,28 @@ def derive_observations(documents, *, company: str = "",
                                              subject_cik=subject_cik)}
     observations, seen = [], set()
     for doc in documents:
+        # THE MAXIMUM IS A CONTRACT, AND THIS IS WHERE IT IS SPENT.
+        #
+        # MEASURED: this stage is 44s of a 107s cohort median, and it is a
+        # per-document loop over text -- so it is the one place in composition
+        # where stopping is both possible and meaningful. Amazon ran 141.1s
+        # against a declared 120s maximum with no terminal behaviour, which is
+        # the page telling the reader something untrue.
+        #
+        # STOPS BETWEEN DOCUMENTS, NEVER INSIDE ONE. A half-read document
+        # would produce an observation whose excerpt is not what the document
+        # says, and a wrong finding is worse than a missing one. What the
+        # reader gets is the observations that were complete, and a gap
+        # naming what was not read.
+        if deadline is not None and getattr(deadline, "expired", False):
+            try:
+                deadline.record_gap(
+                    "observations",
+                    f"{len(documents) - len(seen)} document(s) not read - "
+                    f"the interactive maximum was reached")
+            except Exception:                                 # noqa: BLE001
+                pass
+            break
         # collapse duplicate pages: same content hash or same normalized URL
         key = doc.get("content_hash") or _normalize_url(doc.get("final_url", ""))
         norm = _normalize_url(doc.get("final_url", ""))
