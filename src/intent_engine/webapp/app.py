@@ -9049,8 +9049,19 @@ class WebApp:
         # compare the deep reading against a model this run just wrote.
         previous_model_for_deep = (self.strategic_memory.latest_model(domain)
                                    if domain else None)
-        from intent_engine.company_ingestion.latency import Trace
+        from intent_engine.company_ingestion.latency import Trace, cpu_yardstick
         trace = Trace(run_id)
+        # CALIBRATE THE MACHINE BEFORE TRUSTING THE SPANS. Every stage on the
+        # preview reads 14-15% CPU whether it fetches, computes, or writes
+        # files, which is the signature of a CPU share rather than of I/O.
+        # This measures it directly instead of arguing it from ratios.
+        try:
+            trace.spans.append({"name": "cpu_yardstick", "depth": 0,
+                                "wall_ms": cpu_yardstick(), "cpu_ms": 0.0,
+                                "offset_s": 0.0, "status": "ok",
+                                "calibration": True})
+        except Exception:                       # noqa: BLE001
+            pass
         try:
             # ONE BUDGET ACROSS BOTH ACQUISITION STAGES. Discovery and
             # retrieval are the two halves of the same wait; budgeting only
@@ -9114,6 +9125,20 @@ class WebApp:
             except Exception:                   # noqa: BLE001
                 _LOG.warning("lifecycle core_ready marker failed run=%s",
                              run_id)
+            # A SECOND READING, taken where the cost actually landed. The
+            # first is at t=0 when the worker contends with nothing;
+            # composition is where 48 of the 90 seconds went, so the CPU
+            # share DURING it is the number that explains those seconds.
+            try:
+                from intent_engine.company_ingestion.latency import (
+                    cpu_yardstick as _yard,
+                )
+                trace.spans.append({"name": "cpu_yardstick_after", "depth": 0,
+                                    "wall_ms": _yard(), "cpu_ms": 0.0,
+                                    "offset_s": 0.0, "status": "ok",
+                                    "calibration": True})
+            except Exception:                   # noqa: BLE001
+                pass
             # RECORDED AT CORE_READY, not at the end of the run. A trace
             # written only after DEEP would be lost for exactly the runs
             # whose latency is worth reading -- the ones that never finish.

@@ -39,6 +39,35 @@ CORE_SPANS = ("discovery", "source_selection", "retrieval", "core_composition")
 DEEP_SPANS = ("deep_reasoning",)
 
 
+#: Work with a KNOWN cost and no I/O whatsoever. Sized to be a few
+#: milliseconds on a developer machine -- large enough to measure, far too
+#: small to matter next to a 90-second analysis.
+_YARDSTICK_ROUNDS = 60_000
+
+
+def cpu_yardstick() -> float:
+    """Milliseconds of WALL time for a fixed, pure-CPU workload.
+
+    WHY A YARDSTICK AND NOT A RATIO. `wall_ms` high with `cpu_ms` low has two
+    completely different causes -- blocking on I/O, or being descheduled
+    while ready to run -- and they demand opposite repairs. `build_report`
+    assembles in-memory structures and CANNOT do I/O, yet deployed it shows
+    2702ms wall against 404ms CPU: its CPU time grew 1.4x while its wall grew
+    9.2x. That is a CPU share, not a network.
+
+    Running a known quantity of arithmetic inline turns that inference into a
+    measurement: divide the deployed figure by the local one and every other
+    span's wall becomes interpretable. A span slower than the yardstick
+    predicts is doing real I/O; a span tracking it is simply being starved.
+    """
+    import hashlib
+    began = time.monotonic()
+    digest = b"0" * 64
+    for _ in range(_YARDSTICK_ROUNDS):
+        digest = hashlib.sha256(digest).digest()
+    return round((time.monotonic() - began) * 1000, 2)
+
+
 class Trace:
     """Spans for ONE analysis, in the order they completed."""
 
@@ -101,8 +130,11 @@ class Trace:
         wall = round((time.monotonic() - self._origin) * 1000, 1)
         # TOP-LEVEL ONLY. Children are a breakdown OF a parent, not additional
         # elapsed time beside it.
+        # Calibration spans are instrument overhead, not pipeline stages, so
+        # they are excluded from coverage -- counting them would make the
+        # waterfall claim it explained time the product never spent.
         covered = sum(s.get("wall_ms", 0.0) for s in self.spans
-                      if s.get("depth", 0) == 0)
+                      if s.get("depth", 0) == 0 and not s.get("calibration"))
         return {
             "spans": list(self.spans),
             "total_wall_ms": wall,
