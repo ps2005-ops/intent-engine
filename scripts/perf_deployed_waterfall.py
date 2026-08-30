@@ -116,9 +116,9 @@ def table(deployed: dict, local: dict) -> None:
     print(f"  deployed unaccounted      {dep_unacc / 1000:.2f}s")
     if core:
         pct = dep_unacc / 1000 / core * 100
-        print(f"  UNACCOUNTED SHARE         {pct:.1f}% of CORE"
-              f"   {'OK (<=1%)' if pct <= 1 else '<<< INSTRUMENT THE GAP '
-                                                 'BEFORE RANKING STAGES'}")
+        verdict = ("OK (<=1%)" if pct <= 1
+                   else "<<< INSTRUMENT THE GAP BEFORE RANKING STAGES")
+        print(f"  UNACCOUNTED SHARE         {pct:.1f}% of CORE   {verdict}")
     print(f"  evidence_count            "
           f"{(deployed.get('timing') or {}).get('evidence_count')}")
     print(f"  provenance                "

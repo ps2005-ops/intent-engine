@@ -9102,7 +9102,7 @@ class WebApp:
             # evidence, the exposure and the economic reading while the
             # strategic review is still being written.
             with trace.span("core_composition", deadline=deadline) as sp:
-                core = self._compose(run_id, deep=False)
+                core = self._compose(run_id, deep=False, trace=trace)
                 sp["item_count"] = len(list(self.ci.store.retrieved(run_id)))
             self._results[run_id] = core
             self._core_ready_at[run_id] = time.monotonic()
@@ -9501,7 +9501,7 @@ class WebApp:
         return assess(stored,
                       app_version=version_info().get("app_version", ""))
 
-    def _compose(self, run_id, *, deep: bool = True):
+    def _compose(self, run_id, *, deep: bool = True, trace=None):
         """Compose the run, threading the persisted mental model so the report
         is a VIEW over the company's evolving state, then persist the new
         snapshot and publish strategic events durably (idempotent).
@@ -9518,7 +9518,8 @@ class WebApp:
         # the targeted retry passes the quality gate can order from inside.
         result = self.ci.compose_with_quality(
             run_id, fi_service=self.fi, previous_model=previous_model,
-            deadline=self._analysis_deadlines.get(run_id), deep=deep)
+            deadline=self._analysis_deadlines.get(run_id), deep=deep,
+            trace=trace)
         # THE GATE MUST JUDGE THE EVIDENCE THAT ARRIVED, NOT THE EVIDENCE
         # THAT HAD ARRIVED WHEN IT RAN.
         #
@@ -9643,9 +9644,28 @@ class WebApp:
                                       {})["recomposed_from"] = seen
         report = result.get("strategic_report")
         if report and domain:
-            self.strategic_memory.save_snapshot(domain, report["mental_model"])
-            self.strategic_memory.publish(
-                domain, report.get("analytics_events", []), run_id=run_id)
+            # THE DISK IS NOT THE SAME DISK. Locally these are ~1.9s against a
+            # local SSD; the preview writes append-only files to a NETWORK-
+            # ATTACHED Render volume, and `core_composition` amplifies 12.5x
+            # deployed while the network stages amplify 4x. Composition is
+            # 14% CPU there, so it is waiting on something -- and after the
+            # quality-retry hypothesis was measured and found not to fire,
+            # this is the only I/O left inside it. Split so the next trace
+            # says which of the two writes owns the time.
+            if trace is not None:
+                with trace.span("memory_snapshot"):
+                    self.strategic_memory.save_snapshot(
+                        domain, report["mental_model"])
+                with trace.span("memory_publish") as _sp:
+                    events = report.get("analytics_events", [])
+                    _sp["item_count"] = len(events)
+                    self.strategic_memory.publish(domain, events,
+                                                  run_id=run_id)
+            else:
+                self.strategic_memory.save_snapshot(domain,
+                                                    report["mental_model"])
+                self.strategic_memory.publish(
+                    domain, report.get("analytics_events", []), run_id=run_id)
         # The last read before a stranger sees it. Attached rather than
         # applied: a critic that edits is a second author with less context
         # than the first, and its corrections would reach the reader
@@ -9653,8 +9673,13 @@ class WebApp:
         # worth more than a silent fix.
         if report is not None:
             from intent_engine.strategic_intelligence.critic import critique
-            result["critique"] = critique(
-                report, documents=self.ci.store.retrieved(run_id))
+            if trace is not None:
+                with trace.span("critic"):
+                    result["critique"] = critique(
+                        report, documents=self.ci.store.retrieved(run_id))
+            else:
+                result["critique"] = critique(
+                    report, documents=self.ci.store.retrieved(run_id))
         # Record what produced this, so a later reuse can be checked rather
         # than assumed.
         from intent_engine._version import version_info
@@ -9673,11 +9698,28 @@ class WebApp:
         # empty run and cache the emptiness.
         self._results[run_id] = stamped
         self._external_cache.pop(run_id, None)
+        # THE ONE NETWORK CALL LEFT INSIDE COMPOSITION, and it was the only
+        # stage in the whole pipeline with no span on it. `core_composition`
+        # measures 54.66s deployed at 14% CPU while every child span found so
+        # far is 90-100% CPU and small; an external fetch is the only thing
+        # in here that can wait. It is also wrapped in a bare `except`, so a
+        # slow or hanging provider costs the customer the time and reports
+        # nothing at all.
+        if trace is not None:
+            _ctx = trace.span("external_context")
+        else:
+            from contextlib import nullcontext
+            _ctx = nullcontext({})
         try:
-            self._external_context(run_id, allow_fetch=True)
+            with _ctx:
+                self._external_context(run_id, allow_fetch=True)
         except Exception:  # noqa: BLE001 - context must never lose a run
             _LOG.warning("external context refresh failed for %s", run_id)
-        self._publish_demo_dossier(run_id, stamped)
+        if trace is not None:
+            with trace.span("demo_dossier"):
+                self._publish_demo_dossier(run_id, stamped)
+        else:
+            self._publish_demo_dossier(run_id, stamped)
         return stamped
 
     def _publish_demo_dossier(self, run_id, result):

@@ -1432,7 +1432,7 @@ class CompanyIngestionService:
             report=report)
 
     def compose_with_quality(self, run_id: str, *, fi_service,
-                             max_passes=None, deadline=None,
+                             max_passes=None, deadline=None, trace=None,
                              **compose_kwargs) -> dict:
         """Compose, score the report, and — when the quality gate says more
         evidence would plausibly help — retrieve targeted additional sources
@@ -1502,8 +1502,15 @@ class CompanyIngestionService:
                 break
             attempted.update(extra)
             before = dict(gaps)
-            self.fetch_approved(run_id, candidate_ids=extra,
-                                deadline=deadline)
+            if trace is not None:
+                with trace.span("quality_retry_fetch", deadline=deadline,
+                                retry_pass=attempt) as _sp:
+                    self.fetch_approved(run_id, candidate_ids=extra,
+                                        deadline=deadline)
+                    _sp["item_count"] = len(extra)
+            else:
+                self.fetch_approved(run_id, candidate_ids=extra,
+                                    deadline=deadline)
             after = evidence_gaps(self.store.retrieved(run_id))
             history.append({"pass": attempt, "reason": reason,
                             "new_sources": list(extra),
@@ -1517,8 +1524,13 @@ class CompanyIngestionService:
         # "worth another look" to a user whose budget is already gone — and
         # offer them a retry button that could only repeat itself.
         spent = 1 + sum(1 for h in history if isinstance(h.get("pass"), int))
-        result = self.compose(run_id, fi_service=fi_service, attempt=spent,
-                              **compose_kwargs)
+        if trace is not None:
+            with trace.span("compose_proper", deadline=deadline):
+                result = self.compose(run_id, fi_service=fi_service,
+                                      attempt=spent, **compose_kwargs)
+        else:
+            result = self.compose(run_id, fi_service=fi_service, attempt=spent,
+                                  **compose_kwargs)
         if "quality" not in result:
             # No source could be retrieved at all: compose already returned an
             # honest FAILED run with no report to score. Rediscovery cannot

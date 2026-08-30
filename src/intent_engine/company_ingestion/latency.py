@@ -46,6 +46,7 @@ class Trace:
         self.run_id = run_id
         self.spans: list = []
         self._origin = time.monotonic()
+        self._depth = 0
 
     @contextmanager
     def span(self, name: str, *, deadline=None, **attrs):
@@ -56,8 +57,14 @@ class Trace:
         """
         began_wall = time.monotonic()
         began_cpu = time.thread_time()
-        rec: dict = {"name": name,
+        # DEPTH, because a nested span's time is ALSO its parent's time.
+        # `quality_retry_fetch` lives inside `core_composition`; summing every
+        # span would count those seconds twice and drive `unaccounted`
+        # negative -- an accounting error that would quietly discredit the one
+        # number this module exists to make trustworthy.
+        rec: dict = {"name": name, "depth": self._depth,
                      "offset_s": round(began_wall - self._origin, 3)}
+        self._depth += 1
         rec.update(attrs)
         if deadline is not None:
             try:
@@ -72,6 +79,7 @@ class Trace:
             rec["failure_class"] = type(exc).__name__
             raise
         finally:
+            self._depth -= 1
             rec["wall_ms"] = round((time.monotonic() - began_wall) * 1000, 1)
             rec["cpu_ms"] = round((time.thread_time() - began_cpu) * 1000, 1)
             if deadline is not None:
@@ -91,12 +99,16 @@ class Trace:
         next reader to optimise the 40s.
         """
         wall = round((time.monotonic() - self._origin) * 1000, 1)
-        covered = sum(s.get("wall_ms", 0.0) for s in self.spans)
+        # TOP-LEVEL ONLY. Children are a breakdown OF a parent, not additional
+        # elapsed time beside it.
+        covered = sum(s.get("wall_ms", 0.0) for s in self.spans
+                      if s.get("depth", 0) == 0)
         return {
             "spans": list(self.spans),
             "total_wall_ms": wall,
             "covered_wall_ms": round(covered, 1),
             "unaccounted_wall_ms": round(wall - covered, 1),
             "total_cpu_ms": round(
-                sum(s.get("cpu_ms", 0.0) for s in self.spans), 1),
+                sum(s.get("cpu_ms", 0.0) for s in self.spans
+                    if s.get("depth", 0) == 0), 1),
         }

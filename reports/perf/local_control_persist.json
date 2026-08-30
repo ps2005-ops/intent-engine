@@ -1,0 +1,102 @@
+{
+  "company": "Apple Inc.",
+  "run_id": "01M180N9P1CGRFH9YB8TBRJ2T9",
+  "wall_s": 13.9,
+  "documents": 10,
+  "lifecycle": {
+    "created": "2026-08-30T00:21:10.465863+00:00",
+    "accepted": "2026-08-30T00:21:10.864971+00:00",
+    "core_ready": "2026-08-30T00:21:23.276122+00:00",
+    "deep_started": "2026-08-30T00:21:23.276687+00:00",
+    "deep_ready": "2026-08-30T00:21:24.781281+00:00"
+  },
+  "waterfall": {
+    "covered_wall_ms": 12409.8,
+    "phase": "core",
+    "spans": [
+      {
+        "cpu_ms": 87.6,
+        "deadline_remaining_end_s": 54.03,
+        "deadline_remaining_start_s": 60.0,
+        "depth": 0,
+        "item_count": 47,
+        "name": "discovery",
+        "offset_s": 0.0,
+        "status": "ok",
+        "wall_ms": 5970.1
+      },
+      {
+        "candidates": 47,
+        "cpu_ms": 1.4,
+        "deadline_remaining_end_s": 54.03,
+        "deadline_remaining_start_s": 54.03,
+        "depth": 0,
+        "item_count": 14,
+        "name": "source_selection",
+        "offset_s": 5.97,
+        "status": "ok",
+        "wall_ms": 1.4
+      },
+      {
+        "cpu_ms": 315.0,
+        "deadline_remaining_end_s": 51.48,
+        "deadline_remaining_start_s": 54.03,
+        "depth": 0,
+        "item_count": 10,
+        "name": "retrieval",
+        "offset_s": 5.972,
+        "status": "ok",
+        "wall_ms": 2547.8
+      },
+      {
+        "cpu_ms": 1715.1,
+        "deadline_remaining_end_s": 49.59,
+        "deadline_remaining_start_s": 51.48,
+        "depth": 1,
+        "name": "compose_proper",
+        "offset_s": 8.52,
+        "status": "ok",
+        "wall_ms": 1889.4
+      },
+      {
+        "cpu_ms": 0.3,
+        "depth": 1,
+        "name": "memory_snapshot",
+        "offset_s": 10.41,
+        "status": "ok",
+        "wall_ms": 0.3
+      },
+      {
+        "cpu_ms": 0.7,
+        "depth": 1,
+        "item_count": 14,
+        "name": "memory_publish",
+        "offset_s": 10.41,
+        "status": "ok",
+        "wall_ms": 0.7
+      },
+      {
+        "cpu_ms": 136.3,
+        "depth": 1,
+        "name": "demo_dossier",
+        "offset_s": 12.272,
+        "status": "ok",
+        "wall_ms": 138.1
+      },
+      {
+        "cpu_ms": 2095.2,
+        "deadline_remaining_end_s": 47.59,
+        "deadline_remaining_start_s": 51.48,
+        "depth": 0,
+        "item_count": 10,
+        "name": "core_composition",
+        "offset_s": 8.519,
+        "status": "ok",
+        "wall_ms": 3890.5
+      }
+    ],
+    "total_cpu_ms": 2499.2,
+    "total_wall_ms": 12410.1,
+    "unaccounted_wall_ms": 0.3
+  }
+}

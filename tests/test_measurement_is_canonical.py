@@ -293,3 +293,28 @@ def test_a_failing_stage_still_records_its_span(app):
     assert len(t.spans) == 1
     assert t.spans[0]["status"] == "error"
     assert t.spans[0]["failure_class"] == "ValueError"
+
+
+def test_a_nested_span_is_not_counted_twice(app):
+    """A child's time is ALSO its parent's time.
+
+    `quality_retry_fetch` runs inside `core_composition`, so summing every
+    span counts those seconds twice and drives `unaccounted` negative. That
+    would discredit the one number this module exists to make trustworthy --
+    and it is exactly what happened the first time the sub-spans were added.
+    """
+    import time as _t
+    from intent_engine.company_ingestion.latency import Trace
+    t = Trace("r")
+    with t.span("core_composition"):
+        _t.sleep(0.05)
+        with t.span("quality_retry_fetch"):
+            _t.sleep(0.05)
+    wf = t.waterfall()
+    depths = {s["name"]: s["depth"] for s in wf["spans"]}
+    assert depths["core_composition"] == 0
+    assert depths["quality_retry_fetch"] == 1
+    assert wf["covered_wall_ms"] <= wf["total_wall_ms"] + 1.0, (
+        f"nested span double-counted: covered={wf['covered_wall_ms']} "
+        f"total={wf['total_wall_ms']}")
+    assert wf["unaccounted_wall_ms"] >= -1.0
