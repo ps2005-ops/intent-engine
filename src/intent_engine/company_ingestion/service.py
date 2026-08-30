@@ -73,7 +73,8 @@ from concurrent.futures import TimeoutError as FuturesTimeout
 _LOG = logging.getLogger(__name__)
 
 
-def _bounded_result(future, deadline, stage: str, detail: str = ""):
+def _bounded_result(future, deadline, stage: str, detail: str = "",
+                    cap_s: float = 0.0):
     """A future's value, or None when the budget will not cover the wait.
 
     `may_start()` DECIDES WHETHER TO DISPATCH; THIS BOUNDS THE WAIT. The two
@@ -97,6 +98,15 @@ def _bounded_result(future, deadline, stage: str, detail: str = ""):
     if deadline is None:
         return future.result()
     left = deadline.remaining
+    # AN OPTIONAL BRANCH MAY NOT SPEND THE WHOLE BUDGET WAITING.
+    #
+    # MEASURED on NVIDIA at 6aefd58e: discovery 35.0s at 2% CPU, of which
+    # ~18s was this join. The wait WAS bounded -- by everything that was
+    # left, which on a 60s budget is generous enough never to bite. A source
+    # class the product can do without does not get to decide how long the
+    # reader waits, so an explicit cap applies on top of the budget.
+    if cap_s > 0:
+        left = min(left, cap_s)
     if left <= 0:
         deadline.record_gap(stage, detail or "no budget left to wait for it")
         future.cancel()
@@ -835,8 +845,9 @@ class CompanyIngestionService:
                 if sitemap is not None:
                     _sm = _bounded_result(
                         sitemap, deadline, "discovery",
-                        "sitemap crawl did not return inside the "
-                        "interactive budget")
+                        "sitemap crawl did not return within its share of "
+                        "the interactive budget",
+                        cap_s=self._OPTIONAL_DISCOVERY_CAP_S)
                     candidates = candidates + (_sm or [])
                 # Bounded external-source proposals (customer voice etc.)
                 # broaden the evidence beyond company-owned pages. Off-domain,
@@ -889,8 +900,9 @@ class CompanyIngestionService:
             if third_party is not None:
                 _tp = _bounded_result(
                     third_party, deadline, "discovery",
-                    "third-party filing search did not return "
-                    "inside the interactive budget")
+                    "third-party filing search did not return within its "
+                    "share of the interactive budget",
+                    cap_s=self._OPTIONAL_DISCOVERY_CAP_S)
                 candidates = candidates + (_tp or [])
         finally:
             # NOT `wait=True`. Bounding the joins above and then
@@ -1328,6 +1340,24 @@ class CompanyIngestionService:
     #: keeps a concurrent pass from looking like a burst to one publisher.
     #: SEC in particular answers 429 to bursts, and a 429 costs the run more
     #: than the serialism it replaced.
+    #: How long an OPTIONAL discovery branch may hold the run.
+    #:
+    #: MEASURED on NVIDIA at 6aefd58e: discovery 35.0s at 2% CPU. The homepage
+    #: fetch ran to 11.2s, the EDGAR proposal to 17.2s, and the remaining ~18s
+    #: was the join on the third-party filing search -- EDGAR full-text, which
+    #: is the only independent vantage most runs get and is also the slowest
+    #: thing in the stage.
+    #:
+    #: It was already bounded by `deadline.remaining`, which on a 60s budget
+    #: is 40s and therefore never bit. `CLASS_SHARE` exists to say what a
+    #: class may spend CUMULATIVELY; this says what one branch may spend
+    #: WAITING, which is a different question and the one that was unanswered.
+    #:
+    #: 8s is chosen from the measurement rather than rounded to taste: the
+    #: same search cost 5.3s on a cold Apple run, so this keeps the branch
+    #: that usually succeeds and drops the tail that does not.
+    _OPTIONAL_DISCOVERY_CAP_S = 8.0
+
     _FETCH_CONCURRENCY = 6
     _FETCH_PER_HOST = 2
 
