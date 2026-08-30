@@ -28,8 +28,13 @@ from perf_progressive_matrix import (                          # noqa: E402
 
 #: Stages that provably CANNOT perform I/O. Only these may CONFIRM CPU
 #: starvation -- everything else can merely be consistent with it.
-IO_FREE = {"derive_observations", "classification", "build_report",
-           "analyst_evidence", "strategic_report", "compose_proper"}
+# MEASURED, NOT ASSUMED. A control may only be a stage observed at ~100% CPU
+# on an unloaded machine across runs. `classification` was in this set and is
+# not eligible: it read 47% CPU in one local trace and 9% in the next, and a
+# ratio that swings like that belongs to something that waits. Parent spans
+# are excluded too -- a parent inherits whatever its children do, so it can
+# never be a clean control for anything.
+IO_FREE = {"derive_observations", "analyst_evidence", "build_report"}
 #: Stages whose work is a write to the persistent volume.
 WRITES_DISK = {"demo_dossier", "ownership_append", "memory_snapshot",
                "memory_publish"}
@@ -40,7 +45,7 @@ STORAGE_WAIT, UNKNOWN = "STORAGE_WAIT", "UNKNOWN"
 
 
 def classify(name, local_wall, local_cpu, dep_wall, dep_cpu, slowdown,
-             tol=0.35):
+             stretch=None, tol=0.35):
     """What a span's numbers mean, judged against a MEASURED CPU yardstick.
 
     THE RULE THIS REPLACES WAS WRONG. It read `cpu_ms/wall_ms` and called
@@ -61,7 +66,16 @@ def classify(name, local_wall, local_cpu, dep_wall, dep_cpu, slowdown,
     """
     if not slowdown or local_wall <= 0:
         return UNKNOWN, "no calibration reading -- refusing to guess", 0.0
-    expected = local_wall * slowdown
+    # PREDICT FROM THE STAGE'S OWN DEPLOYED CPU, NOT FROM ITS LOCAL WALL.
+    #
+    # `local_wall * slowdown` charges the machine for a workload difference.
+    # Measured: the deployed run scanned 457,220 characters against 244,712
+    # locally -- 1.87x the work -- and comparing walls across that reported
+    # 25.3s "unexplained" when every stage was in fact within what the CPU
+    # share predicts. A stage's own CPU is what it actually consumed, so
+    # multiplying it by the stretch the probe measured isolates scheduling
+    # from workload.
+    expected = dep_cpu * stretch if stretch else local_wall * slowdown
     excess = dep_wall - expected
     frac = excess / dep_wall if dep_wall else 0.0
     local_ratio = local_cpu / local_wall if local_wall else 0.0
@@ -181,7 +195,7 @@ def table(deployed: dict, local: dict) -> None:
     probes = [v for k, v in dep_spans.items() if k.startswith("cpu_yardstick")]
     base = json.loads(BASELINE.read_text()) if BASELINE.exists() else {}
     local_probe = base.get("wall_median_ms")
-    slowdown = None
+    slowdown = stretch = None
     print(f"\n{'=' * 78}\nCPU CALIBRATION")
     if local_probe and probes:
         print(f"  local probe median      {local_probe:.2f}ms "
@@ -193,6 +207,9 @@ def table(deployed: dict, local: dict) -> None:
                   f"{pr['cpu_ms']:>8.2f}ms cpu  -> {sd:.2f}x slower, "
                   f"probe CPU {cpu_x:.2f}x")
         slowdown = max(p_["wall_ms"] for p_ in probes) / local_probe
+        # WALL WAITED PER MS OF CPU GRANTED -- the workload-free factor.
+        stretch = max(p_["wall_ms"] / p_["cpu_ms"] for p_ in probes
+                      if p_.get("cpu_ms"))
         cpu_growth = (max(p_["cpu_ms"] for p_ in probes)
                       / base.get("cpu_median_ms", 1))
         print(f"\n  EFFECTIVE_CPU_SHARE_ESTIMATE  ~{100 / slowdown:.1f}% of one local core")
@@ -225,18 +242,19 @@ def table(deployed: dict, local: dict) -> None:
         lw = l.get("wall_ms", 0.0) if l else 0.0
         dc = d.get("cpu_ms", 0.0) if d else 0.0
         lc = l.get("cpu_ms", 0.0) if l else 0.0
-        kind, why, excess = classify(name, lw, lc, dw, dc, slowdown)
-        exp = lw * slowdown if slowdown else 0.0
+        kind, why, excess = classify(name, lw, lc, dw, dc, slowdown,
+                                     stretch=stretch)
+        exp = (dc * stretch if stretch else lw * slowdown) or 0.0
         # SUMMED ON OWN TIME ONLY, so a parent does not re-count its
         # children's seconds. See `own_time`.
-        o_d, o_l = dep_own.get(name, {}), loc_own.get(name, {})
-        if o_d and o_l and slowdown:
-            ow_d, ow_l = o_d["own_wall_ms"], o_l["own_wall_ms"]
-            oc_l = o_l["own_cpu_ms"]
-            if ow_l > 0 and oc_l / ow_l >= 0.30:      # was CPU-bound locally
-                own_excess = ow_d - ow_l * slowdown
-                if own_excess > 0:
-                    unexplained += own_excess
+        o_d = dep_own.get(name, {})
+        if o_d and stretch:
+            # OWN time, and predicted from OWN deployed CPU. Both corrections
+            # matter: summing parents double-counts, and predicting from local
+            # wall charges the machine for a larger workload.
+            own_excess = o_d["own_wall_ms"] - o_d["own_cpu_ms"] * stretch
+            if own_excess > 0:
+                unexplained += own_excess
         mult = f"{dw / lw:.1f}x" if lw and dw else "-"
         print(f"{name:<21}{lw / 1000:>8.2f}s{dw / 1000:>9.2f}s{mult:>7}"
               f"{dc / 1000:>8.2f}s{exp / 1000:>8.2f}s{excess / 1000:>+8.2f}s  {kind}")
@@ -249,10 +267,37 @@ def table(deployed: dict, local: dict) -> None:
                   f"{dw / 1000:.1f}s of work nothing reads ***")
 
     core_s = (deployed.get("timing") or {}).get("core_latency_s") or 0
-    print(f"\n  TIME NOT EXPLAINED BY CPU STARVATION  {unexplained / 1000:+.1f}s "
-          f"of {core_s}s CORE"
-          + (f"  ({unexplained / 10 / core_s:.0f}%)" if core_s else ""))
-    print("  A bigger machine does not remove this; it is application work.")
+    # --- BOTTLENECK DECOMPOSITION (§46) ------------------------------------
+    #
+    # Three buckets, on OWN time so nothing is counted twice. They are not
+    # ranked against each other -- they are bought differently. Network wait
+    # is not "unexplained": it is explained by I/O, and calling it unexplained
+    # was how a CPU verdict nearly absorbed 40s of waiting on SEC.
+    net = cpu_starved = beyond = 0.0
+    for nm, o in dep_own.items():
+        ow, oc = o["own_wall_ms"], o["own_cpu_ms"]
+        if not ow:
+            continue
+        predicted = oc * stretch if stretch else 0.0
+        if ow > 0 and oc / ow < 0.10:          # barely used a CPU at all
+            net += ow
+        elif stretch and ow > predicted * 1.35:
+            cpu_starved += predicted
+            beyond += ow - predicted
+        else:
+            cpu_starved += ow
+    waste = sum(sp.get("wall_ms", 0.0) for sp in dep_spans.values()
+                if sp.get("used_on_this_path") is False)
+    print(f"\n  BOTTLENECK DECOMPOSITION of {core_s}s CORE")
+    print(f"    network wait (I/O)            {net / 1000:>7.1f}s   "
+          f"bounded by timeouts/concurrency, not by CPU")
+    print(f"    CPU-starved compute           {cpu_starved / 1000:>7.1f}s   "
+          f"a larger CPU share is the lever")
+    print(f"    beyond the measured share     {beyond / 1000:>7.1f}s   "
+          f"{'needs a named cause' if beyond > 2000 else 'none material'}")
+    print(f"\n    of which WORK NOTHING READS  {waste / 1000:>7.1f}s   "
+          f"removable regardless of machine"
+          + (f"  ({waste / 10 / core_s:.0f}% of CORE)" if core_s else ""))
 
     dep_total = dep.get("total_wall_ms", 0.0)
     dep_unacc = dep.get("unaccounted_wall_ms", 0.0)

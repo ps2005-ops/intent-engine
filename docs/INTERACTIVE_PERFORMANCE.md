@@ -226,3 +226,112 @@ is made, and the run stops on the first 429 rather than spending what is left.
 Quota refusal, provider rate-limiting, cold start and genuine latency are
 reported as **separate statuses**. Conflating them would report an
 infrastructure limit as a product defect.
+
+## 7. CPU calibration and the deployed decomposition (14fc0a1a)
+
+### The question a cpu/wall ratio cannot answer
+
+`wall` high with `cpu` low has two causes that demand opposite repairs:
+blocking on I/O, and being descheduled while READY to run. The classifier
+used to read `cpu_ms/wall_ms < 0.15` and call it `NETWORK_WAIT`. That labelled
+`build_report` — which assembles in-memory structures and cannot perform I/O —
+as network-bound. Every such verdict on a compute stage was false.
+
+### The instrument
+
+`latency.cpu_yardstick()` runs a fixed SHA-256 chain: deterministic, no
+network, no filesystem, no sleeps, no randomness, and it reports the round
+count so two readings can be *proven* to have measured the same work. It
+returns wall **and** CPU, because those separate two purchases:
+
+    wall up 9x, probe CPU FLAT   -> descheduled. A larger CPU SHARE is the lever.
+    wall up 9x, probe CPU UP 9x  -> a slower core. Share buys NOTHING.
+
+An earlier version recorded `cpu_ms` as a hardcoded `0.0` and could not tell
+those apart.
+
+Local baseline, unloaded machine: **13.42ms median, n=15, CV 2.3%,
+cpu/wall = 99.8%**. That last figure is the positive control — it establishes
+the probe is I/O-free, so a deployed ratio materially below it is the machine
+and not the workload.
+
+### Result (Apple, preview, 14fc0a1a)
+
+    probe at t=0              112.01ms wall /  25.90ms cpu  ->  8.35x
+    probe after composition   196.63ms wall /  27.26ms cpu  -> 14.65x
+    core speed                2.04x slower per unit of work
+    scheduling stretch        4.32x -> 7.21x wall per ms of CPU granted
+    EFFECTIVE_CPU_SHARE_ESTIMATE ~7-12% of one local core
+
+`CPU_SCHEDULING_CONSTRAINT = CONFIRMED` on all five conditions: the I/O-free
+yardstick slows materially, multiple compute-only stages match the same
+factor, CPU work is comparable once bytes are accounted, the effect reproduces
+at both ends of the run, and no hidden I/O is needed to explain it.
+
+### Predict from deployed CPU, never from local wall
+
+`expected = local_wall * slowdown` reported 25-30s "unexplained" and pointed at
+an application defect that does not exist. The deployed run had scanned
+**457,220 characters against 244,712 locally (1.87x)** — a different workload,
+not a different machine. Using each stage's own deployed CPU instead,
+`expected = deployed_cpu * stretch`, every compute stage lands within 5-9% of
+prediction and the residual falls to **0.0s**.
+
+Any local-vs-deployed comparison must therefore record the WORK done (bytes,
+rows, items), not just a count of things: 11 documents against 10 concealed a
+1.87x difference in characters.
+
+### Decomposition of the 90.7s CORE
+
+    network wait (I/O)            40.5s   bounded by timeouts/concurrency
+    CPU-starved compute           50.0s   a larger CPU share is the lever
+    beyond the measured share      0.0s   nothing left to explain
+
+    of which WORK NOTHING READS   18.0s   removable regardless of machine (20%)
+
+Keep the buckets separate. Network wait is *explained by I/O*; folding it into
+"unexplained by CPU" would let a hardware verdict absorb 40s of waiting on SEC.
+
+### The application defect a hardware verdict would have buried
+
+`_strategic_report` computed
+
+    evidence = derive_analyst_evidence(documents, company_name)
+
+a second full scan of every retrieved document — and every use of `evidence`
+sat after `if not deep: return payload`. On the interactive CORE path the
+value was built and discarded: 587.5ms locally, **18.0s deployed, 20% of
+CORE**. The function is pure (no I/O, no writes, one return), so this was
+established by reading rather than by inference; its cost was predicted from
+its structural twin `derive_observations` to within 2% local and 5% deployed
+before any span existed to confirm it.
+
+Being "explained by the CPU share" is not the same as "should exist". A faster
+machine runs dead code faster.
+
+### Budgets are predictions about a machine
+
+`COMPOSE_RESERVE_S = 20.0` was set from "composition costs 7-11s locally and is
+pure CPU, so it is the one stage whose duration we can predict". The premise
+holds; the constant does not travel. Composition is 50.29s on the preview and
+~26s even after both repairs. A reserve cannot be one number shared by machines
+that differ 8-15x in scheduling.
+
+### Rules this cost us
+
+- **Never edit source while a guard or suite runs.** Structural tests and break
+  proofs read files from disk; a tree that changes mid-run yields a result
+  about no particular revision.
+- **Nested spans are a breakdown of a parent, not time beside it.** Summing
+  across all spans counts the same seconds up to four times — it produced
+  `covered > total` once, and "68.8s of 90.2s unexplained (76%)" once, where
+  the true figure was a quarter of that. Sum OWN time.
+- **Read `git diff --cached --stat` before every commit** and account for every
+  deletion. It has caught a module overwrite, a mis-indented 51-line call, and
+  an edit referencing a helper that did not exist.
+- **Adding a keyword-only parameter breaks every test double of that method**,
+  and the break reports as the failure under test rather than as a broken test.
+  Three occurrences here.
+- **`find -newermt '-60 minutes'` errors on BSD/macOS** and prints nothing,
+  which is indistinguishable from "nothing changed". It reported a clean tree
+  while three files were being written by another session.

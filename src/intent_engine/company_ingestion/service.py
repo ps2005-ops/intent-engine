@@ -1998,21 +1998,6 @@ class CompanyIngestionService:
         from intent_engine.strategic_intelligence.analyst import (
             AnalystUnavailable, ResultState, analyse,
         )
-        # THE SECOND FULL PASS OVER THE SAME DOCUMENTS. `derive_observations`
-        # above filters on a controlled-vocabulary signal; this one filters on
-        # whether a human would call the page evidence. Two derivations by
-        # design (see observations.py) -- but two scans of every document's
-        # full text, and this is the larger half of the 17.6s that had no span
-        # on it at all.
-        if trace is not None:
-            with trace.span("analyst_evidence") as _ae:
-                evidence = derive_analyst_evidence(documents, company_name)
-                _ae["item_count"] = len(evidence or ())
-                _ae["used_on_this_path"] = bool(deep)
-        else:
-            evidence = derive_analyst_evidence(documents, company_name)
-        evidence += list(extra_observations or ())
-
         payload["reasoning_provenance"] = "pattern_library"
         payload["result_state"] = ResultState.EVIDENCE_LIMITED
         payload["strategic_analysis"] = None
@@ -2038,6 +2023,24 @@ class CompanyIngestionService:
             payload["result_state_detail"] = \
                 ResultState.EXPLANATION[ResultState.DEEP_PENDING]
             return payload
+        # COMPUTED HERE BECAUSE ONLY THE DEEP PATH READS IT.
+        #
+        # This ran ABOVE the `if not deep` return, so every interactive CORE
+        # request paid for a second full scan of every retrieved document and
+        # then discarded the result -- 587.5ms locally, and the larger half of
+        # a 17.6s block on the preview. Nothing between the old call site and
+        # the return touched `evidence`, so moving it changes no output; the
+        # CORE payload is byte-identical either way.
+        #
+        # `derive_analyst_evidence` is pure -- no I/O, no writes, one return --
+        # so that is established by reading rather than by trusting a test.
+        if trace is not None:
+            with trace.span("analyst_evidence") as _ae:
+                evidence = derive_analyst_evidence(documents, company_name)
+                _ae["item_count"] = len(evidence or ())
+        else:
+            evidence = derive_analyst_evidence(documents, company_name)
+        evidence += list(extra_observations or ())
         payload["deep_status"] = DEEP_RUNNING
         try:
             analysis, state, findings = analyse(

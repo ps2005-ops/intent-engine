@@ -1,0 +1,440 @@
+{
+  "deployed": {
+    "status": "OK",
+    "run_id": "01M18CTR611GH75ZSXSXAZDEBY",
+    "timing": {
+      "run_id": "01M18CTR611GH75ZSXSXAZDEBY",
+      "markers": {
+        "created": "2026-08-30T03:53:52.065969+00:00",
+        "accepted": "2026-08-30T03:53:53.067522+00:00",
+        "core_ready": "2026-08-30T03:55:23.766043+00:00",
+        "deep_started": "2026-08-30T03:55:23.967279+00:00"
+      },
+      "core_latency_s": 90.7,
+      "deep_latency_s": null,
+      "evidence_count": 11,
+      "deep_status": "PENDING",
+      "result_state": "DEEP_PENDING",
+      "run_state": "PARTIAL",
+      "trace": [
+        {
+          "covered_wall_ms": 90497.2,
+          "phase": "core",
+          "spans": [
+            {
+              "calibration": true,
+              "cpu_ms": 25.9,
+              "depth": 0,
+              "name": "cpu_yardstick",
+              "offset_s": 0.0,
+              "rounds": 60000,
+              "status": "ok",
+              "wall_ms": 112.01
+            },
+            {
+              "cpu_ms": 374.1,
+              "deadline_remaining_end_s": 34.58,
+              "deadline_remaining_start_s": 59.8,
+              "depth": 0,
+              "item_count": 47,
+              "name": "discovery",
+              "offset_s": 0.112,
+              "status": "ok",
+              "wall_ms": 25220.7
+            },
+            {
+              "candidates": 47,
+              "cpu_ms": 3.1,
+              "deadline_remaining_end_s": 34.57,
+              "deadline_remaining_start_s": 34.58,
+              "depth": 0,
+              "item_count": 14,
+              "name": "source_selection",
+              "offset_s": 25.333,
+              "status": "ok",
+              "wall_ms": 6.0
+            },
+            {
+              "cpu_ms": 1119.1,
+              "deadline_remaining_end_s": 19.59,
+              "deadline_remaining_start_s": 34.57,
+              "depth": 0,
+              "item_count": 11,
+              "name": "retrieval",
+              "offset_s": 25.339,
+              "status": "ok",
+              "wall_ms": 14978.7
+            },
+            {
+              "cpu_ms": 19.0,
+              "depth": 2,
+              "item_count": 11,
+              "name": "fi_run",
+              "offset_s": 41.808,
+              "status": "ok",
+              "wall_ms": 133.7
+            },
+            {
+              "cpu_ms": 0.3,
+              "depth": 2,
+              "name": "evidence_library",
+              "offset_s": 41.942,
+              "status": "ok",
+              "wall_ms": 0.3
+            },
+            {
+              "cpu_ms": 2856.9,
+              "depth": 3,
+              "documents": 11,
+              "item_count": 7,
+              "name": "derive_observations",
+              "offset_s": 42.412,
+              "status": "ok",
+              "text_chars": 457220,
+              "wall_ms": 19302.2
+            },
+            {
+              "cpu_ms": 0.6,
+              "depth": 3,
+              "name": "ownership_append",
+              "offset_s": 61.799,
+              "status": "ok",
+              "wall_ms": 2.0,
+              "wrote_event": true
+            },
+            {
+              "cpu_ms": 292.2,
+              "depth": 3,
+              "name": "classification",
+              "offset_s": 61.801,
+              "status": "ok",
+              "wall_ms": 1999.5
+            },
+            {
+              "cpu_ms": 377.1,
+              "depth": 3,
+              "name": "build_report",
+              "offset_s": 63.801,
+              "status": "ok",
+              "wall_ms": 2501.4
+            },
+            {
+              "cpu_ms": 2671.4,
+              "depth": 3,
+              "item_count": 11,
+              "name": "analyst_evidence",
+              "offset_s": 66.302,
+              "status": "ok",
+              "used_on_this_path": false,
+              "wall_ms": 18011.5
+            },
+            {
+              "cpu_ms": 6198.9,
+              "depth": 2,
+              "name": "strategic_report",
+              "offset_s": 42.412,
+              "status": "ok",
+              "wall_ms": 41987.9
+            },
+            {
+              "cpu_ms": 6517.9,
+              "deadline_remaining_end_s": -24.59,
+              "deadline_remaining_start_s": 19.51,
+              "depth": 1,
+              "name": "compose_proper",
+              "offset_s": 40.402,
+              "status": "ok",
+              "wall_ms": 44103.3
+            },
+            {
+              "cpu_ms": 0.5,
+              "depth": 1,
+              "name": "memory_snapshot",
+              "offset_s": 84.507,
+              "status": "ok",
+              "wall_ms": 1.7
+            },
+            {
+              "cpu_ms": 1.4,
+              "depth": 1,
+              "item_count": 14,
+              "name": "memory_publish",
+              "offset_s": 84.509,
+              "status": "ok",
+              "wall_ms": 1.4
+            },
+            {
+              "cpu_ms": 0.2,
+              "depth": 1,
+              "name": "critic",
+              "offset_s": 84.512,
+              "status": "ok",
+              "wall_ms": 0.2
+            },
+            {
+              "cpu_ms": 349.9,
+              "depth": 1,
+              "name": "external_context",
+              "offset_s": 84.516,
+              "status": "ok",
+              "wall_ms": 3197.2
+            },
+            {
+              "cpu_ms": 427.2,
+              "depth": 1,
+              "name": "demo_dossier",
+              "offset_s": 87.713,
+              "status": "ok",
+              "wall_ms": 2896.6
+            },
+            {
+              "cpu_ms": 7306.1,
+              "deadline_remaining_end_s": -30.7,
+              "deadline_remaining_start_s": 19.59,
+              "depth": 0,
+              "item_count": 11,
+              "name": "core_composition",
+              "offset_s": 40.318,
+              "status": "ok",
+              "wall_ms": 50291.8
+            },
+            {
+              "calibration": true,
+              "cpu_ms": 27.26,
+              "depth": 0,
+              "name": "cpu_yardstick_after",
+              "offset_s": 90.612,
+              "rounds": 60000,
+              "status": "ok",
+              "wall_ms": 196.63
+            }
+          ],
+          "total_cpu_ms": 8802.4,
+          "total_wall_ms": 90808.5,
+          "unaccounted_wall_ms": 311.3
+        }
+      ],
+      "provenance": {
+        "markers": "persisted_lifecycle_event:ci.lifecycle_marked",
+        "core_latency_s": "persisted_lifecycle_event",
+        "deep_latency_s": "persisted_lifecycle_event",
+        "evidence_count": "canonical_retrieved_documents",
+        "deep_status": "composed_report_object",
+        "result_state": "composed_report_object",
+        "run_state": "persisted_run_transitions",
+        "trace": "persisted_spans:ci.trace_recorded"
+      }
+    },
+    "harness_observed_s": 95.9,
+    "total_s": 95.9
+  },
+  "local": {
+    "company": "Apple Inc.",
+    "run_id": "01M18CRDC1Y28AVJYM3PEQX02M",
+    "wall_s": 15.5,
+    "documents": 10,
+    "lifecycle": {
+      "created": "2026-08-30T03:52:35.457437+00:00",
+      "accepted": "2026-08-30T03:52:36.125379+00:00",
+      "core_ready": "2026-08-30T03:52:50.382301+00:00",
+      "deep_started": "2026-08-30T03:52:50.396034+00:00",
+      "deep_ready": "2026-08-30T03:52:51.605127+00:00"
+    },
+    "waterfall": {
+      "covered_wall_ms": 14241.4,
+      "phase": "core",
+      "spans": [
+        {
+          "calibration": true,
+          "cpu_ms": 14.49,
+          "depth": 0,
+          "name": "cpu_yardstick",
+          "offset_s": 0.0,
+          "rounds": 60000,
+          "status": "ok",
+          "wall_ms": 14.54
+        },
+        {
+          "cpu_ms": 102.8,
+          "deadline_remaining_end_s": 51.77,
+          "deadline_remaining_start_s": 59.98,
+          "depth": 0,
+          "item_count": 47,
+          "name": "discovery",
+          "offset_s": 0.015,
+          "status": "ok",
+          "wall_ms": 8214.8
+        },
+        {
+          "candidates": 47,
+          "cpu_ms": 1.4,
+          "deadline_remaining_end_s": 51.77,
+          "deadline_remaining_start_s": 51.77,
+          "depth": 0,
+          "item_count": 14,
+          "name": "source_selection",
+          "offset_s": 8.229,
+          "status": "ok",
+          "wall_ms": 1.4
+        },
+        {
+          "cpu_ms": 316.0,
+          "deadline_remaining_end_s": 49.34,
+          "deadline_remaining_start_s": 51.77,
+          "depth": 0,
+          "item_count": 10,
+          "name": "retrieval",
+          "offset_s": 8.231,
+          "status": "ok",
+          "wall_ms": 2425.9
+        },
+        {
+          "cpu_ms": 8.1,
+          "depth": 2,
+          "item_count": 10,
+          "name": "fi_run",
+          "offset_s": 10.724,
+          "status": "ok",
+          "wall_ms": 9.0
+        },
+        {
+          "cpu_ms": 0.1,
+          "depth": 2,
+          "name": "evidence_library",
+          "offset_s": 10.733,
+          "status": "ok",
+          "wall_ms": 0.1
+        },
+        {
+          "cpu_ms": 587.8,
+          "depth": 3,
+          "documents": 10,
+          "item_count": 6,
+          "name": "derive_observations",
+          "offset_s": 10.759,
+          "status": "ok",
+          "text_chars": 244712,
+          "wall_ms": 590.0
+        },
+        {
+          "cpu_ms": 0.5,
+          "depth": 3,
+          "name": "ownership_append",
+          "offset_s": 11.349,
+          "status": "ok",
+          "wall_ms": 0.7,
+          "wrote_event": true
+        },
+        {
+          "cpu_ms": 15.4,
+          "depth": 3,
+          "name": "classification",
+          "offset_s": 11.35,
+          "status": "ok",
+          "wall_ms": 180.3
+        },
+        {
+          "cpu_ms": 45.7,
+          "depth": 3,
+          "name": "build_report",
+          "offset_s": 11.53,
+          "status": "ok",
+          "wall_ms": 47.5
+        },
+        {
+          "cpu_ms": 585.9,
+          "depth": 3,
+          "item_count": 10,
+          "name": "analyst_evidence",
+          "offset_s": 11.578,
+          "status": "ok",
+          "used_on_this_path": false,
+          "wall_ms": 587.5
+        },
+        {
+          "cpu_ms": 1235.7,
+          "depth": 2,
+          "name": "strategic_report",
+          "offset_s": 10.759,
+          "status": "ok",
+          "wall_ms": 1406.6
+        },
+        {
+          "cpu_ms": 1341.9,
+          "deadline_remaining_end_s": 47.83,
+          "deadline_remaining_start_s": 49.34,
+          "depth": 1,
+          "name": "compose_proper",
+          "offset_s": 10.657,
+          "status": "ok",
+          "wall_ms": 1515.1
+        },
+        {
+          "cpu_ms": 0.3,
+          "depth": 1,
+          "name": "memory_snapshot",
+          "offset_s": 12.173,
+          "status": "ok",
+          "wall_ms": 0.3
+        },
+        {
+          "cpu_ms": 0.7,
+          "depth": 1,
+          "item_count": 14,
+          "name": "memory_publish",
+          "offset_s": 12.173,
+          "status": "ok",
+          "wall_ms": 0.7
+        },
+        {
+          "cpu_ms": 0.1,
+          "depth": 1,
+          "name": "critic",
+          "offset_s": 12.174,
+          "status": "ok",
+          "wall_ms": 0.1
+        },
+        {
+          "cpu_ms": 238.2,
+          "depth": 1,
+          "name": "external_context",
+          "offset_s": 12.174,
+          "status": "ok",
+          "wall_ms": 2066.1
+        },
+        {
+          "cpu_ms": 14.5,
+          "depth": 1,
+          "name": "demo_dossier",
+          "offset_s": 14.24,
+          "status": "ok",
+          "wall_ms": 15.4
+        },
+        {
+          "cpu_ms": 1596.6,
+          "deadline_remaining_end_s": 45.74,
+          "deadline_remaining_start_s": 49.34,
+          "depth": 0,
+          "item_count": 10,
+          "name": "core_composition",
+          "offset_s": 10.657,
+          "status": "ok",
+          "wall_ms": 3599.3
+        },
+        {
+          "calibration": true,
+          "cpu_ms": 12.94,
+          "depth": 0,
+          "name": "cpu_yardstick_after",
+          "offset_s": 14.256,
+          "rounds": 60000,
+          "status": "ok",
+          "wall_ms": 13.0
+        }
+      ],
+      "total_cpu_ms": 2016.8,
+      "total_wall_ms": 14269.1,
+      "unaccounted_wall_ms": 27.7
+    }
+  }
+}

@@ -447,3 +447,85 @@ def test_own_time_partitions_the_run_instead_of_overlapping_it():
     assert sum(v["own_wall_ms"] for v in own.values()) == 6000.0, (
         "own times must sum to the parent's wall, not to 11000ms")
     assert "probe" not in own, "calibration is instrument overhead, not stage time"
+
+
+def test_the_core_path_does_not_compute_what_only_deep_reads(app, finished):
+    """Work whose result nothing reads may not sit on the interactive path.
+
+    `derive_analyst_evidence` scanned every retrieved document a SECOND time
+    and its result was discarded whenever `deep` was false: 587.5ms locally
+    and 18.0s on the preview -- 20% of a 90.7s CORE. It was not slow work, it
+    was work nothing read, and a faster machine only runs it faster.
+
+    Pinned structurally rather than by timing, because a duration assertion
+    on a shared CI machine is a flake and would be deleted rather than fixed.
+    """
+    import inspect
+    from intent_engine.company_ingestion import service as SVC
+    src = inspect.getsource(SVC.CompanyIngestionService._strategic_report)
+    call = src.index("evidence = derive_analyst_evidence")
+    early_return = src.index("if not deep:")
+    assert call > early_return, (
+        "derive_analyst_evidence runs BEFORE the `not deep` return, so every "
+        "interactive CORE request pays for a full document scan it discards")
+
+
+def test_enrichment_is_not_on_the_core_path(app, finished):
+    """Market refresh and the dossier write may not delay CORE_READY.
+
+    Measured on the preview: 3.2s and 2.9s respectively, both AHEAD of the
+    `core_ready` marker -- 6.1s the reader waits for work that adds nothing
+    to what they are about to read. §26 classifies the refresh as enrichment
+    and forbids it blocking CORE_READY.
+    """
+    import inspect
+    from intent_engine.webapp.app import WebApp
+    src = inspect.getsource(WebApp._compose)
+    assert "_publish_enrichment" in src, \
+        "enrichment must be delegated, not inlined into composition"
+    gate = src.index("if deep:")
+    call = src.index("self._publish_enrichment")
+    assert gate < call, "enrichment must be gated so the CORE pass skips it"
+    # POSITIVE CONTROL: the work still exists for the callers that need it.
+    assert "_external_context" in inspect.getsource(WebApp._publish_enrichment)
+    assert "_publish_demo_dossier" in inspect.getsource(
+        WebApp._publish_enrichment)
+
+
+def test_moving_enrichment_off_core_did_not_delete_it(app, finished):
+    """The interactive path must still DO the work, just not before the answer.
+
+    Gating enrichment on `deep` removes it from the CORE pass, so the
+    interactive worker has to call it itself after `core_ready`. The first
+    version of this change split the function out and wired only the batch
+    caller -- every interactive run then published no dossier and never
+    refreshed market context. `_publish_demo_dossier` is the real path, not a
+    demo-only one: the 100-company runner reads what it writes.
+
+    Caught by the pre-commit guard, which is the point; pinned here so the
+    next reader is told by a test instead of by a 30-minute suite.
+    """
+    import inspect
+    from intent_engine.webapp.app import WebApp
+    worker = inspect.getsource(WebApp._run_progressive_analysis) \
+        if hasattr(WebApp, "_run_progressive_analysis") else ""
+    if not worker:                       # find whichever worker composes core
+        for name in dir(WebApp):
+            fn = getattr(WebApp, name, None)
+            if not callable(fn):
+                continue
+            try:
+                src = inspect.getsource(fn)
+            except (OSError, TypeError):
+                continue
+            if "self._compose(run_id, deep=False" in src:
+                worker = src
+                break
+    assert worker, "no worker composes a CORE pass -- the search itself broke"
+    assert "_publish_enrichment" in worker, (
+        "enrichment was removed from _compose but the interactive worker "
+        "never calls it: the dossier and market refresh are silently gone")
+    ready = worker.index('mark_lifecycle(run_id, "core_ready")')
+    call = worker.index("_publish_enrichment")
+    assert call > ready, (
+        "enrichment must run AFTER core_ready, or it still delays the reader")

@@ -8385,11 +8385,28 @@ class WebApp:
                        "INTERRUPTED")
 
     #: §22. Seconds held back from the interactive budget for composition.
-    #: MEASURED: composition of a cold Apple run costs 7-11s locally and is
-    #: pure CPU, so it is the one stage whose duration we can predict. Letting
-    #: acquisition spend the whole budget would push the ANSWER past the hard
-    #: deadline -- the customer would have waited the full 60s and still be
-    #: handed a spinner, which is the exact failure this run exists to remove.
+    #: Letting acquisition spend the whole budget would push the ANSWER past
+    #: the hard deadline -- the customer would have waited the full 60s and
+    #: still be handed a spinner, which is the exact failure this exists to
+    #: remove.
+    #:
+    #: THIS NUMBER IS CALIBRATED AGAINST LOCAL HARDWARE AND IS WRONG ON THE
+    #: PREVIEW. It was set from "composition costs 7-11s locally and is pure
+    #: CPU, so it is the one stage whose duration we can predict". The premise
+    #: holds; the number does not travel. Measured on the preview at 14fc0a1a,
+    #: Apple, with `/runs/<id>/timing`:
+    #:
+    #:     core_composition   50.29s wall / 7.31s cpu
+    #:     cpu yardstick      196.63ms wall / 27.26ms cpu -> 7.2x stretch
+    #:
+    #: The instance grants roughly 7-12% of a local core, so composition needs
+    #: ~26s there even after the discarded `analyst_evidence` scan (18.0s) and
+    #: the enrichment moved off CORE (6.1s) are removed. A reserve is a
+    #: PREDICTION about the machine, so it cannot be a constant shared by
+    #: machines that differ 8-15x in scheduling. Raising it here would only
+    #: starve acquisition; the honest fix is fewer seconds of work or more CPU,
+    #: both of which are measured elsewhere. Left at its current value
+    #: deliberately, with the discrepancy recorded rather than hidden.
     COMPOSE_RESERVE_S = 20.0
 
     # --- what exists for a run, asked once -------------------------------
@@ -9119,6 +9136,24 @@ class WebApp:
             except Exception:                   # noqa: BLE001
                 _LOG.warning("lifecycle core_ready marker failed run=%s",
                              run_id)
+            # ENRICHMENT RUNS HERE: AFTER the marker, not before it.
+            #
+            # The market refresh (3.2s deployed) and the dossier write (2.9s)
+            # used to run inside `_compose`, ahead of `core_ready` -- 6.1s the
+            # reader waited for work that adds nothing to what they are about
+            # to read. Neither produces the answer, so neither may delay it.
+            #
+            # IT STILL RUNS. `_publish_demo_dossier` is the real path, not a
+            # demo-only one: every composed analysis emits a versioned record
+            # and the 100-company runner reads it. Moving the call and failing
+            # to make it is how a latency repair quietly deletes a feature --
+            # the guard caught exactly that, because the first version of this
+            # change split the function out and wired only the batch caller.
+            try:
+                self._publish_enrichment(run_id, core, trace=trace)
+            except Exception:                   # noqa: BLE001 - never a run
+                _LOG.warning("enrichment failed after core_ready run=%s",
+                             run_id)
             # A SECOND READING, taken where the cost actually landed. The
             # first is at t=0 when the worker contends with nothing;
             # composition is where 48 of the 90 seconds went, so the CPU
@@ -9718,6 +9753,41 @@ class WebApp:
         # in here that can wait. It is also wrapped in a bare `except`, so a
         # slow or hanging provider costs the customer the time and reports
         # nothing at all.
+        # NEITHER OF THESE PRODUCES THE ANSWER, so neither may delay it.
+        #
+        # Measured on the preview: the market refresh is 3.9s and the dossier
+        # write 2.6s, both AHEAD of the `core_ready` marker -- 6.5s the reader
+        # waits for work that adds nothing to what they are about to read.
+        # §26 classifies the refresh as enrichment and forbids it blocking
+        # CORE_READY; the dossier is a read-model write with the same standing.
+        #
+        # GATED ON `deep`, NOT ON A NEW KEYWORD. Adding a keyword-only
+        # parameter to a method that tests stub is a breaking change to every
+        # stub of it, and the break surfaces as "composition failed" -- the
+        # very condition those tests exercise. That has now happened three
+        # times in this investigation (`deep`, then `trace`, then `trace` on
+        # `_strategic_report`). `deep` already distinguishes the interactive
+        # CORE pass from the batch callers, so it is the gate.
+        #
+        # The interactive worker calls `_publish_enrichment` itself, AFTER the
+        # marker. Batch callers (deep=True) keep the old inline behaviour.
+        if deep:
+            self._publish_enrichment(run_id, stamped, trace=trace)
+        return stamped
+
+    def _publish_enrichment(self, run_id, stamped, trace=None):
+        """Market refresh and dossier write -- everything CORE does not need.
+
+        THE REFRESH CANNOT BE STARTED EARLIER, which is why it is here rather
+        than at the top of the run: it reads the composed report to find
+        exposure phrases and competitor passages, and building it against an
+        empty run cached the emptiness. So it runs after composition -- but it
+        no longer runs before the reader is told the answer is ready.
+
+        Fails soft, and now says so. The bare `except` this replaces reported
+        neither a duration nor a failure class, which is how an unbounded
+        network call sat on the critical path through four wrong hypotheses.
+        """
         if trace is not None:
             _ctx = trace.span("external_context")
         else:
@@ -9726,14 +9796,14 @@ class WebApp:
         try:
             with _ctx:
                 self._external_context(run_id, allow_fetch=True)
-        except Exception:  # noqa: BLE001 - context must never lose a run
-            _LOG.warning("external context refresh failed for %s", run_id)
+        except Exception as exc:  # noqa: BLE001 - context must never lose a run
+            _LOG.warning("external context refresh failed for %s %s: %s",
+                         run_id, type(exc).__name__, str(exc)[:200])
         if trace is not None:
             with trace.span("demo_dossier"):
                 self._publish_demo_dossier(run_id, stamped)
         else:
             self._publish_demo_dossier(run_id, stamped)
-        return stamped
 
     def _publish_demo_dossier(self, run_id, result):
         """Emit this run's founder snapshot and assemble its demo dossier.
